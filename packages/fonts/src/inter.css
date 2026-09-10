@@ -1,0 +1,12 @@
+/* The deck's one face (SPEC 2.1): InterVariable 4.001 with opsz 14 to 32 and wght 100 to 900,
+   decoded by the scaffold from Prototemplate/deck/fonts/deck-fonts.css, where it was inlined as
+   base64. The descriptor is the deck's, byte for byte apart from the src. The renderer's
+   standalone build inlines the file at <!--FONTS--> (SPEC 5.2). License: SIL OFL 1.1, see
+   THIRD_PARTY_NOTICES.md. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../assets/InterVariable.woff2') format('woff2');
+}

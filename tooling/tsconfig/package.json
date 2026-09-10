@@ -1,0 +1,11 @@
+{
+  "name": "@turboslide/tsconfig",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared TypeScript configs. Packages extend these by relative path: ../../tooling/tsconfig/node.json or react.json.",
+  "files": [
+    "base.json",
+    "node.json",
+    "react.json"
+  ]
+}

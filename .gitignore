@@ -1,0 +1,19 @@
+node_modules
+dist
+.turboslide
+.output
+coverage
+*.log
+.DS_Store
+.turbo
+
+# Derived by the toolchain
+.tanstack
+.nitro
+.vercel
+apps/studio/src/routeTree.gen.ts
+*.tsbuildinfo
+
+# Local environment
+.env
+*.local

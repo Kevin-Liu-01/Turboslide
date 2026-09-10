@@ -1,0 +1,21 @@
+{
+  "name": "@turboslide/chrome",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The Prototemplate viewer shell ported as source: tokens.css (--pt-), ToolButton, Seg, Toolbar, Sidebar, ListRow, SidebarFilter, PreviewLayer, HelpCard, Toast, Progress, ThemeButton, useShellKeys, with PORTED_FROM.json recording the source commit per file.",
+  "exports": {
+    "./index": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/viewer": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  }
+}

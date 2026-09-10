@@ -1,0 +1,20 @@
+{
+  "name": "@turboslide/render",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "One framework-free string renderer: renderSlide, renderDeck, renderStandalone, renderThumb, renderStage, slot geometry, the GT word transform, RasterRef emission.",
+  "exports": {
+    "./index": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/fonts": "workspace:*",
+    "@turboslide/schema": "workspace:*",
+    "@turboslide/theme": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

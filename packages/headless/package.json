@@ -1,0 +1,24 @@
+{
+  "name": "@turboslide/headless",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright driver over the full Chrome for Testing binary: the Metal and SwiftShader flag sets, the readiness wait, the overflow scan, 1x and 2x screenshots, the RenderRecord with renderer and rasters.",
+  "exports": {
+    "./index": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/effects": "workspace:*",
+    "@turboslide/render": "workspace:*",
+    "pixelmatch": "catalog:",
+    "playwright-core": "catalog:",
+    "pngjs": "catalog:",
+    "sharp": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pngjs": "catalog:",
+    "typescript": "catalog:"
+  }
+}

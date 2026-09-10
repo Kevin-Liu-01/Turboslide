@@ -1,0 +1,21 @@
+{
+  "name": "@turboslide/effects",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "bayer8, ditherRamp, the TypeScript twoTone pipeline with the pinned Lanczos3, the tone LUT, the 1-bit PNG encoder, the plate metrics.",
+  "exports": {
+    "./index": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/schema": "workspace:*",
+    "pngjs": "catalog:",
+    "sharp": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/pngjs": "catalog:",
+    "typescript": "catalog:"
+  }
+}

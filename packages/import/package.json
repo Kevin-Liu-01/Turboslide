@@ -1,0 +1,20 @@
+{
+  "name": "@turboslide/import",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Prototemplate deck HTML to the document: parse5 over slides/*.html, import-ids.json, import-report.json.",
+  "exports": {
+    "./index": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/schema": "workspace:*",
+    "@turboslide/theme": "workspace:*",
+    "parse5": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

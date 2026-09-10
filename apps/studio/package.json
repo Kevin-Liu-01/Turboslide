@@ -1,0 +1,43 @@
+{
+  "name": "@turboslide/studio",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TanStack Start app: the viewer, the editor, the presenter, the agent HTTP surface and MCP over streamable HTTP (SPEC 3.4).",
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "scripts": {
+    "dev": "vite dev --port 4321 --strictPort",
+    "generate-routes": "tsr generate",
+    "build": "vite build",
+    "build:deploy": "vite build -c vite.deploy.config.ts",
+    "preview": "vite preview --port 4321 --strictPort"
+  },
+  "dependencies": {
+    "@tanstack/react-devtools": "catalog:",
+    "@tanstack/react-router": "catalog:",
+    "@tanstack/react-router-devtools": "catalog:",
+    "@tanstack/react-start": "catalog:",
+    "@turboslide/agent": "workspace:*",
+    "@turboslide/chrome": "workspace:*",
+    "@turboslide/fonts": "workspace:*",
+    "@turboslide/render": "workspace:*",
+    "@turboslide/schema": "workspace:*",
+    "@turboslide/theme": "workspace:*",
+    "@turboslide/viewer": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@tanstack/devtools-vite": "catalog:",
+    "@tanstack/router-cli": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "nitro": "catalog:",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "@turboslide/fonts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "InterVariable woff2 and its @font-face CSS (SPEC 2.1); the static export instances and fonts.json follow in M2.",
+  "exports": {
+    "./index": "./src/index.ts",
+    "./inter.css": "./src/inter.css",
+    "./assets/InterVariable.woff2": "./assets/InterVariable.woff2",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

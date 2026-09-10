@@ -1,0 +1,16 @@
+{
+  "name": "@turboslide/eslint-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared ESLint flat config: the TanStack config plus the repo rules from AGENTS.md.",
+  "exports": {
+    ".": "./index.js"
+  },
+  "dependencies": {
+    "@tanstack/eslint-config": "catalog:"
+  },
+  "peerDependencies": {
+    "eslint": "catalog:"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "@turboslide/theme",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "gt-ink-paper: sheet.css ported from head.html lines 11 to 176 under .ts-sheet, stage.css from lines 249 to 258, tokens.ts with the CSS parity test, sprite.ts with the 63 Heroicons and gt-mark, copy.ts. assets/sprite.svg holds the sprite copied out of head.html.",
+  "exports": {
+    "./index": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

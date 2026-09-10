@@ -1,0 +1,19 @@
+{
+  "name": "@turboslide/lint",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The grammar linter: every static rule of SPEC 7.7, the rendered rules over RenderRecords, and lint --chrome as the lint-lines.mjs port in shell mode.",
+  "exports": {
+    "./index": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/render": "workspace:*",
+    "@turboslide/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

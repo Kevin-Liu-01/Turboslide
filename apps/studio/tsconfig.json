@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tooling/tsconfig/react.json",
+  "include": ["src", "e2e", "vite.config.ts", "vite.deploy.config.ts"],
+  "compilerOptions": {
+    "types": ["vite/client", "node"],
+    "paths": {
+      "#/*": ["./src/*"],
+      "@/*": ["./src/*"]
+    }
+  },
+  "references": [
+    { "path": "../../packages/schema" },
+    { "path": "../../packages/theme" },
+    { "path": "../../packages/fonts" },
+    { "path": "../../packages/render" },
+    { "path": "../../packages/agent" },
+    { "path": "../../packages/viewer" },
+    { "path": "../../packages/chrome" }
+  ]
+}

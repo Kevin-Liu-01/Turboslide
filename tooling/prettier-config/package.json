@@ -1,0 +1,13 @@
+{
+  "name": "@turboslide/prettier-config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Shared Prettier config: single quotes, two-space indent, semicolons, 100 columns.",
+  "exports": {
+    ".": "./index.js"
+  },
+  "peerDependencies": {
+    "prettier": "catalog:"
+  }
+}

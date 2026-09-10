@@ -1,0 +1,27 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "stream",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".output/**"]
+    },
+    "generate-routes": {
+      "outputs": ["src/routeTree.gen.ts"]
+    },
+    "generate": {
+      "outputs": ["generated/**"]
+    },
+    "lint": {},
+    "test": {},
+    "//#typecheck": {
+      "dependsOn": ["//#generate-routes", "//#generate:contracts"]
+    },
+    "//#generate-routes": {
+      "outputs": ["apps/studio/src/routeTree.gen.ts"]
+    },
+    "//#generate:contracts": {
+      "outputs": ["packages/agent/generated/**", "skills/*/references/**", "docs/grammar.md"]
+    }
+  }
+}

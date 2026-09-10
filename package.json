@@ -1,0 +1,39 @@
+{
+  "name": "turboslide",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.15.1",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "prettier": "@turboslide/prettier-config",
+  "scripts": {
+    "dev": "pnpm --filter @turboslide/studio dev",
+    "build": "turbo run build",
+    "test": "vitest run",
+    "check": "node scripts/check.mjs",
+    "generate:contracts": "pnpm --filter @turboslide/agent generate",
+    "generate-routes": "tsr generate --config apps/studio/tsr.config.json",
+    "typecheck": "tsc -b",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "@playwright/test": "catalog:",
+    "@tanstack/router-cli": "catalog:",
+    "@turboslide/cli": "workspace:*",
+    "@turboslide/eslint-config": "workspace:*",
+    "@turboslide/prettier-config": "workspace:*",
+    "@types/node": "catalog:",
+    "eslint": "catalog:",
+    "pixelmatch": "catalog:",
+    "playwright-core": "catalog:",
+    "prettier": "catalog:",
+    "sharp": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@turboslide/viewer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "React: Stage, Sheet, SlideView, GridView, BookView, theme boot, keys, hash sync; standalone/ is the framework-free tail.html port used by renderStandalone.",
+  "exports": {
+    "./index": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/effects": "workspace:*",
+    "@turboslide/render": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:"
+  }
+}

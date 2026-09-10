@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tooling/tsconfig/node.json",
+  "include": ["src", "tsdown.config.ts"],
+  "references": [
+    { "path": "../../packages/schema" },
+    { "path": "../../packages/theme" },
+    { "path": "../../packages/fonts" },
+    { "path": "../../packages/render" },
+    { "path": "../../packages/import" },
+    { "path": "../../packages/headless" },
+    { "path": "../../packages/effects" },
+    { "path": "../../packages/lint" },
+    { "path": "../../packages/agent" }
+  ]
+}

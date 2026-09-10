@@ -1,0 +1,58 @@
+# Workspace layout (SPEC 3.1). packages/native/npm/* joins in M5.
+packages:
+  - apps/*
+  - packages/*
+  - tooling/*
+
+# The default catalog pins every shared dependency to one exact version (SPEC 3.2).
+# Packages reference these with "catalog:". Never pin "latest"; a version bump goes
+# through a PR that runs the full acceptance suite.
+catalog:
+  '@modelcontextprotocol/sdk': 1.30.0
+  '@paper-design/shaders': 0.0.78
+  '@playwright/test': 1.62.1
+  '@tanstack/devtools-vite': 0.8.5
+  '@tanstack/eslint-config': 0.4.0
+  '@tanstack/react-devtools': 0.10.12
+  '@tanstack/react-router': 1.170.33
+  '@tanstack/react-router-devtools': 1.167.1
+  '@tanstack/react-start': 1.168.50
+  '@tanstack/router-cli': 1.167.34
+  '@types/node': 24.13.4
+  '@types/pngjs': 6.0.5
+  '@types/react': 19.3.0
+  '@types/react-dom': 19.3.0
+  '@vitejs/plugin-react': 6.1.1
+  eslint: 10.10.0
+  googleapis: 178.1.1
+  jszip: 3.10.2
+  nitro: 3.0.260903-beta
+  parse5: 8.0.1
+  pixelmatch: 7.2.0
+  playwright-core: 1.62.1
+  pngjs: 7.0.0
+  pptxgenjs: 4.0.1
+  prettier: 3.9.6
+  react: 19.3.0
+  react-dom: 19.3.0
+  sharp: 0.35.0
+  tsdown: 0.23.0
+  turbo: 2.10.12
+  typescript: 6.0.3
+  vite: 8.2.2
+  vitest: 4.1.11
+  zod: 4.6.1
+
+# pnpm 11 refuses to run dependency build scripts it has not been told about
+# (strictDepBuilds; https://pnpm.io/settings/build). The old pnpm.onlyBuiltDependencies
+# block is ignored, so the approved list is committed here (tanstack report section 2).
+allowBuilds:
+  esbuild: true
+  lightningcss: true
+  unrs-resolver: true
+  sharp: true
+
+# pnpm 11 holds back releases younger than its default minimumReleaseAge; pnpm appended this
+# exclusion for the pinned zod on the first install. Keep entries here only for pinned catalog versions.
+minimumReleaseAgeExclude:
+  - zod@4.6.1

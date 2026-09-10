@@ -1,0 +1,24 @@
+/* App-level resets only. Chrome tokens come from @turboslide/chrome tokens.css (SPEC 2.2) and
+   the sheet styles from @turboslide/theme sheet.css and stage.css (SPEC 5.1); the studio builder
+   wires both in routes/__root.tsx. Chrome type is Inter at 13 px (SPEC 2.2). */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 13px;
+}
+
+.ts-home {
+  padding: 24px;
+}

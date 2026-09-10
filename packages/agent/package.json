@@ -1,0 +1,25 @@
+{
+  "name": "@turboslide/agent",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The action dispatcher and the contracts generator (pnpm generate:contracts): CLI option parsers, the MCP tool list JSON, describe().actions, openapi.json, docs/grammar.md and the skills reference tables, with a stale-file test.",
+  "scripts": {
+    "generate": "node src/generate/main.ts"
+  },
+  "exports": {
+    "./index": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/headless": "workspace:*",
+    "@turboslide/lint": "workspace:*",
+    "@turboslide/render": "workspace:*",
+    "@turboslide/schema": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 // `pnpm check`: the M1 acceptance chain from MILESTONES.md, run in order from the repo root.
-// Every step is the literal command from the milestone plan. The runner adds only what the plan
-// assumes about its environment: it creates .turboslide/, it skips the steps that read Kevin's
-// Prototemplate checkout when that path is missing (CI; set TURBOSLIDE_PROTOTEMPLATE_DECK to point
-// at one), and for the steps that need the studio it starts the dev server on 4321 and stops it
-// afterwards with the server log capped (AGENTS.md, dev-server rules). Nothing is claimed done
-// until every step exits 0.
+// Every step is the literal command from the milestone plan, with one guard: step 3 first proves
+// the generated files are tracked, because `git diff --exit-code` passes trivially on untracked
+// paths. The runner adds only what the plan assumes about its environment: it creates
+// .turboslide/, it skips the steps that read Kevin's Prototemplate checkout when that path is
+// missing (CI; set TURBOSLIDE_PROTOTEMPLATE_DECK to point at one), and for the steps that need the
+// studio it starts the dev server on 4321 and stops it afterwards with the server log capped
+// (AGENTS.md, dev-server rules). Nothing is claimed done until every step exits 0.
 //
 //   node scripts/check.mjs                run everything
 //   node scripts/check.mjs --list         print the numbered steps
@@ -31,7 +32,12 @@ const steps = [
   { cmd: 'pnpm install --frozen-lockfile' },
   { cmd: 'pnpm exec tsr generate --config apps/studio/tsr.config.json' },
   {
-    cmd: 'pnpm generate:contracts && git diff --exit-code -- packages/agent/generated skills/*/references docs/grammar.md apps/studio/src/routes/openapi.json.ts',
+    // `git ls-files --error-unmatch` exits 1 when a pathspec matches no tracked file, so an
+    // uncommitted generated tree fails here instead of passing the diff by having nothing to diff.
+    // The plan writes the route as apps/studio/src/routes/openapi.json.ts; on disk it is
+    // openapi[.]json.ts because TanStack Router's file routing escapes a dot in a segment with
+    // [.], and the :(literal) pathspec magic stops git from reading the brackets as a glob class.
+    cmd: "git ls-files --error-unmatch packages/agent/generated skills/*/references docs/grammar.md ':(literal)apps/studio/src/routes/openapi[.]json.ts' > /dev/null && pnpm generate:contracts && git diff --exit-code -- packages/agent/generated skills/*/references docs/grammar.md ':(literal)apps/studio/src/routes/openapi[.]json.ts'",
   },
   { cmd: 'pnpm exec tsc -b' },
   { cmd: 'pnpm test' },

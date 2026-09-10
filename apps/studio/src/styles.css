@@ -1,6 +1,7 @@
-/* App-level resets only. Chrome tokens come from @turboslide/chrome tokens.css (SPEC 2.2) and
-   the sheet styles from @turboslide/theme sheet.css and stage.css (SPEC 5.1); the studio builder
-   wires both in routes/__root.tsx. Chrome type is Inter at 13 px (SPEC 2.2). */
+/* App-level styles only. Chrome tokens come from @turboslide/chrome tokens.css
+   (SPEC 2.2) and the sheet from the theme's sheet.css and stage.css (SPEC 5.1);
+   routes/__root.tsx loads them once. Chrome type is Inter at 13px (SPEC 2.2).
+   Colors are the --pt- tokens only. */
 
 *,
 *::before,
@@ -15,10 +16,129 @@ body {
 
 body {
   margin: 0;
-  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
   font-size: 13px;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* the theme sprite host: present in the DOM, zero size, never in the way */
+.ts-sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* the fixture chip beside the sidebar title: 11px titanium in a hair box */
+.ts-chip {
+  flex: 0 0 auto;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 16px;
+  padding: 0 5px;
+  color: var(--pt-titanium);
+  border: 1px solid var(--pt-hair);
+  white-space: nowrap;
+}
+
+/* ---- the deck list (/) ---- */
 .ts-home {
-  padding: 24px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 56px 24px 96px;
+}
+
+.ts-home-head {
+  color: var(--pt-ink);
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-home-head h1,
+.ts-home > h1 {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin: 18px 0 0;
+}
+
+.ts-home-head p,
+.ts-home > p,
+.ts-home-empty {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--pt-ink-2);
+  max-width: 62ch;
+  margin: 12px 0 0;
+}
+
+.ts-home code {
+  font-family: var(--pt-mono);
+  font-size: 12.5px;
+}
+
+.ts-decks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* a ruled row per deck: the row role, one rule at the bottom (SPEC 2.2 line law) */
+.ts-deck-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 24px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  color: var(--pt-ink);
+  text-decoration: none;
+}
+
+.ts-deck-row b {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+}
+
+.ts-deck-id {
+  grid-column: 2;
+  grid-row: 1;
+  font-family: var(--pt-mono);
+  font-size: 12px;
+  color: var(--pt-titanium);
+  text-align: right;
+}
+
+.ts-deck-meta {
+  grid-column: 1 / -1;
+  font-size: 12.5px;
+  color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-deck-row:hover b {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-deck-row:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-home-foot {
+  margin-top: 32px;
+  font-size: 12px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
 }

@@ -100,9 +100,10 @@ stopping at the first failure. `node scripts/check.mjs --list` prints the steps;
 when `/Users/kevinliu/repos/Prototemplate/deck` (or `TURBOSLIDE_PROTOTEMPLATE_DECK`) is missing,
 which is the case in CI, and starts and stops the dev server for the two steps that need it.
 
-On the scaffold, steps 1 to 6 pass (install, route generation, contracts generation, `tsc -b`,
-vitest, build plus the client bundle check). Steps 7 to 18 need the CLI, the import, the render
-and the studio routes from the M1 builders.
+All 18 steps pass on the M1 tree (2026-09-10, 219 s on Kevin's machine with the Prototemplate
+checkout present); `docs/M1-STATUS.md` records every step with its measured numbers. On the bare
+scaffold only steps 1 to 6 passed (install, route generation, contracts generation, `tsc -b`,
+vitest, build plus the client bundle check).
 
 Type checking: `pnpm exec tsr generate` must run before `tsc -b` because `routeTree.gen.ts` is
 generated and git-ignored (measured: three type errors otherwise). `tsc -b` writes declaration
@@ -163,6 +164,12 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
 - `eslint` is 10.10.0: `@tanstack/eslint-config` 0.4.0 depends on `@eslint/js` 10, and 9.39.5 is
   deprecated on npm.
 - The Chromium revision note above.
+- The acceptance line names `apps/studio/src/routes/openapi.json.ts`. The file is
+  `apps/studio/src/routes/openapi[.]json.ts` because TanStack Router's file-based routing escapes
+  a dot inside a path segment as `[.]` (the route path stays `/openapi.json`), and the
+  generator does not write it; it serves `packages/agent/generated/openapi.json`. Step 3 of
+  `scripts/check.mjs` names the file through git's `:(literal)` pathspec magic so the brackets
+  are not read as a glob class.
 
 ## License
 
@@ -173,8 +180,11 @@ public under MIT, the GT deck and its licensed photographs move to a private `de
 
 ## Where the specification lives
 
-The specification (`SPEC.md`), the milestone plan (`MILESTONES.md`), the three candidate designs
-and the experiment reports were written on 2026-09-10 and live outside this repository at
-`/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/turboslide/`
-(`design/` and `experiments/`). Whether to vendor them into `docs/` is for the integrator, since
-the repository is public and the documents cite private material.
+The specification is `docs/spec/SPEC.md`, the milestone plan `docs/spec/MILESTONES.md`, and the
+three experiment reports are under `docs/spec/experiments/`. They were written on 2026-09-10 in a
+session scratchpad that was cleared the same day and were recovered from that session's transcript
+(`docs/spec/README.md` records the provenance and what was not recoverable: the three candidate
+designs and the M1 evidence directory). The recovered text is as written, so it still names the
+scratchpad paths and cites private material; whether `docs/spec/` stays in this public repository
+or moves to a private overlay is Kevin's decision (SPEC 11, open question 14). A SPEC citation in
+code (`SPEC 5.1`) is checked against `docs/spec/SPEC.md`.

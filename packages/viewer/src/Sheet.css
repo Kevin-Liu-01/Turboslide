@@ -1,0 +1,142 @@
+/* The sheet in the studio (SPEC 5.5). The theme's stage.css draws the
+   .sheet box (its --edge ring and the two spread shadows, head:255) and
+   the .stage transform origin; this sheet owns what the viewer adds
+   around it: the click and swipe surface, the fit positioning, the paging
+   chevrons, the keyed slide wrapper and the slide change motion (ported
+   from Prototemplate/src/components/viewer/Sheet.css, directive 7.4).
+
+   Slide change: the stage carries data-dir, the way the last move went. The
+   incoming slide fades from 0 and rises 6px over the slide duration, from
+   below for next and from above for previous; the outgoing one fades over
+   the fast duration. All off under reduced motion. */
+
+/* the click and swipe surface for the fixed sheet; shown only in slide mode */
+.pt-sheet-stage {
+  position: absolute;
+  inset: 0;
+}
+
+.pt-sheet-stage[hidden] {
+  display: none;
+}
+
+/* fixed: the sheet is placed by fitSheet() through inline style */
+.pt-sheet-stage > .sheet {
+  position: absolute;
+}
+
+/* a keyed body of stage content: fills the stage, so the leaving and the
+   arriving one stack; a rendered slide inside it is shown (sheet.css hides
+   .slide until it is .is-on, the deck's all-slides-in-one-DOM device) */
+.ts-stage > .pt-slide {
+  position: absolute;
+  inset: 0;
+}
+
+.ts-stage > .pt-slide > .slide {
+  display: block;
+}
+
+/* the paging chevrons: 32px ink-2 on paper at the sheet's edges, hover only */
+.pt-sheet-edge {
+  position: absolute;
+  top: 50%;
+  width: 32px;
+  height: 32px;
+  margin-top: -16px;
+  display: grid;
+  place-items: center;
+  background: var(--pt-paper);
+  border: 1px solid var(--pt-hair);
+  color: var(--pt-ink-2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--pt-dur-fast) var(--pt-ease-out);
+  z-index: 2;
+}
+
+.pt-sheet-edge svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.pt-sheet-edge.is-prev {
+  left: 1px;
+}
+
+.pt-sheet-edge.is-next {
+  right: 1px;
+}
+
+.pt-sheet-stage > .sheet:hover .pt-sheet-edge {
+  opacity: 1;
+}
+
+/* ---- the slide change ---- */
+
+@keyframes pt-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pt-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pt-slide-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .pt-sheet-stage[data-dir='next'] .ts-stage > .pt-slide {
+    animation: pt-slide-up var(--pt-dur-slide) var(--pt-ease-out) both;
+  }
+
+  .pt-sheet-stage[data-dir='prev'] .ts-stage > .pt-slide {
+    animation: pt-slide-down var(--pt-dur-slide) var(--pt-ease-out) both;
+  }
+
+  .pt-sheet-stage[data-dir] .ts-stage > .pt-slide.is-leaving {
+    animation: pt-slide-out var(--pt-dur-fast) var(--pt-ease-out) both;
+    pointer-events: none;
+    will-change: opacity;
+  }
+}
+
+/* present: the ring goes, the sheet reads as the window (head:369) */
+.pt-sheet-stage > .sheet.is-present {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-sheet-edge {
+    transition: none;
+  }
+
+  .ts-stage > .pt-slide.is-leaving {
+    display: none;
+  }
+}

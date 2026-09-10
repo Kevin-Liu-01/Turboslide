@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "archive",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The archive"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Eleven versions were retired from review on July 30, 2026. When their code left the tree, each was kept as a capture at its own address with the route as it was, its source and date, and the commit that last held the code, so any of them can be restored.",
+        "measure": 56
+      },
+      {
+        "id": "refs",
+        "type": "refs",
+        "items": [
+          "Wide Field",
+          "Bento Foundry",
+          "Blueprint Atlas",
+          "Concrete Mono",
+          "Concrete Origin",
+          "Concrete Source",
+          "Field Magnet",
+          "Flipboard Terminus",
+          "Kinetic Verba",
+          "Typographic Broadcast",
+          "White Gallery"
+        ]
+      },
+      {
+        "id": "code",
+        "type": "panel",
+        "code": "git checkout 7920ad9 -- src/app/d/<slug>"
+      }
+    ],
+    "right": [
+      {
+        "id": "fig",
+        "type": "shot",
+        "asset": "proto-archive-record",
+        "fit": "width",
+        "caption": "Blueprint Atlas in the archive at 1110 pixels wide: the record row and the first fold. The record follows the deck theme; the picture stays light, because nothing in it is live.",
+        "captionSize": 16
+      }
+    ]
+  },
+  "ext": {
+    "import": {
+      "css": ".ts-x-archive .refs { gap: 4px 48px; }\n.ts-x-archive .refs span { padding: 4px 0; }",
+      "scope": "s55a"
+    }
+  }
+}

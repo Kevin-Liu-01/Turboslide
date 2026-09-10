@@ -10,6 +10,10 @@
   "scripts": {
     "build": "tsdown"
   },
+  "exports": {
+    "./cli": "./src/cli.ts",
+    "./package.json": "./package.json"
+  },
   "dependencies": {
     "@turboslide/agent": "workspace:*",
     "@turboslide/effects": "workspace:*",

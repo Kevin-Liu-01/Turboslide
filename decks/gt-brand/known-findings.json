@@ -1,0 +1,14 @@
+[
+  {
+    "rule": "icon/known",
+    "slideId": "fixed-points",
+    "blockId": "html",
+    "reason": "Slide 83 defines its own i-lock-closed symbol inline because the deck sprite lacks it (83-fixed-points.html:20). Retire by appending heroicons lock-closed to packages/theme/assets/sprite.svg with scripts/add-icon.ts and expressing the block in the grammar."
+  },
+  {
+    "rule": "type/svg-label-min",
+    "slideId": "goals",
+    "blockId": "html",
+    "reason": "Slide 84 is an html escape whose scoped CSS sets a 16 px figcaption (84-goals.html:15); the rule reads raw escape CSS conservatively as diagram text. Retire by expressing the proof grid in the grammar, where the caption is a paragraph and the svg labels are declared at 18 px or more."
+  }
+]

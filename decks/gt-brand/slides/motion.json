@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "motion",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Motion rules"
+      },
+      {
+        "id": "dia1",
+        "type": "dia",
+        "fit": {
+          "viewBox": [
+            0,
+            0,
+            640,
+            260
+          ]
+        },
+        "svg": "<svg class=\"dia\" viewBox=\"0 0 640 260\" aria-label=\"Three items entering 55 milliseconds apart, each rising over 620 milliseconds\">\n            <line class=\"hair\" stroke-width=\"1\" x1=\"120\" y1=\"55\" x2=\"120\" y2=\"200\"></line>\n            <line class=\"hair\" stroke-width=\"1\" x1=\"120\" y1=\"200\" x2=\"540\" y2=\"200\"></line>\n            <g class=\"mid\" stroke-width=\"1\">\n              <line x1=\"120\" y1=\"200\" x2=\"120\" y2=\"208\"></line>\n              <line x1=\"225\" y1=\"200\" x2=\"225\" y2=\"208\"></line>\n              <line x1=\"330\" y1=\"200\" x2=\"330\" y2=\"208\"></line>\n              <line x1=\"435\" y1=\"200\" x2=\"435\" y2=\"208\"></line>\n              <line x1=\"540\" y1=\"200\" x2=\"540\" y2=\"208\"></line>\n            </g>\n            <text x=\"120\" y=\"236\" text-anchor=\"middle\">0</text>\n            <text x=\"225\" y=\"236\" text-anchor=\"middle\">200</text>\n            <text x=\"330\" y=\"236\" text-anchor=\"middle\">400</text>\n            <text x=\"435\" y=\"236\" text-anchor=\"middle\">600</text>\n            <text x=\"540\" y=\"236\" text-anchor=\"middle\">800 ms</text>\n            <g class=\"ink\" stroke-width=\"1.5\">\n              <line x1=\"120\" y1=\"70\" x2=\"445.5\" y2=\"70\"></line>\n              <line x1=\"148.9\" y1=\"115\" x2=\"474.4\" y2=\"115\"></line>\n              <line x1=\"177.8\" y1=\"160\" x2=\"503.3\" y2=\"160\"></line>\n            </g>\n            <g fill=\"var(--ink)\">\n              <rect x=\"114.5\" y=\"64.5\" width=\"11\" height=\"11\"></rect>\n              <rect x=\"440\" y=\"64.5\" width=\"11\" height=\"11\"></rect>\n              <rect x=\"143.4\" y=\"109.5\" width=\"11\" height=\"11\"></rect>\n              <rect x=\"468.9\" y=\"109.5\" width=\"11\" height=\"11\"></rect>\n              <rect x=\"172.3\" y=\"154.5\" width=\"11\" height=\"11\"></rect>\n              <rect x=\"497.8\" y=\"154.5\" width=\"11\" height=\"11\"></rect>\n            </g>\n            <text x=\"100\" y=\"77\" text-anchor=\"end\">Item 1</text>\n            <text x=\"100\" y=\"122\" text-anchor=\"end\">Item 2</text>\n            <text x=\"100\" y=\"167\" text-anchor=\"end\">Item 3</text>\n            <text x=\"283\" y=\"48\" text-anchor=\"middle\">620 ms</text>\n            <text x=\"522\" y=\"167\">55 ms apart</text>\n          </svg>",
+        "alt": "Three items entering 55 milliseconds apart, each rising over 620 milliseconds"
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 180,
+        "tight": true,
+        "items": [
+          {
+            "key": "Entrance",
+            "value": "Content enters once with a 16px rise. It does not re-animate when scrolling back up.",
+            "icon": {
+              "name": "arrow-up"
+            }
+          },
+          {
+            "key": "Paused by default",
+            "value": "Every loop starts paused and plays only while its section and tab are visible.",
+            "icon": {
+              "name": "pause-circle"
+            }
+          },
+          {
+            "key": "Timeline",
+            "value": "Multi-step choreography runs on one timeline so steps cannot drift out of sync.",
+            "icon": {
+              "name": "adjustments-horizontal"
+            }
+          },
+          {
+            "key": "Reduced motion",
+            "value": "Under prefers-reduced-motion, nothing is animated. The markup is the final frame.",
+            "icon": {
+              "name": "eye-slash"
+            }
+          },
+          {
+            "key": "Native scroll",
+            "value": "The browser scrolls. No library adds smooth scrolling, scroll hijacking, or inertia.",
+            "icon": {
+              "name": "arrows-up-down"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,1037 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`block catalog > renders board (board) in dark 1`] = `
+{
+  "html": "<div class="board" data-block="board" data-type="board"><div><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="board:1"><span class="who"><b data-run="board/rows/0/name">Site</b><small>generaltranslation.com</small></span><b class="state"><svg class="ic warn" aria-hidden="true" data-raster="icon" data-rid="board:2"><use href="#i-clock"/></svg>Fixes open</b><span data-run="board/rows/0/note">Home, pricing, enterprise, careers and contact run the redesign.</span></div><div><span></span><span class="who"><b data-run="board/rows/1/name">Blog</b></span><b class="state"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="board:3"><use href="#i-check-circle"/></svg>Live</b><span data-run="board/rows/1/note">Live.</span></div></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "board",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="board:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "board",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="board:2"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "board",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="board:3"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders board (board) in light 1`] = `
+{
+  "html": "<div class="board" data-block="board" data-type="board"><div><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="board:1"><span class="who"><b data-run="board/rows/0/name">Site</b><small>generaltranslation.com</small></span><b class="state"><svg class="ic warn" aria-hidden="true" data-raster="icon" data-rid="board:2"><use href="#i-clock"/></svg>Fixes open</b><span data-run="board/rows/0/note">Home, pricing, enterprise, careers and contact run the redesign.</span></div><div><span></span><span class="who"><b data-run="board/rows/1/name">Blog</b></span><b class="state"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="board:3"><use href="#i-check-circle"/></svg>Live</b><span data-run="board/rows/1/note">Live.</span></div></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "board",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="board:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "board",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="board:2"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "board",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="board:3"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders composite (group) in dark 1`] = `
+{
+  "html": "<div class="composite" style="grid-template-columns:1fr;gap:0px" data-block="group" data-type="composite"><p class="max-p" data-block="g1" data-type="paragraph" data-run="g1/text">First.</p><p class="max-p" data-block="g2" data-type="paragraph" data-run="g2/text">Second.</p></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders composite (group) in light 1`] = `
+{
+  "html": "<div class="composite" style="grid-template-columns:1fr;gap:0px" data-block="group" data-type="composite"><p class="max-p" data-block="g1" data-type="paragraph" data-run="g1/text">First.</p><p class="max-p" data-block="g2" data-type="paragraph" data-run="g2/text">Second.</p></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders credit (credit) in dark 1`] = `
+{
+  "html": "<div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Event Horizon, a Prototemplate direction</div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders credit (credit) in light 1`] = `
+{
+  "html": "<div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Event Horizon, a Prototemplate direction</div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders details (grid) in dark 1`] = `
+{
+  "html": "<div class="details" data-block="grid" data-type="details"><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:1"><figcaption data-run="grid/items/0/caption">The header.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:2"><figcaption data-run="grid/items/1/caption">The seam.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:3"><figcaption data-run="grid/items/2/caption">The logo row.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" style="height:236px" data-raster="shot" data-rid="grid:4"><figcaption data-run="grid/items/3/caption">The table of contents.</figcaption></figure></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "grid",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="grid:1"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "grid",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="grid:2"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "grid",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="grid:3"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "grid",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="grid:4"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders details (grid) in light 1`] = `
+{
+  "html": "<div class="details" data-block="grid" data-type="details"><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:1"><figcaption data-run="grid/items/0/caption">The header.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:2"><figcaption data-run="grid/items/1/caption">The seam.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:3"><figcaption data-run="grid/items/2/caption">The logo row.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" style="height:236px" data-raster="shot" data-rid="grid:4"><figcaption data-run="grid/items/3/caption">The table of contents.</figcaption></figure></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "grid",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="grid:1"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "grid",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="grid:2"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "grid",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="grid:3"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "grid",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="grid:4"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders dia (dia1) in dark 1`] = `
+{
+  "html": "<svg class="dia" data-block="dia1" data-type="dia" data-raster="dia" data-rid="dia1:1" viewBox="0 0 731.5 150" aria-label="Three code surfaces lead to the website"><rect x="0" y="20" width="11" height="11" fill="var(--ink)"/><rect x="10.5" y="10.5" width="100" height="50" fill="none" class="hair" stroke-width="1"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="160.5" y1="25.5" x2="200.5" y2="25.5"/><rect x="300" y="70" width="11" height="11" fill="var(--ink)"/><use href="#i-check-circle" x="18" y="206" width="24" height="24" fill="#12a37a"/><use href="#gt-mark" x="499.94" y="69.96" width="30.26" height="19.24" fill="var(--ink)"/><g transform="translate(150 74) scale(1 0.5) rotate(45)"><svg width="84" height="54" x="-42" y="-27" fill="var(--ink)" fill-opacity="0.55"><use href="#gt-mark"/></svg></g><text x="24" y="33">CLI</text><text class="lab" x="24" y="80">Open-source</text></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "dia1",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="dia1:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders dia (dia1) in light 1`] = `
+{
+  "html": "<svg class="dia" data-block="dia1" data-type="dia" data-raster="dia" data-rid="dia1:1" viewBox="0 0 731.5 150" aria-label="Three code surfaces lead to the website"><rect x="0" y="20" width="11" height="11" fill="var(--ink)"/><rect x="10.5" y="10.5" width="100" height="50" fill="none" class="hair" stroke-width="1"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="160.5" y1="25.5" x2="200.5" y2="25.5"/><rect x="300" y="70" width="11" height="11" fill="var(--ink)"/><use href="#i-check-circle" x="18" y="206" width="24" height="24" fill="#12a37a"/><use href="#gt-mark" x="499.94" y="69.96" width="30.26" height="19.24" fill="var(--ink)"/><g transform="translate(150 74) scale(1 0.5) rotate(45)"><svg width="84" height="54" x="-42" y="-27" fill="var(--ink)" fill-opacity="0.55"><use href="#gt-mark"/></svg></g><text x="24" y="33">CLI</text><text class="lab" x="24" y="80">Open-source</text></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "dia1",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="dia1:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders dia (dia2) in dark 1`] = `
+{
+  "html": "<svg class="dia" data-block="dia2" data-type="dia" data-raster="dia" data-rid="dia2:1" viewBox="0 0 731.5 452" aria-label="A raw diagram"><text x="0" y="20">Cell borders</text></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "dia2",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="dia2:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders dia (dia2) in light 1`] = `
+{
+  "html": "<svg class="dia" data-block="dia2" data-type="dia" data-raster="dia" data-rid="dia2:1" viewBox="0 0 731.5 452" aria-label="A raw diagram"><text x="0" y="20">Cell borders</text></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "dia2",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="dia2:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders dither (dither) in dark 1`] = `
+{
+  "html": "<canvas class="dither" style="border:1px solid var(--hair)" data-block="dither" data-type="dither" data-dither="{&quot;ramp&quot;:&quot;linear-x&quot;,&quot;height&quot;:220}" aria-label="A ramp from solid ink to sparse dots" data-raster="dither" data-rid="dither:1"></canvas>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "dither",
+      "kind": "dither",
+      "selector": "[data-slide="catalog"] [data-rid="dither:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders dither (dither) in light 1`] = `
+{
+  "html": "<canvas class="dither" style="border:1px solid var(--hair)" data-block="dither" data-type="dither" data-dither="{&quot;ramp&quot;:&quot;linear-x&quot;,&quot;height&quot;:220}" aria-label="A ramp from solid ink to sparse dots" data-raster="dither" data-rid="dither:1"></canvas>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "dither",
+      "kind": "dither",
+      "selector": "[data-slide="catalog"] [data-rid="dither:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders heading (big) in dark 1`] = `
+{
+  "html": "<div class="big" data-block="big" data-type="heading" data-run="big/text">Brand</div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders heading (big) in light 1`] = `
+{
+  "html": "<div class="big" data-block="big" data-type="heading" data-run="big/text">Brand</div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders heading (h) in dark 1`] = `
+{
+  "html": "<h2 style="margin-bottom:0px" data-block="h" data-type="heading" data-run="h/text">The content rule</h2>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders heading (h) in light 1`] = `
+{
+  "html": "<h2 style="margin-bottom:0px" data-block="h" data-type="heading" data-run="h/text">The content rule</h2>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders heading (h1) in dark 1`] = `
+{
+  "html": "<h1 style="margin-top:44px" data-block="h1" data-type="heading" data-run="h1/text">General Translation</h1>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders heading (h1) in light 1`] = `
+{
+  "html": "<h1 style="margin-top:44px" data-block="h1" data-type="heading" data-run="h1/text">General Translation</h1>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders heading (title) in dark 1`] = `
+{
+  "html": "<div class="big title" data-block="title" data-type="heading" data-run="title/text">The Blue Marble</div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders heading (title) in light 1`] = `
+{
+  "html": "<div class="big title" data-block="title" data-type="heading" data-run="title/text">The Blue Marble</div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders html (html) in dark 1`] = `
+{
+  "html": "<div class="ts-x-catalog-html" data-block="html" data-type="html" data-note="Two three-row tables with forced 79 px row heights beside four example diagrams." data-raster="html" data-rid="html:1"><style>.ts-sheet .ts-x-catalog-html .lay { display: flex; gap: 40px; }
+.ts-sheet .ts-x-catalog-html .ex { display: grid; }</style><div class="lay"><h3>Fixed</h3><p>Two tables.</p></div></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "html",
+      "kind": "html",
+      "selector": "[data-slide="catalog"] [data-rid="html:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders html (html) in light 1`] = `
+{
+  "html": "<div class="ts-x-catalog-html" data-block="html" data-type="html" data-note="Two three-row tables with forced 79 px row heights beside four example diagrams." data-raster="html" data-rid="html:1"><style>.ts-sheet .ts-x-catalog-html .lay { display: flex; gap: 40px; }
+.ts-sheet .ts-x-catalog-html .ex { display: grid; }</style><div class="lay"><h3>Fixed</h3><p>Two tables.</p></div></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "html",
+      "kind": "html",
+      "selector": "[data-slide="catalog"] [data-rid="html:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders ladder (ladder) in dark 1`] = `
+{
+  "html": "<div class="ladder wide-value" data-block="ladder" data-type="ladder"><div style="font-size:68px;font-weight:500" data-run="ladder/rows/0/label">Launch in every language<small>hero 3.7rem desktop</small></div><div style="font-size:15px;font-family:var(--text);letter-spacing:0" data-run="ladder/rows/1/label">Launch in every language<small>label 13px</small></div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders ladder (ladder) in light 1`] = `
+{
+  "html": "<div class="ladder wide-value" data-block="ladder" data-type="ladder"><div style="font-size:68px;font-weight:500" data-run="ladder/rows/0/label">Launch in every language<small>hero 3.7rem desktop</small></div><div style="font-size:15px;font-family:var(--text);letter-spacing:0" data-run="ladder/rows/1/label">Launch in every language<small>label 13px</small></div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders lang (lang) in dark 1`] = `
+{
+  "html": "<div class="lang" data-block="lang" data-type="lang"><div lang="en" data-run="lang/items/0/text">Every product in every language.<small>English</small></div><div lang="ja" class="ja" data-run="lang/items/1/text">全製品を、全言語で。<small>Japanese</small></div><div class="ar"><span lang="ar" dir="rtl" style="display:block;text-align:left" data-run="lang/items/2/text">كل منتج بكل لغة.</span><small>Arabic</small></div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders lang (lang) in light 1`] = `
+{
+  "html": "<div class="lang" data-block="lang" data-type="lang"><div lang="en" data-run="lang/items/0/text">Every product in every language.<small>English</small></div><div lang="ja" class="ja" data-run="lang/items/1/text">全製品を、全言語で。<small>Japanese</small></div><div class="ar"><span lang="ar" dir="rtl" style="display:block;text-align:left" data-run="lang/items/2/text">كل منتج بكل لغة.</span><small>Arabic</small></div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders logoPlates (logos) in dark 1`] = `
+{
+  "html": "<div class="lineage" data-block="logos" data-type="logoPlates"><figure><div class="plate"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="logos:1"></div><figcaption data-run="logos/items/0/name">General Motors</figcaption></figure><figure><div class="plate"><svg fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="logos:2"><use href="#gt-mark"/></svg></div><figcaption data-run="logos/items/1/name">General Translation</figcaption></figure></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "logos",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="logos:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "logos",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="logos:2"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders logoPlates (logos) in light 1`] = `
+{
+  "html": "<div class="lineage" data-block="logos" data-type="logoPlates"><figure><div class="plate"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="logos:1"></div><figcaption data-run="logos/items/0/name">General Motors</figcaption></figure><figure><div class="plate"><svg fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="logos:2"><use href="#gt-mark"/></svg></div><figcaption data-run="logos/items/1/name">General Translation</figcaption></figure></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "logos",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="logos:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "logos",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="logos:2"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders mark (mark) in dark 1`] = `
+{
+  "html": "<svg width="520" height="331" fill="currentColor" data-block="mark" data-type="mark" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "mark",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="mark:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders mark (mark) in light 1`] = `
+{
+  "html": "<svg width="520" height="331" fill="currentColor" data-block="mark" data-type="mark" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "mark",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="mark:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders markSizes (sizes) in dark 1`] = `
+{
+  "html": "<div class="sizes" data-block="sizes" data-type="markSizes"><div><svg width="16" height="10" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:1"><use href="#gt-mark"/></svg><span class="cap step">16px favicon</span></div><div><svg width="32" height="20" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:2"><use href="#gt-mark"/></svg><span class="cap step">32px CLI banner</span></div><div><svg width="64" height="41" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:3"><use href="#gt-mark"/></svg><span class="cap step">64px README header</span></div><div><svg width="128" height="81" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:4"><use href="#gt-mark"/></svg><span class="cap step">128px npm page</span></div><div><svg width="256" height="163" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:5"><use href="#gt-mark"/></svg><span class="cap step">256px website</span></div></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "sizes",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="sizes:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "sizes",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="sizes:2"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "sizes",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="sizes:3"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "sizes",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="sizes:4"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "sizes",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="sizes:5"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders markSizes (sizes) in light 1`] = `
+{
+  "html": "<div class="sizes" data-block="sizes" data-type="markSizes"><div><svg width="16" height="10" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:1"><use href="#gt-mark"/></svg><span class="cap step">16px favicon</span></div><div><svg width="32" height="20" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:2"><use href="#gt-mark"/></svg><span class="cap step">32px CLI banner</span></div><div><svg width="64" height="41" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:3"><use href="#gt-mark"/></svg><span class="cap step">64px README header</span></div><div><svg width="128" height="81" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:4"><use href="#gt-mark"/></svg><span class="cap step">128px npm page</span></div><div><svg width="256" height="163" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="sizes:5"><use href="#gt-mark"/></svg><span class="cap step">256px website</span></div></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "sizes",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="sizes:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "sizes",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="sizes:2"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "sizes",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="sizes:3"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "sizes",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="sizes:4"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "sizes",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="sizes:5"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders matrix (matrix) in dark 1`] = `
+{
+  "html": "<div class="matrix" style="grid-template-columns:repeat(4,1fr)" data-block="matrix" data-type="matrix"><span class="r b">0</span><span class="r b">8</span><span class="r b">2</span><span class="b">10</span><span class="r b">12</span><span class="r b">4</span><span class="r b">14</span><span class="b">6</span><span class="r b">3</span><span class="r b">11</span><span class="r b">1</span><span class="b">9</span><span class="r">15</span><span class="r">7</span><span class="r">13</span><span>5</span></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders matrix (matrix) in light 1`] = `
+{
+  "html": "<div class="matrix" style="grid-template-columns:repeat(4,1fr)" data-block="matrix" data-type="matrix"><span class="r b">0</span><span class="r b">8</span><span class="r b">2</span><span class="b">10</span><span class="r b">12</span><span class="r b">4</span><span class="r b">14</span><span class="b">6</span><span class="r b">3</span><span class="r b">11</span><span class="r b">1</span><span class="b">9</span><span class="r">15</span><span class="r">7</span><span class="r">13</span><span>5</span></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders pair (pair) in dark 1`] = `
+{
+  "html": "<div class="pair gap-40 cap-15" style="grid-template-columns:27fr 16fr" data-block="pair" data-type="pair"><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:1"><figcaption data-run="pair/figures/0/caption">The X banner is 1500 by 500 pixels.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:2"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="pair:3"><figcaption data-run="pair/figures/1/caption">Two images in one figure.</figcaption></figure></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "pair",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="pair:1"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "pair",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="pair:2"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "pair",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="pair:3"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders pair (pair) in light 1`] = `
+{
+  "html": "<div class="pair gap-40 cap-15" style="grid-template-columns:27fr 16fr" data-block="pair" data-type="pair"><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:1"><figcaption data-run="pair/figures/0/caption">The X banner is 1500 by 500 pixels.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:2"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="pair:3"><figcaption data-run="pair/figures/1/caption">Two images in one figure.</figcaption></figure></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "pair",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="pair:1"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "pair",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="pair:2"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "pair",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="pair:3"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders panel (code) in dark 1`] = `
+{
+  "html": "<div class="panel" data-block="code" data-type="panel" data-run="code/code">npm i gt-next<br>npm i -D gt<br><br>npx gt translate</div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders panel (code) in light 1`] = `
+{
+  "html": "<div class="panel" data-block="code" data-type="panel" data-run="code/code">npm i gt-next<br>npm i -D gt<br><br>npx gt translate</div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders panel (pre) in dark 1`] = `
+{
+  "html": "<div class="panel panel-15 pre" data-block="pre" data-type="panel" data-run="pre/code">POST /api/generate
+{ &quot;kind&quot;: &quot;background&quot; }</div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders panel (pre) in light 1`] = `
+{
+  "html": "<div class="panel panel-15 pre" data-block="pre" data-type="panel" data-run="pre/code">POST /api/generate
+{ &quot;kind&quot;: &quot;background&quot; }</div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders panel (term) in dark 1`] = `
+{
+  "html": "<div class="panel term" data-block="term" data-type="panel" data-run="term/code"><svg width="25" height="16" aria-hidden="true" data-raster="mark" data-rid="term:1"><use href="#gt-mark"/></svg><svg width="50" height="32" aria-hidden="true" data-raster="mark" data-rid="term:2"><use href="#gt-mark"/></svg><span>npx gt translate</span></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "term",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="term:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "term",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="term:2"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders panel (term) in light 1`] = `
+{
+  "html": "<div class="panel term" data-block="term" data-type="panel" data-run="term/code"><svg width="25" height="16" aria-hidden="true" data-raster="mark" data-rid="term:1"><use href="#gt-mark"/></svg><svg width="50" height="32" aria-hidden="true" data-raster="mark" data-rid="term:2"><use href="#gt-mark"/></svg><span>npx gt translate</span></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "term",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="term:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "term",
+      "kind": "mark",
+      "selector": "[data-slide="catalog"] [data-rid="term:2"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders paragraph (p1) in dark 1`] = `
+{
+  "html": "<p class="max-p" style="margin-top:14px" data-block="p1" data-type="paragraph" data-run="p1/text">Engineers use <span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span> and executives buy it. See <a href="https://prototemplate.com" target="_blank" rel="noreferrer">prototemplate.com</a> and <b>gt-next</b>.</p>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders paragraph (p1) in light 1`] = `
+{
+  "html": "<p class="max-p" style="margin-top:14px" data-block="p1" data-type="paragraph" data-run="p1/text">Engineers use <span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span> and executives buy it. See <a href="https://prototemplate.com" target="_blank" rel="noreferrer">prototemplate.com</a> and <b>gt-next</b>.</p>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders paragraph (p2) in dark 1`] = `
+{
+  "html": "<p class="cap max" data-block="p2" data-type="paragraph" data-run="p2/text">A caption in titanium.</p>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders paragraph (p2) in light 1`] = `
+{
+  "html": "<p class="cap max" data-block="p2" data-type="paragraph" data-run="p2/text">A caption in titanium.</p>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders paragraph (p3) in dark 1`] = `
+{
+  "html": "<p class="lead muted" style="max-width:22ch" data-block="p3" data-type="paragraph" data-run="p3/text">A lead paragraph.</p>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders paragraph (p3) in light 1`] = `
+{
+  "html": "<p class="lead muted" style="max-width:22ch" data-block="p3" data-type="paragraph" data-run="p3/text">A lead paragraph.</p>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders plain (list) in dark 1`] = `
+{
+  "html": "<div class="plain" data-block="list" data-type="plain"><span data-run="list/items/0/text"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="list:1"><use href="#i-check-circle"/></svg>How <span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span> ships a locale</span><span class="no" data-run="list/items/1/text"><svg class="ic no" aria-hidden="true" data-raster="icon" data-rid="list:2"><use href="#i-x-circle"/></svg>Announcements without a result</span></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "list",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="list:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "list",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="list:2"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders plain (list) in light 1`] = `
+{
+  "html": "<div class="plain" data-block="list" data-type="plain"><span data-run="list/items/0/text"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="list:1"><use href="#i-check-circle"/></svg>How <span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span> ships a locale</span><span class="no" data-run="list/items/1/text"><svg class="ic no" aria-hidden="true" data-raster="icon" data-rid="list:2"><use href="#i-x-circle"/></svg>Announcements without a result</span></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "list",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="list:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "list",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="list:2"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders plain (list22) in dark 1`] = `
+{
+  "html": "<div class="plain plain-22" data-block="list22" data-type="plain"><span data-run="list22/items/0/text"><svg class="ic" aria-hidden="true" data-raster="icon" data-rid="list22:1"><use href="#i-cube"/></svg>The libraries</span></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "list22",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="list22:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders plain (list22) in light 1`] = `
+{
+  "html": "<div class="plain plain-22" data-block="list22" data-type="plain"><span data-run="list22/items/0/text"><svg class="ic" aria-hidden="true" data-raster="icon" data-rid="list22:1"><use href="#i-cube"/></svg>The libraries</span></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "list22",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="list22:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders refs (refs) in dark 1`] = `
+{
+  "html": "<div class="refs" data-block="refs" data-type="refs"><span data-run="refs/items/0">Wide Field</span><span data-run="refs/items/1">Bento Foundry</span><span data-run="refs/items/2">White Gallery</span></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders refs (refs) in light 1`] = `
+{
+  "html": "<div class="refs" data-block="refs" data-type="refs"><span data-run="refs/items/0">Wide Field</span><span data-run="refs/items/1">Bento Foundry</span><span data-run="refs/items/2">White Gallery</span></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders rows (links) in dark 1`] = `
+{
+  "html": "<div class="rows tight links" style="--key:220px" data-block="links" data-type="rows"><div><b data-run="links/items/0/key"><svg class="ic" aria-hidden="true" data-raster="icon" data-rid="links:1"><use href="#i-home"/></svg>Landing</b><span data-run="links/items/0/value"><span class="lk"><a href="https://generaltranslation.com" target="_blank" rel="noreferrer">generaltranslation.com</a><svg class="ic ext" aria-hidden="true"><use href="#i-arrow-top-right-on-square"/></svg></span></span></div></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "links",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="links:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders rows (links) in light 1`] = `
+{
+  "html": "<div class="rows tight links" style="--key:220px" data-block="links" data-type="rows"><div><b data-run="links/items/0/key"><svg class="ic" aria-hidden="true" data-raster="icon" data-rid="links:1"><use href="#i-home"/></svg>Landing</b><span data-run="links/items/0/value"><span class="lk"><a href="https://generaltranslation.com" target="_blank" rel="noreferrer">generaltranslation.com</a><svg class="ic ext" aria-hidden="true"><use href="#i-arrow-top-right-on-square"/></svg></span></span></div></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "links",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="links:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders rows (rows) in dark 1`] = `
+{
+  "html": "<div class="rows narrow tight" data-block="rows" data-type="rows"><div><b data-run="rows/items/0/key"><svg class="ic" aria-hidden="true" data-raster="icon" data-rid="rows:1"><use href="#i-user-group"/></svg>Users</b><span data-run="rows/items/0/value">Users are engineering and growth teams.</span></div><div><b class="no-ic" data-run="rows/items/1/key"><span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span></b><span data-run="rows/items/1/value">The short form and the mark.</span></div></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "rows",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="rows:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders rows (rows) in light 1`] = `
+{
+  "html": "<div class="rows narrow tight" data-block="rows" data-type="rows"><div><b data-run="rows/items/0/key"><svg class="ic" aria-hidden="true" data-raster="icon" data-rid="rows:1"><use href="#i-user-group"/></svg>Users</b><span data-run="rows/items/0/value">Users are engineering and growth teams.</span></div><div><b class="no-ic" data-run="rows/items/1/key"><span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span></b><span data-run="rows/items/1/value">The short form and the mark.</span></div></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "rows",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="rows:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders say (say) in dark 1`] = `
+{
+  "html": "<div class="rows ex" data-block="say" data-type="say"><div><b data-run="say/items/0/note"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="say:1"><use href="#i-check-circle"/></svg>Acceptable</b><span class="q" data-run="say/items/0/quote">Translations are generated at build time.</span></div><div><b data-run="say/items/1/note"><svg class="ic no" aria-hidden="true" data-raster="icon" data-rid="say:2"><use href="#i-x-circle"/></svg>Not acceptable</b><span class="q no" data-run="say/items/1/quote">Supercharge your global growth.</span></div></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "say",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="say:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "say",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="say:2"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders say (say) in light 1`] = `
+{
+  "html": "<div class="rows ex" data-block="say" data-type="say"><div><b data-run="say/items/0/note"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="say:1"><use href="#i-check-circle"/></svg>Acceptable</b><span class="q" data-run="say/items/0/quote">Translations are generated at build time.</span></div><div><b data-run="say/items/1/note"><svg class="ic no" aria-hidden="true" data-raster="icon" data-rid="say:2"><use href="#i-x-circle"/></svg>Not acceptable</b><span class="q no" data-run="say/items/1/quote">Supercharge your global growth.</span></div></div>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "say",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="say:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "say",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="say:2"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders scales (scales) in dark 1`] = `
+{
+  "html": "<div class="scales center-tick" data-block="scales" data-type="scales"><div class="scale"><span data-run="scales/items/0/left">Classic</span><div class="bar"><i style="left:78%"></i></div><span data-run="scales/items/0/right"><b>Modern</b></span></div><div class="scale"><span data-run="scales/items/1/left"><b>Reserved</b></span><div class="bar"><i style="left:22%"></i></div><span data-run="scales/items/1/right">Playful</span></div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders scales (scales) in light 1`] = `
+{
+  "html": "<div class="scales center-tick" data-block="scales" data-type="scales"><div class="scale"><span data-run="scales/items/0/left">Classic</span><div class="bar"><i style="left:78%"></i></div><span data-run="scales/items/0/right"><b>Modern</b></span></div><div class="scale"><span data-run="scales/items/1/left"><b>Reserved</b></span><div class="bar"><i style="left:22%"></i></div><span data-run="scales/items/1/right">Playful</span></div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders shot (fig) in dark 1`] = `
+{
+  "html": "<figure class="shot-fig" data-block="fig" data-type="shot"><img class="shot" src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="fig:1"><figcaption data-run="fig/caption">The home page at 1440 by 900 shows the navigation bar closed by one hairline.</figcaption></figure>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "fig",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="fig:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shot (fig) in light 1`] = `
+{
+  "html": "<figure class="shot-fig" data-block="fig" data-type="shot"><img class="shot" src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="fig:1"><figcaption data-run="fig/caption">The home page at 1440 by 900 shows the navigation bar closed by one hairline.</figcaption></figure>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "fig",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="fig:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shot (fig2) in dark 1`] = `
+{
+  "html": "<figure class="shot-fig" style="width:768px;max-width:100%" data-block="fig2" data-type="shot"><img class="shot" src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" style="aspect-ratio:1440/780;object-fit:cover;object-position:top" data-raster="shot" data-rid="fig2:1"></figure>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "fig2",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="fig2:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shot (fig2) in light 1`] = `
+{
+  "html": "<figure class="shot-fig" style="width:768px;max-width:100%" data-block="fig2" data-type="shot"><img class="shot" src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" style="aspect-ratio:1440/780;object-fit:cover;object-position:top" data-raster="shot" data-rid="fig2:1"></figure>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "fig2",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="fig2:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders spec (spec) in dark 1`] = `
+{
+  "html": "<div class="spec" data-block="spec" data-type="spec"><div class="w" style="font-weight:300"><small>300</small>Inter Light</div><div class="w" style="font-weight:500"><small>500</small>Inter Medium</div><div class="w" style="font-weight:800"><small>800</small>Inter Extrabold</div><div class="w" style="font-family:var(--text);font-weight:400;font-size:30px;letter-spacing:0;margin-top:14px" data-run="spec/textRow"><small>Text</small>Long-form reading.</div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders spec (spec) in light 1`] = `
+{
+  "html": "<div class="spec" data-block="spec" data-type="spec"><div class="w" style="font-weight:300"><small>300</small>Inter Light</div><div class="w" style="font-weight:500"><small>500</small>Inter Medium</div><div class="w" style="font-weight:800"><small>800</small>Inter Extrabold</div><div class="w" style="font-family:var(--text);font-weight:400;font-size:30px;letter-spacing:0;margin-top:14px" data-run="spec/textRow"><small>Text</small>Long-form reading.</div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders swatches (swatches) in dark 1`] = `
+{
+  "html": "<div class="swatches" data-block="swatches" data-type="swatches"><div class="swatch ink"><b data-run="swatches/items/0/name">Ink</b><span>#070707</span></div><div class="swatch"><b data-run="swatches/items/1/name">Accent</b><span>#2f5ce0 on light<br>#86a8ff on dark</span></div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders swatches (swatches) in light 1`] = `
+{
+  "html": "<div class="swatches" data-block="swatches" data-type="swatches"><div class="swatch ink"><b data-run="swatches/items/0/name">Ink</b><span>#070707</span></div><div class="swatch"><b data-run="swatches/items/1/name">Accent</b><span>#2f5ce0 on light<br>#86a8ff on dark</span></div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders tiles (dirs) in dark 1`] = `
+{
+  "html": "<div class="tiles cols-4 aspect-16-10 tiles-thumb tiles-marked" data-block="dirs" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="dirs:1"><span data-run="dirs/items/0/label">Toolchain</span></div><div class="tile site"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="dirs:2"><span data-run="dirs/items/1/label">Dossier</span></div></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "dirs",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="dirs:1"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "dirs",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="dirs:2"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders tiles (dirs) in light 1`] = `
+{
+  "html": "<div class="tiles cols-4 aspect-16-10 tiles-thumb tiles-marked" data-block="dirs" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="dirs:1"><span data-run="dirs/items/0/label">Toolchain</span></div><div class="tile site"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="dirs:2"><span data-run="dirs/items/1/label">Dossier</span></div></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "dirs",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="dirs:1"]",
+    },
+    {
+      "alpha": false,
+      "blockId": "dirs",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="dirs:2"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders tiles (eng) in dark 1`] = `
+{
+  "html": "<div class="tiles cols-4 aspect-16-9 tiles-eng label-20" data-block="eng" data-type="tiles"><figure><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="eng:1"><b data-run="eng/items/0/label">Horizon field</b><span data-run="eng/items/0/sub">A WebGL lens shader takes 21 parameters.</span></figure></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "eng",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="eng:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders tiles (eng) in light 1`] = `
+{
+  "html": "<div class="tiles cols-4 aspect-16-9 tiles-eng label-20" data-block="eng" data-type="tiles"><figure><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="eng:1"><b data-run="eng/items/0/label">Horizon field</b><span data-run="eng/items/0/sub">A WebGL lens shader takes 21 parameters.</span></figure></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "eng",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="eng:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders tiles (tiles) in dark 1`] = `
+{
+  "html": "<div class="tiles cols-6 aspect-16-9 tiles-thumb" data-block="tiles" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="tiles:1"><span data-run="tiles/items/0/label">Müller-Brockmann, 1955</span></div><div class="tile more" data-run="tiles/more">The list continues with Powers of Ten.</div></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "tiles",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="tiles:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders tiles (tiles) in light 1`] = `
+{
+  "html": "<div class="tiles cols-6 aspect-16-9 tiles-thumb" data-block="tiles" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="tiles:1"><span data-run="tiles/items/0/label">Müller-Brockmann, 1955</span></div><div class="tile more" data-run="tiles/more">The list continues with Powers of Ten.</div></div>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "tiles",
+      "kind": "shot",
+      "selector": "[data-slide="catalog"] [data-rid="tiles:1"]",
+    },
+  ],
+}
+`;

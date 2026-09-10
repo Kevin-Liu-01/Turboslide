@@ -1,0 +1,34 @@
+{
+  "src": {
+    "width": 137,
+    "height": 91
+  },
+  "resizeDown": {
+    "width": 40,
+    "height": 23,
+    "box": [3.37, 2.5, 131.2, 88.9]
+  },
+  "resizeUp": {
+    "width": 300,
+    "height": 200
+  },
+  "fit": {
+    "width": 80,
+    "height": 45
+  },
+  "tone": {
+    "black": 20,
+    "white": 235,
+    "gamma": 0.9
+  },
+  "cropPadded": {
+    "box": [-20, 10, 150, 100],
+    "width": 170,
+    "height": 90
+  },
+  "nearest2x": {
+    "width": 160,
+    "height": 90
+  },
+  "pillow": "12.3.0"
+}

@@ -1,0 +1,155 @@
+// The readiness signal that replaces the deck's fixed 220 ms settle (SPEC 5.3, the rasters row;
+// slides report section 2.2: the settle was two thirds of the per-slide cost): document.fonts
+// loaded for every face the slide uses, every visible image decoded, the dither canvases drawn,
+// material anchors present, then two animation frames. Also the dither draw itself, which the
+// deck's viewer runtime does in tail.html lines 104 to 114 and the headless page has to do
+// because no runtime ships with a rendered document.
+//
+// Every function handed to page.evaluate is self-contained: Playwright serializes its source, so
+// nothing from module scope may be referenced inside.
+import type { Page } from 'playwright-core';
+
+export type ReadyInfo = {
+  readyMs: number;
+  fonts: { status: 'loaded' | 'partial'; faces: string[] };
+  /** src of every visible image that failed to decode. */
+  brokenImages: string[];
+  imageCount: number;
+};
+
+export type ReadyOptions = {
+  /** The element whose text nodes decide which faces to load; default the active slide, else body. */
+  rootSelector?: string;
+  timeoutMs?: number;
+};
+
+const DEFAULT_ROOT = '.slide.is-on, [data-slide], .slide, .ts-sheet, body';
+
+export async function waitForReady(page: Page, options: ReadyOptions = {}): Promise<ReadyInfo> {
+  const selector = options.rootSelector ?? DEFAULT_ROOT;
+  const timeout = options.timeoutMs ?? 10_000;
+  return page.evaluate(
+    async ({ rootSelector, timeoutMs }) => {
+      const t0 = performance.now();
+      // the selector list is tried in order; a comma list would match body first in document order
+      let root: Element = document.body;
+      for (const sel of rootSelector.split(',')) {
+        const el = document.querySelector(sel.trim());
+        if (el) {
+          root = el;
+          break;
+        }
+      }
+      const withTimeout = <T>(p: Promise<T>, fallback: T): Promise<T> =>
+        Promise.race([p, new Promise<T>((r) => setTimeout(() => r(fallback), timeoutMs))]);
+      await withTimeout(
+        document.fonts.ready.then(() => undefined),
+        undefined,
+      );
+      // Every (weight, size, family) combination the slide's text uses: document.fonts.ready
+      // resolves before a lazily used face loads (pptx report section 4.4 note 4).
+      const combos = new Set<string>();
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      let node: Node | null;
+      while ((node = walker.nextNode())) {
+        if (!(node.textContent ?? '').trim()) continue;
+        const el = node.parentElement;
+        if (!el) continue;
+        const cs = getComputedStyle(el);
+        if (cs.display === 'none' || cs.visibility === 'hidden') continue;
+        const family = (cs.fontFamily.split(',')[0] ?? '').trim().replace(/^['"]|['"]$/g, '');
+        if (!family) continue;
+        combos.add(`${cs.fontWeight} ${cs.fontSize} ${family}`);
+      }
+      const missing: string[] = [];
+      await Promise.all(
+        [...combos].map(async (spec) => {
+          const family = spec.split(' ').slice(2).join(' ');
+          try {
+            const faces = await withTimeout(document.fonts.load(spec), []);
+            if (faces.length === 0 && /^inter$/i.test(family)) missing.push(spec);
+          } catch {
+            if (/^inter$/i.test(family)) missing.push(spec);
+          }
+        }),
+      );
+      const images = [...root.querySelectorAll('img')].filter((img) => {
+        const r = img.getBoundingClientRect();
+        return r.width > 0 && r.height > 0;
+      });
+      await Promise.all(
+        images.map((img) =>
+          withTimeout(
+            img.decode().catch(() => undefined),
+            undefined,
+          ),
+        ),
+      );
+      const brokenImages = images
+        .filter((img) => img.complete && img.naturalWidth === 0)
+        .map((img) => img.getAttribute('src') ?? img.currentSrc);
+      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+      const faces = [...document.fonts]
+        .filter((face) => face.status === 'loaded')
+        .map((face) => `${face.family.replace(/^['"]|['"]$/g, '')} ${face.weight} ${face.style}`);
+      for (const spec of missing) faces.push(`fallback:${spec}`);
+      return {
+        readyMs: Math.round(performance.now() - t0),
+        fonts: { status: missing.length ? ('partial' as const) : ('loaded' as const), faces },
+        brokenImages,
+        imageCount: images.length,
+      };
+    },
+    { rootSelector: selector, timeoutMs: timeout },
+  );
+}
+
+export type DitherDrawOptions = {
+  /** The 64-entry Bayer table, row major, from @turboslide/effects/bayer BAYER8. */
+  table: readonly number[];
+  theme: 'light' | 'dark';
+  selector?: string;
+};
+
+/**
+ * Draw every dither canvas as the deck's drawDither does (tail.html lines 104 to 114): one cell
+ * per canvas pixel at half CSS size, ink where bayer8(y, x) / 64 < 1 - x / W on a paper ground;
+ * the CSS upscales with image-rendering: pixelated. Returns the number of canvases drawn.
+ */
+export async function drawDitherCanvases(page: Page, options: DitherDrawOptions): Promise<number> {
+  return page.evaluate(
+    ({ table, theme, selector }) => {
+      const canvases = [...document.querySelectorAll<HTMLCanvasElement>(selector)];
+      for (const canvas of canvases) {
+        const cw = canvas.clientWidth;
+        const ch = canvas.clientHeight;
+        let W = Math.max(8, Math.round(cw / 2));
+        let H = Math.max(8, Math.round(ch / 2));
+        if (!cw) {
+          W = 505;
+          H = 110;
+        }
+        canvas.width = W;
+        canvas.height = H;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) continue;
+        const dark = theme === 'dark';
+        ctx.fillStyle = dark ? '#070707' : '#ffffff';
+        ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = dark ? '#f2f2f0' : '#070707';
+        for (let y = 0; y < H; y += 1) {
+          for (let x = 0; x < W; x += 1) {
+            if ((table[(y % 8) * 8 + (x % 8)] ?? 0) / 64 < 1 - x / W) ctx.fillRect(x, y, 1, 1);
+          }
+        }
+        canvas.dataset.drawn = '1';
+      }
+      return canvases.length;
+    },
+    {
+      table: [...options.table],
+      theme: options.theme,
+      selector: options.selector ?? 'canvas.dither',
+    },
+  );
+}

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "presenter-compare",
+  "kind": "content",
+  "layout": {
+    "type": "stack"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "html",
+        "type": "html",
+        "css": ".ts-x-presenter-compare-html .split { gap: 40px; }\n.ts-x-presenter-compare-html .head p { margin-top: 10px; }\n.ts-x-presenter-compare-html .tools { display: grid; grid-template-columns: 692px 1fr; gap: 72px; align-items: start; }\n.ts-x-presenter-compare-html figure { margin: 0; display: grid; gap: 12px; }\n.ts-x-presenter-compare-html figcaption { font-size: 16px; line-height: 1.45; color: var(--ink-2); }\n.ts-x-presenter-compare-html img { display: block; width: 100%; height: auto; border: 1px solid var(--hair); background: var(--plate); }\n.ts-x-presenter-compare-html .rig { display: grid; grid-template-columns: 311px 369px; gap: 12px; align-items: start; }\n.ts-x-presenter-compare-html .bar { display: grid; gap: 12px; }",
+        "html": "<div class=\"split\">\n        <div class=\"head\"><h2>Compare and the presenter</h2>\n          <p>Two review tools sit beside the knowledge base. Compare puts two directions side by side; the presenter walks through the redesign with every prototype live.</p></div>\n        <div class=\"body\">\n          <div class=\"tools\">\n            <figure>\n              <div class=\"rig\">\n                <img src=\"assets/proto-compare-list-light.jpg\" data-dark=\"assets/proto-compare-list-dark.jpg\" alt=\"The Sites group of the compare list, with Dossier marked L and Signal marked R\">\n                <div class=\"bar\">\n                  <img src=\"assets/proto-compare-count-light.jpg\" data-dark=\"assets/proto-compare-count-dark.jpg\" alt=\"The toolbar count reading Left 02 / 17 between the previous and next buttons\">\n                  <img src=\"assets/proto-compare-view-light.jpg\" data-dark=\"assets/proto-compare-view-dark.jpg\" alt=\"The Both, Left and Right view control\">\n                </div>\n              </div>\n              <figcaption>Compare loads two directions as same-origin iframes, Dossier in the left pane and Signal in the right, and drives both frames' scroll and theme in lockstep. The three crops come from one capture of the shell. The Sites group of the list marks the loaded pair L and R, the count names the target pane and its direction, and the view control shows both panes or one pane at reading size.</figcaption>\n            </figure>\n            <figure>\n              <img src=\"assets/proto-present.jpg\" alt=\"The presenter's title screen\">\n              <figcaption>The presenter is a full-screen walkthrough in seven parts, from intro to verdict. Its grid of live thumbnails pauses and resumes through the page's requestAnimationFrame gate.</figcaption>\n            </figure>\n          </div>\n        </div>\n      </div>",
+        "note": "Escape: no block for <div class=\"tools\">. Source 67-presenter-compare.html; every scoped rule of the slide travels with the markup."
+      }
+    ]
+  },
+  "title": "Compare and the presenter"
+}

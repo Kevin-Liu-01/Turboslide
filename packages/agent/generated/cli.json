@@ -1,0 +1,1166 @@
+{
+  "version": 1,
+  "binary": "turboslide",
+  "globalFlags": [
+    {
+      "flag": "--deck <dir>",
+      "description": "The deck directory; defaults to the nearest deck.json upward"
+    },
+    {
+      "flag": "--json",
+      "description": "Machine output on stdout, human output on stderr"
+    },
+    {
+      "flag": "--author <name>",
+      "description": "Defaults to $USER or TURBOSLIDE_AUTHOR; agents pass agent:<runId>"
+    },
+    {
+      "flag": "--base-revision <n>",
+      "description": "For writes; defaults to the current revision when omitted (the convenience mode for a human)"
+    }
+  ],
+  "exitCodes": {
+    "0": "success",
+    "1": "findings at the gate or a verify failure",
+    "2": "usage or validation error"
+  },
+  "actions": [
+    {
+      "action": "deck.info",
+      "usage": "turboslide info",
+      "command": [
+        "info"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "M1"
+    },
+    {
+      "action": "slide.list",
+      "usage": "turboslide slides",
+      "command": [
+        "slides"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "sectionId",
+          "flag": "--section-id",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "M1"
+    },
+    {
+      "action": "slide.get",
+      "usage": "turboslide slide get <slideId>",
+      "command": [
+        "slide",
+        "get"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "M1"
+    },
+    {
+      "action": "slide.insert",
+      "usage": "turboslide slide insert --section <sectionId> --after <after> < slide.json",
+      "command": [
+        "slide",
+        "insert"
+      ],
+      "positionals": [],
+      "stdin": "slide",
+      "options": [
+        {
+          "key": "sectionId",
+          "flag": "--section",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "after",
+          "flag": "--after",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "slide.remove",
+      "usage": "turboslide slide remove <slideId>",
+      "command": [
+        "slide",
+        "remove"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "slide.move",
+      "usage": "turboslide slide move <slideId> --to <sectionId> --after <after>",
+      "command": [
+        "slide",
+        "move"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "sectionId",
+          "flag": "--to",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "after",
+          "flag": "--after",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "slide.update",
+      "usage": "turboslide slide patch <slideId> --set <pointer>=<value>",
+      "command": [
+        "slide",
+        "patch"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        },
+        {
+          "key": "mutations",
+          "flag": "--mutations",
+          "type": "object | object | object | object | object | object | object | object | object | object | object | object | object | object | object[]",
+          "required": true
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--set",
+          "template": "<pointer>=<value>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "slide.replace",
+      "usage": "turboslide slide put <slideId> < slide.json",
+      "command": [
+        "slide",
+        "put"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "stdin": "slide",
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "block.set",
+      "usage": "turboslide block set <slideId>#<blockId> <path> <value>",
+      "command": [
+        "block",
+        "set"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId",
+        "path",
+        "value"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "block.insert",
+      "usage": "turboslide block insert <slideId> --slot <slot> --after <after> < block.json",
+      "command": [
+        "block",
+        "insert"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "stdin": "block",
+      "options": [
+        {
+          "key": "slot",
+          "flag": "--slot",
+          "type": "\"main\" | \"head\" | \"headLeft\" | \"headRight\" | \"body\" | \"left\" | \"right\" | \"plate\"",
+          "required": true,
+          "enum": [
+            "main",
+            "head",
+            "headLeft",
+            "headRight",
+            "body",
+            "left",
+            "right",
+            "plate"
+          ]
+        },
+        {
+          "key": "after",
+          "flag": "--after",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "block.remove",
+      "usage": "turboslide block remove <slideId>#<blockId>",
+      "command": [
+        "block",
+        "remove"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "block.move",
+      "usage": "turboslide block move <slideId>#<blockId> --slot <slot> --after <after>",
+      "command": [
+        "block",
+        "move"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId"
+      ],
+      "options": [
+        {
+          "key": "slot",
+          "flag": "--slot",
+          "type": "\"main\" | \"head\" | \"headLeft\" | \"headRight\" | \"body\" | \"left\" | \"right\" | \"plate\"",
+          "required": true,
+          "enum": [
+            "main",
+            "head",
+            "headLeft",
+            "headRight",
+            "body",
+            "left",
+            "right",
+            "plate"
+          ]
+        },
+        {
+          "key": "after",
+          "flag": "--after",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "section.set",
+      "usage": "turboslide sections set < sections.json",
+      "command": [
+        "sections",
+        "set"
+      ],
+      "positionals": [],
+      "stdin": "sections",
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "slide.lease",
+      "usage": "turboslide lease <slideId> --force",
+      "command": [
+        "lease"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "minutes",
+          "flag": "--minutes",
+          "type": "integer",
+          "required": false,
+          "description": "Defaults to 10"
+        },
+        {
+          "key": "force",
+          "flag": "--force",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--force"
+        }
+      ],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "asset.add",
+      "usage": "turboslide asset add <file> --role <role> --two-tone --black <black>",
+      "command": [
+        "asset",
+        "add"
+      ],
+      "positionals": [
+        "file"
+      ],
+      "options": [
+        {
+          "key": "url",
+          "flag": "--url",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "role",
+          "flag": "--role",
+          "type": "\"opener\" | \"mood\" | \"capture\" | \"detail\" | \"thumb\" | \"render\" | \"icon\" | \"logo\" | \"frame\" | \"other\"",
+          "required": true,
+          "enum": [
+            "opener",
+            "mood",
+            "capture",
+            "detail",
+            "thumb",
+            "render",
+            "icon",
+            "logo",
+            "frame",
+            "other"
+          ]
+        },
+        {
+          "key": "alt",
+          "flag": "--alt",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "source",
+          "flag": "--source",
+          "type": "object | object | object | object",
+          "required": true
+        },
+        {
+          "key": "treatment",
+          "flag": "--treatment",
+          "type": "object | object",
+          "required": false
+        },
+        {
+          "key": "credit",
+          "flag": "--credit",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--black",
+          "template": "<black>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "M5"
+    },
+    {
+      "action": "asset.dither",
+      "usage": "turboslide asset dither <assetId> --gamma <gamma> --plate <plate>",
+      "command": [
+        "asset",
+        "dither"
+      ],
+      "positionals": [
+        "assetId"
+      ],
+      "options": [
+        {
+          "key": "treatment",
+          "flag": "--treatment",
+          "type": "object | object",
+          "required": true
+        },
+        {
+          "key": "plate",
+          "flag": "--plate",
+          "type": "\"lower-left\" | \"lower-right\" | \"upper-left\"",
+          "required": false,
+          "enum": [
+            "lower-left",
+            "lower-right",
+            "upper-left"
+          ]
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--gamma",
+          "template": "<gamma>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "M5"
+    },
+    {
+      "action": "asset.capture",
+      "usage": "turboslide asset capture <url> --theme <theme> --region <region>",
+      "command": [
+        "asset",
+        "capture"
+      ],
+      "positionals": [
+        "url"
+      ],
+      "options": [
+        {
+          "key": "viewport",
+          "flag": "--viewport",
+          "type": "[integer, integer]",
+          "required": false
+        },
+        {
+          "key": "scale",
+          "flag": "--scale",
+          "type": "1 | 2",
+          "required": false,
+          "enum": [
+            1,
+            2
+          ]
+        },
+        {
+          "key": "theme",
+          "flag": "--theme",
+          "type": "\"light\" | \"dark\" | \"both\"",
+          "required": true,
+          "enum": [
+            "light",
+            "dark",
+            "both"
+          ]
+        },
+        {
+          "key": "region",
+          "flag": "--region",
+          "type": "[number, number, number, number]",
+          "required": false
+        },
+        {
+          "key": "recipe",
+          "flag": "--recipe",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M5"
+    },
+    {
+      "action": "material.capture",
+      "usage": "turboslide material capture <materialId> --anchor <anchors>",
+      "command": [
+        "material",
+        "capture"
+      ],
+      "positionals": [
+        "materialId"
+      ],
+      "options": [
+        {
+          "key": "uniforms",
+          "flag": "--uniforms",
+          "type": "record",
+          "required": true
+        },
+        {
+          "key": "size",
+          "flag": "--size",
+          "type": "[integer, integer]",
+          "required": false
+        },
+        {
+          "key": "anchors",
+          "flag": "--anchor",
+          "type": "number[]",
+          "required": true,
+          "description": "Frame times in ms"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M5"
+    },
+    {
+      "action": "render.slide",
+      "usage": "turboslide render <slideIds> --theme <themes> --out <out> --json",
+      "command": [
+        "render"
+      ],
+      "positionals": [
+        "slideIds"
+      ],
+      "options": [
+        {
+          "key": "themes",
+          "flag": "--theme",
+          "type": "\"light\" | \"dark\"[]",
+          "required": false,
+          "description": "One or both themes"
+        },
+        {
+          "key": "scale",
+          "flag": "--scale",
+          "type": "1 | 2",
+          "required": false,
+          "enum": [
+            1,
+            2
+          ]
+        },
+        {
+          "key": "format",
+          "flag": "--format",
+          "type": "\"png\" | \"jpg\"",
+          "required": false,
+          "enum": [
+            "png",
+            "jpg"
+          ]
+        },
+        {
+          "key": "out",
+          "flag": "--out",
+          "type": "string",
+          "required": false,
+          "description": "Output directory; defaults to .turboslide/render"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--json"
+        }
+      ],
+      "mutates": false,
+      "milestone": "M1"
+    },
+    {
+      "action": "render.sheet",
+      "usage": "turboslide sheet <slideIds> --cols <cols> --thumb <thumb> --overlay <overlay>",
+      "command": [
+        "sheet"
+      ],
+      "positionals": [
+        "slideIds"
+      ],
+      "options": [
+        {
+          "key": "themes",
+          "flag": "--themes",
+          "type": "\"light\" | \"dark\"[]",
+          "required": false,
+          "description": "One or both themes"
+        },
+        {
+          "key": "cols",
+          "flag": "--cols",
+          "type": "integer",
+          "required": false
+        },
+        {
+          "key": "thumb",
+          "flag": "--thumb",
+          "type": "integer",
+          "required": false,
+          "description": "Thumbnail width in px"
+        },
+        {
+          "key": "numbered",
+          "flag": "--numbered",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "overlay",
+          "flag": "--overlay",
+          "type": "\"lint\" | \"plate\"",
+          "required": false,
+          "enum": [
+            "lint",
+            "plate"
+          ]
+        },
+        {
+          "key": "out",
+          "flag": "--out",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "M1"
+    },
+    {
+      "action": "lint.run",
+      "usage": "turboslide lint <slideIds> --json",
+      "command": [
+        "lint"
+      ],
+      "positionals": [
+        "slideIds"
+      ],
+      "options": [
+        {
+          "key": "layers",
+          "flag": "--layers",
+          "type": "\"static\" | \"rendered\" | \"both\"",
+          "required": false,
+          "enum": [
+            "static",
+            "rendered",
+            "both"
+          ]
+        },
+        {
+          "key": "rule",
+          "flag": "--rule",
+          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
+          "required": false,
+          "enum": [
+            "sheet/overflow",
+            "sheet/rail-touch",
+            "sheet/thumb-legible",
+            "type/floor-15",
+            "type/svg-label-min",
+            "type/weight-cap",
+            "type/face",
+            "type/sizes-ladder",
+            "color/tokens-only",
+            "color/semantic-icons-only",
+            "icon/placement",
+            "icon/known",
+            "rows/two-lines",
+            "rows/key-snap",
+            "dia/label-clearance",
+            "dia/stroke-grammar",
+            "dia/fit-slot",
+            "dia/half-pixel",
+            "asset/twin-or-border",
+            "asset/credit-on-plate",
+            "asset/license-missing",
+            "asset/stretched",
+            "picture/plate-clear",
+            "picture/blank-twin",
+            "picture/mood-placement",
+            "opener/sentence-lists-section",
+            "lines/law",
+            "copy/heading-period",
+            "copy/sentence-case",
+            "copy/token-first",
+            "copy/heading-is-name",
+            "copy/no-em-dash",
+            "copy/no-exclamation",
+            "copy/no-eyebrow",
+            "copy/full-sentence-caption",
+            "copy/contrast-pair",
+            "copy/metaphor-candidate",
+            "contrast/both-themes",
+            "layout/empty-half",
+            "layout/pair-gaps",
+            "layout/columns-aligned",
+            "scales/marker-equals-value",
+            "escape/html-block",
+            "export/non-native",
+            "numbers/contradiction",
+            "count/hard-coded"
+          ]
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--json"
+        }
+      ],
+      "mutates": false,
+      "milestone": "M1"
+    },
+    {
+      "action": "fix.run",
+      "usage": "turboslide fix <slideIds> --rule <rule> --dry-run",
+      "command": [
+        "fix"
+      ],
+      "positionals": [
+        "slideIds"
+      ],
+      "options": [
+        {
+          "key": "rule",
+          "flag": "--rule",
+          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
+          "required": false,
+          "enum": [
+            "sheet/overflow",
+            "sheet/rail-touch",
+            "sheet/thumb-legible",
+            "type/floor-15",
+            "type/svg-label-min",
+            "type/weight-cap",
+            "type/face",
+            "type/sizes-ladder",
+            "color/tokens-only",
+            "color/semantic-icons-only",
+            "icon/placement",
+            "icon/known",
+            "rows/two-lines",
+            "rows/key-snap",
+            "dia/label-clearance",
+            "dia/stroke-grammar",
+            "dia/fit-slot",
+            "dia/half-pixel",
+            "asset/twin-or-border",
+            "asset/credit-on-plate",
+            "asset/license-missing",
+            "asset/stretched",
+            "picture/plate-clear",
+            "picture/blank-twin",
+            "picture/mood-placement",
+            "opener/sentence-lists-section",
+            "lines/law",
+            "copy/heading-period",
+            "copy/sentence-case",
+            "copy/token-first",
+            "copy/heading-is-name",
+            "copy/no-em-dash",
+            "copy/no-exclamation",
+            "copy/no-eyebrow",
+            "copy/full-sentence-caption",
+            "copy/contrast-pair",
+            "copy/metaphor-candidate",
+            "contrast/both-themes",
+            "layout/empty-half",
+            "layout/pair-gaps",
+            "layout/columns-aligned",
+            "scales/marker-equals-value",
+            "escape/html-block",
+            "export/non-native",
+            "numbers/contradiction",
+            "count/hard-coded"
+          ]
+        },
+        {
+          "key": "dryRun",
+          "flag": "--dry-run",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--dry-run"
+        }
+      ],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "diff.run",
+      "usage": "turboslide diff <from> <to> --render",
+      "command": [
+        "diff"
+      ],
+      "positionals": [
+        "from",
+        "to"
+      ],
+      "options": [
+        {
+          "key": "render",
+          "flag": "--render",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--render"
+        }
+      ],
+      "mutates": false,
+      "milestone": "M2"
+    },
+    {
+      "action": "version.save",
+      "usage": "turboslide version save -m <note>",
+      "command": [
+        "version",
+        "save"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "note",
+          "flag": "-m",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "version.list",
+      "usage": "turboslide version list",
+      "command": [
+        "version",
+        "list"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "M2"
+    },
+    {
+      "action": "version.restore",
+      "usage": "turboslide version restore <n>",
+      "command": [
+        "version",
+        "restore"
+      ],
+      "positionals": [
+        "n"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M2"
+    },
+    {
+      "action": "judge.bundle",
+      "usage": "turboslide judge bundle --out <out>",
+      "command": [
+        "judge",
+        "bundle"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "slideIds",
+          "flag": "--slide-ids",
+          "type": "\"all\" | string[]",
+          "required": true,
+          "description": "Slide ids, or 'all'"
+        },
+        {
+          "key": "out",
+          "flag": "--out",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "M4"
+    },
+    {
+      "action": "export.run",
+      "usage": "turboslide export <format> --mode <mode> --theme <theme> --verify",
+      "command": [
+        "export"
+      ],
+      "positionals": [
+        "format"
+      ],
+      "options": [
+        {
+          "key": "mode",
+          "flag": "--mode",
+          "type": "\"native\" | \"flatten\"",
+          "required": false,
+          "enum": [
+            "native",
+            "flatten"
+          ]
+        },
+        {
+          "key": "theme",
+          "flag": "--theme",
+          "type": "\"light\" | \"dark\"[]",
+          "required": false,
+          "description": "One or both themes"
+        },
+        {
+          "key": "fonts",
+          "flag": "--fonts",
+          "type": "\"exact\" | \"standard\"",
+          "required": false,
+          "enum": [
+            "exact",
+            "standard"
+          ]
+        },
+        {
+          "key": "headings",
+          "flag": "--headings",
+          "type": "\"raster\"",
+          "required": false
+        },
+        {
+          "key": "verify",
+          "flag": "--verify",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "out",
+          "flag": "--out",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--verify"
+        }
+      ],
+      "mutates": false,
+      "milestone": "M2"
+    },
+    {
+      "action": "build.run",
+      "usage": "turboslide build --out <out> --budget <budgetMB>",
+      "command": [
+        "build"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "out",
+          "flag": "--out",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "budgetMB",
+          "flag": "--budget",
+          "type": "number",
+          "required": false,
+          "description": "Defaults to 16"
+        },
+        {
+          "key": "quality",
+          "flag": "--quality",
+          "type": "integer",
+          "required": false
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "M1"
+    },
+    {
+      "action": "import.run",
+      "usage": "turboslide import <from> --into <into>",
+      "command": [
+        "import"
+      ],
+      "positionals": [
+        "from"
+      ],
+      "options": [
+        {
+          "key": "into",
+          "flag": "--into",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M1"
+    },
+    {
+      "action": "validate.run",
+      "usage": "turboslide validate <path>",
+      "command": [
+        "validate"
+      ],
+      "positionals": [
+        "path"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "M1"
+    }
+  ]
+}

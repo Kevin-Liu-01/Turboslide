@@ -1,0 +1,419 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`renderSlide > renders closing slide closing in dark 1`] = `
+{
+  "html": "<section class="slide opener s-opener s-closing is-on" data-slide="closing" data-kind="closing"><img class="opener-img" src="decks/test/assets/opener-brand-dark.jpg" data-light="decks/test/assets/opener-brand-light.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><svg class="mark" aria-hidden="true"><use href="#gt-mark"/></svg><div class="big" data-block="big" data-type="heading" data-run="big/text">Every product in every language</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">generaltranslation.com</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Singularity, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "rasters": [],
+  "slots": {
+    "plate": [
+      137,
+      129,
+      720,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders closing slide closing in light 1`] = `
+{
+  "html": "<section class="slide opener s-opener s-closing is-on" data-slide="closing" data-kind="closing"><img class="opener-img" src="decks/test/assets/opener-brand-light.jpg" data-dark="decks/test/assets/opener-brand-dark.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><svg class="mark" aria-hidden="true"><use href="#gt-mark"/></svg><div class="big" data-block="big" data-type="heading" data-run="big/text">Every product in every language</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">generaltranslation.com</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Singularity, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "rasters": [],
+  "slots": {
+    "plate": [
+      137,
+      129,
+      720,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders content slide content-rule in dark 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="content-rule" data-kind="content"><div class="in"><div class="cols even"><div class="stack" data-slot="left"><h2 data-block="h" data-type="heading" data-run="h/text">The content rule</h2><p class="max-p" data-block="p1" data-type="paragraph" data-run="p1/text">Every post states what was built.</p></div><div data-slot="right" class="plain" data-block="list" data-type="plain"><span data-run="list/items/0/text"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="list:1"><use href="#i-check-circle"/></svg>How <span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span> ships a locale</span><span class="no" data-run="list/items/1/text"><svg class="ic no" aria-hidden="true" data-raster="icon" data-rid="list:2"><use href="#i-x-circle"/></svg>Opinions about the industry</span></div></div></div></section>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "list",
+      "kind": "icon",
+      "selector": "[data-slide="content-rule"] [data-rid="list:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "list",
+      "kind": "icon",
+      "selector": "[data-slide="content-rule"] [data-rid="list:2"]",
+    },
+  ],
+  "slots": {
+    "left": [
+      137,
+      129,
+      627,
+      642,
+    ],
+    "right": [
+      836,
+      129,
+      627,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders content slide content-rule in light 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="content-rule" data-kind="content"><div class="in"><div class="cols even"><div class="stack" data-slot="left"><h2 data-block="h" data-type="heading" data-run="h/text">The content rule</h2><p class="max-p" data-block="p1" data-type="paragraph" data-run="p1/text">Every post states what was built.</p></div><div data-slot="right" class="plain" data-block="list" data-type="plain"><span data-run="list/items/0/text"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="list:1"><use href="#i-check-circle"/></svg>How <span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span> ships a locale</span><span class="no" data-run="list/items/1/text"><svg class="ic no" aria-hidden="true" data-raster="icon" data-rid="list:2"><use href="#i-x-circle"/></svg>Opinions about the industry</span></div></div></div></section>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "list",
+      "kind": "icon",
+      "selector": "[data-slide="content-rule"] [data-rid="list:1"]",
+    },
+    {
+      "alpha": true,
+      "blockId": "list",
+      "kind": "icon",
+      "selector": "[data-slide="content-rule"] [data-rid="list:2"]",
+    },
+  ],
+  "slots": {
+    "left": [
+      137,
+      129,
+      627,
+      642,
+    ],
+    "right": [
+      836,
+      129,
+      627,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders content slide details in dark 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="details" data-kind="content"><div class="in"><div class="split" style="gap:44px"><div class="head head-cols head-4-8" data-slot="head"><h2 data-block="h" data-type="heading" data-run="h/text">Details</h2><p data-block="p1" data-type="paragraph" data-run="p1/text">Each crop is cut from the same region.</p></div><div class="body start" data-slot="body"><svg class="dia" data-block="dia1" data-type="dia" data-raster="dia" data-rid="dia1:1" viewBox="0 0 1326 278" aria-label="A flow"><text x="0" y="20">A</text></svg><div class="panel" data-block="code" data-type="panel" data-run="code/code">Requested  /docs</div></div></div></div></section>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "dia1",
+      "kind": "dia",
+      "selector": "[data-slide="details"] [data-rid="dia1:1"]",
+    },
+  ],
+  "slots": {
+    "body": [
+      137,
+      129,
+      1326,
+      642,
+    ],
+    "headLeft": [
+      137,
+      129,
+      418,
+      642,
+    ],
+    "headRight": [
+      627,
+      129,
+      836,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders content slide details in light 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="details" data-kind="content"><div class="in"><div class="split" style="gap:44px"><div class="head head-cols head-4-8" data-slot="head"><h2 data-block="h" data-type="heading" data-run="h/text">Details</h2><p data-block="p1" data-type="paragraph" data-run="p1/text">Each crop is cut from the same region.</p></div><div class="body start" data-slot="body"><svg class="dia" data-block="dia1" data-type="dia" data-raster="dia" data-rid="dia1:1" viewBox="0 0 1326 278" aria-label="A flow"><text x="0" y="20">A</text></svg><div class="panel" data-block="code" data-type="panel" data-run="code/code">Requested  /docs</div></div></div></div></section>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "dia1",
+      "kind": "dia",
+      "selector": "[data-slide="details"] [data-rid="dia1:1"]",
+    },
+  ],
+  "slots": {
+    "body": [
+      137,
+      129,
+      1326,
+      642,
+    ],
+    "headLeft": [
+      137,
+      129,
+      418,
+      642,
+    ],
+    "headRight": [
+      627,
+      129,
+      836,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders content slide site in dark 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="site" data-kind="content"><div class="in"><div class="cols wide-right"><div class="stack" data-slot="left"><h2 data-block="h" data-type="heading" data-run="h/text">The production site</h2></div><div class="shot-wrap" data-slot="right"><figure class="shot-fig" data-block="shot" data-type="shot"><img class="shot" src="decks/test/assets/site-home-dark.jpg" data-light="decks/test/assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="shot:1"><figcaption data-run="shot/caption">The home page.</figcaption></figure></div></div></div></section>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "shot",
+      "kind": "shot",
+      "selector": "[data-slide="site"] [data-rid="shot:1"]",
+    },
+  ],
+  "slots": {
+    "left": [
+      137,
+      129,
+      418,
+      642,
+    ],
+    "right": [
+      627,
+      129,
+      836,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders content slide site in light 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="site" data-kind="content"><div class="in"><div class="cols wide-right"><div class="stack" data-slot="left"><h2 data-block="h" data-type="heading" data-run="h/text">The production site</h2></div><div class="shot-wrap" data-slot="right"><figure class="shot-fig" data-block="shot" data-type="shot"><img class="shot" src="decks/test/assets/site-home-light.jpg" data-dark="decks/test/assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="shot:1"><figcaption data-run="shot/caption">The home page.</figcaption></figure></div></div></div></section>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "shot",
+      "kind": "shot",
+      "selector": "[data-slide="site"] [data-rid="shot:1"]",
+    },
+  ],
+  "slots": {
+    "left": [
+      137,
+      129,
+      418,
+      642,
+    ],
+    "right": [
+      627,
+      129,
+      836,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders content slide voice in dark 1`] = `
+{
+  "html": "<section class="slide ts-x-voice is-on" data-slide="voice" data-kind="content"><style>.ts-sheet .ts-x-voice .rules > div { padding: 13px 0; font-size: 19px; }</style><div class="in"><div class="cols"><div data-slot="left" class="rows tight rules" style="--key:150px;margin-bottom:36px" data-block="rows" data-type="rows"><div><b data-run="rows/items/0/key">Sentence</b><span data-run="rows/items/0/value">Short.</span></div></div><div class="stack" data-slot="right"><p data-block="p1" data-type="paragraph" data-run="p1/text">Right.</p></div></div></div></section>",
+  "rasters": [],
+  "slots": {
+    "left": [
+      137,
+      129,
+      522.5,
+      642,
+    ],
+    "right": [
+      731.5,
+      129,
+      731.5,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders content slide voice in light 1`] = `
+{
+  "html": "<section class="slide ts-x-voice is-on" data-slide="voice" data-kind="content"><style>.ts-sheet .ts-x-voice .rules > div { padding: 13px 0; font-size: 19px; }</style><div class="in"><div class="cols"><div data-slot="left" class="rows tight rules" style="--key:150px;margin-bottom:36px" data-block="rows" data-type="rows"><div><b data-run="rows/items/0/key">Sentence</b><span data-run="rows/items/0/value">Short.</span></div></div><div class="stack" data-slot="right"><p data-block="p1" data-type="paragraph" data-run="p1/text">Right.</p></div></div></div></section>",
+  "rasters": [],
+  "slots": {
+    "left": [
+      137,
+      129,
+      522.5,
+      642,
+    ],
+    "right": [
+      731.5,
+      129,
+      731.5,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders mood slide mood-earth in dark 1`] = `
+{
+  "html": "<section class="slide mood s-mood is-on" data-slide="mood-earth" data-kind="mood"><img class="mood-img" src="decks/test/assets/opener-brand-dark.jpg" data-light="decks/test/assets/opener-brand-light.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="mood-plate" data-slot="plate"><div class="big title" data-block="title" data-type="heading" data-run="title/text">The Blue Marble</div><p style="margin-top:12px" data-block="p" data-type="paragraph" data-run="p/text">NASA's composite of the whole planet.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Image: NASA, Reto Stöckli, 2007, public domain</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "rasters": [],
+  "slots": {
+    "plate": [
+      903,
+      129,
+      560,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders mood slide mood-earth in light 1`] = `
+{
+  "html": "<section class="slide mood s-mood is-on" data-slide="mood-earth" data-kind="mood"><img class="mood-img" src="decks/test/assets/opener-brand-light.jpg" data-dark="decks/test/assets/opener-brand-dark.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="mood-plate" data-slot="plate"><div class="big title" data-block="title" data-type="heading" data-run="title/text">The Blue Marble</div><p style="margin-top:12px" data-block="p" data-type="paragraph" data-run="p/text">NASA's composite of the whole planet.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Image: NASA, Reto Stöckli, 2007, public domain</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "rasters": [],
+  "slots": {
+    "plate": [
+      903,
+      129,
+      560,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders opener slide opener-brand in dark 1`] = `
+{
+  "html": "<section class="slide opener s-opener is-on" data-slide="opener-brand" data-kind="opener"><img class="opener-img" src="decks/test/assets/opener-brand-dark.jpg" data-light="decks/test/assets/opener-brand-light.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><div class="big" data-block="big" data-type="heading" data-run="big/text">Brand</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">This section covers the company.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Event Horizon, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "rasters": [],
+  "slots": {
+    "plate": [
+      137,
+      129,
+      740,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders opener slide opener-brand in light 1`] = `
+{
+  "html": "<section class="slide opener s-opener is-on" data-slide="opener-brand" data-kind="opener"><img class="opener-img" src="decks/test/assets/opener-brand-light.jpg" data-dark="decks/test/assets/opener-brand-dark.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><div class="big" data-block="big" data-type="heading" data-run="big/text">Brand</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">This section covers the company.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Event Horizon, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "rasters": [],
+  "slots": {
+    "plate": [
+      137,
+      129,
+      740,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders statement slide thesis in dark 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="thesis" data-kind="statement"><div class="in"><div class="center" data-slot="main"><div class="big" style="max-width:22ch" data-block="big" data-type="heading" data-run="big/text">Every product in every language</div></div></div></section>",
+  "rasters": [],
+  "slots": {
+    "main": [
+      137,
+      129,
+      1326,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders statement slide thesis in light 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="thesis" data-kind="statement"><div class="in"><div class="center" data-slot="main"><div class="big" style="max-width:22ch" data-block="big" data-type="heading" data-run="big/text">Every product in every language</div></div></div></section>",
+  "rasters": [],
+  "slots": {
+    "main": [
+      137,
+      129,
+      1326,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders title slide title in dark 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="title" data-kind="title"><div class="in"><div class="left-mid" data-slot="main"><svg width="132" height="84" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg><h1 style="margin-top:44px" data-block="heading" data-type="heading" data-run="heading/text">General Translation</h1><p class="lead muted max-p" style="margin-top:26px" data-block="lead" data-type="paragraph" data-run="lead/text">This deck covers the brand.</p></div></div></section>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "mark",
+      "kind": "mark",
+      "selector": "[data-slide="title"] [data-rid="mark:1"]",
+    },
+  ],
+  "slots": {
+    "main": [
+      137,
+      129,
+      1326,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders title slide title in light 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="title" data-kind="title"><div class="in"><div class="left-mid" data-slot="main"><svg width="132" height="84" fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="mark:1"><use href="#gt-mark"/></svg><h1 style="margin-top:44px" data-block="heading" data-type="heading" data-run="heading/text">General Translation</h1><p class="lead muted max-p" style="margin-top:26px" data-block="lead" data-type="paragraph" data-run="lead/text">This deck covers the brand.</p></div></div></section>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "mark",
+      "kind": "mark",
+      "selector": "[data-slide="title"] [data-rid="mark:1"]",
+    },
+  ],
+  "slots": {
+    "main": [
+      137,
+      129,
+      1326,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`stage, deck, thumb and standalone > renders the stage with frame, wordmark and counter 1`] = `"<div class="ts-sheet sheet ts-present" data-theme="light"><div class="ts-stage stage"><div class="frame"><div class="rule top"></div><div class="rule bottom"></div><span class="cross tl"></span><span class="cross tr"></span><span class="cross bl"></span><span class="cross br"></span></div><section class="slide is-on"></section><div class="wordmark" aria-hidden="true"><svg width="28" height="18" fill="currentColor"><use href="#gt-mark"/></svg></div><div class="counter">01 / 85</div></div></div>"`;

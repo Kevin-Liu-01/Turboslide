@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "id": "type",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Typography"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Inter is the one typeface for display, interface and text, loaded as one variable file with an optical size axis. Headings use weight 500 at most. Long-form text and documentation are set at weight 400. Monospace is used only for code, tokens, and technical labels.",
+        "measure": 56
+      },
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "This is the working typeface going into the identity project. It is not a final decision. Alternatives remain open if they cover the required scripts.",
+        "role": "cap",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "spec",
+        "type": "spec",
+        "weights": [
+          300,
+          400,
+          500,
+          600,
+          700,
+          800
+        ],
+        "sample": "Inter",
+        "textRow": "Long-form reading, documentation, captions, table cells."
+      }
+    ]
+  }
+}

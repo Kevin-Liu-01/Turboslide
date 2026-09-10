@@ -1,0 +1,5 @@
+interface:
+  display_name: 'Turboslide create'
+  short_description: 'Write GT-grammar slides'
+  brand_color: '#070707'
+  default_prompt: 'Use $turboslide-create for this Turboslide task.'

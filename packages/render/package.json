@@ -5,8 +5,25 @@
   "type": "module",
   "description": "One framework-free string renderer: renderSlide, renderDeck, renderStandalone, renderThumb, renderStage, slot geometry, the GT word transform, RasterRef emission.",
   "exports": {
-    "./index": "./src/index.ts",
+    "./slide": "./src/slide.ts",
+    "./deck": "./src/deck.ts",
+    "./standalone": "./src/standalone.ts",
+    "./thumb": "./src/thumb.ts",
+    "./stage": "./src/stage.ts",
+    "./geometry": "./src/geometry.ts",
+    "./text": "./src/text.ts",
+    "./html": "./src/html.ts",
+    "./block-css": "./src/block-css.ts",
+    "./runtime": "./src/runtime.ts",
+    "./theme-node": "./src/theme-node.ts",
+    "./blocks/context": "./src/blocks/context.ts",
+    "./blocks/render-block": "./src/blocks/render-block.ts",
+    "./blocks/dia": "./src/blocks/dia.ts",
+    "./blocks/html-escape": "./src/blocks/html-escape.ts",
     "./package.json": "./package.json"
+  },
+  "scripts": {
+    "test": "vitest run"
   },
   "dependencies": {
     "@turboslide/fonts": "workspace:*",

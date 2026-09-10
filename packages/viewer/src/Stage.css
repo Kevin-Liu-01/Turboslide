@@ -1,0 +1,12 @@
+/* The stage root inside the shell's .pt-stagewrap (SPEC 5.5). It is the theme's
+   .ts-sheet root (the tokens root, SPEC 5.1) filling the stage box, so the
+   theme's stage.css owns the picture device (head:249-254): while a
+   full-picture slide is up in slide mode, .ts-sheet.is-picture shows the
+   .backdrop with the slide's image at object-fit cover across the whole stage
+   area, the .sheet goes transparent and loses its edge, and the slide's own
+   copy of the image hides. This sheet only places the root and lets the
+   pointer through to the sheet. */
+.ts-stagewrap {
+  position: absolute;
+  inset: 0;
+}

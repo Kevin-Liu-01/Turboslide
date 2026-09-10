@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mood-compass",
+  "kind": "mood",
+  "picture": {
+    "asset": "mood-compass",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-right",
+    "maxWidth": 560,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "title",
+        "text": "Bowen's compass rose"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "An engraved compass rose from a 1748 chart, the instrument for setting a course. This section lists what has shipped, what is open, and the two points that do not change.",
+        "marginTop": 12
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Engraving: Emanuel Bowen, 1748, public domain"
+      }
+    ]
+  }
+}

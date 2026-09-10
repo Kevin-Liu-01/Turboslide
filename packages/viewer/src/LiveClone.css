@@ -1,0 +1,20 @@
+/* A live clone (SPEC 5.5: thumbnails and book pages scale by
+   --k = frameWidth / 1600, and every block must render from 0.14x to 0.6x).
+   The clone is a .ts-sheet without its ring, filling the frame that holds it
+   (a .pt-thumb-frame, a .pt-page-frame, the preview card's frame, a sidebar
+   mini frame; the frame draws the one line), with the 1600 by 900 stage
+   scaled inside it. It never takes the pointer: the frame does. */
+.ts-sheet.sheet.is-clone {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border: 0;
+  box-shadow: none;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ts-sheet.sheet.is-clone > .ts-stage {
+  transform: scale(var(--k, 0.14));
+}

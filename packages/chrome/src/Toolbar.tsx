@@ -1,0 +1,390 @@
+import type { KeyboardEvent, ReactNode } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
+
+import { GtMark } from './GtMark';
+import { useMountEffect } from './lib/useMountEffect';
+import { Seg } from './Seg';
+import type { SegOption } from './Seg';
+import { usePtShell } from './shell-context';
+import { MODE_ORDER, pad2, previewId } from './shell-data';
+import type { ShellMode } from './shell-data';
+import { ThemeButton } from './ThemeButton';
+import { ToolButton } from './ToolButton';
+import { toggleFullscreen } from './useShellKeys';
+
+import './Toolbar.css';
+
+/**
+ * The 52px bar over the stage, ported from
+ * Prototemplate/src/components/viewer/Toolbar.tsx (SPEC 2.2, 6.3). Left
+ * group: the list toggle (aria-pressed follows the list but the ink frame
+ * does not, since the open list is its own state), the brand (in the DOM
+ * always, shown by Toolbar.css only while the sidebar column is closed),
+ * then Previous, the count (a button: click it, type a number, press Enter)
+ * and Next while the route is paging. Right group: the route's own controls
+ * (`slot`, where the editor puts Edit | View, Twin, Lint and Source in M3),
+ * the mode seg in one fixed order (Slide, Grid, Book), Theme, Present (in
+ * slide mode only, the one solid button), Fullscreen, Copy link and Help.
+ * The Search pill lands with the palette in M3. Every control is a labeled
+ * ToolButton with a title naming its key. The labels collapse in measured
+ * tiers when the bar runs short (Toolbar.css).
+ */
+export type ToolbarProps = {
+  /** the deck's title, shown with the mark while the sidebar is hidden */
+  title: string;
+  /** the route's own controls, first in the right group */
+  slot?: ReactNode;
+  /** the route's own words for the seg */
+  modeLabels?: Partial<Record<ShellMode, string>>;
+};
+
+/* the action words of directive 7.6 */
+const MODE_LABEL: Record<ShellMode, string> = {
+  slide: 'Slide',
+  grid: 'Grid',
+  book: 'Book',
+};
+
+const MODE_ACTION: Record<ShellMode, string> = {
+  slide: 'One at a time',
+  grid: 'Everything as a grid',
+  book: 'Read top to bottom',
+};
+
+const MODE_KEY: Partial<Record<ShellMode, string>> = { grid: 'G', book: 'B' };
+
+/**
+ * How far the labels have collapsed: none; then Copy link and Fullscreen;
+ * then Previous and Next; then Theme; then Help, Present and the slot's
+ * buttons. The seg's words are never traded.
+ */
+type Tight = 0 | 1 | 2 | 3 | 4;
+
+const TIERS: readonly Tight[] = [1, 2, 3, 4];
+
+/* the tiers are cumulative: tier three carries the classes of one and two, so each tier's rules name only what it adds */
+const TIGHT_CLASS: Record<Tight, string> = {
+  0: 'pt-toolbar',
+  1: 'pt-toolbar is-tight-1',
+  2: 'pt-toolbar is-tight-1 is-tight-2',
+  3: 'pt-toolbar is-tight-1 is-tight-2 is-tight-3',
+  4: 'pt-toolbar is-tight-1 is-tight-2 is-tight-3 is-tight-4',
+};
+
+/**
+ * Seg options for the modes a route offers, always in the one order Slide,
+ * Grid, Book, whichever mode is the default. The default mode's title says
+ * that Escape returns to it; the others name their letter.
+ */
+export function modeOptions(
+  modes: readonly ShellMode[],
+  labels?: Partial<Record<ShellMode, string>>,
+): readonly SegOption<ShellMode>[] {
+  const first = modes[0];
+  return MODE_ORDER.filter((mode) => modes.includes(mode)).map((mode) => {
+    const key = MODE_KEY[mode];
+    let title: string;
+    if (mode === first) title = `${MODE_ACTION[mode]}, where Escape returns`;
+    else if (key) title = `${MODE_ACTION[mode]} (${key})`;
+    else title = `Slide view: ${MODE_ACTION[mode].toLowerCase()}`;
+    return { value: mode, label: labels?.[mode] ?? MODE_LABEL[mode], icon: mode, title };
+  });
+}
+
+/**
+ * The count as a control (directive 7.6): `01 / 85` reads the place, a
+ * click opens a number field, Enter goes there. Hovering it previews the
+ * next item through the preview layer (directive 8.6).
+ */
+function Count() {
+  const shell = usePtShell();
+  const { index, total, paged, noun, countLabel } = shell;
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState('');
+  const next = paged[index + 1];
+
+  const open = () => {
+    setValue('');
+    setEditing(true);
+  };
+
+  const close = () => setEditing(false);
+
+  const onKey = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      close();
+      return;
+    }
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    const n = parseInt(value, 10);
+    const item = paged[n - 1];
+    if (!item) {
+      shell.say(`No ${noun} ${value || n}`);
+      return;
+    }
+    close();
+    if (shell.mode === 'grid')
+      shell.setMode(shell.modes.includes('slide') ? 'slide' : (shell.modes[0] ?? 'slide'));
+    shell.select(item.id);
+  };
+
+  if (editing) {
+    return (
+      <span className="pt-count is-editing">
+        {countLabel ? <span className="pt-count-word">{countLabel}</span> : null}
+        <input
+          ref={(el) => el?.focus()}
+          className="pt-count-field"
+          type="text"
+          inputMode="numeric"
+          maxLength={3}
+          value={value}
+          placeholder={pad2(Math.max(1, index + 1))}
+          aria-label={`Go to a ${noun} by number`}
+          data-control="view.goto"
+          onChange={(event) => setValue(event.target.value.replace(/\D/g, ''))}
+          onKeyDown={onKey}
+          onBlur={close}
+        />
+        <span> / {pad2(total)}</span>
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      className="pt-ib pt-count"
+      title={`Go to a ${noun} by number (click, type it, press Enter)`}
+      data-preview={next ? previewId(next) : undefined}
+      data-control="view.count"
+      onClick={open}
+    >
+      {countLabel ? <span className="pt-count-word">{countLabel}</span> : null}
+      {index < 0 ? (
+        <>
+          <b>{total}</b>
+          <span> {noun}s</span>
+        </>
+      ) : (
+        <>
+          <b>{pad2(index + 1)}</b>
+          <span> / {pad2(total)}</span>
+        </>
+      )}
+    </button>
+  );
+}
+
+/**
+ * How far the labels have to collapse for the bar's controls to fit its
+ * box. Measured with each tier applied in turn, so the answer does not
+ * depend on the state it decides. The two groups are measured by their
+ * content, not the bar by its scroll width: the left group is allowed to
+ * shrink (the brand truncates inside it), so its buttons would overlap the
+ * right group before the bar itself overflowed. At most four forced
+ * layouts, and only when the bar or a group's content has changed size.
+ */
+function fitLabels(bar: HTMLElement): Tight {
+  bar.classList.remove('is-tight-1', 'is-tight-2', 'is-tight-3', 'is-tight-4');
+  const style = getComputedStyle(bar);
+  const frame =
+    parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.columnGap);
+  const groups = bar.querySelectorAll<HTMLElement>(':scope > .pt-bar-l, :scope > .pt-bar-r');
+  const need = () => {
+    let width = frame;
+    groups.forEach((group) => {
+      width += group.scrollWidth;
+    });
+    return width;
+  };
+  const room = bar.clientWidth + 1;
+  if (need() <= room) return 0;
+  let tight: Tight = 0;
+  for (const tier of TIERS) {
+    bar.classList.add(`is-tight-${tier}`);
+    tight = tier;
+    if (need() <= room) break;
+  }
+  return tight;
+}
+
+export function Toolbar({ title, slot, modeLabels }: ToolbarProps) {
+  const shell = usePtShell();
+  const { modes, keys, noun, mode, index, sidebarOpen, helpOpen, narrow } = shell;
+  const [fullscreen, setFullscreen] = useState(false);
+  const [tight, setTight] = useState<Tight>(0);
+  const bar = useRef<HTMLDivElement>(null);
+  const showSeg = modes.length > 1;
+  const slideOffered = modes.includes('slide');
+  const hasRouteControls = Boolean(slot) || showSeg;
+  /* the paging trio: on a route with a slide mode it belongs to that mode */
+  const paging = keys === 'paged' || !slideOffered;
+  /* the count is wider while it names the total than while it reads a place */
+  const countNamesTotal = index < 0;
+
+  useMountEffect(() => {
+    const onChange = () => setFullscreen(Boolean(document.fullscreenElement));
+    onChange();
+    document.addEventListener('fullscreenchange', onChange);
+    return () => document.removeEventListener('fullscreenchange', onChange);
+  });
+
+  /* the label collapse: measured against the bar's own box whenever the bar
+     or either group changes size (the sidebar changes the bar without a
+     window resize; the route's slot and the count change the groups). */
+  useMountEffect(() => {
+    const el = bar.current;
+    if (!el) return;
+    const measure = () => setTight(fitLabels(el));
+    measure();
+    let observer: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      observer = new ResizeObserver(measure);
+      observer.observe(el);
+      el.querySelectorAll<HTMLElement>(':scope > .pt-bar-l, :scope > .pt-bar-r').forEach(
+        (group) => {
+          observer?.observe(group);
+        },
+      );
+    }
+    return () => observer?.disconnect();
+  });
+
+  /* and before paint when what the bar holds changes shape */
+  useLayoutEffect(() => {
+    const el = bar.current;
+    if (el) setTight(fitLabels(el));
+  }, [slot, modes, sidebarOpen, shell.countLabel, countNamesTotal, paging, mode]);
+
+  /* a paged route's toast names the item (`Link to slide 12 copied`). On a
+     phone the share sheet is the way to hand a link on; a dismissed sheet is
+     not an error. */
+  const copyLink = async () => {
+    const url = window.location.href;
+    const done =
+      keys === 'paged' && index >= 0 ? `Link to ${noun} ${index + 1} copied` : 'Link copied';
+    if (narrow && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ url });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      shell.say(done);
+    } catch {
+      // no clipboard (an insecure context, or permission refused): show the address instead
+      shell.say(url);
+    }
+  };
+
+  /* presenting from the book or the grid opens the slide on the current item first */
+  const presentNow = () => {
+    if (mode !== 'slide') shell.setMode('slide');
+    shell.setPresent(true);
+  };
+
+  return (
+    <div ref={bar} className={TIGHT_CLASS[tight]} role="toolbar" aria-label="Viewer controls">
+      <div className="pt-bar-l">
+        <ToolButton
+          icon="sidebar"
+          title="Show or hide the list ([)"
+          pressed={sidebarOpen}
+          quiet
+          className="pt-list"
+          control="view.sidebar"
+          onClick={() => shell.setSidebar(!sidebarOpen)}
+        />
+        {/* always rendered; Toolbar.css shows it while the shell root says the column is closed */}
+        <span className="pt-bar-brand">
+          <GtMark />
+          <b>{title}</b>
+        </span>
+        {paging ? (
+          <>
+            <span className="pt-sep" aria-hidden="true" />
+            <ToolButton
+              icon="prev"
+              label="Previous"
+              title="Previous (left arrow)"
+              className="pt-prev"
+              control="view.prev"
+              onClick={() => shell.step(-1)}
+            />
+            <Count />
+            <ToolButton
+              icon="next"
+              label="Next"
+              title="Next (right arrow)"
+              className="pt-next"
+              control="view.next"
+              onClick={() => shell.step(1)}
+            />
+          </>
+        ) : null}
+      </div>
+      <div className="pt-bar-r">
+        {slot ? <div className="pt-bar-slot">{slot}</div> : null}
+        {showSeg ? (
+          <Seg
+            options={modeOptions(modes, modeLabels)}
+            value={mode}
+            onChange={shell.setMode}
+            label="View"
+            control="view.mode"
+          />
+        ) : null}
+        {hasRouteControls ? <span className="pt-sep" aria-hidden="true" /> : null}
+        <ThemeButton className="pt-theme" label />
+        {slideOffered && mode === 'slide' ? (
+          <ToolButton
+            icon="present"
+            label="Present"
+            title="Presentation mode, chrome hidden (P)"
+            solid
+            hideSm
+            className="pt-present-btn"
+            control="view.present"
+            onClick={presentNow}
+          />
+        ) : null}
+        <ToolButton
+          icon={fullscreen ? 'exit-fullscreen' : 'fullscreen'}
+          label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+          title={fullscreen ? 'Leave fullscreen (F)' : 'Fullscreen (F)'}
+          hideSm
+          className="pt-full"
+          control="view.fullscreen"
+          onClick={() => {
+            void toggleFullscreen();
+          }}
+        />
+        <ToolButton
+          icon="link"
+          label="Copy link"
+          title="Copy a link to this view"
+          className="pt-copy"
+          control="view.copyLink"
+          onClick={() => {
+            void copyLink();
+          }}
+        />
+        <ToolButton
+          icon="help"
+          label="Help"
+          title="Keyboard shortcuts (?)"
+          pressed={helpOpen}
+          className="pt-help-btn"
+          control="view.help"
+          onClick={() => shell.setHelp(!helpOpen)}
+        />
+      </div>
+    </div>
+  );
+}

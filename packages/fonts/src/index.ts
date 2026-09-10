@@ -1,15 +1,7 @@
-// @turboslide/fonts: the InterVariable woff2 and its CSS (SPEC 2.1, 8.4); the static export
-// instances and fonts.json arrive in M2 through scripts/build-fonts.py.
-// Scaffold placeholder. The theme builder owns this package in M1 and adds one explicit subpath
-// export per module to package.json (SPEC 3.3 item 2: no barrel files).
+// @turboslide/fonts (SPEC 2.1, 8.4). Import from '@turboslide/fonts/inter' (the font facts, the
+// file URLs and the @font-face writers) or the CSS and woff2 exports directly; no barrel (SPEC 3.3
+// item 2). This file keeps the scaffold's PACKAGE_NAME so the other packages' scaffold
+// placeholders still compile until their owners replace them; the integrator deletes it together
+// with the "./index" export once they have.
 
 export const PACKAGE_NAME = '@turboslide/fonts' as const;
-
-/** Absolute file URL of the variable font, for Node callers (the standalone build, the exporter). */
-export const INTER_VARIABLE_WOFF2 = new URL('../assets/InterVariable.woff2', import.meta.url);
-
-/** Absolute file URL of the @font-face stylesheet. */
-export const INTER_CSS = new URL('./inter.css', import.meta.url);
-
-/** The deck's font family stack for display and text (head.html --display and --text). */
-export const FONT_FAMILY = "'Inter', 'Helvetica Neue', Arial, sans-serif";

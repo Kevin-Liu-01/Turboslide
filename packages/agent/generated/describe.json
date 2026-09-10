@@ -1,0 +1,454 @@
+{
+  "version": 1,
+  "global": "window.turboslide.studio",
+  "event": "turboslide:studio-api-ready",
+  "owners": [
+    {
+      "id": "editor",
+      "when": "a deck is open at /edit/:deckId",
+      "actions": [
+        "deck.info",
+        "slide.list",
+        "slide.get",
+        "slide.insert",
+        "slide.remove",
+        "slide.move",
+        "slide.update",
+        "slide.replace",
+        "block.set",
+        "block.insert",
+        "block.remove",
+        "block.move",
+        "section.set",
+        "slide.lease",
+        "asset.add",
+        "asset.dither",
+        "material.capture",
+        "render.slide",
+        "render.sheet",
+        "lint.run",
+        "fix.run",
+        "diff.run",
+        "version.save",
+        "version.list",
+        "version.restore",
+        "view.goto",
+        "view.mode",
+        "view.theme",
+        "view.present",
+        "export.run",
+        "build.run",
+        "validate.run"
+      ]
+    },
+    {
+      "id": "viewer",
+      "when": "/deck/:deckId in slide, grid or book mode",
+      "actions": [
+        "view.goto",
+        "view.mode",
+        "view.theme",
+        "view.present",
+        "render.slide",
+        "render.sheet"
+      ]
+    },
+    {
+      "id": "source-drawer",
+      "when": "the source drawer is open; delegates to the editor",
+      "actions": [
+        "source.read",
+        "source.apply"
+      ]
+    },
+    {
+      "id": "presenter",
+      "when": "/present/:deckId",
+      "actions": [
+        "view.goto",
+        "view.present"
+      ]
+    }
+  ],
+  "standardActions": [
+    "source.read",
+    "source.apply",
+    "controls.list",
+    "control.activate",
+    "control.set",
+    "artifact.download"
+  ],
+  "actions": [
+    "deck.info",
+    "slide.list",
+    "slide.get",
+    "slide.insert",
+    "slide.remove",
+    "slide.move",
+    "slide.update",
+    "slide.replace",
+    "block.set",
+    "block.insert",
+    "block.remove",
+    "block.move",
+    "section.set",
+    "slide.lease",
+    "asset.add",
+    "asset.dither",
+    "material.capture",
+    "render.slide",
+    "render.sheet",
+    "lint.run",
+    "fix.run",
+    "diff.run",
+    "version.save",
+    "version.list",
+    "version.restore",
+    "view.goto",
+    "view.mode",
+    "view.theme",
+    "view.present",
+    "export.run",
+    "build.run",
+    "validate.run",
+    "source.read",
+    "source.apply",
+    "controls.list",
+    "control.activate",
+    "control.set",
+    "artifact.download"
+  ],
+  "details": {
+    "deck.info": {
+      "label": "Deck info",
+      "doc": "Title, theme, sections with slide ids and titles, counts and the current revision.",
+      "mutates": false,
+      "milestone": "M1",
+      "group": "deck"
+    },
+    "slide.list": {
+      "label": "List slides",
+      "doc": "Every slide in deck order with its number, section, title, kind and lint counts.",
+      "mutates": false,
+      "milestone": "M1",
+      "group": "slide"
+    },
+    "slide.get": {
+      "label": "Get slide",
+      "doc": "The normalized slide, the assets it references and its last render record.",
+      "mutates": false,
+      "milestone": "M1",
+      "group": "slide"
+    },
+    "slide.insert": {
+      "label": "Insert slide",
+      "doc": "Inserts a slide into a section after the named slide, or first.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "slide"
+    },
+    "slide.remove": {
+      "label": "Remove slide",
+      "doc": "Removes a slide from the deck and its section.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "slide"
+    },
+    "slide.move": {
+      "label": "Move slide",
+      "doc": "Moves a slide to a section after the named slide, or first.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "slide"
+    },
+    "slide.update": {
+      "label": "Patch slide",
+      "doc": "Applies a mutation list to one slide and returns the normalized slide with its findings.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "slide"
+    },
+    "slide.replace": {
+      "label": "Replace slide",
+      "doc": "Replaces a slide with the given document; what the source drawer’s Apply emits.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "slide"
+    },
+    "block.set": {
+      "label": "Set block property",
+      "doc": "Writes one property of a block by JSON pointer; an absent value deletes it.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "block"
+    },
+    "block.insert": {
+      "label": "Insert block",
+      "doc": "Inserts a block into a slot after the named block, or first.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "block"
+    },
+    "block.remove": {
+      "label": "Remove block",
+      "doc": "Removes a block from its slide.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "block"
+    },
+    "block.move": {
+      "label": "Move block",
+      "doc": "Moves a block to a slot after the named block, or first.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "block"
+    },
+    "section.set": {
+      "label": "Set sections",
+      "doc": "Replaces the section list, the only place slide order lives.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "deck"
+    },
+    "slide.lease": {
+      "label": "Lease slide",
+      "doc": "Takes a lease on a slide for the author; another author’s write is rejected with 409 unless forced.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "slide"
+    },
+    "asset.add": {
+      "label": "Add asset",
+      "doc": "Adds a file or URL as an asset with its role, alt, source and optional treatment; returns twins and metrics.",
+      "mutates": true,
+      "milestone": "M5",
+      "group": "asset"
+    },
+    "asset.dither": {
+      "label": "Dither asset",
+      "doc": "Re-runs the two-tone pipeline on an asset with new parameters and reports plate clearance.",
+      "mutates": true,
+      "milestone": "M5",
+      "group": "asset"
+    },
+    "material.capture": {
+      "label": "Capture material",
+      "doc": "Renders a shader material at 3200 by 1800 and captures frames at the given anchors as assets with recipe keys.",
+      "mutates": true,
+      "milestone": "M5",
+      "group": "asset"
+    },
+    "render.slide": {
+      "label": "Render",
+      "doc": "Renders slides in one or both themes at 1x or 2x and returns render records with image paths.",
+      "mutates": false,
+      "milestone": "M1",
+      "group": "render"
+    },
+    "render.sheet": {
+      "label": "Contact sheet",
+      "doc": "Renders a contact sheet per theme with a JSON cell map from cell boxes to slide ids.",
+      "mutates": false,
+      "milestone": "M1",
+      "group": "render"
+    },
+    "lint.run": {
+      "label": "Lint",
+      "doc": "Runs the grammar linter on slides in the static, rendered or both layers and returns findings.",
+      "mutates": false,
+      "milestone": "M1",
+      "group": "lint"
+    },
+    "fix.run": {
+      "label": "Fix",
+      "doc": "Applies the fix mutations of findings that carry one and reports what remains.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "lint"
+    },
+    "diff.run": {
+      "label": "Diff",
+      "doc": "The mutation list between two revisions in prose, optionally with before and after crops.",
+      "mutates": false,
+      "milestone": "M2",
+      "group": "version"
+    },
+    "version.save": {
+      "label": "Save version",
+      "doc": "Saves a named version at the current revision.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "version"
+    },
+    "version.list": {
+      "label": "List versions",
+      "doc": "The saved versions with author, note and revision.",
+      "mutates": false,
+      "milestone": "M2",
+      "group": "version"
+    },
+    "version.restore": {
+      "label": "Restore version",
+      "doc": "Restores a version as a mutation, so it is undoable and visible in History.",
+      "mutates": true,
+      "milestone": "M2",
+      "group": "version"
+    },
+    "view.goto": {
+      "label": "Go to slide",
+      "doc": "Shows a slide in the viewer, the editor or the presenter.",
+      "mutates": false,
+      "milestone": "M3",
+      "group": "view"
+    },
+    "view.mode": {
+      "label": "View mode",
+      "doc": "Switches between slide, grid and book mode.",
+      "mutates": false,
+      "milestone": "M3",
+      "group": "view"
+    },
+    "view.theme": {
+      "label": "View theme",
+      "doc": "Sets the theme of chrome and sheet together through the gt-theme key.",
+      "mutates": false,
+      "milestone": "M3",
+      "group": "view"
+    },
+    "view.present": {
+      "label": "Present",
+      "doc": "Enters or leaves present mode.",
+      "mutates": false,
+      "milestone": "M3",
+      "group": "view"
+    },
+    "export.run": {
+      "label": "Export",
+      "doc": "Exports the deck to PPTX, Google Slides or PDF in native or flatten mode and returns the verified report.",
+      "mutates": false,
+      "milestone": "M2",
+      "group": "export"
+    },
+    "build.run": {
+      "label": "Build standalone",
+      "doc": "Writes the single-file HTML deck with fonts and assets inlined and asserts the size budget.",
+      "mutates": false,
+      "milestone": "M1",
+      "group": "export"
+    },
+    "validate.run": {
+      "label": "Validate",
+      "doc": "Validates a deck directory and returns the issues and the normalized document.",
+      "mutates": false,
+      "milestone": "M1",
+      "group": "deck"
+    },
+    "source.read": {
+      "label": "Read source",
+      "doc": "Glyphfield standard action: the exact current source document of the active owner.",
+      "mutates": false,
+      "milestone": "M3",
+      "group": "studio"
+    },
+    "source.apply": {
+      "label": "Apply source",
+      "doc": "Glyphfield standard action: applies a JSON string or object through the active owner’s validator.",
+      "mutates": true,
+      "milestone": "M3",
+      "group": "studio"
+    },
+    "controls.list": {
+      "label": "List controls",
+      "doc": "Glyphfield standard action: the visible interactive controls with labels, data-control ids and values.",
+      "mutates": false,
+      "milestone": "M3",
+      "group": "studio"
+    },
+    "control.activate": {
+      "label": "Activate control",
+      "doc": "Glyphfield standard action: activates a control by accessible label or data-control id.",
+      "mutates": false,
+      "milestone": "M3",
+      "group": "studio"
+    },
+    "control.set": {
+      "label": "Set control",
+      "doc": "Glyphfield standard action: sets a form control by accessible label or data-control id.",
+      "mutates": false,
+      "milestone": "M3",
+      "group": "studio"
+    },
+    "artifact.download": {
+      "label": "Download artifact",
+      "doc": "Glyphfield standard action: saves a returned artifact with its deterministic file name.",
+      "mutates": false,
+      "milestone": "M3",
+      "group": "studio"
+    }
+  },
+  "methods": [
+    {
+      "name": "version",
+      "description": "The API version, 1"
+    },
+    {
+      "name": "describe()",
+      "description": "The active owner, its actions and whether source read and apply are supported"
+    },
+    {
+      "name": "controls()",
+      "description": "Visible interactive controls with accessible labels, data-control ids and values"
+    },
+    {
+      "name": "activate(label)",
+      "description": "Activates a control by accessible label or data-control id; RangeError when missing"
+    },
+    {
+      "name": "set(label, value)",
+      "description": "Sets a control by label or data-control id and dispatches input and change"
+    },
+    {
+      "name": "readSource()",
+      "description": "The exact current source document of the active owner"
+    },
+    {
+      "name": "applySource(doc)",
+      "description": "Applies a JSON string or object through the validator, then waits two animation frames"
+    },
+    {
+      "name": "invoke(action, input)",
+      "description": "Runs a standard action or delegates to the active owner"
+    },
+    {
+      "name": "download(artifact)",
+      "description": "Saves a returned artifact with its deterministic file name"
+    }
+  ],
+  "errors": [
+    {
+      "name": "TypeError",
+      "status": 400,
+      "when": "malformed input, with the Zod path"
+    },
+    {
+      "name": "RangeError",
+      "status": 404,
+      "when": "an unknown action, label or id"
+    },
+    {
+      "name": "ConflictError",
+      "status": 409,
+      "when": "a stale baseRevision or a held lease, with the holder and the current document attached"
+    },
+    {
+      "name": "NotImplementedError",
+      "status": 501,
+      "when": "an action declared in the table whose implementation lands in a later milestone"
+    },
+    {
+      "name": "Error",
+      "status": 500,
+      "when": "renderer and codec failures"
+    }
+  ]
+}

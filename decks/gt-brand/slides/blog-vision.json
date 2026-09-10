@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "blog-vision",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Blog content"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The blog relaunched in August 2026 with an open-source grant program: $15,000 across fifteen developers, each with platform credits, and a profile of each grantee to follow. The first profile is Fuma Nama, the author of Fumadocs, which the docs run on.",
+        "measure": 56
+      },
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 180,
+        "tight": true,
+        "items": [
+          {
+            "key": "Release notes",
+            "value": "Fifty-four have been published. Each has four sections and a changelog headline.",
+            "icon": {
+              "name": "tag"
+            }
+          },
+          {
+            "key": "Essays",
+            "value": "Eight essays were removed. New essays argue one point with code and numbers.",
+            "icon": {
+              "name": "pencil-square"
+            }
+          },
+          {
+            "key": "Profiles",
+            "value": "Long-form interviews are built around the subject's own quotes.",
+            "icon": {
+              "name": "user-circle"
+            }
+          }
+        ]
+      }
+    ],
+    "right": [
+      {
+        "id": "fig",
+        "type": "shot",
+        "asset": "site-blog-oss",
+        "fit": "fit",
+        "caption": "The post announcing the grant program, published on August 17, 2026, carries one of the two designed covers.",
+        "captionSize": 15
+      }
+    ]
+  },
+  "ext": {
+    "import": {
+      "css": ".ts-x-blog-vision [data-block=\"fig\"] figcaption { color: var(--titanium); }"
+    }
+  }
+}

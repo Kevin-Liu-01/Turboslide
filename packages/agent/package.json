@@ -3,11 +3,27 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "The action dispatcher and the contracts generator (pnpm generate:contracts): CLI option parsers, the MCP tool list JSON, describe().actions, openapi.json, docs/grammar.md and the skills reference tables, with a stale-file test.",
+  "description": "The action dispatcher and the contracts generator (pnpm generate:contracts): CLI option parsers, the MCP tool list JSON, describe().actions, openapi.json, the agent manifest, docs/grammar.md and the skills reference tables, with a stale-file test.",
   "scripts": {
-    "generate": "node src/generate/main.ts"
+    "generate": "node src/generate/main.ts",
+    "generate:check": "node src/generate/main.ts --check",
+    "test": "vitest run"
   },
   "exports": {
+    "./dispatch": "./src/dispatch.ts",
+    "./generate/contracts": "./src/generate/contracts.ts",
+    "./generate/cli": "./src/generate/cli.ts",
+    "./generate/mcp": "./src/generate/mcp.ts",
+    "./generate/describe": "./src/generate/describe.ts",
+    "./generate/openapi": "./src/generate/openapi.ts",
+    "./generate/manifest": "./src/generate/manifest.ts",
+    "./generate/grammar": "./src/generate/grammar.ts",
+    "./generate/skills": "./src/generate/skills.ts",
+    "./generated/cli.json": "./generated/cli.json",
+    "./generated/mcp-tools.json": "./generated/mcp-tools.json",
+    "./generated/describe.json": "./generated/describe.json",
+    "./generated/openapi.json": "./generated/openapi.json",
+    "./generated/manifest.json": "./generated/manifest.json",
     "./index": "./src/index.ts",
     "./package.json": "./package.json"
   },

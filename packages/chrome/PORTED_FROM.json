@@ -1,0 +1,262 @@
+{
+  "$comment": "The chrome is the Prototemplate viewer shell ported as source (SPEC 2.2). Every file under src records its origin in /Users/kevinliu/repos/Prototemplate at the commit that last touched the source file (git log -1 -- <path>), read on 2026-09-10 at HEAD 0594fa19a56266195b68aa13de14e4c01c87941b. `changes` lists every edit beyond import paths and the @/ alias; a file with an empty list is verbatim apart from those. Shared across every port: `useGSAP` (a layout effect with dependencies) became React's useLayoutEffect, `@/lib/use-mount-effect` became src/lib/useMountEffect.ts, `@/lib/cn` became src/lib/cn.ts, and the double-quoted JSX attributes follow the repo's Prettier config.",
+  "files": {
+    "src/tokens.css": {
+      "source": "src/components/viewer/tokens.css",
+      "commit": "c51f46fac646ade0cb6d79c5c894cece6ff31b96",
+      "changes": [
+        "the four site colors (--pt-site-dossier, --pt-site-orbit, --pt-site-signal, --pt-site-shipped) and their dark remap removed (SPEC 2.2: verbatim minus the four site colors)",
+        "--pt-display and --pt-text drop Next's var(--font-inter): Inter comes from @turboslide/fonts, and an undefined custom property would invalidate the whole font-family declaration"
+      ]
+    },
+    "src/lib/cn.ts": {
+      "source": "src/lib/cn.ts",
+      "commit": "a6ff5df9b8e2a547e8bbc513e1fab6300204ba0d",
+      "changes": []
+    },
+    "src/lib/useMountEffect.ts": {
+      "source": "src/lib/use-mount-effect.ts",
+      "commit": "229d413e3f8e39ba2e566817d2d291ea5523b136",
+      "changes": []
+    },
+    "src/shell-data.ts": {
+      "source": "src/lib/shell-data.ts",
+      "commit": "0594fa19a56266195b68aa13de14e4c01c87941b",
+      "changes": [
+        "the site map fields (href, url, surface, inPlace, under) removed; previewId() returns the item id",
+        "ShellItem gains kind, html, lint and leased for the sidebar rows of SPEC 6.2 and the live clones of M1",
+        "ShellMark is 'gt' only"
+      ]
+    },
+    "src/shell-context.ts": {
+      "source": "src/components/viewer/shell-context.ts",
+      "commit": "50b480184b8d0b5b86a8c74753085986d4a49f48",
+      "changes": [
+        "two optional flags, panel and search, say whether the route offers the index panel and the search palette"
+      ]
+    },
+    "src/icons.tsx": {
+      "source": "src/components/viewer/icons.tsx",
+      "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497",
+      "changes": [
+        "only the names Turboslide's chrome draws are kept (22 of 37); the paths are verbatim"
+      ]
+    },
+    "src/GtMark.tsx": {
+      "source": "src/components/viewer/GtMark.tsx",
+      "commit": "229d413e3f8e39ba2e566817d2d291ea5523b136",
+      "changes": []
+    },
+    "src/ToolButton.tsx": {
+      "source": "src/components/viewer/ToolButton.tsx",
+      "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497",
+      "changes": ["a `control` prop writes data-control for the window API (SPEC 6.5)"]
+    },
+    "src/ToolButton.css": {
+      "source": "src/components/viewer/ToolButton.css",
+      "commit": "e10f36a62e82d9b37f4903e4af598e90f30c6bf2",
+      "changes": []
+    },
+    "src/Seg.tsx": {
+      "source": "src/components/viewer/Seg.tsx",
+      "commit": "3eba50eec1532b37c9c86d954c0bc8297b7e4413",
+      "changes": ["a `control` prop prefixes data-control on the options"]
+    },
+    "src/Seg.css": {
+      "source": "src/components/viewer/Seg.css",
+      "commit": "c51f46fac646ade0cb6d79c5c894cece6ff31b96",
+      "changes": []
+    },
+    "src/Toolbar.tsx": {
+      "source": "src/components/viewer/Toolbar.tsx",
+      "commit": "e10f36a62e82d9b37f4903e4af598e90f30c6bf2",
+      "changes": [
+        "the Search pill (Palette, M3) and the Index button (no index panel in Turboslide yet) removed; tier four collapses Help, Present and the slot",
+        "the brand is the GT mark only (no PtMark, no mark prop)",
+        "the seg's slide label reads Slide (the deck's word) rather than Slides",
+        "data-control ids on every button"
+      ]
+    },
+    "src/Toolbar.css": {
+      "source": "src/components/viewer/Toolbar.css",
+      "commit": "c51f46fac646ade0cb6d79c5c894cece6ff31b96",
+      "changes": [
+        "the .pt-search-btn and .pt-search-kbd rules and the html[data-shell-sb] boot stamp rules removed with the controls they styled"
+      ]
+    },
+    "src/Sidebar.tsx": {
+      "source": "src/components/viewer/Sidebar.tsx",
+      "commit": "0594fa19a56266195b68aa13de14e4c01c87941b",
+      "changes": [
+        "the site map (surfaces, NAV_GROUPS, buildGroups, merge, nesting, Next Link and router) removed: groups are the deck's sections, rows are slides",
+        "rows carry the derived number, a kind glyph from the theme sprite, the lint badge and the lease dot (SPEC 6.2); thumbnail density draws a 64 by 36 live clone through @turboslide/viewer LiveClone, with ThumbShot for static twins",
+        "the filter matches title, section, id and the slide's text (SPEC 6.2)",
+        "folds persist under gt-shell-groups:<id> and every section is open by default",
+        "ThumbList moved to @turboslide/viewer GridView"
+      ]
+    },
+    "src/Sidebar.css": {
+      "source": "src/components/viewer/Sidebar.css",
+      "commit": "0594fa19a56266195b68aa13de14e4c01c87941b",
+      "changes": [
+        "the site map rules (data-site colors, child groups, the nameplate faces) removed; the list is .pt-tree (the grid's .pt-thumbs rules moved to @turboslide/viewer GridView.css)",
+        "rows gain a 22px number column, .pt-orow-marks for the badge and the lease dot, and .pt-orow-kind for the second line in thumbnail density"
+      ]
+    },
+    "src/ListRow.tsx": {
+      "source": "src/components/viewer/ListRow.tsx",
+      "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497",
+      "changes": ["the row carries data-preview"]
+    },
+    "src/ListRow.css": {
+      "source": "src/components/viewer/ListRow.css",
+      "commit": "50b480184b8d0b5b86a8c74753085986d4a49f48",
+      "changes": []
+    },
+    "src/SidebarFilter.tsx": {
+      "source": "src/components/viewer/SidebarFilter.tsx",
+      "commit": "3eba50eec1532b37c9c86d954c0bc8297b7e4413",
+      "changes": ["the input carries data-control=\"sidebar.filter\""]
+    },
+    "src/SidebarFilter.css": {
+      "source": "src/components/viewer/SidebarFilter.css",
+      "commit": "c51f46fac646ade0cb6d79c5c894cece6ff31b96",
+      "changes": []
+    },
+    "src/ThumbShot.tsx": {
+      "source": "src/components/viewer/ThumbShot.tsx",
+      "commit": "bfb1e175e7357230347c0a782f1218b754bc0d2d",
+      "changes": ["the Sidebar.css side-effect import moved to Sidebar.tsx"]
+    },
+    "src/PreviewLayer.tsx": {
+      "source": "src/components/viewer/PreviewLayer.tsx",
+      "commit": "c51f46fac646ade0cb6d79c5c894cece6ff31b96",
+      "changes": [
+        "the subject is a live clone of the slide's HTML (a `resolve` prop) instead of a decoded capture from src/lib/surfaces.ts; the image cache, the preload observers, the theme MutationObserver and the crossfade of captures are gone until the render worker's thumbnails return in M3",
+        "the mechanics (delegated listeners, 80ms arm, 120ms grace, the eased move, the scroll follow, the close conditions) are kept"
+      ]
+    },
+    "src/PreviewLayer.css": {
+      "source": "src/components/viewer/PreviewLayer.css",
+      "commit": "c51f46fac646ade0cb6d79c5c894cece6ff31b96",
+      "changes": [
+        "the .pt-preview-img and .is-solo rules (captures) removed; the width and height transitions of .is-moving removed"
+      ]
+    },
+    "src/HelpCard.tsx": {
+      "source": "src/components/viewer/HelpCard.tsx",
+      "commit": "3eba50eec1532b37c9c86d954c0bc8297b7e4413",
+      "changes": []
+    },
+    "src/HelpCard.css": {
+      "source": "src/components/viewer/HelpCard.css",
+      "commit": "ae0a765170ffc6df8067afd521b734d848eaf753",
+      "changes": []
+    },
+    "src/Toast.tsx": {
+      "source": "src/components/viewer/Toast.tsx",
+      "commit": "432a416adeffecf357a2345884929cdf6c0de4b2",
+      "changes": []
+    },
+    "src/Toast.css": {
+      "source": "src/components/viewer/Toast.css",
+      "commit": "50b480184b8d0b5b86a8c74753085986d4a49f48",
+      "changes": ["the phone fallback for --pt-toolbar-h is 52px (the toolbar stays one row)"]
+    },
+    "src/Progress.tsx": {
+      "source": "src/components/viewer/Progress.tsx",
+      "commit": "50b480184b8d0b5b86a8c74753085986d4a49f48",
+      "changes": ["the .pt-panel exclusion in the scroll listener removed with the index panel"]
+    },
+    "src/Progress.css": {
+      "source": "src/components/viewer/Progress.css",
+      "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497",
+      "changes": []
+    },
+    "src/ThemeButton.tsx": {
+      "source": "src/components/viewer/ThemeButton.tsx",
+      "commit": "bfb1e175e7357230347c0a782f1218b754bc0d2d",
+      "changes": [
+        "readTheme, applyTheme, toggleTheme, postTheme and the Theme type moved to @turboslide/viewer/theme, which writes the deck's dual key (gt-theme then gt-deck-theme, SPEC 6.8) and swaps the sheet's twins",
+        "the Safari re-assertion of the attribute is dropped (the studio's boot script is the only writer before hydration)"
+      ]
+    },
+    "src/useShellKeys.ts": {
+      "source": "src/components/viewer/useShellKeys.ts",
+      "commit": "ae0a765170ffc6df8067afd521b734d848eaf753",
+      "changes": [
+        "Cmd K opens the palette through an `openSearch` option and only when ShellState.search is set; R toggles the index only when ShellState.panel is set; the help rows follow the same flags"
+      ]
+    },
+    "src/ViewerShell.tsx": {
+      "source": "src/components/viewer/ViewerShell.tsx",
+      "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497",
+      "changes": [
+        "the index panel, the site map and the surfaces set removed",
+        "the hash is read and written through @turboslide/viewer/hash in the form the `hash` prop names (#NN for the embed, #s/<slideId> for the studio; SPEC 5.3)",
+        "`initialMode` (the route's ?mode=) takes precedence over the saved mode and `onModeChange` reports every change; `onSelect` receives the item's 1-based number",
+        "the html[data-shell-sb] boot stamp is not written (the studio's boot script stamps the theme only)",
+        "the root carries data-mode, data-active, data-index and data-total for the window API and the Playwright specs",
+        "the preview layer resolves subjects from the items' HTML"
+      ]
+    },
+    "src/ViewerShell.css": {
+      "source": "src/components/viewer/ViewerShell.css",
+      "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497",
+      "changes": [
+        "the html[data-shell-sb] and html[data-shell-density] boot rules removed; .pt-thumbs became .pt-tree in the density fade; the .sheet-flow rules removed"
+      ]
+    }
+  },
+  "viewer": {
+    "$comment": "Files in packages/viewer that port deck or Prototemplate sources are recorded here for the same diff.",
+    "src/Sheet.tsx": {
+      "source": "src/components/viewer/Sheet.tsx (fitSheet, FixedSheet) and deck/parts/tail.html (fit)",
+      "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497"
+    },
+    "src/Sheet.css": {
+      "source": "src/components/viewer/Sheet.css",
+      "commit": "f804b51ff0038326b7e2bd1e19e56240ec0bfa13"
+    },
+    "src/Frame.tsx": {
+      "source": "src/components/viewer/SheetFrame.tsx and deck/parts/tail.html (the .frame markup)",
+      "commit": "229d413e3f8e39ba2e566817d2d291ea5523b136"
+    },
+    "src/GridView.tsx": {
+      "source": "src/components/viewer/GridView.tsx and Sidebar.tsx (ThumbList, ThumbItem)",
+      "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497"
+    },
+    "src/GridView.css": {
+      "source": "src/components/viewer/GridView.css and Sidebar.css (.pt-thumbs, .pt-thumb)",
+      "commit": "50b480184b8d0b5b86a8c74753085986d4a49f48"
+    },
+    "src/BookView.tsx": {
+      "source": "src/components/viewer/BookView.tsx",
+      "commit": "f804b51ff0038326b7e2bd1e19e56240ec0bfa13"
+    },
+    "src/BookView.css": {
+      "source": "src/components/viewer/BookView.css",
+      "commit": "f804b51ff0038326b7e2bd1e19e56240ec0bfa13"
+    },
+    "src/theme.ts": {
+      "source": "deck/parts/tail.html (storedTheme, toggleTheme, applyTheme, the storage and message listeners) and src/components/viewer/ThemeButton.tsx",
+      "commit": "7dd934f6028003410efdb6796c14161e23fbbabf"
+    },
+    "src/dither.ts": {
+      "source": "deck/parts/tail.html (bayer8, drawDither)",
+      "commit": "7dd934f6028003410efdb6796c14161e23fbbabf"
+    },
+    "standalone/runtime.ts": {
+      "source": "deck/parts/tail.html (the script)",
+      "commit": "7dd934f6028003410efdb6796c14161e23fbbabf"
+    },
+    "standalone/chrome.ts": {
+      "source": "deck/parts/head.html (lines 177 to 370, the viewer chrome CSS) and deck/parts/tail.html (lines 1 to 60, the markup) without the surfaces panel",
+      "commit": "7dd934f6028003410efdb6796c14161e23fbbabf"
+    },
+    "standalone/source.ts": {
+      "source": "new: Node's stripTypeScriptTypes over runtime.ts with the chrome baked in",
+      "commit": ""
+    }
+  }
+}

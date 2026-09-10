@@ -1,0 +1,5 @@
+interface:
+  display_name: 'Turboslide verify'
+  short_description: 'Verify Turboslide decks by artifact'
+  brand_color: '#070707'
+  default_prompt: 'Use $turboslide-verify for this Turboslide task.'

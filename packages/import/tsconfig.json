@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../../tooling/tsconfig/node.json",
-  "include": ["src"],
+  "include": ["src", "vitest.config.ts"],
   "references": [
     {
       "path": "../schema"

@@ -1,0 +1,5 @@
+interface:
+  display_name: 'Turboslide api'
+  short_description: 'Use the Turboslide action table'
+  brand_color: '#070707'
+  default_prompt: 'Use $turboslide-api for this Turboslide task.'

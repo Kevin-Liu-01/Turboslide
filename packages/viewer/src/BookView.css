@@ -1,0 +1,302 @@
+/* The book (SPEC 5.5): the deck read top to bottom. A paper scroll region
+   over the stage holding a 1280px column: head, contents, then section
+   dividers and page rows with a 128px gutter for the number and title and
+   16:9 page frames. Copied from the deck viewer (head.html, the book rules)
+   through Prototemplate/src/components/viewer/BookView.css onto the --pt-
+   tokens. The head's rule and the section dividers are structural
+   (--pt-hair), the contents and meta rows are row rules (--pt-hair-soft),
+   the page frames are frames (--pt-edge); ink appears only on the hovered
+   and the active frame (SPEC 2.2 line law). */
+
+.pt-book {
+  position: absolute;
+  inset: 0;
+  background: var(--pt-paper);
+  z-index: 2;
+  scroll-behavior: smooth;
+}
+
+.pt-book-in {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 44px 56px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ---- the masthead (BookHead) ---- */
+.pt-book-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  gap: 56px;
+  align-items: start;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--pt-hair);
+  color: var(--pt-ink);
+}
+
+.pt-book-title {
+  min-width: 0;
+}
+
+.pt-book-head h1 {
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: 48px;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  margin: 0;
+  text-wrap: balance;
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+.pt-book-head p {
+  font-family: var(--pt-text);
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--pt-ink-2);
+  max-width: 62ch;
+  margin: 16px 0 0;
+}
+
+/* the meta: a ruled mini table, key at the left in titanium and the value
+   at the right in ink, a row rule under each row */
+.pt-book-meta {
+  margin: 0;
+  font-family: var(--pt-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.pt-book-meta > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0 9px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.pt-book-meta > div:first-child {
+  padding-top: 2px;
+}
+
+.pt-book-meta dt {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--pt-titanium);
+  white-space: nowrap;
+}
+
+.pt-book-meta dd {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.3;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--pt-ink);
+  text-align: right;
+  white-space: nowrap;
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+/* contents: four columns of ruled links with a tabular page range */
+.pt-book-toc {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0 28px;
+}
+
+.pt-book-toc a {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  color: inherit;
+  text-decoration: none;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: -0.01em;
+}
+
+.pt-book-toc a span {
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.pt-book-toc a:hover span {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.pt-book-toc a:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.pt-book-toc small {
+  font-family: var(--pt-text);
+  font-size: 12px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+/* section divider: the ordinal and range in the gutter, the title beside */
+.pt-book-sec {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 28px;
+  align-items: end;
+  padding-top: 30px;
+  border-top: 1px solid var(--pt-hair);
+  margin-top: 16px;
+}
+
+.pt-book-sec small {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.pt-book-sec small span {
+  display: block;
+}
+
+.pt-book-sec h2 {
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: 32px;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  margin: 0;
+  text-wrap: balance;
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+/* page row: number and title in the gutter, the frame beside. Pages off
+   screen skip rendering (directive 7.5); the intrinsic size is a 1012px
+   frame at 16:9 so the scroll height holds before a page is first drawn. */
+.pt-page {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr);
+  gap: 28px;
+  align-items: start;
+  scroll-margin-top: 20px;
+  padding: 3px 3px 3px 0;
+  margin: -3px -3px -3px 0;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 570px;
+}
+
+.pt-pn {
+  padding-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--pt-titanium);
+}
+
+.pt-pn b {
+  display: block;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 24px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--pt-ink);
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pt-pn span {
+  display: block;
+}
+
+.pt-page.is-active .pt-pn {
+  color: var(--pt-ink-2);
+}
+
+.pt-page-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.pt-page:hover .pt-page-frame {
+  border-color: var(--pt-ink);
+}
+
+.pt-page.is-active .pt-page-frame {
+  border-color: var(--pt-ink);
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-book {
+    scroll-behavior: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .pt-book-in {
+    padding: 24px 16px 80px;
+    gap: 24px;
+  }
+
+  .pt-book-head {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-bottom: 20px;
+  }
+
+  .pt-book-head h1 {
+    font-size: 32px;
+    letter-spacing: -0.025em;
+  }
+
+  .pt-book-head p {
+    font-size: 15.5px;
+    margin-top: 12px;
+  }
+
+  .pt-book-meta {
+    max-width: 320px;
+  }
+
+  .pt-book-meta > div:first-child {
+    padding-top: 8px;
+    border-top: 1px solid var(--pt-hair-soft);
+  }
+
+  .pt-book-toc {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pt-book-sec,
+  .pt-page {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .pt-pn {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+
+  .pt-pn b {
+    font-size: 16px;
+    margin: 0;
+  }
+}

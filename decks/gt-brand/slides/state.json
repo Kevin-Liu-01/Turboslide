@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "id": "state",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 32,
+    "body": {
+      "align": "start"
+    },
+    "head": {
+      "cols": "4/8"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Current status"
+      }
+    ],
+    "headRight": [
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Each surface is listed with its state on September 9, 2026. Where fixes are open, the redesign is live on that surface and the open items are named."
+      }
+    ],
+    "body": [
+      {
+        "id": "board",
+        "type": "board",
+        "columns": [
+          128,
+          250,
+          200,
+          "fr"
+        ],
+        "rows": [
+          {
+            "asset": "site-home",
+            "name": "Site",
+            "address": "generaltranslation.com",
+            "state": {
+              "name": "clock",
+              "color": "warn"
+            },
+            "note": "Home, pricing, enterprise, careers and contact run the redesign. The enterprise rebuild, the blue consolidation and the CTA ring fix are open."
+          },
+          {
+            "asset": "site-docs",
+            "name": "Docs",
+            "address": "/docs, 393 pages in eight locales",
+            "state": {
+              "name": "clock",
+              "color": "warn"
+            },
+            "note": "The redesign merged September 3 and nearest-page routing September 8. The locale guard, per-locale markdown and flag selectors are open."
+          },
+          {
+            "asset": "site-blog",
+            "name": "Blog",
+            "address": "/blog, posts and the changelog",
+            "state": {
+              "name": "check-circle",
+              "color": "ok"
+            },
+            "note": "The index with its two tickers, the changelog strip and the post pages run the redesign. Designed covers use the gem smoke material."
+          },
+          {
+            "asset": "gh-gt",
+            "name": "Libraries",
+            "address": "github.com/generaltranslation/gt",
+            "state": {
+              "name": "check-circle",
+              "color": "ok"
+            },
+            "note": "gt, gt-next, gt-react, gt-vue, gt-node and gt-python ship under names that are fixed points. The CLI is the gt package."
+          },
+          {
+            "asset": "site-dash",
+            "name": "Dashboard",
+            "address": "dash.generaltranslation.com",
+            "state": {
+              "name": "clock",
+              "color": "warn"
+            },
+            "note": "The sign-in page carries the mark, the dithered globe and the glyph field. Fixes to the dashboard interface are open."
+          },
+          {
+            "asset": "proto-brand",
+            "name": "Brand",
+            "address": "prototemplate.com/brand",
+            "state": {
+              "name": "clock",
+              "color": "warn"
+            },
+            "note": "The identity project runs September 1 to November 27. Its deliverables become design tokens and assets in Prototemplate and on the site."
+          }
+        ]
+      }
+    ]
+  }
+}

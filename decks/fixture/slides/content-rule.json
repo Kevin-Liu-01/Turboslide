@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "content-rule",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The copy test"
+      },
+      {
+        "id": "p",
+        "type": "paragraph",
+        "measure": 56,
+        "text": "Every line of copy states a number or a mechanism. If a line could appear unchanged in a competitor's video, cut it. The same test applies to site copy, docs introductions, blog posts, README and CLI text, and posts on X, LinkedIn, GitHub, and Discord."
+      }
+    ],
+    "right": [
+      {
+        "id": "list",
+        "type": "plain",
+        "items": [
+          {
+            "text": "Legacy i18n: 12 weeks.",
+            "icon": {
+              "name": "check-circle",
+              "color": "ok"
+            }
+          },
+          {
+            "text": "With GT: one pull request.",
+            "icon": {
+              "name": "check-circle",
+              "color": "ok"
+            }
+          },
+          {
+            "text": "Eight locales from one build.",
+            "icon": {
+              "name": "check-circle",
+              "color": "ok"
+            }
+          },
+          {
+            "text": "Numbers, currency, and dates localize too.",
+            "icon": {
+              "name": "check-circle",
+              "color": "ok"
+            }
+          },
+          {
+            "text": "That market is yours to gain.",
+            "icon": {
+              "name": "x-circle",
+              "color": "no"
+            },
+            "no": true
+          },
+          {
+            "text": "Localization is a growth lever.",
+            "icon": {
+              "name": "x-circle",
+              "color": "no"
+            },
+            "no": true
+          }
+        ]
+      }
+    ]
+  },
+  "notes": "Slide 53 of the GT deck, the copy rule, as the fixture's one content slide."
+}

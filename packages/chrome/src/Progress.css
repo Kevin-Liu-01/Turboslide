@@ -1,0 +1,29 @@
+/* Progress: the last row of .pt-main, a 2px track with an ink fill. The
+   fill is a full-width span scaled from its left edge, so every move is a
+   transform (directive 7.4) and Progress.tsx can write it from a scroll
+   frame without a render. The track is a row rule (--pt-hair-soft; SPEC 2.2
+   line law). Ported from Prototemplate/src/components/viewer/Progress.css. */
+.pt-progress {
+  grid-row: 3;
+  position: relative;
+  height: 2px;
+  background: var(--pt-hair-soft);
+}
+
+.pt-progress i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background: var(--pt-ink);
+  transform: scaleX(0);
+  transform-origin: 0 0;
+  transition: transform 160ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-progress i {
+    transition: none;
+  }
+}

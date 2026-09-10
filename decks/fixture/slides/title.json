@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "title",
+  "kind": "title",
+  "mark": {
+    "w": 132,
+    "h": 84
+  },
+  "heading": "General Translation",
+  "lead": "This fixture deck stands in for the GT brand deck while the import lands. It covers the studio's viewer: the sheet, the grid, the book, the theme and the keys.",
+  "notes": "The title slide of the deck: the mark, the company name, the lead."
+}

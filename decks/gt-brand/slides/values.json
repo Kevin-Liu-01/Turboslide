@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "values",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Values"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The rest of this deck applies these five values to type, color, lines, and surfaces.",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 240,
+        "items": [
+          {
+            "key": "Engineering-first",
+            "value": "The product is built by engineers for engineering teams.",
+            "icon": {
+              "name": "code-bracket"
+            }
+          },
+          {
+            "key": "Craft",
+            "value": "Attention to detail extends to individual hairlines.",
+            "icon": {
+              "name": "paint-brush"
+            }
+          },
+          {
+            "key": "Infrastructure-grade",
+            "value": "Enterprises can depend on it for reliability, speed, and security.",
+            "icon": {
+              "name": "server"
+            }
+          },
+          {
+            "key": "International",
+            "value": "Language is both the product's subject and its market.",
+            "icon": {
+              "name": "globe-alt"
+            }
+          },
+          {
+            "key": "Designed",
+            "value": "Every surface from the mark to the docs is designed individually.",
+            "icon": {
+              "name": "swatch"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

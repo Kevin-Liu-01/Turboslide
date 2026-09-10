@@ -1,0 +1,59 @@
+/* ToolButton. tokens.css owns .pt-ib and every state it shares across the
+   shell (hover, focus-visible, .is-on, .pt-icon, .is-solid, .pt-lb) so one
+   rule set draws every button. This sheet holds only what the base leaves
+   open. Ported from Prototemplate/src/components/viewer/ToolButton.css. */
+
+/* the theme glyph (ThemeButton.tsx, directive 8.4): the text ◐ or ◑ at
+   16px, one line, centered in the 16px slot an icon would take; weight 400
+   so the disc's halves meet cleanly */
+.pt-theme-glyph {
+  display: inline-block;
+  width: 16px;
+  font-size: 16px;
+  line-height: 16px;
+  text-align: center;
+  font-weight: 400;
+}
+
+/* a labeled button with no icon keeps its word through every collapse:
+   the rules that hide .pt-lb (Toolbar.css) exclude .is-text, and this one
+   holds the geometry a text-only button needs */
+.pt-ib.is-text {
+  padding: 0 12px;
+}
+
+/* the solid call to action, Present, keeps the old nav's look (Kevin's
+   directive; DESIGN.md, chrome exceptions): an 8px corner, 14px sides, the
+   word first and the 12px play glyph after it (the row is reversed here so
+   ToolButton keeps its one icon-then-label markup), and a hover that drops
+   the ink ground for ink text inside the ink frame. The toolbar's tier four
+   still collapses it to a 32px square. */
+.pt-ib.is-solid {
+  flex-direction: row-reverse;
+  gap: 7px;
+  padding: 0 14px;
+  border-radius: 8px;
+}
+
+.pt-ib.is-solid svg {
+  width: 12px;
+  height: 12px;
+}
+
+.pt-ib.is-solid:hover {
+  background: transparent;
+  color: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+/* the filled button would draw its focus ring ink on ink */
+.pt-ib.is-solid:focus-visible {
+  outline-color: var(--pt-paper);
+}
+
+/* .hide-sm leaves at the narrow breakpoint, wherever the button sits */
+@media (max-width: 900px) {
+  .pt-ib.hide-sm {
+    display: none;
+  }
+}

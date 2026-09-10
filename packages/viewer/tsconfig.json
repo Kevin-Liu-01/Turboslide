@@ -1,7 +1,10 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../../tooling/tsconfig/react.json",
-  "include": ["src"],
+  "include": ["src", "standalone", "vitest.config.ts"],
+  "compilerOptions": {
+    "types": ["node"]
+  },
   "references": [
     {
       "path": "../render"

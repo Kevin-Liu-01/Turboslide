@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "skills-marks",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 36
+  },
+  "slots": {
+    "head": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Skills and marks"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Both pages run in the same viewer and read pure data files. The skills page is built from the frontmatter of every published SKILL.md; the marks page reads nine SVG files and their construction overlays. Both crops follow the deck theme.",
+        "marginTop": 10
+      }
+    ],
+    "body": [
+      {
+        "id": "pair",
+        "type": "pair",
+        "figures": [
+          {
+            "assets": [
+              "proto-skills-rows"
+            ],
+            "caption": "261 skills in three groups: 209 engineering and 39 productivity skills from the wiki and 13 from the General Translation repository, each row a number, a name and a description."
+          },
+          {
+            "assets": [
+              "proto-marks-nine"
+            ],
+            "caption": "Nine marks in three families, bilingual, counterform and reflection, in the judged order, at 96 pixels positive and reversed. Each is one filled path on a 256 unit grid."
+          }
+        ],
+        "captionSize": 15
+      }
+    ]
+  }
+}

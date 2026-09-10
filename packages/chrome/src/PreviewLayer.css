@@ -1,0 +1,99 @@
+/* PreviewLayer: the one card beside a hovered or focused row (directive
+   8.6). A 322px column: a 1px paper mat with a --pt-hair-soft outline (the
+   sheet ring, one stroke each; scripts/lint-lines.mjs allows pt-preview for
+   the pair), the 320x180 frame with its --pt-edge border holding the live
+   clone, and the 32px title row. Rounded on --pt-radius; the frame takes the
+   radius less the mat's 1px and clips its clone to that less its own border.
+   Fixed at the viewport origin and moved with translate3d alone, so opening
+   it lays nothing out.
+
+   Motion (directive 7.4), transform and opacity only. Opening fades the
+   card in over the fast duration with the transform landing at once, so a
+   fresh card never slides in from its last place. Moving between rows
+   (.is-moving) slides the transform over the 160ms duration and never
+   touches opacity. Closing fades the card out in place. Reduced motion
+   drops all of it. Ported from Prototemplate/src/components/viewer/PreviewLayer.css. */
+
+.pt-preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 120;
+  width: 322px;
+  height: 214px;
+  box-sizing: border-box;
+  padding: 1px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
+  outline: 1px solid var(--pt-hair-soft);
+  border-radius: var(--pt-radius, 6px);
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  view-transition-name: pt-preview;
+  /* closing: the fade out, then hidden; the transform holds its last place */
+  transition:
+    opacity var(--pt-dur-fast) var(--pt-ease-out),
+    visibility 0s linear var(--pt-dur-fast);
+}
+
+/* open: the fade in; transform is not in this list, so a fresh card lands at once */
+.pt-preview.is-on {
+  opacity: 1;
+  visibility: visible;
+  will-change: transform;
+  transition: opacity var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+/* a move between rows: one eased slide over the 160ms duration */
+.pt-preview.is-on.is-moving {
+  transition:
+    opacity var(--pt-dur-fast) var(--pt-ease-out),
+    transform var(--pt-dur-toast) var(--pt-ease);
+}
+
+/* the frame: 320x180 including its border; the clone fills it */
+.pt-preview-frame {
+  position: relative;
+  box-sizing: border-box;
+  width: 320px;
+  height: 180px;
+  border: 1px solid var(--pt-edge);
+  border-radius: calc(var(--pt-radius, 6px) - 1px);
+  background: var(--pt-plate);
+  overflow: hidden;
+}
+
+/* the plate under the clone: the initial in 15px titanium, showing while there is no clone */
+.pt-preview-plate {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 15px;
+  color: var(--pt-titanium);
+}
+
+.pt-preview-title {
+  height: 32px;
+  box-sizing: border-box;
+  padding: 7px 10px 8px;
+  font-size: 12.5px;
+  line-height: 17px;
+  color: var(--pt-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-preview,
+  .pt-preview.is-on,
+  .pt-preview.is-on.is-moving {
+    transition: none;
+  }
+}

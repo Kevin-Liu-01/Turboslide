@@ -347,6 +347,9 @@ importers:
       '@turboslide/render':
         specifier: workspace:*
         version: link:../render
+      '@turboslide/schema':
+        specifier: workspace:*
+        version: link:../schema
       pixelmatch:
         specifier: 'catalog:'
         version: 7.2.0

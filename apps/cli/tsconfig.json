@@ -1,16 +1,39 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../../tooling/tsconfig/node.json",
+  "compilerOptions": {
+    "paths": {
+      "sharp": ["./node_modules/sharp/lib/index.d.ts"]
+    }
+  },
   "include": ["src", "tsdown.config.ts"],
   "references": [
-    { "path": "../../packages/schema" },
-    { "path": "../../packages/theme" },
-    { "path": "../../packages/fonts" },
-    { "path": "../../packages/render" },
-    { "path": "../../packages/import" },
-    { "path": "../../packages/headless" },
-    { "path": "../../packages/effects" },
-    { "path": "../../packages/lint" },
-    { "path": "../../packages/agent" }
+    {
+      "path": "../../packages/schema"
+    },
+    {
+      "path": "../../packages/theme"
+    },
+    {
+      "path": "../../packages/fonts"
+    },
+    {
+      "path": "../../packages/render"
+    },
+    {
+      "path": "../../packages/import"
+    },
+    {
+      "path": "../../packages/headless"
+    },
+    {
+      "path": "../../packages/effects"
+    },
+    {
+      "path": "../../packages/lint"
+    },
+    {
+      "path": "../../packages/agent"
+    }
   ]
 }

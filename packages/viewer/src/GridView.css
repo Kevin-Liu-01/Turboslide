@@ -1,0 +1,123 @@
+/* The grid (SPEC 5.5): every slide at once as live clones over the stage, a
+   paper scroll region with an auto-fill grid of 300px minimum tiles and
+   section labels spanning every column. The tile classes (.pt-thumb,
+   .pt-thumb-frame, .pt-sec-label) are Prototemplate's (Sidebar.css and
+   GridView.css, PORTED_FROM.json), kept so scripts/lint-lines.mjs's allow
+   list (thumb-frame) still names the active frame's two strokes. The frame
+   draws the frame role (--pt-edge); ink appears only on the hovered and the
+   active frame (SPEC 2.2 line law). */
+
+.pt-grid {
+  position: absolute;
+  inset: 0;
+  background: var(--pt-paper);
+  z-index: 2;
+}
+
+.pt-grid .pt-thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 26px;
+  align-content: start;
+  padding: 22px 34px 56px;
+  overflow: visible;
+}
+
+/* section labels span every column over a rule; the grid's own 26px gap is
+   the whole break, so the label carries no margin or padding of its own */
+.pt-grid .pt-thumbs > .pt-sec-label {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 8px 0 0;
+  line-height: 1;
+  border-top: 1px solid var(--pt-hair);
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: 13.5px;
+  letter-spacing: -0.005em;
+  font-feature-settings: 'cv11', 'ss01';
+  color: var(--pt-ink);
+}
+
+.pt-grid .pt-thumbs > .pt-sec-label:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* a frame item: the number column, then the frame and its title. The 3px
+   pad (and the matching negative margin) keeps the active frame's offset
+   outline inside the box that content-visibility paints. A 300px column
+   holds a 272px frame at 16:9 plus its title: the size a frame off screen
+   reserves before it is first drawn (directive 7.5). */
+.pt-thumb {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 3px 3px 3px 0;
+  margin: -3px -3px -3px 0;
+  cursor: pointer;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 180px;
+}
+
+.pt-thumb:focus-visible {
+  outline: none;
+}
+
+.pt-thumb .n {
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: 12.5px;
+  font-feature-settings: 'cv11', 'ss01';
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  padding-top: 3px;
+}
+
+.pt-thumb.is-active .n {
+  color: var(--pt-ink);
+}
+
+.pt-thumb-body {
+  min-width: 0;
+}
+
+.pt-thumb-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--pt-edge);
+  overflow: hidden;
+  background: var(--pt-paper);
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.pt-thumb:hover .pt-thumb-frame,
+.pt-thumb:focus-visible .pt-thumb-frame {
+  border-color: var(--pt-ink);
+}
+
+.pt-thumb.is-active .pt-thumb-frame {
+  border-color: var(--pt-ink);
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.pt-thumb-title {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--pt-ink-2);
+  margin-top: 7px;
+}
+
+.pt-thumb.is-active .pt-thumb-title {
+  color: var(--pt-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-thumb-frame {
+    transition: none;
+  }
+}

@@ -1,0 +1,135 @@
+// renderStandalone: build-deck.mjs as a function (SPEC 5.2). Fonts inlined at the font slot, every
+// asset a data URI by its `inline` rule, the theme boot script, the standalone runtime, and the
+// size budget assertion. The asset encoding itself (two-color PNG detection at 98 percent extremes,
+// JPEG q88, resample to 1280 at q78, pass-through) needs sharp and runs in the CLI; this function
+// takes the encoded data URIs and applies the rules and the budget.
+import { BLOCK_CSS } from './block-css.ts';
+import { renderSlides } from './deck.ts';
+import type { RenderedDeck, ThemeBundle } from './deck.ts';
+import { escapeText } from './html.ts';
+import { STANDALONE_RUNTIME_PLACEHOLDER } from './runtime.ts';
+import { counterText, renderStage } from './stage.ts';
+import { slideOrder } from './slide.ts';
+import type { AssetId } from '@turboslide/schema/ids';
+import type { Deck, Slide } from '@turboslide/schema/deck';
+import type { Asset } from '@turboslide/schema/assets';
+import type { Theme } from '@turboslide/schema/render';
+
+/** The inlining rule of build-deck.mjs lines 72 to 76 and 174 to 208, read off the asset record. */
+export function inlineRuleFor(asset: Asset): Asset['inline'] {
+  return asset.inline;
+}
+
+/** Bytes a data URI carries, for the budget. */
+export function dataUriBytes(uri: string): number {
+  const comma = uri.indexOf(',');
+  if (comma < 0) return uri.length;
+  const payload = uri.slice(comma + 1);
+  return uri.startsWith('data:') && /;base64,/.test(uri.slice(0, comma + 1))
+    ? Math.floor((payload.length * 3) / 4)
+    : payload.length;
+}
+
+export type StandaloneBuild = {
+  bundle: ThemeBundle;
+  /** Data URIs per asset twin path (`assets/x-light.png`), produced by the CLI per the inline rule. */
+  assetUris: Record<string, string>;
+  /** The standalone runtime script body; the placeholder until @turboslide/viewer lands its port. */
+  runtime?: string;
+  /** Extra markup the viewer builder wants inside the body before the runtime (chrome). */
+  chromeHtml?: string;
+  /** Size budget in megabytes (default 16, MILESTONES M1 acceptance). */
+  budgetMB?: number;
+  title?: string;
+  /** The theme the document opens with when no key is stored; the deck opens dark (tail:305-312). */
+  defaultTheme?: Theme;
+};
+
+export type StandaloneResult = {
+  html: string;
+  bytes: number;
+  budgetBytes: number;
+  overBudget: boolean;
+  /** Per asset class counts and bytes, the way build-deck.mjs prints them. */
+  inlining: Record<Asset['inline'], { count: number; bytes: number }>;
+  missing: string[];
+  warnings: string[];
+  slides: RenderedDeck['slides'];
+};
+
+/**
+ * The theme boot script of head.html lines 3 to 9: gt-theme, then gt-deck-theme, dark when neither
+ * is set, stamped before first paint so the document never flips.
+ */
+export function themeBootScript(defaultTheme: Theme = 'dark'): string {
+  return `try { var t = localStorage.getItem('gt-theme'); if (t !== 'light' && t !== 'dark') t = localStorage.getItem('gt-deck-theme'); document.documentElement.setAttribute('data-theme', t === 'light' || t === 'dark' ? t : '${defaultTheme}'); } catch (e) { document.documentElement.setAttribute('data-theme', '${defaultTheme}'); }`;
+}
+
+export function renderStandalone(
+  deck: Deck,
+  slides: Slide[],
+  build: StandaloneBuild,
+): StandaloneResult {
+  const missing: string[] = [];
+  const inlining: StandaloneResult['inlining'] = {
+    native: { count: 0, bytes: 0 },
+    'resample-1280': { count: 0, bytes: 0 },
+    'two-color': { count: 0, bytes: 0 },
+    'pass-through': { count: 0, bytes: 0 },
+  };
+  const counted = new Set<string>();
+  const assetSrc = (assetId: AssetId, _theme: Theme, path: string): string => {
+    const uri = build.assetUris[path];
+    if (!uri) {
+      missing.push(`${assetId}: ${path}`);
+      return path;
+    }
+    if (!counted.has(path)) {
+      counted.add(path);
+      const asset = deck.assets[assetId];
+      const rule = asset ? inlineRuleFor(asset) : 'pass-through';
+      inlining[rule].count += 1;
+      inlining[rule].bytes += dataUriBytes(uri);
+    }
+    return uri;
+  };
+  // The standalone file carries both themes; the runtime swaps the img twins. Slides are rendered
+  // in the default theme so the first paint matches the boot script's default.
+  const theme = build.defaultTheme ?? 'dark';
+  const rendered = renderSlides(deck, slides, {
+    theme,
+    chrome: true,
+    assetBase: '',
+    assetSrc,
+    blockAttrs: false,
+    gtWord: true,
+  });
+  const total = slideOrder(deck).length;
+  const stage = renderStage(rendered.map((entry) => entry.rendered.html).join('\n'), {
+    theme,
+    counter: counterText(1, total),
+    sprite: build.bundle.sprite,
+    stageId: 'stage',
+  });
+  const title = build.title ?? deck.title;
+  const html =
+    `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">` +
+    `<title>${escapeText(title)}</title><meta name="robots" content="noindex">` +
+    `<script>${themeBootScript(theme)}</script>` +
+    `<style>${build.bundle.fontsCss}</style><style>${build.bundle.sheetCss}</style><style>${build.bundle.stageCss}</style><style>${BLOCK_CSS}</style>` +
+    `<style>:root{color-scheme:light}:root[data-theme="dark"]{color-scheme:dark}html,body{height:100%}body{margin:0;background:var(--paper);overflow:hidden}#ts-stagewrap{position:fixed;inset:0}</style>` +
+    `</head><body>${build.chromeHtml ?? ''}<div id="ts-stagewrap">${stage}</div>` +
+    `<script>${build.runtime ?? STANDALONE_RUNTIME_PLACEHOLDER}</script></body></html>\n`;
+  const bytes = Buffer.byteLength(html);
+  const budgetBytes = Math.round((build.budgetMB ?? 16) * 1024 * 1024);
+  return {
+    html,
+    bytes,
+    budgetBytes,
+    overBudget: bytes > budgetBytes,
+    inlining,
+    missing,
+    warnings: rendered.flatMap((entry) => entry.rendered.warnings),
+    slides: rendered,
+  };
+}

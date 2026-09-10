@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "id": "directions",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Directions"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Seventeen directions are registered in one file, src/lib/directions.ts: thirteen explorations, three site concepts and the shipped site. The gallery, the presenter, compare and the sitemap all read that list.",
+        "measure": 56
+      },
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "Toolchain is the single source of truth for the shared vocabulary. The forks import its sections and diagrams and re-skin them by rescoping one root class. The three marked thumbnails are the site concepts; Dossier is the reference, and every thumbnail follows the deck theme. The shipped site, the seventeenth direction, has no thumbnail here. It is rebuilt page for page at /d/production, and the Website section shows it.",
+        "role": "cap",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "tiles",
+        "type": "tiles",
+        "columns": 4,
+        "aspect": "16/10",
+        "labelSize": 15,
+        "items": [
+          {
+            "asset": "dir-toolchain",
+            "label": "Toolchain"
+          },
+          {
+            "asset": "dir-chroma-flow",
+            "label": "Chroma Flow"
+          },
+          {
+            "asset": "dir-dither-field",
+            "label": "Dither Field"
+          },
+          {
+            "asset": "dir-aurora-paper",
+            "label": "Aurora Paper"
+          },
+          {
+            "asset": "dir-glyph-rain",
+            "label": "Glyph Rain"
+          },
+          {
+            "asset": "dir-prism",
+            "label": "Prism Light"
+          },
+          {
+            "asset": "dir-lens-gate",
+            "label": "Lens Gate"
+          },
+          {
+            "asset": "dir-paper-foundry",
+            "label": "Paper Foundry"
+          },
+          {
+            "asset": "dir-terminus-board",
+            "label": "Terminus Board"
+          },
+          {
+            "asset": "dir-wide-rule",
+            "label": "Wide Rule"
+          },
+          {
+            "asset": "dir-event-horizon",
+            "label": "Event Horizon"
+          },
+          {
+            "asset": "dir-hourglass",
+            "label": "Hourglass"
+          },
+          {
+            "asset": "dir-singularity",
+            "label": "Singularity"
+          },
+          {
+            "asset": "dir-singularity-dossier",
+            "label": "Dossier",
+            "marker": true
+          },
+          {
+            "asset": "dir-singularity-orbit",
+            "label": "Orbit",
+            "marker": true
+          },
+          {
+            "asset": "dir-singularity-signal",
+            "label": "Signal",
+            "marker": true
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "closing",
+  "kind": "closing",
+  "picture": {
+    "asset": "opener-closing",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "upper-left",
+    "maxWidth": 720,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "big",
+        "text": "Every product in every language"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "generaltranslation.com, prototemplate.com, glyphfield.com",
+        "measure": 56,
+        "marginTop": 14
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Material: Singularity, a Prototemplate direction"
+      }
+    ]
+  },
+  "mark": {
+    "w": 138,
+    "h": 88
+  }
+}

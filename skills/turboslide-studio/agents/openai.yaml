@@ -1,0 +1,5 @@
+interface:
+  display_name: 'Turboslide studio'
+  short_description: 'Drive the Turboslide studio'
+  brand_color: '#070707'
+  default_prompt: 'Use $turboslide-studio for this Turboslide task.'

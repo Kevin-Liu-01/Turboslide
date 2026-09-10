@@ -1,0 +1,168 @@
+import type { MouseEvent, ReactNode, TouchEvent } from 'react';
+import { useRef } from 'react';
+
+import { SHEET_H, SHEET_W } from './model';
+
+import './Sheet.css';
+
+/** The plate left around the sheet: 28px, 12px at or below 900px, 0 in present mode (SPEC 5.5; tail.html fit). */
+export const SHEET_PAD = { wide: 28, narrow: 12, present: 0 } as const;
+
+/** A touch has to travel this far to count as a swipe (tail.html touchend). */
+const SWIPE_PX = 40;
+
+export type SheetFit = {
+  /** the stage transform, W / w */
+  scale: number;
+  /** the sheet's content box, round(w s) by round(h s) */
+  width: number;
+  height: number;
+  /** where the sheet's 1px border box sits inside the stage box */
+  left: number;
+  top: number;
+};
+
+export type SheetFitInput = {
+  /** the stage box */
+  aw: number;
+  ah: number;
+  w?: number;
+  h?: number;
+  pad: number;
+};
+
+/**
+ * The fit math from the deck viewer (tail.html fit(); Prototemplate
+ * Sheet.tsx fitSheet). The 1600 by 900 stage scales to the space left after
+ * the pad and the sheet is centered in it; `left` and `top` place the
+ * sheet's border box one pixel out so the border sits around, not over, the
+ * scaled content. Pure, so the sheet can compute it in render from the stage
+ * size the shell publishes, and the CLI's sheet command can reuse it.
+ */
+export function fitSheet({ aw, ah, w = SHEET_W, h = SHEET_H, pad }: SheetFitInput): SheetFit {
+  const s = Math.max(0.05, Math.min((aw - pad * 2) / w, (ah - pad * 2) / h));
+  const width = Math.round(w * s);
+  const height = Math.round(h * s);
+  return {
+    scale: width / w,
+    width,
+    height,
+    left: Math.round((aw - width) / 2) - 1,
+    top: Math.round((ah - height) / 2) - 1,
+  };
+}
+
+export type SheetProps = {
+  /** the stage box, measured by the shell's ResizeObserver */
+  stageSize: { width: number; height: number };
+  present: boolean;
+  /** window.innerWidth at or below 900: a 12px pad, the sheet under the toolbar */
+  narrow: boolean;
+  /** which way the last move went; the slide change animation reads it */
+  dir: 'next' | 'prev';
+  /** a click on a half of the sheet, or a swipe: pages by one (tail.html wrap click) */
+  onStep?: (delta: number) => void;
+  /** the paging chevrons at the edges on hover; off while presenting */
+  edges?: boolean;
+  /** hidden while another mode is up */
+  hidden?: boolean;
+  children?: ReactNode;
+};
+
+/**
+ * The stage frame in slide mode (SPEC 5.5): the `.sheet` box (the theme's
+ * stage.css draws its --edge ring and the two spread shadows, head:255),
+ * sized and placed by the fit, holding `.ts-stage.stage`, the 1600 by 900
+ * stage scaled by transform: scale(k) with origin 0 0. The theme's tokens
+ * root (`.ts-sheet[data-theme]`) is the Stage around it. The children are
+ * the frame and the slide (SlideView). A click on the left or
+ * right half pages, a swipe pages, and both ignore links and controls inside
+ * the slide.
+ */
+export function Sheet({
+  stageSize,
+  present,
+  narrow,
+  dir,
+  onStep,
+  edges = true,
+  hidden = false,
+  children,
+}: SheetProps) {
+  const sheet = useRef<HTMLDivElement>(null);
+  const touchX = useRef<number | null>(null);
+  const pad = present ? SHEET_PAD.present : narrow ? SHEET_PAD.narrow : SHEET_PAD.wide;
+  const fitted = fitSheet({ aw: stageSize.width, ah: stageSize.height, pad });
+  /* on a narrow viewport the sheet sits under the toolbar instead of centered, so the plate below it can hold the title */
+  const fit: SheetFit = narrow && !present ? { ...fitted, top: pad } : fitted;
+
+  const onClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (!onStep) return;
+    const target = e.target as Element;
+    if (target.closest('a, button, input, textarea, select')) return;
+    const box = sheet.current?.getBoundingClientRect();
+    if (!box) return;
+    onStep(e.clientX > box.left + box.width / 2 ? 1 : -1);
+  };
+
+  const onTouchStart = (e: TouchEvent<HTMLDivElement>) => {
+    const touch = e.changedTouches[0];
+    touchX.current = touch ? touch.clientX : null;
+  };
+
+  const onTouchEnd = (e: TouchEvent<HTMLDivElement>) => {
+    const start = touchX.current;
+    touchX.current = null;
+    const touch = e.changedTouches[0];
+    if (start === null || !touch || !onStep) return;
+    const dx = touch.clientX - start;
+    if (Math.abs(dx) > SWIPE_PX) onStep(dx < 0 ? 1 : -1);
+  };
+
+  return (
+    <div
+      className="pt-sheet-stage"
+      data-dir={dir}
+      hidden={hidden}
+      onClick={onClick}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      <div
+        ref={sheet}
+        className={present ? 'sheet is-present' : 'sheet'}
+        style={{
+          left: fit.left,
+          top: fit.top,
+          width: fit.width,
+          height: fit.height,
+          visibility: stageSize.width > 0 ? undefined : 'hidden',
+        }}
+      >
+        <div className="ts-stage stage" style={{ transform: `scale(${fit.scale})` }}>
+          {children}
+        </div>
+        {edges && !present ? (
+          <>
+            <span className="pt-sheet-edge is-prev" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path
+                  fillRule="evenodd"
+                  d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
+                />
+              </svg>
+            </span>
+            <span className="pt-sheet-edge is-next" aria-hidden="true">
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path
+                  fillRule="evenodd"
+                  d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
+                />
+              </svg>
+            </span>
+          </>
+        ) : null}
+      </div>
+    </div>
+  );
+}

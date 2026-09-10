@@ -4,10 +4,14 @@
   "private": true,
   "type": "module",
   "description": "InterVariable woff2 and its @font-face CSS (SPEC 2.1); the static export instances and fonts.json follow in M2.",
+  "scripts": {
+    "test": "vitest run"
+  },
   "exports": {
-    "./index": "./src/index.ts",
+    "./inter": "./src/inter.ts",
     "./inter.css": "./src/inter.css",
     "./assets/InterVariable.woff2": "./assets/InterVariable.woff2",
+    "./index": "./src/index.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {

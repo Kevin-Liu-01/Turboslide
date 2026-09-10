@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "id": "inspirations",
+  "kind": "content",
+  "layout": {
+    "type": "split"
+  },
+  "slots": {
+    "head": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Visual references"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The primary influence is International Style typography and grids, with Art Deco as a secondary influence. The visual vocabulary is Swiss grids, blueprints, and rectangular forms with no rounded corners. Water and the ocean are a recurring theme. The only texture is an ordered dither.",
+        "measure": 56,
+        "marginTop": 18
+      }
+    ],
+    "body": [
+      {
+        "id": "tiles",
+        "type": "tiles",
+        "columns": 6,
+        "aspect": "16/9",
+        "labelSize": 15,
+        "items": [
+          {
+            "asset": "ref-brockmann",
+            "label": "Müller-Brockmann, 1955"
+          },
+          {
+            "asset": "ref-aicher",
+            "label": "Aicher, Munich 1972"
+          },
+          {
+            "asset": "ref-vignelli",
+            "label": "Vignelli map, 1972"
+          },
+          {
+            "asset": "ref-solari",
+            "label": "Split-flap board"
+          },
+          {
+            "asset": "ref-chart",
+            "label": "NOAA chart"
+          },
+          {
+            "asset": "ref-rosetta",
+            "label": "Rosetta Stone"
+          },
+          {
+            "asset": "ref-chrysler",
+            "label": "Chrysler Building"
+          },
+          {
+            "asset": "ref-whole-earth",
+            "label": "Whole Earth Catalog"
+          },
+          {
+            "asset": "ref-subway-sign",
+            "label": "Transit signage"
+          },
+          {
+            "asset": "ref-rams",
+            "label": "Braun ET66, Dieter Rams"
+          },
+          {
+            "asset": "ref-stamp",
+            "label": "Olympic stamp, 1964"
+          }
+        ],
+        "more": "The list continues with Powers of Ten, vintage National Geographic maps, Borges' Library of Babel, NYRB Classics, and materialarchiv.ch."
+      },
+      {
+        "id": "p2",
+        "type": "paragraph",
+        "text": "The companies referenced for craft are Vercel, Resend, Stripe Press, Linear, and Cursor. The photographs come from Wikimedia Commons and are shown in grayscale.",
+        "role": "cap",
+        "marginTop": 16
+      }
+    ]
+  }
+}

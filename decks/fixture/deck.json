@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "fixture",
+  "title": "Fixture deck",
+  "theme": "gt-ink-paper",
+  "sections": [
+    {
+      "id": "brand",
+      "name": "Brand",
+      "slideIds": [
+        "title",
+        "content-rule"
+      ]
+    }
+  ],
+  "assets": {},
+  "revision": 1,
+  "createdAt": "2026-09-10T20:00:00Z",
+  "updatedAt": "2026-09-10T20:00:00Z"
+}

@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "id": "surfaces",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": {
+      "left": 390
+    }
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Public surfaces"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The brand is live on these surfaces today. The surface index in the viewer, under Surfaces in the toolbar or the R key, lists each one with a preview and a link. [prototemplate.com](https://prototemplate.com) holds the brand directives and every exploration. [glyphfield.com](https://glyphfield.com) holds the design and motion tooling.",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 220,
+        "tight": true,
+        "links": true,
+        "items": [
+          {
+            "key": "Landing",
+            "value": "[generaltranslation.com](https://generaltranslation.com)",
+            "icon": {
+              "name": "home"
+            },
+            "ext": true
+          },
+          {
+            "key": "Pricing",
+            "value": "[/pricing](https://generaltranslation.com/pricing) and [/pricing/usage](https://generaltranslation.com/pricing/usage)",
+            "icon": {
+              "name": "tag"
+            },
+            "ext": true
+          },
+          {
+            "key": "Enterprise",
+            "value": "[/enterprise](https://generaltranslation.com/enterprise)",
+            "icon": {
+              "name": "building-office-2"
+            },
+            "ext": true
+          },
+          {
+            "key": "Careers",
+            "value": "[/careers](https://generaltranslation.com/careers)",
+            "icon": {
+              "name": "briefcase"
+            },
+            "ext": true
+          },
+          {
+            "key": "Documentation",
+            "value": "[/docs](https://generaltranslation.com/docs)",
+            "icon": {
+              "name": "book-open"
+            },
+            "ext": true
+          },
+          {
+            "key": "Report card",
+            "value": "[/report-card](https://generaltranslation.com/report-card)",
+            "icon": {
+              "name": "clipboard-document-check"
+            },
+            "ext": true
+          },
+          {
+            "key": "Blog and changelog",
+            "value": "[/blog](https://generaltranslation.com/blog)",
+            "icon": {
+              "name": "newspaper"
+            },
+            "ext": true
+          },
+          {
+            "key": "Contact and legal",
+            "value": "[/contact](https://generaltranslation.com/contact) and [/legal](https://generaltranslation.com/legal)",
+            "icon": {
+              "name": "envelope"
+            },
+            "ext": true
+          },
+          {
+            "key": "Dashboard",
+            "value": "[dash.generaltranslation.com](https://dash.generaltranslation.com)",
+            "icon": {
+              "name": "squares-2x2"
+            },
+            "ext": true
+          },
+          {
+            "key": "Social",
+            "value": "[x.com/generaltxn](https://x.com/generaltxn), [linkedin.com/company/generaltranslation](https://linkedin.com/company/generaltranslation), [github.com/generaltranslation/gt](https://github.com/generaltranslation/gt)",
+            "icon": {
+              "name": "chat-bubble-left-right"
+            },
+            "ext": true
+          }
+        ]
+      }
+    ]
+  }
+}

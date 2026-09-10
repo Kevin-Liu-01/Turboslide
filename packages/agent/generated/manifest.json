@@ -1,0 +1,166 @@
+{
+  "name": "turboslide",
+  "schemaVersion": 1,
+  "description": "A block document with a validator and a grammar linter; every operation is a named action in one table, reachable from the CLI, MCP, HTTP and the studio window API.",
+  "discovery": {
+    "openapi": "/openapi.json",
+    "llms": "/llms.txt",
+    "llmsFull": "/llms-full.txt",
+    "manifest": "/api/agent",
+    "mcp": "/mcp"
+  },
+  "transports": {
+    "cli": "turboslide <command> --json --author agent:<runId>",
+    "mcp": "turboslide mcp (stdio) or POST /mcp (streamable HTTP); tools deck_<action>",
+    "http": "POST /api/actions/<id> with the input as JSON",
+    "window": "window.turboslide.studio.invoke(<id>, input) after the turboslide:studio-api-ready event"
+  },
+  "rules": [
+    "Every mutating action requires baseRevision and rejects a stale one with 409 and the current document.",
+    "Every write returns the normalized result; re-read from the response, not from memory.",
+    "Unknown fields are rejected with unknown_field and a JSON pointer, except under ext on a slide, a block or an asset.",
+    "A claim about a deck names the revision; render both themes and lint before claiming a slide is done."
+  ],
+  "skills": [
+    {
+      "name": "turboslide-create",
+      "path": "skills/turboslide-create/SKILL.md",
+      "use": "Write or revise slides in the grammar"
+    },
+    {
+      "name": "turboslide-api",
+      "path": "skills/turboslide-api/SKILL.md",
+      "use": "Discover and write through the action table"
+    },
+    {
+      "name": "turboslide-studio",
+      "path": "skills/turboslide-studio/SKILL.md",
+      "use": "Drive the studio through the window API"
+    },
+    {
+      "name": "turboslide-verify",
+      "path": "skills/turboslide-verify/SKILL.md",
+      "use": "Render, lint, judge and verify exports"
+    }
+  ],
+  "actions": {
+    "deck": [
+      "deck.info",
+      "section.set",
+      "import.run",
+      "validate.run"
+    ],
+    "slide": [
+      "slide.list",
+      "slide.get",
+      "slide.insert",
+      "slide.remove",
+      "slide.move",
+      "slide.update",
+      "slide.replace",
+      "slide.lease"
+    ],
+    "block": [
+      "block.set",
+      "block.insert",
+      "block.remove",
+      "block.move"
+    ],
+    "asset": [
+      "asset.add",
+      "asset.dither",
+      "asset.capture",
+      "material.capture"
+    ],
+    "render": [
+      "render.slide",
+      "render.sheet"
+    ],
+    "lint": [
+      "lint.run",
+      "fix.run",
+      "judge.bundle"
+    ],
+    "version": [
+      "diff.run",
+      "version.save",
+      "version.list",
+      "version.restore"
+    ],
+    "view": [
+      "view.goto",
+      "view.mode",
+      "view.theme",
+      "view.present"
+    ],
+    "export": [
+      "export.run",
+      "build.run"
+    ],
+    "studio": [
+      "source.read",
+      "source.apply",
+      "controls.list",
+      "control.activate",
+      "control.set",
+      "artifact.download"
+    ]
+  },
+  "actionCount": 41,
+  "resources": [
+    {
+      "uri": "deck://manifest",
+      "name": "Manifest",
+      "description": "deck.json: sections, assets, revision",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "deck://grammar",
+      "name": "Grammar",
+      "description": "The rule table as JSON plus the prose grammar",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "deck://catalog/blocks",
+      "name": "Block catalog",
+      "description": "Every block type with its schema and defaults",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "deck://catalog/icons",
+      "name": "Icon catalog",
+      "description": "The 63 Heroicons plus gt-mark",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "deck://catalog/materials",
+      "name": "Material catalog",
+      "description": "The shader materials and their uniforms (M5)",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "deck://theme",
+      "name": "Theme",
+      "description": "The gt-ink-paper tokens and the type ladder",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "deck://slides/{id}",
+      "name": "Slide",
+      "description": "One normalized slide",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "deck://lint",
+      "name": "Lint",
+      "description": "The current findings",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "deck://render/{id}/{theme}",
+      "name": "Render",
+      "description": "The latest render of a slide in a theme",
+      "mimeType": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,542 @@
+/* Sidebar: column one of the shell, the deck as a tree (SPEC 6.2; ported
+   from Prototemplate/src/components/viewer/Sidebar.css, directive 8.5,
+   without the site map). A 52px head (the mark, the title, the density
+   toggle, the close button when the list is an overlay), a 40px filter row
+   (SidebarFilter.css draws the field; this sheet places the row and sizes
+   the field), then the list as a scroll region: collapsible groups, one per
+   section, each a 24px header that sticks to the top of the region while
+   its rows scroll under it, and 28px rows indented 24px behind their kind
+   glyphs. Thumbnail density widens the column (ViewerShell.css sets
+   --pt-sb-w to 256px) and every row becomes 44px with its 64x36 live clone.
+
+   Lines (directive 8.9), 1px each, drawn once by one owner: the aside owns
+   its right edge (structural), the head and the filter row their bottom
+   edges, a row's 64x36 clone frame its own --pt-edge. Group headers and
+   rows draw no rule: the tree reads by indentation, and a group starts at
+   the 16px gap above its header (SPEC 2.2, the line law's junction table).
+   The current row draws the 2px ink bar at the column's edge and ink text;
+   a current clone frame an ink frame plus the 2px offset outline every
+   current frame in the shell uses (lint-lines allows thumb-frame for that
+   pair). Spacing (directive 8.8): 28px rows, 24px headers with 16px above,
+   8px above the tree and 32px of run-out below it. The list has no padding
+   of its own: Chromium insets a sticky box's constraint rectangle by its
+   scroll container's padding. Colors are tokens only, radius 0, no shadow;
+   motion is color over the fast duration plus the chevron's turn, off under
+   reduced motion. Rows skip painting off screen (content-visibility). */
+
+.pt-sb {
+  grid-column: 1;
+  grid-row: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border-right: 1px solid var(--pt-hair);
+  /* opening: visible at once, the content fades in as the column widens */
+  transition: opacity var(--pt-dur-sb) var(--pt-ease);
+}
+
+/* the list toggled off, or presenting: the content fades while the column
+   closes, then visibility drops at the end of the shell's width transition */
+.pt-sb.is-hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--pt-dur-sb) var(--pt-ease),
+    visibility 0s linear var(--pt-dur-sb);
+}
+
+/* at or below 900px an open list floats over the stage, above its scrim */
+.pt-sb.is-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: min(84vw, 300px);
+  z-index: 10;
+  animation: pt-sb-in var(--pt-dur-sb) var(--pt-ease) both;
+}
+
+@keyframes pt-sb-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---- the head: the mark, the name (never truncated), the density toggle.
+   At the 208px outline width the arithmetic is tight: 10px pad, the 25px
+   mark, two 6px gaps, the 58px toggle, 6px pad, which leaves the name
+   100px, where the deck's Inter title fits at 13.5px. ---- */
+.pt-sb-head {
+  height: var(--pt-bar-h);
+  flex: 0 0 var(--pt-bar-h);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px 0 10px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.pt-sb-mark {
+  display: flex;
+  flex: 0 0 auto;
+  color: var(--pt-ink);
+}
+
+/* the mark is a link back to the deck list */
+a.pt-sb-mark {
+  padding: 4px;
+  margin: 0 -4px;
+  outline: 1px solid transparent;
+  transition: outline-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+a.pt-sb-mark:hover {
+  outline-color: var(--pt-hair);
+}
+
+a.pt-sb-mark:focus-visible {
+  outline-color: var(--pt-ink);
+}
+
+/* the title takes what the mark and the toggle leave and is never cut */
+.pt-sb-head > b {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  font-feature-settings: 'cv11', 'ss01';
+  white-space: nowrap;
+}
+
+.pt-sb-head .pt-seg {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+
+/* ---- the filter row: the field, then the count at the right end ---- */
+.pt-sb-tools {
+  height: 40px;
+  flex: 0 0 40px;
+  padding: 0 6px 0 10px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+/* the sidebar's size of the shared field: 30px in the 40px row, 13px text */
+.pt-sb .pt-filter {
+  --pt-filter-h: 30px;
+  --pt-filter-fs: 13px;
+}
+
+/* ---- the list: no padding (the header comment says why); the edge fades
+   below leave 8px above the tree and 32px of run-out after the last row ---- */
+.pt-sb .pt-tree {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* the edge fades: 28px of paper to transparent at each end of the scroll
+   region, sticky so they hold the scrollport's edges while the rows scroll
+   under them. Painting order inside the list: rows at auto, the top fade at
+   1, a stuck header at 2 so it stays crisp over the fade, the bottom fade at
+   3 so a header entering from below fades with its rows. */
+.pt-sb .pt-tree::before,
+.pt-sb .pt-tree::after {
+  content: '';
+  position: sticky;
+  flex: 0 0 28px;
+  height: 28px;
+  pointer-events: none;
+}
+
+.pt-sb .pt-tree::before {
+  top: 0;
+  z-index: 1;
+  margin-bottom: -20px;
+  background: linear-gradient(var(--pt-paper), transparent);
+}
+
+.pt-sb .pt-tree::after {
+  bottom: 0;
+  z-index: 3;
+  margin-top: 4px;
+  background: linear-gradient(transparent, var(--pt-paper));
+}
+
+.pt-sb-empty {
+  margin: 0;
+  padding: 12px 10px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--pt-titanium);
+}
+
+/* ---- a group: the header, then its rows as its own children; 16px above
+   every group but the first. The group is the sticky header's containing
+   block. The rows a header opens fade in over the fast duration. ---- */
+.pt-grp {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.pt-grp + .pt-grp {
+  margin-top: 16px;
+}
+
+.pt-grp:not(.is-closed) > .pt-orow {
+  animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
+}
+
+/* the header: 24px, the chevron in a 16px slot at the head of a 24px
+   gutter, the name, the count at the right end painted from data-count;
+   paper ground so the rows scroll under it, no rule. */
+.pt-grp-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: var(--pt-paper);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pt-titanium);
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: 12.5px;
+  letter-spacing: -0.005em;
+  font-feature-settings: 'cv11', 'ss01';
+  text-align: left;
+  cursor: pointer;
+  transition: color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+/* the chevron: 12px in a 16px slot, turned while closed */
+.pt-grp-head > svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  padding: 2px;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  fill: currentColor;
+  transition: transform var(--pt-dur-toast) var(--pt-ease-out);
+}
+
+.pt-grp.is-closed > .pt-grp-head > svg:first-child {
+  transform: rotate(-90deg);
+}
+
+.pt-grp-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* the count, from the attribute: 12px tabular at the right end */
+.pt-grp-head::after {
+  content: attr(data-count);
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.pt-grp-head:hover,
+.pt-grp-head:focus-visible {
+  color: var(--pt-ink);
+}
+
+.pt-grp-head:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+/* ---- a row: a grid of the number, the kind glyph, the name and the
+   badges; 28px for one line. The row skips painting off screen at its own
+   height. ---- */
+.pt-orow {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px 16px minmax(0, 1fr) auto;
+  column-gap: 8px;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px 0 12px;
+  color: var(--pt-ink-2);
+  text-decoration: none;
+  cursor: pointer;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 28px;
+}
+
+/* the derived number in tabular figures (SPEC 6.2) */
+.pt-orow-n {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* the kind glyph from the sprite, the row's own child */
+.pt-orow > svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  color: var(--pt-titanium);
+  transition: color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.pt-orow-name {
+  min-width: 0;
+  font-size: 13px;
+  line-height: 17px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+/* the marks at the right end: the lint badge at severity 2 or 3 and the
+   lease dot (SPEC 6.2); tokens only, never a semantic hue in chrome */
+.pt-orow-marks {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pt-orow-badge {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 16px;
+  padding: 0 5px;
+  color: var(--pt-titanium);
+  border: 1px solid var(--pt-hair);
+  font-variant-numeric: tabular-nums;
+}
+
+.pt-orow-badge[data-severity='3'] {
+  color: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+.pt-orow-lease {
+  width: 6px;
+  height: 6px;
+  background: var(--pt-titanium);
+}
+
+.pt-orow:hover .pt-orow-name,
+.pt-orow:focus-visible .pt-orow-name,
+.pt-orow.is-active .pt-orow-name,
+.pt-orow.is-active .pt-orow-n {
+  color: var(--pt-ink);
+}
+
+.pt-orow.is-active .pt-orow-name {
+  font-weight: 500;
+}
+
+.pt-orow:hover > svg,
+.pt-orow:focus-visible > svg,
+.pt-orow.is-active > svg {
+  color: var(--pt-ink);
+}
+
+/* the current row: the 2px ink bar at the column's edge */
+.pt-orow.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--pt-ink);
+}
+
+.pt-orow:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+/* ---- thumbnail density: every row 44px with its 64x36 clone on the
+   left (a frame of its own, the frame role), the number, the glyph and the
+   name on the first line, the kind on the second. ---- */
+.pt-thumb-frame.is-mini {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 64px;
+  height: 36px;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  overflow: hidden;
+  flex: 0 0 auto;
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.pt-tree.is-shots .pt-orow {
+  grid-template-columns: 64px 22px 16px minmax(0, 1fr) auto;
+  grid-template-rows: 16px 16px;
+  align-content: center;
+  height: 44px;
+  padding: 0 10px;
+  contain-intrinsic-size: auto 44px;
+}
+
+.pt-tree.is-shots .pt-orow .pt-thumb-frame.is-mini {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  align-self: center;
+}
+
+.pt-tree.is-shots .pt-orow .pt-orow-n {
+  grid-column: 2;
+  grid-row: 1;
+  line-height: 16px;
+}
+
+.pt-tree.is-shots .pt-orow > svg {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.pt-tree.is-shots .pt-orow .pt-orow-name {
+  grid-column: 4;
+  grid-row: 1;
+  line-height: 16px;
+}
+
+.pt-tree.is-shots .pt-orow .pt-orow-marks {
+  grid-column: 5;
+  grid-row: 1;
+}
+
+.pt-orow-kind {
+  grid-column: 3 / -1;
+  grid-row: 2;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pt-titanium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pt-orow:hover .pt-thumb-frame.is-mini,
+.pt-orow:focus-visible .pt-thumb-frame.is-mini {
+  border-color: var(--pt-ink);
+}
+
+.pt-orow.is-active .pt-thumb-frame.is-mini {
+  border-color: var(--pt-ink);
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+/* ThumbShot (M3): light and dark twins; the theme attribute picks one */
+.pt-shot {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.pt-shot.is-dark {
+  display: none;
+}
+
+:root[data-theme='dark'] .pt-shot.is-light.has-dark {
+  display: none;
+}
+
+:root[data-theme='dark'] .pt-shot.is-dark {
+  display: block;
+}
+
+.pt-shot-mat {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+:root[data-theme='dark'] .pt-shot-mat {
+  padding: 6%;
+  background: var(--pt-plate);
+}
+
+:root[data-theme='dark'] .pt-shot-mat .pt-shot {
+  position: relative;
+  border: 1px solid var(--pt-hair);
+}
+
+/* the blank plate when an item has no capture: its number in 15px titanium */
+.pt-plate {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--pt-plate);
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: 15px;
+  font-feature-settings: 'cv11', 'ss01';
+  font-variant-numeric: tabular-nums;
+  color: var(--pt-titanium);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-sb,
+  .pt-sb.is-hidden {
+    transition: none;
+  }
+
+  .pt-sb.is-overlay,
+  .pt-grp:not(.is-closed) > .pt-orow {
+    animation: none;
+  }
+
+  a.pt-sb-mark,
+  .pt-grp-head,
+  .pt-grp-head > svg,
+  .pt-orow > svg,
+  .pt-orow-name,
+  .pt-thumb-frame.is-mini {
+    transition: none;
+  }
+}

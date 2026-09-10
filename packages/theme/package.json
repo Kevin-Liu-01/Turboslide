@@ -4,7 +4,20 @@
   "private": true,
   "type": "module",
   "description": "gt-ink-paper: sheet.css ported from head.html lines 11 to 176 under .ts-sheet, stage.css from lines 249 to 258, tokens.ts with the CSS parity test, sprite.ts with the 63 Heroicons and gt-mark, copy.ts. assets/sprite.svg holds the sprite copied out of head.html.",
+  "scripts": {
+    "test": "vitest run",
+    "build:sprite": "node scripts/build-sprite.ts",
+    "add-icon": "node scripts/add-icon.ts"
+  },
   "exports": {
+    "./theme": "./src/theme.ts",
+    "./tokens": "./src/tokens.ts",
+    "./sprite": "./src/sprite.ts",
+    "./copy": "./src/copy.ts",
+    "./css": "./src/css.ts",
+    "./gt-ink-paper/sheet.css": "./src/gt-ink-paper/sheet.css",
+    "./gt-ink-paper/stage.css": "./src/gt-ink-paper/stage.css",
+    "./assets/sprite.svg": "./assets/sprite.svg",
     "./index": "./src/index.ts",
     "./package.json": "./package.json"
   },

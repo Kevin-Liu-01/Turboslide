@@ -1,0 +1,279 @@
+/* ViewerShell: the fixed full-viewport grid (SPEC 6.1). Column one is the
+   sidebar (Sidebar.css draws it and hides or floats itself), column two is
+   the main region with three rows: the toolbar, the stage, the 2px progress
+   line. This sheet owns the grid, the stage box, the sidebar scrim, the
+   modifiers and every motion the shell runs between its views (directive
+   7.4); every other rule belongs to the component that draws it. Colors are
+   tokens only; durations and easings are the --pt-dur-* and --pt-ease*
+   tokens. Ported from Prototemplate/src/components/viewer/ViewerShell.css
+   without the index panel.
+
+   Lines (SPEC 2.2, the line law's junction table): the sidebar's right edge
+   is the seam with the stage, the toolbar's bottom edge the seam with the
+   stage; the main region and the stage draw no left and no top edge.
+
+   Landing: the column transitions below apply only under data-settled,
+   which ViewerShell.tsx stamps one frame after the saved state is in the
+   DOM, so a saved closed list or a saved density is a cut on load and never
+   a 220ms animation from the server's layout.
+
+   Motion here, in order:
+   1. The sidebar column. data-sb on .pt-viewer is '0' while the list is
+      closed (or present, or the viewport is narrow) and the density name
+      while it is open; data-density always names the density, so --pt-sb-w
+      keeps the list's width even while the column is closing. The column
+      animates its track over the sidebar duration; the list keeps its full
+      width under the main region and fades while data-sb-moving names the
+      move.
+   2. The mode change. .pt-stagewrap carries a view-transition-name, so a
+      change of view runs through the View Transitions API from
+      ViewerShell.tsx: the old image fades and scales to 0.985 over the leave
+      duration, the new one fades and scales from 1.015 over the enter
+      duration after a 60ms delay. Without the API, data-entering on
+      .pt-viewer names the entering view for the enter duration and CSS fades
+      it in. */
+
+.pt-viewer {
+  --pt-toolbar-h: var(--pt-bar-h);
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: var(--pt-sb-w) minmax(0, 1fr);
+  grid-template-rows: 100%;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* the one layout animation the shell runs: the stage refits on every frame
+   through the shell's ResizeObserver. Settled only, see the head note. */
+.pt-viewer[data-settled] {
+  transition: grid-template-columns var(--pt-dur-sb) var(--pt-ease);
+}
+
+/* the list's own fade (Sidebar.css) waits for the settle as well */
+.pt-viewer:not([data-settled]) > .pt-sb,
+.pt-viewer:not([data-settled]) > .pt-sb.is-hidden {
+  transition: none;
+}
+
+/* thumbnail density widens the column (SPEC 2.2: 256px in thumbnail density) */
+.pt-viewer[data-density='thumbs'] {
+  --pt-sb-w: 256px;
+}
+
+/* the list toggled off, presenting, or a narrow viewport: the track closes */
+.pt-viewer[data-sb='0'] {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+/* the list keeps the density's width whatever the track is doing, so its
+   content holds still while the main region slides over it */
+.pt-viewer > .pt-sb {
+  min-width: var(--pt-sb-w);
+}
+
+/* the content fade that rides the column's move */
+.pt-viewer[data-sb-moving] > .pt-sb {
+  will-change: opacity;
+}
+
+.pt-viewer[data-sb-moving='open'] > .pt-sb:not(.is-overlay) {
+  animation: pt-fade-in var(--pt-dur-sb) var(--pt-ease-out) both;
+}
+
+.pt-viewer[data-sb-moving='close'] > .pt-sb:not(.is-overlay) {
+  animation: pt-fade-out var(--pt-dur-toast) var(--pt-ease-out) both;
+  pointer-events: none;
+}
+
+.pt-viewer[data-sb-moving='density'] > .pt-sb .pt-tree {
+  animation: pt-fade-in var(--pt-dur-sb) var(--pt-ease-out) both;
+}
+
+/* the narrow overlay leaves the way Sidebar.css brings it in */
+.pt-viewer[data-sb-moving='close'] > .pt-sb.is-overlay {
+  animation: pt-sb-out var(--pt-dur-sb) var(--pt-ease) both;
+  pointer-events: none;
+}
+
+.pt-viewer[data-sb-moving='close'] > .pt-sb-scrim {
+  animation: pt-fade-out var(--pt-dur-toast) var(--pt-ease-out) both;
+  pointer-events: none;
+}
+
+@keyframes pt-sb-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+}
+
+.pt-main {
+  grid-column: 2;
+  grid-row: 1;
+  position: relative;
+  display: grid;
+  /* the toolbar, the stage, the progress line; nothing is inserted between
+     them after hydration, so the stage never moves (directive 7.5) */
+  grid-template-rows: var(--pt-toolbar-h) minmax(0, 1fr) 2px;
+  min-width: 0;
+  min-height: 0;
+  background: var(--pt-paper);
+}
+
+/* the stage: the second row, measured by the shell's ResizeObserver; the
+   sheet, the grid and the book sit inside it on the plate ground (SPEC 6.1).
+   The view-transition-name makes it the one region a mode change
+   cross-fades. */
+.pt-stagewrap {
+  grid-row: 2;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+  background: var(--pt-plate);
+  view-transition-name: pt-stage;
+}
+
+/* the scrim under the narrow overlay list */
+.pt-sb-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  appearance: none;
+  background: var(--pt-scrim);
+  cursor: default;
+  animation: pt-fade-in var(--pt-dur-slide) var(--pt-ease-out) both;
+}
+
+/* present: chrome gone, the stage reads as the window (head:365-370) */
+.pt-viewer.is-present .pt-main {
+  grid-template-rows: 0 minmax(0, 1fr) 0;
+}
+
+.pt-viewer.is-present .pt-toolbar,
+.pt-viewer.is-present .pt-progress {
+  display: none;
+}
+
+.pt-viewer.is-present .pt-stagewrap {
+  background: var(--pt-paper);
+}
+
+/* the entering view: a fade and a settle from 1.015 (directive 7.4) */
+@keyframes pt-view-in {
+  from {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* the leaving view: a fade and a shrink to 0.985 */
+@keyframes pt-view-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+/* ---- the mode change through the View Transitions API ---- */
+
+/* Singletons that can sit over the stage keep their own group, so the
+   stage's snapshot never covers them: the toast (Toast.css), the help card
+   (HelpCard.css), the preview card (PreviewLayer.css), and here the narrow
+   overlay list and its scrim. */
+.pt-viewer > .pt-sb.is-overlay {
+  view-transition-name: pt-sb;
+}
+
+.pt-sb-scrim {
+  view-transition-name: pt-sb-scrim;
+}
+
+/* Everything but the stage shows its new state at once. */
+::view-transition-group(*) {
+  animation: none;
+}
+
+::view-transition-old(*) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(*) {
+  animation: none;
+  opacity: 1;
+  mix-blend-mode: normal;
+}
+
+::view-transition-image-pair(pt-stage) {
+  overflow: clip;
+}
+
+::view-transition-old(pt-stage) {
+  animation: pt-view-out var(--pt-dur-leave) var(--pt-ease-out) both;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(pt-stage) {
+  animation: pt-view-in var(--pt-dur-enter) var(--pt-ease-out) 60ms both;
+  mix-blend-mode: normal;
+}
+
+/* ---- the fallback without the API: the entering view fades in by itself ---- */
+.pt-viewer[data-entering='slide'] .pt-sheet-stage,
+.pt-viewer[data-entering='grid'] .pt-grid,
+.pt-viewer[data-entering='book'] .pt-book {
+  animation: pt-view-in var(--pt-dur-enter) var(--pt-ease-out) both;
+  will-change: transform, opacity;
+}
+
+/* at or below 900px the sidebar leaves the grid; .sb-open marks the shell
+   while the list floats as the overlay Sidebar.css draws */
+@media (max-width: 900px) {
+  .pt-viewer {
+    grid-template-columns: 0 minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-viewer,
+  .pt-viewer[data-settled] {
+    transition: none;
+  }
+
+  .pt-viewer[data-sb-moving] > .pt-sb,
+  .pt-viewer[data-sb-moving] > .pt-sb .pt-tree,
+  .pt-viewer[data-sb-moving] > .pt-sb-scrim,
+  .pt-sb-scrim,
+  .pt-viewer[data-entering] .pt-sheet-stage,
+  .pt-viewer[data-entering] .pt-grid,
+  .pt-viewer[data-entering] .pt-book {
+    animation: none;
+  }
+
+  ::view-transition-old(pt-stage),
+  ::view-transition-new(pt-stage) {
+    animation: none;
+  }
+}

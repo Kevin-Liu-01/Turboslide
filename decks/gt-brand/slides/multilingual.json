@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "multilingual",
+  "kind": "content",
+  "layout": {
+    "type": "split"
+  },
+  "slots": {
+    "head": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Scripts"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Headlines, interface text, and marks have to hold up in CJK, RTL, and Indic scripts as well as Latin.",
+        "measure": 56,
+        "marginTop": 18
+      }
+    ],
+    "body": [
+      {
+        "id": "lang",
+        "type": "lang",
+        "items": [
+          {
+            "script": "en",
+            "text": "Every product in every language.",
+            "label": "English"
+          },
+          {
+            "script": "ja",
+            "text": "全製品を、全言語で。",
+            "label": "Japanese"
+          },
+          {
+            "script": "de",
+            "text": "Jedes Produkt in jeder Sprache.",
+            "label": "German"
+          },
+          {
+            "script": "zh-Hans",
+            "text": "每一个产品，每一种语言。",
+            "label": "Chinese"
+          },
+          {
+            "script": "es",
+            "text": "Cada producto en cada idioma.",
+            "label": "Spanish"
+          },
+          {
+            "script": "ko",
+            "text": "모든 제품을 모든 언어로.",
+            "label": "Korean"
+          },
+          {
+            "script": "hi",
+            "text": "हर उत्पाद, हर भाषा में।",
+            "label": "Hindi"
+          },
+          {
+            "script": "ar",
+            "text": "كل منتج بكل لغة.",
+            "label": "Arabic"
+          }
+        ]
+      }
+    ]
+  }
+}

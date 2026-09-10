@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mood-dictionary",
+  "kind": "mood",
+  "picture": {
+    "asset": "mood-dictionary",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-right",
+    "maxWidth": 560,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "title",
+        "text": "The Compact Oxford English Dictionary"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The full dictionary is printed small enough to need a magnifier, and it is still complete. The docs are built in the same order: the set is complete before it is made compact.",
+        "marginTop": 12
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Photograph: Cullen328, CC BY-SA 4.0"
+      }
+    ]
+  }
+}

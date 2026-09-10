@@ -1,0 +1,519 @@
+// The deck manifest and the slide kinds (SPEC 4.1, 4.2). A deck is a manifest plus one file per
+// slide; the manifest's sections are the only place order lives, so numbers, counts and titles are
+// derived (SPEC 4.2). Slide kinds are the grammar's twelve archetypes folded into six kinds: the
+// full-picture kinds (opener, mood, closing) carry a picture and a plate, title and statement are
+// fixed compositions, and content slides carry typed blocks in the slots of one layout.
+import { z } from 'zod';
+import { annotate } from './annotate.ts';
+import type { Asset } from './assets.ts';
+import { assetSchema } from './assets.ts';
+import type { Block } from './blocks.ts';
+import { blockSchema, extSchema } from './blocks.ts';
+import type { AssetId, SectionId, SlideId } from './ids.ts';
+import { slugSchema } from './ids.ts';
+import type { Text } from './text.ts';
+import { plainText, textSchema } from './text.ts';
+
+export const SCHEMA_VERSION = 1;
+
+/** The one theme; a second theme is additive (SPEC 2.1, open question 6). */
+export const THEMES = ['gt-ink-paper'] as const;
+export type ThemeId = (typeof THEMES)[number];
+
+// ---------------------------------------------------------------------------------------------
+// Types
+
+/** An opener, if present, is first and has kind 'opener'. */
+export type Section = { id: SectionId; name: string; slideIds: SlideId[] };
+
+export type Deck = {
+  schemaVersion: 1;
+  /** slug, stable: 'gt-brand' */
+  id: string;
+  title: string;
+  theme: ThemeId;
+  sections: Section[];
+  assets: Record<AssetId, Asset>;
+  defaults?: { notes?: string };
+  /** increments on every committed write */
+  revision: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type SlideBase = {
+  /** on every slide file so one slide can be read, validated and migrated alone */
+  schemaVersion: 1;
+  id: SlideId;
+  /** overrides the derived title (first heading, big or plate title) */
+  title?: string;
+  /** speaker notes; the only place notes live */
+  notes?: string;
+  tags?: string[];
+  ext?: Record<string, unknown>;
+};
+
+export type SlotName = 'main' | 'head' | 'headLeft' | 'headRight' | 'body' | 'left' | 'right';
+
+export const SLOT_NAMES = [
+  'main',
+  'head',
+  'headLeft',
+  'headRight',
+  'body',
+  'left',
+  'right',
+] as const;
+
+export type ColsRatio = '5/7' | '4/8' | '1/1' | { left: number } | { right: number };
+
+export type Layout =
+  /** slots: left, right */
+  | { type: 'cols'; ratio: ColsRatio; gap?: 72 | 56 | 48; align?: 'start' | 'center' }
+  /** slots: head (or headLeft, headRight), body */
+  | {
+      type: 'split';
+      gap?: 56 | 44 | 40 | 36 | 32 | 26;
+      /**
+       * `align: 'baseline'` aligns the two head columns on the first baseline where the other
+       * head grids align at start (slide 21; import report, deviation 3 from SPEC 4.2).
+       */
+      head?: 'single' | { cols: '5/7' | '4/8'; align?: 'start' | 'baseline' };
+      body?: { align: 'start' | 'center' | 'end' };
+    }
+  /** slot: main */
+  | { type: 'center' }
+  /** slot: main */
+  | { type: 'left-mid' }
+  /** slot: main */
+  | { type: 'stack'; gap?: number };
+
+export type LayoutType = Layout['type'];
+
+export type Picture = { asset: AssetId; fit: 'cover'; position?: 'center' | 'top' | 'bottom' };
+export type PlateSide = 'lower-left' | 'lower-right' | 'upper-left';
+export type Plate = { side: PlateSide; maxWidth: 740 | 560 | 720; blocks: Block[] };
+
+/** Slots present depend on the layout; a content slide lists only the slots it fills. */
+export type ContentSlide = SlideBase & {
+  kind: 'content';
+  layout: Layout;
+  slots: Partial<Record<SlotName, Block[]>>;
+};
+/** side lower-left, 740 */
+export type OpenerSlide = SlideBase & {
+  kind: 'opener';
+  sectionId: SectionId;
+  picture: Picture;
+  plate: Plate;
+};
+/** side lower-right, 560 */
+export type MoodSlide = SlideBase & { kind: 'mood'; picture: Picture; plate: Plate };
+/** upper-left, 720 */
+export type ClosingSlide = SlideBase & {
+  kind: 'closing';
+  picture: Picture;
+  plate: Plate;
+  mark?: { w: number; h: number };
+};
+export type TitleSlide = SlideBase & {
+  kind: 'title';
+  mark: { w: number; h: number };
+  heading: Text;
+  lead: Text;
+};
+/** measure in ch */
+export type StatementSlide = SlideBase & { kind: 'statement'; big: Text; measure?: number };
+
+export type Slide =
+  ContentSlide | OpenerSlide | MoodSlide | ClosingSlide | TitleSlide | StatementSlide;
+export type SlideKind = Slide['kind'];
+
+export const SLIDE_KINDS = ['content', 'opener', 'mood', 'closing', 'title', 'statement'] as const;
+
+/** The manifest and its slides together, the unit the validator, the reducer and the diff work on. */
+export type DeckDocument = { deck: Deck; slides: Record<SlideId, Slide> };
+
+// ---------------------------------------------------------------------------------------------
+// Schemas
+
+const markSizeSchema = z.strictObject({
+  w: annotate(z.number().positive(), { label: 'Mark width', control: 'number', group: 'Layout' }),
+  h: annotate(z.number().positive(), { label: 'Mark height', control: 'number', group: 'Layout' }),
+});
+
+export const sectionSchema = z.strictObject({
+  id: slugSchema,
+  name: z.string().min(1),
+  slideIds: z.array(slugSchema),
+}) satisfies z.ZodType<Section>;
+
+export const colsRatioSchema = z.union([
+  z.literal(['5/7', '4/8', '1/1']),
+  z.strictObject({ left: z.number().positive() }),
+  z.strictObject({ right: z.number().positive() }),
+]) satisfies z.ZodType<ColsRatio>;
+
+export const COLS_GAPS = [72, 56, 48] as const;
+export const SPLIT_GAPS = [56, 44, 40, 36, 32, 26] as const;
+
+export const layoutSchema = z.discriminatedUnion('type', [
+  z.strictObject({
+    type: z.literal('cols'),
+    ratio: annotate(colsRatioSchema, {
+      label: 'Ratio',
+      control: 'json',
+      snap: ['5/7', '4/8', '1/1'],
+      group: 'Layout',
+      help: '5/7 is the deck’s .cols, 4/8 .wide-right, 1/1 .even; { left: 390 } fixes one column in px (head:83-85).',
+    }),
+    gap: annotate(z.literal(COLS_GAPS).optional(), {
+      label: 'Gap',
+      control: 'select',
+      snap: COLS_GAPS,
+      group: 'Layout',
+    }),
+    align: annotate(z.enum(['start', 'center']).optional(), {
+      label: 'Align',
+      control: 'select',
+      snap: ['start', 'center'],
+      group: 'Layout',
+    }),
+  }),
+  z.strictObject({
+    type: z.literal('split'),
+    gap: annotate(z.literal(SPLIT_GAPS).optional(), {
+      label: 'Gap',
+      control: 'select',
+      snap: SPLIT_GAPS,
+      group: 'Layout',
+      help: 'The .split gap variants the deck sets by hand (report 03 section 11 item 8).',
+    }),
+    head: annotate(
+      z
+        .union([
+          z.literal('single'),
+          z.strictObject({
+            cols: z.literal(['5/7', '4/8']),
+            align: z.enum(['start', 'baseline']).optional(),
+          }),
+        ])
+        .optional(),
+      {
+        label: 'Head',
+        control: 'json',
+        snap: ['single', '5/7', '4/8'],
+        group: 'Layout',
+        help: 'single fills the head slot; cols splits it into headLeft and headRight (item 7).',
+      },
+    ),
+    body: annotate(z.strictObject({ align: z.enum(['start', 'center', 'end']) }).optional(), {
+      label: 'Body alignment',
+      control: 'json',
+      snap: ['start', 'center', 'end'],
+      group: 'Layout',
+    }),
+  }),
+  z.strictObject({ type: z.literal('center') }),
+  z.strictObject({ type: z.literal('left-mid') }),
+  z.strictObject({
+    type: z.literal('stack'),
+    gap: annotate(z.number().nonnegative().optional(), {
+      label: 'Gap',
+      control: 'number',
+      group: 'Layout',
+    }),
+  }),
+]) satisfies z.ZodType<Layout>;
+
+export const pictureSchema = z.strictObject({
+  asset: annotate(slugSchema, { label: 'Picture', control: 'asset', group: 'Asset' }),
+  fit: z.literal('cover'),
+  position: annotate(z.enum(['center', 'top', 'bottom']).optional(), {
+    label: 'Position',
+    control: 'select',
+    snap: ['center', 'top', 'bottom'],
+    group: 'Layout',
+  }),
+}) satisfies z.ZodType<Picture>;
+
+export const PLATE_SIDES = ['lower-left', 'lower-right', 'upper-left'] as const;
+export const PLATE_WIDTHS = [740, 560, 720] as const;
+
+export const plateSchema = z.strictObject({
+  side: annotate(z.enum(PLATE_SIDES), {
+    label: 'Plate side',
+    control: 'select',
+    snap: PLATE_SIDES,
+    group: 'Layout',
+    help: 'Opener lower left, mood lower right, closing upper left (SPEC 2.1).',
+  }),
+  maxWidth: annotate(z.literal(PLATE_WIDTHS), {
+    label: 'Plate max width',
+    control: 'select',
+    snap: PLATE_WIDTHS,
+    group: 'Layout',
+    help: '740 for an opener, 560 for a mood slide, 720 for the closing (SPEC 2.1).',
+  }),
+  blocks: z.array(blockSchema),
+}) satisfies z.ZodType<Plate>;
+
+const slideBase = {
+  schemaVersion: z.literal(SCHEMA_VERSION),
+  id: annotate(slugSchema, { label: 'Id', control: 'readonly', group: 'Slide' }),
+  title: annotate(z.string().optional(), {
+    label: 'Title override',
+    control: 'text',
+    group: 'Slide',
+    help: 'Replaces the derived title (first heading, big or plate title).',
+  }),
+  notes: annotate(z.string().optional(), { label: 'Notes', control: 'textarea', group: 'Slide' }),
+  tags: annotate(z.array(z.string()).optional(), {
+    label: 'Tags',
+    control: 'json',
+    group: 'Slide',
+  }),
+  ext: extSchema,
+};
+
+export const slotsSchema = z.partialRecord(z.enum(SLOT_NAMES), z.array(blockSchema));
+
+export const contentSlideSchema = z.strictObject({
+  ...slideBase,
+  kind: z.literal('content'),
+  layout: layoutSchema,
+  slots: slotsSchema,
+}) satisfies z.ZodType<ContentSlide>;
+
+export const openerSlideSchema = z.strictObject({
+  ...slideBase,
+  kind: z.literal('opener'),
+  sectionId: annotate(slugSchema, { label: 'Section', control: 'select', group: 'Slide' }),
+  picture: pictureSchema,
+  plate: plateSchema,
+}) satisfies z.ZodType<OpenerSlide>;
+
+export const moodSlideSchema = z.strictObject({
+  ...slideBase,
+  kind: z.literal('mood'),
+  picture: pictureSchema,
+  plate: plateSchema,
+}) satisfies z.ZodType<MoodSlide>;
+
+export const closingSlideSchema = z.strictObject({
+  ...slideBase,
+  kind: z.literal('closing'),
+  picture: pictureSchema,
+  plate: plateSchema,
+  mark: markSizeSchema.optional(),
+}) satisfies z.ZodType<ClosingSlide>;
+
+export const titleSlideSchema = z.strictObject({
+  ...slideBase,
+  kind: z.literal('title'),
+  mark: markSizeSchema,
+  heading: annotate(textSchema, { label: 'Heading', control: 'text', group: 'Text' }),
+  lead: annotate(textSchema, { label: 'Lead', control: 'textarea', group: 'Text' }),
+}) satisfies z.ZodType<TitleSlide>;
+
+export const statementSlideSchema = z.strictObject({
+  ...slideBase,
+  kind: z.literal('statement'),
+  big: annotate(textSchema, { label: 'Statement', control: 'text', group: 'Text' }),
+  measure: annotate(z.number().positive().optional(), {
+    label: 'Measure (ch)',
+    control: 'number',
+    snap: [22, 32],
+    group: 'Layout',
+  }),
+}) satisfies z.ZodType<StatementSlide>;
+
+export const slideSchema = z.discriminatedUnion('kind', [
+  contentSlideSchema,
+  openerSlideSchema,
+  moodSlideSchema,
+  closingSlideSchema,
+  titleSlideSchema,
+  statementSlideSchema,
+]) satisfies z.ZodType<Slide>;
+
+export const SLIDE_SCHEMAS = {
+  content: contentSlideSchema,
+  opener: openerSlideSchema,
+  mood: moodSlideSchema,
+  closing: closingSlideSchema,
+  title: titleSlideSchema,
+  statement: statementSlideSchema,
+} as const satisfies Record<SlideKind, z.ZodType>;
+
+/** ISO 8601 with a time zone, the form Date.prototype.toISOString writes. */
+export const isoDateSchema = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$/);
+
+export const deckSchema = z.strictObject({
+  schemaVersion: z.literal(SCHEMA_VERSION),
+  id: slugSchema,
+  title: annotate(z.string().min(1), { label: 'Title', control: 'text', group: 'Slide' }),
+  theme: annotate(z.enum(THEMES), {
+    label: 'Theme',
+    control: 'select',
+    snap: THEMES,
+    group: 'Slide',
+  }),
+  sections: z.array(sectionSchema),
+  assets: z.record(slugSchema, assetSchema),
+  defaults: z.strictObject({ notes: z.string().optional() }).optional(),
+  revision: z.number().int().nonnegative(),
+  createdAt: isoDateSchema,
+  updatedAt: isoDateSchema,
+}) satisfies z.ZodType<Deck>;
+
+// ---------------------------------------------------------------------------------------------
+// Derived facts
+
+/** The slot names a layout fills (SPEC 4.2 comments on Layout). */
+export function slotsForLayout(layout: Layout): SlotName[] {
+  switch (layout.type) {
+    case 'cols':
+      return ['left', 'right'];
+    case 'split':
+      return layout.head !== undefined && layout.head !== 'single'
+        ? ['headLeft', 'headRight', 'body']
+        : ['head', 'body'];
+    case 'center':
+    case 'left-mid':
+    case 'stack':
+      return ['main'];
+  }
+}
+
+/** The layout with its defaults filled, the normalized form the validator stores (SPEC 4.4). */
+export function normalizeLayout(layout: Layout): Layout {
+  switch (layout.type) {
+    case 'cols':
+      return {
+        type: 'cols',
+        ratio: layout.ratio,
+        gap: layout.gap ?? 72,
+        align: layout.align ?? 'center',
+      };
+    case 'split':
+      return {
+        type: 'split',
+        gap: layout.gap ?? 56,
+        head: layout.head ?? 'single',
+        body: layout.body ?? { align: 'center' },
+      };
+    case 'stack':
+      return { type: 'stack', gap: layout.gap ?? 22 };
+    case 'center':
+    case 'left-mid':
+      return { type: layout.type };
+  }
+}
+
+/** Slide ids in deck order, flattened from the sections; n = index + 1 (AGENTS.md). */
+export function slideOrder(deck: Deck): SlideId[] {
+  return deck.sections.flatMap((section) => section.slideIds);
+}
+
+export function sectionOfSlide(deck: Deck, slideId: SlideId): Section | undefined {
+  return deck.sections.find((section) => section.slideIds.includes(slideId));
+}
+
+/** The blocks of a slide with the slot each lives in; 'plate' for the full-picture kinds. */
+export function slideBlocks(slide: Slide): { slot: SlotName | 'plate'; block: Block }[] {
+  if (slide.kind === 'content') {
+    return Object.entries(slide.slots).flatMap(([slot, blocks]) =>
+      blocks.map((block) => ({ slot: slot as SlotName, block })),
+    );
+  }
+  if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') {
+    return slide.plate.blocks.map((block) => ({ slot: 'plate' as const, block }));
+  }
+  return [];
+}
+
+/** The longest title the sidebar and the sheet labels show before an ellipsis (tail:90-94). */
+export const TITLE_MAX_CHARS = 72;
+
+/**
+ * The first h1 or h2 of an html escape block as plain text, or undefined when it has none. The
+ * deck's viewer titles a slide from `h1, h2, .big` (tail:90-94), and an escape slide carries the
+ * deck's own markup verbatim, so it is titled the same way. A conservative regex is enough here:
+ * the first match wins the way querySelector does, inner tags are dropped and entities decoded.
+ */
+export function htmlBlockTitle(html: string): string | undefined {
+  const match = /<h([12])\b[^>]*>([\s\S]*?)<\/h\1\s*>/i.exec(html);
+  if (!match) return undefined;
+  const text = collapseWhitespace(decodeEntities((match[2] ?? '').replace(/<[^>]*>/g, '')));
+  return text === '' ? undefined : text;
+}
+
+/**
+ * The title a slide derives from its content (SPEC 4.2): the heading of the title slide, the big
+ * text of a statement, else the first heading block of the slots or the plate, looking inside
+ * composite cells and html escapes (their first h1 or h2). Markup is removed and the result is
+ * trimmed to TITLE_MAX_CHARS with an ellipsis the way the deck's viewer does it (tail:90-94).
+ * Undefined when the slide has nothing to derive a title from.
+ */
+export function derivedSlideTitle(slide: Slide): string | undefined {
+  let text: string | undefined;
+  if (slide.kind === 'title') text = plainText(slide.heading);
+  else if (slide.kind === 'statement') text = plainText(slide.big);
+  else text = firstHeading(slideBlocks(slide).map(({ block }) => block));
+  if (text === undefined) return undefined;
+  const t = collapseWhitespace(text);
+  if (t === '') return undefined;
+  return t.length > TITLE_MAX_CHARS
+    ? `${t.slice(0, TITLE_MAX_CHARS - 3).replace(/\s+\S*$/, '')}...`
+    : t;
+}
+
+/**
+ * The one slide title every surface shows (SPEC 4.2): the override, else the derived title, else
+ * `Slide n` when the caller knows the slide number (the sidebar, the sheet labels, the deck's
+ * viewer at tail:90-94) and the slide id when it does not (CLI rows, lint messages).
+ */
+export function slideTitle(slide: Slide, n?: number): string {
+  if (slide.title !== undefined && slide.title !== '') return slide.title;
+  return derivedSlideTitle(slide) ?? (n === undefined ? slide.id : `Slide ${n}`);
+}
+
+function firstHeading(blocks: Block[]): string | undefined {
+  for (const block of blocks) {
+    if (block.type === 'heading') return plainText(block.text);
+    if (block.type === 'html') {
+      const inner = htmlBlockTitle(block.html);
+      if (inner !== undefined) return inner;
+    }
+    if (block.type === 'composite') {
+      const inner = firstHeading(block.cells.flatMap((cell) => cell.blocks));
+      if (inner !== undefined) return inner;
+    }
+  }
+  return undefined;
+}
+
+function collapseWhitespace(text: string): string {
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: '\u00a0',
+};
+
+/** The entities the deck's headings use; anything else stays as written. */
+function decodeEntities(text: string): string {
+  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (whole, body: string) => {
+    if (/^#x/i.test(body)) return String.fromCodePoint(Number.parseInt(body.slice(2), 16));
+    if (body.startsWith('#')) return String.fromCodePoint(Number.parseInt(body.slice(1), 10));
+    return NAMED_ENTITIES[body.toLowerCase()] ?? whole;
+  });
+}

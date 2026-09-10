@@ -1,0 +1,73 @@
+{
+  "writtenBy": "make.mts",
+  "pair": {
+    "name": "opener-prototemplate",
+    "dark": "opener-prototemplate-dark.png",
+    "light": "opener-prototemplate-light.png",
+    "width": 800,
+    "height": 450,
+    "cell": 2,
+    "deckFiles": ["shots/opener-prototemplate.jpg", "shots/opener-prototemplate-light.jpg"],
+    "litCells": 29880,
+    "litFraction": 0.083,
+    "screeningBox": {
+      "plate": [137, 500, 740, 271],
+      "nearestLitPx": 108,
+      "litUnder": 0,
+      "litInBand": 0
+    },
+    "observedPlate": {
+      "plate": [137, 463, 740, 308],
+      "nearestLitPx": 82,
+      "litUnder": 0,
+      "litInBand": 0
+    },
+    "treatment": {
+      "kind": "two-tone",
+      "crop": [-1325, 105, 2709, 2374],
+      "black": 20,
+      "gamma": 1,
+      "polarity": "dark-ground"
+    },
+    "source": {
+      "file": "openers-60-79/glyphfield/hi/lm-gem-c5-s2.png",
+      "width": 3200,
+      "height": 1800,
+      "status": "not on disk since 2026-09-10 (the session scratchpad was cleared); render again per OPENERS.md, \"Prototemplate and Glyphfield\", and point TURBOSLIDE_TWO_TONE_SOURCE at the file"
+    },
+    "recorded": {
+      "date": "2026-09-10",
+      "pipeline": "packages/effects/src/two-tone.ts, gray before the fit (make.py order)",
+      "darkAgreement": 0.9997555555555555,
+      "lightAgreement": 0.9997555555555555,
+      "mismatchedCells": 88,
+      "cells": 360000
+    }
+  },
+  "golden": {
+    "source": "../pillow/src.png",
+    "dark": "pillow-src-dark.png",
+    "params": {
+      "crop": [-20, 10, 150, 100],
+      "black": 20,
+      "white": 235,
+      "gamma": 0.9,
+      "polarity": "dark-ground"
+    },
+    "screen": {
+      "width": 800,
+      "height": 450
+    },
+    "litCells": 175982,
+    "metrics": {
+      "litFraction": 0.4888,
+      "warnings": ["25049 lit cell(s) under the plate (picture/plate-clear)"],
+      "plateClear": {
+        "plate": [137, 500, 740, 271],
+        "nearestLitPx": 0,
+        "litUnder": 25049,
+        "litInBand": 7053
+      }
+    }
+  }
+}

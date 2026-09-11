@@ -27,6 +27,15 @@ const STUDIO_URL = 'http://localhost:4321';
 const SERVER_LOG = '.turboslide/dev-server.log';
 const LOG_CAP_BYTES = 2 * 1024 * 1024;
 const SERVER_TIMEOUT_MS = 120_000;
+// The pages step 18 audits, fetched once the server answers, with the client module graph they
+// name, so Vite's SSR transforms and its dependency optimizer have run before a browser opens
+// them (measured: `--only 18` on a cold server failed three runs of three with `state "list" did
+// not apply` on the first audit, while the same step passed in the full chain after step 17 had
+// warmed the server; the shell driver now also waits for hydration, this keeps that wait short).
+const WARM_PATHS = ['/deck/gt-brand', '/edit/gt-brand'];
+const WARM_TIMEOUT_MS = 120_000;
+const WARM_MODULE_CAP = 4000;
+const WARM_CONCURRENCY = 8;
 
 // MILESTONES.md, M1 acceptance, in order. `needs` marks the environment a step depends on.
 const steps = [
@@ -142,27 +151,115 @@ function cappedLog(path) {
 let server = null;
 let serverLog = null;
 
+async function fetchText(path) {
+  const response = await fetch(`${STUDIO_URL}${path}`, {
+    signal: AbortSignal.timeout(WARM_TIMEOUT_MS),
+  });
+  return {
+    status: response.status,
+    type: response.headers.get('content-type') ?? '',
+    text: await response.text(),
+  };
+}
+
+// the module URLs a dev page or a transformed module names: script and modulepreload tags,
+// static and dynamic imports; Vite rewrites every import to a root-relative URL in dev
+function moduleUrls(text) {
+  const urls = new Set();
+  for (const m of text.matchAll(/<(?:script|link)\b[^>]*\b(?:src|href)="(\/[^"]+)"/g))
+    urls.add(m[1]);
+  for (const m of text.matchAll(/(?:\bfrom\s*|\bimport\s*\(?\s*)["'](\/[^"'\s]+)["']/g))
+    urls.add(m[1]);
+  return urls;
+}
+
+async function warmServer() {
+  const t = Date.now();
+  const seen = new Set();
+  const queue = [];
+  for (const path of WARM_PATHS) {
+    const { status, text } = await fetchText(path);
+    if (status >= 400) throw new Error(`warm-up: ${STUDIO_URL}${path} answered ${status}`);
+    for (const url of moduleUrls(text)) {
+      if (seen.has(url)) continue;
+      seen.add(url);
+      queue.push(url);
+    }
+  }
+  // the client module graph, crawled breadth first: each request transforms one module and lets
+  // the optimizer discover the dependencies it imports; a module that fails is left to the browser
+  let fetched = 0;
+  let inflight = 0;
+  const worker = async () => {
+    while (queue.length > 0 || inflight > 0) {
+      const url = queue.shift();
+      if (url === undefined) {
+        await sleep(20);
+        continue;
+      }
+      if (fetched >= WARM_MODULE_CAP) continue;
+      fetched += 1;
+      inflight += 1;
+      try {
+        const { status, type, text } = await fetchText(url);
+        if (status < 400 && /javascript|ecmascript/.test(type)) {
+          for (const next of moduleUrls(text)) {
+            if (seen.has(next)) continue;
+            seen.add(next);
+            queue.push(next);
+          }
+        }
+      } catch {
+        // a module the browser will report if it matters
+      } finally {
+        inflight -= 1;
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: WARM_CONCURRENCY }, worker));
+  console.log(
+    `check: warmed ${WARM_PATHS.join(' and ')} with ${fetched} client module(s) in ${((Date.now() - t) / 1000).toFixed(1)} s`,
+  );
+}
+
 async function ensureServer() {
   if (server) return;
   if (await isUp(STUDIO_URL)) {
     console.log(
       `check: reusing the server already listening on ${STUDIO_URL} (it is not stopped afterwards)`,
     );
+    await warmServer();
     return;
   }
-  serverLog = cappedLog(SERVER_LOG);
+  // A kept server outlives this process, so its output is discarded rather than piped: a pipe to
+  // an exited parent kills the server on its next log line (measured: the server left by
+  // `--keep-server` answered one more lint run and then refused connections). Never an unbounded
+  // file (AGENTS.md, dev-server rules).
+  if (!keepServer) serverLog = cappedLog(SERVER_LOG);
   const child = spawn(
     'pnpm',
     ['--filter', '@turboslide/studio', 'exec', 'vite', 'dev', '--port', '4321', '--strictPort'],
-    { cwd: ROOT, detached: true, stdio: ['ignore', 'pipe', 'pipe'] },
+    {
+      cwd: ROOT,
+      detached: true,
+      stdio: keepServer ? ['ignore', 'ignore', 'ignore'] : ['ignore', 'pipe', 'pipe'],
+    },
   );
-  child.stdout.on('data', (chunk) => serverLog.write(chunk));
-  child.stderr.on('data', (chunk) => serverLog.write(chunk));
+  child.stdout?.on('data', (chunk) => serverLog.write(chunk));
+  child.stderr?.on('data', (chunk) => serverLog.write(chunk));
+  if (keepServer) child.unref();
   server = child;
-  console.log(`check: starting the studio dev server on 4321 (log capped in ${SERVER_LOG})`);
+  console.log(
+    keepServer
+      ? 'check: starting the studio dev server on 4321 (output discarded, it stays up after --keep-server)'
+      : `check: starting the studio dev server on 4321 (log capped in ${SERVER_LOG})`,
+  );
   const deadline = Date.now() + SERVER_TIMEOUT_MS;
   while (Date.now() < deadline) {
-    if (await isUp(STUDIO_URL)) return;
+    if (await isUp(STUDIO_URL)) {
+      await warmServer();
+      return;
+    }
     if (child.exitCode !== null)
       throw new Error(
         `dev server exited with ${child.exitCode} before answering; see ${SERVER_LOG}`,

@@ -63,7 +63,11 @@ From M4 the studio hosts that table for agents (MILESTONES M4 item 1):
   `/api/agent` and `/mcp` carries `Authorization: Bearer <token>`; without it the surface serves
   localhost only (X-Forwarded-Host, then Host) and answers 401 elsewhere. Server functions run
   under `createCsrfMiddleware()` (`apps/studio/src/start.ts`), filtered to server functions so the
-  agent routes stay a bearer-token surface.
+  agent routes stay a bearer-token surface. `/api/export` and `/api/render` require the token only
+  when it is set, because the editor's page reaches them without a header (the render route's
+  thumbnail variant `?w=` stays open for the sidebar's `<img>` tags); the production URL runs
+  without one, which `docs/hosting.md` section 6 records as Kevin's open decision. Hosted, every
+  POST to `/api/export` runs synchronously (`docs/hosting-chromium.md` section 4).
 - Leases (SPEC 6.7) are enforced for agent authors from M4: a write by `agent:*` to a slide another
   author holds is 409 with the holder and the current document unless `force` is set; a human's
   write warns and goes through (`packages/store/src/lease.ts` `leasePolicyFor`). The editor takes
@@ -83,12 +87,11 @@ browser: `asset.add`, `asset.dither`, `material.capture`, `material.list`) is li
 through `runDeckAction`, which validates the input with the action's schema and runs the same
 deck dispatcher, and the write comes back over the watch channel. Export from the editor is
 `export.run` through `apps/studio/src/server/download.ts` (the worker job, polled once a second,
-signed one-time download URLs); `format: 'gslides'` with `dryRun: true` is the Dry run entry of
-the Export menu and needs no credentials, the live entry appears when
-`TURBOSLIDE_GOOGLE_CREDENTIALS` names a file (docs/google-slides.md);
-name it in a test (the coverage test scans every `*.test.ts`, `*.spec.ts` and `e2e/*.mjs` for the
-id, the MCP tool or the CLI command) and it appears in the four skill tables through
-`pnpm generate:contracts`.
+signed one-time download URLs); PPTX is the one export target (docs/pptx.md; the Google Slides
+exporter was removed on 2026-09-11 at Kevin's direction), and `export.check` is the CLI-only
+read-back of a file. Name a new action in a test (the coverage test scans every `*.test.ts`,
+`*.spec.ts` and `e2e/*.mjs` for the id, the MCP tool or the CLI command) and it appears in the four
+skill tables through `pnpm generate:contracts`.
 
 ## The judge loop
 
@@ -134,6 +137,28 @@ a 10.7 GB log in eleven minutes) and from the parallel-builder setup.
 - One browser page at a time: the machine is shared. Playwright runs with one worker.
 - The dev server is never a build step. Anything the product needs in production is a server
   route or a server function, not a Vite plugin hook.
+
+## Hosting
+
+The studio is deployed to Vercel from `apps/studio` (the project `turboslide` in Kevin's team,
+root directory `apps/studio`, `apps/studio/vercel.json`: framework off,
+`NITRO_PRESET=vercel pnpm run build:deploy`, `pnpm install --frozen-lockfile`). Production deploys
+come from the push to `main` and land on `turboslide.vercel.app`; a preview is `vercel deploy --yes
+--archive=tgz` from the linked repository root (the root `.vercelignore` keeps the working tree's
+derived folders out of the upload), and only the integrator and the verifier run it. `.vercel/`
+and `.env.local` are written by the CLI on `link` and `env pull` and never committed.
+
+`docs/hosting.md` is the reference. One selection per process (`@turboslide/store/select`):
+`file` in a checkout, `tmp` inside a function without a Blob token (edits live for the instance and
+the editor says so in a banner), `blob` with `BLOB_READ_WRITE_TOKEN` (the overlay under `/tmp`
+mirrors the Vercel Blob store `turboslide-decks`). The function carries `decks/templates`,
+`decks/gt-brand` and the renderer's runtime files as Nitro server assets (`vite.deploy.config.ts`),
+materialized on first use by `apps/studio/src/server/root.ts`, which answers every path helper from
+the selection. Renders and exports run inside the function on `chrome-headless-shell` (the
+recorded deviation below; `docs/hosting-chromium.md`), every POST to `/api/export` is synchronous
+there, and verify never runs there. `node scripts/hosted-smoke.mjs <url>` probes a deployment (six
+rows, exit 1 on a failure; a preview needs `VERCEL_OIDC_TOKEN` from `vercel env pull` in the
+environment); `docs/HOSTED-STATUS.md` records the round.
 
 ## Installs and dependencies
 
@@ -188,11 +213,19 @@ the verifier; `docs/M3-STATUS.md` records them. On the M4 and M5 tree (2026-09-1
 machine, the render worker image building alongside) steps 1 to 18 passed in 265.6 s of step time,
 step 19 failed once on two unformatted files of the fix round and passed alone after they were
 formatted, and every M4, M5 and M6 item 1 line plus the directive's lines passed: the container
-gate on the rebuilt image in 348 s, the Slides exporter as a dry run in both modes, the judge loop
-as written with its runner dropped at the preflight; `docs/M4-M5-STATUS.md` records them with the
-numbers and the steps for a live Google Slides export. On the bare scaffold only steps 1 to 6
-passed (install, route generation, contracts generation, `tsc -b`, vitest, build plus the client
-bundle check).
+gate on the rebuilt image in 348 s, the Slides exporter (since removed) as a dry run in both
+modes, the judge loop as written with its runner dropped at the preflight; `docs/M4-M5-STATUS.md`
+records them with the numbers. On the bare scaffold only steps 1 to 6 passed (install, route
+generation, contracts generation, `tsc -b`, vitest, build plus the client bundle check).
+
+The hosting round's lines beyond `pnpm check` (2026-09-11) are a preview deploy of the tree,
+`node scripts/hosted-smoke.mjs <preview>` at 6 of 6, one synchronous export on it, and the
+integrator's preview drives (`docs/hosted-evidence/README.md`). On the hosting tree steps 1, 2 and
+4 to 19 passed (271.9 s of step time; step 3 failed as written on the uncommitted generated files,
+was verified by regeneration and diff, and passed alone after the paths were staged), the preview
+`turboslide-8ueqvr3ej` answered the six rows and a one-slide flatten export in 7.46 s with
+`perfect: true`; `docs/HOSTED-STATUS.md` records them with the numbers, the production URL facts
+and what Kevin must decide.
 
 Type checking: `pnpm exec tsr generate` must run before `tsc -b` because `routeTree.gen.ts` is
 generated and git-ignored (measured: three type errors otherwise). `tsc -b` writes declaration
@@ -279,6 +312,30 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
   client reaches `@turboslide/effects/io` through the local verify job, and the tsconfig `paths`
   alias the effects, export and cli packages need for sharp's types would otherwise send
   rolldown into `lib/index.d.ts` (measured: `MISSING_EXPORT "default"` on the SSR build).
+- PPTX is the one export target (Kevin, 2026-09-11: "instead of exporting to google slides just
+  make it perfect pptx"): SPEC 8.3 (Google Slides) is not implemented and its code, its `gslides`
+  format, its dry run, the Slides image host route and `docs/google-slides.md` were removed;
+  MILESTONES M6 item 1 is closed as withdrawn. `docs/pptx.md` is the PPTX reference.
+- The flatten page raster is not always the PNG SPEC 8.2 names: the page raster policy
+  (`packages/export/src/pptx/page-raster.ts`) writes a 1-bit PNG, a palette PNG, a JPEG at quality
+  92 (photographic pages only) or a truecolor PNG, whichever is smallest within a measured
+  mismatch budget, and the report records the format and the decoded mismatch per page;
+  `perfect` is the claim that every page stays under 0.1 percent (docs/pptx.md).
+- Fonts are not embedded by default (SPEC 8.2 post-process, 8.4): the flatten file has no visible
+  text to draw and PowerPoint repairs a file whose font parts it rejects, so the flatten export
+  never embeds and the native export embeds only under `--embed-fonts` (`embedFonts` in
+  `export.run`). The render worker image installs the faces, so the LibreOffice gate is unchanged.
+- Every slide part carries `<p:cSld name>` set to the slide title and a hidden title placeholder
+  (`hidden="1"`, an alpha 0 run at the heading's box), which SPEC 8.2 does not name; it is what
+  PowerPoint's own accessibility command writes, kept inside the page for the geometry read-back.
+- Hosted renders and exports run inside the Vercel function (SPEC 3.3 item 7 keeps Chromium out
+  of the web app) on `chrome-headless-shell` 147.0.7727.0 from `@sparticuz/chromium` (SPEC 5.3 and
+  the Chromium section above want the full Chrome for Testing binary): a function has no second
+  process to hand the work to and the package ships only the shell. Every hosted `RenderRecord`
+  names it in `renderer`, the gate stays on this machine and in the worker image, and
+  `docs/hosting-chromium.md` records the switches, the single-process shell's crash on context
+  close (its browser is killed by pid, never closed) and the measurements. Kevin has not approved
+  this beyond the directive to make the deployment work.
 - The acceptance line names `apps/studio/src/routes/openapi.json.ts`. The file is
   `apps/studio/src/routes/openapi[.]json.ts` because TanStack Router's file-based routing escapes
   a dot inside a path segment as `[.]` (the route path stays `/openapi.json`), and the

@@ -11,7 +11,7 @@ import { openFileStore } from '@turboslide/store/file-store';
 import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
 import { slideSelection } from './lint';
-import { deckDir } from './root';
+import { deckDir, ensureDeckAssets, workerClientOptions } from './root';
 
 /**
  * The one renderer the studio calls (SPEC 5.2, 5.3): @turboslide/render's
@@ -34,7 +34,7 @@ export type { Deck, Slide } from '@turboslide/schema/deck';
 let client: WorkerClient | undefined;
 
 function worker(): WorkerClient {
-  client ??= createWorkerClient();
+  client ??= createWorkerClient(workerClientOptions());
   return client;
 }
 
@@ -89,6 +89,7 @@ const renderSlideImagesFn = createServerFn({ method: 'POST' })
     const scale = data.scale ?? 1;
     const records: RenderRecord[] = [];
     const images: string[] = [];
+    await ensureDeckAssets(data.deckId);
     // sequential: the local queue runs one Chromium at a time and the machine is shared
     for (const slideId of ids) {
       for (const theme of data.themes ?? ['light', 'dark']) {

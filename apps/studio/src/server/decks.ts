@@ -1,35 +1,31 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
 import { createServerFn } from '@tanstack/react-start';
 import type { DeckTemplateId } from '@turboslide/schema/actions';
 import { DECK_TEMPLATES } from '@turboslide/schema/actions';
 import { slideTitle } from '@turboslide/schema/deck';
+import type { DeckDocument } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
-import { validateDeck } from '@turboslide/schema/validate';
-import { createDeck, listDeckHeads } from '@turboslide/store/templates';
+import type { HostingFacts } from '@turboslide/store/hosted';
 import type { CreateDeckResult } from '@turboslide/store/templates';
+import { spriteMarkup } from '@turboslide/theme/sprite';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { isPictureKind } from '@turboslide/viewer/model';
 
 import { renderSlide } from './render';
-import type { Deck, Slide } from './render';
-import { deckDir, repoRoot } from './root';
+import { createStoredDeck, hostingFacts, isHosted, listStoredDecks, openDeckStore } from './root';
 
 /**
- * The studio's read side of the document (SPEC 4.1, 5.3): decks/<id>/deck.json
- * plus slides/<slideId>.json through validateDeck (SPEC 4.4), rendered once per
- * slide through renderSlide so the client sets innerHTML and never sees the
- * block model. createServerFn lives only under apps/studio/src/server
- * (SPEC 3.3 item 4).
+ * The studio's read side of the document (SPEC 4.1, 5.3): the deck through its store
+ * (server/root.ts picks the backend: the checkout's decks/, the hosted overlay, or the Blob
+ * mirror), validated by the store's read (SPEC 4.4), rendered once per slide through renderSlide
+ * so the client sets innerHTML and never sees the block model. createServerFn lives only under
+ * apps/studio/src/server (SPEC 3.3 item 4).
  *
- * Fallback: while the import of the GT deck has not landed, a request for a
- * missing deck id is served from decks/fixture with `fallback` set, so
- * /deck/gt-brand and the Playwright spec run against the two-slide fixture.
- * A deck that is missing while no fixture exists is a 404.
+ * Fallback, checkout only: a request for a missing deck id is served from decks/fixture with
+ * `fallback` set, so the M1 viewer spec runs against the two-slide fixture before an import. A
+ * hosted studio has no fixture and answers 404 for a deck it does not hold.
  */
 
-/** The fixture deck served for a missing id. */
+/** The fixture deck served for a missing id in a checkout. */
 const FALLBACK_DECK = 'fixture';
 
 export type DeckSummary = {
@@ -50,41 +46,35 @@ export type DeckPayload = {
   issues: string[];
 };
 
-type Loaded = { deck: Deck; slides: Record<string, Slide>; issues: string[] };
+type Loaded = { servedId: string; document: DeckDocument; issues: string[] };
 
-function readJson(path: string): unknown {
-  return JSON.parse(readFileSync(path, 'utf8')) as unknown;
-}
-
-/** Reads and validates one deck folder; null when it has no manifest or the manifest fails. */
-function loadDeckFolder(dir: string): Loaded | null {
-  const manifestPath = join(dir, 'deck.json');
-  if (!existsSync(manifestPath)) return null;
-  const manifest = readJson(manifestPath);
-  const slidesDir = join(dir, 'slides');
-  const slides: Record<string, unknown> = {};
-  if (existsSync(slidesDir)) {
-    for (const file of readdirSync(slidesDir)) {
-      if (!file.endsWith('.json')) continue;
-      slides[file.slice(0, -5)] = readJson(join(slidesDir, file));
+/** Reads a deck through its store; null when neither the deck nor the fixture can be read. */
+async function loadDeck(deckId: string): Promise<Loaded | null> {
+  const candidates = [deckId];
+  if (!isHosted() && deckId !== FALLBACK_DECK) candidates.push(FALLBACK_DECK);
+  for (const servedId of candidates) {
+    try {
+      const read = await (await openDeckStore(servedId)).read();
+      return {
+        servedId,
+        document: read.document,
+        issues: read.issues
+          .filter((issue) => issue.severity === 3)
+          .map((issue) => `${issue.file}${issue.pointer}: ${issue.message}`),
+      };
+    } catch (error) {
+      // a missing deck is a RangeError, a folder that is not a deck a TypeError; anything else
+      // (the store unreachable) is the route's error
+      if (error instanceof RangeError || error instanceof TypeError) continue;
+      throw error;
     }
   }
-  const result = validateDeck({ deck: manifest, slides });
-  if (!result.deck) return null;
-  return {
-    deck: result.deck,
-    slides: result.slides,
-    issues: result.issues
-      .filter((issue) => issue.severity === 3)
-      .map((issue) => `${issue.file}${issue.pointer}: ${issue.message}`),
-  };
+  return null;
 }
 
-/** The sprite from @turboslide/theme's assets, without its leading comment. */
-function readSprite(): string {
-  const path = join(repoRoot(), 'packages', 'theme', 'assets', 'sprite.svg');
-  if (!existsSync(path)) return '';
-  return readFileSync(path, 'utf8').replace(/^\s*<!--[\s\S]*?-->\s*/, '');
+/** The sprite the stage carries: the same markup the renderer inlines (SPEC 5.1). */
+function sprite(): string {
+  return spriteMarkup();
 }
 
 function buildViewerDeck(
@@ -93,7 +83,7 @@ function buildViewerDeck(
   loaded: Loaded,
   theme: 'light' | 'dark',
 ): ViewerDeck {
-  const { deck, slides } = loaded;
+  const { deck, slides } = loaded.document;
   // Twin paths are relative to the deck directory and already start with `assets/` (SPEC 4.1,
   // 4.3), so the base is the deck's URL prefix; the /decks/$deckId/assets/$ route serves the rest.
   const assetBase = `/decks/${servedId}/`;
@@ -145,12 +135,18 @@ function buildViewerDeck(
 }
 
 /**
- * Every deck under decks/* for the deck list at /decks and the landing redirect, newest first
+ * Every deck the store holds, for the deck list at /decks and the landing redirect, newest first
  * by the updatedAt the store rewrites on every write (templates and folders without a manifest
- * are skipped; @turboslide/store/templates listDeckHeads).
+ * are skipped; @turboslide/store/templates listDeckHeads). Hosted, the first call materializes
+ * the bundled seed, so an empty function instance still lists the GT deck.
  */
 export const listDecks = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<DeckSummary[]> => listDeckHeads(join(repoRoot(), 'decks')),
+  async (): Promise<DeckSummary[]> => listStoredDecks(),
+);
+
+/** The store facts the deck list and the editor show (the hosting round). */
+export const getHostingFacts = createServerFn({ method: 'GET' }).handler(
+  async (): Promise<HostingFacts> => hostingFacts(),
 );
 
 export type CreateDeckInput = { name: string; from: DeckTemplateId; id?: string };
@@ -161,8 +157,9 @@ function isTemplateId(value: unknown): value is DeckTemplateId {
 
 /**
  * deck.create for the studio (the /decks form, the landing redirect with no deck, the editor's
- * window API): one call into @turboslide/store/templates createDeck, the same function the CLI
- * and the MCP server run, over the repository's decks/ folder.
+ * window API): one call into @turboslide/store/templates createDeck through the collection, the
+ * same function the CLI and the MCP server run, over the decks folder the backend owns; the Blob
+ * backend uploads the new deck before it answers.
  */
 const createDeckFn = createServerFn({ method: 'POST' })
   .validator((input: CreateDeckInput): CreateDeckInput => {
@@ -178,9 +175,7 @@ const createDeckFn = createServerFn({ method: 'POST' })
       ...(input.id !== undefined ? { id: input.id } : {}),
     };
   })
-  .handler(async ({ data }): Promise<CreateDeckResult> =>
-    createDeck(join(repoRoot(), 'decks'), data),
-  );
+  .handler(async ({ data }): Promise<CreateDeckResult> => createStoredDeck(data));
 
 export async function createNewDeck(input: CreateDeckInput): Promise<CreateDeckResult> {
   return createDeckFn({ data: input });
@@ -196,16 +191,11 @@ export const getDeck = createServerFn({ method: 'GET' })
   })
   .handler(async ({ data }): Promise<DeckPayload | null> => {
     const theme = data.theme ?? 'dark';
-    let servedId = data.deckId;
-    let loaded = loadDeckFolder(deckDir(servedId));
-    if (!loaded && servedId !== FALLBACK_DECK) {
-      servedId = FALLBACK_DECK;
-      loaded = loadDeckFolder(deckDir(servedId));
-    }
+    const loaded = await loadDeck(data.deckId);
     if (!loaded) return null;
     return {
-      deck: buildViewerDeck(data.deckId, servedId, loaded, theme),
-      sprite: readSprite(),
+      deck: buildViewerDeck(data.deckId, loaded.servedId, loaded, theme),
+      sprite: sprite(),
       issues: loaded.issues,
     };
   });

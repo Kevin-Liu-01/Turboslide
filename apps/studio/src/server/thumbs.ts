@@ -9,17 +9,20 @@ import type { RenderJobResult } from '@turboslide/render-worker/jobs/render';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { RenderRecord, Theme } from '@turboslide/schema/render';
 
-import { deckDir, repoRoot } from './root';
+import { ensureDeckAssets, openDeckStore, stateDir, workerClientOptions } from './root';
 
 /**
  * Static thumbnails for the grid and the sidebar (SPEC 5.5, 6.2; MILESTONES M3
  * item 5). A thumbnail is the render worker's 1x screenshot of a slide
  * (`/api/render/:slideId`, the facade of M2), downsized here by area
  * averaging to one of three widths and cached under
- * `.turboslide/thumbs/<deckId>/<revision>/<theme>@<width>/<slideId>.png`, so a
+ * `<state>/thumbs/<deckId>/<revision>/<theme>@<width>/<slideId>.png`, so a
  * repeated request for the same revision is a file read and a new revision
- * misses the cache by construction. The client (`@turboslide/chrome` Thumb)
- * asks for `thumbUrl()` and shows the live clone until the capture decodes.
+ * misses the cache by construction. The state folder is `.turboslide/` under
+ * the repository root in a checkout and under the overlay when hosted
+ * (server/root.ts stateDir), the one writable place in a function. The client
+ * (`@turboslide/chrome` Thumb) asks for `thumbUrl()` and shows the live clone
+ * until the capture decodes.
  *
  * The facade route serves these when its request carries `w`: the route
  * calls `thumbResponse(await getThumbnail(...))` for `?w=320` and keeps its
@@ -27,9 +30,12 @@ import { deckDir, repoRoot } from './root';
  * theme in one job, so the first grid does not queue 85 single-slide Chromium
  * runs; the editor reaches it through the server function in warm.ts.
  *
- * Headless Chromium never runs in this process (SPEC 3.3 item 7): the worker
- * client drives the CLI as a child process or reaches the worker over HTTP.
- * sharp is reached through `@turboslide/effects/io`, which the Vite configs
+ * The deck's revision and slide order come from its store, so a hosted
+ * instance syncs the deck before it decides a cache hit. Headless Chromium
+ * never runs in this process (SPEC 3.3 item 7): the worker client drives the
+ * CLI as a child process or reaches the worker over HTTP, with the hosted
+ * decks folder and work folder when there is one (root.ts workerPaths). sharp
+ * is reached through `@turboslide/effects/io`, which the Vite configs
  * externalize (AGENTS.md, M2 decision 13).
  */
 
@@ -73,7 +79,7 @@ export type ThumbResult = {
 let client: WorkerClient | undefined;
 
 function worker(): WorkerClient {
-  client ??= createWorkerClient();
+  client ??= createWorkerClient(workerClientOptions());
   return client;
 }
 
@@ -81,23 +87,31 @@ function assertSlug(name: string, value: string): void {
   if (!SLUG_PATTERN.test(value)) throw new RangeError(`${name} must be a slug`);
 }
 
-/** The deck's revision from deck.json (SPEC 4.2); RangeError when the deck is missing. */
-export function readDeckRevision(deckId: string): number {
+type DeckFacts = { revision: number; order: string[] };
+
+/** The deck's revision and slide order from its store (SPEC 4.2); RangeError when the deck is missing. */
+async function deckFacts(deckId: string): Promise<DeckFacts> {
   assertSlug('deckId', deckId);
-  const manifest = join(deckDir(deckId), 'deck.json');
-  if (!existsSync(manifest)) throw new RangeError(`no deck ${deckId}`);
-  const raw = JSON.parse(readFileSync(manifest, 'utf8')) as { revision?: number };
-  return raw.revision ?? 0;
+  const { document } = await (await openDeckStore(deckId)).read();
+  return {
+    revision: document.deck.revision,
+    order: document.deck.sections.flatMap((section) => section.slideIds),
+  };
 }
 
-/** `.turboslide/thumbs/<deckId>/<revision>/<theme>@<width>` under the repository root. */
+/** The deck's revision (SPEC 4.2); RangeError when the deck is missing. */
+export async function deckRevision(deckId: string): Promise<number> {
+  return (await deckFacts(deckId)).revision;
+}
+
+/** `<state>/thumbs/<deckId>/<revision>/<theme>@<width>` under the state folder. */
 export function thumbsDir(
   deckId: string,
   revision: number,
   theme: Theme,
   width: ThumbWidth,
 ): string {
-  return join(repoRoot(), '.turboslide', 'thumbs', deckId, String(revision), `${theme}@${width}`);
+  return join(stateDir(), 'thumbs', deckId, String(revision), `${theme}@${width}`);
 }
 
 export function thumbPath(
@@ -209,9 +223,10 @@ async function writeThumb(
 export async function getThumbnail(request: ThumbRequest): Promise<ThumbResult> {
   assertSlug('deckId', request.deckId);
   assertSlug('slideId', request.slideId);
-  const revision = readDeckRevision(request.deckId);
+  const revision = await deckRevision(request.deckId);
   const path = thumbPath(request.deckId, revision, request.theme, request.width, request.slideId);
   if (existsSync(path)) return { png: new Uint8Array(readFileSync(path)), revision, cached: true };
+  await ensureDeckAssets(request.deckId);
   const rendered = await worker().renderSlide({
     deckId: request.deckId,
     slideId: request.slideId,
@@ -262,13 +277,6 @@ export type WarmResult = {
   ms: number;
 };
 
-function slideOrder(deckId: string): string[] {
-  const raw = JSON.parse(readFileSync(join(deckDir(deckId), 'deck.json'), 'utf8')) as {
-    sections?: { slideIds?: string[] }[];
-  };
-  return (raw.sections ?? []).flatMap((section) => section.slideIds ?? []);
-}
-
 /**
  * Every missing thumbnail of a theme in one render job (`slideIds` in one CLI run, so Chromium
  * launches once), then downsized from the job's records. In local mode the records point at
@@ -279,8 +287,7 @@ export async function warmThumbs(input: WarmInput): Promise<WarmResult> {
   const t = performance.now();
   assertSlug('deckId', input.deckId);
   const width = input.width ?? DEFAULT_THUMB_WIDTH;
-  const revision = readDeckRevision(input.deckId);
-  const order = slideOrder(input.deckId);
+  const { revision, order } = await deckFacts(input.deckId);
   const wanted = input.slideIds ? input.slideIds.filter((id) => order.includes(id)) : order;
   const ready: string[] = [];
   const failed: WarmResult['failed'] = [];

@@ -1,5 +1,7 @@
 # M4 and M5 status
 
+2026-09-11: the Google Slides exporter this document records was removed at Kevin's direction ("instead of exporting to google slides just make it perfect pptx"); the Slides lines below are history, and PPTX is documented in `docs/pptx.md`.
+
 The state of Turboslide at the end of milestones 4 and 5 (the hosted agent surface, the skills and
 the judge loop; assets, effects, materials, grammar completion, native PPTX and the Rust crate;
 `docs/spec/MILESTONES.md`) plus the parts of M6 that Kevin's directive pulled forward: `/` opens the
@@ -318,6 +320,50 @@ measured step 10 at 18.0 s and step 12 at 53.4 s on an idle machine).
 | 17   | `viewer.spec.ts` on the dev server                   | ok in 16.0 s, 6 passed (15.1 s in Playwright; the runner started the server)                                                                                                                        |
 | 18   | `lint --chrome` at 1440, 1280 and 390 in both themes | ok in 81.1 s: `/deck/gt-brand` 24 audits, 0 with findings, 0 states unapplied; `/edit/gt-brand` 24 audits, 0 with findings, 0 states unapplied                                                      |
 | 19   | `pnpm format:check`                                  | failed in 7.0 s on `packages/export/src/gslides/build.test.ts` and `images.ts` (unformatted by the fix round); formatted; passed alone at the end of the run after the documents below were written |
+
+### Step 18 re-run after the line law flake (2026-09-11)
+
+The verification round found step 18 failing on this tree in 4 of 4 runs, two ways: `--only 18`
+on a cold dev server with `state "list" did not apply` on the first audit (exit 2 after 36 to
+41 s), and the full chain with four findings on `/edit/gt-brand` at 390 dark in the book state.
+Both are the driver and the runner reading the page too early; the chrome is unchanged.
+
+1. `driveShell` (`packages/headless/src/shell.ts`) waited a fixed 1200 ms after the SSR
+   `.pt-viewer` selector, and on a cold Vite dev server the `[` key landed before hydration (the
+   key listeners attach in the shell's mount effect). It now waits, bounded at 30 s, for
+   `.pt-viewer[data-settled]` (set one frame after that mount effect) or `window.turboslide.studio`,
+   and a page that never hydrates is an infrastructure failure naming both marks. A page without
+   the ported shell root (the Prototemplate deck iframe) keeps the fixed settle.
+   `scripts/check.mjs` fetches `/deck/gt-brand` and `/edit/gt-brand` once the server answers and
+   crawls the client module graph they name (386 modules in 2.0 to 3.8 s), so the dependency
+   optimizer has run before the first browser opens them.
+2. The four `/edit` 390 dark book findings (`ts-ctl-textarea | DIV`, `ts-ctl-json-field | DIV`,
+   `A | ts-insp-head`, `ts-ctl-select | A`) are the auditor reading through a view transition.
+   At or below 900 px the inspector takes the whole main region and the book is laid out under
+   it (z 2 in `.pt-stagewrap`, the inspector z 4 on paper); the book's meta rules and contents
+   anchors sit 0 to 2 px from the inspector's field and head rules. The mode change runs through
+   `document.startViewTransition`, and while its 200 ms cross-fade runs, `document.elementsFromPoint`
+   returns no covering element, so `bothVisible` (`packages/lint/src/chrome.ts`) sees the book's
+   lines through the opaque inspector. Measured with `auditDocument` in the page: 3 doubles and
+   1 junction at 100 ms after the key, 0 at 300 ms, the same 554 segments both times. The state's
+   fixed 700 ms settle lands inside the transition only when the book's mount is slow (one run of
+   three by hand, the full chain under the image build). `driveShell` now waits before every
+   audit, bounded at 2 s, until no finite animation is running (the view transition's
+   pseudo-element animations included; finished fill-mode animations and infinite loops are not
+   motion) and every scroll offset is unchanged across 120 ms. Inside the transition the wait
+   measured 256 to 257 ms and the audit after it was clean in 3 of 3 runs. The textarea, JSON
+   field, select and inspector head rules named in the finding were not changed: the doubles are
+   two layers, not a seam.
+
+Also in `scripts/check.mjs`: the server left by `--keep-server` died on its next log line once the
+runner exited (its stdout was a pipe to the runner; measured: one more lint run answered, then
+`ERR_CONNECTION_REFUSED`); it now runs with its output discarded, never an unbounded file.
+
+Runs on this tree: `node scripts/check.mjs --only 18` on a cold server passed 4 of 4 (72.9, 61.4,
+67.5 and 62.2 s of step time; 48 audits, 0 with findings, 0 states unapplied each). By hand
+against one server, `turboslide lint --chrome --url http://localhost:4321/edit/gt-brand --widths 390
+--themes dark --states book` was clean 6 of 6 and the default states 3 of 3; before the settle the
+same book-only line reproduced the four findings in 1 of 3 runs.
 
 ### M4 lines
 

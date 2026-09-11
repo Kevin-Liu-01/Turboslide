@@ -51,6 +51,12 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'python',
   // export: the first-baseline target; `lint --baseline` stays a switch
   'baseline-target',
+  // export: `--headings raster`, `--raster-scale auto|2|3`, `--picture-scale 2|3` (SPEC 8.2, 8.3,
+  // 8.6). The render worker passes them as `--flag value`, so a bare flag here would read the
+  // value as a slide id and leave the option at its default.
+  'headings',
+  'raster-scale',
+  'picture-scale',
   // M2 writes (SPEC 7.2): the typed write path and the version commands.
   'slot',
   'set',

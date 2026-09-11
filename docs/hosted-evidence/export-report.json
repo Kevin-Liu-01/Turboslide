@@ -1,0 +1,1388 @@
+{
+  "summary": {
+    "job": "mtxehi44-00460e",
+    "deckId": "gt-brand",
+    "revision": 28,
+    "format": "pptx",
+    "mode": "flatten",
+    "themes": ["light"],
+    "pages": 85,
+    "passed": true,
+    "geometryInBounds": true,
+    "fontsEmbedded": 0,
+    "files": [
+      {
+        "name": "gt-brand-light.pptx",
+        "bytes": 16278003,
+        "sha256": "948948c3b32cf83d509f797e273a55a70424c5f3c8245dc1298a0df8a931e6a9"
+      }
+    ],
+    "verify": "not-requested",
+    "renderer": "chrome-headless-shell 147.0.7727.0, SwiftShader, Google",
+    "worker": "local",
+    "exec": "inprocess",
+    "ms": 201294,
+    "stored": true
+  },
+  "files": [
+    {
+      "name": "gt-brand-light.pptx",
+      "bytes": 16278003,
+      "sha256": "948948c3b32cf83d509f797e273a55a70424c5f3c8245dc1298a0df8a931e6a9",
+      "contentType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/gt-brand/mtxehi44-00460e/gt-brand-light.pptx",
+      "stored": true
+    }
+  ],
+  "verify": "not-requested",
+  "verifyNote": null,
+  "report": {
+    "deckId": "gt-brand",
+    "revision": 28,
+    "format": "pptx",
+    "mode": "flatten",
+    "theme": "light",
+    "fontSet": "exact",
+    "fontSetVersion": "4.001+gt.1",
+    "files": [
+      {
+        "path": "/tmp/turboslide/.turboslide/worker/jobs/mtxehi44-00460e/export/gt-brand-light.pptx",
+        "bytes": 16278003,
+        "sha256": "948948c3b32cf83d509f797e273a55a70424c5f3c8245dc1298a0df8a931e6a9"
+      }
+    ],
+    "fonts": {
+      "embedded": [],
+      "requiredOnViewer": [
+        "GT Inter Display",
+        "GT Inter Text 22",
+        "GT Inter Text 15",
+        "GT Inter Text 14",
+        "GT Inter Text 26",
+        "GT Inter Text 20 Medium",
+        "GT Inter Text 20",
+        "GT Inter Text 18",
+        "GT Inter Text 18 Medium",
+        "GT Inter Text 26 Medium",
+        "GT Inter Text 15 Medium",
+        "GT Inter Text 24 Medium",
+        "DejaVu Sans Mono",
+        "GT Inter Text 22 Medium"
+      ],
+      "substitutedIn": ["every viewer"]
+    },
+    "slides": [
+      {
+        "slideId": "opener-brand",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/01-opener-brand@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 43563,
+          "colors": 439,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "title",
+        "theme": "light",
+        "native": ["heading", "lead"],
+        "raster": [],
+        "sheet": "work/sheets/light/02-title@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 49053,
+          "colors": 642,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "thesis",
+        "theme": "light",
+        "native": ["big"],
+        "raster": [],
+        "sheet": "work/sheets/light/03-thesis@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 27574,
+          "colors": 407,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "reputation",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/04-reputation@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 66369,
+          "colors": 641,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "why",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": [],
+        "sheet": "work/sheets/light/05-why@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 73760,
+          "colors": 403,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "mood-earth",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/06-mood-earth@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 59154,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "positioning",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/07-positioning@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 82443,
+          "colors": 733,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "audience",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/08-audience@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 86174,
+          "colors": 646,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "values",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": [],
+        "sheet": "work/sheets/light/09-values@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 72882,
+          "colors": 407,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "mood-rosetta",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/10-mood-rosetta@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 81838,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "character",
+        "theme": "light",
+        "native": ["h", "p1", "p2"],
+        "raster": ["scales"],
+        "sheet": "work/sheets/light/11-character@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 66306,
+          "colors": 676,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "voice",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": ["say"],
+        "sheet": "work/sheets/light/12-voice@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 129408,
+          "colors": 686,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "inspirations",
+        "theme": "light",
+        "native": ["h", "p1", "p2"],
+        "raster": ["tiles"],
+        "sheet": "work/sheets/light/13-inspirations@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 831510,
+          "colors": 688,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "naming",
+        "theme": "light",
+        "native": ["h", "p1", "p2", "p3", "p4", "rows"],
+        "raster": ["logos"],
+        "sheet": "work/sheets/light/14-naming@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 131764,
+          "colors": 626,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "mark",
+        "theme": "light",
+        "native": ["h", "p1", "p2"],
+        "raster": ["mark"],
+        "sheet": "work/sheets/light/15-mark@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 73776,
+          "colors": 445,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "opener-design-system",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/16-opener-design-system@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 59864,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "compression",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["sizes"],
+        "sheet": "work/sheets/light/17-compression@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 52207,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "color",
+        "theme": "light",
+        "native": ["h", "p1", "p2"],
+        "raster": ["swatches", "dia1"],
+        "sheet": "work/sheets/light/18-color@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 93615,
+          "colors": 912,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "type",
+        "theme": "light",
+        "native": ["h", "p1", "p2"],
+        "raster": ["spec"],
+        "sheet": "work/sheets/light/19-type@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 106527,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "multilingual",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["lang"],
+        "sheet": "work/sheets/light/20-multilingual@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 57043,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "ladder",
+        "theme": "light",
+        "native": ["h", "p1", "ladder"],
+        "raster": [],
+        "sheet": "work/sheets/light/21-ladder@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 116654,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "lines",
+        "theme": "light",
+        "native": ["h", "p1", "p2"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/22-lines@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 84829,
+          "colors": 697,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "doubled-line",
+        "theme": "light",
+        "native": ["h", "p1", "p2"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/23-doubled-line@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 105839,
+          "colors": 680,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "mood-calligraphy",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/24-mood-calligraphy@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 90390,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "diagrams",
+        "theme": "light",
+        "native": ["h", "p1", "rows", "rows2"],
+        "raster": ["dia1", "dia2", "dia3", "dia4"],
+        "sheet": "work/sheets/light/25-diagrams@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 129636,
+          "colors": 1038,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "dither",
+        "theme": "light",
+        "native": ["h", "p1", "p2", "p3"],
+        "raster": ["dither", "matrix"],
+        "sheet": "work/sheets/light/26-dither@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 80087,
+          "colors": 441,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "iso",
+        "theme": "light",
+        "native": ["h", "p1", "p2"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/27-iso@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 91536,
+          "colors": 1146,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "language-as-material",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/28-language-as-material@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 104087,
+          "colors": 645,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "motion",
+        "theme": "light",
+        "native": ["h", "rows"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/29-motion@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 87150,
+          "colors": 652,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "avoid",
+        "theme": "light",
+        "native": ["h", "p1", "list"],
+        "raster": [],
+        "sheet": "work/sheets/light/30-avoid@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 86377,
+          "colors": 407,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "opener-website",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/31-opener-website@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 58849,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "surfaces",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": [],
+        "sheet": "work/sheets/light/32-surfaces@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 113255,
+          "colors": 634,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "site",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/33-site@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 370954,
+          "colors": 4097,
+          "mismatch": 14,
+          "fraction": 2.4305555555555557e-6
+        }
+      },
+      {
+        "slideId": "dark-mode",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["pair"],
+        "sheet": "work/sheets/light/34-dark-mode@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 402566,
+          "colors": 4097,
+          "mismatch": 27,
+          "fraction": 4.6875e-6
+        }
+      },
+      {
+        "slideId": "pages-a",
+        "theme": "light",
+        "native": ["h"],
+        "raster": ["pair"],
+        "sheet": "work/sheets/light/35-pages-a@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 400340,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "pages-b",
+        "theme": "light",
+        "native": ["h"],
+        "raster": ["pair"],
+        "sheet": "work/sheets/light/36-pages-b@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 211605,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "mood-lighthouse",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/37-mood-lighthouse@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 58418,
+          "colors": 439,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "details",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["grid"],
+        "sheet": "work/sheets/light/38-details@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 327822,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "details-two",
+        "theme": "light",
+        "native": ["h", "p1", "p2"],
+        "raster": ["fig", "fig2", "fig3"],
+        "sheet": "work/sheets/light/39-details-two@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 191996,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "shell-numbers",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/40-shell-numbers@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 138526,
+          "colors": 732,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "horizon",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/41-horizon@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 280109,
+          "colors": 4097,
+          "mismatch": 46,
+          "fraction": 7.986111111111112e-6
+        }
+      },
+      {
+        "slideId": "opener-documentation",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/42-opener-documentation@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 60346,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "docs",
+        "theme": "light",
+        "native": ["h", "p1", "p2"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/43-docs@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 292580,
+          "colors": 4097,
+          "mismatch": 1,
+          "fraction": 1.7361111111111112e-7
+        }
+      },
+      {
+        "slideId": "nearest-page-routing",
+        "theme": "light",
+        "native": ["h", "p1", "code"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/44-nearest-page-routing@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 103613,
+          "colors": 630,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "mood-dictionary",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/45-mood-dictionary@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 83921,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "docs-for-agents",
+        "theme": "light",
+        "native": ["h", "p1", "p2", "rows"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/46-docs-for-agents@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 120093,
+          "colors": 676,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "opener-blog",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/47-opener-blog@2x.png",
+        "page": {
+          "format": "jpeg",
+          "bytes": 393442,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": false
+          }
+        ]
+      },
+      {
+        "slideId": "blog-index",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/48-blog-index@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 423170,
+          "colors": 4097,
+          "mismatch": 10,
+          "fraction": 1.7361111111111112e-6
+        }
+      },
+      {
+        "slideId": "blog-covers",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/49-blog-covers@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 196047,
+          "colors": 4097,
+          "mismatch": 2,
+          "fraction": 3.4722222222222224e-7
+        }
+      },
+      {
+        "slideId": "mood-devanagari",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/50-mood-devanagari@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 97745,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "gem-smoke",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["pair"],
+        "sheet": "work/sheets/light/51-gem-smoke@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 610490,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "blog-vision",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/52-blog-vision@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 302551,
+          "colors": 4097,
+          "mismatch": 4,
+          "fraction": 6.944444444444445e-7
+        }
+      },
+      {
+        "slideId": "content-rule",
+        "theme": "light",
+        "native": ["h", "p1", "list"],
+        "raster": [],
+        "sheet": "work/sheets/light/53-content-rule@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 82655,
+          "colors": 643,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "two-registers",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": [],
+        "sheet": "work/sheets/light/54-two-registers@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 100369,
+          "colors": 381,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "off-the-site",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["pair"],
+        "sheet": "work/sheets/light/55-off-the-site@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 313354,
+          "colors": 4097,
+          "mismatch": 20,
+          "fraction": 3.4722222222222224e-6
+        }
+      },
+      {
+        "slideId": "opener-developer-experience",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/56-opener-developer-experience@2x.png",
+        "page": {
+          "format": "jpeg",
+          "bytes": 466277,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": false
+          }
+        ]
+      },
+      {
+        "slideId": "dx",
+        "theme": "light",
+        "native": ["h", "p1", "code"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/57-dx@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 89162,
+          "colors": 614,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "mood-cable",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/58-mood-cable@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 96283,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "cli",
+        "theme": "light",
+        "native": ["h", "p1", "code", "rows"],
+        "raster": [],
+        "sheet": "work/sheets/light/59-cli@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 115793,
+          "colors": 397,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "opener-prototemplate",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/60-opener-prototemplate@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 58483,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "lab",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/61-lab@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 341651,
+          "colors": 869,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "knowledge-base",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/62-knowledge-base@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 117251,
+          "colors": 639,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "skills-marks",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["pair"],
+        "sheet": "work/sheets/light/63-skills-marks@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 374584,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "viewer-shell",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/64-viewer-shell@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 158820,
+          "colors": 639,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "shell-views",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["grid"],
+        "sheet": "work/sheets/light/65-shell-views@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 275853,
+          "colors": 4097,
+          "mismatch": 2,
+          "fraction": 3.4722222222222224e-7
+        }
+      },
+      {
+        "slideId": "line-law",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": ["fig", "dia1"],
+        "sheet": "work/sheets/light/66-line-law@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 191322,
+          "colors": 4097,
+          "mismatch": 1,
+          "fraction": 1.7361111111111112e-7
+        }
+      },
+      {
+        "slideId": "presenter-compare",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["fig", "fig2", "fig3", "fig4"],
+        "sheet": "work/sheets/light/67-presenter-compare@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 297474,
+          "colors": 4097,
+          "mismatch": 5,
+          "fraction": 8.680555555555556e-7
+        }
+      },
+      {
+        "slideId": "dossier",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/68-dossier@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 323652,
+          "colors": 4097,
+          "mismatch": 7,
+          "fraction": 1.2152777777777778e-6
+        }
+      },
+      {
+        "slideId": "directions",
+        "theme": "light",
+        "native": ["h", "p1", "p2"],
+        "raster": ["tiles"],
+        "sheet": "work/sheets/light/69-directions@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 406511,
+          "colors": 4097,
+          "mismatch": 20,
+          "fraction": 3.4722222222222224e-6
+        }
+      },
+      {
+        "slideId": "mood-wave",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/70-mood-wave@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 93293,
+          "colors": 439,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "archive",
+        "theme": "light",
+        "native": ["h", "p1", "refs", "code"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/71-archive@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 467068,
+          "colors": 4097,
+          "mismatch": 1,
+          "fraction": 1.7361111111111112e-7
+        }
+      },
+      {
+        "slideId": "engines",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["tiles"],
+        "sheet": "work/sheets/light/72-engines@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 398989,
+          "colors": 4097,
+          "mismatch": 5,
+          "fraction": 8.680555555555556e-7
+        }
+      },
+      {
+        "slideId": "build-log",
+        "theme": "light",
+        "native": ["h", "p1", "list"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/73-build-log@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 226102,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "glyphfield",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/74-glyphfield@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 410977,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "glyphfield-tools",
+        "theme": "light",
+        "native": ["h", "rows"],
+        "raster": ["fig"],
+        "sheet": "work/sheets/light/75-glyphfield-tools@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 252607,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "books-and-templates",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["pair"],
+        "sheet": "work/sheets/light/76-books-and-templates@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 216269,
+          "colors": 4097,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "glyphfield-materials",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": ["pair"],
+        "sheet": "work/sheets/light/77-glyphfield-materials@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 388116,
+          "colors": 4097,
+          "mismatch": 160,
+          "fraction": 2.777777777777778e-5
+        }
+      },
+      {
+        "slideId": "agent-api",
+        "theme": "light",
+        "native": ["h", "p1", "code", "rows"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/78-agent-api@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 162533,
+          "colors": 640,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "opener-status",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/79-opener-status@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 49373,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "state",
+        "theme": "light",
+        "native": ["h", "p1"],
+        "raster": ["board"],
+        "sheet": "work/sheets/light/80-state@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 206844,
+          "colors": 4097,
+          "mismatch": 4,
+          "fraction": 6.944444444444445e-7
+        }
+      },
+      {
+        "slideId": "mood-compass",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/81-mood-compass@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 91092,
+          "colors": 440,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": true
+          }
+        ]
+      },
+      {
+        "slideId": "identity-project",
+        "theme": "light",
+        "native": ["h", "p1", "rows"],
+        "raster": ["dia1"],
+        "sheet": "work/sheets/light/82-identity-project@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 109544,
+          "colors": 645,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "fixed-points",
+        "theme": "light",
+        "native": ["h", "p1", "h2", "h3", "p2", "h4", "p3", "code", "h5", "list"],
+        "raster": ["dia1", "dia2"],
+        "sheet": "work/sheets/light/83-fixed-points@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 99576,
+          "colors": 657,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "goals",
+        "theme": "light",
+        "native": ["h", "p1", "list", "code"],
+        "raster": ["dia1", "fig"],
+        "sheet": "work/sheets/light/84-goals@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 183472,
+          "colors": 2576,
+          "mismatch": 0,
+          "fraction": 0
+        }
+      },
+      {
+        "slideId": "closing",
+        "theme": "light",
+        "native": ["h", "p1", "credit"],
+        "raster": [],
+        "sheet": "work/sheets/light/85-closing@2x.png",
+        "page": {
+          "format": "png-palette",
+          "bytes": 337125,
+          "colors": 451,
+          "mismatch": 0,
+          "fraction": 0
+        },
+        "pictures": [
+          {
+            "box": [0, 0, 1600, 900],
+            "regenerated": false
+          }
+        ]
+      }
+    ],
+    "geometryInBounds": true,
+    "perfect": true,
+    "passed": true,
+    "residual": [
+      "renderer: chrome-headless-shell 147.0.7727.0, SwiftShader, Google",
+      "flatten (perfect): the slide is a 2x raster of the sheet under the page raster policy; text is an invisible native layer; the slide title is the slide name and a hidden title placeholder",
+      "rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x",
+      "package: 446 parts, 528 relationships, valid against the content types and relationships",
+      "package: 84 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)",
+      "package: 423 kern=\"0\" attribute(s) and 0 empty ext list(s) removed; 0 custGeom",
+      "pages: 83 png-palette, 2 jpeg; 15.22 MiB of page rasters; worst decoded mismatch 0.003 percent at threshold 0.1 (perfect budget 0.1)",
+      "fonts not embedded: GT Inter Display, GT Inter Text 22, GT Inter Text 15, GT Inter Text 14, GT Inter Text 26, GT Inter Text 20 Medium, GT Inter Text 20, GT Inter Text 18, GT Inter Text 18 Medium, GT Inter Text 26 Medium, GT Inter Text 15 Medium, GT Inter Text 24 Medium, DejaVu Sans Mono, GT Inter Text 22 Medium; the text layer is invisible, so no viewer draws them (docs/pptx.md)"
+    ]
+  }
+}

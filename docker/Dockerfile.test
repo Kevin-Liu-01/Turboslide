@@ -1,0 +1,66 @@
+# syntax=docker/dockerfile:1.7
+# The serverless Chromium test image (docs/hosting-chromium.md): Linux x64 the way a Vercel
+# function runs the studio, on node:24-bookworm, with the workspace installed, the committed GT deck
+# in place and @sparticuz/chromium 147.0.2 as the browser (TURBOSLIDE_CHROME=sparticuz, the fourth
+# executable source of @turboslide/headless). docker/chromium-test.mjs then measures what the
+# function will do: `turboslide render 1 8 33 --theme dark`, `turboslide export pptx 1 8 33 --mode
+# flatten --theme light`, and a document.fonts.check() probe for Inter under that binary.
+#
+#   docker build --platform linux/amd64 -f docker/Dockerfile.test -t turboslide-chromium-test .
+#   docker run --rm turboslide-chromium-test                # Debian's nss and expat, no fonts at all
+#   docker run --rm -e VERCEL=1 turboslide-chromium-test    # the package's AL2023 branch: its own
+#                                                           # nss, expat and Open Sans from /tmp
+#
+# Emulation: Docker Desktop on an arm64 Mac runs this image through Rosetta or QEMU, so the times
+# the script prints are upper bounds, not the function's. Keep the sample small.
+#
+# What is deliberately missing, as in a function: no Chrome for Testing, no LibreOffice, no
+# poppler, no fontconfig package and no system font. chrome-headless-shell links only glibc,
+# libexpat, libnspr4 and libnss3 dynamically (measured with ldd on the inflated binary); freetype
+# and fontconfig are built in, so the render document's Inter, inlined as a data URI by
+# @turboslide/render/theme-node, is the only face the page has unless the package's Open Sans is on
+# FONTCONFIG_PATH (VERCEL=1).
+
+FROM --platform=linux/amd64 node:24-bookworm AS test
+
+ARG PNPM_VERSION=11.15.1
+
+# UV_USE_IO_URING=0 is for the emulation only: Node 24's libuv under Rosetta or QEMU aborts with
+# `uv__io_poll: Assertion errno == EEXIST failed` on the first io_uring poll (measured on the first
+# build of this file); a real x86_64 host and the function do not need it.
+ENV DEBIAN_FRONTEND=noninteractive \
+    PNPM_HOME=/pnpm \
+    PATH=/pnpm:$PATH \
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
+    UV_USE_IO_URING=0 \
+    CI=1
+
+# The three shared libraries chrome-headless-shell needs beyond glibc; nothing else, no fonts.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libnss3 libnspr4 libexpat1 ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN corepack enable && corepack prepare "pnpm@${PNPM_VERSION}" --activate
+
+WORKDIR /app
+
+COPY . .
+
+# The lockfile learns @sparticuz/chromium when the integrator runs pnpm install on the host; until
+# then the image resolves it itself. sharp's install script is in allowBuilds and fetches the
+# linux-x64 libvips.
+RUN pnpm install --no-frozen-lockfile
+
+# The optional dependency resolved and its four Brotli files in place.
+RUN (cd packages/headless && node -e "import('@sparticuz/chromium').then((m) => console.log('sparticuz args', m.default.args.length))") \
+    && ls -la packages/headless/node_modules/@sparticuz/chromium/bin
+
+ENV TURBOSLIDE_CHROME=sparticuz \
+    TURBOSLIDE_GPU=swiftshader \
+    TURBOSLIDE_ROOT=/app \
+    TURBOSLIDE_WORKER_DIR=/tmp/turboslide-worker \
+    NODE_ENV=production
+
+RUN test "$(uname -m)" = x86_64 && node apps/cli/bin/turboslide.mjs --help > /dev/null
+
+CMD ["node", "docker/chromium-test.mjs"]

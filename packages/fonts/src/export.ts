@@ -6,7 +6,8 @@
 // files so LibreOffice renders with them. fontSetVersion() is what ExportReport.fontSetVersion
 // records. License: SIL OFL 1.1 with no Reserved Font Name declared (fonts.json `license`).
 import { existsSync, readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { join, sep } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export type ExportFontSet = 'exact' | 'standard';
 
@@ -52,10 +53,22 @@ export type ExportFonts = {
   faces: ExportFace[];
 };
 
-/** The directory of the committed set. */
+/** The directory of the committed set, in a checkout. */
 export const EXPORT_FONTS_DIR = new URL('../export/', import.meta.url);
 
 export const FONTS_JSON = new URL('fonts.json', EXPORT_FONTS_DIR);
+
+/**
+ * A folder laid out like packages/ that stands in for the workspace in a bundled server (the
+ * same variable @turboslide/render/theme-node reads; docs/hosting.md). Unset in a checkout.
+ */
+export const PACKAGES_DIR_VARIABLE = 'TURBOSLIDE_PACKAGES_DIR';
+
+/** The directory of the set this process reads: the override's fonts/export/, else the checkout's. */
+export function exportFontsDir(): URL {
+  const override = process.env[PACKAGES_DIR_VARIABLE];
+  return override ? pathToFileURL(join(override, 'fonts', 'export') + sep) : EXPORT_FONTS_DIR;
+}
 
 /** Headings at and above this size use the display instance (SPEC 8.4 table). */
 export const DISPLAY_MIN_PX = 44;
@@ -65,7 +78,7 @@ let cached: ExportFonts | undefined;
 /** fonts.json, read once. Throws when the set has not been built (`turboslide fonts build`). */
 export function loadExportFonts(): ExportFonts {
   if (cached) return cached;
-  const path = fileURLToPath(FONTS_JSON);
+  const path = fileURLToPath(new URL('fonts.json', exportFontsDir()));
   if (!existsSync(path)) {
     throw new Error(
       `@turboslide/fonts: ${path} is missing; run \`turboslide fonts build\` (scripts/build-fonts.py)`,
@@ -77,7 +90,7 @@ export function loadExportFonts(): ExportFonts {
 
 /** Absolute path of a face's file. */
 export function exportFacePath(face: ExportFace): string {
-  return fileURLToPath(new URL(face.file, EXPORT_FONTS_DIR));
+  return fileURLToPath(new URL(face.file, exportFontsDir()));
 }
 
 export function exportFaceBytes(face: ExportFace): Buffer {

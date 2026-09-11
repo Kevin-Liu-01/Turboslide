@@ -1,0 +1,43 @@
+{
+  "record": {
+    "deckId": "gt-brand",
+    "slideId": "title",
+    "revision": 28,
+    "theme": "light",
+    "scale": 1,
+    "image": "/tmp/turboslide/.turboslide/worker/cache/gt-brand/28/light@1x/title.png",
+    "renderer": "chrome-headless-shell 147.0.7727.0, SwiftShader, Google",
+    "pageErrors": [],
+    "consoleErrors": [],
+    "overflow": [],
+    "blocks": {
+      "heading": {
+        "type": "heading",
+        "box": [138, 421, 901, 90],
+        "lines": 1,
+        "fontSize": 88,
+        "fontWeight": 500,
+        "color": "rgb(7, 7, 7)"
+      },
+      "lead": {
+        "type": "paragraph",
+        "box": [138, 537, 901, 75],
+        "lines": 2,
+        "fontSize": 26,
+        "fontWeight": 400,
+        "color": "rgb(58, 61, 68)"
+      }
+    },
+    "fonts": { "status": "loaded", "faces": ["Inter 100 900 normal"] },
+    "anchors": [],
+    "rasters": [
+      { "blockId": "mark", "kind": "mark", "file": "", "box": [138, 289, 132, 84], "alpha": true }
+    ],
+    "timing": { "readyMs": 17, "screenshotMs": 496 }
+  },
+  "image": "/api/render/title?deck=gt-brand&theme=light&scale=1",
+  "job": "mtxed5pt-d4e5dd",
+  "cached": false,
+  "worker": "local",
+  "exec": "inprocess"
+}

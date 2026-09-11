@@ -141,6 +141,8 @@ export type Scene = {
   total: number;
   theme: Theme;
   kind: SlideKind;
+  /** The slide title every surface shows (schema slideTitle): the slide name and the hidden title in the file. */
+  title?: string;
   sheet: Box;
   paper: string;
   ink: string;

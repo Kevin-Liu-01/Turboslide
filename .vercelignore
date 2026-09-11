@@ -1,0 +1,24 @@
+# What `vercel deploy` from the repository root leaves out of the upload (docs/hosting.md). The
+# production deploy is a git push and clones the tree, so this file only matters for CLI previews;
+# without it the CLI uploaded the working tree with .turboslide (5 GB of renders) in it.
+.git
+node_modules
+dist
+.turboslide
+.output
+coverage
+*.log
+.DS_Store
+.turbo
+.tanstack
+.nitro
+.vercel
+*.tsbuildinfo
+.env
+*.local
+crates/*/target
+*.node
+packages/native/wasm/*
+!packages/native/wasm/README.md
+.repos
+.github

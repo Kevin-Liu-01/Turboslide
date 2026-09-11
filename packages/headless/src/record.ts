@@ -7,6 +7,7 @@ import type { RenderRecord, RenderScale, RenderTheme } from './contracts.ts';
 import type { SheetPage } from './context.ts';
 import { measureSlide } from './measure.ts';
 import type { MeasureOptions } from './measure.ts';
+import { launchLog } from './launch.ts';
 import { drawDitherCanvases, waitForReady } from './ready.ts';
 import { screenshotRasters, screenshotSheet } from './screenshot.ts';
 
@@ -56,13 +57,21 @@ export async function renderSlideRecord(
     const target = input.hash !== undefined ? `${input.url}#${input.hash}` : input.url;
     await page.goto(target, { waitUntil: input.waitUntil ?? 'load' });
   }
+  const t = performance.now();
+  const step = (name: string): void =>
+    launchLog(`${input.slideId} ${theme}: ${name} at ${Math.round(performance.now() - t)} ms`);
+  step('loaded');
   if (input.readySelector)
     await page.waitForSelector(input.readySelector, { state: 'attached', timeout: 15_000 });
   if (input.drawDither !== false)
     await drawDitherCanvases(page, { table: input.bayerTable, theme });
+  step('dither drawn');
   const ready = await waitForReady(page);
+  step(`ready (fonts ${ready.fonts.status}, frames ${ready.frames})`);
   const measured = await measureSlide(page, input.measure);
+  step('measured');
   const shot = await screenshotSheet(page, input.imagePath, measured.sheet);
+  step('shot');
   const rasterFiles = input.rasterDir
     ? await screenshotRasters(page, measured.rasters, input.rasterDir, input.slideId)
     : [];

@@ -27,7 +27,10 @@ import type { Plugin } from 'vite';
 // deck dispatcher (server/actions.ts), whose asset and material actions load the headless
 // package, and the dev server's dependency optimizer followed that chain (it crawls dynamic
 // imports too) into playwright-core's own `vite` import and failed on vite's fsevents binary.
-const SERVER_ONLY = ['sharp', 'playwright-core'] as const;
+// @sparticuz/chromium joined in the hosting round (docs/hosting-chromium.md): an optional
+// dependency of @turboslide/headless loaded through a variable specifier, external on the server
+// and a stub in the client like the other two.
+const SERVER_ONLY = ['sharp', 'playwright-core', '@sparticuz/chromium'] as const;
 const STUB_PREFIX = '\0turboslide:server-only-stub:';
 
 function externalServerOnly(): Plugin {

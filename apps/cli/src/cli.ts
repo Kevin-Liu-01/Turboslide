@@ -1,6 +1,7 @@
 // The command table and dispatcher of the turboslide binary (SPEC 7.2). Every command receives a
 // CommandContext and returns an exit code; the two error classes map to exit 1 and 2, anything
-// else is reported on stderr with exit 2. runCli is pure over its streams so tests drive it.
+// else is reported on stderr by its message with exit 2 (its stack too when TURBOSLIDE_DEBUG is
+// set). runCli is pure over its streams so tests drive it.
 import { flagBoolean, flagString, parseArgs } from './args.ts';
 import { asset } from './commands/asset.ts';
 import { block } from './commands/block.ts';
@@ -81,9 +82,14 @@ Commands
                                     renders, sheets with cell maps, lint.json with the gate, the document, the
                                     numerals per slide and the six lens instructions in one directory (SPEC 7.6)
   build --out <file> --budget 16    the standalone file under a byte budget; exit 1 over budget
-  export pptx [ids|all] --mode flatten|native --theme light,dark --fonts exact|standard
-                                    [--exclude-share-alike] [--baseline-target libreoffice|none] [--verify] --out <dir>
-                                    PPTX per theme with export-report.json; exit 1 when the report fails
+  export pptx [ids|all] --mode flatten|native --theme light,dark|both --fonts exact|standard|embed
+                                    [--embed-fonts] [--headings raster] [--raster-scale auto|2|3] [--picture-scale 2|3]
+                                    [--exclude-share-alike] [--baseline-target libreoffice|none] [--no-jpeg] [--verify] --out <dir>
+                                    PPTX per theme (flatten is perfect, native is editable text), <deckId>-both.zip for both
+                                    themes, export-report.json; exit 1 when the report fails
+  export check <file.pptx> [--python <bin>] [--no-quick-look] [--out <dir>] [--json]
+                                    read an exported file back with python-pptx: pages, size, media formats, fonts,
+                                    slide names, invalid parts (ExportCheck with --json); exit 1 when it is not valid
   fonts build [--check] [--python <bin>] [--out <dir>]
                                     cut the export font set into packages/fonts/export (scripts/build-fonts.py)
   generate                          the contracts generator (pnpm generate:contracts)
@@ -178,7 +184,15 @@ export async function runCli(argv: readonly string[], options: RunOptions): Prom
       out.warn(`turboslide: ${error.message}`);
       return error.exitCode;
     }
-    const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
+    // the message alone: a stack here buries the cause under frames for whoever reads the tail of
+    // stderr (the render worker's job error, the studio's 502 body); TURBOSLIDE_DEBUG=1 adds it
+    const debug = Boolean(env.TURBOSLIDE_DEBUG);
+    const message =
+      error instanceof Error
+        ? debug && error.stack
+          ? error.stack
+          : error.message || String(error)
+        : String(error);
     out.warn(`turboslide: ${message}`);
     return EXIT.usage;
   }

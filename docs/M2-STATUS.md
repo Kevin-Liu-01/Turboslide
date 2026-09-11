@@ -1,5 +1,7 @@
 # M2 status
 
+2026-09-11: the Google Slides exporter this document records was removed at Kevin's direction ("instead of exporting to google slides just make it perfect pptx"); the Slides lines below are history, and PPTX is documented in `docs/pptx.md`.
+
 The state of Turboslide at the end of milestone 2 (the store, typed writes, MCP over stdio, flatten
 PPTX with a verified report; `docs/spec/MILESTONES.md`, M2). Written by the integrator on
 2026-09-10 after `pnpm check` and the rest of the M2 acceptance list ran once more, in order, on the

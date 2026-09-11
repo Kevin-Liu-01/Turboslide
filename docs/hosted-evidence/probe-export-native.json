@@ -1,0 +1,217 @@
+[
+  {
+    "path": "/api/export/gt-brand?sync=1&format=json",
+    "body": {
+      "mode": "native",
+      "theme": ["light"],
+      "slideIds": ["thesis"]
+    },
+    "status": 200,
+    "ms": 6457,
+    "headers": {
+      "x-turboslide-exec": "inprocess",
+      "x-turboslide-worker": "local",
+      "x-turboslide-job": "mtxhtgti-66fb50",
+      "x-turboslide-export-report": "{\"job\":\"mtxhtgti-66fb50\",\"deckId\":\"gt-brand\",\"revision\":31,\"format\":\"pptx\",\"mode\":\"native\",\"themes\":[\"light\"],\"pages\":1,\"passed\":true,\"geometryInBounds\":true,\"fontsEmbedded\":0,\"files\":[{\"name\":\"gt-brand-light.pptx\",\"bytes\":17879,\"sha256\":\"9d0c92a67e7e522bdb539db42c84384aa3ef600a582803e99f7d3fb69c5a65a4\"}],\"verify\":\"not-requested\",\"renderer\":\"chrome-headless-shell 147.0.7727.0, SwiftShader, Google\",\"worker\":\"local\",\"exec\":\"inprocess\",\"ms\":4885,\"stored\":true}",
+      "x-vercel-id": "sfo1::iad1::wtr5f-1789163608638-970a1bbf3391"
+    },
+    "summary": {
+      "job": "mtxhtgti-66fb50",
+      "deckId": "gt-brand",
+      "revision": 31,
+      "format": "pptx",
+      "mode": "native",
+      "themes": ["light"],
+      "pages": 1,
+      "passed": true,
+      "geometryInBounds": true,
+      "fontsEmbedded": 0,
+      "files": [
+        {
+          "name": "gt-brand-light.pptx",
+          "bytes": 17879,
+          "sha256": "9d0c92a67e7e522bdb539db42c84384aa3ef600a582803e99f7d3fb69c5a65a4"
+        }
+      ],
+      "verify": "not-requested",
+      "renderer": "chrome-headless-shell 147.0.7727.0, SwiftShader, Google",
+      "worker": "local",
+      "exec": "inprocess",
+      "ms": 4885,
+      "stored": true
+    },
+    "files": [
+      {
+        "name": "gt-brand-light.pptx",
+        "bytes": 17879,
+        "sha256": "9d0c92a67e7e522bdb539db42c84384aa3ef600a582803e99f7d3fb69c5a65a4",
+        "contentType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/gt-brand/mtxhtgti-66fb50/gt-brand-light.pptx",
+        "stored": true
+      }
+    ],
+    "verify": "not-requested",
+    "verifyNote": null
+  },
+  {
+    "path": "/api/export/gt-brand?sync=1&format=json",
+    "body": {
+      "mode": "native",
+      "theme": ["light"],
+      "slideIds": ["thesis"],
+      "rasterScale": 3
+    },
+    "status": 200,
+    "ms": 1756,
+    "headers": {
+      "x-turboslide-exec": "inprocess",
+      "x-turboslide-worker": "local",
+      "x-turboslide-job": "mtxhtl04-cd5f74",
+      "x-turboslide-export-report": "{\"job\":\"mtxhtl04-cd5f74\",\"deckId\":\"gt-brand\",\"revision\":31,\"format\":\"pptx\",\"mode\":\"native\",\"themes\":[\"light\"],\"pages\":1,\"passed\":true,\"geometryInBounds\":true,\"fontsEmbedded\":0,\"files\":[{\"name\":\"gt-brand-light.pptx\",\"bytes\":17879,\"sha256\":\"449295649ffc7ecdfba38ceb5f3753c86502ca409ea8efbe83a60bb953a29b14\"}],\"verify\":\"not-requested\",\"renderer\":\"chrome-headless-shell 147.0.7727.0, SwiftShader, Google\",\"worker\":\"local\",\"exec\":\"inprocess\",\"ms\":1242,\"stored\":true}",
+      "x-vercel-id": "sfo1::iad1::btjwf-1789163615115-2280c184fe3d"
+    },
+    "summary": {
+      "job": "mtxhtl04-cd5f74",
+      "deckId": "gt-brand",
+      "revision": 31,
+      "format": "pptx",
+      "mode": "native",
+      "themes": ["light"],
+      "pages": 1,
+      "passed": true,
+      "geometryInBounds": true,
+      "fontsEmbedded": 0,
+      "files": [
+        {
+          "name": "gt-brand-light.pptx",
+          "bytes": 17879,
+          "sha256": "449295649ffc7ecdfba38ceb5f3753c86502ca409ea8efbe83a60bb953a29b14"
+        }
+      ],
+      "verify": "not-requested",
+      "renderer": "chrome-headless-shell 147.0.7727.0, SwiftShader, Google",
+      "worker": "local",
+      "exec": "inprocess",
+      "ms": 1242,
+      "stored": true
+    },
+    "files": [
+      {
+        "name": "gt-brand-light.pptx",
+        "bytes": 17879,
+        "sha256": "449295649ffc7ecdfba38ceb5f3753c86502ca409ea8efbe83a60bb953a29b14",
+        "contentType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/gt-brand/mtxhtl04-cd5f74/gt-brand-light.pptx",
+        "stored": true
+      }
+    ],
+    "verify": "not-requested",
+    "verifyNote": null
+  },
+  {
+    "path": "/api/export/gt-brand?sync=1&format=json",
+    "body": {
+      "mode": "native",
+      "theme": ["light"]
+    },
+    "status": 200,
+    "ms": 127356,
+    "headers": {
+      "x-turboslide-exec": "inprocess",
+      "x-turboslide-worker": "local",
+      "x-turboslide-job": "mtxhtmc6-84c724",
+      "x-turboslide-export-report": "{\"job\":\"mtxhtmc6-84c724\",\"deckId\":\"gt-brand\",\"revision\":31,\"format\":\"pptx\",\"mode\":\"native\",\"themes\":[\"light\"],\"pages\":85,\"passed\":true,\"geometryInBounds\":true,\"fontsEmbedded\":0,\"files\":[{\"name\":\"gt-brand-light.pptx\",\"bytes\":23689436,\"sha256\":\"37a03cde8e83a7dc3d74bcd87144745e056cc1738e0da6af1585678ae72aa0eb\"}],\"verify\":\"not-requested\",\"renderer\":\"chrome-headless-shell 147.0.7727.0, SwiftShader, Google\",\"worker\":\"local\",\"exec\":\"inprocess\",\"ms\":126362,\"stored\":true}",
+      "x-vercel-id": "sfo1::iad1::sfhqk-1789163616928-cd21c8f38050"
+    },
+    "summary": {
+      "job": "mtxhtmc6-84c724",
+      "deckId": "gt-brand",
+      "revision": 31,
+      "format": "pptx",
+      "mode": "native",
+      "themes": ["light"],
+      "pages": 85,
+      "passed": true,
+      "geometryInBounds": true,
+      "fontsEmbedded": 0,
+      "files": [
+        {
+          "name": "gt-brand-light.pptx",
+          "bytes": 23689436,
+          "sha256": "37a03cde8e83a7dc3d74bcd87144745e056cc1738e0da6af1585678ae72aa0eb"
+        }
+      ],
+      "verify": "not-requested",
+      "renderer": "chrome-headless-shell 147.0.7727.0, SwiftShader, Google",
+      "worker": "local",
+      "exec": "inprocess",
+      "ms": 126362,
+      "stored": true
+    },
+    "files": [
+      {
+        "name": "gt-brand-light.pptx",
+        "bytes": 23689436,
+        "sha256": "37a03cde8e83a7dc3d74bcd87144745e056cc1738e0da6af1585678ae72aa0eb",
+        "contentType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/gt-brand/mtxhtmc6-84c724/gt-brand-light.pptx",
+        "stored": true
+      }
+    ],
+    "verify": "not-requested",
+    "verifyNote": null
+  },
+  {
+    "path": "/api/export/gt-brand?sync=1&format=json",
+    "body": {
+      "mode": "native",
+      "theme": ["dark"]
+    },
+    "status": 200,
+    "ms": 125442,
+    "headers": {
+      "x-turboslide-exec": "inprocess",
+      "x-turboslide-worker": "local",
+      "x-turboslide-job": "mtxhwcn3-fb8551",
+      "x-turboslide-export-report": "{\"job\":\"mtxhwcn3-fb8551\",\"deckId\":\"gt-brand\",\"revision\":31,\"format\":\"pptx\",\"mode\":\"native\",\"themes\":[\"dark\"],\"pages\":85,\"passed\":true,\"geometryInBounds\":true,\"fontsEmbedded\":0,\"files\":[{\"name\":\"gt-brand-dark.pptx\",\"bytes\":24847042,\"sha256\":\"7b4ecda5969e8eb9ad56a17f25cb23af7c117f32ec72529a89eb218e1f929385\"}],\"verify\":\"not-requested\",\"renderer\":\"chrome-headless-shell 147.0.7727.0, SwiftShader, Google\",\"worker\":\"local\",\"exec\":\"inprocess\",\"ms\":124267,\"stored\":true}",
+      "x-vercel-id": "sfo1::iad1::jdl27-1789163744310-0fedad7bcb9b"
+    },
+    "summary": {
+      "job": "mtxhwcn3-fb8551",
+      "deckId": "gt-brand",
+      "revision": 31,
+      "format": "pptx",
+      "mode": "native",
+      "themes": ["dark"],
+      "pages": 85,
+      "passed": true,
+      "geometryInBounds": true,
+      "fontsEmbedded": 0,
+      "files": [
+        {
+          "name": "gt-brand-dark.pptx",
+          "bytes": 24847042,
+          "sha256": "7b4ecda5969e8eb9ad56a17f25cb23af7c117f32ec72529a89eb218e1f929385"
+        }
+      ],
+      "verify": "not-requested",
+      "renderer": "chrome-headless-shell 147.0.7727.0, SwiftShader, Google",
+      "worker": "local",
+      "exec": "inprocess",
+      "ms": 124267,
+      "stored": true
+    },
+    "files": [
+      {
+        "name": "gt-brand-dark.pptx",
+        "bytes": 24847042,
+        "sha256": "7b4ecda5969e8eb9ad56a17f25cb23af7c117f32ec72529a89eb218e1f929385",
+        "contentType": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/gt-brand/mtxhwcn3-fb8551/gt-brand-dark.pptx",
+        "stored": true
+      }
+    ],
+    "verify": "not-requested",
+    "verifyNote": null
+  }
+]

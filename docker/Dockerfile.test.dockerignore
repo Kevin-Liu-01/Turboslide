@@ -1,0 +1,18 @@
+# Build context for docker/Dockerfile.test (BuildKit reads <Dockerfile>.dockerignore). The install
+# runs inside the image, so nothing installed or derived on the host is copied; the committed deck
+# under decks/ is.
+.git
+**/node_modules
+**/dist
+**/.output
+**/.turbo
+**/.tanstack
+**/.nitro
+**/.vercel
+.turboslide
+**/*.tsbuildinfo
+**/*.log
+apps/studio/src/routeTree.gen.ts
+.env
+**/*.local
+crates/*/target

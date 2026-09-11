@@ -5,7 +5,8 @@
 // 27 px and 1.7 percent at 30 px on GT Inter Text 26 Medium. The emitter takes the excess back as
 // character spacing over the run (pptx/text.ts). Sizes with no measurement are not corrected.
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+
+import { calibrationFile } from '../calibration/locate.ts';
 
 type CalibrationFile = {
   targets: {
@@ -20,8 +21,7 @@ let cached: Record<string, Record<string, number>> | undefined;
 /** The measured excess table: family to size (px, as a string key) to fraction. */
 export function loadFaceAdvance(): Record<string, Record<string, number>> {
   if (cached) return cached;
-  const path = fileURLToPath(new URL('../calibration/calibration.json', import.meta.url));
-  const file = JSON.parse(readFileSync(path, 'utf8')) as CalibrationFile;
+  const file = JSON.parse(readFileSync(calibrationFile(), 'utf8')) as CalibrationFile;
   const table = file.targets['pptx-libreoffice'].faceAdvance?.excess ?? {};
   cached = Object.fromEntries(
     Object.entries(table).map(([family, sizes]) => [

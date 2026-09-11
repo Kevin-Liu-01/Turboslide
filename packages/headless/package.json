@@ -33,6 +33,9 @@
     "pngjs": "catalog:",
     "sharp": "catalog:"
   },
+  "optionalDependencies": {
+    "@sparticuz/chromium": "catalog:"
+  },
   "devDependencies": {
     "@types/node": "catalog:",
     "@types/pngjs": "catalog:",

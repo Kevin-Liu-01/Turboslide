@@ -466,6 +466,7 @@ describe('verifyPptx', () => {
         { slideId: 'b', native: ['h'], raster: [] },
       ],
       geometryInBounds: true,
+      perfect: false,
       passed: true,
       residual: [],
     };
@@ -577,6 +578,7 @@ describe('verifyPptx', () => {
         },
       ],
       geometryInBounds: true,
+      perfect: false,
       passed: true,
       residual: [],
     };
@@ -655,6 +657,7 @@ describe('verifyPptx', () => {
         { slideId: 'b', theme: 'light', native: ['h'], raster: [] },
       ],
       geometryInBounds: true,
+      perfect: false,
       passed: true,
       residual: [],
     };

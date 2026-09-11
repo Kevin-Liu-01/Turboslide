@@ -36,6 +36,9 @@
     "react": "catalog:",
     "react-dom": "catalog:"
   },
+  "optionalDependencies": {
+    "@sparticuz/chromium": "catalog:"
+  },
   "devDependencies": {
     "@tanstack/devtools-vite": "catalog:",
     "@tanstack/router-cli": "catalog:",

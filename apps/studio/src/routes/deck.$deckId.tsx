@@ -68,7 +68,10 @@ function DeckMissing() {
   return (
     <main className="ts-home">
       <h1>No deck named {deckId}</h1>
-      <p>Nothing under decks/{deckId}, and no decks/fixture to stand in for it.</p>
+      <p>
+        This studio holds no deck at decks/{deckId}, and no decks/fixture to stand in for it. The
+        list at /decks has every deck it serves.
+      </p>
     </main>
   );
 }

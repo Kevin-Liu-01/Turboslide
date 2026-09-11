@@ -10,43 +10,34 @@ import { ToolButton } from './ToolButton';
 import './ExportMenu.css';
 
 /**
- * The Export menu in the toolbar (SPEC 8; Kevin's directive: exporting from the editor, Google
- * Slides first). A ToolButton in the shell grammar opens a small card under itself, in the row
- * menu's grammar (Sidebar.css .pt-orow-menu): the PPTX options as Segs and check rows (mode
- * flatten or native, theme light, dark or both, font set exact or standard, headings as raster,
- * the LibreOffice verify pass), then the Google Slides entry, then the standalone HTML build.
- * Every run is one action through the dispatcher the route owns: export.run for PPTX and Slides,
- * build.run for the file; the menu holds only the option state and reports the run's progress
- * line. Google Slides runs only when the server says credentials are configured; otherwise the
- * entry opens the setup card (SetupCard.tsx) with the exact steps. The dry run beside it needs
- * no credentials: export.run with dryRun builds and validates every request and reports. The
- * option Segs select plainly (Seg without `toggle`): a repeated click on the chosen option is a
- * confirmation and changes nothing (measured in the M5 verification: with the ported return to
- * the first option, confirming Native and Light exported flatten in both themes). The options
- * live in this component's state and are kept across runs, the report card and the menu's
- * closing while the route is mounted.
+ * The Export menu in the toolbar (SPEC 8; Kevin's directive of 2026-09-11: one perfect PPTX). A
+ * ToolButton in the shell grammar opens a small card under itself, in the row menu's grammar
+ * (Sidebar.css .pt-orow-menu): the PPTX options as Segs and check rows (mode Perfect or Editable
+ * text, theme light, dark or both, font set exact or standard, embed fonts in the editable mode,
+ * headings as raster, the LibreOffice verify pass), then the standalone HTML build. Every run is
+ * one action through the dispatcher the route owns: export.run for PPTX, build.run for the file;
+ * the menu holds only the option state and reports the run's progress line. The option Segs select
+ * plainly (Seg without `toggle`): a repeated click on the chosen option is a confirmation and
+ * changes nothing (measured in the M5 verification: with the ported return to the first option,
+ * confirming Native and Light exported flatten in both themes). The options live in this
+ * component's state and are kept across runs, the report card and the menu's closing while the
+ * route is mounted.
  */
 export type ExportTheme = 'light' | 'dark' | 'both';
 
 export type ExportMenuInput = {
-  format: Extract<ExportFormat, 'pptx' | 'gslides'>;
+  format: Extract<ExportFormat, 'pptx'>;
   mode: ExportMode;
   theme: ('light' | 'dark')[];
   fonts: 'exact' | 'standard';
+  /** Editable text mode: embed the export faces as fntdata parts (docs/pptx.md) */
+  embedFonts?: true;
   headings?: 'raster';
   verify: boolean;
-  /** Google Slides: build and validate the requests, create no presentation (SPEC 8.3) */
-  dryRun?: boolean;
 };
 
 /** What the server reports about the export surface (apps/studio/src/server/download.ts). */
 export type ExportCapabilities = {
-  gslides: {
-    /** TURBOSLIDE_GOOGLE_CREDENTIALS names a readable file */
-    configured: boolean;
-    /** the environment variable's name, for the setup card */
-    variable: string;
-  };
   /** the worker runs in this process, so produced files can be streamed back */
   downloads: boolean;
   worker: 'local' | 'http';
@@ -61,10 +52,8 @@ export type ExportMenuProps = {
   /** null until the server has answered */
   capabilities: ExportCapabilities | null;
   progress: ExportProgress | null;
-  /** export.run with the chosen options; format pptx or gslides */
+  /** export.run with the chosen options */
   onExport: (input: ExportMenuInput) => void;
-  /** the Google Slides entry without credentials: open the setup card */
-  onGoogleSetup: () => void;
   /** build.run: the standalone HTML file */
   onBuild: () => void;
   className?: string;
@@ -73,18 +62,20 @@ export type ExportMenuProps = {
 const MODES: readonly SegOption<ExportMode>[] = [
   {
     value: 'flatten',
-    label: 'Flatten',
-    title: 'A 2x raster of every sheet with an invisible text layer; pixel identical (SPEC 8.2)',
+    label: 'Perfect',
+    title:
+      'Pixel identical: a 2x raster of every page over a searchable invisible text layer, each page measured within 0.1 percent of the web render (SPEC 8.2)',
   },
   {
     value: 'native',
-    label: 'Native',
-    title: 'Text boxes, lines and rectangles; rasters for the rest (SPEC 8.2)',
+    label: 'Editable text',
+    title:
+      'Text boxes, hairlines and plates you can edit; layout identical within 3 px, glyph antialiasing differs; icons, marks and diagrams as PNG (SPEC 8.2)',
   },
 ];
 
 const THEMES: readonly SegOption<ExportTheme>[] = [
-  { value: 'both', label: 'Both', title: 'One file per theme' },
+  { value: 'both', label: 'Both', title: 'One file per theme plus a zip of both' },
   { value: 'light', label: 'Light', title: 'The light file only' },
   { value: 'dark', label: 'Dark', title: 'The dark file only' },
 ];
@@ -112,7 +103,6 @@ export function ExportMenu({
   capabilities,
   progress,
   onExport,
-  onGoogleSetup,
   onBuild,
   className,
 }: ExportMenuProps) {
@@ -121,6 +111,7 @@ export function ExportMenu({
   const [mode, setMode] = useState<ExportMode>('flatten');
   const [theme, setTheme] = useState<ExportTheme>('both');
   const [fonts, setFonts] = useState<'exact' | 'standard'>('exact');
+  const [embed, setEmbed] = useState(false);
   const [raster, setRaster] = useState(false);
   const [verify, setVerify] = useState(false);
   const [at, setAt] = useState<{ x: number; y: number } | null>(null);
@@ -151,15 +142,16 @@ export function ExportMenu({
   }, [open, onOpenChange]);
 
   const busy = progress !== null;
-  const input = (format: ExportMenuInput['format']): ExportMenuInput => ({
-    format,
+  const native = mode === 'native';
+  const input = (): ExportMenuInput => ({
+    format: 'pptx',
     mode,
     theme: themes(theme),
     fonts,
+    ...(native && embed ? { embedFonts: true as const } : {}),
     ...(raster ? { headings: 'raster' as const } : {}),
     verify,
   });
-  const gslidesReady = capabilities?.gslides.configured === true;
 
   /* Enter on a check row toggles it, as Space does */
   const onCheckKey = (event: ReactKeyboardEvent<HTMLInputElement>, toggle: () => void) => {
@@ -173,7 +165,7 @@ export function ExportMenu({
       <ToolButton
         icon="external"
         label="Export"
-        title="Export the deck: PPTX, Google Slides, standalone HTML"
+        title="Export the deck: PPTX, standalone HTML"
         pressed={open}
         control="export.open"
         className="ts-export-btn"
@@ -201,6 +193,11 @@ export function ExportMenu({
               control="export.mode"
             />
           </div>
+          <p className="ts-export-note" data-control="export.mode-note">
+            {native
+              ? "Editable text: text boxes at the browser boxes, layout identical within 3 px; the glyph antialiasing is the viewer's."
+              : 'Perfect: pixel identical, one 2x raster per page over a searchable text layer; the report says whether every page matched.'}
+          </p>
           <div className="ts-export-row">
             <span className="ts-export-label">Theme</span>
             <Seg
@@ -223,6 +220,27 @@ export function ExportMenu({
               control="export.fonts"
             />
           </div>
+          <label
+            className="ts-export-row ts-export-check"
+            data-disabled={native ? undefined : ''}
+            title={
+              native
+                ? 'Embed the export faces as fntdata parts so a viewer without them keeps the metrics'
+                : 'Perfect mode never embeds fonts: the text layer is invisible'
+            }
+          >
+            <span className="ts-export-label">Embed fonts</span>
+            <input
+              type="checkbox"
+              checked={native && embed}
+              disabled={!native}
+              aria-label="Embed fonts"
+              data-control="export.embed-fonts"
+              onChange={(event) => setEmbed(event.target.checked)}
+              onKeyDown={(event) => onCheckKey(event, () => setEmbed((v) => !v))}
+            />
+            <span className="ts-export-box" aria-hidden="true" />
+          </label>
           <label className="ts-export-row ts-export-check">
             <span className="ts-export-label">Headings as raster</span>
             <input
@@ -251,56 +269,12 @@ export function ExportMenu({
             <button
               type="button"
               className="pt-ib is-text is-solid"
-              title="export.run: one PPTX per theme, downloaded when done"
+              title="export.run: one PPTX per theme (and a zip of both), downloaded when done"
               data-control="export.pptx"
               disabled={busy}
-              onClick={() => onExport(input('pptx'))}
+              onClick={() => onExport(input())}
             >
               <span className="pt-lb">Export PPTX</span>
-            </button>
-          </div>
-          <span className="ts-export-rule" aria-hidden="true" />
-          <span className="ts-export-head">Google Slides</span>
-          <p className="ts-export-note">
-            {gslidesReady
-              ? `The same mode, theme and fonts; a presentation in the Drive of the ${capabilities.gslides.variable} account.`
-              : capabilities === null
-                ? 'Asking the server whether credentials are configured.'
-                : `No credentials: ${capabilities.gslides.variable} is not set on the server.`}
-          </p>
-          <div className="ts-export-actions">
-            {gslidesReady ? (
-              <button
-                type="button"
-                className="pt-ib is-text"
-                title="export.run with format gslides"
-                data-control="export.gslides"
-                disabled={busy}
-                onClick={() => onExport(input('gslides'))}
-              >
-                <span className="pt-lb">Export to Google Slides</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                className="pt-ib is-text"
-                title="The steps to configure Google Slides export"
-                data-control="export.gslides"
-                disabled={capabilities === null}
-                onClick={onGoogleSetup}
-              >
-                <span className="pt-lb">Set up Google Slides</span>
-              </button>
-            )}
-            <button
-              type="button"
-              className="pt-ib is-text"
-              title="export.run with format gslides and dryRun: the batchUpdate requests are built and validated, requests.json and images.json are written, no presentation is created"
-              data-control="export.gslides-dry"
-              disabled={busy}
-              onClick={() => onExport({ ...input('gslides'), dryRun: true })}
-            >
-              <span className="pt-lb">Dry run</span>
             </button>
           </div>
           <span className="ts-export-rule" aria-hidden="true" />
@@ -320,6 +294,11 @@ export function ExportMenu({
               <span className="pt-lb">Build and download</span>
             </button>
           </div>
+          {capabilities !== null && !capabilities.downloads ? (
+            <p className="ts-export-note">
+              The render worker runs elsewhere; the files stay on it and the report card lists them.
+            </p>
+          ) : null}
           {progress ? (
             <p className="ts-export-progress" role="status" data-control="export.progress">
               <i className="ts-export-dot" aria-hidden="true" />

@@ -5354,7 +5354,6 @@
           "type": "string",
           "enum": [
             "pptx",
-            "gslides",
             "pdf"
           ]
         },
@@ -5406,12 +5405,6 @@
             ],
             "additionalProperties": false
           }
-        },
-        "presentationId": {
-          "type": "string"
-        },
-        "url": {
-          "type": "string"
         },
         "fonts": {
           "type": "object",
@@ -5474,6 +5467,48 @@
               },
               "sheet": {
                 "type": "string"
+              },
+              "page": {
+                "type": "object",
+                "properties": {
+                  "format": {
+                    "type": "string",
+                    "enum": [
+                      "png-1bit",
+                      "png-palette",
+                      "png-rgba",
+                      "jpeg"
+                    ]
+                  },
+                  "bytes": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "colors": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "mismatch": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                },
+                "required": [
+                  "format",
+                  "bytes",
+                  "colors",
+                  "mismatch",
+                  "fraction"
+                ],
+                "additionalProperties": false
               },
               "pictures": {
                 "type": "array",
@@ -5600,6 +5635,9 @@
         "geometryInBounds": {
           "type": "boolean"
         },
+        "perfect": {
+          "type": "boolean"
+        },
         "passed": {
           "type": "boolean"
         },
@@ -5622,6 +5660,7 @@
         "fonts",
         "slides",
         "geometryInBounds",
+        "perfect",
         "passed",
         "residual"
       ],
@@ -5635,12 +5674,11 @@
           "type": "string",
           "enum": [
             "pptx",
-            "gslides",
             "pdf"
           ]
         },
         "mode": {
-          "description": "Defaults to flatten, the verified pixel-identical mode (SPEC 8.2)",
+          "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)",
           "type": "string",
           "enum": [
             "native",
@@ -5648,7 +5686,7 @@
           ]
         },
         "theme": {
-          "description": "One file per theme; defaults to both",
+          "description": "One file per theme; defaults to both, which also writes <deckId>-both.zip",
           "minItems": 1,
           "type": "array",
           "items": {
@@ -5666,6 +5704,10 @@
             "exact",
             "standard"
           ]
+        },
+        "embedFonts": {
+          "description": "Native mode only: embed the export faces as fntdata parts; off by default, and flatten never embeds (docs/pptx.md)",
+          "type": "boolean"
         },
         "headings": {
           "description": "Write every heading as a PNG instead of a text box (SPEC 8.3)",
@@ -5710,10 +5752,7 @@
           ]
         },
         "verify": {
-          "type": "boolean"
-        },
-        "dryRun": {
-          "description": "Google Slides: build and validate the batchUpdate requests without credentials and write requests.json; no presentation is created (SPEC 8.3)",
+          "description": "Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)",
           "type": "boolean"
         },
         "slideIds": {
@@ -14457,7 +14496,7 @@
     {
       "name": "deck_export",
       "action": "export.run",
-      "description": "Exports the deck to PPTX, Google Slides or PDF in native or flatten mode and returns the verified report.",
+      "description": "Exports the deck to PPTX in flatten (perfect, pixel identical) or native (editable text) mode and returns the verified report.",
       "inputSchema": {
         "$id": "#/$defs/ExportRunInput",
         "type": "object",
@@ -14466,12 +14505,11 @@
             "type": "string",
             "enum": [
               "pptx",
-              "gslides",
               "pdf"
             ]
           },
           "mode": {
-            "description": "Defaults to flatten, the verified pixel-identical mode (SPEC 8.2)",
+            "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)",
             "type": "string",
             "enum": [
               "native",
@@ -14479,7 +14517,7 @@
             ]
           },
           "theme": {
-            "description": "One file per theme; defaults to both",
+            "description": "One file per theme; defaults to both, which also writes <deckId>-both.zip",
             "minItems": 1,
             "type": "array",
             "items": {
@@ -14497,6 +14535,10 @@
               "exact",
               "standard"
             ]
+          },
+          "embedFonts": {
+            "description": "Native mode only: embed the export faces as fntdata parts; off by default, and flatten never embeds (docs/pptx.md)",
+            "type": "boolean"
           },
           "headings": {
             "description": "Write every heading as a PNG instead of a text box (SPEC 8.3)",
@@ -14541,10 +14583,7 @@
             ]
           },
           "verify": {
-            "type": "boolean"
-          },
-          "dryRun": {
-            "description": "Google Slides: build and validate the batchUpdate requests without credentials and write requests.json; no presentation is created (SPEC 8.3)",
+            "description": "Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)",
             "type": "boolean"
           },
           "slideIds": {
@@ -14591,7 +14630,6 @@
             "type": "string",
             "enum": [
               "pptx",
-              "gslides",
               "pdf"
             ]
           },
@@ -14643,12 +14681,6 @@
               ],
               "additionalProperties": false
             }
-          },
-          "presentationId": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
           },
           "fonts": {
             "type": "object",
@@ -14711,6 +14743,48 @@
                 },
                 "sheet": {
                   "type": "string"
+                },
+                "page": {
+                  "type": "object",
+                  "properties": {
+                    "format": {
+                      "type": "string",
+                      "enum": [
+                        "png-1bit",
+                        "png-palette",
+                        "png-rgba",
+                        "jpeg"
+                      ]
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "colors": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "mismatch": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "required": [
+                    "format",
+                    "bytes",
+                    "colors",
+                    "mismatch",
+                    "fraction"
+                  ],
+                  "additionalProperties": false
                 },
                 "pictures": {
                   "type": "array",
@@ -14837,6 +14911,9 @@
           "geometryInBounds": {
             "type": "boolean"
           },
+          "perfect": {
+            "type": "boolean"
+          },
           "passed": {
             "type": "boolean"
           },
@@ -14859,6 +14936,7 @@
           "fonts",
           "slides",
           "geometryInBounds",
+          "perfect",
           "passed",
           "residual"
         ],

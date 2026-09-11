@@ -1,0 +1,37 @@
+{
+  "mode": "export",
+  "base": "https://turboslide-4qc1szmew-kl01s-projects.vercel.app",
+  "steps": [
+    {
+      "name": "export clicked",
+      "at": 3517
+    },
+    {
+      "name": "report card",
+      "ms": 181701,
+      "links": ["export.download.gt-brand-light.pptx"],
+      "text": "Export: PPTX PerfectPassed in 179.4 sModepptx Perfect (flatten), lightPages85 (one per slide per theme)Perfectyes: every page raster within 0.003 percent of its shot, package validPage rasters83 png-palette, 2 jpeg; 15.22 MiBWorst fractionnot verifiedRaster blocks70Fonts embeddednoneGeometryin boundsRevisionr28gt-brand-light.pptx15.52 MiBDownloadrenderer: chrome-headless-shell 147.0.7727.0, SwiftShader, Googleflatten (perfect): the slide is a 2x raster of the sheet under the page raster policy; text is an invisible native layer; the slide title is the slide name and a hidden title placeholderrasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen"
+    },
+    {
+      "name": "network",
+      "responses": [
+        {
+          "url": "/api/export/gt-brand?sync=1&format=json",
+          "status": 200,
+          "ms": 184764
+        }
+      ],
+      "downloads": [
+        {
+          "url": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/gt-brand/mtxf5ycc-bd3291/gt-brand-light.pptx?download=1",
+          "suggested": "gt-brand-light.pptx"
+        }
+      ]
+    }
+  ],
+  "console": ["error: Failed to load resource: the server responded with a status of 500 ()"],
+  "failedRequests": [
+    "500 https://turboslide-4qc1szmew-kl01s-projects.vercel.app/_serverFn/bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+    "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/gt-brand/mtxf5ycc-bd3291/gt-brand-light.pptx?download=1 net::ERR_ABORTED"
+  ]
+}

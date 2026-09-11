@@ -4,26 +4,36 @@
 // browser's boxes, rows as hairlines plus key and value boxes, icons and marks as 2x PNGs, raster
 // blocks as 2x PNGs, notes. Flatten mode: every text as an invisible run (`<a:alpha val="0"/>`)
 // under the 2x sheet screenshot placed as a full-page picture, so the file is pixel identical in
-// viewers that ignore text alpha and the text stays searchable and recoverable. The pptxgenjs
-// buffer then goes through the OOXML post-process: kern strip, row groups, embedded fonts, stored
-// media.
+// viewers that ignore text alpha and the text stays searchable and recoverable; the screenshot
+// travels in the encoding the page raster policy picks (page-raster.ts) and its decoded mismatch
+// is the report's `page.fraction`. The pptxgenjs buffer then goes through the OOXML post-process:
+// the repair-risk strip (kern, empty ext lists), row groups, the slide name and the hidden title
+// placeholder per slide, the content types clean, the app.xml titles, embedded fonts (native mode
+// under `embedFonts` only), stored media, and the package validation the report fails on.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import PptxGenJS from 'pptxgenjs';
 
-import type { ExportMode } from '@turboslide/schema/export';
+import { decodeImage } from '@turboslide/effects/io';
+import type { ExportMode, PageRasterEntry } from '@turboslide/schema/export';
+import { PAGE_RASTER_BUDGETS, isContinuousToneBlockType } from '@turboslide/schema/export';
 import type { Theme } from '@turboslide/schema/render';
 
+import { cleanContentTypes, setAppTitles, stripRepairRisks } from '../ooxml/clean.ts';
+import type { ContentTypesClean } from '../ooxml/clean.ts';
 import { embedFonts } from '../ooxml/fonts.ts';
 import type { EmbedFont } from '../ooxml/fonts.ts';
 import { readGeometry } from '../ooxml/geometry.ts';
 import type { ShapeBounds } from '../ooxml/geometry.ts';
 import { groupShapes } from '../ooxml/groups.ts';
-import { stripKern } from '../ooxml/kern.ts';
+import { addHiddenTitle, setSlideName } from '../ooxml/titles.ts';
+import type { HiddenTitle } from '../ooxml/titles.ts';
+import { validatePackage } from '../ooxml/validate.ts';
+import type { PackageValidation } from '../ooxml/validate.ts';
 import { openPackage, readPart, slideParts, writePackage, writePart } from '../ooxml/zip.ts';
 import type { Scene } from '../scene/types.ts';
-import { PAGE_IN, parseCssColor } from '../units.ts';
+import { PAGE_EMU, PAGE_IN, parseCssColor, pxToEmu, szOf } from '../units.ts';
 import type { FontSet, FontsCatalog } from './fonts-map.ts';
 import { entryFor, pickFamily } from './fonts-map.ts';
 import { addPicture, addRaster, dataUri, mimeOf } from './images.ts';
@@ -32,7 +42,9 @@ import { addCross, addSceneRect, addSceneRule } from './lines.ts';
 import { defineLayout, defineMasters, paperMasterName, pictureMasterName } from './masters.ts';
 import { addSceneNotes } from './notes.ts';
 import type { BaselineTarget } from './baseline.ts';
-import { addSceneText } from './text.ts';
+import { describeFormats, encodePageRaster } from './page-raster.ts';
+import type { PageRaster } from './page-raster.ts';
+import { addSceneText, familyFor } from './text.ts';
 import type { TextEmitOptions } from './text.ts';
 
 export type BuildOptions = {
@@ -46,13 +58,27 @@ export type BuildOptions = {
   /** The wordmark PNG at 2x for the master. */
   wordmarkPng?: Uint8Array;
   defaultNotes?: string;
-  /** Skip the font parts (a test or a size-sensitive export). */
+  /**
+   * Embed the export faces as fntdata parts. Off by default (docs/pptx.md): a viewer that rejects
+   * a font part repairs the file, and the flatten mode has no visible text the faces would draw.
+   * Honoured in native mode only; a flatten build records the request in its residual.
+   */
   embedFonts?: boolean;
   /** The first-baseline target (pptx/baseline.ts); default libreoffice, the verify renderer. */
   baseline?: BaselineTarget;
+  /** Skip the JPEG candidate of the page raster policy (a PNG-only flatten file). */
+  noJpeg?: boolean;
+  onPage?: (scene: Scene, raster: PageRaster) => void;
 };
 
-export type BuildSlideReport = { slideId: string; native: string[]; raster: string[] };
+export type BuildSlideReport = {
+  slideId: string;
+  title: string;
+  native: string[];
+  raster: string[];
+  /** Flatten mode: the page raster the slide carries. */
+  page?: PageRasterEntry;
+};
 
 /**
  * The flatten cover picture sits 0.01 mm (360 EMU, 0.047 sheet px) below the page's top edge.
@@ -65,6 +91,9 @@ export type BuildSlideReport = { slideId: string; native: string[]; raster: stri
  */
 export const COVER_OFFSET_IN = 360 / 914_400;
 
+/** The content box a slide with no measured text takes for its hidden title, in sheet px (SPEC 2.1 content origin). */
+export const DEFAULT_TITLE_BOX: [number, number, number, number] = [137, 137, 1326, 60];
+
 export type BuildResult = {
   bytes: Uint8Array;
   /** Families the runs use, in first-use order. */
@@ -74,6 +103,12 @@ export type BuildResult = {
   geometry: ShapeBounds[];
   geometryInBounds: boolean;
   groups: number;
+  /** Flatten: every page raster within PAGE_RASTER_BUDGETS.perfect and the package valid. */
+  perfect: boolean;
+  validation: PackageValidation;
+  contentTypes: ContentTypesClean;
+  /** kern attributes and empty ext lists removed over every slide part; custGeom counted. */
+  stripped: { kern: number; extLst: number; custGeom: number };
   residual: string[];
   warnings: string[];
 };
@@ -92,6 +127,46 @@ function readPictureSource(scene: Scene): PictureSource | undefined {
   return { bytes, mime, width, height };
 }
 
+/**
+ * A page carries continuous-tone pixels when one of its blocks is a screenshot, a photograph or a
+ * shader frame, when the extractor tagged an opaque raster (a shot or an html escape's picture), or
+ * when its full picture is a photograph that was not regenerated as a two-tone dither.
+ */
+export function isContinuousTone(scene: Scene): boolean {
+  if (scene.blocks.some((b) => isContinuousToneBlockType(b.type))) return true;
+  if (scene.rasters.some((r) => r.kind === 'shot' || r.kind === 'html' || r.kind === 'material'))
+    return true;
+  return (
+    scene.picture !== undefined &&
+    scene.pictureRegenerated !== true &&
+    scene.pictureExcluded !== true
+  );
+}
+
+/**
+ * The hidden title placeholder of a slide: the slide title at the heading's text box in the
+ * heading's face, size and color (an alpha 0 run), or the content box in the display face when the
+ * slide measured no text. Kept inside the page so the geometry read-back stays in bounds.
+ */
+export function hiddenTitleFor(scene: Scene, fontSet: FontSet): HiddenTitle {
+  const headings = new Set(scene.blocks.filter((b) => b.type === 'heading').map((b) => b.blockId));
+  const text = scene.texts.find((t) => headings.has(t.blockId)) ?? scene.texts[0];
+  const box = text?.textBox ?? DEFAULT_TITLE_BOX;
+  const x = Math.max(0, pxToEmu(box[0]));
+  const y = Math.max(0, pxToEmu(box[1]));
+  const cx = Math.max(1, Math.min(pxToEmu(box[2]), PAGE_EMU.width - x));
+  const cy = Math.max(1, Math.min(pxToEmu(box[3]), PAGE_EMU.height - y));
+  return {
+    title: scene.title ?? scene.slideId,
+    name: `ts:${scene.slideId}#title`,
+    off: [x, y],
+    ext: [cx, cy],
+    sz: szOf(text?.style.size ?? 44),
+    family: text ? familyFor(text.style, fontSet) : pickFamily(44, 500, fontSet).family,
+    colorHex: parseCssColor(text?.style.color ?? scene.ink).hex,
+  };
+}
+
 export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise<BuildResult> {
   const pptx = new PptxGenJS();
   pptx.title = `${options.deckTitle} (${options.theme})`;
@@ -107,6 +182,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
   const residual = new Set<string>();
   const warnings: string[] = [];
   const slidesReport: BuildSlideReport[] = [];
+  const pages: PageRaster[] = [];
 
   for (const scene of scenes) {
     const paperHex = parseCssColor(scene.paper).hex;
@@ -128,6 +204,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       namePrefix,
       baseline: options.baseline ?? 'libreoffice',
     };
+    let page: PageRasterEntry | undefined;
 
     if (options.mode === 'flatten') {
       // The text layer first, then the 2x sheet raster as a full-page picture over it. The runs
@@ -138,14 +215,32 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       for (const text of scene.texts) addSceneText(slide, text, textOptions);
       if (scene.counter) addSceneText(slide, scene.counter, textOptions);
       if (scene.sheetImage && existsSync(scene.sheetImage)) {
+        const shot = await decodeImage(scene.sheetImage);
+        const raster = await encodePageRaster(shot, {
+          continuousTone: isContinuousTone(scene),
+          ...(options.noJpeg ? { noJpeg: true } : {}),
+        });
+        pages.push(raster);
+        options.onPage?.(scene, raster);
+        page = {
+          format: raster.format,
+          bytes: raster.bytes.byteLength,
+          colors: raster.colors,
+          mismatch: raster.mismatch,
+          fraction: raster.fraction,
+        };
+        if (raster.fraction > PAGE_RASTER_BUDGETS.perfect)
+          residual.add(
+            `${scene.slideId}: the ${raster.format} page raster mismatches its shot by ${(raster.fraction * 100).toFixed(3)} percent, over the perfect budget of ${PAGE_RASTER_BUDGETS.perfect * 100}`,
+          );
         slide.addImage({
-          data: dataUri(readFileSync(scene.sheetImage), 'image/png'),
+          data: dataUri(raster.bytes, raster.mime),
           x: 0,
           y: COVER_OFFSET_IN,
           w: PAGE_IN.width,
           // shortened by the offset so the shape ends on the page edge; measured equally exact
           h: PAGE_IN.height - COVER_OFFSET_IN,
-          altText: `${scene.slideId} (${scene.theme}), the sheet at 2x`,
+          altText: `${scene.title ?? scene.slideId} (${scene.theme}), the sheet at 2x`,
           objectName: `${namePrefix}#sheet`,
         });
       } else {
@@ -218,14 +313,16 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       }
       if (scene.texts.some((t) => t.style.mono))
         residual.add(
-          'code panels travel in Menlo; the face differs per machine unless a mono font is installed (SPEC 8.6)',
+          'code panels travel in DejaVu Sans Mono (Menlo on a Mac without it); the face differs per machine unless a mono font is installed (SPEC 8.6)',
         );
     }
     addSceneNotes(slide, scene.notes, options.defaultNotes);
     slidesReport.push({
       slideId: scene.slideId,
+      title: scene.title ?? scene.slideId,
       native: scene.blocks.filter((b) => b.native).map((b) => b.blockId),
       raster: scene.blocks.filter((b) => !b.native).map((b) => b.blockId),
+      ...(page ? { page } : {}),
     });
     for (const w of scene.warnings) warnings.push(`${scene.slideId}: ${w}`);
   }
@@ -233,14 +330,30 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
   const raw = (await pptx.write({ outputType: 'nodebuffer' })) as Buffer;
   const zip = await openPackage(new Uint8Array(raw.buffer, raw.byteOffset, raw.byteLength));
   let groups = 0;
-  for (const part of slideParts(zip)) {
-    const xml = await readPart(zip, part);
-    const grouped = groupShapes(stripKern(xml));
+  const stripped = { kern: 0, extLst: 0, custGeom: 0 };
+  // pptxgenjs numbers the slide parts in insertion order, so part i is scene i
+  for (const [i, part] of slideParts(zip).entries()) {
+    const scene = scenes[i];
+    const strip = stripRepairRisks(await readPart(zip, part));
+    stripped.kern += strip.kern;
+    stripped.extLst += strip.extLst;
+    stripped.custGeom += strip.custGeom;
+    const grouped = groupShapes(strip.xml);
     groups += grouped.groups.length;
-    writePart(zip, part, grouped.xml);
+    let xml = grouped.xml;
+    if (scene) {
+      xml = setSlideName(xml, scene.title ?? scene.slideId);
+      xml = addHiddenTitle(xml, hiddenTitleFor(scene, options.fontSet));
+    }
+    writePart(zip, part, xml);
   }
+  const contentTypes = await cleanContentTypes(zip);
+  await setAppTitles(
+    zip,
+    scenes.map((scene) => scene.title ?? scene.slideId),
+  );
   const embedded: string[] = [];
-  if (options.embedFonts !== false) {
+  if (options.embedFonts === true && options.mode === 'native') {
     const fonts: EmbedFont[] = [];
     for (const family of families) {
       const entry = options.fontsCatalog.entries.find((e) => e.family === family);
@@ -255,8 +368,37 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     const result = await embedFonts(zip, fonts);
     embedded.push(...result.embedded);
     warnings.push(...result.warnings);
+    residual.add(
+      `fonts: ${embedded.length} face(s) embedded as fntdata parts (--embed-fonts); PowerPoint's acceptance of the uncompressed EOT is the scheduled manual pass (docs/export-verification.md)`,
+    );
+  } else if (options.embedFonts === true) {
+    residual.add(
+      'fonts: --embed-fonts ignored in flatten mode; the text layer is invisible and no viewer draws it (docs/pptx.md)',
+    );
+  }
+  const validation = await validatePackage(zip);
+  for (const issue of validation.issues) warnings.push(`package: ${issue}`);
+  if (contentTypes.removedOverrides.length > 0)
+    residual.add(
+      `package: ${contentTypes.removedOverrides.length} content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)`,
+    );
+  if (stripped.kern > 0 || stripped.extLst > 0)
+    residual.add(
+      `package: ${stripped.kern} kern="0" attribute(s) and ${stripped.extLst} empty ext list(s) removed; ${stripped.custGeom} custGeom`,
+    );
+  if (options.mode === 'flatten' && pages.length > 0) {
+    const worst = Math.max(...pages.map((p) => p.fraction));
+    const bytes = pages.reduce((n, p) => n + p.bytes.byteLength, 0);
+    residual.add(
+      `pages: ${describeFormats(pages)}; ${(bytes / (1024 * 1024)).toFixed(2)} MiB of page rasters; worst decoded mismatch ${(worst * 100).toFixed(3)} percent at threshold ${PAGE_RASTER_BUDGETS.threshold} (perfect budget ${PAGE_RASTER_BUDGETS.perfect * 100})`,
+    );
   }
   const geometry = await readGeometry(zip);
+  const perfect =
+    options.mode === 'flatten' &&
+    pages.length === scenes.length &&
+    pages.every((p) => p.fraction <= PAGE_RASTER_BUDGETS.perfect) &&
+    validation.valid;
   const bytes = await writePackage(zip);
   return {
     bytes,
@@ -266,6 +408,10 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     geometry,
     geometryInBounds: geometry.every((g) => g.inBounds),
     groups,
+    perfect,
+    validation,
+    contentTypes,
+    stripped,
     residual: [...residual],
     warnings,
   };

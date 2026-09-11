@@ -114,7 +114,8 @@ let client: WorkerClient | undefined;
 async function worker(): Promise<WorkerClient> {
   if (client === undefined) {
     const { createWorkerClient } = await import('@turboslide/render-worker/client');
-    client = createWorkerClient();
+    const { workerClientOptions } = await import('./root');
+    client = createWorkerClient(workerClientOptions());
   }
   return client;
 }

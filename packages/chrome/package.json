@@ -52,7 +52,6 @@
     "./DeckName": "./src/DeckName.tsx",
     "./ExportMenu": "./src/ExportMenu.tsx",
     "./ExportReportCard": "./src/ExportReportCard.tsx",
-    "./SetupCard": "./src/SetupCard.tsx",
     "./package.json": "./package.json"
   },
   "dependencies": {

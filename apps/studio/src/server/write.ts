@@ -1,20 +1,17 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
 import { createServerFn } from '@tanstack/react-start';
 import type { DeckDocument } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { authorSchema, writeSchema } from '@turboslide/schema/mutations';
 import type { Author, Lease, Version, Write } from '@turboslide/schema/mutations';
 import type { Issue } from '@turboslide/schema/validate';
-import { openFileStore } from '@turboslide/store/file-store';
-import type { FileStore } from '@turboslide/store/file-store';
-import type { VersionRecord } from '@turboslide/store/store';
+import type { HostingFacts } from '@turboslide/store/hosted';
+import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 import { toVersion } from '@turboslide/store/versions';
+import { spriteMarkup } from '@turboslide/theme/sprite';
 
 import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
-import { deckDir, repoRoot } from './root';
+import { hasStoredDeck, hostingFacts, openDeckStore } from './root';
 
 /**
  * The editor's store functions (SPEC 6.7, 7.1; MILESTONES M3 items 3 and 4): every write from the
@@ -31,20 +28,19 @@ import { deckDir, repoRoot } from './root';
  * server function takes and returns a JSON string, the validator parses and checks the input with
  * the schema package, and the exported wrappers give the client the typed shapes. The bytes on the
  * wire are what they would have been.
+ *
+ * The store comes from server/root.ts (the hosting round): FileStore over the checkout's decks/,
+ * or the hosted overlay, or the Blob mirror, whose write pushes to the store before it answers.
  */
 
-function storeFor(deckId: string): FileStore {
+async function storeFor(deckId: string): Promise<DeckStore> {
   if (!SLUG_PATTERN.test(deckId)) throw new RangeError('deckId must be a slug');
-  const dir = deckDir(deckId);
-  if (!existsSync(join(dir, 'deck.json'))) throw new RangeError(`No deck ${deckId} under decks/`);
-  return openFileStore({ dir });
+  return openDeckStore(deckId);
 }
 
-/** The sprite from @turboslide/theme's assets, without its leading comment (as decks.ts reads it). */
+/** The sprite the stage carries: the same markup the renderer inlines (SPEC 5.1). */
 function readSprite(): string {
-  const path = join(repoRoot(), 'packages', 'theme', 'assets', 'sprite.svg');
-  if (!existsSync(path)) return '';
-  return readFileSync(path, 'utf8').replace(/^\s*<!--[\s\S]*?-->\s*/, '');
+  return spriteMarkup();
 }
 
 function requireSlug(value: unknown, name: string): string {
@@ -68,6 +64,8 @@ export type EditorDeck = {
   sprite: string;
   versions: Version[];
   leases: Lease[];
+  /** the store this studio runs on, for the banner over a store whose edits do not persist */
+  hosting: HostingFacts;
 };
 
 const readEditorDeckFn = createServerFn({ method: 'GET' })
@@ -76,8 +74,8 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
     return { deckId: requireSlug(parsed.deckId, 'deckId') };
   })
   .handler(async ({ data }): Promise<string> => {
-    if (!existsSync(join(deckDir(data.deckId), 'deck.json'))) return JSON.stringify(null);
-    const store = storeFor(data.deckId);
+    if (!(await hasStoredDeck(data.deckId))) return JSON.stringify(null);
+    const store = await storeFor(data.deckId);
     const [read, versions, leases] = await Promise.all([
       store.read(),
       store.listVersions(),
@@ -91,6 +89,7 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
       sprite: readSprite(),
       versions,
       leases,
+      hosting: hostingFacts(),
     };
     return JSON.stringify(result);
   });
@@ -150,7 +149,7 @@ const writeDeckFn = createServerFn({ method: 'POST' })
     };
   })
   .handler(async ({ data }): Promise<string> => {
-    const store = storeFor(data.deckId);
+    const store = await storeFor(data.deckId);
     const outcome = await store.write(data.write, data.force === true ? { force: true } : {});
     let result: WriteDeckResult;
     if (outcome.ok) {
@@ -198,7 +197,8 @@ const saveVersionFn = createServerFn({ method: 'POST' })
     };
   })
   .handler(async ({ data }): Promise<string> => {
-    return JSON.stringify(await storeFor(data.deckId).saveVersion(data.author, data.note));
+    const store = await storeFor(data.deckId);
+    return JSON.stringify(await store.saveVersion(data.author, data.note));
   });
 
 /** version.save: a named version at the current revision. */
@@ -216,7 +216,7 @@ const listVersionsFn = createServerFn({ method: 'GET' })
     return { deckId: requireSlug(input.deckId, 'deckId') };
   })
   .handler(async ({ data }): Promise<string> =>
-    JSON.stringify(await storeFor(data.deckId).listVersions()),
+    JSON.stringify(await (await storeFor(data.deckId)).listVersions()),
   );
 
 /** version.list: every log entry, oldest first; the server log the undo spec counts. */
@@ -246,7 +246,7 @@ const leaseSlideFn = createServerFn({ method: 'POST' })
     };
   })
   .handler(async ({ data }): Promise<string> => {
-    const store = storeFor(data.deckId);
+    const store = await storeFor(data.deckId);
     if (data.release === true) {
       const released = await store.release(data.slideId, data.author);
       if (released === undefined) {
@@ -291,7 +291,7 @@ export type WatchDeckResult = {
 const WATCH_DEFAULT_MS = 20_000;
 const WATCH_MAX_MS = 25_000;
 
-async function snapshot(store: FileStore, since: number): Promise<WatchDeckResult> {
+async function snapshot(store: DeckStore, since: number): Promise<WatchDeckResult> {
   const [revision, records, leases] = await Promise.all([
     store.revision(),
     store.records(),
@@ -312,6 +312,8 @@ async function snapshot(store: FileStore, since: number): Promise<WatchDeckResul
  * watch channel as a new revision"; MILESTONES M4 item 2): resolves as soon as deck.json carries a
  * revision other than `since`, or with the current state at the timeout, with the version records
  * written in between so the editor applies them forward within the second. The editor loops on it.
+ * Over the Blob mirror the channel is a revision poll against the store every few seconds
+ * (@turboslide/store/blob-store watch), so a write from another instance arrives within that.
  */
 const watchDeckFn = createServerFn({ method: 'POST' })
   .validator((raw: string): WatchDeckInput => {
@@ -327,7 +329,7 @@ const watchDeckFn = createServerFn({ method: 'POST' })
     };
   })
   .handler(async ({ data }): Promise<string> => {
-    const store = storeFor(data.deckId);
+    const store = await storeFor(data.deckId);
     const now = await snapshot(store, data.since);
     if (now.changed) return JSON.stringify(now);
     const result = await new Promise<WatchDeckResult>((resolve, reject) => {

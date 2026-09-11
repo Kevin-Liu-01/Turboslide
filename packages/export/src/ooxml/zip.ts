@@ -52,6 +52,13 @@ export function isStoredPart(path: string): boolean {
   return /^ppt\/(media|fonts)\//.test(path) || /\.(png|jpe?g|gif|webp|fntdata)$/i.test(path);
 }
 
+/**
+ * The zip entry date: the DOS epoch, the earliest date a zip entry can carry. `new Date(0)` (1970)
+ * lies below it and jszip wrapped it to 2098 on the stored parts (measured on the M5 files), a
+ * date PowerPoint's repair pass has no reason to see.
+ */
+export const ENTRY_DATE = new Date(Date.UTC(1980, 0, 1, 0, 0, 0));
+
 /** Writes the package: media and font parts stored, everything else deflated. */
 export async function writePackage(zip: Package): Promise<Uint8Array> {
   const out = new JSZip();
@@ -61,7 +68,7 @@ export async function writePackage(zip: Package): Promise<Uint8Array> {
     const bytes = await file.async('uint8array');
     out.file(path, bytes, {
       compression: isStoredPart(path) ? 'STORE' : 'DEFLATE',
-      date: new Date(0),
+      date: ENTRY_DATE,
     });
   }
   return out.generateAsync({

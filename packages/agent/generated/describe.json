@@ -351,7 +351,7 @@
     },
     "export.run": {
       "label": "Export",
-      "doc": "Exports the deck to PPTX, Google Slides or PDF in native or flatten mode and returns the verified report.",
+      "doc": "Exports the deck to PPTX in flatten (perfect, pixel identical) or native (editable text) mode and returns the verified report.",
       "mutates": false,
       "milestone": "M2",
       "group": "export"

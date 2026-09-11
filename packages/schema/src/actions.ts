@@ -16,7 +16,7 @@ import {
 import { blockSchema } from './blocks.ts';
 import { materialCatalogEntrySchema, materialUniformsSchema } from './blocks/material.ts';
 import { PLATE_SIDES, sectionSchema, slideSchema, SLIDE_KINDS, SLOT_NAMES } from './deck.ts';
-import { exportReportSchema } from './export.ts';
+import { exportCheckSchema, exportReportSchema } from './export.ts';
 import { findingSchema } from './findings.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
 import { leaseSchema, mutationSchema, versionSchema } from './mutations.ts';
@@ -103,6 +103,7 @@ export const ACTION_IDS = [
   'view.theme',
   'view.present',
   'export.run',
+  'export.check',
   'build.run',
   'fonts.build',
   'import.run',
@@ -1056,22 +1057,32 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'export.run': action({
     id: 'export.run',
     label: 'Export',
-    doc: 'Exports the deck to PPTX, Google Slides or PDF in native or flatten mode and returns the verified report.',
+    doc: 'Exports the deck to PPTX in flatten (perfect, pixel identical) or native (editable text) mode and returns the verified report.',
     group: 'export',
     mutates: false,
     transports: A,
     milestone: 'M2',
     input: z.strictObject({
-      format: z.enum(['pptx', 'gslides', 'pdf']),
+      format: z.enum(['pptx', 'pdf']),
       mode: z
         .enum(['native', 'flatten'])
         .optional()
-        .describe('Defaults to flatten, the verified pixel-identical mode (SPEC 8.2)'),
-      theme: themes.optional().describe('One file per theme; defaults to both'),
+        .describe(
+          'Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)',
+        ),
+      theme: themes
+        .optional()
+        .describe('One file per theme; defaults to both, which also writes <deckId>-both.zip'),
       fonts: z
         .enum(['exact', 'standard'])
         .optional()
         .describe('The export font set (SPEC 8.4); defaults to exact'),
+      embedFonts: z
+        .boolean()
+        .optional()
+        .describe(
+          'Native mode only: embed the export faces as fntdata parts; off by default, and flatten never embeds (docs/pptx.md)',
+        ),
       headings: z
         .literal('raster')
         .optional()
@@ -1100,12 +1111,11 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .describe(
           'The renderer whose measured first-baseline constant offsets native text boxes (calibration.json); defaults to libreoffice, the verify renderer',
         ),
-      verify: z.boolean().optional(),
-      dryRun: z
+      verify: z
         .boolean()
         .optional()
         .describe(
-          'Google Slides: build and validate the batchUpdate requests without credentials and write requests.json; no presentation is created (SPEC 8.3)',
+          'Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)',
         ),
       slideIds: slideIdsOrAll.optional().describe("A subset to export; defaults to 'all'"),
       out: z.string().optional().describe('Output directory; defaults to .turboslide/export'),
@@ -1113,10 +1123,41 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     output: exportReportSchema,
     cli: {
       usage:
-        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --exclude-share-alike --baseline-target <baseline> --verify --dry-run --out <out>',
+        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --verify --out <out>',
     },
     mcp: 'deck_export',
     example: { format: 'pptx', mode: 'flatten', theme: ['light'], fonts: 'exact', verify: true },
+  }),
+  'export.check': action({
+    id: 'export.check',
+    label: 'Check export file',
+    doc: 'Reopens an exported PPTX with python-pptx, walks the package against its content types and relationships, and reports the pages, size, raster formats, fonts and any invalid part.',
+    group: 'export',
+    mutates: false,
+    transports: ['cli'],
+    milestone: 'M6',
+    input: z.strictObject({
+      file: z.string().describe('The .pptx to check'),
+      python: z
+        .string()
+        .optional()
+        .describe(
+          'An interpreter with python-pptx; defaults to TURBOSLIDE_PYTHON, then .turboslide/venv/bin/python when it exists',
+        ),
+      quickLook: z
+        .boolean()
+        .optional()
+        .describe(
+          'Render the first page through macOS QuickLook when qlmanage exists; defaults to on',
+        ),
+      out: z
+        .string()
+        .optional()
+        .describe('Where the QuickLook thumbnail lands; defaults to a folder beside the file'),
+    }),
+    output: exportCheckSchema,
+    cli: { usage: 'turboslide export check <file> --python <python> --out <out>' },
+    example: { file: '.turboslide/export/gt-brand-light.pptx' },
   }),
   'build.run': action({
     id: 'build.run',

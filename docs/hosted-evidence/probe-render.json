@@ -1,0 +1,37 @@
+[
+  {
+    "path": "/api/render/opener-brand?deck=gt-brand&w=320",
+    "status": 200,
+    "bytes": 18735,
+    "ms": 8304,
+    "headers": {
+      "content-type": "image/png",
+      "x-turboslide-worker": "local",
+      "x-vercel-id": "sfo1::iad1::4qg4k-1789157801460-8af33b50d307",
+      "x-vercel-cache": "MISS"
+    }
+  },
+  {
+    "path": "/api/render/opener-brand?deck=gt-brand&w=320",
+    "status": 200,
+    "bytes": 18735,
+    "ms": 385,
+    "headers": {
+      "content-type": "image/png",
+      "x-turboslide-worker": "local",
+      "x-vercel-id": "sfo1::iad1::zsrwt-1789157809698-19aa95bc307c",
+      "x-vercel-cache": "MISS"
+    }
+  },
+  {
+    "path": "/api/render/title?deck=gt-brand&theme=light&format=json",
+    "status": 200,
+    "bytes": 880,
+    "ms": 1883,
+    "headers": {
+      "content-type": "application/json",
+      "x-vercel-id": "sfo1::iad1::n9ldp-1789157810060-1922632bdd60",
+      "x-vercel-cache": "MISS"
+    }
+  }
+]

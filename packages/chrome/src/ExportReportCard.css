@@ -1,8 +1,9 @@
 /* The export report card (SPEC 8.5, 2.2): the conflict card's grammar (edit.$deckId.css
    .ts-card): fixed under the bar, centered, 640px at most, paper with the one ink frame a dialog
    state takes; a head with the title in the display face and the verdict in ink-2 over a --pt-hair
-   rule; the facts as a two-column list whose rows draw --pt-hair-soft under themselves; the files
-   as ruled rows with a Download button each; the residual lines in titanium mono. */
+   rule; the facts as a two-column list whose rows draw --pt-hair-soft under themselves (the
+   Perfect row states the claim of the flatten mode); the files as ruled rows with a Download
+   button each; the residual lines in titanium mono. */
 .ts-report {
   position: fixed;
   left: 50%;
@@ -61,17 +62,6 @@
   margin: 0;
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
-}
-
-.ts-report-link {
-  margin: 12px 0 0;
-}
-
-.ts-report-link a {
-  color: var(--pt-ink);
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
 }
 
 .ts-report-files {

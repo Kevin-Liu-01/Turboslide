@@ -8,25 +8,28 @@ import type { ExportReport } from '@turboslide/schema/export';
 import { exportReportSchema } from '@turboslide/schema/export';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
-import { deckDir } from './root';
+import type { jsonBody } from './export-sync';
+import { deckDir, ensureDeckAssets, isHosted, workerClientOptions } from './root';
 import { buildsDir, downloadUrl, signDownloadToken } from './tokens';
 
 /**
- * The export surface of the editor (SPEC 8; Kevin's directive: exporting from the editor with
- * Google Slides first). export.run and build.run in the browser reach these server functions:
+ * The export surface of the editor (SPEC 8; Kevin's directive: PPTX from the editor's toolbar,
+ * docs/pptx.md). export.run and build.run in the browser reach these server functions:
  * startExport hands the action's validated input to the render worker facade (the same client
  * /api/export/:deckId uses: over HTTP when TURBOSLIDE_WORKER_URL is set, an in-process queue over
  * the turboslide CLI otherwise, so LibreOffice and Chromium never run in the web app, SPEC 3.3
  * item 7); pollExport reads the job back, with the worker's last log line while it runs and the
  * ExportReport plus signed one-time download URLs when it is done (tokens.ts); signDownload mints
  * a fresh URL for a file the editor wants again; runBuild runs `turboslide build` as a child
- * process into the worker's builds folder; exportCapabilities says whether Google credentials are
- * configured (TURBOSLIDE_GOOGLE_CREDENTIALS names a file) and whether produced files can be
- * streamed back (the local worker). createServerFn appears only under apps/studio/src/server.
+ * process into the worker's builds folder; exportCapabilities says whether produced files can be
+ * streamed back (the local worker) and whether the editor must export synchronously instead
+ * (`sync`: a hosted studio, docs/hosting.md, where a job queued by one function invocation is
+ * not visible to the next); syncExport is that synchronous export as a server function, the same
+ * runSyncExport and the same answer as POST /api/export/:deckId?sync=1&format=json, reached same
+ * origin under the CSRF middleware, so the route can require TURBOSLIDE_TOKEN (SPEC 11) without
+ * the page holding the token (docs/hosting.md section 6). createServerFn appears only under
+ * apps/studio/src/server.
  */
-
-/** The environment variable the Slides exporter reads (SPEC 8.3; MILESTONES M6 acceptance). */
-export const GOOGLE_CREDENTIALS_VARIABLE = 'TURBOSLIDE_GOOGLE_CREDENTIALS';
 
 /** How often the editor polls a running job. */
 export const EXPORT_POLL_MS = 1000;
@@ -43,45 +46,41 @@ let client: WorkerClient | undefined;
 async function worker(): Promise<WorkerClient> {
   if (client === undefined) {
     const { createWorkerClient } = await import('@turboslide/render-worker/client');
-    client = createWorkerClient();
+    client = createWorkerClient(workerClientOptions());
   }
   return client;
 }
 
-function requireDeck(deckId: string): string {
+/** The deck's folder once the hosted seed is materialized; a RangeError when the deck is missing. */
+async function requireDeck(deckId: string): Promise<string> {
   if (!SLUG_PATTERN.test(deckId)) throw new TypeError('deckId must be a slug');
+  await ensureDeckAssets(deckId);
   const dir = deckDir(deckId);
   if (!existsSync(join(dir, 'deck.json'))) throw new RangeError(`No deck ${deckId} under decks/`);
   return dir;
 }
 
 export type ExportCapabilities = {
-  gslides: { configured: boolean; variable: string };
   downloads: boolean;
   worker: 'local' | 'http';
+  /** the editor exports through POST /api/export/:deckId?sync=1 (a hosted studio) */
+  sync: boolean;
 };
 
 const exportCapabilitiesFn = createServerFn({ method: 'GET' }).handler(
   async (): Promise<ExportCapabilities> => {
-    const path = process.env[GOOGLE_CREDENTIALS_VARIABLE];
-    const configured =
-      typeof path === 'string' && path !== '' && existsSync(path) && statSync(path).isFile();
     const mode = (await worker()).mode;
-    return {
-      gslides: { configured, variable: GOOGLE_CREDENTIALS_VARIABLE },
-      downloads: mode === 'local',
-      worker: mode,
-    };
+    return { downloads: mode === 'local', worker: mode, sync: isHosted() };
   },
 );
 
-/** What the Export menu can offer: Slides when credentials exist, downloads when the worker is local. */
+/** What the Export menu can offer: downloads when the worker is local, the sync route when hosted. */
 export async function exportCapabilities(): Promise<ExportCapabilities> {
   return exportCapabilitiesFn();
 }
 
 export type ExportRunInput = {
-  format: 'pptx' | 'gslides' | 'pdf';
+  format: 'pptx' | 'pdf';
   mode?: 'native' | 'flatten';
   theme?: ('light' | 'dark')[];
   fonts?: 'exact' | 'standard';
@@ -91,31 +90,34 @@ export type ExportRunInput = {
   excludeShareAlike?: boolean;
   baseline?: 'libreoffice' | 'none';
   verify?: boolean;
-  /** Google Slides: build and validate the requests without credentials (SPEC 8.3) */
-  dryRun?: boolean;
+  /** Editable text mode: embed the export faces as fntdata parts (docs/pptx.md) */
+  embedFonts?: boolean;
   slideIds?: 'all' | string[];
 };
 
 export type StartExportInput = { deckId: string; input: ExportRunInput };
 export type StartExportResult = { jobId: string; status: string };
 
+/** The deck id as a slug and the input through export.run's schema, with `out` removed. */
+function validateExportRun(raw: StartExportInput): StartExportInput {
+  if (typeof raw.deckId !== 'string' || !SLUG_PATTERN.test(raw.deckId))
+    throw new TypeError('deckId must be a slug');
+  const parsed = ACTIONS['export.run'].input.safeParse(raw.input);
+  if (!parsed.success) {
+    const first = parsed.error.issues[0];
+    throw new TypeError(
+      `export.run: invalid input at /${first?.path.map(String).join('/') ?? ''}: ${first?.message ?? 'invalid'}`,
+    );
+  }
+  // the output directory is the worker's job directory, never a caller-chosen path
+  const { out: _out, ...input } = parsed.data as ExportRunInput & { out?: string };
+  return { deckId: raw.deckId, input };
+}
+
 const startExportFn = createServerFn({ method: 'POST' })
-  .validator((raw: StartExportInput): StartExportInput => {
-    if (typeof raw.deckId !== 'string' || !SLUG_PATTERN.test(raw.deckId))
-      throw new TypeError('deckId must be a slug');
-    const parsed = ACTIONS['export.run'].input.safeParse(raw.input);
-    if (!parsed.success) {
-      const first = parsed.error.issues[0];
-      throw new TypeError(
-        `export.run: invalid input at /${first?.path.map(String).join('/') ?? ''}: ${first?.message ?? 'invalid'}`,
-      );
-    }
-    // the output directory is the worker's job directory, never a caller-chosen path
-    const { out: _out, ...input } = parsed.data as ExportRunInput & { out?: string };
-    return { deckId: raw.deckId, input };
-  })
+  .validator(validateExportRun)
   .handler(async ({ data }): Promise<StartExportResult> => {
-    requireDeck(data.deckId);
+    await requireDeck(data.deckId);
     const job = await (await worker()).submit('export', { deckId: data.deckId, ...data.input });
     return { jobId: job.id, status: job.status };
   });
@@ -123,6 +125,29 @@ const startExportFn = createServerFn({ method: 'POST' })
 /** export.run, step one: the job on the worker's queue. */
 export async function startExport(input: StartExportInput): Promise<StartExportResult> {
   return startExportFn({ data: input });
+}
+
+/** The answer of a synchronous export: the report and the files' URLs, never the bytes. */
+export type SyncExportAnswer = ReturnType<typeof jsonBody>;
+
+const syncExportFn = createServerFn({ method: 'POST' })
+  .validator(validateExportRun)
+  .handler(async ({ data }): Promise<SyncExportAnswer> => {
+    await requireDeck(data.deckId);
+    // loaded here for the same reason worker() is: export-sync imports the worker client statically
+    const { jsonBody: body, runSyncExport } = await import('./export-sync');
+    return body(await runSyncExport(data.deckId, data.input));
+  });
+
+/**
+ * export.run in one call (a hosted studio, docs/hosting.md section 6): the export runs to
+ * completion inside this server function, which the deployment gives the same 800 s as the sync
+ * route (`/_serverFn/**` in vite.deploy.config.ts), and the answer lists each file's URL, a stored
+ * copy on the blob backend or this instance's job file on tmp. The editor can call this in place
+ * of its browser fetch of POST /api/export/:deckId?sync=1&format=json, whose body is identical.
+ */
+export async function syncExport(input: StartExportInput): Promise<SyncExportAnswer> {
+  return syncExportFn({ data: input });
 }
 
 export type ExportDownloadLink = { name: string; bytes: number; url: string };
@@ -270,7 +295,7 @@ const runBuildFn = createServerFn({ method: 'POST' })
     return raw;
   })
   .handler(async ({ data }): Promise<RunBuildResult> => {
-    const dir = requireDeck(data.deckId);
+    const dir = await requireDeck(data.deckId);
     const outDir = buildsDir(data.deckId);
     mkdirSync(outDir, { recursive: true });
     const name = `${data.deckId}.html`;

@@ -6,23 +6,28 @@ import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import { GtMark } from '@turboslide/chrome/GtMark';
 import type { DeckTemplateId } from '@turboslide/schema/actions';
 
-import { createNewDeck, listDecks } from '../server/decks';
+import { createNewDeck, getHostingFacts, listDecks } from '../server/decks';
 import type { DeckSummary } from '../server/decks';
 import { getServerHealth } from '../server/health';
 
 import './decks.css';
 
 // The deck list at /decks (SPEC 3.4 put it at `/`; Kevin's directive moved `/` to the editor):
-// every deck under decks/, newest first, with a New deck form (the name and the template, one
+// every deck the store holds, newest first, with a New deck form (the name and the template, one
 // deck.create through the server function) and a row per deck (name, slides, revision, updated,
 // Open, Export). SSR. It also calls the health server function so every build exercises the
 // server-only marker scripts/check-client-bundle.mjs looks for (AGENTS.md, contracts between
-// builders). The file is decks.index.tsx, not decks.tsx: a decks.tsx would become the layout
+// builders), and the hosting facts so the footer names the store (file, tmp or blob) and its
+// notice. The file is decks.index.tsx, not decks.tsx: a decks.tsx would become the layout
 // route of decks.$deckId.assets.$ and run this loader for every asset request.
 export const Route = createFileRoute('/decks/')({
   loader: async () => {
-    const [decks, health] = await Promise.all([listDecks(), getServerHealth()]);
-    return { decks, health };
+    const [decks, health, hosting] = await Promise.all([
+      listDecks(),
+      getServerHealth(),
+      getHostingFacts(),
+    ]);
+    return { decks, health, hosting };
   },
   head: () => ({ meta: [{ title: 'Decks, Turboslide' }] }),
   component: DecksPage,
@@ -46,7 +51,7 @@ export function formatStamp(iso: string): string {
 }
 
 function DecksPage() {
-  const { decks, health } = Route.useLoaderData();
+  const { decks, health, hosting } = Route.useLoaderData();
   const navigate = useNavigate();
   const [creating, setCreating] = useState(false);
   const [name, setName] = useState('');
@@ -75,9 +80,14 @@ function DecksPage() {
         <GtMark width={38} height={24} />
         <h1>Decks</h1>
         <p>
-          Every deck under decks/, newest first. The root address opens the newest one in the
+          Every deck this studio holds, newest first. The root address opens the newest one in the
           editor; a new deck starts from the GT brand template or from one title slide.
         </p>
+        {hosting.notice ? (
+          <p className="ts-home-notice" role="status" data-store={hosting.store}>
+            {hosting.notice}.
+          </p>
+        ) : null}
       </header>
       <div className="ts-decks-tools">
         <button
@@ -163,7 +173,8 @@ function DecksPage() {
         </ul>
       )}
       <footer className="ts-home-foot">
-        Node {health.node}. The sheet is {health.sheet[0]} by {health.sheet[1]}.
+        Node {health.node}. The sheet is {health.sheet[0]} by {health.sheet[1]}. Store:{' '}
+        {hosting.store} ({hosting.reason}){hosting.persistent ? '' : ', not persistent'}.
       </footer>
     </main>
   );

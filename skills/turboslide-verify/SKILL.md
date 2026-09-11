@@ -13,7 +13,7 @@ Evidence first, then judgment. Every claim names the revision it was verified at
 2. `turboslide sheet all --cols 4 --thumb 480 --numbered --overlay lint` writes the sheets and `sheet-<theme>.json`; read the cell map first and address slides by id.
 3. `turboslide lint <ids|all> --json` returns `Finding[]` with `source: lint`; exit 1 means a severity 3 finding outside `known-findings.json`.
 4. `turboslide judge bundle --out .turboslide/judge --json` packages the renders, the sheets with their cell maps, `lint.json` with the gate, the document, the outline, `numbers.json` (numerals per slide) and the six lens instructions in one directory; `scripts/judge-loop.mjs` runs the judges, the skeptics, the fixers and the gate over it (docs/judge-loop.md).
-5. `turboslide export pptx --mode flatten --theme light --verify` writes `export-report.json`; read it.
+5. `turboslide export pptx --mode flatten --theme both --verify` writes `export-report.json`; read it: `perfect` says every page raster decoded within 0.1 percent of its shot, `passed` that LibreOffice's pages matched the render. `turboslide export check <file.pptx>` reopens a file with python-pptx and walks its package (docs/pptx.md).
 6. Over MCP (`turboslide mcp`, or `/mcp` on the studio): `deck_render` returns the PNGs as image content with the records, `deck_sheet` the sheet with its cell map, `deck_lint` the findings as `{ items, count }`, `deck_judge_bundle` the bundle; `deck://render/<slideId>/<theme>` and `deck://sheet/<theme>` hold the latest ones, and the `deck_review` prompt (argument `lens`) gives the lens instructions below.
 
 Read [references/verification.md](references/verification.md) for the evidence actions, the `Finding` schema, the rule table and the judge lenses.
@@ -28,7 +28,7 @@ Read [references/verification.md](references/verification.md) for the evidence a
 
 - An overflow finding is a failure.
 - A severity 3 finding blocks the ship step. The known list is the honest state of the deck, not a place to hide new findings.
-- A resolved export call is not a verified export: `export-report.json` must say `passed` and `geometryInBounds`.
+- A resolved export call is not a verified export: `export-report.json` must say `passed` and `geometryInBounds`, and a perfect claim needs `perfect`.
 - A frame timestamp is not an image; read the file and its dimensions.
 - A resolved apply is only a React commit; wait for the render before reading pixels.
 - Look at both themes after every edit; a slide passes only when both do.

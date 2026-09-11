@@ -21,6 +21,8 @@ catalog:
   '@modelcontextprotocol/sdk': 1.30.0
   '@paper-design/shaders': 0.0.78
   '@playwright/test': 1.62.1
+  # chrome-headless-shell 147 for Linux x64 functions (docs/hosting-chromium.md); optional in @turboslide/headless
+  '@sparticuz/chromium': 147.0.2
   '@tanstack/devtools-vite': 0.8.5
   '@tanstack/eslint-config': 0.4.0
   '@tanstack/react-devtools': 0.10.12
@@ -34,9 +36,9 @@ catalog:
   '@types/pngjs': 6.0.5
   '@types/react': 19.3.0
   '@types/react-dom': 19.3.0
+  '@vercel/blob': 2.8.0
   '@vitejs/plugin-react': 6.1.1
   eslint: 10.10.0
-  googleapis: 178.1.1
   jsdom: 30.0.1
   jszip: 3.10.2
   nitro: 3.0.260903-beta

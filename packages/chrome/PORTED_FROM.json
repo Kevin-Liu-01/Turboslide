@@ -360,14 +360,6 @@
       "source": "new (M4, SPEC 8.5; the .ts-card rules of apps/studio/src/routes/edit.$deckId.css)",
       "commit": ""
     },
-    "src/SetupCard.tsx": {
-      "source": "new (M4, SPEC 8.3; the help card grammar from HelpCard.tsx)",
-      "commit": ""
-    },
-    "src/SetupCard.css": {
-      "source": "new (M4, SPEC 8.3; the .pt-help-card rules from HelpCard.css)",
-      "commit": ""
-    },
     "src/StatusChip.css": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
       "commit": ""

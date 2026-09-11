@@ -15,6 +15,8 @@ export type ReadyInfo = {
   /** src of every visible image that failed to decode. */
   brokenImages: string[];
   imageCount: number;
+  /** how the two-frame settle ended: the frames fired, or the wait fell back to the timer */
+  frames: 'raf' | 'timeout';
 };
 
 export type ReadyOptions = {
@@ -88,7 +90,15 @@ export async function waitForReady(page: Page, options: ReadyOptions = {}): Prom
       const brokenImages = images
         .filter((img) => img.complete && img.naturalWidth === 0)
         .map((img) => img.getAttribute('src') ?? img.currentSrc);
-      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+      // two frames so layout and paint settle; bounded, because a page whose compositor produces
+      // no frames (measured in the hosted chrome-headless-shell: every render hung here to the
+      // job's 300 s timeout) never fires requestAnimationFrame
+      const frames = await withTimeout(
+        new Promise<'raf'>((r) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => r('raf'))),
+        ),
+        'timeout' as const,
+      );
       const faces = [...document.fonts]
         .filter((face) => face.status === 'loaded')
         .map((face) => `${face.family.replace(/^['"]|['"]$/g, '')} ${face.weight} ${face.style}`);
@@ -98,6 +108,7 @@ export async function waitForReady(page: Page, options: ReadyOptions = {}): Prom
         fonts: { status: missing.length ? ('partial' as const) : ('loaded' as const), faces },
         brokenImages,
         imageCount: images.length,
+        frames,
       };
     },
     { rootSelector: selector, timeoutMs: timeout },

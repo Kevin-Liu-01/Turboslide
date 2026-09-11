@@ -1,0 +1,8 @@
+path                                       status  ms     result  detail
+/                                          307     3292   pass    location /edit/gt-brand
+/deck/gt-brand                             200     597    pass    358117 chars
+/edit/gt-brand                             200     130    pass    15504 chars; 3/3 shell marks
+/decks                                     200     283    pass    18529 chars
+/decks/gt-brand/assets/cover-fumadocs.png  200     120    pass    image/png 335538 B
+/api/agent                                 401     123    pass    bearer rule
+6/6 passed against https://turboslide-abjh1s171-kl01s-projects.vercel.app/

@@ -116,6 +116,7 @@ describe('ExportReport (SPEC 4.2 export)', () => {
     embedded: [] as string[],
     slides: [{ slideId: 'site', native: ['h', 'p1'], raster: ['fig'] }],
     geometryInBounds: true,
+    perfect: true,
     residual: [] as string[],
     warnings: [] as string[],
   };
@@ -127,7 +128,18 @@ describe('ExportReport (SPEC 4.2 export)', () => {
     expect(report.fonts.requiredOnViewer).toEqual(['GT Inter Display', 'GT Inter Text 22']);
     expect(report.fonts.substitutedIn).toEqual(['every viewer']);
     expect(report.passed).toBe(true);
+    expect(report.perfect).toBe(true);
     expect(report.residual.some((r) => r.startsWith('fonts not embedded'))).toBe(true);
+    expect(report.residual.some((r) => r.includes('the text layer is invisible'))).toBe(true);
+  });
+
+  test('a warning drops perfect and native never claims it', () => {
+    expect(buildReport({ ...base, theme: 'light', warnings: ['x'] }).perfect).toBe(false);
+    expect(buildReport({ ...base, theme: 'light', mode: 'native', perfect: false }).perfect).toBe(
+      false,
+    );
+    const native = buildReport({ ...base, theme: 'light', mode: 'native', perfect: false });
+    expect(native.residual.some((r) => r.includes('--embed-fonts'))).toBe(true);
   });
 
   test('a warning or out-of-bounds geometry fails the report', () => {
@@ -158,6 +170,8 @@ describe('ExportReport (SPEC 4.2 export)', () => {
     expect(merged.slides).toHaveLength(2);
     expect(merged.geometryInBounds).toBe(false);
     expect(merged.passed).toBe(false);
+    expect(merged.perfect).toBe(true);
+    expect(mergeReports([light, { ...dark, perfect: false }]).perfect).toBe(false);
     expect(merged.residual[0]).toContain('merged report over light and dark');
     expect(mergeReports([light])).toBe(light);
   });

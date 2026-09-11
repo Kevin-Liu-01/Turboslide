@@ -4147,7 +4147,7 @@
       "post": {
         "operationId": "export.run",
         "summary": "Export",
-        "description": "Exports the deck to PPTX, Google Slides or PDF in native or flatten mode and returns the verified report.",
+        "description": "Exports the deck to PPTX in flatten (perfect, pixel identical) or native (editable text) mode and returns the verified report.",
         "tags": [
           "export"
         ],
@@ -10282,7 +10282,6 @@
             "type": "string",
             "enum": [
               "pptx",
-              "gslides",
               "pdf"
             ]
           },
@@ -10334,12 +10333,6 @@
               ],
               "additionalProperties": false
             }
-          },
-          "presentationId": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
           },
           "fonts": {
             "type": "object",
@@ -10402,6 +10395,48 @@
                 },
                 "sheet": {
                   "type": "string"
+                },
+                "page": {
+                  "type": "object",
+                  "properties": {
+                    "format": {
+                      "type": "string",
+                      "enum": [
+                        "png-1bit",
+                        "png-palette",
+                        "png-rgba",
+                        "jpeg"
+                      ]
+                    },
+                    "bytes": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "colors": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "mismatch": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  },
+                  "required": [
+                    "format",
+                    "bytes",
+                    "colors",
+                    "mismatch",
+                    "fraction"
+                  ],
+                  "additionalProperties": false
                 },
                 "pictures": {
                   "type": "array",
@@ -10528,6 +10563,9 @@
           "geometryInBounds": {
             "type": "boolean"
           },
+          "perfect": {
+            "type": "boolean"
+          },
           "passed": {
             "type": "boolean"
           },
@@ -10550,6 +10588,7 @@
           "fonts",
           "slides",
           "geometryInBounds",
+          "perfect",
           "passed",
           "residual"
         ],
@@ -13777,12 +13816,11 @@
             "type": "string",
             "enum": [
               "pptx",
-              "gslides",
               "pdf"
             ]
           },
           "mode": {
-            "description": "Defaults to flatten, the verified pixel-identical mode (SPEC 8.2)",
+            "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)",
             "type": "string",
             "enum": [
               "native",
@@ -13790,7 +13828,7 @@
             ]
           },
           "theme": {
-            "description": "One file per theme; defaults to both",
+            "description": "One file per theme; defaults to both, which also writes <deckId>-both.zip",
             "minItems": 1,
             "type": "array",
             "items": {
@@ -13808,6 +13846,10 @@
               "exact",
               "standard"
             ]
+          },
+          "embedFonts": {
+            "description": "Native mode only: embed the export faces as fntdata parts; off by default, and flatten never embeds (docs/pptx.md)",
+            "type": "boolean"
           },
           "headings": {
             "description": "Write every heading as a PNG instead of a text box (SPEC 8.3)",
@@ -13852,10 +13894,7 @@
             ]
           },
           "verify": {
-            "type": "boolean"
-          },
-          "dryRun": {
-            "description": "Google Slides: build and validate the batchUpdate requests without credentials and write requests.json; no presentation is created (SPEC 8.3)",
+            "description": "Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)",
             "type": "boolean"
           },
           "slideIds": {
@@ -13882,6 +13921,281 @@
         },
         "required": [
           "format"
+        ],
+        "additionalProperties": false
+      },
+      "ExportCheckInput": {
+        "$id": "#/components/schemas/ExportCheckInput",
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "The .pptx to check"
+          },
+          "python": {
+            "description": "An interpreter with python-pptx; defaults to TURBOSLIDE_PYTHON, then .turboslide/venv/bin/python when it exists",
+            "type": "string"
+          },
+          "quickLook": {
+            "description": "Render the first page through macOS QuickLook when qlmanage exists; defaults to on",
+            "type": "boolean"
+          },
+          "out": {
+            "description": "Where the QuickLook thumbnail lands; defaults to a folder beside the file",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "additionalProperties": false
+      },
+      "ExportCheckOutput": {
+        "$id": "#/components/schemas/ExportCheckOutput",
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "parts": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "slides": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "notes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "pageSize": {
+            "type": "object",
+            "properties": {
+              "cx": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "cy": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "cx",
+              "cy"
+            ],
+            "additionalProperties": false
+          },
+          "pageSizeOk": {
+            "type": "boolean"
+          },
+          "slideNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "titledSlides": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "formats": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "mediaBytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "embeddedFonts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "custGeom": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "normAutofit": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "kernZero": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "shapes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "outOfBounds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "relationships": {
+            "type": "object",
+            "properties": {
+              "checked": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "invalid": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "checked",
+              "invalid"
+            ],
+            "additionalProperties": false
+          },
+          "contentTypes": {
+            "type": "object",
+            "properties": {
+              "undeclared": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "missingOverrides": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "undeclared",
+              "missingOverrides"
+            ],
+            "additionalProperties": false
+          },
+          "pythonPptx": {
+            "type": "object",
+            "properties": {
+              "ran": {
+                "type": "boolean"
+              },
+              "python": {
+                "type": "string"
+              },
+              "slides": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "shapes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "error": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ran"
+            ],
+            "additionalProperties": false
+          },
+          "quickLook": {
+            "type": "object",
+            "properties": {
+              "ran": {
+                "type": "boolean"
+              },
+              "png": {
+                "type": "string"
+              },
+              "width": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "height": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "ms": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "error": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "ran"
+            ],
+            "additionalProperties": false
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "valid": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "file",
+          "bytes",
+          "parts",
+          "slides",
+          "notes",
+          "pageSize",
+          "pageSizeOk",
+          "slideNames",
+          "titledSlides",
+          "formats",
+          "mediaBytes",
+          "embeddedFonts",
+          "custGeom",
+          "normAutofit",
+          "kernZero",
+          "shapes",
+          "outOfBounds",
+          "relationships",
+          "contentTypes",
+          "pythonPptx",
+          "quickLook",
+          "issues",
+          "valid"
         ],
         "additionalProperties": false
       },

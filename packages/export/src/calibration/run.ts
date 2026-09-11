@@ -230,6 +230,7 @@ async function main(): Promise<void> {
         })),
     ),
     geometryInBounds: true,
+    perfect: false,
     passed: true,
     residual: [],
   };

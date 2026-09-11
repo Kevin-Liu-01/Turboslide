@@ -1,0 +1,677 @@
+{
+  "deckId": "gt-brand",
+  "revision": 31,
+  "format": "pptx",
+  "mode": "native",
+  "theme": "dark",
+  "fontSet": "exact",
+  "fontSetVersion": "4.001+gt.1",
+  "files": [
+    {
+      "path": "/tmp/turboslide/.turboslide/worker/jobs/mtxhwcn3-fb8551/export/gt-brand-dark.pptx",
+      "bytes": 24847042,
+      "sha256": "7b4ecda5969e8eb9ad56a17f25cb23af7c117f32ec72529a89eb218e1f929385"
+    }
+  ],
+  "fonts": {
+    "embedded": [],
+    "requiredOnViewer": [
+      "GT Inter Display",
+      "GT Inter Text 22",
+      "GT Inter Text 15",
+      "GT Inter Text 14",
+      "GT Inter Text 26",
+      "GT Inter Text 20 Medium",
+      "GT Inter Text 20",
+      "GT Inter Text 18 Medium",
+      "GT Inter Text 18",
+      "GT Inter Text 15 Medium",
+      "GT Inter Text 26 Medium",
+      "GT Inter Text 24 Medium",
+      "DejaVu Sans Mono",
+      "GT Inter Text 22 Medium"
+    ],
+    "substitutedIn": ["every viewer"]
+  },
+  "slides": [
+    {
+      "slideId": "opener-brand",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "title",
+      "theme": "dark",
+      "native": ["heading", "lead"],
+      "raster": []
+    },
+    {
+      "slideId": "thesis",
+      "theme": "dark",
+      "native": ["big"],
+      "raster": []
+    },
+    {
+      "slideId": "reputation",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "why",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": []
+    },
+    {
+      "slideId": "mood-earth",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "positioning",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "audience",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "values",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": []
+    },
+    {
+      "slideId": "mood-rosetta",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "character",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["scales"]
+    },
+    {
+      "slideId": "voice",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["say"]
+    },
+    {
+      "slideId": "inspirations",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["tiles"]
+    },
+    {
+      "slideId": "naming",
+      "theme": "dark",
+      "native": ["h", "p1", "p2", "p3", "p4", "rows"],
+      "raster": ["logos"]
+    },
+    {
+      "slideId": "mark",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["mark"]
+    },
+    {
+      "slideId": "opener-design-system",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "compression",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["sizes"]
+    },
+    {
+      "slideId": "color",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["swatches", "dia1"]
+    },
+    {
+      "slideId": "type",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["spec"]
+    },
+    {
+      "slideId": "multilingual",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["lang"]
+    },
+    {
+      "slideId": "ladder",
+      "theme": "dark",
+      "native": ["h", "p1", "ladder"],
+      "raster": []
+    },
+    {
+      "slideId": "lines",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "doubled-line",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "mood-calligraphy",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "diagrams",
+      "theme": "dark",
+      "native": ["h", "p1", "rows", "rows2"],
+      "raster": ["dia1", "dia2", "dia3", "dia4"]
+    },
+    {
+      "slideId": "dither",
+      "theme": "dark",
+      "native": ["h", "p1", "p2", "p3"],
+      "raster": ["dither", "matrix"]
+    },
+    {
+      "slideId": "iso",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "language-as-material",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "motion",
+      "theme": "dark",
+      "native": ["h", "rows"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "avoid",
+      "theme": "dark",
+      "native": ["h", "p1", "list"],
+      "raster": []
+    },
+    {
+      "slideId": "opener-website",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "surfaces",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": []
+    },
+    {
+      "slideId": "site",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "dark-mode",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["pair"]
+    },
+    {
+      "slideId": "pages-a",
+      "theme": "dark",
+      "native": ["h"],
+      "raster": ["pair"]
+    },
+    {
+      "slideId": "pages-b",
+      "theme": "dark",
+      "native": ["h"],
+      "raster": ["pair"]
+    },
+    {
+      "slideId": "mood-lighthouse",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "details",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["grid"]
+    },
+    {
+      "slideId": "details-two",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["fig", "fig2", "fig3"]
+    },
+    {
+      "slideId": "shell-numbers",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "horizon",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "opener-documentation",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "docs",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "nearest-page-routing",
+      "theme": "dark",
+      "native": ["h", "p1", "code"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "mood-dictionary",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "docs-for-agents",
+      "theme": "dark",
+      "native": ["h", "p1", "p2", "rows"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "opener-blog",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "blog-index",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "blog-covers",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "mood-devanagari",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "gem-smoke",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["pair"]
+    },
+    {
+      "slideId": "blog-vision",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "content-rule",
+      "theme": "dark",
+      "native": ["h", "p1", "list"],
+      "raster": []
+    },
+    {
+      "slideId": "two-registers",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": []
+    },
+    {
+      "slideId": "off-the-site",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["pair"]
+    },
+    {
+      "slideId": "opener-developer-experience",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "dx",
+      "theme": "dark",
+      "native": ["h", "p1", "code"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "mood-cable",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "cli",
+      "theme": "dark",
+      "native": ["h", "p1", "code", "rows"],
+      "raster": []
+    },
+    {
+      "slideId": "opener-prototemplate",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "lab",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "knowledge-base",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "skills-marks",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["pair"]
+    },
+    {
+      "slideId": "viewer-shell",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "shell-views",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["grid"]
+    },
+    {
+      "slideId": "line-law",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["fig", "dia1"]
+    },
+    {
+      "slideId": "presenter-compare",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig", "fig2", "fig3", "fig4"]
+    },
+    {
+      "slideId": "dossier",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "directions",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["tiles"]
+    },
+    {
+      "slideId": "mood-wave",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "archive",
+      "theme": "dark",
+      "native": ["h", "p1", "refs", "code"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "engines",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["tiles"]
+    },
+    {
+      "slideId": "build-log",
+      "theme": "dark",
+      "native": ["h", "p1", "list"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "glyphfield",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "glyphfield-tools",
+      "theme": "dark",
+      "native": ["h", "rows"],
+      "raster": ["fig"]
+    },
+    {
+      "slideId": "books-and-templates",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["pair"]
+    },
+    {
+      "slideId": "glyphfield-materials",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["pair"]
+    },
+    {
+      "slideId": "agent-api",
+      "theme": "dark",
+      "native": ["h", "p1", "code", "rows"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "opener-status",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "state",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["board"]
+    },
+    {
+      "slideId": "mood-compass",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ]
+    },
+    {
+      "slideId": "identity-project",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"]
+    },
+    {
+      "slideId": "fixed-points",
+      "theme": "dark",
+      "native": ["h", "p1", "h2", "h3", "p2", "h4", "p3", "code", "h5", "list"],
+      "raster": ["dia1", "dia2"]
+    },
+    {
+      "slideId": "goals",
+      "theme": "dark",
+      "native": ["h", "p1", "list", "code"],
+      "raster": ["dia1", "fig"]
+    },
+    {
+      "slideId": "closing",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": false
+        }
+      ]
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": false,
+  "passed": true,
+  "residual": [
+    "renderer: chrome-headless-shell 147.0.7727.0, SwiftShader, Google",
+    "native (editable text): text boxes at the browser boxes, layout within 3 px; the glyph antialiasing is the viewer's",
+    "rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x",
+    "package: 597 parts, 695 relationships, valid against the content types and relationships",
+    "reputation#p1: the GT letters are an invisible run under the mark; text after the mark on that line may shift by the width difference",
+    "positioning#p1: the GT letters are an invisible run under the mark; text after the mark on that line may shift by the width difference",
+    "audience#p1: the GT letters are an invisible run under the mark; text after the mark on that line may shift by the width difference",
+    "naming#rows: the GT letters are an invisible run under the mark; text after the mark on that line may shift by the width difference",
+    "avoid#p1: the GT letters are an invisible run under the mark; text after the mark on that line may shift by the width difference",
+    "code panels travel in DejaVu Sans Mono (Menlo on a Mac without it); the face differs per machine unless a mono font is installed (SPEC 8.6)",
+    "content-rule#list: the GT letters are an invisible run under the mark; text after the mark on that line may shift by the width difference",
+    "two-registers#rows: the GT letters are an invisible run under the mark; text after the mark on that line may shift by the width difference",
+    "identity-project#rows: the GT letters are an invisible run under the mark; text after the mark on that line may shift by the width difference",
+    "package: 84 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)",
+    "package: 367 kern=\"0\" attribute(s) and 0 empty ext list(s) removed; 0 custGeom",
+    "fonts not embedded: GT Inter Display, GT Inter Text 22, GT Inter Text 15, GT Inter Text 14, GT Inter Text 26, GT Inter Text 20 Medium, GT Inter Text 20, GT Inter Text 18 Medium, GT Inter Text 18, GT Inter Text 15 Medium, GT Inter Text 26 Medium, GT Inter Text 24 Medium, DejaVu Sans Mono, GT Inter Text 22 Medium; a viewer without them installed substitutes (SPEC 8.4); --embed-fonts embeds them"
+  ]
+}

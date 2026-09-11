@@ -2,7 +2,7 @@
 
 > A block document with a validator and a grammar linter; every operation is a named action in one table, reachable from the CLI, MCP, HTTP and the studio window API (SPEC 1, 7.1).
 
-Turboslide holds the GT brand deck as typed JSON (deck.json plus slides/<id>.json), renders it with one renderer, lints it against the deck grammar, and exports it to PPTX and Google Slides with a verified report. There are no coordinates: a slide is a kind, a layout and typed blocks in named slots.
+Turboslide holds the GT brand deck as typed JSON (deck.json plus slides/<id>.json), renders it with one renderer, lints it against the deck grammar, and exports it to PPTX with a verified report, pixel identical in its default mode (docs/pptx.md). There are no coordinates: a slide is a kind, a layout and typed blocks in named slots.
 
 ## Discovery
 
@@ -43,6 +43,15 @@ Turboslide holds the GT brand deck as typed JSON (deck.json plus slides/<id>.jso
 
 - slide.lease takes ten minutes on a slide; an agent write to a slide another author holds is 409 with the holder unless force is set; a human write warns and goes through (SPEC 6.7).
 - Every mutating action takes baseRevision; a stale one is 409 with currentRevision and the current document; re-read from the response and retry once.
+
+## Renders and exports over HTTP
+
+- GET /api/render/<slideId>?deck=<deckId>&theme=light|dark&scale=1|2 answers the PNG with the RenderRecord in the X-Turboslide-Record header; ?format=json (or Accept: application/json) answers the record. ?w=160|320|640 is the cached thumbnail.
+- POST /api/export/<deckId> takes the export.run input as one JSON object (format defaults to pptx; out is ignored, the file lands in the job folder). ?sync=1 (or "sync": true in the body) runs the export inside the request and answers the file, or the ExportReport with the files and their URLs under ?format=json (or Accept: application/json); the X-Turboslide-Export-Report header carries the summary.
+- A hosted studio (a serverless function) runs every POST synchronously, ?sync=1 or not, and says so in X-Turboslide-Sync: hosted: a queued job would get CPU only while another request kept the instance busy, and its record lives on that instance alone. Send ?sync=1 so the request means the same everywhere.
+- In a checkout or against the Docker worker, a POST without ?sync=1 answers 202 with the job and a Location to poll: GET /api/export/<deckId>?job=<id> for the record (the ExportReport under report once done), GET without job for the deck's jobs.
+- A file over 4.5 MB cannot leave a function: the route answers 302 to the stored copy when the deployment has a Blob store, else 413 with the JSON body; export one theme or a slide subset then.
+- Auth: both routes require Authorization: Bearer <TURBOSLIDE_TOKEN> when the instance has the token set (the thumbnail variant of the render route stays open for the editor); without it they are open.
 
 ## Transports
 
@@ -101,7 +110,8 @@ Every mutating action takes baseRevision. The transports column says where the a
 - view.mode (View mode; read; window; M3): Switches between slide, grid and book mode. Input: mode. MCP: deck_set_view.
 - view.theme (View theme; read; window; M3): Sets the theme of chrome and sheet together through the gt-theme key. Input: theme. MCP: deck_set_view.
 - view.present (Present; read; window; M3): Enters or leaves present mode. Input: on. MCP: deck_set_view.
-- export.run (Export; read; cli, mcp, http, window; M2): Exports the deck to PPTX, Google Slides or PDF in native or flatten mode and returns the verified report. Input: format, mode?, theme?, fonts?, headings?, rasterScale?, pictureScale?, excludeShareAlike?, baseline?, verify?, dryRun?, slideIds?, out?. CLI: turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --exclude-share-alike --baseline-target <baseline> --verify --dry-run --out <out>. MCP: deck_export.
+- export.run (Export; read; cli, mcp, http, window; M2): Exports the deck to PPTX in flatten (perfect, pixel identical) or native (editable text) mode and returns the verified report. Input: format, mode?, theme?, fonts?, embedFonts?, headings?, rasterScale?, pictureScale?, excludeShareAlike?, baseline?, verify?, slideIds?, out?. CLI: turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --verify --out <out>. MCP: deck_export.
+- export.check (Check export file; read; cli; M6): Reopens an exported PPTX with python-pptx, walks the package against its content types and relationships, and reports the pages, size, raster formats, fonts and any invalid part. Input: file, python?, quickLook?, out?. CLI: turboslide export check <file> --python <python> --out <out>.
 - build.run (Build standalone; read; cli, mcp, http, window; M1): Writes the single-file HTML deck with fonts and assets inlined and asserts the size budget. Input: out, budgetMB?, quality?. CLI: turboslide build --out <out> --budget <budgetMB>. MCP: deck_build.
 - fonts.build (Build export fonts; read; cli; M2): Cuts the static export font set from InterVariable into packages/fonts/export with fonts.json (scripts/build-fonts.py); --check reports a stale committed set. Input: check?, python?. CLI: turboslide fonts build --check.
 - import.run (Import deck; mutates; cli; M1): Imports the Prototemplate deck HTML into a Turboslide deck and writes the import report. Input: from, into. CLI: turboslide import <from> --into <into>.

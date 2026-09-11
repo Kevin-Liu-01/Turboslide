@@ -26,7 +26,6 @@ import type { ArtifactRun, ExportDownload } from '@turboslide/chrome/ExportRepor
 import { Inspector } from '@turboslide/chrome/Inspector';
 import type { DitherWorkerLike } from '@turboslide/chrome/inspector/dither';
 import { Overlay } from '@turboslide/chrome/Overlay';
-import { SetupCard } from '@turboslide/chrome/SetupCard';
 import { Palette } from '@turboslide/chrome/Palette';
 import { buildPaletteEntries } from '@turboslide/chrome/palette-data';
 import type { PaletteEntry } from '@turboslide/chrome/palette-data';
@@ -49,6 +48,7 @@ import { blockAssetRefs } from '@turboslide/schema/catalog';
 import { slideBlocks, slideTitle } from '@turboslide/schema/deck';
 import type { DeckDocument, Section, Slide } from '@turboslide/schema/deck';
 import { ConflictError } from '@turboslide/schema/errors';
+import type { ExportReport } from '@turboslide/schema/export';
 import type { Finding } from '@turboslide/schema/findings';
 import { ICON_NAMES } from '@turboslide/schema/icons';
 import { canonicalJson } from '@turboslide/schema/json';
@@ -347,6 +347,8 @@ export type EditorController = {
   allFindings: () => Finding[];
   /** the Edit | View seg's state, for view.* results */
   setEditing: (enabled: boolean) => void;
+  /** export.run posts the sync route instead of queueing a job (a hosted studio) */
+  setExportSync: (enabled: boolean) => void;
   /** what the shell shows, from ShellBridge */
   setView: (view: EditorView) => void;
   /** the shell's toast */
@@ -442,16 +444,62 @@ function triggerDownload(url: string): void {
   anchor.remove();
 }
 
+/** A stored copy is asked for as an attachment (Vercel Blob honours `download=1`); a route of ours already is one. */
+function downloadUrlOf(url: string): string {
+  if (url.startsWith('/')) return url;
+  return `${url}${url.includes('?') ? '&' : '?'}download=1`;
+}
+
+/** The JSON answer of POST /api/export/:deckId?sync=1&format=json (server/export-sync.ts jsonBody). */
+type SyncExportAnswer = {
+  summary: { job: string; ms: number };
+  report: ExportReport;
+  files: { name: string; bytes: number; url: string | null }[];
+  error?: { message?: string };
+};
+
+/**
+ * A hosted studio's export (docs/hosting.md): one POST to the sync route runs the export inside
+ * that request and answers the report with the files' URLs, because a job queued by one function
+ * invocation is not visible to the next; the download then fetches the URL (a stored copy on the
+ * blob backend, this instance's job file on the tmp backend).
+ */
+async function runSyncExport(
+  deckId: string,
+  input: ExportRunInput,
+): Promise<Extract<ArtifactRun, { kind: 'export' }>> {
+  const response = await fetch(`/api/export/${deckId}?sync=1&format=json`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  const body = (await response.json()) as SyncExportAnswer;
+  if (!response.ok)
+    throw new Error(body.error?.message ?? `the export answered ${response.status}`);
+  return {
+    kind: 'export',
+    input: menuInputOf(input),
+    report: body.report,
+    downloads: body.files.map(({ name, bytes, url }) => ({
+      name,
+      bytes,
+      ...(url !== null ? { url } : {}),
+    })),
+    jobId: body.summary.job,
+    ms: body.summary.ms,
+  };
+}
+
 /** The menu's shape of an export.run input, for the report card's title (defaults as the action's). */
 function menuInputOf(input: ExportRunInput): ExportMenuInput {
   return {
-    format: input.format === 'gslides' ? 'gslides' : 'pptx',
+    format: 'pptx',
     mode: input.mode ?? 'flatten',
     theme: input.theme ?? ['light', 'dark'],
     fonts: input.fonts ?? 'exact',
+    ...(input.embedFonts === true ? { embedFonts: true as const } : {}),
     ...(input.headings === 'raster' ? { headings: 'raster' as const } : {}),
     verify: input.verify ?? false,
-    ...(input.dryRun === true ? { dryRun: true } : {}),
   };
 }
 
@@ -1035,6 +1083,8 @@ function createEditorController(init: {
 
   /* the Edit | View seg's state, read by view.* results */
   const editingRef = { current: true };
+  /* export.run goes through the sync route on a hosted studio (server/download.ts capabilities.sync) */
+  let exportSync = false;
 
   // The dispatcher: the same ACTIONS table and validation the CLI and MCP run (SPEC 7.1).
   const dispatcher: Dispatcher = createDispatcher();
@@ -1111,9 +1161,16 @@ function createEditorController(init: {
   serverSide('material.capture');
   serverSide('material.list');
   on<ExportRunInput>('export.run', async (input) => {
-    const label = `${input.format === 'gslides' ? 'Google Slides' : input.format.toUpperCase()} ${input.mode ?? 'flatten'}${input.dryRun ? ' dry run' : ''}`;
+    const label = `${input.format.toUpperCase()} ${input.mode ?? 'flatten'}`;
     publish({ artifact: { progress: { label: `Exporting ${label}` }, run: null } });
     try {
+      if (exportSync) {
+        const run = await runSyncExport(deckId, input);
+        publish({ artifact: { progress: null, run } });
+        const first = run.downloads[0];
+        if (first?.url !== undefined) triggerDownload(downloadUrlOf(first.url));
+        return run.report;
+      }
       const started = await startExport({ deckId, input });
       for (;;) {
         const poll = await pollExport({ jobId: started.jobId });
@@ -1604,6 +1661,9 @@ function createEditorController(init: {
     setEditing(enabled) {
       editingRef.current = enabled;
     },
+    setExportSync(enabled) {
+      exportSync = enabled;
+    },
     setView(view) {
       if (view.mode === snapshot.view.mode && view.present === snapshot.view.present) return;
       publish({ view });
@@ -1627,6 +1687,17 @@ function createEditorController(init: {
     },
     async downloadArtifact(run, file) {
       try {
+        if (file.url !== undefined) {
+          // a sync export's file: the stored copy, or this instance's job file, which another
+          // instance answers with 404 and the advice to run the export again
+          const probe = await fetch(file.url, { method: 'HEAD' });
+          if (probe.status === 404) {
+            const body = (await fetch(file.url).then((r) => r.json())) as SyncExportAnswer;
+            throw new Error(body.error?.message ?? 'the file is not on this instance');
+          }
+          triggerDownload(downloadUrlOf(file.url));
+          return;
+        }
         const { url } = await signDownload(
           run.kind === 'export'
             ? { kind: 'job', jobId: run.jobId, name: file.name }
@@ -1804,7 +1875,6 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
   );
   /* the Export menu (SPEC 8): open from the toolbar or from the deck list's Export link (?export=1) */
   const [exportOpen, setExportOpen] = useState(search.export === 1);
-  const [setupOpen, setSetupOpen] = useState(false);
   const [capabilities, setCapabilities] = useState<ExportCapabilities | null>(null);
   const snap = useSyncExternalStore(
     controller.subscribe,
@@ -1829,7 +1899,10 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
     const stopBridge = installThemeBridge();
     controller.start();
     exportCapabilities()
-      .then(setCapabilities)
+      .then((caps) => {
+        controller.setExportSync(caps.sync);
+        setCapabilities(caps);
+      })
       .catch((error: unknown) => controller.say(`Export: ${errorMessage(error)}`));
     const onKey = (event: KeyboardEvent) => {
       if (event.isComposing) return;
@@ -2117,10 +2190,6 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
               capabilities={capabilities}
               progress={snap.artifact.progress}
               onExport={runExport}
-              onGoogleSetup={() => {
-                setExportOpen(false);
-                setSetupOpen(true);
-              }}
               onBuild={runBuildAction}
             />
           </>
@@ -2209,16 +2278,11 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
           onClose={controller.clearArtifact}
         />
       ) : null}
-      {setupOpen ? (
-        <SetupCard
-          variable={capabilities?.gslides.variable ?? 'TURBOSLIDE_GOOGLE_CREDENTIALS'}
-          onClose={() => setSetupOpen(false)}
-          onNotice={controller.say}
-        />
-      ) : null}
       {snap.conflict ? <ConflictCard controller={controller} conflict={snap.conflict} /> : null}
       {snap.external ? (
         <ExternalRevisionBanner controller={controller} external={snap.external} />
+      ) : payload.hosting.notice !== null ? (
+        <HostingBanner notice={payload.hosting.notice} store={payload.hosting.store} />
       ) : null}
     </div>
   );
@@ -2534,6 +2598,19 @@ function ConflictCard({
           <span className="pt-lb">Discard</span>
         </button>
       </div>
+    </div>
+  );
+}
+
+/**
+ * The store's notice (the hosting round, docs/hosting.md): a hosted studio without a Blob store
+ * keeps edits on one server instance, so the editor says so for as long as the page is open. The
+ * external revision banner takes the same slot while it is up.
+ */
+function HostingBanner({ notice, store }: { notice: string; store: string }) {
+  return (
+    <div className="ts-banner ts-chrome" role="status" data-state="hosting" data-store={store}>
+      <span>{`${notice}. Connect a Blob store to the Vercel project to keep them.`}</span>
     </div>
   );
 }

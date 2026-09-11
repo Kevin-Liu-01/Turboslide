@@ -1,0 +1,17 @@
+[
+  {
+    "path": "/api/export/gt-brand?sync=1&format=json",
+    "status": 200,
+    "bytes": 37151,
+    "ms": 203066,
+    "headers": {
+      "content-type": "application/json",
+      "x-turboslide-exec": "inprocess",
+      "x-turboslide-worker": "local",
+      "x-turboslide-job": "mtxehi44-00460e",
+      "x-turboslide-export-report": "{\"job\":\"mtxehi44-00460e\",\"deckId\":\"gt-brand\",\"revision\":28,\"format\":\"pptx\",\"mode\":\"flatten\",\"themes\":[\"light\"],\"pages\":85,\"passed\":true,\"geometryInBounds\":true,\"fontsEmbedded\":0,\"files\":[{\"name\":\"gt-brand-light.pptx\",\"bytes\":16278003,\"sha256\":\"948948c3b32cf83d509f797e273a55a70424c5f3c8245dc1298a0df8a931e6a9\"}],\"verify\":\"not-requested\",\"renderer\":\"chrome-headless-shell 147.0.7727.0, SwiftShader, Go...",
+      "x-vercel-id": "sfo1::iad1::l69wk-1789158012691-bf720189cd21",
+      "x-vercel-cache": "MISS"
+    }
+  }
+]

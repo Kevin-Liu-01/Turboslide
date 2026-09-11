@@ -22,7 +22,7 @@ function header(): string[] {
     '',
     '> A block document with a validator and a grammar linter; every operation is a named action in one table, reachable from the CLI, MCP, HTTP and the studio window API (SPEC 1, 7.1).',
     '',
-    'Turboslide holds the GT brand deck as typed JSON (deck.json plus slides/<id>.json), renders it with one renderer, lints it against the deck grammar, and exports it to PPTX and Google Slides with a verified report. There are no coordinates: a slide is a kind, a layout and typed blocks in named slots.',
+    'Turboslide holds the GT brand deck as typed JSON (deck.json plus slides/<id>.json), renders it with one renderer, lints it against the deck grammar, and exports it to PPTX with a verified report, pixel identical in its default mode (docs/pptx.md). There are no coordinates: a slide is a kind, a layout and typed blocks in named slots.',
     '',
   ];
 }
@@ -76,6 +76,26 @@ function execution(): string[] {
   ];
 }
 
+/**
+ * The two HTTP routes outside the action table (SPEC 3.4): the render facade and the export
+ * route. Their rules live in the studio (apps/studio/src/routes/api/render.$slideId.ts and
+ * export.$deckId.ts; docs/hosting-chromium.md section 4) and are restated here so an API caller
+ * learns them before the first request.
+ */
+function rendersAndExports(): string[] {
+  return [
+    '## Renders and exports over HTTP',
+    '',
+    '- GET /api/render/<slideId>?deck=<deckId>&theme=light|dark&scale=1|2 answers the PNG with the RenderRecord in the X-Turboslide-Record header; ?format=json (or Accept: application/json) answers the record. ?w=160|320|640 is the cached thumbnail.',
+    '- POST /api/export/<deckId> takes the export.run input as one JSON object (format defaults to pptx; out is ignored, the file lands in the job folder). ?sync=1 (or "sync": true in the body) runs the export inside the request and answers the file, or the ExportReport with the files and their URLs under ?format=json (or Accept: application/json); the X-Turboslide-Export-Report header carries the summary.',
+    '- A hosted studio (a serverless function) runs every POST synchronously, ?sync=1 or not, and says so in X-Turboslide-Sync: hosted: a queued job would get CPU only while another request kept the instance busy, and its record lives on that instance alone. Send ?sync=1 so the request means the same everywhere.',
+    "- In a checkout or against the Docker worker, a POST without ?sync=1 answers 202 with the job and a Location to poll: GET /api/export/<deckId>?job=<id> for the record (the ExportReport under report once done), GET without job for the deck's jobs.",
+    '- A file over 4.5 MB cannot leave a function: the route answers 302 to the stored copy when the deployment has a Blob store, else 413 with the JSON body; export one theme or a slide subset then.',
+    '- Auth: both routes require Authorization: Bearer <TURBOSLIDE_TOKEN> when the instance has the token set (the thumbnail variant of the render route stays open for the editor); without it they are open.',
+    '',
+  ];
+}
+
 function transports(): string[] {
   const manifest = generateManifest();
   return [
@@ -103,6 +123,7 @@ export function generateLlms(): string {
     ...discovery(),
     ...rules(),
     ...execution(),
+    ...rendersAndExports(),
     ...transports(),
     ...skills(),
     '## Verification',

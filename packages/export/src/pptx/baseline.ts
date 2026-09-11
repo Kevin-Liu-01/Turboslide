@@ -16,7 +16,8 @@
 // the scheduled manual pass (docs/export-verification.md); `--baseline-target none` writes the boxes at
 // the browser's coordinates for that measurement.
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+
+import { calibrationFile } from '../calibration/locate.ts';
 
 export type BaselineTarget = 'libreoffice' | 'none';
 
@@ -50,8 +51,7 @@ let cached: BaselineModel | undefined;
 /** The measured model from calibration.json. */
 export function loadBaselineModel(): BaselineModel {
   if (cached) return cached;
-  const path = fileURLToPath(new URL('../calibration/calibration.json', import.meta.url));
-  const file = JSON.parse(readFileSync(path, 'utf8')) as CalibrationFile;
+  const file = JSON.parse(readFileSync(calibrationFile(), 'utf8')) as CalibrationFile;
   const model = file.targets['pptx-libreoffice'].firstBaselineModel;
   cached = {
     formula: model.formula,

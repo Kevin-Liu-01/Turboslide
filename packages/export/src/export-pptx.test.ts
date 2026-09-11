@@ -1,9 +1,11 @@
 // One real export pass over four deck slides in both themes and both modes (MILESTONES M2 item 4):
 // slides 01 (a two-tone opener with a plate), 08 (text plus a diagram and a ruled table with
-// icons), 33 (text plus a screenshot with a caption) and 47 (a second opener). The files reopen
-// with python-pptx when the .turboslide/venv exists, and the XML carries the expected sz, spc,
-// spcPts and line widths, read back with jszip. Runs where the Chrome for Testing binary and the
-// deck exist; TURBOSLIDE_SKIP_BROWSER_TESTS=1 skips it. One browser at a time (AGENTS.md).
+// icons), 33 (text plus a screenshot with a caption) and 47 (a photographic opener). The files
+// reopen with python-pptx when the .turboslide/venv exists, and the XML carries the expected sz,
+// spc, spcPts and line widths, read back with jszip. The flatten files carry the page raster
+// policy, no font parts, the slide names and the hidden titles, and validate as packages
+// (docs/pptx.md). Runs where the Chrome for Testing binary and the deck exist;
+// TURBOSLIDE_SKIP_BROWSER_TESTS=1 skips it. One browser at a time (AGENTS.md).
 import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdtemp, rm } from 'node:fs/promises';
@@ -13,16 +15,23 @@ import { join, resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import type { Deck, Slide } from '@turboslide/schema/deck';
-import { slideOrder } from '@turboslide/schema/deck';
-import { exportReportSchema } from '@turboslide/schema/export';
+import { slideOrder, slideTitle } from '@turboslide/schema/deck';
+import {
+  PAGE_RASTER_BUDGETS,
+  PAGE_RASTER_FORMATS,
+  exportReportSchema,
+} from '@turboslide/schema/export';
 import { resolveExecutable } from '@turboslide/headless/launch';
 
+import { checkPptx } from './check.ts';
 import { exportPptx } from './export-pptx.ts';
 import type { ExportPptxResult } from './export-pptx.ts';
 import { readAllAttributes, readGeometry, readPageSize } from './ooxml/geometry.ts';
 import { listEmbeddedFonts } from './ooxml/fonts.ts';
 import { countGroups } from './ooxml/groups.ts';
-import { openPackage, readPart, slideParts } from './ooxml/zip.ts';
+import { hasTitlePlaceholder, readSlideName, readTitlePlaceholder } from './ooxml/titles.ts';
+import { validatePackage } from './ooxml/validate.ts';
+import { listParts, openPackage, readPart, slideParts } from './ooxml/zip.ts';
 import { loadFontsCatalog } from './pptx/fonts-map.ts';
 import { spcOf, spcPtsOf, szOf } from './units.ts';
 
@@ -74,6 +83,7 @@ describe.skipIf(skip)('export pptx over slides 01, 08, 33 and 47', () => {
       themes: ['light', 'dark'],
       slideIds: ids,
       fontsCatalog: catalog,
+      embedFonts: true,
       writeScenes: true,
     });
   });
@@ -88,9 +98,15 @@ describe.skipIf(skip)('export pptx over slides 01, 08, 33 and 47', () => {
     expect(ids).toEqual(['opener-brand', 'audience', 'site', 'opener-blog']);
   });
 
-  test('writes one file and one report per theme plus the merged report, all valid', () => {
+  test('writes one file and one report per theme plus the merged report and the zip, all valid', () => {
     for (const result of [flatten, native]) {
       expect(result.files).toHaveLength(2);
+      expect(result.zipPath?.endsWith('gt-brand-both.zip')).toBe(true);
+      expect(existsSync(result.zipPath ?? '')).toBe(true);
+      expect(result.merged.files).toHaveLength(3);
+      expect(result.merged.residual.some((r) => r.startsWith('both: gt-brand-both.zip'))).toBe(
+        true,
+      );
       expect(result.reports).toHaveLength(2);
       for (const report of result.reports) exportReportSchema.parse(report);
       exportReportSchema.parse(JSON.parse(readFileSync(result.reportPath, 'utf8')));
@@ -104,6 +120,79 @@ describe.skipIf(skip)('export pptx over slides 01, 08, 33 and 47', () => {
     }
     expect(flatten.merged.mode).toBe('flatten');
     expect(native.merged.mode).toBe('native');
+    expect(native.merged.perfect).toBe(false);
+  });
+
+  test('flatten is perfect: every page raster within budget, no font parts, a valid package', async () => {
+    expect(flatten.merged.perfect).toBe(true);
+    for (const report of flatten.reports) {
+      expect(report.perfect).toBe(true);
+      expect(report.fonts.embedded).toEqual([]);
+      expect(report.slides).toHaveLength(4);
+      for (const slide of report.slides) {
+        expect(slide.page, slide.slideId).toBeDefined();
+        expect(PAGE_RASTER_FORMATS).toContain(slide.page?.format);
+        expect(slide.page?.fraction).toBeLessThanOrEqual(PAGE_RASTER_BUDGETS.perfect);
+        expect(slide.page?.bytes).toBeGreaterThan(0);
+      }
+      // the two-tone opener with its plate and credit quantizes to a palette; the photographic
+      // opener (opener-blog, a continuous treatment) carries a continuous-tone picture
+      const bySlide = new Map(report.slides.map((s) => [s.slideId, s]));
+      expect(bySlide.get('opener-brand')?.page?.format).toBe('png-palette');
+      expect(['jpeg', 'png-palette', 'png-rgba']).toContain(
+        bySlide.get('opener-blog')?.page?.format,
+      );
+      expect(report.residual.some((r) => r.startsWith('pages: '))).toBe(true);
+      expect(report.residual.some((r) => r.startsWith('package: ') && r.includes('valid'))).toBe(
+        true,
+      );
+    }
+    for (const path of flatten.files) {
+      const zip = await openPackage(readFileSync(path));
+      expect(await listEmbeddedFonts(zip)).toEqual([]);
+      expect(listParts(zip).some((p) => p.startsWith('ppt/fonts/'))).toBe(false);
+      expect(await readPart(zip, 'ppt/presentation.xml')).not.toContain('embeddedFontLst');
+      const validation = await validatePackage(zip);
+      expect(validation.valid, validation.issues.join('; ')).toBe(true);
+      expect(validation.missingOverrides).toEqual([]);
+      const types = await readPart(zip, '[Content_Types].xml');
+      expect(types).not.toContain('slideMaster2.xml');
+      expect(types).not.toContain('image/jpg"');
+    }
+  });
+
+  test('every slide is named after its title and carries a hidden title placeholder', async () => {
+    for (const result of [flatten, native]) {
+      const path = result.files.find((f) => f.endsWith('-light.pptx')) ?? '';
+      const zip = await openPackage(readFileSync(path));
+      const parts = slideParts(zip);
+      expect(parts).toHaveLength(4);
+      for (const [i, part] of parts.entries()) {
+        const id = ids[i] ?? '';
+        const title = slideTitle(slides[id] as Slide, i + 1);
+        const xml = await readPart(zip, part);
+        expect(readSlideName(xml), part).toBe(title);
+        expect(hasTitlePlaceholder(xml)).toBe(true);
+        expect(readTitlePlaceholder(xml)).toBe(title);
+        expect(xml).toContain(`name="ts:${id}#title" hidden="1"`);
+        expect(xml).not.toContain('kern="0"');
+      }
+      const app = await readPart(zip, 'docProps/app.xml');
+      expect(app).toContain(`<vt:lpstr>${slideTitle(slides[ids[1] ?? ''] as Slide, 2)}</vt:lpstr>`);
+      expect(app).not.toContain('<vt:lpstr>Slide 1</vt:lpstr>');
+      for (const g of await readGeometry(zip)) expect(g.inBounds, `${g.part} ${g.name}`).toBe(true);
+    }
+  });
+
+  test('export check reads the flatten file back as valid', async () => {
+    const check = await checkPptx(flatten.files[0] ?? '', { quickLook: false });
+    expect(check.valid, check.issues.join('; ')).toBe(true);
+    expect(check.slides).toBe(4);
+    expect(check.titledSlides).toBe(4);
+    expect(check.slideNames).toEqual(ids.map((id, i) => slideTitle(slides[id] as Slide, i + 1)));
+    expect(check.embeddedFonts).toEqual([]);
+    expect(check.kernZero).toBe(0);
+    expect(check.contentTypes.missingOverrides).toEqual([]);
   });
 
   test('the scene measured the deck geometry: the h2 of slide 08 at the left column origin', () => {
@@ -271,7 +360,8 @@ describe.skipIf(skip)('export pptx over slides 01, 08, 33 and 47', () => {
         'for path in sys.argv[1:]:',
         '    p = Presentation(path)',
         '    shapes = sum(len(s.shapes) for s in p.slides)',
-        '    out.append({"path": path, "slides": len(p.slides), "shapes": shapes, "width": p.slide_width, "height": p.slide_height, "notes": sum(1 for s in p.slides if s.has_notes_slide)})',
+        '    titles = [s.shapes.title.text if s.shapes.title is not None else None for s in p.slides]',
+        '    out.append({"path": path, "slides": len(p.slides), "shapes": shapes, "width": p.slide_width, "height": p.slide_height, "notes": sum(1 for s in p.slides if s.has_notes_slide), "names": [s.name for s in p.slides], "titles": titles})',
         'print(json.dumps(out))',
       ].join('\n');
       const raw = execFileSync(VENV_PYTHON, ['-c', script, ...files], { encoding: 'utf8' });
@@ -281,21 +371,29 @@ describe.skipIf(skip)('export pptx over slides 01, 08, 33 and 47', () => {
         shapes: number;
         width: number;
         height: number;
+        names: string[];
+        titles: (string | null)[];
       }[];
       expect(rows).toHaveLength(4);
+      const titles = ids.map((id, i) => slideTitle(slides[id] as Slide, i + 1));
       for (const row of rows) {
         expect(row.slides).toBe(4);
         expect(row.width).toBe(12_192_000);
         expect(row.height).toBe(6_858_000);
         expect(row.shapes).toBeGreaterThan(0);
+        expect(row.names).toEqual(titles);
+        expect(row.titles).toEqual(titles);
       }
     },
   );
 
-  test.skipIf(!catalog.built)('embedded font parts are listed in presentation.xml', async () => {
-    const zip = await openPackage(readFileSync(native.files[0] ?? ''));
-    const listed = await listEmbeddedFonts(zip);
-    expect(listed.length).toBeGreaterThan(0);
-    expect(native.reports[0]?.fonts.embedded).toEqual(listed);
-  });
+  test.skipIf(!catalog.built)(
+    'native with embedFonts lists the font parts in presentation.xml',
+    async () => {
+      const zip = await openPackage(readFileSync(native.files[0] ?? ''));
+      const listed = await listEmbeddedFonts(zip);
+      expect(listed.length).toBeGreaterThan(0);
+      expect(native.reports[0]?.fonts.embedded).toEqual(listed);
+    },
+  );
 });

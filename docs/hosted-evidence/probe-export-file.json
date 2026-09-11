@@ -1,0 +1,17 @@
+[
+  {
+    "path": "/api/export/gt-brand?sync=1",
+    "status": 302,
+    "bytes": 0,
+    "ms": 199797,
+    "headers": {
+      "location": "https://ggmycvj7j6224ay5.public.blob.vercel-storage.com/exports/gt-brand/mtxed7cq-400630/gt-brand-light.pptx",
+      "x-turboslide-exec": "inprocess",
+      "x-turboslide-worker": "local",
+      "x-turboslide-job": "mtxed7cq-400630",
+      "x-turboslide-export-report": "{\"job\":\"mtxed7cq-400630\",\"deckId\":\"gt-brand\",\"revision\":28,\"format\":\"pptx\",\"mode\":\"flatten\",\"themes\":[\"light\"],\"pages\":85,\"passed\":true,\"geometryInBounds\":true,\"fontsEmbedded\":0,\"files\":[{\"name\":\"gt-brand-light.pptx\",\"bytes\":16271404,\"sha256\":\"7e37752ebc7e408b0f33b255fe735fe4280f01a61ce4e65d2c7528be5ece805e\"}],\"verify\":\"not-requested\",\"renderer\":\"chrome-headless-shell 147.0.7727.0, SwiftShader, Go...",
+      "x-vercel-id": "sfo1::iad1::rczgt-1789157812052-11af1dfbce7a",
+      "x-vercel-cache": "MISS"
+    }
+  }
+]

@@ -1,22 +1,18 @@
-// export.run (SPEC 7.1, 7.2): `turboslide export pptx --mode flatten|native --theme light,dark
-// --fonts exact|standard --headings raster --raster-scale auto|2|3 --picture-scale 2|3
-// --exclude-share-alike --verify --out <dir>` writes `<deckId>-<theme>.pptx`,
+// export.run (SPEC 7.1, 7.2): `turboslide export pptx --mode flatten|native --theme light,dark|both
+// --fonts exact|standard [--embed-fonts] [--headings raster] [--raster-scale auto|2|3]
+// [--picture-scale 2|3] [--exclude-share-alike] [--verify] --out <dir>` writes
+// `<deckId>-<theme>.pptx`, `<deckId>-both.zip` when both themes are exported,
 // `export-report-<theme>.json` and the merged `export-report.json`, and exits 1 when the report's
-// `passed` is false. `--verify` hands the report to the verify loop (packages/export/src/verify,
-// the render worker's LibreOffice pass). `turboslide export gslides --mode flatten|native --theme
-// light --dry-run --out <dir>` builds and validates the Slides batchUpdate requests without
-// credentials (requests.json, images.json, dry-run.json, the report with no presentationId) and
-// exits 0; without --dry-run it needs TURBOSLIDE_GOOGLE_CREDENTIALS, creates one presentation per
-// theme and reports the presentationId and URL; `--verify` diffs the LARGE thumbnails (SPEC 8.3,
-// MILESTONES M6). PDF lands with the publishing builder.
+// `passed` is false. Flatten is the perfect mode (pixel identical, docs/pptx.md); native is the
+// editable text mode. `--verify` hands the report to the verify loop (packages/export/src/verify,
+// the render worker's LibreOffice pass plus the QuickLook smoke check where macOS provides it).
+// `turboslide export check <file.pptx>` is export.check (commands/export-check.ts). PDF lands with
+// the publishing builder.
 import { join } from 'node:path';
 
 import type { ExportMode } from '@turboslide/schema/export';
 import type { Theme } from '@turboslide/schema/render';
 import { exportPptx } from '@turboslide/export/export-pptx';
-import { MissingCredentialsError } from '@turboslide/export/gslides/auth';
-import { exportGslides } from '@turboslide/export/gslides/build';
-import type { HostKind } from '@turboslide/export/gslides/images';
 import type { BaselineTarget } from '@turboslide/export/pptx/baseline';
 import type { FontSet } from '@turboslide/export/pptx/fonts-map';
 import type { RasterScalePolicy } from '@turboslide/export/scene/extract';
@@ -29,30 +25,39 @@ import { derivedDir, findDeckDir, loadDeck, resolveOut } from '../deck-files.ts'
 import { EXIT, UsageError } from '../exit.ts';
 import { formatBytes } from '../output.ts';
 import { selectSlides } from '../select.ts';
+import { exportCheck } from './export-check.ts';
 
 function parseMode(ctx: CommandContext): ExportMode {
   const modeFlag = flagString(ctx.args, 'mode') ?? 'flatten';
   if (modeFlag !== 'flatten' && modeFlag !== 'native')
-    throw new UsageError('--mode wants flatten or native');
+    throw new UsageError('--mode wants flatten (perfect) or native (editable text)');
   return modeFlag;
 }
 
-function parseThemes(ctx: CommandContext): Theme[] {
-  const themes = flagList(ctx.args, 'theme', ['light', 'dark']).filter(
-    (t): t is Theme => t === 'light' || t === 'dark',
-  );
-  if (themes.length === 0) throw new UsageError('--theme wants light, dark or light,dark');
-  return themes;
+/** `--theme light`, `light,dark` or `both`; the default is both. */
+export function parseThemes(ctx: CommandContext): Theme[] {
+  const raw = flagList(ctx.args, 'theme', ['light', 'dark']);
+  const themes = raw
+    .flatMap((t) => (t === 'both' ? ['light', 'dark'] : [t]))
+    .filter((t): t is Theme => t === 'light' || t === 'dark');
+  if (
+    themes.length === 0 ||
+    themes.length !== raw.flatMap((t) => (t === 'both' ? [1, 2] : [1])).length
+  )
+    throw new UsageError('--theme wants light, dark, light,dark or both');
+  return [...new Set(themes)];
 }
 
 export async function exportCommand(ctx: CommandContext): Promise<number> {
   const [format, ...rest] = ctx.rest;
   if (format === undefined)
-    throw new UsageError('export wants a format: pptx or gslides (pdf lands in M6)');
-  if (format === 'gslides') return exportGslidesCommand(ctx, rest);
+    throw new UsageError(
+      'export wants a format (pptx) or the check subcommand: export check <file>',
+    );
+  if (format === 'check') return exportCheck(ctx, rest);
   if (format !== 'pptx')
     throw new UsageError(
-      `export ${format} is not implemented yet: pptx ships in M2, gslides in M6, pdf in M6`,
+      `export ${format} is not implemented yet: pptx ships in M2, pdf in M6; the Google Slides exporter was removed on 2026-09-11 (docs/pptx.md)`,
     );
   const dir = findDeckDir(ctx.cwd, flagString(ctx.args, 'deck'), ctx.env);
   const loaded = loadDeck(dir);
@@ -60,9 +65,11 @@ export async function exportCommand(ctx: CommandContext): Promise<number> {
   const mode = parseMode(ctx);
   const themes = parseThemes(ctx);
   const fontsFlag = flagString(ctx.args, 'fonts') ?? 'exact';
-  if (fontsFlag !== 'exact' && fontsFlag !== 'standard')
-    throw new UsageError('--fonts wants exact or standard');
-  const fonts: FontSet = fontsFlag;
+  // `--fonts embed` is the exact set with the faces embedded, the shorthand Kevin's directive names
+  if (fontsFlag !== 'exact' && fontsFlag !== 'standard' && fontsFlag !== 'embed')
+    throw new UsageError('--fonts wants exact, standard or embed (exact plus --embed-fonts)');
+  const fonts: FontSet = fontsFlag === 'embed' ? 'exact' : fontsFlag;
+  const embedFonts = fontsFlag === 'embed' || flagBoolean(ctx.args, 'embed-fonts');
   const outDir = resolveOut(
     ctx.cwd,
     flagString(ctx.args, 'out'),
@@ -88,10 +95,11 @@ export async function exportCommand(ctx: CommandContext): Promise<number> {
     throw new UsageError('--picture-scale wants 2 or 3');
   const pictureScale: PictureScale = pictureFlag === '2' ? 2 : 3;
   const verify = flagBoolean(ctx.args, 'verify');
+  const noJpeg = flagBoolean(ctx.args, 'no-jpeg');
   const startedAt = Date.now();
 
   ctx.out.human(
-    `export: pptx ${mode}, ${ids.length} slide(s) x ${themes.join(',')}, fonts ${fonts}${excludeShareAlike ? ', share-alike pictures excluded' : ''} -> ${outDir}`,
+    `export: pptx ${mode}${mode === 'flatten' ? ' (perfect)' : ' (editable text)'}, ${ids.length} slide(s) x ${themes.join(',')}, fonts ${fonts}${embedFonts ? ' embedded' : ''}${excludeShareAlike ? ', share-alike pictures excluded' : ''} -> ${outDir}`,
   );
   const result = await exportPptx({
     deckDir: dir,
@@ -100,16 +108,22 @@ export async function exportCommand(ctx: CommandContext): Promise<number> {
     mode,
     themes,
     fonts,
+    ...(embedFonts ? { embedFonts: true } : {}),
     excludeShareAlike,
     baseline,
     ...(headingsFlag === 'raster' ? { headings: 'raster' as const } : {}),
     rasterScale,
     pictureScale,
+    ...(noJpeg ? { noJpeg: true } : {}),
     slideIds: ids.length === loaded.order.length ? undefined : ids,
     writeScenes: flagBoolean(ctx.args, 'scenes'),
     onSlide: (scene, ms) =>
       ctx.out.human(
         `  ${String(scene.n).padStart(2)} ${scene.slideId} ${scene.theme} ${ms} ms, ${scene.texts.length} text(s), ${scene.rasters.length} raster(s)`,
+      ),
+    onPage: (scene, raster) =>
+      ctx.out.human(
+        `  ${String(scene.n).padStart(2)} ${scene.slideId} ${scene.theme} page ${raster.format} ${formatBytes(raster.bytes.byteLength)}, ${raster.colors > 4096 ? 'over 4096' : raster.colors} colors, ${(raster.fraction * 100).toFixed(3)} percent mismatch`,
       ),
     onFile: (path, bytes) => ctx.out.human(`export: wrote ${path} (${formatBytes(bytes)})`),
   });
@@ -127,80 +141,8 @@ export async function exportCommand(ctx: CommandContext): Promise<number> {
   }
   ctx.out.result(merged);
   ctx.out.human(
-    `export: ${result.files.length} file(s), revision ${merged.revision}, geometry ${merged.geometryInBounds ? 'in bounds' : 'OUT OF BOUNDS'}, fonts embedded ${merged.fonts.embedded.length}, required on viewer ${merged.fonts.requiredOnViewer.length}, passed ${merged.passed}, ${((Date.now() - startedAt) / 1000).toFixed(1)} s`,
+    `export: ${result.files.length} file(s)${result.zipPath ? ' plus the zip of both' : ''}, revision ${merged.revision}, geometry ${merged.geometryInBounds ? 'in bounds' : 'OUT OF BOUNDS'}, perfect ${merged.perfect}, fonts embedded ${merged.fonts.embedded.length}, required on viewer ${merged.fonts.requiredOnViewer.length}, passed ${merged.passed}, ${((Date.now() - startedAt) / 1000).toFixed(1)} s`,
   );
   for (const line of merged.residual) ctx.out.human(`  residual: ${line}`);
   return merged.passed ? EXIT.ok : EXIT.findings;
-}
-
-/**
- * `turboslide export gslides [ids|all] --mode flatten|native --theme light[,dark] [--dry-run]
- * [--verify] [--images=local|gcs] [--assets-url=<origin>] [--title=<text>] [--scenes] --out <dir>`.
- * A dry run exits 0 when the requests validate and every element stays on the page; a live run
- * exits 1 when the report's `passed` is false and 2 when the credentials are missing.
- */
-async function exportGslidesCommand(ctx: CommandContext, rest: string[]): Promise<number> {
-  const dir = findDeckDir(ctx.cwd, flagString(ctx.args, 'deck'), ctx.env);
-  const loaded = loadDeck(dir);
-  const ids = selectSlides(loaded, rest);
-  const mode = parseMode(ctx);
-  const themes = parseThemes(ctx);
-  const dryRun = flagBoolean(ctx.args, 'dry-run');
-  const verify = flagBoolean(ctx.args, 'verify');
-  const outDir = resolveOut(
-    ctx.cwd,
-    flagString(ctx.args, 'out'),
-    join(derivedDir(dir, ctx.cwd), 'export-gslides'),
-  );
-  const imagesFlag = flagString(ctx.args, 'images');
-  if (imagesFlag !== undefined && imagesFlag !== 'local' && imagesFlag !== 'gcs')
-    throw new UsageError('--images wants local or gcs');
-  const imageHost: HostKind | undefined = imagesFlag;
-  const excludeShareAlike = flagBoolean(ctx.args, 'exclude-share-alike');
-  const title = flagString(ctx.args, 'title');
-  const assetBaseUrl = flagString(ctx.args, 'assets-url');
-  const startedAt = Date.now();
-  ctx.out.human(
-    `export: gslides ${mode}, ${ids.length} slide(s) x ${themes.join(',')}${dryRun ? ', dry run' : ''}${verify ? ', verify' : ''}${excludeShareAlike ? ', share-alike pictures excluded' : ''} -> ${outDir}`,
-  );
-  try {
-    const result = await exportGslides({
-      deckDir: dir,
-      document: { deck: loaded.deck, slides: loaded.slides },
-      outDir,
-      mode,
-      themes,
-      dryRun,
-      verify,
-      env: ctx.env,
-      excludeShareAlike,
-      slideIds: ids.length === loaded.order.length ? undefined : ids,
-      writeScenes: flagBoolean(ctx.args, 'scenes'),
-      ...(imageHost ? { imageHost } : {}),
-      ...(title ? { title } : {}),
-      ...(assetBaseUrl ? { assetBaseUrl } : {}),
-      log: (line) => ctx.out.human(`  ${line}`),
-      onSlide: (scene, ms) =>
-        ctx.out.human(
-          `  ${String(scene.n).padStart(2)} ${scene.slideId} ${scene.theme} ${ms} ms, ${scene.texts.length} text(s), ${scene.rasters.length} raster(s)`,
-        ),
-    });
-    ctx.out.result(result.merged);
-    for (const theme of result.themes) {
-      const bytes = theme.batches.reduce((n, b) => n + b.bytes, 0);
-      ctx.out.human(
-        `export: ${theme.theme}: ${theme.plan.slides.length} slide(s), ${theme.plan.requests.length} request(s) in ${theme.batches.length} batch(es) (${formatBytes(bytes)}), ${theme.manifest.images.length} image(s), ${theme.validation.length} invalid${
-          theme.live ? `, presentation ${theme.live.presentationId} ${theme.live.url}` : ''
-        }${theme.verified ? `, thumbnails ${theme.verified.passed ? 'within' : 'over'} budget` : ''}`,
-      );
-    }
-    ctx.out.human(
-      `export: wrote ${result.requestsPath}, ${result.imagesPath}${result.dryRunPath ? `, ${result.dryRunPath}` : ''}, ${result.reportPath}; geometry ${result.merged.geometryInBounds ? 'in bounds' : 'OUT OF BOUNDS'}, passed ${result.merged.passed}, ${((Date.now() - startedAt) / 1000).toFixed(1)} s`,
-    );
-    for (const line of result.merged.residual) ctx.out.human(`  residual: ${line}`);
-    return result.merged.passed ? EXIT.ok : EXIT.findings;
-  } catch (error) {
-    if (error instanceof MissingCredentialsError) throw new UsageError(error.message);
-    throw error;
-  }
 }

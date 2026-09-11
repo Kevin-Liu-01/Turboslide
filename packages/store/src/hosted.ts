@@ -1,0 +1,193 @@
+// The hosted deck collection (the hosting round; SPEC 11 "Storage"): one object the studio asks
+// for decks, whichever backend select.ts picked. `file` is the checkout's decks/ folder as it
+// always was; `tmp` is the overlay seeded from the bundled decks (tmp-store.ts); `blob` is the
+// overlay as a mirror of a Vercel Blob store (blob-store.ts). Every backend hands out DeckStore
+// instances, so every write still goes through applyWrite (SPEC 7.1), and every backend serves
+// the deck list, deck.create and the asset twins through the same six calls. Framework free: the
+// studio registers the seed and the Blob client it got from Nitro through registerHostingProviders.
+import { existsSync } from 'node:fs';
+import { join, normalize, resolve, sep } from 'node:path';
+
+import type { BlobClient } from './blob-store.ts';
+import { blobDecks } from './blob-store.ts';
+import { openFileStore } from './file-store.ts';
+import type { SeedSource } from './seed.ts';
+import type { StoreKind, StoreSelection } from './select.ts';
+import { NOT_PERSISTENT_NOTICE } from './select.ts';
+import type { DeckStore } from './store.ts';
+import { createDeck, listDeckHeads } from './templates.ts';
+import type { CreateDeckInput, CreateDeckResult, DeckHead } from './templates.ts';
+import { tmpDecks } from './tmp-store.ts';
+
+/** What the deck list and the editor banner show about the store. */
+export type HostingFacts = {
+  store: StoreKind;
+  reason: string;
+  /** false when a new instance starts from the seed again */
+  persistent: boolean;
+  /** a Blob token is present in the environment */
+  blob: boolean;
+  /** where the seed came from; null in file mode */
+  seed: string | null;
+  /** the notice the editor shows; null when edits persist */
+  notice: string | null;
+  decksDir: string;
+};
+
+export type HostedDecks = {
+  readonly kind: StoreKind;
+  readonly persistent: boolean;
+  /** the root the studio treats as the repository root: the workspace, or the overlay */
+  readonly root: string;
+  /** the decks folder FileStore-shaped code reads */
+  readonly decksDir: string;
+  /** the seed is materialized (and, for blob, uploaded once); a no-op in file mode */
+  ready: () => Promise<void>;
+  /** every deck, newest first */
+  list: () => Promise<DeckHead[]>;
+  has: (deckId: string) => Promise<boolean>;
+  /** the store for a deck; a RangeError when the deck is missing */
+  open: (deckId: string) => Promise<DeckStore>;
+  create: (input: CreateDeckInput) => Promise<CreateDeckResult>;
+  /** a deck's twins are on disk, so a render or export job that reads them finds them; a no-op in file mode */
+  ensureAssets: (deckId: string) => Promise<void>;
+  /** the local file of an asset twin, confined to the deck's assets folder; null when absent */
+  assetFile: (deckId: string, relative: string) => Promise<string | null>;
+  /** a URL the twin is served from when it is not on this instance; null when there is none */
+  assetUrl: (deckId: string, relative: string) => Promise<string | null>;
+  facts: () => HostingFacts;
+};
+
+export type BlobClientFactory = BlobClient | (() => Promise<BlobClient>);
+
+export type HostedOptions = {
+  selection: StoreSelection;
+  /** the checkout's decks folder; null when the process runs outside a workspace */
+  workspaceDecksDir: string | null;
+  overlayRoot: string;
+  seed: SeedSource | null;
+  blob: BlobClientFactory | null;
+  /** the clock, for tests */
+  now?: () => string;
+  log?: (line: string) => void;
+};
+
+/**
+ * What the runtime hands the store: the bundled seed and the Blob client. The studio's Nitro
+ * plugin registers them at startup (apps/studio/src/server/hosting-plugin.ts); the studio's
+ * root.ts reads them, and falls back to the checkout's decks/ when nothing is registered.
+ */
+export type HostingProviders = {
+  seed?: SeedSource | null;
+  blob?: BlobClientFactory | null;
+  /**
+   * the runtime files of the theme, fonts and export packages a bundled server cannot resolve
+   * (keys laid out like packages/: theme/src/gt-ink-paper/sheet.css); the studio materializes
+   * them and names the folder in TURBOSLIDE_PACKAGES_DIR
+   */
+  packages?: SeedSource | null;
+  /** who registered, for the facts */
+  source: string;
+};
+
+const GLOBAL_KEY = '__turboslideHosting';
+
+type Shared = typeof globalThis & { [GLOBAL_KEY]?: HostingProviders };
+
+export function registerHostingProviders(providers: HostingProviders): void {
+  (globalThis as Shared)[GLOBAL_KEY] = providers;
+}
+
+export function hostingProviders(): HostingProviders | null {
+  return (globalThis as Shared)[GLOBAL_KEY] ?? null;
+}
+
+/** The absolute path of `<decksDir>/<deckId>/assets/<relative>`, or null when it escapes the folder. */
+export function assetPathWithin(decksDir: string, deckId: string, relative: string): string | null {
+  const base = resolve(join(decksDir, deckId, 'assets'));
+  const file = resolve(join(base, normalize(relative)));
+  return file.startsWith(base + sep) ? file : null;
+}
+
+export function factsFor(
+  selection: StoreSelection,
+  decksDir: string,
+  seed: SeedSource | null,
+): HostingFacts {
+  return {
+    store: selection.kind,
+    reason: selection.reason,
+    persistent: selection.persistent,
+    blob: selection.blob,
+    seed: seed === null ? null : seed.name,
+    notice: selection.persistent ? null : NOT_PERSISTENT_NOTICE,
+    decksDir,
+  };
+}
+
+/** The checkout's decks/ folder: what the studio always had (SPEC 4.1). */
+export function fileDecks(
+  root: string,
+  decksDir: string,
+  selection: StoreSelection,
+  options: { now?: () => string } = {},
+): HostedDecks {
+  const createOptions = options.now === undefined ? {} : { now: options.now };
+  return {
+    kind: 'file',
+    persistent: true,
+    root,
+    decksDir,
+    async ready() {},
+    async list() {
+      return listDeckHeads(decksDir);
+    },
+    async has(deckId) {
+      return existsSync(join(decksDir, deckId, 'deck.json'));
+    },
+    async open(deckId) {
+      const dir = join(decksDir, deckId);
+      if (!existsSync(join(dir, 'deck.json')))
+        throw new RangeError(`No deck ${deckId} under decks/`);
+      return openFileStore({ dir, ...createOptions });
+    },
+    async create(input) {
+      return createDeck(decksDir, input, createOptions);
+    },
+    async ensureAssets() {},
+    async assetFile(deckId, relative) {
+      const file = assetPathWithin(decksDir, deckId, relative);
+      return file !== null && existsSync(file) ? file : null;
+    },
+    async assetUrl() {
+      return null;
+    },
+    facts() {
+      return factsFor(selection, decksDir, null);
+    },
+  };
+}
+
+/** The collection for a selection; a TypeError when the backend's inputs are missing. */
+export function openHostedDecks(options: HostedOptions): HostedDecks {
+  const { selection } = options;
+  switch (selection.kind) {
+    case 'file': {
+      if (options.workspaceDecksDir === null) {
+        throw new TypeError(
+          'The file store needs a checkout: no pnpm-workspace.yaml above the working directory and no TURBOSLIDE_ROOT; set TURBOSLIDE_STORE=tmp or blob when hosting',
+        );
+      }
+      return fileDecks(
+        resolve(options.workspaceDecksDir, '..'),
+        options.workspaceDecksDir,
+        selection,
+        options.now === undefined ? {} : { now: options.now },
+      );
+    }
+    case 'tmp':
+      return tmpDecks(options);
+    case 'blob':
+      return blobDecks(options);
+  }
+}

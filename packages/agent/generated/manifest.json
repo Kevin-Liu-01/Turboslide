@@ -126,6 +126,7 @@
     ],
     "export": [
       "export.run",
+      "export.check",
       "build.run",
       "fonts.build"
     ],
@@ -138,7 +139,7 @@
       "artifact.download"
     ]
   },
-  "actionCount": 45,
+  "actionCount": 46,
   "resources": [
     {
       "uri": "deck://manifest",

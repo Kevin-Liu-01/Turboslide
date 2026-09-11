@@ -2,7 +2,9 @@
    menu's grammar (Sidebar.css .pt-orow-menu): paper, one --pt-hair frame, 11.5px titanium group
    heads, 28px rows, --pt-hair-soft rules between the groups. Option rows put the label at the
    left and a small Seg or a 16px check box at the right, the inspector's check grammar
-   (inspector/check.css). The one solid button is Export PPTX; every other run is a text button.
+   (inspector/check.css); a check row the mode does not offer (Embed fonts outside Editable text)
+   reads in titanium and takes no pointer. The one solid button is Export PPTX; the build is a
+   text button.
    The progress line reads the worker's last log line in 12px with a pulsing dot while a run is
    in flight. Colors are tokens only, radius 0 apart from the Segs' shell corner, no shadow. */
 .ts-export-anchor {
@@ -96,6 +98,20 @@
 
 .ts-export-check:hover .ts-export-box {
   border-color: var(--pt-ink-2);
+}
+
+.ts-export-check[data-disabled] {
+  cursor: default;
+}
+
+.ts-export-check[data-disabled] .ts-export-label {
+  color: var(--pt-titanium);
+}
+
+.ts-export-check[data-disabled] .ts-export-box,
+.ts-export-check[data-disabled]:hover .ts-export-box {
+  border-color: var(--pt-hair-soft);
+  background: var(--pt-paper);
 }
 
 .ts-export-check input:checked ~ .ts-export-box {

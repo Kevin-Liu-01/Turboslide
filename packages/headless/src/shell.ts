@@ -1,7 +1,8 @@
 // The shell driver of Prototemplate/scripts/lint-lines.mjs (auditShellRoute, lines 862 to 983),
 // ported for `turboslide lint --chrome` (SPEC 2.2, MILESTONES M1 acceptance). It opens one page
-// at a width and theme, waits for the shell, verifies the theme, then drives the shell through
-// its states with the keyboard and runs an audit function inside the document after each. The
+// at a width and theme, waits for the shell and for its client to hydrate (a bounded wait, never
+// a fixed settle), verifies the theme, then drives the shell through its states with the keyboard
+// and, once the document has stopped moving, runs an audit function inside it after each. The
 // audit and the probe are parameters (they live in @turboslide/lint, which this package does not
 // import, SPEC 3.3 item 3) and must be self-contained because Playwright serializes them.
 // A state that did not apply is an infrastructure failure, never a pass (lint-lines.mjs line 113).
@@ -86,6 +87,76 @@ export type ShellDrivePlan<TConfig, TAudit> = {
   /** The key that toggles the theme when the document shows the other one. */
   themeKey?: string;
   timeoutMs?: number;
+  /**
+   * How long to wait for the studio page's client to take over the shell before the first key
+   * (default 30 s; the page is an infrastructure failure past it). A page without the ported
+   * shell root (the Prototemplate deck) has no hydration mark and gets `settleMs` instead.
+   */
+  hydrateTimeoutMs?: number;
+  /** The fixed settle for a page without a hydration mark (default 1200 ms). */
+  settleMs?: number;
+  /** The bound on the wait for animations and scrolling to stop before each audit (default 2000 ms). */
+  auditSettleMs?: number;
+};
+
+/**
+ * Whether the studio page's client is running. Self-contained (Playwright serializes it): the
+ * window API owner is installed (packages/agent window/registry.ts), or the shell root carries
+ * data-settled, which ViewerShell sets one frame after its mount effect. The key listeners attach
+ * in that same mount (useShellKeys, useMountEffect), so a key pressed earlier lands on the
+ * server's markup and toggles nothing. Measured on a cold Vite dev server: with a fixed 1200 ms
+ * settle the first audit reported `state "list" did not apply` in three runs of three.
+ */
+const hydrated = (): boolean => {
+  const w = window as Window & { turboslide?: { studio?: unknown } };
+  if (w.turboslide?.studio) return true;
+  return document.querySelector('.pt-viewer[data-settled]') !== null;
+};
+
+/**
+ * Resolves once the document has stopped moving: no running animation with a finite iteration
+ * count (CSS transitions, keyframe animations, and the view transition's
+ * `::view-transition-old/new` pseudo-element animations, which Chromium lists on `html`), and the
+ * window's and every element's scroll offsets unchanged across two samples 120 ms apart; or
+ * `maxMs` reached. Finished animations kept by their fill mode (the outline rows' 120 ms entry)
+ * and infinite loops are not motion.
+ *
+ * Why this exists (measured at 390 dark on /edit, the book state): the mode change runs through
+ * `document.startViewTransition`, and while its 200 ms cross-fade runs, hit testing goes to the
+ * `::view-transition` tree, so `document.elementsFromPoint` names no covering element and the
+ * auditor's `bothVisible` (packages/lint chrome.ts) sees the book's rules through the opaque
+ * inspector that covers them. The four findings (`ts-ctl-textarea | DIV`, `ts-ctl-json-field |
+ * DIV`, `A | ts-insp-head`, `ts-ctl-select | A`) appear at 100 ms after the key and are gone at
+ * 300 ms with the same 554 segments; the state's fixed 700 ms settle lands inside the transition
+ * only when the book's mount is slow (one run of three by hand, the full chain under a
+ * concurrent image build). Self-contained (Playwright serializes it).
+ */
+const settleDocument = async (maxMs: number): Promise<{ ms: number; settled: boolean }> => {
+  const t0 = performance.now();
+  const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+  const moving = (): boolean =>
+    document.getAnimations().some((animation) => {
+      if (animation.playState !== 'running') return false;
+      const timing = animation.effect?.getTiming();
+      return timing === undefined || timing.iterations !== Infinity;
+    });
+  const scrolls = (): string => {
+    const out: string[] = [`${window.scrollX},${window.scrollY}`];
+    for (const el of document.querySelectorAll<HTMLElement>('*')) {
+      if (el.scrollTop !== 0 || el.scrollLeft !== 0) out.push(`${el.scrollTop},${el.scrollLeft}`);
+    }
+    return out.join(';');
+  };
+  let last = scrolls();
+  while (performance.now() - t0 < maxMs) {
+    await wait(120);
+    const next = scrolls();
+    if (next === last && !moving()) {
+      return { ms: Math.round(performance.now() - t0), settled: true };
+    }
+    last = next;
+  }
+  return { ms: Math.round(performance.now() - t0), settled: false };
 };
 
 export type ShellDriveResult<TAudit> = {
@@ -166,8 +237,21 @@ export async function driveShell<TConfig, TAudit extends object>(
         timeout,
       });
     }
+    // the ported shell hydrates (data-settled, or the window API owner); the Prototemplate deck
+    // and any other page without the shell root keep the fixed settle
+    const shellRoot = deck ? null : await page.$('.pt-viewer');
+    if (shellRoot) {
+      const hydrateTimeout = plan.hydrateTimeoutMs ?? 30_000;
+      try {
+        await page.waitForFunction(hydrated, undefined, { timeout: hydrateTimeout, polling: 100 });
+      } catch {
+        out.infrastructure = `${url} at ${width} did not hydrate within ${hydrateTimeout} ms (no .pt-viewer[data-settled], no window.turboslide.studio)`;
+        return out;
+      }
+    } else {
+      await page.waitForTimeout(plan.settleMs ?? 1200);
+    }
     await target.evaluate(() => document.fonts.ready);
-    await page.waitForTimeout(1200);
 
     let probe = await target.evaluate(plan.probe);
     if (probe.theme === null) {
@@ -191,6 +275,7 @@ export async function driveShell<TConfig, TAudit extends object>(
       arg: TArg,
     ) => Promise<TResult>;
     const audit = async (name: string): Promise<ShellProbe> => {
+      await target.evaluate(settleDocument, plan.auditSettleMs ?? 2000);
       const state = await target.evaluate(plan.probe);
       const found = await evaluateWith(plan.audit, plan.cfg);
       out.results[name] = { ...found, probe: state };

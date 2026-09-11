@@ -2,7 +2,9 @@
 // in submission order, because the machine is shared and one browser page at a time is the rule
 // (AGENTS.md, dev server rules). A job has a directory under <workerDir>/jobs/<id> for its files, a
 // bounded log, and a record the HTTP surface serves; finished records are kept in memory up to
-// `keep` and on disk as job.json.
+// `keep` and on disk as job.json. `run` is submit and wait in one call, the shape a serverless
+// invocation needs: the job starts, finishes and is read back before the function answers
+// (docs/hosting-chromium.md); the queue still serializes it behind whatever is running.
 import { randomBytes } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -35,7 +37,7 @@ export type JobContext = {
   signal: AbortSignal;
 };
 
-export type JobRunner<I, O> = (input: I, ctx: JobContext) => Promise<O>;
+export type JobRunner<TInput, TOutput> = (input: TInput, ctx: JobContext) => Promise<TOutput>;
 
 export type QueueStats = {
   queued: number;
@@ -47,11 +49,22 @@ export type QueueStats = {
 
 export type Queue = {
   dir: string;
-  submit: <I, O>(kind: JobKind, input: I, run: JobRunner<I, O>) => JobRecord;
+  submit: <TInput, TOutput>(
+    kind: JobKind,
+    input: TInput,
+    run: JobRunner<TInput, TOutput>,
+  ) => JobRecord;
   get: (id: string) => JobRecord | undefined;
   list: (kind?: JobKind) => JobRecord[];
   /** Resolves when the job is done or failed; rejects on timeout. */
   wait: (id: string, timeoutMs?: number) => Promise<JobRecord>;
+  /** Submit and wait in one call: the finished record (done or failed), or a rejection on timeout. */
+  run: <TInput, TOutput>(
+    kind: JobKind,
+    input: TInput,
+    run: JobRunner<TInput, TOutput>,
+    timeoutMs?: number,
+  ) => Promise<JobRecord>;
   stats: () => QueueStats;
   /** Aborts the running job's signal and stops taking work. */
   close: () => void;
@@ -150,29 +163,55 @@ export function createQueue(options: QueueOptions): Queue {
     })();
   };
 
+  const submit = <TInput, TOutput>(
+    kind: JobKind,
+    input: TInput,
+    run: JobRunner<TInput, TOutput>,
+  ): JobRecord => {
+    if (closed) throw new Error('queue closed');
+    const id = newJobId();
+    const record: JobRecord = {
+      id,
+      kind,
+      status: 'queued',
+      input,
+      dir: join(options.dir, 'jobs', id),
+      createdAt: new Date().toISOString(),
+      log: [],
+    };
+    records.set(id, record);
+    pending.push({
+      record,
+      run: run as JobRunner<unknown, unknown>,
+      controller: new AbortController(),
+    });
+    queueMicrotask(pump);
+    return record;
+  };
+
+  const wait = (id: string, timeoutMs = 600_000): Promise<JobRecord> => {
+    const record = records.get(id);
+    if (!record) return Promise.reject(new RangeError(`no job ${id}`));
+    if (record.status === 'done' || record.status === 'failed') return Promise.resolve(record);
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(
+        () => reject(new Error(`job ${id} did not finish within ${timeoutMs} ms`)),
+        timeoutMs,
+      );
+      const list = waiters.get(id) ?? [];
+      list.push((r) => {
+        clearTimeout(timer);
+        resolve(r);
+      });
+      waiters.set(id, list);
+    });
+  };
+
   return {
     dir: options.dir,
-    submit(kind, input, run) {
-      if (closed) throw new Error('queue closed');
-      const id = newJobId();
-      const record: JobRecord = {
-        id,
-        kind,
-        status: 'queued',
-        input,
-        dir: join(options.dir, 'jobs', id),
-        createdAt: new Date().toISOString(),
-        log: [],
-      };
-      records.set(id, record);
-      pending.push({
-        record,
-        run: run as JobRunner<unknown, unknown>,
-        controller: new AbortController(),
-      });
-      queueMicrotask(pump);
-      return record;
-    },
+    submit,
+    wait,
+    run: (kind, input, run, timeoutMs) => wait(submit(kind, input, run).id, timeoutMs),
     get(id) {
       return records.get(id);
     },
@@ -180,23 +219,6 @@ export function createQueue(options: QueueOptions): Queue {
       return [...records.values()]
         .filter((r) => kind === undefined || r.kind === kind)
         .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-    },
-    wait(id, timeoutMs = 600_000) {
-      const record = records.get(id);
-      if (!record) return Promise.reject(new RangeError(`no job ${id}`));
-      if (record.status === 'done' || record.status === 'failed') return Promise.resolve(record);
-      return new Promise((resolve, reject) => {
-        const timer = setTimeout(
-          () => reject(new Error(`job ${id} did not finish within ${timeoutMs} ms`)),
-          timeoutMs,
-        );
-        const list = waiters.get(id) ?? [];
-        list.push((r) => {
-          clearTimeout(timer);
-          resolve(r);
-        });
-        waiters.set(id, list);
-      });
     },
     stats() {
       const all = [...records.values()];

@@ -35,7 +35,7 @@ import {
 } from '@turboslide/theme/tokens';
 
 import { lintLists } from './lint';
-import { deckDir, repoRoot } from './root';
+import { deckDir, ensureDeckAssets, repoRoot, workerClientOptions } from './root';
 import { studioSessions } from './sessions';
 
 /**
@@ -76,7 +76,7 @@ function latestSheets(): SheetStore {
 let client: WorkerClient | undefined;
 
 function worker(): WorkerClient {
-  client ??= createWorkerClient();
+  client ??= createWorkerClient(workerClientOptions());
   return client;
 }
 
@@ -135,6 +135,7 @@ export async function readRenderUrl(url: string): Promise<Uint8Array> {
   const deckId = parsed.searchParams.get('deck') ?? DEFAULT_DECK;
   const theme: Theme = parsed.searchParams.get('theme') === 'dark' ? 'dark' : 'light';
   const scale: 1 | 2 = parsed.searchParams.get('scale') === '2' ? 2 : 1;
+  await ensureDeckAssets(deckId);
   const rendered = await worker().renderSlide({ deckId, slideId, theme, scale });
   return rendered.png;
 }
@@ -163,6 +164,7 @@ function registerWorkerActions(dispatcher: Dispatcher, deckId: string, store: Fi
       if (document.slides[id] === undefined) throw new RangeError(`No slide "${id}"`);
     const records: RenderRecord[] = [];
     const images: string[] = [];
+    await ensureDeckAssets(deckId);
     // sequential: the local queue runs one Chromium at a time and the machine is shared
     for (const slideId of ids) {
       for (const theme of themes) {

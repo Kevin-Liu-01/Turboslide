@@ -34,6 +34,7 @@ import { checkGeometry, geometryResidual } from './geometry.ts';
 import type { GeometryCheck } from './geometry.ts';
 import { renderPptxPages, resolveTools } from './libreoffice.ts';
 import type { RenderPagesResult, ToolPaths } from './libreoffice.ts';
+import { quickLookBinary, quickLookThumbnail } from './quicklook.ts';
 import {
   ensureReference,
   readReference,
@@ -67,6 +68,11 @@ export type VerifyOptions = {
   slideIds?: readonly string[];
   /** Replaces LibreOffice and poppler: returns page PNG paths for a .pptx (tests, calibration). */
   renderPages?: (pptxPath: string, outDir: string) => Promise<RenderPagesResult>;
+  /**
+   * The QuickLook smoke check (quicklook.ts): the first page through macOS's own renderer,
+   * compared with the reference for the record and never gated; default on where qlmanage exists.
+   */
+  quickLook?: boolean;
   log?: (line: string) => void;
   onSlide?: (slide: SlideVerification) => void;
   env?: NodeJS.ProcessEnv;
@@ -507,6 +513,45 @@ export async function verifyPptx(
       log(
         `  ${pad(n)} ${entry.slideId} ${theme} ${(result.fraction * 100).toFixed(3)} percent${picture ? `, picture ${(picture.fraction * 100).toFixed(3)} percent` : ''}, ${blocks.filter((b) => !b.ok).length} block(s) out of budget${ok ? '' : ' FAIL'}`,
       );
+    }
+    // The second renderer: QuickLook's thumbnail of the first page, where macOS provides it. It
+    // substitutes fonts and ignores text alpha (M2), so the number is recorded, not gated.
+    const qlBin = options.quickLook === false ? null : quickLookBinary(env);
+    const firstSlide = slice[0];
+    if (qlBin && firstSlide) {
+      try {
+        const thumb = await quickLookThumbnail(pptx, join(fileOut, 'quicklook'), {
+          bin: qlBin,
+          env,
+          size: 1600 * scale,
+          log,
+        });
+        const record = referenceRecord(reference, firstSlide.slideId, theme, scale);
+        if (!thumb) {
+          residual.push(`verify: quicklook: ${basename(pptx)} produced no thumbnail`);
+        } else if (record) {
+          const ref = await readPng(referenceImage(reference, record));
+          const got = await readPng(thumb.png);
+          if (ref.width === got.width && ref.height === got.height) {
+            const d = diffImages(ref, got, budgets.threshold);
+            residual.push(
+              `verify: quicklook: ${basename(pptx)} first page (${firstSlide.slideId}) rendered by QuickLook at ${got.width} by ${got.height} in ${thumb.ms} ms, ${(d.fraction * 100).toFixed(3)} percent mismatched against the render (informational: QuickLook substitutes fonts and ignores text alpha)`,
+            );
+          } else {
+            residual.push(
+              `verify: quicklook: ${basename(pptx)} first page rendered at ${got.width} by ${got.height} in ${thumb.ms} ms (the render is ${ref.width} by ${ref.height}, not compared)`,
+            );
+          }
+        } else {
+          residual.push(
+            `verify: quicklook: ${basename(pptx)} first page rendered at ${thumb.width} by ${thumb.height} in ${thumb.ms} ms`,
+          );
+        }
+      } catch (error) {
+        residual.push(
+          `verify: quicklook: ${basename(pptx)} failed: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
     }
     const withPictures = verified.filter((v) => v.pictureFraction !== undefined);
     if (withPictures.length > 0) {

@@ -402,6 +402,7 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
       mode = 'flatten',
       theme = ['light', 'dark'],
       fonts = 'exact',
+      embedFonts = false,
       headings,
       rasterScale,
       pictureScale,
@@ -411,10 +412,11 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
       slideIds = 'all',
       out,
     } = input as {
-      format: 'pptx' | 'gslides' | 'pdf';
+      format: 'pptx' | 'pdf';
       mode?: 'native' | 'flatten';
       theme?: Theme[];
       fonts?: 'exact' | 'standard';
+      embedFonts?: boolean;
       headings?: 'raster';
       rasterScale?: 'auto' | 2 | 3;
       pictureScale?: 2 | 3;
@@ -448,6 +450,7 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
       '--out',
       out === undefined ? exportDir : resolveOut(env.cwd, out, exportDir),
     ];
+    if (embedFonts) argv.push('--embed-fonts');
     if (headings === 'raster') argv.push('--headings', 'raster');
     if (rasterScale !== undefined) argv.push('--raster-scale', String(rasterScale));
     if (pictureScale !== undefined) argv.push('--picture-scale', String(pictureScale));

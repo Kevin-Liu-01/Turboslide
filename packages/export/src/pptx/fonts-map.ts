@@ -60,6 +60,9 @@ export type FontsCatalog = {
 };
 
 function fontsExportDir(): string {
+  // a bundled server names the folder (docs/hosting.md; @turboslide/fonts/export exportFontsDir)
+  const override = process.env.TURBOSLIDE_PACKAGES_DIR;
+  if (override) return join(override, 'fonts', 'export');
   try {
     return join(
       dirname(fileURLToPath(import.meta.resolve('@turboslide/fonts/package.json'))),

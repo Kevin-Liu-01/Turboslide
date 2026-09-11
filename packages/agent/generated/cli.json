@@ -1359,7 +1359,7 @@
     },
     {
       "action": "export.run",
-      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --exclude-share-alike --baseline-target <baseline> --verify --dry-run --out <out>",
+      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --verify --out <out>",
       "command": [
         "export"
       ],
@@ -1372,7 +1372,7 @@
           "flag": "--mode",
           "type": "\"native\" | \"flatten\"",
           "required": false,
-          "description": "Defaults to flatten, the verified pixel-identical mode (SPEC 8.2)",
+          "description": "Defaults to flatten, the perfect mode: a 2x page raster over an invisible text layer, every page measured within 0.1 percent (SPEC 8.2)",
           "enum": [
             "native",
             "flatten"
@@ -1383,7 +1383,7 @@
           "flag": "--theme",
           "type": "\"light\" | \"dark\"[]",
           "required": false,
-          "description": "One file per theme; defaults to both"
+          "description": "One file per theme; defaults to both, which also writes <deckId>-both.zip"
         },
         {
           "key": "fonts",
@@ -1395,6 +1395,13 @@
             "exact",
             "standard"
           ]
+        },
+        {
+          "key": "embedFonts",
+          "flag": "--embed-fonts",
+          "type": "boolean",
+          "required": false,
+          "description": "Native mode only: embed the export faces as fntdata parts; off by default, and flatten never embeds (docs/pptx.md)"
         },
         {
           "key": "headings",
@@ -1443,14 +1450,8 @@
           "key": "verify",
           "flag": "--verify",
           "type": "boolean",
-          "required": false
-        },
-        {
-          "key": "dryRun",
-          "flag": "--dry-run",
-          "type": "boolean",
           "required": false,
-          "description": "Google Slides: build and validate the batchUpdate requests without credentials and write requests.json; no presentation is created (SPEC 8.3)"
+          "description": "Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)"
         },
         {
           "key": "slideIds",
@@ -1470,6 +1471,43 @@
       "custom": [],
       "mutates": false,
       "milestone": "M2"
+    },
+    {
+      "action": "export.check",
+      "usage": "turboslide export check <file> --python <python> --out <out>",
+      "command": [
+        "export",
+        "check"
+      ],
+      "positionals": [
+        "file"
+      ],
+      "options": [
+        {
+          "key": "python",
+          "flag": "--python",
+          "type": "string",
+          "required": false,
+          "description": "An interpreter with python-pptx; defaults to TURBOSLIDE_PYTHON, then .turboslide/venv/bin/python when it exists"
+        },
+        {
+          "key": "quickLook",
+          "flag": "--quick-look",
+          "type": "boolean",
+          "required": false,
+          "description": "Render the first page through macOS QuickLook when qlmanage exists; defaults to on"
+        },
+        {
+          "key": "out",
+          "flag": "--out",
+          "type": "string",
+          "required": false,
+          "description": "Where the QuickLook thumbnail lands; defaults to a folder beside the file"
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "M6"
     },
     {
       "action": "build.run",

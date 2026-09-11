@@ -6,16 +6,19 @@ import './ExportReportCard.css';
 
 /**
  * The summary card after an export or a build (SPEC 8.5: the report is the claim). For an
- * export.run it reads the ExportReport: format and mode, the pages (one entry per slide per
- * theme), the worst verified fraction, the raster blocks, the fonts embedded, then the files
- * with a Download button each and the residual lines; a Slides run shows its presentation link.
- * For a build.run it shows the file, its size against the budget and the assertions. The card
- * draws the ink frame the conflict card draws: the one dialog state (SPEC 2.2).
+ * export.run it reads the ExportReport: mode and themes, the pages (one entry per slide per
+ * theme), whether the file is perfect (flatten with every page raster within 0.1 percent of its
+ * shot), the page raster formats and their size, the worst verified fraction, the raster blocks,
+ * the fonts embedded, then the files with a Download button each and the residual lines. For a
+ * build.run it shows the file, its size against the budget and the assertions. The card draws the
+ * ink frame the conflict card draws: the one dialog state (SPEC 2.2).
  */
 export type ExportDownload = {
   /** the file's base name: gt-brand-light.pptx */
   name: string;
   bytes: number;
+  /** where the file can be fetched again (a hosted studio's sync export); absent for a job file */
+  url?: string;
 };
 
 export type ArtifactRun =
@@ -54,15 +57,54 @@ function percent(fraction: number): string {
   return `${(fraction * 100).toFixed(3)} percent`;
 }
 
+/** The mode's name in the menu: Perfect for flatten, Editable text for native (SPEC 8.2). */
+export function modeLabel(mode: ExportReport['mode']): string {
+  return mode === 'flatten' ? 'Perfect' : 'Editable text';
+}
+
+/** `N png-palette, M jpeg` over the pages that carry a raster, in a fixed format order. */
+export function pageFormats(report: ExportReport): string {
+  const order = ['png-1bit', 'png-palette', 'jpeg', 'png-rgba'];
+  const counts = new Map<string, number>();
+  for (const slide of report.slides)
+    if (slide.page) counts.set(slide.page.format, (counts.get(slide.page.format) ?? 0) + 1);
+  return order
+    .filter((format) => counts.has(format))
+    .map((format) => `${counts.get(format)} ${format}`)
+    .join(', ');
+}
+
 /** The facts the card lists for an export report, in order. */
 export function reportRows(report: ExportReport): { key: string; value: string }[] {
   const verified = report.slides.filter((slide) => slide.verify !== undefined);
   const worst = verified.reduce((max, slide) => Math.max(max, slide.verify?.fraction ?? 0), 0);
   const raster = report.slides.reduce((sum, slide) => sum + slide.raster.length, 0);
   const themes = [...new Set(report.slides.map((slide) => slide.theme ?? report.theme))];
-  return [
-    { key: 'Mode', value: `${report.format} ${report.mode}, ${themes.join(' and ')}` },
+  const pages = report.slides.filter((slide) => slide.page !== undefined);
+  const pageBytes = pages.reduce((sum, slide) => sum + (slide.page?.bytes ?? 0), 0);
+  const worstPage = pages.reduce((max, slide) => Math.max(max, slide.page?.fraction ?? 0), 0);
+  const rows = [
+    {
+      key: 'Mode',
+      value: `${report.format} ${modeLabel(report.mode)} (${report.mode}), ${themes.join(' and ')}`,
+    },
     { key: 'Pages', value: `${report.slides.length} (one per slide per theme)` },
+    {
+      key: 'Perfect',
+      value:
+        report.mode === 'flatten'
+          ? report.perfect
+            ? `yes: every page raster within ${percent(worstPage)} of its shot, package valid`
+            : 'no: see the residual lines'
+          : 'not claimed: editable text is drawn by the viewer',
+    },
+  ];
+  if (pages.length > 0)
+    rows.push({
+      key: 'Page rasters',
+      value: `${pageFormats(report)}; ${formatBytes(pageBytes)}`,
+    });
+  rows.push(
     {
       key: 'Worst fraction',
       value:
@@ -80,14 +122,13 @@ export function reportRows(report: ExportReport): { key: string; value: string }
     },
     { key: 'Geometry', value: report.geometryInBounds ? 'in bounds' : 'out of bounds' },
     { key: 'Revision', value: `r${report.revision}` },
-  ];
+  );
+  return rows;
 }
 
 export function ExportReportCard({ run, downloads, onDownload, onClose }: ExportReportCardProps) {
   const title =
-    run.kind === 'export'
-      ? `Export: ${run.input.format === 'gslides' ? 'Google Slides' : 'PPTX'} ${run.report.mode}${run.input.dryRun ? ' (dry run)' : ''}`
-      : 'Build: standalone HTML';
+    run.kind === 'export' ? `Export: PPTX ${modeLabel(run.report.mode)}` : 'Build: standalone HTML';
   const passed =
     run.kind === 'export' ? run.report.passed : run.assertions.every((entry) => entry.passed);
   const rows =
@@ -108,6 +149,7 @@ export function ExportReportCard({ run, downloads, onDownload, onClose }: Export
       aria-label={title}
       data-control="export.report"
       data-passed={passed ? 'true' : 'false'}
+      data-perfect={run.kind === 'export' && run.report.perfect ? 'true' : undefined}
     >
       <div className="ts-report-head">
         <b>{title}</b>
@@ -121,18 +163,6 @@ export function ExportReportCard({ run, downloads, onDownload, onClose }: Export
           </div>
         ))}
       </dl>
-      {run.kind === 'export' && run.report.url ? (
-        <p className="ts-report-link">
-          <a
-            href={run.report.url}
-            target="_blank"
-            rel="noreferrer"
-            data-control="export.report.open"
-          >
-            Open in Google Slides
-          </a>
-        </p>
-      ) : null}
       {run.downloads.length > 0 ? (
         <ul className="ts-report-files">
           {run.downloads.map((file) => (

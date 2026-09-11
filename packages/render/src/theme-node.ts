@@ -8,7 +8,17 @@ import { fileURLToPath } from 'node:url';
 
 import type { ThemeBundle } from './deck.ts';
 
+/**
+ * A folder laid out like the workspace's packages/ (theme/, fonts/, export/) that stands in for
+ * the workspace where there is none: a bundled server (a Vercel function) has no
+ * @turboslide/theme package to resolve, so the studio materializes the runtime files there and
+ * names the folder (docs/hosting.md). Unset in a checkout.
+ */
+export const PACKAGES_DIR_VARIABLE = 'TURBOSLIDE_PACKAGES_DIR';
+
 function packageDir(name: string): string {
+  const override = process.env[PACKAGES_DIR_VARIABLE];
+  if (override) return join(override, name.slice('@turboslide/'.length));
   return dirname(fileURLToPath(import.meta.resolve(`${name}/package.json`)));
 }
 

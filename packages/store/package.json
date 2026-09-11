@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "The DeckStore contract and the FileStore over decks/<id>: reads the manifest and slides, applies writes through the reducer with the baseRevision check, keeps the version log under versions/, advisory leases and a watch channel over fs.watch (MILESTONES M2 item 1; SPEC 4.1, 6.7, 11).",
+  "description": "The DeckStore contract and the FileStore over decks/<id>: reads the manifest and slides, applies writes through the reducer with the baseRevision check, keeps the version log under versions/, advisory leases and a watch channel over fs.watch (MILESTONES M2 item 1; SPEC 4.1, 6.7, 11). The hosted backends beside it: store selection from the environment (select.ts), the bundled seed (seed.ts), the per-instance overlay (tmp-store.ts) and the Vercel Blob mirror (blob-store.ts, blob-vercel.ts) behind one collection (hosted.ts).",
   "scripts": {
     "test": "vitest run"
   },
@@ -14,10 +14,18 @@
     "./lease": "./src/lease.ts",
     "./watch": "./src/watch.ts",
     "./templates": "./src/templates.ts",
+    "./select": "./src/select.ts",
+    "./seed": "./src/seed.ts",
+    "./hosted": "./src/hosted.ts",
+    "./tmp-store": "./src/tmp-store.ts",
+    "./blob-store": "./src/blob-store.ts",
+    "./blob-fake": "./src/blob-fake.ts",
+    "./blob-vercel": "./src/blob-vercel.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {
-    "@turboslide/schema": "workspace:*"
+    "@turboslide/schema": "workspace:*",
+    "@vercel/blob": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",

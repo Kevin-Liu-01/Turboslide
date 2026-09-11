@@ -1,0 +1,91 @@
+{
+  "mode": "write",
+  "base": "https://turboslide-5sukajqzw-kl01s-projects.vercel.app",
+  "steps": [
+    {
+      "name": "goto /edit/gt-brand",
+      "status": 200,
+      "ms": 615
+    },
+    {
+      "name": "editor ready",
+      "status": "Saved · r27",
+      "revision": 27,
+      "ms": 4366
+    },
+    {
+      "name": "before write",
+      "before": 27,
+      "slide": "thesis"
+    },
+    {
+      "name": "inspector controls",
+      "controls": [
+        "button inspector.slide",
+        "span slide.kind",
+        "textarea slide.title",
+        "textarea slide.notes",
+        "textarea slide.tags",
+        "textarea slide.big",
+        "button inspector.layout",
+        "button slide.measure.down",
+        "input slide.measure",
+        "button slide.measure.up",
+        "button inspector.block",
+        "button inspector.asset",
+        "div asset.intake",
+        "div asset.intake.drop",
+        "input asset.intake.file",
+        "input asset.intake.url",
+        "input asset.intake.id",
+        "input asset.intake.alt",
+        "select asset.intake.role",
+        "input asset.intake.title",
+        "input asset.intake.artist",
+        "input asset.intake.license",
+        "input asset.intake.shareAlike",
+        "input asset.intake.sourceUrl",
+        "input asset.intake.twoTone",
+        "select asset.intake.plate",
+        "button asset.intake.add",
+        "button inspector.lint",
+        "button inspector.versions",
+        "input version.save.note",
+        "button version.save",
+        "button version.restore.10",
+        "button version.restore.9",
+        "button version.restore.8",
+        "button version.restore.7",
+        "button version.restore.6",
+        "button version.restore.5",
+        "button version.restore.4",
+        "button version.restore.3",
+        "button version.restore.2"
+      ]
+    },
+    {
+      "name": "typed",
+      "control": "slide.title",
+      "stamp": "Hosted write 20:09:42"
+    },
+    {
+      "name": "after write",
+      "after": 28,
+      "statusAfter": "Saved · r28"
+    },
+    {
+      "name": "reload",
+      "status": 200,
+      "vercelId": "sfo1::iad1::j9wzd-1789157383513-543155a057dc"
+    },
+    {
+      "name": "after reload",
+      "reloaded": 28,
+      "survived": true,
+      "before": 27,
+      "after": 28
+    }
+  ],
+  "console": [],
+  "failedRequests": []
+}

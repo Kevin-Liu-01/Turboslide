@@ -1,9 +1,14 @@
+import { timingSafeEqual } from 'node:crypto';
+
 import { createFileRoute } from '@tanstack/react-router';
 
+import { bearerToken } from '@turboslide/agent/http/auth';
+import { refuse } from '@turboslide/agent/http/errors';
 import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
+import { ensureDeckAssets, workerClientOptions } from '../../server/root';
 import { getThumbnail, isThumbWidth, thumbResponse } from '../../server/thumbs';
 
 // GET /api/render/:slideId?deck=gt-brand&theme=light&scale=1[&format=json]: the facade over the
@@ -11,33 +16,56 @@ import { getThumbnail, isThumbWidth, thumbResponse } from '../../server/thumbs';
 // downsampled thumbnail from server/thumbs.ts (M3 item 5), cached on disk per revision; a request
 // that also names a stamp (?r=) is immutable for the browser. The worker is reached over HTTP when
 // TURBOSLIDE_WORKER_URL is set; otherwise the same job runs in this process through the local queue,
-// which drives the turboslide CLI as a child process, so headless Chromium never runs inside the
-// web app (SPEC 3.3 item 7). The response is the PNG with the RenderRecord in the
-// X-Turboslide-Record header, or the record as JSON. TURBOSLIDE_TOKEN, when set, is required as a
-// bearer token; a deployed instance sets it (SPEC 11).
+// which drives the turboslide CLI as a child process where the binary exists, so headless Chromium
+// never runs inside the web app (SPEC 3.3 item 7), and through runCli() in this process inside a
+// serverless function (render-worker cli.ts execMode; docs/hosting-chromium.md records the
+// deviation). Either way the browser comes from @turboslide/headless launchBrowser, which selects
+// the serverless binary when TURBOSLIDE_CHROME is `sparticuz` or the function has no other Chrome,
+// and the record's `renderer` names what painted the pixels. The response is the PNG with the
+// RenderRecord in the X-Turboslide-Record header and the execution mode in X-Turboslide-Exec, or
+// the record as JSON.
+//
+// Authentication (SPEC 11): TURBOSLIDE_TOKEN, when set, is required as `Authorization: Bearer
+// <token>` for the full-size render and its JSON variant. The thumbnail variant (?w=) stays open
+// with the token set: the editor's sidebar embeds it as <img>, which carries no header, its result
+// is cached per revision on the instance, and the work it can start is bounded to the deck's slides
+// at three widths and two themes. Unset, the whole route is open; the production URL runs that way
+// today, which docs/hosting.md section 6 records as Kevin's open decision.
 
 let client: WorkerClient | undefined;
 
 function worker(): WorkerClient {
-  client ??= createWorkerClient();
+  client ??= createWorkerClient(workerClientOptions());
   return client;
 }
 
-function unauthorized(request: Request): Response | null {
+function sameToken(given: string, expected: string): boolean {
+  const left = Buffer.from(given);
+  const right = Buffer.from(expected);
+  return left.length === right.length && timingSafeEqual(left, right);
+}
+
+/** The M2 rule of this route: a bearer token when TURBOSLIDE_TOKEN is set, except for thumbnails. */
+function unauthorized(request: Request, url: URL): Response | null {
   const token = process.env.TURBOSLIDE_TOKEN;
-  if (!token) return null;
-  return request.headers.get('authorization') === `Bearer ${token}`
-    ? null
-    : Response.json({ error: { message: 'bearer token required', status: 401 } }, { status: 401 });
+  if (token === undefined || token === '') return null;
+  if (url.searchParams.has('w')) return null;
+  const given = bearerToken(request);
+  if (given !== undefined && sameToken(given, token)) return null;
+  return refuse(
+    401,
+    'unauthorized',
+    'bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>',
+  );
 }
 
 export const Route = createFileRoute('/api/render/$slideId')({
   server: {
     handlers: {
       GET: async ({ params, request }) => {
-        const denied = unauthorized(request);
-        if (denied) return denied;
         const url = new URL(request.url);
+        const denied = unauthorized(request, url);
+        if (denied) return denied;
         const deckId = url.searchParams.get('deck') ?? 'gt-brand';
         const slideId = params.slideId;
         if (!SLUG_PATTERN.test(deckId) || !SLUG_PATTERN.test(slideId))
@@ -70,6 +98,8 @@ export const Route = createFileRoute('/api/render/$slideId')({
           url.searchParams.get('format') === 'json' ||
           (request.headers.get('accept') ?? '').includes('application/json');
         try {
+          // the hosted seed and the deck's twins are on disk before the job runs (server/root.ts)
+          await ensureDeckAssets(deckId);
           const rendered = await worker().renderSlide({ deckId, slideId, theme, scale });
           if (wantsJson) {
             return Response.json({
@@ -78,6 +108,7 @@ export const Route = createFileRoute('/api/render/$slideId')({
               job: rendered.jobId,
               cached: rendered.cached,
               worker: worker().mode,
+              exec: worker().exec,
             });
           }
           return new Response(rendered.png, {
@@ -88,6 +119,7 @@ export const Route = createFileRoute('/api/render/$slideId')({
               'x-turboslide-record': JSON.stringify(rendered.record),
               'x-turboslide-job': rendered.jobId,
               'x-turboslide-worker': worker().mode,
+              'x-turboslide-exec': worker().exec,
             },
           });
         } catch (error) {

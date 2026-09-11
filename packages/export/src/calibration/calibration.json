@@ -308,12 +308,6 @@
       "custGeomCounters": null,
       "normAutofitPresent": null,
       "note": "PowerPoint cannot run headless on Linux; the first manual pass on macOS and Windows records these (docs/export-verification.md)."
-    },
-    "gslides": {
-      "status": "M6",
-      "normalPitchFactor": 1.21,
-      "defaultInsetPt": null,
-      "note": "Inter's normal line height is 1.21 em (ascender 1984, descender -494, unitsPerEm 2048; pptx report section 4.10); the percentage lineSpacing uses it until measured against the Slides thumbnail (SPEC 8.3)."
     }
   }
 }

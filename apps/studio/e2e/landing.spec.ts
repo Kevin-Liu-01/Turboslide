@@ -5,13 +5,12 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 // The landing, the templates and the Export menu (Kevin's directive: `/` opens the editor the
-// way Google Slides opens a document, with exporting from the toolbar). Four steps, in order:
+// way Google Slides opens a document, with exporting from the toolbar). Three steps, in order:
 // `/` lands on /edit/<the newest deck> with the sidebar tree and the deck name as the toolbar's
 // rename control beside the status chip and Search; New deck on /decks creates a deck
 // from the GT brand template with 85 slides and opens it; the Export menu of a blank deck runs
 // export.run (PPTX flatten, light) and the browser receives a download above 1 MB (the fonts
-// alone are 1.9 MiB) while the ExportReport card summarizes the run; the Google Slides entry
-// shows the setup card because TURBOSLIDE_GOOGLE_CREDENTIALS is not set. The decks the spec
+// alone are 1.9 MiB) while the ExportReport card summarizes the run. The decks the spec
 // creates (decks/e2e-landing-deck, decks/e2e-landing-blank) are removed afterwards with their
 // worker caches, so `git status decks` stays empty.
 
@@ -181,25 +180,4 @@ test('the Export menu produces a PPTX download above 1 MB and an ExportReport ca
   expect(Array.isArray(versions)).toBe(true);
   await card.locator('[data-control="export.report.close"]').click();
   await expect(card).toHaveCount(0);
-});
-
-test('the Google Slides entry shows the setup card without credentials', async ({ page }) => {
-  test.skip(
-    Boolean(process.env.TURBOSLIDE_GOOGLE_CREDENTIALS),
-    'credentials are configured on this machine',
-  );
-  await page.goto(`/edit/${BLANK_DECK}`);
-  await settled(page);
-  await page.locator('[data-control="export.open"]').click();
-  const google = page.locator('[data-control="export.gslides"]');
-  await expect(google).toBeEnabled();
-  await expect(google).toHaveText('Set up Google Slides');
-  await google.click();
-  const setup = page.locator('[data-control="export.setup"]');
-  await expect(setup).toBeVisible();
-  await expect(setup).toContainText('TURBOSLIDE_GOOGLE_CREDENTIALS');
-  await expect(setup).toContainText('https://www.googleapis.com/auth/drive.file');
-  await expect(setup).toContainText('Enable the Google Slides API and the Google Drive API');
-  await setup.locator('[data-control="export.setup.close"]').click();
-  await expect(setup).toHaveCount(0);
 });

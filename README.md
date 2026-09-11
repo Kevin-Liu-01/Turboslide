@@ -10,25 +10,27 @@ exporters draw from one source, and a render at revision N is the same pixels ev
 operation is a named action in one action table, from which the CLI subcommands, the MCP tool
 list, the in-page window API, the HTTP routes, the OpenAPI document, the palette entries and the
 skills' reference tables are generated. Export is a client of the renderer: it measures the
-rendered slide in headless Chromium, emits PPTX and Google Slides natively where those formats can
-carry the deck and as 2x rasters where they cannot, then renders the exported file back and diffs
-it against the web render, so "identical" is a measured claim per revision. The editor's chrome is
-the Prototemplate viewer shell ported as source.
+rendered slide in headless Chromium, emits one PPTX per theme, pixel identical in the perfect mode
+and as editable text boxes in the native mode, then renders the exported file back and diffs it
+against the web render, so "identical" is a measured claim per revision (docs/pptx.md). The
+editor's chrome is the Prototemplate viewer shell ported as source.
 
 ## Layout
 
 ```
 apps/
   studio/         TanStack Start app: the editor at /, the deck list, the viewer, the embed, the
-                  agent HTTP surface, MCP over HTTP, the export downloads
+                  agent HTTP surface, MCP over HTTP, the export downloads; deployed to Vercel
+                  through Nitro (docs/hosting.md)
   cli/            the `turboslide` binary, the file transport that needs no browser page
   render-worker/  the job queue the studio's renders and exports run on; the Docker image
                   turboslide-render-worker carries Chrome for Testing, LibreOffice and the fonts
 packages/
   schema/         types, Zod schemas, validateDeck, applyWrite, diffDecks, migrations, the block
                   catalog, the rule table (rules.json), the action table
-  store/          the file store: typed writes, the version log, leases, the watch channel, the
-                  deck templates
+  store/          the deck store behind one DeckStore type: FileStore over decks/, the tmp
+                  overlay and the Vercel Blob mirror; typed writes, the version log, leases, the
+                  watch channel, the deck templates, the seed, the store selection
   theme/          gt-ink-paper: sheet.css and stage.css ported from head.html, tokens.ts, sprite.ts
   fonts/          InterVariable woff2 and its CSS; the static export font set under export/
   render/         renderSlide, renderDeck, renderStandalone, renderThumb, renderStage, the dia
@@ -44,18 +46,19 @@ packages/
   agent/          the action dispatcher, the HTTP request rules, the contracts generator and its
                   generated/ outputs (manifest, describe, cli, mcp-tools, openapi, llms.txt)
   mcp/            the MCP server over stdio and over streamable HTTP
-  export/         scene extraction, PPTX (flatten and native), the OOXML writer, the verify loop,
-                  the calibration constants, the Google Slides exporter (gslides/)
+  export/         scene extraction, PPTX (perfect flatten and editable native), the page raster
+                  policy, the OOXML post-process and package validation, the verify loop, the
+                  calibration constants, export check
   native/         @turboslide/native: the napi addon per platform (npm/*) and the wasm module
   viewer/         React viewer: Stage, Sheet, slide, grid and book modes; Editor; MaterialMount
   chrome/         the Prototemplate shell ported as source: tokens.css (--pt-), Seg, Toolbar,
-                  Sidebar, Inspector, ExportMenu, DeckName, SetupCard, AssetPicker, ...
+                  Sidebar, Inspector, ExportMenu, ExportReportCard, DeckName, AssetPicker, ...
 crates/
   turboslide-native/  the Rust crate behind @turboslide/native (napi and wasm features)
 docker/           render-worker.Dockerfile
 tooling/          shared tsconfig, eslint and prettier configs
 scripts/          check.mjs (the acceptance chain), judge-loop.mjs, check-client-bundle.mjs,
-                  compare-to-shoot.mjs
+                  compare-to-shoot.mjs, hosted-smoke.mjs (probes a deployment)
 decks/            decks/gt-brand is the GT brand deck; decks/templates/gt-brand is the template
                   record deck.create copies; decks/fixture is the test deck
 skills/           the four agent skills with generated reference tables
@@ -76,18 +79,31 @@ pnpm build                   turbo run build: the studio bundle and the CLI bund
 pnpm check                   the acceptance chain, in order (node scripts/check.mjs --list)
 ```
 
-`http://localhost:4321/` opens the editor on the newest deck, the way Google Slides opens a
-document; when no deck exists under `decks/` it creates `GT brand deck` from the template and
-opens that. The other pages: `/decks` (every deck, newest first, with the New deck form: a name
+`http://localhost:4321/` opens the editor on the newest deck at once; when no deck exists under
+`decks/` it creates `GT brand deck` from the template and opens that. The other pages: `/decks` (every deck, newest first, with the New deck form: a name
 and the GT brand or blank template), `/edit/:deckId` (the editor: sidebar tree, stage, inspector,
-the Cmd K palette with the Insert group of 15 slide templates, the Export menu with PPTX, Google
-Slides and the standalone file), `/deck/:deckId` (the viewer: slide, grid and book modes),
+the Cmd K palette with the Insert group of 15 slide templates, the Export menu with PPTX and the
+standalone file), `/deck/:deckId` (the viewer: slide, grid and book modes),
 `/embed/:deckId` (the framed embed). The agent surface: `GET /api/agent` (the manifest and the
 instance facts), `POST /api/actions/:action?deck=<id>` (one action per request, `GET` for its
 contract), `/mcp` (MCP over streamable HTTP, one deck per session), `/openapi.json`, `/llms.txt`
 and `/llms-full.txt`. With `TURBOSLIDE_TOKEN` set those routes want `Authorization: Bearer`;
-without it they serve localhost only. Renders and exports run on the render worker
-(`apps/render-worker`), started by the studio in dev or as the Docker image in production.
+without it they serve localhost only. In a checkout, renders and exports run on the render worker
+(`apps/render-worker`), started by the studio in dev or as the Docker image over
+`TURBOSLIDE_WORKER_URL`; hosted, they run inside the Vercel function (below).
+
+## Hosting
+
+The studio runs on Vercel at `https://turboslide.vercel.app` (the project `turboslide`, root
+directory `apps/studio`; production deploys come from the push to `main`). The function carries the
+GT deck and the templates as its seed, edits persist in the connected Vercel Blob store
+(`turboslide-decks`), and renders and exports run inside the function on `chrome-headless-shell`
+with every export synchronous (`POST /api/export/:deckId` answers the file, the report with
+`Accept: application/json`, or a 302 to the stored copy). Without a Blob token the editor shows a
+banner and edits live for the instance only. `node scripts/hosted-smoke.mjs <url>` probes a
+deployment. [docs/hosting.md](docs/hosting.md) has the store, the deploy configuration and the
+open bearer token decision; [docs/hosting-chromium.md](docs/hosting-chromium.md) the browser;
+[docs/HOSTED-STATUS.md](docs/HOSTED-STATUS.md) the round's measured state.
 
 ## The CLI
 
@@ -115,8 +131,8 @@ lint [ids|all] [--layers static|rendered|both] [--baseline]
 lint --chrome --url <url> --widths 1440,1280,390 --themes light,dark
 judge bundle [ids|all] --out <dir>       the evidence bundle for the judge loop (docs/judge-loop.md)
 build --out <file> --budget 16           the standalone file under a byte budget
-export pptx [ids|all] --mode flatten|native --theme light,dark --fonts exact [--verify] --out <dir>
-export gslides [ids|all] --mode flatten|native --theme light [--dry-run] [--verify] --out <dir>
+export pptx [ids|all] --mode flatten|native --theme light,dark|both --fonts exact [--embed-fonts] [--verify] --out <dir>
+export check <file.pptx> [--python <bin>] [--no-quick-look]
 fonts build [--check]                    cut the export font set (scripts/build-fonts.py)
 generate                                 the contracts generator
 mcp                                      the MCP server over stdio
@@ -133,28 +149,32 @@ pnpm exec turboslide lint all --json
 pnpm exec turboslide build --out .turboslide/brand-deck.html --budget 16
 pnpm exec turboslide judge bundle --out .turboslide/judge --json
 node scripts/judge-loop.mjs --deck decks/gt-brand --bundle .turboslide/judge --out .turboslide/judge/findings.json --gate .turboslide/judge/gate.json
-pnpm exec turboslide export gslides --deck decks/gt-brand --mode native --theme light --dry-run --out .turboslide/export-gslides
 docker build -f docker/render-worker.Dockerfile -t turboslide-render-worker .
+docker run --rm -v "$PWD:/work" turboslide-render-worker turboslide export pptx --deck /work/decks/gt-brand --mode flatten --theme both --fonts exact --verify --out /work/.turboslide/export
 docker run --rm -v "$PWD:/work" turboslide-render-worker turboslide export pptx --deck /work/decks/gt-brand --mode native --theme light,dark --fonts exact --verify --out /work/.turboslide/export-native
+pnpm exec turboslide export check .turboslide/export/gt-brand-light.pptx
 cargo test --manifest-path crates/turboslide-native/Cargo.toml
 pnpm --filter @turboslide/native build && pnpm exec vitest run packages/effects/src/parity.test.ts
 ```
 
 ## Export
 
-PPTX is exported in two modes. Flatten writes the 2x sheet raster per page with the text layer
-behind it, so the page is pixel exact. Native writes every text as a text box in the embedded GT
-Inter static faces, the frame as lines, the paper chips and plates as shapes, and the icons,
-marks, dithers, diagrams and pictures as rasters at 2x or 3x; `--verify` renders the file back
-through LibreOffice in the worker image and diffs every page and block against the web render at
-the same revision. Google Slides works the same way over the Slides API: `--dry-run` builds and
-validates every `batchUpdate` request without credentials and writes `requests.json`,
-`images.json` and the report; the live run needs `TURBOSLIDE_GOOGLE_CREDENTIALS` to name an OAuth
-client secrets file (the one-time Google Cloud setup and the steps are in
-[docs/google-slides.md](docs/google-slides.md) and the Slides section of
-[docs/M4-M5-STATUS.md](docs/M4-M5-STATUS.md)). The Export menu of the editor runs the same
-`export.run` action and hands the files back as one-time download links. The standalone file
-(`build`) is the deck as one HTML file under a byte budget.
+PPTX is the one export target ([docs/pptx.md](docs/pptx.md)), in two modes. Perfect (`--mode
+flatten`, the default) writes each page as its 2x sheet raster over an invisible, searchable text
+layer, so the page is pixel identical; each raster travels in the smallest encoding that decodes
+within 0.1 percent of the shot (a 1-bit PNG, a palette PNG, a JPEG for photographic pages, else
+truecolor), no fonts are embedded, and the report's `perfect` flag says every page matched.
+Editable text (`--mode native`) writes every text as a text box in the GT Inter static faces
+(`--embed-fonts` embeds them), the frame as lines, the paper chips and plates as shapes, and the
+icons, marks, dithers, diagrams and pictures as rasters at 2x or 3x; layout is identical within
+3 px. Both modes name every slide after its title, give it a hidden title placeholder, keep the
+speaker notes, write one file per theme plus `<deckId>-both.zip`, strip what PowerPoint is known to
+repair and validate the package against its content types and relationships. `--verify` renders
+the file back through LibreOffice in the worker image and diffs every page and block against the
+web render at the same revision, with a QuickLook smoke check where macOS provides one;
+`turboslide export check <file>` reopens any file with python-pptx and walks its zip. The Export
+menu of the editor runs the same `export.run` action and hands the files back as one-time
+download links. The standalone file (`build`) is the deck as one HTML file under a byte budget.
 
 Derived files land under `.turboslide/`, which is not committed. The rules for working in this
 repository are in [AGENTS.md](AGENTS.md); reference documents are under [docs/](docs/README.md);

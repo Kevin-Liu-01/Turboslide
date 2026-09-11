@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-api",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The agent API"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Agents and the studio share the identities, the catalog and the generation language. An agent reads llms.txt, generates SVG over HTTP, or drives the live studio in the browser.",
+        "measure": 56
+      },
+      {
+        "id": "dia1",
+        "type": "dia",
+        "fit": {
+          "viewBox": [
+            0,
+            0,
+            522,
+            222
+          ]
+        },
+        "svg": "<svg class=\"dia\" viewBox=\"0 0 522 222\" aria-label=\"One identity feeds the studio tools and the agent API, and both produce the same artifacts\">\n            <g fill=\"none\" class=\"hair\" stroke-width=\"1\">\n              <rect x=\"0.5\" y=\"40.5\" width=\"150\" height=\"141\"></rect>\n              <rect x=\"180.5\" y=\"0.5\" width=\"160\" height=\"104\"></rect>\n              <rect x=\"180.5\" y=\"117.5\" width=\"160\" height=\"104\"></rect>\n              <rect x=\"372.5\" y=\"40.5\" width=\"149\" height=\"141\"></rect>\n            </g>\n            <g fill=\"var(--ink-2)\">\n              <use href=\"#i-identification\" x=\"14\" y=\"52\" width=\"24\" height=\"24\"></use>\n              <use href=\"#i-paint-brush\" x=\"194\" y=\"12\" width=\"24\" height=\"24\"></use>\n              <use href=\"#i-code-bracket\" x=\"194\" y=\"129\" width=\"24\" height=\"24\"></use>\n              <use href=\"#i-photo\" x=\"386\" y=\"52\" width=\"24\" height=\"24\"></use>\n            </g>\n            <text class=\"lab\" x=\"14\" y=\"104\">Identity</text>\n            <text x=\"14\" y=\"132\">One active</text>\n            <text class=\"lab\" x=\"194\" y=\"64\">Studio</text>\n            <text x=\"194\" y=\"92\">Fifteen tools</text>\n            <text class=\"lab\" x=\"194\" y=\"181\">Agent API</text>\n            <text x=\"194\" y=\"209\">HTTP, browser</text>\n            <text class=\"lab\" x=\"386\" y=\"104\">Artifacts</text>\n            <text x=\"386\" y=\"132\">SVG, PNG,</text>\n            <text x=\"386\" y=\"158\">GIF, MP4</text>\n            <g class=\"ink\" stroke-width=\"1\" fill=\"none\">\n              <path d=\"M150.5 111.5 H168.5\"></path>\n              <path d=\"M168.5 52.5 V169.5\"></path>\n              <path d=\"M168.5 52.5 H180.5 M168.5 169.5 H180.5\"></path>\n              <path d=\"M340.5 52.5 H352.5 M340.5 169.5 H352.5\"></path>\n              <path d=\"M352.5 52.5 V169.5\"></path>\n              <path d=\"M352.5 111.5 H372.5\"></path>\n            </g>\n            <rect x=\"169\" y=\"47\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n            <rect x=\"169\" y=\"164\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n            <rect x=\"361\" y=\"106\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n          </svg>",
+        "alt": "One identity feeds the studio tools and the agent API, and both produce the same artifacts"
+      },
+      {
+        "id": "code",
+        "type": "panel",
+        "code": "POST /api/generate\n{ \"kind\": \"background\",\n  \"identity\": { \"preset\": \"gt\" },\n  \"settings\": { \"style\": \"dither\", \"width\": 1200 } }",
+        "size": 15,
+        "pre": true
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 250,
+        "tight": true,
+        "items": [
+          {
+            "key": "/llms.txt",
+            "value": "The operating guide in 194 lines; /llms-full.txt carries the complete documentation corpus."
+          },
+          {
+            "key": "/api/agent",
+            "value": "The manifest, version 0.2.0: interfaces, policies, execution rules and the generation schema."
+          },
+          {
+            "key": "/openapi.json",
+            "value": "The OpenAPI 3.1 document, eleven paths, and the catalogs: labs, materials, identities, elements."
+          },
+          {
+            "key": "/api/elements",
+            "value": "89 brand elements in seven categories, from digital to physical."
+          },
+          {
+            "key": "/api/generate",
+            "value": "POST a kind: background, template, element-brief or design-sequence, as JSON or raw SVG."
+          },
+          {
+            "key": "window.glyphfield.studio",
+            "value": "It exposes describe, controls, activate, set, readSource, applySource, invoke and download."
+          },
+          {
+            "key": "Skills",
+            "value": "Four repository skills, one per task: create, api, studio and export."
+          }
+        ]
+      }
+    ]
+  }
+}

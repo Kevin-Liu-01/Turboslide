@@ -1,18 +1,33 @@
-import { useMemo } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
+import { createDispatcher } from '@turboslide/agent/dispatch';
+import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
+import { createLiveAdapter } from '@turboslide/agent/window/adapter';
+import type { StudioAdapter } from '@turboslide/agent/window/adapter';
+import { registerStudioAutomation, viewerActionIds } from '@turboslide/agent/window/registry';
 import type { ShellItem, ShellMode, ShellSection } from '@turboslide/chrome/shell-data';
+import type { ShellState } from '@turboslide/chrome/shell-context';
 import { usePtShell, usePtStage } from '@turboslide/chrome/shell-context';
 import { ViewerShell } from '@turboslide/chrome/ViewerShell';
+import type { ActionId } from '@turboslide/schema/actions';
 import { BookView } from '@turboslide/viewer/BookView';
 import { GridView } from '@turboslide/viewer/GridView';
 import { pad2, trimTitle } from '@turboslide/viewer/model';
 import type { ViewerDeck } from '@turboslide/viewer/model';
 import { Stage } from '@turboslide/viewer/Stage';
-import { applyTheme, installThemeBridge, postTheme, useTheme } from '@turboslide/viewer/theme';
+import {
+  applyTheme,
+  installThemeBridge,
+  postTheme,
+  readTheme,
+  useTheme,
+} from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import type { DeckPayload } from '../server/decks';
+import { renderSlideImages } from '../server/render';
 import { useMountEffect } from './useMountEffect';
+import { useStudioSession } from './useStudioSession';
 
 /**
  * The viewer page (SPEC 5.3, 5.5, 6.1): the chrome's ViewerShell around the
@@ -104,7 +119,7 @@ export function DeckViewer({ payload, mode, theme, embed = false, onModeChange }
         hash={embed ? 'n' : 'id'}
         onSelect={embed ? (_id, n) => postSlide(n) : undefined}
         onModeChange={onModeChange}
-        homeHref={embed ? undefined : '/'}
+        homeHref={embed ? undefined : '/decks'}
         toolbarSlot={
           deck.fallback ? (
             <span
@@ -117,6 +132,7 @@ export function DeckViewer({ payload, mode, theme, embed = false, onModeChange }
         }
       >
         <StageBridge deck={deck} serverTheme={theme ?? 'dark'} />
+        <ViewerOwner deck={deck} attach={!embed} />
       </ViewerShell>
     </>
   );
@@ -180,4 +196,88 @@ function StageBridge({ deck, serverTheme }: { deck: ViewerDeck; serverTheme: The
       ) : null}
     </>
   );
+}
+
+/**
+ * The viewer as a window API owner (SPEC 7.4: "the viewer in each mode (view.*, render.slide,
+ * render.sheet)") and an attached studio session (MILESTONES M4 item 1): view.goto, view.mode,
+ * view.theme and view.present run against the shell, render.slide through the render worker's
+ * server function, and describe().state reports the deck facts. The marker element is the owner;
+ * the session hook long-polls the server for commands (`deck_goto_slide` over /mcp) and answers
+ * them through this handle. The embed frame registers the owner but does not attach: the host
+ * page drives it through the frame protocol.
+ */
+function ViewerOwner({ deck, attach }: { deck: ViewerDeck; attach: boolean }) {
+  const shell = usePtShell();
+  const shellRef = useRef<ShellState>(shell);
+  shellRef.current = shell;
+  const [ownerEl, setOwnerEl] = useState<HTMLElement | null>(null);
+  const live = useRef(createLiveAdapter(viewerAdapter(deck, shellRef)));
+  live.current.update(viewerAdapter(deck, shellRef));
+  useLayoutEffect(() => {
+    if (!ownerEl) return;
+    return registerStudioAutomation(live.current.adapter, ownerEl);
+  }, [ownerEl]);
+  useStudioSession({ deckId: deck.id, author: 'viewer', enabled: attach });
+  return <span ref={setOwnerEl} className="ts-owner" data-owner="viewer" data-active="true" />;
+}
+
+function viewerAdapter(deck: ViewerDeck, shellRef: { current: ShellState }): StudioAdapter {
+  const dispatcher: Dispatcher = createDispatcher();
+  const context: ActionContext = { author: { kind: 'human', name: 'viewer' } };
+  const on = <T,>(id: ActionId, run: (input: T) => Promise<unknown> | unknown): void => {
+    dispatcher.register(id, (input) => run(input as T));
+  };
+  const viewState = () => {
+    const shell = shellRef.current;
+    const slideId = shell.active || deck.slides[0]?.id || '';
+    const n = deck.slides.find((slide) => slide.id === slideId)?.n ?? 1;
+    return { slideId, n, mode: shell.mode, theme: readTheme(), present: shell.present };
+  };
+  on<{ slideId: string }>('view.goto', (input) => {
+    if (!deck.slides.some((slide) => slide.id === input.slideId)) {
+      throw new RangeError(`No slide "${input.slideId}"`);
+    }
+    const shell = shellRef.current;
+    if (shell.mode === 'grid') shell.setMode('slide');
+    shell.select(input.slideId);
+    return {
+      ...viewState(),
+      slideId: input.slideId,
+      n: deck.slides.find((slide) => slide.id === input.slideId)?.n ?? 1,
+    };
+  });
+  on<{ mode: ShellMode }>('view.mode', (input) => {
+    shellRef.current.setMode(input.mode);
+    return { ...viewState(), mode: input.mode };
+  });
+  on<{ theme: Theme }>('view.theme', (input) => {
+    applyTheme(input.theme);
+    return { ...viewState(), theme: input.theme };
+  });
+  on<{ on: boolean }>('view.present', (input) => {
+    shellRef.current.setPresent(input.on);
+    return { ...viewState(), present: input.on };
+  });
+  on<{ slideIds: 'all' | string[]; themes?: Theme[]; scale?: 1 | 2 }>('render.slide', (input) =>
+    renderSlideImages({
+      deckId: deck.id,
+      slideIds: input.slideIds,
+      ...(input.themes !== undefined ? { themes: input.themes } : {}),
+      ...(input.scale !== undefined ? { scale: input.scale } : {}),
+    }),
+  );
+  return {
+    owner: 'viewer',
+    actions: viewerActionIds(),
+    invoke: (action, input) => {
+      if (!viewerActionIds().includes(action)) {
+        throw new RangeError(
+          `The viewer owner does not expose "${action}"; open /edit/${deck.id} for it.`,
+        );
+      }
+      return dispatcher.dispatch(action, input ?? {}, context);
+    },
+    state: () => ({ deckId: deck.id, revision: deck.revision, ...viewState() }),
+  };
 }

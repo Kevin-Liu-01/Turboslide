@@ -31,12 +31,14 @@ import {
   EMPTY_BOXES,
   gestureMutation,
   handlesFor,
+  labelClearanceBox,
   nudgeMutation,
   PART_SELECTORS,
   sheetPoint,
 } from './Gestures';
 import type { GestureContext, Handle, MeasuredBoxes, Point } from './Gestures';
 import { InlineText, textCommitMutation } from './InlineText';
+import { MaterialMount } from './MaterialMount';
 import { isPictureKind, SHEET_W } from './model';
 import {
   blockById,
@@ -97,8 +99,13 @@ export type EditorOverlayView = {
   lint: LintBox[];
   /** a run is being edited inline */
   editing: boolean;
+  /** Alt is held: the diagram label and marker handles are live (SPEC 6.4 Alt-drag, M5) */
+  alt: boolean;
+  /** the 12 px clearance ring of the dragged diagram label, ink when a stroke intrudes (SPEC 6.4) */
+  clearance: { box: Box; ok: boolean } | null;
   onHandleDown: (handle: Handle, event: PointerEvent) => void;
-  onHandleNudge: (handle: Handle, delta: number) => void;
+  /** `axis` names the arrow pair for a two-axis handle; the default is the handle's own axis */
+  onHandleNudge: (handle: Handle, delta: number, axis?: 'x' | 'y') => void;
 };
 
 export type EditorProps = {
@@ -228,6 +235,7 @@ export function Editor({
   const [activeHandle, setActiveHandle] = useState<string | null>(null);
   const [drop, setDrop] = useState<Box | null>(null);
   const [editing, setEditing] = useState<Editing | null>(null);
+  const [alt, setAlt] = useState(false);
 
   const root = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLDivElement>(null);
@@ -292,6 +300,26 @@ export function Editor({
   useEffect(() => {
     setDraft(null);
   }, [doc]);
+
+  /* Alt held: the diagram handles take the pointer (SPEC 6.4 Alt-drag); released, or the window
+     loses focus, they yield to selection again */
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') setAlt(true);
+    };
+    const up = (e: KeyboardEvent) => {
+      if (e.key === 'Alt') setAlt(false);
+    };
+    const off = () => setAlt(false);
+    window.addEventListener('keydown', down);
+    window.addEventListener('keyup', up);
+    window.addEventListener('blur', off);
+    return () => {
+      window.removeEventListener('keydown', down);
+      window.removeEventListener('keyup', up);
+      window.removeEventListener('blur', off);
+    };
+  }, []);
 
   /* the fresh markup: the theme's twins and dither canvases, then the boxes; fonts and images re-measure */
   useLayoutEffect(() => {
@@ -488,10 +516,15 @@ export function Editor({
     window.addEventListener('pointercancel', cancel);
   };
 
-  const onHandleNudge = (handle: Handle, delta: number) => {
+  const onHandleNudge = (handle: Handle, delta: number, axis?: 'x' | 'y') => {
     const slideNow = slideRef.current;
     if (!slideNow || gesture.current) return;
-    const mutation = nudgeMutation(handle, { slide: slideNow, boxes: boxesRef.current }, delta);
+    const mutation = nudgeMutation(
+      handle,
+      { slide: slideNow, boxes: boxesRef.current },
+      delta,
+      axis ?? (handle.axis === 'y' ? 'y' : 'x'),
+    );
     if (mutation) commit(mutation);
   };
 
@@ -565,6 +598,13 @@ export function Editor({
         })
       : [];
 
+  /* the clearance ring follows the preview document, so it moves with the label under the pointer */
+  const active = activeHandle !== null ? handles.find((h) => h.id === activeHandle) : undefined;
+  const clearance =
+    active && shownSlide && active.kind === 'dia-label'
+      ? labelClearanceBox(shownSlide, active, boxes)
+      : null;
+
   const view: EditorOverlayView = {
     slideId,
     k,
@@ -578,6 +618,8 @@ export function Editor({
     drop,
     lint,
     editing: editing !== null,
+    alt,
+    clearance: clearance ? { box: clearance.box, ok: clearance.ok } : null,
     onHandleDown,
     onHandleNudge,
   };
@@ -617,12 +659,15 @@ export function Editor({
             onClick={onClick}
             dangerouslySetInnerHTML={{ __html: html }}
           />
+          {/* the live shader over every material frame of the slide (SPEC 5.3, 5.4; M5) */}
+          <MaterialMount body={body} html={html} onError={onError} />
         </Sheet>
       </div>
       {/* the overlay layer (SPEC 2.2 junction table): chrome, over the sheet's box, in CSS pixels */}
       <div
         className="ts-overlay ts-chrome"
         data-active-handle={activeHandle ?? undefined}
+        data-alt={alt ? '' : undefined}
         style={{ left: fit.left + 1, top: fit.top + 1, width: fit.width, height: fit.height }}
         hidden={stageSize.width <= 0}
       >

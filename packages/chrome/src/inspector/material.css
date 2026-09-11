@@ -1,0 +1,87 @@
+/* The Material section (SPEC 6.5, 2.2): rows in the inspector's grammar (InspectorControl.css
+   draws the row and its --pt-hair-soft rule); the number and text fields are 22px tall inside the
+   32px row so their --pt-hair box never doubles the rule; a color field carries a 14px swatch
+   before the text; an overridden uniform shows its label in ink and a reset square. */
+.ts-material {
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-material-doc,
+.ts-material-note {
+  margin: 6px 0 4px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--pt-ink-2);
+}
+
+.ts-material-note[role='alert'] {
+  color: var(--pt-ink);
+}
+
+.ts-material-number,
+.ts-material-text {
+  box-sizing: border-box;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px var(--pt-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-material-number {
+  width: 96px;
+  text-align: right;
+}
+
+.ts-material-text {
+  width: 168px;
+  font-family: var(--pt-mono);
+}
+
+.ts-material-number:focus-visible,
+.ts-material-text:focus-visible {
+  outline: none;
+  border-color: var(--pt-ink);
+}
+
+.ts-material-color {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ts-material-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-edge);
+}
+
+.ts-insp-row.is-uniform.is-overridden > .ts-insp-label {
+  color: var(--pt-ink);
+}
+
+.ts-insp-row.is-uniform > .ts-insp-field {
+  gap: 6px;
+}
+
+.ts-material-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0 6px;
+}
+
+.ts-material-frame {
+  font-family: var(--pt-mono);
+  font-size: 12px;
+  color: var(--pt-titanium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -9,7 +9,7 @@ import { join, relative } from 'node:path';
 
 import type { DeckDocument } from '@turboslide/schema/deck';
 import type { ExportMode, ExportReport } from '@turboslide/schema/export';
-import { exportReportSchema } from '@turboslide/schema/export';
+import { exportReportSchema, NATIVE_BLOCK_TYPES } from '@turboslide/schema/export';
 import type { Theme } from '@turboslide/schema/render';
 
 import { buildPptx } from './pptx/build.ts';
@@ -19,6 +19,8 @@ import { loadFontsCatalog } from './pptx/fonts-map.ts';
 import type { FontSet, FontsCatalog } from './pptx/fonts-map.ts';
 import { buildReport, mergeReports } from './report.ts';
 import { extractScenes } from './scene/extract.ts';
+import type { RasterScalePolicy } from './scene/extract.ts';
+import type { PictureScale } from './scene/two-tone.ts';
 import type { Scene } from './scene/types.ts';
 
 export type ExportPptxOptions = {
@@ -31,6 +33,12 @@ export type ExportPptxOptions = {
   excludeShareAlike?: boolean;
   /** The first-baseline target the text boxes are offset for (pptx/baseline.ts); default libreoffice. */
   baseline?: BaselineTarget;
+  /** `raster` writes every heading as a PNG instead of a text box (SPEC 8.3 `--headings raster`). */
+  headings?: 'raster';
+  /** How rasters are scaled: auto (icons and marks 3x, the rest 2x), 2 or 3; default auto. */
+  rasterScale?: RasterScalePolicy;
+  /** The scale two-tone pictures are regenerated at from the one-bit image; default 2. */
+  pictureScale?: PictureScale;
   slideIds?: string[];
   /** Write `scene-<theme>.json` beside the files for inspection. */
   writeScenes?: boolean;
@@ -60,6 +68,10 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
   const { deck } = options.document;
   await mkdir(options.outDir, { recursive: true });
   const workDir = join(options.outDir, 'work');
+  const nativeTypes =
+    options.headings === 'raster'
+      ? NATIVE_BLOCK_TYPES.filter((type) => type !== 'heading')
+      : [...NATIVE_BLOCK_TYPES];
   const extracted = await extractScenes({
     deckDir: options.deckDir,
     document: options.document,
@@ -68,6 +80,9 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
     slideIds: options.slideIds,
     workDir,
     excludeShareAlike: options.excludeShareAlike,
+    nativeTypes,
+    rasterScale: options.rasterScale ?? 'auto',
+    pictureScale: options.pictureScale ?? 2,
     onSlide: options.onSlide,
   });
   const reports: ExportReport[] = [];
@@ -127,6 +142,10 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
         ...(mode === 'flatten'
           ? ['flatten: the slide is a 2x raster of the sheet; text is an invisible native layer']
           : []),
+        ...(options.headings === 'raster'
+          ? ['headings: rasterized as PNG (--headings raster)']
+          : []),
+        `rasters: ${options.rasterScale ?? 'auto'} scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at ${options.pictureScale ?? 2}x`,
         ...built.residual,
       ],
       warnings: [...extracted.warnings, ...built.warnings],

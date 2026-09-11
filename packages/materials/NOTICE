@@ -1,0 +1,13 @@
+Turboslide materials
+
+This package binds @paper-design/shaders 0.0.78 (Apache License 2.0), whose NOTICE reads:
+
+    Paper Shaders
+    Copyright 2026 Paper
+
+    Powered by Paper Shaders:
+    https://shaders.paper.design
+
+The full license text and the notices of every other third-party work Turboslide ships are in
+THIRD_PARTY_NOTICES.md at the repository root; the CLI and studio distributions carry that file
+(SPEC 11, Licensing). Frames rendered from these materials may be shipped, modified and sold.

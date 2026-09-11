@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "id": "naming",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The name"
+      },
+      {
+        "id": "group",
+        "type": "composite",
+        "tracks": "1fr",
+        "gap": 0,
+        "cells": [
+          {
+            "blocks": [
+              {
+                "id": "p1",
+                "type": "paragraph",
+                "text": "The name General Translation was chosen for three reasons, in priority order.",
+                "measure": 56
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "id": "p2",
+                "type": "paragraph",
+                "text": "The first is ambition. As with General Motors or General Electric, the name signals the intent to be the leading company in the category.",
+                "measure": 56
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "id": "p3",
+                "type": "paragraph",
+                "text": "The second is generality. General AI models understand context and follow instructions better than specialized translation models.",
+                "measure": 56
+              }
+            ]
+          },
+          {
+            "blocks": [
+              {
+                "id": "p4",
+                "type": "paragraph",
+                "text": "The third is distinction. Most other localization companies have names beginning with L.",
+                "measure": 56
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "logos",
+        "type": "logoPlates",
+        "items": [
+          {
+            "asset": "logo-gm",
+            "name": "General Motors"
+          },
+          {
+            "asset": "logo-ge",
+            "name": "General Electric"
+          },
+          {
+            "mark": true,
+            "name": "General Translation"
+          }
+        ]
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 300,
+        "tight": true,
+        "items": [
+          {
+            "key": "General Translation",
+            "icon": {
+              "name": "building-office-2",
+              "color": "info"
+            },
+            "value": "The company."
+          },
+          {
+            "key": "GT",
+            "value": "The short form and the mark."
+          },
+          {
+            "key": "gt",
+            "icon": {
+              "name": "command-line"
+            },
+            "value": "The open-source library and CLI."
+          },
+          {
+            "key": "gt-⁠next, gt-⁠react, gt-⁠vue, gt-⁠node, gt-⁠python",
+            "icon": {
+              "name": "cube"
+            },
+            "value": "The framework packages."
+          },
+          {
+            "key": "Locadex",
+            "icon": {
+              "name": "bolt"
+            },
+            "value": "The AI agent product."
+          },
+          {
+            "key": "generaltranslation.com",
+            "icon": {
+              "name": "globe-alt"
+            },
+            "value": "The domain."
+          },
+          {
+            "key": "prototemplate.com",
+            "icon": {
+              "name": "beaker"
+            },
+            "value": "The design lab and the brand handoff site."
+          },
+          {
+            "key": "glyphfield.com",
+            "icon": {
+              "name": "wrench-screwdriver"
+            },
+            "value": "The companion tooling site."
+          }
+        ]
+      }
+    ]
+  }
+}

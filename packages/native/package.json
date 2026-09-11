@@ -1,0 +1,33 @@
+{
+  "name": "@turboslide/native",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Loader for crates/turboslide-native: the napi addon from npm/<platform> or the wasm-bindgen module from wasm/, one NativeModule shape for both (SPEC 10). @turboslide/effects falls back to TypeScript when neither is built.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:napi": "node scripts/build.mjs --napi",
+    "build:wasm": "node scripts/build.mjs --wasm",
+    "test": "vitest run"
+  },
+  "exports": {
+    "./types": "./src/types.ts",
+    "./platform": "./src/platform.ts",
+    "./wasm": "./src/wasm.ts",
+    "./node": "./src/node.ts",
+    "./package.json": "./package.json"
+  },
+  "optionalDependencies": {
+    "@turboslide/native-darwin-arm64": "workspace:*",
+    "@turboslide/native-darwin-x64": "workspace:*",
+    "@turboslide/native-linux-x64-gnu": "workspace:*",
+    "@turboslide/native-linux-arm64-gnu": "workspace:*",
+    "@turboslide/native-linux-x64-musl": "workspace:*",
+    "@turboslide/native-linux-arm64-musl": "workspace:*",
+    "@turboslide/native-win32-x64-msvc": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,583 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`composite > renders the example row, the rig and the plate row in dark > ex-dark 1`] = `
+{
+  "html": "<div class="composite" style="grid-template-columns:repeat(4, 300px);gap:22px;justify-content:space-between" data-block="ex" data-type="composite"><svg class="dia" data-block="dia1" data-type="dia" data-raster="dia" data-rid="dia1:1" viewBox="0 0 300 210" aria-label="Flow"><line class="ink" stroke-width="1" stroke-linecap="square" x1="5.5" y1="70.5" x2="294.5" y2="70.5"/><rect class="marker" x="0" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/0"/><rect class="marker" x="144.5" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/1"/><rect class="marker" x="289" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/2"/><text x="0" y="114" data-dia="texts/0">Source</text><text x="78" y="52" text-anchor="middle" data-dia="texts/1">Strings</text><text x="150" y="114" text-anchor="middle" data-dia="texts/2">Translate</text><text x="222.5" y="52" text-anchor="middle" data-dia="texts/3">Translations</text><text x="300" y="114" text-anchor="end" data-dia="texts/4">Deploy</text><text x="0" y="204" data-dia="texts/5">A three-step flow</text></svg><svg class="dia" data-block="dia2" data-type="dia" data-raster="dia" data-rid="dia2:1" viewBox="0 0 300 210" aria-label="Scale"><line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="70.5" x2="300.5" y2="70.5"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="150.5" y1="66.5" x2="150.5" y2="75.5"/><rect class="marker" x="60.5" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/0"/><text x="0" y="114" data-dia="texts/0">Reserved</text><text x="300" y="114" text-anchor="end" data-dia="texts/1">Playful</text><text x="0" y="204" data-dia="texts/2">A scale with a marker</text></svg><svg class="dia" data-block="dia3" data-type="dia" data-raster="dia" data-rid="dia3:1" viewBox="0 0 300 210" aria-label="Layers"><rect x="0.5" y="62.5" width="299" height="54" fill="var(--plate)"/><rect x="0.5" y="116.5" width="299" height="54" fill="var(--plate)"/><rect x="0.5" y="8.5" width="299" height="162" fill="none" class="hair" stroke-width="1"/><line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="62.5" x2="299.5" y2="62.5"/><line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="116.5" x2="299.5" y2="116.5"/><text x="16" y="42" data-dia="texts/0">Customer apps</text><text x="16" y="96" data-dia="texts/1">Open-source libraries</text><text x="16" y="150" data-dia="texts/2">Platform</text><text x="0" y="204" data-dia="texts/3">A stacked layer model</text></svg><svg class="dia" data-block="dia4" data-type="dia" data-raster="dia" data-rid="dia4:1" viewBox="0 0 300 210" aria-label="Timeline"><line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="70.5" x2="300.5" y2="70.5"/><rect class="marker" x="0" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/0"/><rect class="marker" x="144.5" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/1"/><rect class="marker" x="289" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/2"/><text x="0" y="44" data-dia="texts/0">Redesign</text><text class="sm" x="0" y="104" data-dia="texts/1">June</text><text x="150" y="44" text-anchor="middle" data-dia="texts/2">Launch</text><text class="sm" x="150" y="104" text-anchor="middle" data-dia="texts/3">August</text><text x="300" y="44" text-anchor="end" data-dia="texts/4">Review</text><text class="sm" x="300" y="104" text-anchor="end" data-dia="texts/5">September</text><text x="0" y="204" data-dia="texts/6">A timeline</text></svg></div>",
+  "rasters": [
+    "dia",
+    "dia",
+    "dia",
+    "dia",
+  ],
+}
+`;
+
+exports[`composite > renders the example row, the rig and the plate row in dark > rig-dark 1`] = `
+{
+  "html": "<figure class="composite shot-fig" style="grid-template-columns:1fr;gap:12px" data-block="rig" data-type="composite"><div class="composite" style="grid-template-columns:311px 369px;gap:12px;align-items:start" data-block="grid" data-type="composite"><figure class="shot-fig" data-block="fig" data-type="shot"><img class="shot" src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="fig:1"></figure><div class="composite" style="grid-template-columns:1fr;gap:12px" data-block="bar" data-type="composite"><figure class="shot-fig" data-block="fig2" data-type="shot"><img class="shot" src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="fig2:1"></figure><figure class="shot-fig" data-block="fig3" data-type="shot"><img class="shot" src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="fig3:1"></figure></div></div><figcaption data-run="rig/caption" style="grid-column:1 / -1">Compare loads two directions as same-origin iframes.</figcaption></figure>",
+  "rasters": [
+    "shot",
+    "shot",
+    "shot",
+  ],
+}
+`;
+
+exports[`composite > renders the example row, the rig and the plate row in dark > row-dark 1`] = `
+{
+  "html": "<div class="composite" style="grid-template-columns:28px 1fr;gap:18px;align-items:start" data-block="row" data-type="composite"><svg class="dia ic info" data-block="lock" data-type="dia" data-raster="dia" data-rid="lock:1" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock-closed" x="0" y="0" width="24" height="24" fill="#2f5ce0"/></svg><div class="cell" style="grid-column:span 1"><h2 style="margin-bottom:0px" data-block="name" data-type="heading" data-run="name/text">General Translation</h2><p data-block="p" data-type="paragraph" data-run="p/text">The legal name does not change.</p></div></div>",
+  "rasters": [
+    "dia",
+  ],
+}
+`;
+
+exports[`composite > renders the example row, the rig and the plate row in light > ex-light 1`] = `
+{
+  "html": "<div class="composite" style="grid-template-columns:repeat(4, 300px);gap:22px;justify-content:space-between" data-block="ex" data-type="composite"><svg class="dia" data-block="dia1" data-type="dia" data-raster="dia" data-rid="dia1:1" viewBox="0 0 300 210" aria-label="Flow"><line class="ink" stroke-width="1" stroke-linecap="square" x1="5.5" y1="70.5" x2="294.5" y2="70.5"/><rect class="marker" x="0" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/0"/><rect class="marker" x="144.5" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/1"/><rect class="marker" x="289" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/2"/><text x="0" y="114" data-dia="texts/0">Source</text><text x="78" y="52" text-anchor="middle" data-dia="texts/1">Strings</text><text x="150" y="114" text-anchor="middle" data-dia="texts/2">Translate</text><text x="222.5" y="52" text-anchor="middle" data-dia="texts/3">Translations</text><text x="300" y="114" text-anchor="end" data-dia="texts/4">Deploy</text><text x="0" y="204" data-dia="texts/5">A three-step flow</text></svg><svg class="dia" data-block="dia2" data-type="dia" data-raster="dia" data-rid="dia2:1" viewBox="0 0 300 210" aria-label="Scale"><line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="70.5" x2="300.5" y2="70.5"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="150.5" y1="66.5" x2="150.5" y2="75.5"/><rect class="marker" x="60.5" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/0"/><text x="0" y="114" data-dia="texts/0">Reserved</text><text x="300" y="114" text-anchor="end" data-dia="texts/1">Playful</text><text x="0" y="204" data-dia="texts/2">A scale with a marker</text></svg><svg class="dia" data-block="dia3" data-type="dia" data-raster="dia" data-rid="dia3:1" viewBox="0 0 300 210" aria-label="Layers"><rect x="0.5" y="62.5" width="299" height="54" fill="var(--plate)"/><rect x="0.5" y="116.5" width="299" height="54" fill="var(--plate)"/><rect x="0.5" y="8.5" width="299" height="162" fill="none" class="hair" stroke-width="1"/><line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="62.5" x2="299.5" y2="62.5"/><line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="116.5" x2="299.5" y2="116.5"/><text x="16" y="42" data-dia="texts/0">Customer apps</text><text x="16" y="96" data-dia="texts/1">Open-source libraries</text><text x="16" y="150" data-dia="texts/2">Platform</text><text x="0" y="204" data-dia="texts/3">A stacked layer model</text></svg><svg class="dia" data-block="dia4" data-type="dia" data-raster="dia" data-rid="dia4:1" viewBox="0 0 300 210" aria-label="Timeline"><line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="70.5" x2="300.5" y2="70.5"/><rect class="marker" x="0" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/0"/><rect class="marker" x="144.5" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/1"/><rect class="marker" x="289" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/2"/><text x="0" y="44" data-dia="texts/0">Redesign</text><text class="sm" x="0" y="104" data-dia="texts/1">June</text><text x="150" y="44" text-anchor="middle" data-dia="texts/2">Launch</text><text class="sm" x="150" y="104" text-anchor="middle" data-dia="texts/3">August</text><text x="300" y="44" text-anchor="end" data-dia="texts/4">Review</text><text class="sm" x="300" y="104" text-anchor="end" data-dia="texts/5">September</text><text x="0" y="204" data-dia="texts/6">A timeline</text></svg></div>",
+  "rasters": [
+    "dia",
+    "dia",
+    "dia",
+    "dia",
+  ],
+}
+`;
+
+exports[`composite > renders the example row, the rig and the plate row in light > rig-light 1`] = `
+{
+  "html": "<figure class="composite shot-fig" style="grid-template-columns:1fr;gap:12px" data-block="rig" data-type="composite"><div class="composite" style="grid-template-columns:311px 369px;gap:12px;align-items:start" data-block="grid" data-type="composite"><figure class="shot-fig" data-block="fig" data-type="shot"><img class="shot" src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="fig:1"></figure><div class="composite" style="grid-template-columns:1fr;gap:12px" data-block="bar" data-type="composite"><figure class="shot-fig" data-block="fig2" data-type="shot"><img class="shot" src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="fig2:1"></figure><figure class="shot-fig" data-block="fig3" data-type="shot"><img class="shot" src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="fig3:1"></figure></div></div><figcaption data-run="rig/caption" style="grid-column:1 / -1">Compare loads two directions as same-origin iframes.</figcaption></figure>",
+  "rasters": [
+    "shot",
+    "shot",
+    "shot",
+  ],
+}
+`;
+
+exports[`composite > renders the example row, the rig and the plate row in light > row-light 1`] = `
+{
+  "html": "<div class="composite" style="grid-template-columns:28px 1fr;gap:18px;align-items:start" data-block="row" data-type="composite"><svg class="dia ic info" data-block="lock" data-type="dia" data-raster="dia" data-rid="lock:1" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-lock-closed" x="0" y="0" width="24" height="24" fill="#2f5ce0"/></svg><div class="cell" style="grid-column:span 1"><h2 style="margin-bottom:0px" data-block="name" data-type="heading" data-run="name/text">General Translation</h2><p data-block="p" data-type="paragraph" data-run="p/text">The legal name does not change.</p></div></div>",
+  "rasters": [
+    "dia",
+  ],
+}
+`;
+
+exports[`dia templates > before-and-after: the slide 25 example at 300 units validates and snapshots > before-and-after-svg 1`] = `"<rect x="0.5" y="8.5" width="129" height="144" fill="none" class="hair" stroke-width="1"/><rect x="170.5" y="8.5" width="129" height="144" fill="none" class="hair" stroke-width="1"/><text class="lab" x="16" y="48.5" data-dia="texts/0">Before</text><text x="16" y="88.5" data-dia="texts/1">Nine surfaces</text><text x="16" y="120.5" data-dia="texts/2">Four type families</text><text class="lab" x="186" y="48.5" data-dia="texts/3">After</text><text x="186" y="88.5" data-dia="texts/4">One system</text><text x="186" y="120.5" data-dia="texts/5">Inter</text><text x="0" y="204" data-dia="texts/6">A before and after pair</text>"`;
+
+exports[`dia templates > before-and-after: the slide 25 example at 300 units validates and snapshots 1`] = `
+{
+  "h": 210,
+  "icons": [],
+  "lines": [],
+  "markers": [],
+  "marks": [],
+  "rects": [
+    {
+      "fill": "none",
+      "h": 144,
+      "stroke": "hair",
+      "w": 129,
+      "x": 0.5,
+      "y": 8.5,
+    },
+    {
+      "fill": "none",
+      "h": 144,
+      "stroke": "hair",
+      "w": 129,
+      "x": 170.5,
+      "y": 8.5,
+    },
+  ],
+  "texts": [
+    {
+      "size": 26,
+      "text": "Before",
+      "x": 16,
+      "y": 48.5,
+    },
+    {
+      "size": 20,
+      "text": "Nine surfaces",
+      "x": 16,
+      "y": 88.5,
+    },
+    {
+      "size": 20,
+      "text": "Four type families",
+      "x": 16,
+      "y": 120.5,
+    },
+    {
+      "size": 26,
+      "text": "After",
+      "x": 186,
+      "y": 48.5,
+    },
+    {
+      "size": 20,
+      "text": "One system",
+      "x": 186,
+      "y": 88.5,
+    },
+    {
+      "size": 20,
+      "text": "Inter",
+      "x": 186,
+      "y": 120.5,
+    },
+    {
+      "size": 20,
+      "text": "A before and after pair",
+      "x": 0,
+      "y": 204,
+    },
+  ],
+  "w": 300,
+}
+`;
+
+exports[`dia templates > flow: the slide 25 example at 300 units validates and snapshots > flow-svg 1`] = `"<line class="ink" stroke-width="1" stroke-linecap="square" x1="5.5" y1="70.5" x2="294.5" y2="70.5"/><rect class="marker" x="0" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/0"/><rect class="marker" x="144.5" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/1"/><rect class="marker" x="289" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/2"/><text x="0" y="114" data-dia="texts/0">Source</text><text x="78" y="52" text-anchor="middle" data-dia="texts/1">Strings</text><text x="150" y="114" text-anchor="middle" data-dia="texts/2">Translate</text><text x="222.5" y="52" text-anchor="middle" data-dia="texts/3">Translations</text><text x="300" y="114" text-anchor="end" data-dia="texts/4">Deploy</text><text x="0" y="204" data-dia="texts/5">A three-step flow</text>"`;
+
+exports[`dia templates > flow: the slide 25 example at 300 units validates and snapshots 1`] = `
+{
+  "h": 210,
+  "icons": [],
+  "lines": [
+    {
+      "stroke": "ink",
+      "x1": 5.5,
+      "x2": 294.5,
+      "y1": 70.5,
+      "y2": 70.5,
+    },
+  ],
+  "markers": [
+    {
+      "x": 5.5,
+      "y": 70.5,
+    },
+    {
+      "x": 150,
+      "y": 70.5,
+    },
+    {
+      "x": 294.5,
+      "y": 70.5,
+    },
+  ],
+  "marks": [],
+  "rects": [],
+  "texts": [
+    {
+      "size": 20,
+      "text": "Source",
+      "x": 0,
+      "y": 114,
+    },
+    {
+      "anchor": "middle",
+      "size": 20,
+      "text": "Strings",
+      "x": 78,
+      "y": 52,
+    },
+    {
+      "anchor": "middle",
+      "size": 20,
+      "text": "Translate",
+      "x": 150,
+      "y": 114,
+    },
+    {
+      "anchor": "middle",
+      "size": 20,
+      "text": "Translations",
+      "x": 222.5,
+      "y": 52,
+    },
+    {
+      "anchor": "end",
+      "size": 20,
+      "text": "Deploy",
+      "x": 300,
+      "y": 114,
+    },
+    {
+      "size": 20,
+      "text": "A three-step flow",
+      "x": 0,
+      "y": 204,
+    },
+  ],
+  "w": 300,
+}
+`;
+
+exports[`dia templates > iso-plate: the slide 25 example at 300 units validates and snapshots > iso-plate-svg 1`] = `"<polygon points="150,8 270,77.28 150,146.56 30,77.28" fill="var(--ink)" fill-opacity="0.04"/><polygon points="270,77.28 150,146.56 150,170.56 270,101.28" fill="var(--ink)" fill-opacity="0.15"/><polygon points="30,77.28 150,146.56 150,170.56 30,101.28" fill="var(--ink)" fill-opacity="0.09"/><polygon points="150,8 270,77.28 270,101.28 150,170.56 30,101.28 30,77.28" fill="none" class="mid" stroke-width="1" stroke-linejoin="miter"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="30.5" y1="77.5" x2="150.5" y2="146.5"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="150.5" y1="146.5" x2="270.5" y2="77.5"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="150.5" y1="146.5" x2="150.5" y2="170.5"/><g transform="translate(150 73.99) scale(1 0.5) rotate(45)"><svg width="84" height="54" x="-42" y="-27" fill="var(--ink)" fill-opacity="0.55"><use href="#gt-mark"/></svg></g><text x="0" y="204" data-dia="texts/0">An isometric plate</text>"`;
+
+exports[`dia templates > iso-plate: the slide 25 example at 300 units validates and snapshots 1`] = `
+{
+  "h": 210,
+  "icons": [],
+  "lines": [
+    {
+      "stroke": "mid",
+      "x1": 30,
+      "x2": 150,
+      "y1": 77.28,
+      "y2": 146.56,
+    },
+    {
+      "stroke": "mid",
+      "x1": 150,
+      "x2": 270,
+      "y1": 146.56,
+      "y2": 77.28,
+    },
+    {
+      "stroke": "mid",
+      "x1": 150,
+      "x2": 150,
+      "y1": 146.56,
+      "y2": 170.56,
+    },
+  ],
+  "markers": [],
+  "marks": [
+    {
+      "h": 54,
+      "iso": true,
+      "w": 84,
+      "x": 150,
+      "y": 73.99,
+    },
+  ],
+  "polygons": [
+    {
+      "fill": "ink",
+      "opacity": 0.04,
+      "points": [
+        [
+          150,
+          8,
+        ],
+        [
+          270,
+          77.28,
+        ],
+        [
+          150,
+          146.56,
+        ],
+        [
+          30,
+          77.28,
+        ],
+      ],
+    },
+    {
+      "fill": "ink",
+      "opacity": 0.15,
+      "points": [
+        [
+          270,
+          77.28,
+        ],
+        [
+          150,
+          146.56,
+        ],
+        [
+          150,
+          170.56,
+        ],
+        [
+          270,
+          101.28,
+        ],
+      ],
+    },
+    {
+      "fill": "ink",
+      "opacity": 0.09,
+      "points": [
+        [
+          30,
+          77.28,
+        ],
+        [
+          150,
+          146.56,
+        ],
+        [
+          150,
+          170.56,
+        ],
+        [
+          30,
+          101.28,
+        ],
+      ],
+    },
+    {
+      "fill": "none",
+      "points": [
+        [
+          150,
+          8,
+        ],
+        [
+          270,
+          77.28,
+        ],
+        [
+          270,
+          101.28,
+        ],
+        [
+          150,
+          170.56,
+        ],
+        [
+          30,
+          101.28,
+        ],
+        [
+          30,
+          77.28,
+        ],
+      ],
+      "stroke": "mid",
+    },
+  ],
+  "rects": [],
+  "texts": [
+    {
+      "size": 20,
+      "text": "An isometric plate",
+      "x": 0,
+      "y": 204,
+    },
+  ],
+  "w": 300,
+}
+`;
+
+exports[`dia templates > layers: the slide 25 example at 300 units validates and snapshots > layers-svg 1`] = `"<rect x="0.5" y="62.5" width="299" height="54" fill="var(--plate)"/><rect x="0.5" y="116.5" width="299" height="54" fill="var(--plate)"/><rect x="0.5" y="8.5" width="299" height="162" fill="none" class="hair" stroke-width="1"/><line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="62.5" x2="299.5" y2="62.5"/><line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="116.5" x2="299.5" y2="116.5"/><text x="16" y="42" data-dia="texts/0">Customer apps</text><text x="16" y="96" data-dia="texts/1">Open-source libraries</text><text x="16" y="150" data-dia="texts/2">Platform</text><text x="0" y="204" data-dia="texts/3">A stacked layer model</text>"`;
+
+exports[`dia templates > layers: the slide 25 example at 300 units validates and snapshots 1`] = `
+{
+  "h": 210,
+  "icons": [],
+  "lines": [
+    {
+      "stroke": "hair",
+      "x1": 0.5,
+      "x2": 299.5,
+      "y1": 62.5,
+      "y2": 62.5,
+    },
+    {
+      "stroke": "hair",
+      "x1": 0.5,
+      "x2": 299.5,
+      "y1": 116.5,
+      "y2": 116.5,
+    },
+  ],
+  "markers": [],
+  "marks": [],
+  "rects": [
+    {
+      "fill": "plate",
+      "h": 54,
+      "w": 299,
+      "x": 0.5,
+      "y": 62.5,
+    },
+    {
+      "fill": "plate",
+      "h": 54,
+      "w": 299,
+      "x": 0.5,
+      "y": 116.5,
+    },
+    {
+      "fill": "none",
+      "h": 162,
+      "stroke": "hair",
+      "w": 299,
+      "x": 0.5,
+      "y": 8.5,
+    },
+  ],
+  "texts": [
+    {
+      "size": 20,
+      "text": "Customer apps",
+      "x": 16,
+      "y": 42,
+    },
+    {
+      "size": 20,
+      "text": "Open-source libraries",
+      "x": 16,
+      "y": 96,
+    },
+    {
+      "size": 20,
+      "text": "Platform",
+      "x": 16,
+      "y": 150,
+    },
+    {
+      "size": 20,
+      "text": "A stacked layer model",
+      "x": 0,
+      "y": 204,
+    },
+  ],
+  "w": 300,
+}
+`;
+
+exports[`dia templates > scale: the slide 25 example at 300 units validates and snapshots > scale-svg 1`] = `"<line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="70.5" x2="300.5" y2="70.5"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="150.5" y1="66.5" x2="150.5" y2="75.5"/><rect class="marker" x="60.5" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/0"/><text x="0" y="114" data-dia="texts/0">Reserved</text><text x="300" y="114" text-anchor="end" data-dia="texts/1">Playful</text><text x="0" y="204" data-dia="texts/2">A scale with a marker</text>"`;
+
+exports[`dia templates > scale: the slide 25 example at 300 units validates and snapshots 1`] = `
+{
+  "h": 210,
+  "icons": [],
+  "lines": [
+    {
+      "stroke": "hair",
+      "x1": 0,
+      "x2": 300,
+      "y1": 70.5,
+      "y2": 70.5,
+    },
+    {
+      "stroke": "mid",
+      "x1": 150.5,
+      "x2": 150.5,
+      "y1": 66.5,
+      "y2": 75.5,
+    },
+  ],
+  "markers": [
+    {
+      "x": 66,
+      "y": 70.5,
+    },
+  ],
+  "marks": [],
+  "rects": [],
+  "texts": [
+    {
+      "size": 20,
+      "text": "Reserved",
+      "x": 0,
+      "y": 114,
+    },
+    {
+      "anchor": "end",
+      "size": 20,
+      "text": "Playful",
+      "x": 300,
+      "y": 114,
+    },
+    {
+      "size": 20,
+      "text": "A scale with a marker",
+      "x": 0,
+      "y": 204,
+    },
+  ],
+  "w": 300,
+}
+`;
+
+exports[`dia templates > timeline: the slide 25 example at 300 units validates and snapshots > timeline-svg 1`] = `"<line class="hair" stroke-width="1" stroke-linecap="square" x1="0.5" y1="70.5" x2="300.5" y2="70.5"/><rect class="marker" x="0" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/0"/><rect class="marker" x="144.5" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/1"/><rect class="marker" x="289" y="65" width="11" height="11" fill="var(--ink)" data-dia="markers/2"/><text x="0" y="44" data-dia="texts/0">Redesign</text><text class="sm" x="0" y="104" data-dia="texts/1">June</text><text x="150" y="44" text-anchor="middle" data-dia="texts/2">Launch</text><text class="sm" x="150" y="104" text-anchor="middle" data-dia="texts/3">August</text><text x="300" y="44" text-anchor="end" data-dia="texts/4">Review</text><text class="sm" x="300" y="104" text-anchor="end" data-dia="texts/5">September</text><text x="0" y="204" data-dia="texts/6">A timeline</text>"`;
+
+exports[`dia templates > timeline: the slide 25 example at 300 units validates and snapshots 1`] = `
+{
+  "h": 210,
+  "icons": [],
+  "lines": [
+    {
+      "stroke": "hair",
+      "x1": 0,
+      "x2": 300,
+      "y1": 70.5,
+      "y2": 70.5,
+    },
+  ],
+  "markers": [
+    {
+      "x": 5.5,
+      "y": 70.5,
+    },
+    {
+      "x": 150,
+      "y": 70.5,
+    },
+    {
+      "x": 294.5,
+      "y": 70.5,
+    },
+  ],
+  "marks": [],
+  "rects": [],
+  "texts": [
+    {
+      "size": 20,
+      "text": "Redesign",
+      "x": 0,
+      "y": 44,
+    },
+    {
+      "size": 18,
+      "text": "June",
+      "x": 0,
+      "y": 104,
+    },
+    {
+      "anchor": "middle",
+      "size": 20,
+      "text": "Launch",
+      "x": 150,
+      "y": 44,
+    },
+    {
+      "anchor": "middle",
+      "size": 18,
+      "text": "August",
+      "x": 150,
+      "y": 104,
+    },
+    {
+      "anchor": "end",
+      "size": 20,
+      "text": "Review",
+      "x": 300,
+      "y": 44,
+    },
+    {
+      "anchor": "end",
+      "size": 18,
+      "text": "September",
+      "x": 300,
+      "y": 104,
+    },
+    {
+      "size": 20,
+      "text": "A timeline",
+      "x": 0,
+      "y": 204,
+    },
+  ],
+  "w": 300,
+}
+`;

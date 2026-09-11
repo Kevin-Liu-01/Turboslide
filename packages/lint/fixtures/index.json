@@ -1,0 +1,408 @@
+{
+  "sheet/overflow": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "sheet/rail-touch": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "sheet/thumb-legible": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/rendered/rules.test.ts"
+    ]
+  },
+  "type/floor-15": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/rendered/rules.test.ts"
+    ]
+  },
+  "type/svg-label-min": {
+    "layer": "both",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "type/weight-cap": {
+    "layer": "both",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "type/face": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "type/sizes-ladder": {
+    "layer": "static",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "color/tokens-only": {
+    "layer": "static",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "color/semantic-icons-only": {
+    "layer": "static",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "icon/placement": {
+    "layer": "static",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "icon/known": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "rows/two-lines": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "rows/key-snap": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "dia/label-clearance": {
+    "layer": "both",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/rendered/rules.test.ts",
+      "packages/lint/src/static/dia.test.ts"
+    ]
+  },
+  "dia/stroke-grammar": {
+    "layer": "static",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "dia/fit-slot": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/dia.test.ts"
+    ]
+  },
+  "dia/half-pixel": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/dia.test.ts"
+    ]
+  },
+  "asset/twin-or-border": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "asset/credit-on-plate": {
+    "layer": "static",
+    "slides": [
+      "mood-rosetta"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/picture.test.ts"
+    ]
+  },
+  "asset/license-missing": {
+    "layer": "static",
+    "slides": [
+      "mood-rosetta"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/picture.test.ts"
+    ]
+  },
+  "asset/stretched": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/rendered/rules.test.ts"
+    ]
+  },
+  "picture/plate-clear": {
+    "layer": "static",
+    "slides": [
+      "mood-rosetta"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/picture.test.ts"
+    ]
+  },
+  "picture/blank-twin": {
+    "layer": "static",
+    "slides": [
+      "mood-rosetta"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/picture.test.ts"
+    ]
+  },
+  "picture/mood-placement": {
+    "layer": "static",
+    "slides": [
+      "mood-rosetta"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/picture.test.ts"
+    ]
+  },
+  "opener/sentence-lists-section": {
+    "layer": "static",
+    "slides": [
+      "opener-prototemplate",
+      "opener-status"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "lines/law": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/rendered/rules.test.ts"
+    ]
+  },
+  "copy/heading-period": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "copy/sentence-case": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "copy/token-first": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "copy/heading-is-name": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "copy/no-em-dash": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "copy/no-exclamation": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "copy/no-eyebrow": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "copy/full-sentence-caption": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "copy/contrast-pair": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "copy/metaphor-candidate": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "contrast/both-themes": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/rendered/rules.test.ts"
+    ]
+  },
+  "layout/empty-half": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/rendered/rules.test.ts"
+    ]
+  },
+  "layout/pair-gaps": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/rendered/rules.test.ts"
+    ]
+  },
+  "layout/columns-aligned": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/rendered/rules.test.ts"
+    ]
+  },
+  "scales/marker-equals-value": {
+    "layer": "static",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "escape/html-block": {
+    "layer": "static",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "export/non-native": {
+    "layer": "static",
+    "slides": [
+      "bad-copy",
+      "bad-escape",
+      "content-rule",
+      "the-production-site"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/dia.test.ts",
+      "packages/lint/src/static/export-non-native.test.ts"
+    ]
+  },
+  "numbers/contradiction": {
+    "layer": "static",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "count/hard-coded": {
+    "layer": "static",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  }
+}

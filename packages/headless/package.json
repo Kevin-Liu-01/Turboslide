@@ -15,6 +15,13 @@
     "./record": "./src/record.ts",
     "./sheet": "./src/sheet.ts",
     "./shell": "./src/shell.ts",
+    "./capture/shared": "./src/capture/shared.ts",
+    "./capture/recipes": "./src/capture/recipes.ts",
+    "./capture/gt-site": "./src/capture/gt-site.ts",
+    "./capture/region": "./src/capture/region.ts",
+    "./capture/page": "./src/capture/page.ts",
+    "./capture/intake": "./src/capture/intake.ts",
+    "./capture/twins": "./src/capture/twins.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {

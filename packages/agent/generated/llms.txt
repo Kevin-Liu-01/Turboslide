@@ -1,0 +1,64 @@
+# Turboslide
+
+> A block document with a validator and a grammar linter; every operation is a named action in one table, reachable from the CLI, MCP, HTTP and the studio window API (SPEC 1, 7.1).
+
+Turboslide holds the GT brand deck as typed JSON (deck.json plus slides/<id>.json), renders it with one renderer, lints it against the deck grammar, and exports it to PPTX and Google Slides with a verified report. There are no coordinates: a slide is a kind, a layout and typed blocks in named slots.
+
+## Discovery
+
+- /api/agent: the manifest (transports, rules, execution rules, action ids, skills, resources, what this instance implements)
+- /openapi.json: the OpenAPI 3.1 contract of POST /api/actions/<id>
+- /mcp: MCP over streamable HTTP; `turboslide mcp` is the same server over stdio
+- /llms-full.txt: this guide with every action and every lint rule
+- skills/turboslide-{create,api,studio,verify}/SKILL.md: the four skills with their generated reference tables
+- docs/grammar.md: the deck grammar (slide kinds, layouts, blocks, rules)
+
+## Rules
+
+- Every mutating action requires baseRevision and rejects a stale one with 409 and the current document.
+- Every write returns the normalized result; re-read from the response, not from memory.
+- Unknown fields are rejected with unknown_field and a JSON pointer, except under ext on a slide, a block or an asset.
+- An agent write to a slide another author leased is refused with 409 and the holder unless force is set.
+- A claim about a deck names the revision; render both themes and lint before claiming a slide is done.
+
+## Calling an action over HTTP
+
+- POST /api/actions/<id>; GET /api/actions/<id> returns the action contract: input and output JSON Schema, transports, milestone and whether this instance implements it.
+- Body: One JSON object, the action input exactly as the input schema states it; unknown fields are refused with 400 and code unknown_field plus a JSON pointer.
+- Deck: ?deck=<slug> names the deck; without it the instance default (gt-brand) is used.
+- Author: x-turboslide-author: agent:<runId> (or ?author=); a request without one writes as agent:http.
+- Force: ?force=1 (or x-turboslide-force: 1) writes to a slide another author leased; without it the write is 409 with the holder and the current document.
+- Auth: Authorization: Bearer <TURBOSLIDE_TOKEN> on every deployed instance; open only on localhost when the instance has no token; a request off localhost without a token is 401.
+- Limits: 1048576 bytes per write body, 26214400 bytes per asset upload.
+- Errors: { error: { name, status, message, code?, pointer?, currentRevision?, current?, holder?, milestone? } }; TypeError 400, RangeError 404, ConflictError 409, NotImplementedError 501, Error 500.
+
+## MCP over HTTP
+
+- MCP streamable HTTP: POST JSON-RPC to /mcp (initialize first), GET for the notification stream, DELETE to end the session; the mcp-session-id header carries the session.
+- One MCP session is bound to one deck and one author at initialize; tools are deck_<action> for every implemented action on the mcp transport.
+- ?deck=<slug> on the initialize request; the instance default otherwise. x-turboslide-author or ?author= on the initialize request; agent:mcp-http otherwise.
+- deck_goto_slide (view.goto) is listed when a studio page (/edit or /deck) is attached to the deck and runs in that page.
+
+## Leases and revisions
+
+- slide.lease takes ten minutes on a slide; an agent write to a slide another author holds is 409 with the holder unless force is set; a human write warns and goes through (SPEC 6.7).
+- Every mutating action takes baseRevision; a stale one is 409 with currentRevision and the current document; re-read from the response and retry once.
+
+## Transports
+
+- cli: turboslide <command> --json --author agent:<runId>
+- mcp: turboslide mcp (stdio) or POST /mcp (streamable HTTP); tools deck_<action>
+- http: POST /api/actions/<id> with the input as JSON
+- window: window.turboslide.studio.invoke(<id>, input) after the turboslide:studio-api-ready event
+
+## Skills
+
+- turboslide-create (skills/turboslide-create/SKILL.md): Write or revise slides in the grammar
+- turboslide-api (skills/turboslide-api/SKILL.md): Discover and write through the action table
+- turboslide-studio (skills/turboslide-studio/SKILL.md): Drive the studio through the window API
+- turboslide-verify (skills/turboslide-verify/SKILL.md): Render, lint, judge and verify exports
+
+## Verification
+
+- Render both themes, read the contact sheet by its cell map, run the grammar linter, judge with the six lenses (deck_review prompt), verify exports against the web render (skills/turboslide-verify).
+- A claim about a deck names the revision it was verified at; a severity 3 finding blocks the ship step.

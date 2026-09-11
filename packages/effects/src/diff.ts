@@ -1,32 +1,40 @@
-// Exact diffs (SPEC 3.1 effects "diff"; SPEC 10 diff.rs): a per-pixel count over RGBA buffers,
-// and cell agreement between two one-bit images, which is how a regenerated twin is checked
-// against the file a round approved. The perceptual diff stays with pixelmatch in the headless
-// and export packages until the native module lands (SPEC 10).
+// Diffs (SPEC 3.1 effects "diff"; SPEC 10 diff.rs): the exact per-pixel count, the
+// pixelmatch-compatible perceptual diff and DSSIM over RGBA buffers, each computed by the
+// selected backend (select.ts: the napi addon, the wasm module or the TypeScript modules
+// pixelmatch.ts and dssim.ts), and cell agreement between two one-bit images, which is how a
+// regenerated twin is checked against the file a round approved. The verify loop (SPEC 8.5 step
+// 3) takes `diffPixelmatch` for its pixel budgets and `dssim` for the text gate; both accept a
+// crop from `cropRgba` in image.ts for per-block gates.
 import type { BitImage, GrayImage, RgbaImage } from './image.ts';
+import type { DssimResult } from './dssim.ts';
+import type { PixelmatchDiff, PixelmatchOptions } from './pixelmatch.ts';
+import { getBackend } from './select.ts';
 
 export type ExactDiff = { total: number; mismatched: number; fraction: number };
 
 /** Mismatched pixels between two RGBA images of the same size; alpha counts. */
 export function diffExact(a: RgbaImage, b: RgbaImage): ExactDiff {
-  if (a.width !== b.width || a.height !== b.height) {
-    throw new RangeError(
-      `diffExact: sizes differ (${a.width}x${a.height} vs ${b.width}x${b.height})`,
-    );
-  }
-  const total = a.width * a.height;
-  let mismatched = 0;
-  for (let i = 0; i < total; i += 1) {
-    const p = i * 4;
-    if (
-      a.data[p] !== b.data[p] ||
-      a.data[p + 1] !== b.data[p + 1] ||
-      a.data[p + 2] !== b.data[p + 2] ||
-      a.data[p + 3] !== b.data[p + 3]
-    ) {
-      mismatched += 1;
-    }
-  }
-  return { total, mismatched, fraction: total === 0 ? 0 : mismatched / total };
+  return getBackend().diffExact(a, b);
+}
+
+/**
+ * pixelmatch over two RGBA images of the same size: the mismatched count after antialiasing
+ * detection at `threshold` (0.1 unless set), and the diff image when `output` is asked for.
+ */
+export function diffPixelmatch(
+  a: RgbaImage,
+  b: RgbaImage,
+  options: PixelmatchOptions = {},
+): PixelmatchDiff {
+  return getBackend().diffPixelmatch(a, b, options);
+}
+
+/**
+ * DSSIM over two RGBA images of the same size (dssim.ts has the definition): 0 for identical
+ * images. A per-block gate crops both images to the block's box first.
+ */
+export function dssim(a: RgbaImage, b: RgbaImage): DssimResult {
+  return getBackend().dssim(a, b);
 }
 
 export type CellAgreement = { cells: number; mismatched: number; agreement: number };

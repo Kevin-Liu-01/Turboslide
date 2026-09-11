@@ -155,6 +155,85 @@ size; the exporter follows the deck. The `pptx-quicklook` target carries the ppt
 numbers (geometry and first baseline within 1 px, the residual is the substituted face);
 `pptx-powerpoint` waits for the manual pass below.
 
+## The width gate and native export of every block type (M5)
+
+The M2 native export left two of 79 gated text blocks outside the 3 px width budget (`avoid#p1`
+dw +4, `surfaces#rows` dw -6; `docs/M2-STATUS.md`) and, listed but not gated, five more on slides
+with raster blocks. The M5 baseline run of the M3 tree in the render worker image, both themes,
+measured 20 blocks out of budget over 170 pages; each had a cause in the file, not in the budget,
+and `packages/export/src/calibration/calibration.json` records every measurement under
+`targets.pptx-libreoffice`:
+
+| Blocks                                                                               | Measured                                           | Cause                                                                                                                                                                                                                                              | Fix                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `avoid#p1`, `audience#p1`                                                            | dw +4, both themes                                 | the invisible letters `GT` under the mark are 29.47 px wide in the host font at 22 px, the mark box 25.59 px; the text after the mark moved right by the difference                                                                                | the run is spaced by (mark width minus letters width) per character, to the hundredth of a point (`spc="-116"` at 22 px; `scene/measure.ts` measures the letters on a detached span, `pptx/text.ts` writes the spacing) |
+| `surfaces#rows`                                                                      | dw -6 at the line end with two external glyphs     | the external glyph after a link (head:121) is an inline svg the text layer has no width for; every run after it moved left by its 21 px                                                                                                            | a run followed by a gap wider than 1.5 px carries `gapAfter` and the width of a no-break space; the emitter fills the gap with an invisible spaced run (`gapFiller`)                                                    |
+| `dx#code`, `cli#code`, `archive#code`, `agent-api#code`, dark theme                  | dw -38 to -147, dy +6                              | the panel family `Menlo` is not in the image; fontconfig matched it to Noto Sans, a proportional face, while Chromium's reference used DejaVu Sans Mono for the deck's `monospace` fallback; in light the panel is measured on its edge and hid it | `MONO_FAMILY` is `DejaVu Sans Mono`, the family the verify host resolves (Menlo on macOS is metric compatible); the code panel has its own first-baseline anchor (`firstBaselineModel.mono`, k 0.497 at 17 px)          |
+| `mark#mark`, `lines#dia1`, `positioning#dia1`, `docs-for-agents#dia1`, `motion#dia1` | dx +1, dw -2 (a raster at x 190.5 or 731.5), dy +2 | rasters placed at their fractional element box resample with a half-pixel phase in LibreOffice; the scene was also measured on the 2x page, whose boxes disagree with the 1x record by up to 1.5 px (the M2 open item)                             | the scene is measured on a 1x page and the rasters shot on 2x and 3x pages with the same `data-ts-rid` tags; every raster clip and placement is the whole-pixel box that contains the element (`snapRasterBox`)         |
+| `build-log#p1` and ten 22 px paragraphs at dy +1, 26 h2 at dy +1                     | dy +2 once, +1 on 36                               | the M2 anchors centred the residual at +0.4 px                                                                                                                                                                                                     | the 22 px anchor lifts 4.5 px (k 0.5455) and the 44 px anchor 0.5 px more (k 0.5614); the notes on the anchors carry the round one distribution                                                                         |
+
+Round one (the fixes for the GT run, the mono family and the 1x measurement only) passed 152 of
+170 pages' blocks; the raster placement, the gap filler and the anchor lift went into round two,
+the 1x diagram rasters and the joiner strip into rounds three and four, the off-cut face advance
+and the diagram edge measure into rounds five and six. The rounds ran with the working tree
+mounted over the image's sources (`.turboslide/m5/run-container.sh`, not committed); the
+acceptance line ran on the rebuilt image on 2026-09-11 against `decks/gt-brand` at revision 15:
+`passed` true in both themes, 170 pages, 624 blocks measured, 0 out of budget (`dx` 0 on 590, +1
+on 24, -1 on 10; `dy` 0 on 362, -1 on 247, +1 on 15; `dw` 0 on 422, -1 on 151, +1 on 35, -2 on 9,
++2 on 7), 28 all-native slides per theme, geometry in bounds (1244 shapes per file, 0 `custGeom`,
+0 `normAutofit`), 13 embedded fonts, `gt-brand-light.pptx` 26.75 MiB and `gt-brand-dark.pptx`
+27.85 MiB, 273.5 s for the export and both verifies (LibreOffice 25.2.3.2, pdftocairo 25.03.0,
+Chrome for Testing 147.0.7727.0 on SwiftShader). Whole-page mismatch stays informational in native
+mode (mean 0.353 percent, worst `inspirations` dark 1.213 percent): the mode is gated per block.
+
+Native export now covers every block type. Text blocks travel as text boxes, hairlines and plates:
+`heading`, `paragraph`, `credit`, `rows`, `plain`, `refs`, `ladder` and `panel`
+(`NATIVE_BLOCK_TYPES` in `packages/schema/src/export.ts`; `say` was tried in round three and
+measured dw +4 on `voice#say` in both themes: its 27 px quote has no cut face and the nearest,
+`GT Inter Text 26 Medium`, renders 0.8 percent wider in LibreOffice, so it stays a raster until
+the font set cuts a 27 px face); a `composite` is a grid and emits
+nothing of its own, its cells' blocks export as themselves (`tagRasterElements` and `measureScene`
+walk to the non-composite owner of every element). Everything else is a PNG at its whole-pixel box:
+icons and marks at 3x; declared and raw diagrams and the language specimen at 1x, the sheet's own
+grid (round two measured `lines#dia1` and `diagrams#dia4` at dx +1 dw -2 in the dark theme from a
+2x image: LibreOffice's resampling dimmed their half-covered 1 px strokes below the ink cut, and
+the specimen's fallback faces hint differently on the 2x page, `multilingual#lang` dy -2); dithers,
+shots, pairs, tiles, details, boards, swatches, the matrix, the mark sizes, the type specimen and
+the html escape at 2x (`rasterScaleFor` and `ONE_X_TYPES` in `scene/extract.ts`; the policy is
+`auto`, `2` or `3` through `--raster-scale`, and a forced 2 or 3 applies to every raster). Two-tone pictures are regenerated from the
+one-bit image at 2x or 3x (`--picture-scale`), plates and rails stay native, and `--headings raster`
+takes `heading` out of the native set for a file whose letterforms matter more than editable text
+(SPEC 8.3). The export options a menu offers are data: `EXPORT_OPTIONS` in
+`packages/schema/src/export.ts` lists format, mode, theme, font set, headings, raster scale,
+picture scale and verify with their values, labels and one sentence each, and `export.run`
+accepts every one of them.
+
+A 1x raster is opaque: an alpha PNG of a hairline junction (two 18 percent strokes, alpha 0.27)
+came back 6 units lighter from LibreOffice's compositing and crossed the ink cut
+(`diagrams#dia3` dw -85 in round three); the 2x and 3x rasters keep their alpha, because the plate
+under an icon is a native rectangle. The exported runs drop the document's zero-width joiners
+(U+2060, the nowrap device the importer writes after a hyphen): the lines are hard breaks already,
+and LibreOffice drew the joiners from a fallback face (`fixed-points#h4` dw +10).
+
+A text face used off its cut size renders wider in LibreOffice than the browser draws
+InterVariable at that size: 0.82 percent at 27 px and 1.7 percent at 30 px on `GT Inter Text 26
+Medium` (`voice#say` dw +4, `fixed-points#h4` dw +8). `calibration.json` records the excess under
+`faceAdvance` and the emitter takes it back as character spacing over the run
+(`pptx/face-advance.ts`); sizes without a measurement are not corrected, and a new size that
+fails the width gate is measured and added the same way.
+
+The verify loop measures a diagram raster on its edge like an opaque picture (`compareBlocks`),
+at 30 channel units (`DIA_EDGE_TOLERANCE`) instead of the picture's 40: its hairlines are its
+structure and at 1x they arrive unresampled, the cut at a third left a two-stroke junction 0.006
+past the threshold in the reference and 0.006 short in the page (`diagrams#dia3`), and at 40 the
+hairline itself (45 units from the paper, about 41 after LibreOffice's 1/100 mm placement blurs a
+1:1 image) counted in the reference only (`positioning#dia1` dy +32, `docs-for-agents#dia1` dw
+-32, `agent-api#dia1` dw -38 in round five). The palette leaves a gap between hair-soft (22) and
+hair (45), and 30 sits in it with room for the blur. The loop also skips composite roots
+(`blocksOfRecord`): a composite has no ink of its own and its
+union box only re-measured the edges of the blocks inside it (`details-two#group` read dw +26 in
+the dark theme from the plate border of its last shot).
+
 ## Manual PowerPoint checklist
 
 PowerPoint cannot run headless on Linux, so this pass is scheduled, not automated (SPEC 8.5 step

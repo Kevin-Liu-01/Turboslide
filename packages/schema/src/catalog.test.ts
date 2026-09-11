@@ -110,7 +110,9 @@ describe('the action table', () => {
         spec.id !== 'slide.lease' &&
         spec.id !== 'version.save' &&
         spec.id !== 'import.run' &&
-        spec.id !== 'source.apply'
+        spec.id !== 'source.apply' &&
+        // deck.create writes a deck that does not exist yet, so there is no revision to base on
+        spec.id !== 'deck.create'
       ) {
         const json = z.toJSONSchema(spec.input, { target: 'draft-2020-12' }) as {
           properties?: Record<string, unknown>;
@@ -131,7 +133,8 @@ describe('the action table', () => {
 
   it('keeps the icon list in sprite order with the mark first', () => {
     expect(ICON_NAMES[0]).toBe('gt-mark');
-    expect(ICON_NAMES).toHaveLength(64);
-    expect(new Set(ICON_NAMES).size).toBe(64);
+    // 64 Heroicons plus gt-mark since M5 added lock-closed (slide 83)
+    expect(ICON_NAMES).toHaveLength(65);
+    expect(new Set(ICON_NAMES).size).toBe(65);
   });
 });

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "The MCP server over the action table (SPEC 7.3): tools named deck_<action> for every implemented action offered on mcp with JSON Schema from the Zod definitions, the deck:// resources, the deck_review prompt, and the stdio transport behind `turboslide mcp`.",
+  "description": "The MCP server over the action table (SPEC 7.3): tools named deck_<action> for every implemented action offered on mcp with JSON Schema from the Zod definitions, the deck:// resources, the deck_review prompt, the stdio transport behind `turboslide mcp` and the streamable HTTP transport the studio serves at /mcp.",
   "scripts": {
     "test": "vitest run"
   },
@@ -13,6 +13,7 @@
     "./resources": "./src/resources.ts",
     "./prompts": "./src/prompts.ts",
     "./stdio": "./src/stdio.ts",
+    "./http": "./src/http.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {

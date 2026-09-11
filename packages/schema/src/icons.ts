@@ -1,5 +1,5 @@
 // The icon names the grammar allows (SPEC 4.2: "IconName is the sprite's 63 symbols plus
-// gt-mark"; DECK-GRAMMAR.md:40). The list mirrors packages/theme/assets/sprite-ids.json in sprite
+// gt-mark"; DECK-GRAMMAR.md:40; M5 added lock-closed, the closed lock slide 83 defined inline). The list mirrors packages/theme/assets/sprite-ids.json in sprite
 // order without the `i-` prefix; the theme's sprite test asserts the two agree, and the
 // `icon/known` lint rule checks against this list. A new Heroicon is added with the theme's
 // add-icon script and then appended here.
@@ -70,6 +70,7 @@ export const ICON_NAMES = [
   'bars-3',
   'view-columns',
   'identification',
+  'lock-closed',
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];

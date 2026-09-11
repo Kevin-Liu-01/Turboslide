@@ -27,9 +27,12 @@ describe('the first-baseline constant', () => {
   });
 
   it('moves body text up and tight display headings down, and does nothing for the none target', () => {
-    expect(firstBaselineShiftPx(22, 33)).toBeCloseTo(3.5, 1);
+    // M5 re-measurement: 4.5 at 22 px (calibration.json, the 22 px anchor's note)
+    expect(firstBaselineShiftPx(22, 33)).toBeCloseTo(4.5, 1);
     expect(firstBaselineShiftPx(15, 21.75)).toBeCloseTo(2, 1);
     expect(firstBaselineShiftPx(88, 89.76)).toBeCloseTo(-4, 1);
     expect(firstBaselineShiftPx(22, 33, 'none')).toBe(0);
+    // the code panel's mono face has its own anchor: 6 px at 17 px on a 28.9 px pitch
+    expect(firstBaselineShiftPx(17, 28.9, 'libreoffice', undefined, true)).toBeCloseTo(6, 1);
   });
 });

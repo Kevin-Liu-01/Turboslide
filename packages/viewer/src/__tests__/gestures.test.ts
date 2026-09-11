@@ -8,6 +8,7 @@ import {
   blockMoveFor,
   gestureMutation,
   handlesFor,
+  labelClearanceBox,
   nudgeMutation,
   sheetPoint,
 } from '../Gestures';
@@ -426,5 +427,140 @@ describe('sheetPoint', () => {
   it('divides client offsets by k, the stage width over 1600', () => {
     const stage = { left: 100, top: 50, width: 800 };
     expect(sheetPoint(stage, 500, 250)).toEqual({ x: 800, y: 400 });
+  });
+});
+
+describe('declared diagram labels and markers (SPEC 6.4 Alt-drag, M5)', () => {
+  const dia: Slide = {
+    schemaVersion: 1,
+    id: 'flow',
+    kind: 'content',
+    layout: { type: 'cols', ratio: '5/7', gap: 72, align: 'center' },
+    slots: {
+      left: [{ id: 'h', type: 'heading', level: 'h2', text: 'Flow' }],
+      right: [
+        {
+          id: 'dia1',
+          type: 'dia',
+          fit: { viewBox: [0, 0, 300, 210] },
+          alt: 'A three-step flow',
+          data: {
+            w: 300,
+            h: 210,
+            lines: [{ x1: 5.5, y1: 70.5, x2: 294.5, y2: 70.5, stroke: 'ink' }],
+            rects: [],
+            markers: [
+              { x: 5.5, y: 70.5 },
+              { x: 150, y: 70.5 },
+            ],
+            texts: [
+              { x: 0, y: 114, text: 'Source', size: 20 },
+              { x: 150, y: 114, text: 'Translate', size: 20, anchor: 'middle' },
+            ],
+            icons: [],
+            marks: [],
+          },
+        },
+      ],
+    },
+  };
+  // the dia is drawn at 600 px for its 300 units: one unit is two pixels
+  const diaBoxes: MeasuredBoxes = {
+    blocks: { h: [137, 129, 522.5, 60], dia1: [731.5, 129, 600, 420] },
+    slots: { left: [137, 129, 522.5, 642], right: [731.5, 129, 731.5, 642] },
+    runs: {},
+    parts: {
+      dia1: [
+        [731.5, 259, 22, 22],
+        [1020.5, 259, 22, 22],
+        [731.5, 327, 120, 40],
+        [971.5, 327, 120, 40],
+      ],
+    },
+  };
+
+  it('offers Alt-only handles for every marker and label of a selected declared dia', () => {
+    const list = handlesFor(dia, diaBoxes, { kind: 'block', blockId: 'dia1' });
+    expect(list.map((h) => h.kind)).toEqual([
+      'col-seam',
+      'block-move',
+      'dia-marker',
+      'dia-marker',
+      'dia-label',
+      'dia-label',
+    ]);
+    const label = list.find((h) => h.kind === 'dia-label');
+    expect(label).toMatchObject({
+      label: 'dia1: Label 1',
+      control: 'handle.dia1.data.texts.0',
+      axis: 'xy',
+      alt: true,
+      shape: 'area',
+    });
+    expect(handlesFor(slide, boxes, { kind: 'block', blockId: 'list' }).some((h) => h.alt)).toBe(
+      false,
+    );
+  });
+
+  it('moves a label by the drag in diagram units on the half-pixel grid as one block.set', () => {
+    const list = handlesFor(dia, diaBoxes, { kind: 'block', blockId: 'dia1' });
+    const label = list.filter((h) => h.kind === 'dia-label')[1];
+    if (!label) throw new Error('no label handle');
+    const ctx = { slide: dia, boxes: diaBoxes };
+    // 41 px right and 9 px down at two pixels per unit: 20.5 and 4.5 units
+    expect(gestureMutation(label, ctx, { x: 1000, y: 340 }, { x: 1041, y: 349 })).toEqual({
+      op: 'block.set',
+      slideId: 'flow',
+      blockId: 'dia1',
+      path: '/data/texts/1',
+      value: { x: 170.5, y: 118.5, text: 'Translate', size: 20, anchor: 'middle' },
+    });
+    expect(gestureMutation(label, ctx, { x: 1000, y: 340 }, { x: 1000.4, y: 340 })).toBeNull();
+    const marker = list.find((h) => h.kind === 'dia-marker');
+    if (!marker) throw new Error('no marker handle');
+    expect(gestureMutation(marker, ctx, { x: 742, y: 270 }, { x: 762, y: 270 })).toEqual({
+      op: 'block.set',
+      slideId: 'flow',
+      blockId: 'dia1',
+      path: '/data/markers/0',
+      value: { x: 15.5, y: 70.5 },
+    });
+  });
+
+  it('nudges on both axes from the keyboard and shows the clearance ring', () => {
+    const list = handlesFor(dia, diaBoxes, { kind: 'block', blockId: 'dia1' });
+    const label = list.find((h) => h.kind === 'dia-label');
+    if (!label) throw new Error('no label handle');
+    const ctx = { slide: dia, boxes: diaBoxes };
+    expect(nudgeMutation(label, ctx, 1, 'x')).toMatchObject({
+      path: '/data/texts/0',
+      value: { x: 1, y: 114 },
+    });
+    expect(nudgeMutation(label, ctx, 10, 'y')).toMatchObject({ value: { x: 0, y: 104 } });
+    const ring = labelClearanceBox(dia, label, diaBoxes);
+    if (!ring) throw new Error('no clearance');
+    expect(ring.ok).toBe(true);
+    // the label box in units [0, 99, 62.4, 20] at two pixels per unit from the block origin
+    expect(ring.box.map((v) => Math.round(v * 100) / 100)).toEqual([731.5, 129 + 198, 124.8, 40]);
+    // a label moved onto the line loses its clearance
+    const moved = applyMutations(
+      {
+        deck: {
+          schemaVersion: 1,
+          id: 'fixture',
+          title: 'Fixture',
+          theme: 'gt-ink-paper',
+          sections: [{ id: 'one', name: 'One', slideIds: ['flow'] }],
+          assets: {},
+          revision: 1,
+          createdAt: '2026-09-10T00:00:00.000Z',
+          updatedAt: '2026-09-10T00:00:00.000Z',
+        },
+        slides: { flow: dia },
+      },
+      [{ op: 'block.set', slideId: 'flow', blockId: 'dia1', path: '/data/texts/0/y', value: 80 }],
+    ).document.slides.flow;
+    if (!moved) throw new Error('no slide');
+    expect(labelClearanceBox(moved, label, diaBoxes)?.ok).toBe(false);
   });
 });

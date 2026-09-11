@@ -1,0 +1,17 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "cache": false,
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/crates/turboslide-native/Cargo.toml",
+        "$TURBO_ROOT$/crates/turboslide-native/Cargo.lock",
+        "$TURBO_ROOT$/crates/turboslide-native/build.rs",
+        "$TURBO_ROOT$/crates/turboslide-native/src/**"
+      ],
+      "outputs": ["npm/*/*.node", "wasm/turboslide_native*"]
+    }
+  }
+}

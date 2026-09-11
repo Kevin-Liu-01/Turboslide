@@ -144,7 +144,7 @@
       "note": "The rasterizer is pdftocairo, not pdftoppm: LibreOffice writes the page as 960.009 by 540 pt with the background offset by 0.01 mm, and poppler's Splash backend resamples the 1600 by 900 background across that fraction while the cairo backend reproduces it to the pixel.",
       "firstBaselineModel": {
         "formula": "dy = pitch / 2 - k(size) * size, in sheet px; the exporter moves every Inter text box up by dy (packages/export/src/pptx/baseline.ts)",
-        "measuredOn": "decks/gt-brand revision 13, the 26 all-native slides, light theme, through the M2 acceptance verify run on 2026-09-10; blocks whose ink box top is a hairline (rows), an icon (plain lists) or a panel edge (panel) were excluded",
+        "measuredOn": "decks/gt-brand revision 13, the 26 all-native slides, light theme, through the M2 acceptance verify run on 2026-09-10; blocks whose ink box top is a hairline (rows), an icon (plain lists) or a panel edge (panel) were excluded; the 22 and 44 px anchors re-measured on the M5 round one native export of both themes (2026-09-11)",
         "renderer": "LibreOffice 25.2.3.2 520(Build:2), pdftocairo version 25.03.0 at 1600x900",
         "reference": "Chrome for Testing 147.0.7727.0, SwiftShader, Linux (hhea ascent 1984, descent -494 of 2048; the pure metric model k = 0.605 fits body sizes and drifts to 4 px at 88)",
         "anchors": [
@@ -157,10 +157,11 @@
           },
           {
             "size": 22,
-            "k": 0.5909,
+            "k": 0.5455,
             "pitch": 33,
-            "dy": 3.5,
-            "samples": 23
+            "dy": 4.5,
+            "samples": 154,
+            "note": "M5 re-measurement (r1, both themes): with k 0.5909 the 22 px paragraphs landed 0 on 142, +1 on 10 and +2 on 2 (build-log#p1); half a pixel more lift centres them inside the 1 px budget"
           },
           {
             "size": 26,
@@ -171,10 +172,11 @@
           },
           {
             "size": 44,
-            "k": 0.579,
+            "k": 0.5614,
             "pitch": 48.4,
-            "dy": -1,
-            "samples": 16
+            "dy": -0.5,
+            "samples": 140,
+            "note": "M5 re-measurement (r1, both themes): with k 0.579 the h2 landed 0 on 114 and +1 on 26; a quarter pixel more lift keeps every one within budget"
           },
           {
             "size": 72,
@@ -212,7 +214,21 @@
           },
           "outOfBudget": 0
         },
-        "note": "The 44 px anchor averages the h2 at pitch 48.4 (dy -1) and the title heading on mood slides at pitch 47.52 (dy -2). residualAfterShift is filled by the verify run of the corrected exporter."
+        "note": "The 44 px anchor averages the h2 at pitch 48.4 (dy -1) and the title heading on mood slides at pitch 47.52 (dy -2). residualAfterShift is filled by the verify run of the corrected exporter.",
+        "mono": {
+          "family": "DejaVu Sans Mono",
+          "formula": "the same dy = pitch / 2 - k * size, with one anchor for the code panel",
+          "anchors": [
+            {
+              "size": 17,
+              "k": 0.497,
+              "pitch": 28.9,
+              "dy": 6,
+              "samples": 5
+            }
+          ],
+          "measuredOn": "M5 round one, the dark theme code panels (nearest-page-routing, dx, cli, archive at dy +6, agent-api at +5) once the panel family was DejaVu Sans Mono; the light panels measure on the panel edge and say nothing about the baseline"
+        }
       },
       "pictureShapeOffset": {
         "measuredOn": "2026-09-10, the skills-marks light sheet (3200x1800) as a full-page picture shape over paper, converted and rasterized at 2x in the render worker image",
@@ -228,6 +244,39 @@
         },
         "applied": "the flatten cover picture is written at y = 360 EMU (0.01 mm, 0.047 px) and 360 EMU shorter, so it ends on the page edge; both the full-height and the shortened cover measured 0 mismatched pixels on four sheets (skills-marks, engines, state, opener-brand); pptx/build.ts COVER_OFFSET_IN",
         "note": "A page background fill (p:bg blipFill) paints exactly at y = 0 but QuickLook draws the alpha-0 text layer over it (measured with qlmanage: alpha 0, a:noFill, a hidden cover and an alphaModFix 0 cover all show the text), so the cover stays a picture shape and carries the offset."
+      },
+      "monoFamily": {
+        "value": "DejaVu Sans Mono",
+        "measuredOn": "2026-09-11, the render worker image",
+        "note": "The deck's stack is ui-monospace, 'SF Mono', Menlo, Consolas, monospace (head:23); fc-match monospace resolves to DejaVu Sans Mono in the image and Chromium there uses it for the reference, while fc-match Menlo (the M2 family) resolved to Noto Sans, a proportional face: the dark code panels measured dw -38 to -147 and dy +6 in the M5 baseline. Menlo on macOS is metric compatible with DejaVu Sans Mono."
+      },
+      "gtWordSpacing": {
+        "measuredOn": "2026-09-11, M5 baseline and round one",
+        "note": "The invisible GT letters under the mark are 29.47 px wide at 22 px in the host font against a 25.59 px mark box, so the text after the mark shifted right by 4 px (avoid#p1, audience#p1 dw +4). The exporter spaces the run by (mark width - letters width) / characters per character, to the hundredth of a point (spc -116 at 22 px); round one measured both blocks within budget."
+      },
+      "inlineGlyphGap": {
+        "measuredOn": "2026-09-11, M5 round one",
+        "note": "The external glyph after a link in a link table (head:121) is an inline svg the text layer has no width for, so every run after it moved left by its 21 px (surfaces#rows dw -6 at the line end with two glyphs). The exporter fills a gap wider than 1.5 px between two runs with an invisible no-break space spaced to the gap."
+      },
+      "rasterPlacement": {
+        "measuredOn": "2026-09-11, M5 baseline and round one",
+        "note": "Rasters placed at their fractional element box (the mark at x 190.5, a diagram at 731.5) landed 1 px right and 2 px narrower in the page (mark#mark, lines#dia1, positioning#dia1, docs-for-agents#dia1). The exporter clips and places every raster on whole sheet pixels (snapRasterBox), so a 2x or 3x image maps onto the 1x page with no half-pixel phase."
+      },
+      "faceAdvance": {
+        "about": "A text face used at a size other than its cut optical size renders wider in LibreOffice than the browser draws InterVariable at that size (font-optical-sizing: auto). The excess is a fraction of the run width; the emitter spaces every character of such a run by minus the excess over the run length (pptx/text.ts faceAdvanceExcess). Measured on the deck in the M5 rounds; sizes not listed are not corrected.",
+        "measuredOn": "2026-09-11, the render worker image, LibreOffice 25.2.3.2, GT Inter set 4.001+gt.1",
+        "excess": {
+          "GT Inter Text 26 Medium": {
+            "27": {
+              "value": 0.0082,
+              "block": "voice#say quotes, dw +4 over a 480 px line (round three)"
+            },
+            "30": {
+              "value": 0.017,
+              "block": "fixed-points#h4, dw +8 over a 472 px line (round four)"
+            }
+          }
+        }
       }
     },
     "pptx-quicklook": {

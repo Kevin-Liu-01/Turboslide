@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "glyphfield",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Glyphfield"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Glyphfield is an open-source, local-first brand studio at glyphfield.com, released under the MIT license. One identity supplies the marks, colors, type, voice and defaults to fifteen tools in five categories and to a shared library of 134 live materials. General Translation is one of nine built-in identities, and the two sites share the Bayer dither engines. Projects stay in the browser, and the generation API keeps nothing.",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "fig",
+        "type": "shot",
+        "asset": "glyph-home-hero",
+        "fit": "width",
+        "caption": "The landing page states the studio's scope over a capture of the animation tool, where the GT mark sits on a grain gradient. The crop is cut at two times device scale; the page keeps its own light and dark themes and follows the deck here.",
+        "captionSize": 16
+      }
+    ]
+  }
+}

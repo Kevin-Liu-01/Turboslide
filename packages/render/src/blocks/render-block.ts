@@ -13,6 +13,7 @@ import {
 } from './figures.ts';
 import { renderHtmlEscape } from './html-escape.ts';
 import { renderPlain, renderRefs, renderRows, renderSay } from './lists.ts';
+import { renderMaterial } from './material.ts';
 import { renderDither, renderMark, renderMarkSizes, renderMatrix } from './misc.ts';
 import { renderPanel } from './panel.ts';
 import { renderScales } from './scales.ts';
@@ -71,6 +72,8 @@ export function renderBlock(block: Block, ctx: BlockContext): string {
       return renderMatrix(block, ctx);
     case 'logoPlates':
       return renderLogoPlates(block, ctx);
+    case 'material':
+      return renderMaterial(block, ctx);
     case 'html':
       return renderHtmlEscape(block, ctx);
   }

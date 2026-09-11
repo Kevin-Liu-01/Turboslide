@@ -2,6 +2,7 @@
 import { markSvg, twinAttrs } from './blocks/context.ts';
 import type { BlockContext, RasterRef, ResolvedImage } from './blocks/context.ts';
 import { isTextLike, renderBlock, renderBlocks, wantsShotWrap } from './blocks/render-block.ts';
+import { pictureRecipeAttr } from './blocks/material.ts';
 import { measureStyle } from './blocks/text-blocks.ts';
 import { colsTemplate, colsWidths, COLS_GAP, slotBoxes } from './geometry.ts';
 import { attrs, classes, el, escapeAttr, style } from './html.ts';
@@ -84,6 +85,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     image: imageResolver(deck, options),
     assetUrl: (path) =>
       options.assetSrc ? options.assetSrc('', options.theme, path) : `${options.assetBase}${path}`,
+    ...(options.live === true ? { live: true } : {}),
     rasters: [],
     warnings: [],
     rasterCount: 0,
@@ -116,8 +118,22 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
           : slide.kind === 'closing'
             ? 'opener s-opener s-closing'
             : 'opener s-opener';
+      // a material-sourced picture carries its recipe so the editor's MaterialMount can play the
+      // shader live over the frozen frame (SPEC 5.3, 5.4; M5)
+      const pictureAsset = deck.assets[slide.picture.asset];
+      const recipe =
+        pictureAsset !== undefined && pictureAsset.source.kind === 'material'
+          ? attrs({
+              'data-recipe': pictureRecipeAttr(
+                pictureAsset.source,
+                pictureAsset.treatment?.kind === 'two-tone',
+                slide.plate.side,
+              ),
+              'data-live': options.live === true ? '1' : undefined,
+            })
+          : '';
       const img = image
-        ? `<img class="${imgClass}" src="${escapeAttr(image.src)}"${attrs(twinAttrs(image))} alt="${escapeAttr(image.alt)}"${
+        ? `<img class="${imgClass}" src="${escapeAttr(image.src)}"${attrs(twinAttrs(image))}${recipe} alt="${escapeAttr(image.alt)}"${
             slide.picture.position && slide.picture.position !== 'center'
               ? ` style="object-position:${slide.picture.position}"`
               : ''

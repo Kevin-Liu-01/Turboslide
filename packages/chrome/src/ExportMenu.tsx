@@ -1,0 +1,334 @@
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
+
+import type { ExportFormat, ExportMode } from '@turboslide/schema/export';
+
+import { Seg } from './Seg';
+import type { SegOption } from './Seg';
+import { ToolButton } from './ToolButton';
+
+import './ExportMenu.css';
+
+/**
+ * The Export menu in the toolbar (SPEC 8; Kevin's directive: exporting from the editor, Google
+ * Slides first). A ToolButton in the shell grammar opens a small card under itself, in the row
+ * menu's grammar (Sidebar.css .pt-orow-menu): the PPTX options as Segs and check rows (mode
+ * flatten or native, theme light, dark or both, font set exact or standard, headings as raster,
+ * the LibreOffice verify pass), then the Google Slides entry, then the standalone HTML build.
+ * Every run is one action through the dispatcher the route owns: export.run for PPTX and Slides,
+ * build.run for the file; the menu holds only the option state and reports the run's progress
+ * line. Google Slides runs only when the server says credentials are configured; otherwise the
+ * entry opens the setup card (SetupCard.tsx) with the exact steps. The dry run beside it needs
+ * no credentials: export.run with dryRun builds and validates every request and reports. The
+ * option Segs select plainly (Seg without `toggle`): a repeated click on the chosen option is a
+ * confirmation and changes nothing (measured in the M5 verification: with the ported return to
+ * the first option, confirming Native and Light exported flatten in both themes). The options
+ * live in this component's state and are kept across runs, the report card and the menu's
+ * closing while the route is mounted.
+ */
+export type ExportTheme = 'light' | 'dark' | 'both';
+
+export type ExportMenuInput = {
+  format: Extract<ExportFormat, 'pptx' | 'gslides'>;
+  mode: ExportMode;
+  theme: ('light' | 'dark')[];
+  fonts: 'exact' | 'standard';
+  headings?: 'raster';
+  verify: boolean;
+  /** Google Slides: build and validate the requests, create no presentation (SPEC 8.3) */
+  dryRun?: boolean;
+};
+
+/** What the server reports about the export surface (apps/studio/src/server/download.ts). */
+export type ExportCapabilities = {
+  gslides: {
+    /** TURBOSLIDE_GOOGLE_CREDENTIALS names a readable file */
+    configured: boolean;
+    /** the environment variable's name, for the setup card */
+    variable: string;
+  };
+  /** the worker runs in this process, so produced files can be streamed back */
+  downloads: boolean;
+  worker: 'local' | 'http';
+};
+
+/** A run in flight: the label of the entry that started it and the worker's last log line. */
+export type ExportProgress = { label: string; line?: string };
+
+export type ExportMenuProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** null until the server has answered */
+  capabilities: ExportCapabilities | null;
+  progress: ExportProgress | null;
+  /** export.run with the chosen options; format pptx or gslides */
+  onExport: (input: ExportMenuInput) => void;
+  /** the Google Slides entry without credentials: open the setup card */
+  onGoogleSetup: () => void;
+  /** build.run: the standalone HTML file */
+  onBuild: () => void;
+  className?: string;
+};
+
+const MODES: readonly SegOption<ExportMode>[] = [
+  {
+    value: 'flatten',
+    label: 'Flatten',
+    title: 'A 2x raster of every sheet with an invisible text layer; pixel identical (SPEC 8.2)',
+  },
+  {
+    value: 'native',
+    label: 'Native',
+    title: 'Text boxes, lines and rectangles; rasters for the rest (SPEC 8.2)',
+  },
+];
+
+const THEMES: readonly SegOption<ExportTheme>[] = [
+  { value: 'both', label: 'Both', title: 'One file per theme' },
+  { value: 'light', label: 'Light', title: 'The light file only' },
+  { value: 'dark', label: 'Dark', title: 'The dark file only' },
+];
+
+const FONTS: readonly SegOption<'exact' | 'standard'>[] = [
+  {
+    value: 'exact',
+    label: 'Exact',
+    title: 'Per-size Inter instances, twelve family names (SPEC 8.4)',
+  },
+  {
+    value: 'standard',
+    label: 'Standard',
+    title: 'Three family names: GT Inter Display, Inter, Inter Medium (SPEC 8.4)',
+  },
+];
+
+function themes(theme: ExportTheme): ('light' | 'dark')[] {
+  return theme === 'both' ? ['light', 'dark'] : [theme];
+}
+
+export function ExportMenu({
+  open,
+  onOpenChange,
+  capabilities,
+  progress,
+  onExport,
+  onGoogleSetup,
+  onBuild,
+  className,
+}: ExportMenuProps) {
+  const button = useRef<HTMLSpanElement>(null);
+  const card = useRef<HTMLDivElement>(null);
+  const [mode, setMode] = useState<ExportMode>('flatten');
+  const [theme, setTheme] = useState<ExportTheme>('both');
+  const [fonts, setFonts] = useState<'exact' | 'standard'>('exact');
+  const [raster, setRaster] = useState(false);
+  const [verify, setVerify] = useState(false);
+  const [at, setAt] = useState<{ x: number; y: number } | null>(null);
+
+  /* the card sits under the button, in the viewport, like the sidebar's row menu */
+  useEffect(() => {
+    if (!open) return;
+    const anchor = button.current?.querySelector('button');
+    const rect = anchor?.getBoundingClientRect();
+    if (rect) setAt({ x: Math.min(rect.left, window.innerWidth - 344), y: rect.bottom + 6 });
+    const onDown = (event: MouseEvent) => {
+      if (!(event.target instanceof Node)) return;
+      if (card.current?.contains(event.target) || button.current?.contains(event.target)) return;
+      onOpenChange(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      onOpenChange(false);
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey, true);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey, true);
+    };
+  }, [open, onOpenChange]);
+
+  const busy = progress !== null;
+  const input = (format: ExportMenuInput['format']): ExportMenuInput => ({
+    format,
+    mode,
+    theme: themes(theme),
+    fonts,
+    ...(raster ? { headings: 'raster' as const } : {}),
+    verify,
+  });
+  const gslidesReady = capabilities?.gslides.configured === true;
+
+  /* Enter on a check row toggles it, as Space does */
+  const onCheckKey = (event: ReactKeyboardEvent<HTMLInputElement>, toggle: () => void) => {
+    if (event.key !== 'Enter') return;
+    event.preventDefault();
+    toggle();
+  };
+
+  return (
+    <span ref={button} className={['ts-export-anchor', className ?? ''].filter(Boolean).join(' ')}>
+      <ToolButton
+        icon="external"
+        label="Export"
+        title="Export the deck: PPTX, Google Slides, standalone HTML"
+        pressed={open}
+        control="export.open"
+        className="ts-export-btn"
+        onClick={() => onOpenChange(!open)}
+      />
+      {open && at ? (
+        <div
+          ref={card}
+          className="ts-export"
+          role="dialog"
+          aria-label="Export"
+          data-control="export.menu"
+          data-busy={busy ? '' : undefined}
+          style={{ left: at.x, top: at.y }}
+        >
+          <span className="ts-export-head">PPTX</span>
+          <div className="ts-export-row">
+            <span className="ts-export-label">Mode</span>
+            <Seg
+              options={MODES}
+              value={mode}
+              onChange={setMode}
+              label="Export mode"
+              className="is-small ts-export-seg"
+              control="export.mode"
+            />
+          </div>
+          <div className="ts-export-row">
+            <span className="ts-export-label">Theme</span>
+            <Seg
+              options={THEMES}
+              value={theme}
+              onChange={setTheme}
+              label="Export theme"
+              className="is-small ts-export-seg"
+              control="export.theme"
+            />
+          </div>
+          <div className="ts-export-row">
+            <span className="ts-export-label">Fonts</span>
+            <Seg
+              options={FONTS}
+              value={fonts}
+              onChange={setFonts}
+              label="Export font set"
+              className="is-small ts-export-seg"
+              control="export.fonts"
+            />
+          </div>
+          <label className="ts-export-row ts-export-check">
+            <span className="ts-export-label">Headings as raster</span>
+            <input
+              type="checkbox"
+              checked={raster}
+              aria-label="Headings as raster"
+              data-control="export.headings"
+              onChange={(event) => setRaster(event.target.checked)}
+              onKeyDown={(event) => onCheckKey(event, () => setRaster((v) => !v))}
+            />
+            <span className="ts-export-box" aria-hidden="true" />
+          </label>
+          <label className="ts-export-row ts-export-check">
+            <span className="ts-export-label">Verify with LibreOffice</span>
+            <input
+              type="checkbox"
+              checked={verify}
+              aria-label="Verify with LibreOffice"
+              data-control="export.verify"
+              onChange={(event) => setVerify(event.target.checked)}
+              onKeyDown={(event) => onCheckKey(event, () => setVerify((v) => !v))}
+            />
+            <span className="ts-export-box" aria-hidden="true" />
+          </label>
+          <div className="ts-export-actions">
+            <button
+              type="button"
+              className="pt-ib is-text is-solid"
+              title="export.run: one PPTX per theme, downloaded when done"
+              data-control="export.pptx"
+              disabled={busy}
+              onClick={() => onExport(input('pptx'))}
+            >
+              <span className="pt-lb">Export PPTX</span>
+            </button>
+          </div>
+          <span className="ts-export-rule" aria-hidden="true" />
+          <span className="ts-export-head">Google Slides</span>
+          <p className="ts-export-note">
+            {gslidesReady
+              ? `The same mode, theme and fonts; a presentation in the Drive of the ${capabilities.gslides.variable} account.`
+              : capabilities === null
+                ? 'Asking the server whether credentials are configured.'
+                : `No credentials: ${capabilities.gslides.variable} is not set on the server.`}
+          </p>
+          <div className="ts-export-actions">
+            {gslidesReady ? (
+              <button
+                type="button"
+                className="pt-ib is-text"
+                title="export.run with format gslides"
+                data-control="export.gslides"
+                disabled={busy}
+                onClick={() => onExport(input('gslides'))}
+              >
+                <span className="pt-lb">Export to Google Slides</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="pt-ib is-text"
+                title="The steps to configure Google Slides export"
+                data-control="export.gslides"
+                disabled={capabilities === null}
+                onClick={onGoogleSetup}
+              >
+                <span className="pt-lb">Set up Google Slides</span>
+              </button>
+            )}
+            <button
+              type="button"
+              className="pt-ib is-text"
+              title="export.run with format gslides and dryRun: the batchUpdate requests are built and validated, requests.json and images.json are written, no presentation is created"
+              data-control="export.gslides-dry"
+              disabled={busy}
+              onClick={() => onExport({ ...input('gslides'), dryRun: true })}
+            >
+              <span className="pt-lb">Dry run</span>
+            </button>
+          </div>
+          <span className="ts-export-rule" aria-hidden="true" />
+          <span className="ts-export-head">Standalone HTML</span>
+          <p className="ts-export-note">
+            build.run: the single file with fonts and assets inlined, under the 16 MB budget.
+          </p>
+          <div className="ts-export-actions">
+            <button
+              type="button"
+              className="pt-ib is-text"
+              title="build.run: the standalone deck file, downloaded when done"
+              data-control="export.build"
+              disabled={busy}
+              onClick={onBuild}
+            >
+              <span className="pt-lb">Build and download</span>
+            </button>
+          </div>
+          {progress ? (
+            <p className="ts-export-progress" role="status" data-control="export.progress">
+              <i className="ts-export-dot" aria-hidden="true" />
+              <span>{progress.label}</span>
+              {progress.line ? <span className="ts-export-line">{progress.line}</span> : null}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+    </span>
+  );
+}

@@ -633,6 +633,8 @@ a.pt-sb-mark:focus-visible {
   display: flex;
   flex-direction: column;
   padding: 4px 0;
+  /* the template group makes the menu tall; Sidebar.tsx caps it at the viewport below the anchor */
+  overflow-y: auto;
   background: var(--pt-paper);
   color: var(--pt-ink);
   border: 1px solid var(--pt-hair);

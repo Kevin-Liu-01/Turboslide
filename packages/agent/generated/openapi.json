@@ -11,6 +11,12 @@
       "description": "The studio dev server (always port 4321)"
     }
   ],
+  "security": [
+    {
+      "bearer": []
+    },
+    {}
+  ],
   "tags": [
     {
       "name": "discovery"
@@ -47,7 +53,7 @@
     "/api/agent": {
       "get": {
         "operationId": "agent.manifest",
-        "summary": "The agent manifest: transports, actions, skills and resources",
+        "summary": "The agent manifest: transports, execution rules, actions, what this instance implements, skills and resources",
         "tags": [
           "discovery"
         ],
@@ -61,6 +67,148 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/{id}": {
+      "get": {
+        "operationId": "agent.describeAction",
+        "summary": "The contract of one action and whether this instance implements it",
+        "tags": [
+          "discovery"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "An action id from the table, such as slide.update"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "id, label, doc, group, mutates, transports, milestone, implemented, input and output JSON Schema, cli, mcp, example",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown action, or one not offered on http",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/mcp": {
+      "post": {
+        "operationId": "mcp.rpc",
+        "summary": "MCP over streamable HTTP: JSON-RPC requests (initialize first)",
+        "description": "Tools deck_<action> for every implemented action on the mcp transport, the deck:// resources and the deck_review prompt; the mcp-session-id header carries the session; ?deck= and x-turboslide-author bind the session at initialize; deck_goto_slide is listed while a studio page is attached.",
+        "tags": [
+          "discovery"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A JSON-RPC response, as JSON or as an SSE stream"
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "mcp.stream",
+        "summary": "The server to client notification stream of an MCP session",
+        "tags": [
+          "discovery"
+        ],
+        "responses": {
+          "200": {
+            "description": "text/event-stream"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "mcp.close",
+        "summary": "Ends an MCP session",
+        "tags": [
+          "discovery"
+        ],
+        "responses": {
+          "200": {
+            "description": "Closed"
           }
         }
       }
@@ -125,13 +273,23 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
           }
         ],
         "requestBody": {
@@ -156,7 +314,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -167,6 +335,16 @@
           },
           "404": {
             "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -198,6 +376,286 @@
         }
       }
     },
+    "/api/actions/deck.create": {
+      "post": {
+        "operationId": "deck.create",
+        "summary": "New deck",
+        "description": "Creates a deck under decks/ from the GT brand template or as one title slide, and returns its id, revision and counts.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": true,
+        "x-milestone": "M4",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeckCreateInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeckCreateOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in M4 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/deck.rename": {
+      "post": {
+        "operationId": "deck.rename",
+        "summary": "Rename deck",
+        "description": "Sets the deck title, the name the sidebar head, the toolbar and the deck list show; one deck.set of /title.",
+        "tags": [
+          "deck"
+        ],
+        "x-mutates": true,
+        "x-milestone": "M4",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeckRenameInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeckRenameOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in M4 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/actions/slide.list": {
       "post": {
         "operationId": "slide.list",
@@ -216,13 +674,23 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
           }
         ],
         "requestBody": {
@@ -247,7 +715,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -258,6 +736,16 @@
           },
           "404": {
             "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -307,13 +795,23 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
           }
         ],
         "requestBody": {
@@ -338,7 +836,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -349,6 +857,16 @@
           },
           "404": {
             "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -398,13 +916,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -429,7 +966,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -449,7 +996,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -499,13 +1056,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -530,7 +1106,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -550,7 +1136,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -600,13 +1196,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -631,7 +1246,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -651,7 +1276,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -701,13 +1336,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -732,7 +1386,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -752,7 +1416,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -802,13 +1476,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -833,7 +1526,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -853,7 +1556,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -903,13 +1616,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -934,7 +1666,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -954,7 +1696,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1004,13 +1756,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -1035,7 +1806,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -1055,7 +1836,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1105,13 +1896,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -1136,7 +1946,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -1156,7 +1976,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1206,13 +2036,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -1237,7 +2086,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -1257,7 +2116,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1307,13 +2176,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -1338,7 +2226,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -1358,7 +2256,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1408,13 +2316,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -1439,7 +2366,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -1459,7 +2396,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1495,7 +2442,7 @@
       "post": {
         "operationId": "asset.add",
         "summary": "Add asset",
-        "description": "Adds a file or URL as an asset with its role, alt, source and optional treatment; returns twins and metrics.",
+        "description": "Adds a file, a data URL or a fetched URL as an asset with its role, alt, license fields and optional two-tone treatment; returns the asset with twins and metrics.",
         "tags": [
           "asset"
         ],
@@ -1509,13 +2456,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -1540,7 +2506,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -1560,7 +2536,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (25 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1596,7 +2582,7 @@
       "post": {
         "operationId": "asset.dither",
         "summary": "Dither asset",
-        "description": "Re-runs the two-tone pipeline on an asset with new parameters and reports plate clearance.",
+        "description": "Re-runs the two-tone pipeline on an asset with new parameters and reports plate clearance; with fromRecorded it reads the committed twins back and verifies them cell for cell.",
         "tags": [
           "asset"
         ],
@@ -1610,13 +2596,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -1641,7 +2646,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -1661,7 +2676,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1697,7 +2722,7 @@
       "post": {
         "operationId": "asset.capture",
         "summary": "Capture page",
-        "description": "Captures a page at 1440 by 900 in one or both themes, optionally cropped to a region.",
+        "description": "Captures a page at 1440 by 900 in one or both themes through a per-site recipe, optionally cropped to a region, with identical-region 2x detail crops as further assets.",
         "tags": [
           "asset"
         ],
@@ -1710,13 +2735,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -1741,7 +2785,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -1761,7 +2815,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (25 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1797,7 +2861,7 @@
       "post": {
         "operationId": "material.capture",
         "summary": "Capture material",
-        "description": "Renders a shader material at 3200 by 1800 and captures frames at the given anchors as assets with recipe keys.",
+        "description": "Renders a shader material at 3200 by 1800 and captures frozen frames at the given anchors as assets with recipe keys, through the two-tone screen when asked; one anchor returns the asset, several the list.",
         "tags": [
           "asset"
         ],
@@ -1811,13 +2875,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -1842,7 +2925,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -1862,7 +2955,138 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in M5 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/material.list": {
+      "post": {
+        "operationId": "material.list",
+        "summary": "List materials",
+        "description": "The material catalog: every paper:* entry with its uniform schema and palette presets, and the proto:* engines with their availability.",
+        "tags": [
+          "asset"
+        ],
+        "x-mutates": false,
+        "x-milestone": "M5",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MaterialListInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterialListOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -1912,13 +3136,23 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
           }
         ],
         "requestBody": {
@@ -1943,7 +3177,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -1954,6 +3198,16 @@
           },
           "404": {
             "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2003,13 +3257,23 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
           }
         ],
         "requestBody": {
@@ -2034,7 +3298,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -2045,6 +3319,16 @@
           },
           "404": {
             "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2094,13 +3378,23 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
           }
         ],
         "requestBody": {
@@ -2125,7 +3419,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -2136,6 +3440,16 @@
           },
           "404": {
             "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2185,13 +3499,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -2216,7 +3549,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -2236,7 +3579,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2286,13 +3639,23 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
           }
         ],
         "requestBody": {
@@ -2317,7 +3680,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -2328,6 +3701,16 @@
           },
           "404": {
             "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2377,13 +3760,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -2408,7 +3810,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -2428,7 +3840,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2478,13 +3900,23 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
           }
         ],
         "requestBody": {
@@ -2509,7 +3941,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -2520,6 +3962,16 @@
           },
           "404": {
             "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2569,13 +4021,32 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
           }
         ],
         "requestBody": {
@@ -2600,7 +4071,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -2620,7 +4101,17 @@
             }
           },
           "409": {
-            "description": "Stale baseRevision or a held lease (ConflictError), with the current document",
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2670,13 +4161,23 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
           }
         ],
         "requestBody": {
@@ -2701,7 +4202,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -2712,6 +4223,16 @@
           },
           "404": {
             "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2761,13 +4282,23 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
           }
         ],
         "requestBody": {
@@ -2792,7 +4323,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -2803,6 +4344,16 @@
           },
           "404": {
             "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -2852,13 +4403,23 @@
         ],
         "parameters": [
           {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
             "name": "x-turboslide-author",
             "in": "header",
             "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "human name or agent:<runId>"
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
           }
         ],
         "requestBody": {
@@ -2883,7 +4444,17 @@
             }
           },
           "400": {
-            "description": "Malformed input (TypeError) with the Zod path",
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
             "content": {
               "application/json": {
                 "schema": {
@@ -2894,6 +4465,16 @@
           },
           "404": {
             "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
             "content": {
               "application/json": {
                 "schema": {
@@ -5689,6 +7270,78 @@
                 "type": "number",
                 "minimum": 0
               },
+              "justify": {
+                "title": "Justify tracks",
+                "x-inspector": {
+                  "label": "Justify tracks",
+                  "control": "select",
+                  "snap": [
+                    "start",
+                    "space-between"
+                  ],
+                  "group": "Layout",
+                  "help": "space-between spreads fixed tracks across the slot, the deck’s `justify-content` (s25:8)."
+                },
+                "description": "space-between spreads fixed tracks across the slot, the deck’s `justify-content` (s25:8).",
+                "type": "string",
+                "enum": [
+                  "start",
+                  "space-between"
+                ]
+              },
+              "align": {
+                "title": "Align cells",
+                "x-inspector": {
+                  "label": "Align cells",
+                  "control": "select",
+                  "snap": [
+                    "start",
+                    "center",
+                    "end",
+                    "stretch"
+                  ],
+                  "group": "Layout",
+                  "help": "The grid’s align-items; start keeps a short cell at the top of its row (s67:5, s83:5)."
+                },
+                "description": "The grid’s align-items; start keeps a short cell at the top of its row (s67:5, s83:5).",
+                "type": "string",
+                "enum": [
+                  "start",
+                  "center",
+                  "end",
+                  "stretch"
+                ]
+              },
+              "caption": {
+                "title": "Caption",
+                "x-inspector": {
+                  "label": "Caption",
+                  "control": "textarea",
+                  "group": "Text",
+                  "help": "Renders the composite as a figure with this figcaption (s67:6, s84:16)."
+                },
+                "description": "Renders the composite as a figure with this figcaption (s67:6, s84:16).",
+                "type": "string"
+              },
+              "captionSize": {
+                "title": "Caption size",
+                "x-inspector": {
+                  "label": "Caption size",
+                  "control": "select",
+                  "snap": [
+                    16,
+                    15
+                  ],
+                  "group": "Block",
+                  "help": "The two caption sizes the deck uses (report 03 section 11 item 9)."
+                },
+                "description": "The two caption sizes the deck uses (report 03 section 11 item 9).",
+                "type": "number",
+                "enum": [
+                  16,
+                  15
+                ]
+              },
               "cells": {
                 "minItems": 1,
                 "type": "array",
@@ -6115,7 +7768,8 @@
                             "beaker",
                             "bars-3",
                             "view-columns",
-                            "identification"
+                            "identification",
+                            "lock-closed"
                           ]
                         },
                         "x": {
@@ -6177,6 +7831,66 @@
                         "y",
                         "w",
                         "h"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "polygons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "points": {
+                          "minItems": 3,
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "prefixItems": [
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ],
+                            "items": false,
+                            "minItems": 2,
+                            "maxItems": 2
+                          }
+                        },
+                        "fill": {
+                          "type": "string",
+                          "enum": [
+                            "ink",
+                            "paper",
+                            "plate",
+                            "none"
+                          ]
+                        },
+                        "opacity": {
+                          "type": "number",
+                          "minimum": 0,
+                          "maximum": 1
+                        },
+                        "stroke": {
+                          "type": "string",
+                          "enum": [
+                            "ink",
+                            "mid",
+                            "hair"
+                          ]
+                        },
+                        "width": {
+                          "type": "number",
+                          "enum": [
+                            1,
+                            1.5
+                          ]
+                        }
+                      },
+                      "required": [
+                        "points",
+                        "fill"
                       ],
                       "additionalProperties": false
                     }
@@ -6562,6 +8276,198 @@
               },
               "type": {
                 "type": "string",
+                "const": "material"
+              },
+              "materialId": {
+                "type": "string",
+                "minLength": 1,
+                "title": "Material",
+                "x-inspector": {
+                  "label": "Material",
+                  "control": "select",
+                  "group": "Block",
+                  "help": "A catalog id from `turboslide material list` (paper:liquid-metal, paper:gem-smoke)."
+                },
+                "description": "A catalog id from `turboslide material list` (paper:liquid-metal, paper:gem-smoke)."
+              },
+              "preset": {
+                "title": "Preset",
+                "x-inspector": {
+                  "label": "Preset",
+                  "control": "select",
+                  "group": "Block",
+                  "help": "A palette preset of the material (ink-paper, paper-ink, brand-blue, fire); uniforms override it."
+                },
+                "description": "A palette preset of the material (ink-paper, paper-ink, brand-blue, fire); uniforms override it.",
+                "type": "string",
+                "minLength": 1
+              },
+              "uniforms": {
+                "title": "Uniforms",
+                "x-inspector": {
+                  "label": "Uniforms",
+                  "control": "json",
+                  "group": "Block",
+                  "help": "Uniform overrides in the recipe’s u_* names; the Material section edits them one by one."
+                },
+                "description": "Uniform overrides in the recipe’s u_* names; the Material section edits them one by one.",
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                }
+              },
+              "anchor": {
+                "title": "Anchor (ms)",
+                "x-inspector": {
+                  "label": "Anchor (ms)",
+                  "control": "number",
+                  "snap": [
+                    4000,
+                    5500,
+                    7000
+                  ],
+                  "group": "Block",
+                  "help": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s."
+                },
+                "description": "The frame time the capture freezes; the deck sampled its openers at about 4, 5.5 and 7 s.",
+                "type": "number",
+                "minimum": 0
+              },
+              "twoTone": {
+                "title": "Two-tone",
+                "x-inspector": {
+                  "label": "Two-tone",
+                  "control": "toggle",
+                  "group": "Block",
+                  "help": "Capture through the deck’s 8 by 8 Bayer screen as a light and dark twin pair (SPEC 5.4)."
+                },
+                "description": "Capture through the deck’s 8 by 8 Bayer screen as a light and dark twin pair (SPEC 5.4).",
+                "type": "boolean"
+              },
+              "plate": {
+                "title": "Plate",
+                "x-inspector": {
+                  "label": "Plate",
+                  "control": "select",
+                  "snap": [
+                    "lower-left",
+                    "lower-right",
+                    "upper-left"
+                  ],
+                  "group": "Block",
+                  "help": "The plate rectangle the two-tone metrics are screened against (OPENERS.md:105, 176)."
+                },
+                "description": "The plate rectangle the two-tone metrics are screened against (OPENERS.md:105, 176).",
+                "type": "string",
+                "enum": [
+                  "lower-left",
+                  "lower-right",
+                  "upper-left"
+                ]
+              },
+              "asset": {
+                "title": "Frame",
+                "x-inspector": {
+                  "label": "Frame",
+                  "control": "asset",
+                  "group": "Asset"
+                },
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "height": {
+                "title": "Height",
+                "x-inspector": {
+                  "label": "Height",
+                  "control": "number",
+                  "group": "Layout"
+                },
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "caption": {
+                "title": "Caption",
+                "x-inspector": {
+                  "label": "Caption",
+                  "control": "textarea",
+                  "group": "Text"
+                },
+                "type": "string"
+              },
+              "captionSize": {
+                "title": "Caption size",
+                "x-inspector": {
+                  "label": "Caption size",
+                  "control": "select",
+                  "snap": [
+                    16,
+                    15
+                  ],
+                  "group": "Block"
+                },
+                "type": "number",
+                "enum": [
+                  16,
+                  15
+                ]
+              },
+              "alt": {
+                "type": "string",
+                "minLength": 1,
+                "title": "Alt text",
+                "x-inspector": {
+                  "label": "Alt text",
+                  "control": "text",
+                  "group": "Text"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "materialId",
+              "alt"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$",
+                "title": "Id",
+                "x-inspector": {
+                  "label": "Id",
+                  "control": "readonly",
+                  "group": "Advanced"
+                }
+              },
+              "ext": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "type": {
+                "type": "string",
                 "const": "html"
               },
               "css": {
@@ -6678,7 +8584,8 @@
               "beaker",
               "bars-3",
               "view-columns",
-              "identification"
+              "identification",
+              "lock-closed"
             ],
             "title": "Icon",
             "x-inspector": {
@@ -7004,6 +8911,9 @@
                     "type": "string",
                     "minLength": 1
                   },
+                  "title": {
+                    "type": "string"
+                  },
                   "artist": {
                     "type": "string"
                   },
@@ -7263,6 +9173,10 @@
                 "additionalProperties": false
               }
             ]
+          },
+          "sourceFile": {
+            "type": "string",
+            "minLength": 1
           },
           "credit": {
             "title": "Credit",
@@ -8768,6 +10682,140 @@
         ],
         "additionalProperties": false
       },
+      "DeckCreateInput": {
+        "$id": "#/components/schemas/DeckCreateInput",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The deck title; the id is its slug unless `id` is given"
+          },
+          "from": {
+            "type": "string",
+            "enum": [
+              "gt-brand",
+              "blank"
+            ],
+            "description": "'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide"
+          },
+          "id": {
+            "description": "The deck id under decks/; derived from the name when absent",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "required": [
+          "name",
+          "from"
+        ],
+        "additionalProperties": false
+      },
+      "DeckCreateOutput": {
+        "$id": "#/components/schemas/DeckCreateOutput",
+        "type": "object",
+        "properties": {
+          "deckId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string",
+            "enum": [
+              "gt-brand",
+              "blank"
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "dir": {
+            "type": "string",
+            "description": "The deck directory"
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "slides": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "sections": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "assets": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "slides",
+              "sections",
+              "assets"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "deckId",
+          "title",
+          "from",
+          "revision",
+          "dir",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "DeckRenameInput": {
+        "$id": "#/components/schemas/DeckRenameInput",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The new title"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "name",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "DeckRenameOutput": {
+        "$id": "#/components/schemas/DeckRenameOutput",
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "title",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
       "SlideListInput": {
         "$id": "#/components/schemas/SlideListInput",
         "type": "object",
@@ -9463,10 +11511,17 @@
         "$id": "#/components/schemas/AssetAddInput",
         "type": "object",
         "properties": {
+          "id": {
+            "description": "The asset id; a slug of the file name when omitted",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
           "file": {
+            "description": "A path on the machine, or a data: URL from the studio’s drop or paste",
             "type": "string"
           },
           "url": {
+            "description": "An http(s) URL to fetch, 25 MB at most",
             "type": "string",
             "format": "uri"
           },
@@ -9490,6 +11545,7 @@
             "minLength": 1
           },
           "source": {
+            "description": "The provenance record; built from title, artist, license and sourceUrl when omitted",
             "oneOf": [
               {
                 "type": "object",
@@ -9654,6 +11710,9 @@
                     "type": "string",
                     "minLength": 1
                   },
+                  "title": {
+                    "type": "string"
+                  },
                   "artist": {
                     "type": "string"
                   },
@@ -9688,234 +11747,110 @@
               }
             ]
           },
-          "treatment": {
-            "oneOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "kind": {
-                    "type": "string",
-                    "const": "two-tone"
-                  },
-                  "crop": {
-                    "type": "array",
-                    "prefixItems": [
-                      {
-                        "type": "number"
-                      },
-                      {
-                        "type": "number"
-                      },
-                      {
-                        "type": "number"
-                      },
-                      {
-                        "type": "number"
-                      }
-                    ],
-                    "items": false,
-                    "minItems": 4,
-                    "maxItems": 4,
-                    "title": "Crop",
-                    "x-inspector": {
-                      "label": "Crop",
-                      "control": "json",
-                      "group": "Asset",
-                      "help": "x, y, width, height in source pixels; may reach past the source, which pads with the ground."
-                    },
-                    "description": "x, y, width, height in source pixels; may reach past the source, which pads with the ground."
-                  },
-                  "channel": {
-                    "title": "Channel",
-                    "x-inspector": {
-                      "label": "Channel",
-                      "control": "select",
-                      "snap": [
-                        "gray",
-                        "r",
-                        "g",
-                        "b"
-                      ],
-                      "group": "Asset"
-                    },
-                    "type": "string",
-                    "enum": [
-                      "gray",
-                      "r",
-                      "g",
-                      "b"
-                    ]
-                  },
-                  "invert": {
-                    "title": "Invert",
-                    "x-inspector": {
-                      "label": "Invert",
-                      "control": "toggle",
-                      "group": "Asset"
-                    },
-                    "type": "boolean"
-                  },
-                  "blur": {
-                    "title": "Blur",
-                    "x-inspector": {
-                      "label": "Blur",
-                      "control": "number",
-                      "group": "Asset"
-                    },
-                    "type": "number",
-                    "minimum": 0
-                  },
-                  "autocontrast": {
-                    "type": "number",
-                    "const": 0.5
-                  },
-                  "black": {
-                    "title": "Black point",
-                    "x-inspector": {
-                      "label": "Black point",
-                      "control": "number",
-                      "group": "Asset"
-                    },
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 255
-                  },
-                  "white": {
-                    "title": "White point",
-                    "x-inspector": {
-                      "label": "White point",
-                      "control": "number",
-                      "group": "Asset"
-                    },
-                    "type": "number",
-                    "minimum": 0,
-                    "maximum": 255
-                  },
-                  "gamma": {
-                    "title": "Gamma",
-                    "x-inspector": {
-                      "label": "Gamma",
-                      "control": "number",
-                      "group": "Asset"
-                    },
-                    "type": "number",
-                    "exclusiveMinimum": 0
-                  },
-                  "minFilter": {
-                    "title": "Min filter",
-                    "x-inspector": {
-                      "label": "Min filter",
-                      "control": "number",
-                      "group": "Asset"
-                    },
-                    "type": "number",
-                    "exclusiveMinimum": 0
-                  },
-                  "unsharp": {
-                    "type": "object",
-                    "properties": {
-                      "rows": {
-                        "type": "array",
-                        "prefixItems": [
-                          {
-                            "type": "number"
-                          },
-                          {
-                            "type": "number"
-                          }
-                        ],
-                        "items": false,
-                        "minItems": 2,
-                        "maxItems": 2
-                      },
-                      "amount": {
-                        "type": "number"
-                      }
-                    },
-                    "required": [
-                      "rows",
-                      "amount"
-                    ],
-                    "additionalProperties": false
-                  },
-                  "polarity": {
-                    "type": "string",
-                    "enum": [
-                      "dark-ground",
-                      "light-ground"
-                    ],
-                    "title": "Polarity",
-                    "x-inspector": {
-                      "label": "Polarity",
-                      "control": "select",
-                      "snap": [
-                        "dark-ground",
-                        "light-ground"
-                      ],
-                      "group": "Asset"
-                    }
-                  },
-                  "cell": {
-                    "type": "number",
-                    "const": 2
-                  },
-                  "bayer": {
-                    "type": "number",
-                    "const": 8
-                  },
-                  "resampler": {
-                    "type": "string",
-                    "const": "lanczos3"
-                  }
-                },
-                "required": [
-                  "kind",
-                  "crop",
-                  "autocontrast",
-                  "polarity",
-                  "cell",
-                  "bayer",
-                  "resampler"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "kind": {
-                    "type": "string",
-                    "const": "continuous"
-                  },
-                  "quality": {
-                    "type": "number",
-                    "enum": [
-                      88,
-                      92,
-                      95
-                    ],
-                    "title": "JPEG quality",
-                    "x-inspector": {
-                      "label": "JPEG quality",
-                      "control": "select",
-                      "snap": [
-                        88,
-                        92,
-                        95
-                      ],
-                      "group": "Asset"
-                    }
-                  }
-                },
-                "required": [
-                  "kind",
-                  "quality"
-                ],
-                "additionalProperties": false
-              }
-            ]
+          "title": {
+            "description": "The picture’s name as the source states it",
+            "type": "string"
+          },
+          "artist": {
+            "type": "string"
+          },
+          "license": {
+            "description": "CC0, CC BY, CC BY-SA 4.0, public domain, or the text",
+            "type": "string"
+          },
+          "shareAlike": {
+            "description": "The license is share-alike: the credit must appear on the plate",
+            "type": "boolean"
+          },
+          "sourceUrl": {
+            "description": "Where the picture came from",
+            "type": "string",
+            "format": "uri"
           },
           "credit": {
+            "description": "The plate credit; composed from artist and license when omitted",
             "type": "string"
+          },
+          "twoTone": {
+            "description": "Run the two-tone pipeline; the source is kept as assets/<id>.source.<ext>",
+            "type": "boolean"
+          },
+          "treatment": {
+            "type": "object",
+            "properties": {
+              "crop": {
+                "description": "Left, top, right, bottom in source pixels; may reach past the source",
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "items": false,
+                "minItems": 4,
+                "maxItems": 4
+              },
+              "channel": {
+                "type": "string",
+                "enum": [
+                  "gray",
+                  "r",
+                  "g",
+                  "b"
+                ]
+              },
+              "invert": {
+                "type": "boolean"
+              },
+              "blur": {
+                "type": "number",
+                "minimum": 0
+              },
+              "black": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "white": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "gamma": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "minFilter": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "polarity": {
+                "type": "string",
+                "enum": [
+                  "dark-ground",
+                  "light-ground"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "plate": {
+            "type": "string",
+            "enum": [
+              "lower-left",
+              "lower-right",
+              "upper-left"
+            ],
+            "description": "The plate rectangle the metrics are screened against"
           },
           "baseRevision": {
             "type": "integer",
@@ -9927,7 +11862,6 @@
         "required": [
           "role",
           "alt",
-          "source",
           "baseRevision"
         ],
         "additionalProperties": false
@@ -9937,10 +11871,12 @@
         "type": "object",
         "properties": {
           "assetId": {
+            "description": "Required unless allTwoTone",
             "type": "string",
             "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
           },
           "treatment": {
+            "description": "The full treatment to run; the recorded one with the params merged when omitted",
             "oneOf": [
               {
                 "type": "object",
@@ -10166,13 +12102,99 @@
               }
             ]
           },
+          "params": {
+            "description": "Parameters merged over the recorded treatment (--gamma, --black on the CLI)",
+            "type": "object",
+            "properties": {
+              "crop": {
+                "description": "Left, top, right, bottom in source pixels; may reach past the source",
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "items": false,
+                "minItems": 4,
+                "maxItems": 4
+              },
+              "channel": {
+                "type": "string",
+                "enum": [
+                  "gray",
+                  "r",
+                  "g",
+                  "b"
+                ]
+              },
+              "invert": {
+                "type": "boolean"
+              },
+              "blur": {
+                "type": "number",
+                "minimum": 0
+              },
+              "black": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "white": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "gamma": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "minFilter": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "polarity": {
+                "type": "string",
+                "enum": [
+                  "dark-ground",
+                  "light-ground"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
           "plate": {
             "type": "string",
             "enum": [
               "lower-left",
               "lower-right",
               "upper-left"
-            ]
+            ],
+            "description": "The plate rectangle the metrics are screened against"
+          },
+          "source": {
+            "description": "The continuous source when the asset records none",
+            "type": "string"
+          },
+          "allTwoTone": {
+            "description": "Every asset with a two-tone treatment",
+            "type": "boolean"
+          },
+          "fromRecorded": {
+            "description": "Read the committed twins back instead of regenerating; metrics are recomputed",
+            "type": "boolean"
+          },
+          "verifyCells": {
+            "description": "Regenerate from the source where one exists and count the cells that differ",
+            "type": "boolean"
           },
           "baseRevision": {
             "type": "integer",
@@ -10182,114 +12204,283 @@
           }
         },
         "required": [
-          "assetId",
-          "treatment",
           "baseRevision"
         ],
         "additionalProperties": false
       },
       "AssetDitherOutput": {
         "$id": "#/components/schemas/AssetDitherOutput",
-        "type": "object",
-        "properties": {
-          "twins": {
-            "anyOf": [
-              {
-                "type": "object",
-                "properties": {
-                  "light": {
-                    "type": "string",
-                    "minLength": 1
-                  },
-                  "dark": {
-                    "type": "string",
-                    "minLength": 1
-                  }
-                },
-                "required": [
-                  "light",
-                  "dark"
-                ],
-                "additionalProperties": false
-              },
-              {
-                "type": "object",
-                "properties": {
-                  "neutral": {
-                    "type": "string",
-                    "minLength": 1
-                  }
-                },
-                "required": [
-                  "neutral"
-                ],
-                "additionalProperties": false
-              }
-            ]
-          },
-          "metrics": {
+        "anyOf": [
+          {
             "type": "object",
             "properties": {
-              "litFraction": {
-                "type": "number",
-                "minimum": 0,
-                "maximum": 1
+              "assetId": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
               },
-              "plateClear": {
+              "twins": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "light": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "dark": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "light",
+                      "dark"
+                    ],
+                    "additionalProperties": false
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "neutral": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "required": [
+                      "neutral"
+                    ],
+                    "additionalProperties": false
+                  }
+                ]
+              },
+              "metrics": {
                 "type": "object",
                 "properties": {
-                  "plate": {
-                    "type": "array",
-                    "prefixItems": [
-                      {
-                        "type": "number"
+                  "litFraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "plateClear": {
+                    "type": "object",
+                    "properties": {
+                      "plate": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "items": false,
+                        "minItems": 4,
+                        "maxItems": 4
                       },
-                      {
-                        "type": "number"
+                      "nearestLitPx": {
+                        "type": "number",
+                        "minimum": 0
                       },
-                      {
-                        "type": "number"
+                      "litUnder": {
+                        "type": "number",
+                        "minimum": 0
                       },
-                      {
-                        "type": "number"
+                      "litInBand": {
+                        "type": "number",
+                        "minimum": 0
                       }
+                    },
+                    "required": [
+                      "plate",
+                      "nearestLitPx",
+                      "litUnder",
+                      "litInBand"
                     ],
-                    "items": false,
-                    "minItems": 4,
-                    "maxItems": 4
-                  },
-                  "nearestLitPx": {
-                    "type": "number",
-                    "minimum": 0
-                  },
-                  "litUnder": {
-                    "type": "number",
-                    "minimum": 0
-                  },
-                  "litInBand": {
-                    "type": "number",
-                    "minimum": 0
+                    "additionalProperties": false
                   }
                 },
                 "required": [
-                  "plate",
-                  "nearestLitPx",
-                  "litUnder",
-                  "litInBand"
+                  "litFraction"
                 ],
                 "additionalProperties": false
+              },
+              "mismatchedCells": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "twinInverseMismatch": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "missingParameter": {
+                "type": "boolean"
+              },
+              "missingSource": {
+                "type": "boolean"
+              },
+              "missingTwins": {
+                "type": "boolean"
+              },
+              "written": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "required": [
-              "litFraction"
+              "assetId",
+              "twins",
+              "written"
             ],
             "additionalProperties": false
+          },
+          {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "assetId": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "twins": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "light": {
+                          "type": "string",
+                          "minLength": 1
+                        },
+                        "dark": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "light",
+                        "dark"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "neutral": {
+                          "type": "string",
+                          "minLength": 1
+                        }
+                      },
+                      "required": [
+                        "neutral"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                },
+                "metrics": {
+                  "type": "object",
+                  "properties": {
+                    "litFraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "plateClear": {
+                      "type": "object",
+                      "properties": {
+                        "plate": {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "items": false,
+                          "minItems": 4,
+                          "maxItems": 4
+                        },
+                        "nearestLitPx": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "litUnder": {
+                          "type": "number",
+                          "minimum": 0
+                        },
+                        "litInBand": {
+                          "type": "number",
+                          "minimum": 0
+                        }
+                      },
+                      "required": [
+                        "plate",
+                        "nearestLitPx",
+                        "litUnder",
+                        "litInBand"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "litFraction"
+                  ],
+                  "additionalProperties": false
+                },
+                "mismatchedCells": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "twinInverseMismatch": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "missingParameter": {
+                  "type": "boolean"
+                },
+                "missingSource": {
+                  "type": "boolean"
+                },
+                "missingTwins": {
+                  "type": "boolean"
+                },
+                "written": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "assetId",
+                "twins",
+                "written"
+              ],
+              "additionalProperties": false
+            }
           }
-        },
-        "required": [
-          "twins"
-        ],
-        "additionalProperties": false
+        ]
       },
       "AssetCaptureInput": {
         "$id": "#/components/schemas/AssetCaptureInput",
@@ -10298,6 +12489,21 @@
           "url": {
             "type": "string",
             "format": "uri"
+          },
+          "id": {
+            "description": "The asset id; a slug of the URL when omitted",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "alt": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "capture",
+              "detail"
+            ]
           },
           "viewport": {
             "type": "array",
@@ -10333,6 +12539,7 @@
             ]
           },
           "region": {
+            "description": "A CSS-pixel box x, y, w, h inside the page; both twins take the identical region",
             "type": "array",
             "prefixItems": [
               {
@@ -10352,8 +12559,53 @@
             "minItems": 4,
             "maxItems": 4
           },
+          "details": {
+            "description": "Identical-region detail crops, one asset each as <id>-detail-<n>",
+            "type": "array",
+            "items": {
+              "type": "array",
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "items": false,
+              "minItems": 4,
+              "maxItems": 4
+            }
+          },
           "recipe": {
+            "description": "The per-site recipe; gt-site by default",
             "type": "string"
+          },
+          "settleMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "format": {
+            "description": "The twin file format; jpg at quality 92 by default",
+            "type": "string",
+            "enum": [
+              "jpg",
+              "png"
+            ]
+          },
+          "allowHosts": {
+            "description": "Hosts beyond the built-in allowlist (SPEC 11 captureHosts)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "baseRevision": {
             "type": "integer",
@@ -10365,7 +12617,6 @@
         "required": [
           "url",
           "theme",
-          "recipe",
           "baseRevision"
         ],
         "additionalProperties": false
@@ -10377,6 +12628,10 @@
           "materialId": {
             "type": "string",
             "minLength": 1
+          },
+          "preset": {
+            "description": "A palette preset of the material, under the uniforms",
+            "type": "string"
           },
           "uniforms": {
             "type": "object",
@@ -10427,6 +12682,109 @@
             },
             "description": "Frame times in ms"
           },
+          "id": {
+            "description": "The asset id; <id>-<anchor> per anchor when several",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "opener",
+              "mood",
+              "frame"
+            ]
+          },
+          "alt": {
+            "type": "string"
+          },
+          "twoTone": {
+            "type": "boolean"
+          },
+          "treatment": {
+            "type": "object",
+            "properties": {
+              "crop": {
+                "description": "Left, top, right, bottom in source pixels; may reach past the source",
+                "type": "array",
+                "prefixItems": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "items": false,
+                "minItems": 4,
+                "maxItems": 4
+              },
+              "channel": {
+                "type": "string",
+                "enum": [
+                  "gray",
+                  "r",
+                  "g",
+                  "b"
+                ]
+              },
+              "invert": {
+                "type": "boolean"
+              },
+              "blur": {
+                "type": "number",
+                "minimum": 0
+              },
+              "black": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "white": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "gamma": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "minFilter": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "polarity": {
+                "type": "string",
+                "enum": [
+                  "dark-ground",
+                  "light-ground"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "plate": {
+            "type": "string",
+            "enum": [
+              "lower-left",
+              "lower-right",
+              "upper-left"
+            ],
+            "description": "The plate rectangle the metrics are screened against"
+          },
+          "backend": {
+            "type": "string",
+            "enum": [
+              "angle-metal",
+              "swiftshader"
+            ]
+          },
           "baseRevision": {
             "type": "integer",
             "minimum": 0,
@@ -10436,7 +12794,6 @@
         },
         "required": [
           "materialId",
-          "uniforms",
           "anchors",
           "baseRevision"
         ],
@@ -10444,9 +12801,205 @@
       },
       "MaterialCaptureOutput": {
         "$id": "#/components/schemas/MaterialCaptureOutput",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/Asset"
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Asset"
+            }
+          }
+        ]
+      },
+      "MaterialListInput": {
+        "$id": "#/components/schemas/MaterialListInput",
+        "type": "object",
+        "properties": {
+          "materialId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "MaterialListOutput": {
+        "$id": "#/components/schemas/MaterialListOutput",
         "type": "array",
         "items": {
-          "$ref": "#/components/schemas/Asset"
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "family": {
+              "type": "string",
+              "enum": [
+                "paper",
+                "proto"
+              ]
+            },
+            "label": {
+              "type": "string"
+            },
+            "doc": {
+              "type": "string"
+            },
+            "available": {
+              "type": "boolean"
+            },
+            "credit": {
+              "type": "string"
+            },
+            "license": {
+              "type": "string"
+            },
+            "uniforms": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "float",
+                      "int",
+                      "color",
+                      "colors",
+                      "enum",
+                      "bool"
+                    ]
+                  },
+                  "default": {
+                    "anyOf": [
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "array",
+                        "items": {
+                          "type": "number"
+                        }
+                      },
+                      {
+                        "type": "string"
+                      }
+                    ]
+                  },
+                  "min": {
+                    "type": "number"
+                  },
+                  "max": {
+                    "type": "number"
+                  },
+                  "step": {
+                    "type": "number"
+                  },
+                  "options": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "value"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "maxCount": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  },
+                  "help": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "name",
+                  "label",
+                  "kind",
+                  "default"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "presets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "label": {
+                    "type": "string"
+                  },
+                  "doc": {
+                    "type": "string"
+                  },
+                  "uniforms": {
+                    "type": "object",
+                    "propertyNames": {
+                      "type": "string"
+                    },
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          }
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "label",
+                  "doc",
+                  "uniforms"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "id",
+            "family",
+            "label",
+            "doc",
+            "available",
+            "credit",
+            "license",
+            "uniforms",
+            "presets"
+          ],
+          "additionalProperties": false
         }
       },
       "RenderSlideInput": {
@@ -11257,8 +13810,34 @@
             ]
           },
           "headings": {
+            "description": "Write every heading as a PNG instead of a text box (SPEC 8.3)",
             "type": "string",
             "const": "raster"
+          },
+          "rasterScale": {
+            "description": "Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3 (SPEC 8.6)",
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "auto"
+              },
+              {
+                "type": "number",
+                "const": 2
+              },
+              {
+                "type": "number",
+                "const": 3
+              }
+            ]
+          },
+          "pictureScale": {
+            "description": "The scale two-tone pictures are regenerated at from the one-bit image (SPEC 8.2)",
+            "type": "number",
+            "enum": [
+              2,
+              3
+            ]
           },
           "excludeShareAlike": {
             "description": "Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)",
@@ -11273,6 +13852,10 @@
             ]
           },
           "verify": {
+            "type": "boolean"
+          },
+          "dryRun": {
+            "description": "Google Slides: build and validate the batchUpdate requests without credentials and write requests.json; no presentation is created (SPEC 8.3)",
             "type": "boolean"
           },
           "slideIds": {
@@ -11689,44 +14272,92 @@
         "type": "object",
         "properties": {
           "error": {
-            "type": "string",
-            "enum": [
-              "TypeError",
-              "RangeError",
-              "ConflictError",
-              "NotImplementedError",
-              "Error"
-            ]
-          },
-          "message": {
-            "type": "string"
-          },
-          "path": {
-            "type": "array",
-            "items": {
-              "type": [
-                "string",
-                "integer"
-              ]
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "enum": [
+                  "TypeError",
+                  "RangeError",
+                  "ConflictError",
+                  "NotImplementedError",
+                  "Error"
+                ]
+              },
+              "status": {
+                "type": "integer"
+              },
+              "message": {
+                "type": "string"
+              },
+              "code": {
+                "type": "string",
+                "enum": [
+                  "unknown_field",
+                  "invalid_input",
+                  "unauthorized",
+                  "payload_too_large",
+                  "not_json",
+                  "unknown_action",
+                  "not_on_http",
+                  "method_not_allowed",
+                  "no_session",
+                  "unknown_deck"
+                ],
+                "description": "The machine-readable reason beyond the class name"
+              },
+              "pointer": {
+                "type": "string",
+                "description": "A JSON pointer to the field a 400 is about (unknown_field names the extra key)"
+              },
+              "action": {
+                "type": "string"
+              },
+              "currentRevision": {
+                "type": "integer",
+                "description": "For ConflictError"
+              },
+              "current": {
+                "description": "The current document for ConflictError, so the re-read is free",
+                "type": "object",
+                "properties": {
+                  "deck": {
+                    "$ref": "#/components/schemas/Deck"
+                  },
+                  "slides": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "$ref": "#/components/schemas/Slide"
+                    }
+                  }
+                }
+              },
+              "holder": {
+                "description": "The lease holder when a write was refused for a held lease",
+                "$ref": "#/components/schemas/Author"
+              },
+              "milestone": {
+                "type": "string",
+                "description": "For NotImplementedError"
+              }
             },
-            "description": "The Zod path for TypeError"
-          },
-          "currentRevision": {
-            "type": "integer",
-            "description": "For ConflictError"
-          },
-          "current": {
-            "description": "The current document for ConflictError",
-            "$ref": "#/components/schemas/Deck"
-          },
-          "holder": {
-            "$ref": "#/components/schemas/Author"
+            "required": [
+              "name",
+              "status",
+              "message"
+            ]
           }
         },
         "required": [
-          "error",
-          "message"
+          "error"
         ]
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "TURBOSLIDE_TOKEN of the deployment (SPEC 11). Required on every host but localhost; an instance without a token serves localhost only."
       }
     }
   }

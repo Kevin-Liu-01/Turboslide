@@ -43,6 +43,9 @@
     },
     {
       "path": "../../packages/store"
+    },
+    {
+      "path": "../../packages/materials"
     }
   ]
 }

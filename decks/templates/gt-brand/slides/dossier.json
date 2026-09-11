@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "id": "dossier",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The Dossier"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The Dossier is the completed direction and the reference for the identity in application. Its home page lists the supported frameworks inside the hero terminal. Its enterprise page numbers each compliance control and sets the plan terms and sign-on controls as ruled tables.",
+        "measure": 56
+      },
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 90,
+        "tight": true,
+        "items": [
+          {
+            "key": "Dossier",
+            "value": "The Dossier is the completed direction, with a home page and an enterprise page."
+          },
+          {
+            "key": "Orbit",
+            "value": "Orbit has a one-line hero, a windowed demo, a toolchain bento and a pricing file."
+          },
+          {
+            "key": "Signal",
+            "value": "Signal has a split-pane hero, the story cinema and a self-typing transmission log."
+          },
+          {
+            "key": "Shipped",
+            "value": "The live site is rebuilt page for page at /d/production, fifteen pages in all."
+          }
+        ]
+      }
+    ],
+    "right": [
+      {
+        "id": "fig",
+        "type": "shot",
+        "asset": "site-proto-dossier",
+        "fit": "fit"
+      }
+    ]
+  }
+}

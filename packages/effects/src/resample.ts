@@ -27,10 +27,19 @@ function lanczos(x: number): number {
   return 0;
 }
 
-type Coeffs = { ksize: number; bounds: Int32Array; kk: Int32Array };
+/**
+ * The per-axis tap table: `ksize` coefficients per output pixel in `kk`, and per output pixel its
+ * first input index and tap count in `bounds`.
+ */
+export type Coeffs = { ksize: number; bounds: Int32Array; kk: Int32Array };
 
 /** Pillow's precompute_coeffs plus normalize_coeffs_8bpc, for one axis. */
-function precomputeCoeffs(inSize: number, in0: number, in1: number, outSize: number): Coeffs {
+export function precomputeCoeffs(
+  inSize: number,
+  in0: number,
+  in1: number,
+  outSize: number,
+): Coeffs {
   const scale = (in1 - in0) / outSize;
   const filterscale = scale < 1 ? 1 : scale;
   const support = SUPPORT * filterscale;

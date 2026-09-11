@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "shell-views",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "The shell in use"
+      }
+    ],
+    "headRight": [
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Three states of the gallery route at 1440 pixels, each cut from a capture at two times device scale to the region that carries it. Every crop follows the deck theme."
+      }
+    ],
+    "body": [
+      {
+        "id": "grid",
+        "type": "details",
+        "columns": 3,
+        "rowHeights": [
+          425
+        ],
+        "items": [
+          {
+            "asset": "proto-grid-tiles",
+            "caption": "The grid view (G) closes the sidebar and lays every direction out as a captured tile under its group heading, with the shipped site first. The crop shows two of four columns."
+          },
+          {
+            "asset": "proto-index-panel",
+            "caption": "The index panel (R) opens on This site and lists every page in groups. Each row carries a capture, an address and one line; this crop shows the first three rows."
+          },
+          {
+            "asset": "proto-search-card",
+            "caption": "The search palette (Cmd K) opens as a map of the site, and each row shows its address. Typing one letter reaches every heading, direction, archived version and deck slide."
+          }
+        ]
+      }
+    ]
+  }
+}

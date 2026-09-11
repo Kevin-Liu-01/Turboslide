@@ -17,3 +17,9 @@ apps/studio/src/routeTree.gen.ts
 # Local environment
 .env
 *.local
+
+# Rust crate and native build outputs (docs/native.md); Cargo.lock stays tracked
+crates/*/target
+*.node
+packages/native/wasm/*
+!packages/native/wasm/README.md

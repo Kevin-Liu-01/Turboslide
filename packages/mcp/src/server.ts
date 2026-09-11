@@ -48,6 +48,11 @@ export type McpServerOptions = {
   deckDir?: string;
   version?: string;
   maxImages?: number;
+  /**
+   * Reads the bytes of an image an action output names. The CLI reads files; the studio's render
+   * outputs name facade URLs (/api/render/...) and its reader asks the worker for the PNG.
+   */
+  readImage?: (path: string) => Promise<Uint8Array>;
   /** Diagnostics, written to stderr by the CLI. */
   log?: (line: string) => void;
 };
@@ -70,14 +75,15 @@ const INSTRUCTIONS = [
 async function loadImages(
   paths: ReadonlyArray<string>,
   maxImages: number,
+  readImage: (path: string) => Promise<Uint8Array>,
   log?: (line: string) => void,
 ): Promise<{ images: ToolImage[]; omitted: number; missing: string[] }> {
   const images: ToolImage[] = [];
   const missing: string[] = [];
   for (const path of paths.slice(0, maxImages)) {
     try {
-      const bytes = await readFile(path);
-      images.push({ data: bytes.toString('base64'), mimeType: 'image/png' });
+      const bytes = await readImage(path);
+      images.push({ data: Buffer.from(bytes).toString('base64'), mimeType: 'image/png' });
     } catch (error) {
       missing.push(path);
       log?.(
@@ -92,6 +98,8 @@ async function loadImages(
 export function createMcpServer(options: McpServerOptions): CreatedServer {
   const { dispatcher, source, log } = options;
   const maxImages = options.maxImages ?? DEFAULT_MAX_IMAGES;
+  const readImage =
+    options.readImage ?? (async (path: string) => new Uint8Array(await readFile(path)));
   const context: ActionContext = { author: options.author, deckDir: options.deckDir };
   const tools = deriveTools((id) => dispatcher.has(id));
   const byName = new Map(tools.map((entry) => [entry.name, entry]));
@@ -113,7 +121,12 @@ export function createMcpServer(options: McpServerOptions): CreatedServer {
     try {
       const output = await dispatcher.dispatch(entry.action, args, context);
       if (!entry.returnsImages) return toolResult(entry, output);
-      const loaded = await loadImages(imagePathsOf(entry.action, output), maxImages, log);
+      const loaded = await loadImages(
+        imagePathsOf(entry.action, output),
+        maxImages,
+        readImage,
+        log,
+      );
       const notes: string[] = [];
       if (loaded.omitted > 0)
         notes.push(
@@ -157,7 +170,7 @@ export function createMcpServer(options: McpServerOptions): CreatedServer {
       return await readResource(uri, parsed, {
         source,
         lint,
-        readFile: async (path) => new Uint8Array(await readFile(path)),
+        readFile: readImage,
         readJson: async (path) => JSON.parse(await readFile(path, 'utf8')) as unknown,
       });
     } catch (error) {

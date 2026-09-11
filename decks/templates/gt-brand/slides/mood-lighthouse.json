@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mood-lighthouse",
+  "kind": "mood",
+  "picture": {
+    "asset": "mood-lighthouse",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-right",
+    "maxWidth": 560,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "title",
+        "text": "Louisbourg lighthouse"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "A working light in a storm, built to be read at a distance in any weather. The site is held to the same standard, in light and in dark.",
+        "marginTop": 12
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Photograph: Ken Heaton, CC BY-SA 4.0"
+      }
+    ]
+  }
+}

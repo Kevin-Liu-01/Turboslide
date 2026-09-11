@@ -11,6 +11,7 @@ import type { SceneRun, SceneStyle, SceneText } from '../scene/types.ts';
 import { PAGE_IN, PX_PER_IN, parseCssColor, pxToIn, pxToPt } from '../units.ts';
 import { firstBaselineShiftPx } from './baseline.ts';
 import type { BaselineTarget } from './baseline.ts';
+import { faceAdvanceExcess } from './face-advance.ts';
 import type { FontSet } from './fonts-map.ts';
 import { MONO_FAMILY, pickFamily } from './fonts-map.ts';
 
@@ -52,6 +53,21 @@ function runOptions(
     color: color.hex,
   };
   if (run.style.letterSpacing !== 0) out.charSpacing = pxToPt(run.style.letterSpacing);
+  // A text face used off its cut size renders wider in LibreOffice (calibration.json faceAdvance):
+  // the measured excess of the run's width is taken back across its characters.
+  const excess = run.style.mono ? 0 : faceAdvanceExcess(family, run.style.size);
+  if (excess > 0 && run.text.length > 0 && !run.gt) {
+    const perChar = (excess * run.box[2]) / run.text.length;
+    out.charSpacing = Math.round(pxToPt(run.style.letterSpacing - perChar) * 100) / 100;
+  }
+  if (run.gt && run.gtLetters !== undefined && run.text.length > 0) {
+    // The invisible letters under the mark are spaced down (or up) to the mark's box, so the text
+    // after the mark starts where the browser put it: at 22 px the letters GT are about 4 px wider
+    // than the mark and moved the rest of the line by that much (M5 width gate, avoid#p1 and
+    // audience#p1 measured dw +4). spc is per character, to the hundredth of a point.
+    const perChar = (run.box[2] - run.gtLetters) / run.text.length;
+    out.charSpacing = Math.round(pxToPt(run.style.letterSpacing + perChar) * 100) / 100;
+  }
   if (options.invisible || run.gt) out.transparency = 100;
   else if (color.alpha < 1) out.transparency = Math.round((1 - color.alpha) * 100);
   if (run.style.strike) out.strike = 'sngStrike';
@@ -63,15 +79,56 @@ function runOptions(
   return out;
 }
 
+/**
+ * A space that touches a hyperlink run becomes a no-break space. LibreOffice turns each hyperlink
+ * run into a URL field and drops the ordinary space of the plain run beside it (measured in the
+ * M5 baseline: the link table of surfaces rendered "x.com/generaltxn,linkedin.com/..." and its
+ * widest line 6 px narrower than the browser's); U+00A0 survives the field boundary and has the
+ * same advance in Inter.
+ */
+export function guardLinkSpaces(runs: readonly SceneRun[]): SceneRun[] {
+  return runs.map((run, i) => {
+    if (run.style.link) return run;
+    let text = run.text;
+    const prev = runs[i - 1];
+    const next = runs[i + 1];
+    if (prev?.style.link && text.startsWith(' ')) text = `\u00a0${text.slice(1)}`;
+    if (next?.style.link && text.endsWith(' ')) text = `${text.slice(0, -1)}\u00a0`;
+    return text === run.text ? run : { ...run, text };
+  });
+}
+
+/**
+ * The invisible run that holds the place of an inline element between two runs (the external
+ * glyph after a link, a raster in the file): one no-break space spaced out to the measured gap.
+ */
+export function gapFiller(run: SceneRun, options: TextEmitOptions): PptxGenJS.TextProps | null {
+  if (run.gapAfter === undefined || run.spaceWidth === undefined) return null;
+  const family = familyFor(run.style, options.fontSet);
+  options.families.add(family);
+  return {
+    text: '\u00a0',
+    options: {
+      fontFace: family,
+      fontSize: pxToPt(run.style.size),
+      color: parseCssColor(run.style.color).hex,
+      transparency: 100,
+      charSpacing: Math.round(pxToPt(run.gapAfter - run.spaceWidth) * 100) / 100,
+    },
+  };
+}
+
 /** The pptxgenjs run list of a measured text: lines joined by soft breaks, runs by style. */
 export function textRuns(text: SceneText, options: TextEmitOptions): PptxGenJS.TextProps[] {
   const out: PptxGenJS.TextProps[] = [];
   text.lines.forEach((line, li) => {
-    line.runs.forEach((run, ri) => {
+    guardLinkSpaces(line.runs).forEach((run, ri) => {
       out.push({
         text: run.text,
         options: runOptions(run, options, li === 0 && ri === 0, ri === 0),
       });
+      const filler = gapFiller(run, options);
+      if (filler) out.push(filler);
     });
   });
   return out;
@@ -79,8 +136,8 @@ export function textRuns(text: SceneText, options: TextEmitOptions): PptxGenJS.T
 
 /**
  * The box options of a measured text: the lines' union widened to the element and the slack, and
- * the box moved up by the target renderer's first-baseline offset (baseline.ts), which is 0 for
- * the mono stack because the constant was measured for Inter.
+ * the box moved up by the target renderer's first-baseline offset (baseline.ts); the mono stack
+ * has its own measured anchor.
  */
 export function textBoxOptions(
   text: SceneText,
@@ -90,9 +147,14 @@ export function textBoxOptions(
   const maxW = PAGE_IN.width - pxToIn(x);
   const wIn = Math.min(pxToIn(w) + WIDTH_SLACK_IN, maxW);
   const lineHeight = Math.max(...text.lines.map((l) => l.box[3]));
-  const shift = text.style.mono
-    ? 0
-    : firstBaselineShiftPx(text.style.size, lineHeight, options.baseline ?? 'libreoffice');
+  // the mono face has its own anchor (M5: the dark code panels measured 6 px low with none)
+  const shift = firstBaselineShiftPx(
+    text.style.size,
+    lineHeight,
+    options.baseline ?? 'libreoffice',
+    undefined,
+    text.style.mono,
+  );
   const opts: PptxGenJS.TextPropsOptions = {
     x: pxToIn(x),
     y: pxToIn(Math.max(0, y - shift)),

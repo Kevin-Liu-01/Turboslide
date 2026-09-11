@@ -1,5 +1,6 @@
-// The export job: `turboslide export <format> --deck <dir> --mode --theme --fonts [--verify] --out
-// <job dir>/export --json` (SPEC 7.2), the ExportReport read from the CLI's result or from
+// The export job: `turboslide export <format> --deck <dir> --mode --theme --fonts [--headings raster]
+// [--raster-scale] [--picture-scale] [--baseline-target] [--verify] [--dry-run] --out
+// <job dir>/export --json` (SPEC 7.2; the flags are export.run's input fields, SPEC 7.1), the ExportReport read from the CLI's result or from
 // export-report.json beside the files. A verify failure is exit 1 with a report whose `passed` is
 // false; the job is done, not failed, and the report says why. Exit 2 (usage, an export command
 // not wired yet) fails the job with the CLI's last line.
@@ -29,7 +30,12 @@ export const exportJobInput = z.strictObject({
     .optional(),
   fonts: z.enum(['exact', 'standard']).optional(),
   headings: z.literal('raster').optional(),
+  rasterScale: z.union([z.literal('auto'), z.literal(2), z.literal(3)]).optional(),
+  pictureScale: z.union([z.literal(2), z.literal(3)]).optional(),
+  baseline: z.enum(['libreoffice', 'none']).optional(),
   verify: z.boolean().optional(),
+  /** Google Slides: build and validate the requests without credentials (SPEC 8.3). */
+  dryRun: z.boolean().optional(),
   excludeShareAlike: z.boolean().optional(),
 });
 
@@ -64,7 +70,11 @@ export async function runExportJob(
     ...(input.theme ? ['--theme', input.theme.join(',')] : []),
     ...(input.fonts ? ['--fonts', input.fonts] : []),
     ...(input.headings ? ['--headings', input.headings] : []),
+    ...(input.rasterScale !== undefined ? ['--raster-scale', String(input.rasterScale)] : []),
+    ...(input.pictureScale !== undefined ? ['--picture-scale', String(input.pictureScale)] : []),
+    ...(input.baseline ? ['--baseline-target', input.baseline] : []),
     ...(input.verify ? ['--verify'] : []),
+    ...(input.dryRun ? ['--dry-run'] : []),
     ...(input.excludeShareAlike ? ['--exclude-share-alike'] : []),
     '--out',
     outDir,

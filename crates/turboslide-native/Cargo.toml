@@ -1,0 +1,45 @@
+[package]
+name = "turboslide-native"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+publish = false
+description = "The two-tone pipeline, the 1-bit PNG encoder and the image diffs of @turboslide/effects in Rust, behind napi and wasm-bindgen (SPEC 10)."
+
+# One crate, two bindings. `napi` builds the Node addon that packages/native/npm/<platform>
+# loads; `wasm` builds the module that wasm-bindgen turns into packages/native/wasm. Neither is
+# on by default so `cargo test` checks the plain Rust API. Versions are pinned exactly, as the
+# pnpm catalog pins the JavaScript side (SPEC 3.2); Cargo.lock is committed.
+[lib]
+name = "turboslide_native"
+crate-type = ["cdylib", "rlib"]
+
+[features]
+default = []
+napi = ["dep:napi", "dep:napi-derive"]
+wasm = ["dep:wasm-bindgen"]
+
+[dependencies]
+# sin, exp, pow and cbrt from the FreeBSD msun (fdlibm) ports, the same lineage as V8's
+# base::ieee754, so TypeScript and Rust see one arithmetic on every target; std's f64 methods
+# would call Apple's or glibc's libm on the addon and this crate on wasm.
+libm = { version = "=0.2.16", default-features = false }
+miniz_oxide = { version = "=0.9.1", default-features = false, features = ["with-alloc"] }
+serde = { version = "=1.0.229", features = ["derive"] }
+# float_roundtrip parses JSON numbers correctly rounded, as JSON.parse does.
+serde_json = { version = "=1.0.151", features = ["float_roundtrip"] }
+napi = { version = "=3.12.3", default-features = false, features = ["napi8"], optional = true }
+napi-derive = { version = "=3.6.4", optional = true }
+wasm-bindgen = { version = "=0.2.128", optional = true }
+
+[build-dependencies]
+napi-build = "=2.4.2"
+
+[dev-dependencies]
+png = "=0.18.1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1

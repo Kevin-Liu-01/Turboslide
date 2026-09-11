@@ -36,6 +36,9 @@ export function hasIcons(block: Block): boolean {
 
 /** The export class of one block: native text with optional raster parts, or a raster as a whole. */
 export function classifyBlock(block: Block): BlockExportClass {
+  // A composite is a grid; its cells' blocks are listed as themselves (M5 native export).
+  if (block.type === 'composite')
+    return { blockId: block.id, type: block.type, native: true, parts: [] };
   if (!isNativeBlockType(block.type))
     return { blockId: block.id, type: block.type, native: false, parts: ['block'] };
   const parts: RasterPart[] = [];

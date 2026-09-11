@@ -26,6 +26,7 @@ import type { Author, Mutation } from '@turboslide/schema/mutations';
 import { jsonEqual } from '@turboslide/schema/pointer';
 import { validateDocument } from '@turboslide/schema/validate';
 
+import { leasePolicyFor, leaseRefusalMessage } from './lease.ts';
 import { openFileStore, slidePath } from './file-store.ts';
 import type { FileStore } from './file-store.ts';
 import { readVersions } from './versions.ts';
@@ -279,7 +280,7 @@ describe('FileStore', () => {
     expect(outcome.message).toMatch(/changed outside the store/);
   });
 
-  it('keeps advisory leases: another author warns, enforce conflicts, force passes', async () => {
+  it('enforces leases on agent writes, warns on human writes, and force passes', async () => {
     const lease = await store.lease('content-rule', kevin, { minutes: 10 });
     expect(lease).toEqual({
       slideId: 'content-rule',
@@ -295,16 +296,18 @@ describe('FileStore', () => {
     });
     await expect(store.lease('no-such-slide', agent)).rejects.toThrow(RangeError);
 
+    // The default policy follows the author (lease.ts leasePolicyFor, MILESTONES M4 item 2): a
+    // human's write to kevin's slide warns and goes through, an agent's is refused with the holder.
+    const designer: Author = { kind: 'human', name: 'designer' };
     const advisory = await store.write({
       baseRevision: 412,
-      author: agent,
+      author: designer,
       mutations: [setSize(22)],
     });
     expect(advisory.ok).toBe(true);
     if (advisory.ok) expect(advisory.warnings[0]).toMatch(/leased by kevin until/);
 
-    const strict = openFileStore({ dir, now: () => now, leases: 'enforce' });
-    const refused = await strict.write({
+    const refused = await store.write({
       baseRevision: 413,
       author: agent,
       mutations: [setSize(20)],
@@ -313,14 +316,27 @@ describe('FileStore', () => {
     if (refused.ok || refused.code !== 'conflict') throw new Error('expected a conflict');
     expect(refused.holder).toEqual(kevin);
     expect(refused.currentRevision).toBe(413);
-    const forced = await strict.write(
+    expect(refused.message).toMatch(/leased by kevin until .*; pass force to write anyway/);
+    expect(refused.current.deck.revision).toBe(413);
+    const forced = await store.write(
       { baseRevision: 413, author: agent, mutations: [setSize(20)] },
       { force: true },
     );
     expect(forced.ok).toBe(true);
+
+    // An explicit policy wins over the author: advisory lets the agent through with a warning.
+    const lenient = openFileStore({ dir, now: () => now, leases: 'advisory' });
+    const warned = await lenient.write({
+      baseRevision: 414,
+      author: agent,
+      mutations: [setSize(24)],
+    });
+    expect(warned.ok).toBe(true);
+    if (warned.ok) expect(warned.warnings[0]).toMatch(/leased by kevin until/);
+    const strict = openFileStore({ dir, now: () => now, leases: 'enforce' });
     // Whole-deck writes take no lease.
     const sections = await strict.write({
-      baseRevision: 414,
+      baseRevision: 415,
       author: agent,
       mutations: [{ op: 'deck.set', path: '/title', value: 'Renamed' }],
     });
@@ -364,5 +380,21 @@ describe('FileStore', () => {
     expect(conflicts).toHaveLength(1);
     expect(await store.revision()).toBe(413);
     expect(jsonEqual(readVersions(dir).length, 1)).toBe(true);
+  });
+});
+
+describe('leasePolicyFor', () => {
+  it('enforces agents and advises humans', () => {
+    expect(leasePolicyFor(agent)).toBe('enforce');
+    expect(leasePolicyFor(kevin)).toBe('advisory');
+    expect(
+      leaseRefusalMessage('content-rule', {
+        slideId: 'content-rule',
+        holder: kevin,
+        until: '2026-09-10T20:10:00.000Z',
+      }),
+    ).toBe(
+      'Slide "content-rule" is leased by kevin until 2026-09-10T20:10:00.000Z; pass force to write anyway',
+    );
   });
 });

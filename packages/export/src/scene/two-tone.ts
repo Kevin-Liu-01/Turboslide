@@ -1,9 +1,9 @@
-// Two-tone twins at 2x (SPEC 5.4, 8.2): a 2x screenshot of the 1x twin is bilinear and soft
-// (slides report section 2.5), so the one-bit screen is read back from the stored twin (every JPEG
-// cell stays on its side of the threshold, OPENERS.md) and scaled 4x nearest to 3200 by 1800, then
-// written as a two-entry palette PNG in the theme's exact paper and ink. The extractor swaps the
-// picture element's source to this image before the flatten screenshot and hands the same bytes to
-// the native background.
+// Two-tone twins at 2x or 3x (SPEC 5.4, 8.2; MILESTONES M5 item 5): a 2x screenshot of the 1x twin
+// is bilinear and soft (slides report section 2.5), so the one-bit screen is read back from the
+// stored twin (every JPEG cell stays on its side of the threshold, OPENERS.md) and scaled nearest
+// to 3200 by 1800 (2x) or 4800 by 2700 (3x), then written as a two-entry palette PNG in the
+// theme's exact paper and ink. The extractor swaps the picture element's source to this image
+// before the flatten screenshot and hands the same bytes to the native background.
 import type { Theme } from '@turboslide/schema/render';
 import { bitsFromGray } from '@turboslide/effects/diff';
 import { decodeImage } from '@turboslide/effects/io';
@@ -13,7 +13,15 @@ import { toGray } from '@turboslide/effects/tone';
 
 import { parseCssColor } from '../units.ts';
 
-export type TwoToneAt2x = { png: Uint8Array; width: number; height: number; litFraction: number };
+export type TwoToneAt2x = {
+  png: Uint8Array;
+  width: number;
+  height: number;
+  litFraction: number;
+  scale: 2 | 3;
+};
+
+export type PictureScale = 2 | 3;
 
 function rgbOf(hex: string): [number, number, number] {
   const { hex: h } = parseCssColor(hex);
@@ -30,11 +38,12 @@ export async function twoToneTwinAt2x(
   theme: Theme,
   colors: { paper: string; ink: string },
   cell = 2,
+  scale: PictureScale = 2,
 ): Promise<TwoToneAt2x> {
   const rgba = await decodeImage(twinPath);
   const gray = toGray(rgba, 'gray');
   const screen = bitsFromGray(gray, cell);
-  const scaled = scaleNearest(screen, cell * 2);
+  const scaled = scaleNearest(screen, cell * scale);
   let lit = 0;
   for (const b of screen.bits) lit += b;
   const bright = theme === 'light' ? colors.paper : colors.ink;
@@ -45,5 +54,6 @@ export async function twoToneTwinAt2x(
     width: scaled.width,
     height: scaled.height,
     litFraction: screen.bits.length === 0 ? 0 : lit / screen.bits.length,
+    scale,
   };
 }

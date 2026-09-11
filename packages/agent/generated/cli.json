@@ -38,6 +38,63 @@
       "milestone": "M1"
     },
     {
+      "action": "deck.create",
+      "usage": "turboslide deck create <name> --from <from> --id <id>",
+      "command": [
+        "deck",
+        "create"
+      ],
+      "positionals": [
+        "name"
+      ],
+      "options": [
+        {
+          "key": "from",
+          "flag": "--from",
+          "type": "\"gt-brand\" | \"blank\"",
+          "required": true,
+          "description": "'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide",
+          "enum": [
+            "gt-brand",
+            "blank"
+          ]
+        },
+        {
+          "key": "id",
+          "flag": "--id",
+          "type": "string",
+          "required": false,
+          "description": "The deck id under decks/; derived from the name when absent"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M4"
+    },
+    {
+      "action": "deck.rename",
+      "usage": "turboslide deck rename <name>",
+      "command": [
+        "deck",
+        "rename"
+      ],
+      "positionals": [
+        "name"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M4"
+    },
+    {
       "action": "slide.list",
       "usage": "turboslide slides",
       "command": [
@@ -426,7 +483,7 @@
     },
     {
       "action": "asset.add",
-      "usage": "turboslide asset add <file> --role <role> --two-tone --black <black>",
+      "usage": "turboslide asset add <file> --role <role> --alt <alt> --two-tone --black <black> --plate <plate>",
       "command": [
         "asset",
         "add"
@@ -436,10 +493,18 @@
       ],
       "options": [
         {
+          "key": "id",
+          "flag": "--id",
+          "type": "string",
+          "required": false,
+          "description": "The asset id; a slug of the file name when omitted"
+        },
+        {
           "key": "url",
           "flag": "--url",
           "type": "string",
-          "required": false
+          "required": false,
+          "description": "An http(s) URL to fetch, 25 MB at most"
         },
         {
           "key": "role",
@@ -469,19 +534,74 @@
           "key": "source",
           "flag": "--source",
           "type": "object | object | object | object",
-          "required": true
+          "required": false,
+          "description": "The provenance record; built from title, artist, license and sourceUrl when omitted"
         },
         {
-          "key": "treatment",
-          "flag": "--treatment",
-          "type": "object | object",
+          "key": "title",
+          "flag": "--title",
+          "type": "string",
+          "required": false,
+          "description": "The picture’s name as the source states it"
+        },
+        {
+          "key": "artist",
+          "flag": "--artist",
+          "type": "string",
           "required": false
+        },
+        {
+          "key": "license",
+          "flag": "--license",
+          "type": "string",
+          "required": false,
+          "description": "CC0, CC BY, CC BY-SA 4.0, public domain, or the text"
+        },
+        {
+          "key": "shareAlike",
+          "flag": "--share-alike",
+          "type": "boolean",
+          "required": false,
+          "description": "The license is share-alike: the credit must appear on the plate"
+        },
+        {
+          "key": "sourceUrl",
+          "flag": "--source-url",
+          "type": "string",
+          "required": false,
+          "description": "Where the picture came from"
         },
         {
           "key": "credit",
           "flag": "--credit",
           "type": "string",
+          "required": false,
+          "description": "The plate credit; composed from artist and license when omitted"
+        },
+        {
+          "key": "twoTone",
+          "flag": "--two-tone",
+          "type": "boolean",
+          "required": false,
+          "description": "Run the two-tone pipeline; the source is kept as assets/<id>.source.<ext>"
+        },
+        {
+          "key": "treatment",
+          "flag": "--treatment",
+          "type": "object",
           "required": false
+        },
+        {
+          "key": "plate",
+          "flag": "--plate",
+          "type": "\"lower-left\" | \"lower-right\" | \"upper-left\"",
+          "required": false,
+          "description": "The plate rectangle the metrics are screened against",
+          "enum": [
+            "lower-left",
+            "lower-right",
+            "upper-left"
+          ]
         },
         {
           "key": "baseRevision",
@@ -502,7 +622,7 @@
     },
     {
       "action": "asset.dither",
-      "usage": "turboslide asset dither <assetId> --gamma <gamma> --plate <plate>",
+      "usage": "turboslide asset dither <assetId> --gamma <gamma> --plate <plate> --all-two-tone --from-recorded --verify-cells",
       "command": [
         "asset",
         "dither"
@@ -515,18 +635,55 @@
           "key": "treatment",
           "flag": "--treatment",
           "type": "object | object",
-          "required": true
+          "required": false,
+          "description": "The full treatment to run; the recorded one with the params merged when omitted"
+        },
+        {
+          "key": "params",
+          "flag": "--params",
+          "type": "object",
+          "required": false,
+          "description": "Parameters merged over the recorded treatment (--gamma, --black on the CLI)"
         },
         {
           "key": "plate",
           "flag": "--plate",
           "type": "\"lower-left\" | \"lower-right\" | \"upper-left\"",
           "required": false,
+          "description": "The plate rectangle the metrics are screened against",
           "enum": [
             "lower-left",
             "lower-right",
             "upper-left"
           ]
+        },
+        {
+          "key": "source",
+          "flag": "--source",
+          "type": "string",
+          "required": false,
+          "description": "The continuous source when the asset records none"
+        },
+        {
+          "key": "allTwoTone",
+          "flag": "--all-two-tone",
+          "type": "boolean",
+          "required": false,
+          "description": "Every asset with a two-tone treatment"
+        },
+        {
+          "key": "fromRecorded",
+          "flag": "--from-recorded",
+          "type": "boolean",
+          "required": false,
+          "description": "Read the committed twins back instead of regenerating; metrics are recomputed"
+        },
+        {
+          "key": "verifyCells",
+          "flag": "--verify-cells",
+          "type": "boolean",
+          "required": false,
+          "description": "Regenerate from the source where one exists and count the cells that differ"
         },
         {
           "key": "baseRevision",
@@ -540,6 +697,9 @@
         {
           "flag": "--gamma",
           "template": "<gamma>"
+        },
+        {
+          "flag": "--verify-cells"
         }
       ],
       "mutates": true,
@@ -547,7 +707,7 @@
     },
     {
       "action": "asset.capture",
-      "usage": "turboslide asset capture <url> --theme <theme> --region <region>",
+      "usage": "turboslide asset capture <url> --theme <theme> --scale <scale> --recipe <recipe> --region <region>",
       "command": [
         "asset",
         "capture"
@@ -556,6 +716,29 @@
         "url"
       ],
       "options": [
+        {
+          "key": "id",
+          "flag": "--id",
+          "type": "string",
+          "required": false,
+          "description": "The asset id; a slug of the URL when omitted"
+        },
+        {
+          "key": "alt",
+          "flag": "--alt",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "role",
+          "flag": "--role",
+          "type": "\"capture\" | \"detail\"",
+          "required": false,
+          "enum": [
+            "capture",
+            "detail"
+          ]
+        },
         {
           "key": "viewport",
           "flag": "--viewport",
@@ -587,13 +770,46 @@
           "key": "region",
           "flag": "--region",
           "type": "[number, number, number, number]",
-          "required": false
+          "required": false,
+          "description": "A CSS-pixel box x, y, w, h inside the page; both twins take the identical region"
+        },
+        {
+          "key": "details",
+          "flag": "--details",
+          "type": "[number, number, number, number][]",
+          "required": false,
+          "description": "Identical-region detail crops, one asset each as <id>-detail-<n>"
         },
         {
           "key": "recipe",
           "flag": "--recipe",
           "type": "string",
-          "required": true
+          "required": false,
+          "description": "The per-site recipe; gt-site by default"
+        },
+        {
+          "key": "settleMs",
+          "flag": "--settle-ms",
+          "type": "integer",
+          "required": false
+        },
+        {
+          "key": "format",
+          "flag": "--format",
+          "type": "\"jpg\" | \"png\"",
+          "required": false,
+          "description": "The twin file format; jpg at quality 92 by default",
+          "enum": [
+            "jpg",
+            "png"
+          ]
+        },
+        {
+          "key": "allowHosts",
+          "flag": "--allow-hosts",
+          "type": "string[]",
+          "required": false,
+          "description": "Hosts beyond the built-in allowlist (SPEC 11 captureHosts)"
         },
         {
           "key": "baseRevision",
@@ -609,7 +825,7 @@
     },
     {
       "action": "material.capture",
-      "usage": "turboslide material capture <materialId> --anchor <anchors>",
+      "usage": "turboslide material capture <materialId> --preset <preset> --uniforms <uniforms> --anchor <anchors> --two-tone --plate <plate>",
       "command": [
         "material",
         "capture"
@@ -619,10 +835,17 @@
       ],
       "options": [
         {
+          "key": "preset",
+          "flag": "--preset",
+          "type": "string",
+          "required": false,
+          "description": "A palette preset of the material, under the uniforms"
+        },
+        {
           "key": "uniforms",
           "flag": "--uniforms",
           "type": "record",
-          "required": true
+          "required": false
         },
         {
           "key": "size",
@@ -638,6 +861,64 @@
           "description": "Frame times in ms"
         },
         {
+          "key": "id",
+          "flag": "--id",
+          "type": "string",
+          "required": false,
+          "description": "The asset id; <id>-<anchor> per anchor when several"
+        },
+        {
+          "key": "role",
+          "flag": "--role",
+          "type": "\"opener\" | \"mood\" | \"frame\"",
+          "required": false,
+          "enum": [
+            "opener",
+            "mood",
+            "frame"
+          ]
+        },
+        {
+          "key": "alt",
+          "flag": "--alt",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "twoTone",
+          "flag": "--two-tone",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "treatment",
+          "flag": "--treatment",
+          "type": "object",
+          "required": false
+        },
+        {
+          "key": "plate",
+          "flag": "--plate",
+          "type": "\"lower-left\" | \"lower-right\" | \"upper-left\"",
+          "required": false,
+          "description": "The plate rectangle the metrics are screened against",
+          "enum": [
+            "lower-left",
+            "lower-right",
+            "upper-left"
+          ]
+        },
+        {
+          "key": "backend",
+          "flag": "--backend",
+          "type": "\"angle-metal\" | \"swiftshader\"",
+          "required": false,
+          "enum": [
+            "angle-metal",
+            "swiftshader"
+          ]
+        },
+        {
           "key": "baseRevision",
           "flag": "--base-revision",
           "type": "integer",
@@ -647,6 +928,26 @@
       ],
       "custom": [],
       "mutates": true,
+      "milestone": "M5"
+    },
+    {
+      "action": "material.list",
+      "usage": "turboslide material list",
+      "command": [
+        "material",
+        "list"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "materialId",
+          "flag": "--material-id",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "custom": [],
+      "mutates": false,
       "milestone": "M5"
     },
     {
@@ -1058,7 +1359,7 @@
     },
     {
       "action": "export.run",
-      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --exclude-share-alike --baseline-target <baseline> --verify --out <out>",
+      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --exclude-share-alike --baseline-target <baseline> --verify --dry-run --out <out>",
       "command": [
         "export"
       ],
@@ -1099,7 +1400,26 @@
           "key": "headings",
           "flag": "--headings",
           "type": "\"raster\"",
-          "required": false
+          "required": false,
+          "description": "Write every heading as a PNG instead of a text box (SPEC 8.3)"
+        },
+        {
+          "key": "rasterScale",
+          "flag": "--raster-scale",
+          "type": "\"auto\" | 2 | 3",
+          "required": false,
+          "description": "Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3 (SPEC 8.6)"
+        },
+        {
+          "key": "pictureScale",
+          "flag": "--picture-scale",
+          "type": "2 | 3",
+          "required": false,
+          "description": "The scale two-tone pictures are regenerated at from the one-bit image (SPEC 8.2)",
+          "enum": [
+            2,
+            3
+          ]
         },
         {
           "key": "excludeShareAlike",
@@ -1124,6 +1444,13 @@
           "flag": "--verify",
           "type": "boolean",
           "required": false
+        },
+        {
+          "key": "dryRun",
+          "flag": "--dry-run",
+          "type": "boolean",
+          "required": false,
+          "description": "Google Slides: build and validate the batchUpdate requests without credentials and write requests.json; no presentation is created (SPEC 8.3)"
         },
         {
           "key": "slideIds",

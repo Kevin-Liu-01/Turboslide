@@ -11,7 +11,8 @@
 // export.run runs the export command (commands/export.ts) the same way and returns the merged
 // ExportReport; with `verify` it needs LibreOffice, which lives in the render worker image, so a
 // missing soffice is refused with a plain error before anything is exported. Not registered here,
-// so not offered as tools: asset.*, material.capture, judge.bundle and view.goto, whose handlers
+// judge.bundle runs the judge command into the derived directory (MILESTONES M4 item 4). Not
+// registered here, so not offered as tools: asset.*, material.capture and view.goto, whose handlers
 // land with their packages.
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
@@ -65,7 +66,9 @@ import { EXIT } from '../exit.ts';
 import type { Output } from '../output.ts';
 import { registerStoreActions } from '../store-actions.ts';
 import { build } from './build.ts';
+import { decksDirOfDeck, registerDeckActions } from './deck.ts';
 import { exportCommand } from './export.ts';
+import { judge } from './judge.ts';
 import { render } from './render.ts';
 import { sheet } from './sheet.ts';
 
@@ -377,12 +380,31 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
     return { sheets };
   });
 
+  dispatcher.register('judge.bundle', async (input) => {
+    const { slideIds, out } = input as { slideIds: SlideIds; out: string };
+    const { result } = await runCommand(env, judge, [
+      'bundle',
+      ...idsArgv(slideIds),
+      '--deck',
+      env.dir,
+      '--render',
+      renderDir(env),
+      '--out',
+      resolveOut(env.cwd, out, join(env.derived, 'judge')),
+    ]);
+    if (result === undefined) throw new Error('judge.bundle: the judge command produced no result');
+    return result;
+  });
+
   dispatcher.register('export.run', async (input) => {
     const {
       format,
       mode = 'flatten',
       theme = ['light', 'dark'],
       fonts = 'exact',
+      headings,
+      rasterScale,
+      pictureScale,
       excludeShareAlike = false,
       baseline = 'libreoffice',
       verify = false,
@@ -394,6 +416,8 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
       theme?: Theme[];
       fonts?: 'exact' | 'standard';
       headings?: 'raster';
+      rasterScale?: 'auto' | 2 | 3;
+      pictureScale?: 2 | 3;
       excludeShareAlike?: boolean;
       baseline?: 'libreoffice' | 'none';
       verify?: boolean;
@@ -424,6 +448,9 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
       '--out',
       out === undefined ? exportDir : resolveOut(env.cwd, out, exportDir),
     ];
+    if (headings === 'raster') argv.push('--headings', 'raster');
+    if (rasterScale !== undefined) argv.push('--raster-scale', String(rasterScale));
+    if (pictureScale !== undefined) argv.push('--picture-scale', String(pictureScale));
     if (excludeShareAlike) argv.push('--exclude-share-alike');
     if (verify) argv.push('--verify');
     // The command exits 1 when the report's `passed` is false; the tool returns the report either
@@ -540,6 +567,12 @@ export async function mcp(ctx: CommandContext): Promise<number> {
     store: env.store,
     lint: lintLists(),
     renderRecords: () => renderRecords(env),
+  });
+  /* deck.create makes a sibling of this deck under the same decks/ folder; deck.rename writes this deck */
+  registerDeckActions(dispatcher, {
+    store: env.store,
+    lint: lintLists(),
+    decksDir: decksDirOfDeck(dir),
   });
   const context: ActionContext = { author: ctx.author, deckDir: dir };
   const { server, tools } = createMcpServer({

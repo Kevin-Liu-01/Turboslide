@@ -13,6 +13,7 @@ import { checkCopy } from './static/copy.ts';
 import { checkDia } from './static/dia.ts';
 import { checkExportNonNative } from './static/export-non-native.ts';
 import { checkIcons } from './static/icon.ts';
+import { checkPictures } from './static/picture.ts';
 import { checkRows } from './static/rows.ts';
 import { checkStructure } from './static/structure.ts';
 import { checkType } from './static/type.ts';
@@ -47,6 +48,7 @@ export function lintStatic(input: DeckDocument, options: LintOptions = {}): Find
     ...checkRows(ctx),
     ...checkDia(ctx),
     ...checkAssets(ctx),
+    ...checkPictures(ctx),
     ...checkStructure(ctx),
     ...checkExportNonNative(ctx),
   ];

@@ -38,6 +38,7 @@ const STATIC_EXPECTED: RuleId[] = [
   'type/sizes-ladder',
   'type/svg-label-min',
   'icon/placement',
+  'dia/stroke-grammar',
   'scales/marker-equals-value',
   'count/hard-coded',
   'numbers/contradiction',
@@ -75,7 +76,10 @@ describe('lintStatic', () => {
   test('every finding carries the slide, a rule-table severity and kind, and a stable id', () => {
     for (const f of findings) {
       expect(f.slideId.length).toBeGreaterThan(0);
-      expect(f.severity).toBe(RULES[f.rule].severity);
+      // the table severity, or a documented downward override (context.ts FindingDetails: picture/plate-clear
+      // reports at 1 on a mood slide, whose plate is opaque, and when no metrics are recorded)
+      expect(f.severity).toBeLessThanOrEqual(RULES[f.rule].severity);
+      if (f.rule !== 'picture/plate-clear') expect(f.severity).toBe(RULES[f.rule].severity);
       expect(f.kind).toBe(RULES[f.rule].kind);
       expect(f.id).toBe(
         [f.rule, f.slideId, f.blockId ?? '', f.path ?? '', f.theme ?? ''].join('|'),

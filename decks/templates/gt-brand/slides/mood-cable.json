@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mood-cable",
+  "kind": "mood",
+  "picture": {
+    "asset": "mood-cable",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-right",
+    "maxWidth": 560,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "title",
+        "text": "The Eastern Telegraph cable chart"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "The first global network, drawn as the routes that carried messages between continents. Developer experience is the route a string takes from source code to every locale.",
+        "marginTop": 12
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Map: Eastern Telegraph Company, 1901, public domain"
+      }
+    ]
+  }
+}

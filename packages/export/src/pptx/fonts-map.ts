@@ -138,8 +138,16 @@ export function pickFamily(sizePx: number, weight: number, set: FontSet): Family
   };
 }
 
-/** The monospace family the code panel travels under; the face differs per machine (SPEC 8.6). */
-export const MONO_FAMILY = 'Menlo';
+/**
+ * The monospace family the code panel travels under (SPEC 8.6). The deck's stack is
+ * `ui-monospace, 'SF Mono', Menlo, Consolas, monospace` (head:23); the reference browser in the
+ * render worker image resolves it to DejaVu Sans Mono (`fc-match monospace`), and LibreOffice
+ * there matched the M2 name Menlo to Noto Sans, a proportional face: the dark theme code panels
+ * measured 38 to 147 px narrower and 6 px low (M5 baseline, calibration.json `monoFamily`). The
+ * family is the one the verify host resolves; Menlo on macOS is metric compatible with it (Menlo
+ * is a DejaVu Sans Mono derivative), and the report's residual names the substitution.
+ */
+export const MONO_FAMILY = 'DejaVu Sans Mono';
 
 /** The catalog entry for a picked family, when the set has been built. */
 export function entryFor(catalog: FontsCatalog, pick: FamilyPick): FontEntry | undefined {

@@ -3,7 +3,8 @@
 // writes only the slide files whose normalized value changed, removes the files of removed slides,
 // appends versions/<n>.json and rewrites deck.json last, all under a lock file so two processes
 // never interleave. Leases live under <dir>/.turboslide/leases.json, which the repository's
-// .gitignore already excludes, because they are advisory and expire.
+// .gitignore already excludes, because they expire; a lease another author holds refuses an
+// agent's write and warns on a human's (lease.ts, MILESTONES M4 item 2).
 import {
   closeSync,
   existsSync,
@@ -29,6 +30,8 @@ import {
   describeLease,
   activeLeases,
   leaseConflict,
+  leasePolicyFor,
+  leaseRefusalMessage,
   readLeases,
   releaseLease,
   takeLease,
@@ -44,7 +47,7 @@ import type {
   WriteOptions,
   WriteOutcome,
 } from './store.ts';
-import { authorLabel, touchedSlides } from './store.ts';
+import { touchedSlides } from './store.ts';
 import {
   documentAtVersion,
   nextVersionNumber,
@@ -60,7 +63,10 @@ export type FileStoreOptions = {
   dir: string;
   /** The clock, for tests. Defaults to Date. */
   now?: () => string;
-  /** Advisory (default) or enforced leases (SPEC 6.7). */
+  /**
+   * The lease policy for every write. Absent, the policy follows the author of each write
+   * (lease.ts leasePolicyFor: agents enforced, humans advisory; MILESTONES M4 item 2).
+   */
   leases?: LeasePolicy;
   /** Where the lease records live. Default <dir>/.turboslide/leases.json. */
   leaseFile?: string;
@@ -189,7 +195,7 @@ export function writeManifest(dir: string, deck: Deck): void {
 export function openFileStore(options: FileStoreOptions): FileStore {
   const dir = options.dir;
   const clock = options.now ?? (() => new Date().toISOString());
-  const policy: LeasePolicy = options.leases ?? 'advisory';
+  const policyFor = (author: Author): LeasePolicy => options.leases ?? leasePolicyFor(author);
   const leaseFile = options.leaseFile ?? join(dir, STATE_DIR, 'leases.json');
   const lockFile = options.lockFile ?? join(dir, STATE_DIR, 'write.lock');
   const lockTimeoutMs = options.lockTimeoutMs ?? 5000;
@@ -216,6 +222,7 @@ export function openFileStore(options: FileStoreOptions): FileStore {
         const now = clock();
         const warnings: string[] = [];
         if (writeOptions.force !== true) {
+          const policy = policyFor(write.author);
           const leases = readLeases(leaseFile);
           for (const slideId of touchedSlides(write.mutations)) {
             const held = leaseConflict(leases, slideId, write.author, now);
@@ -224,7 +231,7 @@ export function openFileStore(options: FileStoreOptions): FileStore {
               return {
                 ok: false,
                 code: 'conflict',
-                message: `Slide "${slideId}" is leased by ${authorLabel(held.holder)} until ${held.until}; pass force to write anyway`,
+                message: leaseRefusalMessage(slideId, held),
                 current,
                 currentRevision: current.deck.revision,
                 holder: held.holder,

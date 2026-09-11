@@ -38,7 +38,7 @@ const steps = [
     // The plan writes the route as apps/studio/src/routes/openapi.json.ts; on disk it is
     // openapi[.]json.ts because TanStack Router's file routing escapes a dot in a segment with
     // [.], and the :(literal) pathspec magic stops git from reading the brackets as a glob class.
-    cmd: "git ls-files --error-unmatch packages/agent/generated skills/*/references docs/grammar.md ':(literal)apps/studio/src/routes/openapi[.]json.ts' > /dev/null && pnpm generate:contracts && git diff --exit-code -- packages/agent/generated skills/*/references docs/grammar.md ':(literal)apps/studio/src/routes/openapi[.]json.ts'",
+    cmd: "git ls-files --error-unmatch packages/agent/generated skills/*/references docs/grammar.md packages/schema/src/rules.json packages/lint/fixtures/index.json ':(literal)apps/studio/src/routes/openapi[.]json.ts' > /dev/null && pnpm generate:contracts && git diff --exit-code -- packages/agent/generated skills/*/references docs/grammar.md packages/schema/src/rules.json packages/lint/fixtures/index.json ':(literal)apps/studio/src/routes/openapi[.]json.ts'",
   },
   { cmd: 'pnpm exec tsc -b' },
   { cmd: 'pnpm test' },
@@ -48,7 +48,7 @@ const steps = [
     needs: 'prototemplate',
   },
   {
-    cmd: `node -e "const r=require('./.turboslide/import.json'); if(r.slides!==85||r.sections!==8||r.htmlBlocks>4) process.exit(1)"`,
+    cmd: `node -e "const r=require('./.turboslide/import.json'); if(r.slides!==85||r.sections!==8||r.htmlBlocks!==0) process.exit(1)"`,
     needs: 'prototemplate',
   },
   { cmd: 'pnpm exec turboslide validate decks/gt-brand' },
@@ -59,7 +59,7 @@ const steps = [
     cmd: `node -e "const r=require('./.turboslide/render/render.json'); if(r.length!==170||r.some(x=>x.pageErrors.length)) process.exit(1)"`,
   },
   {
-    cmd: `node scripts/compare-to-shoot.mjs --deck decks/gt-brand --render .turboslide/render --shoot ${PROTOTEMPLATE_DECK} --max-mismatch 0.005 --skip-html-escapes`,
+    cmd: `node scripts/compare-to-shoot.mjs --deck decks/gt-brand --render .turboslide/render --shoot ${PROTOTEMPLATE_DECK} --max-mismatch 0.005`,
     needs: 'prototemplate',
   },
   { cmd: 'pnpm exec turboslide sheet all --cols 4 --thumb 480 --numbered --out .turboslide/sheet' },
@@ -70,7 +70,10 @@ const steps = [
   { cmd: 'pnpm exec turboslide build --out .turboslide/brand-deck.html --budget 16' },
   { cmd: 'pnpm exec playwright test apps/studio/e2e/viewer.spec.ts', needs: 'server' },
   {
-    cmd: `pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/deck/gt-brand --widths 1440,1280,390 --themes light,dark`,
+    // the viewer, then the editor: the editor's toolbar carries the deck name, the status chip,
+    // Search and the Export menu, and the M5 verification found its chip drawn under Search at
+    // 1280 while only /deck was audited here
+    cmd: `pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/deck/gt-brand --widths 1440,1280,390 --themes light,dark && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/edit/gt-brand --widths 1440,1280,390 --themes light,dark`,
     needs: 'server',
   },
   // MILESTONES.md M2 acceptance, added after the M2 review found 41 files that `pnpm format` had

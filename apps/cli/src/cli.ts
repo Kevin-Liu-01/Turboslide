@@ -2,8 +2,10 @@
 // CommandContext and returns an exit code; the two error classes map to exit 1 and 2, anything
 // else is reported on stderr with exit 2. runCli is pure over its streams so tests drive it.
 import { flagBoolean, flagString, parseArgs } from './args.ts';
+import { asset } from './commands/asset.ts';
 import { block } from './commands/block.ts';
 import { build } from './commands/build.ts';
+import { deck } from './commands/deck.ts';
 import { diff } from './commands/diff.ts';
 import { exportCommand } from './commands/export.ts';
 import { fix } from './commands/fix.ts';
@@ -11,8 +13,10 @@ import { fonts } from './commands/fonts.ts';
 import { generate } from './commands/generate.ts';
 import { importCommand } from './commands/import.ts';
 import { info } from './commands/info.ts';
+import { judge } from './commands/judge.ts';
 import { lease } from './commands/lease.ts';
 import { lint } from './commands/lint.ts';
+import { material } from './commands/material.ts';
 import { mcp } from './commands/mcp.ts';
 import { render } from './commands/render.ts';
 import { sections } from './commands/sections.ts';
@@ -33,6 +37,9 @@ Commands
   import <dir> --into <id>          import the Prototemplate deck HTML into decks/<id>/
   validate [dir]                    parse, migrate and normalize a deck; exit 2 on errors
   info                              title, theme, sections, counts, revision
+  deck create <name> --from gt-brand|blank [--id <id>] [--decks <dir>]
+                                    decks/<id> from the GT brand template (85 slides) or as one title slide (deck.create)
+  deck rename <name>                set the deck title (deck.rename)
   slides [--section <id>]           slide rows with per-slide lint counts
   slide get <id>                    one slide, its assets and its last render records
   slide put <id> < slide.json       replace a slide (slide.replace)
@@ -45,6 +52,15 @@ Commands
   block remove <slide>#<block>
   block move <slide>#<block> --slot <slot> [--after <block>]
   sections set < sections.json      replace the section list, the only place order lives
+  asset add <file|url> --role <r> --alt <t> [--artist --license --share-alike --source-url] [--two-tone --black --gamma --plate <side>]
+                                    a picture as an asset with its license fields; --two-tone runs the deck's screen and keeps the source
+  asset capture <url> --theme both [--recipe gt-site] [--region x,y,w,h] [--detail x,y,w,h ...]
+                                    a page at 1440 by 900 at 2x through a per-site recipe, with identical-region detail crops
+  asset dither <id> [--gamma --black --white --crop --plate <side>] | --all-two-tone --from-recorded [--verify-cells]
+                                    re-run a two-tone treatment, or read the committed twins back and verify them
+  material list [<id>]              the material catalog: paper:* with uniforms and presets, proto:* as unavailable
+  material capture <id> --anchor 4000,5500,7000 [--preset <name>] [--uniforms <recipe.json>] [--set u_x=v] [--two-tone --plate <side>]
+                                    frozen frames at 3200 by 1800 as assets with recipe keys
   version save -m <note>            a named version at the current revision
   version list [--named]            every write and save with its author, oldest first
   version restore <n>               restore a version as a write
@@ -61,6 +77,9 @@ Commands
                                     Finding[]; exit 1 when a severity 3 finding is not in known-findings.json
   lint --chrome --url <url> [--widths 1440,1280,390] [--themes light,dark] [--states list,grid,book]
                                     the line law auditor on the studio shell; exit 2 when a state did not apply
+  judge bundle [ids|all] --out <dir> [--render <dir>] [--fresh]
+                                    renders, sheets with cell maps, lint.json with the gate, the document, the
+                                    numerals per slide and the six lens instructions in one directory (SPEC 7.6)
   build --out <file> --budget 16    the standalone file under a byte budget; exit 1 over budget
   export pptx [ids|all] --mode flatten|native --theme light,dark --fonts exact|standard
                                     [--exclude-share-alike] [--baseline-target libreoffice|none] [--verify] --out <dir>
@@ -88,10 +107,13 @@ const COMMANDS: Record<string, Command> = {
   import: importCommand,
   validate,
   info,
+  deck,
   slides,
   slide,
   block,
   sections,
+  asset,
+  material,
   version,
   lease,
   diff,
@@ -99,6 +121,7 @@ const COMMANDS: Record<string, Command> = {
   render,
   sheet,
   lint,
+  judge,
   build,
   export: exportCommand,
   fonts,

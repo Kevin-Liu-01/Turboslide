@@ -1,30 +1,27 @@
-// The two-tone pipeline (SPEC 5.4; OPENERS.md "Shader pipeline" and "Photograph pipeline";
-// scratchpad/rosetta/make.py is the Pillow original): crop, gray or one channel, invert, minimum
-// filter, blur, cover fit to 800 by 450 with the pinned Lanczos3, unsharp band, autocontrast at
-// 0.5 percent, black and white points and gamma through the tone LUT, the 8 by 8 Bayer screen at
-// thresholds (m + 0.5) / 64, polarity, 2x nearest to 1600 by 900, both twins as 1-bit PNGs, and
-// the plate metrics. The parameters are the two-tone treatment of Asset in SPEC 4.2.
+// The two-tone pipeline (SPEC 5.4): crop, gray or one channel, invert, minimum filter, blur,
+// cover fit to 800 by 450 with the pinned Lanczos3, unsharp band, autocontrast at 0.5 percent,
+// black and white points and gamma through the tone LUT, the 8 by 8 Bayer screen at thresholds
+// (m + 0.5) / 64, polarity, 2x nearest to 1600 by 900, both twins as 1-bit PNGs, and the plate
+// metrics. The parameters are the two-tone treatment of Asset in SPEC 4.2.
 //
-// Stage order follows make.py (gray before the fit). The round ten shader pipeline resized the
-// RGB crop first and converted to gray after, and compared the tone in floating point instead of
-// through the LUT; the two orders agree on all but a small share of cells at threshold edges
-// (the two-tone test measures the share on the liquid metal opener).
-import { ditherGray } from './bayer.ts';
-import { gaussianBlur, minFilter, unsharpBand } from './filters.ts';
-import type { UnsharpBand } from './filters.ts';
+// The screen is computed by the selected backend (select.ts; SPEC 10): the napi addon or the
+// wasm module of crates/turboslide-native when one is built, the TypeScript stages of
+// pipeline.ts otherwise. Polarity, the nearest upscale, the PNG encoder and the metrics stay in
+// TypeScript here: they are integer operations that cannot disagree, and the PNG bytes then come
+// from node:zlib on every machine, so a regenerated twin is byte-stable across backends.
 import type { BitImage, Box, Box4, GrayImage, RgbaImage } from './image.ts';
 import { invertBits } from './image.ts';
+import type { UnsharpBand } from './filters.ts';
 import { twoToneMetrics } from './metrics.ts';
 import type { TwoToneMetrics } from './metrics.ts';
+import type { TwoToneScreen } from './pipeline.ts';
 import { encodePng1 } from './png1.ts';
 import type { Png1Options } from './png1.ts';
-import { cropPadded, fitCover, scaleNearest } from './resample.ts';
-import { autocontrast, invertGray, toGray, tone } from './tone.ts';
+import { scaleNearest } from './resample.ts';
+import { getBackend } from './select.ts';
 import type { Channel } from './tone.ts';
 
-/** The screen size the deck dithers at and the sheet it covers (OPENERS.md steps 5 and 6). */
-export const TWO_TONE_SIZE = { width: 800, height: 450 } as const;
-export const SHEET_SIZE = { width: 1600, height: 900 } as const;
+export { SHEET_SIZE, TWO_TONE_SIZE } from './pipeline.ts';
 
 /** Mirrors Asset.treatment for kind 'two-tone' (SPEC 4.2). */
 export type TwoToneParams = {
@@ -61,6 +58,8 @@ export type TwoToneResult = {
   dark: TwoToneTwin;
   light: TwoToneTwin;
   metrics: TwoToneMetrics;
+  /** Which implementation cut the screen (SPEC 10). */
+  backend: 'native' | 'wasm' | 'typescript';
   params: Required<
     Pick<
       TwoToneParams,
@@ -87,21 +86,9 @@ export type TwoToneOptions = {
   png?: Png1Options;
 };
 
-/** The one-bit screen before polarity: every stage up to and including the dither. */
-export function twoToneScreen(
-  rgba: RgbaImage,
-  params: TwoToneParams,
-): { positive: BitImage; toneImage: GrayImage } {
-  let gray = toGray(rgba, params.channel ?? 'gray');
-  gray = cropPadded(gray, params.crop ?? [0, 0, rgba.width, rgba.height]);
-  if (params.invert) gray = invertGray(gray);
-  if (params.minFilter) gray = minFilter(gray, params.minFilter);
-  if (params.blur) gray = gaussianBlur(gray, params.blur);
-  gray = fitCover(gray, TWO_TONE_SIZE.width, TWO_TONE_SIZE.height);
-  if (params.unsharp) gray = unsharpBand(gray, params.unsharp);
-  gray = autocontrast(gray, params.autocontrast ?? 0.5);
-  gray = tone(gray, params.black ?? 0, params.white ?? 255, params.gamma ?? 1);
-  return { positive: ditherGray(gray), toneImage: gray };
+/** The one-bit screen before polarity, from the selected backend. */
+export function twoToneScreen(rgba: RgbaImage, params: TwoToneParams): TwoToneScreen {
+  return getBackend().twoToneScreen(rgba, params);
 }
 
 /** Both twins from a source picture and its treatment. */
@@ -110,7 +97,8 @@ export function twoTone(
   params: TwoToneParams,
   options: TwoToneOptions = {},
 ): TwoToneResult {
-  const { positive, toneImage } = twoToneScreen(rgba, params);
+  const backend = getBackend();
+  const { positive, toneImage } = backend.twoToneScreen(rgba, params);
   const polarity = params.polarity ?? 'dark-ground';
   const cell = params.cell ?? 2;
   const darkBits = polarity === 'dark-ground' ? positive : invertBits(positive);
@@ -123,6 +111,7 @@ export function twoTone(
     dark: { bits: dark, png: encodePng1(dark, options.png) },
     light: { bits: light, png: encodePng1(light, options.png) },
     metrics: twoToneMetrics(darkBits, options.plate, cell),
+    backend: backend.kind,
     params: {
       ...params,
       channel: params.channel ?? 'gray',

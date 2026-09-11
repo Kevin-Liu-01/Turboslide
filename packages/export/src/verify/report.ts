@@ -26,7 +26,7 @@ import { readGeometry } from '../ooxml/geometry.ts';
 import type { ShapeBounds } from '../ooxml/geometry.ts';
 import { openPackage } from '../ooxml/zip.ts';
 import { emuToPx } from '../units.ts';
-import { DEFAULT_BUDGETS, blockKind, mergeBudgets } from './budgets.ts';
+import { DEFAULT_BUDGETS, DIA_EDGE_TOLERANCE, blockKind, mergeBudgets } from './budgets.ts';
 import type { Budgets } from './budgets.ts';
 import { compareBlock, cropPng, diffImages, diffImagesOutside, readPng, writePng } from './diff.ts';
 import type { BlockDelta, BlockToCompare, MaskedImageDiff, Png } from './diff.ts';
@@ -143,14 +143,23 @@ function defaultDeckDir(deckId: string, env: NodeJS.ProcessEnv): string {
  * recorded text color when the record carries one.
  */
 export function blocksOfRecord(record: RenderRecord, scale: ReferenceScale = 1): BlockToCompare[] {
-  return Object.entries(record.blocks)
-    .filter(([id]) => !id.includes('/'))
-    .map(([blockId, block]) => ({
-      blockId,
-      type: block.type,
-      box: [block.box[0] * scale, block.box[1] * scale, block.box[2] * scale, block.box[3] * scale],
-      ...(block.color === undefined ? {} : { color: block.color }),
-    }));
+  return (
+    Object.entries(record.blocks)
+      // a composite is a grid with no ink of its own; its cells' blocks are records too and are
+      // compared as themselves (M5), and its union box would only re-measure their edges
+      .filter(([id, block]) => !id.includes('/') && block.type !== 'composite')
+      .map(([blockId, block]) => ({
+        blockId,
+        type: block.type,
+        box: [
+          block.box[0] * scale,
+          block.box[1] * scale,
+          block.box[2] * scale,
+          block.box[3] * scale,
+        ],
+        ...(block.color === undefined ? {} : { color: block.color }),
+      }))
+  );
 }
 
 /** Every shape of the package by slide part (`ppt/slides/slide<n>.xml`, n the page number). */
@@ -210,12 +219,28 @@ export function compareBlocks(
   const blocks = blocksOfRecord(record, options.scale);
   return blocks.map((block) => {
     const neighbours = blocks.filter((other) => other !== block).map((other) => other.box);
-    const opaque = record.rasters.some((r) => r.blockId === block.blockId && !r.alpha);
+    // a diagram raster is measured on its edge like an opaque picture: its hairlines are its
+    // structure and it arrives unresampled at 1x (M5), while the cut at a third left a two-stroke
+    // junction 0.006 past the threshold in the reference and 0.006 short in the page
+    // (diagrams#dia3, round four)
+    const dia = block.type === 'dia';
+    const opaque = record.rasters.some((r) => r.blockId === block.blockId && !r.alpha) || dia;
     const shape =
       options.shapes && blockKind(block.type) !== 'text'
         ? shapeBoxFor(options.shapes, options.slideId, block.blockId, options.scale)
         : undefined;
-    return compareBlock(ref, got, { ...block, neighbours, opaque, shape }, options.budgets);
+    return compareBlock(
+      ref,
+      got,
+      {
+        ...block,
+        neighbours,
+        opaque,
+        shape,
+        ...(dia ? { edgeTolerance: DIA_EDGE_TOLERANCE } : {}),
+      },
+      options.budgets,
+    );
   });
 }
 

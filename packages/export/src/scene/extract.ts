@@ -1,15 +1,19 @@
 // Scene extraction over the deck (SPEC 8.1, 5.3): render every theme's document with renderDeck,
-// open one 2x page per theme, show each slide by hash, wait for the render surface's readiness
-// stamp, swap two-tone pictures for their regenerated 2x twins, measure the scene, and shoot what
-// the mode needs: the whole sheet at 2x for flatten, the raster elements at 2x with alpha for
-// native. One browser and one page at a time (AGENTS.md). Nothing here knows about pptxgenjs; the
-// scenes and the PNG paths are the contract the PPTX builder reads.
+// open one 1x page per theme for the geometry and one page per raster scale for the pixels, show
+// each slide by hash on every page, wait for the render surface's readiness stamp, swap two-tone
+// pictures for their regenerated 2x or 3x twins, measure the scene on the 1x page, and shoot what
+// the mode needs: the whole sheet at 2x for flatten, the raster elements at 2x (3x for icons and
+// marks, SPEC 8.6) with alpha for native. The geometry comes from the 1x page because the verify
+// loop compares the export with the 1x render: measured in M2 on the 2x page, element boxes
+// disagreed with the record by up to 1.5 px (positioning#dia1 at 731.50 against 733) and rasters
+// landed a pixel off. One browser and a few pages, one slide at a time (AGENTS.md). Nothing here
+// knows about pptxgenjs; the scenes and the PNG paths are the contract the PPTX builder reads.
 import { existsSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import type { Page } from 'playwright-core';
+import type { Browser, Page } from 'playwright-core';
 
 import type { Deck, DeckDocument, Slide } from '@turboslide/schema/deck';
 import { slideOrder } from '@turboslide/schema/deck';
@@ -20,17 +24,49 @@ import type { ExportMode } from '@turboslide/schema/export';
 import type { Theme } from '@turboslide/schema/render';
 import { renderDeck } from '@turboslide/render/deck';
 import { loadThemeBundle } from '@turboslide/render/theme-node';
-import { openSheetPage } from '@turboslide/headless/context';
+import { openSheetPage, SHEET } from '@turboslide/headless/context';
+import type { SheetPage } from '@turboslide/headless/context';
 import { fileUrl, writeTempDocument } from '@turboslide/headless/document';
 import { launchBrowser } from '@turboslide/headless/launch';
 import { waitForReady } from '@turboslide/headless/ready';
 
-import { measureScene } from './measure.ts';
+import { measureScene, tagRasterElements } from './measure.ts';
 import { twoToneTwinAt2x } from './two-tone.ts';
-import type { Scene } from './types.ts';
+import type { PictureScale } from './two-tone.ts';
+import type { Scene, SceneRaster } from './types.ts';
 
 /** The render surface stamps this when fonts, images and dither canvases are in place (render/runtime.ts). */
 export const READY_SELECTOR = 'html[data-ts-ready="1"]';
+
+/**
+ * How rasters are scaled: `auto` shoots icons and marks at 3x, diagrams and the language specimen
+ * at 1x, everything else at 2x (SPEC 8.6); 2 and 3 force every raster to that scale.
+ */
+export type RasterScalePolicy = 'auto' | 2 | 3;
+
+/** The raster kinds `auto` shoots at 3x: small glyphs whose edges matter under zoom. */
+export const THREE_X_KINDS: ReadonlySet<string> = new Set(['icon', 'mark']);
+
+/**
+ * The block types `auto` shoots at 1x, the sheet's own grid. A declared or raw diagram draws 1 px
+ * strokes on the half pixel for the 1x grid; LibreOffice resampling a 2x image of it dimmed the
+ * half-covered strokes below the verify loop's ink cut (M5 round two: `lines#dia1` and
+ * `diagrams#dia4` in the dark theme measured dx +1 dw -2, docs/export-verification.md). The
+ * language specimen renders through fallback faces whose hinting differs between the 1x and 2x
+ * pages (`multilingual#lang` dy -2). At 1x the file holds the pixels the sheet shows.
+ */
+export const ONE_X_TYPES: ReadonlySet<string> = new Set(['dia', 'lang']);
+
+export function rasterScaleFor(
+  kind: string,
+  policy: RasterScalePolicy,
+  blockType?: string,
+): 1 | 2 | 3 {
+  if (policy !== 'auto') return policy;
+  if (THREE_X_KINDS.has(kind)) return 3;
+  if (kind === 'block' && blockType !== undefined && ONE_X_TYPES.has(blockType)) return 1;
+  return 2;
+}
 
 export type ExtractOptions = {
   deckDir: string;
@@ -42,6 +78,12 @@ export type ExtractOptions = {
   /** Where the sheet PNGs, the rasters and the regenerated pictures land. */
   workDir: string;
   excludeShareAlike?: boolean;
+  /** Block types written as native text; default NATIVE_BLOCK_TYPES (`headings: 'raster'` drops heading). */
+  nativeTypes?: readonly string[];
+  /** Raster scale policy; default auto. */
+  rasterScale?: RasterScalePolicy;
+  /** The scale two-tone pictures are regenerated at; default 2. */
+  pictureScale?: PictureScale;
   onSlide?: (scene: Scene, ms: number) => void;
 };
 
@@ -52,6 +94,66 @@ export type ExtractResult = {
   wordmark: Partial<Record<Theme, string>>;
   warnings: string[];
 };
+
+/**
+ * A sheet page at a raster scale. The headless package's `openSheetPage` covers the render scales
+ * of a RenderRecord (1 and 2); the 3x page for icons and marks is opened here with the same
+ * viewport, color scheme, reduced motion and theme seed (headless/context.ts), so the export
+ * package needs no change to the render contract.
+ */
+async function openShotPage(browser: Browser, theme: Theme, scale: 2 | 3): Promise<SheetPage> {
+  if (scale === 2) return openSheetPage(browser, { theme, scale: 2 });
+  const context = await browser.newContext({
+    viewport: { width: SHEET.width, height: SHEET.height },
+    deviceScaleFactor: 3,
+    colorScheme: theme,
+    reducedMotion: 'reduce',
+  });
+  await context.addInitScript((t: string) => {
+    try {
+      localStorage.setItem('gt-theme', t);
+      localStorage.setItem('gt-deck-theme', t);
+    } catch {
+      // storage unavailable on file URLs in some configurations; the document stamps the theme itself
+    }
+  }, theme);
+  const page = await context.newPage();
+  let pageErrors: string[] = [];
+  let consoleErrors: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  return {
+    context,
+    page,
+    theme,
+    // the headless contract knows 1 and 2; the 3x page reports 2 there and the raster keeps 3
+    scale: 2,
+    takeErrors() {
+      const out = { pageErrors, consoleErrors };
+      pageErrors = [];
+      consoleErrors = [];
+      return out;
+    },
+    close: () => context.close(),
+  };
+}
+
+/**
+ * A raster box on whole sheet pixels: the edges round outward to the nearest pixel that contains
+ * the element, so no painted pixel is cut and the box, the clip and the placement agree.
+ */
+export function snapRasterBox(
+  box: [number, number, number, number],
+): [number, number, number, number] {
+  const [x, y, w, h] = box;
+  const x0 = Math.max(0, Math.floor(x + 0.001));
+  const y0 = Math.max(0, Math.floor(y + 0.001));
+  const x1 = Math.min(SHEET.width, Math.ceil(x + w - 0.001));
+  const y1 = Math.min(SHEET.height, Math.ceil(y + h - 0.001));
+  return [x0, y0, Math.max(1, x1 - x0), Math.max(1, y1 - y0)];
+}
 
 function slideHash(slideId: string): string {
   return `s/${encodeURIComponent(slideId)}`;
@@ -141,7 +243,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
   const scenes: Scene[] = [];
   const warnings: string[] = [];
   const wordmark: Partial<Record<Theme, string>> = {};
-  const nativeTypes = [...NATIVE_BLOCK_TYPES];
+  const nativeTypes: readonly string[] = options.nativeTypes ?? [...NATIVE_BLOCK_TYPES];
   let renderer = '';
   try {
     const docs = new Map<Theme, { url: string; n: Map<string, number> }>();
@@ -163,12 +265,21 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
     }
     const launched = await launchBrowser();
     renderer = launched.renderer;
+    const policy = options.rasterScale ?? 'auto';
+    const pictureScale = options.pictureScale ?? 2;
     try {
       for (const theme of options.themes) {
         const doc = docs.get(theme);
         if (!doc) continue;
-        const sheetPage = await openSheetPage(launched.browser, { theme, scale: 2 });
-        const { page } = sheetPage;
+        // The 1x page measures; the shot pages carry the pixels. Which shot scales a theme needs
+        // depends on the mode: flatten shoots the sheet at 2x, native shoots rasters at 2x and, for
+        // icons and marks under `auto`, at 3x.
+        const shotScales: (2 | 3)[] =
+          options.mode === 'flatten' ? [2] : policy === 'auto' ? [2, 3] : [policy];
+        const measurePage = await openSheetPage(launched.browser, { theme, scale: 1 });
+        const shotPages = new Map<2 | 3, SheetPage>();
+        for (const scale of shotScales)
+          shotPages.set(scale, await openShotPage(launched.browser, theme, scale));
         const pictureDir = join(options.workDir, 'pictures', theme);
         const rasterDir = join(options.workDir, 'rasters', theme);
         const sheetDir = join(options.workDir, 'sheets', theme);
@@ -176,6 +287,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
         await mkdir(rasterDir, { recursive: true });
         await mkdir(sheetDir, { recursive: true });
         const picturesDone = new Map<string, string>();
+        const pages = [measurePage, ...shotPages.values()];
         try {
           for (const slideId of ids) {
             const slide = slides[slideId];
@@ -184,20 +296,26 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
               continue;
             }
             const t0 = performance.now();
-            sheetPage.takeErrors();
-            await showSlide(page, doc.url, slideHash(slideId));
-            await waitForReady(page);
-            // the render surface counts the slides in its document; the export counts the deck's
-            await setCounter(page, doc.n.get(slideId) ?? order.indexOf(slideId) + 1, order.length);
+            for (const sheetPage of pages) {
+              sheetPage.takeErrors();
+              await showSlide(sheetPage.page, doc.url, slideHash(slideId));
+              await waitForReady(sheetPage.page);
+              // the render surface counts the slides in its document; the export counts the deck's
+              await setCounter(
+                sheetPage.page,
+                doc.n.get(slideId) ?? order.indexOf(slideId) + 1,
+                order.length,
+              );
+            }
 
-            // The picture: excluded, regenerated at 2x for a two-tone treatment, or the twin file.
+            // The picture: excluded, regenerated at 2x or 3x for a two-tone treatment, or the twin file.
             const asset = pictureAssetOf(slide, deck);
             let pictureFile: string | undefined;
             let pictureExcluded = false;
             let pictureRegenerated = false;
             if (asset) {
               if (options.excludeShareAlike && isShareAlike(asset)) {
-                await hidePicture(page);
+                for (const sheetPage of pages) await hidePicture(sheetPage.page);
                 pictureExcluded = true;
               } else {
                 const twin = 'neutral' in asset.twins ? asset.twins.neutral : asset.twins[theme];
@@ -215,13 +333,15 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
                       theme,
                       { paper, ink },
                       asset.treatment.cell,
+                      pictureScale,
                     );
-                    pictureFile = join(pictureDir, `${asset.id}@2x.png`);
+                    pictureFile = join(pictureDir, `${asset.id}@${pictureScale}x.png`);
                     await writeFile(pictureFile, twoTone.png);
                     picturesDone.set(asset.id, pictureFile);
                   }
                   const bytes = await readFile(pictureFile);
-                  await swapPicture(page, `data:image/png;base64,${bytes.toString('base64')}`);
+                  const uri = `data:image/png;base64,${bytes.toString('base64')}`;
+                  for (const sheetPage of pages) await swapPicture(sheetPage.page, uri);
                   pictureRegenerated = true;
                 } else {
                   pictureFile = twinPath;
@@ -229,7 +349,13 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
               }
             }
 
-            const scene = await measureScene(page, {
+            // The same tags on every page: one document order, one rid per element.
+            const tagOptions = { nativeTypes };
+            const tags = await tagRasterElements(measurePage.page, tagOptions);
+            for (const sheetPage of shotPages.values())
+              await tagRasterElements(sheetPage.page, tagOptions);
+
+            const scene = await measureScene(measurePage.page, {
               slideId,
               n: doc.n.get(slideId) ?? order.indexOf(slideId) + 1,
               total: order.length,
@@ -238,6 +364,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
               nativeTypes,
               pictureAssetId: asset?.id,
               notes: slide.notes,
+              tags,
             });
             if (pictureFile) scene.pictureFile = pictureFile;
             if (pictureExcluded) scene.pictureExcluded = true;
@@ -245,66 +372,91 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
             const nn = String(scene.n).padStart(2, '0');
 
             if (options.mode === 'flatten') {
-              const [x, y, w, h] = scene.sheet;
-              const path = join(sheetDir, `${nn}-${slideId}@2x.png`);
-              await page.screenshot({
-                path,
-                type: 'png',
-                clip: { x, y, width: w, height: h },
-                animations: 'disabled',
-                caret: 'hide',
-              });
-              scene.sheetImage = path;
+              const sheetPage = shotPages.get(2);
+              if (sheetPage) {
+                const [x, y, w, h] = scene.sheet;
+                const path = join(sheetDir, `${nn}-${slideId}@2x.png`);
+                await sheetPage.page.screenshot({
+                  path,
+                  type: 'png',
+                  clip: { x, y, width: w, height: h },
+                  animations: 'disabled',
+                  caret: 'hide',
+                });
+                scene.sheetImage = path;
+              }
             }
 
-            const wantRasters =
+            const wantRasters: SceneRaster[] =
               options.mode === 'native'
                 ? scene.rasters
                 : scene.rasters.filter((r) => r.blockId === 'wordmark' && !wordmark[theme]);
             if (wantRasters.length > 0) {
-              await setTransparentGround(page, true);
+              const touched = new Set<SheetPage>();
               try {
                 for (const raster of wantRasters) {
                   if (raster.blockId === 'wordmark' && wordmark[theme]) continue;
                   const [, , w, h] = raster.box;
                   if (w < 1 || h < 1) continue;
+                  const blockType = scene.blocks.find((b) => b.blockId === raster.blockId)?.type;
+                  const scale = rasterScaleFor(raster.kind, policy, blockType);
+                  // the 1x shots come from the measure page itself, the sheet's own grid
+                  const sheetPage =
+                    scale === 1
+                      ? measurePage
+                      : (shotPages.get(scale) ?? shotPages.get(2) ?? shotPages.get(3));
+                  if (!sheetPage) continue;
+                  raster.scale =
+                    scale === 1 ? 1 : shotPages.has(scale) ? scale : (sheetPage.scale as 2 | 3);
+                  // A 1x raster keeps the sheet's own pixels behind it: an alpha PNG of a hairline
+                  // junction (two 18 percent strokes, alpha 0.27) came back 6 units lighter from
+                  // LibreOffice's compositing and crossed the verify loop's ink cut (M5 round three,
+                  // diagrams#dia3 dw -85); opaque, the page shows the pixel the sheet shows. Only a
+                  // page that shoots alpha rasters loses its ground: an opaque shot over a
+                  // transparent ground comes back on white, a white plate on the dark theme
+                  // (round four: every dark diagram measured tens of pixels off).
+                  const omitBackground = raster.alpha && scale !== 1;
+                  if (!omitBackground) raster.alpha = false;
+                  if (omitBackground && !touched.has(sheetPage)) {
+                    await setTransparentGround(sheetPage.page, true);
+                    touched.add(sheetPage);
+                  }
                   const safeId = raster.id.replace(/[^\w.-]+/g, '_');
                   const path =
                     raster.blockId === 'wordmark'
-                      ? join(rasterDir, 'wordmark@2x.png')
-                      : join(rasterDir, `${nn}-${slideId}-${safeId}@2x.png`);
-                  if (raster.clip) {
-                    const [x, y, cw, ch] = raster.box;
-                    await page.screenshot({
-                      path,
-                      type: 'png',
-                      clip: { x, y, width: cw, height: ch },
-                      omitBackground: raster.alpha,
-                      animations: 'disabled',
-                      caret: 'hide',
-                    });
-                  } else {
-                    await page.locator(raster.selector).first().screenshot({
-                      path,
-                      type: 'png',
-                      omitBackground: raster.alpha,
-                      animations: 'disabled',
-                    });
-                  }
+                      ? join(rasterDir, `wordmark@${raster.scale}x.png`)
+                      : join(rasterDir, `${nn}-${slideId}-${safeId}@${raster.scale}x.png`);
+                  // The clip and the placement are the same whole sheet pixels (snapRasterBox):
+                  // Chromium paints a replaced element's pixels on the 1x grid, and LibreOffice
+                  // drawing a 2x or 3x image at a whole-pixel box scales it by exactly 2 or 3 with
+                  // no half-pixel phase. Measured in M2 and the M5 baseline: the same raster placed
+                  // at its fractional box (the mark at x 190.5, a diagram at 731.5) landed 1 px
+                  // right and 2 px narrower in the page.
+                  const snapped = snapRasterBox(raster.box);
+                  raster.box = snapped;
+                  const [x, y, cw, ch] = snapped;
+                  await sheetPage.page.screenshot({
+                    path,
+                    type: 'png',
+                    clip: { x, y, width: cw, height: ch },
+                    omitBackground,
+                    animations: 'disabled',
+                    caret: 'hide',
+                  });
                   raster.file = path;
                   if (raster.blockId === 'wordmark') wordmark[theme] = path;
                 }
               } finally {
-                await setTransparentGround(page, false);
+                for (const sheetPage of touched) await setTransparentGround(sheetPage.page, false);
               }
             }
-            const errors = sheetPage.takeErrors();
+            const errors = measurePage.takeErrors();
             scene.warnings.push(...errors.pageErrors.map((e) => `page error: ${e}`));
             scenes.push(scene);
             options.onSlide?.(scene, Math.round(performance.now() - t0));
           }
         } finally {
-          await sheetPage.close();
+          for (const sheetPage of pages) await sheetPage.close();
         }
       }
     } finally {

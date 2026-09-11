@@ -13,6 +13,7 @@
     "./versions": "./src/versions.ts",
     "./lease": "./src/lease.ts",
     "./watch": "./src/watch.ts",
+    "./templates": "./src/templates.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {

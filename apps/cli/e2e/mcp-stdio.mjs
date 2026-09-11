@@ -30,8 +30,8 @@ const CALIBRATION_DERIVED = join(SCRATCH, 'calibration-derived');
 const DECK_ID = 'mcp-e2e';
 const RUN_ID = 'mcp-e2e';
 const PNG_SIGNATURE = '89504e470d0a1a0a';
-/** The tools `turboslide mcp` serves: every action on the mcp transport with a handler in the CLI. */
-const TOOL_COUNT = 25;
+/** The tools `turboslide mcp` serves, as a floor: every action on the mcp transport with a handler in the CLI (M2's 25 plus deck_create, deck_rename and deck_judge_bundle). */
+const TOOL_COUNT = 28;
 
 const log = (line) => process.stderr.write(`${line}\n`);
 
@@ -183,11 +183,13 @@ async function main() {
         'deck_version_save',
         'deck_version_list',
         'deck_export',
+        'deck_judge_bundle',
       ])
         assert(names.includes(name), `tools/list lacks ${name}: ${names.join(', ')}`);
+      // a floor, not an exact count: every milestone adds tools (M4 added deck_judge_bundle)
       assert(
-        tools.length === TOOL_COUNT,
-        `expected ${TOOL_COUNT} tools, got ${tools.length}: ${names.join(', ')}`,
+        tools.length >= TOOL_COUNT,
+        `expected at least ${TOOL_COUNT} tools, got ${tools.length}: ${names.join(', ')}`,
       );
       const exportTool = tools.find((tool) => tool.name === 'deck_export');
       assert(
@@ -454,7 +456,10 @@ async function main() {
       await writeCalibrationDeck(CALIBRATION_DIR);
       await exportClient.connect(startServer(CALIBRATION_DIR, CALIBRATION_DERIVED, stderr));
       const { tools } = await exportClient.listTools();
-      assert(tools.length === TOOL_COUNT, `expected ${TOOL_COUNT} tools, got ${tools.length}`);
+      assert(
+        tools.length >= TOOL_COUNT,
+        `expected at least ${TOOL_COUNT} tools, got ${tools.length}`,
+      );
     });
 
     await step('deck_export with verify false returns the report', async () => {

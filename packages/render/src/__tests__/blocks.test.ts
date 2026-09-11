@@ -74,6 +74,7 @@ describe('block catalog', () => {
       'markSizes',
       'matrix',
       'logoPlates',
+      'material',
       'html',
     ];
     for (const type of expected) expect(types.has(type), type).toBe(true);

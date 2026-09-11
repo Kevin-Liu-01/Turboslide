@@ -14,7 +14,12 @@ import type { EditorDispatch } from './dispatch';
 import { authorName } from './dispatch';
 import { HistoryPanel } from './HistoryPanel';
 import { Icon } from './icons';
-import { AssetCard } from './inspector/asset';
+import type { MaterialBlock } from '@turboslide/schema/blocks';
+
+import { AssetCard, AssetIntake } from './inspector/asset';
+import { DitherSection } from './inspector/dither';
+import type { DitherWorkerLike } from './inspector/dither';
+import { MaterialSection } from './inspector/material';
 import type { ArraySpec, ControlSpec, Generated } from './inspector/generate';
 import { blockControls, slideControls } from './inspector/generate';
 import type { ControlContext } from './inspector/props';
@@ -58,13 +63,27 @@ export type InspectorProps = {
   onUndoTo?: (entry: Version) => void;
   lintText?: ControlContext['lintText'];
   assetUrl?: (path: string) => string;
+  /** builds the dither preview worker (apps/studio/src/workers/dither.worker.ts); absent shows the committed twins */
+  createDitherWorker?: () => DitherWorkerLike;
+  /** a toast line from the Dither, Material and intake sections */
+  onNotice?: (line: string) => void;
   /** disables every control while a write is in flight */
   busy?: boolean;
   className?: string;
 };
 
 type SectionId =
-  'slide' | 'layout' | 'block' | 'asset' | 'lint' | 'versions' | 'history' | 'tokens';
+  'slide' | 'layout' | 'block' | 'material' | 'asset' | 'lint' | 'versions' | 'history' | 'tokens';
+
+/** The material block fields the Material section edits (blocks/material.ts MaterialRecipe). */
+const MATERIAL_RECIPE_PATHS = new Set([
+  '/materialId',
+  '/preset',
+  '/uniforms',
+  '/anchor',
+  '/twoTone',
+  '/plate',
+]);
 
 /** The groups of the slide's own controls that belong to the Slide section; the rest is Layout. */
 const SLIDE_GROUPS = new Set(['Slide', 'Text', 'Advanced']);
@@ -152,6 +171,8 @@ export function Inspector({
   onUndoTo,
   lintText,
   assetUrl,
+  createDitherWorker,
+  onNotice,
   busy = false,
   className,
 }: InspectorProps) {
@@ -210,6 +231,12 @@ export function Inspector({
   const slideRows = slideGenerated.controls.filter((spec) => SLIDE_GROUPS.has(spec.group));
   const layoutRows = slideGenerated.controls.filter((spec) => !SLIDE_GROUPS.has(spec.group));
   const blockGenerated = selected ? blockControls(selected) : undefined;
+  /* a material block's recipe fields belong to the Material section; the Block section keeps the rest */
+  if (blockGenerated !== undefined && selected?.type === 'material') {
+    blockGenerated.controls = blockGenerated.controls.filter(
+      (spec) => !MATERIAL_RECIPE_PATHS.has(spec.path),
+    );
+  }
   const lease = leases.find((entry) => entry.slideId === slide.id);
 
   /* the assets the selection or the slide references, for the Asset section */
@@ -217,6 +244,18 @@ export function Inspector({
   if (selected) for (const ref of blockAssetRefs(selected)) assetIds.add(ref.assetId);
   else if ('picture' in slide) assetIds.add(slide.picture.asset);
   const assets = [...assetIds].map((id) => deck.assets[id]).filter((asset) => asset !== undefined);
+  /* the Material section's target: a selected material block, or a picture whose asset is a material */
+  const materialBlock = selected?.type === 'material' ? (selected as MaterialBlock) : undefined;
+  const pictureAsset = 'picture' in slide ? deck.assets[slide.picture.asset] : undefined;
+  const plateSide = 'plate' in slide ? slide.plate.side : undefined;
+  const materialPicture =
+    materialBlock === undefined &&
+    pictureAsset?.source.kind === 'material' &&
+    plateSide !== undefined
+      ? { asset: pictureAsset, plateSide }
+      : undefined;
+  const intakeRole =
+    slide.kind === 'mood' ? 'mood' : slide.kind === 'opener' ? 'opener' : 'capture';
 
   const renderRows = (
     rows: Row[],
@@ -381,24 +420,83 @@ export function Inspector({
           </Section>
         )}
 
-        {assets.length > 0 ? (
+        {materialBlock !== undefined || materialPicture !== undefined ? (
           <Section
-            id="asset"
-            title="Asset"
-            count={assets.length}
-            open={isOpen('asset')}
-            onToggle={() => toggle('asset')}
+            id="material"
+            title={
+              materialBlock !== undefined ? `Material · ${materialBlock.id}` : 'Material · picture'
+            }
+            open={isOpen('material')}
+            onToggle={() => toggle('material')}
           >
-            {assets.map((asset) => (
-              <div key={asset.id} className="ts-insp-row is-wide is-asset">
-                <span className="ts-insp-label">{asset.id}</span>
-                <div className="ts-insp-field">
-                  <AssetCard asset={asset} assetUrl={assetUrl} />
-                </div>
-              </div>
-            ))}
+            <MaterialSection
+              target={
+                materialBlock !== undefined
+                  ? { kind: 'block', slideId: slide.id, block: materialBlock }
+                  : {
+                      kind: 'picture',
+                      slideId: slide.id,
+                      asset: (materialPicture as { asset: (typeof assets)[number] }).asset,
+                      plateSide: (
+                        materialPicture as {
+                          plateSide: 'lower-left' | 'lower-right' | 'upper-left';
+                        }
+                      ).plateSide,
+                    }
+              }
+              revision={revision}
+              dispatch={dispatch}
+              busy={busy}
+              onNotice={onNotice}
+            />
           </Section>
         ) : null}
+
+        <Section
+          id="asset"
+          title="Asset"
+          count={assets.length}
+          open={isOpen('asset')}
+          onToggle={() => toggle('asset')}
+        >
+          {assets.map((asset) => (
+            <div key={asset.id} className="ts-insp-row is-wide is-asset">
+              <span className="ts-insp-label">{asset.id}</span>
+              <div className="ts-insp-field">
+                <AssetCard asset={asset} assetUrl={assetUrl} />
+              </div>
+              {asset.treatment?.kind === 'two-tone' ||
+              asset.role === 'opener' ||
+              asset.role === 'mood' ? (
+                <div className="ts-insp-field is-dither">
+                  <DitherSection
+                    asset={asset}
+                    plate={plateSide}
+                    revision={revision}
+                    dispatch={dispatch}
+                    assetUrl={assetUrl}
+                    createWorker={createDitherWorker}
+                    busy={busy}
+                    onNotice={onNotice}
+                  />
+                </div>
+              ) : null}
+            </div>
+          ))}
+          <div className="ts-insp-row is-wide is-intake">
+            <span className="ts-insp-label">Add a picture</span>
+            <div className="ts-insp-field">
+              <AssetIntake
+                revision={revision}
+                dispatch={dispatch}
+                defaultRole={intakeRole}
+                plate={plateSide}
+                busy={busy}
+                onNotice={onNotice}
+              />
+            </div>
+          </div>
+        </Section>
 
         <Section
           id="lint"

@@ -13,6 +13,7 @@ import {
   matchScore,
   parsePaletteQuery,
 } from '../palette-data';
+import { SLIDE_TEMPLATES } from '../slide-templates';
 
 // The palette's five groups and its filter (SPEC 6.3).
 const document = workedDocument();
@@ -78,17 +79,22 @@ describe('buildPaletteEntries', () => {
     });
   });
 
-  it('lists the six slide kinds and every block the selection allows, with the constraint as a hint', () => {
+  it('lists every slide template and every block the selection allows, with the constraint as a hint', () => {
     const insert = entries.filter((entry) => entry.group === 'insert');
-    const kinds = insert.filter((entry) => entry.id.startsWith('insert:slide:'));
-    expect(kinds.map((entry) => entry.id.split(':')[2])).toEqual([
-      'content',
-      'opener',
-      'mood',
-      'closing',
-      'title',
-      'statement',
-    ]);
+    const templates = insert.filter((entry) => entry.id.startsWith('insert:slide:'));
+    /* the worked deck has an opener, a mood and a capture asset, so every template is offered */
+    expect(templates.map((entry) => entry.id.split(':')[2])).toEqual(
+      SLIDE_TEMPLATES.map((template) => template.id),
+    );
+    const rows = templates.find((entry) => entry.id === 'insert:slide:rows');
+    expect(rows?.title).toBe('Ruled rows slide');
+    expect(rows?.run.kind).toBe('dispatch');
+    if (rows?.run.kind === 'dispatch') {
+      const input = rows.run.input as { sectionId: string; after?: string; slide: { id: string } };
+      expect(input.sectionId).toBe('brand');
+      expect(input.after).toBe('content-rule');
+      expect(input.slide.id).toBe('new-rows');
+    }
     const plain = insert.find((entry) => entry.id === 'insert:block:plain');
     expect(plain?.hint).toBeTruthy();
     expect(plain?.run.kind).toBe('dispatch');
@@ -175,7 +181,10 @@ describe('filterPalette', () => {
 
     const insert = filterPalette(entries, '+plain');
     expect(insert.map((group) => group.group.id)).toEqual(['insert']);
-    expect(insert[0]?.rows[0]?.id).toBe('insert:block:plain');
+    /* the ruled statement list twice: the slide template and the block */
+    const ids = insert[0]?.rows.map((row) => row.id) ?? [];
+    expect(ids).toContain('insert:slide:plain');
+    expect(ids).toContain('insert:block:plain');
   });
 
   it('matches fuzzily over titles and ids and orders the best match first', () => {

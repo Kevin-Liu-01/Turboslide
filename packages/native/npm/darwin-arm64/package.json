@@ -1,0 +1,20 @@
+{
+  "name": "@turboslide/native-darwin-arm64",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The turboslide-native napi addon for darwin-arm64 (crates/turboslide-native, feature napi), built by `pnpm --filter @turboslide/native build` on this platform or by the release CI matrix; @turboslide/native loads it when the platform matches.",
+  "main": "turboslide-native.darwin-arm64.node",
+  "files": [
+    "turboslide-native.darwin-arm64.node"
+  ],
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "license": "MIT"
+}

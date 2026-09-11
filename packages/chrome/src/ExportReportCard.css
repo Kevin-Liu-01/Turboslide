@@ -1,0 +1,133 @@
+/* The export report card (SPEC 8.5, 2.2): the conflict card's grammar (edit.$deckId.css
+   .ts-card): fixed under the bar, centered, 640px at most, paper with the one ink frame a dialog
+   state takes; a head with the title in the display face and the verdict in ink-2 over a --pt-hair
+   rule; the facts as a two-column list whose rows draw --pt-hair-soft under themselves; the files
+   as ruled rows with a Download button each; the residual lines in titanium mono. */
+.ts-report {
+  position: fixed;
+  left: 50%;
+  top: calc(var(--pt-bar-h) + 24px);
+  transform: translateX(-50%);
+  width: min(640px, calc(100vw - 48px));
+  max-height: calc(100vh - var(--pt-bar-h) - 48px);
+  overflow: auto;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-ink);
+  padding: 16px;
+  z-index: 20;
+  font: 13px/1.5 var(--pt-text);
+}
+
+.ts-report-head {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-report-head b {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.ts-report-head span {
+  color: var(--pt-ink-2);
+}
+
+.ts-report[data-passed='false'] .ts-report-head span {
+  color: var(--pt-ink);
+}
+
+.ts-report-rows {
+  margin: 4px 0 0;
+}
+
+.ts-report-row {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-report-row dt {
+  color: var(--pt-ink-2);
+}
+
+.ts-report-row dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.ts-report-link {
+  margin: 12px 0 0;
+}
+
+.ts-report-link a {
+  color: var(--pt-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-report-files {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.ts-report-files li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 36px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-report-file {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--pt-mono);
+  font-size: 12px;
+}
+
+.ts-report-bytes {
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ts-report-files .pt-ib.is-text,
+.ts-report-actions .pt-ib.is-text {
+  border-color: var(--pt-hair);
+  height: 28px;
+}
+
+.ts-report-residual {
+  margin: 12px 0 0;
+  padding: 0 0 0 16px;
+  font-family: var(--pt-mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--pt-titanium);
+}
+
+.ts-report-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+@media (max-width: 600px) {
+  .ts-report-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

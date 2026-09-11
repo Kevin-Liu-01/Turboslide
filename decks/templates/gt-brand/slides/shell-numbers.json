@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "id": "shell-numbers",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Layout measurements"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Every page uses these measurements, so a new page can be checked against them.",
+        "measure": 56
+      },
+      {
+        "id": "dia1",
+        "type": "dia",
+        "fit": {
+          "viewBox": [
+            0,
+            0,
+            520,
+            332
+          ]
+        },
+        "svg": "<svg class=\"dia\" viewBox=\"0 0 520 332\" aria-label=\"The top left corner of a page drawn at 2:1: the outer rail, the column edge, the navigation seam, registration crosses, and a hatch strip\">\n            <defs><pattern id=\"s31-hatch\" patternUnits=\"userSpaceOnUse\" width=\"16\" height=\"16\" patternTransform=\"rotate(45)\"><line class=\"hair\" x1=\"8\" y1=\"0\" x2=\"8\" y2=\"16\"></line></pattern></defs>\n            <line class=\"hair\" x1=\"60\" y1=\"0\" x2=\"60\" y2=\"290\"></line>\n            <line class=\"mid\" x1=\"80\" y1=\"0\" x2=\"80\" y2=\"290\"></line>\n            <line class=\"mid\" x1=\"0\" y1=\"116\" x2=\"300\" y2=\"116\"></line>\n            <line class=\"mid\" x1=\"0\" y1=\"176\" x2=\"300\" y2=\"176\"></line>\n            <rect x=\"80\" y=\"176\" width=\"220\" height=\"80\" fill=\"url(#s31-hatch)\"></rect>\n            <line class=\"mid\" x1=\"0\" y1=\"256\" x2=\"300\" y2=\"256\"></line>\n            <g class=\"ink\" stroke-width=\"1.5\"><path d=\"M71 116 h18 M80 107 v18 M71 176 h18 M80 167 v18 M71 256 h18 M80 247 v18\"></path></g>\n            <path class=\"ink\" fill=\"none\" d=\"M200 0 v116 M194 0 h12 M194 116 h12\"></path>\n            <path class=\"ink\" fill=\"none\" d=\"M60 284 h20 M60 278 v12 M80 278 v12\"></path>\n            <text x=\"214\" y=\"64\">58px navigation bar</text>\n            <text x=\"100\" y=\"150\">9px cross with 1px arms</text>\n            <text x=\"314\" y=\"212\">Hatch strip</text>\n            <text x=\"314\" y=\"238\">Hairlines every 8px</text>\n            <text x=\"94\" y=\"290\">Second rail 10px outside the column</text>\n            <text x=\"0\" y=\"326\">The top left corner of a page is drawn at 2:1.</text>\n          </svg>",
+        "alt": "The top left corner of a page drawn at 2:1: the outer rail, the column edge, the navigation seam, registration crosses, and a hatch strip"
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 240,
+        "tight": true,
+        "items": [
+          {
+            "key": "Column",
+            "icon": {
+              "name": "view-columns"
+            },
+            "value": "The ruled column is 1104px wide, with a second pair of rails 10px outside it."
+          },
+          {
+            "key": "Navigation",
+            "icon": {
+              "name": "bars-3"
+            },
+            "value": "The navigation bar is 58px tall and uses the same column."
+          },
+          {
+            "key": "Cross",
+            "icon": {
+              "name": "plus"
+            },
+            "value": "A 9px registration cross with 1px arms sits at every point where a seam meets a rail."
+          },
+          {
+            "key": "Breakpoint",
+            "icon": {
+              "name": "device-phone-mobile"
+            },
+            "value": "The layout has one breakpoint, 1023px. Below it every row is one column and hairlines stay 1px."
+          },
+          {
+            "key": "Hero type",
+            "icon": {
+              "name": "language"
+            },
+            "value": "The hero type has its own threshold at 720px, below which it is fixed at 2.5rem."
+          },
+          {
+            "key": "Hatch",
+            "icon": {
+              "name": "squares-2x2"
+            },
+            "value": "A hatch strip, 45 degree hairlines every 8px, separates rows where the topic changes."
+          },
+          {
+            "key": "Seam",
+            "icon": {
+              "name": "arrows-right-left"
+            },
+            "value": "The slide-to-compare handle is the doubled line in CSS: two 1px borders and one grip element."
+          }
+        ]
+      }
+    ]
+  }
+}

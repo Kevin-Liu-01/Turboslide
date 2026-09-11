@@ -1,16 +1,31 @@
-// Asset and picture rules (SPEC 7.7): a neutral twin needs a border (DECK-GRAMMAR.md:56), a
-// share-alike source needs its credit on the plate (OPENERS.md:255), a photograph needs a
-// license record, two-tone metrics must clear the plate (OPENERS.md:105, 176) and light neither
-// twin blank (OPENERS.md:251), and a mood slide never sits against an opener (OPENERS.md:137).
-import type { Asset, Finding, Slide } from '../contracts.ts';
+// Asset rules (SPEC 7.7; MILESTONES M5 item 2 "the asset/* lints complete"): a neutral twin
+// needs a border (DECK-GRAMMAR.md:56), a share-alike source needs its credit on the plate naming
+// the artist and the license (OPENERS.md:255: "the dithered files are adaptations, so the credit
+// line on the plate is required"; the credits read "Photograph: Hans Hillewaert, CC BY-SA 4.0"),
+// and a photograph needs a license record (report 06 section 4 item 9): a photo source with a
+// blank or unknown license, or a mood picture whose source is not a photo record at all. The
+// picture rules (plate clearance, blank twins, mood placement) are static/picture.ts.
+import type { Asset, Finding, Mutation, Slide } from '../contracts.ts';
 import { isShareAlike } from '../contracts.ts';
 import type { LintContext } from '../context.ts';
 import { plainText } from '../text.ts';
+import { pictureAsset } from './picture.ts';
 
-function pictureAsset(ctx: LintContext, slide: Slide): Asset | undefined {
-  if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing')
-    return ctx.asset(slide.picture.asset);
-  return undefined;
+/** The share-alike license token a credit must carry (CC BY-SA 4.0, CC BY-SA 2.0). */
+const LICENSE_TOKEN = /CC\s*BY-SA|share[- ]?alike/i;
+
+/** Licenses that record nothing (the intake writes `unknown` when no license is given). */
+const NO_LICENSE = /^\s*$|^unknown$|^none$|^tbd$|^\?+$/i;
+
+/** True when a credit names the artist (or the origin) and, for share-alike, the license. */
+export function creditCovers(credit: string, asset: Asset): boolean {
+  const artist = asset.source.kind === 'photo' ? asset.source.artist : undefined;
+  const recorded = asset.credit;
+  const namesWho =
+    (recorded !== undefined && credit.includes(recorded)) ||
+    (artist !== undefined && artist !== '' && credit.includes(artist));
+  if (!namesWho) return false;
+  return isShareAlike(asset) ? LICENSE_TOKEN.test(credit) : true;
 }
 
 export function checkAssets(ctx: LintContext): Finding[] {
@@ -46,6 +61,8 @@ export function checkAssets(ctx: LintContext): Finding[] {
           );
         }
       }
+      if (block.type === 'material' && block.asset !== undefined && !usedBy.has(block.asset))
+        usedBy.set(block.asset, slide.id);
       if (block.type === 'pair')
         for (const f of block.figures)
           for (const a of f.assets) if (!usedBy.has(a)) usedBy.set(a, slide.id);
@@ -56,100 +73,92 @@ export function checkAssets(ctx: LintContext): Finding[] {
         for (const item of block.items)
           if (item.asset && !usedBy.has(item.asset)) usedBy.set(item.asset, slide.id);
     }
-    // asset/credit-on-plate, picture/plate-clear, picture/blank-twin on the full-picture kinds
-    if (picture && (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing')) {
-      if (isShareAlike(picture)) {
-        const credits = slide.plate.blocks.flatMap((b) =>
-          b.type === 'credit' ? [plainText(b.text)] : [],
-        );
+    // asset/credit-on-plate on the full-picture kinds
+    if (
+      picture &&
+      (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') &&
+      isShareAlike(picture)
+    ) {
+      const creditBlocks = slide.plate.blocks.filter((b) => b.type === 'credit');
+      const credits = creditBlocks.map((b) => (b.type === 'credit' ? plainText(b.text) : ''));
+      const covered = credits.some((c) => creditCovers(c, picture));
+      if (!covered) {
         const artist = picture.source.kind === 'photo' ? picture.source.artist : undefined;
-        const wanted = picture.credit ?? artist ?? '';
-        const present = credits.some((c) =>
-          wanted ? c.includes(wanted) || (artist ? c.includes(artist) : false) : c.length > 0,
+        const wanted =
+          picture.credit ??
+          (artist !== undefined
+            ? `Photograph: ${artist}, ${picture.source.kind === 'photo' ? picture.source.license : ''}`
+            : undefined);
+        const fix: Mutation[] | undefined =
+          wanted === undefined
+            ? undefined
+            : creditBlocks.length === 0
+              ? [
+                  {
+                    op: 'block.insert',
+                    slideId: slide.id,
+                    slot: 'plate',
+                    ...(slide.plate.blocks.length > 0
+                      ? { after: slide.plate.blocks[slide.plate.blocks.length - 1]?.id ?? '' }
+                      : {}),
+                    block: { id: freeId(slide, 'credit'), type: 'credit', text: wanted },
+                  },
+                ]
+              : [
+                  {
+                    op: 'block.set',
+                    slideId: slide.id,
+                    blockId: creditBlocks[0]?.id ?? 'credit',
+                    path: '/text',
+                    value: wanted,
+                  },
+                ];
+        out.push(
+          ctx.finding('asset/credit-on-plate', slide.id, {
+            path: '/plate/blocks',
+            text: wanted ?? picture.id,
+            proposal:
+              creditBlocks.length === 0
+                ? `Add a credit block naming ${artist ?? 'the artist'} and the share-alike license: the dithered file is an adaptation (OPENERS.md:255).`
+                : `The credit on the plate must name ${artist ?? 'the artist'} and the share-alike license (${picture.source.kind === 'photo' ? picture.source.license : 'CC BY-SA'}), as "${wanted ?? 'Photograph: <artist>, CC BY-SA 4.0'}" does (OPENERS.md:255).`,
+            ...(fix !== undefined ? { fix } : {}),
+          }),
         );
-        if (!present) {
-          out.push(
-            ctx.finding('asset/credit-on-plate', slide.id, {
-              path: '/plate/blocks',
-              text: wanted || picture.id,
-              proposal: `Add a credit block naming ${wanted || 'the source'}: the dithered file is an adaptation under a share-alike license (OPENERS.md:255).`,
-            }),
-          );
-        }
-      }
-      const metrics = picture.metrics;
-      if (metrics) {
-        if (metrics.litFraction < 0.02 || metrics.litFraction > 0.98) {
-          out.push(
-            ctx.finding('picture/blank-twin', slide.id, {
-              path: '/picture/asset',
-              text: picture.id,
-              measured: { litFraction: metrics.litFraction },
-              proposal:
-                'One twin is an empty sheet; retone or recrop so both twins carry the picture (OPENERS.md:251).',
-            }),
-          );
-        }
-        if (
-          metrics.plateClear &&
-          (metrics.plateClear.litUnder > 0 || metrics.plateClear.litInBand > 0)
-        ) {
-          out.push(
-            ctx.finding('picture/plate-clear', slide.id, {
-              path: '/picture/asset',
-              text: picture.id,
-              box: metrics.plateClear.plate,
-              measured: {
-                litUnder: metrics.plateClear.litUnder,
-                litInBand: metrics.plateClear.litInBand,
-                nearestLitPx: metrics.plateClear.nearestLitPx,
-              },
-              proposal:
-                'Move or retone the picture so no lit cell sits under the plate or within 30 px of it (OPENERS.md:105, 176).',
-            }),
-          );
-        }
       }
     }
   }
-  // asset/license-missing: every photograph without a license record, attributed to its first user
+  // asset/license-missing: a photo without a license, or a mood picture with no photo record
   for (const asset of Object.values(ctx.deck.assets)) {
-    if (
-      asset.source.kind === 'photo' &&
-      (!asset.source.license || asset.source.license.trim() === '')
-    ) {
-      const slideId = usedBy.get(asset.id) ?? ctx.order[0] ?? ctx.deck.id;
+    const slideId = usedBy.get(asset.id) ?? ctx.order[0] ?? ctx.deck.id;
+    if (asset.source.kind === 'photo') {
+      if (NO_LICENSE.test(asset.source.license)) {
+        out.push(
+          ctx.finding('asset/license-missing', slideId, {
+            text: asset.id,
+            proposal: `Record the license of ${asset.id} (source.license) with the origin and the artist: \`turboslide asset add\` takes --license, --artist and --share-alike (report 06 section 4 item 9).`,
+          }),
+        );
+      }
+      continue;
+    }
+    if (asset.role === 'mood' && asset.source.kind === 'file') {
       out.push(
         ctx.finding('asset/license-missing', slideId, {
           text: asset.id,
-          proposal: `Record the license of ${asset.id} (source.license) with the origin and the artist (report 06 section 4 item 9).`,
-        }),
-      );
-    }
-  }
-  // picture/mood-placement over the deck order
-  const list = ctx.order.map((id) => ctx.slides[id]).filter((s): s is Slide => s !== undefined);
-  for (let i = 0; i + 1 < list.length; i += 1) {
-    const a = list[i];
-    const b = list[i + 1];
-    if (!a || !b || a.kind !== 'mood') continue;
-    if (b.kind === 'opener') {
-      out.push(
-        ctx.finding('picture/mood-placement', a.id, {
-          text: `${a.id} then ${b.id}`,
-          proposal:
-            'Move the mood slide earlier so at least one content slide separates it from the next opener (OPENERS.md:137).',
-        }),
-      );
-    } else if (b.kind === 'mood') {
-      out.push(
-        ctx.finding('picture/mood-placement', a.id, {
-          text: `${a.id} then ${b.id}`,
-          proposal:
-            'Two mood slides are adjacent; separate them with a content slide (OPENERS.md:137).',
+          proposal: `${asset.id} is a mood photograph with no provenance record; set source to { kind: 'photo', origin, artist, license, shareAlike } (report 06 section 4 item 9).`,
         }),
       );
     }
   }
   return out;
+}
+
+/** A block id free on the slide: `credit`, then `credit-2`. */
+function freeId(slide: Slide, base: string): string {
+  const taken = new Set<string>();
+  if (slide.kind === 'content')
+    for (const blocks of Object.values(slide.slots)) for (const b of blocks ?? []) taken.add(b.id);
+  else if ('plate' in slide) for (const b of slide.plate.blocks) taken.add(b.id);
+  if (!taken.has(base)) return base;
+  for (let n = 2; ; n += 1) if (!taken.has(`${base}-${n}`)) return `${base}-${n}`;
 }

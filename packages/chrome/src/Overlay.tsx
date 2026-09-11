@@ -16,9 +16,12 @@ import './Overlay.css';
  * and grip, the key edge, the shot edge and crop area, the pair figures, the scales markers). The
  * chip is the block's drag handle: dragging it reorders the block within its slot. Handles are
  * buttons, so the arrow keys nudge them (SPEC 6.4 keyboard nudges) and the window API can name
- * them by label or `data-control`. Line law (SPEC 2.2 junction table): every rule here is 1px, the
- * ring and an active handle draw ink as a state (.is-selected, .is-active), a resting handle draws
- * --pt-hair, and the sheet's blocks draw nothing. New in Turboslide; no Prototemplate source.
+ * them by label or `data-control`. The labels and markers of a declared diagram are handles that
+ * take the pointer only while Alt is held (`data-alt-only`, the overlay root's `data-alt`; SPEC 6.4
+ * Alt-drag, M5), and a dragged label shows its 12 px clearance ring, ink as a state when a stroke
+ * intrudes. Line law (SPEC 2.2 junction table): every rule here is 1px, the ring and an active
+ * handle draw ink as a state (.is-selected, .is-active), a resting handle draws --pt-hair, and the
+ * sheet's blocks draw nothing. New in Turboslide; no Prototemplate source.
  */
 export type OverlayProps = { view: EditorOverlayView };
 
@@ -30,6 +33,8 @@ function place(box: Box, k: number): CSSProperties {
 /** The chip's height plus its gap to the ring, in CSS pixels. */
 const CHIP_H = 18;
 const CHIP_GAP = 2;
+/** The clearance a diagram label keeps from a stroke, in sheet pixels (DECK-GRAMMAR.md:45). */
+const CLEARANCE_PX = 12;
 
 /** The chip sits above the ring's top left corner, or under its bottom left when the ring meets the sheet's top. */
 function chipStyle(box: Box, k: number): CSSProperties {
@@ -63,6 +68,20 @@ function handleStyle(handle: Handle, k: number): CSSProperties {
     };
   }
   return { ...place(handle.box, k), cursor: handle.cursor };
+}
+
+/** The arrow pair a key belongs to, for a two-axis handle (a diagram label or marker). */
+function nudgeAxis(e: ReactKeyboardEvent<HTMLElement>): 'x' | 'y' | null {
+  switch (e.key) {
+    case 'ArrowLeft':
+    case 'ArrowRight':
+      return 'x';
+    case 'ArrowUp':
+    case 'ArrowDown':
+      return 'y';
+    default:
+      return null;
+  }
 }
 
 function nudgeDelta(e: ReactKeyboardEvent<HTMLElement>, handle: Handle): number | null {
@@ -106,7 +125,11 @@ export function Overlay({ view }: OverlayProps) {
     if (delta === null) return;
     e.preventDefault();
     e.stopPropagation();
-    view.onHandleNudge(handle, delta);
+    // a two-axis handle (SPEC 6.4 dia labels and markers, M5) takes Left and Right on x, Up and
+    // Down on y; every other handle keeps its one axis
+    const axis = handle.axis === 'xy' ? nudgeAxis(e) : null;
+    if (axis) view.onHandleNudge(handle, delta, axis);
+    else view.onHandleNudge(handle, delta);
   };
   return (
     <>
@@ -152,6 +175,23 @@ export function Overlay({ view }: OverlayProps) {
           aria-hidden="true"
         />
       ) : null}
+      {/* the 12 px clearance ring of a dragged diagram label (SPEC 6.4, M5): hair while the label
+          keeps its distance, ink as a state when a stroke or a marker intrudes */}
+      {view.clearance ? (
+        <div
+          className={cn('ts-clearance', !view.clearance.ok && 'is-short')}
+          style={place(
+            [
+              view.clearance.box[0] - CLEARANCE_PX,
+              view.clearance.box[1] - CLEARANCE_PX,
+              view.clearance.box[2] + 2 * CLEARANCE_PX,
+              view.clearance.box[3] + 2 * CLEARANCE_PX,
+            ],
+            k,
+          )}
+          aria-hidden="true"
+        />
+      ) : null}
       {drawn.map((handle) => (
         <button
           key={handle.id}
@@ -163,6 +203,7 @@ export function Overlay({ view }: OverlayProps) {
           )}
           data-kind={handle.kind}
           data-shape={handle.shape}
+          data-alt-only={handle.alt ? '' : undefined}
           style={handleStyle(handle, k)}
           title={handle.label}
           aria-label={handle.label}

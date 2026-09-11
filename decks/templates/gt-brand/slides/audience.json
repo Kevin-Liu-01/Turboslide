@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "id": "audience",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Audience"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Engineers use GT and executives buy it. Most users see GT in code before they see the website."
+      },
+      {
+        "id": "dia1",
+        "type": "dia",
+        "fit": "slot",
+        "svg": "<svg class=\"dia\" viewBox=\"0 0 418 150\" aria-label=\"Three code surfaces lead to the website\">\n            <rect x=\"0\" y=\"20\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n            <rect x=\"0\" y=\"70\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n            <rect x=\"0\" y=\"120\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n            <text x=\"24\" y=\"33\">CLI</text>\n            <text x=\"24\" y=\"83\">README</text>\n            <text x=\"24\" y=\"133\">Pull request</text>\n            <path d=\"M160 25.5 H200 L230 75.5 M160 75.5 H230 M160 125.5 H200 L230 75.5\" class=\"mid\" stroke-width=\"1\" fill=\"none\"></path>\n            <path d=\"M230 75.5 H300\" class=\"ink\" stroke-width=\"1\" fill=\"none\"></path>\n            <rect x=\"300\" y=\"70\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n            <text x=\"324\" y=\"83\">Website</text>\n          </svg>",
+        "alt": "Three code surfaces lead to the website"
+      }
+    ],
+    "right": [
+      {
+        "id": "rows",
+        "type": "rows",
+        "key": 180,
+        "items": [
+          {
+            "key": "Users",
+            "icon": {
+              "name": "user-group"
+            },
+            "value": "Users are engineering and growth teams at scaling startups."
+          },
+          {
+            "key": "Buyers",
+            "icon": {
+              "name": "briefcase"
+            },
+            "value": "Buyers are technical and product executives who need consistency, security, and a review process they can defend."
+          },
+          {
+            "key": "Customers",
+            "icon": {
+              "name": "building-office-2"
+            },
+            "value": "Auth0 translates its docs. Sierra translates marketing and sales material. Ramp translates its core dashboard."
+          },
+          {
+            "key": "Competition",
+            "icon": {
+              "name": "scale"
+            },
+            "value": "Legacy translation management systems bill per seat and cover only part of the stack."
+          }
+        ]
+      }
+    ]
+  }
+}

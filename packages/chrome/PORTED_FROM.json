@@ -332,6 +332,42 @@
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
       "commit": ""
     },
+    "src/slide-templates.ts": {
+      "source": "new (M4, Kevin's GT template directive; the archetype slides of decks/templates/gt-brand/template.json with placeholder copy)",
+      "commit": ""
+    },
+    "src/DeckName.tsx": {
+      "source": "new (M4, SPEC 6.1; the toolbar's brand title as an editable field, the count field's grammar from Toolbar.tsx)",
+      "commit": ""
+    },
+    "src/DeckName.css": {
+      "source": "new (M4, SPEC 6.1; the count field's rules from Toolbar.css)",
+      "commit": ""
+    },
+    "src/ExportMenu.tsx": {
+      "source": "new (M4, SPEC 8; the row menu's card grammar from Sidebar.tsx, the Seg and check controls)",
+      "commit": ""
+    },
+    "src/ExportMenu.css": {
+      "source": "new (M4, SPEC 8; the .pt-orow-menu rules from Sidebar.css at the toolbar)",
+      "commit": ""
+    },
+    "src/ExportReportCard.tsx": {
+      "source": "new (M4, SPEC 8.5; the conflict card grammar of the editor route)",
+      "commit": ""
+    },
+    "src/ExportReportCard.css": {
+      "source": "new (M4, SPEC 8.5; the .ts-card rules of apps/studio/src/routes/edit.$deckId.css)",
+      "commit": ""
+    },
+    "src/SetupCard.tsx": {
+      "source": "new (M4, SPEC 8.3; the help card grammar from HelpCard.tsx)",
+      "commit": ""
+    },
+    "src/SetupCard.css": {
+      "source": "new (M4, SPEC 8.3; the .pt-help-card rules from HelpCard.css)",
+      "commit": ""
+    },
     "src/StatusChip.css": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
       "commit": ""

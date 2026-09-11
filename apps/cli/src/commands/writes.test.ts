@@ -415,7 +415,7 @@ describe('turboslide writes', () => {
     expect((await run(['fix', 'all', '--rule', 'no/such'])).code).toBe(2);
   });
 
-  test('lease takes, refuses another author, forces and releases; writes warn', async () => {
+  test('lease takes, refuses another author, forces and releases; agent writes are refused, human writes warn', async () => {
     const taken = await run(['lease', 'content-rule', '--minutes', '5', '--json']);
     expect(taken.code).toBe(0);
     expect(taken.json).toMatchObject({
@@ -429,7 +429,9 @@ describe('turboslide writes', () => {
       status: 409,
       holder: { name: 'kevin' },
     });
-    const warned = await run([
+    // M4: an agent write to a slide another author holds is 409 with the holder and the current
+    // document unless --force; a human's write warns and goes through (SPEC 6.7)
+    const agentWrite = await run([
       'block',
       'set',
       'content-rule#list',
@@ -437,6 +439,37 @@ describe('turboslide writes', () => {
       '20',
       '--author',
       'agent:r1',
+      '--json',
+    ]);
+    expect(agentWrite.code).toBe(1);
+    expect(agentWrite.json).toMatchObject({
+      error: 'ConflictError',
+      status: 409,
+      holder: { name: 'kevin' },
+    });
+    expect((agentWrite.json as { message: string }).message).toMatch(
+      /leased by kevin .*pass force/,
+    );
+    const agentForced = await run([
+      'block',
+      'set',
+      'content-rule#list',
+      '/size',
+      '20',
+      '--author',
+      'agent:r1',
+      '--force',
+      '--json',
+    ]);
+    expect(agentForced.code).toBe(0);
+    const warned = await run([
+      'block',
+      'set',
+      'content-rule#list',
+      '/size',
+      '22',
+      '--author',
+      'designer',
       '--json',
     ]);
     expect(warned.code).toBe(0);

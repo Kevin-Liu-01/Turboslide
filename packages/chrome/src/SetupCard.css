@@ -1,0 +1,105 @@
+/* The Google Slides setup card (SPEC 8.3): the help card's grammar (HelpCard.css): a scrim over
+   the viewport, the card centered on paper with the --pt-edge frame a floating card keeps, the
+   title in the display face, numbered steps as ruled rows (the title in ink, the detail in ink-2),
+   the export line in the mono stack in a --pt-hair box with its Copy button. */
+.ts-setup {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--pt-scrim);
+  z-index: 20;
+  animation: pt-fade-in var(--pt-dur-toast) var(--pt-ease-out) both;
+}
+
+.ts-setup-card {
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-edge);
+  padding: 26px 30px 22px;
+  width: min(640px, 92vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  font: 13px/1.5 var(--pt-text);
+}
+
+.ts-setup-card h3 {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 10px;
+}
+
+.ts-setup-lead {
+  margin: 0 0 12px;
+  color: var(--pt-ink-2);
+}
+
+.ts-setup-steps {
+  margin: 0;
+  padding: 0 0 0 22px;
+}
+
+.ts-setup-steps li {
+  display: grid;
+  gap: 2px;
+  padding: 8px 0;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-setup-steps li:first-child {
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-setup-steps li:last-child {
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-setup-steps b {
+  font-weight: 500;
+}
+
+.ts-setup-steps span {
+  color: var(--pt-ink-2);
+  overflow-wrap: anywhere;
+}
+
+.ts-setup-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 6px 6px 6px 10px;
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-setup-line code {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--pt-mono);
+  font-size: 12px;
+}
+
+.ts-setup-line .pt-ib.is-text,
+.ts-setup-actions .pt-ib.is-text {
+  border-color: var(--pt-hair);
+  height: 28px;
+}
+
+.ts-setup-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-setup {
+    animation: none;
+  }
+}

@@ -5,11 +5,12 @@ import { repoRoot } from './root';
 
 /**
  * The generated agent contracts the studio serves (SPEC 7.1, MILESTONES M1
- * items 4 and 11): openapi.json, llms.txt and describe().actions are written
- * by `pnpm generate:contracts` into packages/agent/generated and served here
- * verbatim, so the HTTP surface and the committed files cannot disagree.
- * Until the agent builder's generator lands the files may be missing; the
- * fallbacks below say so instead of inventing an action list.
+ * items 4 and 11, M4 item 1): openapi.json, llms.txt, llms-full.txt and
+ * describe().actions are written by `pnpm generate:contracts` into
+ * packages/agent/generated and served here verbatim, so the HTTP surface and
+ * the committed files cannot disagree. /api/agent adds the instance's runtime
+ * facts on top (routes/api/agent.ts, @turboslide/agent/http/manifest). The
+ * fallbacks below name the generator instead of inventing an action list.
  */
 
 const GENERATED = ['packages', 'agent', 'generated'];
@@ -37,6 +38,14 @@ export function openApiDocument(): string {
       null,
       2,
     )
+  );
+}
+
+/** The llms-full.txt guide (every action and rule), or a stub naming the generator. */
+export function llmsFullText(): string {
+  return (
+    readGenerated('llms-full.txt') ??
+    'Placeholder: packages/agent/generated/llms-full.txt has not been generated yet. Run pnpm generate:contracts.\n'
   );
 }
 

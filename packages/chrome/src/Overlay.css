@@ -160,6 +160,40 @@
   outline-offset: 1px;
 }
 
+/* diagram labels and markers (SPEC 6.4 Alt-drag, M5): the handles take the pointer only while the
+   overlay root carries data-alt; a label area draws a hair outline while Alt is held so the
+   draggable labels show, and the clearance ring is hair until a stroke or marker comes within
+   12px, then ink as a state */
+.ts-handle[data-alt-only] {
+  pointer-events: none;
+}
+
+.ts-overlay[data-alt] .ts-handle[data-alt-only] {
+  pointer-events: auto;
+}
+
+.ts-overlay[data-alt] .ts-handle[data-kind='dia-label']::before {
+  display: block;
+  inset: 0;
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-overlay[data-alt] .ts-handle[data-kind='dia-marker']::before,
+.ts-overlay[data-alt] .ts-handle[data-kind='dia-label'].is-active::before {
+  display: block;
+}
+
+.ts-clearance {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  pointer-events: none;
+}
+
+.ts-clearance.is-short {
+  border-color: var(--pt-ink);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ts-hover {
     animation: none;

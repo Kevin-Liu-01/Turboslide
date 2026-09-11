@@ -9,11 +9,16 @@ export type ExportFormat = 'pptx' | 'gslides' | 'pdf';
 export type ExportMode = 'native' | 'flatten';
 
 /**
- * Block types the M2 exporter writes as native text in both modes (MILESTONES M2 item 4: the
- * archetypes measured in the pptx report). Every other block type is a 2x raster in native mode,
- * and its text is recoverable only through the invisible layer in flatten mode. The lint rule
- * export/non-native and the exporter's report read this one list (SPEC 3.3 item 3 keeps lint and
- * export from importing each other, so the classification lives here).
+ * Block types the exporter writes as native text in both modes (MILESTONES M2 item 4: the
+ * archetypes measured in the pptx report; M5 item 5 added the ruled reference list and the type
+ * ladder, whose ink is text and hairlines; the two register quote table stays a raster because
+ * its 27 px quote has no cut face and the nearest, GT Inter Text 26 Medium, renders 0.8 percent
+ * wider in LibreOffice, docs/export-verification.md). Every other block
+ * type is a 2x raster in native mode (icons and marks 3x), and its text is recoverable only
+ * through the invisible layer in flatten mode. A composite is a grid whose cells' blocks export as
+ * themselves. The lint rule export/non-native and the exporter's report read this one list
+ * (SPEC 3.3 item 3 keeps lint and export from importing each other, so the classification lives
+ * here).
  */
 export const NATIVE_BLOCK_TYPES = [
   'heading',
@@ -21,10 +26,147 @@ export const NATIVE_BLOCK_TYPES = [
   'credit',
   'rows',
   'plain',
+  'refs',
+  'ladder',
   'panel',
 ] as const;
 
 export type NativeBlockType = (typeof NATIVE_BLOCK_TYPES)[number];
+
+/**
+ * The export choices a menu offers (MILESTONES M5 item 5: the export dialog with mode, theme, font
+ * set and headings raster), as data so the studio's dialog, the CLI help and the skills read one
+ * list. Every id is an input field of export.run; every value is one the action accepts.
+ */
+export type ExportOptionChoice = { value: string | number | boolean; label: string; doc: string };
+export type ExportOption = {
+  id:
+    'format' | 'mode' | 'theme' | 'fonts' | 'headings' | 'rasterScale' | 'pictureScale' | 'verify';
+  label: string;
+  /** `one` picks one value, `many` several (theme), `flag` is on or off. */
+  kind: 'one' | 'many' | 'flag';
+  default: string | number | boolean | string[];
+  choices: ExportOptionChoice[];
+};
+
+export const EXPORT_OPTIONS: readonly ExportOption[] = [
+  {
+    id: 'format',
+    label: 'Format',
+    kind: 'one',
+    default: 'pptx',
+    choices: [
+      {
+        value: 'pptx',
+        label: 'PowerPoint (.pptx)',
+        doc: 'One file per theme, verified through LibreOffice (SPEC 8.2).',
+      },
+      {
+        value: 'gslides',
+        label: 'Google Slides',
+        doc: 'A presentation in Drive through the Slides API (SPEC 8.3).',
+      },
+      { value: 'pdf', label: 'PDF', doc: 'Book mode through Chromium print (M6).' },
+    ],
+  },
+  {
+    id: 'mode',
+    label: 'Mode',
+    kind: 'one',
+    default: 'flatten',
+    choices: [
+      {
+        value: 'flatten',
+        label: 'Flatten',
+        doc: 'Pixel identical: a 2x raster per slide over a searchable invisible text layer.',
+      },
+      {
+        value: 'native',
+        label: 'Native',
+        doc: 'Editable text boxes, hairlines and plates; icons, marks and diagrams as PNG.',
+      },
+    ],
+  },
+  {
+    id: 'theme',
+    label: 'Theme',
+    kind: 'many',
+    default: ['light', 'dark'],
+    choices: [
+      { value: 'light', label: 'Light', doc: 'Ink on paper.' },
+      { value: 'dark', label: 'Dark', doc: 'Paper on ink.' },
+    ],
+  },
+  {
+    id: 'fonts',
+    label: 'Font set',
+    kind: 'one',
+    default: 'exact',
+    choices: [
+      {
+        value: 'exact',
+        label: 'Exact',
+        doc: 'Per-size Inter instances renamed GT Inter, embedded (SPEC 8.4).',
+      },
+      {
+        value: 'standard',
+        label: 'Standard',
+        doc: 'Inter, Inter Medium and GT Inter Display only.',
+      },
+    ],
+  },
+  {
+    id: 'headings',
+    label: 'Headings',
+    kind: 'flag',
+    default: false,
+    choices: [
+      {
+        value: 'raster',
+        label: 'Rasterize headings',
+        doc: 'Headings as PNG where the letterforms matter more than editable text (SPEC 8.3).',
+      },
+    ],
+  },
+  {
+    id: 'rasterScale',
+    label: 'Raster scale',
+    kind: 'one',
+    default: 'auto',
+    choices: [
+      {
+        value: 'auto',
+        label: 'Auto',
+        doc: 'Icons and marks at 3x, everything else at 2x (SPEC 8.6).',
+      },
+      { value: 2, label: '2x', doc: 'Every raster at two device pixels per sheet pixel.' },
+      { value: 3, label: '3x', doc: 'Every raster at three device pixels per sheet pixel.' },
+    ],
+  },
+  {
+    id: 'pictureScale',
+    label: 'Two-tone pictures',
+    kind: 'one',
+    default: 2,
+    choices: [
+      { value: 2, label: '2x', doc: 'Regenerated from the one-bit image at 3200 by 1800.' },
+      { value: 3, label: '3x', doc: 'Regenerated from the one-bit image at 4800 by 2700.' },
+    ],
+  },
+  {
+    id: 'verify',
+    label: 'Verify',
+    kind: 'flag',
+    default: false,
+    choices: [
+      {
+        value: true,
+        label: 'Verify the file',
+        doc: 'Render the export through LibreOffice and diff it against the web render (SPEC 8.5).',
+      },
+    ],
+  },
+];
 
 export function isNativeBlockType(type: string): type is NativeBlockType {
   return (NATIVE_BLOCK_TYPES as ReadonlyArray<string>).includes(type);

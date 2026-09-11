@@ -15,7 +15,7 @@
 //     blur) * amount / 100 where |in - blur| > threshold, on rows [from, to) only.
 import type { GrayImage } from './image.ts';
 
-function gaussianKernel(sigma: number): Float64Array {
+export function gaussianKernel(sigma: number): Float64Array {
   const radius = Math.ceil(3 * sigma);
   const k = new Float64Array(radius * 2 + 1);
   let sum = 0;

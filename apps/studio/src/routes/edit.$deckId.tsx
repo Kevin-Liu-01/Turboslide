@@ -14,8 +14,19 @@ import {
   viewerActionIds,
   windowActionIds,
 } from '@turboslide/agent/window/registry';
+import { DeckName } from '@turboslide/chrome/DeckName';
+import { ExportMenu } from '@turboslide/chrome/ExportMenu';
+import type {
+  ExportCapabilities,
+  ExportMenuInput,
+  ExportProgress,
+} from '@turboslide/chrome/ExportMenu';
+import { ExportReportCard } from '@turboslide/chrome/ExportReportCard';
+import type { ArtifactRun, ExportDownload } from '@turboslide/chrome/ExportReportCard';
 import { Inspector } from '@turboslide/chrome/Inspector';
+import type { DitherWorkerLike } from '@turboslide/chrome/inspector/dither';
 import { Overlay } from '@turboslide/chrome/Overlay';
+import { SetupCard } from '@turboslide/chrome/SetupCard';
 import { Palette } from '@turboslide/chrome/Palette';
 import { buildPaletteEntries } from '@turboslide/chrome/palette-data';
 import type { PaletteEntry } from '@turboslide/chrome/palette-data';
@@ -31,7 +42,7 @@ import { TwinStage } from '@turboslide/chrome/TwinStage';
 import { ViewerShell } from '@turboslide/chrome/ViewerShell';
 import { lintStatic } from '@turboslide/lint/lint-static';
 import { renderSlide } from '@turboslide/render/slide';
-import type { ActionId } from '@turboslide/schema/actions';
+import type { ActionId, DeckTemplateId } from '@turboslide/schema/actions';
 import type { Asset } from '@turboslide/schema/assets';
 import type { Block } from '@turboslide/schema/blocks';
 import { blockAssetRefs } from '@turboslide/schema/catalog';
@@ -61,6 +72,19 @@ import { applyTheme, installThemeBridge, readTheme, useTheme } from '@turboslide
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { useMountEffect } from '../components/useMountEffect';
+import { useStudioSession } from '../components/useStudioSession';
+import { runDeckAction } from '../server/agent-actions';
+import type { ServerSideWindowAction } from '../server/agent-actions';
+import { createNewDeck } from '../server/decks';
+import {
+  EXPORT_POLL_MS,
+  exportCapabilities,
+  pollExport,
+  runBuild,
+  signDownload,
+  startExport,
+} from '../server/download';
+import type { ExportRunInput } from '../server/download';
 import { lintSlides } from '../server/lint';
 import { renderSlideImages } from '../server/render';
 import { warmThumbnails } from '../server/warm';
@@ -72,7 +96,7 @@ import {
   watchDeck,
   writeDeck,
 } from '../server/write';
-import type { EditorDeck, WriteDeckResult } from '../server/write';
+import type { EditorDeck, WatchDeckResult, WriteDeckResult } from '../server/write';
 
 import './edit.$deckId.css';
 
@@ -98,10 +122,19 @@ const MODES: readonly ShellMode[] = ['slide', 'grid', 'book'];
 /** The author of a browser session when ?author= is absent (SPEC 7.2 names $USER for the CLI). */
 const DEFAULT_AUTHOR = 'studio';
 
-/** Advisory lease length the editor takes on the slide it edits (SPEC 6.7). */
+/** Lease length the editor takes on the slide it edits (SPEC 6.7); enforced against agent writes from M4. */
 const LEASE_MINUTES = 10;
 
+/** How long the external revision banner stays once the revision has been brought in (M4 item 2). */
+const EXTERNAL_BANNER_MS = 8000;
+
 const ASSET_BASE = (deckId: string): string => `/decks/${deckId}/`;
+
+/** The dither preview worker of the inspector's Dither section (SPEC 6.5; workers/dither.worker.ts). */
+const createDitherWorker = (): DitherWorkerLike =>
+  new Worker(new URL('../workers/dither.worker.ts', import.meta.url), {
+    type: 'module',
+  }) as DitherWorkerLike;
 
 // ---------------------------------------------------------------------------------------------
 // Search params (SPEC 6.1): ?mode, ?edit=0|1, ?theme, ?twin=1, ?lint=1, ?src=1, plus ?author=
@@ -114,6 +147,8 @@ export type EditSearch = {
   twin?: 1;
   lint?: 1;
   src?: 1;
+  /** opens the Export menu on load (the deck list's Export link) */
+  export?: 1;
   author?: string;
 };
 
@@ -142,6 +177,7 @@ export function validateEditSearch(search: Record<string, unknown>): EditSearch 
   if (flag(search.twin)) out.twin = 1;
   if (flag(search.lint)) out.lint = 1;
   if (flag(search.src)) out.src = 1;
+  if (flag(search.export)) out.export = 1;
   if (typeof search.author === 'string' && search.author.trim()) out.author = search.author;
   return out;
 }
@@ -191,6 +227,9 @@ function EditPage() {
       replace: true,
     });
   };
+  const onDeckCreated = (deckId: string) => {
+    void navigate({ to: '/edit/$deckId', params: { deckId } });
+  };
   return (
     <EditorRoot
       key={`${payload.deckId}:${authorLabel(author)}`}
@@ -198,6 +237,7 @@ function EditPage() {
       search={search}
       author={author}
       onSearch={onSearch}
+      onDeckCreated={onDeckCreated}
     />
   );
 }
@@ -238,6 +278,9 @@ export type Selection = { slideId: string; blockId: string; pointer?: string };
 /** What the shell shows, mirrored into the snapshot by ShellBridge for the palette and the keys. */
 export type EditorView = { mode: ShellMode; present: boolean };
 
+/** The export surface's state: a run in flight (export.run or build.run) and the last finished one. */
+export type ArtifactState = { progress: ExportProgress | null; run: ArtifactRun | null };
+
 export type EditorSnapshot = {
   deckId: string;
   author: Author;
@@ -267,6 +310,8 @@ export type EditorSnapshot = {
   error: string | null;
   /** Cmd S asked for a version note */
   versionPrompt: boolean;
+  /** the Export menu's run in flight and the last report card */
+  artifact: ArtifactState;
 };
 
 export type EditorController = {
@@ -312,6 +357,10 @@ export type EditorController = {
   undoAfter: (id: number) => Promise<void>;
   /** renders the missing thumbnails of a theme once per session (M3 item 5) */
   warmThumbs: (theme: Theme) => void;
+  /** a fresh one-time URL for a file of the last run, then the browser's download */
+  downloadArtifact: (run: ArtifactRun, file: ExportDownload) => Promise<void>;
+  /** closes the report card */
+  clearArtifact: () => void;
 };
 
 function lintLists() {
@@ -382,10 +431,36 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
+/** A browser download of a same-origin URL the server signed (tokens.ts): an anchor click. */
+function triggerDownload(url: string): void {
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = '';
+  anchor.rel = 'noopener';
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+}
+
+/** The menu's shape of an export.run input, for the report card's title (defaults as the action's). */
+function menuInputOf(input: ExportRunInput): ExportMenuInput {
+  return {
+    format: input.format === 'gslides' ? 'gslides' : 'pptx',
+    mode: input.mode ?? 'flatten',
+    theme: input.theme ?? ['light', 'dark'],
+    fonts: input.fonts ?? 'exact',
+    ...(input.headings === 'raster' ? { headings: 'raster' as const } : {}),
+    verify: input.verify ?? false,
+    ...(input.dryRun === true ? { dryRun: true } : {}),
+  };
+}
+
 function createEditorController(init: {
   deckId: string;
   author: Author;
   payload: EditorDeck;
+  /** deck.create from this editor: open the new deck */
+  onDeckCreated?: (deckId: string) => void;
 }): EditorController {
   const { deckId, author } = init;
   const history = createEditHistory();
@@ -418,6 +493,7 @@ function createEditorController(init: {
     selection: null,
     error: null,
     versionPrompt: false,
+    artifact: { progress: null, run: null },
   };
 
   /* the current snapshot through a call, so a check after an await reads the fresh one */
@@ -822,9 +898,74 @@ function createEditorController(init: {
     })();
   };
 
-  // The watch channel (SPEC 6.7): the store's fs.watch reaches the browser as a long poll; a
-  // revision this session did not write shows the banner once the queue is idle.
+  // The watch channel (SPEC 6.7; MILESTONES M4 item 2): the store's fs.watch reaches the browser
+  // as a long poll; a revision this session did not write is brought into the document once the
+  // queue is idle, and the banner names it and its author.
   const running = (): boolean => alive;
+  let externalTimer: ReturnType<typeof setTimeout> | undefined;
+  const showExternal = (external: External): void => {
+    if (externalTimer !== undefined) clearTimeout(externalTimer);
+    publish({ external });
+    externalTimer = setTimeout(() => {
+      if (latest().external?.revision === external.revision) publish({ external: null });
+    }, EXTERNAL_BANNER_MS);
+  };
+  /**
+   * Applies the records written since the local revision forward through the reducer with the
+   * server's timestamps, so the document equals the server's without a reload and the undo stack
+   * survives; a record that does not apply (a version.restore, a gap in the log) reloads instead.
+   */
+  const adoptExternal = async (result: WatchDeckResult): Promise<void> => {
+    const local = latest();
+    const records = result.since
+      .filter((record) => record.revision > local.serverRevision && record.mutations.length > 0)
+      .sort((a, b) => a.revision - b.revision);
+    const last = records[records.length - 1];
+    const author = last?.author ?? result.head?.author;
+    const external: External = {
+      revision: result.revision,
+      ...(author !== undefined ? { author } : {}),
+      ...(last?.note ? { note: last.note } : {}),
+    };
+    let document = local.document;
+    const changed = new Set<string>();
+    let deckLevel = false;
+    let applied = 0;
+    for (const record of records) {
+      if (
+        record.baseRevision !== document.deck.revision ||
+        record.mutations.some((mutation) => mutation.op === 'version.restore')
+      )
+        break;
+      const step = applyWrite(
+        document,
+        {
+          baseRevision: record.baseRevision,
+          author: record.author,
+          mutations: record.mutations,
+          ...(record.note ? { note: record.note } : {}),
+        },
+        { now: record.createdAt },
+      );
+      if (!step.ok) break;
+      document = step.document;
+      if (record.mutations.some(isDeckLevel)) deckLevel = true;
+      for (const id of touchedSlides(record.mutations)) changed.add(id);
+      applied += 1;
+    }
+    if (applied !== records.length || document.deck.revision !== result.revision) {
+      await reload();
+      showExternal(external);
+      return;
+    }
+    const versions = [
+      ...latest().versions,
+      ...records.map(({ baseRevision: _base, inverse: _inverse, ...version }) => version),
+    ];
+    publish({ serverRevision: result.revision, versions, error: null });
+    setDocument(document, deckLevel ? 'all' : [...changed]);
+    showExternal(external);
+  };
   const watchLoop = async (): Promise<void> => {
     let since = snapshot.serverRevision;
     while (running()) {
@@ -840,13 +981,7 @@ function createEditorController(init: {
           if (!running() || result.revision <= latest().serverRevision) continue;
         }
         if (latest().conflict) continue;
-        publish({
-          external: {
-            revision: result.revision,
-            ...(result.head?.author !== undefined ? { author: result.head.author } : {}),
-            ...(result.head?.note ? { note: result.head.note } : {}),
-          },
-        });
+        await adoptExternal(result);
       } catch {
         await sleep(2000);
       }
@@ -940,6 +1075,111 @@ function createEditorController(init: {
     };
   };
 
+  on<{ name: string; baseRevision: number }>('deck.rename', async (input) => {
+    checkBase(input.baseRevision);
+    const name = input.name.trim();
+    if (name === '') throw new TypeError('deck.rename: name must not be empty');
+    const committed = await commit(
+      [{ op: 'deck.set', path: '/title', value: name }],
+      'deck.rename',
+    );
+    return { title: snapshot.document.deck.title, revision: committed.revision };
+  });
+  on<{ name: string; from: DeckTemplateId; id?: string }>('deck.create', async (input) => {
+    const created = await createNewDeck(input);
+    say(`Created ${created.deckId} from ${created.from}: ${created.counts.slides} slides`);
+    init.onDeckCreated?.(created.deckId);
+    return created;
+  });
+  /* asset.add, asset.dither, material.capture and material.list run on the server (sharp, the
+     capture browser, the catalog); the write they end in comes back over the watch channel */
+  const serverSide = (id: ServerSideWindowAction): void => {
+    on<unknown>(id, async (input) => {
+      const output = await runDeckAction({ deckId, action: id, input, author });
+      if (id !== 'material.list') {
+        const outputs = Array.isArray(output) ? output : [output];
+        const ids = outputs
+          .map((entry) => (entry as { id?: string } | null)?.id)
+          .filter((entry): entry is string => typeof entry === 'string');
+        if (ids.length > 0) say(`${id}: ${ids.join(', ')}`);
+      }
+      return output;
+    });
+  };
+  serverSide('asset.add');
+  serverSide('asset.dither');
+  serverSide('material.capture');
+  serverSide('material.list');
+  on<ExportRunInput>('export.run', async (input) => {
+    const label = `${input.format === 'gslides' ? 'Google Slides' : input.format.toUpperCase()} ${input.mode ?? 'flatten'}${input.dryRun ? ' dry run' : ''}`;
+    publish({ artifact: { progress: { label: `Exporting ${label}` }, run: null } });
+    try {
+      const started = await startExport({ deckId, input });
+      for (;;) {
+        const poll = await pollExport({ jobId: started.jobId });
+        if (poll.status === 'done' && poll.report) {
+          const run: ArtifactRun = {
+            kind: 'export',
+            input: menuInputOf(input),
+            report: poll.report,
+            downloads: (poll.downloads ?? []).map(({ name, bytes }) => ({ name, bytes })),
+            jobId: started.jobId,
+            ms: poll.ms ?? 0,
+          };
+          publish({ artifact: { progress: null, run } });
+          // the first file downloads at once; the card offers every file again
+          const first = poll.downloads?.[0];
+          if (first) triggerDownload(first.url);
+          return poll.report;
+        }
+        if (poll.status === 'failed') throw new Error(poll.error ?? 'the export failed');
+        publish({
+          artifact: {
+            progress: {
+              label: `${poll.status === 'queued' ? 'Queued' : 'Exporting'} ${label}`,
+              ...(poll.line !== undefined ? { line: poll.line } : {}),
+            },
+            run: null,
+          },
+        });
+        await sleep(EXPORT_POLL_MS);
+      }
+    } catch (error) {
+      publish({
+        artifact: { progress: null, run: snapshot.artifact.run },
+        error: errorMessage(error),
+      });
+      throw error;
+    }
+  });
+  on<{ out: string; budgetMB?: number; quality?: number }>('build.run', async (input) => {
+    publish({ artifact: { progress: { label: 'Building the standalone file' }, run: null } });
+    try {
+      const built = await runBuild({
+        deckId,
+        ...(input.budgetMB !== undefined ? { budgetMB: input.budgetMB } : {}),
+      });
+      const run: ArtifactRun = {
+        kind: 'build',
+        path: built.path,
+        bytes: built.bytes,
+        assertions: built.assertions,
+        downloads: built.download
+          ? [{ name: built.download.name, bytes: built.download.bytes }]
+          : [],
+        ms: built.ms,
+      };
+      publish({ artifact: { progress: null, run } });
+      if (built.download) triggerDownload(built.download.url);
+      return { path: built.path, bytes: built.bytes, assertions: built.assertions };
+    } catch (error) {
+      publish({
+        artifact: { progress: null, run: snapshot.artifact.run },
+        error: errorMessage(error),
+      });
+      throw error;
+    }
+  });
   on<Record<string, never>>('deck.info', () => {
     const document = snapshot.document;
     const sections = outlineOf(document);
@@ -1385,6 +1625,21 @@ function createEditorController(init: {
         say(`Thumbnails: ${errorMessage(error)}`);
       });
     },
+    async downloadArtifact(run, file) {
+      try {
+        const { url } = await signDownload(
+          run.kind === 'export'
+            ? { kind: 'job', jobId: run.jobId, name: file.name }
+            : { kind: 'build', deckId, name: file.name },
+        );
+        triggerDownload(url);
+      } catch (error) {
+        say(`Download: ${errorMessage(error)}`);
+      }
+    },
+    clearArtifact() {
+      publish({ artifact: { progress: snapshot.artifact.progress, run: null } });
+    },
   };
   return controller;
 }
@@ -1540,12 +1795,17 @@ type EditorRootProps = {
   search: EditSearch;
   author: Author;
   onSearch: (patch: Partial<EditSearch>) => void;
+  onDeckCreated: (deckId: string) => void;
 };
 
-function EditorRoot({ payload, search, author, onSearch }: EditorRootProps) {
+function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: EditorRootProps) {
   const [controller] = useState(() =>
-    createEditorController({ deckId: payload.deckId, author, payload }),
+    createEditorController({ deckId: payload.deckId, author, payload, onDeckCreated }),
   );
+  /* the Export menu (SPEC 8): open from the toolbar or from the deck list's Export link (?export=1) */
+  const [exportOpen, setExportOpen] = useState(search.export === 1);
+  const [setupOpen, setSetupOpen] = useState(false);
+  const [capabilities, setCapabilities] = useState<ExportCapabilities | null>(null);
   const snap = useSyncExternalStore(
     controller.subscribe,
     controller.getSnapshot,
@@ -1568,6 +1828,9 @@ function EditorRoot({ payload, search, author, onSearch }: EditorRootProps) {
     if (search.theme) applyTheme(search.theme);
     const stopBridge = installThemeBridge();
     controller.start();
+    exportCapabilities()
+      .then(setCapabilities)
+      .catch((error: unknown) => controller.say(`Export: ${errorMessage(error)}`));
     const onKey = (event: KeyboardEvent) => {
       if (event.isComposing) return;
       const f = flags.current;
@@ -1768,6 +2031,21 @@ function EditorRoot({ payload, search, author, onSearch }: EditorRootProps) {
 
   const scopeAttr = { [SCOPE_ATTRIBUTE]: `editor:${snap.deckId}` };
 
+  /* the Export menu's runs are actions through the dispatcher (SPEC 7.1); the menu stays up with
+     the progress line while a run is in flight and closes when the report card takes over */
+  const runExport = (input: ExportMenuInput) => {
+    controller
+      .invoke('export.run', input)
+      .then(() => setExportOpen(false))
+      .catch((error: unknown) => controller.say(`Export: ${errorMessage(error)}`));
+  };
+  const runBuildAction = () => {
+    controller
+      .invoke('build.run', { out: `.turboslide/${snap.deckId}.html`, budgetMB: 16 })
+      .then(() => setExportOpen(false))
+      .catch((error: unknown) => controller.say(`Build: ${errorMessage(error)}`));
+  };
+
   return (
     <div
       className="ts-editor"
@@ -1794,36 +2072,63 @@ function EditorRoot({ payload, search, author, onSearch }: EditorRootProps) {
         keys="paged"
         hash="id"
         onModeChange={(mode) => onSearch({ mode: mode === 'slide' ? undefined : mode })}
-        homeHref="/"
+        homeHref="/decks"
         onSearch={() => setPaletteOpen(true)}
         searchOpen={paletteOpen}
         toolbarStatus={
-          <StatusChip
-            revision={snap.serverRevision}
-            state={status}
-            lease={
-              otherLease
-                ? { holder: authorLabel(otherLease.holder), until: otherLease.until }
-                : null
-            }
-            onClick={() => controller.promptVersion(true)}
-          />
+          <>
+            <DeckName
+              title={deck.title}
+              revision={revision}
+              dispatch={controller.invoke}
+              onNotice={controller.say}
+            />
+            <StatusChip
+              revision={snap.serverRevision}
+              state={status}
+              lease={
+                otherLease
+                  ? { holder: authorLabel(otherLease.holder), until: otherLease.until }
+                  : null
+              }
+              onClick={() => controller.promptVersion(true)}
+            />
+          </>
         }
         toolbarSlot={
-          <EditTools
-            edit={editing}
-            onEdit={(on) => onSearch({ edit: on ? undefined : 0 })}
-            twin={twin}
-            onTwin={() => onSearch({ twin: twin ? undefined : 1 })}
-            lint={lintLayer}
-            lintCount={activeFindings.length}
-            onLint={() => onSearch({ lint: lintLayer ? undefined : 1 })}
-            source={src}
-            onSource={() => onSearch({ src: src ? undefined : 1 })}
-          />
+          <>
+            <EditTools
+              edit={editing}
+              onEdit={(on) => onSearch({ edit: on ? undefined : 0 })}
+              twin={twin}
+              onTwin={() => onSearch({ twin: twin ? undefined : 1 })}
+              lint={lintLayer}
+              lintCount={activeFindings.length}
+              onLint={() => onSearch({ lint: lintLayer ? undefined : 1 })}
+              source={src}
+              onSource={() => onSearch({ src: src ? undefined : 1 })}
+            />
+            <ExportMenu
+              open={exportOpen}
+              onOpenChange={(open) => {
+                setExportOpen(open);
+                if (!open && search.export === 1) onSearch({ export: undefined });
+              }}
+              capabilities={capabilities}
+              progress={snap.artifact.progress}
+              onExport={runExport}
+              onGoogleSetup={() => {
+                setExportOpen(false);
+                setSetupOpen(true);
+              }}
+              onBuild={runBuildAction}
+            />
+          </>
         }
         sidebarEdit={
-          editing ? { revision, dispatch: controller.invoke, onNotice: controller.say } : undefined
+          editing
+            ? { revision, dispatch: controller.invoke, onNotice: controller.say, deck }
+            : undefined
         }
         panel={
           editing && slide ? (
@@ -1847,6 +2152,8 @@ function EditorRoot({ payload, search, author, onSearch }: EditorRootProps) {
               lintText={lintText}
               assetUrl={(path) => ASSET_BASE(snap.deckId) + path}
               busy={snap.conflict !== null}
+              createDitherWorker={createDitherWorker}
+              onNotice={controller.say}
             />
           ) : undefined
         }
@@ -1874,6 +2181,7 @@ function EditorRoot({ payload, search, author, onSearch }: EditorRootProps) {
         }
       >
         <ShellBridge controller={controller} editing={editing} />
+        <SessionBridge deckId={snap.deckId} author={author} />
         <EditorStage
           controller={controller}
           snap={snap}
@@ -1891,6 +2199,23 @@ function EditorRoot({ payload, search, author, onSearch }: EditorRootProps) {
         onClose={() => setPaletteOpen(false)}
         onNotice={controller.say}
       />
+      {snap.artifact.run ? (
+        <ExportReportCard
+          run={snap.artifact.run}
+          downloads={capabilities?.downloads ?? true}
+          onDownload={(run, file) => {
+            void controller.downloadArtifact(run, file);
+          }}
+          onClose={controller.clearArtifact}
+        />
+      ) : null}
+      {setupOpen ? (
+        <SetupCard
+          variable={capabilities?.gslides.variable ?? 'TURBOSLIDE_GOOGLE_CREDENTIALS'}
+          onClose={() => setSetupOpen(false)}
+          onNotice={controller.say}
+        />
+      ) : null}
       {snap.conflict ? <ConflictCard controller={controller} conflict={snap.conflict} /> : null}
       {snap.external ? (
         <ExternalRevisionBanner controller={controller} external={snap.external} />
@@ -1900,8 +2225,18 @@ function EditorRoot({ payload, search, author, onSearch }: EditorRootProps) {
 }
 
 /**
+ * Attaches this page to the studio's session registry (server/sessions.ts) so the hosted agent
+ * surface can drive it: deck_goto_slide over /mcp runs in this page through the active owner's
+ * handle (MILESTONES M4 item 1).
+ */
+function SessionBridge({ deckId, author }: { deckId: string; author: Author }) {
+  useStudioSession({ deckId, author: authorLabel(author) });
+  return null;
+}
+
+/**
  * Inside the shell: hands the shell state to the controller, keeps the active slide and the view
- * in step, takes the advisory lease while editing, warms the thumbnails once the sidebar or the
+ * in step, takes the lease while editing (enforced against agent writes from M4), warms the thumbnails once the sidebar or the
  * grid asks for them, and registers the editor and viewer owners on two marker elements whose
  * data-active flags follow the Edit | View seg, so exactly one is active and the handoff fires one
  * ready event (SPEC 7.4).
@@ -2213,12 +2548,12 @@ function ExternalRevisionBanner({
   return (
     <div className="ts-banner ts-chrome" role="status" data-state="external">
       <span>
-        {`Revision r${external.revision}${external.author ? ` by ${authorLabel(external.author)}` : ''} arrived from outside this editor${external.note ? `: ${external.note}` : ''}.`}
+        {`Revision r${external.revision}${external.author ? ` by ${authorLabel(external.author)}` : ''} arrived from outside this editor and is shown${external.note ? `: ${external.note}` : ''}.`}
       </span>
       <button
         type="button"
         className="pt-ib is-text"
-        title="Load the current document; local edits are kept only while they are unsaved"
+        title="Reload the document from the server; unsaved local edits are dropped"
         data-control="external.reload"
         onClick={() => {
           void controller.reload();

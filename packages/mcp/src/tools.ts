@@ -6,6 +6,7 @@
 // answer NotImplementedError. Tool results carry the action output as JSON text, as
 // structuredContent, and for the render actions the images as image content.
 import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
+import { InvalidInputError } from '@turboslide/agent/dispatch';
 import type { ActionId, ActionSpec } from '@turboslide/schema/actions';
 import { actionsOn } from '@turboslide/schema/actions';
 import { ConflictError, NotImplementedError, errorStatus } from '@turboslide/schema/errors';
@@ -251,6 +252,9 @@ export type ToolErrorBody = {
   status: number;
   message: string;
   action: ActionId;
+  /** unknown_field or invalid_input for a refused input (SPEC 11), with the JSON pointer. */
+  code?: 'unknown_field' | 'invalid_input';
+  pointer?: string;
   currentRevision?: number;
   /** The current document, so the caller's re-read is free after a 409. */
   current?: unknown;
@@ -263,6 +267,10 @@ export function toolErrorBody(action: ActionId, error: unknown): ToolErrorBody {
   const message = error instanceof Error ? error.message : String(error);
   const name = error instanceof Error ? error.name : 'Error';
   const body: ToolErrorBody = { name, status: errorStatus(error), message, action };
+  if (error instanceof InvalidInputError) {
+    body.code = error.code;
+    body.pointer = error.pointer;
+  }
   if (error instanceof ConflictError) {
     body.currentRevision = error.currentRevision;
     if (error.current !== undefined) body.current = error.current;

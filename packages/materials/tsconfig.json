@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tooling/tsconfig/node.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node"]
+  },
+  "include": ["src", "vitest.config.ts"],
+  "references": [
+    {
+      "path": "../schema"
+    },
+    {
+      "path": "../effects"
+    },
+    {
+      "path": "../headless"
+    },
+    {
+      "path": "../store"
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "voice",
+  "ext": {
+    "import": {
+      "css": ".ts-x-voice .rules > div { padding: 13px 0; font-size: 19px; line-height: 1.4; gap: 24px; }",
+      "scope": "s09"
+    }
+  },
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Writing style"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Copy has the register of a technical specification. The same five rules apply to the site, the docs, the blog, and every social post.",
+        "measure": 56
+      },
+      {
+        "id": "rows",
+        "ext": {
+          "import": {
+            "classes": [
+              "rules"
+            ]
+          }
+        },
+        "type": "rows",
+        "key": 150,
+        "tight": true,
+        "items": [
+          {
+            "key": "Sentence",
+            "value": "Sentences are short and declarative, and each carries one claim."
+          },
+          {
+            "key": "Evidence",
+            "value": "A number or a mechanism stands where a marketing adjective would."
+          },
+          {
+            "key": "Hedging",
+            "value": "Nothing is hedged. A claim is made or it is left out."
+          },
+          {
+            "key": "Punctuation",
+            "value": "Exclamation marks and em dashes are not used."
+          },
+          {
+            "key": "Case",
+            "value": "Sentence case is used everywhere, and Title Case only on buttons."
+          }
+        ]
+      }
+    ],
+    "right": [
+      {
+        "id": "say",
+        "type": "say",
+        "items": [
+          {
+            "quote": "Translations are generated at build time and deploy with the app.",
+            "note": "Acceptable"
+          },
+          {
+            "quote": "Supercharge your global growth with cutting-edge AI.",
+            "note": "Not acceptable",
+            "no": true
+          },
+          {
+            "quote": "Source code is the source of truth. Every locale ships with the deploy.",
+            "note": "Acceptable"
+          },
+          {
+            "quote": "Unlock global markets with our game-changing localization platform.",
+            "note": "Not acceptable",
+            "no": true
+          }
+        ]
+      }
+    ]
+  }
+}

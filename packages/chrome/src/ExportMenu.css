@@ -1,0 +1,199 @@
+/* The Export menu (SPEC 8, 2.2): the toolbar's ToolButton plus a 336px card under it in the row
+   menu's grammar (Sidebar.css .pt-orow-menu): paper, one --pt-hair frame, 11.5px titanium group
+   heads, 28px rows, --pt-hair-soft rules between the groups. Option rows put the label at the
+   left and a small Seg or a 16px check box at the right, the inspector's check grammar
+   (inspector/check.css). The one solid button is Export PPTX; every other run is a text button.
+   The progress line reads the worker's last log line in 12px with a pulsing dot while a run is
+   in flight. Colors are tokens only, radius 0 apart from the Segs' shell corner, no shadow. */
+.ts-export-anchor {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ts-export {
+  position: fixed;
+  z-index: 30;
+  width: 336px;
+  max-height: calc(100vh - var(--pt-bar-h) - 24px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0 8px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  font: 12.5px/1.4 var(--pt-text);
+  animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
+}
+
+.ts-export-head {
+  padding: 6px 14px 2px;
+  font-size: 11.5px;
+  color: var(--pt-titanium);
+}
+
+.ts-export-rule {
+  display: block;
+  height: 1px;
+  margin: 6px 0;
+  background: var(--pt-hair-soft);
+}
+
+.ts-export-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 30px;
+  padding: 0 14px;
+}
+
+.ts-export-label {
+  color: var(--pt-ink-2);
+  white-space: nowrap;
+}
+
+.ts-export .pt-seg.is-small.ts-export-seg {
+  height: 22px;
+}
+
+.ts-export .pt-seg.is-small.ts-export-seg .pt-ib {
+  width: auto;
+  height: 20px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+/* the check row: the native input stays in the tree, clipped; the 16px box fills ink when on */
+.ts-export-check {
+  position: relative;
+  cursor: pointer;
+}
+
+.ts-export-check input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.ts-export-box {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  flex: 0 0 auto;
+  transition:
+    border-color var(--pt-dur-fast) var(--pt-ease-out),
+    background-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-export-check:hover .ts-export-box {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-export-check input:checked ~ .ts-export-box {
+  background: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+.ts-export-check input:focus-visible ~ .ts-export-box {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-export-actions {
+  display: flex;
+  gap: 8px;
+  padding: 6px 14px 2px;
+}
+
+.ts-export-actions .pt-ib.is-text {
+  border-color: var(--pt-hair);
+}
+
+.ts-export-actions .pt-ib.is-text.is-solid {
+  border-color: var(--pt-ink);
+}
+
+.ts-export-actions .pt-ib:disabled {
+  color: var(--pt-titanium);
+  border-color: var(--pt-hair-soft);
+  cursor: default;
+}
+
+.ts-export-actions .pt-ib.is-solid:disabled {
+  background: var(--pt-hair);
+  border-color: transparent;
+  color: var(--pt-paper);
+}
+
+.ts-export-note {
+  margin: 0;
+  padding: 0 14px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--pt-ink-2);
+}
+
+.ts-export-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 8px 14px 0;
+  border-top: 1px solid var(--pt-hair-soft);
+  font-size: 12px;
+  color: var(--pt-ink-2);
+  min-width: 0;
+}
+
+.ts-export-progress .ts-export-line {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--pt-mono);
+  font-size: 11px;
+  color: var(--pt-titanium);
+}
+
+.ts-export-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  background: var(--pt-ink);
+  animation: ts-export-pulse 1.2s var(--pt-ease-out) infinite alternate;
+}
+
+@keyframes ts-export-pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-export {
+    animation: none;
+  }
+
+  .ts-export-dot {
+    animation: none;
+  }
+
+  .ts-export-box {
+    transition: none;
+  }
+}

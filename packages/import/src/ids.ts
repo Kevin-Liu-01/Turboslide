@@ -47,6 +47,7 @@ const STEMS: Record<BlockType, string> = {
   markSizes: 'sizes',
   matrix: 'matrix',
   logoPlates: 'logos',
+  material: 'material',
   html: 'html',
 };
 
@@ -72,12 +73,21 @@ export class BlockIdAllocator {
   allocate(type: BlockType, path: string): string {
     const key = `${this.sourceFile}#${path}`;
     const remembered = this.previous[key];
+    const stem = STEMS[type];
     if (remembered && !this.used.has(remembered)) {
       this.used.add(remembered);
       this.next[key] = remembered;
+      // A remembered id advances its stem's counter, so the blocks allocated after it continue the
+      // sequence a fresh import would write (h, p1 remembered, then p2, p3), and a re-import of a
+      // slide that gained blocks yields the same import-ids.json as an import into an empty deck
+      // (MILESTONES M5 acceptance: the re-import sidecar equals the committed one).
+      const match = new RegExp(`^${stem}(\\d*)$`).exec(remembered);
+      if (match) {
+        const n = match[1] === '' ? 1 : Number(match[1]);
+        this.counts.set(stem, Math.max(this.counts.get(stem) ?? 0, n));
+      }
       return remembered;
     }
-    const stem = STEMS[type];
     const count = (this.counts.get(stem) ?? 0) + 1;
     this.counts.set(stem, count);
     let id = NUMBERED_FROM_ONE.has(type) || count > 1 ? `${stem}${count}` : stem;

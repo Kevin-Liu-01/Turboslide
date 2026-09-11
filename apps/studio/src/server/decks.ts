@@ -2,8 +2,13 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { createServerFn } from '@tanstack/react-start';
+import type { DeckTemplateId } from '@turboslide/schema/actions';
+import { DECK_TEMPLATES } from '@turboslide/schema/actions';
 import { slideTitle } from '@turboslide/schema/deck';
+import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { validateDeck } from '@turboslide/schema/validate';
+import { createDeck, listDeckHeads } from '@turboslide/store/templates';
+import type { CreateDeckResult } from '@turboslide/store/templates';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { isPictureKind } from '@turboslide/viewer/model';
 
@@ -34,6 +39,7 @@ export type DeckSummary = {
   sections: number;
   revision: number;
   updatedAt: string;
+  createdAt: string;
 };
 
 export type DeckPayload = {
@@ -138,37 +144,47 @@ function buildViewerDeck(
   };
 }
 
-/** Every deck under decks/*, for the deck list (SPEC 3.4: `/` is the deck list). */
+/**
+ * Every deck under decks/* for the deck list at /decks and the landing redirect, newest first
+ * by the updatedAt the store rewrites on every write (templates and folders without a manifest
+ * are skipped; @turboslide/store/templates listDeckHeads).
+ */
 export const listDecks = createServerFn({ method: 'GET' }).handler(
-  async (): Promise<DeckSummary[]> => {
-    const root = join(repoRoot(), 'decks');
-    if (!existsSync(root)) return [];
-    const out: DeckSummary[] = [];
-    for (const entry of readdirSync(root, { withFileTypes: true })) {
-      if (!entry.isDirectory()) continue;
-      const manifestPath = join(root, entry.name, 'deck.json');
-      if (!existsSync(manifestPath)) continue;
-      const manifest = readJson(manifestPath) as {
-        title?: string;
-        sections?: { slideIds: string[] }[];
-        revision?: number;
-        updatedAt?: string;
-      };
-      out.push({
-        id: entry.name,
-        title: manifest.title ?? entry.name,
-        slides: (manifest.sections ?? []).reduce(
-          (sum, section) => sum + section.slideIds.length,
-          0,
-        ),
-        sections: (manifest.sections ?? []).length,
-        revision: manifest.revision ?? 0,
-        updatedAt: manifest.updatedAt ?? '',
-      });
-    }
-    return out.sort((a, b) => a.id.localeCompare(b.id));
-  },
+  async (): Promise<DeckSummary[]> => listDeckHeads(join(repoRoot(), 'decks')),
 );
+
+export type CreateDeckInput = { name: string; from: DeckTemplateId; id?: string };
+
+function isTemplateId(value: unknown): value is DeckTemplateId {
+  return typeof value === 'string' && (DECK_TEMPLATES as ReadonlyArray<string>).includes(value);
+}
+
+/**
+ * deck.create for the studio (the /decks form, the landing redirect with no deck, the editor's
+ * window API): one call into @turboslide/store/templates createDeck, the same function the CLI
+ * and the MCP server run, over the repository's decks/ folder.
+ */
+const createDeckFn = createServerFn({ method: 'POST' })
+  .validator((input: CreateDeckInput): CreateDeckInput => {
+    if (typeof input.name !== 'string' || input.name.trim() === '')
+      throw new TypeError('name must be a non-empty string');
+    if (!isTemplateId(input.from))
+      throw new TypeError(`from must be one of ${DECK_TEMPLATES.join(', ')}`);
+    if (input.id !== undefined && (typeof input.id !== 'string' || !SLUG_PATTERN.test(input.id)))
+      throw new TypeError('id must be a slug');
+    return {
+      name: input.name,
+      from: input.from,
+      ...(input.id !== undefined ? { id: input.id } : {}),
+    };
+  })
+  .handler(async ({ data }): Promise<CreateDeckResult> =>
+    createDeck(join(repoRoot(), 'decks'), data),
+  );
+
+export async function createNewDeck(input: CreateDeckInput): Promise<CreateDeckResult> {
+  return createDeckFn({ data: input });
+}
 
 export type GetDeckInput = { deckId: string; theme?: 'light' | 'dark' };
 

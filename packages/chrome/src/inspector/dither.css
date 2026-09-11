@@ -1,0 +1,80 @@
+/* The dither tool (SPEC 6.5, 2.2): the two twins side by side in --pt-edge frames with the
+   plate rectangle dashed in titanium over them, the theme word under each, the metrics as a
+   two-column list, then the generated treatment rows (InspectorControl.css draws them) and the
+   two buttons. No line of its own beyond the frames; the rows own their rules. */
+.ts-dither {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 0 8px;
+}
+
+.ts-dither-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ts-dither-preview figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-dither-preview canvas,
+.ts-dither-preview img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-plate);
+  image-rendering: auto;
+}
+
+.ts-dither-preview figcaption {
+  font-size: 11px;
+  color: var(--pt-titanium);
+}
+
+.ts-dither-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--pt-ink-2);
+}
+
+.ts-dither-metrics {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 2px 10px;
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.ts-dither-metrics dt {
+  color: var(--pt-titanium);
+}
+
+.ts-dither-metrics dd {
+  margin: 0;
+  color: var(--pt-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-dither-warnings {
+  margin: 0;
+  padding: 0 0 0 14px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--pt-ink-2);
+}
+
+.ts-dither-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+}

@@ -5,8 +5,9 @@
 import type { Diagram, Finding, Mutation } from '../contracts.ts';
 import type { LintContext } from '../context.ts';
 import { slotWidths } from '../context.ts';
+import { LABEL_CLEARANCE, labelClearance } from '@turboslide/render/dia/snap';
 
-export const LABEL_CLEARANCE_PX = 12;
+export const LABEL_CLEARANCE_PX = LABEL_CLEARANCE;
 const ALLOWED_FILLS = new Set([
   'none',
   'var(--ink)',
@@ -16,36 +17,6 @@ const ALLOWED_FILLS = new Set([
   'inherit',
 ]);
 
-/** Approximate Inter width: 0.52 em per character at weight 400 to 500 (report 03 section 4.7 labels). */
-function labelBox(t: Diagram['texts'][number]): [number, number, number, number] {
-  const w = t.text.length * t.size * 0.52;
-  const x = t.anchor === 'middle' ? t.x - w / 2 : t.anchor === 'end' ? t.x - w : t.x;
-  return [x, t.y - t.size * 0.75, w, t.size];
-}
-
-/** Distance from a box to a segment, 0 when they intersect. */
-function boxToSegment(
-  box: [number, number, number, number],
-  x1: number,
-  y1: number,
-  x2: number,
-  y2: number,
-): number {
-  const [bx, by, bw, bh] = box;
-  const steps = 16;
-  let best = Number.POSITIVE_INFINITY;
-  for (let i = 0; i <= steps; i += 1) {
-    const t = i / steps;
-    const px = x1 + (x2 - x1) * t;
-    const py = y1 + (y2 - y1) * t;
-    const dx = px < bx ? bx - px : px > bx + bw ? px - (bx + bw) : 0;
-    const dy = py < by ? by - py : py > by + bh ? py - (by + bh) : 0;
-    const d = Math.hypot(dx, dy);
-    if (d < best) best = d;
-  }
-  return best;
-}
-
 export function checkDia(ctx: LintContext): Finding[] {
   const out: Finding[] = [];
   for (const slide of ctx.slideList()) {
@@ -54,8 +25,17 @@ export function checkDia(ctx: LintContext): Finding[] {
       const { block } = ref;
       if (block.type !== 'dia') continue;
       const base = { blockId: block.id };
-      if (typeof block.fit === 'object') {
-        const slotWidth = widths[ref.slot];
+      // An icon seat (a diagram of icons and marks alone, the closed lock of slide 83) has no
+      // stroke or label to keep on the pixel grid; its viewBox scales the glyph and stays.
+      const seat =
+        block.data !== undefined &&
+        block.data.lines.length === 0 &&
+        block.data.rects.length === 0 &&
+        block.data.texts.length === 0 &&
+        (block.data.polygons?.length ?? 0) === 0;
+      if (typeof block.fit === 'object' && !seat) {
+        // a nested diagram's slot is its composite cell (M5); a content-sized cell has no width
+        const slotWidth = ref.parent !== undefined ? ref.width : widths[ref.slot];
         if (slotWidth !== undefined && Math.abs(block.fit.viewBox[2] - slotWidth) > 0.5) {
           out.push(
             ctx.finding('dia/fit-slot', slide.id, {
@@ -93,6 +73,30 @@ function checkDeclared(
 ): void {
   const fixes: Mutation[] = [];
   const offenders: string[] = [];
+  data.rects.forEach((rect, i) => {
+    // a stroked rect draws 1 px edges: its corner sits on the half pixel like a line (s25:52)
+    if (!rect.stroke) return;
+    if (Number.isInteger(rect.x)) {
+      offenders.push(`rect ${i} x ${rect.x}`);
+      fixes.push({
+        op: 'block.set',
+        slideId,
+        blockId,
+        path: `/data/rects/${i}/x`,
+        value: rect.x + 0.5,
+      });
+    }
+    if (Number.isInteger(rect.y)) {
+      offenders.push(`rect ${i} y ${rect.y}`);
+      fixes.push({
+        op: 'block.set',
+        slideId,
+        blockId,
+        path: `/data/rects/${i}/y`,
+        value: rect.y + 0.5,
+      });
+    }
+  });
   data.lines.forEach((line, i) => {
     // width is 1 or 1.5 by schema (DECK-GRAMMAR.md:44); the raw svg check covers other values
     const width = line.width ?? 1;
@@ -126,21 +130,9 @@ function checkDeclared(
     );
   }
   data.texts.forEach((t, i) => {
-    const box = labelBox(t);
-    let nearest = Number.POSITIVE_INFINITY;
-    for (const line of data.lines)
-      nearest = Math.min(nearest, boxToSegment(box, line.x1, line.y1, line.x2, line.y2));
-    for (const rect of data.rects) {
-      if (rect.stroke) {
-        nearest = Math.min(
-          nearest,
-          boxToSegment(box, rect.x, rect.y, rect.x + rect.w, rect.y),
-          boxToSegment(box, rect.x, rect.y + rect.h, rect.x + rect.w, rect.y + rect.h),
-          boxToSegment(box, rect.x, rect.y, rect.x, rect.y + rect.h),
-          boxToSegment(box, rect.x + rect.w, rect.y, rect.x + rect.w, rect.y + rect.h),
-        );
-      }
-    }
+    // the clearance the editor shows live during an Alt-drag is this one arithmetic
+    // (render/dia/snap.ts): strokes of lines, stroked rects and polygons, and the marker squares
+    const { box, nearest } = labelClearance(data, i);
     if (nearest < LABEL_CLEARANCE_PX) {
       out.push(
         ctx.finding('dia/label-clearance', slideId, {

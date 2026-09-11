@@ -35,6 +35,18 @@ export type SceneRun = {
   style: SceneStyle;
   /** The run is the hidden letters under a GT mark; the mark itself is a raster (SPEC 5.2). */
   gt?: true;
+  /**
+   * The width the letters take in the host font at 1x, measured in the page; the exporter spaces
+   * the invisible run down to the mark's box so the text after the mark keeps its position.
+   */
+  gtLetters?: number;
+  /**
+   * A horizontal gap after the run in sheet px, left by an inline element that is not text (the
+   * external glyph after a link), with the width of a no-break space in the run's font; the
+   * exporter fills it with an invisible spaced run so the following text keeps its position.
+   */
+  gapAfter?: number;
+  spaceWidth?: number;
 };
 
 export type SceneLine = {
@@ -104,7 +116,11 @@ export type SceneRaster = {
   alpha: boolean;
   /** The PNG path, filled in by the extractor. */
   file?: string;
-  scale: 2;
+  /**
+   * Device pixels per sheet pixel of the PNG: 3 for icons and marks, 1 for diagrams and the
+   * language specimen, 2 for everything else under the `auto` policy (SPEC 8.6; extract.ts).
+   */
+  scale: 1 | 2 | 3;
   /**
    * The element itself has no box (an escape root whose markup is absolutely positioned), so the
    * box is the union of its descendants and the extractor screenshots that clip of the page.

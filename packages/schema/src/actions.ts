@@ -5,9 +5,17 @@
 // not_implemented (HTTP 501) for those (MILESTONES M1 item 3). Every mutating action takes
 // baseRevision and rejects a stale one with 409 and the current document.
 import { z } from 'zod';
-import { assetSchema, assetSourceSchema, assetTreatmentSchema, ASSET_ROLES } from './assets.ts';
+import {
+  assetMetricsSchema,
+  assetSchema,
+  assetSourceSchema,
+  assetTreatmentSchema,
+  assetTwinsSchema,
+  ASSET_ROLES,
+} from './assets.ts';
 import { blockSchema } from './blocks.ts';
-import { sectionSchema, slideSchema, SLIDE_KINDS, SLOT_NAMES } from './deck.ts';
+import { materialCatalogEntrySchema, materialUniformsSchema } from './blocks/material.ts';
+import { PLATE_SIDES, sectionSchema, slideSchema, SLIDE_KINDS, SLOT_NAMES } from './deck.ts';
 import { exportReportSchema } from './export.ts';
 import { findingSchema } from './findings.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
@@ -61,6 +69,8 @@ export type ActionSpec = {
 
 export const ACTION_IDS = [
   'deck.info',
+  'deck.create',
+  'deck.rename',
   'slide.list',
   'slide.get',
   'slide.insert',
@@ -78,6 +88,7 @@ export const ACTION_IDS = [
   'asset.dither',
   'asset.capture',
   'material.capture',
+  'material.list',
   'render.slide',
   'render.sheet',
   'lint.run',
@@ -163,6 +174,56 @@ export const viewStateSchema = z.strictObject({
 
 const empty = z.strictObject({});
 
+const plateSide = z
+  .enum(PLATE_SIDES)
+  .describe('The plate rectangle the metrics are screened against');
+
+/**
+ * The two-tone parameters a capture or an intake takes before the pipeline fills the fixed
+ * fields (kind, autocontrast 0.5, cell 2, bayer 8, lanczos3) and the crop default of the whole
+ * source; every field is optional so `--black 24` alone is a complete request (SPEC 5.4).
+ */
+export const twoToneParamsSchema = z.strictObject({
+  crop: z
+    .tuple([z.number(), z.number(), z.number(), z.number()])
+    .optional()
+    .describe('Left, top, right, bottom in source pixels; may reach past the source'),
+  channel: z.enum(['gray', 'r', 'g', 'b']).optional(),
+  invert: z.boolean().optional(),
+  blur: z.number().nonnegative().optional(),
+  black: z.number().min(0).max(255).optional(),
+  white: z.number().min(0).max(255).optional(),
+  gamma: z.number().positive().optional(),
+  minFilter: z.number().positive().optional(),
+  polarity: z.enum(['dark-ground', 'light-ground']).optional(),
+});
+
+/** One asset's dither report: the twins, the metrics and the verification counts. */
+export const ditherResultSchema = z.strictObject({
+  assetId: slugSchema,
+  twins: assetTwinsSchema,
+  metrics: assetMetricsSchema.optional(),
+  /** Cells of a screen regenerated from the source that differ from the committed dark twin. */
+  mismatchedCells: z.number().int().nonnegative().optional(),
+  /** Cells where the committed light twin is not the inverse of the dark one. */
+  twinInverseMismatch: z.number().int().nonnegative().optional(),
+  /** The recorded treatment lacks a parameter the pipeline needs, so it could not be re-run. */
+  missingParameter: z.boolean().optional(),
+  /** No continuous source is on disk (sourceFile absent), so the cells were not re-run. */
+  missingSource: z.boolean().optional(),
+  /** The committed twin files are not on disk, so nothing was read back. */
+  missingTwins: z.boolean().optional(),
+  /** Files written under assets/, relative to the deck directory. */
+  written: z.array(z.string()),
+});
+
+/**
+ * What deck.create starts from: the GT brand template record under decks/templates/gt-brand
+ * (the deck's manifest and slides with a template.json naming it), or one title slide.
+ */
+export const DECK_TEMPLATES = ['gt-brand', 'blank'] as const;
+export type DeckTemplateId = (typeof DECK_TEMPLATES)[number];
+
 const A = ALL_TRANSPORTS;
 const noWindow: ReadonlyArray<Transport> = ['cli', 'mcp', 'http'];
 
@@ -199,6 +260,55 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     cli: { usage: 'turboslide info' },
     mcp: 'deck_get_info',
     example: {},
+  }),
+  'deck.create': action({
+    id: 'deck.create',
+    label: 'New deck',
+    doc: 'Creates a deck under decks/ from the GT brand template or as one title slide, and returns its id, revision and counts.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'M4',
+    input: z.strictObject({
+      name: z.string().min(1).describe('The deck title; the id is its slug unless `id` is given'),
+      from: z
+        .enum(DECK_TEMPLATES)
+        .describe(
+          "'gt-brand' copies decks/templates/gt-brand (85 slides, 8 sections, the assets); 'blank' writes one title slide",
+        ),
+      id: slugSchema
+        .optional()
+        .describe('The deck id under decks/; derived from the name when absent'),
+    }),
+    output: z.strictObject({
+      deckId: slugSchema,
+      title: z.string(),
+      from: z.enum(DECK_TEMPLATES),
+      revision,
+      dir: z.string().describe('The deck directory'),
+      counts: z.strictObject({
+        slides: z.number().int().nonnegative(),
+        sections: z.number().int().nonnegative(),
+        assets: z.number().int().nonnegative(),
+      }),
+    }),
+    cli: { usage: 'turboslide deck create <name> --from <from> --id <id>' },
+    mcp: 'deck_create',
+    example: { name: 'Q4 review', from: 'gt-brand' },
+  }),
+  'deck.rename': action({
+    id: 'deck.rename',
+    label: 'Rename deck',
+    doc: 'Sets the deck title, the name the sidebar head, the toolbar and the deck list show; one deck.set of /title.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'M4',
+    input: z.strictObject({ name: z.string().min(1).describe('The new title'), baseRevision }),
+    output: z.strictObject({ title: z.string(), revision }),
+    cli: { usage: 'turboslide deck rename <name>' },
+    mcp: 'deck_rename',
+    example: { name: 'GT brand deck, Q4', baseRevision: 412 },
   }),
   'slide.list': action({
     id: 'slide.list',
@@ -476,60 +586,108 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'asset.add': action({
     id: 'asset.add',
     label: 'Add asset',
-    doc: 'Adds a file or URL as an asset with its role, alt, source and optional treatment; returns twins and metrics.',
+    doc: 'Adds a file, a data URL or a fetched URL as an asset with its role, alt, license fields and optional two-tone treatment; returns the asset with twins and metrics.',
     group: 'asset',
     mutates: true,
     transports: A,
     milestone: 'M5',
     input: z.strictObject({
-      file: z.string().optional(),
-      url: z.string().url().optional(),
+      id: slugSchema.optional().describe('The asset id; a slug of the file name when omitted'),
+      file: z
+        .string()
+        .optional()
+        .describe('A path on the machine, or a data: URL from the studio’s drop or paste'),
+      url: z.string().url().optional().describe('An http(s) URL to fetch, 25 MB at most'),
       role: z.enum(ASSET_ROLES),
       alt: z.string().min(1),
-      source: assetSourceSchema,
-      treatment: assetTreatmentSchema.optional(),
-      credit: z.string().optional(),
+      source: assetSourceSchema
+        .optional()
+        .describe(
+          'The provenance record; built from title, artist, license and sourceUrl when omitted',
+        ),
+      title: z.string().optional().describe('The picture’s name as the source states it'),
+      artist: z.string().optional(),
+      license: z
+        .string()
+        .optional()
+        .describe('CC0, CC BY, CC BY-SA 4.0, public domain, or the text'),
+      shareAlike: z
+        .boolean()
+        .optional()
+        .describe('The license is share-alike: the credit must appear on the plate'),
+      sourceUrl: z.string().url().optional().describe('Where the picture came from'),
+      credit: z
+        .string()
+        .optional()
+        .describe('The plate credit; composed from artist and license when omitted'),
+      twoTone: z
+        .boolean()
+        .optional()
+        .describe('Run the two-tone pipeline; the source is kept as assets/<id>.source.<ext>'),
+      treatment: twoToneParamsSchema.optional(),
+      plate: plateSide.optional(),
       baseRevision,
     }),
     output: assetSchema,
-    cli: { usage: 'turboslide asset add <file> --role <role> --two-tone --black <black>' },
+    cli: {
+      usage:
+        'turboslide asset add <file> --role <role> --alt <alt> --two-tone --black <black> --plate <plate>',
+    },
     mcp: 'deck_asset_add',
     example: {
       file: 'photo.jpg',
       role: 'mood',
       alt: 'A photograph',
-      source: { kind: 'photo', origin: 'Wikimedia Commons', license: 'CC BY', shareAlike: false },
+      artist: 'Hans Hillewaert',
+      license: 'CC BY-SA 4.0',
+      shareAlike: true,
+      sourceUrl: 'https://commons.wikimedia.org/wiki/File:Rosetta_Stone.JPG',
+      twoTone: true,
+      treatment: { black: 140, white: 230, gamma: 0.9 },
+      plate: 'lower-right',
       baseRevision: 412,
     },
   }),
   'asset.dither': action({
     id: 'asset.dither',
     label: 'Dither asset',
-    doc: 'Re-runs the two-tone pipeline on an asset with new parameters and reports plate clearance.',
+    doc: 'Re-runs the two-tone pipeline on an asset with new parameters and reports plate clearance; with fromRecorded it reads the committed twins back and verifies them cell for cell.',
     group: 'asset',
     mutates: true,
     transports: A,
     milestone: 'M5',
     input: z.strictObject({
-      assetId: slugSchema,
-      treatment: assetTreatmentSchema,
-      plate: z.enum(['lower-left', 'lower-right', 'upper-left']).optional(),
+      assetId: slugSchema.optional().describe('Required unless allTwoTone'),
+      treatment: assetTreatmentSchema
+        .optional()
+        .describe(
+          'The full treatment to run; the recorded one with the params merged when omitted',
+        ),
+      params: twoToneParamsSchema
+        .optional()
+        .describe('Parameters merged over the recorded treatment (--gamma, --black on the CLI)'),
+      plate: plateSide.optional(),
+      source: z.string().optional().describe('The continuous source when the asset records none'),
+      allTwoTone: z.boolean().optional().describe('Every asset with a two-tone treatment'),
+      fromRecorded: z
+        .boolean()
+        .optional()
+        .describe('Read the committed twins back instead of regenerating; metrics are recomputed'),
+      verifyCells: z
+        .boolean()
+        .optional()
+        .describe('Regenerate from the source where one exists and count the cells that differ'),
       baseRevision,
     }),
-    output: z.strictObject({ twins: assetSchema.shape.twins, metrics: assetSchema.shape.metrics }),
-    cli: { usage: 'turboslide asset dither <assetId> --gamma <gamma> --plate <plate>' },
+    output: z.union([ditherResultSchema, z.array(ditherResultSchema)]),
+    cli: {
+      usage:
+        'turboslide asset dither <assetId> --gamma <gamma> --plate <plate> --all-two-tone --from-recorded --verify-cells',
+    },
     mcp: 'deck_asset_dither',
     example: {
       assetId: 'mood-earth',
-      treatment: {
-        kind: 'two-tone',
-        crop: [0, 0, 1600, 900],
-        autocontrast: 0.5,
-        polarity: 'dark-ground',
-        cell: 2,
-        bayer: 8,
-        resampler: 'lanczos3',
-      },
+      params: { gamma: 1.1 },
       plate: 'lower-right',
       baseRevision: 412,
     },
@@ -537,26 +695,51 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'asset.capture': action({
     id: 'asset.capture',
     label: 'Capture page',
-    doc: 'Captures a page at 1440 by 900 in one or both themes, optionally cropped to a region.',
+    doc: 'Captures a page at 1440 by 900 in one or both themes through a per-site recipe, optionally cropped to a region, with identical-region 2x detail crops as further assets.',
     group: 'asset',
     mutates: true,
     transports: noWindow,
     milestone: 'M5',
     input: z.strictObject({
       url: z.string().url(),
+      id: slugSchema.optional().describe('The asset id; a slug of the URL when omitted'),
+      alt: z.string().optional(),
+      role: z.enum(['capture', 'detail']).optional(),
       viewport: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
       scale: z.literal([1, 2]).optional(),
       theme: z.enum(['light', 'dark', 'both']),
-      region: z.tuple([z.number(), z.number(), z.number(), z.number()]).optional(),
-      recipe: z.string(),
+      region: z
+        .tuple([z.number(), z.number(), z.number(), z.number()])
+        .optional()
+        .describe(
+          'A CSS-pixel box x, y, w, h inside the page; both twins take the identical region',
+        ),
+      details: z
+        .array(z.tuple([z.number(), z.number(), z.number(), z.number()]))
+        .optional()
+        .describe('Identical-region detail crops, one asset each as <id>-detail-<n>'),
+      recipe: z.string().optional().describe('The per-site recipe; gt-site by default'),
+      settleMs: z.number().int().nonnegative().optional(),
+      format: z
+        .enum(['jpg', 'png'])
+        .optional()
+        .describe('The twin file format; jpg at quality 92 by default'),
+      allowHosts: z
+        .array(z.string())
+        .optional()
+        .describe('Hosts beyond the built-in allowlist (SPEC 11 captureHosts)'),
       baseRevision,
     }),
     output: assetSchema,
-    cli: { usage: 'turboslide asset capture <url> --theme <theme> --region <region>' },
+    cli: {
+      usage:
+        'turboslide asset capture <url> --theme <theme> --scale <scale> --recipe <recipe> --region <region>',
+    },
     mcp: 'deck_asset_capture',
     example: {
       url: 'https://generaltranslation.com/',
       theme: 'both',
+      scale: 2,
       recipe: 'gt-site',
       baseRevision: 412,
     },
@@ -564,27 +747,58 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'material.capture': action({
     id: 'material.capture',
     label: 'Capture material',
-    doc: 'Renders a shader material at 3200 by 1800 and captures frames at the given anchors as assets with recipe keys.',
+    doc: 'Renders a shader material at 3200 by 1800 and captures frozen frames at the given anchors as assets with recipe keys, through the two-tone screen when asked; one anchor returns the asset, several the list.',
     group: 'asset',
     mutates: true,
     transports: A,
     milestone: 'M5',
     input: z.strictObject({
       materialId: z.string().min(1),
-      uniforms: z.record(z.string(), z.union([z.number(), z.array(z.number()), z.string()])),
+      preset: z
+        .string()
+        .optional()
+        .describe('A palette preset of the material, under the uniforms'),
+      uniforms: materialUniformsSchema.optional(),
       size: z.tuple([z.number().int().positive(), z.number().int().positive()]).optional(),
       anchors: z.array(z.number().nonnegative()).min(1).describe('Frame times in ms'),
+      id: slugSchema.optional().describe('The asset id; <id>-<anchor> per anchor when several'),
+      role: z.enum(['opener', 'mood', 'frame']).optional(),
+      alt: z.string().optional(),
+      twoTone: z.boolean().optional(),
+      treatment: twoToneParamsSchema.optional(),
+      plate: plateSide.optional(),
+      backend: z.enum(['angle-metal', 'swiftshader']).optional(),
       baseRevision,
     }),
-    output: z.array(assetSchema),
-    cli: { usage: 'turboslide material capture <materialId> --anchor <anchors>' },
+    output: z.union([assetSchema, z.array(assetSchema)]),
+    cli: {
+      usage:
+        'turboslide material capture <materialId> --preset <preset> --uniforms <uniforms> --anchor <anchors> --two-tone --plate <plate>',
+    },
     mcp: 'deck_material_capture',
     example: {
       materialId: 'paper:liquid-metal',
-      uniforms: { u_scale: 1 },
-      anchors: [4000, 5500, 7000],
+      preset: 'diamond',
+      anchors: [5500],
+      twoTone: true,
+      treatment: { crop: [-1325, 105, 2709, 2374], black: 20 },
+      plate: 'lower-left',
       baseRevision: 412,
     },
+  }),
+  'material.list': action({
+    id: 'material.list',
+    label: 'List materials',
+    doc: 'The material catalog: every paper:* entry with its uniform schema and palette presets, and the proto:* engines with their availability.',
+    group: 'asset',
+    mutates: false,
+    transports: A,
+    milestone: 'M5',
+    input: z.strictObject({ materialId: z.string().optional() }),
+    output: z.array(materialCatalogEntrySchema),
+    cli: { usage: 'turboslide material list' },
+    mcp: 'deck_material_list',
+    example: {},
   }),
   'render.slide': action({
     id: 'render.slide',
@@ -858,7 +1072,22 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .enum(['exact', 'standard'])
         .optional()
         .describe('The export font set (SPEC 8.4); defaults to exact'),
-      headings: z.literal('raster').optional(),
+      headings: z
+        .literal('raster')
+        .optional()
+        .describe('Write every heading as a PNG instead of a text box (SPEC 8.3)'),
+      rasterScale: z
+        .union([z.literal('auto'), z.literal(2), z.literal(3)])
+        .optional()
+        .describe(
+          'Device pixels per sheet pixel of the raster PNGs: auto (3x icons and marks, 2x the rest), 2 or 3 (SPEC 8.6)',
+        ),
+      pictureScale: z
+        .literal([2, 3])
+        .optional()
+        .describe(
+          'The scale two-tone pictures are regenerated at from the one-bit image (SPEC 8.2)',
+        ),
       excludeShareAlike: z
         .boolean()
         .optional()
@@ -872,13 +1101,19 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
           'The renderer whose measured first-baseline constant offsets native text boxes (calibration.json); defaults to libreoffice, the verify renderer',
         ),
       verify: z.boolean().optional(),
+      dryRun: z
+        .boolean()
+        .optional()
+        .describe(
+          'Google Slides: build and validate the batchUpdate requests without credentials and write requests.json; no presentation is created (SPEC 8.3)',
+        ),
       slideIds: slideIdsOrAll.optional().describe("A subset to export; defaults to 'all'"),
       out: z.string().optional().describe('Output directory; defaults to .turboslide/export'),
     }),
     output: exportReportSchema,
     cli: {
       usage:
-        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --exclude-share-alike --baseline-target <baseline> --verify --out <out>',
+        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --exclude-share-alike --baseline-target <baseline> --verify --dry-run --out <out>',
     },
     mcp: 'deck_export',
     example: { format: 'pptx', mode: 'flatten', theme: ['light'], fonts: 'exact', verify: true },

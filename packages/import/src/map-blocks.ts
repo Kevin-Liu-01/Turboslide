@@ -19,6 +19,19 @@ import {
   textOf,
 } from './dom.ts';
 import type { ChildNode, Element } from './dom.ts';
+import {
+  bareImage,
+  compositeCandidate,
+  compositeFigure,
+  consumeDiaWidth,
+  consumePlain20Rules,
+  consumeShotImageRules,
+  iconDiagram,
+  isCompositeFigure,
+  isStandaloneIcon,
+  lowerHeading,
+  rowMinHeight,
+} from './composite.ts';
 import { addResidualClasses, addResidualStyle, newBlock, pxIn, Unmapped } from './map-context.ts';
 import type { MapContext } from './map-context.ts';
 import { textOfElement, textOfNodes } from './text.ts';
@@ -176,16 +189,21 @@ export function mapElement(ctx: MapContext, el: Element, path: string): Block[] 
   if (hasClass(el, 'ladder')) return [ladder(ctx, el, path)];
   if (hasClass(el, 'swatches')) return [swatches(ctx, el, path)];
   if (hasClass(el, 'shot-wrap')) return shotWrap(ctx, el, path);
-  if (tag === 'figure') return [shot(ctx, el, path)];
+  if (tag === 'figure')
+    return [isCompositeFigure(el) ? compositeFigure(ctx, el, path, mapNode) : shot(ctx, el, path)];
   if (tag === 'img' && hasClass(el, 'shot')) return [shotImage(ctx, el, path, undefined)];
+  if (tag === 'img') return [bareImage(ctx, el, path)];
   if (hasClass(el, 'crop')) return [cropShot(ctx, el, path)];
   if (tag === 'svg' && hasClass(el, 'dia')) return [dia(ctx, el, path)];
+  if (isStandaloneIcon(el))
+    return [iconDiagram(ctx, el, path, (block, classes) => ctx.sourceClasses.set(block, classes))];
   if (
     tag === 'svg' &&
     find(el, (e) => e.tagName === 'use' && (attr(e, 'href') ?? '') === '#gt-mark')
   ) {
     return [mark(ctx, el, path)];
   }
+  if (/^h[3-6]$/.test(tag)) return [lowerHeading(ctx, el, path)];
   if (tag === 'canvas' && hasClass(el, 'dither')) return [dither(ctx, el, path)];
   if (hasClass(el, 'panel')) return [panel(ctx, el, path)];
   if (hasClass(el, 'pair') || hasClass(el, 'mats')) return [pair(ctx, el, path)];
@@ -198,7 +216,21 @@ export function mapElement(ctx: MapContext, el: Element, path: string): Block[] 
   if (hasClass(el, 'key') || hasClass(el, 'strips') || hasClass(el, 'stack'))
     return [columnGroup(ctx, el, path)];
   if (tag === 'div' && cls.length === 0) return [plainDiv(ctx, el, path)];
+  // A div or span the grammar names no block for: a grid, a stack or a text element by its scoped
+  // rules (composite.ts), the M5 path that retired the last html escapes.
+  if (tag === 'div' || tag === 'span')
+    return [compositeCandidate(ctx, el, path, mapNode, keepSourceClasses(ctx))];
   throw new Unmapped(`no block for <${tag}${cls.length ? ` class="${cls.join(' ')}"` : ''}>`, el);
+}
+
+/** One child node to its blocks, the callback the composite mappers recurse through. */
+function mapNode(ctx: MapContext, node: ChildNode, path: string): Block[] {
+  return mapBlocks(ctx, [node], path);
+}
+
+/** Keeps an element's non-grammar classes on the block so residual rules can target them. */
+function keepSourceClasses(ctx: MapContext): (block: Block, el: Element) => void {
+  return (block, el) => ctx.sourceClasses.set(block, extraClasses(el));
 }
 
 function heading(
@@ -284,6 +316,8 @@ function rows(ctx: MapContext, el: Element, path: string): Block {
     const mh = pxNumber(rowStyle.get('min-height'));
     if (mh !== undefined) minRowHeight = mh;
   }
+  // s25:7 `.rules .rows > div { min-height: 79px }`: the row height a scoped rule forces
+  if (minRowHeight === undefined) minRowHeight = rowMinHeight(ctx, el);
   const block = newBlock(ctx, 'rows', path, {
     key,
     ...(hasClass(el, 'tight') ? { tight: true } : {}),
@@ -329,6 +363,11 @@ function say(ctx: MapContext, el: Element, path: string): Block {
 function plain(ctx: MapContext, el: Element, path: string): Block {
   const size = pxIn(take(ctx.sheet, 'SCOPE .plain', 'font-size'), [24, 22, 20] as const);
   if (size === 22) take(ctx.sheet, 'SCOPE .plain', 'line-height');
+  if (size === 20) {
+    // s84:8-11: the 20 px list restates the renderer's row and icon rules (block-css .plain-20)
+    take(ctx.sheet, 'SCOPE .plain', 'line-height');
+    consumePlain20Rules(ctx);
+  }
   const items: BlockOf<'plain'>['items'] = [];
   for (const span of children(el)) {
     const iconSvg = children(span).find((c) => c.tagName === 'svg' && hasClass(c, 'ic'));
@@ -555,8 +594,9 @@ function shotImage(
   if (width !== undefined) body.width = width;
   take(ctx.sheet, 'SCOPE figure img', 'height');
   if (!hasClass(img, 'shot')) {
-    // A figure image without the class (s39:5) takes the shot's border and plate from its own
-    // rule; the renderer writes the class, so the matching declarations are consumed.
+    // A figure image without the class (s39:5, s67:7, s84:15) takes the shot's border and plate
+    // from its own rule; the renderer writes the class, so the matching declarations are consumed.
+    consumeShotImageRules(ctx, img);
     for (const key of ['SCOPE figure img', 'SCOPE img']) {
       const border = take(ctx.sheet, key, 'border');
       if (border && !/1px solid var\(--hair\)/.test(border))
@@ -593,6 +633,7 @@ function cropShot(ctx: MapContext, el: Element, path: string): Block {
 function dia(ctx: MapContext, el: Element, path: string): Block {
   const style = parseStyle(attr(el, 'style'));
   removeAttr(el, 'style');
+  consumeDiaWidth(ctx, el);
   const viewBox = (attr(el, 'viewBox') ?? '')
     .trim()
     .split(/[\s,]+/)
@@ -978,7 +1019,8 @@ function plainDiv(ctx: MapContext, el: Element, path: string): Block {
     addResidualStyle(ctx, block, style);
     return block;
   }
-  throw new Unmapped('a plain div the grammar does not name', el);
+  // a classless div of blocks (s83:26-40, the halves of the two grid) or a grid by its rules
+  return compositeCandidate(ctx, el, path, mapNode, keepSourceClasses(ctx));
 }
 
 export { addResidualClasses, extraClasses };

@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "ladder",
+  "ext": {
+    "import": {
+      "css": ".ts-x-ladder .ladder > div:nth-child(1) { letter-spacing: -0.038em; }",
+      "scope": "s17"
+    }
+  },
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "5/7",
+      "align": "baseline"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Type scale"
+      }
+    ],
+    "headRight": [
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "Each page uses one type scale. Headings use weight 500 with negative letter-spacing. On desktop the hero headline scales with the viewport up to 3.7rem. The accent color is never applied to a heading; emphasis is a doubled underline in the text color. Below 720px the hero is fixed at 2.5rem and every other size comes from the token ladder shown here."
+      }
+    ],
+    "body": [
+      {
+        "id": "ladder",
+        "type": "ladder",
+        "rows": [
+          {
+            "size": 68,
+            "label": "hero 3.7rem desktop, 2.5rem below 720px"
+          },
+          {
+            "size": 42,
+            "label": "heading 2.25rem / 1.18"
+          },
+          {
+            "size": 26,
+            "label": "subheading 1.375rem / 1.3"
+          },
+          {
+            "size": 21,
+            "label": "title 1.125rem / 1.35"
+          },
+          {
+            "size": 20,
+            "label": "lead 17px / 1.55"
+          },
+          {
+            "size": 19,
+            "label": "body 16px / 1.6"
+          },
+          {
+            "size": 16,
+            "label": "small 14px / 1.55"
+          },
+          {
+            "size": 15,
+            "label": "label 13px"
+          }
+        ],
+        "valueWidth": 320
+      }
+    ]
+  }
+}

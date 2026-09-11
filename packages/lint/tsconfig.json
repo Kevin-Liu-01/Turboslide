@@ -11,6 +11,9 @@
     },
     {
       "path": "../render"
+    },
+    {
+      "path": "../effects"
     }
   ]
 }

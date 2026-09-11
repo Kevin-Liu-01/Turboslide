@@ -9,13 +9,18 @@ import './Seg.css';
 /**
  * The segmented control, ported from Prototemplate/src/components/viewer/Seg.tsx
  * (SPEC 2.2: role group, one shared indicator span moved with translateX and
- * scaleX, the active option's text in paper, clicking the active non-first
- * option returns to the first). A ruled group of ToolButtons with one active
- * option, generic over its value type so it serves the view modes, the
- * sidebar's density toggle and the editor's Edit | View pair (SPEC 6.3). A
- * click lets go of focus afterwards: the reader's attention moves to the
- * stage, and a focus ring left on the clicked option would read as a second
- * selection.
+ * scaleX, the active option's text in paper). A ruled group of ToolButtons
+ * with one active option, generic over its value type so it serves the view
+ * modes, the sidebar's density toggle, the editor's Edit | View pair (SPEC
+ * 6.3), the Export menu's options and the inspector's enum controls. A click
+ * on the active option is a no-op by default: in a menu or an inspector a
+ * repeated click is a confirmation, not a request for the first option
+ * (measured in the M5 verification: confirming Native and Light in the Export
+ * menu exported flatten in both themes). The ported return to the first option
+ * on a click of the active non-first one is the `toggle` prop, which the view
+ * mode seg and the density seg pass. A click lets go of focus afterwards: the
+ * reader's attention moves to the stage, and a focus ring left on the clicked
+ * option would read as a second selection.
  *
  * The active fill is one indicator shared by every option (directive 7.4):
  * an absolutely positioned span under the buttons, moved with a transform
@@ -45,6 +50,12 @@ export type SegProps<T extends string> = {
   className?: string;
   /** the data-control prefix for the options: `view.mode` gives `view.mode.grid` */
   control?: string;
+  /**
+   * the ported behaviour: a click on the active non-first option returns to the first (the view
+   * modes, where Grid again means back to the slide); off, a click on the active option changes
+   * nothing
+   */
+  toggle?: boolean;
 };
 
 /** Where the indicator sits: its left edge and its width, in CSS pixels inside the group's border. */
@@ -70,14 +81,15 @@ export function Seg<T extends string>({
   iconOnly = false,
   className,
   control,
+  toggle = false,
 }: SegProps<T>) {
   const root = useRef<HTMLDivElement>(null);
   const [ind, setInd] = useState<Indicator | null>(null);
 
   const first = options[0]?.value;
   const pick = (next: T) => {
-    if (next === value && first !== undefined && next !== first) onChange(first);
-    else onChange(next);
+    if (next !== value) onChange(next);
+    else if (toggle && first !== undefined && next !== first) onChange(first);
     letGo();
   };
 

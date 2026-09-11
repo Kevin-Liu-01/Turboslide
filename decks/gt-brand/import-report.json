@@ -1,20 +1,21 @@
 {
   "from": "/Users/kevinliu/repos/Prototemplate/deck",
   "into": "gt-brand",
-  "importedAt": "2026-09-11T00:38:38.404Z",
+  "importedAt": "2026-09-11T08:06:18.658Z",
   "slides": 85,
   "sections": 8,
-  "htmlBlocks": 4,
-  "blocks": 286,
-  "assets": 114,
+  "htmlBlocks": 0,
+  "blocks": 332,
+  "assets": 115,
   "files": 199,
   "filesCopied": 0,
-  "rulesConsumed": 983,
-  "rulesLeftOver": 17,
+  "rulesConsumed": 1061,
+  "rulesLeftOver": 29,
   "slidesWithResidualCss": [
     "voice",
     "ladder",
     "doubled-line",
+    "diagrams",
     "iso",
     "language-as-material",
     "nearest-page-routing",
@@ -23,9 +24,11 @@
     "glyphfield-tools",
     "books-and-templates",
     "glyphfield-materials",
-    "identity-project"
+    "identity-project",
+    "fixed-points",
+    "goals"
   ],
-  "inlineLeftOver": 12,
+  "inlineLeftOver": 16,
   "warnings": [],
   "rows": [
     {
@@ -699,20 +702,60 @@
       "file": "25-diagrams.html",
       "id": "diagrams",
       "kind": "content",
-      "layout": "stack",
+      "layout": "split gap 40",
       "blocks": [
         {
-          "id": "html",
-          "type": "html"
+          "id": "h",
+          "type": "heading"
+        },
+        {
+          "id": "p1",
+          "type": "paragraph"
+        },
+        {
+          "id": "group3",
+          "type": "composite"
+        },
+        {
+          "id": "group",
+          "type": "composite"
+        },
+        {
+          "id": "rows",
+          "type": "rows"
+        },
+        {
+          "id": "rows2",
+          "type": "rows"
+        },
+        {
+          "id": "group2",
+          "type": "composite"
+        },
+        {
+          "id": "dia1",
+          "type": "dia"
+        },
+        {
+          "id": "dia2",
+          "type": "dia"
+        },
+        {
+          "id": "dia3",
+          "type": "dia"
+        },
+        {
+          "id": "dia4",
+          "type": "dia"
         }
       ],
-      "rulesConsumed": 6,
-      "rulesLeftOver": [],
+      "rulesConsumed": 14,
+      "rulesLeftOver": [
+        ".s19a .rules .rows > div { padding, gap }"
+      ],
       "inlineLeftOver": [],
       "unhandled": [],
-      "html": {
-        "reason": "no block for <div class=\"rules\"> (section classes: s19a)"
-      }
+      "html": null
     },
     {
       "n": 26,
@@ -1892,20 +1935,54 @@
       "file": "67-presenter-compare.html",
       "id": "presenter-compare",
       "kind": "content",
-      "layout": "stack",
+      "layout": "split gap 40",
       "blocks": [
         {
-          "id": "html",
-          "type": "html"
+          "id": "h",
+          "type": "heading"
+        },
+        {
+          "id": "p1",
+          "type": "paragraph"
+        },
+        {
+          "id": "group4",
+          "type": "composite"
+        },
+        {
+          "id": "group3",
+          "type": "composite"
+        },
+        {
+          "id": "group2",
+          "type": "composite"
+        },
+        {
+          "id": "fig",
+          "type": "shot"
+        },
+        {
+          "id": "group",
+          "type": "composite"
+        },
+        {
+          "id": "fig2",
+          "type": "shot"
+        },
+        {
+          "id": "fig3",
+          "type": "shot"
+        },
+        {
+          "id": "fig4",
+          "type": "shot"
         }
       ],
-      "rulesConsumed": 2,
+      "rulesConsumed": 23,
       "rulesLeftOver": [],
       "inlineLeftOver": [],
       "unhandled": [],
-      "html": {
-        "reason": "no block for <div class=\"tools\"> (section classes: s53f)"
-      }
+      "html": null
     },
     {
       "n": 68,
@@ -2356,40 +2433,165 @@
       "file": "83-fixed-points.html",
       "id": "fixed-points",
       "kind": "content",
-      "layout": "stack",
+      "layout": "split gap 36",
       "blocks": [
         {
-          "id": "html",
-          "type": "html"
+          "id": "h",
+          "type": "heading"
+        },
+        {
+          "id": "p1",
+          "type": "paragraph"
+        },
+        {
+          "id": "group8",
+          "type": "composite"
+        },
+        {
+          "id": "group6",
+          "type": "composite"
+        },
+        {
+          "id": "h2",
+          "type": "heading"
+        },
+        {
+          "id": "group5",
+          "type": "composite"
+        },
+        {
+          "id": "group2",
+          "type": "composite"
+        },
+        {
+          "id": "dia1",
+          "type": "dia"
+        },
+        {
+          "id": "group",
+          "type": "composite"
+        },
+        {
+          "id": "h3",
+          "type": "heading"
+        },
+        {
+          "id": "p2",
+          "type": "paragraph"
+        },
+        {
+          "id": "group4",
+          "type": "composite"
+        },
+        {
+          "id": "dia2",
+          "type": "dia"
+        },
+        {
+          "id": "group3",
+          "type": "composite"
+        },
+        {
+          "id": "h4",
+          "type": "heading"
+        },
+        {
+          "id": "p3",
+          "type": "paragraph"
+        },
+        {
+          "id": "code",
+          "type": "panel"
+        },
+        {
+          "id": "group7",
+          "type": "composite"
+        },
+        {
+          "id": "h5",
+          "type": "heading"
+        },
+        {
+          "id": "list",
+          "type": "plain"
         }
       ],
-      "rulesConsumed": 5,
-      "rulesLeftOver": [],
-      "inlineLeftOver": [],
-      "unhandled": [],
-      "html": {
-        "reason": "no block for <div class=\"two\"> (section classes: s83)"
-      }
+      "rulesConsumed": 22,
+      "rulesLeftOver": [
+        ".s83 .head h2 { margin-bottom }",
+        ".s83 .fixed { border, background }",
+        ".s83 .fixed > div { padding, border-bottom }",
+        ".s83 .fixed > div:last-child { border-bottom }",
+        ".s83 .fixed .ic { width, height, margin-top }",
+        ".s83 .fixed .name { font-family, font-weight, letter-spacing, font-size, line-height, text-wrap }",
+        ".s83 .fixed .names { font-family, font-weight, letter-spacing, font-size, line-height }",
+        ".s83 .fixed p { margin-top, font-size, line-height, color }",
+        ".s83 .panel { margin-top }",
+        ".s83 .plain > span { padding }"
+      ],
+      "inlineLeftOver": [
+        "fixed-points#h2 style=\"font-family:var(--display);font-size:26px;line-height:1.2;font-weight:500;letter-spacing:-0.015em;margin:0 0 12px\"",
+        "fixed-points#h4 style=\"text-wrap:wrap\"",
+        "fixed-points#h5 style=\"font-family:var(--display);font-size:26px;line-height:1.2;font-weight:500;letter-spacing:-0.015em;margin:0 0 12px\""
+      ],
+      "unhandled": [
+        "<h3> mapped to an h2 heading with its rule inline"
+      ],
+      "html": null
     },
     {
       "n": 84,
       "file": "84-goals.html",
       "id": "goals",
       "kind": "content",
-      "layout": "stack",
+      "layout": "split gap 26 head 4/8",
       "blocks": [
         {
-          "id": "html",
-          "type": "html"
+          "id": "h",
+          "type": "heading"
+        },
+        {
+          "id": "p1",
+          "type": "paragraph"
+        },
+        {
+          "id": "group3",
+          "type": "composite"
+        },
+        {
+          "id": "list",
+          "type": "plain"
+        },
+        {
+          "id": "group2",
+          "type": "composite"
+        },
+        {
+          "id": "group",
+          "type": "composite"
+        },
+        {
+          "id": "dia1",
+          "type": "dia"
+        },
+        {
+          "id": "code",
+          "type": "panel"
+        },
+        {
+          "id": "fig",
+          "type": "shot"
         }
       ],
-      "rulesConsumed": 12,
-      "rulesLeftOver": [],
-      "inlineLeftOver": [],
+      "rulesConsumed": 44,
+      "rulesLeftOver": [
+        ".s84 .bench use { fill }"
+      ],
+      "inlineLeftOver": [
+        "goals#fig style=\"gap:8px\""
+      ],
       "unhandled": [],
-      "html": {
-        "reason": "no block for <div class=\"proof\"> (section classes: s84)"
-      }
+      "html": null
     },
     {
       "n": 85,

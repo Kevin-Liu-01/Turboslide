@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "mood-rosetta",
+  "kind": "mood",
+  "picture": {
+    "asset": "mood-rosetta",
+    "fit": "cover"
+  },
+  "plate": {
+    "side": "lower-right",
+    "maxWidth": 560,
+    "blocks": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "title",
+        "text": "The Rosetta Stone"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "One decree carved in three scripts so every reader could read it. General Translation does the same for software: one source text, every language.",
+        "marginTop": 12
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Photograph: Hans Hillewaert, CC BY-SA 4.0"
+      }
+    ]
+  }
+}

@@ -1,0 +1,239 @@
+/* The deck list (/decks). The page grammar comes from styles.css (.ts-home, .ts-home-head,
+   .ts-home-foot); this sheet holds the tools row, the New deck form and the deck rows. Lines are
+   1px, drawn once: the tools row draws --pt-hair under itself, the form its own --pt-hair frame,
+   each deck row --pt-hair-soft under itself (SPEC 2.2 line law). Buttons are the shell's .pt-ib;
+   the one solid button is New deck (Create and open while the form is up). Colors are tokens
+   only, radius 0, Inter at 13px. */
+.ts-decks-page {
+  max-width: 880px;
+}
+
+.ts-decks-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-decks-count {
+  font-size: 12.5px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-decks-page .pt-ib.is-text:not(.is-solid) {
+  border-color: var(--pt-hair);
+}
+
+.ts-decks-page .pt-ib.is-text:not(.is-solid):hover {
+  border-color: var(--pt-ink-2);
+}
+
+/* ---- the New deck form ---- */
+.ts-decks-form {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0 0;
+  padding: 16px;
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-decks-field {
+  display: grid;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--pt-ink-2);
+}
+
+.ts-decks-field input {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13.5px var(--pt-text);
+  outline: none;
+  appearance: none;
+}
+
+.ts-decks-field input:focus {
+  border-color: var(--pt-ink);
+}
+
+.ts-decks-templates {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 0;
+}
+
+.ts-decks-templates legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-size: 12.5px;
+  color: var(--pt-ink-2);
+}
+
+/* a template option: a 16px box that fills ink when chosen, the label in the display face, the
+   detail in ink-2; rows draw --pt-hair-soft under themselves */
+.ts-decks-template {
+  position: relative;
+  display: grid;
+  grid-template-columns: 16px auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 10px;
+  min-height: 34px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  cursor: pointer;
+}
+
+.ts-decks-template:last-child {
+  border-bottom: 0;
+}
+
+.ts-decks-template input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.ts-decks-radio {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+}
+
+.ts-decks-template input:checked ~ .ts-decks-radio {
+  background: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+.ts-decks-template input:focus-visible ~ .ts-decks-radio {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-decks-template b {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 13.5px;
+  white-space: nowrap;
+}
+
+.ts-decks-detail {
+  font-size: 12.5px;
+  color: var(--pt-ink-2);
+  min-width: 0;
+}
+
+.ts-decks-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-decks-actions .pt-ib:disabled {
+  color: var(--pt-titanium);
+  border-color: var(--pt-hair-soft);
+  cursor: default;
+}
+
+.ts-decks-actions .pt-ib.is-solid:disabled {
+  background: var(--pt-hair);
+  border-color: transparent;
+  color: var(--pt-paper);
+}
+
+.ts-decks-error {
+  font-size: 12.5px;
+  color: var(--pt-ink);
+}
+
+/* ---- the rows ---- */
+.ts-decks-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ts-decks-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 80px 56px 128px auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-decks-name {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ts-decks-title {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  color: var(--pt-ink);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-decks-title:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-decks-id {
+  font-family: var(--pt-mono);
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-decks-cell {
+  font-size: 12.5px;
+  color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ts-decks-links {
+  display: inline-flex;
+  gap: 8px;
+}
+
+.ts-decks-links .pt-ib {
+  text-decoration: none;
+  height: 28px;
+}
+
+@media (max-width: 720px) {
+  .ts-decks-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .ts-decks-cell {
+    display: none;
+  }
+}

@@ -42,7 +42,7 @@ function NotFound() {
   return (
     <main className="ts-home">
       <h1>Not found</h1>
-      <p>No page at this address. The deck list is at /.</p>
+      <p>No page at this address. The deck list is at /decks; / opens the newest deck.</p>
     </main>
   );
 }

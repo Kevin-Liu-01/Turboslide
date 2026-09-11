@@ -19,9 +19,15 @@ export function snap(value: number, width: number): number {
   return width % 2 === 1 ? Math.round(value - 0.5) + 0.5 : Math.round(value * 2) / 2;
 }
 
-/** The body of a declared diagram, one element per primitive, in the grammar's draw order. */
-export function diagramBody(data: Diagram): string {
+/**
+ * The body of a declared diagram, one element per primitive, in the grammar's draw order: rects,
+ * polygons, lines, markers, icons, marks, texts. With `attrs` the markers and texts carry
+ * `data-dia="<path>"` (the pointer under `/data`) so the editor can measure them for Alt-drag
+ * (SPEC 6.4) without a second parser.
+ */
+export function diagramBody(data: Diagram, attrs = false): string {
   let out = '';
+  const dia = (path: string): string => (attrs ? ` data-dia="${path}"` : '');
   for (const rect of data.rects) {
     const strokeWidth = rect.stroke ? 1 : 0;
     const x = rect.stroke ? snap(rect.x, 1) : rect.x;
@@ -31,15 +37,24 @@ export function diagramBody(data: Diagram): string {
     if (rect.stroke) out += ` class="${STROKE_CLASS[rect.stroke]}" stroke-width="${strokeWidth}"`;
     out += '/>';
   }
+  for (const polygon of data.polygons ?? []) {
+    // Closed faces (s25:57-60): a filled face has no stroke, an outline has fill none.
+    const points = polygon.points.map(([x, y]) => `${px(x)},${px(y)}`).join(' ');
+    out += `<polygon points="${points}" fill="${FILL_VAR[polygon.fill]}"`;
+    if (polygon.opacity !== undefined) out += ` fill-opacity="${px(polygon.opacity)}"`;
+    if (polygon.stroke)
+      out += ` class="${STROKE_CLASS[polygon.stroke]}" stroke-width="${px(polygon.width ?? 1)}" stroke-linejoin="miter"`;
+    out += '/>';
+  }
   for (const line of data.lines) {
     const width = line.width ?? 1;
     const s = (v: number): string => px(width === 1 ? snap(v, 1) : v);
     out += `<line class="${STROKE_CLASS[line.stroke]}" stroke-width="${px(width)}" stroke-linecap="square" x1="${s(line.x1)}" y1="${s(line.y1)}" x2="${s(line.x2)}" y2="${s(line.y2)}"/>`;
   }
-  for (const marker of data.markers) {
+  data.markers.forEach((marker, i) => {
     // 11 px filled squares centered on the point (DECK-GRAMMAR.md:45, head:127).
-    out += `<rect x="${px(marker.x - 5.5)}" y="${px(marker.y - 5.5)}" width="11" height="11" fill="var(--ink)"/>`;
-  }
+    out += `<rect class="marker" x="${px(marker.x - 5.5)}" y="${px(marker.y - 5.5)}" width="11" height="11" fill="var(--ink)"${dia(`markers/${i}`)}/>`;
+  });
   for (const icon of data.icons) {
     const fill =
       icon.color === 'ok'
@@ -61,11 +76,11 @@ export function diagramBody(data: Diagram): string {
       out += `<use href="#gt-mark" x="${px(mark.x)}" y="${px(mark.y)}" width="${px(mark.w)}" height="${px(mark.h)}" fill="var(--ink)"/>`;
     }
   }
-  for (const text of data.texts) {
+  data.texts.forEach((text, i) => {
     const cls = text.size === 26 ? ' class="lab"' : text.size === 18 ? ' class="sm"' : '';
     const anchor = text.anchor && text.anchor !== 'start' ? ` text-anchor="${text.anchor}"` : '';
-    out += `<text${cls} x="${px(text.x)}" y="${px(text.y)}"${anchor}>${escapeText(text.text)}</text>`;
-  }
+    out += `<text${cls} x="${px(text.x)}" y="${px(text.y)}"${anchor}${dia(`texts/${i}`)}>${escapeText(text.text)}</text>`;
+  });
   return out;
 }
 
@@ -136,5 +151,5 @@ export function renderDia(block: BlockOf<'dia'>, ctx: BlockContext): string {
   out += dataAttrs(rasterAttrs);
   out += ` viewBox="0 0 ${px(width)} ${px(data.h)}"`;
   out += block.alt ? ` aria-label="${escapeAttr(block.alt)}"` : ' aria-hidden="true"';
-  return `${out}>${diagramBody(data)}</svg>`;
+  return `${out}>${diagramBody(data, ctx.blockAttrs)}</svg>`;
 }

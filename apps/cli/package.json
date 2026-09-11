@@ -12,6 +12,8 @@
   },
   "exports": {
     "./cli": "./src/cli.ts",
+    "./store-actions": "./src/store-actions.ts",
+    "./commands/deck": "./src/commands/deck.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {
@@ -22,6 +24,7 @@
     "@turboslide/headless": "workspace:*",
     "@turboslide/import": "workspace:*",
     "@turboslide/lint": "workspace:*",
+    "@turboslide/materials": "workspace:*",
     "@turboslide/mcp": "workspace:*",
     "@turboslide/render": "workspace:*",
     "@turboslide/schema": "workspace:*",

@@ -11,6 +11,7 @@ import type { IdMap } from './ids.ts';
 import { mapSlide } from './map.ts';
 import type { ReportRow } from './map.ts';
 import { parseSections, sectionOf } from './sections.ts';
+import type { Asset } from '@turboslide/schema/assets';
 import { derivedSlideTitle } from '@turboslide/schema/deck';
 import type { Deck, Section, Slide } from '@turboslide/schema/deck';
 import { validateDeck } from '@turboslide/schema/validate';
@@ -124,7 +125,7 @@ export function importDeck(options: ImportOptions): ImportReport {
     title: options.title ?? 'GT brand deck',
     theme: 'gt-ink-paper',
     sections,
-    assets: sortedAssets(assets.registry.assets),
+    assets: sortedAssets(carryDeckAssets(previousDeck?.assets, assets.registry.assets)),
     revision: previousDeck?.revision ?? 0,
     createdAt: previousDeck?.createdAt ?? now(),
     updatedAt: previousDeck?.updatedAt ?? now(),
@@ -201,6 +202,42 @@ function readText(path: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+/**
+ * The asset records a re-import keeps from the deck it replaces (MILESTONES M5: the deck's own
+ * writes survive the in-place re-import `pnpm check` runs). An asset the deck added itself (a
+ * material capture, a site capture, an intake) is not in the source and is kept as recorded; an
+ * imported asset whose twins are the same files keeps the plate metrics `asset dither
+ * --from-recorded` measured and the kept source file, which the source markup cannot carry. A
+ * re-import after those writes therefore changes nothing and keeps the revision.
+ */
+export function carryDeckAssets(
+  previous: Record<string, Asset> | undefined,
+  imported: Record<string, Asset>,
+): Record<string, Asset> {
+  if (previous === undefined) return imported;
+  const out: Record<string, Asset> = {};
+  for (const [id, asset] of Object.entries(imported)) {
+    const before = previous[id];
+    if (before === undefined || JSON.stringify(before.twins) !== JSON.stringify(asset.twins)) {
+      out[id] = asset;
+      continue;
+    }
+    out[id] = {
+      ...asset,
+      ...(asset.metrics === undefined && before.metrics !== undefined
+        ? { metrics: before.metrics }
+        : {}),
+      ...(asset.sourceFile === undefined && before.sourceFile !== undefined
+        ? { sourceFile: before.sourceFile }
+        : {}),
+    };
+  }
+  for (const [id, asset] of Object.entries(previous)) {
+    if (out[id] === undefined) out[id] = asset;
+  }
+  return out;
 }
 
 function sortedAssets<T>(assets: Record<string, T>): Record<string, T> {

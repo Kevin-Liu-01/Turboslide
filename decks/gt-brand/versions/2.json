@@ -1,0 +1,99 @@
+{
+  "n": 2,
+  "revision": 17,
+  "author": {
+    "kind": "human",
+    "name": "kevinliu"
+  },
+  "note": "",
+  "createdAt": "2026-09-11T07:44:18.107Z",
+  "mutations": [
+    {
+      "op": "asset.set",
+      "asset": {
+        "id": "liquid-metal-diamond",
+        "role": "opener",
+        "alt": "Liquid metal, the diamond preset, frozen at 5.5 s",
+        "twins": {
+          "light": "assets/liquid-metal-diamond-light.png",
+          "dark": "assets/liquid-metal-diamond-dark.png"
+        },
+        "size": [
+          1600,
+          900
+        ],
+        "scale": 1,
+        "source": {
+          "kind": "material",
+          "materialId": "paper:liquid-metal",
+          "uniforms": {
+            "u_colorBack": "#000000",
+            "u_colorTint": "#ffffff",
+            "u_repetition": 3,
+            "u_softness": 0.05,
+            "u_shiftRed": 0,
+            "u_shiftBlue": 0,
+            "u_distortion": 0.07,
+            "u_contour": 0.6,
+            "u_angle": 70,
+            "u_shape": 3,
+            "u_fit": "contain",
+            "u_scale": 0.5,
+            "u_rotation": 0,
+            "u_offsetX": 0,
+            "u_offsetY": 0,
+            "u_originX": 0.5,
+            "u_originY": 0.5,
+            "u_worldWidth": 0,
+            "u_worldHeight": 0
+          },
+          "size": [
+            3200,
+            1800
+          ],
+          "timeMs": 5500,
+          "backend": "angle-metal",
+          "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+          "recipeKey": "sha256:a00e58cf54dd307b493610cb87d7865e07c815ee77940ce456f7a1b2d16a478b"
+        },
+        "treatment": {
+          "kind": "two-tone",
+          "crop": [
+            0,
+            0,
+            3200,
+            1800
+          ],
+          "autocontrast": 0.5,
+          "polarity": "dark-ground",
+          "cell": 2,
+          "bayer": 8,
+          "resampler": "lanczos3"
+        },
+        "credit": "Material: liquid metal, Paper Shaders, rendered in Turboslide",
+        "inline": "two-color",
+        "metrics": {
+          "litFraction": 0.0396,
+          "plateClear": {
+            "plate": [
+              137,
+              500,
+              740,
+              271
+            ],
+            "nearestLitPx": 0,
+            "litUnder": 3810,
+            "litInBand": 1356
+          }
+        }
+      }
+    }
+  ],
+  "baseRevision": 16,
+  "inverse": [
+    {
+      "op": "asset.remove",
+      "assetId": "liquid-metal-diamond"
+    }
+  ]
+}

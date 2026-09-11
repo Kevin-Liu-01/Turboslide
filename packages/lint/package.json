@@ -18,6 +18,7 @@
     "./static/rows": "./src/static/rows.ts",
     "./static/dia": "./src/static/dia.ts",
     "./static/asset": "./src/static/asset.ts",
+    "./static/picture": "./src/static/picture.ts",
     "./static/structure": "./src/static/structure.ts",
     "./static/export-non-native": "./src/static/export-non-native.ts",
     "./rendered/rules": "./src/rendered/rules.ts",
@@ -25,6 +26,7 @@
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@turboslide/effects": "workspace:*",
     "@turboslide/render": "workspace:*",
     "@turboslide/schema": "workspace:*"
   },

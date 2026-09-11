@@ -1,7 +1,13 @@
-// Per-slide leases (SPEC 6.7): advisory records with a holder and an expiry, kept outside the
-// committed tree because they are ephemeral. `slide.lease` takes ten minutes on a slide for an
-// author; another author's lease on the same slide is a ConflictError carrying the holder unless
-// `force` is set; leases expire and can be released. Whole-deck writes take no lease.
+// Per-slide leases (SPEC 6.7): records with a holder and an expiry, kept outside the committed
+// tree because they are ephemeral. `slide.lease` takes ten minutes on a slide for an author;
+// another author's lease on the same slide is a ConflictError carrying the holder unless `force`
+// is set; leases expire and can be released. Whole-deck writes take no lease.
+//
+// Enforcement (MILESTONES M4 item 2): a write by an agent author to a slide another author holds
+// is refused with 409, the holder and the current document unless the write carries `force`; a
+// human's write goes through with a warning, as in M2 and M3, because a person at a shell or in
+// the editor sees the lease dot and decides. `leasePolicyFor` is the one place that rule lives;
+// FileStore reads it per write when it was opened without an explicit policy.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 
@@ -11,10 +17,21 @@ import { canonicalJson, parseJson } from '@turboslide/schema/json';
 import type { Author, Lease } from '@turboslide/schema/mutations';
 import { leaseSchema } from '@turboslide/schema/mutations';
 
+import type { LeasePolicy } from './store.ts';
 import { authorLabel, sameAuthor } from './store.ts';
 
 export const DEFAULT_LEASE_MINUTES = 10;
 export const MAX_LEASE_MINUTES = 120;
+
+/** Agent writes are enforced, human writes advisory (SPEC 6.7 "enforced for agent writes in M4"). */
+export function leasePolicyFor(author: Author): LeasePolicy {
+  return author.kind === 'agent' ? 'enforce' : 'advisory';
+}
+
+/** The 409 message a refused write carries; the CLI, MCP and HTTP bodies all show this text. */
+export function leaseRefusalMessage(slideId: SlideId, held: Lease): string {
+  return `Slide "${slideId}" is leased by ${authorLabel(held.holder)} until ${held.until}; pass force to write anyway`;
+}
 
 const leaseListSchema = leaseSchema.array();
 

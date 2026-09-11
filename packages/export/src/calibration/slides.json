@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "about": "Constants of the Google Slides export target (SPEC 8.3, 8.5 step 5; MILESTONES M6 item 1). Every value names its status: `fixed` is the API's contract, `assumed` is a documented default the first live run reads back and corrects, `unmeasured` is null until a live run against the deck fills it. The reader is packages/export/src/gslides/calibration.ts; the values a live run reads back land under `measured` with the date and the account that ran it.",
+  "page": {
+    "status": "fixed",
+    "widthEmu": 9144000,
+    "heightEmu": 5143500,
+    "widthPx": 1600,
+    "heightPx": 900,
+    "emuPerPx": 5715,
+    "ptPerPx": 0.45,
+    "note": "presentations.create ignores pageSize, so the page is the default 10 by 5.625 in. The live run reads pageSize back and fails the export when it differs (build.ts)."
+  },
+  "text": {
+    "normalPitchFactor": 1.21,
+    "normalPitchStatus": "assumed",
+    "defaultInsetPt": { "left": 7.2, "right": 7.2, "top": 3.6, "bottom": 3.6 },
+    "defaultInsetStatus": "assumed",
+    "firstBaselineOffsetPx": null,
+    "widthSlackPx": 2,
+    "headingMinSizePx": 44,
+    "headingWidthSlack": 0.025,
+    "note": "Inter's normal line height is 1.21 em (ascender 1984, descender -494, unitsPerEm 2048; pptx report section 4.10); the percentage lineSpacing divides the measured pitch by it until the thumbnail of the calibration deck is measured. A new TEXT_BOX carries Slides' default insets of 0.1 in left and right and 0.05 in top and bottom, which the API cannot set, so every box is written wider and higher by them and moved up and left by the same amount (SPEC 8.6: no inset). Headings run about 2.5 percent wider in Google Fonts Inter than in the browser, so heading boxes get that much slack and every box 2 px, and hard breaks keep the wraps (SPEC 8.3)."
+  },
+  "lines": {
+    "weightPt": 0.45,
+    "minimumHonoredWeightPt": null,
+    "zeroHeightAccepted": null,
+    "fallbackThicknessEmu": 5715,
+    "note": "A 1 px hairline is written as a STRAIGHT line at 0.45 pt with the token's alpha on lineFill.solidFill. Whether Slides honors a weight under 0.5 pt and whether a zero-height (or zero-width) line size is accepted are read back on the first live run; until then the builder writes zero on the short axis, and flips to fallbackThicknessEmu when zeroHeightAccepted is false."
+  },
+  "fonts": {
+    "family": "Inter",
+    "mono": "Roboto Mono",
+    "weights": [400, 500],
+    "note": "Google Slides serves Google Fonts' Inter; which build and whether opsz applies is undocumented (SPEC 8.4). Weight 500 travels as weightedFontFamily.weight. The code panel's monospace stack becomes Roboto Mono."
+  },
+  "batch": {
+    "maxBytes": 4000000,
+    "maxRequests": 2000,
+    "status": "assumed",
+    "note": "A slide's requests never split across batches. The API documents no per-call request count; the byte cap stays well under the 10 MB request payload limit of Google APIs."
+  },
+  "quota": {
+    "writesPerMinute": 60,
+    "readsPerMinute": 60,
+    "status": "fixed",
+    "source": "https://developers.google.com/workspace/slides/api/limits",
+    "note": "Per user. Every batchUpdate, create and get is one write or read; getThumbnail counts against reads. 429 on excess; the pacer waits for the window and backs off with jitter (pace.ts)."
+  },
+  "thumbnail": {
+    "size": "LARGE",
+    "widthPx": 1600,
+    "mimeType": "PNG",
+    "budgets": { "native": 0.03, "flatten": 0.001 },
+    "threshold": 0.1,
+    "note": "presentations.pages.getThumbnail at LARGE is 1600 px wide (900 high on the default page), diffed with pixelmatch at threshold 0.1 against the Turboslide render at 1x; the budgets are the per-slide mismatched fractions of MILESTONES M6."
+  },
+  "images": {
+    "signedUrlTtlSeconds": 900,
+    "maxUrlBytes": 2048,
+    "note": "createImage fetches the URL once at write time; a signed Cloud Storage URL carries a 15 minute TTL and must stay under 2 KB (SPEC 8.3). The local host serves the dev studio's /api/assets/<token> and is reachable to Google only through a public tunnel (docs/google-slides.md)."
+  },
+  "measured": {
+    "status": "unmeasured",
+    "measuredAt": null,
+    "account": null,
+    "pageSizeEmu": null,
+    "zeroHeightAccepted": null,
+    "minimumHonoredWeightPt": null,
+    "defaultInsetPt": null,
+    "normalPitchFactor": null,
+    "thumbnailSizePx": null,
+    "note": "No Google credentials exist on the build machine; the first live run (turboslide export gslides --verify) writes what it read back here by hand, with the date."
+  }
+}

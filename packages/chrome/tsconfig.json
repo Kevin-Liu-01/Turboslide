@@ -11,6 +11,12 @@
     },
     {
       "path": "../viewer"
+    },
+    {
+      "path": "../materials"
+    },
+    {
+      "path": "../effects"
     }
   ]
 }

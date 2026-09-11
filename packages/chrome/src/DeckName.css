@@ -1,0 +1,81 @@
+/* The deck name in the toolbar (SPEC 6.1): a shell button at rest whose word is the title in the
+   display face at 14.5px, the size the brand title takes in the bar (Toolbar.css .pt-bar-brand),
+   ruled only on hover like every .pt-ib; while editing, the same box as a field with the ink
+   frame the count field takes (Toolbar.css .pt-count.is-editing), so the name moves nowhere when
+   it opens. The title ellipsizes inside 260px so the bar keeps its groups, and inside whatever
+   the bar has left once the label tiers have run (Toolbar.css), never under 56px. */
+.pt-ib.ts-deckname {
+  max-width: 260px;
+  min-width: 56px;
+  flex: 0 1 auto;
+  overflow: hidden;
+  padding: 0 8px;
+  color: var(--pt-ink);
+}
+
+.pt-ib.ts-deckname b {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 14.5px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* the field gives like the button (Toolbar.tsx floorStatusSlot reads its minimum): 220px of
+   text where the bar has it, the room left otherwise (136px at 1440 with the list open, measured
+   in the M5 verification, where a rigid field pushed Help 84px past the bar), never under 72px;
+   a longer name scrolls inside the field as it is typed */
+.ts-deckname.is-editing {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-ink);
+  box-sizing: border-box;
+  flex: 0 1 auto;
+  min-width: 72px;
+  max-width: 238px;
+}
+
+.ts-deckname-field {
+  width: 220px;
+  min-width: 0;
+  flex: 1 1 auto;
+  height: 28px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: none;
+  outline: none;
+  border-radius: 0;
+  color: var(--pt-ink);
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 14.5px;
+  letter-spacing: -0.01em;
+  appearance: none;
+}
+
+/* the toolbar's tiers: the name's cap comes down before the status chip's parts leave (tier
+   three), and from tier four on the name is the one element in the right group that shrinks
+   (Toolbar.css, the status slot), down to its 56px minimum, while the chip's words, then the
+   seg's words and the Search word give (tiers four and five). It never leaves the bar above
+   900px: it is the rename control of the default view (Kevin's directive, the Google Slides
+   shape; measured in the M5 verification: the M5 integration's display: none at tier four hid it
+   at 1440 with the list open, where the bar lands on tier four). Toolbar.tsx counts its hidden
+   letters as room the bar still needs, so the tiers run before the name loses letters and it
+   widens again once they have. */
+.pt-toolbar.is-tight-3 .pt-ib.ts-deckname {
+  max-width: 160px;
+}
+
+@media (max-width: 900px) {
+  .pt-toolbar .ts-deckname {
+    display: none;
+  }
+}

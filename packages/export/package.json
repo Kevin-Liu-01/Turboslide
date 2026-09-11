@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Export as a client of the renderer (SPEC 8): scene extraction in headless Chromium, PPTX through pptxgenjs in flatten and native mode, the OOXML post-process (kern strip, embedded font parts, grpSp rows, stored media), and the typed ExportReport. verify/ is the LibreOffice loop of the render worker.",
+  "description": "Export as a client of the renderer (SPEC 8): scene extraction in headless Chromium, PPTX through pptxgenjs in flatten and native mode, the OOXML post-process (kern strip, embedded font parts, grpSp rows, stored media), and the typed ExportReport. verify/ is the LibreOffice loop of the render worker; gslides/ is the Google Slides exporter (native and flatten, dry run without credentials).",
   "scripts": {
     "test": "vitest run"
   },
@@ -23,6 +23,7 @@
     "./pptx/notes": "./src/pptx/notes.ts",
     "./pptx/fonts-map": "./src/pptx/fonts-map.ts",
     "./pptx/baseline": "./src/pptx/baseline.ts",
+    "./pptx/face-advance": "./src/pptx/face-advance.ts",
     "./ooxml/zip": "./src/ooxml/zip.ts",
     "./ooxml/kern": "./src/ooxml/kern.ts",
     "./ooxml/fonts": "./src/ooxml/fonts.ts",
@@ -38,6 +39,19 @@
     "./calibration/deck": "./src/calibration/deck.ts",
     "./calibration/measure": "./src/calibration/measure.ts",
     "./calibration/calibration.json": "./src/calibration/calibration.json",
+    "./calibration/slides.json": "./src/calibration/slides.json",
+    "./gslides/auth": "./src/gslides/auth.ts",
+    "./gslides/build": "./src/gslides/build.ts",
+    "./gslides/calibration": "./src/gslides/calibration.ts",
+    "./gslides/client": "./src/gslides/client.ts",
+    "./gslides/ids": "./src/gslides/ids.ts",
+    "./gslides/images": "./src/gslides/images.ts",
+    "./gslides/notes": "./src/gslides/notes.ts",
+    "./gslides/pace": "./src/gslides/pace.ts",
+    "./gslides/requests": "./src/gslides/requests.ts",
+    "./gslides/schema": "./src/gslides/schema.ts",
+    "./gslides/thumbs": "./src/gslides/thumbs.ts",
+    "./gslides/units": "./src/gslides/units.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {
@@ -47,11 +61,13 @@
     "@turboslide/render": "workspace:*",
     "@turboslide/schema": "workspace:*",
     "@turboslide/theme": "workspace:*",
+    "googleapis": "catalog:",
     "jszip": "catalog:",
     "pixelmatch": "catalog:",
     "playwright-core": "catalog:",
     "pptxgenjs": "catalog:",
-    "sharp": "catalog:"
+    "sharp": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",

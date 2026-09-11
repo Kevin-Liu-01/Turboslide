@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "bayer8, ditherRamp, the TypeScript twoTone pipeline with the pinned Lanczos3, the tone LUT, the 1-bit PNG encoder, the plate metrics, exact diffs.",
+  "description": "bayer8, ditherRamp, the two-tone pipeline with the pinned Lanczos3, the tone LUT, the 1-bit PNG encoder, the plate metrics, exact, pixelmatch and DSSIM diffs; one API over the native addon, the wasm module and the TypeScript stages (SPEC 10).",
   "exports": {
     "./image": "./src/image.ts",
     "./bayer": "./src/bayer.ts",
@@ -11,15 +11,22 @@
     "./tone": "./src/tone.ts",
     "./filters": "./src/filters.ts",
     "./resample": "./src/resample.ts",
+    "./pipeline": "./src/pipeline.ts",
     "./two-tone": "./src/two-tone.ts",
     "./png1": "./src/png1.ts",
     "./metrics": "./src/metrics.ts",
+    "./pixelmatch": "./src/pixelmatch.ts",
+    "./dssim": "./src/dssim.ts",
     "./diff": "./src/diff.ts",
+    "./backend": "./src/backend.ts",
+    "./select": "./src/select.ts",
     "./io": "./src/io.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@turboslide/native": "workspace:*",
     "@turboslide/schema": "workspace:*",
+    "pixelmatch": "catalog:",
     "pngjs": "catalog:",
     "sharp": "catalog:"
   },

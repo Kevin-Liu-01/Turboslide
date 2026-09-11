@@ -57,6 +57,15 @@ export const MIN_INK_CONTRAST = 48;
  */
 export const EDGE_TOLERANCE = 40;
 
+/**
+ * The edge tolerance of a diagram raster (M5): its hairlines are its structure, and the deck's
+ * palette leaves a gap between hair-soft (22 units from the paper) and hair (45), so a cut at 30
+ * keeps a hairline in both images when LibreOffice's 1/100 mm placement blurs a 1:1 image by a few
+ * units (measured in round five at the default 40: positioning#dia1 dy +32, docs-for-agents#dia1
+ * dw -32, agent-api#dia1 dw -38, the reference's hairlines at 45 and the page's at about 41).
+ */
+export const DIA_EDGE_TOLERANCE = 30;
+
 /** Block types whose ink is glyphs, measured with the text budget (SPEC 4.2 blocks). */
 export const TEXT_BLOCK_TYPES: ReadonlySet<string> = new Set([
   'heading',

@@ -21,6 +21,11 @@ export type TextOptions = {
   breaks?: boolean;
   /** Collect elements the serializer could not express, for the report. */
   unhandled?: string[];
+  /**
+   * True for a span a scoped rule sets to `white-space: nowrap` (s83:14 `.names span`), so the
+   * mapper's rule matcher can hand the nowrap device to the text the same way an inline style does.
+   */
+  nowrap?: (el: Element) => boolean;
 };
 
 /** Serializes the inline content of an element to Text markup. */
@@ -72,7 +77,11 @@ function serializeNode(node: ChildNode, options: TextOptions): string {
     const style = node.attrs.find((a) => a.name === 'style')?.value ?? '';
     const inner = node.childNodes.map((child) => serializeNode(child, options)).join('');
     if (hasClass(node, 'lk')) return inner;
-    if (/white-space\s*:\s*nowrap/.test(style) || hasClass(node, 'nb')) {
+    if (
+      /white-space\s*:\s*nowrap/.test(style) ||
+      hasClass(node, 'nb') ||
+      options.nowrap?.(node) === true
+    ) {
       return joinNoBreak(inner);
     }
     const otherAttrs = node.attrs.filter((a) => a.name !== 'class' && a.name !== 'style');

@@ -6,11 +6,114 @@
 // key's inline `<svg>` icon is not text and never produces a line (pptx report section 6 item 1);
 // the hidden `GT` letters of a gt-word become a run at the mark's box (SPEC 5.2). Hairlines are
 // read from the computed borders of the native blocks, plates and chips from their boxes, and
-// every element the exporter must screenshot is tagged with `data-ts-rid` so the extractor can
-// address it. The callback is self-contained: Playwright serializes its source.
+// every element the exporter must screenshot carries a `data-ts-rid` tag written by
+// `tagRasterElements`, which runs on every page of the extraction (the 1x page the scene is measured
+// on and the 2x and 3x pages the rasters are shot on, M5) in the same document order, so one tag
+// names one element on every page. A block nested in a composite is its own block: the composite
+// root is a grid and emits nothing (M5 native export of every block type). The callbacks are
+// self-contained: Playwright serializes their source.
 import type { Page } from 'playwright-core';
 
 import type { Scene, SceneBlock, SceneRaster, SceneRect, SceneRule, SceneText } from './types.ts';
+
+/** What one tagged raster element is, as tagRasterElements returns it (boxes are measured later). */
+export type RasterTag = {
+  rid: number;
+  blockId: string;
+  kind: SceneRaster['kind'];
+  alpha: boolean;
+};
+
+/**
+ * Tags every element the native export screenshots with `data-ts-rid`, in document order, and
+ * returns the tags: raster leaf blocks as a whole (every non-composite block whose type is not
+ * in `nativeTypes`), the `[data-raster]` elements inside native blocks (icons, marks, shots,
+ * dither canvases, diagram svgs), the untagged inline icons and the gt-word svgs inside native
+ * blocks, the closing plate's mark and the stage wordmark. Stale tags of an earlier slide in the
+ * same document are cleared first, or a hidden slide's element would win the selector. Runs on
+ * every page of the extraction so the 1x geometry and the 2x or 3x pixels name the same elements.
+ */
+export async function tagRasterElements(
+  page: Page,
+  options: { nativeTypes: readonly string[]; slideSelector?: string; sheetSelector?: string },
+): Promise<RasterTag[]> {
+  return page.evaluate(
+    ({ nativeTypes, slideSelector, sheetSelector }) => {
+      const firstOf = (list: string): Element | null => {
+        for (const sel of list.split(',')) {
+          const el = document.querySelector(sel.trim());
+          if (el) return el;
+        }
+        return null;
+      };
+      const sheetEl = firstOf(sheetSelector) ?? document.body;
+      const stage = sheetEl.querySelector('.ts-stage, .stage') ?? sheetEl;
+      const slide = firstOf(slideSelector) ?? sheetEl;
+      const isComposite = (el: Element): boolean => el.getAttribute('data-type') === 'composite';
+      const ownerOf = (el: Element): HTMLElement | null => {
+        let cur: HTMLElement | null = el.closest('[data-block]');
+        while (cur && isComposite(cur)) cur = cur.parentElement?.closest('[data-block]') ?? null;
+        return cur;
+      };
+      const isNativeOwner = (el: Element): boolean => {
+        const owner = ownerOf(el);
+        if (!owner) return true;
+        return nativeTypes.includes(owner.getAttribute('data-type') ?? '');
+      };
+      document.querySelectorAll('[data-ts-rid]').forEach((el) => el.removeAttribute('data-ts-rid'));
+      const tags: { rid: number; blockId: string; kind: string; alpha: boolean }[] = [];
+      let rid = 0;
+      const tag = (el: Element, blockId: string, kind: string, alpha: boolean): void => {
+        rid += 1;
+        (el as HTMLElement).dataset.tsRid = String(rid);
+        tags.push({ rid, blockId, kind, alpha });
+      };
+      const leafBlocks = [...slide.querySelectorAll<HTMLElement>('[data-block]')].filter(
+        (el) => !isComposite(el),
+      );
+      for (const el of leafBlocks) {
+        const type = el.getAttribute('data-type') ?? '';
+        if (!nativeTypes.includes(type))
+          tag(el, el.getAttribute('data-block') ?? '', 'block', true);
+      }
+      slide.querySelectorAll<HTMLElement>('[data-raster]').forEach((el) => {
+        if (!isNativeOwner(el)) return;
+        if (el.closest('[data-ts-rid]') !== null) return;
+        const kind = el.getAttribute('data-raster') ?? 'icon';
+        const owner = ownerOf(el);
+        const blockId =
+          owner?.getAttribute('data-block') ??
+          (el.getAttribute('data-rid') ?? 'raster').split(':')[0] ??
+          'raster';
+        tag(el, blockId, kind, kind !== 'shot' && kind !== 'html');
+      });
+      slide
+        .querySelectorAll<HTMLElement>('svg.ic:not([data-raster]), .gt-word svg')
+        .forEach((el) => {
+          if (!isNativeOwner(el)) return;
+          if (el.closest('[data-ts-rid]') !== null) return;
+          const owner = ownerOf(el);
+          tag(
+            el,
+            owner?.getAttribute('data-block') ?? 'inline',
+            el.closest('.gt-word') ? 'mark' : 'icon',
+            true,
+          );
+        });
+      slide.querySelectorAll<HTMLElement>('svg.mark').forEach((el) => {
+        if (el.closest('[data-ts-rid]') === null) tag(el, 'plate-mark', 'mark', true);
+      });
+      const wordmarkSvg = stage.querySelector<SVGElement>('.wordmark svg');
+      if (wordmarkSvg) tag(wordmarkSvg, 'wordmark', 'mark', true);
+      return tags;
+    },
+    {
+      nativeTypes: [...options.nativeTypes],
+      slideSelector: options.slideSelector ?? DEFAULT_SLIDE_SELECTOR,
+      sheetSelector: options.sheetSelector ?? DEFAULT_SHEET_SELECTOR,
+    },
+  ) as Promise<RasterTag[]>;
+}
 
 export type MeasureSceneOptions = {
   slideId: string;
@@ -25,6 +128,8 @@ export type MeasureSceneOptions = {
   notes?: string;
   sheetSelector?: string;
   slideSelector?: string;
+  /** The raster tags of this page, when the caller ran tagRasterElements already. */
+  tags?: RasterTag[];
 };
 
 export const DEFAULT_SHEET_SELECTOR = '.ts-sheet, .sheet, body';
@@ -36,8 +141,15 @@ type PageScene = Omit<Scene, 'slideId' | 'n' | 'total' | 'theme' | 'kind' | 'not
 };
 
 export async function measureScene(page: Page, options: MeasureSceneOptions): Promise<Scene> {
+  const tags =
+    options.tags ??
+    (await tagRasterElements(page, {
+      nativeTypes: options.nativeTypes,
+      ...(options.slideSelector ? { slideSelector: options.slideSelector } : {}),
+      ...(options.sheetSelector ? { sheetSelector: options.sheetSelector } : {}),
+    }));
   const measured = (await page.evaluate(
-    ({ sheetSelector, slideSelector, nativeTypes, theme }) => {
+    ({ sheetSelector, slideSelector, nativeTypes, theme, tags }) => {
       const W = 1600;
       const H = 900;
       type Box = [number, number, number, number];
@@ -54,7 +166,15 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         features: string;
         align: 'left' | 'center' | 'right';
       };
-      type Run = { text: string; rect: DOMRect; style: Style; gt?: true };
+      type Run = {
+        text: string;
+        rect: DOMRect;
+        style: Style;
+        gt?: true;
+        gtLetters?: number;
+        gapAfter?: number;
+        spaceWidth?: number;
+      };
       type Line = { top: number; bottom: number; runs: Run[] };
 
       const firstOf = (list: string): Element | null => {
@@ -98,9 +218,11 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         rootStyle.getPropertyValue('--ink').trim() || (theme === 'dark' ? '#f2f2f0' : '#070707');
       const warnings: string[] = [];
 
-      // Blocks: the top-level data-block roots; a block nested in a composite belongs to it.
+      // Blocks: every data-block root that is not a composite. A composite is a grid whose cells
+      // hold blocks; each of those is its own block, native or raster by its own type (M5).
+      const isComposite = (el: Element): boolean => el.getAttribute('data-type') === 'composite';
       const blockEls = [...slide.querySelectorAll<HTMLElement>('[data-block]')].filter(
-        (el) => el.parentElement?.closest('[data-block]') === null,
+        (el) => !isComposite(el),
       );
       const blocks: SceneBlock[] = blockEls.map((el) => {
         const type = el.getAttribute('data-type') ?? el.tagName.toLowerCase();
@@ -113,12 +235,8 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
       });
       const ownerOf = (el: Element): HTMLElement | null => {
         let cur: HTMLElement | null = el.closest('[data-block]');
-        let top: HTMLElement | null = cur;
-        while (cur) {
-          top = cur;
-          cur = cur.parentElement?.closest('[data-block]') ?? null;
-        }
-        return top;
+        while (cur && isComposite(cur)) cur = cur.parentElement?.closest('[data-block]') ?? null;
+        return cur;
       };
       const isNativeOwner = (el: Element): boolean => {
         const owner = ownerOf(el);
@@ -175,7 +293,26 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
       const measureCarrier = (el: Element): { lines: Line[]; style: Style } => {
         const lines: Line[] = [];
         const range = document.createRange();
-        const pushRun = (rect: DOMRect, text: string, style: Style, gt: boolean): void => {
+        // The width the hidden letters of a GT word take in the host's font, measured on a detached
+        // span, so the exporter can space the invisible run to the mark's width (M5 width gate:
+        // the letters are about 4 px wider than the mark at 22 px and pushed the rest of the line).
+        const lettersWidth = (host: Element, text: string): number => {
+          const probe = document.createElement('span');
+          const c = getComputedStyle(host);
+          probe.style.cssText = `position:absolute;left:-9999px;top:0;visibility:hidden;white-space:pre;font:${c.font};letter-spacing:${c.letterSpacing};font-feature-settings:${c.fontFeatureSettings};font-optical-sizing:${c.fontOpticalSizing};font-variation-settings:${c.fontVariationSettings};font-kerning:${c.fontKerning}`;
+          probe.textContent = text;
+          document.body.appendChild(probe);
+          const width = probe.getBoundingClientRect().width;
+          probe.remove();
+          return round(width);
+        };
+        const pushRun = (
+          rect: DOMRect,
+          text: string,
+          style: Style,
+          gt: boolean,
+          gtLetters?: number,
+        ): void => {
           const cy = rect.top + rect.height / 2;
           let line = lines.find((l) => cy >= l.top - 1 && cy <= l.bottom + 1);
           if (!line) {
@@ -194,6 +331,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           }
           const run: Run = { text, rect, style };
           if (gt) run.gt = true;
+          if (gtLetters !== undefined) run.gtLetters = gtLetters;
           line.runs.push(run);
         };
         const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
@@ -212,7 +350,14 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
             const svg = word?.querySelector('svg');
             if (!word || !svg) continue;
             const host = word.parentElement ?? parent;
-            pushRun(svg.getBoundingClientRect(), text.trim() || 'GT', styleOf(host, el), true);
+            const letters = text.trim() || 'GT';
+            pushRun(
+              svg.getBoundingClientRect(),
+              letters,
+              styleOf(host, el),
+              true,
+              lettersWidth(host, letters),
+            );
             continue;
           }
           const style = styleOf(parent, el);
@@ -230,8 +375,11 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
             const ch = text.charAt(i);
             if (rects.length === 0) {
               // collapsed white space (a wrap point, leading or trailing space) is dropped as
-              // the browser dropped it; a zero-width non-space character stays with its run
-              if (/\s/.test(ch)) continue;
+              // the browser dropped it; the document's zero-width joiners (U+2060, the nowrap
+              // device the importer writes after a hyphen; U+200B; U+FEFF) are dropped too: the
+              // lines are already hard breaks, and LibreOffice drew them from a fallback face
+              // (M5 round three: fixed-points#h4 dw +10); any other zero-width character stays
+              if (/\s/.test(ch) || /[\u2060\u200b\ufeff]/.test(ch)) continue;
               if (runRect) runText += ch;
               continue;
             }
@@ -247,6 +395,23 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           flush();
         }
         lines.sort((a, b) => a.top - b.top);
+        // An inline element that is not text (the external glyph after a link in a link table,
+        // head:121) leaves a horizontal gap between two runs; the run before it records the gap
+        // and the width of a no-break space in its font, so the exporter can fill the gap with an
+        // invisible run and the text after it keeps its position (M5 width gate: surfaces#rows
+        // measured 6 px narrower with the two glyphs of one line collapsed).
+        for (const line of lines) {
+          for (let i = 0; i + 1 < line.runs.length; i += 1) {
+            const a = line.runs[i];
+            const b = line.runs[i + 1];
+            if (!a || !b || a.gt || b.gt) continue;
+            const gap = b.rect.left - a.rect.right;
+            if (gap > 1.5) {
+              a.gapAfter = round(gap);
+              a.spaceWidth = lettersWidth(el, '\u00a0');
+            }
+          }
+        }
         return { lines, style: styleOf(el, el) };
       };
 
@@ -276,6 +441,9 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
                 style: r.style,
               };
               if (r.gt) out.gt = true;
+              if (r.gtLetters !== undefined) out.gtLetters = r.gtLetters;
+              if (r.gapAfter !== undefined) out.gapAfter = r.gapAfter;
+              if (r.spaceWidth !== undefined) out.spaceWidth = r.spaceWidth;
               return out;
             }),
           };
@@ -383,12 +551,16 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         const type = el.getAttribute('data-type') ?? '';
         const blockId = el.getAttribute('data-block') ?? '';
         if (!nativeTypes.includes(type)) continue;
-        if (type === 'rows') {
+        if (type === 'rows' || type === 'say' || type === 'ladder') {
+          // a top hairline and one under every row (say renders as .rows.ex, the ladder as
+          // .ladder > div; both carry the rows' rules, M5)
           borderRules(el, blockId, 'rows', undefined, ['top']);
           [...el.children].forEach((row, i) =>
             borderRules(row, blockId, 'rows', `${blockId}/row/${i}`, ['bottom']),
           );
-        } else if (type === 'plain') {
+        } else if (type === 'plain' || type === 'refs') {
+          // a top hairline (plain) and a soft rule under every item; refs has no top border, and
+          // borderRules reads the computed widths, so it emits none
           borderRules(el, blockId, 'plain', undefined, ['top']);
           [...el.children].forEach((item, i) =>
             borderRules(item, blockId, 'plain', `${blockId}/item/${i}`, ['bottom']),
@@ -466,15 +638,9 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           ? (toText(counterEl, 'counter', 'counter', true) ?? undefined)
           : undefined;
 
-      // Rasters: raster blocks as a whole; icons, marks and the gt-word svgs inside native blocks;
-      // the closing plate's mark. Each element gets a data-ts-rid the extractor screenshots; the
-      // tags of the slides measured before in the same document are cleared first, or a stale tag
-      // on a hidden slide would win the selector.
-      document.querySelectorAll('[data-ts-rid]').forEach((el) => el.removeAttribute('data-ts-rid'));
-      const rasters: SceneRaster[] = [];
-      let rid = 0;
-      // A root with no box of its own (an escape block whose markup is `position: absolute`) takes
-      // the union of its visible descendants, clipped to the sheet.
+      // Rasters: the elements tagRasterElements tagged on this page, with their boxes. A root
+      // with no box of its own (an escape block whose markup is `position: absolute`) takes the
+      // union of its visible descendants, clipped to the sheet.
       const contentBox = (el: Element): { box: Box; clip: boolean } => {
         const own = el.getBoundingClientRect();
         if (own.width >= 1 && own.height >= 1) return { box: toBox(own), clip: false };
@@ -504,58 +670,23 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           clip: true,
         };
       };
-      const tag = (
-        el: Element,
-        blockId: string,
-        kind: SceneRaster['kind'],
-        alpha: boolean,
-      ): void => {
-        rid += 1;
-        (el as HTMLElement).dataset.tsRid = String(rid);
+      const rasters: SceneRaster[] = [];
+      for (const t of tags) {
+        const el = document.querySelector(`[data-ts-rid="${t.rid}"]`);
+        if (!el) continue;
         const { box, clip } = contentBox(el);
         const raster: SceneRaster = {
-          id: `${blockId}:${rid}`,
-          blockId,
-          kind,
-          selector: `[data-ts-rid="${rid}"]`,
+          id: `${t.blockId}:${t.rid}`,
+          blockId: t.blockId,
+          kind: t.kind,
+          selector: `[data-ts-rid="${t.rid}"]`,
           box,
-          alpha,
+          alpha: t.alpha,
           scale: 2,
         };
         if (clip) raster.clip = true;
         rasters.push(raster);
-      };
-      for (const el of blockEls) {
-        const type = el.getAttribute('data-type') ?? '';
-        if (!nativeTypes.includes(type))
-          tag(el, el.getAttribute('data-block') ?? '', 'block', true);
       }
-      slide.querySelectorAll<HTMLElement>('[data-raster]').forEach((el) => {
-        if (!isNativeOwner(el)) return;
-        const kind = (el.getAttribute('data-raster') ?? 'icon') as SceneRaster['kind'];
-        const owner = ownerOf(el);
-        const blockId =
-          owner?.getAttribute('data-block') ??
-          (el.getAttribute('data-rid') ?? 'raster').split(':')[0] ??
-          'raster';
-        tag(el, blockId, kind, kind !== 'shot' && kind !== 'html');
-      });
-      slide
-        .querySelectorAll<HTMLElement>('svg.ic:not([data-raster]), .gt-word svg')
-        .forEach((el) => {
-          if (!isNativeOwner(el)) return;
-          const owner = ownerOf(el);
-          tag(
-            el,
-            owner?.getAttribute('data-block') ?? 'inline',
-            el.closest('.gt-word') ? 'mark' : 'icon',
-            true,
-          );
-        });
-      slide
-        .querySelectorAll<HTMLElement>('svg.mark')
-        .forEach((el) => tag(el, 'plate-mark', 'mark', true));
-      if (wordmarkSvg) tag(wordmarkSvg, 'wordmark', 'mark', true);
 
       const fonts = [...document.fonts]
         .filter((face) => face.status === 'loaded')
@@ -587,6 +718,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
       slideSelector: options.slideSelector ?? DEFAULT_SLIDE_SELECTOR,
       nativeTypes: [...options.nativeTypes],
       theme: options.theme,
+      tags,
     },
   )) as PageScene;
   const { pictureSrc, ...rest } = measured;

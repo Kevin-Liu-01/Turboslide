@@ -1,7 +1,7 @@
 import type { DragEvent, KeyboardEvent, MouseEvent, ReactNode, RefObject } from 'react';
 import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import type { Slide, SlideKind } from '@turboslide/schema/deck';
+import type { Deck, Slide, SlideKind } from '@turboslide/schema/deck';
 import { useTheme } from '@turboslide/viewer/theme';
 
 import type { EditorDispatch } from './dispatch';
@@ -15,6 +15,7 @@ import type { SegOption } from './Seg';
 import { usePtShell } from './shell-context';
 import type { ShellDensity, ShellItem, ShellSection, ShellThumb } from './shell-data';
 import { SidebarFilter as FilterRow } from './SidebarFilter';
+import { SLIDE_TEMPLATES, templateTitle } from './slide-templates';
 import { Thumb } from './Thumb';
 import { ToolButton } from './ToolButton';
 
@@ -26,14 +27,17 @@ export type SidebarFilter = { active: boolean; clear: () => void };
 /**
  * Edit mode for the tree (SPEC 6.2): rows drag to reorder within and across sections and the
  * drop is one slide.move; Alt with the up and down arrows moves a focused row the same way; a
- * row's menu offers Insert after, Duplicate, Move to section, Delete, Render, Lint this slide
- * and Copy id, each one action through the dispatcher with the revision as baseRevision.
+ * row's menu offers Insert after (a blank kind or a slide template), Duplicate, Move to section,
+ * Delete, Render, Lint this slide and Copy id, each one action through the dispatcher with the
+ * revision as baseRevision.
  */
 export type SidebarEdit = {
   revision: number;
   dispatch: EditorDispatch;
   /** a line for the toast */
   onNotice?: (message: string) => void;
+  /** the manifest, so the slide templates that need a picture asset can take one from the deck */
+  deck?: Deck;
 };
 
 /** Where the reader's folds live: one key per shell holding a JSON map of section id to open or closed. */
@@ -338,10 +342,7 @@ function RowMenu({ menu, sections, edit, onClose }: MenuProps) {
     updatedAt: '2026-01-01T00:00:00Z',
   };
 
-  const insertAfter = (kind: SlideKind) => {
-    const id = freeSlideId(taken, `new-${kind}`);
-    const slide = blankSlide(kind, id, stubDeck, section.id);
-    if (slide === null) return;
+  const insertSlide = (id: string, slide: Slide) =>
     run(`Inserted ${id}`, () =>
       edit.dispatch('slide.insert', {
         sectionId: section.id,
@@ -350,7 +351,20 @@ function RowMenu({ menu, sections, edit, onClose }: MenuProps) {
         baseRevision: edit.revision,
       }),
     );
+
+  const insertAfter = (kind: SlideKind) => {
+    const id = freeSlideId(taken, `new-${kind}`);
+    const slide = blankSlide(kind, id, stubDeck, section.id);
+    if (slide !== null) insertSlide(id, slide);
   };
+
+  /* the slide templates with their placeholder copy; a template whose asset the deck lacks is
+     left out, as the palette leaves it out */
+  const templates = SLIDE_TEMPLATES.flatMap((template) => {
+    const id = freeSlideId(taken, `new-${template.id}`);
+    const slide = template.make(id, edit.deck ?? stubDeck, section.id);
+    return slide === null ? [] : [{ template, id, slide }];
+  });
 
   const duplicate = () => {
     const id = freeSlideId(taken, `${item.id}-copy`);
@@ -409,12 +423,17 @@ function RowMenu({ menu, sections, edit, onClose }: MenuProps) {
       className="pt-orow-menu"
       role="menu"
       aria-label={`Slide ${item.id}`}
-      style={{ left: menu.x, top: menu.y }}
+      /* the template entries make the menu tall: it scrolls inside the viewport below its anchor */
+      style={{ left: menu.x, top: menu.y, maxHeight: `calc(100vh - ${menu.y + 8}px)` }}
       onKeyDown={onMenuKey}
     >
       <span className="pt-orow-menu-head">Insert after</span>
       {INSERT_KINDS.map((kind) =>
         entry(`${kind.label} slide`, `insert.${kind.kind}`, () => insertAfter(kind.kind)),
+      )}
+      {templates.length > 0 ? <span className="pt-orow-menu-head">Insert a template</span> : null}
+      {templates.map(({ template, id, slide }) =>
+        entry(templateTitle(template), `template.${template.id}`, () => insertSlide(id, slide)),
       )}
       <span className="pt-orow-menu-rule" aria-hidden="true" />
       {entry('Duplicate', 'duplicate', duplicate)}
@@ -890,6 +909,7 @@ export function Sidebar({
             iconOnly
             className="is-small"
             control="sidebar.density"
+            toggle
           />
         )}
         {overlay ? (

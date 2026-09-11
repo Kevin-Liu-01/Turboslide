@@ -136,9 +136,14 @@ What: the 63 Heroicons 20 solid symbols in `packages/theme/assets/sprite.svg` an
 ## Paper Shaders (Apache License 2.0, with NOTICE)
 
 What: `@paper-design/shaders` 0.0.78, the shader materials behind the `paper:*` entries of the
-material catalog (SPEC 5.4, M5). Source: https://github.com/paper-design/shaders. Apache 2.0
-permits shipping, modifying and selling renders and requires the LICENSE and NOTICE text below to
-travel with the distribution (pptx report section 4.11).
+material catalog in `packages/materials` (SPEC 5.4, M5): the package's fragment shaders and
+`ShaderMount` are imported as is by `packages/materials/src/paper.ts` and `mount.ts`, served to
+the headless capture page from the package's own `dist` by `capture.ts`, and the GT palette presets
+in `presets.ts` are Turboslide's uniform values, not a modification of the package. Source:
+https://github.com/paper-design/shaders. Apache 2.0 permits shipping, modifying and selling renders
+and requires the LICENSE and NOTICE text below to travel with the distribution (pptx report section
+4.11); `packages/materials/NOTICE` repeats the NOTICE beside the code. Frames rendered from the
+materials carry the credit "Material: <name>, Paper Shaders, rendered in Turboslide".
 
 NOTICE:
 
@@ -435,6 +440,124 @@ Glyphfield's contracts (SPEC 2.2). Source: Kevin Liu's Glyphfield repository.
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
+
+## Rust dependencies of crates/turboslide-native (MIT and Apache-2.0)
+
+What: the crates linked into the napi addon and the wasm module of `crates/turboslide-native`
+(SPEC 10, M5), which `@turboslide/native` loads and `@turboslide/effects` uses when a build is
+present. `docs/native.md` describes the crate. The direct dependencies are pinned in
+`crates/turboslide-native/Cargo.toml` and the whole tree in `Cargo.lock`; the table below is
+`cargo metadata` over the `napi` and `wasm` features with the dev-dependency `png` (test fixtures
+only) left out. Every crate is available under MIT, alone or as an alternative, and Turboslide
+takes each one under MIT (or the MIT alternative where several are offered), except
+`unicode-ident`, whose tables are additionally under Unicode-3.0, and `libloading`, which is ISC.
+
+| Crate                                                        | Version                            | License                             |
+| ------------------------------------------------------------ | ---------------------------------- | ----------------------------------- |
+| adler2                                                       | 2.0.1                              | 0BSD OR MIT OR Apache-2.0           |
+| bitflags                                                     | 2.13.2                             | MIT OR Apache-2.0                   |
+| bumpalo                                                      | 3.20.3                             | MIT OR Apache-2.0                   |
+| cfg-if                                                       | 1.0.4                              | MIT OR Apache-2.0                   |
+| convert_case                                                 | 0.12.0                             | MIT                                 |
+| ctor                                                         | 1.0.13                             | Apache-2.0 OR MIT                   |
+| futures (and its subcrates)                                  | 0.3.34                             | MIT OR Apache-2.0                   |
+| itoa                                                         | 1.0.18                             | MIT OR Apache-2.0                   |
+| libc                                                         | 0.2.189                            | MIT OR Apache-2.0                   |
+| libloading                                                   | 0.9.0                              | ISC                                 |
+| libm                                                         | 0.2.16                             | MIT (fdlibm and CORE-MATH portions) |
+| memchr                                                       | 2.8.3                              | Unlicense OR MIT                    |
+| miniz_oxide                                                  | 0.9.1                              | MIT OR Zlib OR Apache-2.0           |
+| napi, napi-derive, napi-derive-backend, napi-sys, napi-build | 3.12.3, 3.6.4, 6.1.3, 3.3.1, 2.4.2 | MIT                                 |
+| nohash-hasher                                                | 0.2.0                              | Apache-2.0 OR MIT                   |
+| once_cell                                                    | 1.21.4                             | MIT OR Apache-2.0                   |
+| pin-project-lite                                             | 0.2.17                             | Apache-2.0 OR MIT                   |
+| proc-macro2                                                  | 1.0.107                            | MIT OR Apache-2.0                   |
+| quote                                                        | 1.0.47                             | MIT OR Apache-2.0                   |
+| rustc-hash                                                   | 2.1.3                              | Apache-2.0 OR MIT                   |
+| rustversion                                                  | 1.0.23                             | MIT OR Apache-2.0                   |
+| semver                                                       | 1.0.28                             | MIT OR Apache-2.0                   |
+| serde, serde_core, serde_derive                              | 1.0.229                            | MIT OR Apache-2.0                   |
+| serde_json                                                   | 1.0.151                            | MIT OR Apache-2.0                   |
+| simd-adler32                                                 | 0.3.10                             | MIT                                 |
+| slab                                                         | 0.4.12                             | MIT                                 |
+| syn                                                          | 3.0.5, 2.0.119                     | MIT OR Apache-2.0                   |
+| unicode-ident                                                | 1.0.24                             | (MIT OR Apache-2.0) AND Unicode-3.0 |
+| unicode-segmentation                                         | 1.13.3                             | MIT OR Apache-2.0                   |
+| wasm-bindgen (and its macro and shared crates)               | 0.2.128                            | MIT OR Apache-2.0                   |
+| windows-link                                                 | 0.2.1                              | MIT OR Apache-2.0                   |
+| zmij                                                         | 1.0.23                             | MIT                                 |
+
+The MIT text, as it appears in each of these crates (the copyright line names the crate's authors;
+for libm "the rust-lang/libm contributors", for miniz_oxide "2013-2014 RAD Game Tools and Valve
+Software, 2010-2014 Rich Geldreich and Tenacious Software LLC, 2017 Frommi, 2017-2024 oyvindln",
+for napi-rs "2020-present LongYinan", for wasm-bindgen "2014 Alex Crichton", for serde and
+serde_json "the serde developers"):
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+libm's `sin`, `exp` and `pow` are ports of FreeBSD msun (fdlibm) sources, which carry this notice:
+
+    Copyright (C) 1993, 2004 by Sun Microsystems, Inc. All rights reserved.
+
+    Developed at SunPro, a Sun Microsystems, Inc. business.
+    Permission to use, copy, modify, and distribute this
+    software is freely granted, provided that this notice
+    is preserved.
+
+libm's `cbrt` is a port of CORE-MATH (`core-math/src/binary64/cbrt/cbrt.c`, Copyright (c) 2021-2022
+Alexei Sibidanov, MIT).
+
+## pixelmatch (ISC), ported
+
+What: `crates/turboslide-native/src/diff.rs` is a Rust port of pixelmatch 7.2.0
+(https://github.com/mapbox/pixelmatch), the perceptual diff `@turboslide/effects` also uses through
+the npm package (SPEC 8.5 step 3). The port keeps pixelmatch's arithmetic so both count the same
+pixels; `packages/effects/src/parity.test.ts` holds them together.
+
+    ISC License
+
+    Copyright (c) 2019, Mapbox
+
+    Permission to use, copy, modify, and/or distribute this software for any purpose
+    with or without fee is hereby granted, provided that the above copyright notice
+    and this permission notice appear in all copies.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+    FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+    OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+    TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+    THIS SOFTWARE.
+
+## DSSIM: not the dssim crate
+
+SPEC 10 names https://github.com/kornelski/dssim for the perceptual text gate. That crate
+(`dssim-core`) is licensed AGPL-3.0-or-later, and linking it into `turboslide-native` would place
+the addon and the wasm module under the AGPL, which the provisional MIT license of this repository
+(SPEC open question 14) does not allow without a decision. `crates/turboslide-native/src/dssim.rs`
+and `packages/effects/src/dssim.ts` are therefore Turboslide's own implementation of multi-scale
+SSIM from the published method (Wang, Bovik, Sheikh and Simoncelli, "Image quality assessment: from
+error visibility to structural similarity", 2004; Wang, Simoncelli and Bovik, "Multi-scale
+structural similarity for image quality assessment", 2003), written from the papers and not from
+the dssim source, with the `1 / ssim - 1` output convention. `docs/native.md` records the
+definition; adopting the dssim crate is Kevin's licensing decision.
 
 ## Everything else
 

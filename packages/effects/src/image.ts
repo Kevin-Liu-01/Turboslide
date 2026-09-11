@@ -37,3 +37,23 @@ export function litFraction(bits: BitImage): number {
   for (const b of bits.bits) lit += b;
   return bits.bits.length === 0 ? 0 : lit / bits.bits.length;
 }
+
+/**
+ * The pixels of `box` ([left, top, width, height], clamped to the image) as their own image, for
+ * per-block diffs and DSSIM gates; null when nothing of the box lies inside the image.
+ */
+export function cropRgba(image: RgbaImage, box: Box): RgbaImage | null {
+  const x0 = Math.max(0, Math.floor(box[0]));
+  const y0 = Math.max(0, Math.floor(box[1]));
+  const x1 = Math.min(image.width, Math.ceil(box[0] + box[2]));
+  const y1 = Math.min(image.height, Math.ceil(box[1] + box[3]));
+  const width = x1 - x0;
+  const height = y1 - y0;
+  if (width <= 0 || height <= 0) return null;
+  const data = new Uint8Array(width * height * 4);
+  for (let y = 0; y < height; y += 1) {
+    const src = ((y0 + y) * image.width + x0) * 4;
+    data.set(image.data.subarray(src, src + width * 4), y * width * 4);
+  }
+  return { width, height, data };
+}

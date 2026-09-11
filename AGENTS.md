@@ -38,6 +38,69 @@ acceptance commands per milestone are in the milestone plan; the M1 acceptance i
   rule comes from the grammar or the spec, cite the section (`SPEC 5.1`, `DECK-GRAMMAR.md:22`,
   `head:11-176`).
 
+## The agent surface
+
+Every editor or agent write goes through one action of `packages/schema/src/actions.ts` and one
+dispatcher (`@turboslide/agent/dispatch`); the store applies it through `applyWrite` (SPEC 7.1).
+From M4 the studio hosts that table for agents (MILESTONES M4 item 1):
+
+- `POST /api/actions/<id>?deck=<slug>` runs an action whose transports include `http`; `GET` on the
+  same path returns its contract. The request rules live in `packages/agent/src/http/` (framework
+  free, unit tested) and the studio route is an adapter: one JSON object as the input, 1 MB body cap
+  (25 MB for asset uploads), `x-turboslide-author: agent:<runId>` (or `?author=`), `?force=1` (or
+  `x-turboslide-force: 1`) to write past another author's lease, and one error body
+  `{ error: { name, status, message, code?, pointer?, currentRevision?, current?, holder? } }`.
+  An unknown field is 400 with `code: unknown_field` and the pointer to the extra key.
+- `GET /api/agent` is the generated manifest (`packages/agent/generated/manifest.json`, with the
+  execution rules) plus the instance facts: what has a handler here, what waits for a later
+  milestone, whether a token is required, the attached studio pages. `/openapi.json`, `/llms.txt`
+  and `/llms-full.txt` serve the committed generated files.
+- `/mcp` is the MCP server over the SDK's streamable HTTP transport (`packages/mcp/src/http.ts`).
+  One session binds one deck (`?deck=`) and one author at initialize; `deck_goto_slide` is listed
+  while a studio page (`/edit` or `/deck`) is attached to that deck and runs in that page through
+  `window.turboslide.studio` (`apps/studio/src/server/sessions.ts`, `components/useStudioSession.ts`).
+- Authentication (SPEC 11): with `TURBOSLIDE_TOKEN` set every request to `/api/actions`,
+  `/api/agent` and `/mcp` carries `Authorization: Bearer <token>`; without it the surface serves
+  localhost only (X-Forwarded-Host, then Host) and answers 401 elsewhere. Server functions run
+  under `createCsrfMiddleware()` (`apps/studio/src/start.ts`), filtered to server functions so the
+  agent routes stay a bearer-token surface.
+- Leases (SPEC 6.7) are enforced for agent authors from M4: a write by `agent:*` to a slide another
+  author holds is 409 with the holder and the current document unless `force` is set; a human's
+  write warns and goes through (`packages/store/src/lease.ts` `leasePolicyFor`). The editor takes
+  a ten minute lease on the slide it edits.
+- External writes reach an open editor over the store's watch channel within a second: the
+  version records since the editor's revision are applied forward through the reducer and the
+  banner names the revision and the author (`edit.$deckId.tsx` `adoptExternal`).
+
+Adding an action: the parity chain below, then register its handler in the CLI
+(`apps/cli/src/commands/mcp.ts` or `store-actions.ts`), in the studio's dispatcher
+(`apps/studio/src/server/actions.ts`; the asset and material actions come from
+`@turboslide/materials/actions` `registerAssetActions`, `judge.bundle` and `build.run` run the CLI
+as a child process, renders and exports go through the render worker) and, for a window action,
+in the editor's `on(...)` table. A window action whose handler needs Node (sharp, the capture
+browser: `asset.add`, `asset.dither`, `material.capture`, `material.list`) is listed in
+`apps/studio/src/server/agent-actions.ts` `SERVER_SIDE_WINDOW_ACTIONS`; the editor registers it
+through `runDeckAction`, which validates the input with the action's schema and runs the same
+deck dispatcher, and the write comes back over the watch channel. Export from the editor is
+`export.run` through `apps/studio/src/server/download.ts` (the worker job, polled once a second,
+signed one-time download URLs); `format: 'gslides'` with `dryRun: true` is the Dry run entry of
+the Export menu and needs no credentials, the live entry appears when
+`TURBOSLIDE_GOOGLE_CREDENTIALS` names a file (docs/google-slides.md);
+name it in a test (the coverage test scans every `*.test.ts`, `*.spec.ts` and `e2e/*.mjs` for the
+id, the MCP tool or the CLI command) and it appears in the four skill tables through
+`pnpm generate:contracts`.
+
+## The judge loop
+
+`docs/judge-loop.md` is the procedure (SPEC 7.6). `turboslide judge bundle --out <dir>` packages
+the evidence (renders in both themes, sheets with cell maps and the lint overlay, `lint.json` with
+the gate, the document, the outline, the numerals per slide, the six lens instructions);
+`scripts/judge-loop.mjs` runs the judges by lens, the skeptics, the fixers (only with `--fix`) and
+the gate, through the Claude Agent SDK when installed, else the `claude` CLI in headless mode, else
+with the judges skipped (`--runner none`), and writes `findings.json` (every entry with `slideId`
+and `source`: `lint`, `judge:<lens>` or `skeptic`) and `gate.json` with a verdict. The loop writes
+to a deck only under `--fix`, as `agent:judge-loop-<stamp>`, under a lease per slide.
+
 ## Parity chains
 
 The theme has one source of truth and two copies that must agree (SPEC 5.1):
@@ -101,14 +164,35 @@ runner skips the two steps that read the Prototemplate checkout when
 `/Users/kevinliu/repos/Prototemplate/deck` (or `TURBOSLIDE_PROTOTEMPLATE_DECK`) is missing, which
 is the case in CI, and starts and stops the dev server for the two steps that need it.
 
+The M4 lines beyond `pnpm check` are the skills and coverage vitest files
+(`packages/agent/src/__tests__/{skills,coverage}.test.ts`), `apps/studio/e2e/agent-http.spec.ts`
+and `node apps/cli/e2e/mcp-http.mjs` against a server on 4321 (the script starts one when nothing
+answers and stops it), `turboslide judge bundle` and `scripts/judge-loop.mjs` (docs/judge-loop.md).
+
+The M5 lines beyond `pnpm check` are in the M5 section of the milestone plan: the zero-escape
+re-import with identical ids (`scripts/check.mjs` steps 8 and 12 now gate on zero escapes and
+compare every slide), `asset dither --all-two-tone --from-recorded --verify-cells`, the liquid
+metal `material capture` against `decks/gt-brand/assets/liquid-metal-diamond.recipe.json`, a site
+capture with the `gt-site` recipe, `cargo test`, the native build with the parity test, the
+native PPTX gate in the container, and the lint fixture index. `docs/M4-M5-STATUS.md` records the
+run with its numbers. `pnpm-workspace.yaml` lists `packages/native/npm/*` (the per-platform addon
+packages `@turboslide/native` depends on optionally) so the frozen-lockfile install in the render
+worker image resolves them.
+
 All 18 M1 steps passed on the M1 tree (2026-09-10, 219 s on Kevin's machine with the Prototemplate
 checkout present); `docs/M1-STATUS.md` records every step with its measured numbers. All 19 steps
 pass on the M2 tree (2026-09-10, 145.4 s on the same machine); `docs/M2-STATUS.md` records them
 with the rest of the M2 acceptance list. All 19 steps pass on the M3 tree (2026-09-10, 163.4 s on
 the same machine) and the five other M3 lines pass against a server on 4321 started and stopped by
-the verifier; `docs/M3-STATUS.md` records them. On the bare scaffold only steps 1 to 6 passed
-(install, route generation, contracts generation, `tsc -b`, vitest, build plus the client bundle
-check).
+the verifier; `docs/M3-STATUS.md` records them. On the M4 and M5 tree (2026-09-11, the same
+machine, the render worker image building alongside) steps 1 to 18 passed in 265.6 s of step time,
+step 19 failed once on two unformatted files of the fix round and passed alone after they were
+formatted, and every M4, M5 and M6 item 1 line plus the directive's lines passed: the container
+gate on the rebuilt image in 348 s, the Slides exporter as a dry run in both modes, the judge loop
+as written with its runner dropped at the preflight; `docs/M4-M5-STATUS.md` records them with the
+numbers and the steps for a live Google Slides export. On the bare scaffold only steps 1 to 6
+passed (install, route generation, contracts generation, `tsc -b`, vitest, build plus the client
+bundle check).
 
 Type checking: `pnpm exec tsr generate` must run before `tsc -b` because `routeTree.gen.ts` is
 generated and git-ignored (measured: three type errors otherwise). `tsc -b` writes declaration
@@ -160,7 +244,19 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
   directory, so the root copy points at `apps/studio/src/routes`. The app's own `tsr.config.json`
   is read by the Vite plugin. Both produce the same `routeTree.gen.ts` (verified).
 - `pnpm generate:contracts` runs `packages/agent/src/generate/main.ts` with Node's type stripping;
-  it must write every generated file deterministically so `git diff --exit-code` passes.
+  it must write every generated file deterministically so `git diff --exit-code` passes. From M4
+  the outputs include `packages/agent/generated/llms.txt` and `llms-full.txt`; from M5
+  `packages/schema/src/rules.json` (the rule ids in table order) and
+  `packages/lint/fixtures/index.json` (per rule: the fixture deck slides the static layer raises
+  it on and the test files under `packages/lint/src` that name it; `null` for a rule with
+  neither, which `packages/agent/src/__tests__/fixtures.test.ts` and the last M5 acceptance line
+  refuse). A new rule therefore needs a planted slide in `packages/lint/src/fixtures/deck.ts` or
+  a test naming it before the chain passes. Step 3 of `scripts/check.mjs` diffs both files.
+- `GET /api/agent` keeps `actions` as the window API's action list (the M3 window-api spec compares
+  it with `describe().actions` in the page); the manifest's grouped ids are `actionsByGroup`.
+- `apps/studio` depends on `@turboslide/cli` (its `./store-actions` export, so the HTTP and MCP
+  writes run the CLI's store actions) and on `@turboslide/mcp`; the render worker already depended
+  on the CLI the same way.
 
 ## Deviations from the spec, recorded
 

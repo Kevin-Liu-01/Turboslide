@@ -19,8 +19,36 @@
     "Every mutating action requires baseRevision and rejects a stale one with 409 and the current document.",
     "Every write returns the normalized result; re-read from the response, not from memory.",
     "Unknown fields are rejected with unknown_field and a JSON pointer, except under ext on a slide, a block or an asset.",
+    "An agent write to a slide another author leased is refused with 409 and the holder unless force is set.",
     "A claim about a deck names the revision; render both themes and lint before claiming a slide is done."
   ],
+  "execution": {
+    "http": {
+      "method": "POST",
+      "path": "/api/actions/<id>",
+      "describe": "GET /api/actions/<id> returns the action contract: input and output JSON Schema, transports, milestone and whether this instance implements it.",
+      "body": "One JSON object, the action input exactly as the input schema states it; unknown fields are refused with 400 and code unknown_field plus a JSON pointer.",
+      "deck": "?deck=<slug> names the deck; without it the instance default (gt-brand) is used.",
+      "author": "x-turboslide-author: agent:<runId> (or ?author=); a request without one writes as agent:http.",
+      "force": "?force=1 (or x-turboslide-force: 1) writes to a slide another author leased; without it the write is 409 with the holder and the current document.",
+      "auth": "Authorization: Bearer <TURBOSLIDE_TOKEN> on every deployed instance; open only on localhost when the instance has no token; a request off localhost without a token is 401.",
+      "limits": {
+        "writeBytes": 1048576,
+        "assetBytes": 26214400
+      },
+      "errors": "{ error: { name, status, message, code?, pointer?, currentRevision?, current?, holder?, milestone? } }; TypeError 400, RangeError 404, ConflictError 409, NotImplementedError 501, Error 500."
+    },
+    "mcp": {
+      "path": "/mcp",
+      "transport": "MCP streamable HTTP: POST JSON-RPC to /mcp (initialize first), GET for the notification stream, DELETE to end the session; the mcp-session-id header carries the session.",
+      "session": "One MCP session is bound to one deck and one author at initialize; tools are deck_<action> for every implemented action on the mcp transport.",
+      "deck": "?deck=<slug> on the initialize request; the instance default otherwise.",
+      "author": "x-turboslide-author or ?author= on the initialize request; agent:mcp-http otherwise.",
+      "viewTools": "deck_goto_slide (view.goto) is listed when a studio page (/edit or /deck) is attached to the deck and runs in that page."
+    },
+    "leases": "slide.lease takes ten minutes on a slide; an agent write to a slide another author holds is 409 with the holder unless force is set; a human write warns and goes through (SPEC 6.7).",
+    "revisions": "Every mutating action takes baseRevision; a stale one is 409 with currentRevision and the current document; re-read from the response and retry once."
+  },
   "skills": [
     {
       "name": "turboslide-create",
@@ -46,6 +74,8 @@
   "actions": {
     "deck": [
       "deck.info",
+      "deck.create",
+      "deck.rename",
       "section.set",
       "import.run",
       "validate.run"
@@ -70,7 +100,8 @@
       "asset.add",
       "asset.dither",
       "asset.capture",
-      "material.capture"
+      "material.capture",
+      "material.list"
     ],
     "render": [
       "render.slide",
@@ -107,7 +138,7 @@
       "artifact.download"
     ]
   },
-  "actionCount": 42,
+  "actionCount": 45,
   "resources": [
     {
       "uri": "deck://manifest",

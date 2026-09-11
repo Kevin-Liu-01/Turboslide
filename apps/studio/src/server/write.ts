@@ -281,6 +281,11 @@ export type WatchDeckResult = {
   leases: Lease[];
   /** true when the deck moved past `since` */
   changed: boolean;
+  /**
+   * the version records written after `since`, oldest first, so the editor can apply an external
+   * revision forward on its own document instead of reloading (MILESTONES M4 item 2)
+   */
+  since: VersionRecord[];
 };
 
 const WATCH_DEFAULT_MS = 20_000;
@@ -298,13 +303,15 @@ async function snapshot(store: FileStore, since: number): Promise<WatchDeckResul
     head: last === undefined ? null : toVersion(last),
     leases,
     changed: revision !== since,
+    since: revision === since ? [] : records.filter((record) => record.revision > since),
   };
 }
 
 /**
  * The store's watch channel as a long poll (SPEC 6.7 "External changes arrive over the store's
- * watch channel as a new revision"): resolves as soon as deck.json carries a revision other than
- * `since`, or with the current state at the timeout. The editor loops on it.
+ * watch channel as a new revision"; MILESTONES M4 item 2): resolves as soon as deck.json carries a
+ * revision other than `since`, or with the current state at the timeout, with the version records
+ * written in between so the editor applies them forward within the second. The editor loops on it.
  */
 const watchDeckFn = createServerFn({ method: 'POST' })
   .validator((raw: string): WatchDeckInput => {

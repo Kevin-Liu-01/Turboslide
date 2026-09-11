@@ -1,6 +1,7 @@
-// Every generated contract surface by repo-relative path (SPEC 7.1; MILESTONES M1 item 4):
-// packages/agent/generated/{cli,mcp-tools,describe,openapi,manifest}.json, docs/grammar.md and
-// the four skills' reference files. generateAll() is pure; writeAll() writes; staleFiles() is what
+// Every generated contract surface by repo-relative path (SPEC 7.1; MILESTONES M1 item 4, M4
+// item 1): packages/agent/generated/{cli,mcp-tools,describe,openapi,manifest}.json, the two
+// llms guides, docs/grammar.md, the rule ids as JSON with the lint fixture index (M5) and the four
+// skills' reference files. generateAll() is pure; writeAll() writes; staleFiles() is what
 // the test and `--check` use. Outputs are deterministic so `git diff --exit-code` passes after a
 // fresh generation.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
@@ -8,8 +9,15 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateCli } from './cli.ts';
 import { generateDescribe } from './describe.ts';
+import {
+  FIXTURE_INDEX_PATH,
+  RULES_JSON_PATH,
+  generateFixtureIndex,
+  generateRulesJson,
+} from './fixtures.ts';
 import { generateGrammar } from './grammar.ts';
 import { stableJson } from './json-schema.ts';
+import { generateLlms, generateLlmsFull } from './llms.ts';
 import { generateManifest } from './manifest.ts';
 import { generateMcpTools } from './mcp.ts';
 import { generateOpenApi } from './openapi.ts';
@@ -27,7 +35,11 @@ export function generateAll(): Record<string, string> {
     [`${GENERATED_DIR}/describe.json`]: stableJson(generateDescribe()),
     [`${GENERATED_DIR}/openapi.json`]: stableJson(generateOpenApi()),
     [`${GENERATED_DIR}/manifest.json`]: stableJson(generateManifest()),
+    [`${GENERATED_DIR}/llms.txt`]: generateLlms(),
+    [`${GENERATED_DIR}/llms-full.txt`]: generateLlmsFull(),
     'docs/grammar.md': generateGrammar(),
+    [RULES_JSON_PATH]: generateRulesJson(),
+    [FIXTURE_INDEX_PATH]: generateFixtureIndex(),
     ...generateSkillReferences(),
   };
 }

@@ -10,9 +10,10 @@ import type { Author, Lease, Mutation, Version, Write } from '@turboslide/schema
 import type { Issue } from '@turboslide/schema/validate';
 
 /**
- * Leases are advisory in M2 and M3 and enforced for agent writes in M4 (SPEC 6.7). Under
+ * Leases were advisory in M2 and M3 and are enforced for agent writes from M4 (SPEC 6.7). Under
  * `advisory` a write to a slide leased by another author goes through and the outcome carries a
- * warning; under `enforce` it is a conflict with the holder attached.
+ * warning; under `enforce` it is a conflict with the holder attached. A store opened without a
+ * policy applies `enforce` to agent authors and `advisory` to humans (lease.ts leasePolicyFor).
  */
 export type LeasePolicy = 'advisory' | 'enforce';
 

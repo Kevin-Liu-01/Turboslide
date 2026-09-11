@@ -22,12 +22,14 @@
     "./Gestures": "./src/Gestures.tsx",
     "./InlineText": "./src/InlineText.tsx",
     "./Editor": "./src/Editor.tsx",
+    "./MaterialMount": "./src/MaterialMount.tsx",
     "./standalone/source": "./standalone/source.ts",
     "./standalone/runtime.ts": "./standalone/runtime.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {
     "@turboslide/effects": "workspace:*",
+    "@turboslide/materials": "workspace:*",
     "@turboslide/render": "workspace:*",
     "@turboslide/schema": "workspace:*",
     "@turboslide/theme": "workspace:*",

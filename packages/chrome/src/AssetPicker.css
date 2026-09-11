@@ -1,0 +1,141 @@
+/* The asset picker (SPEC 6.5, 2.2): a --pt-hair box under the asset control, the filter field
+   and the role Seg in a head row with --pt-hair under it, then a scrolling list of rows that
+   draw --pt-hair-soft under themselves (the last none). Each row: the twins side by side in
+   --pt-edge frames, the id in the mono stack, the role and size in titanium. Ink is a state:
+   the picked row's frame; the keyboard cursor takes the plate ground. Radius 0, no shadow. */
+.ts-asset-picker {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 320px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+}
+
+.ts-asset-picker-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-asset-picker-filter {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px var(--pt-text);
+}
+
+.ts-asset-picker-filter:focus-visible {
+  outline: none;
+  border-color: var(--pt-ink);
+}
+
+.ts-asset-picker-roles {
+  flex: 0 0 auto;
+  min-width: 0;
+}
+
+.ts-asset-picker-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+}
+
+.ts-asset-picker-empty {
+  padding: 10px 8px;
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-asset-picker-row {
+  appearance: none;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  row-gap: 2px;
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: 6px 8px;
+  border: 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-asset-picker-list > li:last-child .ts-asset-picker-row {
+  border-bottom: 0;
+}
+
+.ts-asset-picker-row.is-cursor {
+  background: var(--pt-plate);
+}
+
+.ts-asset-picker-row:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-asset-picker-twins {
+  grid-row: 1 / 3;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.ts-asset-picker-twins img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-plate);
+}
+
+.ts-asset-picker-twins img[data-theme='dark'] {
+  background: var(--pt-panel-ink);
+}
+
+.ts-asset-picker-twins img:only-child {
+  grid-column: 1 / 3;
+  width: 50%;
+}
+
+.ts-asset-picker-row.is-picked .ts-asset-picker-twins img {
+  border-color: var(--pt-ink);
+}
+
+.ts-asset-picker-id {
+  font-family: var(--pt-mono);
+  font-size: 12px;
+  color: var(--pt-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-asset-picker-meta {
+  font-size: 11.5px;
+  color: var(--pt-titanium);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

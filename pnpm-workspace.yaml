@@ -1,7 +1,9 @@
-# Workspace layout (SPEC 3.1). packages/native/npm/* joins in M5.
+# Workspace layout (SPEC 3.1). packages/native/npm/* are the per-platform addon packages
+# @turboslide/native depends on optionally (M5; docs/native.md).
 packages:
   - apps/*
   - packages/*
+  - packages/native/npm/*
   - tooling/*
 
 # The default catalog pins every shared dependency to one exact version (SPEC 3.2).

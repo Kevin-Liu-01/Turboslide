@@ -274,6 +274,14 @@ const badRaw: unknown[] = [
           css: '.s-x .k { color: #ff0000; font-weight: 700; font-size: 19px; }',
           html: '<div class="s-x"><p>Text <svg class="ic ok" aria-hidden="true"><use href="#i-check-circle"/></svg> inline</p><span style="color:#12a37a">green</span><div class="scale"><div class="bar"><i style="left: 40%"></i></div></div><svg class="dia"><text font-size="14">tiny</text></svg></div>',
         },
+        // dia/stroke-grammar: a raw svg diagram with a 2 px round-capped line (DECK-GRAMMAR.md:44)
+        {
+          id: 'raw',
+          type: 'dia',
+          fit: 'slot',
+          alt: 'One rule drawn 2 px wide with round caps',
+          svg: '<svg viewBox="0 0 200 40" width="200" height="40"><line x1="0.5" y1="20.5" x2="199.5" y2="20.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+        },
         // count/hard-coded (the deck has 8 slides and 2 sections) and numbers/contradiction (2 sections vs 9 sections)
         { id: 'p', type: 'paragraph', text: 'The deck has 8 slides in 2 sections.' },
         { id: 'q', type: 'paragraph', text: 'There are 9 sections in all.' },

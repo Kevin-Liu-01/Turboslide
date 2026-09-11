@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "positioning",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Open source and platform"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "GT builds both the open-source libraries and the closed platform. The positioning is the Vercel model applied to localization. Because GT owns the whole stack, it can deliver consistent translation quality across a company's apps, docs, and websites, with integration time measured in hours.",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "dia1",
+        "type": "dia",
+        "fit": {
+          "viewBox": [
+            0,
+            0,
+            730,
+            300
+          ]
+        },
+        "svg": "<svg class=\"dia\" viewBox=\"0 0 730 300\" aria-label=\"Customer apps, docs, and websites above the two GT layers, the open-source libraries and the platform\">\n          <rect x=\"120\" y=\"80\" width=\"610\" height=\"210\" fill=\"var(--plate)\"></rect>\n          <rect x=\"120\" y=\"0\" width=\"610\" height=\"290\" fill=\"none\" class=\"hair\" stroke-width=\"1\"></rect>\n          <path d=\"M120 80 H730\" class=\"hair\" stroke-width=\"1\" fill=\"none\"></path>\n          <path d=\"M120 185 H730\" class=\"hair\" stroke-width=\"1\" fill=\"none\"></path>\n          <path d=\"M104 80 V290 M96 80 H112 M96 290 H112\" class=\"ink\" stroke-width=\"1\" fill=\"none\"></path>\n          <text x=\"0\" y=\"47\">Customer</text>\n          <use href=\"#gt-mark\" x=\"-0.15\" y=\"177.35\" width=\"23.28\" height=\"14.8\" fill=\"var(--ink-2)\"></use>\n          <text x=\"144\" y=\"47\">Apps, docs, and websites</text>\n          <text x=\"144\" y=\"124\" class=\"lab\">Open-source libraries</text>\n          <text x=\"144\" y=\"162\">gt, gt-next, gt-react, gt-vue, gt-node, gt-python</text>\n          <text x=\"144\" y=\"229\" class=\"lab\">Platform</text>\n          <text x=\"144\" y=\"267\">API, versioning, review, Locadex</text>\n        </svg>",
+        "alt": "Customer apps, docs, and websites above the two GT layers, the open-source libraries and the platform"
+      }
+    ]
+  }
+}

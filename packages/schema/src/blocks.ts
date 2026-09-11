@@ -10,6 +10,24 @@ import type { IconColor, IconName } from './icons.ts';
 import { ICON_COLORS, iconNameSchema } from './icons.ts';
 import type { Text } from './text.ts';
 import { textSchema } from './text.ts';
+import type { MaterialBlock } from './blocks/material.ts';
+import { materialBlockSchema } from './blocks/material.ts';
+
+/** The material block lives in blocks/material.ts (SPEC 5.3, 5.4; M5 item 3). */
+export type {
+  MaterialBlock,
+  MaterialPlateSide,
+  MaterialRecipe,
+  MaterialUniformValue,
+  MaterialUniforms,
+} from './blocks/material.ts';
+export {
+  MATERIAL_ANCHORS,
+  MATERIAL_PLATE_SIDES,
+  materialBlockSchema,
+  materialRecipeOf,
+  materialUniformsSchema,
+} from './blocks/material.ts';
 
 /** Unknown fields survive under `ext` on exactly three levels: Slide, Block and Asset (SPEC 4.1). */
 export const extSchema = z.record(z.string(), z.unknown()).optional();
@@ -54,6 +72,17 @@ export type Diagram = {
   }[];
   icons: { name: IconName; x: number; y: number; size: 24 | 20; color?: IconColor }[];
   marks: { x: number; y: number; w: number; h: number; iso?: true }[];
+  /**
+   * Closed shapes with three or more corners: the faces of the isometric plate (s25:57-60) and any
+   * other declared polygon. Optional so a diagram written before M5 reads back unchanged.
+   */
+  polygons?: {
+    points: [number, number][];
+    fill: 'ink' | 'paper' | 'plate' | 'none';
+    opacity?: number;
+    stroke?: 'ink' | 'mid' | 'hair';
+    width?: 1 | 1.5;
+  }[];
 };
 
 export type BlockBase = { id: BlockId; ext?: Record<string, unknown> };
@@ -155,11 +184,21 @@ export type BoardBlock = BlockBase & {
   columns: [128, 250, 200, 'fr'];
   rows: { asset?: AssetId; name: Text; address?: string; state: Icon; note: Text }[];
 };
-/** M5: the declared figure grid that retires the last escapes. */
+/**
+ * The declared figure grid that retires the last escapes (SPEC 4.2, M5): `tracks` is the CSS grid
+ * template, `gap` the gap in px, `justify` the track distribution when the tracks are narrower
+ * than the slot (s25:8), `align` the cross-axis alignment of the cells (s67:5, s83:5), and each
+ * cell holds blocks and may span columns. A composite with a `caption` renders as a figure with a
+ * figcaption at 16 or 15 px (s67:6, s84:16), the form of the shot and pair figures.
+ */
 export type CompositeBlock = BlockBase & {
   type: 'composite';
   tracks: string;
   gap?: number;
+  justify?: 'start' | 'space-between';
+  align?: 'start' | 'center' | 'end' | 'stretch';
+  caption?: Text;
+  captionSize?: 16 | 15;
   cells: { blocks: Block[]; span?: number }[];
 };
 export type PanelBlock = BlockBase & {
@@ -228,6 +267,7 @@ export type Block =
   | MarkSizesBlock
   | MatrixBlock
   | LogoPlatesBlock
+  | MaterialBlock
   | HtmlBlock;
 
 export type BlockType = Block['type'];
@@ -261,6 +301,7 @@ export const BLOCK_TYPES = [
   'markSizes',
   'matrix',
   'logoPlates',
+  'material',
   'html',
 ] as const satisfies ReadonlyArray<BlockType>;
 
@@ -354,6 +395,17 @@ export const diagramSchema = z.strictObject({
       iso: z.literal(true).optional(),
     }),
   ),
+  polygons: z
+    .array(
+      z.strictObject({
+        points: z.array(z.tuple([z.number(), z.number()])).min(3),
+        fill: z.enum(['ink', 'paper', 'plate', 'none']),
+        opacity: z.number().min(0).max(1).optional(),
+        stroke: strokeSchema.optional(),
+        width: z.literal([1, 1.5]).optional(),
+      }),
+    )
+    .optional(),
 }) satisfies z.ZodType<Diagram>;
 
 const base = {
@@ -947,6 +999,9 @@ export const htmlBlockSchema = z.strictObject({
 /** Recursive through composite cells; typed explicitly so the cycle resolves. */
 export const blockSchema: z.ZodType<Block> = z.lazy(() => blockUnionSchema);
 
+export const COMPOSITE_JUSTIFY = ['start', 'space-between'] as const;
+export const COMPOSITE_ALIGN = ['start', 'center', 'end', 'stretch'] as const;
+
 export const compositeBlockSchema = z.strictObject({
   ...base,
   type: z.literal('composite'),
@@ -961,6 +1016,27 @@ export const compositeBlockSchema = z.strictObject({
     control: 'number',
     group: 'Layout',
   }),
+  justify: annotate(z.enum(COMPOSITE_JUSTIFY).optional(), {
+    label: 'Justify tracks',
+    control: 'select',
+    snap: COMPOSITE_JUSTIFY,
+    group: 'Layout',
+    help: 'space-between spreads fixed tracks across the slot, the deck’s `justify-content` (s25:8).',
+  }),
+  align: annotate(z.enum(COMPOSITE_ALIGN).optional(), {
+    label: 'Align cells',
+    control: 'select',
+    snap: COMPOSITE_ALIGN,
+    group: 'Layout',
+    help: 'The grid’s align-items; start keeps a short cell at the top of its row (s67:5, s83:5).',
+  }),
+  caption: annotate(textSchema.optional(), {
+    label: 'Caption',
+    control: 'textarea',
+    group: 'Text',
+    help: 'Renders the composite as a figure with this figcaption (s67:6, s84:16).',
+  }),
+  captionSize,
   cells: z
     .array(
       z.strictObject({
@@ -997,6 +1073,7 @@ export const blockUnionSchema = z.discriminatedUnion('type', [
   markSizesBlockSchema,
   matrixBlockSchema,
   logoPlatesBlockSchema,
+  materialBlockSchema,
   htmlBlockSchema,
 ]);
 
@@ -1027,5 +1104,6 @@ export const BLOCK_SCHEMAS = {
   markSizes: markSizesBlockSchema,
   matrix: matrixBlockSchema,
   logoPlates: logoPlatesBlockSchema,
+  material: materialBlockSchema,
   html: htmlBlockSchema,
 } as const satisfies Record<BlockType, z.ZodType>;

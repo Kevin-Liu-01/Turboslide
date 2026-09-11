@@ -31,7 +31,8 @@ import './Toolbar.css';
  * the Cmd K chip, Ctrl K off Apple) opens the right group, and `status`
  * (the editor's StatusChip, SPEC 6.1) sits left of it. Every control is a
  * labeled ToolButton with a title naming its key. The labels collapse in
- * measured tiers when the bar runs short (Toolbar.css).
+ * measured tiers when the bar runs short (Toolbar.css): the four ported
+ * tiers, then a fifth for the editor's over-full bar.
  */
 export type ToolbarProps = {
   /** the deck's title, shown with the mark while the sidebar is hidden */
@@ -182,12 +183,16 @@ const MODE_KEY: Partial<Record<ShellMode, string>> = { grid: 'G', book: 'B' };
 
 /**
  * How far the labels have collapsed: none; then Copy link and Fullscreen;
- * then Previous and Next; then Theme; then Help, Present and the slot's
- * buttons. The seg's words are never traded.
+ * then Previous and Next; then Theme; then Help, Present, the slot's buttons
+ * and the status chip's words; then, only when a route's controls still
+ * leave the bar short (the editor at 1280 with the list open), the mode
+ * seg's words and the Search word, the way the bar reads at 900px.
  */
-type Tight = 0 | 1 | 2 | 3 | 4;
+type Tight = 0 | 1 | 2 | 3 | 4 | 5;
 
-const TIERS: readonly Tight[] = [1, 2, 3, 4];
+const TIERS: readonly Tight[] = [1, 2, 3, 4, 5];
+
+const TIGHT_CLASSES = TIERS.map((tier) => `is-tight-${tier}`);
 
 /* the tiers are cumulative: tier three carries the classes of one and two, so each tier's rules name only what it adds */
 const TIGHT_CLASS: Record<Tight, string> = {
@@ -196,6 +201,7 @@ const TIGHT_CLASS: Record<Tight, string> = {
   2: 'pt-toolbar is-tight-1 is-tight-2',
   3: 'pt-toolbar is-tight-1 is-tight-2 is-tight-3',
   4: 'pt-toolbar is-tight-1 is-tight-2 is-tight-3 is-tight-4',
+  5: 'pt-toolbar is-tight-1 is-tight-2 is-tight-3 is-tight-4 is-tight-5',
 };
 
 /**
@@ -311,31 +317,68 @@ function Count() {
  * depend on the state it decides. The two groups are measured by their
  * content, not the bar by its scroll width: the left group is allowed to
  * shrink (the brand truncates inside it), so its buttons would overlap the
- * right group before the bar itself overflowed. At most four forced
+ * right group before the bar itself overflowed. At most five forced
  * layouts, and only when the bar or a group's content has changed size.
  */
 function fitLabels(bar: HTMLElement): Tight {
-  bar.classList.remove('is-tight-1', 'is-tight-2', 'is-tight-3', 'is-tight-4');
+  bar.classList.remove(...TIGHT_CLASSES);
   const style = getComputedStyle(bar);
   const frame =
     parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + parseFloat(style.columnGap);
   const groups = bar.querySelectorAll<HTMLElement>(':scope > .pt-bar-l, :scope > .pt-bar-r');
+  /* an element that gives (the deck name's word, DeckName.tsx data-gives) ellipsizes inside its
+     box, so its hidden text counts as room the bar still needs: the label tiers collapse before
+     the name loses letters, and the name widens again once they have */
+  const gives = bar.querySelectorAll<HTMLElement>('[data-gives]');
   const need = () => {
     let width = frame;
     groups.forEach((group) => {
       width += group.scrollWidth;
     });
+    gives.forEach((el) => {
+      width += Math.max(0, el.scrollWidth - el.clientWidth);
+    });
     return width;
   };
   const room = bar.clientWidth + 1;
-  if (need() <= room) return 0;
   let tight: Tight = 0;
-  for (const tier of TIERS) {
-    bar.classList.add(`is-tight-${tier}`);
-    tight = tier;
-    if (need() <= room) break;
+  if (need() > room) {
+    for (const tier of TIERS) {
+      bar.classList.add(`is-tight-${tier}`);
+      tight = tier;
+      if (need() <= room) break;
+    }
   }
+  floorStatusSlot(bar);
   return tight;
+}
+
+/**
+ * How far the status slot may shrink: as far as the elements in it that give (the deck name,
+ * DeckName.tsx data-gives) can, and no further, so its chip is never drawn under Search.
+ * Toolbar.css lets the slot shrink at all with min-width 0 and the floor is measured here at the
+ * tier reached, since the chip's box depends on the tier (its words leave at tier four): the
+ * name's computed minimum plus the box of everything else in the slot. A CSS min-content floor
+ * would hold the name at its full word instead (measured in the M5 verification at 1170 with the
+ * list open: the name kept 118px while the group overflowed by 46). While nothing in the slot
+ * gives (the name is its 220px field), the floor is the content itself (`auto`), never a pixel
+ * value: a pixel floor taken from the field outlived it, since the button's return left the
+ * group's size unchanged and no observer ran (measured in the same verification: the name came
+ * back squeezed to 82px after Escape).
+ */
+function floorStatusSlot(bar: HTMLElement): void {
+  const slot = bar.querySelector<HTMLElement>(':scope > .pt-bar-r > .pt-bar-status');
+  if (!slot) return;
+  let floor = 0;
+  let givers = 0;
+  for (const child of Array.from(slot.children)) {
+    if (!(child instanceof HTMLElement)) continue;
+    const gives = child.matches('[data-gives]') || child.querySelector('[data-gives]') !== null;
+    if (gives) givers += 1;
+    floor += gives ? parseFloat(getComputedStyle(child).minWidth) || 0 : child.offsetWidth;
+  }
+  const next = givers > 0 ? `${Math.ceil(floor)}px` : 'auto';
+  if (slot.style.minWidth !== next) slot.style.minWidth = next;
 }
 
 export function Toolbar({
@@ -474,6 +517,7 @@ export function Toolbar({
             onChange={shell.setMode}
             label="View"
             control="view.mode"
+            toggle
           />
         ) : null}
         {hasRouteControls ? <span className="pt-sep" aria-hidden="true" /> : null}

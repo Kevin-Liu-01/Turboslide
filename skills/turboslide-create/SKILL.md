@@ -10,7 +10,7 @@ Write the document, not the pixels. A slide is a kind, a layout and typed blocks
 ## Before writing
 
 1. Read [references/grammar.md](references/grammar.md): the sheet, the text markup, the slide kinds with their plate anatomy, the layouts and their slots, every block type with its properties and snap sets, the lint rules.
-2. Read the deck: `turboslide info --json`, then `turboslide slide get <id> --json` for a neighbouring slide of the same archetype and copy its shape.
+2. Read the deck: `turboslide info --json`, then `turboslide slide get <id> --json` for a neighbouring slide of the same archetype and copy its shape. Over HTTP the same reads are `POST /api/actions/deck.info` and `POST /api/actions/slide.get`.
 3. Pick the archetype from the grammar table; if no block expresses the idea, say so and use an `html` escape with a `note` that names what the grammar lacks. The count of escapes is the honest scope of the grammar.
 
 ## Writing rules
@@ -25,8 +25,8 @@ Write the document, not the pixels. A slide is a kind, a layout and typed blocks
 
 ## Applying
 
-Write through `turboslide-api` (`slide.insert`, `slide.update`, `slide.replace`; over MCP the tools `deck_insert_slide`, `deck_update_slide`, `deck_replace_slide` and `deck_update_block`) with the `baseRevision` you read, or paste JSON into the studio's source drawer; every path runs the same validator. Fix every `unknown_field` and `reference` issue; keep `ext` only on a slide, a block or an asset.
+Write through `turboslide-api` (`slide.insert`, `slide.update`, `slide.replace`; over MCP the tools `deck_insert_slide`, `deck_update_slide`, `deck_replace_slide` and `deck_update_block`; over HTTP `POST /api/actions/<id>?deck=<id>` with `x-turboslide-author: agent:<runId>`) with the `baseRevision` you read, or paste JSON into the studio's source drawer; every path runs the same validator. Take `slide.lease` first when you make more than one write to a slide: an agent write to a slide someone else holds is refused with 409 and the holder. Fix every `unknown_field` and `reference` issue; keep `ext` only on a slide, a block or an asset. Mechanical findings the write returns with `fix` mutations are applied by `turboslide fix <id>`.
 
 ## Completion
 
-A slide is done when `turboslide validate` passes, `turboslide render <id> --theme light,dark` shows both themes with no overflow, and `turboslide lint <id>` has no severity 3 finding outside `known-findings.json`. Name the revision in the report. Use `turboslide-verify` for the full loop.
+A slide is done when `turboslide validate` passes, `turboslide render <id> --theme light,dark` shows both themes with no overflow, and `turboslide lint <id>` has no severity 3 finding outside `known-findings.json`. Name the revision in the report. Use `turboslide-verify` for the full loop, and the judge loop (`turboslide judge bundle`, `scripts/judge-loop.mjs`) before a deck ships.

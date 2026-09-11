@@ -8,6 +8,8 @@
       "when": "a deck is open at /edit/:deckId",
       "actions": [
         "deck.info",
+        "deck.create",
+        "deck.rename",
         "slide.list",
         "slide.get",
         "slide.insert",
@@ -24,6 +26,7 @@
         "asset.add",
         "asset.dither",
         "material.capture",
+        "material.list",
         "render.slide",
         "render.sheet",
         "lint.run",
@@ -80,6 +83,8 @@
   ],
   "actions": [
     "deck.info",
+    "deck.create",
+    "deck.rename",
     "slide.list",
     "slide.get",
     "slide.insert",
@@ -96,6 +101,7 @@
     "asset.add",
     "asset.dither",
     "material.capture",
+    "material.list",
     "render.slide",
     "render.sheet",
     "lint.run",
@@ -124,6 +130,20 @@
       "doc": "Title, theme, sections with slide ids and titles, counts and the current revision.",
       "mutates": false,
       "milestone": "M1",
+      "group": "deck"
+    },
+    "deck.create": {
+      "label": "New deck",
+      "doc": "Creates a deck under decks/ from the GT brand template or as one title slide, and returns its id, revision and counts.",
+      "mutates": true,
+      "milestone": "M4",
+      "group": "deck"
+    },
+    "deck.rename": {
+      "label": "Rename deck",
+      "doc": "Sets the deck title, the name the sidebar head, the toolbar and the deck list show; one deck.set of /title.",
+      "mutates": true,
+      "milestone": "M4",
       "group": "deck"
     },
     "slide.list": {
@@ -219,22 +239,29 @@
     },
     "asset.add": {
       "label": "Add asset",
-      "doc": "Adds a file or URL as an asset with its role, alt, source and optional treatment; returns twins and metrics.",
+      "doc": "Adds a file, a data URL or a fetched URL as an asset with its role, alt, license fields and optional two-tone treatment; returns the asset with twins and metrics.",
       "mutates": true,
       "milestone": "M5",
       "group": "asset"
     },
     "asset.dither": {
       "label": "Dither asset",
-      "doc": "Re-runs the two-tone pipeline on an asset with new parameters and reports plate clearance.",
+      "doc": "Re-runs the two-tone pipeline on an asset with new parameters and reports plate clearance; with fromRecorded it reads the committed twins back and verifies them cell for cell.",
       "mutates": true,
       "milestone": "M5",
       "group": "asset"
     },
     "material.capture": {
       "label": "Capture material",
-      "doc": "Renders a shader material at 3200 by 1800 and captures frames at the given anchors as assets with recipe keys.",
+      "doc": "Renders a shader material at 3200 by 1800 and captures frozen frames at the given anchors as assets with recipe keys, through the two-tone screen when asked; one anchor returns the asset, several the list.",
       "mutates": true,
+      "milestone": "M5",
+      "group": "asset"
+    },
+    "material.list": {
+      "label": "List materials",
+      "doc": "The material catalog: every paper:* entry with its uniform schema and palette presets, and the proto:* engines with their availability.",
+      "mutates": false,
       "milestone": "M5",
       "group": "asset"
     },

@@ -321,6 +321,8 @@ export type BlockToCompare = {
   neighbours?: readonly Box[];
   /** True when the block's rasters include an opaque picture (a shot or html raster): measured on its edge. */
   opaque?: boolean;
+  /** The channel distance of the edge measure; EDGE_TOLERANCE unless the caller sets one (a diagram, DIA_EDGE_TOLERANCE). */
+  edgeTolerance?: number;
   /** The union box of the shapes named after the block in the exported file, in image pixels. */
   shape?: Box | null;
 };
@@ -393,7 +395,9 @@ export function compareBlock(
   const region = clamped ? own : widened;
   const background = modeColor(ref, widened, [own, ...neighbours]);
   const ink = measure === 'edge' ? null : blockInkColor(ref, block, own, background, kind);
-  const test: InkTest = ink ? inkPast(background, ink) : toleranceInk(background, EDGE_TOLERANCE);
+  const test: InkTest = ink
+    ? inkPast(background, ink)
+    : toleranceInk(background, block.edgeTolerance ?? EDGE_TOLERANCE);
   const refInk = inkBox(ref, region, background, test);
   const gotInk = inkBox(got, region, background, test);
   const measured = { ...base, background, ink, clamped, refInk, gotInk };

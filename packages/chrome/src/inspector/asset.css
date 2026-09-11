@@ -73,3 +73,122 @@
   color: var(--pt-ink-2);
   overflow-wrap: anywhere;
 }
+
+/* the select and the Browse square on one line; the picker opens under them */
+.ts-ctl-asset-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ts-ctl-asset-row .ts-ctl-select {
+  flex: 1 1 auto;
+}
+
+.ts-asset-mono {
+  font-family: var(--pt-mono);
+  font-size: 11.5px;
+}
+
+/* ---- the intake (M5 item 1): a dashed --pt-hair drop zone on the plate ground, then the
+   license fields as inspector rows; the zone takes ink while a drag is over it (ink is a state) ---- */
+.ts-intake {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0 8px;
+}
+
+.ts-intake-drop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 96px;
+  padding: 12px;
+  margin-bottom: 4px;
+  border: 1px dashed var(--pt-hair);
+  background: var(--pt-plate);
+  color: var(--pt-ink-2);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+  cursor: copy;
+}
+
+.ts-intake-drop.is-over {
+  border-color: var(--pt-ink);
+  color: var(--pt-ink);
+}
+
+.ts-intake-drop:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-intake-thumb {
+  display: block;
+  max-width: 100%;
+  max-height: 140px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-edge);
+}
+
+.ts-intake-file {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ts-intake-file input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ts-intake-field {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 260px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px var(--pt-text);
+}
+
+.ts-intake-field:focus-visible {
+  outline: none;
+  border-color: var(--pt-ink);
+}
+
+.ts-intake-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 8px;
+}
+
+.ts-intake-need,
+.ts-intake-error {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--pt-titanium);
+}
+
+.ts-intake-error {
+  color: var(--pt-ink);
+  padding-top: 6px;
+}

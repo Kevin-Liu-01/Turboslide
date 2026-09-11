@@ -84,13 +84,15 @@ describe('the export font set (SPEC 8.4)', () => {
 });
 
 describe('the classification the lint rule shares (SPEC 4.2 export)', () => {
-  test('six native types', () => {
+  test('eight native types', () => {
     expect([...NATIVE_BLOCK_TYPES]).toEqual([
       'heading',
       'paragraph',
       'credit',
       'rows',
       'plain',
+      'refs',
+      'ladder',
       'panel',
     ]);
     expect(isNativeBlockType('rows')).toBe(true);

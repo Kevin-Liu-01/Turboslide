@@ -146,7 +146,7 @@ exports[`block catalog > renders details (grid) in light 1`] = `
 
 exports[`block catalog > renders dia (dia1) in dark 1`] = `
 {
-  "html": "<svg class="dia" data-block="dia1" data-type="dia" data-raster="dia" data-rid="dia1:1" viewBox="0 0 731.5 150" aria-label="Three code surfaces lead to the website"><rect x="0" y="20" width="11" height="11" fill="var(--ink)"/><rect x="10.5" y="10.5" width="100" height="50" fill="none" class="hair" stroke-width="1"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="160.5" y1="25.5" x2="200.5" y2="25.5"/><rect x="300" y="70" width="11" height="11" fill="var(--ink)"/><use href="#i-check-circle" x="18" y="206" width="24" height="24" fill="#12a37a"/><use href="#gt-mark" x="499.94" y="69.96" width="30.26" height="19.24" fill="var(--ink)"/><g transform="translate(150 74) scale(1 0.5) rotate(45)"><svg width="84" height="54" x="-42" y="-27" fill="var(--ink)" fill-opacity="0.55"><use href="#gt-mark"/></svg></g><text x="24" y="33">CLI</text><text class="lab" x="24" y="80">Open-source</text></svg>",
+  "html": "<svg class="dia" data-block="dia1" data-type="dia" data-raster="dia" data-rid="dia1:1" viewBox="0 0 731.5 150" aria-label="Three code surfaces lead to the website"><rect x="0" y="20" width="11" height="11" fill="var(--ink)"/><rect x="10.5" y="10.5" width="100" height="50" fill="none" class="hair" stroke-width="1"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="160.5" y1="25.5" x2="200.5" y2="25.5"/><rect class="marker" x="300" y="70" width="11" height="11" fill="var(--ink)" data-dia="markers/0"/><use href="#i-check-circle" x="18" y="206" width="24" height="24" fill="#12a37a"/><use href="#gt-mark" x="499.94" y="69.96" width="30.26" height="19.24" fill="var(--ink)"/><g transform="translate(150 74) scale(1 0.5) rotate(45)"><svg width="84" height="54" x="-42" y="-27" fill="var(--ink)" fill-opacity="0.55"><use href="#gt-mark"/></svg></g><text x="24" y="33" data-dia="texts/0">CLI</text><text class="lab" x="24" y="80" data-dia="texts/1">Open-source</text></svg>",
   "rasters": [
     {
       "alpha": true,
@@ -160,7 +160,7 @@ exports[`block catalog > renders dia (dia1) in dark 1`] = `
 
 exports[`block catalog > renders dia (dia1) in light 1`] = `
 {
-  "html": "<svg class="dia" data-block="dia1" data-type="dia" data-raster="dia" data-rid="dia1:1" viewBox="0 0 731.5 150" aria-label="Three code surfaces lead to the website"><rect x="0" y="20" width="11" height="11" fill="var(--ink)"/><rect x="10.5" y="10.5" width="100" height="50" fill="none" class="hair" stroke-width="1"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="160.5" y1="25.5" x2="200.5" y2="25.5"/><rect x="300" y="70" width="11" height="11" fill="var(--ink)"/><use href="#i-check-circle" x="18" y="206" width="24" height="24" fill="#12a37a"/><use href="#gt-mark" x="499.94" y="69.96" width="30.26" height="19.24" fill="var(--ink)"/><g transform="translate(150 74) scale(1 0.5) rotate(45)"><svg width="84" height="54" x="-42" y="-27" fill="var(--ink)" fill-opacity="0.55"><use href="#gt-mark"/></svg></g><text x="24" y="33">CLI</text><text class="lab" x="24" y="80">Open-source</text></svg>",
+  "html": "<svg class="dia" data-block="dia1" data-type="dia" data-raster="dia" data-rid="dia1:1" viewBox="0 0 731.5 150" aria-label="Three code surfaces lead to the website"><rect x="0" y="20" width="11" height="11" fill="var(--ink)"/><rect x="10.5" y="10.5" width="100" height="50" fill="none" class="hair" stroke-width="1"/><line class="mid" stroke-width="1" stroke-linecap="square" x1="160.5" y1="25.5" x2="200.5" y2="25.5"/><rect class="marker" x="300" y="70" width="11" height="11" fill="var(--ink)" data-dia="markers/0"/><use href="#i-check-circle" x="18" y="206" width="24" height="24" fill="#12a37a"/><use href="#gt-mark" x="499.94" y="69.96" width="30.26" height="19.24" fill="var(--ink)"/><g transform="translate(150 74) scale(1 0.5) rotate(45)"><svg width="84" height="54" x="-42" y="-27" fill="var(--ink)" fill-opacity="0.55"><use href="#gt-mark"/></svg></g><text x="24" y="33" data-dia="texts/0">CLI</text><text class="lab" x="24" y="80" data-dia="texts/1">Open-source</text></svg>",
   "rasters": [
     {
       "alpha": true,
@@ -481,6 +481,62 @@ exports[`block catalog > renders markSizes (sizes) in light 1`] = `
       "blockId": "sizes",
       "kind": "mark",
       "selector": "[data-slide="catalog"] [data-rid="sizes:5"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders material (mat) in dark 1`] = `
+{
+  "html": "<figure class="material-fig" data-block="mat" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;uniforms&quot;:{&quot;u_scale&quot;:0.5},&quot;anchor&quot;:5500,&quot;twoTone&quot;:true,&quot;plate&quot;:&quot;lower-left&quot;}"><div class="material" role="img" aria-label="A liquid metal diamond, dithered" data-raster="material" data-rid="mat:1"><img class="material-frame" src="assets/opener-brand-dark.jpg" data-light="assets/opener-brand-light.jpg" alt="The top arc of the event horizon ring, dithered"></div><figcaption data-run="mat/caption">The liquid metal diamond, frozen at 5.5 s.</figcaption></figure>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "mat",
+      "kind": "material",
+      "selector": "[data-slide="catalog"] [data-rid="mat:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders material (mat) in light 1`] = `
+{
+  "html": "<figure class="material-fig" data-block="mat" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;uniforms&quot;:{&quot;u_scale&quot;:0.5},&quot;anchor&quot;:5500,&quot;twoTone&quot;:true,&quot;plate&quot;:&quot;lower-left&quot;}"><div class="material" role="img" aria-label="A liquid metal diamond, dithered" data-raster="material" data-rid="mat:1"><img class="material-frame" src="assets/opener-brand-light.jpg" data-dark="assets/opener-brand-dark.jpg" alt="The top arc of the event horizon ring, dithered"></div><figcaption data-run="mat/caption">The liquid metal diamond, frozen at 5.5 s.</figcaption></figure>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "mat",
+      "kind": "material",
+      "selector": "[data-slide="catalog"] [data-rid="mat:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders material (mat-live) in dark 1`] = `
+{
+  "html": "<figure class="material-fig" data-block="mat-live" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:gem-smoke&quot;,&quot;preset&quot;:&quot;brand-blue&quot;}"><div class="material" style="height:300px;aspect-ratio:auto" role="img" aria-label="The gem smoke material in the brand blue" data-raster="material" data-rid="mat-live:1"><span class="material-label">paper:gem-smoke · brand-blue · not captured</span></div></figure>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "mat-live",
+      "kind": "material",
+      "selector": "[data-slide="catalog"] [data-rid="mat-live:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders material (mat-live) in light 1`] = `
+{
+  "html": "<figure class="material-fig" data-block="mat-live" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:gem-smoke&quot;,&quot;preset&quot;:&quot;brand-blue&quot;}"><div class="material" style="height:300px;aspect-ratio:auto" role="img" aria-label="The gem smoke material in the brand blue" data-raster="material" data-rid="mat-live:1"><span class="material-label">paper:gem-smoke · brand-blue · not captured</span></div></figure>",
+  "rasters": [
+    {
+      "alpha": false,
+      "blockId": "mat-live",
+      "kind": "material",
+      "selector": "[data-slide="catalog"] [data-rid="mat-live:1"]",
     },
   ],
 }

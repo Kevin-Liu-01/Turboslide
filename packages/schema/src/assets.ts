@@ -51,6 +51,8 @@ export type AssetSource =
   | {
       kind: 'photo';
       origin: string;
+      /** The picture's name as the source states it (the mood plate's title). */
+      title?: string;
       artist?: string;
       license: 'CC0' | 'CC BY' | 'CC BY-SA' | 'public domain' | string;
       shareAlike: boolean;
@@ -99,6 +101,13 @@ export type Asset = {
   scale: 1 | 2 | 3;
   source: AssetSource;
   treatment?: AssetTreatment;
+  /**
+   * The continuous original under assets/ that a two-tone treatment re-runs from (asset add
+   * --two-tone keeps it as assets/<id>.source.<ext>); the inspector's Dither section and
+   * `asset dither` need it, the twins alone cannot be re-toned. Absent for the imported deck,
+   * whose sources were not committed (OPENERS.md names them).
+   */
+  sourceFile?: string;
   /** must appear on the plate for share-alike sources */
   credit?: string;
   inline: InlineRule;
@@ -142,6 +151,7 @@ export const assetSourceSchema = z.discriminatedUnion('kind', [
   z.strictObject({
     kind: z.literal('photo'),
     origin: z.string().min(1),
+    title: z.string().optional(),
     artist: z.string().optional(),
     license: z.string().min(1),
     shareAlike: z.boolean(),
@@ -248,6 +258,7 @@ export const assetSchema = z.strictObject({
   }),
   source: assetSourceSchema,
   treatment: assetTreatmentSchema.optional(),
+  sourceFile: relativePath.optional(),
   credit: annotate(z.string().optional(), {
     label: 'Credit',
     control: 'text',

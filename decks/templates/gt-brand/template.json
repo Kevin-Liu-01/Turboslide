@@ -1,0 +1,154 @@
+{
+  "schemaVersion": 1,
+  "id": "gt-brand",
+  "name": "GT brand deck",
+  "description": "The General Translation brand deck as a template: 85 slides in 8 sections in the gt-ink-paper theme, cut from decks/gt-brand at revision 24. deck.create copies deck.json, slides/ and the assets folder named below into decks/<id> with a new id, title and revision 0. The archetypes are the slide templates the editor inserts (palette Insert group, sidebar row menu); their documents live in packages/chrome/src/slide-templates.ts and carry placeholder copy the copy lints flag until it is edited.",
+  "theme": "gt-ink-paper",
+  "deck": "deck.json",
+  "slides": "slides",
+  "assets": "../../gt-brand/assets",
+  "sections": [
+    {
+      "id": "brand",
+      "name": "Brand",
+      "slides": 15
+    },
+    {
+      "id": "design-system",
+      "name": "Design system",
+      "slides": 15
+    },
+    {
+      "id": "website",
+      "name": "Website",
+      "slides": 11
+    },
+    {
+      "id": "documentation",
+      "name": "Documentation",
+      "slides": 5
+    },
+    {
+      "id": "blog-and-content",
+      "name": "Blog and content",
+      "slides": 9
+    },
+    {
+      "id": "developer-experience",
+      "name": "Developer experience",
+      "slides": 4
+    },
+    {
+      "id": "prototemplate-and-glyphfield",
+      "name": "Prototemplate and Glyphfield",
+      "slides": 19
+    },
+    {
+      "id": "status-and-plan",
+      "name": "Status and plan",
+      "slides": 7
+    }
+  ],
+  "archetypes": [
+    {
+      "id": "opener",
+      "label": "Section opener",
+      "kind": "opener",
+      "source": "opener-brand"
+    },
+    {
+      "id": "mood",
+      "label": "Mood",
+      "kind": "mood",
+      "source": "mood-earth"
+    },
+    {
+      "id": "closing",
+      "label": "Closing",
+      "kind": "closing",
+      "source": "closing"
+    },
+    {
+      "id": "title",
+      "label": "Title",
+      "kind": "title",
+      "source": "title"
+    },
+    {
+      "id": "statement",
+      "label": "Statement",
+      "kind": "statement",
+      "source": "thesis"
+    },
+    {
+      "id": "cols",
+      "label": "Two columns",
+      "kind": "content",
+      "layout": "cols",
+      "source": "character"
+    },
+    {
+      "id": "split",
+      "label": "Head over body",
+      "kind": "content",
+      "layout": "split",
+      "source": "engines"
+    },
+    {
+      "id": "rows",
+      "label": "Ruled rows",
+      "kind": "content",
+      "layout": "cols",
+      "source": "surfaces"
+    },
+    {
+      "id": "plain",
+      "label": "Ruled statement list",
+      "kind": "content",
+      "layout": "cols",
+      "source": "avoid"
+    },
+    {
+      "id": "tiles",
+      "label": "Tile grid",
+      "kind": "content",
+      "layout": "split",
+      "source": "engines"
+    },
+    {
+      "id": "details",
+      "label": "Detail grid",
+      "kind": "content",
+      "layout": "split",
+      "source": "details"
+    },
+    {
+      "id": "board",
+      "label": "Status board",
+      "kind": "content",
+      "layout": "split",
+      "source": "state"
+    },
+    {
+      "id": "matrix",
+      "label": "Matrix",
+      "kind": "content",
+      "layout": "cols",
+      "source": "dither"
+    },
+    {
+      "id": "pair",
+      "label": "Pair of figures",
+      "kind": "content",
+      "layout": "split",
+      "source": "pages-a"
+    },
+    {
+      "id": "figure",
+      "label": "Figure",
+      "kind": "content",
+      "layout": "cols",
+      "source": "blog-covers"
+    }
+  ]
+}

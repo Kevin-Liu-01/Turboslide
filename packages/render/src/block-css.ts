@@ -69,6 +69,16 @@ export const BLOCK_CSS = `
 .ts-sheet .shot-fig { margin: 0; width: 100%; display: grid; gap: 12px; } /* s33:3 */
 .ts-sheet .shot-fig figcaption { font-size: 16px; line-height: 1.45; color: var(--ink-2); } /* s33:4 */
 .ts-sheet .shot-fig.cap-15 figcaption { font-size: 15px; } /* s38:11 */
+/* material (M5): a shader frame as a figure in the shot figure's form; the box keeps 16:9 at the
+   slot's width unless the block sets a height; the editor's live mount prepends a canvas that covers
+   the frozen frame; before a capture the plate ground carries a 15 px titanium label */
+.ts-sheet .material-fig { margin: 0; width: 100%; display: grid; gap: 12px; }
+.ts-sheet .material-fig figcaption { font-size: 16px; line-height: 1.45; color: var(--ink-2); }
+.ts-sheet .material-fig.cap-15 figcaption { font-size: 15px; }
+.ts-sheet .material { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--plate); }
+.ts-sheet .material > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ts-sheet .material > canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ts-sheet .material-label { position: absolute; left: 14px; bottom: 12px; font-size: 15px; line-height: 1.45; letter-spacing: 0.01em; color: var(--titanium); }
 .ts-sheet .pair.gap-40 { gap: 40px; } /* s76:5 */
 .ts-sheet .pair.cap-15 figcaption { font-size: 15px; } /* s63:5 */
 /* tiles: the reference and direction grids (s13:3-7, s69:3-7) and the engine grid (s72:6-10) */

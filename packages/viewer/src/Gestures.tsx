@@ -13,6 +13,9 @@ import { jsonEqual } from '@turboslide/schema/pointer';
 import type { Box } from '@turboslide/schema/render';
 import { COLUMN_GAP, CONTENT, CONTENT_ORIGIN, SHEET } from '@turboslide/theme/tokens';
 
+import { labelClearance, snapHalf, unitsPerPixel } from '@turboslide/render/dia/snap';
+import type { DiaBox } from '@turboslide/render/dia/snap';
+
 import type { Selection } from './Selection';
 import { blockById, selectedBlockId } from './Selection';
 import {
@@ -46,7 +49,9 @@ export type HandleKind =
   | 'shot-crop'
   | 'pair-swap'
   | 'scale-marker'
-  | 'block-move';
+  | 'block-move'
+  | 'dia-label'
+  | 'dia-marker';
 
 /**
  * How the overlay draws a handle: `v` a vertical rule through the hit box, `square` an 11 px
@@ -69,10 +74,12 @@ export type Handle = {
   /** the locale-independent id for the window API, under `handle.` so it never collides with an inspector control */
   control: string;
   shape: HandleShape;
-  /** the arrow keys that nudge it */
-  axis: 'x' | 'y';
+  /** the arrow keys that nudge it; `xy` moves on both axes (a diagram label or marker) */
+  axis: 'x' | 'y' | 'xy';
   /** the drag direction that increases the value; -1 for an edge anchored on the right */
   sign: 1 | -1;
+  /** the handle is live only while Alt is held (SPEC 6.4: Alt-drag a label or marker in a dia) */
+  alt?: true;
 };
 
 /** The boxes the Editor measures from the rendered slide, in sheet pixels (SPEC 6.4: rect / k). */
@@ -92,6 +99,8 @@ export const PART_SELECTORS: Partial<Record<BlockType, string>> = {
   scales: '.scale .bar',
   pair: ':scope > figure',
   shot: 'img.shot',
+  // the renderer tags a declared diagram's markers then its texts with data-dia (blocks/dia.ts)
+  dia: '[data-dia]',
 };
 
 /** The hit thickness of an edge handle in sheet pixels; Overlay.css widens it to a minimum in CSS pixels. */
@@ -318,10 +327,132 @@ export function handlesFor(slide: Slide, boxes: MeasuredBoxes, selection: Select
         });
       });
       break;
+    case 'dia': {
+      // Alt-drag a label or a marker of a declared diagram (SPEC 6.4, M5): the parts are the
+      // markers then the texts in render order; each handle is live only while Alt is held.
+      const data = block.data;
+      if (!data) break;
+      const markers = data.markers.length;
+      parts.forEach((part, index) => {
+        if (index < markers) {
+          handles.push({
+            id: `dia-marker:${blockId}:${index}`,
+            kind: 'dia-marker',
+            box: part,
+            blockId,
+            index,
+            cursor: 'grab',
+            label: `${blockId}: Marker ${index + 1}`,
+            control: `handle.${blockId}.data.markers.${index}`,
+            shape: 'square',
+            axis: 'xy',
+            sign: 1,
+            alt: true,
+          });
+          return;
+        }
+        const textIndex = index - markers;
+        if (textIndex >= data.texts.length) return;
+        handles.push({
+          id: `dia-label:${blockId}:${textIndex}`,
+          kind: 'dia-label',
+          box: part,
+          blockId,
+          index: textIndex,
+          cursor: 'grab',
+          label: `${blockId}: Label ${textIndex + 1}`,
+          control: `handle.${blockId}.data.texts.${textIndex}`,
+          shape: 'area',
+          axis: 'xy',
+          sign: 1,
+          alt: true,
+        });
+      });
+      break;
+    }
     default:
       break;
   }
   return handles;
+}
+
+/**
+ * Diagram units per sheet pixel of a rendered dia block: one with `fit: 'slot'`, the viewBox
+ * width over the measured width otherwise (render/dia/snap.ts).
+ */
+export function diaUnitsPerPixel(
+  block: Extract<Block, { type: 'dia' }>,
+  box: Box | undefined,
+): number {
+  if (!block.data) return 1;
+  return unitsPerPixel(block.fit, block.data, box?.[2] ?? block.data.w);
+}
+
+/**
+ * The one mutation of a label or marker move in a declared diagram: the item at its new point on
+ * the half-pixel grid, written whole so the gesture is one `block.set` of `/data/texts/i` or
+ * `/data/markers/i` (SPEC 6.4: each gesture ends in exactly one mutation).
+ */
+export function diaMoveMutation(
+  slide: Slide,
+  block: Extract<Block, { type: 'dia' }>,
+  handle: Handle,
+  dxUnits: number,
+  dyUnits: number,
+): Mutation | null {
+  const data = block.data;
+  if (!data || handle.index === undefined) return null;
+  if (handle.kind === 'dia-marker') {
+    const marker = data.markers[handle.index];
+    if (!marker) return null;
+    const next = { ...marker, x: snapHalf(marker.x + dxUnits), y: snapHalf(marker.y + dyUnits) };
+    if (next.x === marker.x && next.y === marker.y) return null;
+    return {
+      op: 'block.set',
+      slideId: slide.id,
+      blockId: block.id,
+      path: `/data/markers/${handle.index}`,
+      value: next,
+    };
+  }
+  const text = data.texts[handle.index];
+  if (!text) return null;
+  const next = { ...text, x: snapHalf(text.x + dxUnits), y: snapHalf(text.y + dyUnits) };
+  if (next.x === text.x && next.y === text.y) return null;
+  return {
+    op: 'block.set',
+    slideId: slide.id,
+    blockId: block.id,
+    path: `/data/texts/${handle.index}`,
+    value: next,
+  };
+}
+
+/**
+ * The live clearance of a dragged label (SPEC 6.4: 12 px clearance shown live): the label's box in
+ * sheet pixels and whether it keeps the grammar's distance from every stroke and marker, read
+ * from the slide the preview shows. Null for anything but a dia-label handle.
+ */
+export function labelClearanceBox(
+  slide: Slide,
+  handle: Handle,
+  boxes: MeasuredBoxes,
+): { box: Box; ok: boolean; nearest: number } | null {
+  if (handle.kind !== 'dia-label' || handle.blockId === undefined || handle.index === undefined)
+    return null;
+  const block = blockById(slide, handle.blockId);
+  if (!block || block.type !== 'dia' || !block.data) return null;
+  const blockBox = boxes.blocks[handle.blockId];
+  if (!blockBox) return null;
+  const units = diaUnitsPerPixel(block, blockBox);
+  const { box, ok, nearest } = labelClearance(block.data, handle.index);
+  const toSheet = (b: DiaBox): Box => [
+    blockBox[0] + b[0] / units,
+    blockBox[1] + b[1] / units,
+    b[2] / units,
+    b[3] / units,
+  ];
+  return { box: toSheet(box), ok, nearest: nearest / units };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -499,6 +630,12 @@ export function gestureMutation(
         ? null
         : blockSet(slide, blockId, `/items/${handle.index}/value`, next);
     }
+    case 'dia-label':
+    case 'dia-marker': {
+      if (block.type !== 'dia') return null;
+      const units = diaUnitsPerPixel(block, boxes.blocks[blockId]);
+      return diaMoveMutation(slide, block, handle, (now.x - start.x) * units, dy * units);
+    }
     default:
       return null;
   }
@@ -510,7 +647,12 @@ export function gestureMutation(
  * with Shift through `delta`), a shot edge by 10 px, a block by one position, a plate side and a
  * crop anchor flip, a pair figure swaps with its neighbour.
  */
-export function nudgeMutation(handle: Handle, ctx: GestureContext, delta: number): Mutation | null {
+export function nudgeMutation(
+  handle: Handle,
+  ctx: GestureContext,
+  delta: number,
+  axis: 'x' | 'y' = 'x',
+): Mutation | null {
   const { slide, boxes } = ctx;
   switch (handle.kind) {
     case 'col-seam': {
@@ -575,6 +717,14 @@ export function nudgeMutation(handle: Handle, ctx: GestureContext, delta: number
       return next === item.value
         ? null
         : blockSet(slide, blockId, `/items/${handle.index}/value`, next);
+    }
+    case 'dia-label':
+    case 'dia-marker': {
+      // one unit per step on the half-pixel grid (ten with Shift through `delta`); Up is negative y
+      if (block.type !== 'dia') return null;
+      const dx = axis === 'x' ? delta : 0;
+      const dy = axis === 'y' ? -delta : 0;
+      return diaMoveMutation(slide, block, handle, dx, dy);
     }
     case 'block-move': {
       const located = locateBlock(slide, blockId);

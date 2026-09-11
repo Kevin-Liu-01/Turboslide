@@ -37,6 +37,8 @@ export type BaselineAnchor = {
 export type BaselineModel = {
   formula: string;
   anchors: BaselineAnchor[];
+  /** The code panel's monospace face has its own anchor (M5: DejaVu Sans Mono at 17 px). */
+  mono?: { family: string; anchors: BaselineAnchor[] };
 };
 
 type CalibrationFile = {
@@ -51,7 +53,18 @@ export function loadBaselineModel(): BaselineModel {
   const path = fileURLToPath(new URL('../calibration/calibration.json', import.meta.url));
   const file = JSON.parse(readFileSync(path, 'utf8')) as CalibrationFile;
   const model = file.targets['pptx-libreoffice'].firstBaselineModel;
-  cached = { formula: model.formula, anchors: [...model.anchors].sort((a, b) => a.size - b.size) };
+  cached = {
+    formula: model.formula,
+    anchors: [...model.anchors].sort((a, b) => a.size - b.size),
+    ...(model.mono
+      ? {
+          mono: {
+            family: model.mono.family,
+            anchors: [...model.mono.anchors].sort((a, b) => a.size - b.size),
+          },
+        }
+      : {}),
+  };
   return cached;
 }
 
@@ -84,7 +97,10 @@ export function firstBaselineShiftPx(
   pitchPx: number,
   target: BaselineTarget = DEFAULT_BASELINE,
   model: BaselineModel = loadBaselineModel(),
+  mono = false,
 ): number {
   if (target === 'none') return 0;
-  return pitchPx / 2 - baselineK(sizePx, model.anchors) * sizePx;
+  const anchors = mono ? (model.mono?.anchors ?? []) : model.anchors;
+  if (anchors.length === 0) return 0;
+  return pitchPx / 2 - baselineK(sizePx, anchors) * sizePx;
 }

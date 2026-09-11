@@ -115,8 +115,9 @@ test('the toolbar seg, the sidebar rows and the grid tiles select', async ({ pag
 });
 
 test('the embed posts gt-deck-slide on navigation and applies gt-theme', async ({ page }) => {
-  // a same-origin host page around the frame, as Prototemplate's DeckFrame is
-  await page.goto('/');
+  // a same-origin host page around the frame, as Prototemplate's DeckFrame is; the deck list,
+  // since / opens the newest deck in the editor (landing.spec.ts)
+  await page.goto('/decks');
   const messages = await page.evaluateHandle(() => {
     const seen: { type: string; n?: number }[] = [];
     window.addEventListener('message', (event) => {

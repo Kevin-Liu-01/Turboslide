@@ -10,10 +10,17 @@
    either side of the count; tier three (.is-tight-3) takes Theme, whose half
    disc names itself; tier four (.is-tight-4), reached only when a route's
    own controls still leave the bar short, takes Help, Present and the slot's
-   labeled buttons. The seg's words keep their labels at every width above
-   900px. A labeled button with no icon (.is-text) is never collapsed. The
-   left group's controls never shrink; only the brand title inside it gives
-   way. At or below 900px the bar stays one 52px row: the brand and the
+   labeled buttons (a labeled button wrapped in an anchor span, the Export
+   menu's, counts as one of the slot's) and the status chip's words, so the
+   chip is its dot, and the Search pill drops its key chip. Tier five (.is-tight-5) exists for the editor, whose
+   bar is still short at tier four at 1280 with the list open (measured in
+   the M5 verification: the chip ran 93px under Search): the mode seg's
+   options are their icons and the Search pill is its glyph, as both read at
+   900px; the seg keeps its words at every tier below that. A labeled button
+   with no icon (.is-text) is never collapsed. The left group's controls
+   never shrink; only the brand title inside it gives way, and in the right
+   group only the deck name (DeckName.css), so nothing there is ever drawn
+   under its neighbour. At or below 900px the bar stays one 52px row: the brand and the
    separators go, every button but the seg's text-only options is an icon
    square, the seg is icon-only; at or below 600px Previous, Next and Copy
    link leave too (the sheet's edges and a swipe page).
@@ -55,6 +62,38 @@
 .pt-bar-l > .pt-ib,
 .pt-bar-l > .pt-count,
 .pt-bar-l > .pt-sep {
+  flex-shrink: 0;
+}
+
+/* the right group gives through its status slot: the deck name in it (DeckName.css) ellipsizes
+   before the left group's paging is squeezed under it (measured in the M5 integration at 1440
+   with the inspector open: the count sat under the name). While the list column is open the
+   brand is hidden and the left group keeps its width; the tiers below still collapse the labels
+   when the name is at its minimum. The slot shrinks only as far as the name can give (its 56px
+   minimum) plus the chip's box: with min-width 0 alone it shrank past the chip and the chip ran
+   under Search (measured in the M5 verification at 1280 with the list open), and a min-content
+   floor would hold the name at its full word, so Toolbar.tsx floorStatusSlot measures the floor
+   at the tier reached and writes it as the slot's inline min-width. */
+.pt-bar-r {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.pt-bar-r > * {
+  flex-shrink: 0;
+}
+
+.pt-bar-r > .pt-bar-status {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* inside the status slot only the deck name gives; the chip keeps its parts */
+.pt-bar-status > *:not(.ts-deckname) {
+  flex-shrink: 0;
+}
+
+.pt-viewer:not([data-sb='0']) .pt-bar-l {
   flex-shrink: 0;
 }
 
@@ -282,25 +321,69 @@
 }
 
 /* Tier four: Help, Present and the slot's labeled buttons (never a
-   text-only one); the seg keeps its words. */
+   text-only one, and a button wrapped in one anchor span, the Export
+   menu's, counts); the seg keeps its words. */
 .pt-toolbar.is-tight-4 .pt-help-btn .pt-lb,
 .pt-toolbar.is-tight-4 .pt-present-btn .pt-lb,
-.pt-toolbar.is-tight-4 .pt-bar-slot > .pt-ib:not(.is-text) .pt-lb {
+.pt-toolbar.is-tight-4 .pt-bar-slot > .pt-ib:not(.is-text) .pt-lb,
+.pt-toolbar.is-tight-4 .pt-bar-slot > :not(.pt-seg) > .pt-ib:not(.is-text) .pt-lb {
   display: none;
 }
 
 .pt-toolbar.is-tight-4 .pt-help-btn,
 .pt-toolbar.is-tight-4 .pt-present-btn,
-.pt-toolbar.is-tight-4 .pt-bar-slot > .pt-ib:not(.is-text) {
+.pt-toolbar.is-tight-4 .pt-bar-slot > .pt-ib:not(.is-text),
+.pt-toolbar.is-tight-4 .pt-bar-slot > :not(.pt-seg) > .pt-ib:not(.is-text) {
   width: 32px;
   padding: 0;
   gap: 0;
   justify-content: center;
 }
 
-/* tier four narrows the pill too */
+/* tier four narrows the pill too: the key chip leaves (the title still names the key), the
+   glyph and the word stay */
 .pt-toolbar.is-tight-4 .pt-search-btn {
-  min-width: 120px;
+  min-width: 84px;
+}
+
+.pt-toolbar.is-tight-4 .pt-search-kbd {
+  display: none;
+}
+
+/* and the status chip (StatusChip.css) is its dot: the state stays readable by the dot's ink,
+   titanium, pulse or ring, and by the chip's title and accessible name, while the words return
+   with room. Set here with the other tiers so the collapse order reads in one place. */
+.pt-toolbar.is-tight-4 .pt-bar-status .ts-status .ts-status-main {
+  display: none;
+}
+
+.pt-toolbar.is-tight-4 .pt-bar-status .pt-ib.ts-status {
+  width: 32px;
+  padding: 0;
+  gap: 0;
+  justify-content: center;
+}
+
+/* Tier five: the mode seg's options are their icons and the Search pill is
+   its glyph, the 900px reading (the rules below); the slot's Edit | View seg
+   is text-only and keeps its words. */
+.pt-toolbar.is-tight-5 .pt-bar-r > .pt-seg .pt-ib:not(.is-text) .pt-lb,
+.pt-toolbar.is-tight-5 .pt-search-btn .pt-lb,
+.pt-toolbar.is-tight-5 .pt-search-kbd {
+  display: none;
+}
+
+.pt-toolbar.is-tight-5 .pt-bar-r > .pt-seg .pt-ib:not(.is-text) {
+  width: auto;
+  padding: 0 8px;
+}
+
+.pt-toolbar.is-tight-5 .pt-search-btn {
+  min-width: 32px;
+  width: 32px;
+  padding: 0;
+  gap: 0;
+  justify-content: center;
 }
 
 /* narrow: one 52px row. The brand and the separators go, every button but

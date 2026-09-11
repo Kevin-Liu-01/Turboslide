@@ -23,27 +23,39 @@ import type { Plugin } from 'vite';
 // integration: /edit loaded server/thumbs.ts, reached @turboslide/effects/io and asked for
 // /@id/sharp, a 404 that broke the route's lazy chunk), so the client consumer gets a stub whose
 // default export throws if anything ever calls it; the production client bundle tree-shakes it.
-const SHARP_STUB = '\0turboslide:sharp-browser-stub';
+// playwright-core joined the list in the M5 integration: the editor's server functions reach the
+// deck dispatcher (server/actions.ts), whose asset and material actions load the headless
+// package, and the dev server's dependency optimizer followed that chain (it crawls dynamic
+// imports too) into playwright-core's own `vite` import and failed on vite's fsevents binary.
+const SERVER_ONLY = ['sharp', 'playwright-core'] as const;
+const STUB_PREFIX = '\0turboslide:server-only-stub:';
 
-function externalSharp(): Plugin {
+function externalServerOnly(): Plugin {
   return {
-    name: 'turboslide:external-sharp',
+    name: 'turboslide:external-server-only',
     enforce: 'pre',
     resolveId(source) {
-      if (source !== 'sharp') return null;
-      if (this.environment.config.consumer === 'client') return SHARP_STUB;
-      return { id: 'sharp', external: true };
+      if (!(SERVER_ONLY as readonly string[]).includes(source)) return null;
+      if (this.environment.config.consumer === 'client') return `${STUB_PREFIX}${source}`;
+      return { id: source, external: true };
     },
     load(id) {
-      if (id !== SHARP_STUB) return null;
-      return 'export default function sharp() { throw new Error("sharp runs on the server only"); }';
+      if (!id.startsWith(STUB_PREFIX)) return null;
+      const name = id.slice(STUB_PREFIX.length);
+      const message = JSON.stringify(`${name} runs on the server only`);
+      // a default export for `import sharp from 'sharp'`; named imports of playwright-core
+      // (chromium) are never evaluated in the browser, the handler that reaches them is stripped
+      return [
+        `export default function serverOnly() { throw new Error(${message}); }`,
+        `export const chromium = { launch() { throw new Error(${message}); } };`,
+      ].join('\n');
     },
   };
 }
 
 export default defineConfig({
   resolve: { tsconfigPaths: true },
-  plugins: [externalSharp(), devtools(), tanstackStart(), viteReact()],
+  plugins: [externalServerOnly(), devtools(), tanstackStart(), viteReact()],
   server: {
     port: 4321,
     strictPort: true,

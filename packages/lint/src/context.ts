@@ -17,6 +17,7 @@ import type {
   Text,
 } from './contracts.ts';
 import { RULES, findingId, sectionOfSlide, slideBlocks, slideOrder } from './contracts.ts';
+import { cellWidths } from '@turboslide/schema/blocks/composite';
 
 export type LintOptions = {
   /** Proper nouns that keep their capitals in a sentence-case heading (SPEC 5.1 copy.ts). */
@@ -83,6 +84,13 @@ export type BlockRef = {
   /** JSON pointer of the block inside the slide. */
   path: string;
   index: number;
+  /** The composite that holds the block, when it is nested (M5); top-level blocks have none. */
+  parent?: Block;
+  /**
+   * The width available to a nested block in sheet pixels (the composite's track arithmetic), or
+   * undefined when the tracks are content sized. Top-level blocks read slotWidths(slide) instead.
+   */
+  width?: number;
 };
 
 export type LintContext = {
@@ -142,11 +150,42 @@ export function createContext(input: DeckDocument, options: LintOptions = {}): L
         .filter((s): s is Slide => s !== undefined),
     blocksOf: (slide) => {
       const perSlot = new Map<string, number>();
-      return slideBlocks(slide).map(({ slot, block }) => {
-        const index = perSlot.get(slot) ?? 0;
-        perSlot.set(slot, index + 1);
-        return { slide, slot, block, path: blockPath(slot, index), index };
-      });
+      const widths = slotWidths(slide);
+      const out: BlockRef[] = [];
+      // Every block, top level and nested in composite cells, in document order (M5: a composite is
+      // a grid of blocks and each one is linted as itself, with the width its cell gives it).
+      const walk = (
+        blocks: Block[],
+        slot: SlotName | 'plate',
+        pathOf: (i: number) => string,
+        parent: Block | undefined,
+        width: number | undefined,
+      ): void => {
+        blocks.forEach((block, i) => {
+          const ref: BlockRef = { slide, slot, block, path: pathOf(i), index: i };
+          if (parent !== undefined) ref.parent = parent;
+          if (width !== undefined) ref.width = width;
+          out.push(ref);
+          if (block.type === 'composite') {
+            const cells = cellWidths(block, width);
+            block.cells.forEach((cell, c) =>
+              walk(cell.blocks, slot, (b) => `${ref.path}/cells/${c}/blocks/${b}`, block, cells[c]),
+            );
+          }
+        });
+      };
+      const lists = new Map<SlotName | 'plate', Block[]>();
+      for (const { slot, block } of slideBlocks(slide)) {
+        const list = lists.get(slot) ?? [];
+        list.push(block);
+        lists.set(slot, list);
+      }
+      for (const [slot, blocks] of lists) {
+        const start = perSlot.get(slot) ?? 0;
+        perSlot.set(slot, start + blocks.length);
+        walk(blocks, slot, (i) => blockPath(slot, start + i), undefined, widths[slot]);
+      }
+      return out;
     },
     asset: (id) => input.deck.assets[id],
     finding: (rule, slideId, details) => {
@@ -260,12 +299,9 @@ export function blockTexts(block: Block): TextRef[] {
       block.items.forEach((item, i) => push(`/items/${i}/name`, item.name, 'label'));
       break;
     case 'composite':
-      block.cells.forEach((cell, c) =>
-        cell.blocks.forEach((inner, b) => {
-          for (const ref of blockTexts(inner))
-            out.push({ ...ref, path: `/cells/${c}/blocks/${b}${ref.path}` });
-        }),
-      );
+      // the cells' blocks are refs of their own (blocksOf walks them, M5); the composite's text is
+      // its caption
+      push('/caption', block.caption, 'caption');
       break;
     default:
       break;

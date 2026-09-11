@@ -8,7 +8,7 @@
 import type { ActionId, ActionSpec } from '@turboslide/schema/actions';
 import { actionsInOrder } from '@turboslide/schema/actions';
 import type { Block, BlockType } from '@turboslide/schema/blocks';
-import { CATALOG, SLIDE_KIND_CATALOG } from '@turboslide/schema/catalog';
+import { CATALOG } from '@turboslide/schema/catalog';
 import type { Deck, Slide, SlideKind, SlotName } from '@turboslide/schema/deck';
 import { slideBlocks, slideTitle, slotsForLayout } from '@turboslide/schema/deck';
 import type { BlockId, SlideId } from '@turboslide/schema/ids';
@@ -17,6 +17,7 @@ import type { BlockSlot, Version } from '@turboslide/schema/mutations';
 import { authorName } from './dispatch';
 import type { IconName } from './icons';
 import type { ShellMode } from './shell-data';
+import { SLIDE_TEMPLATES, templateTitle } from './slide-templates';
 
 export type PaletteGroupId = 'slides' | 'insert' | 'actions' | 'view' | 'versions';
 
@@ -277,26 +278,28 @@ function insertEntries(ctx: PaletteContext): PaletteEntry[] {
   const section = ctx.slideId === undefined ? undefined : sectionOf(ctx.deck, ctx.slideId);
   const sectionId = section?.id ?? ctx.deck.sections[0]?.id;
   if (sectionId !== undefined) {
+    /* one entry per slide template (slide-templates.ts): the archetype kinds and layouts of the
+       GT template with placeholder copy; a template whose asset the deck lacks is not offered */
     const taken = new Set(Object.keys(ctx.slides));
-    for (const entry of Object.values(SLIDE_KIND_CATALOG)) {
-      const id = freeSlideId(taken, `new-${entry.kind}`);
-      const blank = blankSlide(entry.kind, id, ctx.deck, sectionId);
-      if (blank === null) continue;
+    for (const template of SLIDE_TEMPLATES) {
+      const id = freeSlideId(taken, `new-${template.id}`);
+      const made = template.make(id, ctx.deck, sectionId);
+      if (made === null) continue;
       out.push({
-        id: `insert:slide:${entry.kind}`,
+        id: `insert:slide:${template.id}`,
         group: 'insert',
-        title: `${entry.label} slide`,
-        hint: entry.doc,
+        title: templateTitle(template),
+        hint: template.doc,
         meta: section ? `after this slide in ${section.name}` : 'first',
-        icon: KIND_ICON[entry.kind],
-        terms: `slide ${entry.kind}`,
+        icon: template.icon,
+        terms: `slide template ${template.id} ${template.kind} ${template.layout ?? ''} ${template.source}`,
         run: {
           kind: 'dispatch',
           action: 'slide.insert',
           input: {
             sectionId,
             ...(ctx.slideId !== undefined ? { after: ctx.slideId } : {}),
-            slide: blank,
+            slide: made,
             baseRevision: ctx.revision,
           },
         },
@@ -337,6 +340,20 @@ function insertEntries(ctx: PaletteContext): PaletteEntry[] {
 /** How each action's input is built from the view; absent means the action needs an input the palette cannot build. */
 const INPUTS: Partial<Record<ActionId, InputBuilder>> = {
   'deck.info': () => ({ kind: 'dispatch', action: 'deck.info', input: {} }),
+  'deck.create': () => ({
+    kind: 'prompt',
+    action: 'deck.create',
+    input: { from: 'gt-brand' },
+    field: 'name',
+    label: 'New deck name (from the GT brand template)',
+  }),
+  'deck.rename': (ctx) => ({
+    kind: 'prompt',
+    action: 'deck.rename',
+    input: { baseRevision: ctx.revision },
+    field: 'name',
+    label: 'Deck name',
+  }),
   'slide.list': () => ({ kind: 'dispatch', action: 'slide.list', input: {} }),
   'slide.get': (ctx) =>
     ctx.slideId === undefined
@@ -415,6 +432,7 @@ const INPUTS: Partial<Record<ActionId, InputBuilder>> = {
     input: { format: 'pptx', mode: 'flatten', theme: ['light', 'dark'], verify: false },
   }),
   'fonts.build': () => ({ kind: 'dispatch', action: 'fonts.build', input: {} }),
+  'material.list': () => ({ kind: 'dispatch', action: 'material.list', input: {} }),
 };
 
 const NEEDS: Partial<Record<ActionId, string>> = {
@@ -426,10 +444,12 @@ const NEEDS: Partial<Record<ActionId, string>> = {
   'block.insert': 'Use the Insert group for a new block',
   'block.move': 'Drag the block on the stage',
   'section.set': 'Edit the manifest in the source drawer',
-  'asset.add': 'Needs a file or URL: use the CLI',
-  'asset.dither': 'Needs an asset and a treatment: use the CLI',
-  'asset.capture': 'Needs a URL and a viewport: use the CLI',
-  'material.capture': 'Needs a material and uniforms: use the CLI',
+  'asset.add':
+    'Drop or paste a picture on the stage, or fill the Add a picture form in the Asset section',
+  'asset.dither': 'Use the Dither tool under the asset in the Asset section, or the CLI',
+  'asset.capture': 'Needs a URL: `turboslide asset capture <url> --theme both`',
+  'material.capture':
+    'Insert a Material block and press Capture frame in its section, or use the CLI',
   'version.restore': 'Pick a version in the Versions group',
   'judge.bundle': 'Needs an output directory: use the CLI',
   'import.run': 'Needs a source directory: use the CLI',

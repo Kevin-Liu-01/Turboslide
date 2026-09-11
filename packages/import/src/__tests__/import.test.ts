@@ -7,14 +7,17 @@ import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import { Assets } from '../assets.ts';
+import { keyMatches, rulesMatching, valueFor } from '../composite.ts';
 import { leftover, readStyleSheet, take } from '../css.ts';
-import { parseHtmlFragment, find, hasClass } from '../dom.ts';
+import { parseHtmlFragment, find, findAll, hasClass } from '../dom.ts';
 import { BlockIdAllocator, slideIdFromFile, slugify } from '../ids.ts';
-import { importDeck } from '../import-deck.ts';
+import type { Asset } from '@turboslide/schema/assets';
+import { carryDeckAssets, importDeck } from '../import-deck.ts';
 import { mapSlide } from '../map.ts';
 import { parseSections } from '../sections.ts';
 import { textOfElement } from '../text.ts';
-import type { ContentSlide, OpenerSlide } from '@turboslide/schema/deck';
+import type { ContentSlide, OpenerSlide, Slide } from '@turboslide/schema/deck';
+import { slideTitle } from '@turboslide/schema/deck';
 import { importResidual } from '@turboslide/schema/ext';
 
 const DECK =
@@ -52,6 +55,49 @@ describe('text markup from inline html', () => {
   });
 });
 
+describe('the scoped rule matcher (M5)', () => {
+  it('matches descendant and child selectors with classes, tags and last-child', () => {
+    const fragment = parseHtmlFragment(
+      '<div class="fixed"><div class="row"><svg class="ic info"></svg><div><div class="name">A</div><p>B</p></div></div><div class="row">C</div></div>',
+    );
+    const rows = findAll(fragment, (e) => hasClass(e, 'row'));
+    const [first, last] = rows;
+    if (!first || !last) throw new Error('no rows');
+    expect(keyMatches('SCOPE .fixed > div', first)).toBe(true);
+    expect(keyMatches('SCOPE .fixed > div:last-child', first)).toBe(false);
+    expect(keyMatches('SCOPE .fixed > div:last-child', last)).toBe(true);
+    const name = find(fragment, (e) => hasClass(e, 'name'));
+    if (!name) throw new Error('no name');
+    expect(keyMatches('SCOPE .fixed .name', name)).toBe(true);
+    expect(keyMatches('SCOPE .fixed > .name', name)).toBe(false);
+    expect(keyMatches('SCOPE .fixed p', name)).toBe(false);
+    expect(keyMatches('SCOPE .plain > span:has(> .ic)', name)).toBe(false);
+    const icon = find(fragment, (e) => hasClass(e, 'ic'));
+    if (!icon) throw new Error('no icon');
+    expect(keyMatches('SCOPE .fixed .ic', icon)).toBe(true);
+    expect(keyMatches('SCOPE svg', icon)).toBe(true);
+    expect(keyMatches('.s83 .fixed .ic', icon)).toBe(false);
+  });
+
+  it('reads the last matching declaration and lists the matching rules in sheet order', () => {
+    const sheet = readStyleSheet(
+      '.s83 .fixed p { font-size: 20px; } .s83 .fixed .name { font-size: 44px; } .s83 p { color: red; }',
+      's83',
+    );
+    const fragment = parseHtmlFragment('<div class="fixed"><p class="name">A</p></div>');
+    const p = find(fragment, (e) => e.tagName === 'p');
+    if (!p) throw new Error('no p');
+    expect(rulesMatching(sheet, p).map((r) => r.selector)).toEqual([
+      '.s83 .fixed p',
+      '.s83 .fixed .name',
+      '.s83 p',
+    ]);
+    expect(valueFor(sheet, p, 'font-size')).toBe('44px');
+    expect(valueFor(sheet, p, 'color')).toBe('red');
+    expect(valueFor(sheet, p, 'margin')).toBeUndefined();
+  });
+});
+
 describe('css ledger', () => {
   it('takes declarations and reports the rest under the rewritten scope', () => {
     const sheet = readStyleSheet(
@@ -85,6 +131,24 @@ describe('ids and sections', () => {
     expect(ids.allocate('paragraph', '/slots/left/2')).toBe('p2');
     expect(ids.allocate('rows', '/slots/right/0')).toBe('table');
     expect(next['05-why.html#/slots/left/0']).toBe('h');
+  });
+
+  it('continues a stem after a remembered id, so a re-import equals a fresh import (M5)', () => {
+    const remembered = {
+      '83-fixed-points.html#/slots/head/0': 'h',
+      '83-fixed-points.html#/slots/head/1': 'p1',
+    };
+    const again = new BlockIdAllocator('83-fixed-points.html', remembered, {});
+    expect(again.allocate('heading', '/slots/head/0')).toBe('h');
+    expect(again.allocate('paragraph', '/slots/head/1')).toBe('p1');
+    expect(again.allocate('heading', '/slots/body/0')).toBe('h2');
+    expect(again.allocate('paragraph', '/slots/body/1')).toBe('p2');
+    const fresh = new BlockIdAllocator('83-fixed-points.html', {}, {});
+    expect(
+      ['heading', 'paragraph', 'heading', 'paragraph'].map((type, i) =>
+        fresh.allocate(type as 'heading', `/slots/x/${i}`),
+      ),
+    ).toEqual(['h', 'p1', 'h2', 'p2']);
   });
 
   it('reads SECTIONS from tail.html', () => {
@@ -168,7 +232,7 @@ describe('mapSlide', () => {
 
   it('falls back to an html escape with a reason and scoped css', () => {
     const html = `<section class="slide s99"><style>.s99 .two { display: grid; }</style><div class="in">
-      <div class="lay"><div class="head"><h2>Fixed points</h2></div><div class="two"><h3>Fixed</h3></div></div>
+      <div class="lay"><div class="head"><h2>Fixed points</h2></div><div class="two"><table><tr><td>Fixed</td></tr></table></div></div>
     </div></section>`;
     const { slide, row } = mapSlide({
       file: '83-fixed-points.html',
@@ -179,14 +243,121 @@ describe('mapSlide', () => {
       previousIds: {},
       nextIds: {},
     });
-    expect(row.html?.reason).toContain('no block for <div class="two">');
+    expect(row.html?.reason).toContain('no block for <table>');
     const content = slide as ContentSlide;
     const block = content.slots.main?.[0];
     expect(block?.type).toBe('html');
     if (block?.type === 'html') {
       expect(block.css).toContain('.ts-x-fixed-points-html .two { display: grid; }');
-      expect(block.html).toContain('<h3>Fixed</h3>');
+      expect(block.html).toContain('<td>Fixed</td>');
     }
+  });
+
+  it('maps a scoped grid, a figure without an image, an h3, a text div and a standalone icon (M5)', () => {
+    const html = `<section class="slide s83"><style>
+      .s83 .lay { position: absolute; inset: 0; display: flex; flex-direction: column; gap: 36px; }
+      .s83 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: start; }
+      .s83 h3 { font-size: 26px; margin: 0 0 12px; }
+      .s83 .fixed { border: 1px solid var(--hair); background: var(--plate); }
+      .s83 .fixed > div { display: grid; grid-template-columns: 28px 1fr; gap: 18px; align-items: start; padding: 16px 24px; }
+      .s83 .fixed .ic { width: 28px; height: 28px; margin-top: 10px; }
+      .s83 .fixed .name { font-size: 44px; line-height: 1.1; }
+      .s83 .fixed .names span { white-space: nowrap; }
+      .s83 figure { margin: 0; display: grid; gap: 8px; }
+      .s83 figcaption { font-size: 16px; line-height: 1.45; color: var(--ink-2); }
+      .s83 .proof img { display: block; width: 100%; height: auto; border: 1px solid var(--hair); background: var(--plate); }
+    </style><div class="in"><div class="lay">
+      <div class="head"><h2>Fixed points</h2><p>Two fixed points.</p></div>
+      <div class="two">
+        <div>
+          <h3>Fixed</h3>
+          <div class="fixed">
+            <div><svg class="ic info" aria-hidden="true"><use href="#i-lock-closed"/></svg><div><div class="name">General Translation</div><p>The legal name does not change.</p></div></div>
+            <div><svg class="ic info" aria-hidden="true"><use href="#i-lock-closed"/></svg><div><div class="names"><span>gt</span>, <span>gt-next</span></div><p>The names do not change.</p></div></div>
+          </div>
+        </div>
+        <figure class="proof">
+          <svg class="dia bench" viewBox="0 0 627 160" aria-label="The mark on one baseline"><line class="hair" x1="0" y1="128.5" x2="627" y2="128.5"/></svg>
+          <div class="panel term"><svg width="25" height="16" aria-hidden="true"><use href="#gt-mark"/></svg><span>npx gt translate</span></div>
+          <figcaption>The first test as it is run.</figcaption>
+        </figure>
+      </div>
+    </div></div></section>`;
+    const { slide, row } = mapSlide({
+      file: '83-fixed-points.html',
+      n: 83,
+      html,
+      section,
+      assets: assets(),
+      previousIds: {},
+      nextIds: {},
+    });
+    expect(row.html).toBeNull();
+    const content = slide as ContentSlide;
+    expect(content.layout).toEqual({ type: 'split', gap: 36, body: { align: 'start' } });
+    // the lay's children after the head stay one body block whose gap is the lay gap
+    const body = content.slots.body ?? [];
+    expect(body.map((b) => b.type)).toEqual(['composite']);
+    const two = body[0];
+    if (two?.type !== 'composite') throw new Error('no composite');
+    expect(two).toMatchObject({ tracks: '1fr 1fr', gap: 72, align: 'start' });
+    expect(two.cells).toHaveLength(2);
+    const left = two.cells[0]?.blocks[0];
+    if (left?.type !== 'composite') throw new Error('no left stack');
+    expect(left).toMatchObject({ tracks: '1fr', gap: 0 });
+    const [h3, fixed] = left.cells.map((c) => c.blocks[0]);
+    expect(h3).toMatchObject({ type: 'heading', level: 'h2', text: 'Fixed' });
+    expect(importResidual(h3?.ext)?.style).toBe('font-size:26px;margin:0 0 12px');
+    if (fixed?.type !== 'composite') throw new Error('no fixed plate');
+    expect(importResidual(fixed.ext)?.classes).toEqual(['fixed']);
+    const firstRow = fixed.cells[0]?.blocks[0];
+    if (firstRow?.type !== 'composite') throw new Error('no plate row');
+    expect(firstRow).toMatchObject({ tracks: '28px 1fr', gap: 18, align: 'start' });
+    const lock = firstRow.cells[0]?.blocks[0];
+    expect(lock).toMatchObject({
+      type: 'dia',
+      fit: { viewBox: [0, 0, 24, 24] },
+      data: { icons: [{ name: 'lock-closed', size: 24, color: 'info' }] },
+    });
+    // only the classes a residual rule names survive: `.fixed .ic`, not the tone
+    expect(importResidual(lock?.ext)?.classes).toEqual(['ic']);
+    const name = firstRow.cells[1]?.blocks[0];
+    if (name?.type !== 'composite') throw new Error('no name stack');
+    expect(name.cells[0]?.blocks[0]).toMatchObject({
+      type: 'heading',
+      level: 'h2',
+      text: 'General Translation',
+      marginBottom: 0,
+    });
+    expect(importResidual(name.cells[0]?.blocks[0]?.ext)?.style).toBe('text-wrap:wrap');
+    const secondRow = fixed.cells[1]?.blocks[0];
+    if (secondRow?.type !== 'composite') throw new Error('no second row');
+    const names = secondRow.cells[1]?.blocks[0];
+    if (names?.type !== 'composite') throw new Error('no names stack');
+    // the nowrap rule reaches the text as word joiners and is consumed
+    expect(names.cells[0]?.blocks[0]).toMatchObject({
+      type: 'paragraph',
+      text: 'gt, gt-\u2060next',
+    });
+    const figure = two.cells[1]?.blocks[0];
+    if (figure?.type !== 'composite') throw new Error('no figure');
+    expect(figure).toMatchObject({
+      tracks: '1fr',
+      gap: 8,
+      caption: 'The first test as it is run.',
+      captionSize: 16,
+    });
+    expect(figure.cells.map((c) => c.blocks[0]?.type)).toEqual(['dia', 'panel']);
+    expect(figure.cells[0]?.blocks[0]).toMatchObject({ fit: 'slot' });
+    // the grid, figure, figcaption and h3 rules were consumed; the plate's own rules stay residual
+    expect(row.rulesLeftOver).toEqual([
+      '.s83 .fixed { border, background }',
+      '.s83 .fixed > div { padding }',
+      '.s83 .fixed .ic { width, height, margin-top }',
+      '.s83 .fixed .name { font-size, line-height }',
+      '.s83 .proof img { display, width, height, border, background }',
+    ]);
+    expect(row.unhandled).toEqual(['<h3> mapped to an h2 heading with its rule inline']);
   });
 
   it('keeps residual rules under the slide scope and the classes they name', () => {
@@ -212,6 +383,38 @@ describe('mapSlide', () => {
   });
 });
 
+describe('carryDeckAssets', () => {
+  const twins = { light: 'assets/a-light.png', dark: 'assets/a-dark.png' };
+  const base = {
+    id: 'a',
+    role: 'opener',
+    alt: 'a',
+    twins,
+    source: { kind: 'capture', url: 'https://x.dev' },
+  } as unknown as Asset;
+  const metrics = {
+    litFraction: 0.1,
+    plateClear: { plate: [137, 500, 740, 271], nearestLitPx: 10, litUnder: 0, litInBand: 0 },
+  } as unknown as Asset['metrics'];
+
+  it('keeps the deck-added assets and the measured metrics of unchanged twins', () => {
+    const added = { ...base, id: 'liquid-metal-diamond' };
+    const out = carryDeckAssets(
+      { a: { ...base, metrics, sourceFile: 'assets/a.source.jpg' }, 'liquid-metal-diamond': added },
+      { a: base },
+    );
+    expect(out['liquid-metal-diamond']).toEqual(added);
+    expect(out.a?.metrics).toEqual(metrics);
+    expect(out.a?.sourceFile).toBe('assets/a.source.jpg');
+  });
+
+  it('drops the old metrics when the twins changed and takes the import when there is no previous deck', () => {
+    const other = { ...base, twins: { light: 'assets/b-light.png', dark: 'assets/b-dark.png' } };
+    expect(carryDeckAssets({ a: { ...base, metrics } }, { a: other }).a?.metrics).toBeUndefined();
+    expect(carryDeckAssets(undefined, { a: base })).toEqual({ a: base });
+  });
+});
+
 describe('importDeck on a one-slide deck', () => {
   const from = mkdtempSync(join(tmpdir(), 'turboslide-source-'));
   const out = mkdtempSync(join(tmpdir(), 'turboslide-import-'));
@@ -230,7 +433,7 @@ describe('importDeck on a one-slide deck', () => {
     writeFileSync(
       join(from, 'slides/83-fixed-points.html'),
       `<section class="slide s83"><style>.s83 .two { display: grid; }</style><div class="in">
-      <div class="lay"><div class="head"><h2>Fixed <b>points</b> &amp; limits</h2></div><div class="two"><h3>Fixed</h3></div></div>
+      <div class="lay"><div class="head"><h2>Fixed <b>points</b> &amp; limits</h2></div><div class="two"><table><tr><td>Fixed</td></tr></table></div></div>
     </div></section>`,
     );
     const report = importDeck({
@@ -304,23 +507,17 @@ describe.skipIf(!hasDeck)('the Prototemplate deck', () => {
     });
     expect(report.slides).toBe(85);
     expect(report.sections).toBe(8);
-    expect(report.htmlBlocks).toBeLessThanOrEqual(4);
-    expect(report.rows.filter((r) => r.html).map((r) => r.id)).toEqual([
-      'diagrams',
-      'presenter-compare',
-      'fixed-points',
-      'goals',
-    ]);
+    // M5: the composite block retired the four escapes of M1 (slides 25, 67, 83 and 84)
+    expect(report.htmlBlocks).toBe(0);
+    expect(report.rows.filter((r) => r.html).map((r) => r.id)).toEqual([]);
     expect(report.warnings).toEqual([]);
-    // The four escapes carry the title their h2 derives (slides 25, 67, 83 and 84).
+    // The four former escapes derive their title from their typed h2.
     const titles = Object.fromEntries(
       ['diagrams', 'presenter-compare', 'fixed-points', 'goals'].map((id) => [
         id,
-        (
-          JSON.parse(readFileSync(join(out, `gt-brand/slides/${id}.json`), 'utf8')) as {
-            title?: string;
-          }
-        ).title,
+        slideTitle(
+          JSON.parse(readFileSync(join(out, `gt-brand/slides/${id}.json`), 'utf8')) as Slide,
+        ),
       ]),
     );
     expect(titles).toEqual({

@@ -14,6 +14,8 @@
     "./icons": "./src/icons.ts",
     "./annotate": "./src/annotate.ts",
     "./blocks": "./src/blocks.ts",
+    "./blocks/composite": "./src/blocks/composite.ts",
+    "./blocks/material": "./src/blocks/material.ts",
     "./deck": "./src/deck.ts",
     "./assets": "./src/assets.ts",
     "./mutations": "./src/mutations.ts",

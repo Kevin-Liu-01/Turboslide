@@ -524,6 +524,19 @@ function split(
       contentChildren(bodyEl),
       '/slots/body',
     );
+  } else if (rest.length > 1) {
+    // A .lay with several children after the head (s25, s83, s84) spaces them by its flex gap;
+    // the split body is one grid with no gap, so the children become the cells of a one-track
+    // composite whose gap is the lay gap (the renderer's default split gap when none is set).
+    const gap = layout.gap ?? 56;
+    const cells = rest.map((child, index) => ({
+      blocks: mapBlocks(
+        { ...ctx, slotWidth: CONTENT_WIDTH },
+        [child],
+        `/slots/body/0/cells/${index}/blocks`,
+      ),
+    }));
+    slots.body = [newBlock(ctx, 'composite', '/slots/body/0', { tracks: '1fr', gap, cells })];
   } else {
     slots.body = mapBlocks({ ...ctx, slotWidth: CONTENT_WIDTH }, rest, '/slots/body');
   }

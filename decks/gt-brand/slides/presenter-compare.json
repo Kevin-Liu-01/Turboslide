@@ -1,9 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "presenter-compare",
+  "title": "Compare and the presenter",
   "kind": "content",
   "layout": {
-    "type": "stack"
+    "type": "stack",
+    "gap": 22
   },
   "slots": {
     "main": [
@@ -15,6 +17,5 @@
         "note": "Escape: no block for <div class=\"tools\">. Source 67-presenter-compare.html; every scoped rule of the slide travels with the markup."
       }
     ]
-  },
-  "title": "Compare and the presenter"
+  }
 }

@@ -1,12 +1,20 @@
 {
   "schemaVersion": 1,
   "id": "glyphfield-tools",
+  "ext": {
+    "import": {
+      "css": ".ts-x-glyphfield-tools .rows.stacked > div { grid-template-columns: 1fr; gap: 4px 0; }",
+      "scope": "s57a"
+    }
+  },
   "kind": "content",
   "layout": {
     "type": "cols",
     "ratio": {
       "left": 380
-    }
+    },
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -18,6 +26,13 @@
       },
       {
         "id": "rows",
+        "ext": {
+          "import": {
+            "classes": [
+              "stacked"
+            ]
+          }
+        },
         "type": "rows",
         "key": 240,
         "tight": true,
@@ -42,14 +57,7 @@
             "key": "Components",
             "value": "Component library."
           }
-        ],
-        "ext": {
-          "import": {
-            "classes": [
-              "stacked"
-            ]
-          }
-        }
+        ]
       }
     ],
     "right": [
@@ -62,11 +70,5 @@
         "captionSize": 16
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-glyphfield-tools .rows.stacked > div { grid-template-columns: 1fr; gap: 4px 0; }",
-      "scope": "s57a"
-    }
   }
 }

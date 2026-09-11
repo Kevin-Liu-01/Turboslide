@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "4/8"
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -27,9 +29,9 @@
         "type": "shot",
         "asset": "site-blog-post",
         "fit": "width",
-        "caption": "The gt-rrweb 0.2.0 release note uses a generated type cover: the package name is set through the ten-tier dither ramp on a plate that follows the page theme.",
         "aspect": "1440/780",
         "crop": "top",
+        "caption": "The gt-rrweb 0.2.0 release note uses a generated type cover: the package name is set through the ten-tier dither ramp on a plate that follows the page theme.",
         "captionSize": 16
       }
     ]

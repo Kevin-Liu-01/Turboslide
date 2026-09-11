@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "1/1"
+    "ratio": "1/1",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -29,38 +31,38 @@
         "items": [
           {
             "key": "Engineering-first",
-            "value": "The product is built by engineers for engineering teams.",
             "icon": {
               "name": "code-bracket"
-            }
+            },
+            "value": "The product is built by engineers for engineering teams."
           },
           {
             "key": "Craft",
-            "value": "Attention to detail extends to individual hairlines.",
             "icon": {
               "name": "paint-brush"
-            }
+            },
+            "value": "Attention to detail extends to individual hairlines."
           },
           {
             "key": "Infrastructure-grade",
-            "value": "Enterprises can depend on it for reliability, speed, and security.",
             "icon": {
               "name": "server"
-            }
+            },
+            "value": "Enterprises can depend on it for reliability, speed, and security."
           },
           {
             "key": "International",
-            "value": "Language is both the product's subject and its market.",
             "icon": {
               "name": "globe-alt"
-            }
+            },
+            "value": "Language is both the product's subject and its market."
           },
           {
             "key": "Designed",
-            "value": "Every surface from the mark to the docs is designed individually.",
             "icon": {
               "name": "swatch"
-            }
+            },
+            "value": "Every surface from the mark to the docs is designed individually."
           }
         ]
       }

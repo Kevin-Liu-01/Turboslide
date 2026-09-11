@@ -31,14 +31,14 @@ Pipeline: `render.mjs` assembles each slide with the deck's `parts/head.html` CS
 
 ## 3. Renderers on this machine
 
-| Renderer | Present | Used |
-| --- | --- | --- |
-| LibreOffice (`soffice`, `/Applications/LibreOffice.app`, Homebrew cask) | No | No |
-| Microsoft PowerPoint | No | No |
-| Keynote | No | No |
-| macOS QuickLook (`/usr/bin/qlmanage`) | Yes | Yes, first slide only, 1600 by 902 px thumbnails |
-| Chromium (Chrome for Testing 147 through playwright-core) | Yes | Yes, the reference render |
-| `pdftoppm` (poppler) | Yes | Not needed without a PDF |
+| Renderer                                                                | Present | Used                                             |
+| ----------------------------------------------------------------------- | ------- | ------------------------------------------------ |
+| LibreOffice (`soffice`, `/Applications/LibreOffice.app`, Homebrew cask) | No      | No                                               |
+| Microsoft PowerPoint                                                    | No      | No                                               |
+| Keynote                                                                 | No      | No                                               |
+| macOS QuickLook (`/usr/bin/qlmanage`)                                   | Yes     | Yes, first slide only, 1600 by 902 px thumbnails |
+| Chromium (Chrome for Testing 147 through playwright-core)               | Yes     | Yes, the reference render                        |
+| `pdftoppm` (poppler)                                                    | Yes     | Not needed without a PDF                         |
 
 LibreOffice install, not run: `brew install --cask libreoffice` (cask version 26.8.0 on 2026-09-10, https://formulae.brew.sh/cask/libreoffice). Then the verification loop this experiment could not run: `soffice --headless --convert-to pdf --outdir out out/turboslide-light.pptx` (https://help.libreoffice.org/latest/en-US/text/shared/guide/start_parameters.html), then `pdftoppm -r 120 -png out/turboslide-light.pdf out/lo` so the 13.333 in page comes out 1600 px wide, then `node compare.mjs` pointed at those PNGs. Install a static Inter and an `Inter Medium` face first, or every text box renders in a substitute; LibreOffice 26.8 is the first release with variable font support (https://blog.documentfoundation.org/blog/2026/08/26/libreoffice-26-8/), so static instances stay the safe path. LibreOffice 25.8 also changed how it decides which fonts to embed when it writes PPTX (https://wiki.documentfoundation.org/Special:MyLanguage/ReleaseNotes/25.8); whether it reads `.fntdata` on import is not documented in the pages I could reach.
 
@@ -48,45 +48,45 @@ LibreOffice install, not run: `brew install --cask libreoffice` (cask version 26
 
 Sheet 1600 by 900 px on 13.333333 by 7.5 in: 1 px = 1/120 in = 0.6 pt = 7,620 EMU.
 
-| Element | Browser box (px) | Computed style | Emitted | XML |
-| --- | --- | --- | --- | --- |
-| h2 "Export fidelity" | 137, 129, 1326 by 48.39 | Inter 500, 44 px, -1.1 px tracking, 48.4 px line | x 1.14167 in, y 1.075 in, 26.4 pt, charSpacing -0.66, lineSpacing 29.04 | `sz="2640" spc="-66" kern="0"`, `<a:spcPts val="2904"/>`, `typeface="Inter Medium"` |
-| p1 (three lines) | 137, 195.39, 767.58 by 99; lines at y 198.39, 231.39, 264.39, widths 742.17, 724.41, 152.5 | Inter 400, 22 px, normal tracking, 33 px line | 13.2 pt, lineSpacing 19.8, two `softBreakBefore` runs | `sz="1320"`, `<a:spcPts val="1980"/>`, two `<a:br/>` |
-| `.rows` | 137, 436.19, 1326 by 249; rows 62 px tall at y 437.19, 499.19, 561.19, 623.19 | keys Inter 500, 20 px, -0.2 px; values 20 px, 29 px line | five 0.6 pt lines at y 436.69, 498.69, 560.69, 622.69, 684.69 px; keys 12 pt charSpacing -0.12; values 12 pt lineSpacing 17.4 | `sz="1200" spc="-12"`, `<a:spcPts val="1740"/>`, `<a:ln w="7620">` |
-| icons | 137, 458.19 (and +62 per row), 20 by 20 | `#12a37a` | `addImage` 3x PNG at the svg box | `<p:pic>` times 4, media byte-identical |
-| counter "01 / 02" | 1480.78, 862, 47.22 by 16 | Inter 400, 13 px, 0.26 px tracking, titanium | 7.8 pt, charSpacing 0.156 | `sz="780" spc="16"` |
-| `.big` "Brand" | 163, 560.94, 688 by 76.31 | Inter 500, 72 px, -1.8 px, 76.32 px line | 43.2 pt, charSpacing -1.08, lineSpacing 45.792 | `sz="4320" spc="-108"`, `<a:spcPts val="4579"/>` |
-| p2 (two lines) | 163, 651.25, 688 by 66 | 22 px, 33 px line | one soft break | one `<a:br/>` |
-| credit | 163, 729.25, 688 by 21.75 | 15 px, 0.15 px tracking, titanium | 9 pt, charSpacing 0.09, lineSpacing 13.05 | `sz="900" spc="9"`, `<a:spcPts val="1305"/>` |
-| plate | 137, 538.94, 740 by 232.06 (`fit-content`, max 740) | paper | rect 1.14167, 4.49117, 6.16667, 1.93383 in, `line: { type: 'none' }` | `prst="rect"`, `<a:ln></a:ln>` |
-| chips | 66, 858, 40 by 30 and 1474, 856, 60 by 28 | paper | two rects | |
-| rails and crosses | 1 px at 56 (center 56.5) and 1543.5; crosses 11 px at 51 | `--hair` 0.18, `--cross` 0.38 | master lines 0.6 pt on paper; per-slide alpha lines over the picture | `<a:ln w="7620">`, `<a:alpha val="18000"/>` and `38000` on slide 2 |
+| Element              | Browser box (px)                                                                           | Computed style                                           | Emitted                                                                                                                       | XML                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| h2 "Export fidelity" | 137, 129, 1326 by 48.39                                                                    | Inter 500, 44 px, -1.1 px tracking, 48.4 px line         | x 1.14167 in, y 1.075 in, 26.4 pt, charSpacing -0.66, lineSpacing 29.04                                                       | `sz="2640" spc="-66" kern="0"`, `<a:spcPts val="2904"/>`, `typeface="Inter Medium"` |
+| p1 (three lines)     | 137, 195.39, 767.58 by 99; lines at y 198.39, 231.39, 264.39, widths 742.17, 724.41, 152.5 | Inter 400, 22 px, normal tracking, 33 px line            | 13.2 pt, lineSpacing 19.8, two `softBreakBefore` runs                                                                         | `sz="1320"`, `<a:spcPts val="1980"/>`, two `<a:br/>`                                |
+| `.rows`              | 137, 436.19, 1326 by 249; rows 62 px tall at y 437.19, 499.19, 561.19, 623.19              | keys Inter 500, 20 px, -0.2 px; values 20 px, 29 px line | five 0.6 pt lines at y 436.69, 498.69, 560.69, 622.69, 684.69 px; keys 12 pt charSpacing -0.12; values 12 pt lineSpacing 17.4 | `sz="1200" spc="-12"`, `<a:spcPts val="1740"/>`, `<a:ln w="7620">`                  |
+| icons                | 137, 458.19 (and +62 per row), 20 by 20                                                    | `#12a37a`                                                | `addImage` 3x PNG at the svg box                                                                                              | `<p:pic>` times 4, media byte-identical                                             |
+| counter "01 / 02"    | 1480.78, 862, 47.22 by 16                                                                  | Inter 400, 13 px, 0.26 px tracking, titanium             | 7.8 pt, charSpacing 0.156                                                                                                     | `sz="780" spc="16"`                                                                 |
+| `.big` "Brand"       | 163, 560.94, 688 by 76.31                                                                  | Inter 500, 72 px, -1.8 px, 76.32 px line                 | 43.2 pt, charSpacing -1.08, lineSpacing 45.792                                                                                | `sz="4320" spc="-108"`, `<a:spcPts val="4579"/>`                                    |
+| p2 (two lines)       | 163, 651.25, 688 by 66                                                                     | 22 px, 33 px line                                        | one soft break                                                                                                                | one `<a:br/>`                                                                       |
+| credit               | 163, 729.25, 688 by 21.75                                                                  | 15 px, 0.15 px tracking, titanium                        | 9 pt, charSpacing 0.09, lineSpacing 13.05                                                                                     | `sz="900" spc="9"`, `<a:spcPts val="1305"/>`                                        |
+| plate                | 137, 538.94, 740 by 232.06 (`fit-content`, max 740)                                        | paper                                                    | rect 1.14167, 4.49117, 6.16667, 1.93383 in, `line: { type: 'none' }`                                                          | `prst="rect"`, `<a:ln></a:ln>`                                                      |
+| chips                | 66, 858, 40 by 30 and 1474, 856, 60 by 28                                                  | paper                                                    | two rects                                                                                                                     |                                                                                     |
+| rails and crosses    | 1 px at 56 (center 56.5) and 1543.5; crosses 11 px at 51                                   | `--hair` 0.18, `--cross` 0.38                            | master lines 0.6 pt on paper; per-slide alpha lines over the picture                                                          | `<a:ln w="7620">`, `<a:alpha val="18000"/>` and `38000` on slide 2                  |
 
 Every box is `getBoundingClientRect` divided by 120 with 0.02 in of width slack on text boxes so no renderer wraps early. Text boxes carry `margin: 0`, `valign: 'top'`, `align: 'left'`, `paraSpaceBefore: 0`, `paraSpaceAfter: 0` and no `fit`.
 
 ### 4.2 What landed in the XML (out/xml-findings.json)
 
-| Question | Answer | Evidence |
-| --- | --- | --- |
-| Page size | 12,192,000 by 6,858,000 EMU with `defineLayout` width 13.333333 | `<p:sldSz cx="12192000" cy="6858000"/>`; 13.3333 had produced `cx="12191970"` |
-| Letter spacing | Emitted, negative included, in hundredths of a point | `spc="-66"`, `spc="-108"`, `spc="-12"`, `spc="9"`, `spc="16"`; the source is a truthiness check (`opts.charSpacing ? spc=... kern="0" : ''`), so `charSpacing: 0` emits nothing |
-| Kerning | Disabled on every tracked run | `kern="0"` accompanies every `spc` |
-| Exact line pitch | Emitted in hundredths of a point | `<a:lnSpc><a:spcPts val="1980"/></a:lnSpc>`; `lineSpacingMultiple: 1.5` emits `<a:spcPct val="150000"/>` |
-| Insets and anchor | Zero insets, top anchor | `<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t">` with no children |
-| Autofit | None unless asked | no `normAutofit` or `spAutoFit` on slides 1 and 2; `fit: 'shrink'` emits a bare `<a:normAutofit/>` (renderer-dependent scaling) |
-| Weight | Only the bold flag | `b="1"` on the probe; the 500 weight is carried by `typeface="Inter Medium"` |
-| Soft line breaks | `softBreakBefore` emits `<a:br/>` inside one paragraph | 2 on slide 1, 1 on slide 2 |
-| Line alpha | Emitted | `<a:ln w="7620"><a:solidFill><a:srgbClr val="070707"><a:alpha val="18000"/></a:srgbClr></a:solidFill>` |
-| Shape with no outline | `line: { type: 'none' }` | `line: { width: 0 }` had produced `<a:ln w="12700">` because pptxgenjs defaults a falsy width to 1 pt |
-| Image transparency | `<a:alphaModFix amt="50000"/>` for `transparency: 50` | probe slide |
-| Invisible text layer | `transparency: 100` emits `<a:alpha val="0"/>` on the run color | probe slide (the flatten mode text layer) |
-| Strike | `strike="sngStrike"`; thickness and color are not controllable | probe slide |
-| Custom geometry | `<a:custGeom>` with `<a:path w="2218334" h="1410005">`, 4 `moveTo`, 128 `lnTo`, 4 `close`, no `fill` attribute on the path | probe slide; python-pptx classifies the shape as FREEFORM (5) |
-| Background picture | `<p:bg><p:bgPr><a:blipFill dpi="0" rotWithShape="1"><a:blip r:embed="rId1"/>...<a:stretch><a:fillRect/></a:stretch>` | slide 2 |
-| Media integrity | Every PNG byte-identical to the source (sha256 match) | palette PNG IHDR color type 3, icon and alpha ramp color type 6 |
-| Master | 12 lines at `w="7620"` on a `FFFFFF` (or `070707`) background in `slideLayout2.xml` | `defineSlideMaster` objects |
-| Notes | three `notesSlideN.xml` parts | `addNotes` |
-| Embedded fonts | none from pptxgenjs | `embeddedFontLst` absent until `embed-font.py` |
+| Question              | Answer                                                                                                                     | Evidence                                                                                                                                                                        |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Page size             | 12,192,000 by 6,858,000 EMU with `defineLayout` width 13.333333                                                            | `<p:sldSz cx="12192000" cy="6858000"/>`; 13.3333 had produced `cx="12191970"`                                                                                                   |
+| Letter spacing        | Emitted, negative included, in hundredths of a point                                                                       | `spc="-66"`, `spc="-108"`, `spc="-12"`, `spc="9"`, `spc="16"`; the source is a truthiness check (`opts.charSpacing ? spc=... kern="0" : ''`), so `charSpacing: 0` emits nothing |
+| Kerning               | Disabled on every tracked run                                                                                              | `kern="0"` accompanies every `spc`                                                                                                                                              |
+| Exact line pitch      | Emitted in hundredths of a point                                                                                           | `<a:lnSpc><a:spcPts val="1980"/></a:lnSpc>`; `lineSpacingMultiple: 1.5` emits `<a:spcPct val="150000"/>`                                                                        |
+| Insets and anchor     | Zero insets, top anchor                                                                                                    | `<a:bodyPr wrap="square" lIns="0" tIns="0" rIns="0" bIns="0" rtlCol="0" anchor="t">` with no children                                                                           |
+| Autofit               | None unless asked                                                                                                          | no `normAutofit` or `spAutoFit` on slides 1 and 2; `fit: 'shrink'` emits a bare `<a:normAutofit/>` (renderer-dependent scaling)                                                 |
+| Weight                | Only the bold flag                                                                                                         | `b="1"` on the probe; the 500 weight is carried by `typeface="Inter Medium"`                                                                                                    |
+| Soft line breaks      | `softBreakBefore` emits `<a:br/>` inside one paragraph                                                                     | 2 on slide 1, 1 on slide 2                                                                                                                                                      |
+| Line alpha            | Emitted                                                                                                                    | `<a:ln w="7620"><a:solidFill><a:srgbClr val="070707"><a:alpha val="18000"/></a:srgbClr></a:solidFill>`                                                                          |
+| Shape with no outline | `line: { type: 'none' }`                                                                                                   | `line: { width: 0 }` had produced `<a:ln w="12700">` because pptxgenjs defaults a falsy width to 1 pt                                                                           |
+| Image transparency    | `<a:alphaModFix amt="50000"/>` for `transparency: 50`                                                                      | probe slide                                                                                                                                                                     |
+| Invisible text layer  | `transparency: 100` emits `<a:alpha val="0"/>` on the run color                                                            | probe slide (the flatten mode text layer)                                                                                                                                       |
+| Strike                | `strike="sngStrike"`; thickness and color are not controllable                                                             | probe slide                                                                                                                                                                     |
+| Custom geometry       | `<a:custGeom>` with `<a:path w="2218334" h="1410005">`, 4 `moveTo`, 128 `lnTo`, 4 `close`, no `fill` attribute on the path | probe slide; python-pptx classifies the shape as FREEFORM (5)                                                                                                                   |
+| Background picture    | `<p:bg><p:bgPr><a:blipFill dpi="0" rotWithShape="1"><a:blip r:embed="rId1"/>...<a:stretch><a:fillRect/></a:stretch>`       | slide 2                                                                                                                                                                         |
+| Media integrity       | Every PNG byte-identical to the source (sha256 match)                                                                      | palette PNG IHDR color type 3, icon and alpha ramp color type 6                                                                                                                 |
+| Master                | 12 lines at `w="7620"` on a `FFFFFF` (or `070707`) background in `slideLayout2.xml`                                        | `defineSlideMaster` objects                                                                                                                                                     |
+| Notes                 | three `notesSlideN.xml` parts                                                                                              | `addNotes`                                                                                                                                                                      |
+| Embedded fonts        | none from pptxgenjs                                                                                                        | `embeddedFontLst` absent until `embed-font.py`                                                                                                                                  |
 
 python-pptx 1.0.2 reopens both files: 3 slides, 16 auto shapes plus 4 pictures on slide 1, 19 auto shapes on slide 2, 10 auto shapes, 2 pictures and 1 freeform on slide 3; heading read back at 26.4 pt, face `Inter Medium`, box 1.1417, 1.075, 11.07, 0.4033 in.
 
@@ -94,23 +94,23 @@ python-pptx 1.0.2 reopens both files: 3 slides, 16 auto shapes plus 4 pictures o
 
 QuickLook thumbnails are 1600 by 902; the best crop offset was 0 in every case. pixelmatch threshold 0.1, antialiasing not ignored.
 
-| Pair | Mismatched pixels | Percent |
-| --- | --- | --- |
-| slide 1 light | 30,726 of 1,440,000 | 2.134 |
-| slide 1 dark | 37,188 | 2.583 |
-| slide 2 light (opener first) | 230,961 | 16.039 |
+| Pair                         | Mismatched pixels   | Percent |
+| ---------------------------- | ------------------- | ------- |
+| slide 1 light                | 30,726 of 1,440,000 | 2.134   |
+| slide 1 dark                 | 37,188              | 2.583   |
+| slide 2 light (opener first) | 230,961             | 16.039  |
 
 Per-region ink bounding boxes (pixels far from the region's background), browser versus QuickLook:
 
-| Region | Browser ink box | QuickLook ink box | dx, dy | Width delta | Region mismatch |
-| --- | --- | --- | --- | --- | --- |
-| h2 | 140, 137, 252 by 41 | 137, 136, 251 by 40 | -3, -1 | -0.4 percent (a serif at -0.66 pt tracking happens to match Inter's width) | 1.88 percent |
-| p1 | 138, 202, 740 by 88 | 137, 203, 645 by 84 | -1, +1 | -12.8 percent (substituted face) | 7.61 percent |
-| rows | 139, 459, 1227 by 205 | 140, 458, 1109 by 206 | +1, -1 | -9.6 percent (substituted face) | 4.55 percent |
-| counter | 1482, 865, 44 by 10 | 1485, 866, 31 by 7 | +3, +1 | -29.6 percent | 5.83 percent |
-| big | 168, 573, 177 by 53 | 163, 571, 168 by 51 | -5, -2 | -5.1 percent | 3.94 percent |
-| p2 | 163, 659, 681 by 49 | 162, 659, 592 by 48 | -1, 0 | -13.1 percent | 5.66 percent |
-| credit | 165, 734, 353 by 14 | 164, 735, 304 by 13 | -1, +1 | -13.9 percent | 4.88 percent |
+| Region  | Browser ink box       | QuickLook ink box     | dx, dy | Width delta                                                                | Region mismatch |
+| ------- | --------------------- | --------------------- | ------ | -------------------------------------------------------------------------- | --------------- |
+| h2      | 140, 137, 252 by 41   | 137, 136, 251 by 40   | -3, -1 | -0.4 percent (a serif at -0.66 pt tracking happens to match Inter's width) | 1.88 percent    |
+| p1      | 138, 202, 740 by 88   | 137, 203, 645 by 84   | -1, +1 | -12.8 percent (substituted face)                                           | 7.61 percent    |
+| rows    | 139, 459, 1227 by 205 | 140, 458, 1109 by 206 | +1, -1 | -9.6 percent (substituted face)                                            | 4.55 percent    |
+| counter | 1482, 865, 44 by 10   | 1485, 866, 31 by 7    | +3, +1 | -29.6 percent                                                              | 5.83 percent    |
+| big     | 168, 573, 177 by 53   | 163, 571, 168 by 51   | -5, -2 | -5.1 percent                                                               | 3.94 percent    |
+| p2      | 163, 659, 681 by 49   | 162, 659, 592 by 48   | -1, 0  | -13.1 percent                                                              | 5.66 percent    |
+| credit  | 165, 734, 353 by 14   | 164, 735, 304 by 13   | -1, +1 | -13.9 percent                                                              | 4.88 percent    |
 
 Hairline rows (a column scan at x = 177): browser 436, 498, 560, 622, 684; QuickLook light 437, 498 and 499, 560 and 561, 622, 684; dark 436 and 437, 498 and 499, 560 and 561, 622 and 623, 684. A 0.6 pt line is exactly 1.0 px at this scale and QuickLook antialiases it across two rows when its center is not on a pixel boundary. Rails show the same behavior in the diff images.
 
@@ -126,20 +126,20 @@ Inter is not a system font on this Mac (`fc-list` finds no Inter; `~/Library/Fon
 
 Chromium (out/font-fallback.json, 44 px weight 500 sample, advance widths):
 
-| Stack | Width | Resolves to |
-| --- | --- | --- |
-| `Inter` alone, not installed, not embedded | 902.97 | Times (the same width as `Times` and `serif`; Chromium's standard font on macOS) |
-| the deck's `'Inter', 'Helvetica Neue', Arial, sans-serif` | 1021.47 | Helvetica Neue |
-| `Helvetica`, `Arial`, `sans-serif` | 987.97 | Helvetica |
-| `system-ui` | 955.45 | San Francisco |
+| Stack                                                     | Width   | Resolves to                                                                      |
+| --------------------------------------------------------- | ------- | -------------------------------------------------------------------------------- |
+| `Inter` alone, not installed, not embedded                | 902.97  | Times (the same width as `Times` and `serif`; Chromium's standard font on macOS) |
+| the deck's `'Inter', 'Helvetica Neue', Arial, sans-serif` | 1021.47 | Helvetica Neue                                                                   |
+| `Helvetica`, `Arial`, `sans-serif`                        | 987.97  | Helvetica                                                                        |
+| `system-ui`                                               | 955.45  | San Francisco                                                                    |
 
 Widths of the experiment's own text with Inter loaded versus substitutes, same size, tracking and features (out/font-widths.json):
 
-| Sample | Inter | Helvetica Neue | Helvetica, Arial | Times | system-ui |
-| --- | --- | --- | --- | --- | --- |
-| h2 "Export fidelity", 500 44 px, -0.025 em | 254.75 | +3.91 percent | -2.80 | -5.26 | -2.10 |
-| body line, 400 22 px | 918.41 | -1.86 | -2.94 | -11.73 | -6.12 |
-| key "Verification", 500 20 px, -0.01 em | 103.86 | -3.82 | -8.10 | -11.40 | -4.74 |
+| Sample                                     | Inter  | Helvetica Neue | Helvetica, Arial | Times  | system-ui |
+| ------------------------------------------ | ------ | -------------- | ---------------- | ------ | --------- |
+| h2 "Export fidelity", 500 44 px, -0.025 em | 254.75 | +3.91 percent  | -2.80            | -5.26  | -2.10     |
+| body line, 400 22 px                       | 918.41 | -1.86          | -2.94            | -11.73 | -6.12     |
+| key "Verification", 500 20 px, -0.01 em    | 103.86 | -3.82          | -8.10            | -11.40 | -4.74     |
 
 A 2 to 4 percent width change moves line breaks in a 56 ch paragraph; the exporter's explicit `<a:br/>` breaks and 0.02 in slack are what keep the layout when the face changes, and the box then only looks wrong, it does not reflow.
 
@@ -151,13 +151,13 @@ PowerPoint and LibreOffice, documented, not testable here: PowerPoint for Window
 
 pptxgenjs writes `kern="0"` with every `spc`. In Inter, with the deck's tracking and features on:
 
-| Sample | Kerning on | Kerning off | Delta | Without `cv11`, `ss01` |
-| --- | --- | --- | --- | --- |
-| h2 "Export fidelity", 500 44 px | 254.75 | 252.39 | -2.36 px (-0.93 percent) | 0 |
-| h1 "Typography", 500 88 px | 444.27 | 456.14 | +11.87 px (+2.67 percent) | -4.57 px |
-| h1 "AVATAR WAVE", 500 88 px | 549.25 | 599.16 | +49.91 px (+9.09 percent) | 0 |
-| big "Brand", 500 72 px | 184.23 | 184.81 | +0.58 px | -3.73 px |
-| body line, 400 22 px | 745.30 | 748.17 | +2.87 px (+0.39 percent) | -3.13 px |
+| Sample                          | Kerning on | Kerning off | Delta                     | Without `cv11`, `ss01` |
+| ------------------------------- | ---------- | ----------- | ------------------------- | ---------------------- |
+| h2 "Export fidelity", 500 44 px | 254.75     | 252.39      | -2.36 px (-0.93 percent)  | 0                      |
+| h1 "Typography", 500 88 px      | 444.27     | 456.14      | +11.87 px (+2.67 percent) | -4.57 px               |
+| h1 "AVATAR WAVE", 500 88 px     | 549.25     | 599.16      | +49.91 px (+9.09 percent) | 0                      |
+| big "Brand", 500 72 px          | 184.23     | 184.81      | +0.58 px                  | -3.73 px               |
+| body line, 400 22 px            | 745.30     | 748.17      | +2.87 px (+0.39 percent)  | -3.13 px               |
 
 Two consequences for the exporter: strip `kern="0"` in a post-process (DrawingML `kern` is the minimum size at which kerning applies, so removing the attribute or setting `kern="1200"` restores it above 12 pt: https://learn.microsoft.com/en-us/dotnet/api/documentformat.openxml.drawing.runproperties), and accept that `cv11` and `ss01` cannot be requested in DrawingML at all, so a heading in PowerPoint is a few pixels different in width and shows the double-storey a and closed digits unless a feature-frozen font is installed.
 
@@ -199,24 +199,24 @@ Headless rendering (node-shaders-import.mjs, shader-headless.mjs, out/shader-hea
 
 Verified means read back from the XML or measured in a render on this machine. Risk uses report 04's vocabulary: low is antialiasing only, medium is a measurable difference calibration removes, high is a visible difference or a missing feature.
 
-| Deck element | PPTX construct (pptxgenjs) | Verified here | Renderer result here (QuickLook) | Risk | Mode |
-| --- | --- | --- | --- | --- | --- |
-| Body, lead, caption, row text | text box, `sz` centipoints, `spcPts` pitch, `margin: 0`, `<a:br/>` per browser line | XML exact; baseline within 1 px | correct position, substituted face | low with the font installed; medium without | native |
-| Headings h2, `.big` | same plus `spc -66` and `-108`, face `Inter Medium` | XML exact | correct position, substituted face, no kerning | medium: `kern="0"` must be stripped; `cv11`, `ss01` impossible; weight needs a named family | native |
-| Rails, rules, crosses | master lines `w="7620"` in composite color; alpha lines over pictures | XML exact; within 1 px | rendered, antialiased over two rows | low | native |
-| Counter | text box `sz="780" spc="16"` | XML exact | rendered | low | native |
-| Plate and paper chips over a full-bleed picture | rectangles at DOM boxes with `type: 'none'` outline; picture as `p:bg` blip | XML exact; geometry read back | rendered at place | low for geometry | native plate, raster picture |
-| Two-tone dither | palette PNG background or picture | byte-identical | 71.99 percent cell-exact, 17.96 percent grey at a 0.22 percent stretch | medium and unavoidable at non-1:1 zoom | raster |
-| Ruled tables `.rows` | five hairlines plus key and value text boxes | XML exact; lines within 1 px | rendered | low | native |
-| Semantic icons | RGBA PNG at 3x | byte-identical; alpha honored | rendered over paper in both themes | low | raster |
-| Ruled lists `.plain` strike | `strike="sngStrike"` | XML | not rendered (probe slide) | medium: strike color and thickness not controllable | native |
-| GT mark, inline diagrams | `custGeom` possible (136 points); PNG safe | XML; FREEFORM read back | not rendered (probe slide) | medium: no fill rule | raster by default |
-| Shader materials | frozen frame PNG from headless Chromium | rendered in 43 ms, GPU and SwiftShader | n/a | low | raster |
-| Speaker notes | `addNotes` | three notes parts | n/a | low | native |
-| Invisible text layer (flatten mode) | `transparency: 100` gives `<a:alpha val="0"/>` | XML | not rendered | low | native over raster |
-| Font embedding | raw OOXML `.fntdata` post-process | package valid, python-pptx reopens | QuickLook ignores it | high until PowerPoint confirms | n/a |
-| Weight 500 | none | n/a | serif regular drawn | medium: separate family name | n/a |
-| Autofit | never set | no element emitted by default | n/a | low as long as `fit` stays unset | n/a |
+| Deck element                                    | PPTX construct (pptxgenjs)                                                          | Verified here                          | Renderer result here (QuickLook)                                       | Risk                                                                                        | Mode                         |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------- |
+| Body, lead, caption, row text                   | text box, `sz` centipoints, `spcPts` pitch, `margin: 0`, `<a:br/>` per browser line | XML exact; baseline within 1 px        | correct position, substituted face                                     | low with the font installed; medium without                                                 | native                       |
+| Headings h2, `.big`                             | same plus `spc -66` and `-108`, face `Inter Medium`                                 | XML exact                              | correct position, substituted face, no kerning                         | medium: `kern="0"` must be stripped; `cv11`, `ss01` impossible; weight needs a named family | native                       |
+| Rails, rules, crosses                           | master lines `w="7620"` in composite color; alpha lines over pictures               | XML exact; within 1 px                 | rendered, antialiased over two rows                                    | low                                                                                         | native                       |
+| Counter                                         | text box `sz="780" spc="16"`                                                        | XML exact                              | rendered                                                               | low                                                                                         | native                       |
+| Plate and paper chips over a full-bleed picture | rectangles at DOM boxes with `type: 'none'` outline; picture as `p:bg` blip         | XML exact; geometry read back          | rendered at place                                                      | low for geometry                                                                            | native plate, raster picture |
+| Two-tone dither                                 | palette PNG background or picture                                                   | byte-identical                         | 71.99 percent cell-exact, 17.96 percent grey at a 0.22 percent stretch | medium and unavoidable at non-1:1 zoom                                                      | raster                       |
+| Ruled tables `.rows`                            | five hairlines plus key and value text boxes                                        | XML exact; lines within 1 px           | rendered                                                               | low                                                                                         | native                       |
+| Semantic icons                                  | RGBA PNG at 3x                                                                      | byte-identical; alpha honored          | rendered over paper in both themes                                     | low                                                                                         | raster                       |
+| Ruled lists `.plain` strike                     | `strike="sngStrike"`                                                                | XML                                    | not rendered (probe slide)                                             | medium: strike color and thickness not controllable                                         | native                       |
+| GT mark, inline diagrams                        | `custGeom` possible (136 points); PNG safe                                          | XML; FREEFORM read back                | not rendered (probe slide)                                             | medium: no fill rule                                                                        | raster by default            |
+| Shader materials                                | frozen frame PNG from headless Chromium                                             | rendered in 43 ms, GPU and SwiftShader | n/a                                                                    | low                                                                                         | raster                       |
+| Speaker notes                                   | `addNotes`                                                                          | three notes parts                      | n/a                                                                    | low                                                                                         | native                       |
+| Invisible text layer (flatten mode)             | `transparency: 100` gives `<a:alpha val="0"/>`                                      | XML                                    | not rendered                                                           | low                                                                                         | native over raster           |
+| Font embedding                                  | raw OOXML `.fntdata` post-process                                                   | package valid, python-pptx reopens     | QuickLook ignores it                                                   | high until PowerPoint confirms                                                              | n/a                          |
+| Weight 500                                      | none                                                                                | n/a                                    | serif regular drawn                                                    | medium: separate family name                                                                | n/a                          |
+| Autofit                                         | never set                                                                           | no element emitted by default          | n/a                                                                    | low as long as `fit` stays unset                                                            | n/a                          |
 
 Google Slides was not exercised (no OAuth in this session). Report 04 sections 6 and 8 stand: no letter spacing field in `TextStyle`, `lineSpacing` only as a percentage of the font's normal pitch, images by public URL, no custom geometry (https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations.pages/text).
 

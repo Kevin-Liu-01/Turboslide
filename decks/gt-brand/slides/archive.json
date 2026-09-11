@@ -1,10 +1,18 @@
 {
   "schemaVersion": 1,
   "id": "archive",
+  "ext": {
+    "import": {
+      "css": ".ts-x-archive .refs { gap: 4px 48px; }\n.ts-x-archive .refs span { padding: 4px 0; }",
+      "scope": "s55a"
+    }
+  },
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "5/7"
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -53,11 +61,5 @@
         "captionSize": 16
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-archive .refs { gap: 4px 48px; }\n.ts-x-archive .refs span { padding: 4px 0; }",
-      "scope": "s55a"
-    }
   }
 }

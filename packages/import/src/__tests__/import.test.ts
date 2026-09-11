@@ -249,6 +249,45 @@ describe('importDeck on a one-slide deck', () => {
     expect(slide.slots.main[0]?.type).toBe('html');
     expect(slide.title).toBe('Fixed points & limits');
   });
+
+  it('keeps the revision and the timestamps when a re-import changes nothing', () => {
+    // M1 wart: every `pnpm check` re-imported over the committed deck and bumped the revision
+    // although every file came out byte-identical. A write that changes nothing is not a write.
+    const manifestPath = join(out, 'one/deck.json');
+    const before = readFileSync(manifestPath, 'utf8');
+    const again = importDeck({
+      from,
+      into: 'one',
+      decksDir: out,
+      skipAssets: true,
+      now: () => '2026-09-11T00:00:00.000Z',
+    });
+    expect(again.slides).toBe(1);
+    expect(readFileSync(manifestPath, 'utf8')).toBe(before);
+    expect(JSON.parse(before)).toMatchObject({
+      revision: 1,
+      updatedAt: '2026-09-10T00:00:00.000Z',
+    });
+    expect(again.importedAt).toBe('2026-09-10T00:00:00.000Z');
+    // A changed source bumps the revision once more.
+    writeFileSync(
+      join(from, 'slides/83-fixed-points.html'),
+      `<section class="slide s83"><div class="in"><div class="lay"><div class="head"><h2>Fixed points</h2></div></div></div></section>`,
+    );
+    const changed = importDeck({
+      from,
+      into: 'one',
+      decksDir: out,
+      skipAssets: true,
+      now: () => '2026-09-11T00:00:00.000Z',
+    });
+    expect(changed.htmlBlocks).toBe(0);
+    expect(JSON.parse(readFileSync(manifestPath, 'utf8'))).toMatchObject({
+      revision: 2,
+      createdAt: '2026-09-10T00:00:00.000Z',
+      updatedAt: '2026-09-11T00:00:00.000Z',
+    });
+  });
 });
 
 describe.skipIf(!hasDeck)('the Prototemplate deck', () => {

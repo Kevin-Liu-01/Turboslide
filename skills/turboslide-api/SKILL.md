@@ -10,7 +10,7 @@ Every operation is one named action; the CLI subcommands, the MCP tools and the 
 ## Discovery
 
 1. CLI: `turboslide info --json` and `turboslide slides --json` from a checkout with a `deck.json` upward, or `--deck <dir>`.
-2. MCP: `turboslide mcp` over stdio, or `/mcp` on the studio; read `deck://manifest`, `deck://grammar`, `deck://catalog/blocks`, `deck://catalog/icons`, `deck://theme`.
+2. MCP: `turboslide mcp` over stdio (`--deck <dir>`, `--derived <dir>` for where renders and sheets land, `--author agent:<runId>`), or `/mcp` on the studio from M4. Tools are `deck_<action>` for every implemented action; a tool the server does not list is not implemented yet, so `tools/list` is the honest capability check. Resources: `deck://<id>/manifest`, `deck://<id>/slides/<slideId>`, `deck://lint/<id>`, `deck://render/<slideId>/<theme>` (the latest PNG), `deck://sheet/<theme>` (the latest contact sheet with its cell map), `deck://grammar`, `deck://catalog/blocks`, `deck://catalog/icons`, `deck://theme`. The `deck_review` prompt holds the judge lenses.
 3. HTTP: `GET /api/agent` for the manifest, `/openapi.json` for the full contract, `/llms.txt` for the short guide. The studio runs on port 4321.
 
 Read [references/actions.md](references/actions.md) for every action with its input, transports, CLI usage, MCP tool and milestone. An action whose milestone has not landed answers `NotImplementedError` (501); do not retry it.
@@ -29,6 +29,7 @@ Read [references/actions.md](references/actions.md) for every action with its in
 - Slides, sections and assets are slugs; blocks are `slideId#blockId`; fields are JSON pointers. Never address by number.
 - `section.set` is the only way to reorder; numbers and counts derive from it.
 - Errors are `TypeError` (400, malformed input with the Zod path), `RangeError` (404, unknown id), `ConflictError` (409), `NotImplementedError` (501), `Error` (500). Do not retry unchanged invalid input.
+- Over MCP a tool result carries the action output as JSON text and as `structuredContent`; a list output is wrapped as `{ items, count }`. A refused call is `isError` with `{ error: { name, status, message, currentRevision?, current?, holder? } }` in the text. Render tools return PNGs as image content beside the JSON, at most 12 per call; the rest are read from `deck://render/<slideId>/<theme>`.
 
 ## Completion
 

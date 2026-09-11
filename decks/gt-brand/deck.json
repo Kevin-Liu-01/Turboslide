@@ -1099,7 +1099,6 @@
         "license": "public domain",
         "shareAlike": false
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1108,16 +1107,17 @@
           1060,
           785
         ],
+        "blur": 0.4,
         "autocontrast": 0.5,
+        "black": 100,
+        "white": 215,
         "polarity": "light-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "blur": 0.4,
-        "black": 100,
-        "white": 215
+        "resampler": "lanczos3"
       },
       "credit": "Map: Eastern Telegraph Company, 1901, public domain",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Developer experience, mood-cable",
@@ -1149,7 +1149,6 @@
         "license": "public domain",
         "shareAlike": false
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1159,14 +1158,15 @@
           880
         ],
         "autocontrast": 0.5,
+        "black": 40,
+        "white": 215,
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "black": 40,
-        "white": 215
+        "resampler": "lanczos3"
       },
       "credit": "Calligraphy: Ahmed Karahisari, 16th century, public domain",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Design system, mood-calligraphy",
@@ -1199,7 +1199,6 @@
         "license": "public domain",
         "shareAlike": false
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1209,15 +1208,16 @@
           652
         ],
         "autocontrast": 0.5,
+        "black": 60,
+        "white": 225,
+        "minFilter": 3,
         "polarity": "light-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "black": 60,
-        "white": 225,
-        "minFilter": 3
+        "resampler": "lanczos3"
       },
       "credit": "Engraving: Emanuel Bowen, 1748, public domain",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Status and plan, mood-compass",
@@ -1250,7 +1250,6 @@
         "license": "CC BY-SA 4.0",
         "shareAlike": true
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1260,14 +1259,15 @@
           803
         ],
         "autocontrast": 0.5,
+        "black": 40,
+        "white": 215,
         "polarity": "light-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "black": 40,
-        "white": 215
+        "resampler": "lanczos3"
       },
       "credit": "Photograph: Ms Sarah Welch, CC BY-SA 4.0",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Blog and content, mood-devanagari",
@@ -1300,7 +1300,6 @@
         "license": "CC BY-SA 4.0",
         "shareAlike": true
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1309,16 +1308,17 @@
           1800,
           1122
         ],
+        "blur": 2,
         "autocontrast": 0.5,
+        "black": 110,
+        "white": 235,
         "polarity": "light-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "blur": 2,
-        "black": 110,
-        "white": 235
+        "resampler": "lanczos3"
       },
       "credit": "Photograph: Cullen328, CC BY-SA 4.0",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Documentation, mood-dictionary",
@@ -1351,7 +1351,6 @@
         "license": "public domain",
         "shareAlike": false
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1360,18 +1359,19 @@
           3279,
           1809
         ],
+        "channel": "r",
+        "blur": 0.6,
         "autocontrast": 0.5,
+        "black": 80,
+        "white": 210,
+        "gamma": 1,
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "channel": "r",
-        "blur": 0.6,
-        "black": 80,
-        "white": 210,
-        "gamma": 1
+        "resampler": "lanczos3"
       },
       "credit": "Image: NASA, Reto Stöckli, 2007, public domain",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Brand, mood-earth",
@@ -1405,7 +1405,6 @@
         "license": "CC BY-SA 4.0",
         "shareAlike": true
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1414,12 +1413,8 @@
           1800,
           1174
         ],
-        "autocontrast": 0.5,
-        "polarity": "dark-ground",
-        "cell": 2,
-        "bayer": 8,
-        "resampler": "lanczos3",
         "blur": 0.5,
+        "autocontrast": 0.5,
         "black": 0,
         "white": 212,
         "gamma": 0.8,
@@ -1429,9 +1424,14 @@
             260
           ],
           "amount": 180
-        }
+        },
+        "polarity": "dark-ground",
+        "cell": 2,
+        "bayer": 8,
+        "resampler": "lanczos3"
       },
       "credit": "Photograph: Ken Heaton, CC BY-SA 4.0",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Website, mood-lighthouse",
@@ -1464,7 +1464,6 @@
         "license": "CC BY-SA 4.0. The dithered files are adaptations, so the credit line on the plate is required",
         "shareAlike": true
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1473,17 +1472,18 @@
           1539,
           1166
         ],
+        "blur": 0.6,
         "autocontrast": 0.5,
+        "black": 140,
+        "white": 230,
+        "gamma": 0.9,
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "blur": 0.6,
-        "black": 140,
-        "white": 230,
-        "gamma": 0.9
+        "resampler": "lanczos3"
       },
       "credit": "Photograph: Hans Hillewaert, CC BY-SA 4.0",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Brand, mood-rosetta",
@@ -1517,7 +1517,6 @@
         "license": "public domain",
         "shareAlike": false
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1527,13 +1526,14 @@
           1102
         ],
         "autocontrast": 0.5,
+        "white": 225,
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "white": 225
+        "resampler": "lanczos3"
       },
       "credit": "Print: Katsushika Hokusai, about 1831, public domain",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Prototemplate and Glyphfield, mood-wave",
@@ -1572,12 +1572,12 @@
         "renderer": "Chrome for Testing, ANGLE Metal (Playwright), recorded in OPENERS.md",
         "recipeKey": "sha256:d9d21175a6fd16f4e46b7adc9d2ddff41d34f3830240fedbaee886fadfa4325d"
       },
-      "inline": "native",
       "treatment": {
         "kind": "continuous",
         "quality": 92
       },
       "credit": "Material: gem smoke, Paper Shaders, rendered in Glyphfield",
+      "inline": "native",
       "ext": {
         "provenance": {
           "heading": "Blog and content",
@@ -1604,7 +1604,6 @@
       "source": {
         "kind": "file"
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1614,13 +1613,14 @@
           308
         ],
         "autocontrast": 0.5,
+        "gamma": 0.85,
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "gamma": 0.85
+        "resampler": "lanczos3"
       },
       "credit": "Material: Event Horizon, a Prototemplate direction",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Brand",
@@ -1666,7 +1666,6 @@
       "source": {
         "kind": "file"
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1675,16 +1674,17 @@
           540,
           242
         ],
+        "invert": true,
         "autocontrast": 0.5,
+        "black": 16,
+        "gamma": 1.1,
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "invert": true,
-        "black": 16,
-        "gamma": 1.1
+        "resampler": "lanczos3"
       },
       "credit": "Material: Chroma Flow, a Prototemplate direction",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Design system",
@@ -1722,12 +1722,12 @@
         "renderer": "Chrome for Testing, ANGLE Metal (Playwright), recorded in OPENERS.md",
         "recipeKey": "sha256:8db25baf8767819160e7d7d6ae6688eaafa02b766854f50fdf8c0b662ba9cb15"
       },
-      "inline": "native",
       "treatment": {
         "kind": "continuous",
         "quality": 92
       },
       "credit": "Material: gem smoke, Paper Shaders, rendered in Glyphfield",
+      "inline": "native",
       "ext": {
         "provenance": {
           "heading": "Developer experience",
@@ -1754,7 +1754,6 @@
       "source": {
         "kind": "file"
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1764,14 +1763,15 @@
           626
         ],
         "autocontrast": 0.5,
+        "black": 30,
+        "gamma": 1.2,
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "black": 30,
-        "gamma": 1.2
+        "resampler": "lanczos3"
       },
       "credit": "Material: Lens Gate, a Prototemplate direction",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Documentation",
@@ -1822,7 +1822,6 @@
         "renderer": "Chrome for Testing, ANGLE Metal (Playwright), recorded in OPENERS.md",
         "recipeKey": "sha256:c170779e628d74d29e18c8cd31541b45715cbbd3ee285f5e3552b246a00824d7"
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1832,14 +1831,15 @@
           2374
         ],
         "autocontrast": 0.5,
+        "black": 20,
+        "gamma": 1,
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "black": 20,
-        "gamma": 1
+        "resampler": "lanczos3"
       },
       "credit": "Material: liquid metal, Paper Shaders, rendered in Glyphfield",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Prototemplate and Glyphfield",
@@ -1867,7 +1867,6 @@
       "source": {
         "kind": "file"
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1877,14 +1876,15 @@
           933
         ],
         "autocontrast": 0.5,
+        "black": 50,
+        "gamma": 0.85,
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "black": 50,
-        "gamma": 0.85
+        "resampler": "lanczos3"
       },
       "credit": "Material: Singularity, a Prototemplate direction",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Status and plan",
@@ -1912,7 +1912,6 @@
       "source": {
         "kind": "file"
       },
-      "inline": "two-color",
       "treatment": {
         "kind": "two-tone",
         "crop": [
@@ -1922,14 +1921,15 @@
           542
         ],
         "autocontrast": 0.5,
+        "black": 10,
+        "gamma": 1,
         "polarity": "dark-ground",
         "cell": 2,
         "bayer": 8,
-        "resampler": "lanczos3",
-        "black": 10,
-        "gamma": 1
+        "resampler": "lanczos3"
       },
       "credit": "Material: Glyph Rain, a Prototemplate direction",
+      "inline": "two-color",
       "ext": {
         "provenance": {
           "heading": "Website",
@@ -2966,7 +2966,7 @@
       "inline": "resample-1280"
     }
   },
-  "revision": 12,
+  "revision": 13,
   "createdAt": "2026-09-10T21:29:42.282Z",
-  "updatedAt": "2026-09-10T23:07:16.381Z"
+  "updatedAt": "2026-09-11T00:38:38.404Z"
 }

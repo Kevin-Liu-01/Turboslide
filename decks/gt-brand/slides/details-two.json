@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "4/8"
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -39,16 +41,16 @@
             "blocks": [
               {
                 "id": "fig",
-                "type": "shot",
-                "asset": "detail-nav-mark",
-                "fit": "width",
-                "caption": "The navigation bar carries the mark and four text links and is closed by one hairline, where the left page rail starts.",
-                "captionSize": 15,
                 "ext": {
                   "import": {
                     "style": "gap:10px"
                   }
-                }
+                },
+                "type": "shot",
+                "asset": "detail-nav-mark",
+                "fit": "width",
+                "caption": "The navigation bar carries the mark and four text links and is closed by one hairline, where the left page rail starts.",
+                "captionSize": 15
               }
             ]
           },
@@ -56,16 +58,16 @@
             "blocks": [
               {
                 "id": "fig2",
-                "type": "shot",
-                "asset": "detail-cross",
-                "fit": "width",
-                "caption": "A registration cross marks the point where the left rail meets the rule that closes the hero band.",
-                "captionSize": 15,
                 "ext": {
                   "import": {
                     "style": "gap:10px"
                   }
-                }
+                },
+                "type": "shot",
+                "asset": "detail-cross",
+                "fit": "width",
+                "caption": "A registration cross marks the point where the left rail meets the rule that closes the hero band.",
+                "captionSize": 15
               }
             ]
           },
@@ -73,16 +75,16 @@
             "blocks": [
               {
                 "id": "fig3",
-                "type": "shot",
-                "asset": "detail-code-panel",
-                "fit": "width",
-                "caption": "The install panel keeps the package manager tabs on a plate above the code and marks the active tab with a short underline.",
-                "captionSize": 15,
                 "ext": {
                   "import": {
                     "style": "gap:10px"
                   }
-                }
+                },
+                "type": "shot",
+                "asset": "detail-code-panel",
+                "fit": "width",
+                "caption": "The install panel keeps the package manager tabs on a plate above the code and marks the active tab with a short underline.",
+                "captionSize": 15
               }
             ]
           }

@@ -3,7 +3,12 @@
   "id": "dither",
   "kind": "content",
   "layout": {
-    "type": "split"
+    "type": "split",
+    "gap": 56,
+    "head": "single",
+    "body": {
+      "align": "center"
+    }
   },
   "slots": {
     "head": [
@@ -24,6 +29,11 @@
     "body": [
       {
         "id": "group",
+        "ext": {
+          "import": {
+            "style": "align-items:end;gap:12px 64px"
+          }
+        },
         "type": "composite",
         "tracks": "minmax(0,1fr) 220px",
         "cells": [
@@ -77,14 +87,14 @@
             "blocks": [
               {
                 "id": "p2",
-                "type": "paragraph",
-                "text": "The ramp is drawn with the 8 by 8 screen and runs from solid ink on the left to paper on the right.",
-                "role": "cap",
                 "ext": {
                   "import": {
                     "style": "align-self:start"
                   }
-                }
+                },
+                "type": "paragraph",
+                "text": "The ramp is drawn with the 8 by 8 screen and runs from solid ink on the left to paper on the right.",
+                "role": "cap"
               }
             ]
           },
@@ -92,24 +102,19 @@
             "blocks": [
               {
                 "id": "p3",
-                "type": "paragraph",
-                "text": "The 8 by 8 screen is built from four offset copies of this 4 by 4 threshold matrix.",
-                "role": "cap",
-                "marginTop": 0,
                 "ext": {
                   "import": {
                     "style": "align-self:start"
                   }
-                }
+                },
+                "type": "paragraph",
+                "text": "The 8 by 8 screen is built from four offset copies of this 4 by 4 threshold matrix.",
+                "role": "cap",
+                "marginTop": 0
               }
             ]
           }
-        ],
-        "ext": {
-          "import": {
-            "style": "align-items:end;gap:12px 64px"
-          }
-        }
+        ]
       }
     ]
   }

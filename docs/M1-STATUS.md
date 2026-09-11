@@ -27,7 +27,7 @@ Scope items are numbered as in the M1 section of the milestone plan.
    `migrations`, `pointer`, `ids`, `icons`, `annotate`, `ext`, `errors`, `json`, `fixtures`.
 4. `@turboslide/agent`: the dispatcher and the contracts generator. `pnpm generate:contracts`
    writes 10 files and reports them current: `packages/agent/generated/{cli,mcp-tools,describe,
-   openapi,manifest}.json` (30.2 KB, 363.8 KB, 12.8 KB, 332.0 KB, 4.5 KB), `docs/grammar.md`
+openapi,manifest}.json` (30.2 KB, 363.8 KB, 12.8 KB, 332.0 KB, 4.5 KB), `docs/grammar.md`
    (54.4 KB) and the four `skills/*/references/*.md` tables.
 5. `@turboslide/theme`: `gt-ink-paper/sheet.css` and `stage.css` under `.ts-sheet`, `tokens.ts`
    with the CSS parity test, `sprite.ts` (63 Heroicons plus `gt-mark`), `copy.ts`,
@@ -73,26 +73,26 @@ Playwright cases).
 day stopped at step 3 (see "Fixes made during acceptance"); the run recorded here is the complete
 one after that fix.
 
-| Step | Command (abridged)                                                   | Result | Measured                                                                                                                                        |
-| ---- | -------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1    | `pnpm install --frozen-lockfile`                                     | pass   | 17 workspace projects, already up to date, 0.8 s                                                                                                |
-| 2    | `pnpm exec tsr generate`                                             | pass   | 1.4 s; one Node warning from `@tanstack/router-cli` (`replaceRouteChunk` in a circular dependency), exit 0                                      |
-| 3    | tracked check, `pnpm generate:contracts`, `git diff --exit-code`     | pass   | 10 generated files current, no diff, 2.2 s                                                                                                      |
-| 4    | `pnpm exec tsc -b`                                                   | pass   | 2.2 s                                                                                                                                           |
-| 5    | `pnpm test`                                                          | pass   | 33 files, 386 passed, 1 skipped, 8.20 s in vitest 4.1.11                                                                                        |
-| 6    | `pnpm build && check-client-bundle.mjs`                              | pass   | 2 turbo tasks; marker in 0 of 14 client files and 1 of 18 server files; 6.9 s                                                                   |
-| 7    | `turboslide import … --into gt-brand --json`                         | pass   | 85 slides, 8 sections, 4 html escape blocks, 114 assets, 2.2 s                                                                                  |
-| 8    | import assertion                                                     | pass   | `slides` 85, `sections` 8, `htmlBlocks` 4 (at most 4 allowed)                                                                                   |
-| 9    | `turboslide validate decks/gt-brand`                                 | pass   | 85 slides, 0 errors, 43 warnings (every one an `ext` kept notice: 25 assets, 18 slides), 2.1 s                                                  |
-| 10   | `turboslide render all --theme light,dark --scale 1`                 | pass   | 170 PNGs and records in 49.7 s; renderer `Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max`                                          |
-| 11   | render assertion                                                     | pass   | 170 records, 0 page errors (also 0 console errors, 0 overflow entries, fonts `loaded` in every record)                                           |
-| 12   | `compare-to-shoot.mjs --max-mismatch 0.005 --skip-html-escapes`      | pass   | 170 pairs compared, 8 skipped as escapes, 0 over budget; worst non-escape 0.332 percent, mean 0.011 percent; reference shot in 60.9 s; 67.3 s   |
-| 13   | `turboslide sheet all --cols 4 --thumb 480 --numbered`               | pass   | two sheets of 2056 by 8396 px, 85 cells and 8 section labels each, 5.9 s                                                                        |
-| 14   | sheet assertion                                                      | pass   | both PNGs exist, both JSON cell maps have 85 cells                                                                                              |
-| 15   | `turboslide lint all --json`                                         | pass   | 115 findings: 2 at severity 3 (2 known, 0 blocking), 28 at 2, 85 at 1; 170 render records read; 1.3 s                                           |
-| 16   | `turboslide build --out … --budget 16`                               | pass   | 14.53 MiB of 16.00 MiB, 85 slides, revision 12; 5.7 s                                                                                           |
-| 17   | `playwright test apps/studio/e2e/viewer.spec.ts`                     | pass   | 6 passed in 15.6 s, one worker, against the dev server the runner started on 4321                                                               |
-| 18   | `turboslide lint --chrome --widths 1440,1280,390 --themes light,dark` | pass   | 24 audits over 3 widths and 2 themes, 0 with findings, 0 states unapplied; 36.6 s; server stopped afterwards                                    |
+| Step | Command (abridged)                                                    | Result | Measured                                                                                                                                      |
+| ---- | --------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | `pnpm install --frozen-lockfile`                                      | pass   | 17 workspace projects, already up to date, 0.8 s                                                                                              |
+| 2    | `pnpm exec tsr generate`                                              | pass   | 1.4 s; one Node warning from `@tanstack/router-cli` (`replaceRouteChunk` in a circular dependency), exit 0                                    |
+| 3    | tracked check, `pnpm generate:contracts`, `git diff --exit-code`      | pass   | 10 generated files current, no diff, 2.2 s                                                                                                    |
+| 4    | `pnpm exec tsc -b`                                                    | pass   | 2.2 s                                                                                                                                         |
+| 5    | `pnpm test`                                                           | pass   | 33 files, 386 passed, 1 skipped, 8.20 s in vitest 4.1.11                                                                                      |
+| 6    | `pnpm build && check-client-bundle.mjs`                               | pass   | 2 turbo tasks; marker in 0 of 14 client files and 1 of 18 server files; 6.9 s                                                                 |
+| 7    | `turboslide import … --into gt-brand --json`                          | pass   | 85 slides, 8 sections, 4 html escape blocks, 114 assets, 2.2 s                                                                                |
+| 8    | import assertion                                                      | pass   | `slides` 85, `sections` 8, `htmlBlocks` 4 (at most 4 allowed)                                                                                 |
+| 9    | `turboslide validate decks/gt-brand`                                  | pass   | 85 slides, 0 errors, 43 warnings (every one an `ext` kept notice: 25 assets, 18 slides), 2.1 s                                                |
+| 10   | `turboslide render all --theme light,dark --scale 1`                  | pass   | 170 PNGs and records in 49.7 s; renderer `Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max`                                        |
+| 11   | render assertion                                                      | pass   | 170 records, 0 page errors (also 0 console errors, 0 overflow entries, fonts `loaded` in every record)                                        |
+| 12   | `compare-to-shoot.mjs --max-mismatch 0.005 --skip-html-escapes`       | pass   | 170 pairs compared, 8 skipped as escapes, 0 over budget; worst non-escape 0.332 percent, mean 0.011 percent; reference shot in 60.9 s; 67.3 s |
+| 13   | `turboslide sheet all --cols 4 --thumb 480 --numbered`                | pass   | two sheets of 2056 by 8396 px, 85 cells and 8 section labels each, 5.9 s                                                                      |
+| 14   | sheet assertion                                                       | pass   | both PNGs exist, both JSON cell maps have 85 cells                                                                                            |
+| 15   | `turboslide lint all --json`                                          | pass   | 115 findings: 2 at severity 3 (2 known, 0 blocking), 28 at 2, 85 at 1; 170 render records read; 1.3 s                                         |
+| 16   | `turboslide build --out … --budget 16`                                | pass   | 14.53 MiB of 16.00 MiB, 85 slides, revision 12; 5.7 s                                                                                         |
+| 17   | `playwright test apps/studio/e2e/viewer.spec.ts`                      | pass   | 6 passed in 15.6 s, one worker, against the dev server the runner started on 4321                                                             |
+| 18   | `turboslide lint --chrome --widths 1440,1280,390 --themes light,dark` | pass   | 24 audits over 3 widths and 2 themes, 0 with findings, 0 states unapplied; 36.6 s; server stopped afterwards                                  |
 
 ### Render records
 
@@ -135,10 +135,10 @@ class: native 32 twins at 1.89 MiB, resample-1280 81 twins at 5.82 MiB, two-colo
 `decks/gt-brand/known-findings.json` holds the 2 severity 3 findings the deck has, both inside html
 escape blocks, each with the retirement path in its `reason`:
 
-| Slide | Block  | Rule                 | Reason                                                                                     |
-| ----- | ------ | -------------------- | ------------------------------------------------------------------------------------------ |
-| 83    | `html` | `icon/known`         | `fixed-points` defines its own `i-lock-closed` symbol inline; the sprite lacks it          |
-| 84    | `html` | `type/svg-label-min` | `goals` sets a 16 px figcaption in escape CSS, which the rule reads as diagram text        |
+| Slide | Block  | Rule                 | Reason                                                                              |
+| ----- | ------ | -------------------- | ----------------------------------------------------------------------------------- |
+| 83    | `html` | `icon/known`         | `fixed-points` defines its own `i-lock-closed` symbol inline; the sprite lacks it   |
+| 84    | `html` | `type/svg-label-min` | `goals` sets a 16 px figcaption in escape CSS, which the rule reads as diagram text |
 
 The lint report at revision 12 is 115 findings: 2 at severity 3 (both known, 0 blocking), 28 at
 severity 2, 85 at severity 1. By rule: `export/non-native` 58, `dia/stroke-grammar` 14,
@@ -152,12 +152,12 @@ severity 2, 85 at severity 1. By rule: `export/non-native` 58, `dia/stroke-gramm
 4 of 85 slides carry an `html` block (the acceptance allows at most 4). Each is flagged by
 `escape/html-block` at severity 2 and exports as a raster until it is expressed in the grammar:
 
-| n   | Slide               | Markup the importer had no block for | Source                     |
-| --- | ------------------- | ------------------------------------ | -------------------------- |
-| 25  | `diagrams`          | `<div class="rules">`                | `25-diagrams.html`         |
+| n   | Slide               | Markup the importer had no block for | Source                      |
+| --- | ------------------- | ------------------------------------ | --------------------------- |
+| 25  | `diagrams`          | `<div class="rules">`                | `25-diagrams.html`          |
 | 67  | `presenter-compare` | `<div class="tools">`                | `67-presenter-compare.html` |
-| 83  | `fixed-points`      | `<div class="two">`                  | `83-fixed-points.html`     |
-| 84  | `goals`             | `<div class="proof">`                | `84-goals.html`            |
+| 83  | `fixed-points`      | `<div class="two">`                  | `83-fixed-points.html`      |
+| 84  | `goals`             | `<div class="proof">`                | `84-goals.html`             |
 
 The import consumed 983 scoped CSS rules and left 17 rules and 12 inline styles over, kept under
 `ext` (the 43 validate warnings). The 12 slides with residual CSS: `voice`, `ladder`,
@@ -197,7 +197,7 @@ The import consumed 983 scoped CSS rules and left 17 rules and 12 inline styles 
 
 - `.github/workflows/check.yml` is written but not committed or pushed. GitHub rejected the push
   of the M1 commit with `refusing to allow an OAuth App to create or update workflow
-  .github/workflows/check.yml without workflow scope`: the `gh` token that git uses for
+.github/workflows/check.yml without workflow scope`: the `gh` token that git uses for
   github.com (`credential.https://github.com.helper`) has the scopes `gist`, `read:org` and
   `repo` only. Kevin runs `gh auth refresh -h github.com -s workflow` once, then
   `git add .github && git commit` and `git push origin main`. Until then CI does not run on push.

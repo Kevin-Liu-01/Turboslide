@@ -3,7 +3,12 @@
   "id": "multilingual",
   "kind": "content",
   "layout": {
-    "type": "split"
+    "type": "split",
+    "gap": 56,
+    "head": "single",
+    "body": {
+      "align": "center"
+    }
   },
   "slots": {
     "head": [

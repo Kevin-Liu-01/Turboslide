@@ -10,6 +10,7 @@ import { checkAssets } from './static/asset.ts';
 import { checkColor } from './static/color.ts';
 import { checkCopy } from './static/copy.ts';
 import { checkDia } from './static/dia.ts';
+import { checkExportNonNative } from './static/export-non-native.ts';
 import { checkIcons } from './static/icon.ts';
 import { checkRows } from './static/rows.ts';
 import { checkStructure } from './static/structure.ts';
@@ -45,6 +46,7 @@ export function lintStatic(input: DeckDocument, options: LintOptions = {}): Find
     ...checkDia(ctx),
     ...checkAssets(ctx),
     ...checkStructure(ctx),
+    ...checkExportNonNative(ctx),
   ];
   // deck-level rules (placement, contradictions, licenses) scan the whole deck and report on the selection
   const selected = options.slideIds ? new Set(options.slideIds) : null;

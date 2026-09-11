@@ -1,9 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "goals",
+  "title": "Success criteria",
   "kind": "content",
   "layout": {
-    "type": "stack"
+    "type": "stack",
+    "gap": 22
   },
   "slots": {
     "main": [
@@ -15,6 +17,5 @@
         "note": "Escape: no block for <div class=\"proof\">. Source 84-goals.html; every scoped rule of the slide travels with the markup."
       }
     ]
-  },
-  "title": "Success criteria"
+  }
 }

@@ -4,8 +4,12 @@
   "kind": "content",
   "layout": {
     "type": "split",
+    "gap": 56,
     "head": {
       "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
     }
   },
   "slots": {

@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "4/8"
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [

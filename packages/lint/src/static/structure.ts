@@ -1,23 +1,13 @@
 // Structure and accuracy rules (SPEC 7.7): the opener sentence lists the section's families
 // (OPENERS.md:44), an authored scale marker in imported html (DECK-GRAMMAR.md:61), the escape
-// block itself (report 05 section 6.1), the blocks that export as raster (design C section 6.7),
-// numerals that contradict each other across slides, and a numeral equal to the slide count in
-// copy that should derive from the deck (report 06 section 4 item 2).
-import type { Block, Finding } from '../contracts.ts';
+// block itself (report 05 section 6.1), numerals that contradict each other across slides, and a
+// numeral equal to the slide count in copy that should derive from the deck (report 06 section 4
+// item 2). The export/non-native listing moved to export-non-native.ts in M2.
+import type { Finding } from '../contracts.ts';
 import { slideTitle } from '../contracts.ts';
 import type { LintContext } from '../context.ts';
 import { blockTexts, slideTexts } from '../context.ts';
 import { htmlText, plainText, words } from '../text.ts';
-
-/** Block types the flatten exporter writes as native text (MILESTONES M2 item 4). */
-export const NATIVE_BLOCK_TYPES: readonly Block['type'][] = [
-  'heading',
-  'paragraph',
-  'credit',
-  'rows',
-  'plain',
-  'panel',
-];
 
 const NUMBER_NOUN = /\b(\d{1,3}(?:,\d{3})*|\d+)\s+([a-z][a-z-]{2,})\b/g;
 const NOUN_STOP = new Set([
@@ -59,7 +49,6 @@ export function checkStructure(ctx: LintContext): Finding[] {
 
   for (const slide of ctx.slideList()) {
     const refs = ctx.blocksOf(slide);
-    const rasterBlocks: string[] = [];
     for (const ref of refs) {
       const { block } = ref;
       if (block.type === 'html') {
@@ -82,7 +71,6 @@ export function checkStructure(ctx: LintContext): Finding[] {
           );
         }
       }
-      if (!NATIVE_BLOCK_TYPES.includes(block.type)) rasterBlocks.push(block.id);
       // numerals with their nouns, for numbers/contradiction and count/hard-coded
       const texts =
         block.type === 'html'
@@ -116,15 +104,6 @@ export function checkStructure(ctx: LintContext): Finding[] {
         sectionCount,
         numerals,
       );
-    if (ctx.options.exportMode !== false && rasterBlocks.length > 0) {
-      out.push(
-        ctx.finding('export/non-native', slide.id, {
-          text: rasterBlocks.join(', '),
-          measured: { rasterBlocks: rasterBlocks.length },
-          proposal: `In ${ctx.options.exportMode} mode these blocks export as 2x rasters: ${rasterBlocks.join(', ')}.`,
-        }),
-      );
-    }
     // opener/sentence-lists-section
     if (slide.kind === 'opener') {
       const section = ctx.sectionOf(slide.id);

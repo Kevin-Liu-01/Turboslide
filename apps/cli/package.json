@@ -17,17 +17,21 @@
   "dependencies": {
     "@turboslide/agent": "workspace:*",
     "@turboslide/effects": "workspace:*",
+    "@turboslide/export": "workspace:*",
     "@turboslide/fonts": "workspace:*",
     "@turboslide/headless": "workspace:*",
     "@turboslide/import": "workspace:*",
     "@turboslide/lint": "workspace:*",
+    "@turboslide/mcp": "workspace:*",
     "@turboslide/render": "workspace:*",
     "@turboslide/schema": "workspace:*",
+    "@turboslide/store": "workspace:*",
     "@turboslide/theme": "workspace:*",
     "playwright-core": "catalog:",
     "sharp": "catalog:"
   },
   "devDependencies": {
+    "@modelcontextprotocol/sdk": "catalog:",
     "@types/node": "catalog:",
     "tsdown": "catalog:",
     "typescript": "catalog:"

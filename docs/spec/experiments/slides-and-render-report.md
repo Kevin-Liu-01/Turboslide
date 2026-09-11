@@ -49,103 +49,355 @@ The slide below is the deck's most common archetype, text plus a ruled table, in
 ```json
 {
   "requests": [
-    { "createSlide": { "objectId": "slide-thesis", "insertionIndex": 2,
-        "slideLayoutReference": { "predefinedLayout": "BLANK" } } },
+    {
+      "createSlide": {
+        "objectId": "slide-thesis",
+        "insertionIndex": 2,
+        "slideLayoutReference": { "predefinedLayout": "BLANK" }
+      }
+    },
 
-    { "updatePageProperties": { "objectId": "slide-thesis",
-        "pageProperties": { "pageBackgroundFill": { "solidFill": {
-          "color": { "rgbColor": { "red": 0.0275, "green": 0.0275, "blue": 0.0275 } }, "alpha": 1.0 } } },
-        "fields": "pageBackgroundFill.solidFill" } },
+    {
+      "updatePageProperties": {
+        "objectId": "slide-thesis",
+        "pageProperties": {
+          "pageBackgroundFill": {
+            "solidFill": {
+              "color": { "rgbColor": { "red": 0.0275, "green": 0.0275, "blue": 0.0275 } },
+              "alpha": 1.0
+            }
+          }
+        },
+        "fields": "pageBackgroundFill.solidFill"
+      }
+    },
 
-    { "createLine": { "objectId": "slide-thesis-rule-top", "category": "STRAIGHT",
-        "elementProperties": { "pageObjectId": "slide-thesis",
-          "size": { "width": { "magnitude": 9144000, "unit": "EMU" }, "height": { "magnitude": 0, "unit": "EMU" } },
-          "transform": { "scaleX": 1, "scaleY": 1, "translateX": 0, "translateY": 320040, "unit": "EMU" } } } },
-    { "updateLineProperties": { "objectId": "slide-thesis-rule-top",
-        "lineProperties": { "weight": { "magnitude": 0.45, "unit": "PT" }, "dashStyle": "SOLID",
-          "lineFill": { "solidFill": { "color": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } }, "alpha": 0.22 } } },
-        "fields": "weight,dashStyle,lineFill" } },
+    {
+      "createLine": {
+        "objectId": "slide-thesis-rule-top",
+        "category": "STRAIGHT",
+        "elementProperties": {
+          "pageObjectId": "slide-thesis",
+          "size": {
+            "width": { "magnitude": 9144000, "unit": "EMU" },
+            "height": { "magnitude": 0, "unit": "EMU" }
+          },
+          "transform": {
+            "scaleX": 1,
+            "scaleY": 1,
+            "translateX": 0,
+            "translateY": 320040,
+            "unit": "EMU"
+          }
+        }
+      }
+    },
+    {
+      "updateLineProperties": {
+        "objectId": "slide-thesis-rule-top",
+        "lineProperties": {
+          "weight": { "magnitude": 0.45, "unit": "PT" },
+          "dashStyle": "SOLID",
+          "lineFill": {
+            "solidFill": {
+              "color": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } },
+              "alpha": 0.22
+            }
+          }
+        },
+        "fields": "weight,dashStyle,lineFill"
+      }
+    },
 
-    { "createShape": { "objectId": "slide-thesis-h2", "shapeType": "TEXT_BOX",
-        "elementProperties": { "pageObjectId": "slide-thesis",
-          "size": { "width": { "magnitude": 2986088, "unit": "EMU" }, "height": { "magnitude": 553212, "unit": "EMU" } },
-          "transform": { "scaleX": 1, "scaleY": 1, "translateX": 783055, "translateY": 737235, "unit": "EMU" } } } },
-    { "insertText": { "objectId": "slide-thesis-h2", "insertionIndex": 0,
-        "text": "One source text,\nevery language" } },
-    { "updateTextStyle": { "objectId": "slide-thesis-h2", "textRange": { "type": "ALL" },
-        "style": { "weightedFontFamily": { "fontFamily": "Inter", "weight": 500 },
+    {
+      "createShape": {
+        "objectId": "slide-thesis-h2",
+        "shapeType": "TEXT_BOX",
+        "elementProperties": {
+          "pageObjectId": "slide-thesis",
+          "size": {
+            "width": { "magnitude": 2986088, "unit": "EMU" },
+            "height": { "magnitude": 553212, "unit": "EMU" }
+          },
+          "transform": {
+            "scaleX": 1,
+            "scaleY": 1,
+            "translateX": 783055,
+            "translateY": 737235,
+            "unit": "EMU"
+          }
+        }
+      }
+    },
+    {
+      "insertText": {
+        "objectId": "slide-thesis-h2",
+        "insertionIndex": 0,
+        "text": "One source text,\nevery language"
+      }
+    },
+    {
+      "updateTextStyle": {
+        "objectId": "slide-thesis-h2",
+        "textRange": { "type": "ALL" },
+        "style": {
+          "weightedFontFamily": { "fontFamily": "Inter", "weight": 500 },
           "fontSize": { "magnitude": 19.8, "unit": "PT" },
-          "foregroundColor": { "opaqueColor": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } } } },
-        "fields": "weightedFontFamily,fontSize,foregroundColor" } },
-    { "updateParagraphStyle": { "objectId": "slide-thesis-h2", "textRange": { "type": "ALL" },
-        "style": { "lineSpacing": 90.9, "alignment": "START",
-          "spaceAbove": { "magnitude": 0, "unit": "PT" }, "spaceBelow": { "magnitude": 0, "unit": "PT" } },
-        "fields": "lineSpacing,alignment,spaceAbove,spaceBelow" } },
+          "foregroundColor": {
+            "opaqueColor": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } }
+          }
+        },
+        "fields": "weightedFontFamily,fontSize,foregroundColor"
+      }
+    },
+    {
+      "updateParagraphStyle": {
+        "objectId": "slide-thesis-h2",
+        "textRange": { "type": "ALL" },
+        "style": {
+          "lineSpacing": 90.9,
+          "alignment": "START",
+          "spaceAbove": { "magnitude": 0, "unit": "PT" },
+          "spaceBelow": { "magnitude": 0, "unit": "PT" }
+        },
+        "fields": "lineSpacing,alignment,spaceAbove,spaceBelow"
+      }
+    },
 
-    { "createShape": { "objectId": "slide-thesis-p1", "shapeType": "TEXT_BOX",
-        "elementProperties": { "pageObjectId": "slide-thesis",
-          "size": { "width": { "magnitude": 2986088, "unit": "EMU" }, "height": { "magnitude": 565785, "unit": "EMU" } },
-          "transform": { "scaleX": 1, "scaleY": 1, "translateX": 783055, "translateY": 1393260, "unit": "EMU" } } } },
-    { "insertText": { "objectId": "slide-thesis-p1", "insertionIndex": 0,
-        "text": "The source code is the source of truth and translation is a build step." } },
-    { "updateTextStyle": { "objectId": "slide-thesis-p1", "textRange": { "type": "ALL" },
-        "style": { "weightedFontFamily": { "fontFamily": "Inter", "weight": 400 },
+    {
+      "createShape": {
+        "objectId": "slide-thesis-p1",
+        "shapeType": "TEXT_BOX",
+        "elementProperties": {
+          "pageObjectId": "slide-thesis",
+          "size": {
+            "width": { "magnitude": 2986088, "unit": "EMU" },
+            "height": { "magnitude": 565785, "unit": "EMU" }
+          },
+          "transform": {
+            "scaleX": 1,
+            "scaleY": 1,
+            "translateX": 783055,
+            "translateY": 1393260,
+            "unit": "EMU"
+          }
+        }
+      }
+    },
+    {
+      "insertText": {
+        "objectId": "slide-thesis-p1",
+        "insertionIndex": 0,
+        "text": "The source code is the source of truth and translation is a build step."
+      }
+    },
+    {
+      "updateTextStyle": {
+        "objectId": "slide-thesis-p1",
+        "textRange": { "type": "ALL" },
+        "style": {
+          "weightedFontFamily": { "fontFamily": "Inter", "weight": 400 },
           "fontSize": { "magnitude": 9.9, "unit": "PT" },
-          "foregroundColor": { "opaqueColor": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } } } },
-        "fields": "weightedFontFamily,fontSize,foregroundColor" } },
-    { "updateParagraphStyle": { "objectId": "slide-thesis-p1", "textRange": { "type": "ALL" },
+          "foregroundColor": {
+            "opaqueColor": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } }
+          }
+        },
+        "fields": "weightedFontFamily,fontSize,foregroundColor"
+      }
+    },
+    {
+      "updateParagraphStyle": {
+        "objectId": "slide-thesis-p1",
+        "textRange": { "type": "ALL" },
         "style": { "lineSpacing": 124.0, "alignment": "START" },
-        "fields": "lineSpacing,alignment" } },
+        "fields": "lineSpacing,alignment"
+      }
+    },
 
-    { "createLine": { "objectId": "slide-thesis-row1-rule", "category": "STRAIGHT",
-        "elementProperties": { "pageObjectId": "slide-thesis",
-          "size": { "width": { "magnitude": 2986088, "unit": "EMU" }, "height": { "magnitude": 0, "unit": "EMU" } },
-          "transform": { "scaleX": 1, "scaleY": 1, "translateX": 783055, "translateY": 2286000, "unit": "EMU" } } } },
-    { "updateLineProperties": { "objectId": "slide-thesis-row1-rule",
-        "lineProperties": { "weight": { "magnitude": 0.45, "unit": "PT" }, "dashStyle": "SOLID",
-          "lineFill": { "solidFill": { "color": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } }, "alpha": 0.22 } } },
-        "fields": "weight,dashStyle,lineFill" } },
-    { "createShape": { "objectId": "slide-thesis-row1-key", "shapeType": "TEXT_BOX",
-        "elementProperties": { "pageObjectId": "slide-thesis",
-          "size": { "width": { "magnitude": 1371600, "unit": "EMU" }, "height": { "magnitude": 165735, "unit": "EMU" } },
-          "transform": { "scaleX": 1, "scaleY": 1, "translateX": 783055, "translateY": 2377440, "unit": "EMU" } } } },
-    { "insertText": { "objectId": "slide-thesis-row1-key", "insertionIndex": 0, "text": "Locales" } },
-    { "updateTextStyle": { "objectId": "slide-thesis-row1-key", "textRange": { "type": "ALL" },
-        "style": { "weightedFontFamily": { "fontFamily": "Inter", "weight": 500 },
+    {
+      "createLine": {
+        "objectId": "slide-thesis-row1-rule",
+        "category": "STRAIGHT",
+        "elementProperties": {
+          "pageObjectId": "slide-thesis",
+          "size": {
+            "width": { "magnitude": 2986088, "unit": "EMU" },
+            "height": { "magnitude": 0, "unit": "EMU" }
+          },
+          "transform": {
+            "scaleX": 1,
+            "scaleY": 1,
+            "translateX": 783055,
+            "translateY": 2286000,
+            "unit": "EMU"
+          }
+        }
+      }
+    },
+    {
+      "updateLineProperties": {
+        "objectId": "slide-thesis-row1-rule",
+        "lineProperties": {
+          "weight": { "magnitude": 0.45, "unit": "PT" },
+          "dashStyle": "SOLID",
+          "lineFill": {
+            "solidFill": {
+              "color": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } },
+              "alpha": 0.22
+            }
+          }
+        },
+        "fields": "weight,dashStyle,lineFill"
+      }
+    },
+    {
+      "createShape": {
+        "objectId": "slide-thesis-row1-key",
+        "shapeType": "TEXT_BOX",
+        "elementProperties": {
+          "pageObjectId": "slide-thesis",
+          "size": {
+            "width": { "magnitude": 1371600, "unit": "EMU" },
+            "height": { "magnitude": 165735, "unit": "EMU" }
+          },
+          "transform": {
+            "scaleX": 1,
+            "scaleY": 1,
+            "translateX": 783055,
+            "translateY": 2377440,
+            "unit": "EMU"
+          }
+        }
+      }
+    },
+    {
+      "insertText": { "objectId": "slide-thesis-row1-key", "insertionIndex": 0, "text": "Locales" }
+    },
+    {
+      "updateTextStyle": {
+        "objectId": "slide-thesis-row1-key",
+        "textRange": { "type": "ALL" },
+        "style": {
+          "weightedFontFamily": { "fontFamily": "Inter", "weight": 500 },
           "fontSize": { "magnitude": 9.0, "unit": "PT" },
-          "foregroundColor": { "opaqueColor": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } } } },
-        "fields": "weightedFontFamily,fontSize,foregroundColor" } },
-    { "createShape": { "objectId": "slide-thesis-row1-val", "shapeType": "TEXT_BOX",
-        "elementProperties": { "pageObjectId": "slide-thesis",
-          "size": { "width": { "magnitude": 1431608, "unit": "EMU" }, "height": { "magnitude": 165735, "unit": "EMU" } },
-          "transform": { "scaleX": 1, "scaleY": 1, "translateX": 2337535, "translateY": 2377440, "unit": "EMU" } } } },
-    { "insertText": { "objectId": "slide-thesis-row1-val", "insertionIndex": 0, "text": "Eight, served from one build" } },
-    { "updateTextStyle": { "objectId": "slide-thesis-row1-val", "textRange": { "type": "ALL" },
-        "style": { "weightedFontFamily": { "fontFamily": "Inter", "weight": 400 },
+          "foregroundColor": {
+            "opaqueColor": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } }
+          }
+        },
+        "fields": "weightedFontFamily,fontSize,foregroundColor"
+      }
+    },
+    {
+      "createShape": {
+        "objectId": "slide-thesis-row1-val",
+        "shapeType": "TEXT_BOX",
+        "elementProperties": {
+          "pageObjectId": "slide-thesis",
+          "size": {
+            "width": { "magnitude": 1431608, "unit": "EMU" },
+            "height": { "magnitude": 165735, "unit": "EMU" }
+          },
+          "transform": {
+            "scaleX": 1,
+            "scaleY": 1,
+            "translateX": 2337535,
+            "translateY": 2377440,
+            "unit": "EMU"
+          }
+        }
+      }
+    },
+    {
+      "insertText": {
+        "objectId": "slide-thesis-row1-val",
+        "insertionIndex": 0,
+        "text": "Eight, served from one build"
+      }
+    },
+    {
+      "updateTextStyle": {
+        "objectId": "slide-thesis-row1-val",
+        "textRange": { "type": "ALL" },
+        "style": {
+          "weightedFontFamily": { "fontFamily": "Inter", "weight": 400 },
           "fontSize": { "magnitude": 9.0, "unit": "PT" },
-          "foregroundColor": { "opaqueColor": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } } } },
-        "fields": "weightedFontFamily,fontSize,foregroundColor" } },
+          "foregroundColor": {
+            "opaqueColor": { "rgbColor": { "red": 0.949, "green": 0.949, "blue": 0.941 } }
+          }
+        },
+        "fields": "weightedFontFamily,fontSize,foregroundColor"
+      }
+    },
 
-    { "createShape": { "objectId": "slide-thesis-cap", "shapeType": "TEXT_BOX",
-        "elementProperties": { "pageObjectId": "slide-thesis",
-          "size": { "width": { "magnitude": 2986088, "unit": "EMU" }, "height": { "magnitude": 124301, "unit": "EMU" } },
-          "transform": { "scaleX": 1, "scaleY": 1, "translateX": 783055, "translateY": 4281965, "unit": "EMU" } } } },
-    { "insertText": { "objectId": "slide-thesis-cap", "insertionIndex": 0,
-        "text": "The rows are the deck's table form; there are no bullets." } },
-    { "updateTextStyle": { "objectId": "slide-thesis-cap", "textRange": { "type": "ALL" },
-        "style": { "weightedFontFamily": { "fontFamily": "Inter", "weight": 400 },
+    {
+      "createShape": {
+        "objectId": "slide-thesis-cap",
+        "shapeType": "TEXT_BOX",
+        "elementProperties": {
+          "pageObjectId": "slide-thesis",
+          "size": {
+            "width": { "magnitude": 2986088, "unit": "EMU" },
+            "height": { "magnitude": 124301, "unit": "EMU" }
+          },
+          "transform": {
+            "scaleX": 1,
+            "scaleY": 1,
+            "translateX": 783055,
+            "translateY": 4281965,
+            "unit": "EMU"
+          }
+        }
+      }
+    },
+    {
+      "insertText": {
+        "objectId": "slide-thesis-cap",
+        "insertionIndex": 0,
+        "text": "The rows are the deck's table form; there are no bullets."
+      }
+    },
+    {
+      "updateTextStyle": {
+        "objectId": "slide-thesis-cap",
+        "textRange": { "type": "ALL" },
+        "style": {
+          "weightedFontFamily": { "fontFamily": "Inter", "weight": 400 },
           "fontSize": { "magnitude": 6.75, "unit": "PT" },
-          "foregroundColor": { "opaqueColor": { "rgbColor": { "red": 0.541, "green": 0.561, "blue": 0.596 } } } },
-        "fields": "weightedFontFamily,fontSize,foregroundColor" } },
+          "foregroundColor": {
+            "opaqueColor": { "rgbColor": { "red": 0.541, "green": 0.561, "blue": 0.596 } }
+          }
+        },
+        "fields": "weightedFontFamily,fontSize,foregroundColor"
+      }
+    },
 
-    { "createImage": { "objectId": "slide-thesis-dia",
+    {
+      "createImage": {
+        "objectId": "slide-thesis-dia",
         "url": "https://storage.googleapis.com/turboslide-export/<job>/slide-thesis-dia@2x.png?X-Goog-Signature=...",
-        "elementProperties": { "pageObjectId": "slide-thesis",
-          "size": { "width": { "magnitude": 4180523, "unit": "EMU" }, "height": { "magnitude": 2286000, "unit": "EMU" } },
-          "transform": { "scaleX": 1, "scaleY": 1, "translateX": 4180523, "translateY": 1393260, "unit": "EMU" } } } },
+        "elementProperties": {
+          "pageObjectId": "slide-thesis",
+          "size": {
+            "width": { "magnitude": 4180523, "unit": "EMU" },
+            "height": { "magnitude": 2286000, "unit": "EMU" }
+          },
+          "transform": {
+            "scaleX": 1,
+            "scaleY": 1,
+            "translateX": 4180523,
+            "translateY": 1393260,
+            "unit": "EMU"
+          }
+        }
+      }
+    },
 
-    { "groupObjects": { "groupObjectId": "slide-thesis-rails",
-        "childrenObjectIds": ["slide-thesis-rule-top", "slide-thesis-row1-rule"] } }
+    {
+      "groupObjects": {
+        "groupObjectId": "slide-thesis-rails",
+        "childrenObjectIds": ["slide-thesis-rule-top", "slide-thesis-row1-rule"]
+      }
+    }
   ],
   "writeControl": { "requiredRevisionId": "<revisionId from presentations.get>" }
 }
@@ -209,23 +461,23 @@ Script: `EXP/render-timing.mjs`; raw results in `EXP/out/render-timing.json`, `r
 
 One-time costs.
 
-| Step | Time |
-| --- | --- |
-| Assemble 85 slides and inline fonts | 18 ms |
-| `chromium.launch` | 742 to 1,658 ms across six launches (median about 1.0 s) |
-| `newContext` plus `newPage` plus init script | 1,464 to 1,530 ms |
-| `goto` of the 792 KB document, `load` | 355 to 570 ms |
-| `document.fonts.ready` | 11 to 16 ms |
-| Fixed waits in the script before the first slide | 750 ms |
+| Step                                             | Time                                                     |
+| ------------------------------------------------ | -------------------------------------------------------- |
+| Assemble 85 slides and inline fonts              | 18 ms                                                    |
+| `chromium.launch`                                | 742 to 1,658 ms across six launches (median about 1.0 s) |
+| `newContext` plus `newPage` plus init script     | 1,464 to 1,530 ms                                        |
+| `goto` of the 792 KB document, `load`            | 355 to 570 ms                                            |
+| `document.fonts.ready`                           | 11 to 16 ms                                              |
+| Fixed waits in the script before the first slide | 750 ms                                                   |
 
 Per slide, two slides (01 opener with a full-bleed dithered image, 26 the live dither canvas).
 
-| Scale | Slide | Hash nav plus 220 ms settle | PNG screenshot | PNG bytes | JPEG q82 screenshot | JPEG bytes | Total |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1x (1600 by 900) | 01 | 223 ms | 229 ms (111 ms on the second run) | 164 KB | 36 ms | 497 KB | 489 ms |
-| 1x | 26 | 278 ms | 37 ms | 81 KB | 26 ms | 173 KB | 341 ms |
-| 2x (3200 by 1800) | 01 | 223 ms | 426 ms (478 ms second run) | 540 KB | 121 ms | 1,174 KB | 771 ms |
-| 2x | 26 | 320 ms | 133 ms (203 ms second run) | 182 KB | 110 ms | 439 KB | 563 ms |
+| Scale             | Slide | Hash nav plus 220 ms settle | PNG screenshot                    | PNG bytes | JPEG q82 screenshot | JPEG bytes | Total  |
+| ----------------- | ----- | --------------------------- | --------------------------------- | --------- | ------------------- | ---------- | ------ |
+| 1x (1600 by 900)  | 01    | 223 ms                      | 229 ms (111 ms on the second run) | 164 KB    | 36 ms               | 497 KB     | 489 ms |
+| 1x                | 26    | 278 ms                      | 37 ms                             | 81 KB     | 26 ms               | 173 KB     | 341 ms |
+| 2x (3200 by 1800) | 01    | 223 ms                      | 426 ms (478 ms second run)        | 540 KB    | 121 ms              | 1,174 KB   | 771 ms |
+| 2x                | 26    | 320 ms                      | 133 ms (203 ms second run)        | 182 KB    | 110 ms              | 439 KB     | 563 ms |
 
 Whole deck at 1x, dark, JPEG only: 85 slides in 28.0 s, 330 ms per slide average, 31.8 s wall including launch, 13.1 MB of JPEGs, zero page errors. Distribution per slide: total p50 321 ms, p90 376 ms, max 446 ms (`41-horizon.html`); JPEG screenshot p50 28 ms, p90 66 ms, max 135 ms (slide 41); ten slides take over 60 ms to encode, all with large photographs or detail crops (38, 39, 40, 41, 43, 45, 46, 49, 51, 66). Hash navigation plus the fixed settle is p50 288 ms because `location.hash` and the viewer's own work run before the 220 ms timer starts.
 
@@ -240,13 +492,13 @@ Reading of the numbers.
 
 Script: `EXP/webgl-headless.mjs` (three launch configurations, dsf 1 and 2, a 120-draw queued loop, a 30-frame loop synchronized by a 1 by 1 `readPixels` after every draw, a full readback and a screenshot) and `EXP/webgl-shell.mjs` (the same probe against Playwright's default headless shell). The shader is an 8-octave value-noise field with a radial mask, compiled as WebGL2 with `preserveDrawingBuffer: true`. Results in `EXP/out/webgl-headless.json` and the console output recorded in this run.
 
-| Binary | Flags | Renderer string | Frame at 1600 by 900 | Frame at 3200 by 1800 | Full readback at 2x | Canvas screenshot at 2x | Lit fraction |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Chrome for Testing 147 (full browser, new headless) | none | ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Max) | 0.67 ms | 1.41 ms | 13.6 ms | 170 ms | 0.048 |
-| Chrome for Testing 147 | `--use-gl=angle --use-angle=metal --ignore-gpu-blocklist` | same Metal renderer | 0.82 ms | 1.30 ms | 11.7 ms | 185 ms | 0.048 |
-| Chrome for Testing 147 | `--use-gl=angle --use-angle=swiftshader --ignore-gpu-blocklist` | ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0))) | 5.25 ms | 24.8 ms | 113.7 ms | 248 ms | 0.085 |
-| Playwright default headless shell (Chromium 151.0.7922.34) | none | SwiftShader | 6.51 ms | not run | | | 0.085 |
-| Playwright default headless shell | `--use-gl=angle --use-angle=metal --ignore-gpu-blocklist` | ANGLE Metal, Apple M5 Max | 0.86 ms | not run | | | 0.048 |
+| Binary                                                     | Flags                                                           | Renderer string                                                 | Frame at 1600 by 900 | Frame at 3200 by 1800 | Full readback at 2x | Canvas screenshot at 2x | Lit fraction |
+| ---------------------------------------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------- | -------------------- | --------------------- | ------------------- | ----------------------- | ------------ |
+| Chrome for Testing 147 (full browser, new headless)        | none                                                            | ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Max)               | 0.67 ms              | 1.41 ms               | 13.6 ms             | 170 ms                  | 0.048        |
+| Chrome for Testing 147                                     | `--use-gl=angle --use-angle=metal --ignore-gpu-blocklist`       | same Metal renderer                                             | 0.82 ms              | 1.30 ms               | 11.7 ms             | 185 ms                  | 0.048        |
+| Chrome for Testing 147                                     | `--use-gl=angle --use-angle=swiftshader --ignore-gpu-blocklist` | ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0))) | 5.25 ms              | 24.8 ms               | 113.7 ms            | 248 ms                  | 0.085        |
+| Playwright default headless shell (Chromium 151.0.7922.34) | none                                                            | SwiftShader                                                     | 6.51 ms              | not run               |                     |                         | 0.085        |
+| Playwright default headless shell                          | `--use-gl=angle --use-angle=metal --ignore-gpu-blocklist`       | ANGLE Metal, Apple M5 Max                                       | 0.86 ms              | not run               |                     |                         | 0.048        |
 
 Findings.
 
@@ -287,28 +539,28 @@ Pipeline A is the recipe as written: decode, grayscale, cover 800 by 450, autoco
 
 ### 3.2 Results (milliseconds, warm)
 
-| Phase | sharp (libvips) | Pillow | Go stdlib | Rust (image, png) | Pure Node |
-| --- | --- | --- | --- | --- | --- |
-| Decode 3200 by 1800 PNG | about 40 (inside the 67.8 fused stage) | 51.7 | 65.3 | 50.1 | |
-| Grayscale | fused | 2.3 | 7.6 | 4.8 | |
-| Resize to 800 by 450 | fused (Lanczos3) | 9.9 (Lanczos) | 3.8 (box) | 48.3 (Lanczos3) | |
-| Decode plus gray plus resize plus autocontrast | 67.8 | | | | |
-| Bayer at 800 by 450 | 2.2 (JS loop) | 0.3 | 0.4 | 0.3 | |
-| Nearest 2x plus two-color PNG 1600 by 900 | 55.0 (palette path) | 0.7 plus 13.4 | 1.2 plus 9.2 | 0.9 plus 4.9 | |
-| Pipeline A total | 125 | 85 | 15 | 55 | |
-| Full-res autocontrast plus tone | fused with decode, 77.8 | 16.3 | 11.8 | 14.0 | |
-| Full-res Bayer 3200 by 1800 | 8.7 (JS loop) | 4.9 (ImageChops), 1.4 (numpy) | 6.9 | 5.4 | |
-| Full-res two-color PNG | 218.8 (palette, level 9); 194.7 (level 1); 95.8 (palette, effort 1); 19.2 as 8-bit gray (107 KB) | 65.9 (mode 1, optimize); 40.0 via numpy path | 39.7 (paletted) | 14.8 (1-bit gray) | 12.2 (level 6, 30.6 KB); 9.2 (level 1); 50.1 (level 9) |
-| `make.py` threshold map by tile paste at full res | | 95.8 | | | |
-| RGBA PNG encode 3200 by 1800, default level | 51.7 (545 KB) | | 225.4 (543 KB) | 171.6 (565 KB) | |
-| RGBA PNG encode, fastest level | 27.7 (1.9 MB) | | 152.9 (830 KB) | 29.8 (9.5 MB, store-like) | |
-| JPEG q88 4:4:4 | 54.1 (1.41 MB) | | | | |
-| WebP lossless | 1,549 (176 KB) | | | | |
-| Exact RGB diff loop, 5.76 Mpx | 9.9 | | 11.6 | 6.1 | |
-| pixelmatch, identical pair | 30.7 | | | | |
-| pixelmatch, fully different pair (2.03 M mismatches) | 328.8 | | | | |
-| Deflate a 540 KB PNG at level 6 (ratio 0.934) | | | | | 11.0 |
-| Zip 34 MB of media (85 JPEG, 4 PNG), `zip -0` / `zip -6` | | | | | 90 / 350 (CLI) |
+| Phase                                                    | sharp (libvips)                                                                                  | Pillow                                       | Go stdlib       | Rust (image, png)         | Pure Node                                              |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | -------------------------------------------- | --------------- | ------------------------- | ------------------------------------------------------ |
+| Decode 3200 by 1800 PNG                                  | about 40 (inside the 67.8 fused stage)                                                           | 51.7                                         | 65.3            | 50.1                      |                                                        |
+| Grayscale                                                | fused                                                                                            | 2.3                                          | 7.6             | 4.8                       |                                                        |
+| Resize to 800 by 450                                     | fused (Lanczos3)                                                                                 | 9.9 (Lanczos)                                | 3.8 (box)       | 48.3 (Lanczos3)           |                                                        |
+| Decode plus gray plus resize plus autocontrast           | 67.8                                                                                             |                                              |                 |                           |                                                        |
+| Bayer at 800 by 450                                      | 2.2 (JS loop)                                                                                    | 0.3                                          | 0.4             | 0.3                       |                                                        |
+| Nearest 2x plus two-color PNG 1600 by 900                | 55.0 (palette path)                                                                              | 0.7 plus 13.4                                | 1.2 plus 9.2    | 0.9 plus 4.9              |                                                        |
+| Pipeline A total                                         | 125                                                                                              | 85                                           | 15              | 55                        |                                                        |
+| Full-res autocontrast plus tone                          | fused with decode, 77.8                                                                          | 16.3                                         | 11.8            | 14.0                      |                                                        |
+| Full-res Bayer 3200 by 1800                              | 8.7 (JS loop)                                                                                    | 4.9 (ImageChops), 1.4 (numpy)                | 6.9             | 5.4                       |                                                        |
+| Full-res two-color PNG                                   | 218.8 (palette, level 9); 194.7 (level 1); 95.8 (palette, effort 1); 19.2 as 8-bit gray (107 KB) | 65.9 (mode 1, optimize); 40.0 via numpy path | 39.7 (paletted) | 14.8 (1-bit gray)         | 12.2 (level 6, 30.6 KB); 9.2 (level 1); 50.1 (level 9) |
+| `make.py` threshold map by tile paste at full res        |                                                                                                  | 95.8                                         |                 |                           |                                                        |
+| RGBA PNG encode 3200 by 1800, default level              | 51.7 (545 KB)                                                                                    |                                              | 225.4 (543 KB)  | 171.6 (565 KB)            |                                                        |
+| RGBA PNG encode, fastest level                           | 27.7 (1.9 MB)                                                                                    |                                              | 152.9 (830 KB)  | 29.8 (9.5 MB, store-like) |                                                        |
+| JPEG q88 4:4:4                                           | 54.1 (1.41 MB)                                                                                   |                                              |                 |                           |                                                        |
+| WebP lossless                                            | 1,549 (176 KB)                                                                                   |                                              |                 |                           |                                                        |
+| Exact RGB diff loop, 5.76 Mpx                            | 9.9                                                                                              |                                              | 11.6            | 6.1                       |                                                        |
+| pixelmatch, identical pair                               | 30.7                                                                                             |                                              |                 |                           |                                                        |
+| pixelmatch, fully different pair (2.03 M mismatches)     | 328.8                                                                                            |                                              |                 |                           |                                                        |
+| Deflate a 540 KB PNG at level 6 (ratio 0.934)            |                                                                                                  |                                              |                 |                           | 11.0                                                   |
+| Zip 34 MB of media (85 JPEG, 4 PNG), `zip -0` / `zip -6` |                                                                                                  |                                              |                 |                           | 90 / 350 (CLI)                                         |
 
 Whole-process wall time for pipeline A plus B (cold start included): Pillow 0.47 s, Go 0.6 s, Rust 0.39 s; the sharp script is not comparable because it also runs the WebP, JPEG and pixelmatch phases (2.7 s, of which 1.5 s is WebP lossless).
 
@@ -325,17 +577,17 @@ Whole-process wall time for pipeline A plus B (cold start included): Pillow 0.47
 
 `EXP/bench/compare.mjs` compared the outputs cell by cell.
 
-| Pair | Size | Mismatched cells | Fraction |
-| --- | --- | --- | --- |
-| sharp A vs Pillow A (Lanczos in libvips vs Pillow) | 1600 by 900 | 124 | 0.0001 |
-| sharp A vs Rust A | 1600 by 900 | 116 | 0.0001 |
-| Pillow A vs Rust A | 1600 by 900 | 16 | 0.0000 |
-| sharp A vs Go A (box filter) | 1600 by 900 | 560 | 0.0004 |
-| sharp B vs Pillow B (no resample) | 3200 by 1800 | 2 | 0.0000 |
-| sharp B vs Rust B | 3200 by 1800 | 2 | 0.0000 |
-| Pillow B vs Rust B | 3200 by 1800 | 0 | 0 |
-| Pillow B vs Go B (integer luma) | 3200 by 1800 | 249 | 0.0000 |
-| Pillow B (ImageChops) vs Pillow B2 (numpy) | 3200 by 1800 | 0 | 0 |
+| Pair                                               | Size         | Mismatched cells | Fraction |
+| -------------------------------------------------- | ------------ | ---------------- | -------- |
+| sharp A vs Pillow A (Lanczos in libvips vs Pillow) | 1600 by 900  | 124              | 0.0001   |
+| sharp A vs Rust A                                  | 1600 by 900  | 116              | 0.0001   |
+| Pillow A vs Rust A                                 | 1600 by 900  | 16               | 0.0000   |
+| sharp A vs Go A (box filter)                       | 1600 by 900  | 560              | 0.0004   |
+| sharp B vs Pillow B (no resample)                  | 3200 by 1800 | 2                | 0.0000   |
+| sharp B vs Rust B                                  | 3200 by 1800 | 2                | 0.0000   |
+| Pillow B vs Rust B                                 | 3200 by 1800 | 0                | 0        |
+| Pillow B vs Go B (integer luma)                    | 3200 by 1800 | 249              | 0.0000   |
+| Pillow B (ImageChops) vs Pillow B2 (numpy)         | 3200 by 1800 | 0                | 0        |
 
 All four implementations light 20.66 to 20.69 percent of cells. The dither and tone stages are exactly reproducible across languages when the arithmetic is specified (Pillow and Rust agree to the bit at full resolution); the resampler and the grayscale conversion are the sources of drift (sharp's `b-w` colourspace differs from the 299/587/114 luma in two pixels; three Lanczos implementations disagree on about 120 cells of 1.44 million). The design consequence: the dither must be one specified algorithm with one pinned resampler, and any place that renders it (the editor's live preview in the browser, the CLI, the export service) must run the same code. That is the only argument here for Rust: one crate compiled to a napi-rs addon for Node and to WebAssembly for the browser gives bit identity between the preview a designer approves and the file the exporter writes. JavaScript can also achieve it (one TypeScript module for both, with a hand-written Lanczos), and at these sizes it would run in under 30 ms.
 

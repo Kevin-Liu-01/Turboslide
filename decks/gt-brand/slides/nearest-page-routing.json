@@ -1,9 +1,20 @@
 {
   "schemaVersion": 1,
   "id": "nearest-page-routing",
+  "ext": {
+    "import": {
+      "css": ".ts-x-nearest-page-routing svg.dia .ic { width: 24px; height: 24px; }\n.ts-x-nearest-page-routing svg.dia .ic.muted { width: 20px; height: 20px; }",
+      "scope": "s44r"
+    }
+  },
   "kind": "content",
   "layout": {
-    "type": "split"
+    "type": "split",
+    "gap": 56,
+    "head": "single",
+    "body": {
+      "align": "center"
+    }
   },
   "slots": {
     "head": [
@@ -50,11 +61,5 @@
         ]
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-nearest-page-routing svg.dia .ic { width: 24px; height: 24px; }\n.ts-x-nearest-page-routing svg.dia .ic.muted { width: 20px; height: 20px; }",
-      "scope": "s44r"
-    }
   }
 }

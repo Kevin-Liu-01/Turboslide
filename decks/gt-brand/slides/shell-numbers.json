@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "5/7"
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -44,52 +46,52 @@
         "items": [
           {
             "key": "Column",
-            "value": "The ruled column is 1104px wide, with a second pair of rails 10px outside it.",
             "icon": {
               "name": "view-columns"
-            }
+            },
+            "value": "The ruled column is 1104px wide, with a second pair of rails 10px outside it."
           },
           {
             "key": "Navigation",
-            "value": "The navigation bar is 58px tall and uses the same column.",
             "icon": {
               "name": "bars-3"
-            }
+            },
+            "value": "The navigation bar is 58px tall and uses the same column."
           },
           {
             "key": "Cross",
-            "value": "A 9px registration cross with 1px arms sits at every point where a seam meets a rail.",
             "icon": {
               "name": "plus"
-            }
+            },
+            "value": "A 9px registration cross with 1px arms sits at every point where a seam meets a rail."
           },
           {
             "key": "Breakpoint",
-            "value": "The layout has one breakpoint, 1023px. Below it every row is one column and hairlines stay 1px.",
             "icon": {
               "name": "device-phone-mobile"
-            }
+            },
+            "value": "The layout has one breakpoint, 1023px. Below it every row is one column and hairlines stay 1px."
           },
           {
             "key": "Hero type",
-            "value": "The hero type has its own threshold at 720px, below which it is fixed at 2.5rem.",
             "icon": {
               "name": "language"
-            }
+            },
+            "value": "The hero type has its own threshold at 720px, below which it is fixed at 2.5rem."
           },
           {
             "key": "Hatch",
-            "value": "A hatch strip, 45 degree hairlines every 8px, separates rows where the topic changes.",
             "icon": {
               "name": "squares-2x2"
-            }
+            },
+            "value": "A hatch strip, 45 degree hairlines every 8px, separates rows where the topic changes."
           },
           {
             "key": "Seam",
-            "value": "The slide-to-compare handle is the doubled line in CSS: two 1px borders and one grip element.",
             "icon": {
               "name": "arrows-right-left"
-            }
+            },
+            "value": "The slide-to-compare handle is the doubled line in CSS: two 1px borders and one grip element."
           }
         ]
       }

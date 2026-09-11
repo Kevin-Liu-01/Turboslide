@@ -95,7 +95,8 @@
     ],
     "export": [
       "export.run",
-      "build.run"
+      "build.run",
+      "fonts.build"
     ],
     "studio": [
       "source.read",
@@ -106,7 +107,7 @@
       "artifact.download"
     ]
   },
-  "actionCount": 41,
+  "actionCount": 42,
   "resources": [
     {
       "uri": "deck://manifest",

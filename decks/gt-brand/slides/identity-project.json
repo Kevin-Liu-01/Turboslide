@@ -1,9 +1,20 @@
 {
   "schemaVersion": 1,
   "id": "identity-project",
+  "ext": {
+    "import": {
+      "css": ".ts-x-identity-project svg.dia use { fill: var(--ink); }\n.ts-x-identity-project svg.dia .term { font-family: var(--mono); }",
+      "scope": "s82"
+    }
+  },
   "kind": "content",
   "layout": {
-    "type": "split"
+    "type": "split",
+    "gap": 56,
+    "head": "single",
+    "body": {
+      "align": "center"
+    }
   },
   "slots": {
     "head": [
@@ -23,30 +34,30 @@
     "body": [
       {
         "id": "rows",
+        "ext": {
+          "import": {
+            "style": "margin-bottom:36px"
+          }
+        },
         "type": "rows",
         "key": 200,
         "tight": true,
         "items": [
           {
             "key": "Inputs",
-            "value": "The inputs are prototemplate.com as the handoff site, the brand book, the questionnaire finalized August 11, and the test list.",
             "icon": {
               "name": "archive-box"
-            }
+            },
+            "value": "The inputs are prototemplate.com as the handoff site, the brand book, the questionnaire finalized August 11, and the test list."
           },
           {
             "key": "Decisions",
-            "value": "The four reviews cover the territory, the identity direction, the system, and the handoff. GT selects one option at each and returns one consolidated feedback document within 48 hours.",
             "icon": {
               "name": "scale"
-            }
+            },
+            "value": "The four reviews cover the territory, the identity direction, the system, and the handoff. GT selects one option at each and returns one consolidated feedback document within 48 hours."
           }
-        ],
-        "ext": {
-          "import": {
-            "style": "margin-bottom:36px"
-          }
-        }
+        ]
       },
       {
         "id": "dia1",
@@ -56,11 +67,5 @@
         "alt": "Five stages across thirteen weeks with an icon each, four review points, and a marker on September 9"
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-identity-project svg.dia use { fill: var(--ink); }\n.ts-x-identity-project svg.dia .term { font-family: var(--mono); }",
-      "scope": "s82"
-    }
   }
 }

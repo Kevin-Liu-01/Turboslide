@@ -1,0 +1,28 @@
+{
+  "name": "@turboslide/mcp",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The MCP server over the action table (SPEC 7.3): tools named deck_<action> for every implemented action offered on mcp with JSON Schema from the Zod definitions, the deck:// resources, the deck_review prompt, and the stdio transport behind `turboslide mcp`.",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "exports": {
+    "./server": "./src/server.ts",
+    "./tools": "./src/tools.ts",
+    "./resources": "./src/resources.ts",
+    "./prompts": "./src/prompts.ts",
+    "./stdio": "./src/stdio.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "catalog:",
+    "@turboslide/agent": "workspace:*",
+    "@turboslide/schema": "workspace:*",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

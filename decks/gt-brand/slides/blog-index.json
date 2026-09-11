@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "4/8"
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -28,8 +30,8 @@
         "asset": "site-blog",
         "fit": "width",
         "caption": "The blog index runs the two tickers above and below the headline, sets the changelog strip between two registration crosses on the left rail, and starts the post grid under the category filter.",
-        "width": 768,
-        "captionSize": 16
+        "captionSize": 16,
+        "width": 768
       }
     ]
   }

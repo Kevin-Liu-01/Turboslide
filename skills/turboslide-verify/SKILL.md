@@ -13,6 +13,7 @@ Evidence first, then judgment. Every claim names the revision it was verified at
 2. `turboslide sheet all --cols 4 --thumb 480 --numbered --overlay lint` writes the sheets and `sheet-<theme>.json`; read the cell map first and address slides by id.
 3. `turboslide lint <ids|all> --json` returns `Finding[]`; exit 1 means a severity 3 finding outside `known-findings.json`.
 4. `turboslide export pptx --mode flatten --theme light --verify` writes `export-report.json`; read it.
+5. Over MCP (`turboslide mcp`): `deck_render` returns the PNGs as image content with the records, `deck_sheet` the sheet with its cell map, `deck_lint` the findings as `{ items, count }`; `deck://render/<slideId>/<theme>` and `deck://sheet/<theme>` hold the latest ones, and the `deck_review` prompt (argument `lens`, one of layout, visual-consistency, copy, accuracy, completeness, art-direction, or all) gives the lens instructions below.
 
 Read [references/verification.md](references/verification.md) for the evidence actions, the `Finding` schema, the rule table and the judge lenses.
 

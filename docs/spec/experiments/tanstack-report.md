@@ -26,35 +26,35 @@ Then, in order: `pnpm exec tsc --noEmit -p tsconfig.json`, `pnpm exec vite build
 
 The scaffold pins every `@tanstack/*` package to the `latest` dist-tag, not a range. Resolved on 2026-09-10:
 
-| Package | Version | Note |
-| --- | --- | --- |
-| `@tanstack/cli` | 0.71.0 | run through `pnpm dlx` |
-| `@tanstack/react-start` | 1.168.50 | |
-| `@tanstack/react-router` | 1.170.33 | |
-| `@tanstack/router-core` | 1.171.28 | transitive |
-| `@tanstack/start-server-core` | 1.169.32 | transitive |
-| `@tanstack/start-client-core` | 1.170.28 | transitive |
-| `@tanstack/start-plugin-core` | 1.171.40 | transitive; the Vite plugin |
-| `@tanstack/router-plugin` | 19.3.0 | transitive; note the separate major line |
-| `@tanstack/router-generator` | 1.167.34 | transitive; owns `tsr.config.json` |
-| `@tanstack/router-cli` | 1.167.34 | devDependency; `tsr generate` |
-| `@tanstack/react-devtools` | 0.10.12 | Solid-based, dev only |
-| `@tanstack/devtools-vite` | 0.8.5 | strips devtools from builds, pipes console |
-| `@tanstack/react-router-devtools` | 1.167.1 | |
-| `@tanstack/eslint-config` | 0.4.0 | |
-| `vite` | 8.2.2 | Rolldown bundler |
-| `rolldown` | 1.2.8 | transitive |
-| `@vitejs/plugin-react` | 6.x per package.json (resolved dir shows 2.7.0 hash; not load-bearing) | |
-| `react`, `react-dom` | 19.3.0 | |
-| `typescript` | 6.0.3 | the last JavaScript-based compiler line |
-| `tailwindcss`, `@tailwindcss/vite` | 4.3.3 | scaffold default |
-| `eslint` | 9.39.5 | |
-| `prettier` | 3.9.6 | |
-| `@types/node` | 22.20.2 | stale against Node 24; harmless here |
-| `h3` | 2.0.1-rc.20 | transitive server toolkit |
-| `srvx` | 0.11.22 transitive; 1.0.4 added | universal server adapter |
-| `nitro` | 3.0.260903-beta | added for deployment builds |
-| `seroval` | 1.5.6 and 1.6.7 | server function serialization |
+| Package                            | Version                                                                | Note                                       |
+| ---------------------------------- | ---------------------------------------------------------------------- | ------------------------------------------ |
+| `@tanstack/cli`                    | 0.71.0                                                                 | run through `pnpm dlx`                     |
+| `@tanstack/react-start`            | 1.168.50                                                               |                                            |
+| `@tanstack/react-router`           | 1.170.33                                                               |                                            |
+| `@tanstack/router-core`            | 1.171.28                                                               | transitive                                 |
+| `@tanstack/start-server-core`      | 1.169.32                                                               | transitive                                 |
+| `@tanstack/start-client-core`      | 1.170.28                                                               | transitive                                 |
+| `@tanstack/start-plugin-core`      | 1.171.40                                                               | transitive; the Vite plugin                |
+| `@tanstack/router-plugin`          | 19.3.0                                                                 | transitive; note the separate major line   |
+| `@tanstack/router-generator`       | 1.167.34                                                               | transitive; owns `tsr.config.json`         |
+| `@tanstack/router-cli`             | 1.167.34                                                               | devDependency; `tsr generate`              |
+| `@tanstack/react-devtools`         | 0.10.12                                                                | Solid-based, dev only                      |
+| `@tanstack/devtools-vite`          | 0.8.5                                                                  | strips devtools from builds, pipes console |
+| `@tanstack/react-router-devtools`  | 1.167.1                                                                |                                            |
+| `@tanstack/eslint-config`          | 0.4.0                                                                  |                                            |
+| `vite`                             | 8.2.2                                                                  | Rolldown bundler                           |
+| `rolldown`                         | 1.2.8                                                                  | transitive                                 |
+| `@vitejs/plugin-react`             | 6.x per package.json (resolved dir shows 2.7.0 hash; not load-bearing) |                                            |
+| `react`, `react-dom`               | 19.3.0                                                                 |                                            |
+| `typescript`                       | 6.0.3                                                                  | the last JavaScript-based compiler line    |
+| `tailwindcss`, `@tailwindcss/vite` | 4.3.3                                                                  | scaffold default                           |
+| `eslint`                           | 9.39.5                                                                 |                                            |
+| `prettier`                         | 3.9.6                                                                  |                                            |
+| `@types/node`                      | 22.20.2                                                                | stale against Node 24; harmless here       |
+| `h3`                               | 2.0.1-rc.20                                                            | transitive server toolkit                  |
+| `srvx`                             | 0.11.22 transitive; 1.0.4 added                                        | universal server adapter                   |
+| `nitro`                            | 3.0.260903-beta                                                        | added for deployment builds                |
+| `seroval`                          | 1.5.6 and 1.6.7                                                        | server function serialization              |
 
 `node_modules` is 184 MB with 294 store entries after the base install.
 
@@ -172,10 +172,10 @@ Incident: after about eleven minutes with the browser pane attached, `dev.log` h
 
 Browser pane (Chromium inside the Claude Code app) at `/canvas`: `{"ok":true,"version":"WebGL 2.0 (OpenGL ES 3.0 Chromium)","corner":[7,7,7,255]}` and the dithered gradient visible. Headless, through Prototemplate's `playwright-core` with `chromium.launch({ channel: 'chrome', headless: true, args })`, viewport 1600 by 900, `reducedMotion: 'reduce'`:
 
-| GPU args | Result | Wall time (launch to screenshot) |
-| --- | --- | --- |
-| `--use-angle=metal` | ok, `WebGL 2.0 (OpenGL ES 3.0 Chromium)`, corner `[7,7,7,255]` | 2.9 s |
-| `--use-gl=angle --use-angle=swiftshader` | ok, same version string, same corner | 6.3 s |
+| GPU args                                 | Result                                                         | Wall time (launch to screenshot) |
+| ---------------------------------------- | -------------------------------------------------------------- | -------------------------------- |
+| `--use-angle=metal`                      | ok, `WebGL 2.0 (OpenGL ES 3.0 Chromium)`, corner `[7,7,7,255]` | 2.9 s                            |
+| `--use-gl=angle --use-angle=swiftshader` | ok, same version string, same corner                           | 6.3 s                            |
 
 The screenshots are `canvas-headless-metal.png` and `canvas-headless-swiftshader.png`; both show the two-tone dither and the server function's JSON under the canvas. `waitUntil: 'networkidle'` never resolves against `vite dev` (HMR socket), so the script waits for `load` and then for the report text. SwiftShader matters because Linux CI has no Metal; the deck rounds used `--use-angle=metal` on this Mac.
 

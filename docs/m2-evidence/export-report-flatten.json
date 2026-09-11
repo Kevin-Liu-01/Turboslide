@@ -1,0 +1,7266 @@
+{
+  "deckId": "gt-brand",
+  "revision": 13,
+  "format": "pptx",
+  "mode": "flatten",
+  "theme": "light",
+  "fontSet": "exact",
+  "fontSetVersion": "4.001+gt.1",
+  "files": [
+    {
+      "path": "/work/.turboslide/export/gt-brand-light.pptx",
+      "bytes": 42729872,
+      "sha256": "f307dd71d4c9284446dd752f36548794fc0b8a422add184d60a7dd86dd5c69d2"
+    },
+    {
+      "path": "/work/.turboslide/export/gt-brand-dark.pptx",
+      "bytes": 44484060,
+      "sha256": "c8f3fb46d862224326bbd109b8e81aea31343abde011fed3db57d3fd8caf9156"
+    }
+  ],
+  "fonts": {
+    "embedded": [
+      "GT Inter Display",
+      "GT Inter Text 22",
+      "GT Inter Text 15",
+      "GT Inter Text 14",
+      "GT Inter Text 26",
+      "GT Inter Text 20 Medium",
+      "GT Inter Text 20",
+      "GT Inter Text 18",
+      "GT Inter Text 18 Medium",
+      "GT Inter Text 26 Medium",
+      "GT Inter Text 15 Medium",
+      "GT Inter Text 24 Medium",
+      "GT Inter Text 22 Medium"
+    ],
+    "requiredOnViewer": ["Menlo"],
+    "substitutedIn": ["Keynote", "PowerPoint for the web", "Google Slides"]
+  },
+  "slides": [
+    {
+      "slideId": "opener-brand",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/01-opener-brand@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 0,
+        "pictureFraction": 0,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/01-opener-brand-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-01.png",
+        "diff": "verify/gt-brand-light/01-opener-brand.diff.png"
+      }
+    },
+    {
+      "slideId": "title",
+      "theme": "light",
+      "native": ["heading", "lead"],
+      "raster": [],
+      "sheet": "work/sheets/light/02-title@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "heading",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "lead",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/02-title-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-02.png",
+        "diff": "verify/gt-brand-light/02-title.diff.png"
+      }
+    },
+    {
+      "slideId": "thesis",
+      "theme": "light",
+      "native": ["big"],
+      "raster": [],
+      "sheet": "work/sheets/light/03-thesis@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "big",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/03-thesis-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-03.png",
+        "diff": "verify/gt-brand-light/03-thesis.diff.png"
+      }
+    },
+    {
+      "slideId": "reputation",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/04-reputation@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/04-reputation-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-04.png",
+        "diff": "verify/gt-brand-light/04-reputation.diff.png"
+      }
+    },
+    {
+      "slideId": "why",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": [],
+      "sheet": "work/sheets/light/05-why@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/05-why-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-05.png",
+        "diff": "verify/gt-brand-light/05-why.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-earth",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/06-mood-earth@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 0,
+        "pictureFraction": 0,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/06-mood-earth-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-06.png",
+        "diff": "verify/gt-brand-light/06-mood-earth.diff.png"
+      }
+    },
+    {
+      "slideId": "positioning",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/07-positioning@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/07-positioning-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-07.png",
+        "diff": "verify/gt-brand-light/07-positioning.diff.png"
+      }
+    },
+    {
+      "slideId": "audience",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/08-audience@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/08-audience-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-08.png",
+        "diff": "verify/gt-brand-light/08-audience.diff.png"
+      }
+    },
+    {
+      "slideId": "values",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": [],
+      "sheet": "work/sheets/light/09-values@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/09-values-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-09.png",
+        "diff": "verify/gt-brand-light/09-values.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-rosetta",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/10-mood-rosetta@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 86,
+        "pictureFraction": 0.000014930555555555555,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/10-mood-rosetta-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-10.png",
+        "diff": "verify/gt-brand-light/10-mood-rosetta.diff.png"
+      }
+    },
+    {
+      "slideId": "character",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": ["scales"],
+      "sheet": "work/sheets/light/11-character@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "scales",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/11-character-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-11.png",
+        "diff": "verify/gt-brand-light/11-character.diff.png"
+      }
+    },
+    {
+      "slideId": "voice",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": ["say"],
+      "sheet": "work/sheets/light/12-voice@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "say",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/12-voice-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-12.png",
+        "diff": "verify/gt-brand-light/12-voice.diff.png"
+      }
+    },
+    {
+      "slideId": "inspirations",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": ["tiles"],
+      "sheet": "work/sheets/light/13-inspirations@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "tiles",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/13-inspirations-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-13.png",
+        "diff": "verify/gt-brand-light/13-inspirations.diff.png"
+      }
+    },
+    {
+      "slideId": "naming",
+      "theme": "light",
+      "native": ["h", "rows"],
+      "raster": ["group", "logos"],
+      "sheet": "work/sheets/light/14-naming@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "group",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p3",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p4",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "logos",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/14-naming-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-14.png",
+        "diff": "verify/gt-brand-light/14-naming.diff.png"
+      }
+    },
+    {
+      "slideId": "mark",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": ["mark"],
+      "sheet": "work/sheets/light/15-mark@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "mark",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/15-mark-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-15.png",
+        "diff": "verify/gt-brand-light/15-mark.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-design-system",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/16-opener-design-system@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 228,
+        "pictureFraction": 0.00003958333333333333,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/16-opener-design-system-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-16.png",
+        "diff": "verify/gt-brand-light/16-opener-design-system.diff.png"
+      }
+    },
+    {
+      "slideId": "compression",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["sizes"],
+      "sheet": "work/sheets/light/17-compression@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "sizes",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/17-compression-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-17.png",
+        "diff": "verify/gt-brand-light/17-compression.diff.png"
+      }
+    },
+    {
+      "slideId": "color",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": ["swatches", "dia1"],
+      "sheet": "work/sheets/light/18-color@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "swatches",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/18-color-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-18.png",
+        "diff": "verify/gt-brand-light/18-color.diff.png"
+      }
+    },
+    {
+      "slideId": "type",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": ["spec"],
+      "sheet": "work/sheets/light/19-type@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "spec",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/19-type-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-19.png",
+        "diff": "verify/gt-brand-light/19-type.diff.png"
+      }
+    },
+    {
+      "slideId": "multilingual",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["lang"],
+      "sheet": "work/sheets/light/20-multilingual@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "lang",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/20-multilingual-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-20.png",
+        "diff": "verify/gt-brand-light/20-multilingual.diff.png"
+      }
+    },
+    {
+      "slideId": "ladder",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["ladder"],
+      "sheet": "work/sheets/light/21-ladder@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "ladder",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/21-ladder-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-21.png",
+        "diff": "verify/gt-brand-light/21-ladder.diff.png"
+      }
+    },
+    {
+      "slideId": "lines",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/22-lines@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/22-lines-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-22.png",
+        "diff": "verify/gt-brand-light/22-lines.diff.png"
+      }
+    },
+    {
+      "slideId": "doubled-line",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/23-doubled-line@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/23-doubled-line-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-23.png",
+        "diff": "verify/gt-brand-light/23-doubled-line.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-calligraphy",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/24-mood-calligraphy@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 750,
+        "pictureFraction": 0.00013020833333333333,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/24-mood-calligraphy-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-24.png",
+        "diff": "verify/gt-brand-light/24-mood-calligraphy.diff.png"
+      }
+    },
+    {
+      "slideId": "diagrams",
+      "theme": "light",
+      "native": [],
+      "raster": ["html"],
+      "sheet": "work/sheets/light/25-diagrams@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "html",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/25-diagrams-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-25.png",
+        "diff": "verify/gt-brand-light/25-diagrams.diff.png"
+      }
+    },
+    {
+      "slideId": "dither",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["group"],
+      "sheet": "work/sheets/light/26-dither@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "group",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dither",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "matrix",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p3",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/26-dither-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-26.png",
+        "diff": "verify/gt-brand-light/26-dither.diff.png"
+      }
+    },
+    {
+      "slideId": "iso",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/27-iso@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/27-iso-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-27.png",
+        "diff": "verify/gt-brand-light/27-iso.diff.png"
+      }
+    },
+    {
+      "slideId": "language-as-material",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/28-language-as-material@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/28-language-as-material-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-28.png",
+        "diff": "verify/gt-brand-light/28-language-as-material.diff.png"
+      }
+    },
+    {
+      "slideId": "motion",
+      "theme": "light",
+      "native": ["h", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/29-motion@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/29-motion-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-29.png",
+        "diff": "verify/gt-brand-light/29-motion.diff.png"
+      }
+    },
+    {
+      "slideId": "avoid",
+      "theme": "light",
+      "native": ["h", "p1", "list"],
+      "raster": [],
+      "sheet": "work/sheets/light/30-avoid@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "list",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/30-avoid-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-30.png",
+        "diff": "verify/gt-brand-light/30-avoid.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-website",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/31-opener-website@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 0,
+        "pictureFraction": 0,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/31-opener-website-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-31.png",
+        "diff": "verify/gt-brand-light/31-opener-website.diff.png"
+      }
+    },
+    {
+      "slideId": "surfaces",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": [],
+      "sheet": "work/sheets/light/32-surfaces@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/32-surfaces-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-32.png",
+        "diff": "verify/gt-brand-light/32-surfaces.diff.png"
+      }
+    },
+    {
+      "slideId": "site",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/light/33-site@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/33-site-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-33.png",
+        "diff": "verify/gt-brand-light/33-site.diff.png"
+      }
+    },
+    {
+      "slideId": "dark-mode",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/light/34-dark-mode@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/34-dark-mode-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-34.png",
+        "diff": "verify/gt-brand-light/34-dark-mode.diff.png"
+      }
+    },
+    {
+      "slideId": "pages-a",
+      "theme": "light",
+      "native": ["h"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/light/35-pages-a@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/35-pages-a-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-35.png",
+        "diff": "verify/gt-brand-light/35-pages-a.diff.png"
+      }
+    },
+    {
+      "slideId": "pages-b",
+      "theme": "light",
+      "native": ["h"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/light/36-pages-b@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/36-pages-b-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-36.png",
+        "diff": "verify/gt-brand-light/36-pages-b.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-lighthouse",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/37-mood-lighthouse@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 3193,
+        "pictureFraction": 0.0005543402777777777,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/37-mood-lighthouse-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-37.png",
+        "diff": "verify/gt-brand-light/37-mood-lighthouse.diff.png"
+      }
+    },
+    {
+      "slideId": "details",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["grid"],
+      "sheet": "work/sheets/light/38-details@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "grid",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/38-details-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-38.png",
+        "diff": "verify/gt-brand-light/38-details.diff.png"
+      }
+    },
+    {
+      "slideId": "details-two",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": ["group"],
+      "sheet": "work/sheets/light/39-details-two@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "group",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig3",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/39-details-two-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-39.png",
+        "diff": "verify/gt-brand-light/39-details-two.diff.png"
+      }
+    },
+    {
+      "slideId": "shell-numbers",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/40-shell-numbers@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/40-shell-numbers-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-40.png",
+        "diff": "verify/gt-brand-light/40-shell-numbers.diff.png"
+      }
+    },
+    {
+      "slideId": "horizon",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/light/41-horizon@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/41-horizon-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-41.png",
+        "diff": "verify/gt-brand-light/41-horizon.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-documentation",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/42-opener-documentation@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 440,
+        "pictureFraction": 0.00007638888888888889,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/42-opener-documentation-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-42.png",
+        "diff": "verify/gt-brand-light/42-opener-documentation.diff.png"
+      }
+    },
+    {
+      "slideId": "docs",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/light/43-docs@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/43-docs-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-43.png",
+        "diff": "verify/gt-brand-light/43-docs.diff.png"
+      }
+    },
+    {
+      "slideId": "nearest-page-routing",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["group"],
+      "sheet": "work/sheets/light/44-nearest-page-routing@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "group",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "code",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/44-nearest-page-routing-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-44.png",
+        "diff": "verify/gt-brand-light/44-nearest-page-routing.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-dictionary",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/45-mood-dictionary@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 3073,
+        "pictureFraction": 0.0005335069444444444,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/45-mood-dictionary-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-45.png",
+        "diff": "verify/gt-brand-light/45-mood-dictionary.diff.png"
+      }
+    },
+    {
+      "slideId": "docs-for-agents",
+      "theme": "light",
+      "native": ["h", "p1", "p2", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/46-docs-for-agents@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/46-docs-for-agents-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-46.png",
+        "diff": "verify/gt-brand-light/46-docs-for-agents.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-blog",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/47-opener-blog@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": false
+        }
+      ],
+      "verify": {
+        "mismatch": 2100,
+        "fraction": 0.00036458333333333335,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/47-opener-blog-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-47.png",
+        "diff": "verify/gt-brand-light/47-opener-blog.diff.png"
+      }
+    },
+    {
+      "slideId": "blog-index",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/light/48-blog-index@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/48-blog-index-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-48.png",
+        "diff": "verify/gt-brand-light/48-blog-index.diff.png"
+      }
+    },
+    {
+      "slideId": "blog-covers",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/light/49-blog-covers@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/49-blog-covers-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-49.png",
+        "diff": "verify/gt-brand-light/49-blog-covers.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-devanagari",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/50-mood-devanagari@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 392,
+        "pictureFraction": 0.00006805555555555555,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/50-mood-devanagari-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-50.png",
+        "diff": "verify/gt-brand-light/50-mood-devanagari.diff.png"
+      }
+    },
+    {
+      "slideId": "gem-smoke",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/light/51-gem-smoke@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/51-gem-smoke-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-51.png",
+        "diff": "verify/gt-brand-light/51-gem-smoke.diff.png"
+      }
+    },
+    {
+      "slideId": "blog-vision",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/light/52-blog-vision@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/52-blog-vision-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-52.png",
+        "diff": "verify/gt-brand-light/52-blog-vision.diff.png"
+      }
+    },
+    {
+      "slideId": "content-rule",
+      "theme": "light",
+      "native": ["h", "p1", "list"],
+      "raster": [],
+      "sheet": "work/sheets/light/53-content-rule@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "list",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/53-content-rule-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-53.png",
+        "diff": "verify/gt-brand-light/53-content-rule.diff.png"
+      }
+    },
+    {
+      "slideId": "two-registers",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": [],
+      "sheet": "work/sheets/light/54-two-registers@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/54-two-registers-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-54.png",
+        "diff": "verify/gt-brand-light/54-two-registers.diff.png"
+      }
+    },
+    {
+      "slideId": "off-the-site",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/light/55-off-the-site@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/55-off-the-site-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-55.png",
+        "diff": "verify/gt-brand-light/55-off-the-site.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-developer-experience",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/56-opener-developer-experience@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": false
+        }
+      ],
+      "verify": {
+        "mismatch": 2860,
+        "fraction": 0.0004965277777777778,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/56-opener-developer-experience-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-56.png",
+        "diff": "verify/gt-brand-light/56-opener-developer-experience.diff.png"
+      }
+    },
+    {
+      "slideId": "dx",
+      "theme": "light",
+      "native": ["h", "p1", "code"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/57-dx@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "code",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/57-dx-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-57.png",
+        "diff": "verify/gt-brand-light/57-dx.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-cable",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/58-mood-cable@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 644,
+        "pictureFraction": 0.00011180555555555556,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/58-mood-cable-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-58.png",
+        "diff": "verify/gt-brand-light/58-mood-cable.diff.png"
+      }
+    },
+    {
+      "slideId": "cli",
+      "theme": "light",
+      "native": ["h", "p1", "code", "rows"],
+      "raster": [],
+      "sheet": "work/sheets/light/59-cli@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "code",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/59-cli-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-59.png",
+        "diff": "verify/gt-brand-light/59-cli.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-prototemplate",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/60-opener-prototemplate@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 0,
+        "pictureFraction": 0,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/60-opener-prototemplate-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-60.png",
+        "diff": "verify/gt-brand-light/60-opener-prototemplate.diff.png"
+      }
+    },
+    {
+      "slideId": "lab",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/light/61-lab@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/61-lab-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-61.png",
+        "diff": "verify/gt-brand-light/61-lab.diff.png"
+      }
+    },
+    {
+      "slideId": "knowledge-base",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/62-knowledge-base@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/62-knowledge-base-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-62.png",
+        "diff": "verify/gt-brand-light/62-knowledge-base.diff.png"
+      }
+    },
+    {
+      "slideId": "skills-marks",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/light/63-skills-marks@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/63-skills-marks-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-63.png",
+        "diff": "verify/gt-brand-light/63-skills-marks.diff.png"
+      }
+    },
+    {
+      "slideId": "viewer-shell",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/64-viewer-shell@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/64-viewer-shell-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-64.png",
+        "diff": "verify/gt-brand-light/64-viewer-shell.diff.png"
+      }
+    },
+    {
+      "slideId": "shell-views",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["grid"],
+      "sheet": "work/sheets/light/65-shell-views@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "grid",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/65-shell-views-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-65.png",
+        "diff": "verify/gt-brand-light/65-shell-views.diff.png"
+      }
+    },
+    {
+      "slideId": "line-law",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["fig", "group"],
+      "sheet": "work/sheets/light/66-line-law@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "group",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/66-line-law-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-66.png",
+        "diff": "verify/gt-brand-light/66-line-law.diff.png"
+      }
+    },
+    {
+      "slideId": "presenter-compare",
+      "theme": "light",
+      "native": [],
+      "raster": ["html"],
+      "sheet": "work/sheets/light/67-presenter-compare@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "html",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/67-presenter-compare-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-67.png",
+        "diff": "verify/gt-brand-light/67-presenter-compare.diff.png"
+      }
+    },
+    {
+      "slideId": "dossier",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/light/68-dossier@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/68-dossier-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-68.png",
+        "diff": "verify/gt-brand-light/68-dossier.diff.png"
+      }
+    },
+    {
+      "slideId": "directions",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": ["tiles"],
+      "sheet": "work/sheets/light/69-directions@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "tiles",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/69-directions-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-69.png",
+        "diff": "verify/gt-brand-light/69-directions.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-wave",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/70-mood-wave@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 1722,
+        "pictureFraction": 0.0002989583333333333,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/70-mood-wave-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-70.png",
+        "diff": "verify/gt-brand-light/70-mood-wave.diff.png"
+      }
+    },
+    {
+      "slideId": "archive",
+      "theme": "light",
+      "native": ["h", "p1", "code"],
+      "raster": ["refs", "fig"],
+      "sheet": "work/sheets/light/71-archive@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "refs",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "code",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/71-archive-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-71.png",
+        "diff": "verify/gt-brand-light/71-archive.diff.png"
+      }
+    },
+    {
+      "slideId": "engines",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["tiles"],
+      "sheet": "work/sheets/light/72-engines@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "tiles",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/72-engines-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-72.png",
+        "diff": "verify/gt-brand-light/72-engines.diff.png"
+      }
+    },
+    {
+      "slideId": "build-log",
+      "theme": "light",
+      "native": ["h", "p1", "list"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/light/73-build-log@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "list",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/73-build-log-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-73.png",
+        "diff": "verify/gt-brand-light/73-build-log.diff.png"
+      }
+    },
+    {
+      "slideId": "glyphfield",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/light/74-glyphfield@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/74-glyphfield-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-74.png",
+        "diff": "verify/gt-brand-light/74-glyphfield.diff.png"
+      }
+    },
+    {
+      "slideId": "glyphfield-tools",
+      "theme": "light",
+      "native": ["h", "rows"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/light/75-glyphfield-tools@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/75-glyphfield-tools-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-75.png",
+        "diff": "verify/gt-brand-light/75-glyphfield-tools.diff.png"
+      }
+    },
+    {
+      "slideId": "books-and-templates",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/light/76-books-and-templates@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/76-books-and-templates-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-76.png",
+        "diff": "verify/gt-brand-light/76-books-and-templates.diff.png"
+      }
+    },
+    {
+      "slideId": "glyphfield-materials",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/light/77-glyphfield-materials@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/77-glyphfield-materials-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-77.png",
+        "diff": "verify/gt-brand-light/77-glyphfield-materials.diff.png"
+      }
+    },
+    {
+      "slideId": "agent-api",
+      "theme": "light",
+      "native": ["h", "p1", "code", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/78-agent-api@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "code",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/78-agent-api-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-78.png",
+        "diff": "verify/gt-brand-light/78-agent-api.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-status",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/79-opener-status@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 246,
+        "pictureFraction": 0.00004270833333333333,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/79-opener-status-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-79.png",
+        "diff": "verify/gt-brand-light/79-opener-status.diff.png"
+      }
+    },
+    {
+      "slideId": "state",
+      "theme": "light",
+      "native": ["h", "p1"],
+      "raster": ["board"],
+      "sheet": "work/sheets/light/80-state@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "board",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/80-state-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-80.png",
+        "diff": "verify/gt-brand-light/80-state.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-compass",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/81-mood-compass@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 859,
+        "pictureFraction": 0.00014913194444444444,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/81-mood-compass-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-81.png",
+        "diff": "verify/gt-brand-light/81-mood-compass.diff.png"
+      }
+    },
+    {
+      "slideId": "identity-project",
+      "theme": "light",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/light/82-identity-project@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/82-identity-project-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-82.png",
+        "diff": "verify/gt-brand-light/82-identity-project.diff.png"
+      }
+    },
+    {
+      "slideId": "fixed-points",
+      "theme": "light",
+      "native": [],
+      "raster": ["html"],
+      "sheet": "work/sheets/light/83-fixed-points@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "html",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/83-fixed-points-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-83.png",
+        "diff": "verify/gt-brand-light/83-fixed-points.diff.png"
+      }
+    },
+    {
+      "slideId": "goals",
+      "theme": "light",
+      "native": [],
+      "raster": ["html"],
+      "sheet": "work/sheets/light/84-goals@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "html",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/84-goals-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-84.png",
+        "diff": "verify/gt-brand-light/84-goals.diff.png"
+      }
+    },
+    {
+      "slideId": "closing",
+      "theme": "light",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/light/85-closing@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": false
+        }
+      ],
+      "verify": {
+        "mismatch": 416,
+        "fraction": 0.00007222222222222222,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-light/85-closing-light@2x.png",
+        "got": "verify/gt-brand-light/gt-brand-light-pages/page-85.png",
+        "diff": "verify/gt-brand-light/85-closing.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-brand",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/01-opener-brand@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 0,
+        "pictureFraction": 0,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/01-opener-brand-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-01.png",
+        "diff": "verify/gt-brand-dark/01-opener-brand.diff.png"
+      }
+    },
+    {
+      "slideId": "title",
+      "theme": "dark",
+      "native": ["heading", "lead"],
+      "raster": [],
+      "sheet": "work/sheets/dark/02-title@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "heading",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "lead",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/02-title-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-02.png",
+        "diff": "verify/gt-brand-dark/02-title.diff.png"
+      }
+    },
+    {
+      "slideId": "thesis",
+      "theme": "dark",
+      "native": ["big"],
+      "raster": [],
+      "sheet": "work/sheets/dark/03-thesis@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "big",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/03-thesis-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-03.png",
+        "diff": "verify/gt-brand-dark/03-thesis.diff.png"
+      }
+    },
+    {
+      "slideId": "reputation",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/04-reputation@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/04-reputation-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-04.png",
+        "diff": "verify/gt-brand-dark/04-reputation.diff.png"
+      }
+    },
+    {
+      "slideId": "why",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": [],
+      "sheet": "work/sheets/dark/05-why@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/05-why-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-05.png",
+        "diff": "verify/gt-brand-dark/05-why.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-earth",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/06-mood-earth@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 0,
+        "pictureFraction": 0,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/06-mood-earth-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-06.png",
+        "diff": "verify/gt-brand-dark/06-mood-earth.diff.png"
+      }
+    },
+    {
+      "slideId": "positioning",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/07-positioning@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/07-positioning-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-07.png",
+        "diff": "verify/gt-brand-dark/07-positioning.diff.png"
+      }
+    },
+    {
+      "slideId": "audience",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/08-audience@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/08-audience-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-08.png",
+        "diff": "verify/gt-brand-dark/08-audience.diff.png"
+      }
+    },
+    {
+      "slideId": "values",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": [],
+      "sheet": "work/sheets/dark/09-values@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/09-values-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-09.png",
+        "diff": "verify/gt-brand-dark/09-values.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-rosetta",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/10-mood-rosetta@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 86,
+        "pictureFraction": 0.000014930555555555555,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/10-mood-rosetta-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-10.png",
+        "diff": "verify/gt-brand-dark/10-mood-rosetta.diff.png"
+      }
+    },
+    {
+      "slideId": "character",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["scales"],
+      "sheet": "work/sheets/dark/11-character@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "scales",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/11-character-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-11.png",
+        "diff": "verify/gt-brand-dark/11-character.diff.png"
+      }
+    },
+    {
+      "slideId": "voice",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["say"],
+      "sheet": "work/sheets/dark/12-voice@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "say",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/12-voice-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-12.png",
+        "diff": "verify/gt-brand-dark/12-voice.diff.png"
+      }
+    },
+    {
+      "slideId": "inspirations",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["tiles"],
+      "sheet": "work/sheets/dark/13-inspirations@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "tiles",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/13-inspirations-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-13.png",
+        "diff": "verify/gt-brand-dark/13-inspirations.diff.png"
+      }
+    },
+    {
+      "slideId": "naming",
+      "theme": "dark",
+      "native": ["h", "rows"],
+      "raster": ["group", "logos"],
+      "sheet": "work/sheets/dark/14-naming@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "group",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p3",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p4",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "logos",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/14-naming-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-14.png",
+        "diff": "verify/gt-brand-dark/14-naming.diff.png"
+      }
+    },
+    {
+      "slideId": "mark",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["mark"],
+      "sheet": "work/sheets/dark/15-mark@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "mark",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/15-mark-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-15.png",
+        "diff": "verify/gt-brand-dark/15-mark.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-design-system",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/16-opener-design-system@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 228,
+        "pictureFraction": 0.00003958333333333333,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/16-opener-design-system-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-16.png",
+        "diff": "verify/gt-brand-dark/16-opener-design-system.diff.png"
+      }
+    },
+    {
+      "slideId": "compression",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["sizes"],
+      "sheet": "work/sheets/dark/17-compression@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "sizes",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/17-compression-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-17.png",
+        "diff": "verify/gt-brand-dark/17-compression.diff.png"
+      }
+    },
+    {
+      "slideId": "color",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["swatches", "dia1"],
+      "sheet": "work/sheets/dark/18-color@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "swatches",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/18-color-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-18.png",
+        "diff": "verify/gt-brand-dark/18-color.diff.png"
+      }
+    },
+    {
+      "slideId": "type",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["spec"],
+      "sheet": "work/sheets/dark/19-type@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "spec",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/19-type-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-19.png",
+        "diff": "verify/gt-brand-dark/19-type.diff.png"
+      }
+    },
+    {
+      "slideId": "multilingual",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["lang"],
+      "sheet": "work/sheets/dark/20-multilingual@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "lang",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/20-multilingual-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-20.png",
+        "diff": "verify/gt-brand-dark/20-multilingual.diff.png"
+      }
+    },
+    {
+      "slideId": "ladder",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["ladder"],
+      "sheet": "work/sheets/dark/21-ladder@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "ladder",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/21-ladder-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-21.png",
+        "diff": "verify/gt-brand-dark/21-ladder.diff.png"
+      }
+    },
+    {
+      "slideId": "lines",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/22-lines@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/22-lines-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-22.png",
+        "diff": "verify/gt-brand-dark/22-lines.diff.png"
+      }
+    },
+    {
+      "slideId": "doubled-line",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/23-doubled-line@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/23-doubled-line-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-23.png",
+        "diff": "verify/gt-brand-dark/23-doubled-line.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-calligraphy",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/24-mood-calligraphy@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 750,
+        "pictureFraction": 0.00013020833333333333,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/24-mood-calligraphy-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-24.png",
+        "diff": "verify/gt-brand-dark/24-mood-calligraphy.diff.png"
+      }
+    },
+    {
+      "slideId": "diagrams",
+      "theme": "dark",
+      "native": [],
+      "raster": ["html"],
+      "sheet": "work/sheets/dark/25-diagrams@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "html",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/25-diagrams-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-25.png",
+        "diff": "verify/gt-brand-dark/25-diagrams.diff.png"
+      }
+    },
+    {
+      "slideId": "dither",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["group"],
+      "sheet": "work/sheets/dark/26-dither@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "group",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dither",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "matrix",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p3",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/26-dither-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-26.png",
+        "diff": "verify/gt-brand-dark/26-dither.diff.png"
+      }
+    },
+    {
+      "slideId": "iso",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/27-iso@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/27-iso-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-27.png",
+        "diff": "verify/gt-brand-dark/27-iso.diff.png"
+      }
+    },
+    {
+      "slideId": "language-as-material",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/28-language-as-material@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/28-language-as-material-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-28.png",
+        "diff": "verify/gt-brand-dark/28-language-as-material.diff.png"
+      }
+    },
+    {
+      "slideId": "motion",
+      "theme": "dark",
+      "native": ["h", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/29-motion@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/29-motion-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-29.png",
+        "diff": "verify/gt-brand-dark/29-motion.diff.png"
+      }
+    },
+    {
+      "slideId": "avoid",
+      "theme": "dark",
+      "native": ["h", "p1", "list"],
+      "raster": [],
+      "sheet": "work/sheets/dark/30-avoid@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "list",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/30-avoid-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-30.png",
+        "diff": "verify/gt-brand-dark/30-avoid.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-website",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/31-opener-website@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 0,
+        "pictureFraction": 0,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/31-opener-website-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-31.png",
+        "diff": "verify/gt-brand-dark/31-opener-website.diff.png"
+      }
+    },
+    {
+      "slideId": "surfaces",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": [],
+      "sheet": "work/sheets/dark/32-surfaces@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/32-surfaces-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-32.png",
+        "diff": "verify/gt-brand-dark/32-surfaces.diff.png"
+      }
+    },
+    {
+      "slideId": "site",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/dark/33-site@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/33-site-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-33.png",
+        "diff": "verify/gt-brand-dark/33-site.diff.png"
+      }
+    },
+    {
+      "slideId": "dark-mode",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/dark/34-dark-mode@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/34-dark-mode-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-34.png",
+        "diff": "verify/gt-brand-dark/34-dark-mode.diff.png"
+      }
+    },
+    {
+      "slideId": "pages-a",
+      "theme": "dark",
+      "native": ["h"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/dark/35-pages-a@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/35-pages-a-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-35.png",
+        "diff": "verify/gt-brand-dark/35-pages-a.diff.png"
+      }
+    },
+    {
+      "slideId": "pages-b",
+      "theme": "dark",
+      "native": ["h"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/dark/36-pages-b@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/36-pages-b-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-36.png",
+        "diff": "verify/gt-brand-dark/36-pages-b.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-lighthouse",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/37-mood-lighthouse@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 3193,
+        "pictureFraction": 0.0005543402777777777,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/37-mood-lighthouse-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-37.png",
+        "diff": "verify/gt-brand-dark/37-mood-lighthouse.diff.png"
+      }
+    },
+    {
+      "slideId": "details",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["grid"],
+      "sheet": "work/sheets/dark/38-details@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "grid",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/38-details-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-38.png",
+        "diff": "verify/gt-brand-dark/38-details.diff.png"
+      }
+    },
+    {
+      "slideId": "details-two",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["group"],
+      "sheet": "work/sheets/dark/39-details-two@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "group",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig3",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/39-details-two-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-39.png",
+        "diff": "verify/gt-brand-dark/39-details-two.diff.png"
+      }
+    },
+    {
+      "slideId": "shell-numbers",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/40-shell-numbers@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/40-shell-numbers-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-40.png",
+        "diff": "verify/gt-brand-dark/40-shell-numbers.diff.png"
+      }
+    },
+    {
+      "slideId": "horizon",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/dark/41-horizon@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/41-horizon-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-41.png",
+        "diff": "verify/gt-brand-dark/41-horizon.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-documentation",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/42-opener-documentation@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 440,
+        "pictureFraction": 0.00007638888888888889,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/42-opener-documentation-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-42.png",
+        "diff": "verify/gt-brand-dark/42-opener-documentation.diff.png"
+      }
+    },
+    {
+      "slideId": "docs",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/dark/43-docs@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/43-docs-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-43.png",
+        "diff": "verify/gt-brand-dark/43-docs.diff.png"
+      }
+    },
+    {
+      "slideId": "nearest-page-routing",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["group"],
+      "sheet": "work/sheets/dark/44-nearest-page-routing@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "group",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "code",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/44-nearest-page-routing-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-44.png",
+        "diff": "verify/gt-brand-dark/44-nearest-page-routing.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-dictionary",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/45-mood-dictionary@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 3073,
+        "pictureFraction": 0.0005335069444444444,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/45-mood-dictionary-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-45.png",
+        "diff": "verify/gt-brand-dark/45-mood-dictionary.diff.png"
+      }
+    },
+    {
+      "slideId": "docs-for-agents",
+      "theme": "dark",
+      "native": ["h", "p1", "p2", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/46-docs-for-agents@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/46-docs-for-agents-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-46.png",
+        "diff": "verify/gt-brand-dark/46-docs-for-agents.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-blog",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/47-opener-blog@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": false
+        }
+      ],
+      "verify": {
+        "mismatch": 675,
+        "fraction": 0.0001171875,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/47-opener-blog-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-47.png",
+        "diff": "verify/gt-brand-dark/47-opener-blog.diff.png"
+      }
+    },
+    {
+      "slideId": "blog-index",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/dark/48-blog-index@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/48-blog-index-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-48.png",
+        "diff": "verify/gt-brand-dark/48-blog-index.diff.png"
+      }
+    },
+    {
+      "slideId": "blog-covers",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/dark/49-blog-covers@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/49-blog-covers-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-49.png",
+        "diff": "verify/gt-brand-dark/49-blog-covers.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-devanagari",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/50-mood-devanagari@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 392,
+        "pictureFraction": 0.00006805555555555555,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/50-mood-devanagari-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-50.png",
+        "diff": "verify/gt-brand-dark/50-mood-devanagari.diff.png"
+      }
+    },
+    {
+      "slideId": "gem-smoke",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/dark/51-gem-smoke@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/51-gem-smoke-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-51.png",
+        "diff": "verify/gt-brand-dark/51-gem-smoke.diff.png"
+      }
+    },
+    {
+      "slideId": "blog-vision",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/dark/52-blog-vision@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/52-blog-vision-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-52.png",
+        "diff": "verify/gt-brand-dark/52-blog-vision.diff.png"
+      }
+    },
+    {
+      "slideId": "content-rule",
+      "theme": "dark",
+      "native": ["h", "p1", "list"],
+      "raster": [],
+      "sheet": "work/sheets/dark/53-content-rule@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "list",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/53-content-rule-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-53.png",
+        "diff": "verify/gt-brand-dark/53-content-rule.diff.png"
+      }
+    },
+    {
+      "slideId": "two-registers",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": [],
+      "sheet": "work/sheets/dark/54-two-registers@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/54-two-registers-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-54.png",
+        "diff": "verify/gt-brand-dark/54-two-registers.diff.png"
+      }
+    },
+    {
+      "slideId": "off-the-site",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/dark/55-off-the-site@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/55-off-the-site-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-55.png",
+        "diff": "verify/gt-brand-dark/55-off-the-site.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-developer-experience",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/56-opener-developer-experience@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": false
+        }
+      ],
+      "verify": {
+        "mismatch": 337,
+        "fraction": 0.00005850694444444444,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/56-opener-developer-experience-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-56.png",
+        "diff": "verify/gt-brand-dark/56-opener-developer-experience.diff.png"
+      }
+    },
+    {
+      "slideId": "dx",
+      "theme": "dark",
+      "native": ["h", "p1", "code"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/57-dx@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "code",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/57-dx-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-57.png",
+        "diff": "verify/gt-brand-dark/57-dx.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-cable",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/58-mood-cable@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 644,
+        "pictureFraction": 0.00011180555555555556,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/58-mood-cable-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-58.png",
+        "diff": "verify/gt-brand-dark/58-mood-cable.diff.png"
+      }
+    },
+    {
+      "slideId": "cli",
+      "theme": "dark",
+      "native": ["h", "p1", "code", "rows"],
+      "raster": [],
+      "sheet": "work/sheets/dark/59-cli@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "code",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/59-cli-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-59.png",
+        "diff": "verify/gt-brand-dark/59-cli.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-prototemplate",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/60-opener-prototemplate@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 0,
+        "pictureFraction": 0,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/60-opener-prototemplate-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-60.png",
+        "diff": "verify/gt-brand-dark/60-opener-prototemplate.diff.png"
+      }
+    },
+    {
+      "slideId": "lab",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/dark/61-lab@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/61-lab-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-61.png",
+        "diff": "verify/gt-brand-dark/61-lab.diff.png"
+      }
+    },
+    {
+      "slideId": "knowledge-base",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/62-knowledge-base@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/62-knowledge-base-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-62.png",
+        "diff": "verify/gt-brand-dark/62-knowledge-base.diff.png"
+      }
+    },
+    {
+      "slideId": "skills-marks",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/dark/63-skills-marks@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/63-skills-marks-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-63.png",
+        "diff": "verify/gt-brand-dark/63-skills-marks.diff.png"
+      }
+    },
+    {
+      "slideId": "viewer-shell",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/64-viewer-shell@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/64-viewer-shell-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-64.png",
+        "diff": "verify/gt-brand-dark/64-viewer-shell.diff.png"
+      }
+    },
+    {
+      "slideId": "shell-views",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["grid"],
+      "sheet": "work/sheets/dark/65-shell-views@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "grid",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/65-shell-views-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-65.png",
+        "diff": "verify/gt-brand-dark/65-shell-views.diff.png"
+      }
+    },
+    {
+      "slideId": "line-law",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig", "group"],
+      "sheet": "work/sheets/dark/66-line-law@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "group",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/66-line-law-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-66.png",
+        "diff": "verify/gt-brand-dark/66-line-law.diff.png"
+      }
+    },
+    {
+      "slideId": "presenter-compare",
+      "theme": "dark",
+      "native": [],
+      "raster": ["html"],
+      "sheet": "work/sheets/dark/67-presenter-compare@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "html",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/67-presenter-compare-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-67.png",
+        "diff": "verify/gt-brand-dark/67-presenter-compare.diff.png"
+      }
+    },
+    {
+      "slideId": "dossier",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/dark/68-dossier@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/68-dossier-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-68.png",
+        "diff": "verify/gt-brand-dark/68-dossier.diff.png"
+      }
+    },
+    {
+      "slideId": "directions",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": ["tiles"],
+      "sheet": "work/sheets/dark/69-directions@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p2",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "tiles",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/69-directions-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-69.png",
+        "diff": "verify/gt-brand-dark/69-directions.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-wave",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/70-mood-wave@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 1722,
+        "pictureFraction": 0.0002989583333333333,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/70-mood-wave-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-70.png",
+        "diff": "verify/gt-brand-dark/70-mood-wave.diff.png"
+      }
+    },
+    {
+      "slideId": "archive",
+      "theme": "dark",
+      "native": ["h", "p1", "code"],
+      "raster": ["refs", "fig"],
+      "sheet": "work/sheets/dark/71-archive@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "refs",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "code",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/71-archive-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-71.png",
+        "diff": "verify/gt-brand-dark/71-archive.diff.png"
+      }
+    },
+    {
+      "slideId": "engines",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["tiles"],
+      "sheet": "work/sheets/dark/72-engines@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "tiles",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/72-engines-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-72.png",
+        "diff": "verify/gt-brand-dark/72-engines.diff.png"
+      }
+    },
+    {
+      "slideId": "build-log",
+      "theme": "dark",
+      "native": ["h", "p1", "list"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/dark/73-build-log@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "list",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/73-build-log-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-73.png",
+        "diff": "verify/gt-brand-dark/73-build-log.diff.png"
+      }
+    },
+    {
+      "slideId": "glyphfield",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/dark/74-glyphfield@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/74-glyphfield-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-74.png",
+        "diff": "verify/gt-brand-dark/74-glyphfield.diff.png"
+      }
+    },
+    {
+      "slideId": "glyphfield-tools",
+      "theme": "dark",
+      "native": ["h", "rows"],
+      "raster": ["fig"],
+      "sheet": "work/sheets/dark/75-glyphfield-tools@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "fig",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/75-glyphfield-tools-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-75.png",
+        "diff": "verify/gt-brand-dark/75-glyphfield-tools.diff.png"
+      }
+    },
+    {
+      "slideId": "books-and-templates",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/dark/76-books-and-templates@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/76-books-and-templates-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-76.png",
+        "diff": "verify/gt-brand-dark/76-books-and-templates.diff.png"
+      }
+    },
+    {
+      "slideId": "glyphfield-materials",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["pair"],
+      "sheet": "work/sheets/dark/77-glyphfield-materials@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "pair",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/77-glyphfield-materials-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-77.png",
+        "diff": "verify/gt-brand-dark/77-glyphfield-materials.diff.png"
+      }
+    },
+    {
+      "slideId": "agent-api",
+      "theme": "dark",
+      "native": ["h", "p1", "code", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/78-agent-api@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "code",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/78-agent-api-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-78.png",
+        "diff": "verify/gt-brand-dark/78-agent-api.diff.png"
+      }
+    },
+    {
+      "slideId": "opener-status",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/79-opener-status@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 246,
+        "pictureFraction": 0.00004270833333333333,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/79-opener-status-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-79.png",
+        "diff": "verify/gt-brand-dark/79-opener-status.diff.png"
+      }
+    },
+    {
+      "slideId": "state",
+      "theme": "dark",
+      "native": ["h", "p1"],
+      "raster": ["board"],
+      "sheet": "work/sheets/dark/80-state@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "board",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/80-state-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-80.png",
+        "diff": "verify/gt-brand-dark/80-state.diff.png"
+      }
+    },
+    {
+      "slideId": "mood-compass",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/81-mood-compass@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": true
+        }
+      ],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 859,
+        "pictureFraction": 0.00014913194444444444,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/81-mood-compass-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-81.png",
+        "diff": "verify/gt-brand-dark/81-mood-compass.diff.png"
+      }
+    },
+    {
+      "slideId": "identity-project",
+      "theme": "dark",
+      "native": ["h", "p1", "rows"],
+      "raster": ["dia1"],
+      "sheet": "work/sheets/dark/82-identity-project@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "rows",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "dia1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/82-identity-project-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-82.png",
+        "diff": "verify/gt-brand-dark/82-identity-project.diff.png"
+      }
+    },
+    {
+      "slideId": "fixed-points",
+      "theme": "dark",
+      "native": [],
+      "raster": ["html"],
+      "sheet": "work/sheets/dark/83-fixed-points@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "html",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/83-fixed-points-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-83.png",
+        "diff": "verify/gt-brand-dark/83-fixed-points.diff.png"
+      }
+    },
+    {
+      "slideId": "goals",
+      "theme": "dark",
+      "native": [],
+      "raster": ["html"],
+      "sheet": "work/sheets/dark/84-goals@2x.png",
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "html",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/84-goals-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-84.png",
+        "diff": "verify/gt-brand-dark/84-goals.diff.png"
+      }
+    },
+    {
+      "slideId": "closing",
+      "theme": "dark",
+      "native": ["h", "p1", "credit"],
+      "raster": [],
+      "sheet": "work/sheets/dark/85-closing@2x.png",
+      "pictures": [
+        {
+          "box": [0, 0, 1600, 900],
+          "regenerated": false
+        }
+      ],
+      "verify": {
+        "mismatch": 416,
+        "fraction": 0.00007222222222222222,
+        "scale": 2,
+        "blocks": [
+          {
+            "blockId": "h",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "p1",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          },
+          {
+            "blockId": "credit",
+            "dx": 0,
+            "dy": 0,
+            "dw": 0,
+            "ok": true
+          }
+        ],
+        "ref": "verify/reference-dark/85-closing-dark@2x.png",
+        "got": "verify/gt-brand-dark/gt-brand-dark-pages/page-85.png",
+        "diff": "verify/gt-brand-dark/85-closing.diff.png"
+      }
+    }
+  ],
+  "geometryInBounds": true,
+  "passed": true,
+  "residual": [
+    "merged report over light and dark; theme names the first, per-theme reports are beside this file",
+    "renderer: Chrome for Testing 147.0.7727.0, SwiftShader, Google",
+    "flatten: the slide is a 2x raster of the sheet; text is an invisible native layer",
+    "fonts not embedded: Menlo; every viewer without them installed substitutes (SPEC 8.4)",
+    "verify: gt-brand-light.pptx: 15 slide(s) carry a regenerated two-tone picture; those regions were compared with the embedded 2x sheet shot (worst 0.055 percent) and excluded from the render comparison (SPEC 8.2)",
+    "verify: gt-brand-light.pptx rendered by LibreOffice 25.2.3.2 520(Build:2), pdftocairo version 25.03.0; 85 page(s), 753 shapes, 0 custGeom, 0 normAutofit, 13 embedded font(s)",
+    "verify: gt-brand-dark.pptx: 15 slide(s) carry a regenerated two-tone picture; those regions were compared with the embedded 2x sheet shot (worst 0.055 percent) and excluded from the render comparison (SPEC 8.2)",
+    "verify: gt-brand-dark.pptx rendered by LibreOffice 25.2.3.2 520(Build:2), pdftocairo version 25.03.0; 85 page(s), 753 shapes, 0 custGeom, 0 normAutofit, 13 embedded font(s)"
+  ]
+}

@@ -1,10 +1,20 @@
 {
   "schemaVersion": 1,
   "id": "books-and-templates",
+  "ext": {
+    "import": {
+      "css": ".ts-x-books-and-templates .pair img { display: block; background: var(--plate); }",
+      "scope": "s57b"
+    }
+  },
   "kind": "content",
   "layout": {
     "type": "split",
-    "gap": 32
+    "gap": 32,
+    "head": "single",
+    "body": {
+      "align": "center"
+    }
   },
   "slots": {
     "head": [
@@ -25,6 +35,8 @@
       {
         "id": "pair",
         "type": "pair",
+        "gap": 40,
+        "captionSize": 15,
         "figures": [
           {
             "assets": [
@@ -40,16 +52,8 @@
             ],
             "caption": "Slide templates build a 16:9 system from fourteen layouts on a direct-manipulation canvas. The library holds the layouts, and each renders as SVG through the API."
           }
-        ],
-        "gap": 40,
-        "captionSize": 15
+        ]
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-books-and-templates .pair img { display: block; background: var(--plate); }",
-      "scope": "s57b"
-    }
   }
 }

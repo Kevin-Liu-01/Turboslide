@@ -1,10 +1,18 @@
 {
   "schemaVersion": 1,
   "id": "doubled-line",
+  "ext": {
+    "import": {
+      "css": ".ts-x-doubled-line svg.dia text { font-size: 22px; }",
+      "scope": "s19"
+    }
+  },
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "5/7"
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -44,11 +52,5 @@
         "alt": "One path stroked 6px in ink and then 3px in paper, shown as a curve with a junction and as two enlarged bars"
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-doubled-line svg.dia text { font-size: 22px; }",
-      "scope": "s19"
-    }
   }
 }

@@ -4,7 +4,11 @@
   "kind": "content",
   "layout": {
     "type": "split",
-    "gap": 36
+    "gap": 36,
+    "head": "single",
+    "body": {
+      "align": "center"
+    }
   },
   "slots": {
     "head": [
@@ -25,6 +29,7 @@
       {
         "id": "pair",
         "type": "pair",
+        "captionSize": 15,
         "figures": [
           {
             "assets": [
@@ -38,8 +43,7 @@
             ],
             "caption": "Nine marks in three families, bilingual, counterform and reflection, in the judged order, at 96 pixels positive and reversed. Each is one filled path on a 256 unit grid."
           }
-        ],
-        "captionSize": 15
+        ]
       }
     ]
   }

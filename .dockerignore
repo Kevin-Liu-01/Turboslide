@@ -1,0 +1,17 @@
+# Build context for docker/render-worker.Dockerfile, the repository's one image. The same list
+# sits beside the Dockerfile for BuildKit (<Dockerfile>.dockerignore); the classic builder reads this one.
+# The install runs inside the image, so nothing installed or derived on the host is copied.
+.git
+**/node_modules
+**/dist
+**/.output
+**/.turbo
+**/.tanstack
+**/.nitro
+**/.vercel
+.turboslide
+**/*.tsbuildinfo
+**/*.log
+apps/studio/src/routeTree.gen.ts
+.env
+**/*.local

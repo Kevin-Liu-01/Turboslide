@@ -4341,7 +4341,9 @@
           "type": "string",
           "description": "JSON pointer inside the block, such as /key"
         },
-        "value": {},
+        "value": {
+          "description": "The new value; omit it to delete the property"
+        },
         "baseRevision": {
           "type": "integer",
           "minimum": 0,
@@ -4353,7 +4355,6 @@
         "slideId",
         "blockId",
         "path",
-        "value",
         "baseRevision"
       ],
       "additionalProperties": false
@@ -4556,6 +4557,49 @@
       "type": "object",
       "properties": {
         "from": {
+          "description": "The older revision; omitted with staged, the last named version",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "to": {
+          "description": "Defaults to the current revision",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "staged": {
+          "description": "Diff from the newest named version below the current revision",
+          "type": "boolean"
+        },
+        "render": {
+          "description": "Write before and after crops of every touched block",
+          "type": "boolean"
+        },
+        "themes": {
+          "description": "Themes to render the crops in; defaults to light",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          }
+        },
+        "out": {
+          "description": "Crop directory; defaults to .turboslide/diff",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DiffRunOutput": {
+      "$id": "#/$defs/DiffRunOutput",
+      "type": "object",
+      "properties": {
+        "from": {
           "type": "integer",
           "minimum": 0,
           "maximum": 9007199254740991
@@ -4565,19 +4609,6 @@
           "minimum": 0,
           "maximum": 9007199254740991
         },
-        "render": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "from"
-      ],
-      "additionalProperties": false
-    },
-    "DiffRunOutput": {
-      "$id": "#/$defs/DiffRunOutput",
-      "type": "object",
-      "properties": {
         "mutations": {
           "type": "array",
           "items": {
@@ -4603,15 +4634,25 @@
                 "type": "string",
                 "pattern": "^[a-z0-9][a-z0-9-]*$"
               },
+              "theme": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ]
+              },
               "before": {
-                "type": "string"
+                "type": "string",
+                "description": "The crop's path; '' when the slide is absent before"
               },
               "after": {
-                "type": "string"
+                "type": "string",
+                "description": "The crop's path; '' when the slide is absent after"
               }
             },
             "required": [
               "slideId",
+              "theme",
               "before",
               "after"
             ],
@@ -4620,6 +4661,8 @@
         }
       },
       "required": [
+        "from",
+        "to",
         "mutations",
         "prose"
       ],
@@ -4739,6 +4782,13 @@
                 "type": "string",
                 "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
               },
+              "theme": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ]
+              },
               "native": {
                 "type": "array",
                 "items": {
@@ -4753,6 +4803,45 @@
                   "pattern": "^[a-z0-9][a-z0-9-]*$"
                 }
               },
+              "sheet": {
+                "type": "string"
+              },
+              "pictures": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "box": {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "items": false,
+                      "minItems": 4,
+                      "maxItems": 4
+                    },
+                    "regenerated": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "box",
+                    "regenerated"
+                  ],
+                  "additionalProperties": false
+                }
+              },
               "verify": {
                 "type": "object",
                 "properties": {
@@ -4761,6 +4850,19 @@
                     "minimum": 0
                   },
                   "fraction": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "scale": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "pictureMismatch": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "pictureFraction": {
                     "type": "number",
                     "minimum": 0,
                     "maximum": 1
@@ -4869,6 +4971,7 @@
           ]
         },
         "mode": {
+          "description": "Defaults to flatten, the verified pixel-identical mode (SPEC 8.2)",
           "type": "string",
           "enum": [
             "native",
@@ -4876,6 +4979,7 @@
           ]
         },
         "theme": {
+          "description": "One file per theme; defaults to both",
           "minItems": 1,
           "type": "array",
           "items": {
@@ -4884,10 +4988,10 @@
               "light",
               "dark"
             ]
-          },
-          "description": "One or both themes"
+          }
         },
         "fonts": {
+          "description": "The export font set (SPEC 8.4); defaults to exact",
           "type": "string",
           "enum": [
             "exact",
@@ -4898,10 +5002,40 @@
           "type": "string",
           "const": "raster"
         },
+        "excludeShareAlike": {
+          "description": "Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)",
+          "type": "boolean"
+        },
+        "baseline": {
+          "description": "The renderer whose measured first-baseline constant offsets native text boxes (calibration.json); defaults to libreoffice, the verify renderer",
+          "type": "string",
+          "enum": [
+            "libreoffice",
+            "none"
+          ]
+        },
         "verify": {
           "type": "boolean"
         },
+        "slideIds": {
+          "description": "A subset to export; defaults to 'all'",
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "all"
+            },
+            {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              }
+            }
+          ]
+        },
         "out": {
+          "description": "Output directory; defaults to .turboslide/export",
           "type": "string"
         }
       },
@@ -5921,8 +6055,7 @@
           "required": [
             "op",
             "slideId",
-            "path",
-            "value"
+            "path"
           ],
           "additionalProperties": false
         },
@@ -6077,8 +6210,7 @@
             "op",
             "slideId",
             "blockId",
-            "path",
-            "value"
+            "path"
           ],
           "additionalProperties": false
         },
@@ -6203,8 +6335,7 @@
           },
           "required": [
             "op",
-            "path",
-            "value"
+            "path"
           ],
           "additionalProperties": false
         },
@@ -7673,6 +7804,10 @@
         },
         "force": {
           "type": "boolean"
+        },
+        "release": {
+          "description": "Give the author’s lease on the slide back",
+          "type": "boolean"
         }
       },
       "required": [
@@ -8965,7 +9100,9 @@
             "type": "string",
             "description": "JSON pointer inside the block, such as /key"
           },
-          "value": {},
+          "value": {
+            "description": "The new value; omit it to delete the property"
+          },
           "baseRevision": {
             "type": "integer",
             "minimum": 0,
@@ -8977,7 +9114,6 @@
           "slideId",
           "blockId",
           "path",
-          "value",
           "baseRevision"
         ],
         "additionalProperties": false
@@ -9324,6 +9460,10 @@
             "maximum": 120
           },
           "force": {
+            "type": "boolean"
+          },
+          "release": {
+            "description": "Give the author’s lease on the slide back",
             "type": "boolean"
           }
         },
@@ -12216,6 +12356,49 @@
         "type": "object",
         "properties": {
           "from": {
+            "description": "The older revision; omitted with staged, the last named version",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "to": {
+            "description": "Defaults to the current revision",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "staged": {
+            "description": "Diff from the newest named version below the current revision",
+            "type": "boolean"
+          },
+          "render": {
+            "description": "Write before and after crops of every touched block",
+            "type": "boolean"
+          },
+          "themes": {
+            "description": "Themes to render the crops in; defaults to light",
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "light",
+                "dark"
+              ]
+            }
+          },
+          "out": {
+            "description": "Crop directory; defaults to .turboslide/diff",
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/DiffRunOutput",
+        "type": "object",
+        "properties": {
+          "from": {
             "type": "integer",
             "minimum": 0,
             "maximum": 9007199254740991
@@ -12225,19 +12408,6 @@
             "minimum": 0,
             "maximum": 9007199254740991
           },
-          "render": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "from"
-        ],
-        "additionalProperties": false
-      },
-      "outputSchema": {
-        "$id": "#/$defs/DiffRunOutput",
-        "type": "object",
-        "properties": {
           "mutations": {
             "type": "array",
             "items": {
@@ -12263,15 +12433,25 @@
                   "type": "string",
                   "pattern": "^[a-z0-9][a-z0-9-]*$"
                 },
+                "theme": {
+                  "type": "string",
+                  "enum": [
+                    "light",
+                    "dark"
+                  ]
+                },
                 "before": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "The crop's path; '' when the slide is absent before"
                 },
                 "after": {
-                  "type": "string"
+                  "type": "string",
+                  "description": "The crop's path; '' when the slide is absent after"
                 }
               },
               "required": [
                 "slideId",
+                "theme",
                 "before",
                 "after"
               ],
@@ -12280,6 +12460,8 @@
           }
         },
         "required": [
+          "from",
+          "to",
           "mutations",
           "prose"
         ],
@@ -12595,6 +12777,7 @@
             ]
           },
           "mode": {
+            "description": "Defaults to flatten, the verified pixel-identical mode (SPEC 8.2)",
             "type": "string",
             "enum": [
               "native",
@@ -12602,6 +12785,7 @@
             ]
           },
           "theme": {
+            "description": "One file per theme; defaults to both",
             "minItems": 1,
             "type": "array",
             "items": {
@@ -12610,10 +12794,10 @@
                 "light",
                 "dark"
               ]
-            },
-            "description": "One or both themes"
+            }
           },
           "fonts": {
+            "description": "The export font set (SPEC 8.4); defaults to exact",
             "type": "string",
             "enum": [
               "exact",
@@ -12624,10 +12808,40 @@
             "type": "string",
             "const": "raster"
           },
+          "excludeShareAlike": {
+            "description": "Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)",
+            "type": "boolean"
+          },
+          "baseline": {
+            "description": "The renderer whose measured first-baseline constant offsets native text boxes (calibration.json); defaults to libreoffice, the verify renderer",
+            "type": "string",
+            "enum": [
+              "libreoffice",
+              "none"
+            ]
+          },
           "verify": {
             "type": "boolean"
           },
+          "slideIds": {
+            "description": "A subset to export; defaults to 'all'",
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "all"
+              },
+              {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                }
+              }
+            ]
+          },
           "out": {
+            "description": "Output directory; defaults to .turboslide/export",
             "type": "string"
           }
         },
@@ -12750,6 +12964,13 @@
                   "type": "string",
                   "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
                 },
+                "theme": {
+                  "type": "string",
+                  "enum": [
+                    "light",
+                    "dark"
+                  ]
+                },
                 "native": {
                   "type": "array",
                   "items": {
@@ -12764,6 +12985,45 @@
                     "pattern": "^[a-z0-9][a-z0-9-]*$"
                   }
                 },
+                "sheet": {
+                  "type": "string"
+                },
+                "pictures": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "box": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "items": false,
+                        "minItems": 4,
+                        "maxItems": 4
+                      },
+                      "regenerated": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "box",
+                      "regenerated"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
                 "verify": {
                   "type": "object",
                   "properties": {
@@ -12772,6 +13032,19 @@
                       "minimum": 0
                     },
                     "fraction": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "scale": {
+                      "type": "number",
+                      "exclusiveMinimum": 0
+                    },
+                    "pictureMismatch": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "pictureFraction": {
                       "type": "number",
                       "minimum": 0,
                       "maximum": 1

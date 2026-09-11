@@ -1,12 +1,13 @@
 #!/usr/bin/env node
-// `pnpm check`: the M1 acceptance chain from MILESTONES.md, run in order from the repo root.
-// Every step is the literal command from the milestone plan, with one guard: step 3 first proves
-// the generated files are tracked, because `git diff --exit-code` passes trivially on untracked
-// paths. The runner adds only what the plan assumes about its environment: it creates
-// .turboslide/, it skips the steps that read Kevin's Prototemplate checkout when that path is
-// missing (CI; set TURBOSLIDE_PROTOTEMPLATE_DECK to point at one), and for the steps that need the
-// studio it starts the dev server on 4321 and stops it afterwards with the server log capped
-// (AGENTS.md, dev-server rules). Nothing is claimed done until every step exits 0.
+// `pnpm check`: the M1 acceptance chain from MILESTONES.md, run in order from the repo root, plus
+// the M2 format gate as the last step. Every step is the literal command from the milestone plan,
+// with one guard: step 3 first proves the generated files are tracked, because
+// `git diff --exit-code` passes trivially on untracked paths. The runner adds only what the plan
+// assumes about its environment: it creates .turboslide/, it skips the steps that read Kevin's
+// Prototemplate checkout when that path is missing (CI; set TURBOSLIDE_PROTOTEMPLATE_DECK to point
+// at one), and for the steps that need the studio it starts the dev server on 4321 and stops it
+// afterwards with the server log capped (AGENTS.md, dev-server rules). Nothing is claimed done
+// until every step exits 0.
 //
 //   node scripts/check.mjs                run everything
 //   node scripts/check.mjs --list         print the numbered steps
@@ -72,6 +73,10 @@ const steps = [
     cmd: `pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/deck/gt-brand --widths 1440,1280,390 --themes light,dark`,
     needs: 'server',
   },
+  // MILESTONES.md M2 acceptance, added after the M2 review found 41 files that `pnpm format` had
+  // not touched: the tree is prettier-clean (AGENTS.md code rules). Last, so the M1 step numbers
+  // that AGENTS.md and the status documents cite stay valid.
+  { cmd: 'pnpm format:check' },
 ];
 
 const argv = process.argv.slice(2);

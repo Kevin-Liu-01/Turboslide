@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "4/8"
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -35,31 +37,31 @@
         "items": [
           {
             "key": "Users",
-            "value": "Users are engineering and growth teams at scaling startups.",
             "icon": {
               "name": "user-group"
-            }
+            },
+            "value": "Users are engineering and growth teams at scaling startups."
           },
           {
             "key": "Buyers",
-            "value": "Buyers are technical and product executives who need consistency, security, and a review process they can defend.",
             "icon": {
               "name": "briefcase"
-            }
+            },
+            "value": "Buyers are technical and product executives who need consistency, security, and a review process they can defend."
           },
           {
             "key": "Customers",
-            "value": "Auth0 translates its docs. Sierra translates marketing and sales material. Ramp translates its core dashboard.",
             "icon": {
               "name": "building-office-2"
-            }
+            },
+            "value": "Auth0 translates its docs. Sierra translates marketing and sales material. Ramp translates its core dashboard."
           },
           {
             "key": "Competition",
-            "value": "Legacy translation management systems bill per seat and cover only part of the stack.",
             "icon": {
               "name": "scale"
-            }
+            },
+            "value": "Legacy translation management systems bill per seat and cover only part of the stack."
           }
         ]
       }

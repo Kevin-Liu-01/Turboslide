@@ -1,9 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "fixed-points",
+  "title": "Fixed points",
   "kind": "content",
   "layout": {
-    "type": "stack"
+    "type": "stack",
+    "gap": 22
   },
   "slots": {
     "main": [
@@ -15,6 +17,5 @@
         "note": "Escape: no block for <div class=\"two\">. Source 83-fixed-points.html; every scoped rule of the slide travels with the markup."
       }
     ]
-  },
-  "title": "Fixed points"
+  }
 }

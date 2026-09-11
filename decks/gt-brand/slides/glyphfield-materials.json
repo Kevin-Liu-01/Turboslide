@@ -1,12 +1,20 @@
 {
   "schemaVersion": 1,
   "id": "glyphfield-materials",
+  "ext": {
+    "import": {
+      "css": ".ts-x-glyphfield-materials .mats img { display: block; width: 100%; height: auto; border: 1px solid var(--hair); background: var(--plate); }\n.ts-x-glyphfield-materials .mats figcaption { line-height: 1.4; min-height: 45px; color: var(--ink-2); }\n.ts-x-glyphfield-materials .pair figure { gap: 6px; }",
+      "scope": "s77x"
+    }
+  },
   "kind": "content",
   "layout": {
     "type": "cols",
     "ratio": {
       "right": 568
-    }
+    },
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -50,7 +58,16 @@
     "right": [
       {
         "id": "pair",
+        "ext": {
+          "import": {
+            "style": "gap:10px 24px",
+            "classes": [
+              "mats"
+            ]
+          }
+        },
         "type": "pair",
+        "captionSize": 16,
         "figures": [
           {
             "assets": [
@@ -88,23 +105,8 @@
             ],
             "caption": "Grain gradient is a house renderer."
           }
-        ],
-        "captionSize": 16,
-        "ext": {
-          "import": {
-            "style": "gap:10px 24px",
-            "classes": [
-              "mats"
-            ]
-          }
-        }
+        ]
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-glyphfield-materials .mats img { display: block; width: 100%; height: auto; border: 1px solid var(--hair); background: var(--plate); }\n.ts-x-glyphfield-materials .mats figcaption { line-height: 1.4; min-height: 45px; color: var(--ink-2); }\n.ts-x-glyphfield-materials .pair figure { gap: 6px; }",
-      "scope": "s77x"
-    }
   }
 }

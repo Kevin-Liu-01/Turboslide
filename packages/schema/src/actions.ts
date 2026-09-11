@@ -93,6 +93,7 @@ export const ACTION_IDS = [
   'view.present',
   'export.run',
   'build.run',
+  'fonts.build',
   'import.run',
   'validate.run',
   'source.read',
@@ -353,7 +354,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       slideId: slugSchema,
       blockId: blockIdSchema,
       path: z.string().describe('JSON pointer inside the block, such as /key'),
-      value: z.unknown(),
+      value: z.unknown().optional().describe('The new value; omit it to delete the property'),
       baseRevision,
     }),
     output: slideResultSchema,
@@ -465,9 +466,10 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       slideId: slugSchema,
       minutes: z.number().int().positive().max(120).optional().describe('Defaults to 10'),
       force: z.boolean().optional(),
+      release: z.boolean().optional().describe('Give the author’s lease on the slide back'),
     }),
     output: leaseSchema,
-    cli: { usage: 'turboslide lease <slideId> --force' },
+    cli: { usage: 'turboslide lease <slideId> --minutes <minutes> --force --release' },
     mcp: 'deck_lease_slide',
     example: { slideId: 'content-rule', minutes: 10 },
   }),
@@ -690,11 +692,27 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     transports: A,
     milestone: 'M2',
     input: z.strictObject({
-      from: z.number().int().nonnegative(),
-      to: z.number().int().nonnegative().optional(),
-      render: z.boolean().optional(),
+      from: z
+        .number()
+        .int()
+        .nonnegative()
+        .optional()
+        .describe('The older revision; omitted with staged, the last named version'),
+      to: z.number().int().nonnegative().optional().describe('Defaults to the current revision'),
+      staged: z
+        .boolean()
+        .optional()
+        .describe('Diff from the newest named version below the current revision'),
+      render: z
+        .boolean()
+        .optional()
+        .describe('Write before and after crops of every touched block'),
+      themes: themes.optional().describe('Themes to render the crops in; defaults to light'),
+      out: z.string().optional().describe('Crop directory; defaults to .turboslide/diff'),
     }),
     output: z.strictObject({
+      from: revision,
+      to: revision,
       mutations: z.array(mutationSchema),
       prose: z.array(z.string()),
       crops: z
@@ -702,13 +720,14 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
           z.strictObject({
             slideId: slugSchema,
             blockId: blockIdSchema.optional(),
-            before: z.string(),
-            after: z.string(),
+            theme,
+            before: z.string().describe("The crop's path; '' when the slide is absent before"),
+            after: z.string().describe("The crop's path; '' when the slide is absent after"),
           }),
         )
         .optional(),
     }),
-    cli: { usage: 'turboslide diff <from> <to> --render' },
+    cli: { usage: 'turboslide diff <from> <to> --staged --render --theme <themes> --out <out>' },
     mcp: 'deck_diff',
     example: { from: 400, to: 412 },
   }),
@@ -830,15 +849,37 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     milestone: 'M2',
     input: z.strictObject({
       format: z.enum(['pptx', 'gslides', 'pdf']),
-      mode: z.enum(['native', 'flatten']).optional(),
-      theme: themes.optional(),
-      fonts: z.enum(['exact', 'standard']).optional(),
+      mode: z
+        .enum(['native', 'flatten'])
+        .optional()
+        .describe('Defaults to flatten, the verified pixel-identical mode (SPEC 8.2)'),
+      theme: themes.optional().describe('One file per theme; defaults to both'),
+      fonts: z
+        .enum(['exact', 'standard'])
+        .optional()
+        .describe('The export font set (SPEC 8.4); defaults to exact'),
       headings: z.literal('raster').optional(),
+      excludeShareAlike: z
+        .boolean()
+        .optional()
+        .describe(
+          'Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)',
+        ),
+      baseline: z
+        .enum(['libreoffice', 'none'])
+        .optional()
+        .describe(
+          'The renderer whose measured first-baseline constant offsets native text boxes (calibration.json); defaults to libreoffice, the verify renderer',
+        ),
       verify: z.boolean().optional(),
-      out: z.string().optional(),
+      slideIds: slideIdsOrAll.optional().describe("A subset to export; defaults to 'all'"),
+      out: z.string().optional().describe('Output directory; defaults to .turboslide/export'),
     }),
     output: exportReportSchema,
-    cli: { usage: 'turboslide export <format> --mode <mode> --theme <theme> --verify' },
+    cli: {
+      usage:
+        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --exclude-share-alike --baseline-target <baseline> --verify --out <out>',
+    },
     mcp: 'deck_export',
     example: { format: 'pptx', mode: 'flatten', theme: ['light'], fonts: 'exact', verify: true },
   }),
@@ -865,6 +906,44 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     cli: { usage: 'turboslide build --out <out> --budget <budgetMB>' },
     mcp: 'deck_build',
     example: { out: 'public/brand-deck.html', budgetMB: 16 },
+  }),
+  'fonts.build': action({
+    id: 'fonts.build',
+    label: 'Build export fonts',
+    doc: 'Cuts the static export font set from InterVariable into packages/fonts/export with fonts.json (scripts/build-fonts.py); --check reports a stale committed set.',
+    group: 'export',
+    mutates: false,
+    transports: ['cli'],
+    milestone: 'M2',
+    input: z.strictObject({
+      check: z
+        .boolean()
+        .optional()
+        .describe('Compare the committed set with a fresh build; exit 1 when it differs'),
+      python: z
+        .string()
+        .optional()
+        .describe(
+          'The Python binary; defaults to .turboslide/venv/bin/python, created from scripts/requirements.txt when missing',
+        ),
+    }),
+    output: z.strictObject({
+      out: z.string(),
+      version: z.string(),
+      faces: z.array(
+        z.strictObject({
+          file: z.string(),
+          family: z.string(),
+          opsz: z.number(),
+          weight: z.number(),
+          bytes: z.number().int().nonnegative(),
+        }),
+      ),
+      written: z.array(z.string()),
+      stale: z.array(z.string()),
+    }),
+    cli: { usage: 'turboslide fonts build --check' },
+    example: {},
   }),
   'import.run': action({
     id: 'import.run',

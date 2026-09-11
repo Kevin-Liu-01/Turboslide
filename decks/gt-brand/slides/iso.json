@@ -1,10 +1,18 @@
 {
   "schemaVersion": 1,
   "id": "iso",
+  "ext": {
+    "import": {
+      "css": ".ts-x-iso svg.dia text { font-size: 22px; }",
+      "scope": "s21"
+    }
+  },
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "5/7"
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -44,11 +52,5 @@
         "alt": "An isometric plate with three shaded faces, each labeled with its shading percentage, and the mark seated in the top face"
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-iso svg.dia text { font-size: 22px; }",
-      "scope": "s21"
-    }
   }
 }

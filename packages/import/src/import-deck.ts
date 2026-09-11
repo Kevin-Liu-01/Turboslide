@@ -13,6 +13,7 @@ import type { ReportRow } from './map.ts';
 import { parseSections, sectionOf } from './sections.ts';
 import { derivedSlideTitle } from '@turboslide/schema/deck';
 import type { Deck, Section, Slide } from '@turboslide/schema/deck';
+import { validateDeck } from '@turboslide/schema/validate';
 import { canonicalJson, readJson, writeIfChanged } from './write.ts';
 
 export type ImportOptions = {
@@ -113,28 +114,62 @@ export function importDeck(options: ImportOptions): ImportReport {
   }
   warnings.push(...assets.registry.warnings);
 
-  // Write the deck directory: slides, assets, deck.json, sidecars.
-  const slidesDir = join(target, 'slides');
-  if (existsSync(slidesDir)) {
-    for (const stale of readdirSync(slidesDir)) {
-      if (!ids.has(stale.replace(/\.json$/, ''))) rmSync(join(slidesDir, stale));
-    }
-  }
-  for (const slide of slides)
-    writeIfChanged(join(slidesDir, `${slide.id}.json`), canonicalJson(slide));
-  const filesCopied = options.skipAssets ? 0 : assets.copyTo(target);
-
-  const deck: Deck = {
+  // The stored form is the normalized one (SPEC 4.4: layout defaults filled, text canonical, keys
+  // in schema order), the same bytes the store writes after a mutation, so a store write touches
+  // only the slide it changes and a re-import compares like with like. A deck the validator
+  // rejects is written as mapped so `turboslide validate` can name the problem.
+  const mapped: Deck = {
     schemaVersion: 1,
     id: options.into,
     title: options.title ?? 'GT brand deck',
     theme: 'gt-ink-paper',
     sections,
     assets: sortedAssets(assets.registry.assets),
-    revision: (previousDeck?.revision ?? 0) + 1,
+    revision: previousDeck?.revision ?? 0,
     createdAt: previousDeck?.createdAt ?? now(),
-    updatedAt: now(),
+    updatedAt: previousDeck?.updatedAt ?? now(),
   };
+  const validation = validateDeck({ deck: mapped, slides });
+  let stored: { deck: Deck; slides: Slide[] } = { deck: mapped, slides };
+  if (validation.ok && validation.deck !== null) {
+    stored = {
+      deck: validation.deck,
+      slides: slides.map((slide) => validation.slides[slide.id] ?? slide),
+    };
+  } else {
+    warnings.push(
+      `the imported deck does not validate (${validation.issues.filter((issue) => issue.severity === 3).length} error(s)); written as mapped, run turboslide validate`,
+    );
+  }
+
+  // Write the deck directory: slides, assets, deck.json, sidecars. A re-import that changes no
+  // slide, asset, section or manifest field keeps the revision and the timestamps (SPEC 4.2:
+  // revision increments on every committed write, and a write that changes nothing is not one).
+  const slidesDir = join(target, 'slides');
+  let changed = false;
+  if (existsSync(slidesDir)) {
+    for (const stale of readdirSync(slidesDir)) {
+      if (!ids.has(stale.replace(/\.json$/, ''))) {
+        rmSync(join(slidesDir, stale));
+        changed = true;
+      }
+    }
+  }
+  for (const slide of stored.slides) {
+    if (writeIfChanged(join(slidesDir, `${slide.id}.json`), canonicalJson(slide))) changed = true;
+  }
+  const filesCopied = options.skipAssets ? 0 : assets.copyTo(target);
+  if (filesCopied > 0) changed = true;
+  if (readText(join(target, 'deck.json')) !== canonicalJson(stored.deck)) changed = true;
+
+  const deck: Deck = changed
+    ? {
+        ...stored.deck,
+        revision: (previousDeck?.revision ?? 0) + 1,
+        createdAt: previousDeck?.createdAt ?? now(),
+        updatedAt: now(),
+      }
+    : stored.deck;
   writeIfChanged(join(target, 'deck.json'), canonicalJson(deck));
   writeIfChanged(join(target, 'import-ids.json'), canonicalJson(sortKeys(nextIds)));
 
@@ -158,6 +193,14 @@ export function importDeck(options: ImportOptions): ImportReport {
   };
   writeIfChanged(join(target, 'import-report.json'), canonicalJson(report));
   return report;
+}
+
+function readText(path: string): string | undefined {
+  try {
+    return readFileSync(path, 'utf8');
+  } catch {
+    return undefined;
+  }
 }
 
 function sortedAssets<T>(assets: Record<string, T>): Record<string, T> {

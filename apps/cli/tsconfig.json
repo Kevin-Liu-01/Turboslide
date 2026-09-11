@@ -30,10 +30,19 @@
       "path": "../../packages/effects"
     },
     {
+      "path": "../../packages/export"
+    },
+    {
       "path": "../../packages/lint"
     },
     {
       "path": "../../packages/agent"
+    },
+    {
+      "path": "../../packages/mcp"
+    },
+    {
+      "path": "../../packages/store"
     }
   ]
 }

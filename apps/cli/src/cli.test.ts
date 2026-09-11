@@ -24,6 +24,7 @@ async function run(argv: string[], cwd: string): Promise<Run> {
     cwd,
     env: { USER: 'tester' },
     streams: { stdout: (t) => (stdout += t), stderr: (t) => (stderr += t) },
+    stdin: async () => '',
   });
   return { code, stdout, stderr };
 }

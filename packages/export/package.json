@@ -1,0 +1,61 @@
+{
+  "name": "@turboslide/export",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Export as a client of the renderer (SPEC 8): scene extraction in headless Chromium, PPTX through pptxgenjs in flatten and native mode, the OOXML post-process (kern strip, embedded font parts, grpSp rows, stored media), and the typed ExportReport. verify/ is the LibreOffice loop of the render worker.",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "exports": {
+    "./units": "./src/units.ts",
+    "./report": "./src/report.ts",
+    "./export-pptx": "./src/export-pptx.ts",
+    "./scene/types": "./src/scene/types.ts",
+    "./scene/measure": "./src/scene/measure.ts",
+    "./scene/extract": "./src/scene/extract.ts",
+    "./scene/two-tone": "./src/scene/two-tone.ts",
+    "./pptx/build": "./src/pptx/build.ts",
+    "./pptx/masters": "./src/pptx/masters.ts",
+    "./pptx/text": "./src/pptx/text.ts",
+    "./pptx/lines": "./src/pptx/lines.ts",
+    "./pptx/images": "./src/pptx/images.ts",
+    "./pptx/notes": "./src/pptx/notes.ts",
+    "./pptx/fonts-map": "./src/pptx/fonts-map.ts",
+    "./pptx/baseline": "./src/pptx/baseline.ts",
+    "./ooxml/zip": "./src/ooxml/zip.ts",
+    "./ooxml/kern": "./src/ooxml/kern.ts",
+    "./ooxml/fonts": "./src/ooxml/fonts.ts",
+    "./ooxml/groups": "./src/ooxml/groups.ts",
+    "./ooxml/geometry": "./src/ooxml/geometry.ts",
+    "./verify/budgets": "./src/verify/budgets.ts",
+    "./verify/diff": "./src/verify/diff.ts",
+    "./verify/libreoffice": "./src/verify/libreoffice.ts",
+    "./verify/geometry": "./src/verify/geometry.ts",
+    "./verify/reference": "./src/verify/reference.ts",
+    "./verify/fixture": "./src/verify/fixture.ts",
+    "./verify/report": "./src/verify/report.ts",
+    "./calibration/deck": "./src/calibration/deck.ts",
+    "./calibration/measure": "./src/calibration/measure.ts",
+    "./calibration/calibration.json": "./src/calibration/calibration.json",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/effects": "workspace:*",
+    "@turboslide/fonts": "workspace:*",
+    "@turboslide/headless": "workspace:*",
+    "@turboslide/render": "workspace:*",
+    "@turboslide/schema": "workspace:*",
+    "@turboslide/theme": "workspace:*",
+    "jszip": "catalog:",
+    "pixelmatch": "catalog:",
+    "playwright-core": "catalog:",
+    "pptxgenjs": "catalog:",
+    "sharp": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -10,12 +10,29 @@
     }
   },
   "references": [
-    { "path": "../../packages/schema" },
-    { "path": "../../packages/theme" },
-    { "path": "../../packages/fonts" },
-    { "path": "../../packages/render" },
-    { "path": "../../packages/agent" },
-    { "path": "../../packages/viewer" },
-    { "path": "../../packages/chrome" }
+    {
+      "path": "../../packages/schema"
+    },
+    {
+      "path": "../../packages/theme"
+    },
+    {
+      "path": "../../packages/fonts"
+    },
+    {
+      "path": "../../packages/render"
+    },
+    {
+      "path": "../../packages/agent"
+    },
+    {
+      "path": "../../packages/viewer"
+    },
+    {
+      "path": "../../packages/chrome"
+    },
+    {
+      "path": "../render-worker"
+    }
   ]
 }

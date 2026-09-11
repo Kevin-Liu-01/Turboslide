@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "1/1"
+    "ratio": "1/1",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -22,13 +24,13 @@
       },
       {
         "id": "code",
-        "type": "panel",
-        "code": "import { T, Var } from 'gt-next';\n\n<T>\n<h1>Hello, <Var>{user.name}</Var></h1>\n</T>",
         "ext": {
           "import": {
             "style": "margin-top:8px"
           }
-        }
+        },
+        "type": "panel",
+        "code": "import { T, Var } from 'gt-next';\n\n<T>\n<h1>Hello, <Var>{user.name}</Var></h1>\n</T>"
       }
     ],
     "right": [

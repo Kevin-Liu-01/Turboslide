@@ -1,10 +1,17 @@
 {
   "schemaVersion": 1,
   "id": "blog-vision",
+  "ext": {
+    "import": {
+      "css": ".ts-x-blog-vision [data-block=\"fig\"] figcaption { color: var(--titanium); }"
+    }
+  },
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "1/1"
+    "ratio": "1/1",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -28,24 +35,24 @@
         "items": [
           {
             "key": "Release notes",
-            "value": "Fifty-four have been published. Each has four sections and a changelog headline.",
             "icon": {
               "name": "tag"
-            }
+            },
+            "value": "Fifty-four have been published. Each has four sections and a changelog headline."
           },
           {
             "key": "Essays",
-            "value": "Eight essays were removed. New essays argue one point with code and numbers.",
             "icon": {
               "name": "pencil-square"
-            }
+            },
+            "value": "Eight essays were removed. New essays argue one point with code and numbers."
           },
           {
             "key": "Profiles",
-            "value": "Long-form interviews are built around the subject's own quotes.",
             "icon": {
               "name": "user-circle"
-            }
+            },
+            "value": "Long-form interviews are built around the subject's own quotes."
           }
         ]
       }
@@ -60,10 +67,5 @@
         "captionSize": 15
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-blog-vision [data-block=\"fig\"] figcaption { color: var(--titanium); }"
-    }
   }
 }

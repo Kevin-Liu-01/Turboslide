@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "5/7"
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -51,31 +53,31 @@
         "items": [
           {
             "key": "Markdown",
-            "value": "Data-driven components, such as the supported-locales table, are expanded into plain markdown.",
             "icon": {
               "name": "document-text"
-            }
+            },
+            "value": "Data-driven components, such as the supported-locales table, are expanded into plain markdown."
           },
           {
             "key": "Preference",
-            "value": "Framework preference is stored in a cookie and the URL, so each variant is a separately cached page.",
             "icon": {
               "name": "cog-6-tooth"
-            }
+            },
+            "value": "Framework preference is stored in a cookie and the URL, so each variant is a separately cached page."
           },
           {
             "key": "Search",
-            "value": "Pagefind indexes the built HTML after every deploy, with one index partition per locale.",
             "icon": {
               "name": "magnifying-glass"
-            }
+            },
+            "value": "Pagefind indexes the built HTML after every deploy, with one index partition per locale."
           },
           {
             "key": "Locales",
-            "value": "The English tree defines structure and locale trees supply labels, so every sidebar lists every page.",
             "icon": {
               "name": "globe-alt"
-            }
+            },
+            "value": "The English tree defines structure and locale trees supply labels, so every sidebar lists every page."
           }
         ]
       }

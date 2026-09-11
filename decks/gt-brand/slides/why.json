@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "4/8"
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -28,24 +30,24 @@
         "items": [
           {
             "key": "Launch readiness",
-            "value": "The site is the first contact point for customers, candidates, and partners. It needed to be ready before the next launch.",
             "icon": {
               "name": "rocket-launch"
-            }
+            },
+            "value": "The site is the first contact point for customers, candidates, and partners. It needed to be ready before the next launch."
           },
           {
             "key": "Differentiation",
-            "value": "The previous site looked like the default shadcn theme. The identity needs to be recognizably ours.",
             "icon": {
               "name": "finger-print"
-            }
+            },
+            "value": "The previous site looked like the default shadcn theme. The identity needs to be recognizably ours."
           },
           {
             "key": "Perceived quality",
-            "value": "Visitors should perceive quality before reading any copy.",
             "icon": {
               "name": "eye"
-            }
+            },
+            "value": "Visitors should perceive quality before reading any copy."
           }
         ]
       }

@@ -103,7 +103,8 @@ export const mutationSchema = z.discriminatedUnion('op', [
     op: z.literal('slide.set'),
     slideId: slugSchema,
     path: pointer,
-    value: z.unknown(),
+    // Zod 4 requires the key for a bare z.unknown(); optional() lets a deletion omit it.
+    value: z.unknown().optional(),
   }),
   z.strictObject({ op: z.literal('slide.replace'), slideId: slugSchema, slide: slideSchema }),
   z.strictObject({
@@ -126,7 +127,7 @@ export const mutationSchema = z.discriminatedUnion('op', [
     slideId: slugSchema,
     blockId: blockIdSchema,
     path: pointer,
-    value: z.unknown(),
+    value: z.unknown().optional(),
   }),
   z.strictObject({
     op: z.literal('text.replace'),
@@ -139,7 +140,7 @@ export const mutationSchema = z.discriminatedUnion('op', [
   z.strictObject({ op: z.literal('section.set'), sections: z.array(sectionSchema) }),
   z.strictObject({ op: z.literal('asset.set'), asset: assetSchema }),
   z.strictObject({ op: z.literal('asset.remove'), assetId: slugSchema }),
-  z.strictObject({ op: z.literal('deck.set'), path: pointer, value: z.unknown() }),
+  z.strictObject({ op: z.literal('deck.set'), path: pointer, value: z.unknown().optional() }),
   z.strictObject({ op: z.literal('version.restore'), n: z.number().int().positive() }),
 ]) satisfies z.ZodType<Mutation>;
 

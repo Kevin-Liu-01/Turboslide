@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "5/7"
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -90,11 +92,11 @@
         "items": [
           {
             "key": "General Translation",
-            "value": "The company.",
             "icon": {
               "name": "building-office-2",
               "color": "info"
-            }
+            },
+            "value": "The company."
           },
           {
             "key": "GT",
@@ -102,45 +104,45 @@
           },
           {
             "key": "gt",
-            "value": "The open-source library and CLI.",
             "icon": {
               "name": "command-line"
-            }
+            },
+            "value": "The open-source library and CLI."
           },
           {
             "key": "gt-⁠next, gt-⁠react, gt-⁠vue, gt-⁠node, gt-⁠python",
-            "value": "The framework packages.",
             "icon": {
               "name": "cube"
-            }
+            },
+            "value": "The framework packages."
           },
           {
             "key": "Locadex",
-            "value": "The AI agent product.",
             "icon": {
               "name": "bolt"
-            }
+            },
+            "value": "The AI agent product."
           },
           {
             "key": "generaltranslation.com",
-            "value": "The domain.",
             "icon": {
               "name": "globe-alt"
-            }
+            },
+            "value": "The domain."
           },
           {
             "key": "prototemplate.com",
-            "value": "The design lab and the brand handoff site.",
             "icon": {
               "name": "beaker"
-            }
+            },
+            "value": "The design lab and the brand handoff site."
           },
           {
             "key": "glyphfield.com",
-            "value": "The companion tooling site.",
             "icon": {
               "name": "wrench-screwdriver"
-            }
+            },
+            "value": "The companion tooling site."
           }
         ]
       }

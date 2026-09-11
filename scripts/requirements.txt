@@ -1,0 +1,8 @@
+# Python tooling for the font build and the export checks (SPEC 3.2, 8.4). Installed once into
+# .turboslide/venv by `turboslide fonts build` (never globally):
+#   python3 -m venv .turboslide/venv && .turboslide/venv/bin/pip install -r scripts/requirements.txt
+fonttools==4.65.0
+brotli==1.2.0
+opentype-feature-freezer==1.32.2
+python-pptx==1.0.2
+lxml==6.1.3

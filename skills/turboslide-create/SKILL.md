@@ -25,7 +25,7 @@ Write the document, not the pixels. A slide is a kind, a layout and typed blocks
 
 ## Applying
 
-Write through `turboslide-api` (`slide.insert`, `slide.update`, `slide.replace`) with the `baseRevision` you read, or paste JSON into the studio's source drawer; both run the same validator. Fix every `unknown_field` and `reference` issue; keep `ext` only on a slide, a block or an asset.
+Write through `turboslide-api` (`slide.insert`, `slide.update`, `slide.replace`; over MCP the tools `deck_insert_slide`, `deck_update_slide`, `deck_replace_slide` and `deck_update_block`) with the `baseRevision` you read, or paste JSON into the studio's source drawer; every path runs the same validator. Fix every `unknown_field` and `reference` issue; keep `ext` only on a slide, a block or an asset.
 
 ## Completion
 

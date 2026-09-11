@@ -387,7 +387,7 @@
     },
     {
       "action": "slide.lease",
-      "usage": "turboslide lease <slideId> --force",
+      "usage": "turboslide lease <slideId> --minutes <minutes> --force --release",
       "command": [
         "lease"
       ],
@@ -407,11 +407,18 @@
           "flag": "--force",
           "type": "boolean",
           "required": false
+        },
+        {
+          "key": "release",
+          "flag": "--release",
+          "type": "boolean",
+          "required": false,
+          "description": "Give the author’s lease on the slide back"
         }
       ],
       "custom": [
         {
-          "flag": "--force"
+          "flag": "--release"
         }
       ],
       "mutates": true,
@@ -924,7 +931,7 @@
     },
     {
       "action": "diff.run",
-      "usage": "turboslide diff <from> <to> --render",
+      "usage": "turboslide diff <from> <to> --staged --render --theme <themes> --out <out>",
       "command": [
         "diff"
       ],
@@ -934,17 +941,35 @@
       ],
       "options": [
         {
+          "key": "staged",
+          "flag": "--staged",
+          "type": "boolean",
+          "required": false,
+          "description": "Diff from the newest named version below the current revision"
+        },
+        {
           "key": "render",
           "flag": "--render",
           "type": "boolean",
-          "required": false
-        }
-      ],
-      "custom": [
+          "required": false,
+          "description": "Write before and after crops of every touched block"
+        },
         {
-          "flag": "--render"
+          "key": "themes",
+          "flag": "--theme",
+          "type": "\"light\" | \"dark\"[]",
+          "required": false,
+          "description": "Themes to render the crops in; defaults to light"
+        },
+        {
+          "key": "out",
+          "flag": "--out",
+          "type": "string",
+          "required": false,
+          "description": "Crop directory; defaults to .turboslide/diff"
         }
       ],
+      "custom": [],
       "mutates": false,
       "milestone": "M2"
     },
@@ -1033,7 +1058,7 @@
     },
     {
       "action": "export.run",
-      "usage": "turboslide export <format> --mode <mode> --theme <theme> --verify",
+      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --exclude-share-alike --baseline-target <baseline> --verify --out <out>",
       "command": [
         "export"
       ],
@@ -1046,6 +1071,7 @@
           "flag": "--mode",
           "type": "\"native\" | \"flatten\"",
           "required": false,
+          "description": "Defaults to flatten, the verified pixel-identical mode (SPEC 8.2)",
           "enum": [
             "native",
             "flatten"
@@ -1056,13 +1082,14 @@
           "flag": "--theme",
           "type": "\"light\" | \"dark\"[]",
           "required": false,
-          "description": "One or both themes"
+          "description": "One file per theme; defaults to both"
         },
         {
           "key": "fonts",
           "flag": "--fonts",
           "type": "\"exact\" | \"standard\"",
           "required": false,
+          "description": "The export font set (SPEC 8.4); defaults to exact",
           "enum": [
             "exact",
             "standard"
@@ -1075,23 +1102,45 @@
           "required": false
         },
         {
+          "key": "excludeShareAlike",
+          "flag": "--exclude-share-alike",
+          "type": "boolean",
+          "required": false,
+          "description": "Replace share-alike pictures with the paper plate and its credit (SPEC 11, open question 12)"
+        },
+        {
+          "key": "baseline",
+          "flag": "--baseline-target",
+          "type": "\"libreoffice\" | \"none\"",
+          "required": false,
+          "description": "The renderer whose measured first-baseline constant offsets native text boxes (calibration.json); defaults to libreoffice, the verify renderer",
+          "enum": [
+            "libreoffice",
+            "none"
+          ]
+        },
+        {
           "key": "verify",
           "flag": "--verify",
           "type": "boolean",
           "required": false
         },
         {
+          "key": "slideIds",
+          "flag": "--slide-ids",
+          "type": "\"all\" | string[]",
+          "required": false,
+          "description": "A subset to export; defaults to 'all'"
+        },
+        {
           "key": "out",
           "flag": "--out",
           "type": "string",
-          "required": false
+          "required": false,
+          "description": "Output directory; defaults to .turboslide/export"
         }
       ],
-      "custom": [
-        {
-          "flag": "--verify"
-        }
-      ],
+      "custom": [],
       "mutates": false,
       "milestone": "M2"
     },
@@ -1126,6 +1175,38 @@
       "custom": [],
       "mutates": false,
       "milestone": "M1"
+    },
+    {
+      "action": "fonts.build",
+      "usage": "turboslide fonts build --check",
+      "command": [
+        "fonts",
+        "build"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "check",
+          "flag": "--check",
+          "type": "boolean",
+          "required": false,
+          "description": "Compare the committed set with a fresh build; exit 1 when it differs"
+        },
+        {
+          "key": "python",
+          "flag": "--python",
+          "type": "string",
+          "required": false,
+          "description": "The Python binary; defaults to .turboslide/venv/bin/python, created from scripts/requirements.txt when missing"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--check"
+        }
+      ],
+      "mutates": false,
+      "milestone": "M2"
     },
     {
       "action": "import.run",

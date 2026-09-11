@@ -1,10 +1,18 @@
 {
   "schemaVersion": 1,
   "id": "voice",
+  "ext": {
+    "import": {
+      "css": ".ts-x-voice .rules > div { padding: 13px 0; font-size: 19px; line-height: 1.4; gap: 24px; }",
+      "scope": "s09"
+    }
+  },
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "5/7"
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -22,6 +30,13 @@
       },
       {
         "id": "rows",
+        "ext": {
+          "import": {
+            "classes": [
+              "rules"
+            ]
+          }
+        },
         "type": "rows",
         "key": 150,
         "tight": true,
@@ -46,14 +61,7 @@
             "key": "Case",
             "value": "Sentence case is used everywhere, and Title Case only on buttons."
           }
-        ],
-        "ext": {
-          "import": {
-            "classes": [
-              "rules"
-            ]
-          }
-        }
+        ]
       }
     ],
     "right": [
@@ -82,11 +90,5 @@
         ]
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-voice .rules > div { padding: 13px 0; font-size: 19px; line-height: 1.4; gap: 24px; }",
-      "scope": "s09"
-    }
   }
 }

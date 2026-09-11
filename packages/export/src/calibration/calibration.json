@@ -1,0 +1,270 @@
+{
+  "version": 1,
+  "about": "Measured constants of the export targets (SPEC 8.5 step 5). Every number names the renderer and font set that produced it; null means unmeasured. Re-measure with `node packages/export/src/calibration/run.ts --out .turboslide/calibration` inside the render worker image when the font set or a renderer changes, and by hand for PowerPoint (docs/export-verification.md).",
+  "deck": "packages/export/src/calibration/deck.ts",
+  "page": {
+    "widthEmu": 12192000,
+    "heightEmu": 6858000,
+    "widthPx": 1600,
+    "heightPx": 900,
+    "emuPerPx": 7620,
+    "ptPerPx": 0.6
+  },
+  "fontSet": {
+    "name": "exact",
+    "version": "4.001+gt.1:exact",
+    "reservedFontName": null,
+    "families": 17,
+    "gtInterFamilies": 15
+  },
+  "budgets": {
+    "threshold": 0.1,
+    "flattenFraction": 0.001,
+    "text": {
+      "dx": 3,
+      "dy": 1,
+      "dw": 3
+    },
+    "line": {
+      "dx": 1,
+      "dy": 1,
+      "dw": 1
+    },
+    "raster": {
+      "dx": 1,
+      "dy": 1,
+      "dw": 1
+    }
+  },
+  "targets": {
+    "pptx-libreoffice": {
+      "status": "measured",
+      "measuredAt": "2026-09-10",
+      "image": "docker/render-worker.Dockerfile (node:24-trixie, Debian 13.6, arm64)",
+      "renderer": "LibreOffice 25.2.3.2 520(Build:2)",
+      "rasterizer": "pdftocairo version 25.03.0 at 120 dpi, -scale-to-x 1600 -scale-to-y 900",
+      "reference": "Chrome for Testing 147.0.7727.0, SwiftShader, Google (the Playwright chromium-1217 Linux build reports itself as Chromium 147.0.7727.0)",
+      "pdfExport": "impress_pdf_Export with UseLosslessCompression true and ReduceImageResolution false",
+      "pageSizePt": [960.009, 540],
+      "backgroundOffsetPt": [0, 0.028],
+      "flatten": {
+        "maxFraction": 0,
+        "slides": {
+          "cal-text": {
+            "light": 0,
+            "dark": 0
+          },
+          "cal-lists": {
+            "light": 0,
+            "dark": 0
+          },
+          "cal-lines": {
+            "light": 0,
+            "dark": 0
+          },
+          "cal-picture": {
+            "light": 0,
+            "dark": 0
+          },
+          "cal-image": {
+            "light": 0,
+            "dark": 0
+          }
+        },
+        "history": {
+          "pdftoppm 1x, default JPEG export": {
+            "text": "0.36 to 0.74 percent",
+            "picture": "11.4 percent"
+          },
+          "pdftoppm 1x, lossless export": {
+            "text": "0.18 to 0.44 percent",
+            "picture": "11.4 percent"
+          },
+          "pdftoppm 2x box averaged, lossless export": {
+            "text": "0.27 to 0.74 percent",
+            "picture": "29 percent"
+          },
+          "pdftocairo 1x, lossless export": {
+            "text": "0 percent",
+            "picture": "0 percent"
+          }
+        }
+      },
+      "firstBaselineOffsetPx": {
+        "15": {
+          "dy": 3,
+          "dx": 1,
+          "dw": 0,
+          "samples": 4,
+          "family": "GT Inter Text 15"
+        },
+        "22": {
+          "dy": 5,
+          "dx": 1,
+          "dw": 0,
+          "samples": 4,
+          "family": "GT Inter Text 22"
+        },
+        "26": {
+          "dy": 5,
+          "dx": 1,
+          "dw": -1,
+          "samples": 2,
+          "family": "GT Inter Text 26"
+        },
+        "44": {
+          "dy": 0,
+          "dx": 1,
+          "dw": 0,
+          "samples": 8,
+          "family": "GT Inter Display"
+        },
+        "88": {
+          "dy": -2,
+          "dx": 1,
+          "dw": 0,
+          "samples": 2,
+          "family": "GT Inter Display"
+        }
+      },
+      "firstBaselineNote": "dy is the ink box of a native text box in LibreOffice minus the Turboslide render, in sheet px, for one-line blocks written at the rendered box with sz, spcPts pitch and zero insets, measured on the calibration deck. The deck measurement in firstBaselineModel sits 1 to 1.5 px more negative at every size than this fixture table; the exporter follows the deck measurement.",
+      "hairlineOffsetPx": null,
+      "geometry": {
+        "flattenShapes": 0,
+        "nativeShapes": 10,
+        "inBounds": true,
+        "custGeomCount": 0,
+        "normAutofitCount": 0
+      },
+      "timing": {
+        "convertMsPerFivePages": 636,
+        "rasterMsPerFivePages": 450,
+        "diffMsPerFivePages": 150
+      },
+      "note": "The rasterizer is pdftocairo, not pdftoppm: LibreOffice writes the page as 960.009 by 540 pt with the background offset by 0.01 mm, and poppler's Splash backend resamples the 1600 by 900 background across that fraction while the cairo backend reproduces it to the pixel.",
+      "firstBaselineModel": {
+        "formula": "dy = pitch / 2 - k(size) * size, in sheet px; the exporter moves every Inter text box up by dy (packages/export/src/pptx/baseline.ts)",
+        "measuredOn": "decks/gt-brand revision 13, the 26 all-native slides, light theme, through the M2 acceptance verify run on 2026-09-10; blocks whose ink box top is a hairline (rows), an icon (plain lists) or a panel edge (panel) were excluded",
+        "renderer": "LibreOffice 25.2.3.2 520(Build:2), pdftocairo version 25.03.0 at 1600x900",
+        "reference": "Chrome for Testing 147.0.7727.0, SwiftShader, Linux (hhea ascent 1984, descent -494 of 2048; the pure metric model k = 0.605 fits body sizes and drifts to 4 px at 88)",
+        "anchors": [
+          {
+            "size": 15,
+            "k": 0.5917,
+            "pitch": 21.75,
+            "dy": 2,
+            "samples": 16
+          },
+          {
+            "size": 22,
+            "k": 0.5909,
+            "pitch": 33,
+            "dy": 3.5,
+            "samples": 23
+          },
+          {
+            "size": 26,
+            "k": 0.5712,
+            "pitch": 37.7,
+            "dy": 4,
+            "samples": 1
+          },
+          {
+            "size": 44,
+            "k": 0.579,
+            "pitch": 48.4,
+            "dy": -1,
+            "samples": 16
+          },
+          {
+            "size": 72,
+            "k": 0.581,
+            "pitch": 76.32,
+            "dy": -3.67,
+            "samples": 9
+          },
+          {
+            "size": 88,
+            "k": 0.5555,
+            "pitch": 89.76,
+            "dy": -4,
+            "samples": 1
+          }
+        ],
+        "residualAfterShift": {
+          "measuredOn": "decks/gt-brand revision 13, native light export with the shift applied, 2026-09-10, the same image",
+          "slides": 27,
+          "blocks": 79,
+          "dy": {
+            "0": 69,
+            "1": 4,
+            "-1": 6
+          },
+          "dx": {
+            "0": 78,
+            "1": 1
+          },
+          "dw": {
+            "0": 53,
+            "-1": 23,
+            "1": 2,
+            "3": 1
+          },
+          "outOfBudget": 0
+        },
+        "note": "The 44 px anchor averages the h2 at pitch 48.4 (dy -1) and the title heading on mood slides at pitch 47.52 (dy -2). residualAfterShift is filled by the verify run of the corrected exporter."
+      },
+      "pictureShapeOffset": {
+        "measuredOn": "2026-09-10, the skills-marks light sheet (3200x1800) as a full-page picture shape over paper, converted and rasterized at 2x in the render worker image",
+        "unit": "sheet px at 1x (7620 EMU)",
+        "mismatchByDy": {
+          "-0.2": 74554,
+          "-0.094": 51654,
+          "-0.047": 32114,
+          "0": 6916,
+          "0.047": 0,
+          "0.094": 5,
+          "0.2": 32706
+        },
+        "applied": "the flatten cover picture is written at y = 360 EMU (0.01 mm, 0.047 px) and 360 EMU shorter, so it ends on the page edge; both the full-height and the shortened cover measured 0 mismatched pixels on four sheets (skills-marks, engines, state, opener-brand); pptx/build.ts COVER_OFFSET_IN",
+        "note": "A page background fill (p:bg blipFill) paints exactly at y = 0 but QuickLook draws the alpha-0 text layer over it (measured with qlmanage: alpha 0, a:noFill, a hidden cover and an alphaModFix 0 cover all show the text), so the cover stays a picture shape and carries the offset."
+      }
+    },
+    "pptx-quicklook": {
+      "status": "measured",
+      "renderer": "macOS 26.4 QuickLook (qlmanage), no Inter installed",
+      "measuredAt": "2026-09-10",
+      "source": "docs/spec/experiments/pptx-report.md section 4.3",
+      "flatten": null,
+      "firstBaselineOffsetPx": {
+        "22": 1,
+        "44": -1,
+        "72": -2,
+        "15": 1,
+        "13": 1
+      },
+      "hairlineOffsetPx": 1,
+      "textMismatchPercent": {
+        "light": 2.134,
+        "dark": 2.583
+      },
+      "note": "Geometry within 1 px; the residual is font substitution (a Times-class serif). Embedded fonts are ignored by QuickLook."
+    },
+    "pptx-powerpoint": {
+      "status": "scheduled",
+      "renderer": null,
+      "measuredAt": null,
+      "eotAccepted": null,
+      "firstBaselineOffsetPx": {},
+      "custGeomCounters": null,
+      "normAutofitPresent": null,
+      "note": "PowerPoint cannot run headless on Linux; the first manual pass on macOS and Windows records these (docs/export-verification.md)."
+    },
+    "gslides": {
+      "status": "M6",
+      "normalPitchFactor": 1.21,
+      "defaultInsetPt": null,
+      "note": "Inter's normal line height is 1.21 em (ascender 1984, descender -494, unitsPerEm 2048; pptx report section 4.10); the percentage lineSpacing uses it until measured against the Slides thumbnail (SPEC 8.3)."
+    }
+  }
+}

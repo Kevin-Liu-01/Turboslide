@@ -47,7 +47,29 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'decks',
   'findings',
   'renders',
+  'derived',
+  'python',
+  // export: the first-baseline target; `lint --baseline` stays a switch
+  'baseline-target',
+  // M2 writes (SPEC 7.2): the typed write path and the version commands.
+  'slot',
+  'set',
+  'unset',
+  'minutes',
+  'note',
+  'message',
+  'm',
+  'file',
 ]);
+
+/**
+ * Valued flags that also work bare: `lint --render <dir>` names a render directory while
+ * `diff --render` is a switch, so a following `--flag` or the end of the line leaves it `true`.
+ */
+const OPTIONAL_VALUE_FLAGS: ReadonlySet<string> = new Set(['render']);
+
+/** Short flags: `-m <note>` on version save (the acceptance line), `-h` for help. */
+const SHORT_FLAGS: Readonly<Record<string, string>> = { m: 'm', h: 'help' };
 
 export function parseArgs(argv: readonly string[]): Parsed {
   const positionals: string[] = [];
@@ -75,8 +97,13 @@ export function parseArgs(argv: readonly string[]): Parsed {
       const name = arg.slice(2);
       const next = argv[i + 1];
       if (VALUED_FLAGS.has(name)) {
-        if (next === undefined || next.startsWith('--'))
+        if (next === undefined || next.startsWith('--')) {
+          if (OPTIONAL_VALUE_FLAGS.has(name)) {
+            set(name, true);
+            continue;
+          }
           throw new UsageError(`--${name} needs a value`);
+        }
         set(name, next);
         i += 1;
       } else {
@@ -84,8 +111,18 @@ export function parseArgs(argv: readonly string[]): Parsed {
       }
       continue;
     }
-    if (arg === '-h') {
-      set('help', true);
+    const short = /^-([a-zA-Z])$/.exec(arg);
+    const shortName = short?.[1] !== undefined ? SHORT_FLAGS[short[1]] : undefined;
+    if (shortName !== undefined) {
+      const next = argv[i + 1];
+      if (VALUED_FLAGS.has(shortName)) {
+        if (next === undefined || next.startsWith('-'))
+          throw new UsageError(`-${short?.[1] ?? ''} needs a value`);
+        set(shortName, next);
+        i += 1;
+      } else {
+        set(shortName, true);
+      }
       continue;
     }
     positionals.push(arg);
@@ -113,6 +150,13 @@ export function flagNumber(parsed: Parsed, name: string, fallback: number): numb
   const n = Number(v);
   if (!Number.isFinite(n)) throw new UsageError(`--${name} wants a number, got ${v}`);
   return n;
+}
+
+/** Every value of a repeated flag, uncut: `--set /a=1 --set /b=x,y` keeps the comma. */
+export function flagAll(parsed: Parsed, name: string): string[] {
+  const v = parsed.flags[name];
+  if (v === undefined || v === true) return [];
+  return Array.isArray(v) ? [...v] : [v];
 }
 
 /** A comma list flag: `--theme light,dark` or repeated flags. */

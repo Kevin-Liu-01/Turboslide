@@ -5,11 +5,11 @@
   "layout": {
     "type": "split",
     "gap": 32,
-    "body": {
-      "align": "start"
-    },
     "head": {
       "cols": "4/8"
+    },
+    "body": {
+      "align": "start"
     }
   },
   "slots": {

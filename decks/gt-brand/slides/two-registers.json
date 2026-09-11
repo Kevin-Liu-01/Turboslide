@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "4/8"
+    "ratio": "4/8",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -30,31 +32,31 @@
         "items": [
           {
             "key": "Site copy",
-            "value": "Site copy uses declarative sentences, sentence-case headings, Title Case button labels, and short captions.",
             "icon": {
               "name": "document-text"
-            }
+            },
+            "value": "Site copy uses declarative sentences, sentence-case headings, Title Case button labels, and short captions."
           },
           {
             "key": "Founder posts",
-            "value": "Founder posts are lowercase, terse, and first person. A post that any founder account could have written is not ready to publish.",
             "icon": {
               "name": "chat-bubble-left-right"
-            }
+            },
+            "value": "Founder posts are lowercase, terse, and first person. A post that any founder account could have written is not ready to publish."
           },
           {
             "key": "Both",
-            "value": "Both avoid founder clichés such as thrilled to announce and make no claim without a number, a mechanism, or an artifact.",
             "icon": {
               "name": "arrows-right-left"
-            }
+            },
+            "value": "Both avoid founder clichés such as thrilled to announce and make no claim without a number, a mechanism, or an artifact."
           },
           {
             "key": "Checks",
-            "value": "Three checks run before posting: only GT could have written it, it cites concrete evidence, and it supports the reputation for quality.",
             "icon": {
               "name": "clipboard-document-check"
-            }
+            },
+            "value": "Three checks run before posting: only GT could have written it, it cites concrete evidence, and it supports the reputation for quality."
           }
         ]
       }

@@ -9,6 +9,7 @@ export default defineConfig({
     projects: [
       'packages/*',
       'apps/cli',
+      'apps/render-worker',
       {
         test: {
           name: 'scripts',

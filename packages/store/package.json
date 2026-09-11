@@ -1,0 +1,25 @@
+{
+  "name": "@turboslide/store",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The DeckStore contract and the FileStore over decks/<id>: reads the manifest and slides, applies writes through the reducer with the baseRevision check, keeps the version log under versions/, advisory leases and a watch channel over fs.watch (MILESTONES M2 item 1; SPEC 4.1, 6.7, 11).",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "exports": {
+    "./store": "./src/store.ts",
+    "./file-store": "./src/file-store.ts",
+    "./versions": "./src/versions.ts",
+    "./lease": "./src/lease.ts",
+    "./watch": "./src/watch.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

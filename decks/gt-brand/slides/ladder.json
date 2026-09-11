@@ -1,12 +1,22 @@
 {
   "schemaVersion": 1,
   "id": "ladder",
+  "ext": {
+    "import": {
+      "css": ".ts-x-ladder .ladder > div:nth-child(1) { letter-spacing: -0.038em; }",
+      "scope": "s17"
+    }
+  },
   "kind": "content",
   "layout": {
     "type": "split",
+    "gap": 56,
     "head": {
       "cols": "5/7",
       "align": "baseline"
+    },
+    "body": {
+      "align": "center"
     }
   },
   "slots": {
@@ -66,11 +76,5 @@
         "valueWidth": 320
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-ladder .ladder > div:nth-child(1) { letter-spacing: -0.038em; }",
-      "scope": "s17"
-    }
   }
 }

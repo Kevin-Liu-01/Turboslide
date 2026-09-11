@@ -6,7 +6,9 @@
     "type": "cols",
     "ratio": {
       "left": 390
-    }
+    },
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -33,82 +35,82 @@
         "items": [
           {
             "key": "Landing",
-            "value": "[generaltranslation.com](https://generaltranslation.com)",
             "icon": {
               "name": "home"
             },
+            "value": "[generaltranslation.com](https://generaltranslation.com)",
             "ext": true
           },
           {
             "key": "Pricing",
-            "value": "[/pricing](https://generaltranslation.com/pricing) and [/pricing/usage](https://generaltranslation.com/pricing/usage)",
             "icon": {
               "name": "tag"
             },
+            "value": "[/pricing](https://generaltranslation.com/pricing) and [/pricing/usage](https://generaltranslation.com/pricing/usage)",
             "ext": true
           },
           {
             "key": "Enterprise",
-            "value": "[/enterprise](https://generaltranslation.com/enterprise)",
             "icon": {
               "name": "building-office-2"
             },
+            "value": "[/enterprise](https://generaltranslation.com/enterprise)",
             "ext": true
           },
           {
             "key": "Careers",
-            "value": "[/careers](https://generaltranslation.com/careers)",
             "icon": {
               "name": "briefcase"
             },
+            "value": "[/careers](https://generaltranslation.com/careers)",
             "ext": true
           },
           {
             "key": "Documentation",
-            "value": "[/docs](https://generaltranslation.com/docs)",
             "icon": {
               "name": "book-open"
             },
+            "value": "[/docs](https://generaltranslation.com/docs)",
             "ext": true
           },
           {
             "key": "Report card",
-            "value": "[/report-card](https://generaltranslation.com/report-card)",
             "icon": {
               "name": "clipboard-document-check"
             },
+            "value": "[/report-card](https://generaltranslation.com/report-card)",
             "ext": true
           },
           {
             "key": "Blog and changelog",
-            "value": "[/blog](https://generaltranslation.com/blog)",
             "icon": {
               "name": "newspaper"
             },
+            "value": "[/blog](https://generaltranslation.com/blog)",
             "ext": true
           },
           {
             "key": "Contact and legal",
-            "value": "[/contact](https://generaltranslation.com/contact) and [/legal](https://generaltranslation.com/legal)",
             "icon": {
               "name": "envelope"
             },
+            "value": "[/contact](https://generaltranslation.com/contact) and [/legal](https://generaltranslation.com/legal)",
             "ext": true
           },
           {
             "key": "Dashboard",
-            "value": "[dash.generaltranslation.com](https://dash.generaltranslation.com)",
             "icon": {
               "name": "squares-2x2"
             },
+            "value": "[dash.generaltranslation.com](https://dash.generaltranslation.com)",
             "ext": true
           },
           {
             "key": "Social",
-            "value": "[x.com/generaltxn](https://x.com/generaltxn), [linkedin.com/company/generaltranslation](https://linkedin.com/company/generaltranslation), [github.com/generaltranslation/gt](https://github.com/generaltranslation/gt)",
             "icon": {
               "name": "chat-bubble-left-right"
             },
+            "value": "[x.com/generaltxn](https://x.com/generaltxn), [linkedin.com/company/generaltranslation](https://linkedin.com/company/generaltranslation), [github.com/generaltranslation/gt](https://github.com/generaltranslation/gt)",
             "ext": true
           }
         ]

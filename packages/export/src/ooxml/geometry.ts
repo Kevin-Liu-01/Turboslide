@@ -1,0 +1,88 @@
+// Geometry read-back (SPEC 8.5 step 4): every shape and picture offset and extent of every slide
+// part, asserted against the 12,192,000 by 6,858,000 EMU page; plus the run and line attributes
+// the acceptance reads back (`sz`, `spc`, `spcPts`, `<a:ln w>`), so a test can check the XML
+// carries the expected values without a renderer.
+import { PAGE_EMU } from '../units.ts';
+import { listShapes } from './groups.ts';
+import { readPart, slideParts } from './zip.ts';
+import type { Package } from './zip.ts';
+
+export type ShapeBounds = {
+  part: string;
+  id: number;
+  name: string;
+  off: [number, number];
+  ext: [number, number];
+  inBounds: boolean;
+};
+
+/** A shape is in bounds when its box lies inside the page with a one-pixel (7,620 EMU) tolerance. */
+export function inPage(off: [number, number], ext: [number, number], tolerance = 7620): boolean {
+  return (
+    off[0] >= -tolerance &&
+    off[1] >= -tolerance &&
+    off[0] + ext[0] <= PAGE_EMU.width + tolerance &&
+    off[1] + ext[1] <= PAGE_EMU.height + tolerance
+  );
+}
+
+/** Every shape of every slide part. Group children are read through their own xfrm. */
+export async function readGeometry(zip: Package): Promise<ShapeBounds[]> {
+  const out: ShapeBounds[] = [];
+  for (const part of slideParts(zip)) {
+    const xml = await readPart(zip, part);
+    for (const shape of listShapes(xml)) {
+      out.push({
+        part,
+        id: shape.id,
+        name: shape.name,
+        off: shape.off,
+        ext: shape.ext,
+        inBounds: inPage(shape.off, shape.ext),
+      });
+    }
+  }
+  return out;
+}
+
+export type PartAttributes = {
+  sz: number[];
+  spc: number[];
+  spcPts: number[];
+  lineWidths: number[];
+  kernZero: number;
+  alphaValues: number[];
+  softBreaks: number;
+  typefaces: string[];
+};
+
+/** The attribute values of one slide part. */
+export function readAttributes(xml: string): PartAttributes {
+  const numbers = (re: RegExp): number[] => [...xml.matchAll(re)].map((m) => Number(m[1]));
+  return {
+    sz: numbers(/<a:rPr[^>]*\ssz="(-?\d+)"/g),
+    spc: numbers(/<a:rPr[^>]*\sspc="(-?\d+)"/g),
+    spcPts: numbers(/<a:spcPts val="(\d+)"\/>/g),
+    lineWidths: numbers(/<a:ln w="(\d+)"/g),
+    kernZero: (xml.match(/\skern="0"/g) ?? []).length,
+    alphaValues: numbers(/<a:alpha val="(\d+)"\/>/g),
+    softBreaks: (xml.match(/<a:br\/>/g) ?? []).length,
+    typefaces: [
+      ...new Set([...xml.matchAll(/<a:latin typeface="([^"]+)"/g)].map((m) => m[1] ?? '')),
+    ],
+  };
+}
+
+/** Attributes per slide part, in slide order. */
+export async function readAllAttributes(zip: Package): Promise<Record<string, PartAttributes>> {
+  const out: Record<string, PartAttributes> = {};
+  for (const part of slideParts(zip)) out[part] = readAttributes(await readPart(zip, part));
+  return out;
+}
+
+/** The page size written in presentation.xml. */
+export async function readPageSize(zip: Package): Promise<{ cx: number; cy: number }> {
+  const xml = await readPart(zip, 'ppt/presentation.xml');
+  const m = /<p:sldSz cx="(\d+)" cy="(\d+)"/.exec(xml);
+  return { cx: Number(m?.[1] ?? 0), cy: Number(m?.[2] ?? 0) };
+}

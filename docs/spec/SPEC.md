@@ -50,14 +50,14 @@ Components ported file by file with a `PORTED_FROM.json` map recording the Proto
 
 The line law for chrome (`Prototemplate/DESIGN.md`, "Line law for chrome") is a rule of the chrome package. Every rule in chrome is 1 px, drawn once, in one of three roles: structural `--pt-hair` (the sheet ring, the search card, the panel's left edge, the toolbar bottom, the sidebar right edge, the segmented control, fields at rest), row `--pt-hair-soft` (list rows, search results, panel rows, the sheet mat's outer ring, the progress track), frame `--pt-edge` (thumbnails, page frames, grid tiles, the hover preview's frame, the help card). `--pt-ink` appears on a border only as a state: pressed, active, the count while edited, the solid call to action, focus. Where two components touch, exactly one draws the seam. The regions Turboslide adds take their seams from this table, which extends `DESIGN.md`'s:
 
-| Junction | Owner | The other side |
-| --- | --- | --- |
-| Stage and inspector | the inspector's left edge, `--pt-hair` | the stage draws no right edge |
-| Toolbar and inspector | the toolbar's bottom edge runs under the inspector | the inspector draws no top edge |
-| Stage and source drawer | the drawer's top edge, `--pt-hair` | the stage draws no bottom edge; the drawer covers the progress track while open, as the index panel does |
-| Inspector section header and its rows | the header draws `--pt-hair` under itself | rows draw `--pt-hair-soft` under themselves; the last row draws none |
-| Selection ring and the sheet | the overlay layer draws `--pt-ink` as a state | the block draws nothing |
-| Lint box and the sheet | the overlay layer draws `--pt-ink` for severity 3 and `--pt-titanium` for 1 and 2, 1 px, with a 13 px chip naming the rule | the block draws nothing; semantic hues never appear in chrome (they are allowed inside the rendered sheet only, on icons) |
+| Junction                              | Owner                                                                                                                      | The other side                                                                                                            |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Stage and inspector                   | the inspector's left edge, `--pt-hair`                                                                                     | the stage draws no right edge                                                                                             |
+| Toolbar and inspector                 | the toolbar's bottom edge runs under the inspector                                                                         | the inspector draws no top edge                                                                                           |
+| Stage and source drawer               | the drawer's top edge, `--pt-hair`                                                                                         | the stage draws no bottom edge; the drawer covers the progress track while open, as the index panel does                  |
+| Inspector section header and its rows | the header draws `--pt-hair` under itself                                                                                  | rows draw `--pt-hair-soft` under themselves; the last row draws none                                                      |
+| Selection ring and the sheet          | the overlay layer draws `--pt-ink` as a state                                                                              | the block draws nothing                                                                                                   |
+| Lint box and the sheet                | the overlay layer draws `--pt-ink` for severity 3 and `--pt-titanium` for 1 and 2, 1 px, with a 13 px chip naming the rule | the block draws nothing; semantic hues never appear in chrome (they are allowed inside the rendered sheet only, on icons) |
 
 `scripts/lint-lines.mjs` is ported as `turboslide lint --chrome` and runs in CI from M1 against the studio at 1440, 1280 and 390 in both themes, with the deck's allow list (`sheet`, `thumb-frame`, `page-frame`, `pt-tile`, `pt-preview`) plus `ts-select` for the selection ring. Resolution: design A had this in M2; the look judge asked for it in M1, and the spec follows the judge.
 
@@ -124,32 +124,32 @@ Turboslide/
 
 Resolved by the TanStack experiment on 2026-09-10 (tanstack report section 3) and the two export experiments; pinned exactly in the default pnpm catalog (catalogs need pnpm 10.12.1 or later, https://pnpm.io/catalogs). The scaffold pins `latest` for `@tanstack/*`; Turboslide never does, and `pnpm update` of that group goes through a PR that runs the full acceptance suite.
 
-| Package | Version | Note |
-| --- | --- | --- |
-| `@tanstack/react-start` | 1.168.50 | the only importer is `apps/studio` |
-| `@tanstack/react-router` | 1.170.33 | |
-| `@tanstack/router-cli` | 1.167.34 | `tsr generate` before `tsc -b` |
-| `@tanstack/router-plugin` | 19.3.0 | transitive, separate major line |
-| `@tanstack/react-devtools` | 0.10.12 | Solid based; the `devtools()` plugin stays in every Vite config and the component mounts only under `import.meta.env.DEV` |
-| `@tanstack/devtools-vite` | 0.8.5 | console piping off |
-| `vite` | 8.2.2 | Rolldown 1.2.8; Node 20.19+ or 22.12+ (https://vite.dev/blog/announcing-vite8) |
-| `react`, `react-dom` | 19.3.0 | |
-| `typescript` | 6.0.3 | the last JavaScript-based line; `moduleResolution: bundler`, no `baseUrl` (https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html); the standalone repo does not follow gt-cloud's native v7 until `@tanstack/*` types are verified against it |
-| `nitro` | 3.0.260903-beta | deployment builds; `NITRO_PRESET` node-server (default), vercel (built, not deployed), bun (bundle only) |
-| `zod` | 4.x | `z.toJSONSchema` for MCP and OpenAPI (https://zod.dev/json-schema) |
-| `@modelcontextprotocol/sdk` | current | https://github.com/modelcontextprotocol/typescript-sdk |
-| `playwright-core` | 1.62.1 | with the full Chrome for Testing 147.0.7727.15 (`chromium-1217`) binary, never the headless shell |
-| `pptxgenjs` | 4.0.1 | |
-| `jszip` | 3.10.2 | OOXML post-process |
-| `pixelmatch` | 7.2.0 | |
-| `pngjs` | 7.0.0 | |
-| `sharp` | 0.35.0 | libvips 8.18.3 prebuilt; RGBA PNG and JPEG encode, Lanczos3 resize |
-| `googleapis` | 178.1.1 | Slides export (M6) |
-| `@paper-design/shaders` | 0.0.78 | Apache-2.0 with NOTICE (pptx report section 4.11) |
-| `parse5` | current | the importer |
-| `tsdown` | current | bundles `apps/cli` |
-| `vitest` | 3.x | |
-| Python 3.14 with fontTools 4.65.0, brotli | pinned in `scripts/requirements.txt` | font build only, run once and committed |
+| Package                                   | Version                              | Note                                                                                                                                                                                                                                                                   |
+| ----------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `@tanstack/react-start`                   | 1.168.50                             | the only importer is `apps/studio`                                                                                                                                                                                                                                     |
+| `@tanstack/react-router`                  | 1.170.33                             |                                                                                                                                                                                                                                                                        |
+| `@tanstack/router-cli`                    | 1.167.34                             | `tsr generate` before `tsc -b`                                                                                                                                                                                                                                         |
+| `@tanstack/router-plugin`                 | 19.3.0                               | transitive, separate major line                                                                                                                                                                                                                                        |
+| `@tanstack/react-devtools`                | 0.10.12                              | Solid based; the `devtools()` plugin stays in every Vite config and the component mounts only under `import.meta.env.DEV`                                                                                                                                              |
+| `@tanstack/devtools-vite`                 | 0.8.5                                | console piping off                                                                                                                                                                                                                                                     |
+| `vite`                                    | 8.2.2                                | Rolldown 1.2.8; Node 20.19+ or 22.12+ (https://vite.dev/blog/announcing-vite8)                                                                                                                                                                                         |
+| `react`, `react-dom`                      | 19.3.0                               |                                                                                                                                                                                                                                                                        |
+| `typescript`                              | 6.0.3                                | the last JavaScript-based line; `moduleResolution: bundler`, no `baseUrl` (https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html); the standalone repo does not follow gt-cloud's native v7 until `@tanstack/*` types are verified against it |
+| `nitro`                                   | 3.0.260903-beta                      | deployment builds; `NITRO_PRESET` node-server (default), vercel (built, not deployed), bun (bundle only)                                                                                                                                                               |
+| `zod`                                     | 4.x                                  | `z.toJSONSchema` for MCP and OpenAPI (https://zod.dev/json-schema)                                                                                                                                                                                                     |
+| `@modelcontextprotocol/sdk`               | current                              | https://github.com/modelcontextprotocol/typescript-sdk                                                                                                                                                                                                                 |
+| `playwright-core`                         | 1.62.1                               | with the full Chrome for Testing 147.0.7727.15 (`chromium-1217`) binary, never the headless shell                                                                                                                                                                      |
+| `pptxgenjs`                               | 4.0.1                                |                                                                                                                                                                                                                                                                        |
+| `jszip`                                   | 3.10.2                               | OOXML post-process                                                                                                                                                                                                                                                     |
+| `pixelmatch`                              | 7.2.0                                |                                                                                                                                                                                                                                                                        |
+| `pngjs`                                   | 7.0.0                                |                                                                                                                                                                                                                                                                        |
+| `sharp`                                   | 0.35.0                               | libvips 8.18.3 prebuilt; RGBA PNG and JPEG encode, Lanczos3 resize                                                                                                                                                                                                     |
+| `googleapis`                              | 178.1.1                              | Slides export (M6)                                                                                                                                                                                                                                                     |
+| `@paper-design/shaders`                   | 0.0.78                               | Apache-2.0 with NOTICE (pptx report section 4.11)                                                                                                                                                                                                                      |
+| `parse5`                                  | current                              | the importer                                                                                                                                                                                                                                                           |
+| `tsdown`                                  | current                              | bundles `apps/cli`                                                                                                                                                                                                                                                     |
+| `vitest`                                  | 3.x                                  |                                                                                                                                                                                                                                                                        |
+| Python 3.14 with fontTools 4.65.0, brotli | pinned in `scripts/requirements.txt` | font build only, run once and committed                                                                                                                                                                                                                                |
 
 Toolchain on the machine: Node 24.13.0, pnpm 11.15.1 through corepack, cargo 1.98.1, Go 1.26.5, no Bun, no Zig, no LibreOffice, no PowerPoint (pptx report section 3).
 
@@ -219,52 +219,87 @@ The shape of `packages/schema/src/`. Zod schemas produce the TypeScript types, t
 // packages/schema/src/deck.ts
 export type Deck = {
   schemaVersion: 1;
-  id: string;                          // slug, stable: 'gt-brand'
+  id: string; // slug, stable: 'gt-brand'
   title: string;
-  theme: 'gt-ink-paper';               // one-member enum; a second theme is additive
-  sections: Section[];                 // the only place order lives; numbers, counts, SECTIONS and titles are derived
+  theme: 'gt-ink-paper'; // one-member enum; a second theme is additive
+  sections: Section[]; // the only place order lives; numbers, counts, SECTIONS and titles are derived
   assets: Record<AssetId, Asset>;
   defaults?: { notes?: string };
-  revision: number;                    // increments on every committed write
-  createdAt: string; updatedAt: string;
+  revision: number; // increments on every committed write
+  createdAt: string;
+  updatedAt: string;
 };
 
-export type Section = { id: string; name: string; slideIds: SlideId[] };  // an opener, if present, is first and has kind 'opener'
+export type Section = { id: string; name: string; slideIds: SlideId[] }; // an opener, if present, is first and has kind 'opener'
 
-export type SlideId = string;          // slug, never a number: 'why-the-redesign'
-export type BlockId = string;          // unique within the slide: 'h', 'p1', 'list', 'fig'
+export type SlideId = string; // slug, never a number: 'why-the-redesign'
+export type BlockId = string; // unique within the slide: 'h', 'p1', 'list', 'fig'
 export type AssetId = string;
 
 type SlideBase = {
-  schemaVersion: 1;                    // on every slide file so one slide can be read, validated and migrated alone
+  schemaVersion: 1; // on every slide file so one slide can be read, validated and migrated alone
   id: SlideId;
-  title?: string;                      // overrides the derived title (first heading, big or plate title)
-  notes?: string;                      // speaker notes; the only place notes live
+  title?: string; // overrides the derived title (first heading, big or plate title)
+  notes?: string; // speaker notes; the only place notes live
   tags?: string[];
   ext?: Record<string, unknown>;
 };
 
-export type Slide = ContentSlide | OpenerSlide | MoodSlide | ClosingSlide | TitleSlide | StatementSlide;
+export type Slide =
+  ContentSlide | OpenerSlide | MoodSlide | ClosingSlide | TitleSlide | StatementSlide;
 
-export type ContentSlide = SlideBase & { kind: 'content'; layout: Layout; slots: Record<SlotName, Block[]> };
+export type ContentSlide = SlideBase & {
+  kind: 'content';
+  layout: Layout;
+  slots: Record<SlotName, Block[]>;
+};
 export type SlotName = 'main' | 'head' | 'headLeft' | 'headRight' | 'body' | 'left' | 'right';
 
 export type Layout =
-  | { type: 'cols'; ratio: '5/7' | '4/8' | '1/1' | { left: number } | { right: number }; gap?: 72 | 56 | 48; align?: 'start' | 'center' }
+  | {
+      type: 'cols';
+      ratio: '5/7' | '4/8' | '1/1' | { left: number } | { right: number };
+      gap?: 72 | 56 | 48;
+      align?: 'start' | 'center';
+    }
   //   slots: left, right
-  | { type: 'split'; gap?: 56 | 44 | 40 | 36 | 32 | 26; head?: 'single' | { cols: '5/7' | '4/8' }; body?: { align: 'start' | 'center' | 'end' } }
+  | {
+      type: 'split';
+      gap?: 56 | 44 | 40 | 36 | 32 | 26;
+      head?: 'single' | { cols: '5/7' | '4/8' };
+      body?: { align: 'start' | 'center' | 'end' };
+    }
   //   slots: head (or headLeft, headRight), body
-  | { type: 'center' }                 // slot: main
-  | { type: 'left-mid' }               // slot: main
-  | { type: 'stack'; gap?: number };   // slot: main
+  | { type: 'center' } // slot: main
+  | { type: 'left-mid' } // slot: main
+  | { type: 'stack'; gap?: number }; // slot: main
 
 export type Picture = { asset: AssetId; fit: 'cover'; position?: 'center' | 'top' | 'bottom' };
-export type Plate = { side: 'lower-left' | 'lower-right' | 'upper-left'; maxWidth: 740 | 560 | 720; blocks: Block[] };
-export type OpenerSlide   = SlideBase & { kind: 'opener'; sectionId: string; picture: Picture; plate: Plate };   // side lower-left, 740
-export type MoodSlide     = SlideBase & { kind: 'mood'; picture: Picture; plate: Plate };                        // side lower-right, 560
-export type ClosingSlide  = SlideBase & { kind: 'closing'; picture: Picture; plate: Plate; mark?: { w: number; h: number } }; // upper-left, 720
-export type TitleSlide    = SlideBase & { kind: 'title'; mark: { w: number; h: number }; heading: Text; lead: Text };
-export type StatementSlide = SlideBase & { kind: 'statement'; big: Text; measure?: number };                     // measure in ch
+export type Plate = {
+  side: 'lower-left' | 'lower-right' | 'upper-left';
+  maxWidth: 740 | 560 | 720;
+  blocks: Block[];
+};
+export type OpenerSlide = SlideBase & {
+  kind: 'opener';
+  sectionId: string;
+  picture: Picture;
+  plate: Plate;
+}; // side lower-left, 740
+export type MoodSlide = SlideBase & { kind: 'mood'; picture: Picture; plate: Plate }; // side lower-right, 560
+export type ClosingSlide = SlideBase & {
+  kind: 'closing';
+  picture: Picture;
+  plate: Plate;
+  mark?: { w: number; h: number };
+}; // upper-left, 720
+export type TitleSlide = SlideBase & {
+  kind: 'title';
+  mark: { w: number; h: number };
+  heading: Text;
+  lead: Text;
+};
+export type StatementSlide = SlideBase & { kind: 'statement'; big: Text; measure?: number }; // measure in ch
 ```
 
 Text is a string in a four-rule inline markup. Resolution: design A used `string | Run[]`; design B used a markup string; the agent-nativeness judge asked for the string so that `git diff` stays at the word level and an agent can type it. The parsed form is the run model.
@@ -279,7 +314,7 @@ export type Text = string;
 //                     (code, URLs, package names, attributes, panel text); the document keeps the letters
 //   \*  \[  \GT       escapes
 // No line breaks inside a string except in panel.code, where \n is honored. A non-breaking space (U+00A0) is the nowrap device.
-export type Run = { t: string; b?: true; gt?: true; link?: string };      // parseText(text): Run[]; serializeRuns(runs): Text
+export type Run = { t: string; b?: true; gt?: true; link?: string }; // parseText(text): Run[]; serializeRuns(runs): Text
 ```
 
 Blocks are the grammar's classes as typed nodes.
@@ -287,45 +322,151 @@ Blocks are the grammar's classes as typed nodes.
 ```ts
 // packages/schema/src/blocks.ts
 type BlockBase = { id: BlockId; ext?: Record<string, unknown> };
-export type Block = BlockBase & (
-  | { type: 'heading'; level: 'h1' | 'h2' | 'big' | 'title'; text: Text; marginTop?: number; marginBottom?: 0 | 18 }
-  | { type: 'paragraph'; text: Text; role?: 'body' | 'lead' | 'cap'; tone?: 'ink' | 'muted'; measure?: 32 | 56 | number; marginTop?: number }
-  | { type: 'credit'; text: Text }                                             // 15 px titanium, plate only
-  | { type: 'rows'; key: 90 | 120 | 150 | 180 | 190 | 200 | 220 | 240 | 250 | 300; tight?: boolean; links?: boolean; minRowHeight?: number; items: RowItem[] }
-  | { type: 'plain'; size?: 24 | 22 | 20; items: PlainItem[] }
-  | { type: 'refs'; items: Text[] }
-  | { type: 'say'; items: { quote: Text; note?: Text; no?: true }[] }
-  | { type: 'scales'; centerTick?: boolean; items: { left: Text; right: Text; value: number }[] }   // the marker is derived from value
-  | { type: 'spec'; weights: (300 | 400 | 500 | 600 | 700 | 800)[]; sample: string; textRow?: Text }
-  | { type: 'lang'; items: { script: 'latin' | 'ja' | 'zh' | 'ko' | 'ar' | 'hi' | string; text: string; label: string }[] }
-  | { type: 'ladder'; rows: { size: number; label: string }[]; valueWidth?: 200 | 320 }
-  | { type: 'swatches'; items: { name: string; value: string; plate: 'ink' | 'raised' | 'ti' | 'paper' | 'outline' }[] }
-  | { type: 'shot'; asset: AssetId; fit?: 'width' | 'fit'; aspect?: string; crop?: 'top' | 'center'; caption?: Text; captionSize?: 16 | 15; width?: number; border?: boolean }
-  | { type: 'pair'; ratio?: '1/1' | { left: number; right: number }; gap?: 28 | 40; captionSize?: 16 | 15; figures: { assets: AssetId[]; caption?: Text }[] }
-  | { type: 'tiles'; columns: 4 | 5 | 6; aspect: '16/9' | '16/10' | '1/1'; labelSize?: 15 | 20; items: { asset?: AssetId; label?: Text; sub?: Text; marker?: true }[]; more?: Text }
-  | { type: 'details'; columns: 3; rowHeights?: number[]; items: { asset: AssetId; caption?: Text }[] }
-  | { type: 'board'; columns: [128, 250, 200, 'fr']; rows: { asset?: AssetId; name: Text; address?: string; state: Icon; note: Text }[] }
-  | { type: 'composite'; tracks: string; gap?: number; cells: { blocks: Block[]; span?: number }[] }   // M5: the declared figure grid that retires the last escapes
-  | { type: 'panel'; code: string; size?: 17 | 15; pre?: boolean; term?: boolean; marks?: true }
-  | { type: 'dia'; fit: 'slot' | { viewBox: [number, number, number, number] }; data?: Diagram; svg?: string; alt: string }
-  | { type: 'dither'; height: 220; ramp: 'linear-x'; border?: true; alt: string }
-  | { type: 'mark'; w: number; h: number }                                     // the standalone GT mark
-  | { type: 'markSizes'; sizes: number[] }                                     // the compression specimen
-  | { type: 'matrix'; cells: number[][]; caption?: Text }                      // the 4 by 4 Bayer table
-  | { type: 'logoPlates'; items: { asset: AssetId; name: Text }[] }            // fixed-white plates for external logos (slide 14)
-  | { type: 'html'; css: string; html: string; note: string }                  // the escape hatch: flagged by lint, raster on export
-);
+export type Block = BlockBase &
+  (
+    | {
+        type: 'heading';
+        level: 'h1' | 'h2' | 'big' | 'title';
+        text: Text;
+        marginTop?: number;
+        marginBottom?: 0 | 18;
+      }
+    | {
+        type: 'paragraph';
+        text: Text;
+        role?: 'body' | 'lead' | 'cap';
+        tone?: 'ink' | 'muted';
+        measure?: 32 | 56 | number;
+        marginTop?: number;
+      }
+    | { type: 'credit'; text: Text } // 15 px titanium, plate only
+    | {
+        type: 'rows';
+        key: 90 | 120 | 150 | 180 | 190 | 200 | 220 | 240 | 250 | 300;
+        tight?: boolean;
+        links?: boolean;
+        minRowHeight?: number;
+        items: RowItem[];
+      }
+    | { type: 'plain'; size?: 24 | 22 | 20; items: PlainItem[] }
+    | { type: 'refs'; items: Text[] }
+    | { type: 'say'; items: { quote: Text; note?: Text; no?: true }[] }
+    | { type: 'scales'; centerTick?: boolean; items: { left: Text; right: Text; value: number }[] } // the marker is derived from value
+    | {
+        type: 'spec';
+        weights: (300 | 400 | 500 | 600 | 700 | 800)[];
+        sample: string;
+        textRow?: Text;
+      }
+    | {
+        type: 'lang';
+        items: {
+          script: 'latin' | 'ja' | 'zh' | 'ko' | 'ar' | 'hi' | string;
+          text: string;
+          label: string;
+        }[];
+      }
+    | { type: 'ladder'; rows: { size: number; label: string }[]; valueWidth?: 200 | 320 }
+    | {
+        type: 'swatches';
+        items: {
+          name: string;
+          value: string;
+          plate: 'ink' | 'raised' | 'ti' | 'paper' | 'outline';
+        }[];
+      }
+    | {
+        type: 'shot';
+        asset: AssetId;
+        fit?: 'width' | 'fit';
+        aspect?: string;
+        crop?: 'top' | 'center';
+        caption?: Text;
+        captionSize?: 16 | 15;
+        width?: number;
+        border?: boolean;
+      }
+    | {
+        type: 'pair';
+        ratio?: '1/1' | { left: number; right: number };
+        gap?: 28 | 40;
+        captionSize?: 16 | 15;
+        figures: { assets: AssetId[]; caption?: Text }[];
+      }
+    | {
+        type: 'tiles';
+        columns: 4 | 5 | 6;
+        aspect: '16/9' | '16/10' | '1/1';
+        labelSize?: 15 | 20;
+        items: { asset?: AssetId; label?: Text; sub?: Text; marker?: true }[];
+        more?: Text;
+      }
+    | {
+        type: 'details';
+        columns: 3;
+        rowHeights?: number[];
+        items: { asset: AssetId; caption?: Text }[];
+      }
+    | {
+        type: 'board';
+        columns: [128, 250, 200, 'fr'];
+        rows: { asset?: AssetId; name: Text; address?: string; state: Icon; note: Text }[];
+      }
+    | {
+        type: 'composite';
+        tracks: string;
+        gap?: number;
+        cells: { blocks: Block[]; span?: number }[];
+      } // M5: the declared figure grid that retires the last escapes
+    | { type: 'panel'; code: string; size?: 17 | 15; pre?: boolean; term?: boolean; marks?: true }
+    | {
+        type: 'dia';
+        fit: 'slot' | { viewBox: [number, number, number, number] };
+        data?: Diagram;
+        svg?: string;
+        alt: string;
+      }
+    | { type: 'dither'; height: 220; ramp: 'linear-x'; border?: true; alt: string }
+    | { type: 'mark'; w: number; h: number } // the standalone GT mark
+    | { type: 'markSizes'; sizes: number[] } // the compression specimen
+    | { type: 'matrix'; cells: number[][]; caption?: Text } // the 4 by 4 Bayer table
+    | { type: 'logoPlates'; items: { asset: AssetId; name: Text }[] } // fixed-white plates for external logos (slide 14)
+    | { type: 'html'; css: string; html: string; note: string } // the escape hatch: flagged by lint, raster on export
+  );
 
-export type Icon = { name: IconName; color?: 'ok' | 'warn' | 'no' | 'info' };  // IconName is the sprite's 63 symbols plus gt-mark
-export type RowItem = { key: Text; icon?: Icon; value: Text; ext?: true };     // ext: the external link glyph after a link
+export type Icon = { name: IconName; color?: 'ok' | 'warn' | 'no' | 'info' }; // IconName is the sprite's 63 symbols plus gt-mark
+export type RowItem = { key: Text; icon?: Icon; value: Text; ext?: true }; // ext: the external link glyph after a link
 export type PlainItem = { text: Text; icon?: Icon; no?: true };
 
-export type Diagram = {                 // the declared, lintable form of svg.dia; with fit 'slot' the renderer sets w to the slot width
-  w: number; h: number;
-  lines: { x1: number; y1: number; x2: number; y2: number; stroke: 'ink' | 'mid' | 'hair'; width?: 1 | 1.5 }[];
-  rects: { x: number; y: number; w: number; h: number; fill: 'ink' | 'paper' | 'plate' | 'none'; stroke?: 'ink' | 'mid' | 'hair'; opacity?: number }[];
-  markers: { x: number; y: number }[];  // 11 px squares
-  texts: { x: number; y: number; text: string; size: 20 | 26 | 18; anchor?: 'start' | 'middle' | 'end' }[];
+export type Diagram = {
+  // the declared, lintable form of svg.dia; with fit 'slot' the renderer sets w to the slot width
+  w: number;
+  h: number;
+  lines: {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    stroke: 'ink' | 'mid' | 'hair';
+    width?: 1 | 1.5;
+  }[];
+  rects: {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+    fill: 'ink' | 'paper' | 'plate' | 'none';
+    stroke?: 'ink' | 'mid' | 'hair';
+    opacity?: number;
+  }[];
+  markers: { x: number; y: number }[]; // 11 px squares
+  texts: {
+    x: number;
+    y: number;
+    text: string;
+    size: 20 | 26 | 18;
+    anchor?: 'start' | 'middle' | 'end';
+  }[];
   icons: { name: IconName; x: number; y: number; size: 24 | 20; color?: Icon['color'] }[];
   marks: { x: number; y: number; w: number; h: number; iso?: true }[];
 };
@@ -337,25 +478,79 @@ Assets carry role, twins, provenance, treatment and metrics.
 // packages/schema/src/assets.ts
 export type Asset = {
   id: AssetId;
-  role: 'opener' | 'mood' | 'capture' | 'detail' | 'thumb' | 'render' | 'icon' | 'logo' | 'frame' | 'other';
+  role:
+    | 'opener'
+    | 'mood'
+    | 'capture'
+    | 'detail'
+    | 'thumb'
+    | 'render'
+    | 'icon'
+    | 'logo'
+    | 'frame'
+    | 'other';
   alt: string;
-  twins: { light: string; dark: string } | { neutral: string };   // relative paths under assets/
-  size: [number, number];                 // pixels of the stored file
-  scale: 1 | 2 | 3;                       // device pixels per sheet px the file was produced at
+  twins: { light: string; dark: string } | { neutral: string }; // relative paths under assets/
+  size: [number, number]; // pixels of the stored file
+  scale: 1 | 2 | 3; // device pixels per sheet px the file was produced at
   source:
-    | { kind: 'material'; materialId: string; uniforms: Record<string, number | number[] | string>; size: [3200, 1800]; timeMs: number;
-        backend: 'angle-metal' | 'swiftshader'; renderer: string; recipeKey: string }
-    | { kind: 'capture'; url: string; viewport: [1440, 900]; scale: 2; theme: 'light' | 'dark' | 'both'; region?: [number, number, number, number]; recipe: string }
-    | { kind: 'photo'; origin: string; artist?: string; license: 'CC0' | 'CC BY' | 'CC BY-SA' | 'public domain' | string; shareAlike: boolean }
+    | {
+        kind: 'material';
+        materialId: string;
+        uniforms: Record<string, number | number[] | string>;
+        size: [3200, 1800];
+        timeMs: number;
+        backend: 'angle-metal' | 'swiftshader';
+        renderer: string;
+        recipeKey: string;
+      }
+    | {
+        kind: 'capture';
+        url: string;
+        viewport: [1440, 900];
+        scale: 2;
+        theme: 'light' | 'dark' | 'both';
+        region?: [number, number, number, number];
+        recipe: string;
+      }
+    | {
+        kind: 'photo';
+        origin: string;
+        artist?: string;
+        license: 'CC0' | 'CC BY' | 'CC BY-SA' | 'public domain' | string;
+        shareAlike: boolean;
+      }
     | { kind: 'file' };
   treatment?:
-    | { kind: 'two-tone'; crop: [number, number, number, number]; channel?: 'gray' | 'r' | 'g' | 'b'; invert?: boolean; blur?: number;
-        autocontrast: 0.5; black?: number; white?: number; gamma?: number; minFilter?: number; unsharp?: { rows: [number, number]; amount: number };
-        polarity: 'dark-ground' | 'light-ground'; cell: 2; bayer: 8; resampler: 'lanczos3' }
+    | {
+        kind: 'two-tone';
+        crop: [number, number, number, number];
+        channel?: 'gray' | 'r' | 'g' | 'b';
+        invert?: boolean;
+        blur?: number;
+        autocontrast: 0.5;
+        black?: number;
+        white?: number;
+        gamma?: number;
+        minFilter?: number;
+        unsharp?: { rows: [number, number]; amount: number };
+        polarity: 'dark-ground' | 'light-ground';
+        cell: 2;
+        bayer: 8;
+        resampler: 'lanczos3';
+      }
     | { kind: 'continuous'; quality: 88 | 92 | 95 };
-  credit?: string;                        // must appear on the plate for share-alike sources
-  inline: 'native' | 'resample-1280' | 'two-color' | 'pass-through';   // the build rule, from build-deck.mjs:72-76
-  metrics?: { litFraction: number; plateClear?: { plate: [number, number, number, number]; nearestLitPx: number; litUnder: number; litInBand: number } };
+  credit?: string; // must appear on the plate for share-alike sources
+  inline: 'native' | 'resample-1280' | 'two-color' | 'pass-through'; // the build rule, from build-deck.mjs:72-76
+  metrics?: {
+    litFraction: number;
+    plateClear?: {
+      plate: [number, number, number, number];
+      nearestLitPx: number;
+      litUnder: number;
+      litInBand: number;
+    };
+  };
   ext?: Record<string, unknown>;
 };
 ```
@@ -368,60 +563,137 @@ export type Mutation =
   | { op: 'slide.insert'; sectionId: string; after?: SlideId; slide: Slide }
   | { op: 'slide.remove'; slideId: SlideId }
   | { op: 'slide.move'; slideId: SlideId; sectionId: string; after?: SlideId }
-  | { op: 'slide.set'; slideId: SlideId; path: string; value: unknown }              // JSON pointer into the slide
-  | { op: 'slide.replace'; slideId: SlideId; slide: Slide }                          // what the source drawer's Apply emits
-  | { op: 'block.insert'; slideId: SlideId; slot: SlotName | 'plate'; after?: BlockId; block: Block }
+  | { op: 'slide.set'; slideId: SlideId; path: string; value: unknown } // JSON pointer into the slide
+  | { op: 'slide.replace'; slideId: SlideId; slide: Slide } // what the source drawer's Apply emits
+  | {
+      op: 'block.insert';
+      slideId: SlideId;
+      slot: SlotName | 'plate';
+      after?: BlockId;
+      block: Block;
+    }
   | { op: 'block.remove'; slideId: SlideId; blockId: BlockId }
-  | { op: 'block.move'; slideId: SlideId; blockId: BlockId; slot: SlotName | 'plate'; after?: BlockId }
+  | {
+      op: 'block.move';
+      slideId: SlideId;
+      blockId: BlockId;
+      slot: SlotName | 'plate';
+      after?: BlockId;
+    }
   | { op: 'block.set'; slideId: SlideId; blockId: BlockId; path: string; value: unknown }
-  | { op: 'text.replace'; slideId: SlideId; blockId: BlockId; path: string; range: [number, number]; text: Text }   // typing, coalesced
+  | {
+      op: 'text.replace';
+      slideId: SlideId;
+      blockId: BlockId;
+      path: string;
+      range: [number, number];
+      text: Text;
+    } // typing, coalesced
   | { op: 'section.set'; sections: Section[] }
   | { op: 'asset.set'; asset: Asset }
   | { op: 'asset.remove'; assetId: AssetId }
   | { op: 'deck.set'; path: string; value: unknown }
-  | { op: 'version.restore'; n: number };                                            // restore is a mutation, so it is undoable and visible
+  | { op: 'version.restore'; n: number }; // restore is a mutation, so it is undoable and visible
 
-export type Author = { kind: 'human' | 'agent'; name: string; runId?: string };     // CLI and MCP: --author agent:<runId>
+export type Author = { kind: 'human' | 'agent'; name: string; runId?: string }; // CLI and MCP: --author agent:<runId>
 export type Write = { baseRevision: number; author: Author; note?: string; mutations: Mutation[] };
-export type Version = { n: number; revision: number; author: Author; note: string; createdAt: string; mutations: Mutation[] };
-export type Lease = { slideId: SlideId; holder: Author; until: string };            // advisory in M3, enforced for agent writes in M4
+export type Version = {
+  n: number;
+  revision: number;
+  author: Author;
+  note: string;
+  createdAt: string;
+  mutations: Mutation[];
+};
+export type Lease = { slideId: SlideId; holder: Author; until: string }; // advisory in M3, enforced for agent writes in M4
 
 // packages/schema/src/findings.ts
-export type Severity = 1 | 2 | 3;      // 3 must fix (the gate), 2 should fix, 1 polish
+export type Severity = 1 | 2 | 3; // 3 must fix (the gate), 2 should fix, 1 polish
 export type Finding = {
-  id: string; rule: RuleId; severity: Severity; kind: 'defect' | 'diagram' | 'polish' | 'copy' | 'accuracy';
-  slideId: SlideId; blockId?: BlockId; path?: string; theme?: 'light' | 'dark';
-  evidence: { text?: string; box?: [number, number, number, number]; measured?: Record<string, number>; image?: string };
-  proposal: string;                    // prose a fixer acts on without judgment
-  fix?: Mutation[];                    // present when the fix is mechanical; turboslide fix and the inspector's Fix button apply it
+  id: string;
+  rule: RuleId;
+  severity: Severity;
+  kind: 'defect' | 'diagram' | 'polish' | 'copy' | 'accuracy';
+  slideId: SlideId;
+  blockId?: BlockId;
+  path?: string;
+  theme?: 'light' | 'dark';
+  evidence: {
+    text?: string;
+    box?: [number, number, number, number];
+    measured?: Record<string, number>;
+    image?: string;
+  };
+  proposal: string; // prose a fixer acts on without judgment
+  fix?: Mutation[]; // present when the fix is mechanical; turboslide fix and the inspector's Fix button apply it
   source: 'lint' | `judge:${string}` | 'skeptic';
 };
 
 // packages/schema/src/render.ts
 export type Box = [number, number, number, number];
 export type RenderRecord = {
-  deckId: string; slideId: SlideId; revision: number; theme: 'light' | 'dark'; scale: 1 | 2; image: string;
-  renderer: string;                    // 'Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max' or the SwiftShader string
-  pageErrors: string[]; consoleErrors: string[];
+  deckId: string;
+  slideId: SlideId;
+  revision: number;
+  theme: 'light' | 'dark';
+  scale: 1 | 2;
+  image: string;
+  renderer: string; // 'Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max' or the SwiftShader string
+  pageErrors: string[];
+  consoleErrors: string[];
   overflow: { blockId?: BlockId; selector: string; box: Box }[];
-  blocks: Record<BlockId, { type: string; box: Box; lines?: number; fontSize?: number; fontWeight?: number; color?: string }>;
+  blocks: Record<
+    BlockId,
+    {
+      type: string;
+      box: Box;
+      lines?: number;
+      fontSize?: number;
+      fontWeight?: number;
+      color?: string;
+    }
+  >;
   fonts: { status: 'loaded' | 'partial'; faces: string[] };
   anchors: { assetId: AssetId; recipeKey: string; timeMs: number }[];
-  rasters: { blockId: BlockId; kind: 'dia' | 'dither' | 'icon' | 'mark' | 'shot' | 'html' | 'material'; file: string; box: Box; alpha: boolean }[];
+  rasters: {
+    blockId: BlockId;
+    kind: 'dia' | 'dither' | 'icon' | 'mark' | 'shot' | 'html' | 'material';
+    file: string;
+    box: Box;
+    alpha: boolean;
+  }[];
   timing: { readyMs: number; screenshotMs: number };
 };
 
 // packages/schema/src/export.ts
 export type ExportReport = {
-  deckId: string; revision: number; format: 'pptx' | 'gslides' | 'pdf'; mode: 'native' | 'flatten'; theme: 'light' | 'dark';
-  fontSet: 'exact' | 'standard'; fontSetVersion: string;
-  files: { path: string; bytes: number; sha256: string }[]; presentationId?: string; url?: string;
+  deckId: string;
+  revision: number;
+  format: 'pptx' | 'gslides' | 'pdf';
+  mode: 'native' | 'flatten';
+  theme: 'light' | 'dark';
+  fontSet: 'exact' | 'standard';
+  fontSetVersion: string;
+  files: { path: string; bytes: number; sha256: string }[];
+  presentationId?: string;
+  url?: string;
   fonts: { embedded: string[]; requiredOnViewer: string[]; substitutedIn: string[] };
-  slides: { slideId: SlideId; native: BlockId[]; raster: BlockId[];
-            verify?: { mismatch: number; fraction: number; blocks: { blockId: BlockId; dx: number; dy: number; dw: number; ok: boolean }[];
-                       ref: string; got: string; diff: string } }[];
-  geometryInBounds: boolean;           // the overflow assertion re-run on the exported EMU geometry
-  passed: boolean; residual: string[];
+  slides: {
+    slideId: SlideId;
+    native: BlockId[];
+    raster: BlockId[];
+    verify?: {
+      mismatch: number;
+      fraction: number;
+      blocks: { blockId: BlockId; dx: number; dy: number; dw: number; ok: boolean }[];
+      ref: string;
+      got: string;
+      diff: string;
+    };
+  }[];
+  geometryInBounds: boolean; // the overflow assertion re-run on the exported EMU geometry
+  passed: boolean;
+  residual: string[];
 };
 ```
 
@@ -436,9 +708,17 @@ The manifest fragment for the sections these slides live in:
   "title": "GT brand deck",
   "theme": "gt-ink-paper",
   "sections": [
-    { "id": "brand", "name": "Brand", "slideIds": ["opener-brand", "title", "thesis", "content-rule"] },
+    {
+      "id": "brand",
+      "name": "Brand",
+      "slideIds": ["opener-brand", "title", "thesis", "content-rule"]
+    },
     { "id": "website", "name": "Website", "slideIds": ["opener-website", "the-production-site"] },
-    { "id": "prototemplate-and-glyphfield", "name": "Prototemplate and Glyphfield", "slideIds": ["opener-prototemplate"] }
+    {
+      "id": "prototemplate-and-glyphfield",
+      "name": "Prototemplate and Glyphfield",
+      "slideIds": ["opener-prototemplate"]
+    }
   ],
   "assets": { "...": "see below" },
   "revision": 412,
@@ -461,9 +741,18 @@ Slide one, `slides/opener-prototemplate.json`: a section opener whose picture is
     "maxWidth": 740,
     "blocks": [
       { "id": "big", "type": "heading", "level": "big", "text": "Prototemplate and Glyphfield" },
-      { "id": "p", "type": "paragraph", "measure": 56, "marginTop": 14,
-        "text": "This section covers prototemplate.com, the design lab and knowledge base, and glyphfield.com, the tooling behind it." },
-      { "id": "credit", "type": "credit", "text": "Material: liquid metal, Paper Shaders, rendered in Glyphfield" }
+      {
+        "id": "p",
+        "type": "paragraph",
+        "measure": 56,
+        "marginTop": 14,
+        "text": "This section covers prototemplate.com, the design lab and knowledge base, and glyphfield.com, the tooling behind it."
+      },
+      {
+        "id": "credit",
+        "type": "credit",
+        "text": "Material: liquid metal, Paper Shaders, rendered in Glyphfield"
+      }
     ]
   },
   "notes": "Two products, one grammar. Say what each is for before the detail slides."
@@ -510,18 +799,43 @@ Slide two, `slides/content-rule.json`: a ruled statement list with semantic icon
   "slots": {
     "left": [
       { "id": "h", "type": "heading", "level": "h2", "text": "The content rule" },
-      { "id": "p1", "type": "paragraph", "measure": 56,
-        "text": "Every post states what was built, what it cost, and what changed. The list names what passes and what is excluded." }
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "measure": 56,
+        "text": "Every post states what was built, what it cost, and what changed. The list names what passes and what is excluded."
+      }
     ],
     "right": [
-      { "id": "list", "type": "plain", "items": [
-        { "icon": { "name": "check-circle", "color": "ok" }, "text": "A measured result with the method" },
-        { "icon": { "name": "check-circle", "color": "ok" }, "text": "A decision and the constraint behind it" },
-        { "icon": { "name": "check-circle", "color": "ok" }, "text": "A tool that a reader can run" },
-        { "icon": { "name": "check-circle", "color": "ok" }, "text": "How GT ships a locale" },
-        { "icon": { "name": "x-circle", "color": "no" }, "no": true, "text": "Announcements without a result" },
-        { "icon": { "name": "x-circle", "color": "no" }, "no": true, "text": "Opinions about the industry" }
-      ] }
+      {
+        "id": "list",
+        "type": "plain",
+        "items": [
+          {
+            "icon": { "name": "check-circle", "color": "ok" },
+            "text": "A measured result with the method"
+          },
+          {
+            "icon": { "name": "check-circle", "color": "ok" },
+            "text": "A decision and the constraint behind it"
+          },
+          {
+            "icon": { "name": "check-circle", "color": "ok" },
+            "text": "A tool that a reader can run"
+          },
+          { "icon": { "name": "check-circle", "color": "ok" }, "text": "How GT ships a locale" },
+          {
+            "icon": { "name": "x-circle", "color": "no" },
+            "no": true,
+            "text": "Announcements without a result"
+          },
+          {
+            "icon": { "name": "x-circle", "color": "no" },
+            "no": true,
+            "text": "Opinions about the industry"
+          }
+        ]
+      }
     ]
   }
 }
@@ -538,12 +852,22 @@ Slide three, `slides/the-production-site.json`: two columns, a 2x page capture w
   "slots": {
     "left": [
       { "id": "h", "type": "heading", "level": "h2", "text": "The production site" },
-      { "id": "p1", "type": "paragraph", "measure": 56,
-        "text": "The site shown is the production build in September 2026. generaltranslation.com was rebuilt page by page on one layout system: a single ruled column, hairline seams between sections, registration crosses at junctions, and one display face at one weight." }
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "measure": 56,
+        "text": "The site shown is the production build in September 2026. generaltranslation.com was rebuilt page by page on one layout system: a single ruled column, hairline seams between sections, registration crosses at junctions, and one display face at one weight."
+      }
     ],
     "right": [
-      { "id": "shot", "type": "shot", "asset": "site-home", "fit": "width", "captionSize": 16,
-        "caption": "The home page at 1440 by 900 shows the navigation bar closed by one hairline, the hero inside the rails, the product demo, and the customer logo row in ruled cells." }
+      {
+        "id": "shot",
+        "type": "shot",
+        "asset": "site-home",
+        "fit": "width",
+        "captionSize": 16,
+        "caption": "The home page at 1440 by 900 shows the navigation bar closed by one hairline, the hero inside the rails, the product demo, and the customer logo row in ruled cells."
+      }
     ]
   }
 }
@@ -577,13 +901,40 @@ Serves: deterministic and visible. Everything downstream (editor, viewer, CLI, e
 `packages/theme/src/gt-ink-paper/sheet.css` is `head:11-176` (the sheet block, which ends at the `viewer chrome` divider at head:177) rewritten under the `.ts-sheet` root class instead of `:root`, plus the stage rules `.sheet`, `.stage`, `.slide` and `.backdrop` from head:249-258 in `stage.css`. Element selectors keep their names (`h1` becomes `.ts-sheet h1`) so imported escape blocks render unchanged.
 
 ```css
-.ts-sheet { color-scheme: light; --paper: #ffffff; --ink: #070707; --ink-2: #3a3d44; --titanium: #8a8f98;
-  --hair: rgba(7,7,7,0.18); --hair-soft: rgba(7,7,7,0.09); --plate: rgba(7,7,7,0.035); --cross: rgba(7,7,7,0.38);
-  --edge: rgba(7,7,7,0.62); --thumb: rgba(7,7,7,0.32); --display: 'Inter', 'Helvetica Neue', Arial, sans-serif; /* … */ }
-.ts-sheet[data-theme="dark"] { color-scheme: dark; --paper: #070707; --ink: #f2f2f0; --ink-2: #b9bcc3;
-  --hair: rgba(242,242,240,0.22); --hair-soft: rgba(242,242,240,0.1); --plate: rgba(242,242,240,0.05); --cross: rgba(255,255,255,0.34);
-  --edge: rgba(242,242,240,0.55); }
-.ts-sheet h1, .ts-sheet h2, .ts-sheet .big { font-family: var(--display); font-weight: 500; letter-spacing: -0.025em; text-wrap: balance; font-feature-settings: 'cv11', 'ss01'; }
+.ts-sheet {
+  color-scheme: light;
+  --paper: #ffffff;
+  --ink: #070707;
+  --ink-2: #3a3d44;
+  --titanium: #8a8f98;
+  --hair: rgba(7, 7, 7, 0.18);
+  --hair-soft: rgba(7, 7, 7, 0.09);
+  --plate: rgba(7, 7, 7, 0.035);
+  --cross: rgba(7, 7, 7, 0.38);
+  --edge: rgba(7, 7, 7, 0.62);
+  --thumb: rgba(7, 7, 7, 0.32);
+  --display: 'Inter', 'Helvetica Neue', Arial, sans-serif; /* … */
+}
+.ts-sheet[data-theme='dark'] {
+  color-scheme: dark;
+  --paper: #070707;
+  --ink: #f2f2f0;
+  --ink-2: #b9bcc3;
+  --hair: rgba(242, 242, 240, 0.22);
+  --hair-soft: rgba(242, 242, 240, 0.1);
+  --plate: rgba(242, 242, 240, 0.05);
+  --cross: rgba(255, 255, 255, 0.34);
+  --edge: rgba(242, 242, 240, 0.55);
+}
+.ts-sheet h1,
+.ts-sheet h2,
+.ts-sheet .big {
+  font-family: var(--display);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  font-feature-settings: 'cv11', 'ss01';
+}
 /* every rule from head:57-176 follows, prefixed; the 140 ms cut stays behind prefers-reduced-motion */
 ```
 
@@ -594,9 +945,27 @@ The same values exist as data in `tokens.ts` (the nine tokens per theme, the fou
 ```ts
 // packages/render/src/slide.ts
 export function renderSlide(deck: Deck, slideId: SlideId, opts: RenderOptions): RenderedSlide;
-type RenderOptions = { theme: 'light' | 'dark'; chrome: boolean; counter?: string; assetBase: string; blockAttrs: boolean; gtWord: boolean; live?: boolean };
-type RenderedSlide = { html: string; slots: Record<string, Box>; rasters: RasterRef[]; warnings: string[] };
-type RasterRef = { blockId: BlockId; kind: 'dia' | 'dither' | 'icon' | 'mark' | 'shot' | 'html' | 'material'; selector: string; alpha: boolean };
+type RenderOptions = {
+  theme: 'light' | 'dark';
+  chrome: boolean;
+  counter?: string;
+  assetBase: string;
+  blockAttrs: boolean;
+  gtWord: boolean;
+  live?: boolean;
+};
+type RenderedSlide = {
+  html: string;
+  slots: Record<string, Box>;
+  rasters: RasterRef[];
+  warnings: string[];
+};
+type RasterRef = {
+  blockId: BlockId;
+  kind: 'dia' | 'dither' | 'icon' | 'mark' | 'shot' | 'html' | 'material';
+  selector: string;
+  alpha: boolean;
+};
 ```
 
 The output is the markup the deck writes by hand: `<section class="slide" data-slide="content-rule"><div class="in"><div class="cols even"><div class="stack" data-slot="left">…`. Every block root carries `data-block="<id>"` and `data-type="<type>"` when `blockAttrs` is on, every text run `data-run="<blockId>/<path>"`, and anything the exporter must screenshot `data-raster="<kind>"`. Rendering is a string builder with HTML escaping, never React, so the CLI, the exporter and the studio share it without a framework; its output is snapshot-tested per block type in both themes. Resolution: design B proposed an `HNode` tree with `toHtml` and `toReact` serializers; the look judge called that a fidelity seam (the exporter would measure the string DOM while the designer looks at the React DOM), so the studio sets `innerHTML` to the string, as designs A and C do.
@@ -616,11 +985,11 @@ What the renderer owns that slides used to copy:
 
 ### 5.3 Three surfaces, one HTML
 
-| Surface | What runs | Notes |
-| --- | --- | --- |
-| Browser editor and viewer (`apps/studio`) | `renderSlide` output set as `innerHTML` of the `.ts-stage` inside the React `Sheet`; React owns chrome, overlays and view state only | A slide re-renders when its JSON changes; then `drawDither()` runs on every `canvas.dither` and materials mount on `[data-type="material"][data-live]` |
-| Static viewer and the Prototemplate `/deck` iframe | `renderStandalone` writes one HTML file with `packages/viewer/standalone` (tail.html ported, framework free, feature frozen) | The `gt-theme` and `gt-deck-slide` `postMessage` protocol and the `#NN` hash contract are preserved; the studio also writes `#s/<slideId>` as the stable form |
-| Rasters (`@turboslide/headless`) | Playwright loads `renderDeck` output from a temp file at 1600 by 900, `deviceScaleFactor` 1 or 2, `reducedMotion: 'reduce'`, theme seeded in `localStorage` and stamped on the root, present mode so the sheet fills the viewport | Readiness replaces the 220 ms settle: `document.fonts.load()` for every face the slide uses, `img.decode()` on every visible image, dither canvases drawn, material anchors present, two animation frames. Measured: the settle is two thirds of the 321 ms p50 per slide today (slides report section 2.2) |
+| Surface                                            | What runs                                                                                                                                                                                                                         | Notes                                                                                                                                                                                                                                                                                                       |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Browser editor and viewer (`apps/studio`)          | `renderSlide` output set as `innerHTML` of the `.ts-stage` inside the React `Sheet`; React owns chrome, overlays and view state only                                                                                              | A slide re-renders when its JSON changes; then `drawDither()` runs on every `canvas.dither` and materials mount on `[data-type="material"][data-live]`                                                                                                                                                      |
+| Static viewer and the Prototemplate `/deck` iframe | `renderStandalone` writes one HTML file with `packages/viewer/standalone` (tail.html ported, framework free, feature frozen)                                                                                                      | The `gt-theme` and `gt-deck-slide` `postMessage` protocol and the `#NN` hash contract are preserved; the studio also writes `#s/<slideId>` as the stable form                                                                                                                                               |
+| Rasters (`@turboslide/headless`)                   | Playwright loads `renderDeck` output from a temp file at 1600 by 900, `deviceScaleFactor` 1 or 2, `reducedMotion: 'reduce'`, theme seeded in `localStorage` and stamped on the root, present mode so the sheet fills the viewport | Readiness replaces the 220 ms settle: `document.fonts.load()` for every face the slide uses, `img.decode()` on every visible image, dither canvases drawn, material anchors present, two animation frames. Measured: the settle is two thirds of the 321 ms p50 per slide today (slides report section 2.2) |
 
 Determinism rules: fixed viewport and scale; reduced motion; seeded theme; inlined fonts; the full Chrome for Testing binary with `--use-gl=angle --use-angle=metal --ignore-gpu-blocklist` on macOS and `--use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader` on Linux CI (https://chromium.googlesource.com/chromium/src/+/main/docs/gpu/swiftshader.md; Chrome 137 removed the automatic fallback, https://developer.chrome.com/blog/supercharge-web-ai-testing); shader materials drawn from stored frames only; dither canvases drawn from the block's parameters so both themes share cells; the `renderer` string recorded in every `RenderRecord`.
 
@@ -674,18 +1043,18 @@ An overlay positioned over the stage draws, from block boxes measured with `getB
 
 Direct manipulation exists only where the grammar has a property to move:
 
-| Gesture | Mutation | Limit |
-| --- | --- | --- |
-| Drag a slide row or a grid tile | `slide.move` | within and across sections |
-| Drag a block up or down inside a slot, or across the two slots of `cols` | `block.move` | never out of a plate |
-| Drag the column seam of `cols` | `slide.set /layout/ratio` | snaps to 5/7, 4/8, 1/1, then 10 px steps |
-| Drag the key column edge of `rows` | `block.set /key` | snaps to the key set |
-| Drag the plate's right edge on a full-picture slide | `slide.set /plate/maxWidth` | 20 px steps up to the kind's cap |
-| Drag a plate to the other side | `slide.set /plate/side` | the sides its kind allows |
-| Drag a `scales` marker | `block.set /items/i/value` | integer 0 to 100; the marker is derived, so the two cannot disagree |
-| Resize a `shot` | `block.set /width` | snaps to the column width, 425 and the slot height |
-| Alt-drag a label or marker in a declared `dia` (M5) | `block.set /data/…` | half-pixel grid, 12 px clearance shown live |
-| Double-click text | `text.replace`, coalesced at 400 ms | `contenteditable` on the run element; the run toolbar has weight 500 and link; a typed standalone `GT` renders as the mark at once |
+| Gesture                                                                  | Mutation                            | Limit                                                                                                                              |
+| ------------------------------------------------------------------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Drag a slide row or a grid tile                                          | `slide.move`                        | within and across sections                                                                                                         |
+| Drag a block up or down inside a slot, or across the two slots of `cols` | `block.move`                        | never out of a plate                                                                                                               |
+| Drag the column seam of `cols`                                           | `slide.set /layout/ratio`           | snaps to 5/7, 4/8, 1/1, then 10 px steps                                                                                           |
+| Drag the key column edge of `rows`                                       | `block.set /key`                    | snaps to the key set                                                                                                               |
+| Drag the plate's right edge on a full-picture slide                      | `slide.set /plate/maxWidth`         | 20 px steps up to the kind's cap                                                                                                   |
+| Drag a plate to the other side                                           | `slide.set /plate/side`             | the sides its kind allows                                                                                                          |
+| Drag a `scales` marker                                                   | `block.set /items/i/value`          | integer 0 to 100; the marker is derived, so the two cannot disagree                                                                |
+| Resize a `shot`                                                          | `block.set /width`                  | snaps to the column width, 425 and the slot height                                                                                 |
+| Alt-drag a label or marker in a declared `dia` (M5)                      | `block.set /data/…`                 | half-pixel grid, 12 px clearance shown live                                                                                        |
+| Double-click text                                                        | `text.replace`, coalesced at 400 ms | `contenteditable` on the run element; the run toolbar has weight 500 and link; a typed standalone `GT` renders as the mark at once |
 
 There are no free x and y, no resize handles on text, no z-order, no rotation. The `html` block shows a titanium hatch and its severity 2 lint.
 
@@ -723,36 +1092,36 @@ Serves: discoverable, parity by named actions, lintable, verified by artifact.
 
 `packages/schema/src/actions.ts` is one typed constant. Each entry has an id, a Zod input and output, a `label` for the palette, a `mutates` flag, the `transports` it is offered on (`cli`, `mcp`, `http`, `window`), and one sentence of documentation. `pnpm generate:contracts` writes the CLI option parsers, the MCP tool list, `describe().actions`, the OpenAPI 3.1 document, the skills' reference tables and `docs/grammar.md` into committed files, and a stale-file test fails CI when any committed output differs from a fresh generation, from M1 (from design B). A coverage test asserts every action has a test and a doc row (from design C).
 
-| Action id | Input (abridged) | Output | Mutates | Transports | CLI | MCP tool |
-| --- | --- | --- | --- | --- | --- | --- |
-| `deck.info` | `{}` | title, theme, sections with slide ids and titles, counts, revision | no | all | `turboslide info` | `deck_get_info` |
-| `slide.list` | `{ sectionId? }` | `[{ id, n, section, title, kind, lint: { s3, s2 } }]` | no | all | `turboslide slides` | `deck_list_slides` |
-| `slide.get` | `{ slideId }` | the normalized slide, its assets, its last render record | no | all | `turboslide slide get <id>` | `deck_get_slide` |
-| `slide.insert` | `{ sectionId, after?, slide, baseRevision }` | `{ slide, revision, outline }` | yes | all | `turboslide slide insert --section <s> --after <id> < slide.json` | `deck_insert_slide` |
-| `slide.remove` | `{ slideId, baseRevision }` | `{ revision, outline }` | yes | all | `turboslide slide remove <id>` | `deck_remove_slide` |
-| `slide.move` | `{ slideId, sectionId, after?, baseRevision }` | `{ sections, revision }` | yes | all | `turboslide slide move <id> --to <s> --after <id>` | `deck_move_slide` |
-| `slide.update` | `{ slideId, baseRevision, mutations }` | `{ slide, revision, findings }` | yes | all | `turboslide slide patch <id> --set /layout/ratio=4/8` | `deck_update_slide` |
-| `slide.replace` | `{ slideId, baseRevision, slide }` | `{ slide, revision, findings }` | yes | all | `turboslide slide put <id> < slide.json` | `deck_replace_slide` |
-| `block.set`, `block.insert`, `block.remove`, `block.move` | as the mutations plus `baseRevision` | `{ slide, revision, findings }` | yes | all | `turboslide block set <slide>#<block> /key 180` | `deck_update_block` and `deck_*_block` |
-| `section.set` | `{ sections, baseRevision }` | `{ sections, revision }` | yes | all | `turboslide sections set < sections.json` | `deck_set_sections` |
-| `slide.lease` | `{ slideId, minutes?, force? }` | `{ until, holder }` | yes | all | `turboslide lease <id> [--force]` | `deck_lease_slide` |
-| `asset.add` | `{ file or url, role, alt, source, treatment?, credit? }` | the asset with twins and metrics | yes | all | `turboslide asset add photo.jpg --role mood --two-tone --black 24` | `deck_asset_add` |
-| `asset.dither` | `{ assetId, treatment, plate? }` | twins, metrics | yes | all | `turboslide asset dither <id> --gamma 1.1 --plate lower-left` | `deck_asset_dither` |
-| `asset.capture` | `{ url, viewport, scale, theme, region?, recipe }` | the asset | yes | cli, mcp, http | `turboslide asset capture https://… --theme both --region 0,0,2880,400` | `deck_asset_capture` |
-| `material.capture` | `{ materialId, uniforms, size, anchors }` | frames as assets with recipe keys | yes | all | `turboslide material capture paper:liquid-metal --anchor 4000,5500,7000` | `deck_material_capture` |
-| `render.slide` | `{ slideIds or 'all', themes, scale, format }` | `RenderRecord[]` plus image paths (MCP returns image content) | no | all | `turboslide render [ids] --theme light,dark --out preview/ --json` | `deck_render` |
-| `render.sheet` | `{ slideIds, themes, cols, thumb, numbered, overlay?: 'lint' or 'plate' }` | sheet images plus a JSON cell map (cell boxes to slide ids) | no | all | `turboslide sheet all --cols 4 --thumb 480 --overlay lint` | `deck_sheet` |
-| `lint.run` | `{ slideIds or 'all', layers: 'static' or 'rendered' or 'both' }` | `Finding[]` | no | all | `turboslide lint [ids] --json` (exit 1 on severity 3 beyond the baseline) | `deck_lint` |
-| `fix.run` | `{ slideIds, rule?, dryRun }` | writes applied, findings remaining | yes | all | `turboslide fix [ids] --rule <id> --dry-run` | `deck_fix` |
-| `diff.run` | `{ from, to?, render? }` | `Mutation[]` in prose plus optional before and after crops | no | all | `turboslide diff 400 412 --render` | `deck_diff` |
-| `version.save`, `version.list`, `version.restore` | `{ note }`, `{}`, `{ n, baseRevision }` | `Version`, `Version[]`, `{ revision }` | yes, no, yes | all | `turboslide version save -m "…"` | `deck_version_*` |
-| `judge.bundle` | `{ slideIds, out }` | a directory with renders, sheets, records and findings | no | cli, mcp | `turboslide judge bundle --out .turboslide/judge/` | `deck_judge_bundle` |
-| `view.goto`, `view.mode`, `view.theme`, `view.present` | `{ slideId }`, `{ mode }`, `{ theme }`, `{ on }` | the view state | no | window; `view.goto` also mcp | none | `deck_goto_slide`, `deck_set_view` |
-| `export.run` | `{ format, mode, theme, fonts: 'exact' or 'standard', headings?: 'raster', verify }` | `ExportReport` | no | all | `turboslide export pptx --mode flatten --theme light --verify` | `deck_export` |
-| `build.run` | `{ out, budgetMB, quality? }` | path, size, assertions | no | all | `turboslide build --out public/brand-deck.html --budget 16` | `deck_build` |
-| `import.run` | `{ from, into }` | the import report | yes | cli | `turboslide import /Users/kevinliu/repos/Prototemplate/deck --into gt-brand` | none |
-| `validate.run` | `{ path }` | issues and the normalized document | no | all | `turboslide validate decks/gt-brand` | `deck_validate` |
-| `source.read`, `source.apply`, `controls.list`, `control.activate`, `control.set`, `artifact.download` | Glyphfield's six standard actions | | | window | none | none |
+| Action id                                                                                              | Input (abridged)                                                                     | Output                                                             | Mutates      | Transports                   | CLI                                                                          | MCP tool                               |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ------------------------------------------------------------------ | ------------ | ---------------------------- | ---------------------------------------------------------------------------- | -------------------------------------- |
+| `deck.info`                                                                                            | `{}`                                                                                 | title, theme, sections with slide ids and titles, counts, revision | no           | all                          | `turboslide info`                                                            | `deck_get_info`                        |
+| `slide.list`                                                                                           | `{ sectionId? }`                                                                     | `[{ id, n, section, title, kind, lint: { s3, s2 } }]`              | no           | all                          | `turboslide slides`                                                          | `deck_list_slides`                     |
+| `slide.get`                                                                                            | `{ slideId }`                                                                        | the normalized slide, its assets, its last render record           | no           | all                          | `turboslide slide get <id>`                                                  | `deck_get_slide`                       |
+| `slide.insert`                                                                                         | `{ sectionId, after?, slide, baseRevision }`                                         | `{ slide, revision, outline }`                                     | yes          | all                          | `turboslide slide insert --section <s> --after <id> < slide.json`            | `deck_insert_slide`                    |
+| `slide.remove`                                                                                         | `{ slideId, baseRevision }`                                                          | `{ revision, outline }`                                            | yes          | all                          | `turboslide slide remove <id>`                                               | `deck_remove_slide`                    |
+| `slide.move`                                                                                           | `{ slideId, sectionId, after?, baseRevision }`                                       | `{ sections, revision }`                                           | yes          | all                          | `turboslide slide move <id> --to <s> --after <id>`                           | `deck_move_slide`                      |
+| `slide.update`                                                                                         | `{ slideId, baseRevision, mutations }`                                               | `{ slide, revision, findings }`                                    | yes          | all                          | `turboslide slide patch <id> --set /layout/ratio=4/8`                        | `deck_update_slide`                    |
+| `slide.replace`                                                                                        | `{ slideId, baseRevision, slide }`                                                   | `{ slide, revision, findings }`                                    | yes          | all                          | `turboslide slide put <id> < slide.json`                                     | `deck_replace_slide`                   |
+| `block.set`, `block.insert`, `block.remove`, `block.move`                                              | as the mutations plus `baseRevision`                                                 | `{ slide, revision, findings }`                                    | yes          | all                          | `turboslide block set <slide>#<block> /key 180`                              | `deck_update_block` and `deck_*_block` |
+| `section.set`                                                                                          | `{ sections, baseRevision }`                                                         | `{ sections, revision }`                                           | yes          | all                          | `turboslide sections set < sections.json`                                    | `deck_set_sections`                    |
+| `slide.lease`                                                                                          | `{ slideId, minutes?, force? }`                                                      | `{ until, holder }`                                                | yes          | all                          | `turboslide lease <id> [--force]`                                            | `deck_lease_slide`                     |
+| `asset.add`                                                                                            | `{ file or url, role, alt, source, treatment?, credit? }`                            | the asset with twins and metrics                                   | yes          | all                          | `turboslide asset add photo.jpg --role mood --two-tone --black 24`           | `deck_asset_add`                       |
+| `asset.dither`                                                                                         | `{ assetId, treatment, plate? }`                                                     | twins, metrics                                                     | yes          | all                          | `turboslide asset dither <id> --gamma 1.1 --plate lower-left`                | `deck_asset_dither`                    |
+| `asset.capture`                                                                                        | `{ url, viewport, scale, theme, region?, recipe }`                                   | the asset                                                          | yes          | cli, mcp, http               | `turboslide asset capture https://… --theme both --region 0,0,2880,400`      | `deck_asset_capture`                   |
+| `material.capture`                                                                                     | `{ materialId, uniforms, size, anchors }`                                            | frames as assets with recipe keys                                  | yes          | all                          | `turboslide material capture paper:liquid-metal --anchor 4000,5500,7000`     | `deck_material_capture`                |
+| `render.slide`                                                                                         | `{ slideIds or 'all', themes, scale, format }`                                       | `RenderRecord[]` plus image paths (MCP returns image content)      | no           | all                          | `turboslide render [ids] --theme light,dark --out preview/ --json`           | `deck_render`                          |
+| `render.sheet`                                                                                         | `{ slideIds, themes, cols, thumb, numbered, overlay?: 'lint' or 'plate' }`           | sheet images plus a JSON cell map (cell boxes to slide ids)        | no           | all                          | `turboslide sheet all --cols 4 --thumb 480 --overlay lint`                   | `deck_sheet`                           |
+| `lint.run`                                                                                             | `{ slideIds or 'all', layers: 'static' or 'rendered' or 'both' }`                    | `Finding[]`                                                        | no           | all                          | `turboslide lint [ids] --json` (exit 1 on severity 3 beyond the baseline)    | `deck_lint`                            |
+| `fix.run`                                                                                              | `{ slideIds, rule?, dryRun }`                                                        | writes applied, findings remaining                                 | yes          | all                          | `turboslide fix [ids] --rule <id> --dry-run`                                 | `deck_fix`                             |
+| `diff.run`                                                                                             | `{ from, to?, render? }`                                                             | `Mutation[]` in prose plus optional before and after crops         | no           | all                          | `turboslide diff 400 412 --render`                                           | `deck_diff`                            |
+| `version.save`, `version.list`, `version.restore`                                                      | `{ note }`, `{}`, `{ n, baseRevision }`                                              | `Version`, `Version[]`, `{ revision }`                             | yes, no, yes | all                          | `turboslide version save -m "…"`                                             | `deck_version_*`                       |
+| `judge.bundle`                                                                                         | `{ slideIds, out }`                                                                  | a directory with renders, sheets, records and findings             | no           | cli, mcp                     | `turboslide judge bundle --out .turboslide/judge/`                           | `deck_judge_bundle`                    |
+| `view.goto`, `view.mode`, `view.theme`, `view.present`                                                 | `{ slideId }`, `{ mode }`, `{ theme }`, `{ on }`                                     | the view state                                                     | no           | window; `view.goto` also mcp | none                                                                         | `deck_goto_slide`, `deck_set_view`     |
+| `export.run`                                                                                           | `{ format, mode, theme, fonts: 'exact' or 'standard', headings?: 'raster', verify }` | `ExportReport`                                                     | no           | all                          | `turboslide export pptx --mode flatten --theme light --verify`               | `deck_export`                          |
+| `build.run`                                                                                            | `{ out, budgetMB, quality? }`                                                        | path, size, assertions                                             | no           | all                          | `turboslide build --out public/brand-deck.html --budget 16`                  | `deck_build`                           |
+| `import.run`                                                                                           | `{ from, into }`                                                                     | the import report                                                  | yes          | cli                          | `turboslide import /Users/kevinliu/repos/Prototemplate/deck --into gt-brand` | none                                   |
+| `validate.run`                                                                                         | `{ path }`                                                                           | issues and the normalized document                                 | no           | all                          | `turboslide validate decks/gt-brand`                                         | `deck_validate`                        |
+| `source.read`, `source.apply`, `controls.list`, `control.activate`, `control.set`, `artifact.download` | Glyphfield's six standard actions                                                    |                                                                    |              | window                       | none                                                                         | none                                   |
 
 Every mutating action requires `baseRevision` and rejects a stale one with 409 and the current document; every write returns the normalized result so the agent's re-read is free. Errors follow Glyphfield's classes: `TypeError` for malformed input with the Zod path, `RangeError` for an unknown action, label or id, `ConflictError` (HTTP 409) for a stale `baseRevision` or a held lease with the holder attached, plain `Error` for renderer and codec failures.
 
@@ -805,53 +1174,53 @@ The rounds' pipeline becomes a documented procedure (`docs/judge-loop.md`) whose
 
 Two layers in `packages/lint`: static rules on the document without a browser (`lintStatic(deck)`), rendered rules on `RenderRecord`s (`lintRendered(deck, records)`). Every finding names the slide, the block and a pixel box where one exists; mechanical rules carry `fix`. Rule ids are constants in the schema package so the docs table and the CLI's `--rule` filter are generated.
 
-| Rule id | Layer | Severity | Check | Fix | Source |
-| --- | --- | --- | --- | --- | --- |
-| `sheet/overflow` | rendered | 3 | any `data-block` box outside 0..1600 by 0..900 | no | `DECK-GRAMMAR.md:15`, `shoot-slide.mjs:47-56` |
-| `sheet/rail-touch` | rendered | 2 | a text box within 8 px of a rail or rule | no | `DECK-GRAMMAR.md:15` |
-| `sheet/thumb-legible` | rendered | 1 | text under 2 px when the block renders at 0.14x | no | report 03 section 1 |
-| `type/floor-15` | rendered | 3 | computed font size under 15 px on any text node | no | `DECK-GRAMMAR.md:21` |
-| `type/svg-label-min` | static (declared) and rendered (raw) | 3 | diagram text under 18 px, or 18 px without `sm` | no | head:157-160 |
-| `type/weight-cap` | static and rendered | 3 | display weight above 500 outside `spec` | yes | `DECK-GRAMMAR.md:20` |
-| `type/face` | rendered | 3 | a font status of `fallback` for Inter | no | pptx report section 4.4 |
-| `type/sizes-ladder` | static | 2 | a heading or paragraph size outside the ladder | yes | head:59-65 |
-| `color/tokens-only` | static | 3 | a color literal in `html` CSS or raw svg outside the sanctioned exceptions (swatch, panel, logoPlates) | no | `DECK-GRAMMAR.md:28` |
-| `color/semantic-icons-only` | static | 3 | a semantic hue on anything but an `Icon` | no | `DECK-GRAMMAR.md:30` |
-| `icon/placement` | static | 3 | an icon outside a rows key, a plain row start, a board state or a dia; size not 20 or 24 | no | `DECK-GRAMMAR.md:40` |
-| `icon/known` | static | 3 | an `IconName` not in the sprite | no | report 03 section 11 item 12 |
-| `rows/two-lines` | rendered | 2 | a row value taller than two line heights | no | `DECK-GRAMMAR.md:36` |
-| `rows/key-snap` | static | 1 | a key width outside the snap set | yes | report 03 section 11 item 6 |
-| `dia/label-clearance` | static for declared, rendered for raw | 2 | a label box within 12 px of a stroke | no | `DECK-GRAMMAR.md:45` |
-| `dia/stroke-grammar` | static | 2 | stroke not 1 or 1.5, round caps or joins, filled arrowheads over 8 px, fill outside ink, paper, plate | no | `DECK-GRAMMAR.md:44` |
-| `dia/fit-slot` | static | 1 | a `viewBox` width that does not equal its slot width | yes | report 03 section 1 |
-| `dia/half-pixel` | static | 1 | an odd-width stroke on an integer coordinate | yes | report 03 section 5.11 |
-| `asset/twin-or-border` | static | 3 | a `shot` or `pair` image with a `neutral` twin and no border | yes | `DECK-GRAMMAR.md:56` |
-| `asset/credit-on-plate` | static | 3 | a share-alike source whose credit is missing from the plate | no | `OPENERS.md:255` |
-| `asset/license-missing` | static | 2 | a photograph with no license record | no | report 06 section 4 item 9 |
-| `asset/stretched` | rendered | 2 | an image drawn at an aspect other than its file's, outside `crop` | no | `DECK-GRAMMAR.md:61` |
-| `picture/plate-clear` | static (from metrics) | 2 | lit cells inside the plate rectangle or within 30 px of it | no | `OPENERS.md:105, 176` |
-| `picture/blank-twin` | static | 3 | a two-tone twin with lit fraction under 0.02 or over 0.98 | no | `OPENERS.md:251` |
-| `picture/mood-placement` | static | 2 | a mood slide directly before an opener, or two mood slides adjacent | no | `OPENERS.md:137` |
-| `opener/sentence-lists-section` | static | 1 | the opener sentence does not mention each family in the section | no | `OPENERS.md:44` |
-| `lines/law` | rendered | 2 | doubled hairlines within 4 px, junctions drawn twice, a border color outside the three roles | no | `lint-lines.mjs:1-28` |
-| `copy/heading-period` | static | 3 | a heading, plate title or key ending in `.` | yes | `DECK-GRAMMAR.md:22` |
-| `copy/sentence-case` | static | 2 | a heading with Title Case outside the proper-noun and token lists (mode from `deck.json`, open question 13) | yes | `DECK-GRAMMAR.md:22` |
-| `copy/token-first` | static | 2 | a heading starting with a product token | no | `DECK-GRAMMAR.md:22` |
-| `copy/heading-is-name` | static | 2 | a heading containing a domain | no | `DECK-GRAMMAR.md:22` |
-| `copy/no-em-dash`, `copy/no-exclamation` | static | 3 | the characters present | yes | `DECK-GRAMMAR.md:23` |
-| `copy/no-eyebrow` | static | 2 | a short cap or all-caps line as the first block above a heading | no | `DECK-GRAMMAR.md:23` |
-| `copy/full-sentence-caption` | static | 1 | a caption without a terminal period | yes | `DECK-GRAMMAR.md:23` |
-| `copy/contrast-pair` | static | 1 | `not` followed by a comma clause, for the copy judge | no | `DECK-GRAMMAR.md:23` |
-| `copy/metaphor-candidate` | static | 1 | a word list hit (journey, unlock, supercharge) | no | `DECK-GRAMMAR.md:23` |
-| `contrast/both-themes` | rendered | 2 | sampled text against ground under 4.5:1 (3:1 at 26 px and up) in either theme | no | `DECK-GRAMMAR.md:61` |
-| `layout/empty-half` | rendered | 2 | ink coverage under 2 percent in one column of a `cols` slide while the other exceeds 10 | no | `DECK-GRAMMAR.md:61` |
-| `layout/pair-gaps` | rendered | 2 | unequal gaps in a `pair` or `details` grid beyond 2 px | no | `DECK-GRAMMAR.md:61` |
-| `layout/columns-aligned` | rendered | 2 | tops of side-by-side `rows` blocks differing by more than 1 px | no | report 03 section 11 item 4 |
-| `scales/marker-equals-value` | static | 3 | a marker authored rather than derived; only possible in imported `html` | no | `DECK-GRAMMAR.md:61` |
-| `escape/html-block` | static | 2 | an `html` block exists; export is raster for it | no | report 05 section 6.1 |
-| `export/non-native` | static | 1 | a block that exports as raster in the requested mode, listed per export | no | design C section 6.7 |
-| `numbers/contradiction` | static, assisted | 1 | the same noun with different numerals across slides, for the accuracy judge | no | `DECK-GRAMMAR.md:61` |
-| `count/hard-coded` | static | 3 | a numeral equal to the slide count inside copy that should derive from the deck | no | report 06 section 4 item 2 |
+| Rule id                                  | Layer                                 | Severity | Check                                                                                                       | Fix | Source                                        |
+| ---------------------------------------- | ------------------------------------- | -------- | ----------------------------------------------------------------------------------------------------------- | --- | --------------------------------------------- |
+| `sheet/overflow`                         | rendered                              | 3        | any `data-block` box outside 0..1600 by 0..900                                                              | no  | `DECK-GRAMMAR.md:15`, `shoot-slide.mjs:47-56` |
+| `sheet/rail-touch`                       | rendered                              | 2        | a text box within 8 px of a rail or rule                                                                    | no  | `DECK-GRAMMAR.md:15`                          |
+| `sheet/thumb-legible`                    | rendered                              | 1        | text under 2 px when the block renders at 0.14x                                                             | no  | report 03 section 1                           |
+| `type/floor-15`                          | rendered                              | 3        | computed font size under 15 px on any text node                                                             | no  | `DECK-GRAMMAR.md:21`                          |
+| `type/svg-label-min`                     | static (declared) and rendered (raw)  | 3        | diagram text under 18 px, or 18 px without `sm`                                                             | no  | head:157-160                                  |
+| `type/weight-cap`                        | static and rendered                   | 3        | display weight above 500 outside `spec`                                                                     | yes | `DECK-GRAMMAR.md:20`                          |
+| `type/face`                              | rendered                              | 3        | a font status of `fallback` for Inter                                                                       | no  | pptx report section 4.4                       |
+| `type/sizes-ladder`                      | static                                | 2        | a heading or paragraph size outside the ladder                                                              | yes | head:59-65                                    |
+| `color/tokens-only`                      | static                                | 3        | a color literal in `html` CSS or raw svg outside the sanctioned exceptions (swatch, panel, logoPlates)      | no  | `DECK-GRAMMAR.md:28`                          |
+| `color/semantic-icons-only`              | static                                | 3        | a semantic hue on anything but an `Icon`                                                                    | no  | `DECK-GRAMMAR.md:30`                          |
+| `icon/placement`                         | static                                | 3        | an icon outside a rows key, a plain row start, a board state or a dia; size not 20 or 24                    | no  | `DECK-GRAMMAR.md:40`                          |
+| `icon/known`                             | static                                | 3        | an `IconName` not in the sprite                                                                             | no  | report 03 section 11 item 12                  |
+| `rows/two-lines`                         | rendered                              | 2        | a row value taller than two line heights                                                                    | no  | `DECK-GRAMMAR.md:36`                          |
+| `rows/key-snap`                          | static                                | 1        | a key width outside the snap set                                                                            | yes | report 03 section 11 item 6                   |
+| `dia/label-clearance`                    | static for declared, rendered for raw | 2        | a label box within 12 px of a stroke                                                                        | no  | `DECK-GRAMMAR.md:45`                          |
+| `dia/stroke-grammar`                     | static                                | 2        | stroke not 1 or 1.5, round caps or joins, filled arrowheads over 8 px, fill outside ink, paper, plate       | no  | `DECK-GRAMMAR.md:44`                          |
+| `dia/fit-slot`                           | static                                | 1        | a `viewBox` width that does not equal its slot width                                                        | yes | report 03 section 1                           |
+| `dia/half-pixel`                         | static                                | 1        | an odd-width stroke on an integer coordinate                                                                | yes | report 03 section 5.11                        |
+| `asset/twin-or-border`                   | static                                | 3        | a `shot` or `pair` image with a `neutral` twin and no border                                                | yes | `DECK-GRAMMAR.md:56`                          |
+| `asset/credit-on-plate`                  | static                                | 3        | a share-alike source whose credit is missing from the plate                                                 | no  | `OPENERS.md:255`                              |
+| `asset/license-missing`                  | static                                | 2        | a photograph with no license record                                                                         | no  | report 06 section 4 item 9                    |
+| `asset/stretched`                        | rendered                              | 2        | an image drawn at an aspect other than its file's, outside `crop`                                           | no  | `DECK-GRAMMAR.md:61`                          |
+| `picture/plate-clear`                    | static (from metrics)                 | 2        | lit cells inside the plate rectangle or within 30 px of it                                                  | no  | `OPENERS.md:105, 176`                         |
+| `picture/blank-twin`                     | static                                | 3        | a two-tone twin with lit fraction under 0.02 or over 0.98                                                   | no  | `OPENERS.md:251`                              |
+| `picture/mood-placement`                 | static                                | 2        | a mood slide directly before an opener, or two mood slides adjacent                                         | no  | `OPENERS.md:137`                              |
+| `opener/sentence-lists-section`          | static                                | 1        | the opener sentence does not mention each family in the section                                             | no  | `OPENERS.md:44`                               |
+| `lines/law`                              | rendered                              | 2        | doubled hairlines within 4 px, junctions drawn twice, a border color outside the three roles                | no  | `lint-lines.mjs:1-28`                         |
+| `copy/heading-period`                    | static                                | 3        | a heading, plate title or key ending in `.`                                                                 | yes | `DECK-GRAMMAR.md:22`                          |
+| `copy/sentence-case`                     | static                                | 2        | a heading with Title Case outside the proper-noun and token lists (mode from `deck.json`, open question 13) | yes | `DECK-GRAMMAR.md:22`                          |
+| `copy/token-first`                       | static                                | 2        | a heading starting with a product token                                                                     | no  | `DECK-GRAMMAR.md:22`                          |
+| `copy/heading-is-name`                   | static                                | 2        | a heading containing a domain                                                                               | no  | `DECK-GRAMMAR.md:22`                          |
+| `copy/no-em-dash`, `copy/no-exclamation` | static                                | 3        | the characters present                                                                                      | yes | `DECK-GRAMMAR.md:23`                          |
+| `copy/no-eyebrow`                        | static                                | 2        | a short cap or all-caps line as the first block above a heading                                             | no  | `DECK-GRAMMAR.md:23`                          |
+| `copy/full-sentence-caption`             | static                                | 1        | a caption without a terminal period                                                                         | yes | `DECK-GRAMMAR.md:23`                          |
+| `copy/contrast-pair`                     | static                                | 1        | `not` followed by a comma clause, for the copy judge                                                        | no  | `DECK-GRAMMAR.md:23`                          |
+| `copy/metaphor-candidate`                | static                                | 1        | a word list hit (journey, unlock, supercharge)                                                              | no  | `DECK-GRAMMAR.md:23`                          |
+| `contrast/both-themes`                   | rendered                              | 2        | sampled text against ground under 4.5:1 (3:1 at 26 px and up) in either theme                               | no  | `DECK-GRAMMAR.md:61`                          |
+| `layout/empty-half`                      | rendered                              | 2        | ink coverage under 2 percent in one column of a `cols` slide while the other exceeds 10                     | no  | `DECK-GRAMMAR.md:61`                          |
+| `layout/pair-gaps`                       | rendered                              | 2        | unequal gaps in a `pair` or `details` grid beyond 2 px                                                      | no  | `DECK-GRAMMAR.md:61`                          |
+| `layout/columns-aligned`                 | rendered                              | 2        | tops of side-by-side `rows` blocks differing by more than 1 px                                              | no  | report 03 section 11 item 4                   |
+| `scales/marker-equals-value`             | static                                | 3        | a marker authored rather than derived; only possible in imported `html`                                     | no  | `DECK-GRAMMAR.md:61`                          |
+| `escape/html-block`                      | static                                | 2        | an `html` block exists; export is raster for it                                                             | no  | report 05 section 6.1                         |
+| `export/non-native`                      | static                                | 1        | a block that exports as raster in the requested mode, listed per export                                     | no  | design C section 6.7                          |
+| `numbers/contradiction`                  | static, assisted                      | 1        | the same noun with different numerals across slides, for the accuracy judge                                 | no  | `DECK-GRAMMAR.md:61`                          |
+| `count/hard-coded`                       | static                                | 3        | a numeral equal to the slide count inside copy that should derive from the deck                             | no  | report 06 section 4 item 2                    |
 
 Metaphors, fragment rhythm and comma-tail headings stay with the copy judge; the linter flags candidates at severity 1 only.
 
@@ -881,17 +1250,17 @@ Flatten mode. One 2x PNG of the whole sheet per slide as the slide background (w
 
 The deck embeds InterVariable 4.001 with `opsz` 14 to 32 and `font-optical-sizing: auto`, so 15 to 31 px text uses an optical size no static Inter file has (pptx report section 4.10); `fsType` is 0, installable embedding. `scripts/build-fonts.py` cuts the export set once with fontTools `varLib.instancer` and `pyftfeatfreeze` (https://github.com/twardoch/fonttools-opentype-feature-freezer) into `packages/fonts/export/` with `fonts.json` mapping `(sizePx, weight, display)` to a family name. Resolution: design A defaulted to a three-family `standard` set and the look judge counted that a weakness; design C defaulted to per-size instances. The spec makes `--fonts exact` the default and keeps `--fonts standard` as the fallback for people who do not want twelve family names in a file.
 
-| Family name emitted | Instance | Used for | Set |
-| --- | --- | --- | --- |
-| `GT Inter Display` | opsz 32, wght 500, `cv11` and `ss01` frozen | h1 88, `.big` 72, h2 44, mood title 44 | exact and standard |
-| `GT Inter Text 26`, `GT Inter Text 26 Medium` | opsz 26, wght 400 and 500 | `.lead`, `.lab` | exact |
-| `GT Inter Text 24 Medium` | opsz 24, wght 500 | `.plain` | exact |
-| `GT Inter Text 22` | opsz 22, wght 400 | p | exact |
-| `GT Inter Text 20`, `GT Inter Text 20 Medium` | opsz 20, wght 400 and 500 | rows, dia text | exact |
-| `GT Inter Text 18`, `GT Inter Text 18 Medium` | opsz 18 | `.sm`, scale labels | exact |
-| `GT Inter Text 15` | opsz 15, wght 400 | `.cap`, credit | exact |
-| `GT Inter Text 14` | opsz 14, wght 400 | counter, specimen small | exact |
-| `Inter`, `Inter Medium` | opsz 14, wght 400 and 500 | everything under 44 px | standard |
+| Family name emitted                           | Instance                                    | Used for                               | Set                |
+| --------------------------------------------- | ------------------------------------------- | -------------------------------------- | ------------------ |
+| `GT Inter Display`                            | opsz 32, wght 500, `cv11` and `ss01` frozen | h1 88, `.big` 72, h2 44, mood title 44 | exact and standard |
+| `GT Inter Text 26`, `GT Inter Text 26 Medium` | opsz 26, wght 400 and 500                   | `.lead`, `.lab`                        | exact              |
+| `GT Inter Text 24 Medium`                     | opsz 24, wght 500                           | `.plain`                               | exact              |
+| `GT Inter Text 22`                            | opsz 22, wght 400                           | p                                      | exact              |
+| `GT Inter Text 20`, `GT Inter Text 20 Medium` | opsz 20, wght 400 and 500                   | rows, dia text                         | exact              |
+| `GT Inter Text 18`, `GT Inter Text 18 Medium` | opsz 18                                     | `.sm`, scale labels                    | exact              |
+| `GT Inter Text 15`                            | opsz 15, wght 400                           | `.cap`, credit                         | exact              |
+| `GT Inter Text 14`                            | opsz 14, wght 400                           | counter, specimen small                | exact              |
+| `Inter`, `Inter Medium`                       | opsz 14, wght 400 and 500                   | everything under 44 px                 | standard           |
 
 The prefix `GT Inter` is provisional until Inter's OFL is read for a Reserved Font Name (https://github.com/rsms/inter/blob/master/LICENSE.txt; open question 5). The set is installed on the render worker so LibreOffice renders with it and embedded into every PPTX; without it every renderer substitutes (measured: QuickLook drew a Times-class serif, widths differ by 2 to 13 percent, pptx report section 4.4). Google Slides always uses Google Fonts' Inter; which build it serves and whether `opsz` applies is undocumented (https://github.com/google/fonts/issues/3429). Keynote reportedly ignores embedded fonts and PowerPoint for the web is not listed among the versions honoring them (https://support.microsoft.com/en-us/office/benefits-of-embedding-custom-fonts-cb3982aa-ea76-4323-b008-86670f222dbc); `ExportReport.fonts.substitutedIn` names them.
 
@@ -912,26 +1281,26 @@ Measured baseline on this machine (QuickLook, no Inter installed, first slide on
 
 Verified means read back from the XML or measured in a render on this machine. Risk: low is antialiasing only; medium is a measurable difference calibration or a font set removes; high is a visible difference or a missing feature.
 
-| Deck element | PPTX | Google Slides | Verified here | Risk | Mode |
-| --- | --- | --- | --- | --- | --- |
-| Body, lead, caption, row text | text box, `sz` centipoints, `spcPts` pitch, margin 0, `<a:br/>` per browser line, per-size family | TEXT_BOX, `weightedFontFamily`, percent `lineSpacing`, hard breaks | XML exact; baseline within 1 px in QuickLook | low with fonts; medium in Slides (pitch percent, inset) | native |
-| Headings h1, h2, `.big` | same plus `spc -66` and `-108`, `GT Inter Display` with frozen `cv11`, `ss01` | no tracking, no features, about 2.5 percent wider; `--headings raster` optional | XML exact | medium in PPTX; high in Slides | native, or raster in Slides |
-| Rails, rules, crosses | master lines `w="7620"` in composite colors; alpha lines over pictures | STRAIGHT lines at 0.45 pt, grouped; alpha over pictures | XML exact; within 1 px | low; Slides' minimum honored weight unverified | native |
-| Counter, wordmark | text box `sz="780" spc="16"`; mark as 2x PNG | text box; PNG | XML exact | low | native text, raster mark |
-| Plates and paper chips over a picture | rectangles at DOM boxes with `type: 'none'`; picture as `p:bg` blip | RECTANGLE; `stretchedPictureFill` | XML exact; geometry read back | low | native plate, raster picture |
-| Two-tone dithers | 1-bit or palette PNG at 2x or 3x | PNG from signed URL | byte identical; 71.99 percent cell exact and 17.96 percent grey at a 0.22 percent stretch | medium and unavoidable at any non-1:1 zoom | raster |
-| Ruled tables `.rows` | five hairlines plus key and value boxes, grouped | lines plus boxes, grouped | XML exact; lines within 1 px | low | native |
-| Ruled lists `.plain` | boxes plus hair-soft lines; `strike="sngStrike"` | same; `strikethrough` | XML | medium: strike color and thickness not controllable | native |
-| Semantic icons | RGBA PNG at 3x | PNG | byte identical; alpha honored | low | raster |
-| GT mark, inline diagrams, iso plate | `custGeom` possible (136 points) but no fill rule; PNG by default | PNG only | FREEFORM read back | medium native; low raster | raster |
-| Shader materials | frozen frame PNG with recipe key in alt text | PNG | 43 ms to first frame, Metal and SwiftShader | low | raster |
-| Live dither canvas | 2x PNG | PNG | crisp at 2x | medium (greys under zoom) | raster |
-| Code panel | text box on `#101010`, system mono | same with a Google mono font | not measured | medium: face differs per machine unless a mono font is embedded | native |
-| Speaker notes | `addNotes` | `insertText` into `speakerNotesObjectId` | three notes parts | low | native |
-| Invisible text layer (flatten) | `transparency: 100` gives `<a:alpha val="0"/>` | `foregroundColor` alpha 0 | XML; Slides unverified | low | native over raster |
-| Font embedding | OOXML `.fntdata` post-process | none (Google Fonts) | package valid, python-pptx reopens; QuickLook ignores | high until PowerPoint confirms | n/a |
-| Weight 500 | a family name | `weightedFontFamily.weight` 500 | n/a | medium in PPTX | n/a |
-| 140 ms cut, live theme switch, shaders in motion | none | none | n/a | dropped; one theme per file | drop |
+| Deck element                                     | PPTX                                                                                              | Google Slides                                                                   | Verified here                                                                             | Risk                                                            | Mode                         |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ---------------------------- |
+| Body, lead, caption, row text                    | text box, `sz` centipoints, `spcPts` pitch, margin 0, `<a:br/>` per browser line, per-size family | TEXT_BOX, `weightedFontFamily`, percent `lineSpacing`, hard breaks              | XML exact; baseline within 1 px in QuickLook                                              | low with fonts; medium in Slides (pitch percent, inset)         | native                       |
+| Headings h1, h2, `.big`                          | same plus `spc -66` and `-108`, `GT Inter Display` with frozen `cv11`, `ss01`                     | no tracking, no features, about 2.5 percent wider; `--headings raster` optional | XML exact                                                                                 | medium in PPTX; high in Slides                                  | native, or raster in Slides  |
+| Rails, rules, crosses                            | master lines `w="7620"` in composite colors; alpha lines over pictures                            | STRAIGHT lines at 0.45 pt, grouped; alpha over pictures                         | XML exact; within 1 px                                                                    | low; Slides' minimum honored weight unverified                  | native                       |
+| Counter, wordmark                                | text box `sz="780" spc="16"`; mark as 2x PNG                                                      | text box; PNG                                                                   | XML exact                                                                                 | low                                                             | native text, raster mark     |
+| Plates and paper chips over a picture            | rectangles at DOM boxes with `type: 'none'`; picture as `p:bg` blip                               | RECTANGLE; `stretchedPictureFill`                                               | XML exact; geometry read back                                                             | low                                                             | native plate, raster picture |
+| Two-tone dithers                                 | 1-bit or palette PNG at 2x or 3x                                                                  | PNG from signed URL                                                             | byte identical; 71.99 percent cell exact and 17.96 percent grey at a 0.22 percent stretch | medium and unavoidable at any non-1:1 zoom                      | raster                       |
+| Ruled tables `.rows`                             | five hairlines plus key and value boxes, grouped                                                  | lines plus boxes, grouped                                                       | XML exact; lines within 1 px                                                              | low                                                             | native                       |
+| Ruled lists `.plain`                             | boxes plus hair-soft lines; `strike="sngStrike"`                                                  | same; `strikethrough`                                                           | XML                                                                                       | medium: strike color and thickness not controllable             | native                       |
+| Semantic icons                                   | RGBA PNG at 3x                                                                                    | PNG                                                                             | byte identical; alpha honored                                                             | low                                                             | raster                       |
+| GT mark, inline diagrams, iso plate              | `custGeom` possible (136 points) but no fill rule; PNG by default                                 | PNG only                                                                        | FREEFORM read back                                                                        | medium native; low raster                                       | raster                       |
+| Shader materials                                 | frozen frame PNG with recipe key in alt text                                                      | PNG                                                                             | 43 ms to first frame, Metal and SwiftShader                                               | low                                                             | raster                       |
+| Live dither canvas                               | 2x PNG                                                                                            | PNG                                                                             | crisp at 2x                                                                               | medium (greys under zoom)                                       | raster                       |
+| Code panel                                       | text box on `#101010`, system mono                                                                | same with a Google mono font                                                    | not measured                                                                              | medium: face differs per machine unless a mono font is embedded | native                       |
+| Speaker notes                                    | `addNotes`                                                                                        | `insertText` into `speakerNotesObjectId`                                        | three notes parts                                                                         | low                                                             | native                       |
+| Invisible text layer (flatten)                   | `transparency: 100` gives `<a:alpha val="0"/>`                                                    | `foregroundColor` alpha 0                                                       | XML; Slides unverified                                                                    | low                                                             | native over raster           |
+| Font embedding                                   | OOXML `.fntdata` post-process                                                                     | none (Google Fonts)                                                             | package valid, python-pptx reopens; QuickLook ignores                                     | high until PowerPoint confirms                                  | n/a                          |
+| Weight 500                                       | a family name                                                                                     | `weightedFontFamily.weight` 500                                                 | n/a                                                                                       | medium in PPTX                                                  | n/a                          |
+| 140 ms cut, live theme switch, shaders in motion | none                                                                                              | none                                                                            | n/a                                                                                       | dropped; one theme per file                                     | drop                         |
 
 What is honestly not identical: native mode never matches glyph antialiasing, so the gate is a tolerance; `cv11` and `ss01` reach PowerPoint through the frozen family and never reach Slides; intermediate optical sizes exist only in PPTX exact mode; Slides has no letter spacing, exact pitch, inset, page size, image crop, SVG or custom geometry; weight 500 in PPTX depends on the embed or the install; two-tone dithers grey at any non-1:1 zoom in every office application; shaders, canvases and live theme do not exist in office formats; the GT mark stays a PNG until PowerPoint confirms `custGeom` fill of self-overlapping subpaths; PowerPoint's first-baseline constant, EOT acceptance, Keynote's handling of embedded fonts and the Drive import page size remain unverified until those applications are run.
 
@@ -939,34 +1308,34 @@ What is honestly not identical: native mode never matches glyph antialiasing, so
 
 `turboslide import /Users/kevinliu/repos/Prototemplate/deck --into gt-brand` parses `parts/head.html` (to confirm the theme matches), every `slides/NN-*.html` with parse5, `SECTIONS` from tail:83 for the eight sections, and `shots/OPENERS.md` and `shots/DETAILS.md` for asset provenance, treatment parameters, credits, licenses and captions. It writes `decks/gt-brand/` and `import-report.json` with a per-slide row: id, kind, layout, blocks, scoped style rules consumed, rules left over, and whether an `html` block was needed and why. Slide ids are slugs from the file names (`05-why.html` becomes `why`); block ids follow document order (`h`, `p1`, `p2`, `list`, `fig`, `dia1`); `import-ids.json` maps source file and block path to id so a re-import keeps ids stable and findings, leases and MCP addresses survive (from design B). The count disappears; the 46 stale scoped class names vanish because the importer consumes the rules they scope.
 
-| head.html class or pattern | Block or property | Slides |
-| --- | --- | --- |
-| `section.slide.opener.s-opener` with the copied style block, `img.opener-img`, `.opener-plate` | `kind: 'opener'`, `picture`, `plate` lower-left; the style block is recognized as the known text and dropped | 01, 16, 31, 42, 47, 56, 60, 79 |
-| `.mood` with `.mood-plate` | `kind: 'mood'`, plate lower-right | 06, 10, 24, 37, 45, 50, 58, 70, 81 |
-| `.s-closing` with the plate at the top | `kind: 'closing'`, `mark` | 85 |
-| `.left-mid` with mark, h1, lead | `kind: 'title'` | 02 |
-| `.center > .big` | `kind: 'statement'`, `measure` from the inline `max-width` | 03 |
-| `.cols`, `.cols.even`, `.cols.wide-right`; scoped `grid-template-columns` overrides | `layout: cols` with ratio `5/7`, `1/1`, `4/8`, or `{ left: 390 }`, `{ left: 380 }`, `{ right: 568 }` | 40 slides |
-| `.split`; scoped `gap` overrides; `.lay` flex columns | `layout: split` with `gap` 56, 44, 40, 36, 32, 26 | 21 plus 4 `.lay` |
-| `.split > .head` turned into a grid by scoped CSS | `head: { cols: '5/7' or '4/8' }` | 21, 34, 38, 51, 55, 61, 62, 65, 72, 80, 84 |
-| `h1`, `h2`, `.big`, `p`, `.lead`, `.cap`, `.muted`, `.max`, `.max-p`; inline margins | `heading`, `paragraph` with `role`, `tone`, `measure`, `marginTop`; `<b>` to `*x*`, `<a>` to `[x](url)`, `.gt-word` to `GT` | everywhere |
-| `.rows` with `--key` inline or scoped, `.tight`, `.narrow`, `.links`, `.ic` in `b` | `rows` with `key`, `tight`, `links`, items with `icon` and `ext` | 23 |
-| `.plain` with `.ic` and `.no`; scoped size | `plain` with `size` | 30, 53, 73, 83, 84 |
-| `.refs`, `.s09 .ex` (the re-implemented `.say`) | `refs`, `say` | 71, 12 |
-| `.scales` with inline marker `left: NN%` and the center tick rule | `scales` with `value` and `centerTick` | 11 |
-| `.spec`, `.lang`, `.ladder`, `.swatches` | the specimen blocks | 19, 20, 21, 18 |
-| `.shot`, `.shot.fit`, `.shot-wrap`, `figure` with `figcaption`; scoped caption size, `.crop`, `aspect-ratio`, fixed `width` | `shot` with `fit`, `captionSize`, `aspect`, `crop`, `width` | 12 slides |
-| `.pair`, inline `grid-template-columns` ratios, two images per figure | `pair` with `ratio`, `gap`, `figures[].assets` | 34, 35, 36, 51, 55, 63, 76 |
-| `.refgrid`, `.dirs`, `.eng`, `.mats`, `.sizes` | `tiles`; `markSizes` | 13, 69, 72, 77, 17 |
-| `.dgrid`, `.strips` | `details` with `rowHeights` | 38, 65, 39 |
-| `.board` | `board` | 80 |
-| `.panel`, `.panel.term`, `white-space: pre` | `panel` with `size`, `pre`, `term`, `marks` | 44, 57, 59, 71, 78, 83, 84 |
-| `svg.dia` | `dia` with `svg` (raw) and `fit` inferred from the viewBox (522, 731, 418, 627, 639, 1326, 300 match `slot`); declared `data` is a later conversion | 23 diagrams on 20 slides |
-| `canvas.dither`; the inline 4 by 4 table | `dither`; `matrix` | 26 |
-| standalone `<svg><use href="#gt-mark">` | `mark` | 02, 15, 17, 85 |
-| `.lineage` with `#ffffff` plates | `logoPlates` | 14 |
-| `img src` and `data-dark` | assets with twins; `OPENERS.md` and `DETAILS.md` supply source, license, credit, crop and caption | 117 references, 90 twins, 246 files |
-| anything left after the above | `html` with the residual scoped CSS and the section markup, `note` naming the rules | see below |
+| head.html class or pattern                                                                                                  | Block or property                                                                                                                                   | Slides                                     |
+| --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `section.slide.opener.s-opener` with the copied style block, `img.opener-img`, `.opener-plate`                              | `kind: 'opener'`, `picture`, `plate` lower-left; the style block is recognized as the known text and dropped                                        | 01, 16, 31, 42, 47, 56, 60, 79             |
+| `.mood` with `.mood-plate`                                                                                                  | `kind: 'mood'`, plate lower-right                                                                                                                   | 06, 10, 24, 37, 45, 50, 58, 70, 81         |
+| `.s-closing` with the plate at the top                                                                                      | `kind: 'closing'`, `mark`                                                                                                                           | 85                                         |
+| `.left-mid` with mark, h1, lead                                                                                             | `kind: 'title'`                                                                                                                                     | 02                                         |
+| `.center > .big`                                                                                                            | `kind: 'statement'`, `measure` from the inline `max-width`                                                                                          | 03                                         |
+| `.cols`, `.cols.even`, `.cols.wide-right`; scoped `grid-template-columns` overrides                                         | `layout: cols` with ratio `5/7`, `1/1`, `4/8`, or `{ left: 390 }`, `{ left: 380 }`, `{ right: 568 }`                                                | 40 slides                                  |
+| `.split`; scoped `gap` overrides; `.lay` flex columns                                                                       | `layout: split` with `gap` 56, 44, 40, 36, 32, 26                                                                                                   | 21 plus 4 `.lay`                           |
+| `.split > .head` turned into a grid by scoped CSS                                                                           | `head: { cols: '5/7' or '4/8' }`                                                                                                                    | 21, 34, 38, 51, 55, 61, 62, 65, 72, 80, 84 |
+| `h1`, `h2`, `.big`, `p`, `.lead`, `.cap`, `.muted`, `.max`, `.max-p`; inline margins                                        | `heading`, `paragraph` with `role`, `tone`, `measure`, `marginTop`; `<b>` to `*x*`, `<a>` to `[x](url)`, `.gt-word` to `GT`                         | everywhere                                 |
+| `.rows` with `--key` inline or scoped, `.tight`, `.narrow`, `.links`, `.ic` in `b`                                          | `rows` with `key`, `tight`, `links`, items with `icon` and `ext`                                                                                    | 23                                         |
+| `.plain` with `.ic` and `.no`; scoped size                                                                                  | `plain` with `size`                                                                                                                                 | 30, 53, 73, 83, 84                         |
+| `.refs`, `.s09 .ex` (the re-implemented `.say`)                                                                             | `refs`, `say`                                                                                                                                       | 71, 12                                     |
+| `.scales` with inline marker `left: NN%` and the center tick rule                                                           | `scales` with `value` and `centerTick`                                                                                                              | 11                                         |
+| `.spec`, `.lang`, `.ladder`, `.swatches`                                                                                    | the specimen blocks                                                                                                                                 | 19, 20, 21, 18                             |
+| `.shot`, `.shot.fit`, `.shot-wrap`, `figure` with `figcaption`; scoped caption size, `.crop`, `aspect-ratio`, fixed `width` | `shot` with `fit`, `captionSize`, `aspect`, `crop`, `width`                                                                                         | 12 slides                                  |
+| `.pair`, inline `grid-template-columns` ratios, two images per figure                                                       | `pair` with `ratio`, `gap`, `figures[].assets`                                                                                                      | 34, 35, 36, 51, 55, 63, 76                 |
+| `.refgrid`, `.dirs`, `.eng`, `.mats`, `.sizes`                                                                              | `tiles`; `markSizes`                                                                                                                                | 13, 69, 72, 77, 17                         |
+| `.dgrid`, `.strips`                                                                                                         | `details` with `rowHeights`                                                                                                                         | 38, 65, 39                                 |
+| `.board`                                                                                                                    | `board`                                                                                                                                             | 80                                         |
+| `.panel`, `.panel.term`, `white-space: pre`                                                                                 | `panel` with `size`, `pre`, `term`, `marks`                                                                                                         | 44, 57, 59, 71, 78, 83, 84                 |
+| `svg.dia`                                                                                                                   | `dia` with `svg` (raw) and `fit` inferred from the viewBox (522, 731, 418, 627, 639, 1326, 300 match `slot`); declared `data` is a later conversion | 23 diagrams on 20 slides                   |
+| `canvas.dither`; the inline 4 by 4 table                                                                                    | `dither`; `matrix`                                                                                                                                  | 26                                         |
+| standalone `<svg><use href="#gt-mark">`                                                                                     | `mark`                                                                                                                                              | 02, 15, 17, 85                             |
+| `.lineage` with `#ffffff` plates                                                                                            | `logoPlates`                                                                                                                                        | 14                                         |
+| `img src` and `data-dark`                                                                                                   | assets with twins; `OPENERS.md` and `DETAILS.md` supply source, license, credit, crop and caption                                                   | 117 references, 90 twins, 246 files        |
+| anything left after the above                                                                                               | `html` with the residual scoped CSS and the section markup, `note` naming the rules                                                                 | see below                                  |
 
 Escape count. With the twenty grammar blocks plus `tiles`, `details`, `board`, `matrix`, `logoPlates` and `markSizes` in the M1 catalog and the layout variants above, report 03 Appendix A leaves four escape candidates: 67 (the composite `.tools` and `.rig` figure grids), 83 (the `.two` grid with a `.fixed` plate beside a list), 84 (the `.proof` bench: a diagram, a terminal panel and a docs crop in one grid), and 25 (two three-row tables with forced 79 px row heights beside four example diagrams). Resolution: designs B and C estimated eight or nine because their M1 catalogs were smaller; the spec takes A's larger M1 catalog, so the M1 target is at most four `html` blocks out of 85, verified by `import-report.json`, and the `composite` block in M5 brings the deck to zero. The number is measured, not estimated, and it is the honest scope of the grammar.
 

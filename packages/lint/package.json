@@ -18,6 +18,7 @@
     "./static/dia": "./src/static/dia.ts",
     "./static/asset": "./src/static/asset.ts",
     "./static/structure": "./src/static/structure.ts",
+    "./static/export-non-native": "./src/static/export-non-native.ts",
     "./rendered/rules": "./src/rendered/rules.ts",
     "./fixtures/deck": "./src/fixtures/deck.ts",
     "./package.json": "./package.json"

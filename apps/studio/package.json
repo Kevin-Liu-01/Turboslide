@@ -23,6 +23,7 @@
     "@turboslide/chrome": "workspace:*",
     "@turboslide/fonts": "workspace:*",
     "@turboslide/render": "workspace:*",
+    "@turboslide/render-worker": "workspace:*",
     "@turboslide/schema": "workspace:*",
     "@turboslide/theme": "workspace:*",
     "@turboslide/viewer": "workspace:*",

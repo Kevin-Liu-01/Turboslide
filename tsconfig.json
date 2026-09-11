@@ -10,10 +10,14 @@
     { "path": "packages/lint" },
     { "path": "packages/headless" },
     { "path": "packages/import" },
+    { "path": "packages/export" },
     { "path": "packages/agent" },
+    { "path": "packages/store" },
+    { "path": "packages/mcp" },
     { "path": "packages/viewer" },
     { "path": "packages/chrome" },
     { "path": "apps/cli" },
+    { "path": "apps/render-worker" },
     { "path": "apps/studio" }
   ]
 }

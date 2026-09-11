@@ -4,8 +4,12 @@
   "kind": "content",
   "layout": {
     "type": "split",
+    "gap": 56,
     "head": {
       "cols": "5/7"
+    },
+    "body": {
+      "align": "center"
     }
   },
   "slots": {
@@ -28,6 +32,10 @@
       {
         "id": "pair",
         "type": "pair",
+        "ratio": {
+          "left": 27,
+          "right": 16
+        },
         "figures": [
           {
             "assets": [
@@ -41,11 +49,7 @@
             ],
             "caption": "The reel ends on this frame with the grant amount."
           }
-        ],
-        "ratio": {
-          "left": 27,
-          "right": 16
-        }
+        ]
       }
     ]
   }

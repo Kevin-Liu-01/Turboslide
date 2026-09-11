@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tooling/tsconfig/node.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "paths": {
+      "sharp": ["./node_modules/sharp/lib/index.d.ts"]
+    }
+  },
+  "include": ["src", "vitest.config.ts"],
+  "references": [
+    {
+      "path": "../schema"
+    },
+    {
+      "path": "../theme"
+    },
+    {
+      "path": "../fonts"
+    },
+    {
+      "path": "../render"
+    },
+    {
+      "path": "../effects"
+    },
+    {
+      "path": "../headless"
+    }
+  ]
+}

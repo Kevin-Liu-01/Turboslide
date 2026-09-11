@@ -4,7 +4,9 @@
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "1/1"
+    "ratio": "1/1",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -38,38 +40,38 @@
         "items": [
           {
             "key": "Entrance",
-            "value": "Content enters once with a 16px rise. It does not re-animate when scrolling back up.",
             "icon": {
               "name": "arrow-up"
-            }
+            },
+            "value": "Content enters once with a 16px rise. It does not re-animate when scrolling back up."
           },
           {
             "key": "Paused by default",
-            "value": "Every loop starts paused and plays only while its section and tab are visible.",
             "icon": {
               "name": "pause-circle"
-            }
+            },
+            "value": "Every loop starts paused and plays only while its section and tab are visible."
           },
           {
             "key": "Timeline",
-            "value": "Multi-step choreography runs on one timeline so steps cannot drift out of sync.",
             "icon": {
               "name": "adjustments-horizontal"
-            }
+            },
+            "value": "Multi-step choreography runs on one timeline so steps cannot drift out of sync."
           },
           {
             "key": "Reduced motion",
-            "value": "Under prefers-reduced-motion, nothing is animated. The markup is the final frame.",
             "icon": {
               "name": "eye-slash"
-            }
+            },
+            "value": "Under prefers-reduced-motion, nothing is animated. The markup is the final frame."
           },
           {
             "key": "Native scroll",
-            "value": "The browser scrolls. No library adds smooth scrolling, scroll hijacking, or inertia.",
             "icon": {
               "name": "arrows-up-down"
-            }
+            },
+            "value": "The browser scrolls. No library adds smooth scrolling, scroll hijacking, or inertia."
           }
         ]
       }

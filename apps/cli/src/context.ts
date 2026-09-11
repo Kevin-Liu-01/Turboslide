@@ -19,4 +19,6 @@ export type CommandContext = {
   author: Author;
   /** The positionals after the command (and subcommand) words. */
   rest: string[];
+  /** Reads standard input to the end; the write commands take documents from it (SPEC 7.2). */
+  readStdin: () => Promise<string>;
 };

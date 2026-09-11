@@ -41,4 +41,6 @@ export type { Mutation } from '@turboslide/schema/mutations';
 export type { Box, RenderRecord } from '@turboslide/schema/render';
 export type { SlideId, BlockId, AssetId, SectionId } from '@turboslide/schema/ids';
 export type { Text } from '@turboslide/schema/text';
+export { parseText } from '@turboslide/schema/text';
 export { ICON_NAMES } from '@turboslide/schema/icons';
+export { NATIVE_BLOCK_TYPES, isNativeBlockType } from '@turboslide/schema/export';

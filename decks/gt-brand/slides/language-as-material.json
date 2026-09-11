@@ -1,10 +1,18 @@
 {
   "schemaVersion": 1,
   "id": "language-as-material",
+  "ext": {
+    "import": {
+      "css": ".ts-x-language-as-material .rows > div { gap: 24px; }",
+      "scope": "s22"
+    }
+  },
   "kind": "content",
   "layout": {
     "type": "cols",
-    "ratio": "1/1"
+    "ratio": "1/1",
+    "gap": 72,
+    "align": "center"
   },
   "slots": {
     "left": [
@@ -44,33 +52,27 @@
         "items": [
           {
             "key": "Text node",
-            "value": "The morphing unit is one shaped text node. Per-⁠character spans break Arabic joining.",
             "icon": {
               "name": "language"
-            }
+            },
+            "value": "The morphing unit is one shaped text node. Per-⁠character spans break Arabic joining."
           },
           {
             "key": "Width",
-            "value": "A hidden probe in the word's language sets the width. Only container width animates.",
             "icon": {
               "name": "arrows-right-left"
-            }
+            },
+            "value": "A hidden probe in the word's language sets the width. Only container width animates."
           },
           {
             "key": "Clock",
-            "value": "The component has no timer. The host page drives it, so every animation shares one clock.",
             "icon": {
               "name": "clock"
-            }
+            },
+            "value": "The component has no timer. The host page drives it, so every animation shares one clock."
           }
         ]
       }
     ]
-  },
-  "ext": {
-    "import": {
-      "css": ".ts-x-language-as-material .rows > div { gap: 24px; }",
-      "scope": "s22"
-    }
   }
 }

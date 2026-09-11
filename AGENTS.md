@@ -94,16 +94,18 @@ a 10.7 GB log in eleven minutes) and from the parallel-builder setup.
 
 ## Acceptance
 
-`pnpm check` runs `scripts/check.mjs`: the M1 acceptance chain from the milestone plan, in order,
-stopping at the first failure. `node scripts/check.mjs --list` prints the steps; `--only 4,5` and
-`--from 6` run parts of it. The runner skips the two steps that read the Prototemplate checkout
-when `/Users/kevinliu/repos/Prototemplate/deck` (or `TURBOSLIDE_PROTOTEMPLATE_DECK`) is missing,
-which is the case in CI, and starts and stops the dev server for the two steps that need it.
+`pnpm check` runs `scripts/check.mjs`: the M1 acceptance chain from the milestone plan followed by
+the M2 format gate (`pnpm format:check`, step 19), in order, stopping at the first failure.
+`node scripts/check.mjs --list` prints the steps; `--only 4,5` and `--from 6` run parts of it. The
+runner skips the two steps that read the Prototemplate checkout when
+`/Users/kevinliu/repos/Prototemplate/deck` (or `TURBOSLIDE_PROTOTEMPLATE_DECK`) is missing, which
+is the case in CI, and starts and stops the dev server for the two steps that need it.
 
-All 18 steps pass on the M1 tree (2026-09-10, 219 s on Kevin's machine with the Prototemplate
-checkout present); `docs/M1-STATUS.md` records every step with its measured numbers. On the bare
-scaffold only steps 1 to 6 passed (install, route generation, contracts generation, `tsc -b`,
-vitest, build plus the client bundle check).
+All 18 M1 steps passed on the M1 tree (2026-09-10, 219 s on Kevin's machine with the Prototemplate
+checkout present); `docs/M1-STATUS.md` records every step with its measured numbers. All 19 steps
+pass on the M2 tree (2026-09-10, 145.4 s on the same machine); `docs/M2-STATUS.md` records them
+with the rest of the M2 acceptance list. On the bare scaffold only steps 1 to 6 passed (install,
+route generation, contracts generation, `tsc -b`, vitest, build plus the client bundle check).
 
 Type checking: `pnpm exec tsr generate` must run before `tsc -b` because `routeTree.gen.ts` is
 generated and git-ignored (measured: three type errors otherwise). `tsc -b` writes declaration
@@ -164,6 +166,20 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
 - `eslint` is 10.10.0: `@tanstack/eslint-config` 0.4.0 depends on `@eslint/js` 10, and 9.39.5 is
   deprecated on npm.
 - The Chromium revision note above.
+- Flatten export verification compares at 2x, not 1x (M2 integration, `docs/export-verification.md`):
+  SPEC 8.5 states the 0.1 percent gate against the Playwright reference without naming a scale,
+  and a flatten page carries a 2x sheet raster, so the PDF is rasterized at 3200 by 1800 and the
+  reference is `render --scale 2`; measured at 1x the rasterizer's downsample alone costs 0.1 to
+  0.4 percent per text slide. Inside a regenerated two-tone picture the page is gated on the 2x
+  sheet shot it embeds, because the browser at 2x shows a bilinear upscale of the 1x twin.
+- Native text boxes are moved up by LibreOffice's measured first-baseline offset
+  (`packages/export/src/pptx/baseline.ts`, `calibration.json` `firstBaselineModel`); the CLI flag
+  is `--baseline-target libreoffice|none` because `lint --baseline` already names a switch. The
+  action input field is `baseline`.
+- `apps/studio` externalizes `sharp` in its Vite configs (`externalSharp()`): the render worker
+  client reaches `@turboslide/effects/io` through the local verify job, and the tsconfig `paths`
+  alias the effects, export and cli packages need for sharp's types would otherwise send
+  rolldown into `lib/index.d.ts` (measured: `MISSING_EXPORT "default"` on the SSR build).
 - The acceptance line names `apps/studio/src/routes/openapi.json.ts`. The file is
   `apps/studio/src/routes/openapi[.]json.ts` because TanStack Router's file-based routing escapes
   a dot inside a path segment as `[.]` (the route path stays `/openapi.json`), and the

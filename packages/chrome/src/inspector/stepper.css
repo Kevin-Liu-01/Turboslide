@@ -1,0 +1,68 @@
+/* The stepper: two 22px squares either side of a 64px number field, 22px tall like every
+   field in a 32px row (5px from the row's rule). The field draws the one --pt-hair box (ink
+   while focused); the buttons are .pt-ib icon squares and draw their border only on hover, as
+   every shell button does, so the three read as one control with one line. */
+.ts-ctl-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ts-ctl-stepper .pt-ib.ts-ctl-step {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  justify-content: center;
+  font-family: var(--pt-display);
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.ts-ctl-number {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  width: 64px;
+  height: 22px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px var(--pt-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-ctl-number::-webkit-outer-spin-button,
+.ts-ctl-number::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.ts-ctl-number::placeholder {
+  color: var(--pt-titanium);
+}
+
+.ts-ctl-number:hover {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-ctl-number:focus-visible {
+  outline: none;
+  border-color: var(--pt-ink);
+}
+
+.ts-ctl-snap {
+  margin-left: 4px;
+  font-size: 11px;
+  color: var(--pt-titanium);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-ctl-number {
+    transition: none;
+  }
+}

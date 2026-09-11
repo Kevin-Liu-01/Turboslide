@@ -1,0 +1,115 @@
+/* The editor route (SPEC 6.1). The shell's fixed grid carries the regions: the inspector column
+   in the main region's second column (ViewerShell.css, Inspector.css), the source drawer over the
+   stage (SourceDrawer.css), the overlay over the sheet (Overlay.css), the palette over everything
+   (Palette.css). This file holds only what the route itself draws: the two owner markers, the
+   twin panes' overlay, the conflict card and the external revision banner. Colors are --pt- tokens
+   only; type is Inter at 13px. Lines follow SPEC 2.2: the card draws its own ink frame as the one
+   dialog state, the banner a --pt-hair frame, each once. */
+
+/* the two owner markers: in the DOM, never painted, never hidden (hidden would deactivate them) */
+.ts-owner {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* ---- the twin panes' overlay (SPEC 6.8): inside the scaled stage, sheet pixels ---- */
+.ts-twin-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ---- the conflict card and the external revision banner (SPEC 6.7) ---- */
+.ts-card {
+  position: fixed;
+  left: 50%;
+  top: calc(var(--pt-bar-h) + 24px);
+  transform: translateX(-50%);
+  width: min(720px, calc(100vw - 48px));
+  max-height: calc(100vh - var(--pt-bar-h) - 48px);
+  overflow: auto;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-ink);
+  padding: 16px;
+  z-index: 20;
+  font: 13px/1.5 var(--pt-text);
+}
+
+.ts-card-head {
+  display: grid;
+  gap: 4px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-card-head b {
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.ts-card-head span,
+.ts-card-error {
+  color: var(--pt-ink-2);
+}
+
+.ts-card p {
+  margin: 12px 0 0;
+}
+
+.ts-card-both {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.ts-card-both h4 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--pt-titanium);
+}
+
+.ts-card-both pre {
+  margin: 0;
+  max-height: 240px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--pt-hair-soft);
+  font: 11px/1.45 var(--pt-mono);
+  white-space: pre-wrap;
+}
+
+.ts-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.ts-banner {
+  position: fixed;
+  left: 50%;
+  top: calc(var(--pt-bar-h) + 12px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px 6px 14px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  z-index: 19;
+  font: 12.5px/1.4 var(--pt-text);
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .ts-card-both {
+    grid-template-columns: 1fr;
+  }
+}

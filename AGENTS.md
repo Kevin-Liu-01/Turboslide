@@ -104,8 +104,11 @@ is the case in CI, and starts and stops the dev server for the two steps that ne
 All 18 M1 steps passed on the M1 tree (2026-09-10, 219 s on Kevin's machine with the Prototemplate
 checkout present); `docs/M1-STATUS.md` records every step with its measured numbers. All 19 steps
 pass on the M2 tree (2026-09-10, 145.4 s on the same machine); `docs/M2-STATUS.md` records them
-with the rest of the M2 acceptance list. On the bare scaffold only steps 1 to 6 passed (install,
-route generation, contracts generation, `tsc -b`, vitest, build plus the client bundle check).
+with the rest of the M2 acceptance list. All 19 steps pass on the M3 tree (2026-09-10, 163.4 s on
+the same machine) and the five other M3 lines pass against a server on 4321 started and stopped by
+the verifier; `docs/M3-STATUS.md` records them. On the bare scaffold only steps 1 to 6 passed
+(install, route generation, contracts generation, `tsc -b`, vitest, build plus the client bundle
+check).
 
 Type checking: `pnpm exec tsr generate` must run before `tsc -b` because `routeTree.gen.ts` is
 generated and git-ignored (measured: three type errors otherwise). `tsc -b` writes declaration

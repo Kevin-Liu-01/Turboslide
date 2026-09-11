@@ -15,12 +15,25 @@ import type { Plugin } from 'vite';
 // condition, and `resolve.tsconfigPaths` would follow that alias into the type file
 // (measured during the M2 integration: MISSING_EXPORT "default" on lib/index.d.ts). This resolver
 // runs before Vite's and keeps `sharp` a runtime import, resolved from the workspace root.
+// In the browser the same import must resolve to nothing that runs: the client transform of a
+// createServerFn module keeps its module-level imports in dev (measured during the M3
+// integration: /edit loaded server/thumbs.ts, reached @turboslide/effects/io and asked for
+// /@id/sharp, a 404 that broke the route's lazy chunk), so the client consumer gets a stub whose
+// default export throws if anything ever calls it; the production client bundle tree-shakes it.
+const SHARP_STUB = '\0turboslide:sharp-browser-stub';
+
 function externalSharp(): Plugin {
   return {
     name: 'turboslide:external-sharp',
     enforce: 'pre',
     resolveId(source) {
-      return source === 'sharp' ? { id: 'sharp', external: true } : null;
+      if (source !== 'sharp') return null;
+      if (this.environment.config.consumer === 'client') return SHARP_STUB;
+      return { id: 'sharp', external: true };
+    },
+    load(id) {
+      if (id !== SHARP_STUB) return null;
+      return 'export default function sharp() { throw new Error("sharp runs on the server only"); }';
     },
   };
 }

@@ -1,0 +1,69 @@
+/* The text control: a textarea in the shell's field box (--pt-hair at rest, ink while focused,
+   the shell corner), Inter at 12.5px, growing with its text (text.tsx sets the height); a
+   multiline field caps at 12 lines and scrolls inside. The copy lint's messages sit under it
+   in 11.5px titanium, one per line. */
+.ts-ctl-text {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+
+.ts-ctl-textarea {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 5px 9px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12.5px/1.4 var(--pt-text);
+  resize: none;
+  overflow: hidden;
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-ctl-text.is-multiline .ts-ctl-textarea {
+  font-family: var(--pt-mono);
+  font-size: 12px;
+  max-height: calc(12 * 1.4 * 12px + 10px);
+  overflow: auto;
+  white-space: pre;
+}
+
+.ts-ctl-textarea::placeholder {
+  color: var(--pt-titanium);
+}
+
+.ts-ctl-textarea:hover {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-ctl-textarea:focus-visible {
+  outline: none;
+  border-color: var(--pt-ink);
+}
+
+.ts-ctl-textarea:disabled {
+  color: var(--pt-titanium);
+}
+
+.ts-ctl-lint {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--pt-titanium);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-ctl-textarea {
+    transition: none;
+  }
+}

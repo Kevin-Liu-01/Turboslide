@@ -20,8 +20,9 @@
 
    The bar's bottom edge is the structural rule (--pt-hair) that the stage
    and everything under it never redraw (SPEC 2.2 line law). Ported from
-   Prototemplate/src/components/viewer/Toolbar.css without the Search pill
-   (Palette, M3) and the Index button. */
+   Prototemplate/src/components/viewer/Toolbar.css without the Index button;
+   the Search pill's rules returned with the palette (M3, SPEC 6.3), and the
+   status chip (StatusChip.css) and the lint count badge are Turboslide's. */
 .pt-toolbar {
   grid-row: 1;
   height: var(--pt-toolbar-h, var(--pt-bar-h));
@@ -61,6 +62,89 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+/* the Search pill (directive 8.3, SPEC 6.3): a field-shaped button, 176px at least, ruled in
+   --pt-hair at rest, the search glyph, the word in ink-2 and the key chip at the right end (the
+   pill's corner is --pt-radius, the shell corner this pill set; the 4px chip inside it is the
+   chip's own) */
+.pt-toolbar .pt-search-btn {
+  min-width: 176px;
+  height: 32px;
+  padding: 0 6px 0 10px;
+  justify-content: flex-start;
+  gap: 8px;
+  border-color: var(--pt-hair);
+  border-radius: var(--pt-radius);
+  color: var(--pt-titanium);
+}
+
+.pt-toolbar .pt-search-btn .pt-lb {
+  color: var(--pt-ink-2);
+}
+
+.pt-toolbar .pt-search-btn:hover {
+  color: var(--pt-ink);
+  border-color: var(--pt-ink-2);
+}
+
+/* the open palette: ink, the active state's color (the count while editing draws the same) */
+.pt-toolbar .pt-search-btn[aria-expanded='true'] {
+  color: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+.pt-toolbar .pt-search-btn:hover .pt-lb,
+.pt-toolbar .pt-search-btn[aria-expanded='true'] .pt-lb {
+  color: var(--pt-ink);
+}
+
+/* the key chip: 18px tall on --pt-hair-soft, 11px titanium, at the pill's right end */
+.pt-search-kbd {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: var(--pt-hair-soft);
+  font-family: var(--pt-text);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--pt-titanium);
+  white-space: nowrap;
+}
+
+/* the status chip's slot, left of Search (SPEC 6.1) */
+.pt-bar-status {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* the lint count badge on the Lint button: 16px, tabular, a --pt-hair box; ink while findings
+   exist */
+.pt-lint-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--pt-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.pt-lint-count.is-zero {
+  color: var(--pt-titanium);
 }
 
 /* the count: a button that opens a number field, ruled at rest so it reads
@@ -214,9 +298,14 @@
   justify-content: center;
 }
 
+/* tier four narrows the pill too */
+.pt-toolbar.is-tight-4 .pt-search-btn {
+  min-width: 120px;
+}
+
 /* narrow: one 52px row. The brand and the separators go, every button but
    a text-only seg option is an icon square, the seg is icon-only, the
-   count keeps its numbers. */
+   search is a glyph (directive 8.3), the count keeps its numbers. */
 @media (max-width: 900px) {
   .pt-toolbar {
     gap: 8px;
@@ -243,6 +332,14 @@
     padding: 0;
     gap: 0;
     justify-content: center;
+  }
+
+  .pt-toolbar .pt-search-btn {
+    min-width: 32px;
+  }
+
+  .pt-toolbar .pt-search-kbd {
+    display: none;
   }
 
   .pt-toolbar .pt-seg .pt-ib:not(.is-text) {

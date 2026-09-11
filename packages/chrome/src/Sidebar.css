@@ -540,3 +540,153 @@ a.pt-sb-mark:focus-visible {
     transition: none;
   }
 }
+
+/* ---- edit mode (SPEC 6.2): drag to reorder, the row menu ---- */
+
+/* the row being dragged fades; the drop line is 2px ink at the top or bottom edge of the row
+   under the pointer (ink as a state, SPEC 2.2), and a section header taking a drop draws it
+   under itself */
+.pt-orow.is-dragging {
+  opacity: 0.4;
+}
+
+.pt-orow[data-drop]::after,
+.pt-grp.is-drop > .pt-grp-head::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 10px;
+  height: 2px;
+  background: var(--pt-ink);
+  pointer-events: none;
+}
+
+.pt-orow[data-drop='before']::after {
+  top: -1px;
+}
+
+.pt-orow[data-drop='after']::after {
+  bottom: -1px;
+}
+
+/* the header keeps its count text; the drop line overrides the ::after that paints it */
+.pt-grp.is-drop > .pt-grp-head::after {
+  content: '';
+  left: 10px;
+  bottom: 0;
+}
+
+.pt-grp-empty {
+  margin: 0;
+  padding: 6px 10px 6px 34px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pt-titanium);
+}
+
+/* the menu button: a 20px square at the row's right end, shown on hover, focus or while open */
+.pt-orow-more {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-titanium);
+  font: 14px/1 var(--pt-display);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity var(--pt-dur-fast) var(--pt-ease-out),
+    color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.pt-orow:hover .pt-orow-more,
+.pt-orow:focus-within .pt-orow-more,
+.pt-orow-more.is-on {
+  opacity: 1;
+}
+
+.pt-orow-more:hover,
+.pt-orow-more.is-on {
+  color: var(--pt-ink);
+  border-color: var(--pt-hair);
+}
+
+.pt-orow-more:focus-visible {
+  opacity: 1;
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+/* the menu: a 220px card on paper with the structural edge, over everything in the shell;
+   headings in titanium, items as 28px rows, rules between the groups in --pt-hair-soft */
+.pt-orow-menu {
+  position: fixed;
+  z-index: 30;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  font-family: var(--pt-text);
+  animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
+}
+
+.pt-orow-menu-head {
+  padding: 6px 12px 2px;
+  font-size: 11.5px;
+  color: var(--pt-titanium);
+}
+
+.pt-orow-menu-rule {
+  display: block;
+  height: 1px;
+  margin: 4px 0;
+  background: var(--pt-hair-soft);
+}
+
+.pt-orow-menu-item {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink-2);
+  font: 12.5px var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.pt-orow-menu-item:hover,
+.pt-orow-menu-item:focus-visible {
+  background: var(--pt-plate);
+  color: var(--pt-ink);
+  outline: none;
+}
+
+.pt-orow-menu-item:disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-orow-more {
+    transition: none;
+  }
+
+  .pt-orow-menu {
+    animation: none;
+  }
+}

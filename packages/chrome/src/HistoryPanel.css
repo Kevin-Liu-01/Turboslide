@@ -1,0 +1,105 @@
+/* The history panel: ruled rows newest first (--pt-hair-soft under each, none under the last):
+   the meta line in titanium (revision in tabular figures, author, time, a note when named), the
+   mutations as prose in ink-2, Undo to here at the right end. */
+.ts-history {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-history-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  height: 32px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-history-head b {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 13.5px;
+}
+
+.ts-history-head span {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-history-empty {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--pt-titanium);
+}
+
+.ts-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ts-history-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'meta undo'
+    'mutations undo';
+  column-gap: 8px;
+  row-gap: 2px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-history-list li:last-child {
+  border-bottom: 0;
+}
+
+.ts-history-meta {
+  grid-area: meta;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-history-rev {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  color: var(--pt-ink);
+}
+
+.ts-history-note {
+  color: var(--pt-ink-2);
+}
+
+.ts-history-mutations {
+  grid-area: mutations;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--pt-ink-2);
+}
+
+.ts-history-mutations li {
+  overflow-wrap: anywhere;
+}
+
+.ts-history-more {
+  color: var(--pt-titanium);
+}
+
+.ts-history-undo {
+  grid-area: undo;
+  align-self: start;
+}

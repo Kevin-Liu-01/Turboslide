@@ -1,0 +1,87 @@
+/* The status chip: a shell button (.pt-ib) at the toolbar height, ruled at rest in --pt-hair
+   like the count, with a 6px dot that names the state (ink while saved, titanium while
+   unsaved or saving, an ink ring while in conflict) and the words in 12.5px tabular figures.
+   Conflict turns the frame ink: a state, the one border ink is allowed on (SPEC 2.2). */
+.pt-ib.ts-status {
+  gap: 6px;
+  padding: 0 10px 0 9px;
+  border-color: var(--pt-hair);
+  color: var(--pt-ink-2);
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ts-status-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  box-sizing: border-box;
+  background: var(--pt-ink);
+  flex: 0 0 auto;
+}
+
+.pt-ib.ts-status[data-state='unsaved'] .ts-status-dot,
+.pt-ib.ts-status[data-state='saving'] .ts-status-dot,
+.pt-ib.ts-status[data-state='offline'] .ts-status-dot {
+  background: var(--pt-titanium);
+}
+
+.pt-ib.ts-status[data-state='saving'] .ts-status-dot {
+  animation: ts-status-pulse 1.2s var(--pt-ease-out) infinite alternate;
+}
+
+@keyframes ts-status-pulse {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0.3;
+  }
+}
+
+.pt-ib.ts-status[data-state='conflict'] {
+  border-color: var(--pt-ink);
+  color: var(--pt-ink);
+}
+
+.pt-ib.ts-status[data-state='conflict'] .ts-status-dot {
+  background: transparent;
+  border: 1px solid var(--pt-ink);
+}
+
+.ts-status-main {
+  color: var(--pt-ink);
+}
+
+.ts-status-part {
+  color: var(--pt-titanium);
+}
+
+.ts-status-sep {
+  margin: 0 5px 0 0;
+}
+
+/* the toolbar's tiers: the extra parts leave first, then the chip is the dot and the state */
+.pt-toolbar.is-tight-3 .ts-status-part {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .pt-toolbar .ts-status-part {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .pt-toolbar .pt-ib.ts-status {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-ib.ts-status[data-state='saving'] .ts-status-dot {
+    animation: none;
+  }
+}

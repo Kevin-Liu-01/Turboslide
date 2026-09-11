@@ -1,58 +1,14 @@
 // The two layers of the grammar linter (SPEC 7.7): lintStatic over the document without a
-// browser, lintRendered over RenderRecords, and the baseline gate of known-findings.json
-// (MILESTONES M1 item 7: severity 3 findings not in the baseline fail `turboslide lint`).
-import type { DeckDocument, Finding, KnownFinding, RenderRecord, RuleId } from './contracts.ts';
+// browser (its own module, lint-static.ts, so the editor can import it into the browser without
+// the rendered layer's node:zlib), lintRendered over RenderRecords, and the baseline gate of
+// known-findings.json (MILESTONES M1 item 7: severity 3 findings not in the baseline fail
+// `turboslide lint`). lintStatic is re-exported here so `@turboslide/lint/run` keeps its shape.
+import type { DeckDocument, Finding, KnownFinding, RenderRecord } from './contracts.ts';
 import { RULES, isKnownFinding } from './contracts.ts';
 import { createContext } from './context.ts';
 import type { LintOptions } from './context.ts';
+import { filterRules, lintStatic, sortFindings } from './lint-static.ts';
 import { lintRecord } from './rendered/rules.ts';
-import { checkAssets } from './static/asset.ts';
-import { checkColor } from './static/color.ts';
-import { checkCopy } from './static/copy.ts';
-import { checkDia } from './static/dia.ts';
-import { checkExportNonNative } from './static/export-non-native.ts';
-import { checkIcons } from './static/icon.ts';
-import { checkRows } from './static/rows.ts';
-import { checkStructure } from './static/structure.ts';
-import { checkType } from './static/type.ts';
-
-function filterRules(findings: Finding[], rules?: readonly RuleId[]): Finding[] {
-  if (!rules || rules.length === 0) return findings;
-  const set = new Set(rules);
-  return findings.filter((f) => set.has(f.rule));
-}
-
-function sortFindings(findings: Finding[], order: string[]): Finding[] {
-  const n = new Map(order.map((id, i) => [id, i]));
-  return [...findings].sort((a, b) => {
-    const sa = n.get(a.slideId) ?? Number.MAX_SAFE_INTEGER;
-    const sb = n.get(b.slideId) ?? Number.MAX_SAFE_INTEGER;
-    if (sa !== sb) return sa - sb;
-    if (a.severity !== b.severity) return b.severity - a.severity;
-    if (a.rule !== b.rule) return a.rule.localeCompare(b.rule);
-    return a.id.localeCompare(b.id);
-  });
-}
-
-/** Static rules on the document, no browser. */
-export function lintStatic(input: DeckDocument, options: LintOptions = {}): Finding[] {
-  const ctx = createContext(input, options);
-  const findings = [
-    ...checkCopy(ctx),
-    ...checkType(ctx),
-    ...checkColor(ctx),
-    ...checkIcons(ctx),
-    ...checkRows(ctx),
-    ...checkDia(ctx),
-    ...checkAssets(ctx),
-    ...checkStructure(ctx),
-    ...checkExportNonNative(ctx),
-  ];
-  // deck-level rules (placement, contradictions, licenses) scan the whole deck and report on the selection
-  const selected = options.slideIds ? new Set(options.slideIds) : null;
-  const onSelection = selected ? findings.filter((f) => selected.has(f.slideId)) : findings;
-  return sortFindings(filterRules(onSelection, options.rules), ctx.order);
-}
 
 /** Rendered rules on records; records for slides outside options.slideIds are ignored. */
 export function lintRendered(
@@ -152,4 +108,4 @@ export function formatFinding(f: Finding): string {
   return `${where}${theme} ${f.rule} (${f.severity})${box}: ${f.proposal}`;
 }
 
-export { RULES };
+export { RULES, lintStatic };

@@ -24,7 +24,7 @@ import type {
   ShellThumb,
 } from './shell-data';
 import { Sidebar } from './Sidebar';
-import type { SidebarFilter } from './Sidebar';
+import type { SidebarEdit, SidebarFilter } from './Sidebar';
 import { Toast, useToast } from './Toast';
 import { Toolbar } from './Toolbar';
 import { useShellKeys } from './useShellKeys';
@@ -123,6 +123,19 @@ export type ViewerShellProps = {
   homeHref?: string;
   /** a node after the sidebar title: the fixture chip */
   headAside?: ReactNode;
+  /**
+   * The editor's additions (SPEC 6.1, M3). `onSearch` opens the palette from the toolbar's
+   * Search pill and Cmd K (the shell's `search` flag follows it); `searchOpen` draws the pill's
+   * ink frame; `toolbarStatus` is the status chip left of Search; `panel` is the inspector,
+   * docked in the main region's second column under the toolbar's rule; `drawer` is the source
+   * drawer, over the stage; `sidebarEdit` turns the tree's drag reorder and row menu on.
+   */
+  onSearch?: () => void;
+  searchOpen?: boolean;
+  toolbarStatus?: ReactNode;
+  panel?: ReactNode;
+  drawer?: ReactNode;
+  sidebarEdit?: SidebarEdit;
   /** the stage content */
   children?: ReactNode;
 };
@@ -174,6 +187,12 @@ export function ViewerShell({
   modeLabels,
   homeHref,
   headAside,
+  onSearch,
+  searchOpen = false,
+  toolbarStatus,
+  panel,
+  drawer,
+  sidebarEdit,
   children,
 }: ViewerShellProps) {
   const items = useMemo(() => flattenShellItems(sections), [sections]);
@@ -231,6 +250,8 @@ export function ViewerShell({
   onSelectRef.current = onSelect;
   const onModeRef = useRef(onModeChange);
   onModeRef.current = onModeChange;
+  const onSearchRef = useRef(onSearch);
+  onSearchRef.current = onSearch;
   const modesRef = useRef(modes);
   modesRef.current = modes;
   const modeRef = useRef(mode);
@@ -536,6 +557,7 @@ export function ViewerShell({
       dir,
       total,
       ready: booted,
+      search: onSearch !== undefined,
       setMode,
       setDensity,
       setSidebar,
@@ -568,6 +590,7 @@ export function ViewerShell({
       dir,
       total,
       booted,
+      onSearch,
       toast.say,
     ],
   );
@@ -582,6 +605,8 @@ export function ViewerShell({
       filter.current.clear();
       return true;
     },
+    /* Cmd K opens the palette when the route offers one (SPEC 6.3) */
+    openSearch: () => onSearchRef.current?.(),
   });
 
   const overlayOpen = narrow && sidebarShown;
@@ -635,13 +660,25 @@ export function ViewerShell({
             filter={filter}
             homeHref={homeHref}
             aside={headAside}
+            edit={sidebarEdit}
           />
-          <section className="pt-main">
-            <Toolbar title={title} slot={toolbarSlot} modeLabels={modeLabels} />
+          <section className="pt-main" data-panel={panel ? '' : undefined}>
+            <Toolbar
+              title={title}
+              slot={toolbarSlot}
+              modeLabels={modeLabels}
+              onSearch={onSearch}
+              searchOpen={searchOpen}
+              status={toolbarStatus}
+            />
             <div ref={stageRef} className="pt-stagewrap">
               {children}
             </div>
             <Progress />
+            {/* the source drawer, over the stage and the progress track (SPEC 6.6) */}
+            {drawer}
+            {/* the inspector, in the second column under the toolbar's rule (SPEC 6.1, 6.5) */}
+            {panel}
           </section>
         </div>
         <HelpCard />

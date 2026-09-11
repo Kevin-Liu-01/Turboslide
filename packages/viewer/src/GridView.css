@@ -94,6 +94,23 @@
   transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
 }
 
+/* the static capture (M3 item 5): hidden until decoded, then over the clone in one cut */
+.pt-thumb-shot {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.pt-thumb-shot.is-loaded {
+  visibility: visible;
+}
+
 .pt-thumb:hover .pt-thumb-frame,
 .pt-thumb:focus-visible .pt-thumb-frame {
   border-color: var(--pt-ink);

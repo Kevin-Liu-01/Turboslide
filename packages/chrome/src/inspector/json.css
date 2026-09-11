@@ -1,0 +1,56 @@
+/* The JSON control: the select (select.css) over the mono field, which is the text control's
+   box in the mono stack. A parse error sits under the field in titanium; the field keeps the
+   text until it parses or Escape restores the value. */
+.ts-ctl-json {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+  width: 100%;
+  min-width: 0;
+}
+
+.ts-ctl-json .ts-ctl-select {
+  align-self: flex-end;
+}
+
+.ts-ctl-json-field {
+  display: block;
+  width: 100%;
+  min-height: 28px;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 5px 9px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px/1.4 var(--pt-mono);
+  resize: vertical;
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-ctl-json-field::placeholder {
+  color: var(--pt-titanium);
+}
+
+.ts-ctl-json-field:hover {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-ctl-json-field:focus-visible {
+  outline: none;
+  border-color: var(--pt-ink);
+}
+
+.ts-ctl-json-error {
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: var(--pt-titanium);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-ctl-json-field {
+    transition: none;
+  }
+}

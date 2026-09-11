@@ -1,0 +1,155 @@
+/* The lint panel: ruled rows (--pt-hair-soft under each, none under the last), one per finding.
+   The severity sits in a 16px chip: ink border and ink figure at 3, titanium at 1 and 2 (no
+   semantic hue in chrome, SPEC 2.2). The rule id in the mono stack, the block id, the proposal
+   in ink-2 wrapping under them. Fix is a labeled shell button at the row's right end. */
+.ts-lint {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--pt-text);
+  color: var(--pt-ink);
+}
+
+.ts-lint-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  height: 32px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-lint-head b {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 13.5px;
+}
+
+.ts-lint-head span {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-lint-notice,
+.ts-lint-empty {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--pt-titanium);
+}
+
+.ts-lint-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ts-lint-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-lint-list li:last-child {
+  border-bottom: 0;
+}
+
+/* the selected block's findings: the 2px ink bar at the left, the sidebar's mark */
+.ts-lint-row.is-selected {
+  position: relative;
+}
+
+.ts-lint-row.is-selected::before {
+  content: '';
+  position: absolute;
+  left: -18px;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  background: var(--pt-ink);
+}
+
+.ts-lint-pick {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 16px auto auto auto;
+  grid-auto-flow: row dense;
+  column-gap: 8px;
+  row-gap: 2px;
+  align-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink-2);
+  font: 12.5px/1.4 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-lint-pick:hover {
+  color: var(--pt-ink);
+}
+
+.ts-lint-pick:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-lint-sev {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-lint-row[data-severity='3'] .ts-lint-sev {
+  color: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+.ts-lint-rule {
+  font-family: var(--pt-mono);
+  font-size: 12px;
+  color: var(--pt-ink);
+  white-space: nowrap;
+}
+
+.ts-lint-block,
+.ts-lint-theme {
+  font-size: 11.5px;
+  color: var(--pt-titanium);
+  white-space: nowrap;
+}
+
+.ts-lint-proposal {
+  grid-column: 2 / -1;
+  min-width: 0;
+}
+
+.ts-lint-evidence {
+  grid-column: 2 / -1;
+  font-size: 11.5px;
+  color: var(--pt-titanium);
+  overflow-wrap: anywhere;
+}
+
+.ts-lint-fix.is-busy {
+  color: var(--pt-titanium);
+}

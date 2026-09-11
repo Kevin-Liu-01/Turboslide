@@ -1,0 +1,183 @@
+/* The source drawer (SPEC 6.6, 2.2): a panel at the foot of the stage column, 46 percent of
+   the main region and 240px at least, on paper, over the stage and the progress track. Lines,
+   each 1px and drawn once: the drawer's top edge in --pt-hair (the stage draws no bottom edge),
+   the head's rule under itself in --pt-hair-soft, the banner's rule under itself, the side
+   column's left edge in --pt-hair-soft; the editor draws no border and its gutter no rule.
+   Motion: the drawer rises 8px and fades over the enter duration; still under reduced motion.
+   Colors are tokens only; the editor's own colors come from EditorView.theme on the same tokens. */
+.ts-drawer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 46%;
+  min-height: 240px;
+  max-height: calc(100% - 96px);
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
+  border-top: 1px solid var(--pt-hair);
+  view-transition-name: ts-drawer;
+  animation: ts-drawer-in var(--pt-dur-enter) var(--pt-ease-out) both;
+}
+
+@keyframes ts-drawer-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* the head: 48px, the file name at the left, the 32px buttons at the right (8px from the head's
+   rule, so a pressed Apply's ink frame never doubles it) */
+.ts-drawer-head {
+  flex: 0 0 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px 0 14px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-drawer-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--pt-mono);
+  font-weight: 400;
+  font-size: 12.5px;
+  color: var(--pt-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-drawer-rev,
+.ts-drawer-dirty {
+  font-family: var(--pt-text);
+  font-size: 12px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-drawer-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+
+/* the banner: one line in ink-2 with Reload at its end; rule under itself */
+.ts-drawer-banner {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px 6px 14px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--pt-ink-2);
+}
+
+.ts-drawer-banner > span {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* the body: the editor beside the 240px side column */
+.ts-drawer-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+}
+
+.ts-drawer-editor {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ts-drawer-editor .cm-editor {
+  height: 100%;
+}
+
+.ts-drawer-side {
+  min-height: 0;
+  padding: 10px 14px 16px;
+  border-left: 1px solid var(--pt-hair-soft);
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--pt-ink-2);
+}
+
+.ts-drawer-side h4 {
+  margin: 0 0 6px;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 12.5px;
+  color: var(--pt-titanium);
+}
+
+.ts-drawer-issues,
+.ts-drawer-log {
+  margin: 0;
+  padding: 0 0 0 16px;
+}
+
+.ts-drawer-issues li,
+.ts-drawer-log li {
+  margin: 0 0 4px;
+  overflow-wrap: anywhere;
+}
+
+.ts-drawer-issues code {
+  font-family: var(--pt-mono);
+  font-size: 11.5px;
+  color: var(--pt-ink);
+}
+
+.ts-drawer-note {
+  margin: 0;
+  color: var(--pt-titanium);
+}
+
+@media (max-width: 900px) {
+  .ts-drawer-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ts-drawer-side {
+    display: none;
+  }
+
+  .ts-drawer-tools .pt-ib:not(.pt-icon) .pt-lb {
+    display: none;
+  }
+
+  .ts-drawer-tools .pt-ib:not(.pt-icon) {
+    width: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-drawer {
+    animation: none;
+  }
+}

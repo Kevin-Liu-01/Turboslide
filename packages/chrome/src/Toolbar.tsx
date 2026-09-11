@@ -2,6 +2,8 @@ import type { KeyboardEvent, ReactNode } from 'react';
 import { useLayoutEffect, useRef, useState } from 'react';
 
 import { GtMark } from './GtMark';
+import { Icon } from './icons';
+import { cn } from './lib/cn';
 import { useMountEffect } from './lib/useMountEffect';
 import { Seg } from './Seg';
 import type { SegOption } from './Seg';
@@ -25,18 +27,143 @@ import './Toolbar.css';
  * (`slot`, where the editor puts Edit | View, Twin, Lint and Source in M3),
  * the mode seg in one fixed order (Slide, Grid, Book), Theme, Present (in
  * slide mode only, the one solid button), Fullscreen, Copy link and Help.
- * The Search pill lands with the palette in M3. Every control is a labeled
- * ToolButton with a title naming its key. The labels collapse in measured
- * tiers when the bar runs short (Toolbar.css).
+ * With `onSearch` the Search pill (SPEC 6.3: the field-shaped button with
+ * the Cmd K chip, Ctrl K off Apple) opens the right group, and `status`
+ * (the editor's StatusChip, SPEC 6.1) sits left of it. Every control is a
+ * labeled ToolButton with a title naming its key. The labels collapse in
+ * measured tiers when the bar runs short (Toolbar.css).
  */
 export type ToolbarProps = {
   /** the deck's title, shown with the mark while the sidebar is hidden */
   title: string;
-  /** the route's own controls, first in the right group */
+  /** the route's own controls, first in the right group after the search pill */
   slot?: ReactNode;
   /** the route's own words for the seg */
   modeLabels?: Partial<Record<ShellMode, string>>;
+  /** opens the palette; the Search pill is drawn only when set (SPEC 6.3) */
+  onSearch?: () => void;
+  /** the palette is open: the pill draws its ink frame */
+  searchOpen?: boolean;
+  /** the status chip, left of Search (SPEC 6.1) */
+  status?: ReactNode;
 };
+
+/**
+ * The editor's toolbar controls (SPEC 6.3): the `Edit | View` Seg, Twin, Lint with its count
+ * badge and Source, rendered by the route into the toolbar's `slot`. Editing is a property of
+ * the stage, so the viewer and the editor share one toolbar. Presentational: the route owns
+ * every flag and the keys (E, Shift D, Cmd L, Cmd /).
+ */
+export type EditToolsProps = {
+  edit: boolean;
+  onEdit: (edit: boolean) => void;
+  twin: boolean;
+  onTwin: () => void;
+  lint: boolean;
+  /** the current slide's finding count, shown as the badge */
+  lintCount?: number;
+  onLint: () => void;
+  source: boolean;
+  onSource: () => void;
+};
+
+const EDIT_OPTIONS: readonly SegOption<'edit' | 'view'>[] = [
+  { value: 'edit', label: 'Edit', title: 'Edit the slide (E)' },
+  { value: 'view', label: 'View', title: 'View only (E)' },
+];
+
+export function EditTools({
+  edit,
+  onEdit,
+  twin,
+  onTwin,
+  lint,
+  lintCount,
+  onLint,
+  source,
+  onSource,
+}: EditToolsProps) {
+  return (
+    <>
+      <Seg
+        options={EDIT_OPTIONS}
+        value={edit ? 'edit' : 'view'}
+        onChange={(value) => onEdit(value === 'edit')}
+        label="Editing"
+        control="edit.mode"
+      />
+      <ToolButton
+        icon="grid"
+        label="Twin"
+        title="Light and dark side by side (Shift D)"
+        pressed={twin}
+        control="edit.twin"
+        onClick={onTwin}
+      />
+      <ToolButton
+        label="Lint"
+        title="Show the findings on the sheet (Cmd L)"
+        pressed={lint}
+        control="edit.lint"
+        className="pt-lint-btn"
+        onClick={onLint}
+      >
+        <span
+          className={cn('pt-lint-count', (lintCount ?? 0) === 0 && 'is-zero')}
+          aria-label={`${lintCount ?? 0} findings`}
+        >
+          {lintCount ?? 0}
+        </span>
+      </ToolButton>
+      <ToolButton
+        icon="document"
+        label="Source"
+        title="The slide's JSON in the source drawer (Cmd /)"
+        pressed={source}
+        control="edit.source"
+        onClick={onSource}
+      />
+    </>
+  );
+}
+
+/* what the pill's key chip reads: the command glyph on Apple platforms, the word elsewhere */
+const MAC_CHIP = '⌘K';
+const OTHER_CHIP = 'Ctrl K';
+
+/** Apple platforms, where the shortcut is Cmd K; everything else (Windows, Linux) reads Ctrl K. */
+function isApplePlatform(): boolean {
+  return /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+}
+
+/**
+ * The Search pill (Prototemplate Search.tsx, the `field` trigger): the search glyph, the word,
+ * the key chip, in the shell corner; an icon square at or below 900px (Toolbar.css).
+ */
+function SearchPill({ onOpen, open }: { onOpen: () => void; open: boolean }) {
+  /* the chip is rendered as Cmd K on the server; a Windows or Linux reader sees Ctrl K after mount */
+  const [chip, setChip] = useState(MAC_CHIP);
+  useMountEffect(() => {
+    if (!isApplePlatform()) setChip(OTHER_CHIP);
+  });
+  return (
+    <button
+      type="button"
+      className="pt-ib pt-search-btn"
+      title="Search slides, actions and views (Cmd K or Ctrl K)"
+      aria-haspopup="dialog"
+      aria-expanded={open}
+      data-control="palette.open"
+      onClick={onOpen}
+    >
+      <Icon name="search" />
+      <span className="pt-lb">Search</span>
+      <kbd className="pt-search-kbd" aria-hidden="true">
+        {chip}
+      </kbd>
+    </button>
+  );
+}
 
 /* the action words of directive 7.6 */
 const MODE_LABEL: Record<ShellMode, string> = {
@@ -211,7 +338,14 @@ function fitLabels(bar: HTMLElement): Tight {
   return tight;
 }
 
-export function Toolbar({ title, slot, modeLabels }: ToolbarProps) {
+export function Toolbar({
+  title,
+  slot,
+  modeLabels,
+  onSearch,
+  searchOpen = false,
+  status,
+}: ToolbarProps) {
   const shell = usePtShell();
   const { modes, keys, noun, mode, index, sidebarOpen, helpOpen, narrow } = shell;
   const [fullscreen, setFullscreen] = useState(false);
@@ -219,7 +353,7 @@ export function Toolbar({ title, slot, modeLabels }: ToolbarProps) {
   const bar = useRef<HTMLDivElement>(null);
   const showSeg = modes.length > 1;
   const slideOffered = modes.includes('slide');
-  const hasRouteControls = Boolean(slot) || showSeg;
+  const hasRouteControls = Boolean(slot) || showSeg || Boolean(onSearch) || Boolean(status);
   /* the paging trio: on a route with a slide mode it belongs to that mode */
   const paging = keys === 'paged' || !slideOffered;
   /* the count is wider while it names the total than while it reads a place */
@@ -257,7 +391,7 @@ export function Toolbar({ title, slot, modeLabels }: ToolbarProps) {
   useLayoutEffect(() => {
     const el = bar.current;
     if (el) setTight(fitLabels(el));
-  }, [slot, modes, sidebarOpen, shell.countLabel, countNamesTotal, paging, mode]);
+  }, [slot, status, onSearch, modes, sidebarOpen, shell.countLabel, countNamesTotal, paging, mode]);
 
   /* a paged route's toast names the item (`Link to slide 12 copied`). On a
      phone the share sheet is the way to hand a link on; a dismissed sheet is
@@ -330,6 +464,8 @@ export function Toolbar({ title, slot, modeLabels }: ToolbarProps) {
         ) : null}
       </div>
       <div className="pt-bar-r">
+        {status ? <div className="pt-bar-status">{status}</div> : null}
+        {onSearch ? <SearchPill onOpen={onSearch} open={searchOpen} /> : null}
         {slot ? <div className="pt-bar-slot">{slot}</div> : null}
         {showSeg ? (
           <Seg

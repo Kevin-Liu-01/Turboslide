@@ -33,6 +33,8 @@ export type ViewerSlide = {
   notes?: string;
   /** the lint counts the sidebar badge shows (SPEC 6.2) */
   lint?: { s3: number; s2: number };
+  /** the render worker's static capture twins, shown over the live clone once decoded (M3 item 5) */
+  shot?: { light: string; dark?: string };
 };
 
 export type ViewerSection = { id: string; name: string; slideIds: readonly string[] };

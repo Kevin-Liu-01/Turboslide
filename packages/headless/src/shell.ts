@@ -33,7 +33,12 @@ export type ShellStateSpec = {
   settleMs?: number;
 };
 
-/** The states lint-lines.mjs drives: the list toggle, the index panel, the search, the grid, the book. */
+/**
+ * The states lint-lines.mjs drives (the list toggle, the index panel, the search, the grid, the
+ * book) plus the editor's (MILESTONES M3 acceptance): inspector (Tab selects the first block, so
+ * the ring, the chip and the Block section show), source (Cmd / opens the drawer), palette
+ * (Cmd K) and twin (Shift D). The probe fields they read are packages/lint chrome.ts probeState.
+ */
 export const SHELL_STATES: Record<string, ShellStateSpec> = {
   list: {
     key: '[',
@@ -52,6 +57,15 @@ export const SHELL_STATES: Record<string, ShellStateSpec> = {
   },
   grid: { key: 'g', applied: (p) => p.grid, settleMs: 700 },
   book: { key: 'b', applied: (p) => p.book, settleMs: 700 },
+  inspector: {
+    key: 'Tab',
+    applied: (p) => Boolean(p.inspector) && Boolean(p.selected),
+    leave: 'Escape',
+    settleMs: 600,
+  },
+  source: { key: 'Meta+/', applied: (p) => Boolean(p.source), leave: 'Meta+/', settleMs: 700 },
+  palette: { key: 'Meta+k', applied: (p) => p.search, leave: 'Escape', settleMs: 500 },
+  twin: { key: 'Shift+D', applied: (p) => Boolean(p.twin), leave: 'Shift+D', settleMs: 700 },
 };
 
 export type ShellDrivePlan<TConfig, TAudit> = {

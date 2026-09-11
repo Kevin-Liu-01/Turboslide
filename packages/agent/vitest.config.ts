@@ -5,6 +5,6 @@ import { defineConfig } from 'vitest/config';
 // `pnpm test` still includes this package through its `projects` glob.
 export default defineConfig({
   test: {
-    include: ['src/**/*.test.ts'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
   },
 });

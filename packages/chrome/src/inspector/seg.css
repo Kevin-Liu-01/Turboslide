@@ -1,0 +1,40 @@
+/* The Seg control: the shared small Seg (Seg.css) with text options instead of icon squares,
+   at 22px so its border sits 5px from the row's rule, plus the hidden native mirror. One rule:
+   the Seg's own border (tokens.css .pt-seg), so the row draws nothing around it (SPEC 2.2 line
+   law). */
+.ts-ctl-seg {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ts-ctl-seg .pt-seg.is-small {
+  height: 22px;
+}
+
+.ts-ctl-seg .pt-seg.is-small .pt-ib {
+  width: auto;
+  height: 20px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the native mirror: in the accessibility tree and reachable by the window API, off screen for
+   the eye; a focus on it (Tab from the row) shows the ring on the Seg instead */
+.ts-native-mirror {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.ts-ctl-seg:has(.ts-native-mirror:focus-visible) .pt-seg {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}

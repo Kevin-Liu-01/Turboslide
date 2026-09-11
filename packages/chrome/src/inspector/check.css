@@ -1,0 +1,64 @@
+/* The check row's control: a 16px square in --pt-hair that fills ink when checked, with the
+   word on or off beside it in 12px titanium. The native input stays in the tree, clipped, so
+   the label, the keyboard and the window API reach it. */
+.ts-ctl-check {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 22px;
+  cursor: pointer;
+}
+
+.ts-ctl-check input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.ts-ctl-check-box {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  transition:
+    border-color var(--pt-dur-fast) var(--pt-ease-out),
+    background-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-ctl-check:hover .ts-ctl-check-box {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-ctl-check input:checked + .ts-ctl-check-box {
+  background: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+.ts-ctl-check input:focus-visible + .ts-ctl-check-box {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-ctl-check input:disabled ~ .ts-ctl-check-box {
+  border-color: var(--pt-hair-soft);
+}
+
+.ts-ctl-check-word {
+  font-size: 12px;
+  color: var(--pt-titanium);
+  min-width: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-ctl-check-box {
+    transition: none;
+  }
+}

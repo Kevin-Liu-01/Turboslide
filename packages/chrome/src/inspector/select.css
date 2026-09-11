@@ -1,0 +1,43 @@
+/* The select control: the shell's field at rest (a --pt-hair box, the shell corner), ink on
+   focus, the native arrow replaced by a chevron drawn in currentColor. 22px tall inside the
+   32px row, so its border sits 5px from the row's rule and the two never read as a doubled
+   line (SPEC 2.2; the auditor's 1 to 4 px band). */
+.ts-ctl-select {
+  appearance: none;
+  height: 22px;
+  min-width: 96px;
+  max-width: 220px;
+  padding: 0 24px 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px var(--pt-text);
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%238a8f98'%3E%3Cpath fill-rule='evenodd' d='M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 5px center;
+  background-size: 14px 14px;
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-ctl-select:hover {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-ctl-select:focus-visible {
+  outline: none;
+  border-color: var(--pt-ink);
+}
+
+.ts-ctl-select:disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-ctl-select {
+    transition: none;
+  }
+}

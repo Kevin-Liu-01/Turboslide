@@ -104,7 +104,7 @@ export const RULES: Readonly<Record<RuleId, Rule>> = {
     'rendered',
     1,
     'polish',
-    'text under 2 px when the block renders at 0.14x',
+    'text whose rendered size (font size times the diagram scale) is under 2 px at the grid’s 0.14x',
     false,
     'report 03 section 1',
   ),
@@ -505,3 +505,51 @@ export function isRuleId(value: string): value is RuleId {
 export function rulesInOrder(): Rule[] {
   return RULE_IDS.map((id) => RULES[id]);
 }
+
+/** The rules a layer runs: `rendered` includes the rules of both layers. */
+export function ruleIdsOfLayer(layer: 'static' | 'rendered'): RuleId[] {
+  return RULE_IDS.filter((id) => RULES[id].layer === layer || RULES[id].layer === 'both');
+}
+
+/**
+ * The measured limits of the rendered rules (SPEC 7.7; MILESTONES M3 item 5), one source for the
+ * checks in @turboslide/lint and for the numbers the rule table quotes. Distances are sheet pixels
+ * at scale 1; fractions are of an area or of an aspect ratio.
+ */
+export const RENDERED_LIMITS = {
+  /** sheet/rail-touch: a text box closer than this to a rail or rule (DECK-GRAMMAR.md:15). */
+  railTouchPx: 8,
+  /** type/floor-15 (DECK-GRAMMAR.md:21). */
+  floorPx: 15,
+  /** type/svg-label-min (head:157-160). */
+  svgLabelMinPx: 18,
+  /** type/weight-cap (DECK-GRAMMAR.md:20). */
+  weightCap: 500,
+  /** dia/label-clearance: a label box this close to a stroke (DECK-GRAMMAR.md:45). */
+  labelClearancePx: 12,
+  /** lines/law: two parallel 1 px lines this close, edge to edge, are one seam drawn twice. */
+  doubledLinePx: 4,
+  /** lines/law: the shortest uniform 1 px run that counts as a drawn line. */
+  lineMinRunPx: 48,
+  /** lines/law: the per-channel distance within which a line color matches a role. */
+  lineColorTolerance: 10,
+  /** contrast/both-themes: WCAG ratios; the lower floor applies from contrastLargePx up. */
+  contrastMin: 4.5,
+  contrastLargeMin: 3,
+  contrastLargePx: 26,
+  /** layout/empty-half: ink coverage of one column under the first while the other exceeds the second. */
+  emptyHalfMaxFraction: 0.02,
+  fullHalfMinFraction: 0.1,
+  /** layout/pair-gaps: the spread of the gaps in a figure grid. */
+  pairGapPx: 2,
+  /** layout/columns-aligned: the difference of the tops of side-by-side rows blocks. */
+  columnsAlignedPx: 1,
+  /** asset/stretched: the relative deviation of the drawn aspect from the file's, and its pixel floor. */
+  stretchedFraction: 0.02,
+  stretchedMinPx: 2,
+  /** sheet/thumb-legible: the grid's smallest scale (report 03 section 1) and the size legible at it. */
+  thumbScale: 0.14,
+  thumbMinPx: 2,
+} as const;
+
+export type RenderedLimits = typeof RENDERED_LIMITS;

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "The action dispatcher and the contracts generator (pnpm generate:contracts): CLI option parsers, the MCP tool list JSON, describe().actions, openapi.json, the agent manifest, docs/grammar.md and the skills reference tables, with a stale-file test.",
+  "description": "The action dispatcher and the contracts generator (pnpm generate:contracts): CLI option parsers, the MCP tool list JSON, describe().actions, openapi.json, the agent manifest, docs/grammar.md and the skills reference tables, with a stale-file test, and the window API behind window.turboslide.studio (registry, adapter, controls, invoke, ready, history).",
   "scripts": {
     "generate": "node src/generate/main.ts",
     "generate:check": "node src/generate/main.ts --check",
@@ -19,6 +19,12 @@
     "./generate/manifest": "./src/generate/manifest.ts",
     "./generate/grammar": "./src/generate/grammar.ts",
     "./generate/skills": "./src/generate/skills.ts",
+    "./window/adapter": "./src/window/adapter.ts",
+    "./window/controls": "./src/window/controls.ts",
+    "./window/history": "./src/window/history.ts",
+    "./window/invoke": "./src/window/invoke.ts",
+    "./window/ready": "./src/window/ready.ts",
+    "./window/registry": "./src/window/registry.ts",
     "./generated/cli.json": "./generated/cli.json",
     "./generated/mcp-tools.json": "./generated/mcp-tools.json",
     "./generated/describe.json": "./generated/describe.json",
@@ -36,6 +42,11 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "jsdom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "typescript": "catalog:"
   }
 }

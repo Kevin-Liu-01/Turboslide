@@ -11,6 +11,12 @@
     },
     {
       "path": "../effects"
+    },
+    {
+      "path": "../schema"
+    },
+    {
+      "path": "../theme"
     }
   ]
 }

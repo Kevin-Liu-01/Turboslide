@@ -74,14 +74,16 @@
         "the Search pill (Palette, M3) and the Index button (no index panel in Turboslide yet) removed; tier four collapses Help, Present and the slot",
         "the brand is the GT mark only (no PtMark, no mark prop)",
         "the seg's slide label reads Slide (the deck's word) rather than Slides",
-        "data-control ids on every button"
+        "data-control ids on every button",
+        "M3: the Search pill returns as SearchPill behind an `onSearch` prop (the palette opener, SPEC 6.3) with `searchOpen` for its ink frame; a `status` slot left of it takes the StatusChip (SPEC 6.1); EditTools (the Edit | View Seg, Twin, Lint with its count badge, Source) is exported for the route to place in the slot"
       ]
     },
     "src/Toolbar.css": {
       "source": "src/components/viewer/Toolbar.css",
       "commit": "c51f46fac646ade0cb6d79c5c894cece6ff31b96",
       "changes": [
-        "the .pt-search-btn and .pt-search-kbd rules and the html[data-shell-sb] boot stamp rules removed with the controls they styled"
+        "the .pt-search-btn and .pt-search-kbd rules and the html[data-shell-sb] boot stamp rules removed with the controls they styled",
+        "M3: the .pt-search-btn and .pt-search-kbd rules restored from the source with the palette, plus the tier-four and narrow rules for the pill; .pt-bar-status and .pt-lint-count are new"
       ]
     },
     "src/Sidebar.tsx": {
@@ -92,7 +94,8 @@
         "rows carry the derived number, a kind glyph from the theme sprite, the lint badge and the lease dot (SPEC 6.2); thumbnail density draws a 64 by 36 live clone through @turboslide/viewer LiveClone, with ThumbShot for static twins",
         "the filter matches title, section, id and the slide's text (SPEC 6.2)",
         "folds persist under gt-shell-groups:<id> and every section is open by default",
-        "ThumbList moved to @turboslide/viewer GridView"
+        "ThumbList moved to @turboslide/viewer GridView",
+        "M3 (SPEC 6.2): an `edit` prop turns on drag to reorder within and across sections (one slide.move on drop, a header drop inserts first), Alt with the up and down arrows to move a focused row, empty sections listed as drop targets, and the row menu (Insert after, Duplicate, Move to section, Render, Lint this slide, Copy id, Delete), every item one action through the dispatcher"
       ]
     },
     "src/Sidebar.css": {
@@ -100,7 +103,8 @@
       "commit": "0594fa19a56266195b68aa13de14e4c01c87941b",
       "changes": [
         "the site map rules (data-site colors, child groups, the nameplate faces) removed; the list is .pt-tree (the grid's .pt-thumbs rules moved to @turboslide/viewer GridView.css)",
-        "rows gain a 22px number column, .pt-orow-marks for the badge and the lease dot, and .pt-orow-kind for the second line in thumbnail density"
+        "rows gain a 22px number column, .pt-orow-marks for the badge and the lease dot, and .pt-orow-kind for the second line in thumbnail density",
+        "M3: the drop line (2px ink, a state), the dragging row, the empty-section note, the row menu button and the menu card"
       ]
     },
     "src/ListRow.tsx": {
@@ -197,15 +201,212 @@
         "`initialMode` (the route's ?mode=) takes precedence over the saved mode and `onModeChange` reports every change; `onSelect` receives the item's 1-based number",
         "the html[data-shell-sb] boot stamp is not written (the studio's boot script stamps the theme only)",
         "the root carries data-mode, data-active, data-index and data-total for the window API and the Playwright specs",
-        "the preview layer resolves subjects from the items' HTML"
+        "the preview layer resolves subjects from the items' HTML",
+        "M3 (SPEC 6.1): `onSearch` (sets the shell search flag and Cmd K), `searchOpen`, `toolbarStatus`, `panel` (the inspector in the main region's second column), `drawer` (the source drawer over the stage) and `sidebarEdit` props; the main region carries data-panel while an inspector is present"
       ]
     },
     "src/ViewerShell.css": {
       "source": "src/components/viewer/ViewerShell.css",
       "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497",
       "changes": [
-        "the html[data-shell-sb] and html[data-shell-density] boot rules removed; .pt-thumbs became .pt-tree in the density fade; the .sheet-flow rules removed"
+        "the html[data-shell-sb] and html[data-shell-density] boot rules removed; .pt-thumbs became .pt-tree in the density fade; the .sheet-flow rules removed",
+        "M3: the two-column main region under data-panel (the toolbar spans both, the inspector takes rows two and three and owns the seam with its left edge), the drawer's right edge at the panel, present and narrow rules for both"
       ]
+    },
+    "src/Palette.tsx": {
+      "source": "src/components/viewer/Search.tsx",
+      "commit": "e10f36a62e82d9b37f4903e4af598e90f30c6bf2",
+      "changes": [
+        "grown into the command palette of SPEC 6.3: the entries come in as props (palette-data.ts builds the five groups from the document and the action table) and Enter runs an entry through the editor dispatcher, a prompt entry after one field, a view toggle through its callback; the router, the site index and the anchor rows are gone",
+        "the trigger pill moved to Toolbar.tsx (SearchPill) and the open state to the route; useShellKeys opens it through ViewerShell onSearch instead of a document event",
+        "rows gain a key chip and a hint line; group labels carry their prefix chip; the foot names the three prefixes"
+      ]
+    },
+    "src/Palette.css": {
+      "source": "src/components/viewer/Search.css",
+      "commit": "f804b51ff0038326b7e2bd1e19e56240ec0bfa13",
+      "changes": [
+        "the site-color rules (data-site) removed with the site map; the field takes the shell corner like the sidebar filter",
+        "rows gain the keys and hint areas (a two-row grid), .is-needs, the kbd chip rules and the prefix chips in the group label and the foot; the prompt state of the tools row"
+      ]
+    },
+    "src/palette-data.ts": {
+      "source": "src/lib/search-index.ts (searchGroups, searchCount)",
+      "commit": "0594fa19a56266195b68aa13de14e4c01c87941b",
+      "changes": [
+        "rewritten for the deck: the five groups of SPEC 6.3 built from the document, the block and slide kind catalogs, the action table and the version log; the prefix parser and the scored fuzzy filter are new"
+      ]
+    },
+    "src/Inspector.css": {
+      "source": "src/components/viewer/IndexPanel.css (the panel edge, head, group heading and row rules)",
+      "commit": "c51f46fac646ade0cb6d79c5c894cece6ff31b96",
+      "changes": [
+        "the panel is docked in the main region instead of sliding over the stage (no transform, no scrim); section headers are 32px sticky buttons with the chevron; rows are the 32px ruled rows of InspectorControl.css"
+      ]
+    },
+    "src/Inspector.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/InspectorControl.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/InspectorControl.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/generate.ts": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/props.ts": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/seg.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/seg.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/select.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/select.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/stepper.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/stepper.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/check.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/check.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/text.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/text.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/icon.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/icon.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/asset.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/asset.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/json.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/inspector/json.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/StatusChip.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/StatusChip.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/LintPanel.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/LintPanel.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/VersionsPanel.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/VersionsPanel.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/HistoryPanel.tsx": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/HistoryPanel.css": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/dispatch.ts": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/source/apply.ts": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/source/schema-completion.ts": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/source/editor.ts": {
+      "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
+      "commit": ""
+    },
+    "src/SourceDrawer.tsx": {
+      "source": "new (M3, SPEC 6.6); the delegating owner contract follows glyphfield/src/components/SourceCodeDrawer.tsx:292-302 and the Apply round trip through one validator (glyphfield/src/lib/sourceCode.ts), as contracts, not code (SPEC 2.2)",
+      "commit": ""
+    },
+    "src/SourceDrawer.css": {
+      "source": "new (M3, SPEC 6.6); the head and tools grammar from IndexPanel.css and Toolbar.css",
+      "commit": ""
+    },
+    "src/Overlay.tsx": {
+      "source": "new (M3, SPEC 6.4, SPEC 2.2 junction table); no Prototemplate source, the selection ring, chip, lint boxes and handles are drawn from the viewer Editor's measured boxes",
+      "commit": ""
+    },
+    "src/Overlay.css": {
+      "source": "new (M3, SPEC 6.4); the chip and handle grammar from Prototemplate DESIGN.md \"Line law for chrome\"",
+      "commit": ""
+    },
+    "src/TwinStage.tsx": {
+      "source": "new (M3, SPEC 6.8); two Stage-shaped panes over the viewer's Sheet, Frame and SlideView",
+      "commit": ""
+    },
+    "src/TwinStage.css": {
+      "source": "new (M3, SPEC 6.8); the 12.5px titanium caption grammar from Sidebar.css",
+      "commit": ""
+    },
+    "src/Thumb.tsx": {
+      "source": "new (M3, SPEC 5.5); the static capture over LiveClone, the fallback order of ThumbShot.tsx",
+      "commit": ""
+    },
+    "src/Thumb.css": {
+      "source": "new (M3, SPEC 5.5)",
+      "commit": ""
     }
   },
   "viewer": {

@@ -1,18 +1,34 @@
-// Rendered rules over RenderRecords (SPEC 7.7; MILESTONES M1 item 9): sheet/overflow,
-// sheet/rail-touch, type/floor-15, type/weight-cap, type/face, rows/two-lines, plus the rendered
-// half of type/svg-label-min. The remaining rendered rules (dia/label-clearance on raw svg,
-// lines/law inside the sheet, contrast/both-themes, layout/*, asset/stretched,
-// sheet/thumb-legible) land in M3 (MILESTONES M3 item 5). Every finding names the block and its
-// pixel box from the record; a record carries the theme, so findings do too.
+// Rendered rules over RenderRecords (SPEC 7.7; MILESTONES M1 item 9 and M3 item 5): sheet/overflow,
+// sheet/rail-touch, type/floor-15, type/weight-cap, type/face, rows/two-lines and the rendered
+// half of type/svg-label-min from the record's boxes and text metrics; layout/columns-aligned,
+// layout/pair-gaps, asset/stretched and sheet/thumb-legible from the boxes and the document; the
+// rendered half of dia/label-clearance from a raw svg's geometry scaled by its measured box; and
+// contrast/both-themes, layout/empty-half and lines/law from the screenshot's pixels (bitmap.ts),
+// which are skipped when the PNG is not on disk. Every finding names the block and its pixel box
+// from the record; a record carries the theme, so findings do too. The limits are
+// RENDERED_LIMITS in @turboslide/schema/rules, one source for the checks and the docs.
+import { RENDERED_LIMITS } from '@turboslide/schema/rules';
+
 import type { Finding, RenderRecord, Slide } from '../contracts.ts';
 import type { LintContext } from '../context.ts';
+import type { RenderedInputs } from './bitmap.ts';
+import { loadRecordBitmap } from './bitmap.ts';
+import { checkLabelClearance } from './clearance.ts';
+import { checkContrast } from './contrast.ts';
+import { checkColumnsAligned, checkEmptyHalf, checkPairGaps } from './layout.ts';
+import { checkLinesLaw } from './lines.ts';
+import { indexBlocks } from './shared.ts';
+import { checkStretched } from './stretched.ts';
+import { checkThumbLegible } from './thumb.ts';
+
+export type { RenderedInputs } from './bitmap.ts';
 
 /** Rails at 56 px from the edges, rules at 56 px from top and bottom (SPEC 2.1). */
 export const RAIL = 56;
-export const RAIL_TOUCH_PX = 8;
-export const FLOOR_PX = 15;
-export const WEIGHT_CAP = 500;
-export const SVG_LABEL_MIN = 18;
+export const RAIL_TOUCH_PX = RENDERED_LIMITS.railTouchPx;
+export const FLOOR_PX = RENDERED_LIMITS.floorPx;
+export const WEIGHT_CAP = RENDERED_LIMITS.weightCap;
+export const SVG_LABEL_MIN = RENDERED_LIMITS.svgLabelMinPx;
 
 /** Block types whose boxes hold text and must keep clear of the rails. */
 const TEXT_TYPES = new Set([
@@ -35,11 +51,15 @@ const TEXT_TYPES = new Set([
   'logoPlates',
 ]);
 
-function blockPaths(ctx: LintContext, slide: Slide | undefined): Map<string, string> {
-  const map = new Map<string, string>();
-  if (!slide) return map;
-  for (const ref of ctx.blocksOf(slide)) map.set(ref.block.id, ref.path);
-  return map;
+/**
+ * The render directory a caller passed through the lint options, when it did. LintOptions in
+ * context.ts does not declare the field yet; it is read here by name so `turboslide lint
+ * --render <dir>` can hand it down once the CLI passes it (AGENTS.md contracts: a record's image
+ * is relative to the render directory).
+ */
+function renderDirOf(options: object): string | undefined {
+  const value: unknown = (options as Record<string, unknown>).renderDir;
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
 
 /** Distance from a box to the four rails and rules; 0 when the box crosses one. */
@@ -58,10 +78,15 @@ function railDistance(box: [number, number, number, number]): { line: string; di
   return candidates.reduce((best, c) => (c.distance < best.distance ? c : best));
 }
 
-export function lintRecord(ctx: LintContext, record: RenderRecord): Finding[] {
+export function lintRecord(
+  ctx: LintContext,
+  record: RenderRecord,
+  inputs: RenderedInputs = {},
+): Finding[] {
   const out: Finding[] = [];
-  const slide = ctx.slides[record.slideId];
-  const paths = blockPaths(ctx, slide);
+  const slide: Slide | undefined = ctx.slides[record.slideId];
+  const refs = indexBlocks(ctx, slide);
+  const paths = new Map([...refs].map(([id, ref]) => [id, ref.path]));
   const theme = record.theme;
 
   for (const entry of record.overflow) {
@@ -167,5 +192,19 @@ export function lintRecord(ctx: LintContext, record: RenderRecord): Finding[] {
       }
     }
   }
+
+  // M3 item 5: the rules that read the document and the boxes together
+  out.push(...checkColumnsAligned(ctx, record, slide, refs));
+  out.push(...checkPairGaps(ctx, record, slide, refs));
+  out.push(...checkStretched(ctx, record, slide, refs));
+  out.push(...checkThumbLegible(ctx, record, slide, refs));
+  out.push(...checkLabelClearance(ctx, record, slide, refs));
+
+  // and the rules that read the screenshot; null means there is none, so nothing is read from disk
+  const renderDir = inputs.renderDir ?? renderDirOf(ctx.options);
+  const bitmap = inputs.bitmap !== undefined ? inputs.bitmap : loadRecordBitmap(record, renderDir);
+  out.push(...checkContrast(ctx, record, slide, refs, bitmap));
+  out.push(...checkEmptyHalf(ctx, record, slide, refs, bitmap));
+  out.push(...checkLinesLaw(ctx, record, slide, refs, bitmap));
   return out;
 }

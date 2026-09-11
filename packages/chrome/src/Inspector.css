@@ -1,0 +1,255 @@
+/* The inspector (SPEC 6.5, 2.2): a 460px column (--pt-panel-w) on paper with one line, its
+   left edge in --pt-hair; the toolbar's bottom rule runs above it, so it draws no top edge, and
+   it covers the progress track's row while open, as the index panel did (IndexPanel.css).
+   Inside: a scroll region of sections, 16px apart. A section header is a 32px sticky row that
+   draws --pt-hair under itself; its rows draw --pt-hair-soft under themselves
+   (InspectorControl.css) and the last row draws none. Ported grammar: the index panel's head,
+   group heading and row rules (Prototemplate IndexPanel.css), at the panel width. Colors are
+   tokens only, radius 0 apart from the fields' shell corner, no shadow. */
+.ts-inspector {
+  position: relative;
+  width: var(--pt-panel-w);
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font-family: var(--pt-text);
+  font-size: 13px;
+  border-left: 1px solid var(--pt-hair);
+}
+
+.ts-insp-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0 18px 44px;
+}
+
+.ts-insp-notice,
+.ts-insp-lease {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-insp-lease {
+  color: var(--pt-ink-2);
+}
+
+/* ---- sections: 16px between them; the first sits 4px under the toolbar's rule ---- */
+.ts-insp-section {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-top: 4px;
+}
+
+.ts-insp-section + .ts-insp-section {
+  margin-top: 16px;
+}
+
+/* the header: 32px, sticky, paper ground so rows scroll under it, --pt-hair under itself */
+.ts-insp-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  appearance: none;
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--pt-ink);
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 13.5px;
+  letter-spacing: -0.005em;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-insp-head > svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  padding: 2px;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  fill: currentColor;
+  color: var(--pt-titanium);
+  transition: transform var(--pt-dur-toast) var(--pt-ease-out);
+}
+
+.ts-insp-section.is-closed > .ts-insp-head > svg {
+  transform: rotate(-90deg);
+}
+
+.ts-insp-head-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-insp-head-count {
+  flex: 0 0 auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-insp-head:hover > svg,
+.ts-insp-head:focus-visible > svg {
+  color: var(--pt-ink);
+}
+
+.ts-insp-head:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+/* the body: rows; the last row draws no rule (the line law's junction table) */
+.ts-insp-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-insp-body > .ts-insp-row:last-child,
+.ts-insp-body > .ts-insp-array:last-child > .ts-insp-row:last-child {
+  border-bottom: 0;
+}
+
+.ts-insp-doc {
+  margin: 0;
+  padding: 8px 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--pt-titanium);
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+/* ---- arrays: an item header row over its controls, an Add row after the items ---- */
+.ts-insp-array {
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-insp-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.ts-insp-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  padding-top: 6px;
+  font-size: 12px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-insp-item-head .pt-ib.ts-insp-item-remove {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  justify-content: center;
+}
+
+.ts-insp-item-head .pt-ib.ts-insp-item-remove svg {
+  width: 12px;
+  height: 12px;
+}
+
+.ts-insp-row.is-add {
+  grid-template-columns: 1fr;
+  justify-items: start;
+}
+
+/* ---- the block list when nothing is selected ---- */
+.ts-insp-blocks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ts-insp-block-row {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink-2);
+  font: 12.5px var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-insp-blocks li:last-child .ts-insp-block-row {
+  border-bottom: 0;
+}
+
+.ts-insp-block-row:hover {
+  color: var(--pt-ink);
+}
+
+.ts-insp-block-row:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-insp-block-type {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+}
+
+.ts-insp-block-id {
+  font-family: var(--pt-mono);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-insp-block-slot {
+  font-size: 11.5px;
+  color: var(--pt-titanium);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-insp-head > svg {
+    transition: none;
+  }
+}
+
+/* at or below 900px the inspector takes the whole main region under the toolbar */
+@media (max-width: 900px) {
+  .ts-inspector {
+    width: 100%;
+    border-left: 0;
+  }
+}

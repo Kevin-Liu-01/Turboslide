@@ -1,9 +1,9 @@
 import type { KeyboardEvent, MouseEvent } from 'react';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 
 import { LiveClone } from './LiveClone';
 import { pad2, trimTitle } from './model';
-import type { ViewerDeck } from './model';
+import type { ViewerDeck, ViewerSlide } from './model';
 import type { Theme } from './theme';
 
 import './GridView.css';
@@ -37,6 +37,30 @@ function pressWithoutFocus(event: MouseEvent<HTMLElement>): void {
   event.preventDefault();
   const focused = document.activeElement;
   if (focused instanceof HTMLElement && focused !== event.currentTarget) focused.blur();
+}
+
+/**
+ * The render worker's capture for a tile (M3 item 5): invisible until it has decoded, then shown
+ * over the live clone in one cut; a capture that fails to load leaves the clone in place.
+ */
+function StaticShot({ shot, theme }: { shot: NonNullable<ViewerSlide['shot']>; theme: Theme }) {
+  const src = theme === 'dark' ? (shot.dark ?? shot.light) : shot.light;
+  const [loaded, setLoaded] = useState<string | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
+  if (failed === src) return null;
+  return (
+    <img
+      key={src}
+      className={loaded === src ? 'pt-thumb-shot is-loaded' : 'pt-thumb-shot'}
+      src={src}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      draggable={false}
+      onLoad={() => setLoaded(src)}
+      onError={() => setFailed(src)}
+    />
+  );
 }
 
 /**
@@ -81,6 +105,7 @@ export function GridView({
                   <div className="pt-thumb-body">
                     <div className="pt-thumb-frame">
                       <LiveClone html={slide.html} theme={theme} />
+                      {slide.shot ? <StaticShot shot={slide.shot} theme={theme} /> : null}
                     </div>
                     <div className="pt-thumb-title" data-preview={slide.id}>
                       {trimTitle(slide.title)}

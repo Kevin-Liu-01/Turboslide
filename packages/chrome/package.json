@@ -3,11 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "The Prototemplate viewer shell ported as source: tokens.css (--pt-), ToolButton, Seg, Toolbar, Sidebar, ListRow, SidebarFilter, ThumbShot, PreviewLayer, HelpCard, Toast, Progress, ThemeButton, useShellKeys, ViewerShell, with PORTED_FROM.json recording the source commit per file.",
+  "description": "The Prototemplate viewer shell ported as source: tokens.css (--pt-), ToolButton, Seg, Toolbar, Sidebar, ListRow, SidebarFilter, ThumbShot, PreviewLayer, HelpCard, Toast, Progress, ThemeButton, useShellKeys, ViewerShell, plus the editor chrome of M3: Palette, Inspector with its generated controls, SourceDrawer, Overlay, TwinStage, Thumb, StatusChip, LintPanel, VersionsPanel, HistoryPanel; PORTED_FROM.json records the source commit per file.",
+  "scripts": {
+    "test": "vitest run"
+  },
   "exports": {
     "./tokens.css": "./src/tokens.css",
     "./shell-data": "./src/shell-data.ts",
     "./shell-context": "./src/shell-context.ts",
+    "./dispatch": "./src/dispatch.ts",
     "./icons": "./src/icons.tsx",
     "./GtMark": "./src/GtMark.tsx",
     "./ToolButton": "./src/ToolButton.tsx",
@@ -24,16 +28,45 @@
     "./ThemeButton": "./src/ThemeButton.tsx",
     "./useShellKeys": "./src/useShellKeys.ts",
     "./ViewerShell": "./src/ViewerShell.tsx",
+    "./Overlay": "./src/Overlay.tsx",
+    "./TwinStage": "./src/TwinStage.tsx",
+    "./Thumb": "./src/Thumb.tsx",
+    "./palette-data": "./src/palette-data.ts",
+    "./Palette": "./src/Palette.tsx",
+    "./Inspector": "./src/Inspector.tsx",
+    "./InspectorControl": "./src/InspectorControl.tsx",
+    "./inspector/generate": "./src/inspector/generate.ts",
+    "./SourceDrawer": "./src/SourceDrawer.tsx",
+    "./source/apply": "./src/source/apply.ts",
+    "./source/schema-completion": "./src/source/schema-completion.ts",
+    "./source/editor": "./src/source/editor.ts",
+    "./StatusChip": "./src/StatusChip.tsx",
+    "./LintPanel": "./src/LintPanel.tsx",
+    "./VersionsPanel": "./src/VersionsPanel.tsx",
+    "./HistoryPanel": "./src/HistoryPanel.tsx",
     "./package.json": "./package.json"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "catalog:",
+    "@codemirror/commands": "catalog:",
+    "@codemirror/lang-json": "catalog:",
+    "@codemirror/language": "catalog:",
+    "@codemirror/lint": "catalog:",
+    "@codemirror/state": "catalog:",
+    "@codemirror/view": "catalog:",
+    "@lezer/highlight": "catalog:",
+    "@turboslide/schema": "workspace:*",
     "@turboslide/viewer": "workspace:*",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
+    "@testing-library/dom": "catalog:",
+    "@testing-library/react": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "jsdom": "catalog:",
     "typescript": "catalog:"
   }
 }

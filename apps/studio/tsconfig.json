@@ -32,6 +32,15 @@
       "path": "../../packages/chrome"
     },
     {
+      "path": "../../packages/effects"
+    },
+    {
+      "path": "../../packages/lint"
+    },
+    {
+      "path": "../../packages/store"
+    },
+    {
       "path": "../render-worker"
     }
   ]

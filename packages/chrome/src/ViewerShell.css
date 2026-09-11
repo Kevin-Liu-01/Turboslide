@@ -142,6 +142,46 @@
   view-transition-name: pt-stage;
 }
 
+/* ---- the editor's regions (SPEC 6.1, M3) ---- */
+
+/* with an inspector the main region has two columns: the toolbar spans both (its bottom rule
+   runs under the inspector, which draws no top edge), the stage and the progress line keep the
+   first, the inspector takes the second over rows two and three (it covers the progress track's
+   row, as the index panel did; the inspector owns the seam with its left edge) */
+.pt-main[data-panel] {
+  grid-template-columns: minmax(0, 1fr) var(--pt-panel-w);
+}
+
+.pt-main[data-panel] > .pt-toolbar {
+  grid-column: 1 / -1;
+}
+
+.pt-main[data-panel] > .pt-stagewrap,
+.pt-main[data-panel] > .pt-progress {
+  grid-column: 1;
+}
+
+.pt-main > .ts-inspector {
+  grid-column: 2;
+  grid-row: 2 / 4;
+  min-height: 0;
+}
+
+/* the source drawer sits over the stage column only */
+.pt-main[data-panel] > .ts-drawer {
+  right: var(--pt-panel-w);
+}
+
+/* present: the editor's regions leave with the chrome */
+.pt-viewer.is-present .pt-main[data-panel] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.pt-viewer.is-present .pt-main > .ts-inspector,
+.pt-viewer.is-present .pt-main > .ts-drawer {
+  display: none;
+}
+
 /* the scrim under the narrow overlay list */
 .pt-sb-scrim {
   position: absolute;
@@ -249,10 +289,37 @@
 }
 
 /* at or below 900px the sidebar leaves the grid; .sb-open marks the shell
-   while the list floats as the overlay Sidebar.css draws */
+   while the list floats as the overlay Sidebar.css draws. The inspector
+   floats over the stage under the toolbar, full width, and the drawer takes
+   the whole column. */
 @media (max-width: 900px) {
   .pt-viewer {
     grid-template-columns: 0 minmax(0, 1fr);
+  }
+
+  .pt-main[data-panel] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pt-main[data-panel] > .pt-toolbar,
+  .pt-main[data-panel] > .pt-stagewrap,
+  .pt-main[data-panel] > .pt-progress {
+    grid-column: 1;
+  }
+
+  .pt-main > .ts-inspector {
+    position: absolute;
+    top: var(--pt-toolbar-h);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .pt-main[data-panel] > .ts-drawer {
+    right: 0;
   }
 }
 

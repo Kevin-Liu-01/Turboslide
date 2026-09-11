@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "React: Stage, Sheet, SlideView, GridView, BookView, LiveClone, theme boot, keys, hash sync; standalone/ is the framework-free tail.html port used by renderStandalone.",
+  "description": "React: Stage, Sheet, SlideView, GridView, BookView, LiveClone, theme boot, keys, hash sync; the editor's stage (Editor, Selection, Gestures, InlineText, snap tables); standalone/ is the framework-free tail.html port used by renderStandalone.",
   "exports": {
     "./model": "./src/model.ts",
     "./theme": "./src/theme.ts",
@@ -17,6 +17,11 @@
     "./LiveClone": "./src/LiveClone.tsx",
     "./GridView": "./src/GridView.tsx",
     "./BookView": "./src/BookView.tsx",
+    "./snap": "./src/snap.ts",
+    "./Selection": "./src/Selection.tsx",
+    "./Gestures": "./src/Gestures.tsx",
+    "./InlineText": "./src/InlineText.tsx",
+    "./Editor": "./src/Editor.tsx",
     "./standalone/source": "./standalone/source.ts",
     "./standalone/runtime.ts": "./standalone/runtime.ts",
     "./package.json": "./package.json"
@@ -24,6 +29,8 @@
   "dependencies": {
     "@turboslide/effects": "workspace:*",
     "@turboslide/render": "workspace:*",
+    "@turboslide/schema": "workspace:*",
+    "@turboslide/theme": "workspace:*",
     "react": "catalog:",
     "react-dom": "catalog:"
   },

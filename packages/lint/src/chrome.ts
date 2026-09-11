@@ -17,7 +17,7 @@
 // The function is self-contained: Playwright serializes it, so it reads only its argument.
 // A state that did not apply is an infrastructure failure, never a pass (lint-lines.mjs line 113).
 
-export type ChromeRoles = 'hair' | 'soft' | 'edge' | 'ink' | 'paper';
+export type ChromeRoles = 'hair' | 'soft' | 'edge' | 'ink' | 'paper' | 'titanium';
 
 export type ChromeScope = {
   /** Selectors of the shell roots that make an element chrome. */
@@ -30,6 +30,11 @@ export type ChromeScope = {
   tokens: Record<ChromeRoles, string[]>;
   /** Elements whose ink border is a state, not a seam. */
   active: string;
+  /**
+   * The overlay's lint boxes (SPEC 2.2 junction table): 1px titanium for severity 1 and 2, ink
+   * for 3, outside any active state; absent means no such element.
+   */
+  lint?: string;
 };
 
 export type AuditConfig = { ALLOW: string[]; chrome: ChromeScope | null };
@@ -98,6 +103,7 @@ export const SHELL_CHROME: ChromeScope = {
     edge: ['--pt-edge', '--edge'],
     ink: ['--pt-ink', '--ink'],
     paper: ['--pt-paper', '--paper'],
+    titanium: ['--pt-titanium', '--titanium'],
   },
   active:
     '.is-on, .is-active, .is-editing, .is-solid, [aria-pressed="true"], [aria-current], [aria-selected="true"], [aria-expanded="true"]',
@@ -113,6 +119,7 @@ export const TURBOSLIDE_CHROME: ChromeScope = {
     '.pt-viewer, .pt-corner, .pt-corner-layer, .pt-help, .pt-toast, .pt-preview, .ts-studio, .ts-chrome',
   content: '.ts-stage, .ts-sheet, .stage, .sheet-flow .sheet > *, .pt-page-body, .pt-root, iframe',
   active: `${SHELL_CHROME.active}, .is-selected, [data-selected="true"]`,
+  lint: '.ts-lint-box',
 };
 
 /** The deck's own document inside the Prototemplate /deck iframe (lint-lines.mjs DECK_CHROME). */
@@ -139,6 +146,11 @@ export type ShellProbeState = {
   grid: boolean;
   book: boolean;
   help: boolean;
+  /** the editor's regions (SPEC 6.1, M3): the inspector column, a selected block, the drawer, the twin */
+  inspector: boolean;
+  selected: boolean;
+  source: boolean;
+  twin: boolean;
 };
 
 /**
@@ -199,6 +211,10 @@ export const probeState = (): ShellProbeState => {
         ),
       ),
     help: Boolean(document.querySelector('.pt-help, .help:not([hidden])')),
+    inspector: Boolean(document.querySelector('.ts-inspector')),
+    selected: Boolean(document.querySelector('.ts-overlay .ts-select')),
+    source: Boolean(document.querySelector('.ts-drawer')),
+    twin: Boolean(document.querySelector('.ts-twin')),
   };
 };
 
@@ -334,6 +350,9 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
       const role = roleOf(color);
       if (role && SEAM_ROLES.includes(role)) continue;
       if (role === 'ink' && activeNear(el)) continue;
+      /* a lint box is titanium (severity 1 and 2) or ink (3) by the junction table, not a seam */
+      if ((role === 'titanium' || role === 'ink') && chrome.lint && el.matches(chrome.lint))
+        continue;
       colors.push({
         kind: 'border',
         owner: isPseudo ? `pseudo:${owner}` : owner,

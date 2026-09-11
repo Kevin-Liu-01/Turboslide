@@ -45,7 +45,7 @@ Read `sheet-<theme>.json` first: `cells` maps each cell box to a slide id and nu
 | ------------------------------- | -------- | -------- | --- | ----------------------------------------------------------------------------------------------------- |
 | `sheet/overflow`                | rendered | 3        | no  | any data-block box outside 0..1600 by 0..900                                                          |
 | `sheet/rail-touch`              | rendered | 2        | no  | a text box within 8 px of a rail or rule                                                              |
-| `sheet/thumb-legible`           | rendered | 1        | no  | text under 2 px when the block renders at 0.14x                                                       |
+| `sheet/thumb-legible`           | rendered | 1        | no  | text whose rendered size (font size times the diagram scale) is under 2 px at the grid’s 0.14x        |
 | `type/floor-15`                 | rendered | 3        | no  | computed font size under 15 px on any text node                                                       |
 | `type/svg-label-min`            | both     | 3        | no  | diagram text under 18 px, or 18 px without sm                                                         |
 | `type/weight-cap`               | both     | 3        | yes | display weight above 500 outside spec                                                                 |

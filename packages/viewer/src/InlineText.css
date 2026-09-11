@@ -1,0 +1,56 @@
+/* The run toolbar (SPEC 6.4: weight 500 run, link, GT mark), a 32px paper bar over the run being
+   edited, in the chrome's vocabulary: the buttons are tokens.css .pt-ib icon squares, so they draw
+   the shell's hover hairline and pressed ink themselves. Line law (SPEC 2.2): the bar draws its one
+   1px --pt-hair ring; the link field draws the one rule between it and the buttons; nothing else
+   in the bar draws a line. Placed in CSS pixels inside the overlay layer by InlineText.tsx. */
+.ts-run-toolbar {
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0;
+  background: var(--pt-paper);
+  border: 1px solid var(--pt-hair);
+  color: var(--pt-ink-2);
+  font: 13px/1 var(--pt-text);
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+.ts-run-toolbar .pt-ib {
+  height: 30px;
+}
+
+/* the weight 500 glyph, in the display face with the deck's alternates */
+.ts-run-glyph {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.ts-run-link {
+  appearance: none;
+  height: 30px;
+  width: 240px;
+  margin: 0;
+  padding: 0 8px;
+  border: 0;
+  border-left: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+  outline: none;
+}
+
+.ts-run-link::placeholder {
+  color: var(--pt-titanium);
+}
+
+.ts-run-link:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}

@@ -1,0 +1,42 @@
+/* The stage in edit mode (SPEC 6.4). The Editor root is the theme's .ts-sheet root, as the
+   viewer's Stage is (Stage.css), with .ts-editor added: the half-click paging and the edge
+   chevrons are off, blocks take the default cursor and text runs the text cursor, and a link is
+   text rather than navigation. The overlay layer (.ts-overlay) is a sibling of the root inside the
+   shell's stage box, placed over the sheet's content box by the Editor in CSS pixels; it draws
+   nothing itself (the chrome's Overlay fills it, Overlay.css) and lets the pointer through to the
+   slide except where a handle or the run toolbar re-enables it. The selection ring never lives in
+   the sheet's markup (SPEC 2.2: the block draws nothing). */
+.ts-editor .pt-sheet-stage {
+  cursor: default;
+}
+
+.ts-editor .pt-slide [data-run] {
+  cursor: text;
+}
+
+.ts-editor .pt-slide a {
+  cursor: text;
+}
+
+/* the ring is the overlay's; the browser's focus ring on the editable run would be a second line */
+.ts-editor .pt-slide [data-run].ts-editing {
+  outline: none;
+}
+
+/* edit mode never plays the theme's entrance cut (sheet.css `.ts-sheet .slide.is-on`, 140 ms
+   from opacity 0): every write and every drag preview replaces the slide's markup, and a fade that
+   restarts on each fresh element flashes the sheet on every edit and dims it for the length of a
+   drag. A slide change remounts the body through key={slideId} and stays cut-free as well. */
+.ts-editor .pt-slide .slide.is-on {
+  animation: none;
+}
+
+.ts-overlay {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.ts-overlay[hidden] {
+  display: none;
+}

@@ -1,0 +1,167 @@
+/* The stage overlay in edit mode (SPEC 6.4; SPEC 2.2 junction table). Everything here is placed
+   in CSS pixels by Overlay.tsx from sheet boxes times k, so a rule is 1px at every stage scale.
+   Colors are the chrome tokens only. Line law: the hover outline is structural --pt-hair; the
+   selection ring is --pt-ink as a state (.is-selected, allowed as `ts-select` in the audit); a
+   handle's rule is --pt-hair at rest and --pt-ink while it is being dragged (.is-active); the drop
+   line is ink while a drag is on. The lint boxes follow SPEC 2.2: ink for severity 3, titanium for
+   1 and 2, with a 13px chip naming the rule. The chip and the lint chip are filled labels, not
+   lines. Motion: the hover outline fades over the fast duration and nothing else animates; the
+   reduced motion block turns that off. */
+
+.ts-hover {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  pointer-events: none;
+  animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
+}
+
+/* the ring: ink as a state, never in the sheet's markup */
+.ts-select {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-ink);
+  pointer-events: none;
+}
+
+/* the chip naming `type · id`, outside the ring; as a button it is the block's drag handle */
+.ts-select-chip {
+  position: absolute;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  margin: 0;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 0;
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  font: 500 13px/1 var(--pt-text);
+  white-space: nowrap;
+  pointer-events: auto;
+  cursor: grab;
+  appearance: none;
+}
+
+.ts-select-chip.is-static {
+  cursor: default;
+}
+
+.ts-select-chip.is-active {
+  cursor: grabbing;
+}
+
+.ts-select-chip:focus-visible {
+  outline: 1px solid var(--pt-paper);
+  outline-offset: -2px;
+}
+
+/* lint boxes: titanium for severity 1 and 2, ink for 3 */
+.ts-lint-box {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-titanium);
+  pointer-events: none;
+}
+
+.ts-lint-box[data-severity='3'] {
+  border-color: var(--pt-ink);
+}
+
+.ts-lint-box-chip {
+  position: absolute;
+  left: -1px;
+  bottom: 100%;
+  display: inline-flex;
+  align-items: center;
+  height: 16px;
+  padding: 0 5px;
+  background: var(--pt-titanium);
+  color: var(--pt-paper);
+  font: 13px/1 var(--pt-text);
+  white-space: nowrap;
+}
+
+.ts-lint-box[data-severity='3'] .ts-lint-box-chip {
+  background: var(--pt-ink);
+}
+
+/* the insertion line of a block drag */
+.ts-drop {
+  position: absolute;
+  height: 0;
+  border-top: 1px solid var(--pt-ink);
+  pointer-events: none;
+}
+
+/* handles: transparent hit boxes that draw one rule or one square through ::before */
+.ts-handle {
+  position: absolute;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  appearance: none;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.ts-handle::before {
+  content: '';
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+/* a vertical edge: a 1px rule down the middle of the hit box */
+.ts-handle[data-shape='v']::before {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
+  background: var(--pt-hair);
+}
+
+/* a grip: the deck's 11px square on paper with a hairline */
+.ts-handle[data-shape='square']::before {
+  inset: 0;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+}
+
+/* an area (a crop, a pair figure) has a cursor and no drawing */
+.ts-handle[data-shape='area']::before {
+  display: none;
+}
+
+/* the slide-level handles (the seam, the plate) are silent until the pointer finds them */
+.ts-handle:not(.is-selected):not(.is-active):not(:hover):not(:focus-visible)::before {
+  display: none;
+}
+
+.ts-handle.is-active[data-shape='v']::before {
+  background: var(--pt-ink);
+}
+
+.ts-handle.is-active[data-shape='square']::before {
+  border-color: var(--pt-ink);
+}
+
+.ts-handle.is-active {
+  cursor: grabbing;
+}
+
+.ts-handle:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-hover {
+    animation: none;
+  }
+}

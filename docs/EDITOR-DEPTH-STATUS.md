@@ -295,8 +295,9 @@ box write's record is missing. Every function instance that reads the deck answe
 calls through `@vercel/blob` from this machine with the same token answer 200 for every one of the
 deck's 290 blobs and `null` for the missing records, and the other hosted decks (`gt-brand` r31,
 `editor-depth-09120307` r19, `editor-depth-09120252` r13, `fixture-p8-193001` r29) read fine on
-the same preview. The cause is not established (section 10); the drive of preview 9 had landed all
-twelve editor writes with the same store code.
+the same preview. Between 21:22 and 21:29 PDT the 403 cleared: the preview and production both
+read the deck at revision 2 afterwards (section 12). The cause is not established (section 10);
+the drive of preview 9 had landed all twelve editor writes with the same store code.
 
 A second hosted defect turned up while reproducing: `POST /api/actions/deck.create` on the preview
 answered `revision 0` with `dir: /tmp/turboslide/decks/verifier-repro-2113`, the store never
@@ -328,14 +329,16 @@ the evidence README):
 
 ## 10. Blockers
 
-- One hosted deck of the final preview is unreadable by the function (section 9): the drive's
-  third write never landed, the store holds `deck.json` at r2 with one record and the box write's
-  record missing, and every instance's read of the deck fails with a Blob 403 that this machine
-  cannot reproduce against the same blobs with the same token. Whether the 403 is the CDN's answer
-  to an overwritten public blob fetched with `useCache: false` from inside Vercel, or the mirror
-  asking for a pathname this machine did not, needs the function's own log line; the store code is
-  the one preview 9 landed twelve writes on. Until it is understood, a deck that hits it is lost to
-  the editor (its files are intact in the store and `deck pull` can read them from this machine).
+- A fresh hosted deck went dark for a quarter of an hour (section 9): after the drive created
+  `editor-depth-09120413` and wrote r1 and r2 within a minute, the third write never landed, the
+  store kept `deck.json` at r2 with the box write's record missing, and for 10 to 16 minutes every
+  function instance's read of the deck failed with a Blob 403 that this machine could not
+  reproduce against the same blobs with the same token; the 403 then cleared on the preview and on
+  production alike. The likely suspect is the Blob CDN's state for a freshly created public blob
+  overwritten twice, fetched with `useCache: false` from inside Vercel; the function's own log
+  line would settle it, and immutable per-revision documents would remove the overwrite. The lost
+  record means the deck's history starts at its second write. The store code is the one preview 9
+  landed twelve writes on.
 - `deck.create` over `POST /api/actions` is instance-local hosted (section 9): the deck lands in
   the function's `/tmp` and never in the store. Route it through `createStoredDeck` as the page
   does; until then an agent creates a deck hosted through the page or `turboslide deck push`.
@@ -393,4 +396,39 @@ https://turboslide.vercel.app --token <value>` once with the value from `vercel 
 
 ## 12. Production after the push
 
-The push to `main` of this commit deploys the tree. The verifier polls `https://turboslide.vercel.app/deck/gt-brand` every 30 s until its SSR page carries the head text Turboslide, then runs `node scripts/hosted-smoke.mjs https://turboslide.vercel.app` and one synchronous flatten export against production, and records the table, the commit hash and the export size here in the follow-up commit.
+Commit `3f1be80ed8871e5cba24e718d704a353f7e6ae4c` (`Turboslide editor depth: freeform layout,
+primitives, palette and typography, tooltips, deck transfer`, authored as the repo-local identity)
+was pushed to `main` at 21:24:31 PDT on 2026-09-11. Vercel created the production deployment
+`turboslide-kgu6an9md` at 21:24:35, built it in 41 s, and `https://turboslide.vercel.app` served it
+by 21:25:41: the SSR page of `/deck/gt-brand` carried the head text Turboslide twice and 25
+`data-tip` attributes where the hosting round's build carried none. (The verifier's first poll
+used `grep` on the saved body and counted zero because this machine's `grep` treats the page's
+long UTF-8 lines as binary; a byte count with Python found the marker at once.)
+
+`node scripts/hosted-smoke.mjs https://turboslide.vercel.app` at 21:28 PDT
+(`docs/editor-depth-evidence/smoke-production.md`):
+
+| Path                                        | Status | ms   | Result | Detail                                                    |
+| ------------------------------------------- | ------ | ---- | ------ | --------------------------------------------------------- |
+| `/`                                         | 307    | 3505 | pass   | to `/edit/editor-depth-09120413`, the drive's broken deck |
+| `/deck/gt-brand`                            | 200    | 275  | pass   | 374,609 chars                                             |
+| `/edit/gt-brand`                            | 200    | 100  | pass   | 17,235 chars, 3 of 3 shell marks                          |
+| `/decks`                                    | 200    | 279  | pass   | 42,426 chars                                              |
+| `/decks/gt-brand/assets/cover-fumadocs.png` | 200    | 190  | pass   | image/png, 335,538 B                                      |
+| `/api/agent`                                | 401    | 96   | pass   | the bearer rule; `TURBOSLIDE_TOKEN` is now enforced       |
+
+One synchronous flatten export against production, `POST
+/api/export/gt-brand?sync=1&format=json` with the bearer and the body `{ format: pptx, mode:
+flatten, theme: [light], fonts: exact, slideIds: [thesis] }`: HTTP 200 in 7.68 s end to end,
+`X-Turboslide-Sync: requested`, the summary at revision 31, 1 page, `passed: true`, the report's
+`perfect: true`, geometry in bounds, no fonts embedded, `gt-brand-light.pptx` of 45,531 bytes
+(sha256 `349dd026…98fa10`), stored in the Blob store under `exports/` (`stored: true`), 6,143 ms
+inside the function on `chrome-headless-shell 147.0.7727.0` over SwiftShader, `exec: inprocess`,
+verify not requested (it never runs hosted).
+
+Production reads the drive's deck: `deck.info` on `editor-depth-09120413` answers revision 2 with
+85 slides and one version record (the shape write), `/deck/editor-depth-09120413` is 200 and
+`/deck/gt-brand?present=1` is 200; `/decks` lists 14 decks, the GT deck among twelve the drives
+created and one fixture, and `/` opens the newest of them. By 21:29 PDT the preview read the same
+deck at revision 2 too, so the Blob 403 of section 9 lasted between 10 and 16 minutes and then
+cleared on every instance.

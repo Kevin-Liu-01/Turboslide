@@ -41,8 +41,9 @@ The tree of the editor depth commit was deployed as preview 11, `turboslide-8hol
 `/deck/gt-brand` 200 with the head text Turboslide in the SSR page, `/edit/gt-brand` 200 with 3 of 3
 shell marks, `/decks` 200, the twin 200, `/api/agent` 401). The drive passed 5 of 19 rows and was
 stopped after the tenth: the box and shape inserts landed r1 and r2, the text insert waited 120 s
-for the server revision, and every read of the deck by the function then failed with a Blob 403
-that this machine cannot reproduce against the same blobs with the same token
+for the server revision, and every read of the deck by the function then failed for 10 to 16 minutes with a Blob
+403 that this machine could not reproduce against the same blobs with the same token, before it
+cleared on the preview and on production
 (`drive-final-preview.md`, `17-final-preview-viewer-turboslide-thumbs-1440x900.jpg`,
 `18-final-preview-text-insert-failed-1440x900.jpg`; `docs/EDITOR-DEPTH-STATUS.md` sections 9 and
 10 have the store's state and the second defect found on the way, the instance-local

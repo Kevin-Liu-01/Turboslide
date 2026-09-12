@@ -18,6 +18,7 @@ import { SidebarFilter as FilterRow } from './SidebarFilter';
 import { SLIDE_TEMPLATES, templateTitle } from './slide-templates';
 import { Thumb } from './Thumb';
 import { ToolButton } from './ToolButton';
+import { tipProps } from './Tooltip';
 
 import './Sidebar.css';
 
@@ -49,10 +50,27 @@ const WALK = '.pt-grp-head, .pt-orow';
 /** the distance a followed row keeps from the list's edges */
 const FOLLOW_MARGIN = 8;
 
-/* queue-list for the outline, photo for the thumbnails (SPEC 6.2 density Seg) */
+/** The product name in the sidebar head (Kevin, 2026-09-11: "change this to say turboslide"); the deck's name lives in the toolbar's DeckName control. */
+export const PRODUCT_NAME = 'Turboslide';
+
+/* photo for the thumbnails, queue-list for the outline (SPEC 6.2 density Seg); thumbnails are
+   the default (Kevin, 2026-09-11: "the default should be images") and the choice is remembered
+   per browser (ViewerShell gt-shell-density) */
 const DENSITY_OPTIONS: readonly SegOption<ShellDensity>[] = [
-  { value: 'outline', label: 'Outline', icon: 'queue-list', title: 'Outline' },
-  { value: 'thumbs', label: 'Thumbnails', icon: 'photo', title: 'Thumbnails' },
+  {
+    value: 'thumbs',
+    label: 'Thumbnails',
+    icon: 'photo',
+    title: 'Thumbnails',
+    doc: 'Numbered 16:9 thumbnails with the title under each; the default.',
+  },
+  {
+    value: 'outline',
+    label: 'Outline',
+    icon: 'queue-list',
+    title: 'Outline',
+    doc: 'One 28 px row per slide: number, kind glyph and title.',
+  },
 ];
 
 /** The sprite symbol a row draws for its slide kind (SPEC 6.2: a kind glyph from the sprite). */
@@ -154,12 +172,14 @@ function pressWithoutFocus(event: MouseEvent<HTMLElement>): void {
 }
 
 /**
- * The 64x36 mini in its own frame (SPEC 6.2): the render worker's static capture once it has
- * decoded, the live clone until then, the blank plate when the item has neither (M3 item 5).
+ * The 16:9 card in its own frame (SPEC 6.2; Kevin's screenshot of 2026-09-11: the numbered
+ * thumbnail with the title under it): the render worker's static capture once it has decoded,
+ * the live clone until then, the blank plate when the item has neither (M3 item 5). The frame
+ * fills the row's width and keeps the sheet's aspect.
  */
-function Mini({ item, theme }: { item: ShellItem; theme: 'light' | 'dark' }) {
+function Card({ item, theme }: { item: ShellItem; theme: 'light' | 'dark' }) {
   return (
-    <span className="pt-thumb-frame is-mini">
+    <span className="pt-thumb-frame is-card">
       <Thumb
         shot={item.shot}
         html={item.html}
@@ -235,8 +255,8 @@ function TreeRow({ section, item, active, shots, theme, href, onPick, follow, ed
       }
       ref={follow}
     >
-      {shots ? <Mini item={item} theme={theme} /> : null}
       <span className="pt-orow-n">{item.n ?? ''}</span>
+      {shots ? <Card item={item} theme={theme} /> : null}
       <svg viewBox="0 0 20 20" aria-hidden="true">
         <use href={`#${glyphOf(item)}`} />
       </svg>
@@ -257,8 +277,11 @@ function TreeRow({ section, item, active, shots, theme, href, onPick, follow, ed
             <button
               type="button"
               className={cn('pt-orow-more', edit.menuOpen && 'is-on')}
-              title={`Slide ${item.id}: insert, duplicate, move, delete`}
               aria-label={`Menu for slide ${item.id}`}
+              {...tipProps({
+                name: 'Slide menu',
+                doc: `Insert after, duplicate, move, render, lint or delete ${item.id}; right click opens it too.`,
+              })}
               aria-haspopup="menu"
               aria-expanded={edit.menuOpen}
               data-control={`sidebar.menu.${item.id}`}
@@ -273,9 +296,6 @@ function TreeRow({ section, item, active, shots, theme, href, onPick, follow, ed
             </button>
           ) : null}
         </span>
-      ) : null}
-      {shots ? (
-        <span className="pt-orow-kind">{`${item.kind ?? 'content'} in ${section.label}`}</span>
       ) : null}
     </a>
   );
@@ -403,15 +423,15 @@ function RowMenu({ menu, sections, edit, onClose }: MenuProps) {
   };
 
   /* the control suffix is unique per item (insert.<kind>, move.<sectionId>), so it is the key */
-  const entry = (label: string, control: string, act: () => void, disabled = false) => (
+  const entry = (label: string, control: string, act: () => void, doc: string, key?: string) => (
     <button
       key={control}
       type="button"
       role="menuitem"
       className="pt-orow-menu-item"
       data-control={`sidebar.menu.${item.id}.${control}`}
-      disabled={disabled}
       onClick={act}
+      {...tipProps({ name: label, doc, ...(key !== undefined ? { key } : {}) })}
     >
       {label}
     </button>
@@ -429,51 +449,91 @@ function RowMenu({ menu, sections, edit, onClose }: MenuProps) {
     >
       <span className="pt-orow-menu-head">Insert after</span>
       {INSERT_KINDS.map((kind) =>
-        entry(`${kind.label} slide`, `insert.${kind.kind}`, () => insertAfter(kind.kind)),
+        entry(
+          `${kind.label} slide`,
+          `insert.${kind.kind}`,
+          () => insertAfter(kind.kind),
+          `Inserts a blank ${kind.label.toLowerCase()} slide after ${item.id} (slide.insert).`,
+        ),
       )}
       {templates.length > 0 ? <span className="pt-orow-menu-head">Insert a template</span> : null}
       {templates.map(({ template, id, slide }) =>
-        entry(templateTitle(template), `template.${template.id}`, () => insertSlide(id, slide)),
+        entry(
+          templateTitle(template),
+          `template.${template.id}`,
+          () => insertSlide(id, slide),
+          `${template.doc} Inserted after ${item.id} with placeholder copy.`,
+        ),
       )}
       <span className="pt-orow-menu-rule" aria-hidden="true" />
-      {entry('Duplicate', 'duplicate', duplicate)}
+      {entry(
+        'Duplicate',
+        'duplicate',
+        duplicate,
+        `Inserts a copy of ${item.id} after it under a free id (slide.get then slide.insert).`,
+      )}
       {sections.length > 1 ? <span className="pt-orow-menu-head">Move to section</span> : null}
       {sections
         .filter((entrySection) => entrySection.id !== section.id)
-        .map((target) => entry(target.label, `move.${target.id}`, () => moveTo(target)))}
+        .map((target) =>
+          entry(
+            target.label,
+            `move.${target.id}`,
+            () => moveTo(target),
+            `Moves ${item.id} to the end of ${target.label} (slide.move).`,
+          ),
+        )}
       <span className="pt-orow-menu-rule" aria-hidden="true" />
-      {entry('Render', 'render', () =>
-        run(`Rendered ${item.id}`, () =>
-          edit.dispatch('render.slide', {
-            slideIds: [item.id],
-            themes: ['light', 'dark'],
-            scale: 1,
-          }),
-        ),
+      {entry(
+        'Render',
+        'render',
+        () =>
+          run(`Rendered ${item.id}`, () =>
+            edit.dispatch('render.slide', {
+              slideIds: [item.id],
+              themes: ['light', 'dark'],
+              scale: 1,
+            }),
+          ),
+        'Renders both themes of this slide through the render worker (render.slide).',
       )}
-      {entry('Lint this slide', 'lint', () =>
-        run(`Linted ${item.id}`, () =>
-          edit.dispatch('lint.run', { slideIds: [item.id], layers: 'static' }),
-        ),
+      {entry(
+        'Lint this slide',
+        'lint',
+        () =>
+          run(`Linted ${item.id}`, () =>
+            edit.dispatch('lint.run', { slideIds: [item.id], layers: 'static' }),
+          ),
+        'Runs the static lint layer on this slide alone (lint.run).',
       )}
-      {entry('Copy id', 'copyId', () => {
-        onClose();
-        navigator.clipboard
-          .writeText(item.id)
-          .then(() => edit.onNotice?.(`Copied ${item.id}`))
-          .catch(() => edit.onNotice?.(item.id));
-      })}
+      {entry(
+        'Copy id',
+        'copyId',
+        () => {
+          onClose();
+          navigator.clipboard
+            .writeText(item.id)
+            .then(() => edit.onNotice?.(`Copied ${item.id}`))
+            .catch(() => edit.onNotice?.(item.id));
+        },
+        `Copies ${item.id} to the clipboard for the CLI and the agent surface.`,
+      )}
       <span className="pt-orow-menu-rule" aria-hidden="true" />
-      {entry('Delete', 'delete', () =>
-        run(`Removed ${item.id}`, () =>
-          edit.dispatch('slide.remove', { slideId: item.id, baseRevision: edit.revision }),
-        ),
+      {entry(
+        'Delete',
+        'delete',
+        () =>
+          run(`Removed ${item.id}`, () =>
+            edit.dispatch('slide.remove', { slideId: item.id, baseRevision: edit.revision }),
+          ),
+        `Removes ${item.id} from the deck (slide.remove); History undoes it.`,
       )}
     </div>
   );
 }
 
 export type SidebarProps = {
+  /** the deck's title: the aside's accessible name (the head reads the product name) */
   title: string;
   /** `85 slides`; already worded by the route */
   count: string;
@@ -493,8 +553,9 @@ export type SidebarProps = {
 
 /**
  * Column one of the shell (SPEC 6.2; Prototemplate directive 8.5). A 52px
- * head holds the mark, the deck title, which never truncates, and the
- * density toggle; a 40px filter row holds the field and the count. The list
+ * head holds the mark, the product name Turboslide (Kevin, 2026-09-11; the
+ * deck's own name is the toolbar's DeckName control) and the density toggle,
+ * thumbnails first; a 40px filter row holds the field and the count. The list
  * fills the rest as a scroll region of collapsible groups, one per section:
  * a 24px header with the chevron, the name and its count (painted from
  * data-count), sticky at the top of the region so the section in view is
@@ -842,9 +903,12 @@ export function Sidebar({
             type="button"
             className="pt-grp-head"
             aria-expanded={open}
-            title={open ? `Collapse ${section.label}` : `Expand ${section.label}`}
             data-count={items.length}
             onClick={() => setOpen(section, !open)}
+            {...tipProps({
+              name: section.label,
+              doc: `${items.length} slide${items.length === 1 ? '' : 's'}; click to ${open ? 'collapse' : 'expand'} the section, left and right arrows fold it from the keyboard.`,
+            })}
             onDragOver={edit ? (event) => onDragOverSection(section, event) : undefined}
             onDrop={edit ? onDrop : undefined}
           >
@@ -890,7 +954,12 @@ export function Sidebar({
     >
       <div className="pt-sb-head">
         {homeHref ? (
-          <a className="pt-sb-mark" href={homeHref} title="Every deck" aria-label="Every deck">
+          <a
+            className="pt-sb-mark"
+            href={homeHref}
+            aria-label="Every deck"
+            {...tipProps({ name: PRODUCT_NAME, doc: 'Back to the deck list.' })}
+          >
             <GtMark />
           </a>
         ) : (
@@ -898,7 +967,7 @@ export function Sidebar({
             <GtMark />
           </span>
         )}
-        <b>{title}</b>
+        <b>{PRODUCT_NAME}</b>
         {aside}
         {thumb === 'row' ? null : (
           <Seg
@@ -913,7 +982,12 @@ export function Sidebar({
           />
         )}
         {overlay ? (
-          <ToolButton icon="close" title="Close the list (Esc)" onClick={() => setSidebar(false)} />
+          <ToolButton
+            icon="close"
+            title="Close the list (Esc)"
+            doc="Hides the overlay list; the [ key opens it again."
+            onClick={() => setSidebar(false)}
+          />
         ) : null}
       </div>
       <FilterRow

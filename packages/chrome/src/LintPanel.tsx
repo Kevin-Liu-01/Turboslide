@@ -6,6 +6,7 @@ import type { BlockId, SlideId } from '@turboslide/schema/ids';
 import type { EditorDispatch } from './dispatch';
 import { cn } from './lib/cn';
 import { ToolButton } from './ToolButton';
+import { tipProps } from './Tooltip';
 
 import './LintPanel.css';
 
@@ -94,12 +95,13 @@ export function LintPanel({
               <button
                 type="button"
                 className="ts-lint-pick"
-                title={
-                  finding.blockId ? `Select block ${finding.blockId}` : 'A slide-level finding'
-                }
                 aria-label={`${finding.rule} on ${finding.blockId ?? slideId}: ${finding.proposal}`}
                 data-control={`lint.${finding.id}`}
                 onClick={() => onSelectBlock?.(finding.blockId)}
+                {...tipProps({
+                  name: finding.rule,
+                  doc: `${finding.proposal} Severity ${finding.severity}, ${SEVERITY_WORD[finding.severity]}; ${finding.blockId ? `click selects block ${finding.blockId}` : 'a slide-level finding'}.`,
+                })}
               >
                 <span className="ts-lint-sev" aria-label={SEVERITY_WORD[finding.severity]}>
                   {finding.severity}
@@ -115,7 +117,8 @@ export function LintPanel({
               {finding.fix && finding.fix.length > 0 ? (
                 <ToolButton
                   label="Fix"
-                  title={`Apply the fix for ${finding.rule}`}
+                  title="Fix"
+                  doc={`Applies the mechanical fix for ${finding.rule} through one slide.update, the same mutations turboslide fix writes.`}
                   ariaLabel={`Fix ${finding.rule} on ${finding.blockId ?? slideId}`}
                   className={cn('ts-lint-fix', busy === finding.id && 'is-busy')}
                   control={`lint.${finding.id}.fix`}

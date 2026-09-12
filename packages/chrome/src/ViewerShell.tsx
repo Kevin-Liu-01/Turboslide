@@ -74,7 +74,7 @@ type Transition = ShellTransition & { native: boolean };
  * content (the viewer's Stage, GridView and BookView) as children, reading
  * the mode from the context.
  *
- * Landing. The server renders the defaults (the list open in outline
+ * Landing. The server renders the defaults (the list open in thumbnail
  * density, the first item active, or the item the route read from its
  * search and hash). The mount effect applies the saved state and the hash
  * and publishes `ready`; one frame later the root gains data-settled and
@@ -203,7 +203,8 @@ export function ViewerShell({
     initialMode && modes.includes(initialMode) ? initialMode : defaultMode,
   );
   const [transition, setTransition] = useState<Transition | null>(null);
-  const [density, setDensityState] = useState<ShellDensity>('outline');
+  /* thumbnails first (Kevin, 2026-09-11: "the default should be images"); the saved choice applies on mount */
+  const [density, setDensityState] = useState<ShellDensity>('thumbs');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   /* the List button's override while the grid is up: the column is closed there unless the reader opens it */
   const [gridList, setGridList] = useState(false);

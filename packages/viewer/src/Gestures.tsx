@@ -23,16 +23,23 @@ import {
   plateSideFor,
   PLATE_SIDES_BY_KIND,
   ratioLeftWidth,
+  RESIZE_DIRS,
+  resizeCursor,
   snapKey,
+  snapMove,
   snapPlateWidth,
   snapRatio,
+  snapResize,
   snapScaleValue,
   snapShotWidth,
   stepInSet,
   stepRatio,
 } from './snap';
+import type { ResizeDir, SnapLine } from './snap';
+import { isFreeformSlide, posBox, posFor } from './Freeform';
+import type { Position } from '@turboslide/schema/position';
 import { ROWS_KEY_SNAP } from '@turboslide/schema/blocks';
-import { PLATE_WIDTHS } from '@turboslide/schema/deck';
+import { PLATE_WIDTHS, slotsForLayout } from '@turboslide/schema/deck';
 
 /** The sheet box type the overlay reads, so the chrome package needs no dependency on the schema. */
 export type { Box } from '@turboslide/schema/render';
@@ -51,7 +58,11 @@ export type HandleKind =
   | 'scale-marker'
   | 'block-move'
   | 'dia-label'
-  | 'dia-marker';
+  | 'dia-marker'
+  /** a positioned block of a freeform slide: its chip drags it anywhere (this round) */
+  | 'free-move'
+  /** one of the eight resize squares of a positioned block */
+  | 'free-resize';
 
 /**
  * How the overlay draws a handle: `v` a vertical rule through the hit box, `square` an 11 px
@@ -68,7 +79,10 @@ export type Handle = {
   blockId?: string;
   /** the item the handle edits: a scales row, a pair figure */
   index?: number;
-  cursor: 'col-resize' | 'ew-resize' | 'ns-resize' | 'grab';
+  /** the edge or corner a free-resize handle moves */
+  dir?: ResizeDir;
+  cursor:
+    'col-resize' | 'ew-resize' | 'ns-resize' | 'nesw-resize' | 'nwse-resize' | 'grab' | 'move';
   /** the accessible name, `<block id>: <property>` (SPEC 6.5) */
   label: string;
   /** the locale-independent id for the window API, under `handle.` so it never collides with an inspector control */
@@ -231,18 +245,60 @@ export function handlesFor(slide: Slide, boxes: MeasuredBoxes, selection: Select
   const box = boxes.blocks[blockId];
   if (!block || !box) return handles;
   const parts = boxes.parts[blockId] ?? [];
-  handles.push({
-    id: `block-move:${blockId}`,
-    kind: 'block-move',
-    box,
-    blockId,
-    cursor: 'grab',
-    label: `${blockId}: Move`,
-    control: `handle.${blockId}.move`,
-    shape: 'chip',
-    axis: 'y',
-    sign: 1,
-  });
+  if (isFreeformSlide(slide)) {
+    /* a positioned block (this round): the chip drags it anywhere and eight squares resize it;
+       the per-type property handles below still apply to it */
+    handles.push({
+      id: `free-move:${blockId}`,
+      kind: 'free-move',
+      box,
+      blockId,
+      cursor: 'move',
+      label: `${blockId}: Move`,
+      control: `handle.${blockId}.move`,
+      shape: 'chip',
+      axis: 'xy',
+      sign: 1,
+    });
+    for (const dir of RESIZE_DIRS) {
+      const cx = dir.includes('w')
+        ? box[0]
+        : dir.includes('e')
+          ? box[0] + box[2]
+          : box[0] + box[2] / 2;
+      const cy = dir.includes('n')
+        ? box[1]
+        : dir.includes('s')
+          ? box[1] + box[3]
+          : box[1] + box[3] / 2;
+      handles.push({
+        id: `free-resize:${blockId}:${dir}`,
+        kind: 'free-resize',
+        box: square(cx, cy),
+        blockId,
+        dir,
+        cursor: resizeCursor(dir),
+        label: `${blockId}: Resize ${dir}`,
+        control: `handle.${blockId}.resize.${dir}`,
+        shape: 'square',
+        axis: 'xy',
+        sign: 1,
+      });
+    }
+  } else {
+    handles.push({
+      id: `block-move:${blockId}`,
+      kind: 'block-move',
+      box,
+      blockId,
+      cursor: 'grab',
+      label: `${blockId}: Move`,
+      control: `handle.${blockId}.move`,
+      shape: 'chip',
+      axis: 'y',
+      sign: 1,
+    });
+  }
   switch (block.type) {
     case 'rows':
       handles.push({
@@ -458,8 +514,18 @@ export function labelClearanceBox(
 // ---------------------------------------------------------------------------------------------
 // Drags
 
+/**
+ * What a freeform gesture reads beyond the slide and the boxes: the blocks that move together (the
+ * anchor first) and the snap lines of everything they can land on (the sheet's lines plus the
+ * edges and centers of the blocks that stay put).
+ */
+export type FreeContext = { ids: string[]; lines: SnapLine[] };
+
 /** What a gesture reads: the slide as it was when the drag began and the boxes measured then. */
-export type GestureContext = { slide: Slide; boxes: MeasuredBoxes };
+export type GestureContext = { slide: Slide; boxes: MeasuredBoxes; free?: FreeContext };
+
+/** The modifier keys a freeform gesture reads on every move: Shift locks the aspect of a resize. */
+export type GestureMods = { shift: boolean };
 
 function blockSet(slide: Slide, blockId: string, path: string, value?: unknown): Mutation {
   return value === undefined
@@ -482,55 +548,75 @@ function slotBoxOf(slide: Slide, blockId: string, boxes: MeasuredBoxes): Box {
 const STACK_GAP = 22;
 
 /**
+ * The slot a dragged block would land in (SPEC 6.4: across the two slots of `cols`, never out of a
+ * plate; this round adds the slots of `split`): for `cols` the half of the gap the pointer is on;
+ * for `split` the measured slot that contains the pointer, the head's two columns split at the
+ * head's center when the layout has them; every other layout keeps the block's own slot.
+ */
+export function dropSlotFor(
+  slide: Slide,
+  from: BlockSlot,
+  now: Point,
+  boxes: MeasuredBoxes,
+): BlockSlot {
+  if (slide.kind !== 'content') return from;
+  const layout = slide.layout;
+  if (layout.type === 'cols') {
+    const right = boxes.slots.right;
+    const left = boxes.slots.left;
+    if (left && right) return now.x >= right[0] - COLUMN_GAP / 2 ? 'right' : 'left';
+    return from;
+  }
+  if (layout.type === 'split') {
+    const head = boxes.slots.head ?? boxes.slots.headLeft;
+    const body = boxes.slots.body;
+    const twoHeads = slotsForLayout(layout).includes('headLeft');
+    if (head && now.y < head[1] + head[3] + (body ? (body[1] - head[1] - head[3]) / 2 : 0)) {
+      if (!twoHeads) return 'head';
+      const seam = boxes.slots.headRight?.[0] ?? head[0] + head[2] / 2;
+      return now.x >= seam - COLUMN_GAP / 2 ? 'headRight' : 'headLeft';
+    }
+    if (body) return 'body';
+  }
+  return from;
+}
+
+/**
  * The block.move a drag of a block's chip lands on (SPEC 6.4: up or down inside a slot, or across
- * the two slots of `cols`, never out of a plate), plus the drop line the overlay draws. The
- * insertion point is the first sibling whose vertical center is below the pointer; the mutation is
- * null when the block would land where it already is.
+ * the slots of `cols` and `split`, never out of a plate), plus the drop line the overlay draws and
+ * the target slot's box it outlines. The insertion point is the first sibling whose vertical
+ * center is below the pointer; the mutation is null when the block would land where it already
+ * is. dropIndexFor is the pure index computation behind it.
  */
 export function blockMoveFor(
   slide: Slide,
   blockId: string,
   now: Point,
   boxes: MeasuredBoxes,
-): { mutation: Mutation | null; indicator: Box | null } {
+): { mutation: Mutation | null; indicator: Box | null; slot: BlockSlot; slotBox: Box | null } {
   const located = locateBlock(slide, blockId);
-  if (!located) return { mutation: null, indicator: null };
-  let slot: BlockSlot = located.slot;
-  if (slide.kind === 'content' && slide.layout.type === 'cols') {
-    const right = boxes.slots.right;
-    const left = boxes.slots.left;
-    if (left && right) slot = now.x >= right[0] - COLUMN_GAP / 2 ? 'right' : 'left';
-  }
+  if (!located) return { mutation: null, indicator: null, slot: 'main', slotBox: null };
+  const slot = dropSlotFor(slide, located.slot, now, boxes);
   const targetList =
     slide.kind === 'content'
       ? (slide.slots[slot as keyof typeof slide.slots] ?? [])
       : located.blocks;
   const siblings = targetList.filter((block) => block.id !== blockId);
   const slotBox = boxes.slots[slot] ?? slotBoxOf(slide, blockId, boxes);
-  let after: string | undefined;
-  let indicator: Box | null = null;
-  let placed = false;
-  for (let i = 0; i < siblings.length; i += 1) {
-    const sibling = siblings[i];
-    const box = sibling ? boxes.blocks[sibling.id] : undefined;
-    if (!sibling || !box) continue;
-    if (now.y < box[1] + box[3] / 2) {
-      after = i > 0 ? siblings[i - 1]?.id : undefined;
-      indicator = [slotBox[0], box[1] - STACK_GAP / 2, slotBox[2], 0];
-      placed = true;
-      break;
-    }
-  }
-  if (!placed) {
-    const last = siblings[siblings.length - 1];
-    after = last?.id;
-    const lastBox = last ? boxes.blocks[last.id] : undefined;
-    indicator = lastBox
-      ? [slotBox[0], lastBox[1] + lastBox[3] + STACK_GAP / 2, slotBox[2], 0]
-      : [slotBox[0], slotBox[1], slotBox[2], 0];
-  }
+  const drop = dropIndexFor(
+    now.y,
+    siblings.map((block) => block.id),
+    boxes.blocks,
+  );
+  const after = drop.index > 0 ? siblings[drop.index - 1]?.id : undefined;
+  const indicator: Box =
+    drop.lineY === null
+      ? [slotBox[0], slotBox[1], slotBox[2], 0]
+      : [slotBox[0], drop.lineY, slotBox[2], 0];
   const currentAfter = located.index > 0 ? located.blocks[located.index - 1]?.id : undefined;
-  if (slot === located.slot && after === currentAfter) return { mutation: null, indicator };
+  if (slot === located.slot && after === currentAfter) {
+    return { mutation: null, indicator, slot, slotBox };
+  }
   const mutation: Mutation = {
     op: 'block.move',
     slideId: slide.id,
@@ -538,7 +624,32 @@ export function blockMoveFor(
     slot,
     ...(after !== undefined ? { after } : {}),
   };
-  return { mutation, indicator };
+  return { mutation, indicator, slot, slotBox };
+}
+
+/**
+ * The insertion index of a dragged block among its target siblings (the dragged block itself
+ * excluded) for a pointer at `y`: the first sibling whose vertical center is below the pointer,
+ * else after the last. `lineY` is where the drop line goes: half the stack gap above that sibling,
+ * or below the last; null for an empty slot (the line sits at the slot's top).
+ */
+export function dropIndexFor(
+  y: number,
+  siblings: readonly string[],
+  blocks: Record<string, Box>,
+): { index: number; lineY: number | null } {
+  for (let i = 0; i < siblings.length; i += 1) {
+    const id = siblings[i];
+    const box = id === undefined ? undefined : blocks[id];
+    if (!box) continue;
+    if (y < box[1] + box[3] / 2) return { index: i, lineY: box[1] - STACK_GAP / 2 };
+  }
+  const last = siblings[siblings.length - 1];
+  const lastBox = last === undefined ? undefined : blocks[last];
+  return {
+    index: siblings.length,
+    lineY: lastBox ? lastBox[1] + lastBox[3] + STACK_GAP / 2 : null,
+  };
 }
 
 /**
@@ -641,6 +752,63 @@ export function gestureMutation(
   }
 }
 
+/** What a freeform gesture stands for at its current point: the `pos` writes and the guides drawn. */
+export type FreeGesture = { mutations: Mutation[]; guides: SnapLine[] };
+
+function posMutation(slide: Slide, blockId: string, pos: Position): Mutation {
+  return { op: 'block.set', slideId: slide.id, blockId, path: '/pos', value: pos };
+}
+
+/**
+ * The freeform gestures (this round): a `free-move` drag moves the anchor block and every other
+ * selected block by the same snapped offset, the anchor's box snapping to the sheet's lines and
+ * the resting blocks' edges and centers, else to the 8 px grid; a `free-resize` drag moves one or
+ * two edges of the anchor with the same snaps, Shift locking the aspect. Every block that moves
+ * gets one `block.set /pos`; the Editor commits the list as one write. Null when nothing changed,
+ * so a click on a chip writes nothing. The guides are what the overlay draws while the pointer is
+ * down. Pure; freeform.test.ts pins it.
+ */
+export function freeGesture(
+  handle: Handle,
+  ctx: GestureContext,
+  start: Point,
+  now: Point,
+  mods: GestureMods = { shift: false },
+): FreeGesture | null {
+  const { slide, boxes } = ctx;
+  const blockId = handle.blockId;
+  if (blockId === undefined || !isFreeformSlide(slide)) return null;
+  const anchor = posFor(slide, blockId, boxes);
+  if (!anchor) return null;
+  const lines = ctx.free?.lines ?? [];
+  const dx = now.x - start.x;
+  const dy = now.y - start.y;
+  if (handle.kind === 'free-move') {
+    const ids = ctx.free?.ids.includes(blockId) ? ctx.free.ids : [blockId];
+    const snapped = snapMove(posBox(anchor), dx, dy, lines);
+    const sdx = snapped.box[0] - anchor.x;
+    const sdy = snapped.box[1] - anchor.y;
+    if (sdx === 0 && sdy === 0) return null;
+    const mutations: Mutation[] = [];
+    for (const id of ids) {
+      const pos = posFor(slide, id, boxes);
+      if (!pos) continue;
+      mutations.push(posMutation(slide, id, { ...pos, x: pos.x + sdx, y: pos.y + sdy }));
+    }
+    return mutations.length > 0 ? { mutations, guides: snapped.guides } : null;
+  }
+  if (handle.kind === 'free-resize' && handle.dir !== undefined) {
+    const snapped = snapResize(posBox(anchor), handle.dir, dx, dy, lines, { aspect: mods.shift });
+    const [x, y, w, h] = snapped.box;
+    if (x === anchor.x && y === anchor.y && w === anchor.w && h === anchor.h) return null;
+    return {
+      mutations: [posMutation(slide, blockId, { ...anchor, x, y, w, h })],
+      guides: snapped.guides,
+    };
+  }
+  return null;
+}
+
 /**
  * One keyboard step on a focused handle (SPEC 6.4 keyboard nudges): the key edge and the plate
  * edge step through their sets, the seam through the named ratios and 10 px, a marker by one (ten
@@ -726,6 +894,25 @@ export function nudgeMutation(
       const dy = axis === 'y' ? -delta : 0;
       return diaMoveMutation(slide, block, handle, dx, dy);
     }
+    case 'free-move': {
+      // one sheet pixel per step (eight with Shift through `delta`); Up is negative y
+      const pos = posFor(slide, blockId, boxes);
+      if (!pos) return null;
+      const dx = axis === 'x' ? delta : 0;
+      const dy = axis === 'y' ? -delta : 0;
+      return posMutation(slide, blockId, { ...pos, x: pos.x + dx, y: pos.y + dy });
+    }
+    case 'free-resize': {
+      // the handle's edge moves by one pixel per step: Right and Up grow, Left and Down shrink
+      const pos = posFor(slide, blockId, boxes);
+      if (!pos || handle.dir === undefined) return null;
+      const dx = axis === 'x' ? delta : 0;
+      const dy = axis === 'y' ? -delta : 0;
+      const grown = snapResize(posBox(pos), handle.dir, dx, dy, [], { grid: false });
+      const [x, y, w, h] = grown.box;
+      if (x === pos.x && y === pos.y && w === pos.w && h === pos.h) return null;
+      return posMutation(slide, blockId, { ...pos, x, y, w, h });
+    }
     case 'block-move': {
       const located = locateBlock(slide, blockId);
       if (!located) return null;
@@ -805,4 +992,28 @@ export function actionForMutation(mutation: Mutation, baseRevision: number): Act
     default:
       throw new RangeError(`The stage does not emit ${mutation.op}`);
   }
+}
+
+/**
+ * One action call for a list of stage mutations (this round: a group move, an align, a nudge of
+ * several blocks, a Delete of a multi-selection): a single mutation is its own action as above;
+ * several travel as one `slide.update`, so the write is one revision and one undo step. Every
+ * mutation must name the same slide.
+ */
+export function actionForMutations(
+  mutations: ReadonlyArray<Mutation>,
+  baseRevision: number,
+): ActionCall {
+  const [first, ...rest] = mutations;
+  if (first === undefined) throw new RangeError('actionForMutations: no mutations');
+  if (rest.length === 0) return actionForMutation(first, baseRevision);
+  const slideId = 'slideId' in first ? first.slideId : undefined;
+  if (slideId === undefined)
+    throw new RangeError('actionForMutations: the first mutation names no slide');
+  for (const mutation of mutations) {
+    if (!('slideId' in mutation) || mutation.slideId !== slideId) {
+      throw new RangeError('actionForMutations: every mutation must name the same slide');
+    }
+  }
+  return { id: 'slide.update', input: { slideId, baseRevision, mutations: [...mutations] } };
 }

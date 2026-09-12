@@ -140,6 +140,28 @@ export const BLOCK_CSS = `
 .ts-sheet .matrix > span.r { border-right: 1px solid var(--hair-soft); }
 .ts-sheet .matrix > span.b { border-bottom: 1px solid var(--hair-soft); }
 
+/* ---- the freeform layout and the primitives (docs/freeform.md) ---- */
+/* the layer over the content box and the layer at the sheet origin; a .free wrapper is one block's box */
+.ts-sheet .freeform { position: absolute; inset: 0; }
+.ts-sheet .freeform-sheet { position: absolute; width: 1600px; height: 900px; pointer-events: none; }
+.ts-sheet .freeform-sheet > .free { pointer-events: auto; }
+.ts-sheet .free { position: absolute; }
+.ts-sheet .free > .box, .ts-sheet .free > svg.shape { width: 100%; height: 100%; }
+.ts-sheet .free > .rule-h { width: 100%; }
+.ts-sheet .free > .rule-v { height: 100%; }
+.ts-sheet .free > h1, .ts-sheet .free > h2, .ts-sheet .free > .big, .ts-sheet .free > p { margin: 0; }
+/* box: a hairline rectangle with its text at the body size (head:62); the border color and width are inline */
+.ts-sheet .box { display: block; box-sizing: border-box; font-size: 22px; line-height: 1.5; color: var(--ink); }
+.ts-sheet .box .box-text { margin: 0; }
+/* shape: inline SVG on the tokens; a flow-layout shape is as wide as its slot */
+.ts-sheet svg.shape { display: block; overflow: visible; max-width: 100%; }
+/* rule: the sheet hairline as a block (DECK-GRAMMAR.md:15) */
+.ts-sheet .rule { display: block; flex: 0 0 auto; }
+/* text: the body step unless typography says otherwise */
+.ts-sheet p.text { font-size: 22px; line-height: 1.5; color: var(--ink); }
+/* icon: one glyph at its stated size; .ic keeps the sprite fill */
+.ts-sheet svg.icon-block { display: block; vertical-align: baseline; }
+
 /* ---- the render surface: one visible slide, the sheet filling the viewport in present mode ---- */
 .ts-render-surface { margin: 0; background: var(--paper); overflow: hidden; }
 .ts-render-surface .ts-sheet.ts-present { position: absolute; left: -1px; top: -1px; border-color: transparent; box-shadow: none; }

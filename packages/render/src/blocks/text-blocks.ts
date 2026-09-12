@@ -1,7 +1,10 @@
 // heading, paragraph and credit (SPEC 4.2; head:57-68 for the ladder, s01:8-10 for the plate).
+// A heading or paragraph may carry `typography` (typography.ts): its declarations are written
+// inline after the margins, so an absent record leaves the grammar's step untouched.
 import { el, style } from '../html.ts';
 import { renderText } from '../text.ts';
 import type { BlockOf } from '@turboslide/schema/blocks';
+import { typographyDeclarations } from '@turboslide/schema/typography';
 import { rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
 
@@ -10,6 +13,7 @@ export function renderHeading(block: BlockOf<'heading'>, ctx: BlockContext): str
   const inline = style(
     block.marginTop !== undefined && `margin-top:${block.marginTop}px`,
     block.marginBottom !== undefined && `margin-bottom:${block.marginBottom}px`,
+    ...typographyDeclarations(block.typography),
   );
   const run = runAttr(ctx, block.id, 'text');
   switch (block.level) {
@@ -54,6 +58,7 @@ export function renderParagraph(block: BlockOf<'paragraph'>, ctx: BlockContext):
   const inline = style(
     measure.style,
     block.marginTop !== undefined && `margin-top:${block.marginTop}px`,
+    ...typographyDeclarations(block.typography),
   );
   return el(
     'p',

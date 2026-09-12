@@ -13,6 +13,8 @@ import { z } from 'zod';
 import { annotate } from '../annotate.ts';
 import type { AssetId, BlockId } from '../ids.ts';
 import { blockIdSchema, slugSchema } from '../ids.ts';
+import type { Position } from '../position.ts';
+import { positionSchema } from '../position.ts';
 import type { Text } from '../text.ts';
 import { textSchema } from '../text.ts';
 
@@ -30,6 +32,8 @@ export const MATERIAL_ANCHORS = [4000, 5500, 7000] as const;
 export type MaterialBlock = {
   id: BlockId;
   ext?: Record<string, unknown>;
+  /** The box on a freeform slide (position.ts), as on every block. */
+  pos?: Position;
   type: 'material';
   /** The catalog id: `paper:liquid-metal`, `paper:gem-smoke`. */
   materialId: string;
@@ -66,6 +70,7 @@ export const materialUniformsSchema = z.record(
 export const materialBlockSchema = z.strictObject({
   id: annotate(blockIdSchema, { label: 'Id', control: 'readonly', group: 'Advanced' }),
   ext: z.record(z.string(), z.unknown()).optional(),
+  pos: positionSchema,
   type: z.literal('material'),
   materialId: annotate(z.string().min(1), {
     label: 'Material',

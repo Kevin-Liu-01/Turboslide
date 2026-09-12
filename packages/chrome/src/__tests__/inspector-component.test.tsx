@@ -61,7 +61,10 @@ describe('Inspector', () => {
         dispatch={dispatch}
       />,
     );
-    const fields = Object.keys(inspectorsOf(rowsBlockSchema)).filter((key) => key !== 'id');
+    /* the position box (pos) is offered on a freeform slide only */
+    const fields = Object.keys(inspectorsOf(rowsBlockSchema)).filter(
+      (key) => key !== 'id' && key !== 'pos',
+    );
     for (const key of fields) {
       const label = inspectorsOf(rowsBlockSchema)[key]?.label ?? key;
       expect(screen.getByLabelText(`list: ${label}`)).toBeTruthy();
@@ -181,7 +184,7 @@ describe('Inspector', () => {
         onSelectBlock={onSelectBlock}
       />,
     );
-    fireEvent.click(screen.getByTitle('Select rows list'));
+    fireEvent.click(screen.getByRole('button', { name: 'Select rows list' }));
     expect(onSelectBlock).toHaveBeenCalledWith('list');
   });
 

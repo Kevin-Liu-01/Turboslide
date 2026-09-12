@@ -75,9 +75,62 @@ describe('block catalog', () => {
       'matrix',
       'logoPlates',
       'material',
+      'box',
+      'shape',
+      'rule',
+      'text',
+      'icon',
       'html',
     ];
     for (const type of expected) expect(types.has(type), type).toBe(true);
+  });
+
+  it('writes palette tokens as css variables, hues and custom colors as literals, typography inline', () => {
+    const box = renderBlock(catalog.find((block) => block.id === 'bx') as Block, context('light'));
+    expect(box).toContain('background:var(--plate)');
+    expect(box).toContain('border:1px solid var(--hair)');
+    expect(box).toContain('font-size:20px');
+    expect(box).toContain('data-run="bx/text"');
+    const blue = renderBlock(
+      catalog.find((block) => block.id === 'bx2') as Block,
+      context('light'),
+    );
+    expect(blue).toContain('background:#2f5ce0');
+    expect(blue).toContain('border:0');
+    expect(blue).toContain('border-radius:6px');
+    expect(blue).toContain('color:var(--paper)');
+    const text = renderBlock(catalog.find((block) => block.id === 'tx') as Block, context('light'));
+    expect(text).toContain(
+      'style="color:var(--ink-2);font-size:26px;font-weight:500;text-align:center;letter-spacing:-0.01em;line-height:1.3"',
+    );
+    const icon = renderBlock(
+      catalog.find((block) => block.id === 'ico') as Block,
+      context('light'),
+    );
+    expect(icon).toContain('width:48px;height:48px;color:#f0a020');
+    expect(icon).toContain('<use href="#i-bolt"/>');
+  });
+
+  it('draws shapes as inline svg at the slot width with the ends and heads the exporter reads', () => {
+    const arrow = renderBlock(
+      catalog.find((block) => block.id === 'arr') as Block,
+      context('light'),
+    );
+    expect(arrow).toContain('viewBox="0 0 731.5 24"');
+    expect(arrow).toContain('data-shape="arrow"');
+    expect(arrow).toContain('data-from="0.5,12.5" data-to="731.5,12.5" data-heads="both"');
+    expect(arrow.match(/<polygon/g)?.length).toBe(2);
+    expect(arrow).toContain('stroke="var(--ink)"');
+    const ellipse = renderBlock(
+      catalog.find((block) => block.id === 'ell') as Block,
+      context('light'),
+    );
+    expect(ellipse).toContain(
+      '<ellipse cx="365.75" cy="100" rx="365.25" ry="99.5" fill="#12a37a" stroke="var(--ink)"',
+    );
+    const rule = renderBlock(catalog.find((block) => block.id === 'rl') as Block, context('light'));
+    expect(rule).toContain('style="width:731.5px;height:1px;background:var(--hair)"');
+    expect(rule).toContain('role="separator"');
   });
 
   it('marks every block root with data-block and data-type', () => {

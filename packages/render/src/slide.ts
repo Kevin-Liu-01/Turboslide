@@ -4,12 +4,13 @@ import type { BlockContext, RasterRef, ResolvedImage } from './blocks/context.ts
 import { isTextLike, renderBlock, renderBlocks, wantsShotWrap } from './blocks/render-block.ts';
 import { pictureRecipeAttr } from './blocks/material.ts';
 import { measureStyle } from './blocks/text-blocks.ts';
-import { colsTemplate, colsWidths, COLS_GAP, slotBoxes } from './geometry.ts';
-import { attrs, classes, el, escapeAttr, style } from './html.ts';
+import { colsTemplate, colsWidths, COLS_GAP, CONTENT, slotBoxes } from './geometry.ts';
+import { attrs, classes, el, escapeAttr, px, style } from './html.ts';
 import { renderText } from './text.ts';
 import type { AssetId, SlideId } from '@turboslide/schema/ids';
 import type { Block } from '@turboslide/schema/blocks';
 import type { ContentSlide, Deck, Layout, Plate, Slide, SlotName } from '@turboslide/schema/deck';
+import { insideContent, sortByZ } from '@turboslide/schema/freeform';
 import type { Box, Theme } from '@turboslide/schema/render';
 import { importResidual } from '@turboslide/schema/ext';
 
@@ -347,7 +348,52 @@ function renderLayout(slide: ContentSlide, ctx: BlockContext): string {
         },
         renderBlocks(slot('main'), { ...ctx, slotWidth: 1326 }),
       );
+    case 'freeform':
+      return renderFreeform(slot('main'), ctx);
   }
+}
+
+/**
+ * The freeform layout (docs/freeform.md): every block sits in a `.free` wrapper at its position
+ * box, in paint order (z, then document order). A box inside the content box lives in the
+ * `.freeform` layer over `.in`, offset by the content origin, so the slot geometry still holds; a
+ * box that reaches past the content box lives in the `.freeform-sheet` layer, which is the whole
+ * sheet placed at the sheet origin (the slide box is inset 57 px with 80 by 72 padding, head:257),
+ * so its coordinates are sheet coordinates as written. The block renders with the box's width and
+ * height as its slot.
+ */
+function renderFreeform(blocks: Block[], ctx: BlockContext): string {
+  const inside: string[] = [];
+  const outside: string[] = [];
+  const [contentX, contentY] = CONTENT;
+  sortByZ(blocks).forEach((block, order) => {
+    const pos = block.pos ?? { x: contentX, y: contentY, w: 1326, h: 642 };
+    const inContent = insideContent(pos);
+    const inline = style(
+      `left:${px(inContent ? pos.x - contentX : pos.x)}px`,
+      `top:${px(inContent ? pos.y - contentY : pos.y)}px`,
+      `width:${px(pos.w)}px`,
+      `height:${px(pos.h)}px`,
+      `z-index:${order + 1}`,
+    );
+    const html = el(
+      'div',
+      { class: 'free', 'data-free': block.id, style: inline },
+      renderBlock(block, { ...ctx, slotWidth: pos.w, slotHeight: pos.h }),
+    );
+    (inContent ? inside : outside).push(html);
+  });
+  // the sheet layer sits at the sheet origin: .in starts at the content origin, which is the
+  // slide inset plus the padding (INSET + PAD, geometry.ts CONTENT)
+  const sheetLayer =
+    outside.length > 0
+      ? el(
+          'div',
+          { class: 'freeform-sheet', style: `left:${-contentX}px;top:${-contentY}px` },
+          outside.join(''),
+        )
+      : '';
+  return el('div', { class: 'freeform', 'data-slot': 'main' }, inside.join('')) + sheetLayer;
 }
 
 /**

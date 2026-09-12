@@ -6,6 +6,7 @@ import type { ExportFormat, ExportMode } from '@turboslide/schema/export';
 import { Seg } from './Seg';
 import type { SegOption } from './Seg';
 import { ToolButton } from './ToolButton';
+import { tipProps } from './Tooltip';
 
 import './ExportMenu.css';
 
@@ -21,7 +22,9 @@ import './ExportMenu.css';
  * changes nothing (measured in the M5 verification: with the ported return to the first option,
  * confirming Native and Light exported flatten in both themes). The options live in this
  * component's state and are kept across runs, the report card and the menu's closing while the
- * route is mounted.
+ * route is mounted. Focus (this round): opened from the keyboard the dialog focuses its first
+ * control, opened with the pointer it takes focus itself, so Tab walks its controls next; Escape
+ * closes it and returns focus to the Export button.
  */
 export type ExportTheme = 'light' | 'dark' | 'both';
 
@@ -56,6 +59,8 @@ export type ExportMenuProps = {
   onExport: (input: ExportMenuInput) => void;
   /** build.run: the standalone HTML file */
   onBuild: () => void;
+  /** deck.pack: the deck as one bundle zip (docs/deck-transfer.md); absent hides the entry */
+  onDownloadBundle?: () => void;
   className?: string;
 };
 
@@ -97,6 +102,14 @@ function themes(theme: ExportTheme): ('light' | 'dark')[] {
   return theme === 'both' ? ['light', 'dark'] : [theme];
 }
 
+/** The controls Tab reaches inside the card, for the focus on a keyboard open. */
+const CARD_CONTROLS = 'button:not(:disabled), input:not(:disabled)';
+
+/** The Export button of the anchor. */
+function triggerOf(anchor: HTMLElement | null): HTMLButtonElement | null {
+  return anchor?.querySelector('button') ?? null;
+}
+
 export function ExportMenu({
   open,
   onOpenChange,
@@ -104,6 +117,7 @@ export function ExportMenu({
   progress,
   onExport,
   onBuild,
+  onDownloadBundle,
   className,
 }: ExportMenuProps) {
   const button = useRef<HTMLSpanElement>(null);
@@ -115,16 +129,19 @@ export function ExportMenu({
   const [raster, setRaster] = useState(false);
   const [verify, setVerify] = useState(false);
   const [at, setAt] = useState<{ x: number; y: number } | null>(null);
+  /* the last press on the anchor was a pointer, so the open that follows is the pointer's */
+  const viaPointer = useRef(false);
 
   /* the card sits under the button, in the viewport, like the sidebar's row menu */
   useEffect(() => {
     if (!open) return;
-    const anchor = button.current?.querySelector('button');
+    const anchor = triggerOf(button.current);
     const rect = anchor?.getBoundingClientRect();
     if (rect) setAt({ x: Math.min(rect.left, window.innerWidth - 344), y: rect.bottom + 6 });
     const onDown = (event: MouseEvent) => {
       if (!(event.target instanceof Node)) return;
       if (card.current?.contains(event.target) || button.current?.contains(event.target)) return;
+      // the press lands elsewhere: the menu closes and focus follows the press, not the button
       onOpenChange(false);
     };
     const onKey = (event: KeyboardEvent) => {
@@ -132,6 +149,7 @@ export function ExportMenu({
       event.preventDefault();
       event.stopPropagation();
       onOpenChange(false);
+      triggerOf(button.current)?.focus();
     };
     document.addEventListener('mousedown', onDown);
     document.addEventListener('keydown', onKey, true);
@@ -140,6 +158,15 @@ export function ExportMenu({
       document.removeEventListener('keydown', onKey, true);
     };
   }, [open, onOpenChange]);
+
+  /* focus on open: the first control from the keyboard, the dialog itself from the pointer */
+  useEffect(() => {
+    if (!open || at === null) return;
+    const el = card.current;
+    if (!el) return;
+    const first = viaPointer.current ? null : el.querySelector<HTMLElement>(CARD_CONTROLS);
+    (first ?? el).focus();
+  }, [open, at]);
 
   const busy = progress !== null;
   const native = mode === 'native';
@@ -161,11 +188,21 @@ export function ExportMenu({
   };
 
   return (
-    <span ref={button} className={['ts-export-anchor', className ?? ''].filter(Boolean).join(' ')}>
+    <span
+      ref={button}
+      className={['ts-export-anchor', className ?? ''].filter(Boolean).join(' ')}
+      onPointerDownCapture={() => {
+        viaPointer.current = true;
+      }}
+      onKeyDownCapture={(event) => {
+        if (event.target === triggerOf(button.current)) viaPointer.current = false;
+      }}
+    >
       <ToolButton
         icon="external"
         label="Export"
-        title="Export the deck: PPTX, standalone HTML"
+        title="Export"
+        doc="Opens the export options: one perfect PPTX per theme, or the standalone HTML file."
         pressed={open}
         control="export.open"
         className="ts-export-btn"
@@ -179,6 +216,7 @@ export function ExportMenu({
           aria-label="Export"
           data-control="export.menu"
           data-busy={busy ? '' : undefined}
+          tabIndex={-1}
           style={{ left: at.x, top: at.y }}
         >
           <span className="ts-export-head">PPTX</span>
@@ -223,11 +261,12 @@ export function ExportMenu({
           <label
             className="ts-export-row ts-export-check"
             data-disabled={native ? undefined : ''}
-            title={
-              native
-                ? 'Embed the export faces as fntdata parts so a viewer without them keeps the metrics'
-                : 'Perfect mode never embeds fonts: the text layer is invisible'
-            }
+            {...tipProps({
+              name: 'Embed fonts',
+              doc: native
+                ? 'Embeds the export faces as fntdata parts so a viewer without them keeps the metrics.'
+                : 'Perfect mode never embeds fonts: the text layer is invisible.',
+            })}
           >
             <span className="ts-export-label">Embed fonts</span>
             <input
@@ -241,7 +280,13 @@ export function ExportMenu({
             />
             <span className="ts-export-box" aria-hidden="true" />
           </label>
-          <label className="ts-export-row ts-export-check">
+          <label
+            className="ts-export-row ts-export-check"
+            {...tipProps({
+              name: 'Headings as raster',
+              doc: 'Draws the display headings as PNG so their glyphs match the web render exactly.',
+            })}
+          >
             <span className="ts-export-label">Headings as raster</span>
             <input
               type="checkbox"
@@ -253,7 +298,13 @@ export function ExportMenu({
             />
             <span className="ts-export-box" aria-hidden="true" />
           </label>
-          <label className="ts-export-row ts-export-check">
+          <label
+            className="ts-export-row ts-export-check"
+            {...tipProps({
+              name: 'Verify with LibreOffice',
+              doc: 'Renders the file back through LibreOffice and measures every page against the web render (SPEC 8.5).',
+            })}
+          >
             <span className="ts-export-label">Verify with LibreOffice</span>
             <input
               type="checkbox"
@@ -269,10 +320,13 @@ export function ExportMenu({
             <button
               type="button"
               className="pt-ib is-text is-solid"
-              title="export.run: one PPTX per theme (and a zip of both), downloaded when done"
               data-control="export.pptx"
               disabled={busy}
               onClick={() => onExport(input())}
+              {...tipProps({
+                name: 'Export PPTX',
+                doc: 'Runs export.run: one PPTX per theme and a zip of both, downloaded when done.',
+              })}
             >
               <span className="pt-lb">Export PPTX</span>
             </button>
@@ -286,14 +340,42 @@ export function ExportMenu({
             <button
               type="button"
               className="pt-ib is-text"
-              title="build.run: the standalone deck file, downloaded when done"
               data-control="export.build"
               disabled={busy}
               onClick={onBuild}
+              {...tipProps({
+                name: 'Build and download',
+                doc: 'Runs build.run: the standalone HTML deck with fonts and assets inlined, under 16 MB.',
+              })}
             >
               <span className="pt-lb">Build and download</span>
             </button>
           </div>
+          {onDownloadBundle !== undefined ? (
+            <>
+              <span className="ts-export-rule" aria-hidden="true" />
+              <span className="ts-export-head">Deck bundle</span>
+              <p className="ts-export-note">
+                deck.pack: deck.json, slides, assets and versions as one zip, for another studio or
+                a checkout (turboslide deck unpack).
+              </p>
+              <div className="ts-export-actions">
+                <button
+                  type="button"
+                  className="pt-ib is-text"
+                  data-control="export.bundle"
+                  disabled={busy}
+                  onClick={onDownloadBundle}
+                  {...tipProps({
+                    name: 'Download deck bundle',
+                    doc: 'Runs deck.pack: the deck as one bundle zip, to move it to another studio or a checkout or to back it up.',
+                  })}
+                >
+                  <span className="pt-lb">Download deck bundle</span>
+                </button>
+              </div>
+            </>
+          ) : null}
           {capabilities !== null && !capabilities.downloads ? (
             <p className="ts-export-note">
               The render worker runs elsewhere; the files stay on it and the report card lists them.

@@ -16,6 +16,7 @@ import { renderPlain, renderRefs, renderRows, renderSay } from './lists.ts';
 import { renderMaterial } from './material.ts';
 import { renderDither, renderMark, renderMarkSizes, renderMatrix } from './misc.ts';
 import { renderPanel } from './panel.ts';
+import { renderBox, renderIcon, renderRule, renderShape, renderTextBlock } from './primitives.ts';
 import { renderScales } from './scales.ts';
 import { renderLadder, renderLang, renderSpec, renderSwatches } from './specimen.ts';
 import { renderCredit, renderHeading, renderParagraph } from './text-blocks.ts';
@@ -74,6 +75,16 @@ export function renderBlock(block: Block, ctx: BlockContext): string {
       return renderLogoPlates(block, ctx);
     case 'material':
       return renderMaterial(block, ctx);
+    case 'box':
+      return renderBox(block, ctx);
+    case 'shape':
+      return renderShape(block, ctx);
+    case 'rule':
+      return renderRule(block, ctx);
+    case 'text':
+      return renderTextBlock(block, ctx);
+    case 'icon':
+      return renderIcon(block, ctx);
     case 'html':
       return renderHtmlEscape(block, ctx);
   }
@@ -89,7 +100,10 @@ export function isTextLike(block: Block): boolean {
     block.type === 'heading' ||
     block.type === 'paragraph' ||
     block.type === 'credit' ||
-    block.type === 'panel'
+    block.type === 'panel' ||
+    block.type === 'text' ||
+    block.type === 'box' ||
+    block.type === 'rule'
   );
 }
 

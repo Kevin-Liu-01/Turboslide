@@ -74,7 +74,7 @@ describe('valueCompletions', () => {
     const types = valueCompletions(root, ['layout', 'type'], { kind: 'content' }).map(
       (row) => row.label,
     );
-    expect(types).toEqual(['"cols"', '"split"', '"center"', '"left-mid"', '"stack"']);
+    expect(types).toEqual(['"cols"', '"split"', '"center"', '"left-mid"', '"stack"', '"freeform"']);
     const doc = { kind: 'content', slots: { left: [{ type: 'rows' }] } };
     const tight = valueCompletions(root, ['slots', 'left', 0, 'tight'], doc).map(
       (row) => row.label,

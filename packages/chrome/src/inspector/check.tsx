@@ -1,3 +1,4 @@
+import { tipProps } from '../Tooltip';
 import type { ControlProps } from './props';
 
 import './check.css';
@@ -12,7 +13,18 @@ export function CheckControl({ spec, onChange, disabled }: ControlProps) {
   const literal = spec.schema.def.type === 'literal';
   const checked = spec.value === true;
   return (
-    <label className="ts-ctl-check">
+    <label
+      className="ts-ctl-check"
+      {...tipProps({
+        name: spec.inspector.label,
+        doc:
+          spec.inspector.help ??
+          (literal
+            ? `Present or absent: unchecking removes ${spec.inspector.label}.`
+            : `On or off; unchecking ${spec.optional ? 'removes the field' : 'writes false'}.`),
+        key: 'Space',
+      })}
+    >
       <input
         type="checkbox"
         aria-label={spec.label}

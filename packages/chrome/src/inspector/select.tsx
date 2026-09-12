@@ -1,3 +1,4 @@
+import { tipProps } from '../Tooltip';
 import type { ControlProps } from './props';
 import { optionValue } from './props';
 
@@ -24,6 +25,10 @@ export function SelectControl({ spec, onChange, disabled }: ControlProps) {
         const raw = event.target.value;
         onChange(raw === '' ? undefined : optionValue(raw, options));
       }}
+      {...tipProps({
+        name: spec.inspector.label,
+        doc: spec.inspector.help ?? `One of ${options.length} values.`,
+      })}
     >
       {spec.optional || current === '' ? <option value="">none</option> : null}
       {!known && current !== '' ? <option value={current}>{current}</option> : null}

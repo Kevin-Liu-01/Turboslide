@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
+import { tipProps } from '../Tooltip';
 import type { ControlProps } from './props';
 
 import './text.css';
@@ -58,6 +59,16 @@ export function TextControl({ spec, onChange, context, disabled }: ControlProps)
     }
   };
 
+  const fieldTip = tipProps({
+    name: spec.inspector.label,
+    doc:
+      spec.inspector.help ??
+      (multiline
+        ? 'Line breaks are kept; Cmd Enter or Ctrl Enter commits, Escape restores.'
+        : 'One line in the four-rule markup (*bold*, [links], GT for the mark); Enter commits, Escape restores.'),
+    key: multiline ? 'Cmd Enter' : 'Enter',
+  });
+
   return (
     <span className={multiline ? 'ts-ctl-text is-multiline' : 'ts-ctl-text'}>
       <textarea
@@ -70,9 +81,16 @@ export function TextControl({ spec, onChange, context, disabled }: ControlProps)
         placeholder={spec.optional ? 'none' : undefined}
         disabled={disabled}
         spellCheck={spec.text}
+        {...fieldTip}
         onChange={(event) => setDraft(event.target.value)}
-        onBlur={commit}
-        onKeyDown={onKey}
+        onBlur={(event) => {
+          fieldTip.onBlur(event);
+          commit();
+        }}
+        onKeyDown={(event) => {
+          fieldTip.onKeyDown(event);
+          onKey(event);
+        }}
       />
       {messages.length > 0 ? (
         <span className="ts-ctl-lint" role="status">

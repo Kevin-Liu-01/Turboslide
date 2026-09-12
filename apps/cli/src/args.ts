@@ -89,6 +89,24 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'preset',
   'uniforms',
   'backend',
+  // deck transfer (docs/deck-transfer.md): `deck unpack --as`, `deck push --token --from-url`
+  'as',
+  'token',
+  'from-url',
+  // the freeform round (docs/freeform.md): block align, distribute, order and move --z; slide
+  // set-layout with the layout's options as flags
+  'blocks',
+  'edge',
+  'axis',
+  'gap',
+  'move',
+  'z',
+  'layout',
+  'type',
+  'ratio',
+  'head',
+  'align',
+  'body',
 ]);
 
 /**

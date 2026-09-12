@@ -1,17 +1,13 @@
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-
 import { createServerFn } from '@tanstack/react-start';
 import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { RenderRecord, Theme } from '@turboslide/schema/render';
-import { openFileStore } from '@turboslide/store/file-store';
 
 import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
 import { slideSelection } from './lint';
-import { deckDir, ensureDeckAssets, workerClientOptions } from './root';
+import { ensureDeckAssets, openDeckStore, workerClientOptions } from './root';
 
 /**
  * The one renderer the studio calls (SPEC 5.2, 5.3): @turboslide/render's
@@ -28,7 +24,10 @@ export type { Deck, Slide } from '@turboslide/schema/deck';
  * runs over HTTP when TURBOSLIDE_WORKER_URL is set and in this process otherwise, driving the
  * turboslide CLI as a child process, so headless Chromium never runs inside the web app (SPEC 3.3
  * item 7). Records come back with `image` rewritten to the /api/render URL the browser can fetch;
- * the worker's cache makes that fetch a hit at the same revision.
+ * the worker's cache makes that fetch a hit at the same revision. The deck is opened through the
+ * hosted store before anything is read or rendered, so the overlay the worker renders from holds
+ * the store's current document and its twins, not what this instance last pulled (the editor
+ * depth round; lint.ts says why).
  */
 
 let client: WorkerClient | undefined;
@@ -77,11 +76,12 @@ const renderSlideImagesFn = createServerFn({ method: 'POST' })
     return { deckId: input.deckId, slideIds: slideSelection(input.slideIds), themes, scale };
   })
   .handler(async ({ data }): Promise<string> => {
-    const dir = deckDir(data.deckId);
-    if (!existsSync(join(dir, 'deck.json'))) throw new RangeError(`No deck ${data.deckId}`);
+    // a RangeError when the deck is missing; the open syncs the store's copy, the twins follow
+    const store = await openDeckStore(data.deckId);
+    await ensureDeckAssets(data.deckId);
     let ids: string[];
     if (data.slideIds === 'all') {
-      const { document } = await openFileStore({ dir }).read();
+      const { document } = await store.read();
       ids = document.deck.sections.flatMap((section) => section.slideIds);
     } else {
       ids = data.slideIds;
@@ -89,7 +89,6 @@ const renderSlideImagesFn = createServerFn({ method: 'POST' })
     const scale = data.scale ?? 1;
     const records: RenderRecord[] = [];
     const images: string[] = [];
-    await ensureDeckAssets(data.deckId);
     // sequential: the local queue runs one Chromium at a time and the machine is shared
     for (const slideId of ids) {
       for (const theme of data.themes ?? ['light', 'dark']) {

@@ -1,0 +1,134 @@
+/* The color control: a row of 20px swatches (the twelve palette entries plus none), each a
+   --pt-hair box painted with its token through --swatch; the chosen one draws the ink ring
+   (a state, SPEC 2.2) and the none swatch a diagonal hairline. Under it the custom hex field in
+   the shell's field box with its own swatch, the contrast readout in 11px titanium and the lint
+   mark. The control takes the wide row (InspectorControl.css is-wide). */
+.ts-ctl-color {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.ts-ctl-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.ts-ctl-swatch {
+  appearance: none;
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--swatch, var(--pt-paper));
+  cursor: pointer;
+  transition:
+    border-color var(--pt-dur-fast) var(--pt-ease-out),
+    outline-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-ctl-swatch:hover {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-ctl-swatch.is-on {
+  border-color: var(--pt-ink);
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+.ts-ctl-swatch:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-ctl-swatch:disabled {
+  cursor: default;
+  border-color: var(--pt-hair-soft);
+}
+
+/* none: paper with one diagonal hairline */
+.ts-ctl-swatch.is-none {
+  background:
+    linear-gradient(
+      to top right,
+      transparent calc(50% - 0.5px),
+      var(--pt-hair) calc(50% - 0.5px),
+      var(--pt-hair) calc(50% + 0.5px),
+      transparent calc(50% + 0.5px)
+    ),
+    var(--pt-paper);
+}
+
+.ts-ctl-swatch.is-custom {
+  cursor: default;
+}
+
+.ts-ctl-swatch.is-custom:not(.is-on) {
+  background: var(--pt-plate);
+}
+
+.ts-ctl-hex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-ctl-hexfield {
+  width: 84px;
+  height: 22px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px var(--pt-mono);
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-ctl-hexfield::placeholder {
+  color: var(--pt-titanium);
+}
+
+.ts-ctl-hexfield:hover {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-ctl-hexfield:focus-visible {
+  outline: none;
+  border-color: var(--pt-ink);
+}
+
+/* a value that did not parse: the field keeps it and draws the ink ring (an outline, SPEC 2.2) */
+.ts-ctl-hexfield.is-error {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+.ts-ctl-contrast {
+  font-size: 11px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ts-ctl-contrast[data-low] {
+  color: var(--pt-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-ctl-swatch,
+  .ts-ctl-hexfield {
+    transition: none;
+  }
+}

@@ -1,7 +1,10 @@
 // The export font set (SPEC 8.4): which family name a run travels under, and which file embeds it.
 // Weight 500 has no DrawingML attribute (only the bold flag), so the medium cut is its own family
 // (pptx report section 4.2). `exact` maps every size to a per-size Inter instance renamed GT Inter;
-// `standard` keeps Inter and Inter Medium under 44 px and the display instance above. The files
+// `standard` keeps Inter and Inter Medium under 44 px and the display instance above. The set
+// carries Regular and Medium cuts only: a run at 600 or 700 (the inspector offers 300 to 700,
+// schema/typography.ts) travels as the Medium family plus the bold flag, a run under 400 as the
+// Regular family, and the report's residual names the substitution (docs/pptx.md). The files
 // and the recorded mapping come from packages/fonts/export/fonts.json, which scripts/build-fonts.py
 // writes (the fonts builder); when that file is absent the table below still names the families
 // and the report lists them under requiredOnViewer instead of embedded.
@@ -114,23 +117,51 @@ export function nearestOpsz(sizePx: number): number {
   return best;
 }
 
-export type FamilyPick = { family: string; display: boolean; opsz: number; weight: 400 | 500 };
+export type FamilyPick = {
+  family: string;
+  display: boolean;
+  opsz: number;
+  /** the cut the family holds */
+  weight: 400 | 500;
+  /** the run's measured weight, as requested */
+  requested: number;
+  /** the run travels with the bold flag: the requested weight is 600 or more */
+  bold: boolean;
+};
+
+/** The weight cuts the export set holds; every other weight is a substitution the report names. */
+export const EXPORT_WEIGHTS: readonly number[] = [400, 500];
+
+/** The bold flag stands in for the weights above the Medium cut. */
+export const BOLD_FROM = 600;
 
 /**
- * The family a run travels under. Display text (weight 500 at 44 px and above, the h1, h2, big and
- * mood title) goes to the display instance with cv11 and ss01 frozen; everything else to a text
- * instance by optical size in the exact set, or to Inter and Inter Medium in the standard set.
+ * The family a run travels under. Display text (weight 500 or more at 44 px and above, the h1, h2,
+ * big and mood title) goes to the display instance with cv11 and ss01 frozen; everything else to
+ * a text instance by optical size in the exact set, or to Inter and Inter Medium in the standard
+ * set. A weight of 600 or more takes the Medium cut plus `bold`; a weight under 500 takes Regular.
  */
 export function pickFamily(sizePx: number, weight: number, set: FontSet): FamilyPick {
   const medium = weight >= 500;
+  const bold = weight >= BOLD_FROM;
   const display = medium && sizePx >= 44;
-  if (display) return { family: `${FAMILY_PREFIX} Display`, display: true, opsz: 32, weight: 500 };
+  if (display)
+    return {
+      family: `${FAMILY_PREFIX} Display`,
+      display: true,
+      opsz: 32,
+      weight: 500,
+      requested: weight,
+      bold,
+    };
   if (set === 'standard')
     return {
       family: medium ? 'Inter Medium' : 'Inter',
       display: false,
       opsz: 14,
       weight: medium ? 500 : 400,
+      requested: weight,
+      bold,
     };
   const opsz = nearestOpsz(sizePx);
   return {
@@ -138,7 +169,21 @@ export function pickFamily(sizePx: number, weight: number, set: FontSet): Family
     display: false,
     opsz,
     weight: medium ? 500 : 400,
+    requested: weight,
+    bold,
   };
+}
+
+/**
+ * The residual line for a weight the set has no cut for; null for 400 and 500. One line per
+ * distinct weight in the report (build.ts collects them in a Set).
+ */
+export function weightSubstitution(pick: FamilyPick): string | null {
+  if (EXPORT_WEIGHTS.includes(pick.requested)) return null;
+  const cut = pick.weight === 500 ? 'Medium' : 'Regular';
+  return pick.bold
+    ? `fonts: weight ${pick.requested} exported as the ${cut} cut plus bold; the export set carries Regular and Medium cuts only (docs/pptx.md)`
+    : `fonts: weight ${pick.requested} exported as the ${cut} cut; the export set carries Regular and Medium cuts only (docs/pptx.md)`;
 }
 
 /**

@@ -7,6 +7,7 @@ import { ASSET_ROLES, isShareAlike } from '@turboslide/schema/assets';
 import { AssetPicker } from '../AssetPicker';
 import type { EditorDispatch } from '../dispatch';
 import { ToolButton } from '../ToolButton';
+import { tipProps } from '../Tooltip';
 import type { ControlProps } from './props';
 
 import './asset.css';
@@ -127,6 +128,10 @@ export function AssetControl({ spec, onChange, context, disabled }: ControlProps
             const raw = event.target.value;
             onChange(raw === '' ? undefined : raw);
           }}
+          {...tipProps({
+            name: spec.inspector.label,
+            doc: spec.inspector.help ?? 'The asset this field shows, from the deck.',
+          })}
         >
           {spec.optional || current === '' ? <option value="">none</option> : null}
           {current !== '' && !ids.includes(current) ? (
@@ -139,7 +144,12 @@ export function AssetControl({ spec, onChange, context, disabled }: ControlProps
           ))}
         </select>
         <ToolButton
-          title={browsing ? 'Close the asset picker' : 'Browse the deck’s assets with their twins'}
+          title={browsing ? 'Close the asset picker' : 'Browse assets'}
+          doc={
+            browsing
+              ? 'Closes the picker; the chosen asset stays.'
+              : 'Opens the picker with every asset of the deck and its twins.'
+          }
           ariaLabel={`${spec.label} browse`}
           icon="photo"
           pressed={browsing}
@@ -242,6 +252,17 @@ const ROLE_LABEL: Record<AssetRole, string> = {
 };
 
 const SHARE_ALIKE = /BY-SA|share[- ]?alike/i;
+
+/** One sentence per intake field, for its tooltip. */
+const INTAKE_DOC: Readonly<Record<string, string>> = {
+  url: 'A picture to fetch by URL when no file is dropped.',
+  id: 'The asset id; from the file name when left empty.',
+  alt: 'The alt text every twin carries; required.',
+  title: 'The picture’s own title, kept in the source record.',
+  artist: 'Who made the picture, for the credit line.',
+  license: 'The license as written at the source; share-alike puts the credit on the plate.',
+  sourceUrl: 'Where the picture came from, kept in the source record.',
+};
 
 export function AssetIntake({
   revision,
@@ -363,6 +384,7 @@ export function AssetIntake({
           placeholder={placeholder}
           disabled={busy}
           onChange={(event) => set(event.target.value)}
+          {...tipProps({ name: label, doc: INTAKE_DOC[name] ?? `${label} of the new asset.` })}
         />
       </div>
     </div>
@@ -376,6 +398,10 @@ export function AssetIntake({
         tabIndex={0}
         aria-label="asset intake: drop zone"
         data-control={`${control}.drop`}
+        {...tipProps({
+          name: 'Drop zone',
+          doc: 'Drop or paste a picture here; asset.add writes the twins and the record.',
+        })}
         onDragOver={(event) => {
           event.preventDefault();
           setOver(true);
@@ -398,6 +424,7 @@ export function AssetIntake({
             data-control={`${control}.file`}
             disabled={busy}
             onChange={onPickFile}
+            {...tipProps({ name: 'Choose a file', doc: 'Picks one image file from disk.' })}
           />
           <span>{file !== null ? file.name : 'Choose a file'}</span>
         </label>
@@ -414,6 +441,10 @@ export function AssetIntake({
             data-control={`${control}.role`}
             value={role}
             disabled={busy}
+            {...tipProps({
+              name: 'Role',
+              doc: 'What the picture is for; mood and opener pictures go through the two-tone screen.',
+            })}
             onChange={(event) => {
               const next = event.target.value as AssetRole;
               setRole(next);
@@ -435,7 +466,13 @@ export function AssetIntake({
       <div className="ts-insp-row">
         <span className="ts-insp-label">Share-alike</span>
         <div className="ts-insp-field">
-          <label className="ts-ctl-check">
+          <label
+            className="ts-ctl-check"
+            {...tipProps({
+              name: 'Share-alike',
+              doc: 'A share-alike license puts the credit on the plate (asset/credit-on-plate).',
+            })}
+          >
             <input
               type="checkbox"
               aria-label="asset intake: Share-alike"
@@ -461,7 +498,13 @@ export function AssetIntake({
       <div className="ts-insp-row">
         <span className="ts-insp-label">Two-tone</span>
         <div className="ts-insp-field">
-          <label className="ts-ctl-check">
+          <label
+            className="ts-ctl-check"
+            {...tipProps({
+              name: 'Two-tone',
+              doc: 'Runs the picture through the Bayer screen into a light and a dark twin.',
+            })}
+          >
             <input
               type="checkbox"
               aria-label="asset intake: Two-tone"
@@ -487,6 +530,10 @@ export function AssetIntake({
               data-control={`${control}.plate`}
               value={plateSide}
               disabled={busy}
+              {...tipProps({
+                name: 'Plate',
+                doc: 'The plate the two-tone metrics are screened against.',
+              })}
               onChange={(event) => setPlateSide(event.target.value as PlateSide | '')}
             >
               <option value="">none</option>
@@ -499,7 +546,8 @@ export function AssetIntake({
       ) : null}
       <div className="ts-intake-actions">
         <ToolButton
-          title="Add the picture to the deck (asset.add)"
+          title="Add the picture to the deck"
+          doc="Runs asset.add: writes the twins, the record and the credit into the deck."
           label={adding ? 'Adding' : 'Add asset'}
           icon="sparkles"
           control={`${control}.add`}

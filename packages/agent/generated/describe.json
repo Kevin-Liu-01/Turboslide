@@ -17,10 +17,14 @@
         "slide.move",
         "slide.update",
         "slide.replace",
+        "slide.setLayout",
         "block.set",
         "block.insert",
         "block.remove",
         "block.move",
+        "block.align",
+        "block.distribute",
+        "block.order",
         "section.set",
         "slide.lease",
         "asset.add",
@@ -92,10 +96,14 @@
     "slide.move",
     "slide.update",
     "slide.replace",
+    "slide.setLayout",
     "block.set",
     "block.insert",
     "block.remove",
     "block.move",
+    "block.align",
+    "block.distribute",
+    "block.order",
     "section.set",
     "slide.lease",
     "asset.add",
@@ -195,6 +203,13 @@
       "milestone": "M2",
       "group": "slide"
     },
+    "slide.setLayout": {
+      "label": "Set layout",
+      "doc": "Moves a content slide to another layout and refiles its blocks: to freeform every block gets a position box from its slot, from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).",
+      "mutates": true,
+      "milestone": "M6",
+      "group": "slide"
+    },
     "block.set": {
       "label": "Set block property",
       "doc": "Writes one property of a block by JSON pointer; an absent value deletes it.",
@@ -221,6 +236,27 @@
       "doc": "Moves a block to a slot after the named block, or first.",
       "mutates": true,
       "milestone": "M2",
+      "group": "block"
+    },
+    "block.align": {
+      "label": "Align blocks",
+      "doc": "Aligns the position boxes of freeform blocks on one edge, against the selection, the content box or the sheet, and snaps the result unless snap is false.",
+      "mutates": true,
+      "milestone": "M6",
+      "group": "block"
+    },
+    "block.distribute": {
+      "label": "Distribute blocks",
+      "doc": "Spreads freeform blocks along one axis with equal gaps between the first and the last, or with a fixed gap; with snap the moved edges round to the 8 px grid.",
+      "mutates": true,
+      "milestone": "M6",
+      "group": "block"
+    },
+    "block.order": {
+      "label": "Order block",
+      "doc": "Moves a freeform block through the stacking order, to the front or back or by one step, or to a given z rank, and renumbers the stack densely.",
+      "mutates": true,
+      "milestone": "M6",
       "group": "block"
     },
     "section.set": {

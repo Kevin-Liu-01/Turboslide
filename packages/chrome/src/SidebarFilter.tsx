@@ -2,6 +2,7 @@ import type { KeyboardEvent, RefObject } from 'react';
 
 import { Icon } from './icons';
 import { cn } from './lib/cn';
+import { tipProps } from './Tooltip';
 
 import './SidebarFilter.css';
 
@@ -41,6 +42,11 @@ export function SidebarFilter({
     onChange('');
     inputRef?.current?.focus({ preventScroll: true });
   };
+  const fieldTip = tipProps({
+    name: label ?? placeholder,
+    doc: 'Matches the title, the section, the id, the number and the slide text; Enter opens the first match, Down moves into the list.',
+    key: 'Enter',
+  });
   return (
     <div className={cn('pt-filter-row', className)}>
       <div className={cn('pt-filter', value && 'has-text')}>
@@ -50,8 +56,12 @@ export function SidebarFilter({
             ref={inputRef}
             type="search"
             value={value}
+            {...fieldTip}
             onChange={(event) => onChange(event.target.value)}
-            onKeyDown={onKeyDown}
+            onKeyDown={(event) => {
+              fieldTip.onKeyDown(event);
+              onKeyDown?.(event);
+            }}
             placeholder={placeholder}
             aria-label={label ?? placeholder}
             data-control="sidebar.filter"
@@ -66,9 +76,13 @@ export function SidebarFilter({
           <button
             type="button"
             className="pt-filter-clear"
-            title="Clear the filter (Esc)"
             aria-label="Clear the filter"
             onClick={clear}
+            {...tipProps({
+              name: 'Clear the filter',
+              doc: 'Empties the field and shows every slide.',
+              key: 'Esc',
+            })}
           >
             <Icon name="close" />
           </button>

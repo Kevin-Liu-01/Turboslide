@@ -200,7 +200,7 @@ test('set by label and by data-control id are one action call each, and the rend
   expect(rowsBefore.length).toBeGreaterThan(1);
 
   // select the list block so the inspector generates its controls
-  await page.locator('.ts-stage > .pt-slide [data-block="list"]').click();
+  await page.locator('.ts-stagewrap.ts-editor .pt-slide [data-block="list"]').click();
   await expect(page.getByRole('group', { name: 'list: Size' })).toBeVisible();
 
   // one call by accessible label

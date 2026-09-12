@@ -24,6 +24,18 @@ export type LiveCloneProps = {
  * worker replace live clones in M3 (SPEC 5.5), with the clone as the
  * fallback while a render is pending.
  */
+/**
+ * The clone's pictures load lazily: the sidebar mounts one clone per slide in thumbnail density,
+ * and eager pictures made the 85 clones request about 120 asset twins at once, which held every
+ * browser connection to the dev server so an editor write waited 15 s behind them (measured
+ * 2026-09-11; on the host the same requests compete with the renders for function instances).
+ * Only the clones near the viewport fetch their pictures now; a picture already marked keeps its
+ * own attribute.
+ */
+export function lazyPictures(html: string): string {
+  return html.replace(/<img\b(?![^>]*\bloading=)/g, '<img loading="lazy" decoding="async"');
+}
+
 export function LiveClone({ html, theme, frame = true }: LiveCloneProps) {
   const root = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLDivElement>(null);
@@ -51,7 +63,11 @@ export function LiveClone({ html, theme, frame = true }: LiveCloneProps) {
     <div ref={root} className="ts-sheet sheet is-clone" data-theme={theme} aria-hidden="true">
       <div className="ts-stage stage">
         {frame ? <Frame wordmark={false} counter={false} /> : null}
-        <div ref={body} className="pt-slide" dangerouslySetInnerHTML={{ __html: html }} />
+        <div
+          ref={body}
+          className="pt-slide"
+          dangerouslySetInnerHTML={{ __html: lazyPictures(html) }}
+        />
       </div>
     </div>
   );

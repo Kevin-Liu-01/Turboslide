@@ -7,6 +7,7 @@ import type { EditorDispatch } from './dispatch';
 import { authorName } from './dispatch';
 import { cn } from './lib/cn';
 import { ToolButton } from './ToolButton';
+import { tipProps } from './Tooltip';
 
 import './VersionsPanel.css';
 
@@ -72,6 +73,12 @@ export function VersionsPanel({
     }
   };
 
+  const noteTip = tipProps({
+    name: 'Version note',
+    doc: 'Names the version to save; Enter saves it (version.save).',
+    key: 'Enter',
+  });
+
   return (
     <div
       className={cn('ts-versions', embedded && 'is-embedded', className)}
@@ -92,12 +99,17 @@ export function VersionsPanel({
           aria-label="Version note"
           data-control="version.save.note"
           disabled={busy}
+          {...noteTip}
           onChange={(event) => setNote(event.target.value)}
-          onKeyDown={onNoteKey}
+          onKeyDown={(event) => {
+            noteTip.onKeyDown(event);
+            onNoteKey(event);
+          }}
         />
         <ToolButton
           label="Save"
           title="Save a named version at the current revision (Cmd S)"
+          doc="Writes version.save with the note; the version appears here and in the palette."
           ariaLabel="Save version"
           control="version.save"
           onClick={save}
@@ -130,7 +142,8 @@ export function VersionsPanel({
               </span>
               <ToolButton
                 label="Restore"
-                title={`Restore version ${version.n} as a mutation (undoable)`}
+                title="Restore"
+                doc={`Restores version ${version.n} as a mutation (version.restore), so History undoes it.`}
                 ariaLabel={`Restore version ${version.n}`}
                 className="ts-version-restore"
                 control={`version.restore.${version.n}`}

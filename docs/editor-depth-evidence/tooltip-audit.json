@@ -1,0 +1,95 @@
+{
+  "width": 1440,
+  "theme": "light",
+  "pages": [
+    {
+      "url": "http://localhost:4455/edit/gt-brand?edit=1",
+      "surfaces": [
+        {
+          "surface": "page",
+          "hits": [
+            {
+              "tag": "select",
+              "role": null,
+              "control": "slide.picture.asset",
+              "label": "slide: Picture",
+              "className": "ts-ctl-select"
+            }
+          ]
+        },
+        {
+          "surface": "row menu",
+          "hits": [
+            {
+              "tag": "select",
+              "role": null,
+              "control": "slide.picture.asset",
+              "label": "slide: Picture",
+              "className": "ts-ctl-select"
+            }
+          ]
+        },
+        {
+          "surface": "insert menu",
+          "hits": [
+            {
+              "tag": "select",
+              "role": null,
+              "control": "slide.picture.asset",
+              "label": "slide: Picture",
+              "className": "ts-ctl-select"
+            }
+          ]
+        },
+        {
+          "surface": "export menu",
+          "hits": [
+            {
+              "tag": "select",
+              "role": null,
+              "control": "slide.picture.asset",
+              "label": "slide: Picture",
+              "className": "ts-ctl-select"
+            }
+          ]
+        },
+        {
+          "surface": "palette",
+          "hits": [
+            {
+              "tag": "select",
+              "role": null,
+              "control": "slide.picture.asset",
+              "label": "slide: Picture",
+              "className": "ts-ctl-select"
+            }
+          ]
+        },
+        {
+          "surface": "inspector, block selected",
+          "hits": []
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:4455/deck/gt-brand",
+      "surfaces": [
+        {
+          "surface": "page",
+          "hits": []
+        }
+      ]
+    },
+    {
+      "url": "http://localhost:4455/decks",
+      "surfaces": [
+        {
+          "surface": "page",
+          "hits": []
+        }
+      ]
+    }
+  ],
+  "missing": 5,
+  "broken": 0
+}

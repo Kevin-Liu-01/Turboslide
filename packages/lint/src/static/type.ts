@@ -1,19 +1,38 @@
 // Static type rules (SPEC 7.7): the declared and raw diagram label minimum (head:157-160), the
-// display weight cap (DECK-GRAMMAR.md:20), and the size ladder (head:59-65). Declared blocks
-// cannot carry an off-ladder size or a heavy weight, so these rules read html escape blocks and
-// raw svg strings, and the spec block's weights are the one sanctioned exception.
-import type { Finding } from '../contracts.ts';
+// display weight cap (DECK-GRAMMAR.md:20), and the size ladder (head:59-65). The grammar blocks
+// cannot carry an off-ladder size or a heavy weight, so the escape rules read html blocks and raw
+// svg strings, and the spec block's weights are the one sanctioned exception. The typography
+// record of a heading, paragraph, text or box (docs/freeform.md) is read directly: a weight over
+// 500 is type/weight-cap with a fix to 500, a size off the ladder is type/ladder with a fix to the
+// nearest step; the ladder and the cap are the schema's (typography.ts).
+import type { Block, Finding } from '../contracts.ts';
+import {
+  TYPE_LADDER as LADDER,
+  WEIGHT_CAP,
+  isLadderSize,
+  nearestLadderSize,
+} from '../contracts.ts';
 import type { LintContext } from '../context.ts';
 
-/** The sheet's type ladder in px (head:59-65 and the block rules; 15 is the floor). */
-export const TYPE_LADDER: readonly number[] = [88, 72, 58, 44, 34, 26, 24, 22, 20, 18, 17, 16, 15];
-export const WEIGHT_CAP = 500;
+/** The schema's ladder widened to numbers, the form the escape checks compare against. */
+export const TYPE_LADDER: readonly number[] = LADDER;
+export { WEIGHT_CAP };
 export const SVG_LABEL_MIN = 18;
 
-function nearestLadder(size: number): number {
-  let best = TYPE_LADDER[0] ?? 22;
-  for (const s of TYPE_LADDER) if (Math.abs(s - size) < Math.abs(best - size)) best = s;
-  return best;
+const nearestLadder = nearestLadderSize;
+
+/** The typography record of a block that carries one, with the field's pointer. */
+function typographyOf(block: Block): { size?: number; weight?: number; path: string } | undefined {
+  if (
+    block.type === 'heading' ||
+    block.type === 'paragraph' ||
+    block.type === 'text' ||
+    block.type === 'box'
+  ) {
+    if (block.typography === undefined) return undefined;
+    return { ...block.typography, path: '/typography' };
+  }
+  return undefined;
 }
 
 function weightValue(raw: string): number {
@@ -29,6 +48,50 @@ export function checkType(ctx: LintContext): Finding[] {
     for (const ref of ctx.blocksOf(slide)) {
       const { block } = ref;
       const base = { blockId: block.id, path: ref.path };
+      const typography = typographyOf(block);
+      if (typography !== undefined) {
+        if (typography.weight !== undefined && typography.weight > WEIGHT_CAP) {
+          out.push(
+            ctx.finding('type/weight-cap', slide.id, {
+              ...base,
+              path: `${ref.path}${typography.path}/weight`,
+              text: `weight ${typography.weight}`,
+              measured: { fontWeight: typography.weight },
+              proposal: `Weight ${typography.weight} on a ${block.type} block; display weight is capped at 500 outside the type specimen (DECK-GRAMMAR.md:20). The fix sets 500.`,
+              fix: [
+                {
+                  op: 'block.set',
+                  slideId: slide.id,
+                  blockId: block.id,
+                  path: `${typography.path}/weight`,
+                  value: WEIGHT_CAP,
+                },
+              ],
+            }),
+          );
+        }
+        if (typography.size !== undefined && !isLadderSize(typography.size)) {
+          const nearest = nearestLadder(typography.size);
+          out.push(
+            ctx.finding('type/ladder', slide.id, {
+              ...base,
+              path: `${ref.path}${typography.path}/size`,
+              text: `${typography.size} px`,
+              measured: { fontSize: typography.size, nearest },
+              proposal: `Size ${typography.size} px is off the type ladder (${TYPE_LADDER.join(', ')}; head:59-65); the fix snaps it to ${nearest}.`,
+              fix: [
+                {
+                  op: 'block.set',
+                  slideId: slide.id,
+                  blockId: block.id,
+                  path: `${typography.path}/size`,
+                  value: nearest,
+                },
+              ],
+            }),
+          );
+        }
+      }
       if (block.type === 'html') {
         const css = block.css;
         // type/weight-cap in escape CSS, fixable by rewriting the declaration to 500.

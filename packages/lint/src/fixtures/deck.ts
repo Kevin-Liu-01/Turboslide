@@ -320,13 +320,47 @@ const badRaw: unknown[] = [
       ],
     },
   },
-  // opener/sentence-lists-section: the sentence above does not mention the fixed points slide
+  // opener/sentence-lists-section: the sentence above does not mention the fixed points slide.
+  // The slide is on the freeform layout (docs/freeform.md), so it also plants: layout/freeform;
+  // type/ladder (23 px) and type/weight-cap (700) on the text block's typography; freeform/overlap
+  // (the text box over the heading); color/off-palette (a hex fill on the box); freeform/off-sheet
+  // (an arrow past the right edge). Every value here is schema-valid.
   {
     schemaVersion: 1,
     id: 'fixed-points',
     kind: 'content',
-    layout: { type: 'center' },
-    slots: { main: [{ id: 'h', type: 'heading', level: 'h2', text: 'Fixed points' }] },
+    layout: { type: 'freeform' },
+    slots: {
+      main: [
+        {
+          id: 'h',
+          type: 'heading',
+          level: 'h2',
+          text: 'Fixed points',
+          pos: { x: 137, y: 129, w: 640, h: 56, z: 0 },
+        },
+        {
+          id: 't1',
+          type: 'text',
+          text: 'A text box over the heading.',
+          typography: { size: 23, weight: 700 },
+          pos: { x: 137, y: 150, w: 400, h: 40, z: 1 },
+        },
+        {
+          id: 'b1',
+          type: 'box',
+          fill: '#ff0000',
+          stroke: 'hair',
+          pos: { x: 900, y: 129, w: 300, h: 200, z: 2 },
+        },
+        {
+          id: 's1',
+          type: 'shape',
+          shape: 'arrow',
+          pos: { x: 1500, y: 800, w: 200, h: 8, z: 3 },
+        },
+      ],
+    },
   },
 ];
 

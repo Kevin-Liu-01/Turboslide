@@ -29,8 +29,10 @@ import { getThumbnail, isThumbWidth, thumbResponse } from '../../server/thumbs';
 // <token>` for the full-size render and its JSON variant. The thumbnail variant (?w=) stays open
 // with the token set: the editor's sidebar embeds it as <img>, which carries no header, its result
 // is cached per revision on the instance, and the work it can start is bounded to the deck's slides
-// at three widths and two themes. Unset, the whole route is open; the production URL runs that way
-// today, which docs/hosting.md section 6 records as Kevin's open decision.
+// at three widths and two themes. Unset (a checkout), the whole route is open. The editor's own
+// full-size renders go through the renderSlideImages server function (server/render.ts), never
+// this route, so the token set on the production and preview environments of the `turboslide`
+// project since 2026-09-11 (docs/hosting.md section 6, option 2) costs the page nothing.
 
 let client: WorkerClient | undefined;
 

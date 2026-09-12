@@ -13,18 +13,21 @@ import type { RenderRecord } from '@turboslide/schema/render';
 import { isRuleId } from '@turboslide/schema/rules';
 import type { RuleId } from '@turboslide/schema/rules';
 import { PRODUCT_TOKENS, PROPER_NOUNS } from '@turboslide/theme/copy';
-import { openFileStore } from '@turboslide/store/file-store';
 
 import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
-import { deckDir } from './root';
+import { openDeckStore } from './root';
 
 /**
  * lint.run for the editor (SPEC 6.5 "this slide's findings from the same linter the CLI runs";
  * MILESTONES M3 item 2): @turboslide/lint over the store's normalized document, the static layer
  * always and the rendered layer over the render worker's cached records for the current revision
  * when it has them (the worker writes cache/<deck>/<revision>/<theme>@1x/<slide>.json). The copy
- * lists and the icon names are the same ones apps/cli/src/deps/theme.ts hands the CLI.
+ * lists and the icon names are the same ones apps/cli/src/deps/theme.ts hands the CLI. The
+ * document comes through the hosted store (root.ts openDeckStore), which pulls the Blob mirror
+ * before it reads: a plain FileStore over this instance's overlay answered the document this
+ * instance last pulled, so the window API's lint.run on a deployment counted another instance's
+ * writes late (the editor depth round, docs/EDITOR-DEPTH-STATUS.md section 5).
  */
 
 export type LintSlidesInput = {
@@ -104,9 +107,8 @@ const lintSlidesFn = createServerFn({ method: 'POST' })
     };
   })
   .handler(async ({ data }): Promise<string> => {
-    const dir = deckDir(data.deckId);
-    if (!existsSync(join(dir, 'deck.json'))) throw new RangeError(`No deck ${data.deckId}`);
-    const { document } = await openFileStore({ dir }).read();
+    // a RangeError when the deck is missing; the open syncs the store's copy first
+    const { document } = await (await openDeckStore(data.deckId)).read();
     const order = document.deck.sections.flatMap((section) => section.slideIds);
     const ids = data.slideIds === 'all' ? order : data.slideIds;
     for (const id of ids) {

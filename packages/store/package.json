@@ -21,6 +21,10 @@
     "./blob-store": "./src/blob-store.ts",
     "./blob-fake": "./src/blob-fake.ts",
     "./blob-vercel": "./src/blob-vercel.ts",
+    "./zip": "./src/zip.ts",
+    "./bundle": "./src/bundle.ts",
+    "./pack": "./src/pack.ts",
+    "./unpack": "./src/unpack.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {

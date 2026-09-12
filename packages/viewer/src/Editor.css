@@ -40,3 +40,18 @@
 .ts-overlay[hidden] {
   display: none;
 }
+
+/* ---- the freeform layout (Kevin's direction of 2026-09-11, Freeform.tsx) ---- */
+
+/* a positioned block reads as a plain target: the body drag moves it, the chip shows the move
+   cursor, text runs keep the caret */
+.ts-editor.is-freeform .pt-slide .free {
+  cursor: default;
+}
+
+/* a marquee under way: the crosshair over the whole stage, above the blocks' cursors */
+.ts-editor[data-marquee] .pt-sheet-stage,
+.ts-editor[data-marquee] .pt-slide [data-block],
+.ts-editor[data-marquee] .pt-slide [data-run] {
+  cursor: crosshair;
+}

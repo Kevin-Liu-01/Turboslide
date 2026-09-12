@@ -6,6 +6,7 @@ import { ASSET_ROLES } from '@turboslide/schema/assets';
 
 import { cn } from './lib/cn';
 import { Seg } from './Seg';
+import { tipProps } from './Tooltip';
 import type { SegOption } from './Seg';
 
 import './AssetPicker.css';
@@ -135,6 +136,9 @@ export function AssetPicker({
       .map((r) => ({ value: r, label: ROLE_WORDS[r], title: `${label}: ${ROLE_WORDS[r]}` })),
   ];
 
+  const rowTip = (asset: Asset) =>
+    tipProps({ name: asset.id, doc: `${asset.alt} Picks this asset for the field.` });
+
   return (
     <div
       className={cn('ts-asset-picker', className)}
@@ -150,6 +154,11 @@ export function AssetPicker({
           aria-label={`${label} filter`}
           data-control={`${control}.filter`}
           value={needle}
+          {...tipProps({
+            name: 'Filter assets',
+            doc: 'Matches the id, the alt text and the role; the arrows move, Enter picks.',
+            key: 'Enter',
+          })}
           onChange={(event) => {
             setNeedle(event.target.value);
             setCursor(0);
@@ -174,6 +183,7 @@ export function AssetPicker({
             aria-label={`${label} role list`}
             data-control={`${control}.role.list`}
             value={role}
+            {...tipProps({ name: 'Role', doc: 'Shows the assets of one role, or every role.' })}
             onChange={(event) =>
               setRole(event.target.value === 'all' ? 'all' : (event.target.value as AssetRole))
             }
@@ -201,8 +211,11 @@ export function AssetPicker({
                 index === cursor && 'is-cursor',
               )}
               data-control={`${control}.${asset.id}`}
-              title={asset.alt}
-              onMouseEnter={() => setCursor(index)}
+              {...rowTip(asset)}
+              onMouseEnter={(event) => {
+                rowTip(asset).onMouseEnter(event);
+                setCursor(index);
+              }}
               onClick={() => onPick(asset.id)}
             >
               <span className="ts-asset-picker-twins" aria-hidden="true">

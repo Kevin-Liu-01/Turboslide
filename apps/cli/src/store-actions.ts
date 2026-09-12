@@ -9,13 +9,27 @@
 import type { ActionContext, ActionHandler, Dispatcher } from '@turboslide/agent/dispatch';
 import { lintDeck, lintStatic } from '@turboslide/lint/run';
 import type { Block } from '@turboslide/schema/blocks';
-import type { DeckDocument, Section, Slide } from '@turboslide/schema/deck';
+import type { DeckDocument, Layout, Section, Slide } from '@turboslide/schema/deck';
 import { slideBlocks, slideTitle } from '@turboslide/schema/deck';
 import { describeMutation, diffDecks } from '@turboslide/schema/diff';
 import { ConflictError } from '@turboslide/schema/errors';
 import type { Finding } from '@turboslide/schema/findings';
+import type {
+  AlignEdge,
+  AlignTarget,
+  DistributeAxis,
+  OrderMove,
+} from '@turboslide/schema/freeform';
+import {
+  alignPositions,
+  convertLayout,
+  distributePositions,
+  reorderZ,
+  snapToGrid,
+} from '@turboslide/schema/freeform';
 import type { BlockSlot, Lease, Mutation, Version } from '@turboslide/schema/mutations';
-import { getAt } from '@turboslide/schema/pointer';
+import { getAt, jsonEqual } from '@turboslide/schema/pointer';
+import type { Position } from '@turboslide/schema/position';
 import { applyMutations } from '@turboslide/schema/reduce';
 import type { RenderRecord } from '@turboslide/schema/render';
 import type { RuleId } from '@turboslide/schema/rules';
@@ -65,6 +79,8 @@ export type BlockMoveInput = Rev & {
   blockId: string;
   slot: BlockSlot;
   after?: string;
+  /** The z order of a positioned block on a freeform slide (docs/freeform.md). */
+  z?: number;
 };
 export type SectionSetInput = Rev & { sections: Section[] };
 export type LeaseInput = { slideId: string; minutes?: number; force?: boolean; release?: boolean };
@@ -311,6 +327,7 @@ export async function blockMove(
       blockId: input.blockId,
       slot: input.slot,
       ...(input.after !== undefined ? { after: input.after } : {}),
+      ...(input.z !== undefined ? { z: input.z } : {}),
     },
   ]);
   return slideResult(deps, committed, input.slideId);
@@ -518,6 +535,186 @@ export async function fixRun(
 }
 
 // ---------------------------------------------------------------------------------------------
+// Freeform (docs/freeform.md): block.align, block.distribute, block.order and slide.setLayout. The
+// arithmetic is the schema's (@turboslide/schema/freeform), so the editor's drag and these actions
+// agree; each one ends in ordinary block.set or slide.replace mutations through commit, so the
+// inverse, the version log and the leases are the same as for any other write.
+
+export type BlockAlignInput = Rev & {
+  slideId: string;
+  blockIds: string[];
+  edge: AlignEdge;
+  to?: AlignTarget;
+  snap?: boolean;
+};
+export type BlockDistributeInput = Rev & {
+  slideId: string;
+  blockIds: string[];
+  axis: DistributeAxis;
+  gap?: number;
+  snap?: boolean;
+};
+export type BlockOrderInput = Rev & {
+  slideId: string;
+  blockId: string;
+  move?: OrderMove;
+  z?: number;
+};
+export type SlideSetLayoutInput = Rev & { slideId: string; layout: Layout };
+
+type Positioned = { block: Block; pos: Position };
+
+/** The positioned top-level blocks of a freeform slide; a TypeError names any other slide. */
+function freeformBlocks(slide: Slide): Positioned[] {
+  if (slide.kind !== 'content' || slide.layout.type !== 'freeform') {
+    throw new TypeError(
+      `Slide "${slide.id}" is not on the freeform layout; slide.setLayout moves it there (docs/freeform.md)`,
+    );
+  }
+  return (slide.slots.main ?? []).flatMap((block) =>
+    block.pos === undefined ? [] : [{ block, pos: block.pos }],
+  );
+}
+
+function pickBlocks(rows: Positioned[], ids: readonly string[], slideId: string): Positioned[] {
+  return ids.map((id) => {
+    const row = rows.find((candidate) => candidate.block.id === id);
+    if (row === undefined)
+      throw new RangeError(`No positioned block "${id}" on slide "${slideId}"`);
+    return row;
+  });
+}
+
+/** One block.set of /pos per block whose box changed. */
+function positionMutations(
+  slideId: string,
+  rows: readonly Positioned[],
+  next: readonly Position[],
+): Mutation[] {
+  return rows.flatMap((row, index) => {
+    const pos = next[index];
+    if (pos === undefined || jsonEqual(pos, row.pos)) return [];
+    return [{ op: 'block.set' as const, slideId, blockId: row.block.id, path: '/pos', value: pos }];
+  });
+}
+
+/** Writes the mutations, or returns the current slide when nothing moved (a stale base still conflicts). */
+async function commitPositions(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: Rev & { slideId: string },
+  current: DeckDocument,
+  mutations: Mutation[],
+): Promise<SlideResult> {
+  if (mutations.length > 0) {
+    const committed = await commit(deps, ctx, input.baseRevision, mutations);
+    return slideResult(deps, committed, input.slideId);
+  }
+  if (input.baseRevision !== current.deck.revision) {
+    throw new ConflictError(
+      `baseRevision ${input.baseRevision} is stale; the document is at revision ${current.deck.revision}`,
+      { currentRevision: current.deck.revision, current },
+    );
+  }
+  return {
+    slide: requireSlide(current, input.slideId),
+    revision: current.deck.revision,
+    findings: findingsFor(deps, current, input.slideId),
+  };
+}
+
+export async function blockAlign(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: BlockAlignInput,
+): Promise<SlideResult> {
+  const current = (await deps.store.read()).document;
+  const rows = pickBlocks(
+    freeformBlocks(requireSlide(current, input.slideId)),
+    input.blockIds,
+    input.slideId,
+  );
+  const next = alignPositions(
+    rows.map((row) => row.pos),
+    input.edge,
+    input.to,
+    input.snap !== false,
+  );
+  return commitPositions(deps, ctx, input, current, positionMutations(input.slideId, rows, next));
+}
+
+export async function blockDistribute(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: BlockDistributeInput,
+): Promise<SlideResult> {
+  const current = (await deps.store.read()).document;
+  const rows = pickBlocks(
+    freeformBlocks(requireSlide(current, input.slideId)),
+    input.blockIds,
+    input.slideId,
+  );
+  let next = distributePositions(
+    rows.map((row) => row.pos),
+    input.axis,
+    input.gap,
+  );
+  if (input.snap === true) {
+    next = next.map((pos) =>
+      input.axis === 'horizontal'
+        ? { ...pos, x: snapToGrid(pos.x) }
+        : { ...pos, y: snapToGrid(pos.y) },
+    );
+  }
+  return commitPositions(deps, ctx, input, current, positionMutations(input.slideId, rows, next));
+}
+
+export async function blockOrder(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: BlockOrderInput,
+): Promise<SlideResult> {
+  const current = (await deps.store.read()).document;
+  const rows = freeformBlocks(requireSlide(current, input.slideId));
+  const move = input.move ?? { z: input.z ?? 0 };
+  const stack = reorderZ(
+    rows.map((row) => ({ id: row.block.id, pos: row.pos })),
+    input.blockId,
+    move,
+  );
+  const mutations: Mutation[] = rows.flatMap((row) => {
+    const z = stack[row.block.id];
+    if (z === undefined || z === row.pos.z) return [];
+    return [
+      {
+        op: 'block.set' as const,
+        slideId: input.slideId,
+        blockId: row.block.id,
+        path: '/pos/z',
+        value: z,
+      },
+    ];
+  });
+  return commitPositions(deps, ctx, input, current, mutations);
+}
+
+export async function slideSetLayout(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: SlideSetLayoutInput,
+): Promise<SlideResult> {
+  const current = (await deps.store.read()).document;
+  const slide = requireSlide(current, input.slideId);
+  if (slide.kind !== 'content')
+    throw new TypeError(`Slide "${slide.id}" is a ${slide.kind} slide and has no layout to set`);
+  const next = convertLayout(slide, input.layout);
+  const committed = await commit(deps, ctx, input.baseRevision, [
+    { op: 'slide.replace', slideId: input.slideId, slide: next },
+  ]);
+  return slideResult(deps, committed, input.slideId);
+}
+
+// ---------------------------------------------------------------------------------------------
 // Registration
 
 /** Registers every store-backed action on a dispatcher; inputs arrive validated by the action's schema. */
@@ -525,6 +722,22 @@ export function registerStoreActions(dispatcher: Dispatcher, deps: StoreActionDe
   const on = <T>(run: (input: T, ctx: WriteContext) => Promise<unknown>): ActionHandler => {
     return (input, ctx) => run(input as T, ctx);
   };
+  dispatcher.register(
+    'block.align',
+    on<BlockAlignInput>((i, c) => blockAlign(deps, c, i)),
+  );
+  dispatcher.register(
+    'block.distribute',
+    on<BlockDistributeInput>((i, c) => blockDistribute(deps, c, i)),
+  );
+  dispatcher.register(
+    'block.order',
+    on<BlockOrderInput>((i, c) => blockOrder(deps, c, i)),
+  );
+  dispatcher.register(
+    'slide.setLayout',
+    on<SlideSetLayoutInput>((i, c) => slideSetLayout(deps, c, i)),
+  );
   dispatcher.register(
     'slide.insert',
     on<SlideInsertInput>((i, c) => slideInsert(deps, c, i)),

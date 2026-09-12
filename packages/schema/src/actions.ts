@@ -15,9 +15,17 @@ import {
 } from './assets.ts';
 import { blockSchema } from './blocks.ts';
 import { materialCatalogEntrySchema, materialUniformsSchema } from './blocks/material.ts';
-import { PLATE_SIDES, sectionSchema, slideSchema, SLIDE_KINDS, SLOT_NAMES } from './deck.ts';
+import {
+  layoutSchema,
+  PLATE_SIDES,
+  sectionSchema,
+  slideSchema,
+  SLIDE_KINDS,
+  SLOT_NAMES,
+} from './deck.ts';
 import { exportCheckSchema, exportReportSchema } from './export.ts';
 import { findingSchema } from './findings.ts';
+import { ALIGN_EDGES, ALIGN_TARGETS, DISTRIBUTE_AXES, ORDER_MOVES } from './freeform.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
 import { leaseSchema, mutationSchema, versionSchema } from './mutations.ts';
 import { renderRecordSchema } from './render.ts';
@@ -71,6 +79,10 @@ export const ACTION_IDS = [
   'deck.info',
   'deck.create',
   'deck.rename',
+  'deck.pack',
+  'deck.unpack',
+  'deck.push',
+  'deck.pull',
   'slide.list',
   'slide.get',
   'slide.insert',
@@ -78,10 +90,14 @@ export const ACTION_IDS = [
   'slide.move',
   'slide.update',
   'slide.replace',
+  'slide.setLayout',
   'block.set',
   'block.insert',
   'block.remove',
   'block.move',
+  'block.align',
+  'block.distribute',
+  'block.order',
   'section.set',
   'slide.lease',
   'asset.add',
@@ -225,6 +241,51 @@ export const ditherResultSchema = z.strictObject({
 export const DECK_TEMPLATES = ['gt-brand', 'blank'] as const;
 export type DeckTemplateId = (typeof DECK_TEMPLATES)[number];
 
+/**
+ * The deck bundle shapes (docs/deck-transfer.md): what deck.pack reports, what deck.unpack and
+ * deck.pull take and report; deck.push reports the same with the editor URL on the studio.
+ */
+const bundleCounts = z.strictObject({
+  slides: z.number().int().nonnegative(),
+  assets: z.number().int().nonnegative(),
+  versions: z.number().int().nonnegative(),
+  documents: z.number().int().nonnegative(),
+});
+
+export const bundlePackResultSchema = z.strictObject({
+  deckId: slugSchema,
+  title: z.string(),
+  revision,
+  out: z.string().describe('The zip written'),
+  bytes: z.number().int().nonnegative(),
+  sha256: z.string(),
+  counts: z.strictObject({
+    documents: z.number().int().nonnegative(),
+    assets: z.number().int().nonnegative(),
+    versions: z.number().int().nonnegative(),
+  }),
+});
+
+export const bundleUnpackInputSchema = z.strictObject({
+  file: z.string().describe('The bundle zip to read'),
+  as: slugSchema.optional().describe('The deck id to write under; the bundle id when absent'),
+  replace: z
+    .boolean()
+    .optional()
+    .describe('Remove the deck that holds the id first; without it a taken id gets a free sibling'),
+});
+
+export const bundleUnpackResultSchema = z.strictObject({
+  deckId: slugSchema.describe('The id the deck was written under'),
+  sourceDeckId: slugSchema.describe('The id the bundle carried'),
+  title: z.string(),
+  revision,
+  dir: z.string().describe('The deck directory'),
+  replaced: z.boolean(),
+  renamed: z.boolean(),
+  counts: bundleCounts,
+});
+
 const A = ALL_TRANSPORTS;
 const noWindow: ReadonlyArray<Transport> = ['cli', 'mcp', 'http'];
 
@@ -310,6 +371,103 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     cli: { usage: 'turboslide deck rename <name>' },
     mcp: 'deck_rename',
     example: { name: 'GT brand deck, Q4', baseRevision: 412 },
+  }),
+  'deck.pack': action({
+    id: 'deck.pack',
+    label: 'Pack deck bundle',
+    doc: 'Writes decks/<id> (deck.json, slides, assets, versions and the sidecars) as one zip with a manifest.json carrying the bundle version, the deck id, its revision and a digest per file (docs/deck-transfer.md).',
+    group: 'deck',
+    mutates: false,
+    transports: ['cli'],
+    milestone: 'M6',
+    input: z.strictObject({
+      id: slugSchema.describe('The deck id under decks/'),
+      out: z.string().optional().describe('The zip to write; defaults to <id>-r<revision>.zip'),
+      versions: z
+        .boolean()
+        .optional()
+        .describe('Carry versions/<n>.json; on by default (--no-versions turns it off)'),
+    }),
+    output: bundlePackResultSchema,
+    cli: { usage: 'turboslide deck pack <id> --out <out>' },
+    example: { id: 'gt-brand', out: 'gt-brand-r24.zip' },
+  }),
+  'deck.unpack': action({
+    id: 'deck.unpack',
+    label: 'Unpack deck bundle',
+    doc: 'Creates a deck under decks/ from a bundle zip after validating it, under a free id when the bundle id is taken unless `replace` removes the deck that holds it (docs/deck-transfer.md).',
+    group: 'deck',
+    mutates: true,
+    transports: ['cli'],
+    milestone: 'M6',
+    input: bundleUnpackInputSchema,
+    output: bundleUnpackResultSchema,
+    cli: { usage: 'turboslide deck unpack <file> --as <as> --replace' },
+    example: { file: 'gt-brand-r24.zip', as: 'gt-brand-copy' },
+  }),
+  'deck.push': action({
+    id: 'deck.push',
+    label: 'Push deck to a studio',
+    doc: 'Packs decks/<id> and uploads the bundle to a hosted studio through POST /api/decks/bundle with the bearer token, so the deck can be edited there (docs/deck-transfer.md).',
+    group: 'deck',
+    mutates: true,
+    transports: ['cli'],
+    milestone: 'M6',
+    input: z.strictObject({
+      id: slugSchema.describe('The deck id under decks/'),
+      to: z.string().url().describe('The studio, such as https://turboslide.vercel.app'),
+      token: z
+        .string()
+        .optional()
+        .describe(
+          'The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use',
+        ),
+      as: slugSchema
+        .optional()
+        .describe('The id the deck takes on the studio; the local id when absent'),
+      replace: z.boolean().optional().describe('Replace the deck of that id on the studio'),
+      fromUrl: z
+        .string()
+        .url()
+        .optional()
+        .describe(
+          'A bundle already stored at a URL the studio may read (the deck store Blob host); the studio fetches it instead of receiving the bytes, for bundles over a function 4.5 MB body cap',
+        ),
+    }),
+    output: bundleUnpackResultSchema.extend({
+      url: z.string().describe('The editor URL of the deck on the studio'),
+    }),
+    cli: {
+      usage:
+        'turboslide deck push <id> --to <to> --token <token> --as <as> --replace --from-url <fromUrl>',
+    },
+    example: { id: 'gt-brand', to: 'https://turboslide.vercel.app' },
+  }),
+  'deck.pull': action({
+    id: 'deck.pull',
+    label: 'Pull deck from a studio',
+    doc: 'Downloads a deck bundle from a hosted studio through GET /api/decks/<id>/bundle with the bearer token and unpacks it into decks/, so the deck can be edited locally (docs/deck-transfer.md).',
+    group: 'deck',
+    mutates: true,
+    transports: ['cli'],
+    milestone: 'M6',
+    input: z.strictObject({
+      id: slugSchema.describe('The deck id on the studio'),
+      from: z.string().url().describe('The studio, such as https://turboslide.vercel.app'),
+      token: z
+        .string()
+        .optional()
+        .describe(
+          'The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use',
+        ),
+      as: slugSchema
+        .optional()
+        .describe('The id the deck takes under decks/; the id on the studio when absent'),
+      replace: z.boolean().optional().describe('Replace the local deck of that id'),
+    }),
+    output: bundleUnpackResultSchema,
+    cli: { usage: 'turboslide deck pull <id> --from <from> --token <token> --as <as> --replace' },
+    example: { id: 'gt-brand', from: 'https://turboslide.vercel.app', as: 'gt-brand-hosted' },
   }),
   'slide.list': action({
     id: 'slide.list',
@@ -453,6 +611,27 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       },
     },
   }),
+  'slide.setLayout': action({
+    id: 'slide.setLayout',
+    label: 'Set layout',
+    doc: 'Moves a content slide to another layout and refiles its blocks: to freeform every block gets a position box from its slot, from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'M6',
+    input: z.strictObject({
+      slideId: slugSchema,
+      layout: layoutSchema.describe('The target layout with its options'),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide slide set-layout <slideId> --type <type> --ratio <ratio> --gap <gap> --layout <layout>',
+    },
+    mcp: 'deck_set_layout',
+    example: { slideId: 'content-rule', layout: { type: 'freeform' }, baseRevision: 412 },
+  }),
   'block.set': action({
     id: 'block.set',
     label: 'Set block property',
@@ -547,6 +726,97 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       after: 'p1',
       baseRevision: 412,
     },
+  }),
+  'block.align': action({
+    id: 'block.align',
+    label: 'Align blocks',
+    doc: 'Aligns the position boxes of freeform blocks on one edge, against the selection, the content box or the sheet, and snaps the result unless snap is false.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'M6',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z
+        .array(blockIdSchema)
+        .min(1)
+        .describe('The blocks to move, top level of a freeform slide'),
+      edge: z
+        .enum(ALIGN_EDGES)
+        .describe('left, center or right move x; top, middle or bottom move y'),
+      to: z
+        .enum(ALIGN_TARGETS)
+        .optional()
+        .describe(
+          "The reference box; 'selection' for several blocks and 'content' for one unless set",
+        ),
+      snap: z
+        .boolean()
+        .optional()
+        .describe('Snap the moved edges to the guides and the grid; on unless false'),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide block align <slideId> --blocks <blockIds> --edge <edge> --to <to>' },
+    mcp: 'deck_align_blocks',
+    example: { slideId: 'content-rule', blockIds: ['h', 'p1'], edge: 'left', baseRevision: 412 },
+  }),
+  'block.distribute': action({
+    id: 'block.distribute',
+    label: 'Distribute blocks',
+    doc: 'Spreads freeform blocks along one axis with equal gaps between the first and the last, or with a fixed gap; with snap the moved edges round to the 8 px grid.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'M6',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z.array(blockIdSchema).min(2),
+      axis: z.enum(DISTRIBUTE_AXES),
+      gap: z
+        .number()
+        .nonnegative()
+        .optional()
+        .describe('A fixed gap in px instead of equal spacing'),
+      snap: z.boolean().optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage: 'turboslide block distribute <slideId> --blocks <blockIds> --axis <axis> --gap <gap>',
+    },
+    mcp: 'deck_distribute_blocks',
+    example: {
+      slideId: 'content-rule',
+      blockIds: ['h', 'p1', 'list'],
+      axis: 'vertical',
+      baseRevision: 412,
+    },
+  }),
+  'block.order': action({
+    id: 'block.order',
+    label: 'Order block',
+    doc: 'Moves a freeform block through the stacking order, to the front or back or by one step, or to a given z rank, and renumbers the stack densely.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'M6',
+    input: z
+      .strictObject({
+        slideId: slugSchema,
+        blockId: blockIdSchema,
+        move: z.enum(ORDER_MOVES).optional(),
+        z: z.number().int().optional().describe('The target rank in the stack, 0 at the back'),
+        baseRevision,
+      })
+      .refine((value) => (value.move === undefined) !== (value.z === undefined), {
+        message: 'block.order takes move or z, not both and not neither',
+        path: ['move'],
+      }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide block order <slideId>#<blockId> --move <move> --z <z>' },
+    mcp: 'deck_order_block',
+    example: { slideId: 'content-rule', blockId: 'h', move: 'front', baseRevision: 412 },
   }),
   'section.set': action({
     id: 'section.set',

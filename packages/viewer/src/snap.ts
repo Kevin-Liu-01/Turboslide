@@ -7,9 +7,15 @@
 // keyboard nudges call them, and snap.test.ts pins them.
 import { ROWS_KEY_SNAP } from '@turboslide/schema/blocks';
 import type { ColsRatio, PlateSide } from '@turboslide/schema/deck';
+import {
+  FREEFORM_GRID,
+  GUIDES,
+  SNAP_DISTANCE,
+  snapToGrid as schemaSnapToGrid,
+} from '@turboslide/schema/freeform';
 import { PLATE_WIDTHS } from '@turboslide/schema/deck';
 import { jsonEqual } from '@turboslide/schema/pointer';
-import { COLUMN_GAP, CONTENT, SHEET, columnWidths } from '@turboslide/theme/tokens';
+import { COLUMN_GAP, CONTENT, CONTENT_ORIGIN, SHEET, columnWidths } from '@turboslide/theme/tokens';
 
 export type RowsKey = (typeof ROWS_KEY_SNAP)[number];
 export type PlateWidth = (typeof PLATE_WIDTHS)[number];
@@ -144,4 +150,272 @@ export function snapShotWidth(px: number, slotWidth: number, slotHeight: number)
 /** A scales marker is an integer 0 to 100 derived from the pointer's fraction of the bar (SPEC 6.4). */
 export function snapScaleValue(fraction: number): number {
   return Math.max(0, Math.min(100, Math.round(fraction * 100)));
+}
+
+// ---------------------------------------------------------------------------------------------
+// The freeform snap engine (Kevin's direction of 2026-09-11, recorded over SPEC 6.4's
+// no-coordinates rule; docs/freeform.md): a positioned block drags anywhere on the 1600 by 900
+// sheet and lands on the 8 px grid, the rails at 56 px, the content box edges and centers, the
+// column seams of the named ratios, the plate edges (the schema's GUIDES, one implementation the
+// CLI's block.align and the inspector's position control share), and the edges and centers of the
+// other blocks, which only the stage knows. A line snap wins within FREE_SNAP_PX and is what the
+// overlay draws as a guide; the grid takes the rest and draws nothing. Pure functions over sheet
+// pixels; snap-freeform.test.ts pins them.
+
+/** The freeform grid step in sheet pixels (schema/freeform.ts FREEFORM_GRID). */
+export const FREE_GRID: number = FREEFORM_GRID;
+/** A box edge or center within this many sheet pixels of a snap line takes the line (SNAP_DISTANCE). */
+export const FREE_SNAP_PX: number = SNAP_DISTANCE;
+/** The smallest side a resize can leave. */
+export const FREE_MIN_SIZE = 16;
+
+export type SnapAxis = 'x' | 'y';
+export type SnapKind = 'grid' | 'rail' | 'content' | 'seam' | 'plate' | 'edge' | 'center';
+
+/**
+ * One snap line: a vertical (`axis: 'x'`) or horizontal (`axis: 'y'`) line at `at`, spanning
+ * `from` to `to` along its own direction, so the overlay can draw the guide over the source and
+ * the snapped box together.
+ */
+export type SnapLine = { axis: SnapAxis; at: number; kind: SnapKind; from: number; to: number };
+
+/** The eight resize directions, compass named. */
+export type ResizeDir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+
+export const RESIZE_DIRS: readonly ResizeDir[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+
+/** The kind of a schema guide from its name (schema/freeform.ts verticalGuides, horizontalGuides). */
+function kindOfGuide(name: string): SnapKind {
+  if (name.includes('rail') || name.includes('rule')) return 'rail';
+  if (name.includes('plate')) return 'plate';
+  if (name.includes('column')) return 'seam';
+  return 'content';
+}
+
+/**
+ * The sheet's own snap lines, from the schema's GUIDES: the four rails at 56 px span the whole
+ * sheet; the content box's edges and centers, the column seams of the three named ratios (both
+ * sides of the gap) and the plate edges span the content box.
+ */
+export function sheetSnapLines(): SnapLine[] {
+  const [cx, cy] = CONTENT_ORIGIN;
+  const [cw, ch] = CONTENT;
+  const lines: SnapLine[] = [];
+  for (const guide of GUIDES.x) {
+    const kind = kindOfGuide(guide.name);
+    const full = kind === 'rail';
+    lines.push({
+      axis: 'x',
+      at: guide.at,
+      kind,
+      from: full ? 0 : cy,
+      to: full ? SHEET.height : cy + ch,
+    });
+  }
+  for (const guide of GUIDES.y) {
+    const kind = kindOfGuide(guide.name);
+    const full = kind === 'rail';
+    lines.push({
+      axis: 'y',
+      at: guide.at,
+      kind,
+      from: full ? 0 : cx,
+      to: full ? SHEET.width : cx + cw,
+    });
+  }
+  return lines;
+}
+
+/** The six snap lines of a box: its left, center and right, its top, middle and bottom. */
+export function boxSnapLines(box: readonly [number, number, number, number]): SnapLine[] {
+  const [x, y, w, h] = box;
+  return [
+    { axis: 'x', at: x, kind: 'edge', from: y, to: y + h },
+    { axis: 'x', at: x + w / 2, kind: 'center', from: y, to: y + h },
+    { axis: 'x', at: x + w, kind: 'edge', from: y, to: y + h },
+    { axis: 'y', at: y, kind: 'edge', from: x, to: x + w },
+    { axis: 'y', at: y + h / 2, kind: 'center', from: x, to: x + w },
+    { axis: 'y', at: y + h, kind: 'edge', from: x, to: x + w },
+  ];
+}
+
+/** The nearest multiple of the grid (the schema's snapToGrid). */
+export function snapToGrid(value: number, grid: number = FREE_GRID): number {
+  return schemaSnapToGrid(value, grid);
+}
+
+type AxisSnap = { delta: number; line: SnapLine | null };
+
+/**
+ * The best line snap for a set of moving positions on one axis: the smallest correction within
+ * FREE_SNAP_PX, ties to the earlier line. With no line in range the first position (the leading
+ * edge) lands on the grid.
+ */
+function snapAxis(positions: number[], lines: SnapLine[], axis: SnapAxis, grid: boolean): AxisSnap {
+  let best: AxisSnap | null = null;
+  for (const line of lines) {
+    if (line.axis !== axis) continue;
+    for (const at of positions) {
+      const delta = line.at - at;
+      if (Math.abs(delta) > FREE_SNAP_PX) continue;
+      if (best === null || Math.abs(delta) < Math.abs(best.delta)) best = { delta, line };
+    }
+  }
+  if (best) return best;
+  const lead = positions[0];
+  if (!grid || lead === undefined) return { delta: 0, line: null };
+  return { delta: snapToGrid(lead) - lead, line: null };
+}
+
+/** A guide spanning the snap line's own extent and the snapped box's, so it reaches both. */
+function guideFor(line: SnapLine, box: readonly [number, number, number, number]): SnapLine {
+  const [x, y, w, h] = box;
+  const lo = line.axis === 'x' ? y : x;
+  const hi = line.axis === 'x' ? y + h : x + w;
+  return { ...line, from: Math.min(line.from, lo), to: Math.max(line.to, hi) };
+}
+
+export type SnapResult = { box: [number, number, number, number]; guides: SnapLine[] };
+
+/**
+ * A box moved by (dx, dy) and snapped: its left, center and right against the vertical lines,
+ * its top, middle and bottom against the horizontal ones, else its top left corner on the grid.
+ * The result is rounded to whole sheet pixels, which is what `pos` stores.
+ */
+export function snapMove(
+  box: readonly [number, number, number, number],
+  dx: number,
+  dy: number,
+  lines: SnapLine[],
+  options: { grid?: boolean } = {},
+): SnapResult {
+  const grid = options.grid ?? true;
+  const [x0, y0, w, h] = box;
+  const x = x0 + dx;
+  const y = y0 + dy;
+  const sx = snapAxis([x, x + w / 2, x + w], lines, 'x', grid);
+  const sy = snapAxis([y, y + h / 2, y + h], lines, 'y', grid);
+  const snapped: [number, number, number, number] = [
+    Math.round(x + sx.delta),
+    Math.round(y + sy.delta),
+    Math.round(w),
+    Math.round(h),
+  ];
+  const guides: SnapLine[] = [];
+  if (sx.line) guides.push(guideFor(sx.line, snapped));
+  if (sy.line) guides.push(guideFor(sy.line, snapped));
+  return { box: snapped, guides };
+}
+
+function hasDir(dir: ResizeDir, edge: 'n' | 's' | 'e' | 'w'): boolean {
+  return dir.includes(edge);
+}
+
+/**
+ * A box resized from one of eight handles by (dx, dy): only the moving edges snap, the opposite
+ * edges hold, no side drops under `min`. With `aspect` (Shift) the corner handles keep the box's
+ * ratio from the dominant delta and an edge handle scales the other side from its own; the
+ * dependent side skips the line snap so the ratio holds exactly.
+ */
+export function snapResize(
+  box: readonly [number, number, number, number],
+  dir: ResizeDir,
+  dx: number,
+  dy: number,
+  lines: SnapLine[],
+  options: { aspect?: boolean; min?: number; grid?: boolean } = {},
+): SnapResult {
+  const min = options.min ?? FREE_MIN_SIZE;
+  const grid = options.grid ?? true;
+  const aspect = options.aspect ?? false;
+  const [x, y, w, h] = box;
+  let left = x;
+  let right = x + w;
+  let top = y;
+  let bottom = y + h;
+  const movesX = hasDir(dir, 'e') || hasDir(dir, 'w');
+  const movesY = hasDir(dir, 'n') || hasDir(dir, 's');
+  if (hasDir(dir, 'w')) left += dx;
+  if (hasDir(dir, 'e')) right += dx;
+  if (hasDir(dir, 'n')) top += dy;
+  if (hasDir(dir, 's')) bottom += dy;
+  const guides: SnapLine[] = [];
+  const ratio = h > 0 ? w / h : 1;
+  /* which axis leads under an aspect lock: the larger relative change on a corner, the moving
+     axis on an edge */
+  const leadX = !aspect
+    ? movesX
+    : movesX && movesY
+      ? Math.abs(dx) / Math.max(1, w) >= Math.abs(dy) / Math.max(1, h)
+      : movesX;
+  const leadY = !aspect ? movesY : !leadX;
+  if (leadX) {
+    if (hasDir(dir, 'w')) {
+      const s = snapAxis([left], lines, 'x', grid);
+      left += s.delta;
+      if (s.line) guides.push(s.line);
+    } else if (hasDir(dir, 'e')) {
+      const s = snapAxis([right], lines, 'x', grid);
+      right += s.delta;
+      if (s.line) guides.push(s.line);
+    }
+    if (right - left < min) {
+      if (hasDir(dir, 'w')) left = right - min;
+      else right = left + min;
+    }
+  }
+  if (leadY) {
+    if (hasDir(dir, 'n')) {
+      const s = snapAxis([top], lines, 'y', grid);
+      top += s.delta;
+      if (s.line) guides.push(s.line);
+    } else if (hasDir(dir, 's')) {
+      const s = snapAxis([bottom], lines, 'y', grid);
+      bottom += s.delta;
+      if (s.line) guides.push(s.line);
+    }
+    if (bottom - top < min) {
+      if (hasDir(dir, 'n')) top = bottom - min;
+      else bottom = top + min;
+    }
+  }
+  if (aspect) {
+    if (leadX) {
+      const nextH = Math.max(min, (right - left) / ratio);
+      // an edge handle grows from the top; a corner grows away from its anchored side
+      if (hasDir(dir, 'n')) top = bottom - nextH;
+      else bottom = top + nextH;
+    } else {
+      const nextW = Math.max(min, (bottom - top) * ratio);
+      if (hasDir(dir, 'w')) left = right - nextW;
+      else right = left + nextW;
+    }
+  }
+  const snapped: [number, number, number, number] = [
+    Math.round(left),
+    Math.round(top),
+    Math.max(min, Math.round(right - left)),
+    Math.max(min, Math.round(bottom - top)),
+  ];
+  return { box: snapped, guides: guides.map((line) => guideFor(line, snapped)) };
+}
+
+/** The cursor of a resize handle by its direction. */
+export function resizeCursor(
+  dir: ResizeDir,
+): 'ns-resize' | 'ew-resize' | 'nesw-resize' | 'nwse-resize' {
+  switch (dir) {
+    case 'n':
+    case 's':
+      return 'ns-resize';
+    case 'e':
+    case 'w':
+      return 'ew-resize';
+    case 'ne':
+    case 'sw':
+      return 'nesw-resize';
+    case 'nw':
+    case 'se':
+      return 'nwse-resize';
+  }
 }

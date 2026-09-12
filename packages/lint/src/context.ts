@@ -164,7 +164,9 @@ export function createContext(input: DeckDocument, options: LintOptions = {}): L
         blocks.forEach((block, i) => {
           const ref: BlockRef = { slide, slot, block, path: pathOf(i), index: i };
           if (parent !== undefined) ref.parent = parent;
-          if (width !== undefined) ref.width = width;
+          // a positioned block on a freeform slide is as wide as its box (docs/freeform.md)
+          if (parent === undefined && block.pos !== undefined) ref.width = block.pos.w;
+          else if (width !== undefined) ref.width = width;
           out.push(ref);
           if (block.type === 'composite') {
             const cells = cellWidths(block, width);
@@ -302,6 +304,12 @@ export function blockTexts(block: Block): TextRef[] {
       // the cells' blocks are refs of their own (blocksOf walks them, M5); the composite's text is
       // its caption
       push('/caption', block.caption, 'caption');
+      break;
+    case 'text':
+      push('/text', block.text, 'body');
+      break;
+    case 'box':
+      push('/text', block.text, 'body');
       break;
     default:
       break;

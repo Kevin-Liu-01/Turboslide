@@ -12,6 +12,7 @@ import { checkColor } from './static/color.ts';
 import { checkCopy } from './static/copy.ts';
 import { checkDia } from './static/dia.ts';
 import { checkExportNonNative } from './static/export-non-native.ts';
+import { checkFreeform } from './static/freeform.ts';
 import { checkIcons } from './static/icon.ts';
 import { checkPictures } from './static/picture.ts';
 import { checkRows } from './static/rows.ts';
@@ -50,6 +51,7 @@ export function lintStatic(input: DeckDocument, options: LintOptions = {}): Find
     ...checkAssets(ctx),
     ...checkPictures(ctx),
     ...checkStructure(ctx),
+    ...checkFreeform(ctx),
     ...checkExportNonNative(ctx),
   ];
   // deck-level rules (placement, contradictions, licenses) scan the whole deck and report on the selection

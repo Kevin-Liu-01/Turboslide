@@ -1,0 +1,11 @@
+  quicklook: /usr/bin/qlmanage -t -s 3200 -o /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/exports/check /private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/exports/native-light.pptx
+check: native-light.pptx: 22.59 MiB, 597 parts, 85 slide(s), 85 notes part(s)
+check: page: 12192000 by 6858000 EMU (13.333 by 7.5 in); 1332 shapes, 0 out of bounds
+check: media: 3 jpeg, 15 png-1bit, 219 png-rgba; 22.27 MiB
+check: fonts embedded: none
+check: titles: 85 of 85 slide(s) carry a title placeholder; slide names 85 set
+check: checklist: 0 custGeom, 0 normAutofit, 0 kern="0"
+check: relationships: 695 checked, 0 invalid; content types: 0 undeclared part(s), 0 override(s) for missing parts
+check: python-pptx: reopened, 85 slide(s), 1088 shape(s) (/Users/kevinliu/repos/Turboslide/.turboslide/venv/bin/python)
+check: quicklook: first page rendered at 3200 by 1805 in 800 ms (/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/exports/check/native-light.pptx.quicklook.png)
+check: valid

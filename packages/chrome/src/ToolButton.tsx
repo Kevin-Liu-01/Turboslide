@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 
 import { Icon } from './icons';
 import type { IconName } from './icons';
+import { tipOf, tipProps } from './Tooltip';
 
 import './ToolButton.css';
 
@@ -15,10 +16,19 @@ import './ToolButton.css';
  * carries a text glyph such as the theme button's half disc. A labeled
  * button with no icon is .is-text, and the collapse rules leave its label
  * alone, since an icon square with nothing in it would be a blank block.
+ *
+ * The title is the tooltip (Tooltip.tsx), not the browser's: `tipOf` reads
+ * the name (the label, else the title's body), the sentence (`doc`, else the
+ * title's body when a label names the control) and the key from the trailing
+ * parenthetical, and the button carries `data-tip` and the tooltip handlers
+ * instead of a native title, so one plate in the shell grammar shows for
+ * every control and the two never double up.
  */
 export type ToolButtonProps = {
-  /** tooltip; names the key in parentheses, as in 'Dark or light (D)' */
+  /** the tooltip; names the key in parentheses, as in 'Dark or light (D)' */
   title: string;
+  /** one sentence on what the button does, when the title is the name alone */
+  doc?: string;
   onClick: () => void;
   /** the 16px solid glyph from icons.tsx */
   icon?: IconName;
@@ -41,6 +51,8 @@ export type ToolButtonProps = {
   className?: string;
   /** a locale-independent control id for the window API (SPEC 6.5) */
   control?: string;
+  /** the button takes no input; the tooltip still names it */
+  disabled?: boolean;
   /** replaces the icon: the theme glyph */
   children?: ReactNode;
 };
@@ -52,6 +64,7 @@ function nameFromTitle(title: string): string {
 
 export function ToolButton({
   title,
+  doc,
   onClick,
   icon,
   label,
@@ -62,6 +75,7 @@ export function ToolButton({
   ariaLabel,
   className,
   control,
+  disabled,
   children,
 }: ToolButtonProps) {
   const iconOnly = label === undefined;
@@ -79,15 +93,18 @@ export function ToolButton({
   /* a labeled button is named by its label, with the title as the fallback
      once the label collapses; an icon square needs the name spelled out */
   const name = ariaLabel ?? (iconOnly ? nameFromTitle(title) : undefined);
+  const tip = tipOf(title, label ?? ariaLabel);
+  if (doc !== undefined) tip.doc = doc;
   return (
     <button
       type="button"
       className={classes}
-      title={title}
       aria-label={name}
       aria-pressed={pressed}
       data-control={control}
+      disabled={disabled}
       onClick={onClick}
+      {...tipProps(tip)}
     >
       {icon ? <Icon name={icon} /> : children}
       {label !== undefined ? <span className="pt-lb">{label}</span> : null}

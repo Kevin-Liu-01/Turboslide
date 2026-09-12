@@ -15,8 +15,11 @@ import {
   loadFontsCatalog,
   nearestOpsz,
   pickFamily,
+  weightSubstitution,
 } from './pptx/fonts-map.ts';
-import { familyFor } from './pptx/text.ts';
+import { familyFor, textRuns } from './pptx/text.ts';
+import type { TextEmitOptions } from './pptx/text.ts';
+import type { SceneText } from './scene/types.ts';
 import { buildReport, mergeReports } from './report.ts';
 
 describe('the export font set (SPEC 8.4)', () => {
@@ -34,6 +37,72 @@ describe('the export font set (SPEC 8.4)', () => {
     expect(pickFamily(20, 500, 'standard').family).toBe('Inter Medium');
     expect(nearestOpsz(27)).toBe(26);
     expect(nearestOpsz(34)).toBe(26);
+  });
+
+  test('weights beyond the two cuts travel as Medium plus bold or as Regular, and are named', () => {
+    const heavy = pickFamily(22, 700, 'exact');
+    expect(heavy.family).toBe(`${FAMILY_PREFIX} Text 22 Medium`);
+    expect(heavy.bold).toBe(true);
+    expect(weightSubstitution(heavy)).toMatch(
+      /^fonts: weight 700 exported as the Medium cut plus bold/,
+    );
+    const semi = pickFamily(88, 600, 'standard');
+    expect(semi.family).toBe(`${FAMILY_PREFIX} Display`);
+    expect(semi.bold).toBe(true);
+    const light = pickFamily(22, 300, 'exact');
+    expect(light.family).toBe(`${FAMILY_PREFIX} Text 22`);
+    expect(light.bold).toBe(false);
+    expect(weightSubstitution(light)).toMatch(/^fonts: weight 300 exported as the Regular cut;/);
+    expect(weightSubstitution(pickFamily(22, 400, 'exact'))).toBeNull();
+    expect(weightSubstitution(pickFamily(20, 500, 'exact'))).toBeNull();
+    expect(pickFamily(20, 500, 'exact').bold).toBe(false);
+
+    /* the run itself carries the bold flag and the report's residual the line, once per weight */
+    const style = (weight: number) => ({
+      family: 'GT Inter Text 22',
+      mono: false,
+      weight,
+      size: 22,
+      letterSpacing: 0,
+      lineHeight: 33,
+      color: 'rgb(7, 7, 7)',
+      strike: false,
+      features: 'normal',
+      align: 'left' as const,
+    });
+    const text: SceneText = {
+      id: 'p/text',
+      blockId: 'p',
+      box: [137, 129, 600, 66],
+      textBox: [137, 129, 600, 66],
+      style: style(700),
+      lines: [
+        {
+          box: [137, 129, 600, 33],
+          runs: [{ text: 'Heavy', box: [137, 129, 80, 33], style: style(700) }],
+        },
+        {
+          box: [137, 162, 600, 33],
+          runs: [{ text: 'Plain', box: [137, 162, 70, 33], style: style(400) }],
+        },
+      ],
+      native: true,
+    };
+    const residual = new Set<string>();
+    const options: TextEmitOptions = {
+      fontSet: 'exact',
+      invisible: false,
+      hairHex: 'D2D2D2',
+      families: new Set(),
+      namePrefix: 'ts:test',
+      residual,
+    };
+    const runs = textRuns(text, options);
+    expect(runs[0]?.options?.bold).toBe(true);
+    expect(runs[0]?.options?.fontFace).toBe(`${FAMILY_PREFIX} Text 22 Medium`);
+    expect(runs[1]?.options?.bold).toBeUndefined();
+    expect([...residual]).toHaveLength(1);
+    expect([...residual][0]).toMatch(/weight 700 exported as the Medium cut plus bold/);
   });
 
   test('the code panel travels in the mono family', () => {
@@ -84,7 +153,7 @@ describe('the export font set (SPEC 8.4)', () => {
 });
 
 describe('the classification the lint rule shares (SPEC 4.2 export)', () => {
-  test('eight native types', () => {
+  test('twelve native types: the eight measured archetypes and the four freeform primitives', () => {
     expect([...NATIVE_BLOCK_TYPES]).toEqual([
       'heading',
       'paragraph',
@@ -94,8 +163,14 @@ describe('the classification the lint rule shares (SPEC 4.2 export)', () => {
       'refs',
       'ladder',
       'panel',
+      'text',
+      'box',
+      'shape',
+      'rule',
     ]);
     expect(isNativeBlockType('rows')).toBe(true);
+    expect(isNativeBlockType('shape')).toBe(true);
+    expect(isNativeBlockType('icon')).toBe(false);
     expect(isNativeBlockType('shot')).toBe(false);
   });
 });

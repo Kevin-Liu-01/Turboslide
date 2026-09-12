@@ -35,7 +35,7 @@ async function serve(request: Request, action: string): Promise<Response> {
   const deckId = url.searchParams.get('deck') || DEFAULT_DECK;
   let dispatcher;
   try {
-    dispatcher = deckDispatcher(deckId).dispatcher;
+    dispatcher = (await deckDispatcher(deckId)).dispatcher;
   } catch (error) {
     if (error instanceof RangeError) return refuse(404, 'unknown_deck', error.message, { action });
     return errorResponse(error, action);

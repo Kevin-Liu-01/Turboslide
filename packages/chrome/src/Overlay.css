@@ -199,3 +199,96 @@
     animation: none;
   }
 }
+
+/* ---- this round: drag targets, multi-selection, freeform handles, guides, the arrange bar ---- */
+
+/* the slot a block drag would land in: structural hair around the whole slot, under the ink
+   drop line, so the reader sees where the block goes before the line says where in it */
+.ts-drop-slot {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  pointer-events: none;
+}
+
+/* every other block of a multi-selection draws the same ink ring as the anchor */
+.ts-select.is-extra {
+  border-color: var(--pt-ink);
+}
+
+/* the box around a multi-selection: hair, so the group reads as one without a second ink ring */
+.ts-group {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  pointer-events: none;
+}
+
+/* a positioned block's chip moves it anywhere: the move cursor names the gesture */
+.ts-select-chip[data-kind='free-move'] {
+  cursor: move;
+}
+
+/* the eight resize squares of a positioned block: the deck's 11px square on paper with a hair
+   ring, ink while dragged; the cursor comes from the handle through its inline style */
+.ts-handle[data-kind='free-resize']::before {
+  inset: 0;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+}
+
+.ts-handle[data-kind='free-resize'].is-active::before,
+.ts-handle[data-kind='free-resize']:hover::before {
+  border-color: var(--pt-ink);
+}
+
+/* the arrange bar of a freeform selection: the run toolbar's 32px paper bar (InlineText.css) with
+   the shell's icon squares, placed under the selection by Overlay.tsx. Line law: the bar draws its
+   one hair ring; the two group seams (before distribute, before the order pair) are one rule each */
+.ts-arrange {
+  position: absolute;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0;
+  background: var(--pt-paper);
+  border: 1px solid var(--pt-hair);
+  color: var(--pt-ink-2);
+  font: 13px/1 var(--pt-text);
+  pointer-events: auto;
+  white-space: nowrap;
+}
+
+.ts-arrange .pt-ib {
+  height: 30px;
+  width: 30px;
+}
+
+.ts-arrange .pt-ib.ts-arrange-group {
+  border-left: 1px solid var(--pt-hair);
+}
+
+.ts-arrange .pt-ib:disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+  opacity: 0.5;
+}
+
+.ts-arrange .pt-ib:disabled:hover {
+  border-color: transparent;
+}
+
+.ts-arrange .pt-ib.ts-arrange-group:disabled:hover {
+  border-left-color: var(--pt-hair);
+}
+
+/* the align top, middle and bottom glyphs are the align left, center and right bars turned a
+   quarter turn; send back is bring forward turned over */
+.ts-arrange-rotated {
+  transform: rotate(90deg);
+}
+
+.ts-arrange-flipped {
+  transform: rotate(180deg);
+}

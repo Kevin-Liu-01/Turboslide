@@ -39,8 +39,13 @@ gated blocks lands within 3 px horizontally and 1 px vertically of the web rende
 `docs/export-verification.md`), while glyph antialiasing, hinting and the exact face a viewer
 resolves are the viewer's. The GT Inter static faces are named in the runs; `--embed-fonts`
 (`embedFonts` in `export.run`) embeds them as fntdata parts for a viewer without them installed,
-off by default for the repair reason above. The menu calls this mode "Editable text" and states
-the tolerance; nothing in it is called identical.
+off by default for the repair reason above. The set holds the Regular and Medium cuts only
+(`packages/fonts/export`, `fonts-map.ts EXPORT_WEIGHTS`), while the inspector's typography control
+offers 300 to 700 with the 500 cap as a lint: a run measured at 600 or 700 travels as the Medium
+family with the bold flag (`b="1"`), a run under 400 as the Regular family, and the report's
+residual carries one line per such weight (`fonts: weight 700 exported as the Medium cut plus
+bold ...`), so a file that differs from the web render in weight says so. The menu calls this
+mode "Editable text" and states the tolerance; nothing in it is called identical.
 
 ## The raster policy
 

@@ -52,6 +52,34 @@ exports[`block catalog > renders board (board) in light 1`] = `
 }
 `;
 
+exports[`block catalog > renders box (bx) in dark 1`] = `
+{
+  "html": "<div class="box" style="background:var(--plate);border:1px solid var(--hair);padding:16px;font-size:20px" data-block="bx" data-type="box"><div class="box-text" data-run="bx/text">A plate box with <b>display</b> text and <span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span> inside.</div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders box (bx) in light 1`] = `
+{
+  "html": "<div class="box" style="background:var(--plate);border:1px solid var(--hair);padding:16px;font-size:20px" data-block="bx" data-type="box"><div class="box-text" data-run="bx/text">A plate box with <b>display</b> text and <span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span> inside.</div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders box (bx2) in dark 1`] = `
+{
+  "html": "<div class="box" style="background:#2f5ce0;border:0;border-radius:6px;padding:16px;height:120px;color:var(--paper)" data-block="bx2" data-type="box"><div class="box-text" data-run="bx2/text">A blue box.</div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders box (bx2) in light 1`] = `
+{
+  "html": "<div class="box" style="background:#2f5ce0;border:0;border-radius:6px;padding:16px;height:120px;color:var(--paper)" data-block="bx2" data-type="box"><div class="box-text" data-run="bx2/text">A blue box.</div></div>",
+  "rasters": [],
+}
+`;
+
 exports[`block catalog > renders composite (group) in dark 1`] = `
 {
   "html": "<div class="composite" style="grid-template-columns:1fr;gap:0px" data-block="group" data-type="composite"><p class="max-p" data-block="g1" data-type="paragraph" data-run="g1/text">First.</p><p class="max-p" data-block="g2" data-type="paragraph" data-run="g2/text">Second.</p></div>",
@@ -309,6 +337,62 @@ exports[`block catalog > renders html (html) in light 1`] = `
       "blockId": "html",
       "kind": "html",
       "selector": "[data-slide="catalog"] [data-rid="html:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders icon (ico) in dark 1`] = `
+{
+  "html": "<svg class="ic icon-block" style="width:48px;height:48px;color:#f0a020" data-block="ico" data-type="icon" aria-hidden="true" data-raster="icon" data-rid="ico:1"><use href="#i-bolt"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "ico",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="ico:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders icon (ico) in light 1`] = `
+{
+  "html": "<svg class="ic icon-block" style="width:48px;height:48px;color:#f0a020" data-block="ico" data-type="icon" aria-hidden="true" data-raster="icon" data-rid="ico:1"><use href="#i-bolt"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "ico",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="ico:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders icon (ico2) in dark 1`] = `
+{
+  "html": "<svg class="ic icon-block" style="width:32px;height:32px" data-block="ico2" data-type="icon" aria-hidden="true" data-raster="icon" data-rid="ico2:1"><use href="#gt-mark"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "ico2",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="ico2:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders icon (ico2) in light 1`] = `
+{
+  "html": "<svg class="ic icon-block" style="width:32px;height:32px" data-block="ico2" data-type="icon" aria-hidden="true" data-raster="icon" data-rid="ico2:1"><use href="#gt-mark"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "ico2",
+      "kind": "icon",
+      "selector": "[data-slide="catalog"] [data-rid="ico2:1"]",
     },
   ],
 }
@@ -858,6 +942,34 @@ exports[`block catalog > renders rows (rows) in light 1`] = `
 }
 `;
 
+exports[`block catalog > renders rule (rl) in dark 1`] = `
+{
+  "html": "<div class="rule rule-h" style="width:731.5px;height:1px;background:var(--hair)" data-block="rl" data-type="rule" role="separator" aria-orientation="horizontal"></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders rule (rl) in light 1`] = `
+{
+  "html": "<div class="rule rule-h" style="width:731.5px;height:1px;background:var(--hair)" data-block="rl" data-type="rule" role="separator" aria-orientation="horizontal"></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders rule (rl2) in dark 1`] = `
+{
+  "html": "<div class="rule rule-v" style="width:2px;height:200px;background:#2f5ce0" data-block="rl2" data-type="rule" role="separator" aria-orientation="vertical"></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders rule (rl2) in light 1`] = `
+{
+  "html": "<div class="rule rule-v" style="width:2px;height:200px;background:#2f5ce0" data-block="rl2" data-type="rule" role="separator" aria-orientation="vertical"></div>",
+  "rasters": [],
+}
+`;
+
 exports[`block catalog > renders say (say) in dark 1`] = `
 {
   "html": "<div class="rows ex" data-block="say" data-type="say"><div><b data-run="say/items/0/note"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="say:1"><use href="#i-check-circle"/></svg>Acceptable</b><span class="q" data-run="say/items/0/quote">Translations are generated at build time.</span></div><div><b data-run="say/items/1/note"><svg class="ic no" aria-hidden="true" data-raster="icon" data-rid="say:2"><use href="#i-x-circle"/></svg>Not acceptable</b><span class="q no" data-run="say/items/1/quote">Supercharge your global growth.</span></div></div>",
@@ -909,6 +1021,146 @@ exports[`block catalog > renders scales (scales) in light 1`] = `
 {
   "html": "<div class="scales center-tick" data-block="scales" data-type="scales"><div class="scale"><span data-run="scales/items/0/left">Classic</span><div class="bar"><i style="left:78%"></i></div><span data-run="scales/items/0/right"><b>Modern</b></span></div><div class="scale"><span data-run="scales/items/1/left"><b>Reserved</b></span><div class="bar"><i style="left:22%"></i></div><span data-run="scales/items/1/right">Playful</span></div></div>",
   "rasters": [],
+}
+`;
+
+exports[`block catalog > renders shape (arr) in dark 1`] = `
+{
+  "html": "<svg viewBox="0 0 731.5 24" width="731.5" height="24" preserveAspectRatio="none" class="shape shape-arrow" data-block="arr" data-type="shape" data-raster="dia" data-rid="arr:1" data-shape="arrow" aria-hidden="true" data-from="0.5,12.5" data-to="731.5,12.5" data-heads="both"><line x1="8.5" y1="12.5" x2="723.5" y2="12.5" stroke="var(--ink)" stroke-width="1" stroke-linecap="square"/><polygon points="731.5,12.5 723.5,16.5 723.5,8.5" fill="var(--ink)"/><polygon points="0.5,12.5 8.5,8.5 8.5,16.5" fill="var(--ink)"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "arr",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="arr:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shape (arr) in light 1`] = `
+{
+  "html": "<svg viewBox="0 0 731.5 24" width="731.5" height="24" preserveAspectRatio="none" class="shape shape-arrow" data-block="arr" data-type="shape" data-raster="dia" data-rid="arr:1" data-shape="arrow" aria-hidden="true" data-from="0.5,12.5" data-to="731.5,12.5" data-heads="both"><line x1="8.5" y1="12.5" x2="723.5" y2="12.5" stroke="var(--ink)" stroke-width="1" stroke-linecap="square"/><polygon points="731.5,12.5 723.5,16.5 723.5,8.5" fill="var(--ink)"/><polygon points="0.5,12.5 8.5,8.5 8.5,16.5" fill="var(--ink)"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "arr",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="arr:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shape (ell) in dark 1`] = `
+{
+  "html": "<svg viewBox="0 0 731.5 200" width="731.5" height="200" preserveAspectRatio="none" class="shape shape-ellipse" data-block="ell" data-type="shape" data-raster="dia" data-rid="ell:1" data-shape="ellipse" aria-hidden="true"><ellipse cx="365.75" cy="100" rx="365.25" ry="99.5" fill="#12a37a" stroke="var(--ink)" stroke-width="1"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "ell",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="ell:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shape (ell) in light 1`] = `
+{
+  "html": "<svg viewBox="0 0 731.5 200" width="731.5" height="200" preserveAspectRatio="none" class="shape shape-ellipse" data-block="ell" data-type="shape" data-raster="dia" data-rid="ell:1" data-shape="ellipse" aria-hidden="true"><ellipse cx="365.75" cy="100" rx="365.25" ry="99.5" fill="#12a37a" stroke="var(--ink)" stroke-width="1"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "ell",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="ell:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shape (ln) in dark 1`] = `
+{
+  "html": "<svg viewBox="0 0 731.5 100" width="731.5" height="100" preserveAspectRatio="none" class="shape shape-line" data-block="ln" data-type="shape" data-raster="dia" data-rid="ln:1" data-shape="line" aria-hidden="true" data-from="1,99" data-to="730.5,1" data-heads="none"><line x1="1" y1="99" x2="730.5" y2="1" stroke="var(--ink)" stroke-width="2" stroke-linecap="square"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "ln",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="ln:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shape (ln) in light 1`] = `
+{
+  "html": "<svg viewBox="0 0 731.5 100" width="731.5" height="100" preserveAspectRatio="none" class="shape shape-line" data-block="ln" data-type="shape" data-raster="dia" data-rid="ln:1" data-shape="line" aria-hidden="true" data-from="1,99" data-to="730.5,1" data-heads="none"><line x1="1" y1="99" x2="730.5" y2="1" stroke="var(--ink)" stroke-width="2" stroke-linecap="square"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "ln",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="ln:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shape (rect) in dark 1`] = `
+{
+  "html": "<svg viewBox="0 0 731.5 160" width="731.5" height="160" preserveAspectRatio="none" class="shape shape-rectangle" data-block="rect" data-type="shape" data-raster="dia" data-rid="rect:1" data-shape="rectangle" aria-hidden="true"><rect x="0.75" y="0.75" width="730" height="158.5" fill="none" stroke="var(--ink)" stroke-width="1.5"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "rect",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="rect:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shape (rect) in light 1`] = `
+{
+  "html": "<svg viewBox="0 0 731.5 160" width="731.5" height="160" preserveAspectRatio="none" class="shape shape-rectangle" data-block="rect" data-type="shape" data-raster="dia" data-rid="rect:1" data-shape="rectangle" aria-hidden="true"><rect x="0.75" y="0.75" width="730" height="158.5" fill="none" stroke="var(--ink)" stroke-width="1.5"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "rect",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="rect:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shape (round) in dark 1`] = `
+{
+  "html": "<svg viewBox="0 0 731.5 120" width="731.5" height="120" preserveAspectRatio="none" class="shape shape-rounded" data-block="round" data-type="shape" data-raster="dia" data-rid="round:1" data-shape="rounded" aria-hidden="true"><rect x="0.5" y="0.5" width="730.5" height="119" rx="12" ry="12" fill="var(--plate)" stroke="var(--hair)" stroke-width="1"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "round",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="round:1"]",
+    },
+  ],
+}
+`;
+
+exports[`block catalog > renders shape (round) in light 1`] = `
+{
+  "html": "<svg viewBox="0 0 731.5 120" width="731.5" height="120" preserveAspectRatio="none" class="shape shape-rounded" data-block="round" data-type="shape" data-raster="dia" data-rid="round:1" data-shape="rounded" aria-hidden="true"><rect x="0.5" y="0.5" width="730.5" height="119" rx="12" ry="12" fill="var(--plate)" stroke="var(--hair)" stroke-width="1"/></svg>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "round",
+      "kind": "dia",
+      "selector": "[data-slide="catalog"] [data-rid="round:1"]",
+    },
+  ],
 }
 `;
 
@@ -992,6 +1244,20 @@ exports[`block catalog > renders swatches (swatches) in dark 1`] = `
 exports[`block catalog > renders swatches (swatches) in light 1`] = `
 {
   "html": "<div class="swatches" data-block="swatches" data-type="swatches"><div class="swatch ink"><b data-run="swatches/items/0/name">Ink</b><span>#070707</span></div><div class="swatch"><b data-run="swatches/items/1/name">Accent</b><span>#2f5ce0 on light<br>#86a8ff on dark</span></div></div>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders text (tx) in dark 1`] = `
+{
+  "html": "<p class="text" style="color:var(--ink-2);font-size:26px;font-weight:500;text-align:center;letter-spacing:-0.01em;line-height:1.3" data-block="tx" data-type="text" data-run="tx/text">A text box with <span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span> inside.</p>",
+  "rasters": [],
+}
+`;
+
+exports[`block catalog > renders text (tx) in light 1`] = `
+{
+  "html": "<p class="text" style="color:var(--ink-2);font-size:26px;font-weight:500;text-align:center;letter-spacing:-0.01em;line-height:1.3" data-block="tx" data-type="text" data-run="tx/text">A text box with <span class="gt-word"><svg aria-hidden="true"><use href="#gt-mark"/></svg><span class="sr">GT</span></span> inside.</p>",
   "rasters": [],
 }
 `;

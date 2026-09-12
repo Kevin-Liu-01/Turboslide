@@ -1,0 +1,64 @@
+/* The position control: X, Y, W, H and Z as five steppers in a two-column grid (stepper.css
+   draws the 22px buttons and the field; this sheet arranges them and adds the 12px key before
+   each), then the sheet note in 11px titanium with the off-sheet lint mark. Sits in a wide
+   inspector row, which draws the one rule (SPEC 2.2 line law). */
+.ts-ctl-pos {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.ts-ctl-pos-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, auto));
+  column-gap: 16px;
+  row-gap: 4px;
+  justify-content: start;
+}
+
+.ts-ctl-pos-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ts-ctl-pos-field[data-field='z'] {
+  grid-column: 1 / -1;
+}
+
+.ts-ctl-pos-key {
+  display: inline-block;
+  width: 14px;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--pt-titanium);
+  text-align: center;
+}
+
+.ts-ctl-pos .pt-ib.ts-ctl-step {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  justify-content: center;
+  font-family: var(--pt-display);
+  font-size: 15px;
+  line-height: 1;
+  font-weight: 400;
+}
+
+.ts-ctl-pos-number {
+  width: 56px;
+}
+
+.ts-ctl-pos-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}

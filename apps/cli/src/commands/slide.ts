@@ -1,7 +1,10 @@
 // The slide commands (SPEC 7.1, 7.2): `slide get` from M1, and the typed writes slide put
 // (slide.replace), patch (slide.update), insert, remove and move, each with --base-revision,
 // --author and --json. Documents come from stdin or --file; patch takes --set <pointer>=<value>
-// and --unset <pointer>, or a mutation list as JSON.
+// and --unset <pointer>, or a mutation list as JSON. The freeform round adds slide set-layout
+// (slide.setLayout), which refiles the blocks when a slide changes layout (docs/freeform.md).
+import type { Layout } from '@turboslide/schema/deck';
+import { layoutSchema } from '@turboslide/schema/deck';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { mutationSchema } from '@turboslide/schema/mutations';
 
@@ -13,6 +16,7 @@ import {
   slideMove,
   slideRemove,
   slideReplace,
+  slideSetLayout,
   slideUpdate,
 } from '../store-actions.ts';
 import {
@@ -28,13 +32,15 @@ import {
 } from '../write.ts';
 import { slideGet } from './slides.ts';
 
-const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move> ...
+const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-layout> ...
   slide get <id>
   slide put <id> [--file slide.json] < slide.json
   slide patch <id> --set <pointer>=<value> [--unset <pointer>] | --mutations [--file mutations.json]
   slide insert --section <sectionId> [--after <slideId>] [--file slide.json] < slide.json
   slide remove <id>
   slide move <id> --to <sectionId> [--after <slideId>]
+  slide set-layout <id> --type cols|split|center|left-mid|stack|freeform [--ratio 5/7] [--gap <px>] [--head single|5/7|4/8] [--align start|center] [--body start|center|end]
+  slide set-layout <id> --layout '<json>'      the layout object as written in a slide file
 Every write takes --base-revision <n> (default: the current revision), --author <name>, --note <text>, --force and --json.`;
 
 export async function slide(ctx: CommandContext): Promise<number> {
@@ -53,9 +59,59 @@ export async function slide(ctx: CommandContext): Promise<number> {
       return slideRemoveCommand(inner);
     case 'move':
       return slideMoveCommand(inner);
+    case 'set-layout':
+      return slideSetLayoutCommand(inner);
     default:
       throw new UsageError(`unknown subcommand "slide ${sub ?? ''}"\n${USAGE}`);
   }
+}
+
+/** The layout of `slide set-layout`: `--layout <json>`, or `--type` with the layout's options as flags. */
+export function layoutFromFlags(ctx: CommandContext): Layout {
+  const raw = flagString(ctx.args, 'layout');
+  let candidate: unknown;
+  if (raw !== undefined) {
+    candidate = parseValue(raw);
+  } else {
+    const type = flagString(ctx.args, 'type');
+    if (type === undefined)
+      throw new UsageError(`slide set-layout needs --type or --layout\n${USAGE}`);
+    const record: Record<string, unknown> = { type };
+    const ratio = flagString(ctx.args, 'ratio');
+    if (ratio !== undefined) record.ratio = parseValue(ratio);
+    const gap = flagString(ctx.args, 'gap');
+    if (gap !== undefined) record.gap = Number(gap);
+    const head = flagString(ctx.args, 'head');
+    if (head !== undefined) record.head = head === 'single' ? 'single' : { cols: head };
+    const align = flagString(ctx.args, 'align');
+    if (align !== undefined) record.align = align;
+    const body = flagString(ctx.args, 'body');
+    if (body !== undefined) record.body = { align: body };
+    candidate = record;
+  }
+  const parsed = layoutSchema.safeParse(candidate);
+  if (!parsed.success) {
+    const first = parsed.error.issues[0];
+    throw new UsageError(
+      `the layout is invalid at /${first?.path.map(String).join('/') ?? ''}: ${first?.message ?? 'invalid'}\n${USAGE}`,
+    );
+  }
+  return parsed.data;
+}
+
+async function slideSetLayoutCommand(ctx: CommandContext): Promise<number> {
+  const slideId = requirePositional(ctx, 0, USAGE);
+  const layout = layoutFromFlags(ctx);
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    slideSetLayout(storeDeps(ctx, store), writeContext(ctx), {
+      slideId,
+      layout,
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  printSlideResult(ctx, `set layout ${layout.type} on`, result);
+  return 0;
 }
 
 async function slidePut(ctx: CommandContext): Promise<number> {

@@ -28,7 +28,15 @@ export type Mutation =
   /** `after` absent inserts first in the slot. */
   | { op: 'block.insert'; slideId: SlideId; slot: BlockSlot; after?: BlockId; block: Block }
   | { op: 'block.remove'; slideId: SlideId; blockId: BlockId }
-  | { op: 'block.move'; slideId: SlideId; blockId: BlockId; slot: BlockSlot; after?: BlockId }
+  /** `z` sets the stacking order of a positioned block on a freeform slide (docs/freeform.md). */
+  | {
+      op: 'block.move';
+      slideId: SlideId;
+      blockId: BlockId;
+      slot: BlockSlot;
+      after?: BlockId;
+      z?: number;
+    }
   /** JSON pointer into the block; an absent value deletes the field. */
   | { op: 'block.set'; slideId: SlideId; blockId: BlockId; path: string; value?: unknown }
   /** typing, coalesced; range is [start, end) in the markup string at `path` */
@@ -121,6 +129,7 @@ export const mutationSchema = z.discriminatedUnion('op', [
     blockId: blockIdSchema,
     slot: blockSlotSchema,
     after: blockIdSchema.optional(),
+    z: z.number().int().optional(),
   }),
   z.strictObject({
     op: z.literal('block.set'),

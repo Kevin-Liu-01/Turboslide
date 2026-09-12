@@ -10,7 +10,8 @@ import type { LayoutType, PlateSide, SlideKind, SlotName } from './deck.ts';
 import { SLIDE_SCHEMAS } from './deck.ts';
 import type { BlockId } from './ids.ts';
 
-export type BlockGroup = 'text' | 'list' | 'figure' | 'diagram' | 'specimen' | 'mark' | 'escape';
+export type BlockGroup =
+  'text' | 'list' | 'figure' | 'diagram' | 'specimen' | 'mark' | 'primitive' | 'escape';
 
 /** A pointer template relative to the block; `*` stands for any array index. */
 export type PathTemplate = string;
@@ -436,6 +437,71 @@ export const CATALOG: Readonly<Record<BlockType, BlockCatalogEntry>> = {
       alt: 'The gem smoke material in the brand blue',
     }),
   }),
+  box: entry({
+    type: 'box',
+    label: 'Box',
+    group: 'primitive',
+    doc: 'A bordered box with an optional text inside: fill, stroke and text color from the palette, a corner radius and padding; a hairline outline unless set.',
+    source: 'docs/freeform.md',
+    allowedIn: ['content'],
+    textPaths: ['/text'],
+    assetPaths: [],
+    iconPaths: [],
+    export: 'native',
+    make: (id) => ({ id, type: 'box', stroke: 'hair', padding: 16, text: 'A box.' }),
+  }),
+  shape: entry({
+    type: 'shape',
+    label: 'Shape',
+    group: 'primitive',
+    doc: 'A rectangle, rounded rectangle, ellipse, line or arrow filling its box, with palette fill and stroke, a stroke width and filled 8 px arrowheads.',
+    source: 'docs/freeform.md',
+    allowedIn: ['content'],
+    textPaths: [],
+    assetPaths: [],
+    iconPaths: [],
+    export: 'native',
+    make: (id) => ({ id, type: 'shape', shape: 'rectangle', stroke: 'hair' }),
+  }),
+  rule: entry({
+    type: 'rule',
+    label: 'Rule',
+    group: 'primitive',
+    doc: 'A horizontal or vertical hairline in a palette color at 1, 1.5 or 2 px; the slot width in a flow layout, its box on a freeform slide.',
+    source: 'DECK-GRAMMAR.md:15; docs/freeform.md',
+    allowedIn: ['content'],
+    textPaths: [],
+    assetPaths: [],
+    iconPaths: [],
+    export: 'native',
+    make: (id) => ({ id, type: 'rule', orientation: 'horizontal' }),
+  }),
+  text: entry({
+    type: 'text',
+    label: 'Text box',
+    group: 'primitive',
+    doc: 'One Text in the four-rule markup with typography (size, weight, align, tracking, leading) and a palette color over the body defaults of 22 px on 1.5.',
+    source: 'head:62; docs/freeform.md',
+    allowedIn: ['content', 'plate'],
+    textPaths: ['/text'],
+    assetPaths: [],
+    iconPaths: [],
+    export: 'native',
+    make: (id) => ({ id, type: 'text', text: 'Text.' }),
+  }),
+  icon: entry({
+    type: 'icon',
+    label: 'Icon',
+    group: 'primitive',
+    doc: 'One sprite glyph on its own at 16 to 96 px in a palette color; the semantic hues stay on icons (DECK-GRAMMAR.md:30, 40).',
+    source: 'DECK-GRAMMAR.md:40; docs/freeform.md',
+    allowedIn: ['content'],
+    textPaths: [],
+    assetPaths: [],
+    iconPaths: [],
+    export: 'raster',
+    make: (id) => ({ id, type: 'icon', name: 'check-circle', size: 24 }),
+  }),
   html: entry({
     type: 'html',
     label: 'HTML escape',
@@ -464,6 +530,7 @@ export const BLOCK_GROUPS: ReadonlyArray<{ id: BlockGroup; label: string }> = [
   { id: 'diagram', label: 'Diagrams' },
   { id: 'specimen', label: 'Specimens' },
   { id: 'mark', label: 'The mark' },
+  { id: 'primitive', label: 'Primitives' },
   { id: 'escape', label: 'Escape' },
 ];
 
@@ -575,6 +642,13 @@ export const LAYOUT_CATALOG: Readonly<Record<LayoutType, LayoutCatalogEntry>> = 
     label: 'Stack',
     doc: 'A vertical flex column with a 22 px gap.',
     source: 'head:86',
+    slots: ['main'],
+  },
+  freeform: {
+    type: 'freeform',
+    label: 'Freeform',
+    doc: 'Every block carries pos, its box on the 1600 by 900 sheet, snapped to the 8 px grid, the rails, the plate edges and the column seams; flagged by layout/freeform at severity 1.',
+    source: 'Kevin, 2026-09-11; docs/freeform.md',
     slots: ['main'],
   },
 };

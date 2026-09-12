@@ -29,6 +29,8 @@ export type BlockContext = {
   assetUrl: (path: string) => string;
   /** The width in sheet pixels available to the block, when the layout knows it. */
   slotWidth?: number;
+  /** The height of the block's box on a freeform slide (docs/freeform.md); unknown in a flow layout. */
+  slotHeight?: number;
   /** A live render (RenderOptions.live): material roots carry data-live for the editor's mount. */
   live?: boolean;
   rasters: RasterRef[];

@@ -60,10 +60,13 @@ import { ensureDeckAssets, isHosted, workerClientOptions } from '../../server/ro
 // request is an export finds the deck.
 //
 // Authentication (SPEC 11): TURBOSLIDE_TOKEN, when set, is required as `Authorization: Bearer
-// <token>` on every request here; unset, the route is open, because the editor's page posts the
-// sync export from the browser without a header. The production URL runs without the token today;
-// docs/hosting.md section 6 records that as Kevin's open decision and the three ways out of it (the
-// editor's export can run through the syncExport server function of server/download.ts instead).
+// <token>` on every request here; unset (a checkout), the route is open. The editor never fetches
+// this route: its export runs through the syncExport server function of server/download.ts (the
+// same runSyncExport and the same JSON answer, reached same origin under the CSRF middleware), so
+// the page holds no token. The token is set on the production and preview environments of the
+// `turboslide` project since 2026-09-11 (docs/hosting.md section 6, option 2), which also opens
+// the agent routes to callers that send it; agents and the CLI (`turboslide deck push`) read it
+// from their environment or ~/.config/turboslide/hosts.json.
 
 const BODY_LIMIT = 1024 * 1024;
 

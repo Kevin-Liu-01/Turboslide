@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
 import { ToolButton } from '../ToolButton';
+import { tipProps } from '../Tooltip';
 import type { ControlProps } from './props';
 
 import './stepper.css';
@@ -79,13 +80,23 @@ export function StepperControl({ spec, onChange, disabled }: ControlProps) {
   };
 
   const shown = draft ?? (current === undefined ? '' : String(current));
+  const fieldTip = tipProps({
+    name: spec.inspector.label,
+    doc:
+      spec.inspector.help ??
+      (options.length > 0
+        ? `Type a value or step through ${options.length} set values; Enter commits.`
+        : 'Type a value; Enter commits, up and down arrows step by one.'),
+    key: 'Enter',
+  });
   const atFirst = options.length > 0 && current !== undefined && current <= Math.min(...options);
   const atLast = options.length > 0 && current !== undefined && current >= Math.max(...options);
 
   return (
     <span className="ts-ctl-stepper">
       <ToolButton
-        title={`${spec.label}: smaller`}
+        title={`${spec.inspector.label} down`}
+        doc={options.length > 0 ? 'The previous value of the set.' : 'One less.'}
         ariaLabel={`${spec.label} down`}
         className="ts-ctl-step"
         onClick={() => step(-1)}
@@ -103,11 +114,16 @@ export function StepperControl({ spec, onChange, disabled }: ControlProps) {
         value={shown}
         placeholder={spec.optional ? 'none' : undefined}
         disabled={disabled}
+        {...fieldTip}
         onChange={(event) => setDraft(event.target.value)}
-        onKeyDown={onKey}
+        onKeyDown={(event) => {
+          fieldTip.onKeyDown(event);
+          onKey(event);
+        }}
       />
       <ToolButton
-        title={`${spec.label}: larger`}
+        title={`${spec.inspector.label} up`}
+        doc={options.length > 0 ? 'The next value of the set.' : 'One more.'}
         ariaLabel={`${spec.label} up`}
         className="ts-ctl-step"
         onClick={() => step(1)}

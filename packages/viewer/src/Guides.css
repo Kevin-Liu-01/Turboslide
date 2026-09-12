@@ -1,0 +1,17 @@
+/* The snap guides (Guides.tsx), drawn inside the overlay layer in CSS pixels. Line law (SPEC 2.2):
+   1px, --pt-titanium, the color the chrome gives a transient measurement (the lint boxes of
+   severity 1 and 2 use it too), never ink and never the sheet's own tokens. A guide never takes
+   the pointer and nothing about it animates. */
+.ts-guide {
+  position: absolute;
+  background: var(--pt-titanium);
+  pointer-events: none;
+}
+
+.ts-guide[data-axis='x'] {
+  width: 1px;
+}
+
+.ts-guide[data-axis='y'] {
+  height: 1px;
+}

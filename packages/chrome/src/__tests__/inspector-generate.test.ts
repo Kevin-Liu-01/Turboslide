@@ -37,12 +37,19 @@ describe('blockControls for a rows block', () => {
   const generated = blockControls(rows);
   const byPath = new Map(generated.controls.map((spec) => [spec.path, spec]));
 
-  it('gives every annotated top-level field a control except the read-only id', () => {
-    const annotated = Object.keys(inspectorsOf(rowsBlockSchema)).filter((key) => key !== 'id');
+  it('gives every annotated top-level field a control except the read-only id and the position box', () => {
+    /* `pos` (schema/position.ts) is offered on a freeform slide only */
+    const annotated = Object.keys(inspectorsOf(rowsBlockSchema)).filter(
+      (key) => key !== 'id' && key !== 'pos',
+    );
     expect(annotated).toEqual(['key', 'tight', 'links', 'minRowHeight']);
     for (const key of annotated) expect(byPath.has(`/${key}`)).toBe(true);
     expect(byPath.has('/id')).toBe(false);
     expect(byPath.has('/type')).toBe(false);
+    expect(byPath.has('/pos')).toBe(false);
+    expect(
+      blockControls(rows, { freeform: true }).controls.some((spec) => spec.path === '/pos'),
+    ).toBe(true);
   });
 
   it('gives every annotated item field a control, per item, with the item number in the label', () => {
@@ -150,7 +157,7 @@ describe('slideControls', () => {
     const byPath = new Map(controls.map((spec) => [spec.path, spec]));
     const type = controls.find((spec) => spec.control === 'slide.layout.type');
     expect(type?.kind).toBe('select');
-    expect(type?.options).toEqual(['cols', 'split', 'center', 'left-mid', 'stack']);
+    expect(type?.options).toEqual(['cols', 'split', 'center', 'left-mid', 'stack', 'freeform']);
     expect(type?.value).toBe('cols');
     const ratio = byPath.get('/layout/ratio');
     expect(ratio?.kind).toBe('json');

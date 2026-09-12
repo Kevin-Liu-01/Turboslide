@@ -39,7 +39,8 @@
       "source": "src/components/viewer/icons.tsx",
       "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497",
       "changes": [
-        "only the names Turboslide's chrome draws are kept (22 of 37); the paths are verbatim"
+        "only the names Turboslide's chrome draws are kept (22 of 37); the paths are verbatim",
+        "the chrome round of 2026-09-11 adds the names the inspector sections, the primitives palette and the tooltips draw (box, minus, plus, arrow-right, cube, swatch, columns, language, beaker, clock, archive, tag, adjustments, exclamation, pencil, brush, star, table, code, chat, x-circle, check-circle, swap, sync, text, move), with the paths of the theme sprite and the Prototemplate source"
       ]
     },
     "src/GtMark.tsx": {
@@ -50,7 +51,10 @@
     "src/ToolButton.tsx": {
       "source": "src/components/viewer/ToolButton.tsx",
       "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497",
-      "changes": ["a `control` prop writes data-control for the window API (SPEC 6.5)"]
+      "changes": [
+        "a `control` prop writes data-control for the window API (SPEC 6.5)",
+        "the chrome round of 2026-09-11 (Kevin: tooltips in every control surface): the title is the Tooltip primitive's content (Tooltip.tsx tipOf reads the name, the sentence and the key), a `doc` prop adds the sentence, a `disabled` prop, and the button carries data-tip and the tooltip handlers instead of a native title"
+      ]
     },
     "src/ToolButton.css": {
       "source": "src/components/viewer/ToolButton.css",
@@ -60,7 +64,10 @@
     "src/Seg.tsx": {
       "source": "src/components/viewer/Seg.tsx",
       "commit": "3eba50eec1532b37c9c86d954c0bc8297b7e4413",
-      "changes": ["a `control` prop prefixes data-control on the options"]
+      "changes": [
+        "a `control` prop prefixes data-control on the options",
+        "the chrome round of 2026-09-11 (Kevin: tooltips in every control surface): an option carries `doc`, the tooltip sentence, passed to its ToolButton"
+      ]
     },
     "src/Seg.css": {
       "source": "src/components/viewer/Seg.css",
@@ -75,7 +82,9 @@
         "the brand is the GT mark only (no PtMark, no mark prop)",
         "the seg's slide label reads Slide (the deck's word) rather than Slides",
         "data-control ids on every button",
-        "M3: the Search pill returns as SearchPill behind an `onSearch` prop (the palette opener, SPEC 6.3) with `searchOpen` for its ink frame; a `status` slot left of it takes the StatusChip (SPEC 6.1); EditTools (the Edit | View Seg, Twin, Lint with its count badge, Source) is exported for the route to place in the slot"
+        "M3: the Search pill returns as SearchPill behind an `onSearch` prop (the palette opener, SPEC 6.3) with `searchOpen` for its ink frame; a `status` slot left of it takes the StatusChip (SPEC 6.1); EditTools (the Edit | View Seg, Twin, Lint with its count badge, Source) is exported for the route to place in the slot",
+        "the brand reads the product name Turboslide (Kevin, 2026-09-11); the deck's title stands read only in the status slot (.pt-bar-deck) when the route passes no `status`",
+        "the chrome round of 2026-09-11 (Kevin: tooltips in every control surface): the count, its field and the Search pill carry tooltips; EditTools takes an `insert` prop that draws the InsertMenu first in the group"
       ]
     },
     "src/Toolbar.css": {
@@ -83,7 +92,8 @@
       "commit": "c51f46fac646ade0cb6d79c5c894cece6ff31b96",
       "changes": [
         "the .pt-search-btn and .pt-search-kbd rules and the html[data-shell-sb] boot stamp rules removed with the controls they styled",
-        "M3: the .pt-search-btn and .pt-search-kbd rules restored from the source with the palette, plus the tier-four and narrow rules for the pill; .pt-bar-status and .pt-lint-count are new"
+        "M3: the .pt-search-btn and .pt-search-kbd rules restored from the source with the palette, plus the tier-four and narrow rules for the pill; .pt-bar-status and .pt-lint-count are new",
+        "the read-only deck title in the status slot (.pt-bar-deck)"
       ]
     },
     "src/Sidebar.tsx": {
@@ -95,7 +105,10 @@
         "the filter matches title, section, id and the slide's text (SPEC 6.2)",
         "folds persist under gt-shell-groups:<id> and every section is open by default",
         "ThumbList moved to @turboslide/viewer GridView",
-        "M3 (SPEC 6.2): an `edit` prop turns on drag to reorder within and across sections (one slide.move on drop, a header drop inserts first), Alt with the up and down arrows to move a focused row, empty sections listed as drop targets, and the row menu (Insert after, Duplicate, Move to section, Render, Lint this slide, Copy id, Delete), every item one action through the dispatcher"
+        "M3 (SPEC 6.2): an `edit` prop turns on drag to reorder within and across sections (one slide.move on drop, a header drop inserts first), Alt with the up and down arrows to move a focused row, empty sections listed as drop targets, and the row menu (Insert after, Duplicate, Move to section, Render, Lint this slide, Copy id, Delete), every item one action through the dispatcher",
+        "the head reads the mark then the product name Turboslide, never the deck title (Kevin, 2026-09-11); the deck's name is the toolbar's DeckName control",
+        "thumbnail density draws a card per row: the number, a 16:9 frame the row's width (.pt-thumb-frame.is-card) and the title under it (Kevin's screenshot of 2026-09-11); the density options list thumbnails first",
+        "the chrome round of 2026-09-11 (Kevin: tooltips in every control surface): the mark link, the density options, the group headers, the row menu button and every menu item carry tooltips through Tooltip.tsx"
       ]
     },
     "src/Sidebar.css": {
@@ -104,7 +117,8 @@
       "changes": [
         "the site map rules (data-site colors, child groups, the nameplate faces) removed; the list is .pt-tree (the grid's .pt-thumbs rules moved to @turboslide/viewer GridView.css)",
         "rows gain a 22px number column, .pt-orow-marks for the badge and the lease dot, and .pt-orow-kind for the second line in thumbnail density",
-        "M3: the drop line (2px ink, a state), the dragging row, the empty-section note, the row menu button and the menu card"
+        "M3: the drop line (2px ink, a state), the dragging row, the empty-section note, the row menu button and the menu card",
+        "thumbnail density is the card layout (.pt-thumb-frame.is-card, the two-row grid) instead of the 44px row with the 64 by 36 mini"
       ]
     },
     "src/ListRow.tsx": {
@@ -120,7 +134,10 @@
     "src/SidebarFilter.tsx": {
       "source": "src/components/viewer/SidebarFilter.tsx",
       "commit": "3eba50eec1532b37c9c86d954c0bc8297b7e4413",
-      "changes": ["the input carries data-control=\"sidebar.filter\""]
+      "changes": [
+        "the input carries data-control=\"sidebar.filter\"",
+        "the chrome round of 2026-09-11 (Kevin: tooltips in every control surface): the field and the clear button carry tooltips"
+      ]
     },
     "src/SidebarFilter.css": {
       "source": "src/components/viewer/SidebarFilter.css",
@@ -202,7 +219,8 @@
         "the html[data-shell-sb] boot stamp is not written (the studio's boot script stamps the theme only)",
         "the root carries data-mode, data-active, data-index and data-total for the window API and the Playwright specs",
         "the preview layer resolves subjects from the items' HTML",
-        "M3 (SPEC 6.1): `onSearch` (sets the shell search flag and Cmd K), `searchOpen`, `toolbarStatus`, `panel` (the inspector in the main region's second column), `drawer` (the source drawer over the stage) and `sidebarEdit` props; the main region carries data-panel while an inspector is present"
+        "M3 (SPEC 6.1): `onSearch` (sets the shell search flag and Cmd K), `searchOpen`, `toolbarStatus`, `panel` (the inspector in the main region's second column), `drawer` (the source drawer over the stage) and `sidebarEdit` props; the main region carries data-panel while an inspector is present",
+        "the density defaults to thumbnails (Kevin, 2026-09-11: \"the default should be images\"); the saved gt-shell-density still applies on mount"
       ]
     },
     "src/ViewerShell.css": {
@@ -219,7 +237,8 @@
       "changes": [
         "grown into the command palette of SPEC 6.3: the entries come in as props (palette-data.ts builds the five groups from the document and the action table) and Enter runs an entry through the editor dispatcher, a prompt entry after one field, a view toggle through its callback; the router, the site index and the anchor rows are gone",
         "the trigger pill moved to Toolbar.tsx (SearchPill) and the open state to the route; useShellKeys opens it through ViewerShell onSearch instead of a document event",
-        "rows gain a key chip and a hint line; group labels carry their prefix chip; the foot names the three prefixes"
+        "rows gain a key chip and a hint line; group labels carry their prefix chip; the foot names the three prefixes",
+        "the chrome round of 2026-09-11 (Kevin: tooltips in every control surface): every row and field carries a tooltip; an `icon` run opens the IconPicker inside the card (the Icon primitive) and writes the picked name into the insert input"
       ]
     },
     "src/Palette.css": {
@@ -234,7 +253,8 @@
       "source": "src/lib/search-index.ts (searchGroups, searchCount)",
       "commit": "0594fa19a56266195b68aa13de14e4c01c87941b",
       "changes": [
-        "rewritten for the deck: the five groups of SPEC 6.3 built from the document, the block and slide kind catalogs, the action table and the version log; the prefix parser and the scored fuzzy filter are new"
+        "rewritten for the deck: the five groups of SPEC 6.3 built from the document, the block and slide kind catalogs, the action table and the version log; the prefix parser and the scored fuzzy filter are new",
+        "the chrome round of 2026-09-11: the Insert group leads with the primitives (Box, the five shapes, Rule, Text, Icon through the picker, Image, Material), then the blocks and the templates; entries carry `insert` and `variant`; the `icon` run kind; a position box on freeform slides (defaultPosition)"
       ]
     },
     "src/Inspector.css": {
@@ -246,11 +266,17 @@
     },
     "src/Inspector.tsx": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
-      "commit": ""
+      "commit": "",
+      "changes": [
+        "the chrome round of 2026-09-11: sections from inspector/sections.ts with an icon, a title and a tooltip each, remembered folds (ts-inspector-sections), the block head with the type glyph and the rename field (slide.update carrying block.remove and block.insert), the Text, Color, Position and size and Dither sections, layout changes through slide.setLayout"
+      ]
     },
     "src/InspectorControl.tsx": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
-      "commit": ""
+      "commit": "",
+      "changes": [
+        "the chrome round of 2026-09-11: the row draws the property's glyph, carries the tooltip on its label and the lint marks of the findings naming its path; the color, typography and position kinds"
+      ]
     },
     "src/InspectorControl.css": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
@@ -258,7 +284,10 @@
     },
     "src/inspector/generate.ts": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
-      "commit": ""
+      "commit": "",
+      "changes": [
+        "the chrome round of 2026-09-11: the color, typography and position kinds, compositeControls for the fields of a composite, the position control offered on freeform slides only, the layout discriminator validated as a tag"
+      ]
     },
     "src/inspector/props.ts": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
@@ -306,7 +335,10 @@
     },
     "src/inspector/icon.tsx": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
-      "commit": ""
+      "commit": "",
+      "changes": [
+        "the chrome round of 2026-09-11: the card moved to IconPicker.tsx; the button carries the tooltip"
+      ]
     },
     "src/inspector/icon.css": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
@@ -330,7 +362,8 @@
     },
     "src/StatusChip.tsx": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
-      "commit": ""
+      "commit": "",
+      "changes": ["the chrome round of 2026-09-11: the chip carries its tooltip"]
     },
     "src/slide-templates.ts": {
       "source": "new (M4, Kevin's GT template directive; the archetype slides of decks/templates/gt-brand/template.json with placeholder copy)",
@@ -338,7 +371,8 @@
     },
     "src/DeckName.tsx": {
       "source": "new (M4, SPEC 6.1; the toolbar's brand title as an editable field, the count field's grammar from Toolbar.tsx)",
-      "commit": ""
+      "commit": "",
+      "changes": ["the chrome round of 2026-09-11: the button and the field carry tooltips"]
     },
     "src/DeckName.css": {
       "source": "new (M4, SPEC 6.1; the count field's rules from Toolbar.css)",
@@ -346,10 +380,21 @@
     },
     "src/ExportMenu.tsx": {
       "source": "new (M4, SPEC 8; the row menu's card grammar from Sidebar.tsx, the Seg and check controls)",
-      "commit": ""
+      "commit": "",
+      "changes": [
+        "the chrome round of 2026-09-11: the buttons and check rows carry tooltips through Tooltip.tsx instead of native titles"
+      ]
     },
     "src/ExportMenu.css": {
       "source": "new (M4, SPEC 8; the .pt-orow-menu rules from Sidebar.css at the toolbar)",
+      "commit": ""
+    },
+    "src/ConnectCard.tsx": {
+      "source": "new (the deck transfer round of 2026-09-11, docs/deck-transfer.md; the deck list's ruled block grammar from apps/studio/src/routes/decks.css, the shell's text .pt-ib)",
+      "commit": ""
+    },
+    "src/ConnectCard.css": {
+      "source": "new (the deck transfer round of 2026-09-11; the .ts-decks-form and .ts-decks-row rules of apps/studio/src/routes/decks.css)",
       "commit": ""
     },
     "src/ExportReportCard.tsx": {
@@ -366,7 +411,8 @@
     },
     "src/LintPanel.tsx": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
-      "commit": ""
+      "commit": "",
+      "changes": ["the chrome round of 2026-09-11: the finding rows and Fix carry tooltips"]
     },
     "src/LintPanel.css": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
@@ -374,7 +420,8 @@
     },
     "src/VersionsPanel.tsx": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
-      "commit": ""
+      "commit": "",
+      "changes": ["the chrome round of 2026-09-11: the note field, Save and Restore carry tooltips"]
     },
     "src/VersionsPanel.css": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
@@ -382,7 +429,8 @@
     },
     "src/HistoryPanel.tsx": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
-      "commit": ""
+      "commit": "",
+      "changes": ["the chrome round of 2026-09-11: Undo to here carries its tooltip"]
     },
     "src/HistoryPanel.css": {
       "source": "new (M3, SPEC 6.5; the fields, seg, select and button grammar from tokens.css and the ported components)",
@@ -434,6 +482,66 @@
     },
     "src/Thumb.css": {
       "source": "new (M3, SPEC 5.5)",
+      "commit": ""
+    },
+    "src/Tooltip.tsx": {
+      "source": "new (the chrome round of 2026-09-11; the kbd chip grammar from Toolbar.css .pt-search-kbd and the plate grammar from tokens.css)",
+      "commit": ""
+    },
+    "src/Tooltip.css": {
+      "source": "new (the chrome round of 2026-09-11)",
+      "commit": ""
+    },
+    "src/IconPicker.tsx": {
+      "source": "new (the chrome round of 2026-09-11; the card lifted out of inspector/icon.tsx of M3)",
+      "commit": ""
+    },
+    "src/IconPicker.css": {
+      "source": "new (the chrome round of 2026-09-11; the rules of inspector/icon.css of M3)",
+      "commit": ""
+    },
+    "src/InsertMenu.tsx": {
+      "source": "new (the chrome round of 2026-09-11; the card grammar of ExportMenu.tsx and the row menu of Sidebar.tsx)",
+      "commit": ""
+    },
+    "src/InsertMenu.css": {
+      "source": "new (the chrome round of 2026-09-11)",
+      "commit": ""
+    },
+    "src/inspector/sections.ts": {
+      "source": "new (the chrome round of 2026-09-11, SPEC 6.5)",
+      "commit": ""
+    },
+    "src/inspector/palette.tsx": {
+      "source": "new (the chrome round of 2026-09-11; schema/color.ts)",
+      "commit": ""
+    },
+    "src/inspector/palette.css": {
+      "source": "new (the chrome round of 2026-09-11)",
+      "commit": ""
+    },
+    "src/inspector/typography.tsx": {
+      "source": "new (the chrome round of 2026-09-11; schema/typography.ts)",
+      "commit": ""
+    },
+    "src/inspector/typography.css": {
+      "source": "new (the chrome round of 2026-09-11)",
+      "commit": ""
+    },
+    "src/inspector/position.tsx": {
+      "source": "new (the chrome round of 2026-09-11; schema/position.ts and freeform.ts)",
+      "commit": ""
+    },
+    "src/inspector/position.css": {
+      "source": "new (the chrome round of 2026-09-11)",
+      "commit": ""
+    },
+    "src/inspector/lint-mark.tsx": {
+      "source": "new (the chrome round of 2026-09-11)",
+      "commit": ""
+    },
+    "src/inspector/lint-mark.css": {
+      "source": "new (the chrome round of 2026-09-11)",
       "commit": ""
     }
   },

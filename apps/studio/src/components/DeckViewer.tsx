@@ -43,6 +43,8 @@ export type DeckViewerProps = {
   mode?: ShellMode;
   /** ?theme= from the route: applied once on mount, ahead of the stored theme */
   theme?: Theme;
+  /** ?present=1 from the route: present mode (chrome hidden) on mount */
+  present?: boolean;
   /** the frame protocol for Prototemplate's /deck iframe */
   embed?: boolean;
   onModeChange?: (mode: ShellMode) => void;
@@ -82,7 +84,14 @@ function postSlide(n: number): void {
   }
 }
 
-export function DeckViewer({ payload, mode, theme, embed = false, onModeChange }: DeckViewerProps) {
+export function DeckViewer({
+  payload,
+  mode,
+  theme,
+  present = false,
+  embed = false,
+  onModeChange,
+}: DeckViewerProps) {
   const { deck, sprite } = payload;
   const sections = useMemo(() => toSections(deck), [deck]);
 
@@ -132,10 +141,26 @@ export function DeckViewer({ payload, mode, theme, embed = false, onModeChange }
         }
       >
         <StageBridge deck={deck} serverTheme={theme ?? 'dark'} />
+        <PresentOnLoad on={present} />
         <ViewerOwner deck={deck} attach={!embed} />
       </ViewerShell>
     </>
   );
+}
+
+/**
+ * ?present=1: present mode on mount, through the shell's own setPresent (the grid hands over to
+ * the slide, the list leaves with the chrome), so /deck/<id>?present=1 opens as the presentation
+ * the way the P key would. Rendered inside the shell, where its state is in scope.
+ */
+function PresentOnLoad({ on }: { on: boolean }) {
+  const shell = usePtShell();
+  const shellRef = useRef(shell);
+  shellRef.current = shell;
+  useMountEffect(() => {
+    if (on) shellRef.current.setPresent(true);
+  });
+  return null;
 }
 
 /**

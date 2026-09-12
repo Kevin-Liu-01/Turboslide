@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { KeyboardEvent } from 'react';
 
+import { tipProps } from '../Tooltip';
 import type { ControlProps } from './props';
 import { optionValue } from './props';
 
@@ -70,6 +71,12 @@ export function JsonControl({ spec, onChange, disabled }: ControlProps) {
     }
   };
 
+  const fieldTip = tipProps({
+    name: `${spec.inspector.label} as JSON`,
+    doc: spec.inspector.help ?? 'A JSON value; Cmd Enter or Ctrl Enter commits, Escape restores.',
+    key: 'Cmd Enter',
+  });
+
   return (
     <span className="ts-ctl-json">
       {options !== undefined ? (
@@ -79,6 +86,10 @@ export function JsonControl({ spec, onChange, disabled }: ControlProps) {
           data-control={showField ? `${spec.control}.form` : spec.control}
           value={picked}
           disabled={disabled}
+          {...tipProps({
+            name: spec.inspector.label,
+            doc: spec.inspector.help ?? 'One of the common forms, or custom for a JSON value.',
+          })}
           onChange={(event) => {
             const raw = event.target.value;
             if (raw === 'custom') {
@@ -111,9 +122,16 @@ export function JsonControl({ spec, onChange, disabled }: ControlProps) {
           placeholder={spec.optional ? 'none' : undefined}
           disabled={disabled}
           spellCheck={false}
+          {...fieldTip}
           onChange={(event) => setDraft(event.target.value)}
-          onBlur={commit}
-          onKeyDown={onKey}
+          onBlur={(event) => {
+            fieldTip.onBlur(event);
+            commit();
+          }}
+          onKeyDown={(event) => {
+            fieldTip.onKeyDown(event);
+            onKey(event);
+          }}
         />
       ) : null}
       {error ? (

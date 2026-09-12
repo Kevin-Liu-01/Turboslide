@@ -1,0 +1,48 @@
+/* The typography control: five 28px sub-rows under the Typography label, each the field's
+   14px glyph and word at the left in ink-2 and its stepper or Seg at the right, the unit in
+   11px titanium after the field and the lint mark after that. The sub-rows draw no rule of
+   their own: the control sits in one wide inspector row, which draws the one --pt-hair-soft
+   rule under itself (SPEC 2.2 line law). */
+.ts-ctl-typo {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+
+.ts-ctl-typo-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 28px;
+}
+
+.ts-ctl-typo-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--pt-ink-2);
+  white-space: nowrap;
+}
+
+.ts-ctl-typo-label svg {
+  fill: currentColor;
+  color: var(--pt-titanium);
+  flex: 0 0 auto;
+}
+
+.ts-ctl-typo-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.ts-ctl-typo-unit {
+  font-size: 11px;
+  color: var(--pt-titanium);
+  min-width: 18px;
+}

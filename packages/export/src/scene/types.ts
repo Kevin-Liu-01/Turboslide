@@ -80,17 +80,43 @@ export type SceneRule = {
   blockId?: string;
   /** Shapes that share a group key are wrapped in one grpSp (SPEC 8.2: a ruled row moves as one). */
   group?: string;
-  role: 'frame' | 'cross' | 'rows' | 'plain' | 'panel' | 'border';
+  /** `rule` is the rule block of the freeform round (docs/freeform.md), measured from its own box. */
+  role: 'frame' | 'cross' | 'rows' | 'plain' | 'panel' | 'border' | 'rule';
 };
+
+/** The native geometry a rect travels as: a rectangle, a rounded rectangle or an ellipse (prstGeom). */
+export type SceneShapeKind = 'rect' | 'roundRect' | 'ellipse';
 
 export type SceneRect = {
   box: Box;
+  /** The computed fill; `rgba(0, 0, 0, 0)` for a shape with no fill, which the builder writes as no fill. */
   fill: string;
   blockId?: string;
-  role: 'plate' | 'chip' | 'panel' | 'other';
+  /** `box` and `shape` are the freeform round's box and closed shape blocks (docs/freeform.md). */
+  role: 'plate' | 'chip' | 'panel' | 'other' | 'box' | 'shape';
   group?: string;
   /** An outline, when the element draws a border on every side (the code panel in dark). */
   line?: { color: string; width: number };
+  /** The geometry; a plain rectangle when absent. */
+  shape?: SceneShapeKind;
+  /** The corner radius of a rounded rectangle in sheet px. */
+  radius?: number;
+};
+
+/**
+ * A line or arrow of a shape block (docs/freeform.md), measured from the svg's ends in sheet px;
+ * the builder writes a native line with a triangle head at the headed ends. (`SceneLine` above is
+ * a line of text; this is a drawn segment.)
+ */
+export type SceneSegment = {
+  blockId: string;
+  from: [number, number];
+  to: [number, number];
+  /** The computed stroke color, rgb() or rgba(). */
+  color: string;
+  /** Stroke width in sheet px. */
+  width: number;
+  heads: 'none' | 'start' | 'end' | 'both';
 };
 
 export type ScenePicture = {
@@ -159,6 +185,8 @@ export type Scene = {
   texts: SceneText[];
   rules: SceneRule[];
   rects: SceneRect[];
+  /** Lines and arrows of shape blocks; absent on a scene measured before the freeform round. */
+  lines?: SceneSegment[];
   rasters: SceneRaster[];
   blocks: SceneBlock[];
   notes?: string;

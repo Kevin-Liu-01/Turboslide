@@ -43,7 +43,10 @@ export const PAGE_RASTER_BUDGETS = {
  * through the invisible layer in flatten mode. A composite is a grid whose cells' blocks export as
  * themselves. The lint rule export/non-native and the exporter's report read this one list
  * (SPEC 3.3 item 3 keeps lint and export from importing each other, so the classification lives
- * here).
+ * here). The freeform round added the text box and the three vector primitives (text as a text
+ * box, box as a rectangle with a text box, shape as a native rectangle, rounded rectangle,
+ * ellipse, line or arrow, rule as a line; docs/freeform.md); the icon block stays a raster like
+ * every glyph (SPEC 8.6).
  */
 export const NATIVE_BLOCK_TYPES = [
   'heading',
@@ -54,6 +57,10 @@ export const NATIVE_BLOCK_TYPES = [
   'refs',
   'ladder',
   'panel',
+  'text',
+  'box',
+  'shape',
+  'rule',
 ] as const;
 
 export type NativeBlockType = (typeof NATIVE_BLOCK_TYPES)[number];

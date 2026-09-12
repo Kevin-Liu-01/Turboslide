@@ -40,12 +40,16 @@ export function blockOrder(root: ParentNode): string[] {
   return ids;
 }
 
-/** The innermost `[data-block]` at or above an event target inside `root`, or null. */
+/**
+ * The innermost `[data-block]` at or above an event target inside `root`, or null. A positioned
+ * block's `.free[data-free]` wrapper (render/slide.ts renderFreeform) counts as the block, so a
+ * press inside its box but outside its text still selects it.
+ */
 export function resolveBlock(target: EventTarget | null, root: Element): string | null {
   if (!(target instanceof Element)) return null;
-  const el = target.closest<HTMLElement>('[data-block]');
+  const el = target.closest<HTMLElement>('[data-block], .free[data-free]');
   if (!el || !root.contains(el)) return null;
-  return el.dataset.block ?? null;
+  return el.dataset['block'] ?? el.dataset['free'] ?? null;
 }
 
 /** The `[data-run]` at or above an event target inside `root`, with its element, or null. */
@@ -144,4 +148,50 @@ export function isEditableTarget(target: EventTarget | null): boolean {
     target.tagName === 'SELECT' ||
     target.isContentEditable
   );
+}
+
+// ---------------------------------------------------------------------------------------------
+// Multi-selection (this round's directive: Shift click and the marquee on a freeform slide)
+
+/**
+ * The selected block ids with the anchor first: the `Selection` the page owns names the anchor
+ * (what the inspector edits) and the Editor keeps the rest of a multi-selection in `extra`.
+ * Duplicates and a stray anchor in `extra` are dropped.
+ */
+export function selectedIds(selection: Selection, extra: readonly string[]): string[] {
+  const anchor = selectedBlockId(selection);
+  const out: string[] = anchor === null ? [] : [anchor];
+  for (const id of extra) if (!out.includes(id)) out.push(id);
+  return out;
+}
+
+/**
+ * A Shift click on `id`: added when absent, removed when present; removing the anchor promotes
+ * the first extra to anchor, and removing the last block clears the selection.
+ */
+export function toggleSelected(
+  selection: Selection,
+  extra: readonly string[],
+  id: string,
+): { selection: Selection; extra: string[] } {
+  const anchor = selectedBlockId(selection);
+  if (anchor === null) return { selection: { kind: 'block', blockId: id }, extra: [] };
+  if (anchor === id) {
+    const [next, ...rest] = extra;
+    return next === undefined
+      ? { selection: null, extra: [] }
+      : { selection: { kind: 'block', blockId: next }, extra: rest };
+  }
+  if (extra.includes(id)) {
+    return { selection: { kind: 'block', blockId: anchor }, extra: extra.filter((e) => e !== id) };
+  }
+  return { selection: { kind: 'block', blockId: anchor }, extra: [...extra, id] };
+}
+
+/** A selection of several blocks from an ordered id list: the first is the anchor. */
+export function selectionOf(ids: readonly string[]): { selection: Selection; extra: string[] } {
+  const [anchor, ...rest] = ids;
+  return anchor === undefined
+    ? { selection: null, extra: [] }
+    : { selection: { kind: 'block', blockId: anchor }, extra: rest };
 }

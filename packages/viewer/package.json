@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "React: Stage, Sheet, SlideView, GridView, BookView, LiveClone, theme boot, keys, hash sync; the editor's stage (Editor, Selection, Gestures, InlineText, snap tables); standalone/ is the framework-free tail.html port used by renderStandalone.",
+  "description": "React: Stage, Sheet, SlideView, GridView, BookView, LiveClone, theme boot, keys, hash sync; the editor's stage (Editor, Selection, Gestures, InlineText, snap tables, the freeform layout with Freeform, Marquee and Guides); standalone/ is the framework-free tail.html port used by renderStandalone.",
   "exports": {
     "./model": "./src/model.ts",
     "./theme": "./src/theme.ts",
@@ -18,6 +18,9 @@
     "./GridView": "./src/GridView.tsx",
     "./BookView": "./src/BookView.tsx",
     "./snap": "./src/snap.ts",
+    "./Freeform": "./src/Freeform.tsx",
+    "./Marquee": "./src/Marquee.tsx",
+    "./Guides": "./src/Guides.tsx",
     "./Selection": "./src/Selection.tsx",
     "./Gestures": "./src/Gestures.tsx",
     "./InlineText": "./src/InlineText.tsx",

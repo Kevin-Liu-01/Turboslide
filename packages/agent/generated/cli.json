@@ -95,6 +95,169 @@
       "milestone": "M4"
     },
     {
+      "action": "deck.pack",
+      "usage": "turboslide deck pack <id> --out <out>",
+      "command": [
+        "deck",
+        "pack"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "out",
+          "flag": "--out",
+          "type": "string",
+          "required": false,
+          "description": "The zip to write; defaults to <id>-r<revision>.zip"
+        },
+        {
+          "key": "versions",
+          "flag": "--versions",
+          "type": "boolean",
+          "required": false,
+          "description": "Carry versions/<n>.json; on by default (--no-versions turns it off)"
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "M6"
+    },
+    {
+      "action": "deck.unpack",
+      "usage": "turboslide deck unpack <file> --as <as> --replace",
+      "command": [
+        "deck",
+        "unpack"
+      ],
+      "positionals": [
+        "file"
+      ],
+      "options": [
+        {
+          "key": "as",
+          "flag": "--as",
+          "type": "string",
+          "required": false,
+          "description": "The deck id to write under; the bundle id when absent"
+        },
+        {
+          "key": "replace",
+          "flag": "--replace",
+          "type": "boolean",
+          "required": false,
+          "description": "Remove the deck that holds the id first; without it a taken id gets a free sibling"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--replace"
+        }
+      ],
+      "mutates": true,
+      "milestone": "M6"
+    },
+    {
+      "action": "deck.push",
+      "usage": "turboslide deck push <id> --to <to> --token <token> --as <as> --replace --from-url <fromUrl>",
+      "command": [
+        "deck",
+        "push"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "to",
+          "flag": "--to",
+          "type": "string",
+          "required": true,
+          "description": "The studio, such as https://turboslide.vercel.app"
+        },
+        {
+          "key": "token",
+          "flag": "--token",
+          "type": "string",
+          "required": false,
+          "description": "The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use"
+        },
+        {
+          "key": "as",
+          "flag": "--as",
+          "type": "string",
+          "required": false,
+          "description": "The id the deck takes on the studio; the local id when absent"
+        },
+        {
+          "key": "replace",
+          "flag": "--replace",
+          "type": "boolean",
+          "required": false,
+          "description": "Replace the deck of that id on the studio"
+        },
+        {
+          "key": "fromUrl",
+          "flag": "--from-url",
+          "type": "string",
+          "required": false,
+          "description": "A bundle already stored at a URL the studio may read (the deck store Blob host); the studio fetches it instead of receiving the bytes, for bundles over a function 4.5 MB body cap"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M6"
+    },
+    {
+      "action": "deck.pull",
+      "usage": "turboslide deck pull <id> --from <from> --token <token> --as <as> --replace",
+      "command": [
+        "deck",
+        "pull"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "from",
+          "flag": "--from",
+          "type": "string",
+          "required": true,
+          "description": "The studio, such as https://turboslide.vercel.app"
+        },
+        {
+          "key": "token",
+          "flag": "--token",
+          "type": "string",
+          "required": false,
+          "description": "The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use"
+        },
+        {
+          "key": "as",
+          "flag": "--as",
+          "type": "string",
+          "required": false,
+          "description": "The id the deck takes under decks/; the id on the studio when absent"
+        },
+        {
+          "key": "replace",
+          "flag": "--replace",
+          "type": "boolean",
+          "required": false,
+          "description": "Replace the local deck of that id"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--replace"
+        }
+      ],
+      "mutates": true,
+      "milestone": "M6"
+    },
+    {
       "action": "slide.list",
       "usage": "turboslide slides",
       "command": [
@@ -279,6 +442,49 @@
       "milestone": "M2"
     },
     {
+      "action": "slide.setLayout",
+      "usage": "turboslide slide set-layout <slideId> --type <type> --ratio <ratio> --gap <gap> --layout <layout>",
+      "command": [
+        "slide",
+        "set-layout"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "layout",
+          "flag": "--layout",
+          "type": "object | object | object | object | object | object",
+          "required": true,
+          "description": "The target layout with its options"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--type",
+          "template": "<type>"
+        },
+        {
+          "flag": "--ratio",
+          "template": "<ratio>"
+        },
+        {
+          "flag": "--gap",
+          "template": "<gap>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "M6"
+    },
+    {
       "action": "block.set",
       "usage": "turboslide block set <slideId>#<blockId> <path> <value>",
       "command": [
@@ -419,6 +625,165 @@
       "custom": [],
       "mutates": true,
       "milestone": "M2"
+    },
+    {
+      "action": "block.align",
+      "usage": "turboslide block align <slideId> --blocks <blockIds> --edge <edge> --to <to>",
+      "command": [
+        "block",
+        "align"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "blockIds",
+          "flag": "--blocks",
+          "type": "string[]",
+          "required": true,
+          "description": "The blocks to move, top level of a freeform slide"
+        },
+        {
+          "key": "edge",
+          "flag": "--edge",
+          "type": "\"left\" | \"center\" | \"right\" | \"top\" | \"middle\" | \"bottom\"",
+          "required": true,
+          "description": "left, center or right move x; top, middle or bottom move y",
+          "enum": [
+            "left",
+            "center",
+            "right",
+            "top",
+            "middle",
+            "bottom"
+          ]
+        },
+        {
+          "key": "to",
+          "flag": "--to",
+          "type": "\"selection\" | \"content\" | \"sheet\"",
+          "required": false,
+          "description": "The reference box; 'selection' for several blocks and 'content' for one unless set",
+          "enum": [
+            "selection",
+            "content",
+            "sheet"
+          ]
+        },
+        {
+          "key": "snap",
+          "flag": "--snap",
+          "type": "boolean",
+          "required": false,
+          "description": "Snap the moved edges to the guides and the grid; on unless false"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M6"
+    },
+    {
+      "action": "block.distribute",
+      "usage": "turboslide block distribute <slideId> --blocks <blockIds> --axis <axis> --gap <gap>",
+      "command": [
+        "block",
+        "distribute"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "blockIds",
+          "flag": "--blocks",
+          "type": "string[]",
+          "required": true
+        },
+        {
+          "key": "axis",
+          "flag": "--axis",
+          "type": "\"horizontal\" | \"vertical\"",
+          "required": true,
+          "enum": [
+            "horizontal",
+            "vertical"
+          ]
+        },
+        {
+          "key": "gap",
+          "flag": "--gap",
+          "type": "number",
+          "required": false,
+          "description": "A fixed gap in px instead of equal spacing"
+        },
+        {
+          "key": "snap",
+          "flag": "--snap",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M6"
+    },
+    {
+      "action": "block.order",
+      "usage": "turboslide block order <slideId>#<blockId> --move <move> --z <z>",
+      "command": [
+        "block",
+        "order"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId"
+      ],
+      "options": [
+        {
+          "key": "move",
+          "flag": "--move",
+          "type": "\"front\" | \"back\" | \"forward\" | \"backward\"",
+          "required": false,
+          "enum": [
+            "front",
+            "back",
+            "forward",
+            "backward"
+          ]
+        },
+        {
+          "key": "z",
+          "flag": "--z",
+          "type": "integer",
+          "required": false,
+          "description": "The target rank in the stack, 0 at the back"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "M6"
     },
     {
       "action": "section.set",
@@ -1084,7 +1449,7 @@
         {
           "key": "rule",
           "flag": "--rule",
-          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
+          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
           "required": false,
           "enum": [
             "sheet/overflow",
@@ -1095,8 +1460,10 @@
             "type/weight-cap",
             "type/face",
             "type/sizes-ladder",
+            "type/ladder",
             "color/tokens-only",
             "color/semantic-icons-only",
+            "color/off-palette",
             "icon/placement",
             "icon/known",
             "rows/two-lines",
@@ -1128,6 +1495,9 @@
             "layout/empty-half",
             "layout/pair-gaps",
             "layout/columns-aligned",
+            "layout/freeform",
+            "freeform/overlap",
+            "freeform/off-sheet",
             "scales/marker-equals-value",
             "escape/html-block",
             "export/non-native",
@@ -1157,7 +1527,7 @@
         {
           "key": "rule",
           "flag": "--rule",
-          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
+          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
           "required": false,
           "enum": [
             "sheet/overflow",
@@ -1168,8 +1538,10 @@
             "type/weight-cap",
             "type/face",
             "type/sizes-ladder",
+            "type/ladder",
             "color/tokens-only",
             "color/semantic-icons-only",
+            "color/off-palette",
             "icon/placement",
             "icon/known",
             "rows/two-lines",
@@ -1201,6 +1573,9 @@
             "layout/empty-half",
             "layout/pair-gaps",
             "layout/columns-aligned",
+            "layout/freeform",
+            "freeform/overlap",
+            "freeform/off-sheet",
             "scales/marker-equals-value",
             "escape/html-block",
             "export/non-native",

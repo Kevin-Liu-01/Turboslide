@@ -2,6 +2,7 @@ import type { KeyboardEvent } from 'react';
 import { useState } from 'react';
 
 import type { EditorWriter } from './dispatch';
+import { tipProps } from './Tooltip';
 
 import './DeckName.css';
 
@@ -58,6 +59,12 @@ export function DeckName({ title, revision, dispatch, onNotice, className }: Dec
     }
   };
 
+  const fieldTip = tipProps({
+    name: 'Deck name',
+    doc: 'Type the new name; Enter or leaving the field writes deck.rename, Escape keeps the old one.',
+    key: 'Enter',
+  });
+
   if (editing) {
     return (
       <span
@@ -73,10 +80,20 @@ export function DeckName({ title, revision, dispatch, onNotice, className }: Dec
           data-control="deck.name"
           spellCheck={false}
           autoComplete="off"
+          {...fieldTip}
           onChange={(event) => setValue(event.target.value)}
-          onKeyDown={onKey}
-          onBlur={commit}
-          onFocus={(event) => event.currentTarget.select()}
+          onKeyDown={(event) => {
+            fieldTip.onKeyDown(event);
+            onKey(event);
+          }}
+          onBlur={(event) => {
+            fieldTip.onBlur(event);
+            commit();
+          }}
+          onFocus={(event) => {
+            fieldTip.onFocus(event);
+            event.currentTarget.select();
+          }}
         />
       </span>
     );
@@ -86,10 +103,13 @@ export function DeckName({ title, revision, dispatch, onNotice, className }: Dec
     <button
       type="button"
       className={['pt-ib ts-deckname', className ?? ''].filter(Boolean).join(' ')}
-      title="Rename the deck (click, type the name, press Enter)"
       aria-label="Deck name"
       data-control="deck.name"
       onClick={open}
+      {...tipProps({
+        name: 'Deck name',
+        doc: 'The deck this editor is on; click to rename it (deck.rename).',
+      })}
     >
       <b data-gives="">{title}</b>
     </button>

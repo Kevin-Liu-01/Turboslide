@@ -35,8 +35,10 @@ export type SegOption<T extends string> = {
   value: T;
   label: string;
   icon?: IconName;
-  /** tooltip naming the key, as in 'Every slide as a grid (G)' */
+  /** tooltip naming the key, as in 'Every slide as a grid (G)' (Tooltip.tsx reads it) */
   title: string;
+  /** one sentence for the tooltip when the title is the name alone */
+  doc?: string;
 };
 
 export type SegProps<T extends string> = {
@@ -132,6 +134,7 @@ export function Seg<T extends string>({
           label={iconOnly ? undefined : option.label}
           ariaLabel={iconOnly ? option.label : undefined}
           title={option.title}
+          doc={option.doc}
           pressed={option.value === value}
           control={control ? `${control}.${option.value}` : undefined}
           onClick={() => pick(option.value)}

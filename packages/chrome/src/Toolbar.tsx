@@ -3,6 +3,8 @@ import { useLayoutEffect, useRef, useState } from 'react';
 
 import { GtMark } from './GtMark';
 import { Icon } from './icons';
+import { InsertMenu } from './InsertMenu';
+import type { InsertMenuProps } from './InsertMenu';
 import { cn } from './lib/cn';
 import { useMountEffect } from './lib/useMountEffect';
 import { Seg } from './Seg';
@@ -10,8 +12,10 @@ import type { SegOption } from './Seg';
 import { usePtShell } from './shell-context';
 import { MODE_ORDER, pad2, previewId } from './shell-data';
 import type { ShellMode } from './shell-data';
+import { PRODUCT_NAME } from './Sidebar';
 import { ThemeButton } from './ThemeButton';
 import { ToolButton } from './ToolButton';
+import { tipProps } from './Tooltip';
 import { toggleFullscreen } from './useShellKeys';
 
 import './Toolbar.css';
@@ -20,22 +24,24 @@ import './Toolbar.css';
  * The 52px bar over the stage, ported from
  * Prototemplate/src/components/viewer/Toolbar.tsx (SPEC 2.2, 6.3). Left
  * group: the list toggle (aria-pressed follows the list but the ink frame
- * does not, since the open list is its own state), the brand (in the DOM
- * always, shown by Toolbar.css only while the sidebar column is closed),
- * then Previous, the count (a button: click it, type a number, press Enter)
- * and Next while the route is paging. Right group: the route's own controls
- * (`slot`, where the editor puts Edit | View, Twin, Lint and Source in M3),
- * the mode seg in one fixed order (Slide, Grid, Book), Theme, Present (in
- * slide mode only, the one solid button), Fullscreen, Copy link and Help.
- * With `onSearch` the Search pill (SPEC 6.3: the field-shaped button with
- * the Cmd K chip, Ctrl K off Apple) opens the right group, and `status`
- * (the editor's StatusChip, SPEC 6.1) sits left of it. Every control is a
- * labeled ToolButton with a title naming its key. The labels collapse in
- * measured tiers when the bar runs short (Toolbar.css): the four ported
- * tiers, then a fifth for the editor's over-full bar.
+ * does not, since the open list is its own state), the brand (the mark and
+ * the product name Turboslide, in the DOM always, shown by Toolbar.css only
+ * while the sidebar column is closed), then Previous, the count (a button:
+ * click it, type a number, press Enter) and Next while the route is paging.
+ * Right group: the status slot (`status`, the editor's DeckName and
+ * StatusChip, SPEC 6.1; the deck's title read only on a route without
+ * them), the Search pill (SPEC 6.3: the field-shaped button with the Cmd K
+ * chip, Ctrl K off Apple, drawn with `onSearch`), the route's own controls
+ * (`slot`, where the editor puts Insert, Edit | View, Twin, Lint, Source and
+ * Export), the mode seg in one fixed order (Slide, Grid, Book), Theme,
+ * Present (in slide mode only, the one solid button), Fullscreen, Copy link
+ * and Help. Every control is a labeled ToolButton with a title naming its
+ * key, which is its tooltip (Tooltip.tsx). The labels collapse in measured
+ * tiers when the bar runs short (Toolbar.css): the four ported tiers, then a
+ * fifth for the editor's over-full bar.
  */
 export type ToolbarProps = {
-  /** the deck's title, shown with the mark while the sidebar is hidden */
+  /** the deck's title: read only in the status slot when the route passes no `status` */
   title: string;
   /** the route's own controls, first in the right group after the search pill */
   slot?: ReactNode;
@@ -56,6 +62,8 @@ export type ToolbarProps = {
  * every flag and the keys (E, Shift D, Cmd L, Cmd /).
  */
 export type EditToolsProps = {
+  /** the Insert menu (InsertMenu.tsx), first in the group, when the route passes its entries */
+  insert?: InsertMenuProps;
   edit: boolean;
   onEdit: (edit: boolean) => void;
   twin: boolean;
@@ -69,11 +77,22 @@ export type EditToolsProps = {
 };
 
 const EDIT_OPTIONS: readonly SegOption<'edit' | 'view'>[] = [
-  { value: 'edit', label: 'Edit', title: 'Edit the slide (E)' },
-  { value: 'view', label: 'View', title: 'View only (E)' },
+  {
+    value: 'edit',
+    label: 'Edit',
+    title: 'Edit (E)',
+    doc: 'Selection, drag and the inspector on the stage; every change is one action.',
+  },
+  {
+    value: 'view',
+    label: 'View',
+    title: 'View (E)',
+    doc: 'The sheet alone, as the viewer shows it; nothing on the stage writes.',
+  },
 ];
 
 export function EditTools({
+  insert,
   edit,
   onEdit,
   twin,
@@ -86,6 +105,7 @@ export function EditTools({
 }: EditToolsProps) {
   return (
     <>
+      {insert ? <InsertMenu {...insert} /> : null}
       <Seg
         options={EDIT_OPTIONS}
         value={edit ? 'edit' : 'view'}
@@ -151,11 +171,16 @@ function SearchPill({ onOpen, open }: { onOpen: () => void; open: boolean }) {
     <button
       type="button"
       className="pt-ib pt-search-btn"
-      title="Search slides, actions and views (Cmd K or Ctrl K)"
+      aria-label="Search"
       aria-haspopup="dialog"
       aria-expanded={open}
       data-control="palette.open"
       onClick={onOpen}
+      {...tipProps({
+        name: 'Search',
+        doc: 'Opens the palette: slides, insert, every action, views and versions.',
+        key: chip === MAC_CHIP ? 'Cmd K' : 'Ctrl K',
+      })}
     >
       <Icon name="search" />
       <span className="pt-lb">Search</span>
@@ -164,6 +189,10 @@ function SearchPill({ onOpen, open }: { onOpen: () => void; open: boolean }) {
       </kbd>
     </button>
   );
+}
+
+function capitalize(word: string): string {
+  return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
 /* the action words of directive 7.6 */
@@ -263,6 +292,12 @@ function Count() {
     shell.select(item.id);
   };
 
+  const fieldTip = tipProps({
+    name: `Go to a ${noun}`,
+    doc: `Type the ${noun} number; Enter goes there, Escape keeps the place.`,
+    key: 'Enter',
+  });
+
   if (editing) {
     return (
       <span className="pt-count is-editing">
@@ -277,9 +312,16 @@ function Count() {
           placeholder={pad2(Math.max(1, index + 1))}
           aria-label={`Go to a ${noun} by number`}
           data-control="view.goto"
+          {...fieldTip}
           onChange={(event) => setValue(event.target.value.replace(/\D/g, ''))}
-          onKeyDown={onKey}
-          onBlur={close}
+          onKeyDown={(event) => {
+            fieldTip.onKeyDown(event);
+            onKey(event);
+          }}
+          onBlur={(event) => {
+            fieldTip.onBlur(event);
+            close();
+          }}
         />
         <span> / {pad2(total)}</span>
       </span>
@@ -290,10 +332,14 @@ function Count() {
     <button
       type="button"
       className="pt-ib pt-count"
-      title={`Go to a ${noun} by number (click, type it, press Enter)`}
+      aria-label={`${noun} ${index + 1} of ${total}`}
       data-preview={next ? previewId(next) : undefined}
       data-control="view.count"
       onClick={open}
+      {...tipProps({
+        name: `${capitalize(noun)} ${index < 0 ? total : index + 1} of ${total}`,
+        doc: `Click, type a ${noun} number and press Enter to go there; digits typed on the sheet do the same.`,
+      })}
     >
       {countLabel ? <span className="pt-count-word">{countLabel}</span> : null}
       {index < 0 ? (
@@ -472,6 +518,7 @@ export function Toolbar({
         <ToolButton
           icon="sidebar"
           title="Show or hide the list ([)"
+          doc="The slide list at the left; S does the same."
           pressed={sidebarOpen}
           quiet
           className="pt-list"
@@ -481,7 +528,7 @@ export function Toolbar({
         {/* always rendered; Toolbar.css shows it while the shell root says the column is closed */}
         <span className="pt-bar-brand">
           <GtMark />
-          <b>{title}</b>
+          <b>{PRODUCT_NAME}</b>
         </span>
         {paging ? (
           <>
@@ -490,6 +537,7 @@ export function Toolbar({
               icon="prev"
               label="Previous"
               title="Previous (left arrow)"
+              doc="The slide before this one; Page up, Backspace, K and H do the same."
               className="pt-prev"
               control="view.prev"
               onClick={() => shell.step(-1)}
@@ -499,6 +547,7 @@ export function Toolbar({
               icon="next"
               label="Next"
               title="Next (right arrow)"
+              doc="The slide after this one; Space, Page down, J and L do the same."
               className="pt-next"
               control="view.next"
               onClick={() => shell.step(1)}
@@ -507,7 +556,19 @@ export function Toolbar({
         ) : null}
       </div>
       <div className="pt-bar-r">
-        {status ? <div className="pt-bar-status">{status}</div> : null}
+        {status ? (
+          <div className="pt-bar-status">{status}</div>
+        ) : title ? (
+          <div className="pt-bar-status">
+            <span
+              className="pt-bar-deck"
+              data-gives=""
+              {...tipProps({ name: title, doc: 'The deck this view shows.' })}
+            >
+              {title}
+            </span>
+          </div>
+        ) : null}
         {onSearch ? <SearchPill onOpen={onSearch} open={searchOpen} /> : null}
         {slot ? <div className="pt-bar-slot">{slot}</div> : null}
         {showSeg ? (
@@ -526,7 +587,8 @@ export function Toolbar({
           <ToolButton
             icon="present"
             label="Present"
-            title="Presentation mode, chrome hidden (P)"
+            title="Present (P)"
+            doc="Presentation mode: the sheet alone with the chrome hidden; Escape returns."
             solid
             hideSm
             className="pt-present-btn"
@@ -537,7 +599,12 @@ export function Toolbar({
         <ToolButton
           icon={fullscreen ? 'exit-fullscreen' : 'fullscreen'}
           label={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-          title={fullscreen ? 'Leave fullscreen (F)' : 'Fullscreen (F)'}
+          title={fullscreen ? 'Exit fullscreen (F)' : 'Fullscreen (F)'}
+          doc={
+            fullscreen
+              ? 'Leaves the browser’s fullscreen; the chrome stays as it was.'
+              : 'The browser’s fullscreen, the chrome kept; Present hides it too.'
+          }
           hideSm
           className="pt-full"
           control="view.fullscreen"
@@ -548,7 +615,8 @@ export function Toolbar({
         <ToolButton
           icon="link"
           label="Copy link"
-          title="Copy a link to this view"
+          title="Copy link"
+          doc="Copies the address of this view, slide and mode included, to the clipboard."
           className="pt-copy"
           control="view.copyLink"
           onClick={() => {
@@ -559,6 +627,7 @@ export function Toolbar({
           icon="help"
           label="Help"
           title="Keyboard shortcuts (?)"
+          doc="The card of every key this route answers."
           pressed={helpOpen}
           className="pt-help-btn"
           control="view.help"

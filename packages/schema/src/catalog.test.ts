@@ -112,7 +112,12 @@ describe('the action table', () => {
         spec.id !== 'import.run' &&
         spec.id !== 'source.apply' &&
         // deck.create writes a deck that does not exist yet, so there is no revision to base on
-        spec.id !== 'deck.create'
+        spec.id !== 'deck.create' &&
+        // deck.unpack, deck.push and deck.pull write a whole deck folder from a bundle
+        // (docs/deck-transfer.md), so there is no document revision to base on either
+        spec.id !== 'deck.unpack' &&
+        spec.id !== 'deck.push' &&
+        spec.id !== 'deck.pull'
       ) {
         const json = z.toJSONSchema(spec.input, { target: 'draft-2020-12' }) as {
           properties?: Record<string, unknown>;
@@ -133,8 +138,9 @@ describe('the action table', () => {
 
   it('keeps the icon list in sprite order with the mark first', () => {
     expect(ICON_NAMES[0]).toBe('gt-mark');
-    // 64 Heroicons plus gt-mark since M5 added lock-closed (slide 83)
-    expect(ICON_NAMES).toHaveLength(65);
-    expect(new Set(ICON_NAMES).size).toBe(65);
+    // 67 Heroicons plus gt-mark: M5 added lock-closed (slide 83), the editor depth round the three
+    // bars glyphs of the arrange bar's align buttons
+    expect(ICON_NAMES).toHaveLength(68);
+    expect(new Set(ICON_NAMES).size).toBe(68);
   });
 });

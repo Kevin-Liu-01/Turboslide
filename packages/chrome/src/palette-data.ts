@@ -4,20 +4,30 @@
 // not palette, because a case-insensitive file system resolves `./palette` to Palette.tsx.) Because the Actions
 // group lists every action-table entry that carries a label, anything an agent can invoke a
 // human can find by name (SPEC 6.3); an entry runs through the dispatcher with an input built
-// from the current view, or names the input it still needs.
+// from the current view, or names the input it still needs. The Insert group (Kevin, 2026-09-11:
+// "reuse primitives and icons like boxes and shapes") leads with the primitives palette: Box,
+// Shape in its five kinds, Rule, Text, Icon (through the sprite picker), Image and Material,
+// then the grammar's other blocks and the slide templates; the same entries feed the toolbar's
+// Insert menu (InsertMenu.tsx). On a freeform slide every inserted block carries a position box
+// (docs/freeform.md) under the selected block or at the content box's top left.
 import type { ActionId, ActionSpec } from '@turboslide/schema/actions';
 import { actionsInOrder } from '@turboslide/schema/actions';
-import type { Block, BlockType } from '@turboslide/schema/blocks';
+import type { Block, BlockType, ShapeKind } from '@turboslide/schema/blocks';
+import { PRIMITIVE_BLOCK_TYPES, SHAPE_KINDS } from '@turboslide/schema/blocks';
 import { CATALOG } from '@turboslide/schema/catalog';
 import type { Deck, Slide, SlideKind, SlotName } from '@turboslide/schema/deck';
 import { slideBlocks, slideTitle, slotsForLayout } from '@turboslide/schema/deck';
+import { FREEFORM_GRID, snapPosition } from '@turboslide/schema/freeform';
 import type { BlockId, SlideId } from '@turboslide/schema/ids';
 import type { BlockSlot, Version } from '@turboslide/schema/mutations';
+import type { Position } from '@turboslide/schema/position';
+import { CONTENT_BOX } from '@turboslide/schema/render';
 
 import { authorName } from './dispatch';
 import type { IconName } from './icons';
+import { BLOCK_ICONS, KIND_ICONS } from './inspector/sections';
 import type { ShellMode } from './shell-data';
-import { SLIDE_TEMPLATES, templateTitle } from './slide-templates';
+import { SLIDE_TEMPLATES, pickAsset, templateTitle } from './slide-templates';
 
 export type PaletteGroupId = 'slides' | 'insert' | 'actions' | 'view' | 'versions';
 
@@ -40,10 +50,11 @@ export const PALETTE_GROUPS: ReadonlyArray<PaletteGroup> = [
 
 /**
  * What Enter does on an entry. `dispatch` runs the action through the dispatcher with the input
- * as built; `prompt` asks for one field first (a version note) and then dispatches; `call` runs a
- * view toggle that is not an action-table entry (twin, lint layer, edit, source); `needs` names
- * an input the palette cannot build from the view (a file, a URL, revisions), so Enter reports it
- * and the CLI or the source drawer takes the action.
+ * as built; `prompt` asks for one field first (a version note) and then dispatches; `icon` opens
+ * the sprite picker and writes the picked name at `path` inside the input before dispatching (the
+ * Icon primitive); `call` runs a view toggle that is not an action-table entry (twin, lint layer,
+ * edit, source); `needs` names an input the palette cannot build from the view (a file, a URL,
+ * revisions), so Enter reports it and the CLI or the source drawer takes the action.
  */
 export type PaletteRun =
   | { kind: 'dispatch'; action: ActionId; input: unknown }
@@ -52,6 +63,14 @@ export type PaletteRun =
       action: ActionId;
       input: Record<string, unknown>;
       field: string;
+      label: string;
+    }
+  | {
+      kind: 'icon';
+      action: ActionId;
+      input: Record<string, unknown>;
+      /** the JSON pointer inside the input the picked icon name lands at: `/block/name` */
+      path: string;
       label: string;
     }
   | { kind: 'call'; call: () => void }
@@ -73,6 +92,10 @@ export type PaletteEntry = {
   preview?: string;
   /** more words the filter matches, beyond the title */
   terms?: string;
+  /** an insert entry's family: a primitive, another block, or a slide template */
+  insert?: 'primitive' | 'block' | 'slide';
+  /** the shape kind of a Shape primitive entry */
+  variant?: ShapeKind;
   run: PaletteRun;
 };
 
@@ -111,14 +134,71 @@ export type PaletteContext = {
 /** The action ids the palette builds inputs for from the view; the rest name what they need. */
 type InputBuilder = (ctx: PaletteContext) => PaletteRun;
 
-const KIND_ICON: Record<SlideKind, IconName> = {
-  content: 'document',
-  opener: 'deck',
-  mood: 'photo',
-  closing: 'check-badge',
-  title: 'sparkles',
-  statement: 'document',
+const KIND_ICON: Record<SlideKind, IconName> = KIND_ICONS;
+
+/** The primitives in palette order (docs/freeform.md); Image and Material are the existing blocks under primitive names. */
+export const PRIMITIVE_ORDER: ReadonlyArray<BlockType> = [
+  ...PRIMITIVE_BLOCK_TYPES,
+  'shot',
+  'material',
+];
+
+/** The label an insert entry shows for a block type: the primitives' short names, the catalog's for the rest. */
+export function insertLabel(type: BlockType, variant?: ShapeKind): string {
+  if (type === 'shape' && variant !== undefined) return `${SHAPE_WORD[variant]} shape`;
+  if (type === 'shot') return 'Image';
+  return CATALOG[type].label;
+}
+
+const SHAPE_WORD: Readonly<Record<ShapeKind, string>> = {
+  rectangle: 'Rectangle',
+  rounded: 'Rounded rectangle',
+  ellipse: 'Ellipse',
+  line: 'Line',
+  arrow: 'Arrow',
 };
+
+const SHAPE_DOC: Readonly<Record<ShapeKind, string>> = {
+  rectangle: 'A rectangle filling its box, hairline stroke, no fill unless set.',
+  rounded: 'A rectangle with 8 px corners filling its box.',
+  ellipse: 'An ellipse filling its box.',
+  line: 'A line across its box, horizontal when the box is wider than tall.',
+  arrow: 'A line with a filled 8 px head at its end.',
+};
+
+/** The box a new block takes on a freeform slide, by type; in sheet px on the 8 px grid. */
+const DEFAULT_SIZE: Readonly<Record<string, [number, number]>> = {
+  box: [320, 184],
+  shape: [240, 160],
+  rule: [320, 8],
+  text: [480, 64],
+  icon: [48, 48],
+  shot: [480, 272],
+  material: [480, 272],
+  heading: [800, 56],
+  paragraph: [640, 104],
+};
+
+/**
+ * Where a new block lands on a freeform slide: under the selected block when it has a box, else
+ * at the content box's top left, snapped like a drag would be (freeform.ts snapPosition).
+ */
+export function defaultPosition(slide: Slide, type: BlockType, blockId?: BlockId): Position {
+  const [w, h] = DEFAULT_SIZE[type] ?? [320, 160];
+  const [contentX, contentY] = CONTENT_BOX;
+  const anchor =
+    blockId === undefined
+      ? undefined
+      : slideBlocks(slide).find(({ block }) => block.id === blockId)?.block.pos;
+  const x = anchor?.x ?? contentX;
+  const y = anchor === undefined ? contentY : anchor.y + anchor.h + FREEFORM_GRID * 2;
+  return snapPosition({ x, y, w, h });
+}
+
+/** True for a content slide under the freeform layout, where every block needs a position box. */
+export function isFreeform(slide: Slide): boolean {
+  return slide.kind === 'content' && slide.layout.type === 'freeform';
+}
 
 /* Cmd L is the lint layer toggle (SPEC 6.9), not lint.run, so lint.run shows no key */
 const VIEW_KEYS: Partial<Record<ActionId, string>> = {
@@ -272,69 +352,171 @@ function slideEntries(ctx: PaletteContext): PaletteEntry[] {
   return out;
 }
 
-function insertEntries(ctx: PaletteContext): PaletteEntry[] {
+function templateEntries(ctx: PaletteContext): PaletteEntry[] {
   const out: PaletteEntry[] = [];
-  const slide = currentSlide(ctx);
   const section = ctx.slideId === undefined ? undefined : sectionOf(ctx.deck, ctx.slideId);
   const sectionId = section?.id ?? ctx.deck.sections[0]?.id;
-  if (sectionId !== undefined) {
-    /* one entry per slide template (slide-templates.ts): the archetype kinds and layouts of the
-       GT template with placeholder copy; a template whose asset the deck lacks is not offered */
-    const taken = new Set(Object.keys(ctx.slides));
-    for (const template of SLIDE_TEMPLATES) {
-      const id = freeSlideId(taken, `new-${template.id}`);
-      const made = template.make(id, ctx.deck, sectionId);
-      if (made === null) continue;
-      out.push({
-        id: `insert:slide:${template.id}`,
-        group: 'insert',
-        title: templateTitle(template),
-        hint: template.doc,
-        meta: section ? `after this slide in ${section.name}` : 'first',
-        icon: template.icon,
-        terms: `slide template ${template.id} ${template.kind} ${template.layout ?? ''} ${template.source}`,
-        run: {
-          kind: 'dispatch',
-          action: 'slide.insert',
-          input: {
-            sectionId,
-            ...(ctx.slideId !== undefined ? { after: ctx.slideId } : {}),
-            slide: made,
-            baseRevision: ctx.revision,
-          },
-        },
-      });
-    }
-  }
-  if (slide === undefined) return out;
-  const slot = insertionSlot(slide, ctx.blockId);
-  if (slot === null) return out;
-  const where: 'content' | 'plate' = slot === 'plate' ? 'plate' : 'content';
-  for (const entry of Object.values(CATALOG)) {
-    if (!entry.allowedIn.includes(where)) continue;
-    const block: Block = entry.make(freeBlockId(slide, entry.type));
+  if (sectionId === undefined) return out;
+  /* one entry per slide template (slide-templates.ts): the archetype kinds and layouts of the
+     GT template with placeholder copy; a template whose asset the deck lacks is not offered */
+  const taken = new Set(Object.keys(ctx.slides));
+  for (const template of SLIDE_TEMPLATES) {
+    const id = freeSlideId(taken, `new-${template.id}`);
+    const made = template.make(id, ctx.deck, sectionId);
+    if (made === null) continue;
     out.push({
-      id: `insert:block:${entry.type}`,
+      id: `insert:slide:${template.id}`,
       group: 'insert',
-      title: `${entry.label} block`,
-      hint: entry.doc,
-      meta: `into ${slot}${ctx.blockId !== undefined ? ` after ${ctx.blockId}` : ''}`,
-      icon: 'document',
-      terms: `block ${entry.type} ${entry.group}`,
+      title: templateTitle(template),
+      hint: template.doc,
+      meta: section ? `after this slide in ${section.name}` : 'first',
+      icon: template.icon,
+      terms: `slide template ${template.id} ${template.kind} ${template.layout ?? ''} ${template.source}`,
+      insert: 'slide',
       run: {
         kind: 'dispatch',
-        action: 'block.insert',
+        action: 'slide.insert',
         input: {
-          slideId: slide.id,
-          slot,
-          ...(ctx.blockId !== undefined ? { after: ctx.blockId } : {}),
-          block,
+          sectionId,
+          ...(ctx.slideId !== undefined ? { after: ctx.slideId } : {}),
+          slide: made,
           baseRevision: ctx.revision,
         },
       },
     });
   }
   return out;
+}
+
+/** A block instance for an insert entry, with its position box on a freeform slide. */
+function madeBlock(
+  slide: Slide,
+  type: BlockType,
+  blockId: BlockId | undefined,
+  patch: Partial<Block> = {},
+): Block {
+  const block = { ...CATALOG[type].make(freeBlockId(slide, type)), ...patch } as Block;
+  return isFreeform(slide) ? { ...block, pos: defaultPosition(slide, type, blockId) } : block;
+}
+
+function blockEntries(ctx: PaletteContext): PaletteEntry[] {
+  const out: PaletteEntry[] = [];
+  const slide = currentSlide(ctx);
+  if (slide === undefined) return out;
+  const slot = insertionSlot(slide, ctx.blockId);
+  if (slot === null) return out;
+  const where: 'content' | 'plate' = slot === 'plate' ? 'plate' : 'content';
+  const meta = `into ${slot}${ctx.blockId !== undefined ? ` after ${ctx.blockId}` : ''}`;
+  const insertInput = (block: Block) => ({
+    slideId: slide.id,
+    slot,
+    ...(ctx.blockId !== undefined ? { after: ctx.blockId } : {}),
+    block,
+    baseRevision: ctx.revision,
+  });
+  const dispatchInsert = (block: Block): PaletteRun => ({
+    kind: 'dispatch',
+    action: 'block.insert',
+    input: insertInput(block),
+  });
+
+  /* the primitives first, in their own order */
+  for (const type of PRIMITIVE_ORDER) {
+    const entry = CATALOG[type];
+    if (!entry.allowedIn.includes(where)) continue;
+    if (type === 'shape') {
+      for (const variant of SHAPE_KINDS) {
+        out.push({
+          id: `insert:block:shape:${variant}`,
+          group: 'insert',
+          title: insertLabel('shape', variant),
+          hint: SHAPE_DOC[variant],
+          meta,
+          icon: 'cube',
+          terms: `shape ${variant} primitive block`,
+          insert: 'primitive',
+          variant,
+          run: dispatchInsert(madeBlock(slide, 'shape', ctx.blockId, { shape: variant })),
+        });
+      }
+      continue;
+    }
+    if (type === 'icon') {
+      out.push({
+        id: 'insert:block:icon',
+        group: 'insert',
+        title: insertLabel('icon'),
+        hint: entry.doc,
+        meta,
+        icon: BLOCK_ICONS.icon,
+        terms: 'icon glyph sprite primitive block',
+        insert: 'primitive',
+        run: {
+          kind: 'icon',
+          action: 'block.insert',
+          input: insertInput(madeBlock(slide, 'icon', ctx.blockId)),
+          path: '/block/name',
+          label: 'Pick the symbol',
+        },
+      });
+      continue;
+    }
+    if (type === 'shot') {
+      const asset = pickAsset(ctx.deck, ['capture', 'detail', 'thumb', 'render', 'other']);
+      out.push({
+        id: 'insert:block:image',
+        group: 'insert',
+        title: insertLabel('shot'),
+        hint: 'A picture from the deck’s assets in a bordered frame with a light and dark twin; pick another asset in the inspector.',
+        meta,
+        icon: BLOCK_ICONS.shot,
+        terms: 'image picture shot capture figure primitive block',
+        insert: 'primitive',
+        run:
+          asset === undefined
+            ? {
+                kind: 'needs',
+                action: 'block.insert',
+                reason: 'Add a picture in the Asset section first',
+              }
+            : dispatchInsert(madeBlock(slide, 'shot', ctx.blockId, { asset: asset.id })),
+      });
+      continue;
+    }
+    out.push({
+      id: `insert:block:${type}`,
+      group: 'insert',
+      title: insertLabel(type),
+      hint: entry.doc,
+      meta,
+      icon: BLOCK_ICONS[type],
+      terms: `${type} primitive block ${entry.group}`,
+      insert: 'primitive',
+      run: dispatchInsert(madeBlock(slide, type, ctx.blockId)),
+    });
+  }
+
+  /* then the grammar's other blocks */
+  for (const entry of Object.values(CATALOG)) {
+    if (!entry.allowedIn.includes(where)) continue;
+    if (PRIMITIVE_ORDER.includes(entry.type)) continue;
+    out.push({
+      id: `insert:block:${entry.type}`,
+      group: 'insert',
+      title: `${entry.label} block`,
+      hint: entry.doc,
+      meta,
+      icon: BLOCK_ICONS[entry.type],
+      terms: `block ${entry.type} ${entry.group}`,
+      insert: 'block',
+      run: dispatchInsert(madeBlock(slide, entry.type, ctx.blockId)),
+    });
+  }
+  return out;
+}
+
+function insertEntries(ctx: PaletteContext): PaletteEntry[] {
+  return [...blockEntries(ctx), ...templateEntries(ctx)];
 }
 
 /** How each action's input is built from the view; absent means the action needs an input the palette cannot build. */

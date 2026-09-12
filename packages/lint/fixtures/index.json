@@ -40,7 +40,8 @@
   "type/weight-cap": {
     "layer": "both",
     "slides": [
-      "bad-escape"
+      "bad-escape",
+      "fixed-points"
     ],
     "tests": [
       "packages/lint/src/lint.test.ts"
@@ -62,6 +63,15 @@
       "packages/lint/src/lint.test.ts"
     ]
   },
+  "type/ladder": {
+    "layer": "static",
+    "slides": [
+      "fixed-points"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
   "color/tokens-only": {
     "layer": "static",
     "slides": [
@@ -75,6 +85,15 @@
     "layer": "static",
     "slides": [
       "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "color/off-palette": {
+    "layer": "static",
+    "slides": [
+      "fixed-points"
     ],
     "tests": [
       "packages/lint/src/lint.test.ts"
@@ -353,6 +372,33 @@
     "slides": [],
     "tests": [
       "packages/lint/src/rendered/rules.test.ts"
+    ]
+  },
+  "layout/freeform": {
+    "layer": "static",
+    "slides": [
+      "fixed-points"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "freeform/overlap": {
+    "layer": "static",
+    "slides": [
+      "fixed-points"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "freeform/off-sheet": {
+    "layer": "static",
+    "slides": [
+      "fixed-points"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
     ]
   },
   "scales/marker-equals-value": {

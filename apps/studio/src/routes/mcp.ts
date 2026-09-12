@@ -23,10 +23,10 @@ function handler(): McpHttpHandler {
   const holder = globalThis as unknown as Record<symbol, McpHttpHandler | undefined>;
   holder[HANDLER] ??= createMcpHttpHandler({
     authorize: (request) => requireAgentAuth(request),
-    createServer: (request, sessionId) => {
+    createServer: async (request, sessionId) => {
       const deckId = requestDeckId(request, DEFAULT_DECK) ?? DEFAULT_DECK;
       const author = agentAuthor(request, MCP_DEFAULT_AUTHOR);
-      const deck = deckDispatcher(deckId, { withView: true });
+      const deck = await deckDispatcher(deckId, { withView: true });
       const created = createMcpServer({
         dispatcher: deck.dispatcher,
         source: deck.source,

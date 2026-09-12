@@ -14,6 +14,10 @@ export type InspectorControl =
   | 'asset'
   | 'icon'
   | 'color'
+  /** The typography group of typography.ts as one control: size, weight, align, tracking, leading. */
+  | 'typography'
+  /** The position group of position.ts as one control: x, y, w, h and z on the sheet. */
+  | 'position'
   | 'json'
   | 'readonly';
 

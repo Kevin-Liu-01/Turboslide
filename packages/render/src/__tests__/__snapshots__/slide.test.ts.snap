@@ -172,6 +172,52 @@ exports[`renderSlide > renders content slide details in light 1`] = `
 }
 `;
 
+exports[`renderSlide > renders content slide free in dark 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="free" data-kind="content"><div class="in"><div class="freeform" data-slot="main"><div class="free" data-free="h" style="left:0px;top:0px;width:640px;height:56px;z-index:1"><h2 data-block="h" data-type="heading" data-run="h/text">A freeform slide</h2></div><div class="free" data-free="p1" style="left:0px;top:80px;width:480px;height:72px;z-index:2"><p class="text" data-block="p1" data-type="text" data-run="p1/text">Boxes, shapes and text sit anywhere on the sheet.</p></div><div class="free" data-free="arrow" style="left:503px;top:72px;width:176px;height:16px;z-index:3"><svg viewBox="0 0 176 16" width="176" height="16" preserveAspectRatio="none" class="shape shape-arrow" data-block="arrow" data-type="shape" data-raster="dia" data-rid="arrow:1" data-shape="arrow" aria-hidden="true" data-from="0.5,8.5" data-to="176.5,8.5" data-heads="end"><line x1="0.5" y1="8.5" x2="168.5" y2="8.5" stroke="var(--ink)" stroke-width="1" stroke-linecap="square"/><polygon points="176.5,8.5 168.5,12.5 168.5,4.5" fill="var(--ink)"/></svg></div><div class="free" data-free="box" style="left:695px;top:0px;width:320px;height:160px;z-index:4"><div class="box" style="background:var(--plate);border:1px solid var(--hair);padding:16px" data-block="box" data-type="box"><div class="box-text" data-run="box/text">A plate box.</div></div></div></div><div class="freeform-sheet" style="left:-137px;top:-129px"><div class="free" data-free="tag" style="left:60px;top:70px;width:400px;height:24px;z-index:5"><p class="text" style="color:var(--titanium);font-size:15px" data-block="tag" data-type="text" data-run="tag/text">Over the top rule, outside the content box.</p></div></div></div></section>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "arrow",
+      "kind": "dia",
+      "selector": "[data-slide="free"] [data-rid="arrow:1"]",
+    },
+  ],
+  "slots": {
+    "main": [
+      137,
+      129,
+      1326,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
+exports[`renderSlide > renders content slide free in light 1`] = `
+{
+  "html": "<section class="slide is-on" data-slide="free" data-kind="content"><div class="in"><div class="freeform" data-slot="main"><div class="free" data-free="h" style="left:0px;top:0px;width:640px;height:56px;z-index:1"><h2 data-block="h" data-type="heading" data-run="h/text">A freeform slide</h2></div><div class="free" data-free="p1" style="left:0px;top:80px;width:480px;height:72px;z-index:2"><p class="text" data-block="p1" data-type="text" data-run="p1/text">Boxes, shapes and text sit anywhere on the sheet.</p></div><div class="free" data-free="arrow" style="left:503px;top:72px;width:176px;height:16px;z-index:3"><svg viewBox="0 0 176 16" width="176" height="16" preserveAspectRatio="none" class="shape shape-arrow" data-block="arrow" data-type="shape" data-raster="dia" data-rid="arrow:1" data-shape="arrow" aria-hidden="true" data-from="0.5,8.5" data-to="176.5,8.5" data-heads="end"><line x1="0.5" y1="8.5" x2="168.5" y2="8.5" stroke="var(--ink)" stroke-width="1" stroke-linecap="square"/><polygon points="176.5,8.5 168.5,12.5 168.5,4.5" fill="var(--ink)"/></svg></div><div class="free" data-free="box" style="left:695px;top:0px;width:320px;height:160px;z-index:4"><div class="box" style="background:var(--plate);border:1px solid var(--hair);padding:16px" data-block="box" data-type="box"><div class="box-text" data-run="box/text">A plate box.</div></div></div></div><div class="freeform-sheet" style="left:-137px;top:-129px"><div class="free" data-free="tag" style="left:60px;top:70px;width:400px;height:24px;z-index:5"><p class="text" style="color:var(--titanium);font-size:15px" data-block="tag" data-type="text" data-run="tag/text">Over the top rule, outside the content box.</p></div></div></div></section>",
+  "rasters": [
+    {
+      "alpha": true,
+      "blockId": "arrow",
+      "kind": "dia",
+      "selector": "[data-slide="free"] [data-rid="arrow:1"]",
+    },
+  ],
+  "slots": {
+    "main": [
+      137,
+      129,
+      1326,
+      642,
+    ],
+  },
+  "warnings": [],
+}
+`;
+
 exports[`renderSlide > renders content slide site in dark 1`] = `
 {
   "html": "<section class="slide is-on" data-slide="site" data-kind="content"><div class="in"><div class="cols wide-right"><div class="stack" data-slot="left"><h2 data-block="h" data-type="heading" data-run="h/text">The production site</h2></div><div class="shot-wrap" data-slot="right"><figure class="shot-fig" data-block="shot" data-type="shot"><img class="shot" src="decks/test/assets/site-home-dark.jpg" data-light="decks/test/assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="shot:1"><figcaption data-run="shot/caption">The home page.</figcaption></figure></div></div></div></section>",

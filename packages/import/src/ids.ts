@@ -48,6 +48,13 @@ const STEMS: Record<BlockType, string> = {
   matrix: 'matrix',
   logoPlates: 'logos',
   material: 'material',
+  // the freeform round's primitives (docs/freeform.md); the importer never emits them, the map
+  // is total over BlockType so a new type cannot be forgotten here
+  box: 'box',
+  shape: 'shape',
+  rule: 'rule',
+  text: 'text',
+  icon: 'icon',
   html: 'html',
 };
 

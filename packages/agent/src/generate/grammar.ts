@@ -43,7 +43,7 @@ export function generateGrammar(): string {
     '',
   );
   parts.push(
-    'Type is Inter only. Display weight is capped at 500; text under 15 px on the sheet is a defect; SVG labels never go under 18 px (DECK-GRAMMAR.md:20-21). Color is the nine tokens; the four semantic hues appear only on icons (DECK-GRAMMAR.md:28-30).',
+    'Type is Inter only. Display weight is capped at 500; text under 15 px on the sheet is a defect; SVG labels never go under 18 px (DECK-GRAMMAR.md:20-21). Color is the nine tokens; the four semantic hues appear only on icons (DECK-GRAMMAR.md:28-30). The primitive blocks take a `Color`: a palette token (`ink`, `paper`, `ink-2`, `titanium`, `hair`, `hair-soft`, `plate`, `edge`, `green`, `amber`, `red`, `blue`) that follows the theme, or a custom `#rrggbb` that the linter flags as `color/off-palette` at severity 2. A heading, paragraph, text or box may carry `typography` (size from the ladder, weight 300 to 700, align, tracking in em, leading); a weight over 500 is `type/weight-cap` and a size off the ladder is `type/ladder`, both with a fix (docs/freeform.md).',
     '',
   );
 
@@ -77,7 +77,7 @@ export function generateGrammar(): string {
 
   parts.push('## Addressing', '');
   parts.push(
-    'A slide is its slug id, never a number (`content-rule`); numbers derive from the manifest’s section order. A block is `slideId#blockId` (`content-rule#list`). A field is a JSON pointer inside the slide or the block (`/slots/right/0/items/3/text`); a run inside a text is a pointer plus a character range. Slots and ids are the only coordinates: there are no x, y, z-order or rotation (SPEC 1, 4.3).',
+    'A slide is its slug id, never a number (`content-rule`); numbers derive from the manifest’s section order. A block is `slideId#blockId` (`content-rule#list`). A field is a JSON pointer inside the slide or the block (`/slots/right/0/items/3/text`); a run inside a text is a pointer plus a character range. In the grammar layouts slots and ids are the only coordinates: there are no x, y, z-order or rotation (SPEC 1, 4.3). The `freeform` layout is the one exception (Kevin, 2026-09-11): every top-level block of a freeform slide carries `pos`, its `{ x, y, w, h, z }` box on the 1600 by 900 sheet, snapped to the 8 px grid, the rails and rules, the content box, the column seams and the plate edges; `pos` is refused anywhere else, and a freeform slide is flagged `layout/freeform` at severity 1 so a pure-grammar deck knows (docs/freeform.md).',
     '',
   );
 

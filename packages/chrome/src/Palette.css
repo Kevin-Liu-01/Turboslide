@@ -129,6 +129,30 @@
   white-space: nowrap;
 }
 
+/* the static field of the icon prompt: the words in ink-2, no input */
+.pt-search-field.is-static {
+  cursor: default;
+  color: var(--pt-ink-2);
+  font-size: 13.5px;
+}
+
+/* the sprite picker inside the card: centered, 18px around it */
+.pt-search-iconpick {
+  display: flex;
+  justify-content: center;
+  padding: 18px;
+}
+
+.pt-search-iconpick .ts-iconpicker {
+  width: 100%;
+  max-width: 400px;
+}
+
+.pt-search-iconpick .ts-iconpicker-grid {
+  grid-template-columns: repeat(auto-fill, 32px);
+  max-height: 280px;
+}
+
 /* ---- the results ---- */
 .pt-search-list {
   flex: 1 1 auto;

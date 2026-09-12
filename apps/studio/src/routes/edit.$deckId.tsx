@@ -37,6 +37,7 @@ import type { SourceOwnerApi } from '@turboslide/chrome/SourceDrawer';
 import { StatusChip } from '@turboslide/chrome/StatusChip';
 import type { SaveState } from '@turboslide/chrome/StatusChip';
 import { EditTools } from '@turboslide/chrome/Toolbar';
+import { ToolButton } from '@turboslide/chrome/ToolButton';
 import { TwinStage } from '@turboslide/chrome/TwinStage';
 import { ViewerShell } from '@turboslide/chrome/ViewerShell';
 import { lintStatic } from '@turboslide/lint/lint-static';
@@ -46,14 +47,27 @@ import type { Asset } from '@turboslide/schema/assets';
 import type { Block } from '@turboslide/schema/blocks';
 import { blockAssetRefs } from '@turboslide/schema/catalog';
 import { slideBlocks, slideTitle } from '@turboslide/schema/deck';
-import type { DeckDocument, Section, Slide } from '@turboslide/schema/deck';
+import type { ContentSlide, DeckDocument, Layout, Section, Slide } from '@turboslide/schema/deck';
 import { ConflictError } from '@turboslide/schema/errors';
-import type { ExportReport } from '@turboslide/schema/export';
 import type { Finding } from '@turboslide/schema/findings';
+import {
+  alignPositions,
+  convertLayout,
+  distributePositions,
+  reorderZ,
+  snapToGrid,
+} from '@turboslide/schema/freeform';
+import type {
+  AlignEdge,
+  AlignTarget,
+  DistributeAxis,
+  OrderMove,
+} from '@turboslide/schema/freeform';
 import { ICON_NAMES } from '@turboslide/schema/icons';
 import { canonicalJson } from '@turboslide/schema/json';
 import { parseAuthor } from '@turboslide/schema/mutations';
 import type { Author, Lease, Mutation, Version, Write } from '@turboslide/schema/mutations';
+import type { Position } from '@turboslide/schema/position';
 import { applyMutations, applyWrite } from '@turboslide/schema/reduce';
 import { validateSlide } from '@turboslide/schema/validate';
 import type { Issue } from '@turboslide/schema/validate';
@@ -63,6 +77,12 @@ import { PRODUCT_TOKENS, PROPER_NOUNS } from '@turboslide/theme/copy';
 import { SHEET, TOKENS, TOKEN_NAMES } from '@turboslide/theme/tokens';
 import { BookView } from '@turboslide/viewer/BookView';
 import { Editor as StageEditor } from '@turboslide/viewer/Editor';
+import {
+  GRAMMAR_EXT_KEY,
+  readStageBoxes,
+  toFreeform,
+  toGrammar,
+} from '@turboslide/viewer/Freeform';
 import { GridView } from '@turboslide/viewer/GridView';
 import { isPictureKind, pad2, trimTitle } from '@turboslide/viewer/model';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
@@ -75,6 +95,7 @@ import { useMountEffect } from '../components/useMountEffect';
 import { useStudioSession } from '../components/useStudioSession';
 import { runDeckAction } from '../server/agent-actions';
 import type { ServerSideWindowAction } from '../server/agent-actions';
+import { bundleDownloadTicket } from '../server/bundle';
 import { createNewDeck } from '../server/decks';
 import {
   EXPORT_POLL_MS,
@@ -83,8 +104,9 @@ import {
   runBuild,
   signDownload,
   startExport,
+  syncExport,
 } from '../server/download';
-import type { ExportRunInput } from '../server/download';
+import type { ExportRunInput, SyncExportAnswer } from '../server/download';
 import { lintSlides } from '../server/lint';
 import { renderSlideImages } from '../server/render';
 import { warmThumbnails } from '../server/warm';
@@ -253,7 +275,16 @@ type PendingWrite = {
   label: string;
   resolve: (value: Committed) => void;
   reject: (error: unknown) => void;
+  /** retries after the hosted store refused to commit on a copy it could not prove yet */
+  attempts?: number;
 };
+
+/** The hosted store's refusal while another instance's write has not reached its mirror (StaleMirrorError, packages/store/src/blob-store.ts). */
+function isRetryableWriteError(error: unknown): boolean {
+  return error instanceof Error && /retry the write/.test(error.message);
+}
+const WRITE_RETRIES = 6;
+const WRITE_RETRY_MS = 1500;
 
 export type Conflict = {
   message: string;
@@ -450,32 +481,20 @@ function downloadUrlOf(url: string): string {
   return `${url}${url.includes('?') ? '&' : '?'}download=1`;
 }
 
-/** The JSON answer of POST /api/export/:deckId?sync=1&format=json (server/export-sync.ts jsonBody). */
-type SyncExportAnswer = {
-  summary: { job: string; ms: number };
-  report: ExportReport;
-  files: { name: string; bytes: number; url: string | null }[];
-  error?: { message?: string };
-};
-
 /**
- * A hosted studio's export (docs/hosting.md): one POST to the sync route runs the export inside
- * that request and answers the report with the files' URLs, because a job queued by one function
- * invocation is not visible to the next; the download then fetches the URL (a stored copy on the
- * blob backend, this instance's job file on the tmp backend).
+ * A hosted studio's export (docs/hosting.md): one call to the syncExport server function runs the
+ * export inside that request and answers the report with the files' URLs (the same runSyncExport
+ * and the same JSON as POST /api/export/:deckId?sync=1&format=json), because a job queued by one
+ * function invocation is not visible to the next; the download then fetches the URL (a stored copy
+ * on the blob backend, this instance's job file on the tmp backend). It is a server function, not
+ * a fetch of the route, so the route can require TURBOSLIDE_TOKEN (SPEC 11; docs/hosting.md
+ * section 6, option 2) while the page never holds the token.
  */
 async function runSyncExport(
   deckId: string,
   input: ExportRunInput,
 ): Promise<Extract<ArtifactRun, { kind: 'export' }>> {
-  const response = await fetch(`/api/export/${deckId}?sync=1&format=json`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(input),
-  });
-  const body = (await response.json()) as SyncExportAnswer;
-  if (!response.ok)
-    throw new Error(body.error?.message ?? `the export answered ${response.status}`);
+  const body: SyncExportAnswer = await syncExport({ deckId, input });
   return {
     kind: 'export',
     input: menuInputOf(input),
@@ -703,6 +722,12 @@ function createEditorController(init: {
         try {
           result = await writeDeck({ deckId, write: job.write });
         } catch (error) {
+          const attempts = (job.attempts ?? 0) + 1;
+          if (isRetryableWriteError(error) && attempts <= WRITE_RETRIES) {
+            job.attempts = attempts;
+            await new Promise((resolve) => setTimeout(resolve, WRITE_RETRY_MS * attempts));
+            continue;
+          }
           const waiting = queue;
           queue = [];
           publish({ pending: 0, error: errorMessage(error) });
@@ -1454,6 +1479,138 @@ function createEditorController(init: {
     );
     return slideResult(committed, input.slideId);
   });
+  // Freeform (docs/freeform.md). The arithmetic is the schema's, the same the CLI's store-actions
+  // use, so an arrange from the inspector, the stage or an agent writes the same block.set /pos
+  // mutations; each action is one commit, so one history entry and one version record.
+  type Positioned = { id: string; pos: Position };
+  const freeformRows = (slideId: string): Positioned[] => {
+    const slide = requireSlide(slideId);
+    if (slide.kind !== 'content' || slide.layout.type !== 'freeform') {
+      throw new TypeError(
+        `Slide "${slideId}" is not on the freeform layout; slide.setLayout moves it there (docs/freeform.md)`,
+      );
+    }
+    return (slide.slots.main ?? []).flatMap((block) =>
+      block.pos === undefined ? [] : [{ id: block.id, pos: block.pos }],
+    );
+  };
+  const pickRows = (rows: Positioned[], ids: readonly string[], slideId: string): Positioned[] =>
+    ids.map((id) => {
+      const row = rows.find((candidate) => candidate.id === id);
+      if (row === undefined)
+        throw new RangeError(`No positioned block "${id}" on slide "${slideId}"`);
+      return row;
+    });
+  const positionMutations = (
+    slideId: string,
+    rows: readonly Positioned[],
+    next: readonly Position[],
+  ): Mutation[] =>
+    rows.flatMap((row, index) => {
+      const pos = next[index];
+      if (pos === undefined || canonicalJson(pos) === canonicalJson(row.pos)) return [];
+      return [{ op: 'block.set' as const, slideId, blockId: row.id, path: '/pos', value: pos }];
+    });
+  const commitPositions = async (slideId: string, mutations: Mutation[], label: string) => {
+    if (mutations.length === 0) {
+      return {
+        slide: requireSlide(slideId),
+        revision: snapshot.document.deck.revision,
+        findings: findingsFor(slideId),
+      };
+    }
+    const committed = await commit(mutations, label);
+    return slideResult(committed, slideId);
+  };
+  on<{
+    slideId: string;
+    blockIds: string[];
+    edge: AlignEdge;
+    to?: AlignTarget;
+    snap?: boolean;
+    baseRevision: number;
+  }>('block.align', (input) => {
+    checkBase(input.baseRevision);
+    const rows = pickRows(freeformRows(input.slideId), input.blockIds, input.slideId);
+    const next = alignPositions(
+      rows.map((row) => row.pos),
+      input.edge,
+      input.to,
+      input.snap !== false,
+    );
+    return commitPositions(
+      input.slideId,
+      positionMutations(input.slideId, rows, next),
+      'block.align',
+    );
+  });
+  on<{
+    slideId: string;
+    blockIds: string[];
+    axis: DistributeAxis;
+    gap?: number;
+    snap?: boolean;
+    baseRevision: number;
+  }>('block.distribute', (input) => {
+    checkBase(input.baseRevision);
+    const rows = pickRows(freeformRows(input.slideId), input.blockIds, input.slideId);
+    let next = distributePositions(
+      rows.map((row) => row.pos),
+      input.axis,
+      input.gap,
+    );
+    if (input.snap === true) {
+      next = next.map((pos) =>
+        input.axis === 'horizontal'
+          ? { ...pos, x: snapToGrid(pos.x) }
+          : { ...pos, y: snapToGrid(pos.y) },
+      );
+    }
+    return commitPositions(
+      input.slideId,
+      positionMutations(input.slideId, rows, next),
+      'block.distribute',
+    );
+  });
+  on<{ slideId: string; blockId: string; move?: OrderMove; z?: number; baseRevision: number }>(
+    'block.order',
+    (input) => {
+      checkBase(input.baseRevision);
+      const rows = freeformRows(input.slideId);
+      const stack = reorderZ(rows, input.blockId, input.move ?? { z: input.z ?? 0 });
+      const mutations: Mutation[] = rows.flatMap((row) => {
+        const z = stack[row.id];
+        if (z === undefined || z === row.pos.z) return [];
+        return [
+          {
+            op: 'block.set' as const,
+            slideId: input.slideId,
+            blockId: row.id,
+            path: '/pos/z',
+            value: z,
+          },
+        ];
+      });
+      return commitPositions(input.slideId, mutations, 'block.order');
+    },
+  );
+  on<{ slideId: string; layout: Layout; baseRevision: number }>(
+    'slide.setLayout',
+    async (input) => {
+      checkBase(input.baseRevision);
+      const slide = requireSlide(input.slideId);
+      if (slide.kind !== 'content')
+        throw new TypeError(
+          `Slide "${slide.id}" is a ${slide.kind} slide and has no layout to set`,
+        );
+      const next = convertedLayout(slide, input.layout);
+      const committed = await commit(
+        [{ op: 'slide.replace', slideId: input.slideId, slide: next }],
+        'slide.setLayout',
+      );
+      return slideResult(committed, input.slideId);
+    },
+  );
   on<{ sections: Section[]; baseRevision: number }>('section.set', async (input) => {
     checkBase(input.baseRevision);
     const committed = await commit(
@@ -1692,7 +1849,9 @@ function createEditorController(init: {
           // instance answers with 404 and the advice to run the export again
           const probe = await fetch(file.url, { method: 'HEAD' });
           if (probe.status === 404) {
-            const body = (await fetch(file.url).then((r) => r.json())) as SyncExportAnswer;
+            const body = (await fetch(file.url).then((r) => r.json())) as {
+              error?: { message?: string };
+            };
             throw new Error(body.error?.message ?? 'the file is not on this instance');
           }
           triggerDownload(downloadUrlOf(file.url));
@@ -1843,6 +2002,28 @@ function isEditable(target: EventTarget | null): target is HTMLElement {
 }
 
 /** The route's selection as the stage Editor's: a block, or the run being edited inside it. */
+/**
+ * The slide slide.setLayout writes for a picked layout. To freeform the stage's measured boxes
+ * place every block where it is drawn (toFreeform, which records the source under ext.grammar);
+ * back to the recorded grammar layout type toGrammar is lossless; every other case is the
+ * schema's convertLayout, the same arithmetic the CLI's store action uses (docs/freeform.md).
+ */
+function convertedLayout(slide: ContentSlide, layout: Layout): ContentSlide {
+  const boxes = typeof document === 'undefined' ? null : readStageBoxes();
+  if (layout.type === 'freeform' && slide.layout.type !== 'freeform' && boxes) {
+    const converted = toFreeform(slide, boxes);
+    if (converted) return converted.slide;
+  }
+  if (slide.layout.type === 'freeform' && layout.type !== 'freeform') {
+    const record = slide.ext?.[GRAMMAR_EXT_KEY] as { layout?: Layout } | undefined;
+    if (record?.layout?.type === layout.type) {
+      const back = toGrammar(slide);
+      if (back && back.lossless) return back.slide;
+    }
+  }
+  return convertLayout(slide, layout);
+}
+
 function toStageSelection(selection: Selection | null, slideId: string): StageSelection {
   if (!selection || selection.slideId !== slideId) return null;
   return selection.pointer !== undefined
@@ -2031,8 +2212,9 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
     [controller],
   );
 
+  /* built on every document change (not only while the palette is open) because the toolbar's
+     Insert menu lists the same insert entries; the work is one pass over the slides and actions */
   const paletteEntries = useMemo<readonly PaletteEntry[]>(() => {
-    if (!paletteOpen) return [];
     const patch = onSearchRef.current;
     return buildPaletteEntries({
       deck,
@@ -2059,7 +2241,6 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
       apple: isApple(),
     });
   }, [
-    paletteOpen,
     deck,
     snap.document.slides,
     slide,
@@ -2117,6 +2298,17 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
       .invoke('build.run', { out: `.turboslide/${snap.deckId}.html`, budgetMB: 16 })
       .then(() => setExportOpen(false))
       .catch((error: unknown) => controller.say(`Build: ${errorMessage(error)}`));
+  };
+  /* deck.pack (docs/deck-transfer.md): the bundle route with a ticket from the server function,
+     so the download needs no bearer token in the page; the zip is an attachment */
+  const downloadBundle = () => {
+    bundleDownloadTicket({ deckId: snap.deckId })
+      .then(({ url }) => {
+        triggerDownload(url);
+        setExportOpen(false);
+        controller.say(`Downloading the bundle of ${snap.deckId}`);
+      })
+      .catch((error: unknown) => controller.say(`Bundle: ${errorMessage(error)}`));
   };
 
   return (
@@ -2180,6 +2372,25 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
               onLint={() => onSearch({ lint: lintLayer ? undefined : 1 })}
               source={src}
               onSource={() => onSearch({ src: src ? undefined : 1 })}
+              insert={{
+                entries: paletteEntries,
+                dispatch: controller.invoke,
+                onNotice: controller.say,
+              }}
+            />
+            <ToolButton
+              icon="present"
+              label="Presentation"
+              title={`Open the presentation view in a new tab: /deck/${snap.deckId}?present=1, the viewer in present mode`}
+              hideSm
+              control="present.open"
+              onClick={() => {
+                window.open(
+                  `/deck/${encodeURIComponent(snap.deckId)}?present=1`,
+                  '_blank',
+                  'noopener',
+                );
+              }}
             />
             <ExportMenu
               open={exportOpen}
@@ -2191,6 +2402,7 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
               progress={snap.artifact.progress}
               onExport={runExport}
               onBuild={runBuildAction}
+              onDownloadBundle={downloadBundle}
             />
           </>
         }

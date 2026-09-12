@@ -20,7 +20,8 @@ export function SegControl({ spec, onChange, disabled }: ControlProps) {
   const segOptions: readonly SegOption<string>[] = options.map((option) => ({
     value: String(option),
     label: String(option),
-    title: `${spec.label} ${String(option)}`,
+    title: `${spec.inspector.label} ${String(option)}`,
+    doc: spec.inspector.help ?? `Sets ${spec.inspector.label} to ${String(option)}.`,
   }));
   const pick = (raw: string) => {
     if (disabled) return;

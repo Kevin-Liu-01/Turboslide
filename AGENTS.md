@@ -7,7 +7,10 @@ where this file is silent; see "Where the specification lives" at the end.
 
 Turboslide is a block document with a validator and a grammar linter, and everything else is a
 client of that one library (SPEC 1). The slides are the GT brand deck, unchanged; the theme is
-`gt-ink-paper` (SPEC 2.1). The chrome is the Prototemplate viewer shell ported as source (SPEC 2.2).
+`gt-ink-paper` (SPEC 2.1). Since 2026-09-11 the document also carries the freeform layout, the
+primitive blocks and the palette and typography fields of `docs/freeform.md`, a recorded deviation
+from SPEC 1 and 6.4 (the deviations list below). The chrome is the Prototemplate viewer shell
+ported as source (SPEC 2.2).
 The repo is a pnpm workspace on TanStack Start (SPEC 3). Package ownership, file lists and
 acceptance commands per milestone are in the milestone plan; the M1 acceptance is `pnpm check`.
 
@@ -34,6 +37,13 @@ acceptance commands per milestone are in the milestone plan; the M1 acceptance i
   namespaces or parameter properties, and relative imports inside those packages carry the `.ts`
   extension.
 - Plain CSS: one `tokens.css` and one small CSS file per component, no Tailwind (SPEC 3.3 item 6).
+- Every control, toolbar button, menu item, handle and chip carries the Tooltip primitive
+  (`packages/chrome/src/Tooltip.tsx`, `data-tip`) with its name, one sentence on what it does and
+  its key; a native `title` alone does not count. `node scripts/tooltip-audit.mjs --base <origin>`
+  walks the built client's pages and their menus and exits 1 on a miss. Icons are Heroicons 20
+  solid from the theme sprite (`@turboslide/chrome/icons` over `sprite-ids.json`), never inline
+  paths; a palette color is a theme token by name or one of the four semantic hues
+  (`packages/schema/src/color.ts`), and a custom hex is a `color/off-palette` finding.
 - Comments and docs in plain technical English, sentence case, no em dashes, no metaphors. Where a
   rule comes from the grammar or the spec, cite the section (`SPEC 5.1`, `DECK-GRAMMAR.md:22`,
   `head:11-176`).
@@ -65,9 +75,13 @@ From M4 the studio hosts that table for agents (MILESTONES M4 item 1):
   under `createCsrfMiddleware()` (`apps/studio/src/start.ts`), filtered to server functions so the
   agent routes stay a bearer-token surface. `/api/export` and `/api/render` require the token only
   when it is set, because the editor's page reaches them without a header (the render route's
-  thumbnail variant `?w=` stays open for the sidebar's `<img>` tags); the production URL runs
-  without one, which `docs/hosting.md` section 6 records as Kevin's open decision. Hosted, every
-  POST to `/api/export` runs synchronously (`docs/hosting-chromium.md` section 4).
+  thumbnail variant `?w=` stays open for the sidebar's `<img>` tags), and so do the two bundle
+  routes (`docs/deck-transfer.md`). `TURBOSLIDE_TOKEN` is set on the production and preview
+  environments of the `turboslide` project since 2026-09-11 (`docs/hosting.md` section 6 records
+  the decision); the editor reaches its export and its bundle download through server functions
+  and short-lived tickets, so the page never holds the token, and `turboslide deck push` and
+  `deck pull` read it from `~/.config/turboslide/hosts.json`. Hosted, every POST to `/api/export`
+  runs synchronously (`docs/hosting-chromium.md` section 4).
 - Leases (SPEC 6.7) are enforced for agent authors from M4: a write by `agent:*` to a slide another
   author holds is 409 with the holder and the current document unless `force` is set; a human's
   write warns and goes through (`packages/store/src/lease.ts` `leasePolicyFor`). The editor takes
@@ -81,7 +95,11 @@ Adding an action: the parity chain below, then register its handler in the CLI
 (`apps/studio/src/server/actions.ts`; the asset and material actions come from
 `@turboslide/materials/actions` `registerAssetActions`, `judge.bundle` and `build.run` run the CLI
 as a child process, renders and exports go through the render worker) and, for a window action,
-in the editor's `on(...)` table. A window action whose handler needs Node (sharp, the capture
+in the editor's `on(...)` table (the freeform round's `block.align`, `block.distribute`,
+`block.order` and `slide.setLayout` are there, running the schema's arithmetic and committing one
+write; `deck.pack`, `deck.unpack`, `deck.push` and `deck.pull` are `cli` only because they take
+paths on the caller's machine, and their hosted surface is the two bundle routes of
+`docs/deck-transfer.md`). A window action whose handler needs Node (sharp, the capture
 browser: `asset.add`, `asset.dither`, `material.capture`, `material.list`) is listed in
 `apps/studio/src/server/agent-actions.ts` `SERVER_SIDE_WINDOW_ACTIONS`; the editor registers it
 through `runDeckAction`, which validates the input with the action's schema and runs the same
@@ -113,8 +131,9 @@ The theme has one source of truth and two copies that must agree (SPEC 5.1):
 the same values exist as data in `packages/theme/src/tokens.ts`. A vitest parses `sheet.css` and
 asserts that the two agree. A change to a token, a size or a grid constant is made in `sheet.css`
 and `tokens.ts` together; the test fails otherwise. `packages/theme/assets/sprite.svg` is the
-sprite copied out of `head.html` (63 Heroicons plus `gt-mark`; the ids are in `sprite-ids.json`)
-and `sprite.ts` is generated from it.
+sprite copied out of `head.html` (67 Heroicons plus `gt-mark` after the editor depth round added
+the three text alignment glyphs; the ids are in `sprite-ids.json`) and `sprite.ts` is generated
+from it.
 
 A UI capability change walks the chain in this order (SPEC 7.5): schema and migration, mutation,
 inspector control with label and `data-control`, action table entry, `pnpm generate:contracts`,
@@ -227,6 +246,19 @@ was verified by regeneration and diff, and passed alone after the paths were sta
 `perfect: true`; `docs/HOSTED-STATUS.md` records them with the numbers, the production URL facts
 and what Kevin must decide.
 
+The editor depth round's lines beyond `pnpm check` (2026-09-11 to 12) are a preview deploy of the
+tree, `node scripts/editor-depth-drive.mjs <preview>` (one Playwright page at 1440 by 900 through
+the head and density, a deck from the GT template, the Insert menu's primitives, the freeform
+switch, drag with guides, resize, align, palette and custom colors with the lint mark, typography,
+a drag across columns, tooltips, the menu's Perfect export, the bundle round trip and present),
+`node scripts/tooltip-audit.mjs --base <built client>` at zero misses, `turboslide export check` on
+the exported files, `turboslide deck pull` and `deck push` against the preview, and eight writes
+through `POST /api/actions` landing in the Blob store; `docs/EDITOR-DEPTH-STATUS.md` records the
+run with its numbers and `docs/editor-depth-evidence/` holds the screenshots and tables. On that
+tree steps 4 to 19 passed (step 3 fails as written on the uncommitted generated files and passes
+by regeneration and diff; step 5 timed out twice on the material capture test while other
+worktrees' servers loaded the machine and passed alone and on the rerun).
+
 Type checking: `pnpm exec tsr generate` must run before `tsc -b` because `routeTree.gen.ts` is
 generated and git-ignored (measured: three type errors otherwise). `tsc -b` writes declaration
 output to `<package>/dist/types` (project references need it); run `pnpm typecheck` once after a
@@ -287,6 +319,11 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
   a test naming it before the chain passes. Step 3 of `scripts/check.mjs` diffs both files.
 - `GET /api/agent` keeps `actions` as the window API's action list (the M3 window-api spec compares
   it with `describe().actions` in the page); the manifest's grouped ids are `actionsByGroup`.
+- A deck bundle is one zip holding `manifest.json` and `decks/<id>/...` in the layout of SPEC 4.1
+  (`@turboslide/store/pack`, `unpack`, `zip`); `GET /api/decks/:deckId/bundle` and
+  `POST /api/decks/bundle` move it hosted, with the bearer or a ticket from the `bundle.ts` server
+  functions, and a bundle over a function's 4.5 MB body cap travels by a stored Blob copy
+  (`docs/deck-transfer.md`).
 - `apps/studio` depends on `@turboslide/cli` (its `./store-actions` export, so the HTTP and MCP
   writes run the CLI's store actions) and on `@turboslide/mcp`; the render worker already depended
   on the CLI the same way.
@@ -336,6 +373,20 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
   `docs/hosting-chromium.md` records the switches, the single-process shell's crash on context
   close (its browser is killed by pid, never closed) and the measurements. Kevin has not approved
   this beyond the directive to make the deployment work.
+- The freeform layout, the primitive blocks and the palette and typography fields (Kevin,
+  2026-09-11: "be able to drag stuff around in each slide and reorder or move stuff", "be able to
+  reuse primitives and icons like boxes and shapes and selecting colors and font and typography
+  controls"): SPEC 1 and 6.4 rule out free x and y, resize handles on text, z-order and rotation.
+  The grammar layouts keep that rule and gain drag to move and reorder blocks within and across
+  slots (`block.move`); the `freeform` layout carries `pos` (x, y, w, h and z on the 1600 by 900
+  sheet, snapped to the 8 px grid and to the rails, plates and column seams) and is a
+  `layout/freeform` finding at severity 1 so a pure grammar deck knows; the primitives box, shape
+  (rectangle, rounded rectangle, ellipse, line, arrow), rule, text and icon take palette colors
+  (the theme tokens and green, amber, red and GT blue) with a custom hex allowed as
+  `color/off-palette` at severity 2; typography offers the ladder sizes, weights 300 to 700 with
+  the 500 cap as the `type/weight-cap` lint rather than a block, alignment, tracking and leading
+  steps. Rotation stays out. `docs/freeform.md` is the reference and `docs/EDITOR-DEPTH-STATUS.md`
+  the round's record.
 - The acceptance line names `apps/studio/src/routes/openapi.json.ts`. The file is
   `apps/studio/src/routes/openapi[.]json.ts` because TanStack Router's file-based routing escapes
   a dot inside a path segment as `[.]` (the route path stays `/openapi.json`), and the

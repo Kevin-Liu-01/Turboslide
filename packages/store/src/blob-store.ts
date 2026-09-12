@@ -10,6 +10,7 @@
 // therefore end with one committed write and one conflict outcome, never two manifests. The
 // store talks to Blob through the small BlobClient below, so the tests run it against an
 // in-memory fake (blob-fake.ts) and the studio against @vercel/blob (blob-vercel.ts).
+import { createHash } from 'node:crypto';
 import {
   existsSync,
   mkdirSync,
@@ -22,10 +23,13 @@ import {
 import { dirname, extname, join, posix } from 'node:path';
 
 import type { DeckDocument } from '@turboslide/schema/deck';
+import { canonicalJson } from '@turboslide/schema/json';
 import { ConflictError } from '@turboslide/schema/errors';
 import type { Author, Lease, Version, Write } from '@turboslide/schema/mutations';
+import { applyWrite } from '@turboslide/schema/reduce';
 
-import { STATE_DIR, loadDeckDir, openFileStore } from './file-store.ts';
+import { STATE_DIR, loadDeckDir, openFileStore, slidePath, writeManifest } from './file-store.ts';
+import { documentAtVersion, readVersions } from './versions.ts';
 import type { FileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
 import { assetPathWithin, factsFor } from './hosted.ts';
@@ -179,6 +183,32 @@ function localDocuments(dir: string): string[] {
   return out;
 }
 
+/** Vercel Blob's etag: the md5 of the body in quotes (measured 2026-09-11). */
+function quotedMd5(body: Uint8Array | string): string {
+  return `"${createHash('md5').update(body).digest('hex')}"`;
+}
+
+/** The mirror could not prove it holds the store's current document; the caller retries. */
+export class StaleMirrorError extends Error {
+  constructor(deckId: string) {
+    super(
+      `This instance's copy of ${deckId} is behind the store and the store's current copy could not be read yet; retry the write`,
+    );
+    this.name = 'StaleMirrorError';
+  }
+}
+
+/** The highest version record number the mirror holds (or the manifest being built names), 0 without any. */
+function lastRecord(dir: string, manifest?: Manifest): number {
+  let last = 0;
+  const names = [...localDocuments(dir), ...Object.keys(manifest?.files ?? {})];
+  for (const relative of names) {
+    const match = /^versions\/(\d+)\.json$/.exec(relative);
+    if (match) last = Math.max(last, Number(match[1]));
+  }
+  return last;
+}
+
 function serialQueue(): <T>(run: () => Promise<T>) => Promise<T> {
   let tail: Promise<unknown> = Promise.resolve();
   return <T>(run: () => Promise<T>): Promise<T> => {
@@ -238,24 +268,159 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
 
   const pathOf = (relative: string): string => join(dir, ...relative.split('/'));
 
-  /** Pulls every document whose version differs from the mirror's; removes what the store no longer has. */
+  /**
+   * Pulls the store's documents into the mirror. Three facts about Vercel Blob decide the shape
+   * of this (measured against the live store on 2026-09-11): `list()` lags `head()` by up to a
+   * minute; the public URL a body is fetched from is served by the CDN, which keeps an overwritten
+   * blob's previous body for a while after `head()` already answers the new etag (the SDK's
+   * `useCache: false` only bypasses it for private stores); and the etag is the md5 of the body.
+   * So a document counts as current only when its bytes hash to the etag `head()` reports, and
+   * the current document is otherwise derived, never guessed: the version records are written
+   * once under immutable names (always fresh), every record above the mirror's last one is
+   * fetched by number, and they are replayed through `applyWrite` from the mirror's previous state
+   * exactly as the writing instance ran them (same clock value, same reducer), which reproduces
+   * the writer's bytes and therefore its etag. When neither proof succeeds, the mirror keeps what
+   * it has for reads and `write()` refuses to commit on it (StaleMirrorError) rather than commit
+   * a stale base over a newer document; before this a second write from another instance failed
+   * with "changed in the Blob store since it was read", and a fresh mirror that took a lagging
+   * body as its base could commit over newer revisions (docs/hosting.md).
+   */
   const pull = async (): Promise<void> => {
     const manifest = readManifest(dir);
+    const before = existsSync(pathOf('deck.json')) ? loadDeckDir(dir).document : null;
+    const deckHead = await client.head(`${prefix}deck.json`);
     const entries = (await client.list(prefix))
       .map((entry) => ({ entry, relative: entry.pathname.slice(prefix.length) }))
-      .filter(({ relative }) => isMirroredDocument(relative));
+      .filter(({ relative }) => isMirroredDocument(relative) && relative !== 'deck.json');
     const next: Manifest = { files: {} };
+    const fetchBody = async (
+      relative: string,
+    ): Promise<{ bytes: Uint8Array; version: string } | null> => {
+      const fetched = await client.get(`${prefix}${relative}`);
+      return fetched === null ? null : { bytes: fetched.bytes, version: fetched.entry.version };
+    };
+    /** records never change, so their first body is the body */
+    const fetchRecord = async (relative: string): Promise<boolean> => {
+      const fetched = await fetchBody(relative);
+      if (fetched === null) return false;
+      writeAtomic(pathOf(relative), fetched.bytes);
+      next.files[relative] = fetched.version;
+      return true;
+    };
+    // 1. the records: the listing's, then by number past what the listing shows
+    const slideEntries: { entry: BlobEntry; relative: string }[] = [];
     await eachLimit(entries, 8, async ({ entry, relative }) => {
-      const local = pathOf(relative);
-      if (manifest.files[relative] === entry.version && existsSync(local)) {
+      if (!relative.startsWith('versions/')) {
+        slideEntries.push({ entry, relative });
+        return;
+      }
+      if (manifest.files[relative] === entry.version && existsSync(pathOf(relative))) {
         next.files[relative] = entry.version;
         return;
       }
-      const fetched = await client.get(entry.pathname);
-      if (fetched === null) return;
-      writeAtomic(local, fetched.bytes);
-      next.files[relative] = fetched.entry.version;
+      if (!(await fetchRecord(relative)) && existsSync(pathOf(relative)))
+        next.files[relative] = manifest.files[relative] ?? entry.version;
     });
+    const first = lastRecord(dir, next) + 1;
+    for (let n = first; n < first + 10_000; n++) {
+      const relative = `versions/${n}.json`;
+      if (
+        (next.files[relative] === undefined || !existsSync(pathOf(relative))) &&
+        !(await fetchRecord(relative))
+      )
+        break;
+    }
+    if (deckHead === null) {
+      for (const relative of localDocuments(dir)) {
+        if (next.files[relative] === undefined) rmSync(pathOf(relative), { force: true });
+      }
+      writeManifestFile(dir, next);
+      return;
+    }
+    // 2. the base: the mirror's previous state, or the bodies the store serves for an empty mirror
+    let base = before;
+    const unproven = new Set<string>();
+    if (base === null) {
+      const deck = await fetchBody('deck.json');
+      if (deck === null) throw new RangeError(`No deck ${deckId} in the Blob store`);
+      writeAtomic(pathOf('deck.json'), deck.bytes);
+      await eachLimit(slideEntries, 8, async ({ relative }) => {
+        const body = await fetchBody(relative);
+        if (body === null) return;
+        writeAtomic(pathOf(relative), body.bytes);
+        const head = await client.head(`${prefix}${relative}`);
+        if (head === null || head.version !== quotedMd5(body.bytes))
+          unproven.add(relative.slice('slides/'.length, -'.json'.length));
+      });
+      base = loadDeckDir(dir).document;
+    }
+    // 3. the replay: every record above the base, through the writer's own reducer and clock
+    const records = readVersions(dir);
+    let document = base;
+    const rewritten = new Set<string>();
+    for (const record of [...records].sort((a, b) => a.n - b.n)) {
+      if (record.baseRevision !== document.deck.revision) continue;
+      const applied = applyWrite(
+        document,
+        { baseRevision: record.baseRevision, author: record.author, mutations: record.mutations },
+        { now: record.createdAt, resolveVersion: (n) => documentAtVersion(document, records, n) },
+      );
+      if (!applied.ok) break;
+      document = applied.document;
+      for (const id of Object.keys(document.slides)) {
+        if (canonicalJson(document.slides[id]) !== canonicalJson(base.slides[id]))
+          rewritten.add(id);
+      }
+    }
+    // deck.json's etag proves the manifest; a slide body the CDN served stale is proven only when
+    // the replay rewrote it from the records
+    const derivedEtag = quotedMd5(canonicalJson(document.deck));
+    let proven = derivedEtag === deckHead.version && [...unproven].every((id) => rewritten.has(id));
+    if (!proven) {
+      // 4. the fresh path: the bodies themselves, each proven against its own head
+      const deck = await fetchBody('deck.json');
+      if (deck !== null && quotedMd5(deck.bytes) === deckHead.version) {
+        const bodies = new Map<string, Uint8Array>();
+        let lagging = 0;
+        await eachLimit(slideEntries, 8, async ({ relative }) => {
+          const body = await fetchBody(relative);
+          const head = await client.head(`${prefix}${relative}`);
+          if (body === null || head === null) return;
+          if (quotedMd5(body.bytes) === head.version) bodies.set(relative, body.bytes);
+          else lagging += 1;
+        });
+        if (lagging === 0) {
+          writeAtomic(pathOf('deck.json'), deck.bytes);
+          for (const [relative, bytes] of bodies) writeAtomic(pathOf(relative), bytes);
+          document = loadDeckDir(dir).document;
+          proven = true;
+        }
+      }
+    }
+    if (proven) {
+      const current = loadDeckDir(dir).document;
+      mkdirSync(join(dir, 'slides'), { recursive: true });
+      for (const [id, slide] of Object.entries(document.slides)) {
+        const bytes = new TextEncoder().encode(canonicalJson(slide));
+        if (
+          canonicalJson(current.slides[id]) !== canonicalJson(slide) ||
+          !existsSync(slidePath(dir, id))
+        )
+          writeAtomic(slidePath(dir, id), bytes);
+        next.files[`slides/${id}.json`] = quotedMd5(bytes);
+      }
+      for (const id of Object.keys(current.slides)) {
+        if (document.slides[id] === undefined) rmSync(slidePath(dir, id), { force: true });
+      }
+      writeManifest(dir, document.deck);
+      next.files['deck.json'] = deckHead.version;
+    } else {
+      // unprovable for now: reads keep the mirror's copy, write() refuses until a later pull proves one
+      for (const relative of localDocuments(dir)) {
+        if (relative === 'deck.json' || relative.startsWith('slides/'))
+          next.files[relative] = quotedMd5(readFileSync(pathOf(relative)));
+      }
+    }
     for (const relative of localDocuments(dir)) {
       if (next.files[relative] === undefined) rmSync(pathOf(relative), { force: true });
     }
@@ -315,9 +480,19 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
     syncedAt = 0;
   };
 
+  /**
+   * Forgets the mirror's documents as well as its versions: after a failed commit the mirror holds
+   * a state the store never had (the local apply that preceded the push), so the next pull must
+   * start from the store's bodies, not from that state.
+   */
+  const discard = (): void => {
+    for (const relative of localDocuments(dir)) rmSync(pathOf(relative), { force: true });
+    invalidate();
+  };
+
   /** Runs inside the write's queue slot, so it syncs directly. */
   const conflictFromStore = async (): Promise<WriteOutcome> => {
-    invalidate();
+    discard();
     await syncNow(true);
     const current = loadDeckDir(dir).document;
     return {
@@ -356,6 +531,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         await pullLeases();
         const manifest = readManifest(dir);
         const synced = manifest.files['deck.json'];
+        if (synced !== head.version) throw new StaleMirrorError(deckId);
         const outcome = await file.write(write, writeOptions);
         if (!outcome.ok) return outcome;
         try {
@@ -383,8 +559,8 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           return outcome;
         } catch (error) {
           if (error instanceof BlobPreconditionError) return conflictFromStore();
-          // the mirror is ahead of the store: forget its versions so the next sync pulls the truth
-          invalidate();
+          // the mirror is ahead of the store: forget it so the next sync pulls the truth
+          discard();
           throw error;
         }
       });

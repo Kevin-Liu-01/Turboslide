@@ -3,7 +3,10 @@
 Turboslide is a slides editor for the General Translation brand deck, built for designers and
 agents alike. A deck is a block document: a manifest plus one JSON file per slide plus assets with
 light and dark twins. A slide is a kind, a layout and typed blocks whose types are the GT deck
-grammar's classes made explicit, with stable slug ids and no x or y coordinates. One
+grammar's classes made explicit, with stable slug ids. The grammar layouts carry no x or y
+coordinates; the freeform layout added on 2026-09-11 carries positioned blocks on the 1600 by
+900 sheet, and the primitive blocks box, shape, rule, text and icon take palette colors and
+typography fields (docs/freeform.md). One
 framework-free renderer turns the document into the same HTML and CSS the deck uses today, so the
 browser editor, the static viewer, the Prototemplate `/deck` iframe, the CLI's screenshots and the
 exporters draw from one source, and a render at revision N is the same pixels everywhere. Every
@@ -30,7 +33,8 @@ packages/
                   catalog, the rule table (rules.json), the action table
   store/          the deck store behind one DeckStore type: FileStore over decks/, the tmp
                   overlay and the Vercel Blob mirror; typed writes, the version log, leases, the
-                  watch channel, the deck templates, the seed, the store selection
+                  watch channel, the deck templates, the seed, the store selection, the deck
+                  bundle (zip, pack, unpack; docs/deck-transfer.md)
   theme/          gt-ink-paper: sheet.css and stage.css ported from head.html, tokens.ts, sprite.ts
   fonts/          InterVariable woff2 and its CSS; the static export font set under export/
   render/         renderSlide, renderDeck, renderStandalone, renderThumb, renderStage, the dia
@@ -50,15 +54,19 @@ packages/
                   policy, the OOXML post-process and package validation, the verify loop, the
                   calibration constants, export check
   native/         @turboslide/native: the napi addon per platform (npm/*) and the wasm module
-  viewer/         React viewer: Stage, Sheet, slide, grid and book modes; Editor; MaterialMount
+  viewer/         React viewer: Stage, Sheet, slide, grid and book modes; Editor with Selection,
+                  Gestures, Freeform, Marquee and Guides; MaterialMount
   chrome/         the Prototemplate shell ported as source: tokens.css (--pt-), Seg, Toolbar,
-                  Sidebar, Inspector, ExportMenu, ExportReportCard, DeckName, AssetPicker, ...
+                  Sidebar, Inspector, ExportMenu, ExportReportCard, DeckName, AssetPicker,
+                  Tooltip, InsertMenu, IconPicker, ConnectCard, ...
 crates/
   turboslide-native/  the Rust crate behind @turboslide/native (napi and wasm features)
 docker/           render-worker.Dockerfile
 tooling/          shared tsconfig, eslint and prettier configs
 scripts/          check.mjs (the acceptance chain), judge-loop.mjs, check-client-bundle.mjs,
-                  compare-to-shoot.mjs, hosted-smoke.mjs (probes a deployment)
+                  compare-to-shoot.mjs, hosted-smoke.mjs (probes a deployment),
+                  editor-depth-drive.mjs (drives a preview), tooltip-audit.mjs (every control
+                  carries a tooltip)
 decks/            decks/gt-brand is the GT brand deck; decks/templates/gt-brand is the template
                   record deck.create copies; decks/fixture is the test deck
 skills/           the four agent skills with generated reference tables
@@ -80,11 +88,18 @@ pnpm check                   the acceptance chain, in order (node scripts/check.
 ```
 
 `http://localhost:4321/` opens the editor on the newest deck at once; when no deck exists under
-`decks/` it creates `GT brand deck` from the template and opens that. The other pages: `/decks` (every deck, newest first, with the New deck form: a name
-and the GT brand or blank template), `/edit/:deckId` (the editor: sidebar tree, stage, inspector,
-the Cmd K palette with the Insert group of 15 slide templates, the Export menu with PPTX and the
-standalone file), `/deck/:deckId` (the viewer: slide, grid and book modes),
-`/embed/:deckId` (the framed embed). The agent surface: `GET /api/agent` (the manifest and the
+`decks/` it creates `GT brand deck` from the template and opens that. The other pages: `/decks` (every deck, newest first, with the New deck form: a name and the GT
+brand or blank template; Upload deck bundle; a row per deck with Open, Present, Export and
+Download bundle; and the Connect card naming the `deck push` and `deck pull` commands for this
+studio), `/edit/:deckId` (the editor: the slide sidebar in thumbnail density by default under the
+head reading Turboslide, the stage with drag to move and reorder blocks within and across slots
+and, on a freeform slide, drag, resize, marquee selection and the arrange bar, the inspector in
+sections with icons and the color, typography and position controls, the toolbar's Insert menu
+with the primitives, the Cmd K palette with the Insert group of 15 slide templates, the Export
+menu with PPTX, the standalone file and the deck bundle, and a tooltip on every control),
+`/deck/:deckId` (the viewer: slide, grid and book modes; `?present=1` opens it in present mode,
+so `/deck/gt-brand?present=1` is the GT template presentation), `/embed/:deckId` (the framed
+embed). The agent surface: `GET /api/agent` (the manifest and the
 instance facts), `POST /api/actions/:action?deck=<id>` (one action per request, `GET` for its
 contract), `/mcp` (MCP over streamable HTTP, one deck per session), `/openapi.json`, `/llms.txt`
 and `/llms-full.txt`. With `TURBOSLIDE_TOKEN` set those routes want `Authorization: Bearer`;
@@ -101,9 +116,16 @@ GT deck and the templates as its seed, edits persist in the connected Vercel Blo
 with every export synchronous (`POST /api/export/:deckId` answers the file, the report with
 `Accept: application/json`, or a 302 to the stored copy). Without a Blob token the editor shows a
 banner and edits live for the instance only. `node scripts/hosted-smoke.mjs <url>` probes a
-deployment. [docs/hosting.md](docs/hosting.md) has the store, the deploy configuration and the
-open bearer token decision; [docs/hosting-chromium.md](docs/hosting-chromium.md) the browser;
-[docs/HOSTED-STATUS.md](docs/HOSTED-STATUS.md) the round's measured state.
+deployment. `TURBOSLIDE_TOKEN` is set on the production and preview environments since
+2026-09-11: the agent routes open to callers that send `Authorization: Bearer <token>`, the raw
+export, render and bundle routes require it, and the editor reaches them through server
+functions and tickets so the page never holds it. A local deck moves into the hosted studio with
+`turboslide deck push <id> --to https://turboslide.vercel.app --token <TURBOSLIDE_TOKEN>` and back
+with `deck pull` ([docs/deck-transfer.md](docs/deck-transfer.md); the token is saved per host after
+the first call). [docs/hosting.md](docs/hosting.md) has the store, the deploy configuration and
+the bearer token decision; [docs/hosting-chromium.md](docs/hosting-chromium.md) the browser;
+[docs/HOSTED-STATUS.md](docs/HOSTED-STATUS.md) the hosting round's measured state;
+[docs/EDITOR-DEPTH-STATUS.md](docs/EDITOR-DEPTH-STATUS.md) the editor depth round's.
 
 ## The CLI
 
@@ -117,7 +139,13 @@ validate [dir]                           parse, migrate and normalize; exit 2 on
 info                                     title, theme, sections, counts, revision
 deck create <name> --from gt-brand|blank a deck from the GT brand template (85 slides) or a title slide
 deck rename <name>                       the deck title
+deck pack <id> [--out <file.zip>]        decks/<id> as one bundle zip (deck.json, slides, assets, versions)
+deck unpack <file.zip> [--as <id>]       a deck from a bundle; nothing is written when the bundle is refused
+deck push <id> --to <url> [--token <t>]  pack decks/<id> and upload it to a hosted studio (the token is saved per host)
+deck pull <id> --from <url> [--token <t>] download a deck's bundle from a hosted studio and unpack it
 slides, slide get|put|patch|insert|remove|move, block set|insert|remove|move, sections set
+slide set-layout <id> --type <layout>    the layout; to freeform every block keeps its box, back is by geometry
+block align|distribute|order <slideId>   arrange positioned blocks (--blocks, --edge | --axis | --move); block move --z
 asset add <file|url> --role --alt        a picture with its license fields; --two-tone runs the screen
 asset capture <url> --theme both         a page at 1440 by 900 at 2x through a recipe (--recipe gt-site)
 asset dither <id> | --all-two-tone --from-recorded --verify-cells
@@ -165,8 +193,10 @@ layer, so the page is pixel identical; each raster travels in the smallest encod
 within 0.1 percent of the shot (a 1-bit PNG, a palette PNG, a JPEG for photographic pages, else
 truecolor), no fonts are embedded, and the report's `perfect` flag says every page matched.
 Editable text (`--mode native`) writes every text as a text box in the GT Inter static faces
-(`--embed-fonts` embeds them), the frame as lines, the paper chips and plates as shapes, and the
-icons, marks, dithers, diagrams and pictures as rasters at 2x or 3x; layout is identical within
+(`--embed-fonts` embeds them), the frame as lines, the paper chips and plates as shapes, the box,
+shape and rule primitives as native rectangles, rounded rectangles, ellipses, lines and arrows with
+their fill and stroke, the text primitive as a text box, and the icons, marks, dithers, diagrams
+and pictures as rasters at 2x or 3x; layout is identical within
 3 px. Both modes name every slide after its title, give it a hidden title placeholder, keep the
 speaker notes, write one file per theme plus `<deckId>-both.zip`, strip what PowerPoint is known to
 repair and validate the package against its content types and relationships. `--verify` renders
@@ -174,7 +204,7 @@ the file back through LibreOffice in the worker image and diffs every page and b
 web render at the same revision, with a QuickLook smoke check where macOS provides one;
 `turboslide export check <file>` reopens any file with python-pptx and walks its zip. The Export
 menu of the editor runs the same `export.run` action and hands the files back as one-time
-download links. The standalone file (`build`) is the deck as one HTML file under a byte budget.
+download links, and its Download deck bundle entry hands the deck back as one zip. The standalone file (`build`) is the deck as one HTML file under a byte budget.
 
 Derived files land under `.turboslide/`, which is not committed. The rules for working in this
 repository are in [AGENTS.md](AGENTS.md); reference documents are under [docs/](docs/README.md);

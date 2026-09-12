@@ -1,4 +1,5 @@
 import { cn } from './lib/cn';
+import { tipProps } from './Tooltip';
 
 import './StatusChip.css';
 
@@ -53,10 +54,10 @@ export function StatusChip({ revision, state, lease, lint, onClick, className }:
       type="button"
       className={cn('pt-ib ts-status', className)}
       data-state={state}
-      title={description}
       aria-label={`Status: ${description}`}
       data-control="edit.status"
       onClick={onClick}
+      {...tipProps({ name: statusText({ revision, state }), doc: `${description}.` })}
     >
       <i className="ts-status-dot" aria-hidden="true" />
       {parts.map((part, index) => (

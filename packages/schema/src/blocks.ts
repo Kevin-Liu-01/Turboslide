@@ -1,15 +1,25 @@
 // Blocks: the grammar's classes as typed nodes (SPEC 4.2 "Blocks"). Every block has a stable id
-// unique within its slide and no coordinates; the grammar's hand-set values become properties
-// with the snap sets the deck uses (report 03 section 11). Zod schemas produce the JSON Schema
-// for MCP and OpenAPI and carry the inspector annotations (SPEC 4.2).
+// unique within its slide and no coordinates in the grammar layouts; the grammar's hand-set values
+// become properties with the snap sets the deck uses (report 03 section 11). Zod schemas produce
+// the JSON Schema for MCP and OpenAPI and carry the inspector annotations (SPEC 4.2). Since the
+// freeform round (Kevin, 2026-09-11; docs/freeform.md) a block may carry `pos`, its box on the
+// sheet, which validate.ts requires on a freeform slide and refuses elsewhere, and the primitive
+// blocks box, shape, rule, text and icon carry Color and Typography fields (color.ts,
+// typography.ts) whose defaults are the theme tokens.
 import { z } from 'zod';
 import { annotate } from './annotate.ts';
+import type { Color } from './color.ts';
+import { colorField } from './color.ts';
 import type { AssetId, BlockId } from './ids.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
 import type { IconColor, IconName } from './icons.ts';
 import { ICON_COLORS, iconNameSchema } from './icons.ts';
+import type { Position } from './position.ts';
+import { positionSchema } from './position.ts';
 import type { Text } from './text.ts';
 import { textSchema } from './text.ts';
+import type { Typography } from './typography.ts';
+import { typographySchema } from './typography.ts';
 import type { MaterialBlock } from './blocks/material.ts';
 import { materialBlockSchema } from './blocks/material.ts';
 
@@ -85,7 +95,8 @@ export type Diagram = {
   }[];
 };
 
-export type BlockBase = { id: BlockId; ext?: Record<string, unknown> };
+/** `pos` is the block's box on a freeform slide (position.ts); validate.ts keeps it there only. */
+export type BlockBase = { id: BlockId; ext?: Record<string, unknown>; pos?: Position };
 
 export type HeadingBlock = BlockBase & {
   type: 'heading';
@@ -93,6 +104,8 @@ export type HeadingBlock = BlockBase & {
   text: Text;
   marginTop?: number;
   marginBottom?: 0 | 18;
+  /** Overrides over the level's ladder step; absent keeps the grammar (typography.ts). */
+  typography?: Typography;
 };
 export type ParagraphBlock = BlockBase & {
   type: 'paragraph';
@@ -101,6 +114,96 @@ export type ParagraphBlock = BlockBase & {
   tone?: 'ink' | 'muted';
   measure?: 32 | 56 | number;
   marginTop?: number;
+  typography?: Typography;
+};
+
+// ---------------------------------------------------------------------------------------------
+// The primitives (Kevin, 2026-09-11: "reuse primitives and icons like boxes and shapes"). Every
+// color is a Color (a token first); stroke widths are the grammar's 1 and 1.5 plus 2 for a plate
+// edge; arrowheads are filled 8 px triangles, the size dia/stroke-grammar allows (DECK-GRAMMAR.md:44).
+
+export const STROKE_WIDTHS = [0, 1, 1.5, 2] as const;
+export type StrokeWidth = (typeof STROKE_WIDTHS)[number];
+
+/** A bordered box with an optional text inside; the stroke is a hairline unless set. */
+export type BoxBlock = BlockBase & {
+  type: 'box';
+  fill?: Color;
+  stroke?: Color;
+  /** 0 removes the border. */
+  strokeWidth?: StrokeWidth;
+  radius?: number;
+  padding?: number;
+  /** The box's height in a flow layout; on a freeform slide `pos.h` wins. */
+  height?: number;
+  text?: Text;
+  typography?: Typography;
+  /** The text color; the ink unless set. */
+  color?: Color;
+};
+
+export const SHAPE_KINDS = ['rectangle', 'rounded', 'ellipse', 'line', 'arrow'] as const;
+export type ShapeKind = (typeof SHAPE_KINDS)[number];
+export const SHAPE_ORIENTATIONS = [
+  'horizontal',
+  'vertical',
+  'diagonal-down',
+  'diagonal-up',
+] as const;
+export type ShapeOrientation = (typeof SHAPE_ORIENTATIONS)[number];
+export const ARROWHEADS = ['end', 'start', 'both', 'none'] as const;
+export type Arrowheads = (typeof ARROWHEADS)[number];
+export const SHAPE_STROKE_WIDTHS = [1, 1.5, 2, 3, 4] as const;
+export type ShapeStrokeWidth = (typeof SHAPE_STROKE_WIDTHS)[number];
+
+/**
+ * A vector shape drawn as inline SVG filling its box: a rectangle, a rounded rectangle, an
+ * ellipse, or a line or arrow along the box (horizontal through the middle by default, vertical,
+ * or one of the two diagonals). A closed shape has no fill unless set and a hairline stroke; a
+ * line or arrow is drawn in the ink.
+ */
+export type ShapeBlock = BlockBase & {
+  type: 'shape';
+  shape: ShapeKind;
+  fill?: Color;
+  stroke?: Color;
+  width?: ShapeStrokeWidth;
+  /** Corner radius of a rounded rectangle; 8 unless set. */
+  radius?: number;
+  /** Which ends of an arrow carry a head; `end` unless set. Ignored on the other shapes. */
+  arrowheads?: Arrowheads;
+  orientation?: ShapeOrientation;
+  /** The shape's height in a flow layout; on a freeform slide `pos.h` wins. */
+  height?: number;
+};
+
+/** A hairline: the sheet's 1 px rule in `hair` unless set, horizontal across its box or vertical down it. */
+export type RuleBlock = BlockBase & {
+  type: 'rule';
+  orientation: 'horizontal' | 'vertical';
+  /** Length in px in a flow layout; the slot width when absent. On a freeform slide the box decides. */
+  length?: number;
+  weight?: 1 | 1.5 | 2;
+  color?: Color;
+};
+
+/** A text box: one Text in the four-rule markup with typography and color over the body defaults. */
+export type TextBlock = BlockBase & {
+  type: 'text';
+  text: Text;
+  typography?: Typography;
+  color?: Color;
+};
+
+export const ICON_BLOCK_SIZES = [16, 20, 24, 32, 48, 64, 96] as const;
+export type IconBlockSize = (typeof ICON_BLOCK_SIZES)[number];
+
+/** One sprite glyph on its own, at a stated size, in a palette color (the ink unless set). */
+export type IconBlock = BlockBase & {
+  type: 'icon';
+  name: IconName;
+  size?: IconBlockSize;
+  color?: Color;
 };
 /** 15 px titanium, plate only (head:65; OPENERS.md). */
 export type CreditBlock = BlockBase & { type: 'credit'; text: Text };
@@ -268,6 +371,11 @@ export type Block =
   | MatrixBlock
   | LogoPlatesBlock
   | MaterialBlock
+  | BoxBlock
+  | ShapeBlock
+  | RuleBlock
+  | TextBlock
+  | IconBlock
   | HtmlBlock;
 
 export type BlockType = Block['type'];
@@ -302,8 +410,16 @@ export const BLOCK_TYPES = [
   'matrix',
   'logoPlates',
   'material',
+  'box',
+  'shape',
+  'rule',
+  'text',
+  'icon',
   'html',
 ] as const satisfies ReadonlyArray<BlockType>;
+
+/** The primitive block types the freeform round added (docs/freeform.md). */
+export const PRIMITIVE_BLOCK_TYPES = ['box', 'shape', 'rule', 'text', 'icon'] as const;
 
 // ---------------------------------------------------------------------------------------------
 // Schemas
@@ -411,6 +527,7 @@ export const diagramSchema = z.strictObject({
 const base = {
   id: annotate(blockIdSchema, { label: 'Id', control: 'readonly', group: 'Advanced' }),
   ext: extSchema,
+  pos: positionSchema,
 };
 
 const captionSize = annotate(z.literal([16, 15]).optional(), {
@@ -446,6 +563,7 @@ export const headingBlockSchema = z.strictObject({
     snap: [0, 18],
     group: 'Layout',
   }),
+  typography: typographySchema,
 }) satisfies z.ZodType<HeadingBlock>;
 
 export const paragraphBlockSchema = z.strictObject({
@@ -477,6 +595,7 @@ export const paragraphBlockSchema = z.strictObject({
     control: 'number',
     group: 'Layout',
   }),
+  typography: typographySchema,
 }) satisfies z.ZodType<ParagraphBlock>;
 
 export const creditBlockSchema = z.strictObject({
@@ -996,6 +1115,153 @@ export const htmlBlockSchema = z.strictObject({
   }),
 }) satisfies z.ZodType<HtmlBlock>;
 
+// ---------------------------------------------------------------------------------------------
+// The primitives
+
+const strokeWidthField = annotate(z.literal(STROKE_WIDTHS).optional(), {
+  label: 'Stroke width',
+  control: 'select',
+  snap: STROKE_WIDTHS,
+  group: 'Block',
+  help: '1 is the sheet hairline, 1.5 the diagram emphasis stroke, 2 a plate edge; 0 removes the border.',
+});
+
+const flowHeight = annotate(z.number().positive().optional(), {
+  label: 'Height',
+  control: 'number',
+  group: 'Layout',
+  help: 'The height in a flow layout; on a freeform slide the position box decides.',
+});
+
+export const boxBlockSchema = z.strictObject({
+  ...base,
+  type: z.literal('box'),
+  fill: colorField(
+    'Fill',
+    'The box ground; none unless set. Tokens follow the theme (docs/freeform.md).',
+  ),
+  stroke: colorField('Stroke', 'The border color; the hairline token unless set.'),
+  strokeWidth: strokeWidthField,
+  radius: annotate(z.number().nonnegative().optional(), {
+    label: 'Corner radius',
+    control: 'number',
+    snap: [0, 4, 6, 8, 12, 16],
+    group: 'Block',
+    help: 'Every box on the sheet is square unless set; 6 is the one corner the chrome uses (SPEC 2.2).',
+  }),
+  padding: annotate(z.number().nonnegative().optional(), {
+    label: 'Padding',
+    control: 'number',
+    snap: [0, 8, 12, 16, 22, 26],
+    group: 'Layout',
+    help: '16 px unless set; the plates pad 22 by 26 (head:8).',
+  }),
+  height: flowHeight,
+  text: annotate(textSchema.optional(), { label: 'Text', control: 'textarea', group: 'Text' }),
+  typography: typographySchema,
+  color: colorField(
+    'Text color',
+    'The color of the text inside the box; the ink unless set.',
+    'Text',
+  ),
+}) satisfies z.ZodType<BoxBlock>;
+
+export const shapeBlockSchema = z.strictObject({
+  ...base,
+  type: z.literal('shape'),
+  shape: annotate(z.enum(SHAPE_KINDS), {
+    label: 'Shape',
+    control: 'select',
+    snap: SHAPE_KINDS,
+    group: 'Block',
+    help: 'A closed shape fills its box; a line or arrow runs along it (orientation).',
+  }),
+  fill: colorField('Fill', 'The inside of a closed shape; none unless set.'),
+  stroke: colorField(
+    'Stroke',
+    'The outline or the line color; hair for closed shapes, ink for lines unless set.',
+  ),
+  width: annotate(z.literal(SHAPE_STROKE_WIDTHS).optional(), {
+    label: 'Stroke width',
+    control: 'select',
+    snap: SHAPE_STROKE_WIDTHS,
+    group: 'Block',
+    help: 'Stroke in px; 1 unless set. Above 1.5 is outside the diagram grammar (DECK-GRAMMAR.md:44) and meant for freeform slides.',
+  }),
+  radius: annotate(z.number().nonnegative().optional(), {
+    label: 'Corner radius',
+    control: 'number',
+    snap: [4, 6, 8, 12, 16, 24],
+    group: 'Block',
+    help: 'The rounded rectangle corner; 8 unless set.',
+  }),
+  arrowheads: annotate(z.enum(ARROWHEADS).optional(), {
+    label: 'Arrowheads',
+    control: 'select',
+    snap: ARROWHEADS,
+    group: 'Block',
+    help: 'Filled 8 px triangles at the ends of an arrow; end unless set.',
+  }),
+  orientation: annotate(z.enum(SHAPE_ORIENTATIONS).optional(), {
+    label: 'Orientation',
+    control: 'select',
+    snap: SHAPE_ORIENTATIONS,
+    group: 'Block',
+    help: 'How a line or arrow crosses its box; horizontal when the box is wider than tall, else vertical.',
+  }),
+  height: flowHeight,
+}) satisfies z.ZodType<ShapeBlock>;
+
+export const ruleBlockSchema = z.strictObject({
+  ...base,
+  type: z.literal('rule'),
+  orientation: annotate(z.enum(['horizontal', 'vertical']), {
+    label: 'Orientation',
+    control: 'select',
+    snap: ['horizontal', 'vertical'],
+    group: 'Block',
+  }),
+  length: annotate(z.number().positive().optional(), {
+    label: 'Length',
+    control: 'number',
+    group: 'Layout',
+    help: 'In px; the slot width in a flow layout when absent. On a freeform slide the box decides.',
+  }),
+  weight: annotate(z.literal([1, 1.5, 2]).optional(), {
+    label: 'Weight',
+    control: 'select',
+    snap: [1, 1.5, 2],
+    group: 'Block',
+    help: '1 px is the sheet hairline (DECK-GRAMMAR.md:15).',
+  }),
+  color: colorField('Color', 'The rule color; the hairline token unless set.'),
+}) satisfies z.ZodType<RuleBlock>;
+
+export const textBlockSchema = z.strictObject({
+  ...base,
+  type: z.literal('text'),
+  text: annotate(textSchema, { label: 'Text', control: 'textarea', group: 'Text' }),
+  typography: typographySchema,
+  color: colorField('Color', 'The text color; the ink unless set.', 'Text'),
+}) satisfies z.ZodType<TextBlock>;
+
+export const iconBlockSchema = z.strictObject({
+  ...base,
+  type: z.literal('icon'),
+  name: annotate(iconNameSchema, { label: 'Icon', control: 'icon', group: 'Block' }),
+  size: annotate(z.literal(ICON_BLOCK_SIZES).optional(), {
+    label: 'Size',
+    control: 'select',
+    snap: ICON_BLOCK_SIZES,
+    group: 'Block',
+    help: 'The glyph size in px; 24 unless set. Inside lists icons stay 20 and 24 (DECK-GRAMMAR.md:40).',
+  }),
+  color: colorField(
+    'Color',
+    'The glyph color; the ink unless set. Green, amber, red and blue are the semantic hues.',
+  ),
+}) satisfies z.ZodType<IconBlock>;
+
 /** Recursive through composite cells; typed explicitly so the cycle resolves. */
 export const blockSchema: z.ZodType<Block> = z.lazy(() => blockUnionSchema);
 
@@ -1074,6 +1340,11 @@ export const blockUnionSchema = z.discriminatedUnion('type', [
   matrixBlockSchema,
   logoPlatesBlockSchema,
   materialBlockSchema,
+  boxBlockSchema,
+  shapeBlockSchema,
+  ruleBlockSchema,
+  textBlockSchema,
+  iconBlockSchema,
   htmlBlockSchema,
 ]);
 
@@ -1105,5 +1376,10 @@ export const BLOCK_SCHEMAS = {
   matrix: matrixBlockSchema,
   logoPlates: logoPlatesBlockSchema,
   material: materialBlockSchema,
+  box: boxBlockSchema,
+  shape: shapeBlockSchema,
+  rule: ruleBlockSchema,
+  text: textBlockSchema,
+  icon: iconBlockSchema,
   html: htmlBlockSchema,
 } as const satisfies Record<BlockType, z.ZodType>;

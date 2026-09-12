@@ -258,7 +258,7 @@ export function applyMutation(
         );
       }
       insertAfter(list, located.block, after);
-      return [
+      const inverse: Mutation[] = [
         {
           op: 'block.move',
           slideId: mutation.slideId,
@@ -267,6 +267,25 @@ export function applyMutation(
           ...(fromAfter !== undefined ? { after: fromAfter } : {}),
         },
       ];
+      if (mutation.z !== undefined) {
+        // the z target of a freeform block (docs/freeform.md); the inverse restores or removes it
+        const pos = located.block.pos;
+        if (pos === undefined) {
+          throw new TypeError(
+            `block.move: block "${mutation.blockId}" has no position box, so it has no z order`,
+          );
+        }
+        const oldZ = pos.z;
+        pos.z = mutation.z;
+        inverse.push({
+          op: 'block.set',
+          slideId: mutation.slideId,
+          blockId: mutation.blockId,
+          path: '/pos/z',
+          ...(oldZ !== undefined ? { value: oldZ } : {}),
+        });
+      }
+      return inverse;
     }
     case 'block.set': {
       const slide = requireSlide(document, mutation.slideId);

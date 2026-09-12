@@ -9,8 +9,10 @@ import { getDeck } from '../server/decks';
 // The viewer (SPEC 3.4, 6.1): slide, grid, book and present modes; the theme;
 // the keys; #NN and #s/<slideId> hashes; the sidebar tree, the toolbar, the
 // hover preview layer. Search params carry view state so links reproduce a
-// view: ?mode=slide|grid|book and ?theme=light|dark. No editing in M1.
-export type DeckSearch = { mode?: ShellMode; theme?: Theme };
+// view: ?mode=slide|grid|book and ?theme=light|dark. No editing in M1. ?present=1 opens the deck
+// in present mode (chrome hidden), the address the editor's Presentation entry and the deck
+// list's Present links open (docs/deck-transfer.md, the GT template presentation).
+export type DeckSearch = { mode?: ShellMode; theme?: Theme; present?: 1 };
 
 function isMode(value: unknown): value is ShellMode {
   return value === 'slide' || value === 'grid' || value === 'book';
@@ -24,6 +26,7 @@ export function validateDeckSearch(search: Record<string, unknown>): DeckSearch 
   const out: DeckSearch = {};
   if (isMode(search.mode)) out.mode = search.mode;
   if (isTheme(search.theme)) out.theme = search.theme;
+  if (search.present === 1 || search.present === '1' || search.present === true) out.present = 1;
   return out;
 }
 
@@ -58,6 +61,7 @@ function DeckPage() {
       payload={payload}
       mode={search.mode}
       theme={search.theme}
+      present={search.present === 1}
       onModeChange={onModeChange}
     />
   );

@@ -1,0 +1,86 @@
+/* Tooltip (Tooltip.tsx): one paper plate on the hair edge, fixed, 6px from its control, at
+   12.5px in the text face; the name in the display face at weight 500, the key as an 18px kbd
+   chip on --pt-hair-soft at the shell corner (--pt-radius, the one corner chrome draws; SPEC
+   2.2), the sentence in ink-2 under them. Radius 0 and no shadow on the plate, as every plate in
+   chrome; the plate's
+   --pt-hair border is the one line it draws. z-index 40 sits over the menus (30) and under the
+   hover preview layer (120). Motion: the fade over the fast duration when data-motion is fade;
+   Tooltip.tsx writes none under reduced motion and tokens.css zeroes the duration as well.
+   pointer-events none, so the plate never takes the hover that made it. */
+.pt-tip {
+  position: fixed;
+  z-index: 40;
+  box-sizing: border-box;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px 8px 7px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  font: 12.5px/1.4 var(--pt-text);
+  pointer-events: none;
+}
+
+.pt-tip[hidden] {
+  display: none;
+}
+
+.pt-tip[data-motion='fade'] {
+  animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
+}
+
+.pt-tip-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pt-tip-name {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 12.5px;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pt-tip-key {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--pt-radius);
+  background: var(--pt-hair-soft);
+  font-family: var(--pt-text);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--pt-titanium);
+  white-space: nowrap;
+}
+
+.pt-tip-doc {
+  color: var(--pt-ink-2);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+/* the wrapper the Tooltip component puts around a component child: in the tree, no box */
+.pt-tip-anchor {
+  display: contents;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-tip[data-motion='fade'] {
+    animation: none;
+  }
+}

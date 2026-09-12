@@ -41,6 +41,14 @@ Commands
   deck create <name> --from gt-brand|blank [--id <id>] [--decks <dir>]
                                     decks/<id> from the GT brand template (85 slides) or as one title slide (deck.create)
   deck rename <name>                set the deck title (deck.rename)
+  deck pack <id> [--out <file.zip>] [--no-versions]
+                                    decks/<id> as one bundle zip with manifest.json (deck.pack; docs/deck-transfer.md)
+  deck unpack <file.zip> [--as <id>] [--replace]
+                                    a deck under decks/ from a bundle; a taken id gets a free sibling unless --replace (deck.unpack)
+  deck push <id> --to <url> [--token <t>] [--as <id>] [--replace] [--from-url <url>]
+                                    upload the bundle to a hosted studio (deck.push); the token is kept in ~/.config/turboslide/hosts.json
+  deck pull <id> --from <url> [--token <t>] [--as <id>] [--replace]
+                                    download a deck bundle from a hosted studio into decks/ (deck.pull)
   slides [--section <id>]           slide rows with per-slide lint counts
   slide get <id>                    one slide, its assets and its last render records
   slide put <id> < slide.json       replace a slide (slide.replace)
@@ -48,10 +56,16 @@ Commands
   slide insert --section <s> [--after <id>] < slide.json
   slide remove <id>
   slide move <id> --to <s> [--after <id>]
+  slide set-layout <id> --type <layout> [--ratio --gap --head --align --body] | --layout '<json>'
+                                    move a content slide to another layout and refile its blocks (slide.setLayout, docs/freeform.md)
   block set <slide>#<block> <pointer> <value> [--delete]
   block insert <slide> --slot <slot> [--after <block>] < block.json
   block remove <slide>#<block>
-  block move <slide>#<block> --slot <slot> [--after <block>]
+  block move <slide>#<block> --slot <slot> [--after <block>] [--z <n>]
+  block align <slide> --blocks <id,...> --edge left|center|right|top|middle|bottom [--to selection|content|sheet] [--no-snap]
+  block distribute <slide> --blocks <id,...> --axis horizontal|vertical [--gap <px>] [--snap]
+  block order <slide>#<block> --move front|back|forward|backward | --z <n>
+                                    the position boxes of a freeform slide (block.align, block.distribute, block.order)
   sections set < sections.json      replace the section list, the only place order lives
   asset add <file|url> --role <r> --alt <t> [--artist --license --share-alike --source-url] [--two-tone --black --gamma --plate <side>]
                                     a picture as an asset with its license fields; --two-tone runs the deck's screen and keeps the source

@@ -86,7 +86,13 @@ export type Layout =
   /** slot: main */
   | { type: 'left-mid' }
   /** slot: main */
-  | { type: 'stack'; gap?: number };
+  | { type: 'stack'; gap?: number }
+  /**
+   * slot: main. Every top-level block carries `pos`, its box on the sheet, and the renderer places
+   * it absolutely (Kevin, 2026-09-11, over the no-coordinates rule of SPEC 1 and 6.4; docs/freeform.md).
+   * A pure-grammar deck learns of it through the layout/freeform lint at severity 1.
+   */
+  | { type: 'freeform' };
 
 export type LayoutType = Layout['type'];
 
@@ -224,6 +230,7 @@ export const layoutSchema = z.discriminatedUnion('type', [
       group: 'Layout',
     }),
   }),
+  z.strictObject({ type: z.literal('freeform') }),
 ]) satisfies z.ZodType<Layout>;
 
 export const pictureSchema = z.strictObject({
@@ -384,6 +391,7 @@ export function slotsForLayout(layout: Layout): SlotName[] {
     case 'center':
     case 'left-mid':
     case 'stack':
+    case 'freeform':
       return ['main'];
   }
 }
@@ -409,6 +417,7 @@ export function normalizeLayout(layout: Layout): Layout {
       return { type: 'stack', gap: layout.gap ?? 22 };
     case 'center':
     case 'left-mid':
+    case 'freeform':
       return { type: layout.type };
   }
 }

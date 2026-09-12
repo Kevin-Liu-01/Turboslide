@@ -97,7 +97,7 @@ const runDeckActionFn = createServerFn({ method: 'POST' })
     // enter the browser's dependency optimizer (measured: the dev server failed on vite's
     // fsevents binary when the import was static; the production build tree-shakes it either way)
     const { deckDispatcher } = await import('./actions');
-    const { dispatcher } = deckDispatcher(data.deckId);
+    const { dispatcher } = await deckDispatcher(data.deckId);
     const output = await dispatcher.dispatch(data.action, data.input, {
       author: data.author,
       deckDir: deckDir(data.deckId),

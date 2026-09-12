@@ -84,10 +84,13 @@ export const TEXT_BLOCK_TYPES: ReadonlySet<string> = new Set([
   'panel',
   'composite',
   'counter',
+  // the freeform round's text carriers (docs/freeform.md)
+  'text',
+  'box',
 ]);
 
-/** Blocks that are mostly hairlines: declared diagrams and scales. */
-export const LINE_BLOCK_TYPES: ReadonlySet<string> = new Set(['dia', 'scales']);
+/** Blocks that are mostly hairlines: declared diagrams, scales, and the rule and shape primitives. */
+export const LINE_BLOCK_TYPES: ReadonlySet<string> = new Set(['dia', 'scales', 'rule', 'shape']);
 
 export function blockKind(type: string): BlockKind {
   if (TEXT_BLOCK_TYPES.has(type)) return 'text';

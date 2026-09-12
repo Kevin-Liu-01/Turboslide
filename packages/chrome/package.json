@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "The Prototemplate viewer shell ported as source: tokens.css (--pt-), ToolButton, Seg, Toolbar, Sidebar, ListRow, SidebarFilter, ThumbShot, PreviewLayer, HelpCard, Toast, Progress, ThemeButton, useShellKeys, ViewerShell, plus the editor chrome of M3: Palette, Inspector with its generated controls, SourceDrawer, Overlay, TwinStage, Thumb, StatusChip, LintPanel, VersionsPanel, HistoryPanel; PORTED_FROM.json records the source commit per file.",
+  "description": "The Prototemplate viewer shell ported as source: tokens.css (--pt-), ToolButton, Seg, Toolbar, Sidebar, ListRow, SidebarFilter, ThumbShot, PreviewLayer, HelpCard, Toast, Progress, ThemeButton, useShellKeys, ViewerShell, plus the editor chrome of M3: Palette, Inspector with its generated controls, SourceDrawer, Overlay, TwinStage, Thumb, StatusChip, LintPanel, VersionsPanel, HistoryPanel; the Tooltip primitive, the IconPicker, the InsertMenu and the palette, typography and position controls of the freeform round; PORTED_FROM.json records the source commit per file.",
   "scripts": {
     "test": "vitest run"
   },
@@ -15,8 +15,10 @@
     "./icons": "./src/icons.tsx",
     "./GtMark": "./src/GtMark.tsx",
     "./ToolButton": "./src/ToolButton.tsx",
+    "./Tooltip": "./src/Tooltip.tsx",
     "./Seg": "./src/Seg.tsx",
     "./Toolbar": "./src/Toolbar.tsx",
+    "./InsertMenu": "./src/InsertMenu.tsx",
     "./Sidebar": "./src/Sidebar.tsx",
     "./ListRow": "./src/ListRow.tsx",
     "./SidebarFilter": "./src/SidebarFilter.tsx",
@@ -35,9 +37,15 @@
     "./Palette": "./src/Palette.tsx",
     "./Inspector": "./src/Inspector.tsx",
     "./AssetPicker": "./src/AssetPicker.tsx",
+    "./IconPicker": "./src/IconPicker.tsx",
     "./inspector/asset": "./src/inspector/asset.tsx",
     "./inspector/dither": "./src/inspector/dither.tsx",
     "./inspector/material": "./src/inspector/material.tsx",
+    "./inspector/sections": "./src/inspector/sections.ts",
+    "./inspector/palette": "./src/inspector/palette.tsx",
+    "./inspector/typography": "./src/inspector/typography.tsx",
+    "./inspector/position": "./src/inspector/position.tsx",
+    "./inspector/lint-mark": "./src/inspector/lint-mark.tsx",
     "./InspectorControl": "./src/InspectorControl.tsx",
     "./inspector/generate": "./src/inspector/generate.ts",
     "./SourceDrawer": "./src/SourceDrawer.tsx",
@@ -52,6 +60,7 @@
     "./DeckName": "./src/DeckName.tsx",
     "./ExportMenu": "./src/ExportMenu.tsx",
     "./ExportReportCard": "./src/ExportReportCard.tsx",
+    "./ConnectCard": "./src/ConnectCard.tsx",
     "./package.json": "./package.json"
   },
   "dependencies": {

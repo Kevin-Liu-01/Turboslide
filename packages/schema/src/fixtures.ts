@@ -260,6 +260,67 @@ export const OPENER_BRAND: Slide = {
   },
 };
 
+/**
+ * A freeform slide with one of every primitive (docs/freeform.md), outside the worked deck so the
+ * counts the M2 acceptance asserts stay; `freeformDocument()` adds it to the worked deck's website
+ * section for the tests of the renderer, the linter, the reducer and the CLI.
+ */
+export const FREEFORM_SLIDE: Slide = {
+  schemaVersion: 1,
+  id: 'free',
+  kind: 'content',
+  layout: { type: 'freeform' },
+  slots: {
+    main: [
+      {
+        id: 'h',
+        type: 'heading',
+        level: 'h2',
+        text: 'A freeform slide',
+        pos: { x: 137, y: 129, w: 640, h: 56, z: 0 },
+      },
+      {
+        id: 'p1',
+        type: 'text',
+        text: 'Boxes, shapes and text sit anywhere on the sheet, snapped to the grid.',
+        typography: { size: 22, leading: 1.5 },
+        pos: { x: 137, y: 209, w: 480, h: 72, z: 1 },
+      },
+      {
+        id: 'box',
+        type: 'box',
+        fill: 'plate',
+        stroke: 'hair',
+        padding: 16,
+        text: 'A plate box with a hairline.',
+        pos: { x: 832, y: 129, w: 320, h: 160, z: 2 },
+      },
+      {
+        id: 'arrow',
+        type: 'shape',
+        shape: 'arrow',
+        stroke: 'ink',
+        width: 1.5,
+        pos: { x: 640, y: 201, w: 176, h: 16, z: 3 },
+      },
+      {
+        id: 'rule',
+        type: 'rule',
+        orientation: 'horizontal',
+        pos: { x: 137, y: 760, w: 1326, h: 8, z: 4 },
+      },
+      {
+        id: 'ic',
+        type: 'icon',
+        name: 'check-circle',
+        size: 32,
+        color: 'green',
+        pos: { x: 137, y: 320, w: 32, h: 32, z: 5 },
+      },
+    ],
+  },
+};
+
 export const WORKED_DECK: Deck = {
   schemaVersion: 1,
   id: 'gt-brand',
@@ -303,4 +364,13 @@ export function workedDocument(): DeckDocument {
   const slides: Record<string, Slide> = {};
   for (const slide of WORKED_SLIDES) slides[slide.id] = JSON.parse(JSON.stringify(slide)) as Slide;
   return { deck: JSON.parse(JSON.stringify(WORKED_DECK)) as Deck, slides };
+}
+
+/** The worked deck plus the freeform slide at the end of the website section, as a fresh copy. */
+export function freeformDocument(): DeckDocument {
+  const document = workedDocument();
+  const website = document.deck.sections.find((section) => section.id === 'website');
+  website?.slideIds.push(FREEFORM_SLIDE.id);
+  document.slides[FREEFORM_SLIDE.id] = JSON.parse(JSON.stringify(FREEFORM_SLIDE)) as Slide;
+  return document;
 }

@@ -49,6 +49,8 @@ const TEXT_TYPES = new Set([
   'tiles',
   'matrix',
   'logoPlates',
+  'text',
+  'box',
 ]);
 
 /**

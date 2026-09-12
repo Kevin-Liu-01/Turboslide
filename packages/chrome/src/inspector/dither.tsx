@@ -393,7 +393,8 @@ export function DitherSection({
       ))}
       <div className="ts-dither-actions">
         <ToolButton
-          title="Re-run the two-tone pipeline from the source and write the twins (asset.dither)"
+          title="Recapture"
+          doc="Runs asset.dither: the two-tone pipeline from the source again, writing both twins."
           label="Recapture"
           icon="sparkles"
           control={`asset.${asset.id}.recapture`}
@@ -401,7 +402,8 @@ export function DitherSection({
           solid
         />
         <ToolButton
-          title="Read the committed twins back and record their plate metrics (asset.dither --from-recorded)"
+          title="Measure"
+          doc="Runs asset.dither --from-recorded: reads the committed twins back and records their plate metrics."
           label="Measure"
           control={`asset.${asset.id}.measure`}
           onClick={measure}

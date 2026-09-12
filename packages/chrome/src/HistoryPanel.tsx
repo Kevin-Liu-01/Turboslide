@@ -71,7 +71,8 @@ export function HistoryPanel({
                 {onUndoTo && index > 0 && entry.mutations.length > 0 ? (
                   <ToolButton
                     label="Undo to here"
-                    title={`Undo every write after revision ${entry.revision}`}
+                    title="Undo to here"
+                    doc={`Undoes every write after revision ${entry.revision} as one forward write carrying the inverse mutations.`}
                     ariaLabel={`Undo to revision ${entry.revision}`}
                     className="ts-history-undo"
                     control={`history.undo.${entry.n}`}

@@ -41,7 +41,7 @@ test('the deck opens dark on its first slide with the sheet fitted', async ({ pa
   const box = await sheet.boundingBox();
   expect(box).not.toBeNull();
   if (box) expect(Math.abs(box.width / box.height - 16 / 9)).toBeLessThan(0.01);
-  await expect(page.locator('.ts-stage .pt-slide > .slide')).toBeVisible();
+  await expect(page.locator('.ts-stagewrap .ts-stage .pt-slide > .slide')).toBeVisible();
 });
 
 test('g, b, d and p change the mode, the theme and the present state', async ({ page }) => {

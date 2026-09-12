@@ -1598,6 +1598,146 @@
         }
       }
     },
+    "/api/actions/slide.setLayout": {
+      "post": {
+        "operationId": "slide.setLayout",
+        "summary": "Set layout",
+        "description": "Moves a content slide to another layout and refiles its blocks: to freeform every block gets a position box from its slot, from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).",
+        "tags": [
+          "slide"
+        ],
+        "x-mutates": true,
+        "x-milestone": "M6",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SlideSetLayoutInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlideUpdateOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in M6 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/actions/block.set": {
       "post": {
         "operationId": "block.set",
@@ -2147,6 +2287,426 @@
           },
           "501": {
             "description": "Declared, lands in M2 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/block.align": {
+      "post": {
+        "operationId": "block.align",
+        "summary": "Align blocks",
+        "description": "Aligns the position boxes of freeform blocks on one edge, against the selection, the content box or the sheet, and snaps the result unless snap is false.",
+        "tags": [
+          "block"
+        ],
+        "x-mutates": true,
+        "x-milestone": "M6",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockAlignInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlideUpdateOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in M6 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/block.distribute": {
+      "post": {
+        "operationId": "block.distribute",
+        "summary": "Distribute blocks",
+        "description": "Spreads freeform blocks along one axis with equal gaps between the first and the last, or with a fixed gap; with snap the moved edges round to the 8 px grid.",
+        "tags": [
+          "block"
+        ],
+        "x-mutates": true,
+        "x-milestone": "M6",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockDistributeInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlideUpdateOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in M6 (NotImplementedError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/actions/block.order": {
+      "post": {
+        "operationId": "block.order",
+        "summary": "Order block",
+        "description": "Moves a freeform block through the stacking order, to the front or back or by one step, or to a given z rank, and renumbers the stack densely.",
+        "tags": [
+          "block"
+        ],
+        "x-mutates": true,
+        "x-milestone": "M6",
+        "x-transports": [
+          "cli",
+          "mcp",
+          "http",
+          "window"
+        ],
+        "parameters": [
+          {
+            "name": "deck",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The deck id under decks/; the instance default (gt-brand) when absent"
+          },
+          {
+            "name": "x-turboslide-author",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "human name or agent:<runId>; agent:http when absent (?author= is accepted too)"
+          },
+          {
+            "name": "force",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Write to a slide another author leased (SPEC 6.7 force); x-turboslide-force: 1 is the header form"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BlockOrderInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The normalized result at the new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SlideUpdateOutput"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input (TypeError) with the Zod path; an unknown field carries code unknown_field and a JSON pointer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Bearer token required off localhost",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unknown id (RangeError)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Stale baseRevision or a held lease (ConflictError), with currentRevision, the current document and the holder",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over the cap (1 MB)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Renderer or codec failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "501": {
+            "description": "Declared, lands in M6 (NotImplementedError)",
             "content": {
               "application/json": {
                 "schema": {
@@ -5468,6 +6028,19 @@
               "type"
             ],
             "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "const": "freeform"
+              }
+            },
+            "required": [
+              "type"
+            ],
+            "additionalProperties": false
           }
         ]
       },
@@ -5598,6 +6171,77 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "heading"
@@ -5659,6 +6303,136 @@
                   0,
                   18
                 ]
+              },
+              "typography": {
+                "title": "Typography",
+                "x-inspector": {
+                  "label": "Typography",
+                  "control": "typography",
+                  "group": "Text",
+                  "help": "Size from the ladder, weight, alignment, tracking and leading; an absent field keeps the grammar default."
+                },
+                "description": "Size from the ladder, weight, alignment, tracking and leading; an absent field keeps the grammar default.",
+                "type": "object",
+                "properties": {
+                  "size": {
+                    "title": "Size",
+                    "x-inspector": {
+                      "label": "Size",
+                      "control": "select",
+                      "snap": [
+                        88,
+                        72,
+                        58,
+                        44,
+                        34,
+                        26,
+                        24,
+                        22,
+                        20,
+                        18,
+                        17,
+                        16,
+                        15
+                      ],
+                      "group": "Text",
+                      "help": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding."
+                    },
+                    "description": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding.",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "weight": {
+                    "title": "Weight",
+                    "x-inspector": {
+                      "label": "Weight",
+                      "control": "select",
+                      "snap": [
+                        300,
+                        400,
+                        500,
+                        600,
+                        700
+                      ],
+                      "group": "Text",
+                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                    },
+                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                    "type": "number",
+                    "enum": [
+                      300,
+                      400,
+                      500,
+                      600,
+                      700
+                    ]
+                  },
+                  "align": {
+                    "title": "Align",
+                    "x-inspector": {
+                      "label": "Align",
+                      "control": "select",
+                      "snap": [
+                        "left",
+                        "center",
+                        "right"
+                      ],
+                      "group": "Text"
+                    },
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "center",
+                      "right"
+                    ]
+                  },
+                  "tracking": {
+                    "title": "Tracking (em)",
+                    "x-inspector": {
+                      "label": "Tracking (em)",
+                      "control": "number",
+                      "snap": [
+                        -0.025,
+                        -0.02,
+                        -0.015,
+                        -0.01,
+                        0,
+                        0.01,
+                        0.02
+                      ],
+                      "group": "Text",
+                      "help": "Letter spacing in em; the display faces sit at -0.025 (head:58)."
+                    },
+                    "description": "Letter spacing in em; the display faces sit at -0.025 (head:58).",
+                    "type": "number"
+                  },
+                  "leading": {
+                    "title": "Leading",
+                    "x-inspector": {
+                      "label": "Leading",
+                      "control": "number",
+                      "snap": [
+                        1.02,
+                        1.06,
+                        1.08,
+                        1.1,
+                        1.2,
+                        1.25,
+                        1.3,
+                        1.4,
+                        1.45,
+                        1.5,
+                        1.7
+                      ],
+                      "group": "Text",
+                      "help": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65)."
+                    },
+                    "description": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65).",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "additionalProperties": false
               }
             },
             "required": [
@@ -5688,6 +6462,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -5764,6 +6609,136 @@
                   "group": "Layout"
                 },
                 "type": "number"
+              },
+              "typography": {
+                "title": "Typography",
+                "x-inspector": {
+                  "label": "Typography",
+                  "control": "typography",
+                  "group": "Text",
+                  "help": "Size from the ladder, weight, alignment, tracking and leading; an absent field keeps the grammar default."
+                },
+                "description": "Size from the ladder, weight, alignment, tracking and leading; an absent field keeps the grammar default.",
+                "type": "object",
+                "properties": {
+                  "size": {
+                    "title": "Size",
+                    "x-inspector": {
+                      "label": "Size",
+                      "control": "select",
+                      "snap": [
+                        88,
+                        72,
+                        58,
+                        44,
+                        34,
+                        26,
+                        24,
+                        22,
+                        20,
+                        18,
+                        17,
+                        16,
+                        15
+                      ],
+                      "group": "Text",
+                      "help": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding."
+                    },
+                    "description": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding.",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "weight": {
+                    "title": "Weight",
+                    "x-inspector": {
+                      "label": "Weight",
+                      "control": "select",
+                      "snap": [
+                        300,
+                        400,
+                        500,
+                        600,
+                        700
+                      ],
+                      "group": "Text",
+                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                    },
+                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                    "type": "number",
+                    "enum": [
+                      300,
+                      400,
+                      500,
+                      600,
+                      700
+                    ]
+                  },
+                  "align": {
+                    "title": "Align",
+                    "x-inspector": {
+                      "label": "Align",
+                      "control": "select",
+                      "snap": [
+                        "left",
+                        "center",
+                        "right"
+                      ],
+                      "group": "Text"
+                    },
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "center",
+                      "right"
+                    ]
+                  },
+                  "tracking": {
+                    "title": "Tracking (em)",
+                    "x-inspector": {
+                      "label": "Tracking (em)",
+                      "control": "number",
+                      "snap": [
+                        -0.025,
+                        -0.02,
+                        -0.015,
+                        -0.01,
+                        0,
+                        0.01,
+                        0.02
+                      ],
+                      "group": "Text",
+                      "help": "Letter spacing in em; the display faces sit at -0.025 (head:58)."
+                    },
+                    "description": "Letter spacing in em; the display faces sit at -0.025 (head:58).",
+                    "type": "number"
+                  },
+                  "leading": {
+                    "title": "Leading",
+                    "x-inspector": {
+                      "label": "Leading",
+                      "control": "number",
+                      "snap": [
+                        1.02,
+                        1.06,
+                        1.08,
+                        1.1,
+                        1.2,
+                        1.25,
+                        1.3,
+                        1.4,
+                        1.45,
+                        1.5,
+                        1.7
+                      ],
+                      "group": "Text",
+                      "help": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65)."
+                    },
+                    "description": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65).",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "additionalProperties": false
               }
             },
             "required": [
@@ -5792,6 +6767,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -5835,6 +6881,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -5981,6 +7098,77 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "plain"
@@ -6069,6 +7257,77 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "refs"
@@ -6113,6 +7372,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -6186,6 +7516,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -6274,6 +7675,77 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "spec"
@@ -6355,6 +7827,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -6441,6 +7984,77 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "ladder"
@@ -6522,6 +8136,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -6610,6 +8295,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -6750,6 +8506,77 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "pair"
@@ -6885,6 +8712,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -7034,6 +8932,77 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "details"
@@ -7123,6 +9092,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -7243,6 +9283,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -7395,6 +9506,77 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "panel"
@@ -7484,6 +9666,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -7769,7 +10022,10 @@
                             "bars-3",
                             "view-columns",
                             "identification",
-                            "lock-closed"
+                            "lock-closed",
+                            "bars-3-bottom-left",
+                            "bars-3-center-left",
+                            "bars-3-bottom-right"
                           ]
                         },
                         "x": {
@@ -7959,6 +10215,77 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "dither"
@@ -8033,6 +10360,77 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "mark"
@@ -8088,6 +10486,77 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "markSizes"
@@ -8140,6 +10609,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -8197,6 +10737,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -8273,6 +10884,77 @@
                   "type": "string"
                 },
                 "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
               },
               "type": {
                 "type": "string",
@@ -8466,6 +11148,1606 @@
                 },
                 "additionalProperties": {}
               },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
+              "type": {
+                "type": "string",
+                "const": "box"
+              },
+              "fill": {
+                "title": "Fill",
+                "x-inspector": {
+                  "label": "Fill",
+                  "control": "color",
+                  "snap": [
+                    "ink",
+                    "paper",
+                    "ink-2",
+                    "titanium",
+                    "hair",
+                    "hair-soft",
+                    "plate",
+                    "edge",
+                    "green",
+                    "amber",
+                    "red",
+                    "blue"
+                  ],
+                  "group": "Block",
+                  "help": "The box ground; none unless set. Tokens follow the theme (docs/freeform.md)."
+                },
+                "description": "The box ground; none unless set. Tokens follow the theme (docs/freeform.md).",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "ink",
+                      "paper",
+                      "ink-2",
+                      "titanium",
+                      "hair",
+                      "hair-soft",
+                      "plate",
+                      "edge",
+                      "green",
+                      "amber",
+                      "red",
+                      "blue"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                ]
+              },
+              "stroke": {
+                "title": "Stroke",
+                "x-inspector": {
+                  "label": "Stroke",
+                  "control": "color",
+                  "snap": [
+                    "ink",
+                    "paper",
+                    "ink-2",
+                    "titanium",
+                    "hair",
+                    "hair-soft",
+                    "plate",
+                    "edge",
+                    "green",
+                    "amber",
+                    "red",
+                    "blue"
+                  ],
+                  "group": "Block",
+                  "help": "The border color; the hairline token unless set."
+                },
+                "description": "The border color; the hairline token unless set.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "ink",
+                      "paper",
+                      "ink-2",
+                      "titanium",
+                      "hair",
+                      "hair-soft",
+                      "plate",
+                      "edge",
+                      "green",
+                      "amber",
+                      "red",
+                      "blue"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                ]
+              },
+              "strokeWidth": {
+                "title": "Stroke width",
+                "x-inspector": {
+                  "label": "Stroke width",
+                  "control": "select",
+                  "snap": [
+                    0,
+                    1,
+                    1.5,
+                    2
+                  ],
+                  "group": "Block",
+                  "help": "1 is the sheet hairline, 1.5 the diagram emphasis stroke, 2 a plate edge; 0 removes the border."
+                },
+                "description": "1 is the sheet hairline, 1.5 the diagram emphasis stroke, 2 a plate edge; 0 removes the border.",
+                "type": "number",
+                "enum": [
+                  0,
+                  1,
+                  1.5,
+                  2
+                ]
+              },
+              "radius": {
+                "title": "Corner radius",
+                "x-inspector": {
+                  "label": "Corner radius",
+                  "control": "number",
+                  "snap": [
+                    0,
+                    4,
+                    6,
+                    8,
+                    12,
+                    16
+                  ],
+                  "group": "Block",
+                  "help": "Every box on the sheet is square unless set; 6 is the one corner the chrome uses (SPEC 2.2)."
+                },
+                "description": "Every box on the sheet is square unless set; 6 is the one corner the chrome uses (SPEC 2.2).",
+                "type": "number",
+                "minimum": 0
+              },
+              "padding": {
+                "title": "Padding",
+                "x-inspector": {
+                  "label": "Padding",
+                  "control": "number",
+                  "snap": [
+                    0,
+                    8,
+                    12,
+                    16,
+                    22,
+                    26
+                  ],
+                  "group": "Layout",
+                  "help": "16 px unless set; the plates pad 22 by 26 (head:8)."
+                },
+                "description": "16 px unless set; the plates pad 22 by 26 (head:8).",
+                "type": "number",
+                "minimum": 0
+              },
+              "height": {
+                "title": "Height",
+                "x-inspector": {
+                  "label": "Height",
+                  "control": "number",
+                  "group": "Layout",
+                  "help": "The height in a flow layout; on a freeform slide the position box decides."
+                },
+                "description": "The height in a flow layout; on a freeform slide the position box decides.",
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "text": {
+                "title": "Text",
+                "x-inspector": {
+                  "label": "Text",
+                  "control": "textarea",
+                  "group": "Text"
+                },
+                "type": "string"
+              },
+              "typography": {
+                "title": "Typography",
+                "x-inspector": {
+                  "label": "Typography",
+                  "control": "typography",
+                  "group": "Text",
+                  "help": "Size from the ladder, weight, alignment, tracking and leading; an absent field keeps the grammar default."
+                },
+                "description": "Size from the ladder, weight, alignment, tracking and leading; an absent field keeps the grammar default.",
+                "type": "object",
+                "properties": {
+                  "size": {
+                    "title": "Size",
+                    "x-inspector": {
+                      "label": "Size",
+                      "control": "select",
+                      "snap": [
+                        88,
+                        72,
+                        58,
+                        44,
+                        34,
+                        26,
+                        24,
+                        22,
+                        20,
+                        18,
+                        17,
+                        16,
+                        15
+                      ],
+                      "group": "Text",
+                      "help": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding."
+                    },
+                    "description": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding.",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "weight": {
+                    "title": "Weight",
+                    "x-inspector": {
+                      "label": "Weight",
+                      "control": "select",
+                      "snap": [
+                        300,
+                        400,
+                        500,
+                        600,
+                        700
+                      ],
+                      "group": "Text",
+                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                    },
+                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                    "type": "number",
+                    "enum": [
+                      300,
+                      400,
+                      500,
+                      600,
+                      700
+                    ]
+                  },
+                  "align": {
+                    "title": "Align",
+                    "x-inspector": {
+                      "label": "Align",
+                      "control": "select",
+                      "snap": [
+                        "left",
+                        "center",
+                        "right"
+                      ],
+                      "group": "Text"
+                    },
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "center",
+                      "right"
+                    ]
+                  },
+                  "tracking": {
+                    "title": "Tracking (em)",
+                    "x-inspector": {
+                      "label": "Tracking (em)",
+                      "control": "number",
+                      "snap": [
+                        -0.025,
+                        -0.02,
+                        -0.015,
+                        -0.01,
+                        0,
+                        0.01,
+                        0.02
+                      ],
+                      "group": "Text",
+                      "help": "Letter spacing in em; the display faces sit at -0.025 (head:58)."
+                    },
+                    "description": "Letter spacing in em; the display faces sit at -0.025 (head:58).",
+                    "type": "number"
+                  },
+                  "leading": {
+                    "title": "Leading",
+                    "x-inspector": {
+                      "label": "Leading",
+                      "control": "number",
+                      "snap": [
+                        1.02,
+                        1.06,
+                        1.08,
+                        1.1,
+                        1.2,
+                        1.25,
+                        1.3,
+                        1.4,
+                        1.45,
+                        1.5,
+                        1.7
+                      ],
+                      "group": "Text",
+                      "help": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65)."
+                    },
+                    "description": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65).",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "additionalProperties": false
+              },
+              "color": {
+                "title": "Text color",
+                "x-inspector": {
+                  "label": "Text color",
+                  "control": "color",
+                  "snap": [
+                    "ink",
+                    "paper",
+                    "ink-2",
+                    "titanium",
+                    "hair",
+                    "hair-soft",
+                    "plate",
+                    "edge",
+                    "green",
+                    "amber",
+                    "red",
+                    "blue"
+                  ],
+                  "group": "Text",
+                  "help": "The color of the text inside the box; the ink unless set."
+                },
+                "description": "The color of the text inside the box; the ink unless set.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "ink",
+                      "paper",
+                      "ink-2",
+                      "titanium",
+                      "hair",
+                      "hair-soft",
+                      "plate",
+                      "edge",
+                      "green",
+                      "amber",
+                      "red",
+                      "blue"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "type"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$",
+                "title": "Id",
+                "x-inspector": {
+                  "label": "Id",
+                  "control": "readonly",
+                  "group": "Advanced"
+                }
+              },
+              "ext": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
+              "type": {
+                "type": "string",
+                "const": "shape"
+              },
+              "shape": {
+                "type": "string",
+                "enum": [
+                  "rectangle",
+                  "rounded",
+                  "ellipse",
+                  "line",
+                  "arrow"
+                ],
+                "title": "Shape",
+                "x-inspector": {
+                  "label": "Shape",
+                  "control": "select",
+                  "snap": [
+                    "rectangle",
+                    "rounded",
+                    "ellipse",
+                    "line",
+                    "arrow"
+                  ],
+                  "group": "Block",
+                  "help": "A closed shape fills its box; a line or arrow runs along it (orientation)."
+                },
+                "description": "A closed shape fills its box; a line or arrow runs along it (orientation)."
+              },
+              "fill": {
+                "title": "Fill",
+                "x-inspector": {
+                  "label": "Fill",
+                  "control": "color",
+                  "snap": [
+                    "ink",
+                    "paper",
+                    "ink-2",
+                    "titanium",
+                    "hair",
+                    "hair-soft",
+                    "plate",
+                    "edge",
+                    "green",
+                    "amber",
+                    "red",
+                    "blue"
+                  ],
+                  "group": "Block",
+                  "help": "The inside of a closed shape; none unless set."
+                },
+                "description": "The inside of a closed shape; none unless set.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "ink",
+                      "paper",
+                      "ink-2",
+                      "titanium",
+                      "hair",
+                      "hair-soft",
+                      "plate",
+                      "edge",
+                      "green",
+                      "amber",
+                      "red",
+                      "blue"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                ]
+              },
+              "stroke": {
+                "title": "Stroke",
+                "x-inspector": {
+                  "label": "Stroke",
+                  "control": "color",
+                  "snap": [
+                    "ink",
+                    "paper",
+                    "ink-2",
+                    "titanium",
+                    "hair",
+                    "hair-soft",
+                    "plate",
+                    "edge",
+                    "green",
+                    "amber",
+                    "red",
+                    "blue"
+                  ],
+                  "group": "Block",
+                  "help": "The outline or the line color; hair for closed shapes, ink for lines unless set."
+                },
+                "description": "The outline or the line color; hair for closed shapes, ink for lines unless set.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "ink",
+                      "paper",
+                      "ink-2",
+                      "titanium",
+                      "hair",
+                      "hair-soft",
+                      "plate",
+                      "edge",
+                      "green",
+                      "amber",
+                      "red",
+                      "blue"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                ]
+              },
+              "width": {
+                "title": "Stroke width",
+                "x-inspector": {
+                  "label": "Stroke width",
+                  "control": "select",
+                  "snap": [
+                    1,
+                    1.5,
+                    2,
+                    3,
+                    4
+                  ],
+                  "group": "Block",
+                  "help": "Stroke in px; 1 unless set. Above 1.5 is outside the diagram grammar (DECK-GRAMMAR.md:44) and meant for freeform slides."
+                },
+                "description": "Stroke in px; 1 unless set. Above 1.5 is outside the diagram grammar (DECK-GRAMMAR.md:44) and meant for freeform slides.",
+                "type": "number",
+                "enum": [
+                  1,
+                  1.5,
+                  2,
+                  3,
+                  4
+                ]
+              },
+              "radius": {
+                "title": "Corner radius",
+                "x-inspector": {
+                  "label": "Corner radius",
+                  "control": "number",
+                  "snap": [
+                    4,
+                    6,
+                    8,
+                    12,
+                    16,
+                    24
+                  ],
+                  "group": "Block",
+                  "help": "The rounded rectangle corner; 8 unless set."
+                },
+                "description": "The rounded rectangle corner; 8 unless set.",
+                "type": "number",
+                "minimum": 0
+              },
+              "arrowheads": {
+                "title": "Arrowheads",
+                "x-inspector": {
+                  "label": "Arrowheads",
+                  "control": "select",
+                  "snap": [
+                    "end",
+                    "start",
+                    "both",
+                    "none"
+                  ],
+                  "group": "Block",
+                  "help": "Filled 8 px triangles at the ends of an arrow; end unless set."
+                },
+                "description": "Filled 8 px triangles at the ends of an arrow; end unless set.",
+                "type": "string",
+                "enum": [
+                  "end",
+                  "start",
+                  "both",
+                  "none"
+                ]
+              },
+              "orientation": {
+                "title": "Orientation",
+                "x-inspector": {
+                  "label": "Orientation",
+                  "control": "select",
+                  "snap": [
+                    "horizontal",
+                    "vertical",
+                    "diagonal-down",
+                    "diagonal-up"
+                  ],
+                  "group": "Block",
+                  "help": "How a line or arrow crosses its box; horizontal when the box is wider than tall, else vertical."
+                },
+                "description": "How a line or arrow crosses its box; horizontal when the box is wider than tall, else vertical.",
+                "type": "string",
+                "enum": [
+                  "horizontal",
+                  "vertical",
+                  "diagonal-down",
+                  "diagonal-up"
+                ]
+              },
+              "height": {
+                "title": "Height",
+                "x-inspector": {
+                  "label": "Height",
+                  "control": "number",
+                  "group": "Layout",
+                  "help": "The height in a flow layout; on a freeform slide the position box decides."
+                },
+                "description": "The height in a flow layout; on a freeform slide the position box decides.",
+                "type": "number",
+                "exclusiveMinimum": 0
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "shape"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$",
+                "title": "Id",
+                "x-inspector": {
+                  "label": "Id",
+                  "control": "readonly",
+                  "group": "Advanced"
+                }
+              },
+              "ext": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
+              "type": {
+                "type": "string",
+                "const": "rule"
+              },
+              "orientation": {
+                "type": "string",
+                "enum": [
+                  "horizontal",
+                  "vertical"
+                ],
+                "title": "Orientation",
+                "x-inspector": {
+                  "label": "Orientation",
+                  "control": "select",
+                  "snap": [
+                    "horizontal",
+                    "vertical"
+                  ],
+                  "group": "Block"
+                }
+              },
+              "length": {
+                "title": "Length",
+                "x-inspector": {
+                  "label": "Length",
+                  "control": "number",
+                  "group": "Layout",
+                  "help": "In px; the slot width in a flow layout when absent. On a freeform slide the box decides."
+                },
+                "description": "In px; the slot width in a flow layout when absent. On a freeform slide the box decides.",
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "weight": {
+                "title": "Weight",
+                "x-inspector": {
+                  "label": "Weight",
+                  "control": "select",
+                  "snap": [
+                    1,
+                    1.5,
+                    2
+                  ],
+                  "group": "Block",
+                  "help": "1 px is the sheet hairline (DECK-GRAMMAR.md:15)."
+                },
+                "description": "1 px is the sheet hairline (DECK-GRAMMAR.md:15).",
+                "type": "number",
+                "enum": [
+                  1,
+                  1.5,
+                  2
+                ]
+              },
+              "color": {
+                "title": "Color",
+                "x-inspector": {
+                  "label": "Color",
+                  "control": "color",
+                  "snap": [
+                    "ink",
+                    "paper",
+                    "ink-2",
+                    "titanium",
+                    "hair",
+                    "hair-soft",
+                    "plate",
+                    "edge",
+                    "green",
+                    "amber",
+                    "red",
+                    "blue"
+                  ],
+                  "group": "Block",
+                  "help": "The rule color; the hairline token unless set."
+                },
+                "description": "The rule color; the hairline token unless set.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "ink",
+                      "paper",
+                      "ink-2",
+                      "titanium",
+                      "hair",
+                      "hair-soft",
+                      "plate",
+                      "edge",
+                      "green",
+                      "amber",
+                      "red",
+                      "blue"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "orientation"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$",
+                "title": "Id",
+                "x-inspector": {
+                  "label": "Id",
+                  "control": "readonly",
+                  "group": "Advanced"
+                }
+              },
+              "ext": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
+              "type": {
+                "type": "string",
+                "const": "text"
+              },
+              "text": {
+                "type": "string",
+                "title": "Text",
+                "x-inspector": {
+                  "label": "Text",
+                  "control": "textarea",
+                  "group": "Text"
+                }
+              },
+              "typography": {
+                "title": "Typography",
+                "x-inspector": {
+                  "label": "Typography",
+                  "control": "typography",
+                  "group": "Text",
+                  "help": "Size from the ladder, weight, alignment, tracking and leading; an absent field keeps the grammar default."
+                },
+                "description": "Size from the ladder, weight, alignment, tracking and leading; an absent field keeps the grammar default.",
+                "type": "object",
+                "properties": {
+                  "size": {
+                    "title": "Size",
+                    "x-inspector": {
+                      "label": "Size",
+                      "control": "select",
+                      "snap": [
+                        88,
+                        72,
+                        58,
+                        44,
+                        34,
+                        26,
+                        24,
+                        22,
+                        20,
+                        18,
+                        17,
+                        16,
+                        15
+                      ],
+                      "group": "Text",
+                      "help": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding."
+                    },
+                    "description": "Font size in px from the type ladder (head:59-65); another value is a type/ladder finding.",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "weight": {
+                    "title": "Weight",
+                    "x-inspector": {
+                      "label": "Weight",
+                      "control": "select",
+                      "snap": [
+                        300,
+                        400,
+                        500,
+                        600,
+                        700
+                      ],
+                      "group": "Text",
+                      "help": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md)."
+                    },
+                    "description": "Inter weight; display weight above 500 is a type/weight-cap finding (DECK-GRAMMAR.md:20). The PPTX export carries Regular and Medium cuts: 600 and 700 travel as Medium plus bold, 300 as Regular, and the report says so (docs/pptx.md).",
+                    "type": "number",
+                    "enum": [
+                      300,
+                      400,
+                      500,
+                      600,
+                      700
+                    ]
+                  },
+                  "align": {
+                    "title": "Align",
+                    "x-inspector": {
+                      "label": "Align",
+                      "control": "select",
+                      "snap": [
+                        "left",
+                        "center",
+                        "right"
+                      ],
+                      "group": "Text"
+                    },
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "center",
+                      "right"
+                    ]
+                  },
+                  "tracking": {
+                    "title": "Tracking (em)",
+                    "x-inspector": {
+                      "label": "Tracking (em)",
+                      "control": "number",
+                      "snap": [
+                        -0.025,
+                        -0.02,
+                        -0.015,
+                        -0.01,
+                        0,
+                        0.01,
+                        0.02
+                      ],
+                      "group": "Text",
+                      "help": "Letter spacing in em; the display faces sit at -0.025 (head:58)."
+                    },
+                    "description": "Letter spacing in em; the display faces sit at -0.025 (head:58).",
+                    "type": "number"
+                  },
+                  "leading": {
+                    "title": "Leading",
+                    "x-inspector": {
+                      "label": "Leading",
+                      "control": "number",
+                      "snap": [
+                        1.02,
+                        1.06,
+                        1.08,
+                        1.1,
+                        1.2,
+                        1.25,
+                        1.3,
+                        1.4,
+                        1.45,
+                        1.5,
+                        1.7
+                      ],
+                      "group": "Text",
+                      "help": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65)."
+                    },
+                    "description": "Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65).",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "additionalProperties": false
+              },
+              "color": {
+                "title": "Color",
+                "x-inspector": {
+                  "label": "Color",
+                  "control": "color",
+                  "snap": [
+                    "ink",
+                    "paper",
+                    "ink-2",
+                    "titanium",
+                    "hair",
+                    "hair-soft",
+                    "plate",
+                    "edge",
+                    "green",
+                    "amber",
+                    "red",
+                    "blue"
+                  ],
+                  "group": "Text",
+                  "help": "The text color; the ink unless set."
+                },
+                "description": "The text color; the ink unless set.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "ink",
+                      "paper",
+                      "ink-2",
+                      "titanium",
+                      "hair",
+                      "hair-soft",
+                      "plate",
+                      "edge",
+                      "green",
+                      "amber",
+                      "red",
+                      "blue"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "text"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$",
+                "title": "Id",
+                "x-inspector": {
+                  "label": "Id",
+                  "control": "readonly",
+                  "group": "Advanced"
+                }
+              },
+              "ext": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
+              "type": {
+                "type": "string",
+                "const": "icon"
+              },
+              "name": {
+                "type": "string",
+                "enum": [
+                  "gt-mark",
+                  "check-circle",
+                  "x-circle",
+                  "clock",
+                  "exclamation-circle",
+                  "arrow-top-right-on-square",
+                  "arrow-right",
+                  "arrow-up",
+                  "swatch",
+                  "document-text",
+                  "sparkles",
+                  "globe-alt",
+                  "signal",
+                  "folder",
+                  "presentation-chart-bar",
+                  "play",
+                  "arrows-right-left",
+                  "arrows-up-down",
+                  "archive-box",
+                  "bolt",
+                  "rectangle-stack",
+                  "list-bullet",
+                  "photo",
+                  "cube",
+                  "map",
+                  "key",
+                  "lock-open",
+                  "star",
+                  "book-open",
+                  "squares-2x2",
+                  "code-bracket",
+                  "command-line",
+                  "building-office-2",
+                  "briefcase",
+                  "user-group",
+                  "user-circle",
+                  "scale",
+                  "finger-print",
+                  "eye",
+                  "eye-slash",
+                  "pencil-square",
+                  "chat-bubble-left-right",
+                  "clipboard-document-check",
+                  "wrench-screwdriver",
+                  "cog-6-tooth",
+                  "pause-circle",
+                  "adjustments-horizontal",
+                  "plus",
+                  "device-phone-mobile",
+                  "language",
+                  "table-cells",
+                  "envelope",
+                  "server",
+                  "paint-brush",
+                  "home",
+                  "tag",
+                  "newspaper",
+                  "magnifying-glass",
+                  "rocket-launch",
+                  "check-badge",
+                  "beaker",
+                  "bars-3",
+                  "view-columns",
+                  "identification",
+                  "lock-closed",
+                  "bars-3-bottom-left",
+                  "bars-3-center-left",
+                  "bars-3-bottom-right"
+                ],
+                "title": "Icon",
+                "x-inspector": {
+                  "label": "Icon",
+                  "control": "icon",
+                  "group": "Block"
+                }
+              },
+              "size": {
+                "title": "Size",
+                "x-inspector": {
+                  "label": "Size",
+                  "control": "select",
+                  "snap": [
+                    16,
+                    20,
+                    24,
+                    32,
+                    48,
+                    64,
+                    96
+                  ],
+                  "group": "Block",
+                  "help": "The glyph size in px; 24 unless set. Inside lists icons stay 20 and 24 (DECK-GRAMMAR.md:40)."
+                },
+                "description": "The glyph size in px; 24 unless set. Inside lists icons stay 20 and 24 (DECK-GRAMMAR.md:40).",
+                "type": "number",
+                "enum": [
+                  16,
+                  20,
+                  24,
+                  32,
+                  48,
+                  64,
+                  96
+                ]
+              },
+              "color": {
+                "title": "Color",
+                "x-inspector": {
+                  "label": "Color",
+                  "control": "color",
+                  "snap": [
+                    "ink",
+                    "paper",
+                    "ink-2",
+                    "titanium",
+                    "hair",
+                    "hair-soft",
+                    "plate",
+                    "edge",
+                    "green",
+                    "amber",
+                    "red",
+                    "blue"
+                  ],
+                  "group": "Block",
+                  "help": "The glyph color; the ink unless set. Green, amber, red and blue are the semantic hues."
+                },
+                "description": "The glyph color; the ink unless set. Green, amber, red and blue are the semantic hues.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "ink",
+                      "paper",
+                      "ink-2",
+                      "titanium",
+                      "hair",
+                      "hair-soft",
+                      "plate",
+                      "edge",
+                      "green",
+                      "amber",
+                      "red",
+                      "blue"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^#[0-9a-fA-F]{6}$"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "type",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9-]*$",
+                "title": "Id",
+                "x-inspector": {
+                  "label": "Id",
+                  "control": "readonly",
+                  "group": "Advanced"
+                }
+              },
+              "ext": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string"
+                },
+                "additionalProperties": {}
+              },
+              "pos": {
+                "title": "Position",
+                "x-inspector": {
+                  "label": "Position",
+                  "control": "position",
+                  "group": "Layout",
+                  "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+                },
+                "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "title": "X",
+                    "x-inspector": {
+                      "label": "X",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "y": {
+                    "type": "number",
+                    "title": "Y",
+                    "x-inspector": {
+                      "label": "Y",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "w": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "h": {
+                    "type": "number",
+                    "exclusiveMinimum": 0,
+                    "title": "Height",
+                    "x-inspector": {
+                      "label": "Height",
+                      "control": "number",
+                      "group": "Layout"
+                    }
+                  },
+                  "z": {
+                    "title": "Z order",
+                    "x-inspector": {
+                      "label": "Z order",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "Higher draws over lower; block.order moves a block through the stack."
+                    },
+                    "description": "Higher draws over lower; block.order moves a block through the stack.",
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "x",
+                  "y",
+                  "w",
+                  "h"
+                ],
+                "additionalProperties": false
+              },
               "type": {
                 "type": "string",
                 "const": "html"
@@ -8585,7 +12867,10 @@
               "bars-3",
               "view-columns",
               "identification",
-              "lock-closed"
+              "lock-closed",
+              "bars-3-bottom-left",
+              "bars-3-center-left",
+              "bars-3-bottom-right"
             ],
             "title": "Icon",
             "x-inspector": {
@@ -9504,6 +13789,11 @@
               "after": {
                 "type": "string",
                 "pattern": "^[a-z0-9][a-z0-9-]*$"
+              },
+              "z": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
               }
             },
             "required": [
@@ -9825,8 +14115,10 @@
               "type/weight-cap",
               "type/face",
               "type/sizes-ladder",
+              "type/ladder",
               "color/tokens-only",
               "color/semantic-icons-only",
+              "color/off-palette",
               "icon/placement",
               "icon/known",
               "rows/two-lines",
@@ -9858,6 +14150,9 @@
               "layout/empty-half",
               "layout/pair-gaps",
               "layout/columns-aligned",
+              "layout/freeform",
+              "freeform/overlap",
+              "freeform/off-sheet",
               "scales/marker-equals-value",
               "escape/html-block",
               "export/non-native",
@@ -10855,6 +15150,350 @@
         ],
         "additionalProperties": false
       },
+      "DeckPackInput": {
+        "$id": "#/components/schemas/DeckPackInput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The deck id under decks/"
+          },
+          "out": {
+            "description": "The zip to write; defaults to <id>-r<revision>.zip",
+            "type": "string"
+          },
+          "versions": {
+            "description": "Carry versions/<n>.json; on by default (--no-versions turns it off)",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "DeckPackOutput": {
+        "$id": "#/components/schemas/DeckPackOutput",
+        "type": "object",
+        "properties": {
+          "deckId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "out": {
+            "type": "string",
+            "description": "The zip written"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sha256": {
+            "type": "string"
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "documents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "assets": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "versions": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "documents",
+              "assets",
+              "versions"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "deckId",
+          "title",
+          "revision",
+          "out",
+          "bytes",
+          "sha256",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "DeckUnpackInput": {
+        "$id": "#/components/schemas/DeckUnpackInput",
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "The bundle zip to read"
+          },
+          "as": {
+            "description": "The deck id to write under; the bundle id when absent",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "replace": {
+            "description": "Remove the deck that holds the id first; without it a taken id gets a free sibling",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "file"
+        ],
+        "additionalProperties": false
+      },
+      "DeckUnpackOutput": {
+        "$id": "#/components/schemas/DeckUnpackOutput",
+        "type": "object",
+        "properties": {
+          "deckId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The id the deck was written under"
+          },
+          "sourceDeckId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The id the bundle carried"
+          },
+          "title": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "dir": {
+            "type": "string",
+            "description": "The deck directory"
+          },
+          "replaced": {
+            "type": "boolean"
+          },
+          "renamed": {
+            "type": "boolean"
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "slides": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "assets": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "versions": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "documents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "slides",
+              "assets",
+              "versions",
+              "documents"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "deckId",
+          "sourceDeckId",
+          "title",
+          "revision",
+          "dir",
+          "replaced",
+          "renamed",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "DeckPushInput": {
+        "$id": "#/components/schemas/DeckPushInput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The deck id under decks/"
+          },
+          "to": {
+            "type": "string",
+            "format": "uri",
+            "description": "The studio, such as https://turboslide.vercel.app"
+          },
+          "token": {
+            "description": "The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use",
+            "type": "string"
+          },
+          "as": {
+            "description": "The id the deck takes on the studio; the local id when absent",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "replace": {
+            "description": "Replace the deck of that id on the studio",
+            "type": "boolean"
+          },
+          "fromUrl": {
+            "description": "A bundle already stored at a URL the studio may read (the deck store Blob host); the studio fetches it instead of receiving the bytes, for bundles over a function 4.5 MB body cap",
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "id",
+          "to"
+        ],
+        "additionalProperties": false
+      },
+      "DeckPushOutput": {
+        "$id": "#/components/schemas/DeckPushOutput",
+        "type": "object",
+        "properties": {
+          "deckId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The id the deck was written under"
+          },
+          "sourceDeckId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The id the bundle carried"
+          },
+          "title": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "dir": {
+            "type": "string",
+            "description": "The deck directory"
+          },
+          "replaced": {
+            "type": "boolean"
+          },
+          "renamed": {
+            "type": "boolean"
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "slides": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "assets": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "versions": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "documents": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "slides",
+              "assets",
+              "versions",
+              "documents"
+            ],
+            "additionalProperties": false
+          },
+          "url": {
+            "type": "string",
+            "description": "The editor URL of the deck on the studio"
+          }
+        },
+        "required": [
+          "deckId",
+          "sourceDeckId",
+          "title",
+          "revision",
+          "dir",
+          "replaced",
+          "renamed",
+          "counts",
+          "url"
+        ],
+        "additionalProperties": false
+      },
+      "DeckPullInput": {
+        "$id": "#/components/schemas/DeckPullInput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The deck id on the studio"
+          },
+          "from": {
+            "type": "string",
+            "format": "uri",
+            "description": "The studio, such as https://turboslide.vercel.app"
+          },
+          "token": {
+            "description": "The bearer token (TURBOSLIDE_TOKEN of the deployment); kept in ~/.config/turboslide/hosts.json after the first use",
+            "type": "string"
+          },
+          "as": {
+            "description": "The id the deck takes under decks/; the id on the studio when absent",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "replace": {
+            "description": "Replace the local deck of that id",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "from"
+        ],
+        "additionalProperties": false
+      },
       "SlideListInput": {
         "$id": "#/components/schemas/SlideListInput",
         "type": "object",
@@ -11327,6 +15966,32 @@
         ],
         "additionalProperties": false
       },
+      "SlideSetLayoutInput": {
+        "$id": "#/components/schemas/SlideSetLayoutInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "layout": {
+            "description": "The target layout with its options",
+            "$ref": "#/components/schemas/Layout"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "layout",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
       "BlockSetInput": {
         "$id": "#/components/schemas/BlockSetInput",
         "type": "object",
@@ -11470,6 +16135,150 @@
           "slideId",
           "blockId",
           "slot",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "BlockAlignInput": {
+        "$id": "#/components/schemas/BlockAlignInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "blockIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$"
+            },
+            "description": "The blocks to move, top level of a freeform slide"
+          },
+          "edge": {
+            "type": "string",
+            "enum": [
+              "left",
+              "center",
+              "right",
+              "top",
+              "middle",
+              "bottom"
+            ],
+            "description": "left, center or right move x; top, middle or bottom move y"
+          },
+          "to": {
+            "description": "The reference box; 'selection' for several blocks and 'content' for one unless set",
+            "type": "string",
+            "enum": [
+              "selection",
+              "content",
+              "sheet"
+            ]
+          },
+          "snap": {
+            "description": "Snap the moved edges to the guides and the grid; on unless false",
+            "type": "boolean"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "blockIds",
+          "edge",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "BlockDistributeInput": {
+        "$id": "#/components/schemas/BlockDistributeInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "blockIds": {
+            "minItems": 2,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$"
+            }
+          },
+          "axis": {
+            "type": "string",
+            "enum": [
+              "horizontal",
+              "vertical"
+            ]
+          },
+          "gap": {
+            "description": "A fixed gap in px instead of equal spacing",
+            "type": "number",
+            "minimum": 0
+          },
+          "snap": {
+            "type": "boolean"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "blockIds",
+          "axis",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "BlockOrderInput": {
+        "$id": "#/components/schemas/BlockOrderInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "blockId": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "move": {
+            "type": "string",
+            "enum": [
+              "front",
+              "back",
+              "forward",
+              "backward"
+            ]
+          },
+          "z": {
+            "description": "The target rank in the stack, 0 at the back",
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "blockId",
           "baseRevision"
         ],
         "additionalProperties": false
@@ -13301,8 +18110,10 @@
               "type/weight-cap",
               "type/face",
               "type/sizes-ladder",
+              "type/ladder",
               "color/tokens-only",
               "color/semantic-icons-only",
+              "color/off-palette",
               "icon/placement",
               "icon/known",
               "rows/two-lines",
@@ -13334,6 +18145,9 @@
               "layout/empty-half",
               "layout/pair-gaps",
               "layout/columns-aligned",
+              "layout/freeform",
+              "freeform/overlap",
+              "freeform/off-sheet",
               "scales/marker-equals-value",
               "escape/html-block",
               "export/non-native",
@@ -13386,8 +18200,10 @@
               "type/weight-cap",
               "type/face",
               "type/sizes-ladder",
+              "type/ladder",
               "color/tokens-only",
               "color/semantic-icons-only",
+              "color/off-palette",
               "icon/placement",
               "icon/known",
               "rows/two-lines",
@@ -13419,6 +18235,9 @@
               "layout/empty-half",
               "layout/pair-gaps",
               "layout/columns-aligned",
+              "layout/freeform",
+              "freeform/overlap",
+              "freeform/off-sheet",
               "scales/marker-equals-value",
               "escape/html-block",
               "export/non-native",

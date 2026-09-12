@@ -1,0 +1,171 @@
+/* The Insert menu (InsertMenu.tsx): the toolbar's ToolButton plus a 344px card under it in the
+   row menu's grammar (Sidebar.css .pt-orow-menu, ExportMenu.css .ts-export): paper, one --pt-hair
+   frame, 11.5px titanium group heads, 28px rows with a 16px glyph in titanium and the word in
+   ink-2 (ink on hover), --pt-hair-soft rules between the groups. The Shape row carries its five
+   variants as 24px glyph squares, bordered on hover in --pt-hair and never at rest. The sprite
+   picker (IconPicker.css) takes the card while an icon is being picked. Colors are tokens only,
+   radius 0, no shadow; the fade over the fast duration. */
+.ts-insert-anchor {
+  display: inline-flex;
+  align-items: center;
+}
+
+.ts-insert {
+  position: fixed;
+  z-index: 30;
+  width: 344px;
+  max-height: calc(100vh - var(--pt-bar-h) - 24px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0 8px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  font: 12.5px/1.4 var(--pt-text);
+  animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
+}
+
+.ts-insert-head {
+  padding: 6px 14px 2px;
+  font-size: 11.5px;
+  color: var(--pt-titanium);
+}
+
+.ts-insert-rule {
+  display: block;
+  height: 1px;
+  margin: 6px 0;
+  background: var(--pt-hair-soft);
+}
+
+.ts-insert-note {
+  margin: 0;
+  padding: 6px 14px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--pt-titanium);
+}
+
+.ts-insert-row,
+.ts-insert-shapes {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 10px;
+  width: 100%;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink-2);
+  font: 12.5px var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-insert-shapes {
+  cursor: default;
+}
+
+.ts-insert-row:hover,
+.ts-insert-row:focus-visible {
+  background: var(--pt-plate);
+  color: var(--pt-ink);
+  outline: none;
+}
+
+.ts-insert-row.is-needs {
+  color: var(--pt-titanium);
+}
+
+.ts-insert-ic {
+  display: inline-flex;
+  color: var(--pt-titanium);
+}
+
+.ts-insert-ic svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-insert-row:hover .ts-insert-ic {
+  color: var(--pt-ink);
+}
+
+.ts-insert-t {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-insert-needs {
+  font-size: 11px;
+  color: var(--pt-titanium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+/* the shape variants: five 24px squares, the shape drawn in the current color */
+.ts-insert-variants {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.ts-insert-variant {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink-2);
+  cursor: pointer;
+  transition:
+    color var(--pt-dur-fast) var(--pt-ease-out),
+    border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-insert-variant:hover {
+  color: var(--pt-ink);
+  border-color: var(--pt-hair);
+}
+
+.ts-insert-variant:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-insert-iconpick {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 14px 6px;
+}
+
+.ts-insert-iconpick .ts-iconpicker {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-insert {
+    animation: none;
+  }
+
+  .ts-insert-variant {
+    transition: none;
+  }
+}

@@ -7,7 +7,8 @@ import { renderSlide, slideTitle } from '../slide.ts';
 import { renderStage } from '../stage.ts';
 import { renderStandalone } from '../standalone.ts';
 import { renderThumb } from '../thumb.ts';
-import type { Slide } from '@turboslide/schema/deck';
+import type { Layout, Slide } from '@turboslide/schema/deck';
+import { layoutSlotBoxes } from '@turboslide/schema/freeform';
 import type { Theme } from '@turboslide/schema/render';
 import { contentSlide, deck } from './fixtures.ts';
 
@@ -165,6 +166,50 @@ const withResidual = contentSlide(
   { ext: { import: { css: '.rules > div { padding: 13px 0; font-size: 19px; }', scope: 's09' } } },
 );
 
+/** A freeform slide (docs/freeform.md): boxes inside the content box and one over the top rule. */
+const freeform = contentSlide(
+  'free',
+  { type: 'freeform' },
+  {
+    main: [
+      {
+        id: 'h',
+        type: 'heading',
+        level: 'h2',
+        text: 'A freeform slide',
+        pos: { x: 137, y: 129, w: 640, h: 56, z: 0 },
+      },
+      {
+        id: 'p1',
+        type: 'text',
+        text: 'Boxes, shapes and text sit anywhere on the sheet.',
+        pos: { x: 137, y: 209, w: 480, h: 72, z: 1 },
+      },
+      {
+        id: 'box',
+        type: 'box',
+        fill: 'plate',
+        text: 'A plate box.',
+        pos: { x: 832, y: 129, w: 320, h: 160, z: 3 },
+      },
+      {
+        id: 'arrow',
+        type: 'shape',
+        shape: 'arrow',
+        pos: { x: 640, y: 201, w: 176, h: 16, z: 2 },
+      },
+      {
+        id: 'tag',
+        type: 'text',
+        text: 'Over the top rule, outside the content box.',
+        typography: { size: 15 },
+        color: 'titanium',
+        pos: { x: 60, y: 70, w: 400, h: 24, z: 9 },
+      },
+    ],
+  },
+);
+
 const kinds: Slide[] = [
   opener,
   mood,
@@ -175,6 +220,7 @@ const kinds: Slide[] = [
   site,
   split,
   withResidual,
+  freeform,
 ];
 
 describe('renderSlide', () => {
@@ -247,6 +293,51 @@ describe('renderSlide', () => {
       right: [627, 129, 836, 642],
     });
     expect(slotBoxes({ type: 'center' })).toEqual({ main: [137, 129, 1326, 642] });
+  });
+
+  it('agrees with the schema copy of the slot geometry that slide.setLayout uses', () => {
+    const layouts: Layout[] = [
+      { type: 'cols', ratio: '5/7' },
+      { type: 'cols', ratio: '4/8', gap: 48 },
+      { type: 'cols', ratio: { left: 390 } },
+      { type: 'split' },
+      { type: 'split', head: { cols: '4/8' } },
+      { type: 'center' },
+      { type: 'stack' },
+      { type: 'freeform' },
+    ];
+    for (const layout of layouts) expect(layoutSlotBoxes(layout)).toEqual(slotBoxes(layout));
+  });
+
+  it('places freeform blocks at their boxes in paint order, inside .in or on the sheet layer', () => {
+    const rendered = renderSlide(deck, freeform, {
+      theme: 'light',
+      chrome: false,
+      assetBase: '',
+      blockAttrs: true,
+      gtWord: true,
+    });
+    expect(rendered.warnings).toEqual([]);
+    expect(rendered.slots).toEqual({ main: [137, 129, 1326, 642] });
+    // inside the content box: offset by the content origin, z-index by paint order
+    expect(rendered.html).toContain(
+      '<div class="free" data-free="h" style="left:0px;top:0px;width:640px;height:56px;z-index:1">',
+    );
+    expect(rendered.html).toContain(
+      '<div class="free" data-free="arrow" style="left:503px;top:72px;width:176px;height:16px;z-index:3">',
+    );
+    expect(rendered.html).toContain(
+      '<div class="free" data-free="box" style="left:695px;top:0px;width:320px;height:160px;z-index:4">',
+    );
+    // the block over the top rule lives on the sheet layer at the sheet origin, in sheet coordinates
+    expect(rendered.html).toContain('<div class="freeform-sheet" style="left:-137px;top:-129px">');
+    expect(rendered.html).toContain(
+      '<div class="free" data-free="tag" style="left:60px;top:70px;width:400px;height:24px;z-index:5">',
+    );
+    expect(rendered.html).toContain('<div class="freeform" data-slot="main">');
+    // the box's text is a run the exporter measures, and the shape carries its ends
+    expect(rendered.html).toContain('data-run="box/text"');
+    expect(rendered.html).toContain('data-shape="arrow"');
   });
 });
 

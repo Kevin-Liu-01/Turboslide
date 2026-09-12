@@ -2,10 +2,13 @@
    left edge in --pt-hair; the toolbar's bottom rule runs above it, so it draws no top edge, and
    it covers the progress track's row while open, as the index panel did (IndexPanel.css).
    Inside: a scroll region of sections, 16px apart. A section header is a 32px sticky row that
-   draws --pt-hair under itself; its rows draw --pt-hair-soft under themselves
-   (InspectorControl.css) and the last row draws none. Ported grammar: the index panel's head,
-   group heading and row rules (Prototemplate IndexPanel.css), at the panel width. Colors are
-   tokens only, radius 0 apart from the fields' shell corner, no shadow. */
+   draws --pt-hair under itself: the section's 16px glyph in titanium, the name, the count and
+   the chevron at the right end, turned while closed. Its rows draw --pt-hair-soft under
+   themselves (InspectorControl.css) and the last row draws none. The block head under the Block
+   header carries the type glyph and label, the slot word and the id as a rename field in the
+   shell's field box. Ported grammar: the index panel's head, group heading and row rules
+   (Prototemplate IndexPanel.css), at the panel width. Colors are tokens only, radius 0 apart
+   from the fields' shell corner, no shadow. */
 .ts-inspector {
   position: relative;
   width: var(--pt-panel-w);
@@ -80,6 +83,22 @@
   cursor: pointer;
 }
 
+/* the section glyph: 16px in titanium, ink on hover */
+.ts-insp-head-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--pt-titanium);
+  transition: color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-insp-head-icon svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* the chevron: 12px in a 16px slot at the right end, turned while closed */
 .ts-insp-head > svg {
   display: block;
   width: 16px;
@@ -113,7 +132,9 @@
 }
 
 .ts-insp-head:hover > svg,
-.ts-insp-head:focus-visible > svg {
+.ts-insp-head:focus-visible > svg,
+.ts-insp-head:hover .ts-insp-head-icon,
+.ts-insp-head:focus-visible .ts-insp-head-icon {
   color: var(--pt-ink);
 }
 
@@ -140,6 +161,83 @@
   line-height: 1.5;
   color: var(--pt-titanium);
   border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+/* ---- the block head: the type glyph and word, the slot, the id as a rename field ---- */
+.ts-insp-blockhead {
+  display: grid;
+  grid-template-columns: minmax(0, auto) auto minmax(96px, 1fr);
+  align-items: center;
+  column-gap: 10px;
+  min-height: 36px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-insp-blocktype {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--pt-ink);
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.ts-insp-blocktype svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  color: var(--pt-titanium);
+  flex: 0 0 auto;
+}
+
+.ts-insp-blocktype b {
+  font-weight: 500;
+}
+
+.ts-insp-blockslot {
+  font-size: 11.5px;
+  color: var(--pt-titanium);
+  white-space: nowrap;
+}
+
+/* the rename field: the shell's field box in the mono stack, ink while focused; an id that
+   would not validate draws the ink ring (an outline, SPEC 2.2: rings may be ink) until it is
+   fixed or restored */
+.ts-insp-rename {
+  width: 100%;
+  min-width: 0;
+  height: 24px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px var(--pt-mono);
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-insp-rename:hover {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-insp-rename:focus-visible {
+  outline: none;
+  border-color: var(--pt-ink);
+}
+
+.ts-insp-rename.is-invalid {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+.ts-insp-rename:disabled {
+  color: var(--pt-titanium);
 }
 
 /* ---- arrays: an item header row over its controls, an Add row after the items ---- */
@@ -176,12 +274,17 @@
   height: 12px;
 }
 
+.ts-insp-item-head .pt-ib.ts-insp-item-remove:disabled {
+  color: var(--pt-hair);
+  cursor: default;
+}
+
 .ts-insp-row.is-add {
   grid-template-columns: 1fr;
   justify-items: start;
 }
 
-/* ---- the block list when nothing is selected ---- */
+/* ---- the block list when nothing is selected: the type glyph, the label, the id, the slot ---- */
 .ts-insp-blocks {
   list-style: none;
   margin: 0;
@@ -191,7 +294,7 @@
 .ts-insp-block-row {
   appearance: none;
   display: grid;
-  grid-template-columns: 88px minmax(0, 1fr) auto;
+  grid-template-columns: 16px 110px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   width: 100%;
@@ -212,7 +315,24 @@
   border-bottom: 0;
 }
 
+.ts-insp-block-icon {
+  display: inline-flex;
+  color: var(--pt-titanium);
+  transition: color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-insp-block-icon svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
 .ts-insp-block-row:hover {
+  color: var(--pt-ink);
+}
+
+.ts-insp-block-row:hover .ts-insp-block-icon {
   color: var(--pt-ink);
 }
 
@@ -225,6 +345,9 @@
   font-family: var(--pt-display);
   font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ts-insp-block-id {
@@ -241,7 +364,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ts-insp-head > svg {
+  .ts-insp-head > svg,
+  .ts-insp-head-icon,
+  .ts-insp-block-icon,
+  .ts-insp-rename {
     transition: none;
   }
 }

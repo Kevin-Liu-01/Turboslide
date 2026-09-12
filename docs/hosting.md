@@ -179,18 +179,18 @@ was read" and the deck stayed at revision 24.
 
 Environment variables the hosted studio reads:
 
-| Variable                                        | Set by         | Effect                                                                                                                                                                                                                                                          |
-| ----------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `VERCEL`                                        | the platform   | selects `tmp` or `blob` (with the token)                                                                                                                                                                                                                        |
-| `BLOB_READ_WRITE_TOKEN`                         | the Blob store | the `blob` backend; `@vercel/blob` reads it                                                                                                                                                                                                                     |
-| `TURBOSLIDE_STORE`                              | you            | forces `file`, `tmp` or `blob`                                                                                                                                                                                                                                  |
-| `TURBOSLIDE_OVERLAY_DIR`                        | you            | moves the overlay (default `<tmpdir>/turboslide`)                                                                                                                                                                                                               |
-| `TURBOSLIDE_BLOB_ACCESS`                        | you            | `public` (default) or `private`                                                                                                                                                                                                                                 |
-| `TURBOSLIDE_TOKEN`                              | you            | the bearer token of `/api/actions`, `/api/agent`, `/mcp` off localhost (SPEC 11), and of `/api/export` and `/api/render` once set (the thumbnail variant `?w=` stays open); unset today, so the agent routes answer 401 and the two routes are open (section 6) |
-| `TURBOSLIDE_DOWNLOAD_SECRET`                    | you            | the signing secret of the export download URLs; random per instance when unset                                                                                                                                                                                  |
-| `TURBOSLIDE_DECKS_DIR`, `TURBOSLIDE_WORKER_DIR` | root.ts        | pointed at the overlay for the render worker's local mode when hosted                                                                                                                                                                                           |
-| `TURBOSLIDE_PACKAGES_DIR`                       | root.ts        | the materialized `packages` group the renderer and exporter read from (section 2); unset in a checkout                                                                                                                                                          |
-| `TURBOSLIDE_LAUNCH_LOG`                         | you            | prints the browser launch steps on stderr (always on inside a function; docs/hosting-chromium.md)                                                                                                                                                               |
+| Variable                                        | Set by         | Effect                                                                                                                                                                                                                                                    |
+| ----------------------------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VERCEL`                                        | the platform   | selects `tmp` or `blob` (with the token)                                                                                                                                                                                                                  |
+| `BLOB_READ_WRITE_TOKEN`                         | the Blob store | the `blob` backend; `@vercel/blob` reads it                                                                                                                                                                                                               |
+| `TURBOSLIDE_STORE`                              | you            | forces `file`, `tmp` or `blob`                                                                                                                                                                                                                            |
+| `TURBOSLIDE_OVERLAY_DIR`                        | you            | moves the overlay (default `<tmpdir>/turboslide`)                                                                                                                                                                                                         |
+| `TURBOSLIDE_BLOB_ACCESS`                        | you            | `public` (default) or `private`                                                                                                                                                                                                                           |
+| `TURBOSLIDE_TOKEN`                              | you            | the bearer token of `/api/actions`, `/api/agent`, `/mcp` off localhost (SPEC 11), and of `/api/export`, `/api/render` (the thumbnail variant `?w=` stays open) and the bundle routes once set; set on production and preview since 2026-09-11 (section 6) |
+| `TURBOSLIDE_DOWNLOAD_SECRET`                    | you            | the signing secret of the export download URLs; random per instance when unset                                                                                                                                                                            |
+| `TURBOSLIDE_DECKS_DIR`, `TURBOSLIDE_WORKER_DIR` | root.ts        | pointed at the overlay for the render worker's local mode when hosted                                                                                                                                                                                     |
+| `TURBOSLIDE_PACKAGES_DIR`                       | root.ts        | the materialized `packages` group the renderer and exporter read from (section 2); unset in a checkout                                                                                                                                                    |
+| `TURBOSLIDE_LAUNCH_LOG`                         | you            | prints the browser launch steps on stderr (always on inside a function; docs/hosting-chromium.md)                                                                                                                                                         |
 
 ## 6. The deploy configuration
 
@@ -225,46 +225,60 @@ Measured build (scratch copy of the tree, `NITRO_PRESET=vercel vite build -c vit
 chunks under `_virtual/`, `@vercel/blob` inlined at 1.1 MB), `static/` 36 MB with the 202 twins
 under `decks/gt-brand/assets`, `config.json` routes for the three rules before the catch-all.
 
-### The bearer token on the production URL, an open decision
+### The bearer token on the production URL, decided
 
-Measured on 2026-09-11: `vercel env ls` on the `turboslide` project lists `BLOB_READ_WRITE_TOKEN`
-alone, so `TURBOSLIDE_TOKEN` is unset on every environment. `/api/actions`, `/api/agent` and `/mcp`
-answer 401 off localhost by the rule of `@turboslide/agent/http/auth` (no agent write reaches a
-hosted deck until the token is set). `/api/export` and `/api/render` check the token only when it is
-set (`apps/studio/src/routes/api/export.$deckId.ts`, `render.$slideId.ts`: the shared bearer parser
-and a timing-safe compare, `code: unauthorized` on refusal), so on studio-delta-six-40.vercel.app,
-which is public where the previews sit behind Vercel Authentication, any request can start a
-Chromium export of up to 800 s or a render. SPEC 11 asks for a bearer token per deployment. The
-editor is open by design and reaches both routes from the page without a header: the Export menu's
-fetch of `?sync=1&format=json` and the sidebar's `<img>` thumbnails. Setting the token by itself
-would therefore break the editor's export.
+Measured on 2026-09-11 before this round: `vercel env ls` on the `turboslide` project listed
+`BLOB_READ_WRITE_TOKEN` alone, so `TURBOSLIDE_TOKEN` was unset on every environment. `/api/actions`,
+`/api/agent` and `/mcp` answered 401 off localhost by the rule of `@turboslide/agent/http/auth`, and
+`/api/export` and `/api/render`, which check the token only when it is set, were open on the
+production URL (an anonymous caller could start a Chromium export of up to 800 s). SPEC 11 asks for
+a bearer token per deployment.
 
-What the tree allows, so the decision is one environment variable:
+The tree allowed three ways out: leave the routes open with the open editor (what ran), set the
+token and move the editor's export to a server function, or put the deployment behind Vercel
+Deployment Protection. The deck transfer round of 2026-09-11 implemented the second (option 2):
 
-1. Leave the routes open with the open editor. This is what runs. The exposure is function time an
-   anonymous caller can spend: one Chromium job at a time per instance (the local queue), 800 s at
-   most per export. An export reads the deck the store holds, writes under `/tmp` and, on the blob
-   backend, under `exports/` in the Blob store; it carries no secret.
-2. Set the token: `vercel env add TURBOSLIDE_TOKEN production` (and `preview`) with a random value,
-   then redeploy. `/api/export` and the full-size and JSON variants of `/api/render` then require
-   `Authorization: Bearer <token>`, and the agent routes open to callers that send it. The editor
-   keeps its export when the fetch in `edit.$deckId.tsx` `runSyncExport` is replaced by the
-   `syncExport` server function of `apps/studio/src/server/download.ts` (the same `runSyncExport`
-   and the same JSON answer, reached same origin under the CSRF middleware, so the page never holds
-   the token), and it keeps its thumbnails because the `?w=` variant of `/api/render` stays open
-   with the token set: an `<img>` carries no header, the result is cached per revision on the
-   instance, and the work it can start is bounded to the deck's slides at three widths and two
-   themes. A server function answers any client that sends the CSRF headers, so this option gates
-   the agent surface and the raw routes, not the export's compute.
-3. Put the deployment behind Vercel Deployment Protection (Standard Protection or a password on
-   production). That protects the editor itself and every route with it; an agent then sends the
-   Protection Bypass for Automation header with its bearer token. This is a project setting on
-   vercel.com, not a change in the tree.
+- `TURBOSLIDE_TOKEN` is set on the production and preview environments of the `turboslide` project
+  (`openssl rand -hex 32`, then `vercel env add TURBOSLIDE_TOKEN production` and `preview` from the
+  linked repository root with the value on stdin; `vercel env ls` shows both as Encrypted). The same
+  value is in Kevin's `~/.config/turboslide/hosts.json` under `https://turboslide.vercel.app`, mode
+  0600, where `turboslide deck push` and `deck pull` read it (docs/deck-transfer.md); it was never
+  printed and is nowhere in the tree. The next production deploy (the push to `main`) picks it up;
+  until then the production URL still runs open.
+- With the token set, `/api/actions`, `/api/agent` and `/mcp` open to callers that send it,
+  `/api/export`, the full-size and JSON variants of `/api/render` and the two bundle routes require
+  it, and the `?w=` thumbnail variant stays open (an `<img>` carries no header; the result is cached
+  per revision and the work is bounded to the deck's slides at three widths and two themes).
+- The editor keeps its export because `edit.$deckId.tsx` `runSyncExport` calls the `syncExport`
+  server function of `apps/studio/src/server/download.ts` (the same `runSyncExport` and the same
+  JSON answer as the route's `?sync=1&format=json`, reached same origin under the CSRF middleware),
+  and its full-size renders go through the `renderSlideImages` server function; the page holds no
+  token. The /decks page and the Export menu download and upload bundles through short-lived
+  tickets minted by server functions (`apps/studio/src/server/bundle.ts`), which the bundle routes
+  accept in place of the bearer.
+- A server function answers any client that sends the CSRF headers, so the token gates the agent
+  surface and the raw routes, not the export's compute; Deployment Protection (option 3) remains
+  available as a project setting on vercel.com and would protect the editor itself.
 
-Option 1 is the state of the tree and of the production URL; 2 and 3 are Kevin's call (open
-question 3 of the specification, identity beyond a token). The code for option 2 is in place and
-was driven against the built function on this machine (section 7); nothing on the project was
-changed.
+Measured against the built studio on this machine with `TURBOSLIDE_TOKEN` set (`vite preview`,
+2026-09-11): `/api/decks/gt-brand/bundle` 401 without the header and 200 with it, `POST
+/api/decks/bundle` 401, `/api/agent` 401 and 200 with the bearer, `GET /api/export/gt-brand` 401,
+`/api/render/thesis?w=160` 200; the page's bundle download and upload passed through their tickets
+(`apps/studio/e2e/deck-transfer.spec.ts`) and `apps/cli/e2e/deck-transfer.mjs` passed its seven
+steps with the token on both sides.
+
+### Blob listing consistency, measured
+
+Vercel Blob's `list()` lags its `head()` and `get()`: on the preview of 2026-09-11, after one
+function instance committed r12 of a deck, the next write landed on another instance whose
+`head(deck.json)` saw the new etag while its listing still carried r11's, so the mirror's
+listing-based pull kept the stale copy, the conditional commit answered "Precondition failed", and
+the editor showed `decks/<id>/deck.json changed in the Blob store since it was read` and rebased
+onto r11 (`docs/editor-depth-evidence/README.md`; every second write of the drive failed this way).
+`packages/store/src/blob-store.ts` `pull()` now reads `deck.json` straight from `get`, walks the
+version records above the mirror's last one by number until the store has none or the record reaches
+the document's revision, and fetches the slides those records touched whatever the listing says;
+`hosted.test.ts` holds the fake's listing stale between two instances' writes to keep it so.
 
 ## 7. Verify a deployment
 
@@ -274,7 +288,9 @@ one twin (200 image or 302 to one; the first twin of `decks/gt-brand/deck.json` 
 `--asset <file>`) and `/api/agent` (401 off localhost without a token), prints a table and exits 1 on
 a failure. A preview sits behind Vercel Authentication, so the script sends the project's
 development token in the Trusted Sources header when `VERCEL_OIDC_TOKEN` is in the environment
-(`vercel env pull <file>`, never printed or committed); `vercel curl` does the same for one request.
+(`vercel env pull <file>`, never printed or committed); `vercel curl` does the same for one request,
+and so do `turboslide deck push` and `deck pull` (docs/deck-transfer.md) and the editor depth
+round's drive, `node scripts/editor-depth-drive.mjs <url>` (docs/editor-depth-evidence/README.md).
 
 Measured on 2026-09-11 against the preview deploys of the `turboslide` project (the full table with
 the files is `docs/hosted-evidence/README.md`):
@@ -385,11 +401,10 @@ elsewhere, the seed uploaded once across instances). 71 tests.
   from an editor whose sidebar is still filling waits behind the thumbnails. A render cache per
   revision on the instance and the Blob-stored export copies limit the repeat cost; a shared
   thumbnail cache (the Blob store) and a worker service are the next steps.
-- The editor's sync export (`capabilities.sync`, `POST /api/export/:deckId?sync=1&format=json`)
-  downloads from `files[].url`: the stored Blob copy on the blob backend, this instance's job file
-  on the tmp backend (404 from another instance, which the card reports). `download.ts`
-  `syncExport` gives the same answer as a server function; the editor switches to it when the
-  route requires the token (section 6, option 2).
+- The editor's sync export (`capabilities.sync`) runs through the `syncExport` server function of
+  `download.ts` (the same answer as `POST /api/export/:deckId?sync=1&format=json`) and downloads
+  from `files[].url`: the stored Blob copy on the blob backend, this instance's job file on the
+  tmp backend (404 from another instance, which the card reports).
 - The route's 202 path is not offered hosted: every POST to `/api/export/:deckId` runs
   synchronously there and answers `X-Turboslide-Sync: hosted` (`docs/hosting-chromium.md`
   section 4).

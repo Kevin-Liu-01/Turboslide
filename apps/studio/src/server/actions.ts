@@ -35,7 +35,7 @@ import {
 } from '@turboslide/theme/tokens';
 
 import { lintLists } from './lint';
-import { deckDir, ensureDeckAssets, repoRoot, workerClientOptions } from './root';
+import { deckDir, ensureDeckAssets, openDeckStore, repoRoot, workerClientOptions } from './root';
 import { studioSessions } from './sessions';
 
 /**
@@ -366,14 +366,24 @@ export type DeckDispatcherOptions = {
   withView?: boolean;
 };
 
-/** One dispatcher over one deck: the store actions, the readers, the worker actions and, when attached, the view. */
-export function deckDispatcher(
+/**
+ * One dispatcher over one deck: the store actions, the readers, the worker actions and, when
+ * attached, the view. The document reads and writes go through the selected store (the Blob
+ * mirror when hosted: `openDeckStore`), so an agent's write reaches every instance; the plain
+ * FileStore over the same folder serves the dir-based helpers (renders, assets). Before this the
+ * route wrote through the FileStore alone and a hosted agent write never left the instance
+ * (measured 2026-09-11: eight HTTP writes answered r11 to r18 while the Blob store stayed at r10).
+ */
+export async function deckDispatcher(
   deckId: string,
   options: DeckDispatcherOptions = {},
-): DeckDispatcher {
+): Promise<DeckDispatcher> {
+  // the hosted store first: opening it pulls the deck's mirror into this instance's overlay, which
+  // the FileStore check below expects (a deck created after this instance started was a 404 here)
+  const deckStore = await openDeckStore(deckId);
   const store = storeFor(deckId);
   const dispatcher = createDispatcher();
-  const load = async (): Promise<DeckDocument> => (await store.read()).document;
+  const load = async (): Promise<DeckDocument> => (await deckStore.read()).document;
   const renderRecords = (document: DeckDocument): RenderRecord[] =>
     cachedRecords(deckId, document.deck.revision, orderOf(document));
   registerReadActions(dispatcher, {
@@ -394,14 +404,14 @@ export function deckDispatcher(
     },
   });
   registerStoreActions(dispatcher, {
-    store,
+    store: deckStore,
     lint: lintLists(),
     // fix.run's rendered layer reads the worker's cache for the current revision (sync, like the CLI's render.json read)
     renderRecords: () => renderRecords(loadDeckDir(store.dir).document),
   });
   // deck.create makes a sibling under decks/; deck.rename writes this deck's title
   registerDeckActions(dispatcher, {
-    store,
+    store: deckStore,
     lint: lintLists(),
     renderRecords: () => renderRecords(loadDeckDir(store.dir).document),
     decksDir: join(repoRoot(), 'decks'),

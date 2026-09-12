@@ -30,7 +30,24 @@ export type {
   HeadingBlock,
   ParagraphBlock,
   ShotBlock,
+  BoxBlock,
+  ShapeBlock,
+  RuleBlock,
+  TextBlock,
+  IconBlock,
 } from '@turboslide/schema/blocks';
+export type { Color } from '@turboslide/schema/color';
+export { COLOR_TOKENS, isHexColor } from '@turboslide/schema/color';
+export type { Typography } from '@turboslide/schema/typography';
+export {
+  TYPE_LADDER,
+  WEIGHT_CAP,
+  isLadderSize,
+  nearestLadderSize,
+} from '@turboslide/schema/typography';
+export type { Position } from '@turboslide/schema/position';
+export { zOf } from '@turboslide/schema/position';
+export { boxesOverlap, offSheet, overlapArea, positionBox } from '@turboslide/schema/freeform';
 export type { Asset, AssetSource, AssetTwins } from '@turboslide/schema/assets';
 export { isShareAlike } from '@turboslide/schema/assets';
 export type { Finding, KnownFinding, Severity, FindingSource } from '@turboslide/schema/findings';

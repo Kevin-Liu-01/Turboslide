@@ -1,0 +1,16 @@
+# CLI transfer against the previews (2026-09-12); the bearer came from ~/.config/turboslide/hosts.json through TURBOSLIDE_TOKEN and the Trusted Sources header from VERCEL_OIDC_TOKEN; neither is printed.
+
+## preview 5 (turboslide-1ki2rb5yu)
+turboslide deck pull editor-depth-09120057 --from <preview> --decks <scratch>/decks
+  downloaded editor-depth-09120057: 18.36 MiB; created at revision 10, 85 slides, 202 assets, 10 versions; exit 0 in 8 s (31 MB on disk)
+turboslide deck push fixture --to <preview> --as fixture-pushed-181201 --decks decks
+  packed fixture at revision 1: 1.8 KiB; created fixture-pushed-181201: 2 slides; exit 0 in 1 s; /deck/fixture-pushed-181201 answered 200
+turboslide deck push editor-depth-09120057 --to <preview> --as editor-depth-pushed-181201 --decks <scratch>/decks
+  packed 18.36 MiB; refused: Request Entity Too Large. A Vercel function accepts a 4.5 MB body; store the zip where the studio can read it and pass --from-url; exit 2 in 3 s (docs/deck-transfer.md section 4)
+
+## preview 7 (turboslide-gt5mkhlc5)
+turboslide deck pull fixture-pushed-181201 --from <preview>: created at revision 7, 2 slides, 6 versions; exit 0 in 2 s
+turboslide deck push fixture-pushed-181201 --to <preview> --as fixture-p7-190558: created; exit 0 in 1 s
+
+## preview 8 (turboslide-oss9puowm)
+turboslide deck push fixture --to <preview> --as fixture-p8-193001: created; then eight POST /api/actions/block.insert writes (http-writes.txt) landed r2 to r9 and the Blob store listed the eight records with deck.json at r9.

@@ -1,0 +1,27 @@
+/* The lint mark: a 16px square holding the 14px exclamation glyph, titanium at severity 1 and
+   2 and ink at 3 (the overlay's lint colors, SPEC 2.2 junction table); no border, no ground, so
+   it draws no line. Focusable for its tooltip. */
+.ts-lint-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  color: var(--pt-titanium);
+  cursor: help;
+}
+
+.ts-lint-mark svg {
+  fill: currentColor;
+  display: block;
+}
+
+.ts-lint-mark[data-severity='3'] {
+  color: var(--pt-ink);
+}
+
+.ts-lint-mark:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}

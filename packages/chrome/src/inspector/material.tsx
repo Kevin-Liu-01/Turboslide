@@ -16,6 +16,7 @@ import { MATERIAL_ANCHORS } from '@turboslide/schema/blocks/material';
 import type { EditorDispatch } from '../dispatch';
 import { Seg } from '../Seg';
 import { ToolButton } from '../ToolButton';
+import { tipProps } from '../Tooltip';
 
 import './material.css';
 
@@ -235,6 +236,10 @@ export function MaterialSection({
             data-control={`${controlBase}.materialId`}
             value={draft.materialId}
             disabled={busy || target.kind === 'picture'}
+            {...tipProps({
+              name: 'Material',
+              doc: 'The shader in the catalog; changing it drops the preset and the uniforms.',
+            })}
             onChange={(event) => {
               const next = event.target.value;
               setDraft((current) => ({
@@ -296,7 +301,10 @@ export function MaterialSection({
                 className={`ts-insp-row is-uniform${overridden ? ' is-overridden' : ''}`}
                 data-path={`/uniforms/${spec.name}`}
               >
-                <span className="ts-insp-label" title={spec.help ?? spec.name}>
+                <span
+                  className="ts-insp-label"
+                  {...tipProps({ name: spec.label, doc: spec.help ?? `The ${spec.name} uniform.` })}
+                >
                   {spec.label}
                 </span>
                 <div className="ts-insp-field">
@@ -354,7 +362,8 @@ export function MaterialSection({
                   )}
                   {overridden ? (
                     <ToolButton
-                      title={`Back to the preset value of ${spec.label}`}
+                      title="Reset"
+                      doc={`Back to the preset value of ${spec.label}.`}
                       ariaLabel={`${label} reset`}
                       icon="close"
                       control={`${control}.reset`}
@@ -374,6 +383,10 @@ export function MaterialSection({
                 aria-label={`${noun}: Anchor (ms)`}
                 data-control={`${controlBase}.anchor`}
                 list={`${controlBase}-anchors`}
+                {...tipProps({
+                  name: 'Anchor',
+                  doc: 'The frame time in ms the capture freezes; the catalog names the good ones.',
+                })}
                 value={draft.anchor ?? ''}
                 min={0}
                 step={100}
@@ -395,7 +408,13 @@ export function MaterialSection({
           <div className="ts-insp-row">
             <span className="ts-insp-label">Two-tone</span>
             <div className="ts-insp-field">
-              <label className="ts-ctl-check">
+              <label
+                className="ts-ctl-check"
+                {...tipProps({
+                  name: 'Two-tone',
+                  doc: 'Screens the captured frame into a light and a dark twin.',
+                })}
+              >
                 <input
                   type="checkbox"
                   aria-label={`${noun}: Two-tone`}
@@ -455,7 +474,8 @@ export function MaterialSection({
           </div>
           <div className="ts-material-actions">
             <ToolButton
-              title="Render the recipe at 3200 by 1800, freeze the frame at the anchor and set it as the frame (material.capture)"
+              title="Capture frame"
+              doc="Runs material.capture: renders the recipe at 3200 by 1800, freezes the frame at the anchor and sets it as the block's frame."
               label={capturing ? 'Capturing' : pending ? 'Placing the frame' : 'Capture frame'}
               icon="sparkles"
               control={`${controlBase}.capture`}

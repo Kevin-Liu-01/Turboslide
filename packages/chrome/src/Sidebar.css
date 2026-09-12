@@ -1,13 +1,14 @@
 /* Sidebar: column one of the shell, the deck as a tree (SPEC 6.2; ported
    from Prototemplate/src/components/viewer/Sidebar.css, directive 8.5,
-   without the site map). A 52px head (the mark, the title, the density
-   toggle, the close button when the list is an overlay), a 40px filter row
-   (SidebarFilter.css draws the field; this sheet places the row and sizes
-   the field), then the list as a scroll region: collapsible groups, one per
-   section, each a 24px header that sticks to the top of the region while
-   its rows scroll under it, and 28px rows indented 24px behind their kind
-   glyphs. Thumbnail density widens the column (ViewerShell.css sets
-   --pt-sb-w to 256px) and every row becomes 44px with its 64x36 live clone.
+   without the site map). A 52px head (the mark, the product name, the
+   density toggle, the close button when the list is an overlay), a 40px
+   filter row (SidebarFilter.css draws the field; this sheet places the row
+   and sizes the field), then the list as a scroll region: collapsible
+   groups, one per section, each a 24px header that sticks to the top of the
+   region while its rows scroll under it, and 28px rows indented 24px behind
+   their kind glyphs. Thumbnail density, the default, widens the column
+   (ViewerShell.css sets --pt-sb-w to 256px) and every row becomes a card:
+   the number, a 16:9 frame the row's width, the title under it.
 
    Lines (directive 8.9), 1px each, drawn once by one owner: the aside owns
    its right edge (structural), the head and the filter row their bottom
@@ -74,10 +75,10 @@
   }
 }
 
-/* ---- the head: the mark, the name (never truncated), the density toggle.
-   At the 208px outline width the arithmetic is tight: 10px pad, the 25px
-   mark, two 6px gaps, the 58px toggle, 6px pad, which leaves the name
-   100px, where the deck's Inter title fits at 13.5px. ---- */
+/* ---- the head: the mark, the product name (never truncated), the density
+   toggle. At the 208px outline width the arithmetic is tight: 10px pad, the
+   25px mark, two 6px gaps, the 58px toggle, 6px pad, which leaves the name
+   100px, where Turboslide in Inter fits at 13.5px. ---- */
 .pt-sb-head {
   height: var(--pt-bar-h);
   flex: 0 0 var(--pt-bar-h);
@@ -390,77 +391,73 @@ a.pt-sb-mark:focus-visible {
   outline-offset: -1px;
 }
 
-/* ---- thumbnail density: every row 44px with its 64x36 clone on the
-   left (a frame of its own, the frame role), the number, the glyph and the
-   name on the first line, the kind on the second. ---- */
-.pt-thumb-frame.is-mini {
+/* ---- thumbnail density (Kevin, 2026-09-11, image 2): every row is a card, the number at
+   the top left, the 16:9 frame filling the rest of the row's width (a frame of its own, the
+   frame role), and under the frame the kind glyph and the title on one 16px line. At the 256px
+   column the frame is 204 by 114.75. ---- */
+.pt-thumb-frame.is-card {
   position: relative;
   display: block;
   box-sizing: border-box;
-  width: 64px;
-  height: 36px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   border: 1px solid var(--pt-edge);
   background: var(--pt-paper);
   overflow: hidden;
-  flex: 0 0 auto;
   transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
 }
 
 .pt-tree.is-shots .pt-orow {
-  grid-template-columns: 64px 22px 16px minmax(0, 1fr) auto;
-  grid-template-rows: 16px 16px;
-  align-content: center;
-  height: 44px;
-  padding: 0 10px;
-  contain-intrinsic-size: auto 44px;
-}
-
-.pt-tree.is-shots .pt-orow .pt-thumb-frame.is-mini {
-  grid-column: 1;
-  grid-row: 1 / 3;
-  align-self: center;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  grid-template-rows: auto 16px;
+  row-gap: 6px;
+  align-items: center;
+  height: auto;
+  padding: 6px 10px 8px 12px;
+  contain-intrinsic-size: auto 152px;
 }
 
 .pt-tree.is-shots .pt-orow .pt-orow-n {
-  grid-column: 2;
+  grid-column: 1;
   grid-row: 1;
+  align-self: start;
   line-height: 16px;
 }
 
-.pt-tree.is-shots .pt-orow > svg {
-  grid-column: 3;
+.pt-tree.is-shots .pt-orow .pt-thumb-frame.is-card {
+  grid-column: 2 / -1;
   grid-row: 1;
 }
 
+.pt-tree.is-shots .pt-orow > svg {
+  grid-column: 1;
+  grid-row: 2;
+  justify-self: end;
+}
+
 .pt-tree.is-shots .pt-orow .pt-orow-name {
-  grid-column: 4;
-  grid-row: 1;
+  grid-column: 2;
+  grid-row: 2;
   line-height: 16px;
 }
 
 .pt-tree.is-shots .pt-orow .pt-orow-marks {
-  grid-column: 5;
-  grid-row: 1;
-}
-
-.pt-orow-kind {
-  grid-column: 3 / -1;
+  grid-column: 3;
   grid-row: 2;
-  min-width: 0;
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--pt-titanium);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.pt-orow:hover .pt-thumb-frame.is-mini,
-.pt-orow:focus-visible .pt-thumb-frame.is-mini {
+/* the ink bar of the current card runs the frame's height */
+.pt-tree.is-shots .pt-orow.is-active::before {
+  top: 6px;
+  bottom: 30px;
+}
+
+.pt-orow:hover .pt-thumb-frame.is-card,
+.pt-orow:focus-visible .pt-thumb-frame.is-card {
   border-color: var(--pt-ink);
 }
 
-.pt-orow.is-active .pt-thumb-frame.is-mini {
+.pt-orow.is-active .pt-thumb-frame.is-card {
   border-color: var(--pt-ink);
   outline: 1px solid var(--pt-ink);
   outline-offset: 2px;
@@ -536,7 +533,7 @@ a.pt-sb-mark:focus-visible {
   .pt-grp-head > svg,
   .pt-orow > svg,
   .pt-orow-name,
-  .pt-thumb-frame.is-mini {
+  .pt-thumb-frame.is-card {
     transition: none;
   }
 }

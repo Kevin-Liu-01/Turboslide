@@ -1,0 +1,9 @@
+/* The marquee rectangle (Marquee.tsx), drawn inside the overlay layer in CSS pixels. Line law
+   (SPEC 2.2): one 1px rule, --pt-ink as a state because a marquee is an active gesture; no fill,
+   so the sheet under it stays legible. It never takes the pointer. */
+.ts-marquee {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-ink);
+  pointer-events: none;
+}

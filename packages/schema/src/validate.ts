@@ -28,7 +28,9 @@ export type IssueCode =
   | 'slot'
   | 'reference'
   | 'unlisted'
-  | 'opener';
+  | 'opener'
+  /** a freeform block without `pos`, or `pos` on a block outside a freeform slide's top level */
+  | 'position';
 
 export type Issue = {
   code: IssueCode;
@@ -163,7 +165,11 @@ function extPointers(slide: Slide): string[] {
   return out;
 }
 
+/** A block pointer of the form /slots/<slot>/<index>: a top-level block of a content slide. */
+const TOP_LEVEL_SLOT_BLOCK = /^\/slots\/[A-Za-z]+\/\d+$/;
+
 function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
+  const freeform = slide.kind === 'content' && slide.layout.type === 'freeform';
   if (slide.kind === 'content') {
     slide.layout = normalizeLayout(slide.layout);
     const allowed = slotsForLayout(slide.layout);
@@ -184,6 +190,29 @@ function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
   const seen = new Map<string, string>();
   for (const list of blockLists(slide)) {
     walkBlocks(list.blocks, list.pointer, (block, pointer) => {
+      // pos lives on the top-level blocks of a freeform slide and nowhere else (docs/freeform.md)
+      const topLevel = TOP_LEVEL_SLOT_BLOCK.test(pointer);
+      if (freeform && topLevel && block.pos === undefined) {
+        issues.push(
+          issue(
+            'position',
+            3,
+            file,
+            `${pointer}/pos`,
+            `Block "${block.id}" needs a position box (pos) under the freeform layout (docs/freeform.md)`,
+          ),
+        );
+      } else if (block.pos !== undefined && !(freeform && topLevel)) {
+        issues.push(
+          issue(
+            'position',
+            3,
+            file,
+            `${pointer}/pos`,
+            `Block "${block.id}" carries pos, which only a top-level block of a freeform slide may (docs/freeform.md)`,
+          ),
+        );
+      }
       const first = seen.get(block.id);
       if (first !== undefined) {
         issues.push(

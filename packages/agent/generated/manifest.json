@@ -76,6 +76,10 @@
       "deck.info",
       "deck.create",
       "deck.rename",
+      "deck.pack",
+      "deck.unpack",
+      "deck.push",
+      "deck.pull",
       "section.set",
       "import.run",
       "validate.run"
@@ -88,13 +92,17 @@
       "slide.move",
       "slide.update",
       "slide.replace",
+      "slide.setLayout",
       "slide.lease"
     ],
     "block": [
       "block.set",
       "block.insert",
       "block.remove",
-      "block.move"
+      "block.move",
+      "block.align",
+      "block.distribute",
+      "block.order"
     ],
     "asset": [
       "asset.add",
@@ -139,7 +147,7 @@
       "artifact.download"
     ]
   },
-  "actionCount": 46,
+  "actionCount": 54,
   "resources": [
     {
       "uri": "deck://manifest",

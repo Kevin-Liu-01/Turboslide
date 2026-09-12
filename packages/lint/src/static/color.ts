@@ -1,8 +1,38 @@
 // Color rules (SPEC 7.7; DECK-GRAMMAR.md:28-30): only the tokens, never a literal outside the
-// sanctioned exceptions, and the four semantic hues only on icons. Declared blocks cannot carry a
-// color, so both rules read html escape blocks and raw svg strings.
-import type { Finding } from '../contracts.ts';
+// sanctioned exceptions, and the four semantic hues only on icons. The grammar blocks cannot carry
+// a color, so those two rules read html escape blocks and raw svg strings. The primitive blocks
+// of the freeform round carry Color fields (docs/freeform.md): a token is right by construction
+// and a custom hex is color/off-palette at severity 2, named with the block and the field.
+import type { Block, Finding } from '../contracts.ts';
+import { COLOR_TOKENS, isHexColor } from '../contracts.ts';
 import type { LintContext } from '../context.ts';
+
+/** The Color fields per primitive block type (schema blocks.ts). */
+export function colorFields(block: Block): { field: string; value: string }[] {
+  const out: { field: string; value: string }[] = [];
+  const push = (field: string, value: string | undefined): void => {
+    if (value !== undefined) out.push({ field, value });
+  };
+  switch (block.type) {
+    case 'box':
+      push('fill', block.fill);
+      push('stroke', block.stroke);
+      push('color', block.color);
+      break;
+    case 'shape':
+      push('fill', block.fill);
+      push('stroke', block.stroke);
+      break;
+    case 'rule':
+    case 'text':
+    case 'icon':
+      push('color', block.color);
+      break;
+    default:
+      break;
+  }
+  return out;
+}
 
 /** The four semantic hues, the same in both themes (head:106-109). */
 export const SEMANTIC_HUES: Readonly<Record<'ok' | 'warn' | 'no' | 'info', string>> = {
@@ -40,6 +70,17 @@ export function checkColor(ctx: LintContext): Finding[] {
   for (const slide of ctx.slideList()) {
     for (const ref of ctx.blocksOf(slide)) {
       const { block } = ref;
+      for (const { field, value } of colorFields(block)) {
+        if (!isHexColor(value)) continue;
+        out.push(
+          ctx.finding('color/off-palette', slide.id, {
+            blockId: block.id,
+            path: `${ref.path}/${field}`,
+            text: value,
+            proposal: `Block "${block.id}" sets ${field} to ${value}, a custom color that stays the same in both themes; a palette token (${COLOR_TOKENS.join(', ')}) follows the theme (DECK-GRAMMAR.md:28; docs/freeform.md).`,
+          }),
+        );
+      }
       const sources: { path: string; text: string }[] = [];
       if (block.type === 'html')
         sources.push(

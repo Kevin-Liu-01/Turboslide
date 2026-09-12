@@ -280,7 +280,7 @@ export function describeMutation(mutation: Mutation): string {
     case 'block.remove':
       return `slide ${mutation.slideId}: block ${mutation.blockId} removed`;
     case 'block.move':
-      return `slide ${mutation.slideId}: block ${mutation.blockId} moved to ${mutation.slot}${mutation.after !== undefined ? ` after ${mutation.after}` : ' first'}`;
+      return `slide ${mutation.slideId}: block ${mutation.blockId} moved to ${mutation.slot}${mutation.after !== undefined ? ` after ${mutation.after}` : ' first'}${mutation.z !== undefined ? ` at z ${mutation.z}` : ''}`;
     case 'block.set':
       return `slide ${mutation.slideId}: block ${mutation.blockId} ${mutation.path} ${mutation.value === undefined ? 'removed' : 'changed'}`;
     case 'text.replace':

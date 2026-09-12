@@ -38,7 +38,7 @@ import type { FontSet, FontsCatalog } from './fonts-map.ts';
 import { entryFor, pickFamily } from './fonts-map.ts';
 import { addPicture, addRaster, dataUri, mimeOf } from './images.ts';
 import type { PictureSource } from './images.ts';
-import { addCross, addSceneRect, addSceneRule } from './lines.ts';
+import { addCross, addSceneLine, addSceneRect, addSceneRule } from './lines.ts';
 import { defineLayout, defineMasters, paperMasterName, pictureMasterName } from './masters.ts';
 import { addSceneNotes } from './notes.ts';
 import type { BaselineTarget } from './baseline.ts';
@@ -203,6 +203,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       families,
       namePrefix,
       baseline: options.baseline ?? 'libreoffice',
+      residual,
     };
     let page: PageRasterEntry | undefined;
 
@@ -297,6 +298,8 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       scene.plates.forEach((plate, i) => addSceneRect(slide, plate, onPaper, `plate/${i}`));
       scene.rects.forEach((rect, i) => addSceneRect(slide, rect, onPaper, `rect/${i}`));
       scene.rules.forEach((rule, i) => addSceneRule(slide, rule, onPaper, `rule/${i}`));
+      // the lines and arrows of shape blocks (docs/freeform.md), native with triangle heads
+      (scene.lines ?? []).forEach((line, i) => addSceneLine(slide, line, onPaper, `line/${i}`));
       for (const text of scene.texts) {
         if (!text.native) continue;
         addSceneText(slide, text, textOptions);

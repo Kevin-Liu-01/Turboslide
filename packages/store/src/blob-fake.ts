@@ -18,16 +18,30 @@ export type FakeBlobClient = BlobClient & {
   readonly base: string;
   /** injects a failure for the next put of a pathname (a network fault) */
   failNextPut: (pathname: string, error: Error) => void;
+  /** freezes what list() answers at this moment until releaseList(): Vercel Blob's listing lags */
+  holdList: () => void;
+  releaseList: () => void;
+  /** get() keeps answering the bodies stored now for overwritten pathnames until releaseGet(): the CDN lags an overwrite */
+  holdGet: () => void;
+  releaseGet: () => void;
 };
 
+/** The etag Vercel Blob answers is the md5 of the body in quotes (measured 2026-09-11); the fake matches it so the mirror's proofs hold in tests. */
 export function versionOf(bytes: Uint8Array): string {
-  return `"${createHash('sha256').update(bytes).digest('hex').slice(0, 32)}"`;
+  return `"${createHash('md5').update(bytes).digest('hex')}"`;
 }
 
 export function memoryBlobClient(base = 'https://fake.blob.local'): FakeBlobClient {
   const blobs = new Map<string, { bytes: Uint8Array; version: string }>();
   const calls: FakeBlobCall[] = [];
   const failures = new Map<string, Error>();
+  let heldList: BlobEntry[] | null = null;
+  let heldBodies: Map<string, { bytes: Uint8Array; version: string }> | null = null;
+  const listing = (): BlobEntry[] =>
+    [...blobs.keys()]
+      .sort()
+      .map((pathname) => entryOf(pathname))
+      .filter((entry): entry is BlobEntry => entry !== null);
   const entryOf = (pathname: string): BlobEntry | null => {
     const stored = blobs.get(pathname);
     return stored === undefined
@@ -46,24 +60,35 @@ export function memoryBlobClient(base = 'https://fake.blob.local'): FakeBlobClie
     failNextPut(pathname, error) {
       failures.set(pathname, error);
     },
+    holdList() {
+      heldList = listing();
+    },
+    holdGet() {
+      heldBodies = new Map(
+        [...blobs].map(([k, v]) => [k, { bytes: new Uint8Array(v.bytes), version: v.version }]),
+      );
+    },
+    releaseGet() {
+      heldBodies = null;
+    },
+    releaseList() {
+      heldList = null;
+    },
     async head(pathname) {
       calls.push({ op: 'head', pathname });
       return entryOf(pathname);
     },
     async get(pathname) {
       calls.push({ op: 'get', pathname });
-      const stored = blobs.get(pathname);
-      const entry = entryOf(pathname);
-      if (stored === undefined || entry === null) return null;
-      return { entry, bytes: new Uint8Array(stored.bytes) };
+      const held = heldBodies?.get(pathname);
+      const stored = held ?? blobs.get(pathname);
+      const entry = held ? { ...entryOf(pathname), version: held.version } : entryOf(pathname);
+      if (stored === undefined || entry === null || entry.pathname === undefined) return null;
+      return { entry: entry as BlobEntry, bytes: new Uint8Array(stored.bytes) };
     },
     async list(prefix) {
       calls.push({ op: 'list', pathname: prefix });
-      return [...blobs.keys()]
-        .filter((pathname) => pathname.startsWith(prefix))
-        .sort()
-        .map((pathname) => entryOf(pathname))
-        .filter((entry): entry is BlobEntry => entry !== null);
+      return (heldList ?? listing()).filter((entry) => entry.pathname.startsWith(prefix));
     },
     async folders(prefix) {
       calls.push({ op: 'folders', pathname: prefix });

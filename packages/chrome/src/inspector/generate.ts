@@ -7,7 +7,7 @@
 // the sprite picker; an AssetId the asset picker. Every control carries the accessible label
 // `<block id>: <property label>` and the locale-independent data-control id `block.<id>.<path>`
 // the window API matches (SPEC 6.5, 7.4). Pure: no React, so it is unit tested in Node.
-import type { z } from 'zod';
+import { z } from 'zod';
 
 import type { Inspector, InspectorGroup } from '@turboslide/schema/annotate';
 import { readInspector } from '@turboslide/schema/annotate';
@@ -29,6 +29,9 @@ export type ControlKind =
   | 'textarea'
   | 'icon'
   | 'asset'
+  | 'color'
+  | 'typography'
+  | 'position'
   | 'json'
   | 'readonly';
 
@@ -237,6 +240,12 @@ export function kindFor(
       return 'json';
     case 'textarea':
       return 'textarea';
+    case 'color':
+      return 'color';
+    case 'typography':
+      return 'typography';
+    case 'position':
+      return 'position';
     case 'number':
       return inspector.snap !== undefined ? 'stepper' : 'number';
     case 'select': {
@@ -249,7 +258,6 @@ export function kindFor(
       return numeric ? 'stepper' : 'select';
     }
     case 'text':
-    case 'color':
       break;
   }
   const type = defOf(inner).type;
@@ -351,7 +359,9 @@ function walk(
         value: current,
         optional: false,
         text: false,
-        schema: inner,
+        /* the row validates the picked tag, not the whole branch; the Inspector turns a layout
+           tag into slide.setLayout (docs/freeform.md), which refiles the blocks */
+        schema: tagSchema(choices),
       });
       if (picked !== undefined) walk(picked, value, path, suffix, target, options, out);
     }
@@ -391,6 +401,16 @@ function capitalize(word: string): string {
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
 
+/** A schema accepting exactly the discriminator tags a union offers. */
+function tagSchema(choices: ReadonlyArray<ControlOption>): z.ZodType {
+  const literals = choices.map((choice) => z.literal(choice));
+  const first = literals[0];
+  if (first === undefined) return z.never();
+  const second = literals[1];
+  if (second === undefined) return first;
+  return z.union([first, second, ...literals.slice(2)]);
+}
+
 /** The controls an object schema yields against a value; the root fields are the target's own. */
 export function controlsFor(
   schema: z.ZodType,
@@ -412,8 +432,16 @@ export function controlsFor(
 const BLOCK_SKIP = new Set(['/id', '/type', '/ext']);
 const SLIDE_SKIP = new Set(['/id', '/ext']);
 
+/** The block's position box (schema/position.ts), offered on a freeform slide only. */
+export const POSITION_PATH = '/pos';
+
+export type BlockControlOptions = {
+  /** the slide's layout is freeform: the position control is offered (validate.ts requires `pos` there and refuses it elsewhere) */
+  freeform?: boolean;
+};
+
 /** The controls of a block, labelled `<block id>: <label>` with data-control `block.<id>.<path>`. */
-export function blockControls(block: Block): Generated {
+export function blockControls(block: Block, options: BlockControlOptions = {}): Generated {
   const schema = BLOCK_SCHEMAS[block.type];
   const generated = controlsFor(
     schema,
@@ -423,8 +451,53 @@ export function blockControls(block: Block): Generated {
       textPaths: CATALOG[block.type].textPaths.flatMap((template) => expandPaths(block, template)),
     },
   );
-  generated.controls = generated.controls.filter((spec) => !BLOCK_SKIP.has(spec.path));
+  generated.controls = generated.controls.filter(
+    (spec) =>
+      !BLOCK_SKIP.has(spec.path) && (options.freeform === true || spec.path !== POSITION_PATH),
+  );
   return generated;
+}
+
+/** The noun before the colon of a control label: `list` from `list: Key width`. */
+export function nounOf(spec: ControlSpec): string {
+  const at = spec.label.indexOf(': ');
+  return at < 0 ? spec.label : spec.label.slice(0, at);
+}
+
+/**
+ * The controls of a composite's fields (typography, position): one ControlSpec per annotated
+ * field of the inner object, labelled `<noun>: <field label>` and addressed `<control>.<field>`,
+ * reading the field's value out of the composite's current object.
+ */
+export function compositeControls(spec: ControlSpec): ControlSpec[] {
+  if (!isObject(spec.schema)) return [];
+  const record =
+    spec.value !== null && typeof spec.value === 'object'
+      ? (spec.value as Record<string, unknown>)
+      : {};
+  const noun = nounOf(spec);
+  const out: ControlSpec[] = [];
+  for (const [key, field] of Object.entries(spec.schema.shape)) {
+    const fieldSchema = field as z.ZodType;
+    const { inner, optional } = unwrap(fieldSchema);
+    const inspector = readInspector(fieldSchema) ?? readInspector(inner);
+    if (inspector === undefined) continue;
+    const values = inspector.snap ?? literalValues(inner);
+    out.push({
+      control: `${spec.control}.${key}`,
+      label: `${noun}: ${inspector.label}`,
+      path: pointerJoin(spec.path, key),
+      kind: kindFor(inspector, inner, values),
+      inspector,
+      group: inspector.group ?? spec.group,
+      ...(values !== undefined ? { options: values } : {}),
+      value: record[key],
+      optional,
+      text: false,
+      schema: inner,
+    });
+  }
+  return out;
 }
 
 /**

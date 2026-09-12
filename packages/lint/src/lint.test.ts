@@ -49,6 +49,12 @@ const STATIC_EXPECTED: RuleId[] = [
   'asset/license-missing',
   'opener/sentence-lists-section',
   'export/non-native',
+  // the freeform round (docs/freeform.md), planted on fixed-points
+  'layout/freeform',
+  'freeform/overlap',
+  'freeform/off-sheet',
+  'type/ladder',
+  'color/off-palette',
 ];
 
 describe('text', () => {
@@ -122,6 +128,49 @@ describe('lintStatic', () => {
     expect(
       String(weight?.fix?.[0] && 'value' in weight.fix[0] ? weight.fix[0].value : ''),
     ).toContain('font-weight: 500');
+  });
+
+  test('the freeform rules name the block, the box and the color, and typography fixes snap to the ladder and the cap', () => {
+    const onSlide = findings.filter((f) => f.slideId === 'fixed-points');
+    expect(onSlide.find((f) => f.rule === 'layout/freeform')).toMatchObject({
+      severity: 1,
+      path: '/layout',
+    });
+    const off = onSlide.find((f) => f.rule === 'freeform/off-sheet');
+    expect(off).toMatchObject({ severity: 3, blockId: 's1', path: '/slots/main/3/pos' });
+    expect(off?.evidence.box).toEqual([1500, 800, 200, 8]);
+    const overlap = onSlide.find((f) => f.rule === 'freeform/overlap');
+    expect(overlap).toMatchObject({ severity: 1, blockId: 't1' });
+    expect(overlap?.evidence.text).toBe('h and t1');
+    expect(overlap?.evidence.box).toEqual([137, 150, 400, 35]);
+    const palette = onSlide.find((f) => f.rule === 'color/off-palette');
+    expect(palette).toMatchObject({ severity: 2, blockId: 'b1', path: '/slots/main/2/fill' });
+    expect(palette?.evidence.text).toBe('#ff0000');
+    expect(palette?.proposal).toContain('"b1"');
+    const ladder = onSlide.find((f) => f.rule === 'type/ladder');
+    expect(ladder?.fix).toEqual([
+      {
+        op: 'block.set',
+        slideId: 'fixed-points',
+        blockId: 't1',
+        path: '/typography/size',
+        value: 24,
+      },
+    ]);
+    const cap = onSlide.find((f) => f.rule === 'type/weight-cap');
+    expect(cap?.fix).toEqual([
+      {
+        op: 'block.set',
+        slideId: 'fixed-points',
+        blockId: 't1',
+        path: '/typography/weight',
+        value: 500,
+      },
+    ]);
+    // the grammar slides raise none of the freeform rules
+    expect(
+      findings.filter((f) => f.slideId !== 'fixed-points' && f.rule.startsWith('freeform/')),
+    ).toEqual([]);
   });
 
   test('the gate separates known severity 3 findings from blocking ones', () => {

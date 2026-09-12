@@ -284,6 +284,52 @@ describe('hosted stores', () => {
       expect(await store.sync()).toMatchObject({ present: false });
     });
 
+    it('commits on a fresh document when the listing lags behind head (Vercel Blob list consistency)', async () => {
+      const { fake, a, b } = await blobPair();
+      await b.sync();
+      // the listing freezes at r412; instance a commits r413
+      fake.holdList();
+      const first = await a.write({ baseRevision: 412, author: agentA, mutations: [setSize(20)] });
+      expect(first.ok).toBe(true);
+      // instance b: head sees r413, the listing still says r412; its write must land on r413
+      const second = await b.write({
+        baseRevision: 413,
+        author: agentB,
+        mutations: [setSize(22)],
+      });
+      expect(second.ok).toBe(true);
+      if (second.ok) expect(second.revision).toBe(414);
+      const list = (await b.read()).document.slides['content-rule'];
+      expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 22 });
+      expect((await b.records()).map((r) => r.revision)).toEqual([413, 414]);
+      fake.releaseList();
+      await a.sync(true);
+      expect((await a.read()).document.deck.revision).toBe(414);
+    });
+
+    it('commits on a fresh document when the CDN still serves the overwritten bodies (Vercel Blob get lag)', async () => {
+      const { fake, a, b } = await blobPair();
+      await b.sync();
+      // b has read r412; a commits r413; from then on get() answers the r412 bodies while head() is current
+      fake.holdGet();
+      const first = await a.write({ baseRevision: 412, author: agentA, mutations: [setSize(20)] });
+      expect(first.ok).toBe(true);
+      const second = await b.write({
+        baseRevision: 413,
+        author: agentB,
+        mutations: [setSize(22)],
+      });
+      expect(second.ok).toBe(true);
+      if (second.ok) expect(second.revision).toBe(414);
+      // b derived r413 from a's record, so its document carries a's change under its own
+      const list = (await b.read()).document.slides['content-rule'];
+      expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 22 });
+      expect((await b.records()).map((r) => r.revision)).toEqual([413, 414]);
+      fake.releaseGet();
+      await a.sync(true);
+      expect((await a.read()).document.deck.revision).toBe(414);
+    });
+
     it('turns a lost commit race into a conflict outcome and converges on the winner', async () => {
       const hooks = {
         beforeCommit: async () => {
@@ -494,6 +540,45 @@ describe('hosted stores', () => {
       });
       expect(outcome.ok).toBe(true);
       expect(await (await first.open('second-deck')).revision()).toBe(1);
+    });
+
+    it('answers another instance’s later write through open(), where the overlay alone is stale', async () => {
+      /* the studio's lint.run and render.slide read the deck this way (apps/studio/src/server/lint.ts,
+         render.ts): open() pulls the mirror before read(). A FileStore over the instance's overlay
+         folder answers whatever that instance last pulled, which is how the window API's lint.run
+         on a deployment counted another instance's writes late (the editor depth round). */
+      const fake = memoryBlobClient();
+      const first = collection('blob', join(root, 'overlay-1'), fake);
+      await first.ready();
+      clock = '2026-09-11T11:00:00.000Z';
+      await first.create({ name: 'Second deck', from: 'gt-brand' });
+      const a = await first.open('second-deck');
+      expect((await a.write({ baseRevision: 0, author: kevin, mutations: [setSize(22)] })).ok).toBe(
+        true,
+      );
+
+      // instance b pulls r1, then a commits r2 behind its back
+      const second = collection('blob', join(root, 'overlay-2'), fake);
+      await second.ready();
+      const seen = await (await second.open('second-deck')).read();
+      expect(seen.document.deck.revision).toBe(1);
+      expect((await a.write({ baseRevision: 1, author: kevin, mutations: [setSize(24)] })).ok).toBe(
+        true,
+      );
+
+      // the overlay folder still holds r1: what lint.run read before the fix
+      const overlayOnly = await openFileStore({ dir: join(second.decksDir, 'second-deck') }).read();
+      expect(overlayOnly.document.deck.revision).toBe(1);
+      const staleList = overlayOnly.document.slides['content-rule'];
+      expect(staleList?.kind === 'content' && staleList.slots.right?.[0]).toMatchObject({
+        size: 22,
+      });
+
+      // open() syncs first: the document b lints is a's r2
+      const synced = await (await second.open('second-deck')).read();
+      expect(synced.document.deck.revision).toBe(2);
+      const list = synced.document.slides['content-rule'];
+      expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 24 });
     });
 
     it('refuses to open without a client', () => {

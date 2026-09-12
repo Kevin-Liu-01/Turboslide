@@ -1,0 +1,137 @@
+{
+  "base": "https://turboslide-owb42s633-kl01s-projects.vercel.app",
+  "startedAt": "2026-09-12T02:52:09.759Z",
+  "steps": [
+    {
+      "name": "viewer head reads Turboslide, list in thumbnail density",
+      "ok": true,
+      "numbers": "head \"Turboslide\", density thumbs, 85 thumbnail cards, settled 1025 ms, status slot \"GT brand deck\" (1060 ms)",
+      "file": "01-viewer-turboslide-thumbs-1440x900.jpg"
+    },
+    {
+      "name": "create a deck from the GT template on /decks",
+      "ok": true,
+      "numbers": "deck editor-depth-09120252, 85 slides, created in 4589 ms (6003 ms)",
+      "file": "02-created-deck-editor-1440x900.jpg",
+      "deckId": "editor-depth-09120252"
+    },
+    {
+      "name": "open the editor on content-rule",
+      "ok": true,
+      "numbers": "layout cols, r0, 3 blocks (1027 ms)"
+    },
+    {
+      "name": "insert a box primitive from the Insert menu",
+      "ok": true,
+      "numbers": "block box (box), r0 to r1 (660 ms)"
+    },
+    {
+      "name": "insert a shape primitive from the Insert menu",
+      "ok": true,
+      "numbers": "block shape (shape), r1 to r2 (518 ms)"
+    },
+    {
+      "name": "insert a text primitive from the Insert menu",
+      "ok": true,
+      "numbers": "block text (text), r2 to r3 (530 ms)"
+    },
+    {
+      "name": "switch the slide to the freeform layout",
+      "ok": true,
+      "numbers": "layout freeform, 6/6 blocks positioned, 6 .free wrappers, r3 to r4 (1667 ms)",
+      "file": "05-freeform-layout-1440x900.jpg"
+    },
+    {
+      "name": "drag a block, guides show, one snapped mutation",
+      "ok": true,
+      "numbers": "pos 137,377 to 56,96 (rail 56, content top 96, grid 8), 2 guides at the drop point, r4 to r5 (1815 ms)",
+      "file": "06-drag-with-guides-1440x900.jpg",
+      "before": {
+        "x": 137,
+        "y": 377,
+        "w": 627,
+        "h": 67,
+        "z": 2
+      },
+      "after": {
+        "x": 56,
+        "y": 96,
+        "w": 627,
+        "h": 67,
+        "z": 2
+      }
+    },
+    {
+      "name": "resize a block from a corner handle",
+      "ok": true,
+      "numbers": "size 627x67 to 712x139 (an edge on a guide), r5 to r6 (1197 ms)"
+    },
+    {
+      "name": "align two blocks on an edge",
+      "ok": true,
+      "numbers": "2 selected, align left: box 56,96 712x139 and h 137,466 627x48 to 56,96 and 56,466, r6 to r7 (1829 ms)",
+      "file": "07-align-1440x900.jpg"
+    },
+    {
+      "name": "palette color then custom color with the off-palette lint mark",
+      "ok": false,
+      "numbers": "fill green (r8) then #ff6600 (r9), lint marks 1 to 2, color/off-palette findings 0 (2591 ms)",
+      "file": "08-color-off-palette-1440x900.jpg"
+    },
+    {
+      "name": "typography size, weight (cap mark) and alignment",
+      "ok": true,
+      "numbers": "typography {\"size\":28,\"weight\":700,\"align\":\"center\"}, weight-cap marks 2, type/weight-cap findings 1, r9 to r12 (6251 ms)",
+      "file": "09-typography-1440x900.jpg"
+    },
+    {
+      "name": "drag a block into the other column on a cols slide",
+      "ok": true,
+      "numbers": "slide reputation: h left to right (2 drop indicators while dragging), r12 to r13 (2266 ms)",
+      "file": "10-grammar-drag-across-columns-1440x900.jpg"
+    },
+    {
+      "name": "tooltips on three controls",
+      "ok": true,
+      "numbers": "insert.open: \"InsertPrimitives (box, shape, rule, text, icon, image, material), the grammar's blocks and\" | export.open: \"ExportOpens the export options: one perfect PPTX per theme, or the standalone HTML file.\" | sidebar.density.outline: \"OutlineOne 28 px row per slide: number, kind glyph and title.\" (3336 ms)",
+      "file": "11-tooltip-1440x900.jpg"
+    },
+    {
+      "name": "export perfect PPTX from the Export menu (sync)",
+      "ok": false,
+      "numbers": "answers is not defined (210033 ms)",
+      "file": "12-failed-1440x900.jpg"
+    },
+    {
+      "name": "download the deck bundle from the Export menu",
+      "ok": false,
+      "numbers": "page.waitForEvent: Timeout 180000ms exceeded while waiting for event \"download\" (180049 ms)",
+      "file": "13-failed-1440x900.jpg"
+    },
+    {
+      "name": "upload the bundle back on /decks as a new deck",
+      "ok": false,
+      "numbers": "no bundle to upload (16 ms)",
+      "file": "14-failed-1440x900.jpg"
+    },
+    {
+      "name": "create a blank deck, download and upload its bundle",
+      "ok": false,
+      "numbers": "page.waitForURL: Timeout 120000ms exceeded. (123550 ms)",
+      "file": "15-failed-1440x900.jpg"
+    },
+    {
+      "name": "open /deck/<id>?present=1",
+      "ok": true,
+      "numbers": "present mode on opener-brand (1556 ms)",
+      "file": "16-present-1440x900.jpg"
+    }
+  ],
+  "pageErrors": [],
+  "deckId": "editor-depth-09120252",
+  "uploadedId": null,
+  "smallId": null,
+  "pptxUrl": null,
+  "bundlePath": null,
+  "finishedAt": "2026-09-12T03:01:15.889Z"
+}

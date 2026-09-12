@@ -88,8 +88,12 @@
   min-width: 0;
 }
 
-/* inside the status slot only the deck name gives; the chip keeps its parts */
-.pt-bar-status > *:not(.ts-deckname) {
+/* inside the status slot only the deck name gives (the editor's DeckName button, or the viewer's
+   read-only .pt-bar-deck); the chip keeps its parts. The read-only name must be excluded here as
+   well: this rule outranks .pt-bar-deck's own flex-shrink, and with it in force the viewer's
+   title could not give at all, so at 1440 the right group ran under the centered Seg and the
+   title was cut without its ellipsis (measured on the editor depth preview, screenshot 01) */
+.pt-bar-status > *:not(.ts-deckname):not(.pt-bar-deck) {
   flex-shrink: 0;
 }
 
@@ -160,6 +164,26 @@
 .pt-bar-status {
   display: inline-flex;
   align-items: center;
+}
+
+/* the deck's title read only in the status slot, on a route without the DeckName control (the
+   viewer): the display face at 14.5px like the name button (DeckName.css), giving like it down to
+   56px with an ellipsis (Toolbar.tsx fitLabels counts its hidden text, floorStatusSlot its floor) */
+.pt-bar-deck {
+  display: block;
+  max-width: 260px;
+  min-width: 56px;
+  flex: 0 1 auto;
+  padding: 0 8px;
+  color: var(--pt-ink);
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 14.5px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* the lint count badge on the Lint button: 16px, tabular, a --pt-hair box; ink while findings

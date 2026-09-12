@@ -26,7 +26,7 @@ export const Route = createFileRoute('/api/agent')({
         let dispatcher;
         let note: string | undefined;
         try {
-          dispatcher = deckDispatcher(deckId, { withView: true }).dispatcher;
+          dispatcher = (await deckDispatcher(deckId, { withView: true })).dispatcher;
         } catch (error) {
           dispatcher = createDispatcher();
           note = error instanceof Error ? error.message : String(error);

@@ -149,7 +149,7 @@ test('the key column edge and the column seam write snapped values', async ({ pa
   await seedSlide(page);
 
   // select the rows block: the ring, the chip and its key edge handle appear
-  await page.locator('.ts-stage > .pt-slide [data-block="table"]').click();
+  await page.locator('.ts-stagewrap.ts-editor .pt-slide [data-block="table"]').click();
   await expect(page.locator('.ts-overlay .ts-select')).toBeVisible();
   const keyHandle = page.locator('[data-control="handle.table.key"]');
   await expect(keyHandle).toHaveCount(1);
@@ -195,7 +195,9 @@ test('the key column edge and the column seam write snapped values', async ({ pa
 test('inline text with a bare GT renders the mark and keeps the letters', async ({ page }) => {
   test.setTimeout(120_000);
   await openEditor(page);
-  const run = page.locator('.ts-stage > .pt-slide [data-block="list"] [data-run]').first();
+  const run = page
+    .locator('.ts-stagewrap.ts-editor .pt-slide [data-block="list"] [data-run]')
+    .first();
   await expect(run).toBeVisible();
   const before = (await versions(page)).length;
   await run.dblclick();
@@ -216,7 +218,7 @@ test('inline text with a bare GT renders the mark and keeps the letters', async 
   expect(text).toContain('GT');
   expect(text).not.toContain('gt-word');
   await expect(
-    page.locator('.ts-stage > .pt-slide [data-block="list"] .gt-word').first(),
+    page.locator('.ts-stagewrap.ts-editor .pt-slide [data-block="list"] .gt-word').first(),
   ).toBeVisible();
 });
 
@@ -298,7 +300,7 @@ test('Tab from the page selects the first block once, Delete removes it after a 
   test.setTimeout(120_000);
   await openEditor(page);
   const order = await page
-    .locator('.ts-stage > .pt-slide [data-block]')
+    .locator('.ts-stagewrap.ts-editor .pt-slide [data-block]')
     .evaluateAll((els) => els.map((el) => el.getAttribute('data-block')));
   expect(order.length).toBeGreaterThan(1);
   const first = order[0]!;
@@ -330,12 +332,47 @@ test('Tab from the page selects the first block once, Delete removes it after a 
   const write = (await versions(page)).at(-1)!;
   expect(write.mutations).toHaveLength(1);
   expect(write.mutations[0]).toMatchObject({ op: 'block.remove', slideId: SLIDE, blockId: last });
-  await expect(page.locator(`.ts-stage > .pt-slide [data-block="${last}"]`)).toHaveCount(0);
+  await expect(
+    page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-block="${last}"]`),
+  ).toHaveCount(0);
 
   // the write re-rendered the slide with no entrance cut: opaque, and no animation on it
-  const paint = await page.locator('.ts-stage > .pt-slide .slide').evaluate((el) => {
+  const paint = await page.locator('.ts-stagewrap.ts-editor .pt-slide .slide').evaluate((el) => {
     const style = getComputedStyle(el);
     return { opacity: style.opacity, animation: style.animationName };
   });
   expect(paint).toEqual({ opacity: '1', animation: 'none' });
+});
+
+test('Alt with Down on the focused move chip reorders the block within its slot as one block.move', async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await openEditor(page);
+  const order = await page
+    .locator('.ts-stagewrap.ts-editor .pt-slide [data-block]')
+    .evaluateAll((els) => els.map((el) => el.getAttribute('data-block')));
+  expect(order.length).toBeGreaterThan(1);
+  const first = order[0]!;
+  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
+  await page.keyboard.press('Tab');
+  const chip = page.locator('.ts-overlay .ts-select-chip');
+  await expect(chip).toHaveText(new RegExp(` · ${first}$`));
+  // the chip is a button: focused, its tooltip names it and Alt with Down is the order key
+  await chip.focus();
+  await expect(chip).toHaveAttribute('data-tip', `${first}: Move`);
+  await expect(page.locator('#pt-tip .pt-tip-doc')).toContainText(
+    'Alt with Up or Down moves it one step',
+  );
+  const before = (await versions(page)).length;
+  await page.keyboard.press('Alt+ArrowDown');
+  await expect.poll(async () => (await versions(page)).length).toBe(before + 1);
+  const write = (await versions(page)).at(-1)!;
+  expect(write.mutations).toHaveLength(1);
+  expect(write.mutations[0]).toMatchObject({ op: 'block.move', slideId: SLIDE, blockId: first });
+  // the block now follows the one that was second in its slot
+  const after = await page
+    .locator('.ts-stagewrap.ts-editor .pt-slide [data-block]')
+    .evaluateAll((els) => els.map((el) => el.getAttribute('data-block')));
+  expect(after.indexOf(first)).toBe(1);
 });

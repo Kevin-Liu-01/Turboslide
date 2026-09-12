@@ -5,7 +5,10 @@ import { applyMutations } from '@turboslide/schema/reduce';
 
 import {
   actionForMutation,
+  actionForMutations,
   blockMoveFor,
+  dropIndexFor,
+  dropSlotFor,
   gestureMutation,
   handlesFor,
   labelClearanceBox,
@@ -562,5 +565,83 @@ describe('declared diagram labels and markers (SPEC 6.4 Alt-drag, M5)', () => {
     ).document.slides.flow;
     if (!moved) throw new Error('no slide');
     expect(labelClearanceBox(moved, label, diaBoxes)?.ok).toBe(false);
+  });
+});
+
+describe('dropIndexFor and dropSlotFor', () => {
+  it('lands before the first sibling whose center is below the pointer, else after the last', () => {
+    const list: MeasuredBoxes['blocks'] = { a: [137, 100, 500, 40], b: [137, 200, 500, 40] };
+    expect(dropIndexFor(90, ['a', 'b'], list)).toEqual({ index: 0, lineY: 100 - 11 });
+    expect(dropIndexFor(150, ['a', 'b'], list)).toEqual({ index: 1, lineY: 200 - 11 });
+    expect(dropIndexFor(300, ['a', 'b'], list)).toEqual({ index: 2, lineY: 240 + 11 });
+    // an empty slot: the line sits at the slot's top
+    expect(dropIndexFor(300, [], list)).toEqual({ index: 0, lineY: null });
+    // a sibling without a measured box is skipped
+    expect(dropIndexFor(150, ['zzz', 'b'], list)).toEqual({ index: 1, lineY: 200 - 11 });
+  });
+
+  it('names the target slot of cols by the gap half and of split by the pointer', () => {
+    expect(dropSlotFor(slide, 'left', { x: 900, y: 300 }, boxes)).toBe('right');
+    expect(dropSlotFor(slide, 'right', { x: 300, y: 300 }, boxes)).toBe('left');
+    const split: Slide = {
+      schemaVersion: 1,
+      id: 'split',
+      kind: 'content',
+      layout: { type: 'split', head: { cols: '5/7' } },
+      slots: {
+        headLeft: [{ id: 'h', type: 'heading', level: 'h2', text: 'Head' }],
+        headRight: [{ id: 'p', type: 'paragraph', text: 'Lead.' }],
+        body: [{ id: 'rows', type: 'rows', key: 200, items: [] }],
+      },
+    };
+    const splitBoxes: MeasuredBoxes = {
+      blocks: { h: [137, 129, 522.5, 60], p: [731.5, 129, 731.5, 60], rows: [137, 300, 1326, 200] },
+      slots: { head: [137, 129, 1326, 60], body: [137, 245, 1326, 526] },
+      runs: {},
+      parts: {},
+    };
+    expect(dropSlotFor(split, 'body', { x: 300, y: 150 }, splitBoxes)).toBe('headLeft');
+    expect(dropSlotFor(split, 'body', { x: 900, y: 150 }, splitBoxes)).toBe('headRight');
+    expect(dropSlotFor(split, 'headLeft', { x: 300, y: 500 }, splitBoxes)).toBe('body');
+    const { mutation, slot, slotBox } = blockMoveFor(split, 'h', { x: 300, y: 500 }, splitBoxes);
+    expect(slot).toBe('body');
+    expect(slotBox).toEqual([137, 245, 1326, 526]);
+    expect(mutation).toEqual({
+      op: 'block.move',
+      slideId: 'split',
+      blockId: 'h',
+      slot: 'body',
+      after: 'rows',
+    });
+    // a stack keeps its one slot wherever the pointer is
+    const stack: Slide = { ...split, layout: { type: 'stack' }, slots: { main: [] } };
+    expect(dropSlotFor(stack, 'main', { x: 1500, y: 880 }, splitBoxes)).toBe('main');
+  });
+
+  it('reports the outlined slot beside the drop line on a cols slide', () => {
+    const across = blockMoveFor(slide, 'h', { x: 900, y: 150 }, boxes);
+    expect(across.slot).toBe('right');
+    expect(across.slotBox).toEqual([731.5, 129, 731.5, 642]);
+    expect(across.indicator).toEqual([731.5, 129 - 11, 731.5, 0]);
+  });
+});
+
+describe('actionForMutations', () => {
+  it('sends one mutation as its own action and several as one slide.update', () => {
+    const one = {
+      op: 'block.set',
+      slideId: 'positioning',
+      blockId: 'list',
+      path: '/key',
+      value: 240,
+    } as const;
+    expect(actionForMutations([one], 13)).toEqual(actionForMutation(one, 13));
+    const two = { op: 'block.remove', slideId: 'positioning', blockId: 'p1' } as const;
+    expect(actionForMutations([one, two], 13)).toEqual({
+      id: 'slide.update',
+      input: { slideId: 'positioning', baseRevision: 13, mutations: [one, two] },
+    });
+    const elsewhere = { op: 'block.remove', slideId: 'other', blockId: 'x' } as const;
+    expect(() => actionForMutations([one, elsewhere], 13)).toThrow(RangeError);
   });
 });

@@ -14,7 +14,15 @@
 // self-contained: Playwright serializes their source.
 import type { Page } from 'playwright-core';
 
-import type { Scene, SceneBlock, SceneRaster, SceneRect, SceneRule, SceneText } from './types.ts';
+import type {
+  Scene,
+  SceneBlock,
+  SceneRaster,
+  SceneRect,
+  SceneRule,
+  SceneSegment,
+  SceneText,
+} from './types.ts';
 
 /** What one tagged raster element is, as tagRasterElements returns it (boxes are measured later). */
 export type RasterTag = {
@@ -503,9 +511,10 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         if (text) texts.push(text);
       });
 
-      // Rules and rects of the native blocks: computed borders and backgrounds.
+      // Rules, rects and lines of the native blocks: computed borders, backgrounds and strokes.
       const rules: SceneRule[] = [];
       const rects: SceneRect[] = [];
+      const lines: SceneSegment[] = [];
       const borderRules = (
         el: Element,
         blockId: string,
@@ -576,6 +585,89 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           const bw = parseFloat(c.borderTopWidth);
           if (bw > 0) rect.line = { color: c.borderTopColor, width: round(bw) };
           rects.push(rect);
+        } else if (type === 'box') {
+          // the box block (docs/freeform.md): its ground, border and corner from the computed style;
+          // its text is a [data-run] carrier measured with the others
+          const c = getComputedStyle(el);
+          const rect: SceneRect = {
+            box: toBox(el.getBoundingClientRect()),
+            fill: c.backgroundColor,
+            blockId,
+            role: 'box',
+            shape: 'rect',
+          };
+          const bw = parseFloat(c.borderTopWidth);
+          if (bw > 0) rect.line = { color: c.borderTopColor, width: round(bw) };
+          const radius = parseFloat(c.borderTopLeftRadius);
+          if (radius > 0) {
+            rect.shape = 'roundRect';
+            rect.radius = round(radius);
+          }
+          rects.push(rect);
+        } else if (type === 'rule') {
+          // the rule block: the element is the line, its background the color
+          const c = getComputedStyle(el);
+          const r = el.getBoundingClientRect();
+          rules.push({
+            box: toBox(r),
+            color: c.backgroundColor,
+            width: round(Math.min(r.width, r.height)),
+            blockId,
+            role: 'rule',
+          });
+        } else if (type === 'shape') {
+          // the shape block: the svg's own box, the inner element's computed fill and stroke (a
+          // token resolves to rgb here), the ends and heads from the data attributes the renderer
+          // wrote in viewBox units, scaled to the box
+          const kind = el.getAttribute('data-shape') ?? 'rectangle';
+          const svgRect = el.getBoundingClientRect();
+          const viewBox = (el.getAttribute('viewBox') ?? '0 0 1 1').split(/\s+/).map(Number);
+          const sx = svgRect.width / (viewBox[2] || 1);
+          const sy = svgRect.height / (viewBox[3] || 1);
+          if (kind === 'line' || kind === 'arrow') {
+            const lineEl = el.querySelector('line');
+            if (lineEl) {
+              const c = getComputedStyle(lineEl);
+              const point = (name: string): [number, number] => {
+                const parts = (el.getAttribute(name) ?? '0,0').split(',').map(Number);
+                return [
+                  round(svgRect.left - ox + (parts[0] ?? 0) * sx),
+                  round(svgRect.top - oy + (parts[1] ?? 0) * sy),
+                ];
+              };
+              const headsAttr = el.getAttribute('data-heads');
+              const heads: SceneSegment['heads'] =
+                headsAttr === 'start' || headsAttr === 'end' || headsAttr === 'both'
+                  ? headsAttr
+                  : 'none';
+              lines.push({
+                blockId,
+                from: point('data-from'),
+                to: point('data-to'),
+                color: c.stroke,
+                width: round(parseFloat(c.strokeWidth) || 1),
+                heads,
+              });
+            }
+          } else {
+            const shapeEl = el.querySelector('rect, ellipse');
+            if (shapeEl) {
+              const c = getComputedStyle(shapeEl);
+              const rect: SceneRect = {
+                box: toBox(svgRect),
+                fill: c.fill === 'none' || c.fill === '' ? 'rgba(0, 0, 0, 0)' : c.fill,
+                blockId,
+                role: 'shape',
+                shape: kind === 'ellipse' ? 'ellipse' : kind === 'rounded' ? 'roundRect' : 'rect',
+              };
+              if (kind === 'rounded')
+                rect.radius = round(parseFloat(shapeEl.getAttribute('rx') ?? '0') * sx);
+              const sw = parseFloat(c.strokeWidth);
+              if (c.stroke !== 'none' && c.stroke !== '' && sw > 0)
+                rect.line = { color: c.stroke, width: round(sw) };
+              rects.push(rect);
+            }
+          }
         }
       }
 
@@ -702,6 +794,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         texts,
         rules,
         rects,
+        lines,
         rasters,
         blocks,
         fonts,

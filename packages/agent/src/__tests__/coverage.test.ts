@@ -78,6 +78,10 @@ describe('every action', () => {
           'version.save',
           'import.run',
           'deck.create',
+          // whole-deck transfers (docs/deck-transfer.md): a bundle carries its own revision
+          'deck.unpack',
+          'deck.push',
+          'deck.pull',
           'source.apply',
         ];
         if (!noBase.includes(spec.id))

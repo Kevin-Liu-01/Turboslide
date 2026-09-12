@@ -1,0 +1,381 @@
+# Canvas text editing model
+
+Report 09 in the Google Slides parity research series for the Turboslide redesign. Written 2026-09-11 against commit `8c7056c` (main, after the editor depth round). Reports 01 to 07 in this folder were read first; report 07 names retyping a customer name, a number or a bullet as the most frequent sales edit, and report 06 (section 7 item 13, section 2.4) shows that Turboslide's text model collides with it: Enter commits instead of adding a line, editing starts on a double click or Enter, there are no line breaks, no bullets and no italic. Neither report documents Google's text interaction at the level of keystrokes and clicks, so this report does that in Part A, inventories Turboslide's text model from the code in Part B, and puts the two side by side in Part C with the smallest document change that closes each gap and the SPEC constraint it touches.
+
+Every public source was read on 2026-09-11 without signing in to any account. Google's own icons, artwork and trademarked assets are not reproduced; "Google Slides" appears as a reference only. Claims that no public page read for this report confirms are collected in the "Unverified" section and are labelled in the body. Rules followed: plain technical English, sentence case, no em dashes, no metaphors, no trailing periods on headings.
+
+## How to read this report
+
+- "Verified" means a Google page (support.google.com, workspaceupdates.googleblog.com, developers.google.com) states the behaviour. "Corroborated" means two or more third party pages state it. "Single source" means one third party page states it. "Unverified" means the behaviour is expected from product knowledge or browser convention but no page read for this report states it.
+- Google's shortcut page groups shortcuts as Common actions, Film strip actions, Navigation, Menus, Comments, Text, Move and arrange objects, Presenting, Video player and Screen reader support (report 04 Part B). Windows keys are given first, Mac keys in brackets.
+- Google's file model comes from the Slides API and Apps Script references. Where the interaction is not documented on a help page but the file model fixes it (for example, a paragraph ends at a newline character), the report says so and labels the interaction as inferred from the model.
+- Turboslide facts are lines of source at `8c7056c`; the file is named beside every fact. Nothing was measured in a browser for this report.
+
+## Findings a designer must not miss
+
+1. Google's Enter key writes a paragraph break into the document; Turboslide's Enter ends the editing session and writes the whole text as one `block.set`. The Slides API states that "Inserting a newline character will implicitly create a new `ParagraphMarker` at that index" and that "Paragraphs always end in a newline character". Turboslide's `textSchema` refuses any `\n` or `\r` with the message "a Text has no line breaks (SPEC 4.2)" (`packages/schema/src/text.ts`). This is a document model gap, not an interaction gap, and it is the one that blocks the most frequent sales edit.
+2. Google's Escape leaves text editing and keeps what was typed (the screen reader guide: "To return focus to the layout element or container, press Escape"). Turboslide's Escape restores the original text and discards the edit (`InlineText.tsx`, `finish(false)` puts `originalHtml` back). A salesperson who presses Escape to "get out" after retyping a customer name loses the change. This is the single most dangerous mismatch in the table.
+3. A single click into Google text places the caret; a click on the border selects the box. In Turboslide a single click anywhere on a block selects the block, a double click or Enter starts editing, and the caret always lands at the end of the run (`range.collapse(false)` in `InlineText.tsx`), never where the reader clicked. Double click therefore does not select a word as it does in Google, it opens the editor.
+4. With a block selected and no field focused, Turboslide's bare letters S, D, E, P, F, G, B, J, K, L, H and ? still act (report 06 section 7 item 12). Google's editor binds no bare letters in edit mode. A seller who clicks the title and starts typing a customer name hides the sidebar, flips the theme and leaves edit mode instead of typing.
+5. Google's placeholder prompt text ("Click to add title", "Click to add text") is fixed prompt text that is not part of the shape's text content in the file model. Turboslide's templates insert real copy ("Placeholder heading, not final copy", `packages/chrome/src/slide-templates.ts`) that renders in thumbnails, present mode and every export, and that the copy linter flags at severity 1 until the words are replaced. Closing this needs a placeholder state in the document or the renderer, not a wording change.
+6. Bullets are the other document model gap. Google has bulleted and numbered lists with up to nine nesting levels, Tab to nest and Enter twice to leave the list. Turboslide's lists are `rows` (key and value), `plain` (a ruled statement list) and `refs`, each item a separate `Text` in an array; there are no bullet glyphs by grammar ("Ruled rows and lists instead of bullets", SPEC section 2.1), and a new item is added only through the inspector's "Add item" button or the source drawer, never by pressing Enter at the end of an item.
+7. Italic, underline, strikethrough within a run, per run colour and font size are Google run styles (`TextStyle.bold`, `italic`, `underline`, `strikethrough`, `smallCaps`, `fontSize`, `foregroundColor`, `backgroundColor`, `link`, `baselineOffset`). Turboslide's run has three flags: `b` (weight 500), `gt` (the mark) and `link`. The four rule markup is "Four rules, nothing else" by SPEC 4.2. Italic has no cut in the export font set either (`EXPORT_WEIGHTS` is `[400, 500]`, `packages/export/src/pptx/fonts-map.ts`), so an italic run is a schema, renderer and export change at once.
+8. Turboslide turns the browser's spell check off on the editable run (`element.spellcheck = false`, `InlineText.tsx` line 337), and no other spelling surface exists. Google underlines misspellings in red, offers suggestions on right click, and has Tools, Spelling with Change, Change all, Ignore, Ignore all and a personal dictionary. Turning the attribute back on is an interaction change with no document cost.
+9. Undo granularity differs in kind. Turboslide records one history entry per commit, and an inline session commits once, so Cmd Z after a long retype removes the whole retype. SPEC 6.7 and 6.9 planned `text.replace` coalesced at 400 ms; the code does not implement it (`InlineText.tsx` commits one `block.set` of the whole markup; `packages/agent/src/window/history.ts` stores one entry per write). Google's typing undo granularity is not documented on a public page read and is listed as unverified.
+10. Speaker notes in Google are a formatted text area under the canvas with the full text toolbar; in Turboslide notes are a plain `string` edited in the inspector's Slide section textarea (Cmd Enter commits). Plain notes need no document change to move under the canvas; formatted notes would.
+
+## Part A: how Google Slides handles text on the canvas
+
+### A1 The three selection states
+
+Google's canvas has three states a text edit passes through. The labels are this report's; Google does not name them on a page read.
+
+| State | How it is entered | What the keyboard does | What the toolbar shows | Source and status |
+| --- | --- | --- | --- | --- |
+| Nothing selected | Click on empty canvas; Esc from a selected object ("Exit the current mode: Esc") | Arrow keys and Page keys move between slides (Navigation group); Tab selects the first shape ("Select next shape: Tab") | The slide controls: Background, Layout, Theme, Transition (report 02 section 4.1) | Verified for the keys (G1); toolbar from report 02 |
+| Box selected (the container has focus, no caret) | A click on the box border or on an object that has no text; Tab and Shift+Tab walk shapes; Esc from text editing ("To return focus to the layout element or container, press Escape") | Arrow keys "Nudge one pixel at a time", Shift plus arrows "Nudge by larger increment"; Delete removes the object; Ctrl+D duplicates; Ctrl+C, Ctrl+X, Ctrl+V; Enter starts editing ("To edit an element and insert content, press Enter") | The text controls plus Fill color, Border color, Border weight, Border dash and Format options (report 02 section 4.2, which attests the tail for "a text box or placeholder is selected") | Verified (G1, G3) |
+| Caret in text | A click inside the text of a text box or placeholder; Enter on a selected box; a double tap on touch ("double-tap the text box to start typing", G2) | Characters insert at the caret; arrows move the caret ("to read the lines, use the up and down arrow keys", G3, said of the notes area); Enter inserts a paragraph (A2); Esc returns to the box | The text controls of report 02 section 4.2 | Verified for Enter, Esc and arrows (G3, G1); the mouse click into text is corroborated by third parties (T1 "You can now begin typing", T4 "Click and drag to draw the text box, then type to enter text") and not stated word for word on a Google page read |
+
+Clicks in detail:
+
+- Inserting a box: "At the top, click Insert. Choose what you want to add, then click Text box, Image, Shape, or Line" (G2). The toolbar route: "Click the Text box button on the formatting toolbar. Click and drag to draw the text box, then type to enter text" (T4, cheat sheet). BrightCarbon describes a click without a drag: "drop the text box onto your slide by clicking with your cursor. You can now begin typing" (T1). A new text box therefore opens in the caret state at once.
+- Typing into a shape: "You can also type directly into a shape by simply double clicking it and starting to type" (T1, single source). Whether a shape that is merely selected accepts typing without the double click is not stated on a page read (unverified).
+- Selecting the box rather than the text: Slidesgo's text box tutorial says to move a box "Select it first and, when the cursor becomes a four-headed arrow, drag one of its borders to its new placement" and to resize "Select it and then drag one of its handles" (T2, single source). The border is the drag surface while the interior is the caret surface; this is also how a box is dragged while it is being edited (single source, T2).
+- Selection frame: a blue border with square handles at the corners and edge midpoints and a rotation handle above (report 02 section 6, from BrightCarbon and SlideEgg).
+- Word and paragraph selection: Google's Docs shortcut page lists, under "Text selection with mouse", "Select word: Double-click" and "Select paragraph: Triple-click" (G12). The Slides shortcut page has no such rows; the same behaviour in Slides is browser convention and is listed as unverified for Slides.
+- Deleting: "select it, right-click and choose Delete. You can also select it and press the Delete key" (T2); Google's shortcut page lists "Delete: Delete" (G1). Deleting a placeholder instance removes that instance only (report 05 A1, from G2).
+
+### A2 Keys while the caret is in text
+
+| Key | What it does | Status and source |
+| --- | --- | --- |
+| Enter | Ends the paragraph and starts a new one. The file model fixes this: "Inserting a newline character will implicitly create a new `ParagraphMarker` at that index" (G9) and "Paragraphs always end in a newline character, so there's always a newline at the end of the text contents of a shape or table cell" (G8). In a list, Enter adds an item (T3 "Press Enter to create new list items") | Verified in the model (G8, G9); list behaviour single source (T3) |
+| Enter twice in a list | Leaves the list or returns to the parent level: "To go back to the main list, press Enter twice" (G3), "press Enter twice on your keyboard" (G6), "to close it just press Enter twice" (T3) | Verified (G3, G6) |
+| Shift+Enter | Expected to insert a line break inside the paragraph. No Google page read states it, and the API concepts page documents only the newline character as a break | Unverified |
+| Tab in a list | Nests the item one level: "To start a list inside a list, press Tab" (G3); "press Tab on your keyboard. The new list will be indented" (G6). The API counts "leading tabs in front of each paragraph" to derive nesting when bullets are created (G9), which shows tabs are stored as characters until they become nesting | Verified (G3, G6, G9) |
+| Shift+Tab in a list | Expected to lower the level. Not stated on a page read; the documented routes down are "Decrease indent" (Ctrl+[, Cmd+[) and Enter twice | Unverified for the key; the button and shortcut are verified (G1, T3) |
+| Tab outside a list | Expected to insert a tab character. Not stated on a page read | Unverified |
+| Esc | "To return focus to the layout element or container, press Escape" (G3); "Exit the current mode: Esc" (G1). Typed text stays. A second Esc to deselect the box is not stated | Verified for the first Esc (G3, G1); the second Esc unverified |
+| Arrow keys | Move the caret; "use the up and down arrow keys" to read lines in an editable area (G3) | Verified (G3) |
+| Ctrl+A (Cmd+A) | "Select all" (G1). Inside a text box this selects the box's text; whether it selects every object when no caret is placed is not stated | Verified for the row (G1); the no caret case unverified |
+| Ctrl+B, Ctrl+I, Ctrl+U (Cmd+B, Cmd+I, Cmd+U) | Bold, Italic, Underline (G1) | Verified |
+| Alt+Shift+5 (Cmd+Shift+X) | Strikethrough (G1) | Verified |
+| Ctrl+Shift+> and Ctrl+Shift+< (Cmd+Shift+> and <) | Increase and decrease font size (G1) | Verified |
+| Ctrl+Shift+L, E, R, J (Cmd+Shift+L, E, R, J) | Left, center, right align, justify (G1) | Verified |
+| Ctrl+Shift+8 and Ctrl+Shift+7 (Cmd+Shift+8 and 7) | Bulleted list, numbered list (G1) | Verified |
+| Ctrl+] and Ctrl+[ (Cmd+] and Cmd+[) | Increase indent, decrease indent (G1) | Verified |
+| Ctrl+\ or Ctrl+Space (Cmd+\) | Clear formatting (G1); "Select the text with formatting you want to clear. Click Format on the menu bar. Select Clear formatting" (T5) | Verified |
+| Alt+Shift+Up and Down (Option+Shift+Up and Down) | Move paragraph up or down (report 04 B6, from G1) | Verified |
+| Ctrl+' and Ctrl+; (Cmd+' and Cmd+;) | "Move to next misspelling", "Move to previous misspelling" (G1) | Verified |
+| Ctrl+K (Cmd+K) | "Insert or edit link" (G1); Alt+Enter (Option+Enter) "Open link" (G1) | Verified |
+| Ctrl+Shift+V (Cmd+Shift+V) | Paste without formatting (T4 cheat sheet, "Paste without formatting ... Ctrl + Shift + V"; also report 01 Edit menu). Not on Google's Slides shortcut page | Corroborated (T4, report 01 T07 and T08) |
+| Ctrl+Alt+C and Ctrl+Alt+V (Cmd+Option+C and V) | Copy and paste formatting (G1, T4) | Verified |
+| Tab or right arrow with a Smart Compose suggestion showing | Accepts the suggestion: "Press the tab key" or "Press the right-arrow key"; to reject, keep typing (G10) | Verified |
+| Backspace right after an autocorrection | "Pressing the backspace button immediately after any autocorrection, including automated lists, will undo it" (G11, covers Docs, Slides and Drawings) | Verified |
+
+Formatting applied with the caret placed and no range selected applies to the word or to new typing according to browser and editor convention; Google does not document this on a page read (unverified). Formatting a whole box by selecting the box and pressing Ctrl+B is what the file model supports (`UpdateTextStyleRequest` over a range of type `ALL`, G9, and the request "implicitly creates new `TextRun` objects as needed", G8), and the cheat sheet's formatting steps begin with "Select the text you want to format" (T4); the whole box case is not stated on a page read (unverified).
+
+### A3 Keys while the box is selected
+
+| Key | What it does | Status and source |
+| --- | --- | --- |
+| Arrow keys | "Nudge one pixel at a time" (G1); since 2025-08-19 an arrow moves one pixel and Shift plus an arrow moves "by a larger increment" (report 04 G11) | Verified |
+| Tab and Shift+Tab | "Select next shape", "Select previous shape" (G1); for screen reader users Tab "moves through all layout or container elements in the order read by your screen reader and then returns to the start" (G3) | Verified |
+| Enter | Starts editing the selected element: "To edit an element and insert content, press Enter" (G3) | Verified (screen reader guide) |
+| Esc | Deselects ("Exit the current mode") | Verified for the row (G1); whether it clears the selection or only leaves a mode is not stated |
+| Delete, Backspace | Removes the object (G1, T2) | Verified |
+| Ctrl+D (Cmd+D) | Duplicates the object or slide (report 07) | Verified |
+| Ctrl+Up, Ctrl+Down, Ctrl+Shift+Up, Ctrl+Shift+Down | Order: bring forward, send backward, to front, to back (G1) | Verified |
+| Alt+Left and Right, Alt+Shift+Left and Right | Rotate by 15 or 1 degree (G1) | Verified |
+| Ctrl+Alt+Y (Cmd+Option+Y) | Alt text (G1) | Verified |
+
+### A4 Placeholders and prompt text
+
+- Layout placeholders show fixed prompt text: "Click to add title", "Click to add subtitle", "Click to add text"; custom prompt text is not supported (report 03, from two third party pages S53 and S65). Google's layout page defines a layout as "The way your text and images are arranged on a slide" (G13) and does not describe the prompt text.
+- In the file model a placeholder is a shape that inherits from the layout: "Placeholders are page elements that inherit from corresponding placeholders on layouts and masters", and a shape's `text` field is "The text content of the shape" (G14). The prompt text is not part of the text content, which is why an empty placeholder has no text to present or export. That the prompt is hidden in the slideshow, in thumbnails and in downloads, and that it disappears on the first keystroke, follows from the model but is not stated on a page read (unverified as an interaction statement).
+- Deleting a placeholder on a slide removes that instance only (report 05 A1); the layout keeps it.
+- Text placeholders default to "Shrink text on overflow" and new text boxes to "Resize shape to fit text" (A5).
+
+### A5 Autofit and the three fitting modes
+
+Google's help page (G4) is explicit. The three options are "Do not autofit.", "Shrink text on overflow. This is the default for theme text placeholders." and "Resize shape to fit text. This is the default for text boxes." The setting is reached three ways: Format, then Format options, then "Text fitting" in the sidebar; right click a text placeholder or box and choose "Text fitting"; or create a new text box and click "the accompanying autofit icon" that appears next to it. Custom defaults live under Tools, Preferences, "Use custom autofit preferences". The page dates the behaviour: "Autofit for new text placeholders and text boxes changed in January 2021. Text placeholders and text boxes created before that were not affected." BrightCarbon describes the same three options and adds that the Text fitting section also holds indentation (None, First line, Hanging) and four padding values (T1). The autofit icon's glyph and exact position are not described on a page read (unverified).
+
+### A6 Spelling
+
+- Google's Slides page (G5): "At the top, click Tools > Spelling." The spell check card offers "Change", the down arrow then "Change all", "Ignore", the down arrow then "Ignore all". Inline: "If you turn on spelling suggestions, misspelled words will be underlined in red. Right-click the word to accept or reject the suggestions." The toggle is Tools, Spelling, "Underline errors", and it applies to all presentations. The personal dictionary: "Click Personal dictionary. Enter your new word. Click OK."
+- Shortcuts: "Move to next misspelling: Ctrl + '", "Move to previous misspelling: Ctrl + ;" (G1).
+- Grammar: the "Correct your spelling & grammar" page (G15) covers Docs ("misspelled words are underlined in red, and grammar suggestions are underlined in blue") and does not mention Slides. Grammar suggestions in Slides are unverified.
+- The spelling language follows File, Language (report 01 G32).
+
+### A7 Autocorrect, substitutions, automated lists, Smart Compose and Markdown
+
+- Automated lists and autocorrect undo (G11, 2014, covers Docs, Slides and Drawings): typing "*" or "-" as the first character followed by a space starts a bulleted list; "1)" or "a." followed by a space starts a numbered list, "as would other permutations like I., (A), etc."; the feature "will be defaulted on, but users will be able to disable it in Tools -> Preferences"; and "Pressing the backspace button immediately after any autocorrection, including automated lists, will undo it", with the example that "(c)" corrected to the copyright sign reverts on Backspace.
+- Substitutions: Google's "Manage Autocorrect" page (G16) is written for Docs. It places the toggles under Tools, Preferences, Substitutions ("Automatic capitalization", "Spelling corrections", "Link detection"), lets the user "uncheck the box" per substitution or "click Remove", offers "Always correct to" on right click, and undoes a correction by clicking the word and then "Undo". Report 01 records a Slides Preferences dialog with General and Substitutions tabs, autocorrect toggles (automatically detect links, capitalise words), Smart Compose, "Use custom autofit preferences", measurement units and "Show link details" (report 01, sources G17, G10, G29, G33, T01). The Slides dialog contents beyond G4 (autofit) and G10 (Smart Compose) are therefore corroborated through report 01 rather than verified on a Google Slides page read here.
+- Smart Compose (G10): works in Docs, Slides, Sheets and Drawings and "is also available in comments for Google Slides and Drawings"; accept with Tab or the right arrow, reject by continuing to type; the toggle is Tools, Preferences, "Show Smart Compose suggestions"; work and school accounts only; English, Spanish, Portuguese and French. The Workspace update of 2021-08-02 added it to Slides comments (G17).
+- Autocorrect in Slides comments (G18, 2021-07-02): corrected words carry "a grey dashed underline".
+- Markdown (G19): Tools, Preferences, "Enable Markdown"; in Slides it converts italics, bold, strikethrough and links as you type; headings are Docs only.
+
+### A8 Links
+
+- Adding: "Click where you want the link, or highlight the text that you want to link", then Insert, Link or "CTRL + k or ⌘ + k"; "Under 'Text,' enter the text you want to be linked"; "Under 'Link,' enter a URL or email address, or search for a website" (G7). Slidesgo adds the "Slides in this presentation" drop-down for slide targets and "Apply", and notes "The Link option is disabled if you select more than a single element" (T6).
+- Changing and removing: "To remove the link in Google Docs or Slides, click Remove. To update the link, click Change and choose a new link or text" (G7). The chip that carries Change and Remove appears when the linked text is clicked (report 01 G33); its visual form is not described on a page read.
+- Opening: "Open link: Alt + Enter" ("Option + Enter") (G1); in edit mode a click on a link opens the chip, not the destination (report 01).
+- Appearance: "If the resource you use as a link is a text, it could appear underlined and with a different format. Don't worry, you can change it back, and the link won't be removed" (T6).
+- Automatic link detection when a URL is typed is a Preferences toggle ("Link detection" on the Docs page G16; "automatically detect links" in report 01's Slides dialog). Verified for Docs, corroborated for Slides.
+
+### A9 Paste
+
+- Ctrl+V (Cmd+V) pastes with the source formatting; Ctrl+Shift+V (Cmd+Shift+V) pastes without formatting so the text takes the destination box's style (T4 cheat sheet; report 01 Edit menu rows "Paste" and "Paste without formatting"; report 07). Google's "Copy and paste text and images" page (G20) does not cover Slides text and Google's Slides shortcut page does not list the plain paste row, so the plain paste is corroborated rather than verified.
+- Pasting a slide into another deck asks to keep the source styles, match the destination theme, or link (report 01 Edit, Copy row).
+
+### A10 The toolbar tail by selection state
+
+Report 02 section 4.2 gives the text toolbar attested for "a text box or placeholder is selected": Fill color, Border color, Border weight, Border dash, Font, Font size with minus and plus, Bold, Italic, Underline, Text color, Highlight color, Insert link, Add comment, Align (Left, Center, Right, Justify; Top, Middle, Bottom), Line & paragraph spacing, Bulleted list, Numbered list, Decrease indent, Increase indent, Clear formatting, Format options. With nothing selected the tail is Background, Layout, Theme, Transition (report 02 section 4.1). Whether the tail differs between the caret state and the box selected state is not stated on a page read (unverified); the sources describe one text toolbar for both.
+
+### A11 Text in speaker notes
+
+- The pane sits under the canvas and reads "Click to add speaker notes" (T7, report 02 section 7). "Click View > Show Speaker Notes in the menu" toggles it; the divider's three dots drag to resize (T8). The shortcut is "Open speaker notes panel: Ctrl + Alt + Shift + s" ("⌘ + Option + Shift + s") (G1).
+- Notes take the text toolbar: "Change the font style or size, apply color, bold, or italics, or use a numbered or bulleted list" (T8). "Your edits are saved automatically just like any other changes" (T8).
+- For keyboard users the notes area is "an editable text area, normal editing navigation and feedback can be used to read them. For example, to read the lines, use the up and down arrow keys" (G3).
+- In presenter view the notes have "+" and "-" buttons for text size (T7, report 04).
+
+### A12 Word art
+
+"Insert Word Art: Select the slide you want to add word art to. Click Insert on the menu bar and select Word art. Then enter the text and press Enter" (T4 cheat sheet). The entry field is a bar at the top of the canvas and Enter commits (report 01 Insert, Word art; report 05 A9). BrightCarbon suggests it for "quickly resizing large numbers and statistics" (T1). Word art is an object whose letter outlines take the border tools (report 01). A multi line entry key is not documented (report 05, unverified).
+
+### A13 Find and replace
+
+Edit, Find and replace (Ctrl+H, Cmd+Shift+H per report 01 G01); Ctrl+F (Cmd+F) opens the lighter Find bar (G6a). The dialog has Find, "Replace with", "Match case" ("Matches only words with the same capitalization"), Prev, Next, Replace and "Replace all" (G6a; T4 "Enter a word or phrase in the Find field and click Next", "Click Replace or Replace all"). Google's page says the feature works "in a document, spreadsheet, or presentation" and gives no Slides specific scope; whether it searches speaker notes is not stated (unverified). The Tool finder "can activate Find and replace when you type content from the document" (report 01 G01).
+
+### A14 Undo
+
+"Undo: Ctrl + z", "Redo: Ctrl + y, Ctrl + Shift + z" ("⌘ + z", "⌘ + y, ⌘ + Shift + z") (G1); Undo and Redo buttons sit at the start of the toolbar (report 02 section 4.1; report 07). How much typing one Undo removes (a word, a burst, a sentence) is not documented on a page read (unverified).
+
+### A15 The file model behind the keys
+
+The Slides API and Apps Script references fix the document model that the keystrokes above write into (G8, G9, G14, G21):
+
+- Text lives in a shape or table cell as `TextContent` with `textElements[]` and `lists`. A `TextElement` spans a range in Unicode code units and is one of `paragraphMarker` ("A marker representing the beginning of a new paragraph"), `textRun` ("all of the characters in the run have the same TextStyle") or `autoText` ("A spot in the text that is dynamically replaced with content that can change over time", the slide number for example).
+- Paragraphs: "Paragraphs always end in a newline character"; "The start and end index of the text element represents the full span of the paragraph, including the newline character that ends the paragraph"; "A paragraph never overlaps another paragraph"; "There is always an implicit newline character at the end of a shape's or table cell's text that cannot be deleted" (G9); Apps Script: "Since the entire text in a Shape or TableCell must end in a newline, the final newline in the text is not removed" (G21).
+- Runs: "Text runs never cross paragraph boundaries: even if the text ending one paragraph has the same styling as the text starting the next paragraph, the contents are split after the newline character to form separate text runs" (G8). "Links are not settable on newline characters" (G14).
+- Inserting: "Inserting a newline character implicitly creates a new paragraph"; "Text styles for inserted text will be determined automatically, generally preserving the styling of neighboring text" (G9). Deleting: "Deleting text that crosses a paragraph boundary may result in changes to paragraph styles and lists as the two paragraphs are merged" (G9).
+- `TextStyle`: `bold`, `italic`, `underline`, `strikethrough`, `smallCaps`, `fontSize` (points), `fontFamily`, `weightedFontFamily` (weight 100 to 900 in steps of 100), `foregroundColor`, `backgroundColor`, `link`, `baselineOffset` (NONE, SUPERSCRIPT, SUBSCRIPT) (G14).
+- `ParagraphStyle`: `alignment` (START, CENTER, END, JUSTIFIED), `lineSpacing` (percent of normal, default 100), `indentStart`, `indentEnd`, `indentFirstLine`, `spaceAbove`, `spaceBelow`, `direction`, `spacingMode` (G14).
+- Bullets: a `Bullet` on the paragraph marker with `listId`, `nestingLevel`, `glyph` and `bulletStyle`; nesting levels 0 to 8 (G14); "Paragraphs within the same logical list will refer to the same list ID" (G8); bullets are created from presets and "The nesting level of each paragraph will be determined by counting leading tabs in front of each paragraph" (G9); removing bullets keeps the indent ("visually preserved by adding indent to the start of the corresponding paragraph", G9). Styling a range that contains a whole list paragraph also restyles its bullet (G9).
+
+What this means for the parity design: Google's Enter, Shift+Enter, Tab, bullets, italic and per run colour are all writes into this model. A Turboslide document that cannot represent a paragraph break, a list item or an italic run cannot mirror the key, whatever the editor does.
+
+## Part B: Turboslide's text model at commit 8c7056c
+
+### B1 The Text type and the four rules
+
+`packages/schema/src/text.ts` defines `export type Text = string` and the parsed form `export type Run = { t: string; b?: true; gt?: true; link?: string }`. The header comment restates SPEC 4.2: `*text*` is "the display run: weight 500, the deck's `<b>`"; `[text](https://…)` is a link, followed by an external glyph inside `rows.links`; a standalone `GT` "becomes the mark at render" while "the document keeps the letters"; `\*`, `\[` and `\GT` are escapes; and "No line breaks inside a string except in panel.code, where \n is honored. A non-breaking space (U+00A0) is the nowrap device."
+
+The schema enforces the last rule: `textSchema = z.string().refine((value) => !/[\n\r]/.test(value), 'a Text has no line breaks (SPEC 4.2)')`. The GT boundary rule uses `WORD_CHARACTER = /[A-Za-z0-9_\-./]/`, so `GT:` and `(GT)` are standalone while `gt-next`, `GTM` and a URL path are not, and the parser never flags GT inside a link. `parseText` reads the markup into runs, `mergeRuns` joins neighbours with equal flags (gt runs stay separate), `serializeRuns` writes the canonical string (bold runs grouped in one `*…*`), `canonicalText` is parse then serialize (the form the validator stores, SPEC 4.4), and `plainText` strips the markup for the copy rules. Unclosed `*` and `[` are literal characters. There is no run flag for italic, underline, strikethrough, colour, size or font, and no paragraph or line break token.
+
+`panel.code` is a plain `z.string()` (`packages/schema/src/blocks.ts` line 965), not a `Text`, so it is the one place a line break lives.
+
+### B2 Typography
+
+`packages/schema/src/typography.ts`: `TYPE_LADDER = [88, 72, 58, 44, 34, 26, 24, 22, 20, 18, 17, 16, 15]`; `TYPE_WEIGHTS = [300, 400, 500, 600, 700]` with `WEIGHT_CAP = 500` enforced by the `type/weight-cap` lint rather than the schema; `TYPE_ALIGNS = ['left', 'center', 'right']` (no justify); tracking steps from -0.025 to 0.02 em; leading steps from 1.02 to 1.7. `Typography = { size?, weight?, align?, tracking?, leading? }` is optional on heading, paragraph, text and box blocks only (`blocks.ts` lines 102 to 119 and 192 to 196), and a value off the ladder is a `type/ladder` finding. The comment records the export cost: "The PPTX export set holds the 400 and 500 cuts only (export/pptx/fonts-map.ts EXPORT_WEIGHTS): 600 and 700 travel as Medium plus the bold flag, 300 as Regular". Inter is the only face (SPEC 2.1). Colour is block level: `TextBlock` carries `color?: Color` for the whole block (`blocks.ts` line 196); nothing colours a run.
+
+### B3 Where a Text lives
+
+- Blocks: `heading` (`level: 'h1' | 'h2' | 'big' | 'title'`, `text`), `paragraph` (`text`, `role: 'body' | 'lead' | 'cap'`, `tone`, `measure`), `text` (a text box), `credit`, `rows` (`items: { key: Text; value: Text; icon? }[]`, `key` widths 90 to 300, `.min(1)`), `plain` (`items: { text: Text; icon?; no? }[]`, `size: 24 | 22 | 20`, `.min(1)`), `refs` (`items: Text[]`), `say` (`quote`, `note`), `scales` (`left`, `right`), tile and figure captions and labels (`blocks.ts`).
+- Slide fields: a title slide has `heading: Text` and `lead: Text` (`deck.ts` lines 128 to 129, 322 to 323; the lead's inspector control is a textarea but the schema is still `textSchema`), a statement slide has `big: Text` with `measure` (line 132, 329). These are not blocks: the renderer gives them pseudo block attributes `data-block="heading"`, `"lead"` and `"big"` with `data-run="heading/text"`, `"lead/text"` and `"big/text"` (`packages/render/src/slide.ts` lines 158 to 211), and a commit writes `slide.set` at `/heading`, `/lead` or `/big` (`InlineText.tsx` `slideTextPath`, `textCommitMutation`).
+- Notes: `notes?: string` on every slide, "speaker notes; the only place notes live" (`deck.ts` line 51; SPEC 4.2), annotated `control: 'textarea'` (line 277), so notes accept line breaks and are edited in the inspector's Slide section (report 06 row 99). Notes are a plain string, not a Text, and carry no formatting.
+
+### B4 The inline editing session
+
+`packages/viewer/src/InlineText.tsx` is the whole session. On mount it records `element.innerHTML` and `textFromNode(element)`, makes every existing mark span non editable, sets `element.contentEditable = 'true'`, `element.spellcheck = false`, adds `ts-editing`, focuses the element, and places the caret at the end: `range.selectNodeContents(element); range.collapse(false)`. Listeners:
+
+- `keydown`: `Enter` calls `finish(true)` (commit); there is no `shiftKey` check, so Shift+Enter also commits. `Escape` calls `finish(false)`, which sets `element.innerHTML = originalHtml.current` and calls `onCancel`: the edit is discarded. Cmd or Ctrl+B runs `document.execCommand('bold')`. Cmd or Ctrl+K opens the link field. No other key is intercepted, so the browser's own contenteditable defaults apply to Cmd+I and Cmd+U during the session (not measured for this report).
+- `input`: `markGtInEditable(element)` turns every standalone `GT` the caret is not touching into the mark span, then `onInput` lets the Editor re-measure the run's box.
+- `blur`: commits unless focus moved into the run toolbar.
+- `paste`: prevented; the clipboard's `text/plain` is inserted with line breaks turned into spaces: `.replace(/\s*[\n\r]+\s*/g, ' ')`, "a line break is a space (SPEC 4.2: no line breaks in a Text)".
+
+The commit walks the DOM back to runs (`runsFromNode`): text nodes (a non breaking space at either edge becomes a space), `B` and `STRONG` set `b`, `A` with `href` sets `link`, the `gt-word` span is a gt run, `BR`, `SVG` and `USE` are skipped, and any other element is recursed with the same flags, so an `<i>`, `<u>` or styled `<span>` the browser inserted contributes its text and loses its styling. Remaining `\n` or `\r` become spaces; `textFromNode` trims. `textCommitMutation` returns one `block.set` at `/<pointer>` (for example `/items/0/value`) or one `slide.set` on a title or statement field, or `null` when the markup equals the document. The run toolbar (`role="toolbar"`, "Text run") has three buttons, "Weight 500 run (⌘B)", "Link (⌘K)" and "GT mark", plus a URL field ("https://") that applies on Enter or blur and removes the link when emptied. The toolbar sits 32 px above the run or below it at the sheet's top.
+
+`packages/viewer/src/__tests__/inline-text.test.ts` pins the pure part: bold, link and bare GT read back as runs; the round trip through `parseText` and `serializeRuns`; a typed bare GT commits as the letters; GT inside a word or a link stays letters; typed `*` and `[` are escaped; a `BR` is dropped so the words on either side join (`'a * star [and'` plus `BR` plus `'a bracket'` commits as `'a \\* star \\[anda bracket'`); the edge non breaking space becomes a space; `block.set` versus `slide.set`; null when unchanged. No test drives the component's keys or the double click.
+
+### B5 The editor's selection and keys
+
+`packages/viewer/src/Editor.tsx`:
+
+- `onPointerDown`: with an edit open, "a click inside the editable run is the caret's; one outside ends the edit through its blur". Otherwise the innermost `[data-block]` under the pointer is selected (`select({ kind: 'block', blockId })`); a click on empty sheet clears the selection (or arms a marquee on a freeform slide); Shift toggles membership on a freeform slide; a real block arms a body drag ("to reorder on a grammar slide, anywhere on a freeform one; the text of a title or statement slide is a field and has no chip"). A single click never places a caret.
+- `onDoubleClick`: `resolveRun` finds the closest `[data-run]` and `startEdit(run)` opens the session, which selects the run (`{ kind: 'run', ... }`).
+- `onClick`: a click on `<a>` is prevented ("links are text on the stage in edit mode, never navigation").
+- The capture phase key handler is inert while editing, inside fields (`isEditableTarget`) and over the overlay. Tab and Shift+Tab cycle blocks in document order (`cycleSelection`), from nothing selecting the first or last. With a block selected: Escape steps run to block to nothing (`escapeSelection`, `Selection.tsx` line 111); arrows nudge 1 px (8 with Shift) on a freeform slide and cycle the selection on a grammar slide; Alt+Up and Down change order; Cmd ] and [ change order on a freeform slide; Enter opens the block's first run (`firstRunOf`) for editing; Delete and Backspace remove every selected real block in one write ("the text of a title or statement slide is a field, not a block", so Delete does nothing there). Modifier keys other than those fall through.
+- Bare letters with nothing focused are the shell's (`packages/viewer/src/keys.ts`: Space, J, L next; K, H, Backspace previous; G grid; B book; `[` or S sidebar; D theme; P present; F fullscreen; `?` help), and `useShellKeys` adds E for edit mode (report 06 section 2). They stay live while a block is selected because the stage handler only stops the keys it handles.
+
+`docs/spec/SPEC.md` 6.4 describes the intended stage: "Selection is by click on the innermost `[data-block]`; Tab and Shift Tab walk blocks in document order; Escape steps back from text edit to block to nothing", and the gesture table row "Double-click text | `text.replace`, coalesced at 400 ms | `contenteditable` on the run element; the run toolbar has weight 500 and link; a typed standalone `GT` renders as the mark at once". The code matches the double click and the Escape ladder and does not implement `text.replace` (report 06 section 8).
+
+### B6 The inspector's text fields
+
+`packages/chrome/src/inspector/text.tsx`: "A `text` field is one line of markup: it grows with its content, Enter commits and a line break is never inserted (a Text has none, SPEC 4.2). A `textarea` field (notes, panel code, css, html) takes line breaks; Cmd Enter or Ctrl Enter commits." The single line field strips breaks on commit (`draft.replace(/[\r\n]+/g, ' ')`) and its help reads "One line in the four-rule markup (*bold*, [links], GT for the mark); Enter commits, Escape restores." List items are array rows (`Inspector.tsx` lines 486 to 542): each item has a head "<item> n" with a "Remove <item> n" button disabled at the array's `min(1)`, and the array ends with an "Add item" button whose doc reads "Appends a blank item to <list>; fill its fields in the rows above the button." This is the only way a person adds a row to `rows`, `plain` or `refs` besides the source drawer.
+
+### B7 Rendering of runs and lists
+
+`packages/render/src/text.ts` `renderRuns`: a `b` run opens `<b>`, a link becomes `<a href target="_blank" rel="noreferrer">` (wrapped in `.lk` with the external glyph inside link tables), a gt run becomes `GT_WORD_HTML` (an inline svg plus a visually hidden `GT`), everything else is escaped text. `packages/render/src/blocks/lists.ts`: `rows` is a grid with one `<div>` per item holding `<b data-run="…/items/i/key">` and `<span data-run="…/items/i/value">`, hairlines from CSS, icons at 20 px in the key cell; `plain` is `.plain` with one `<span data-run="…/items/i/text">` per item at 24, 22 or 20 px, `.no` striking a row, an icon at the row start; `refs` and `say` follow the same pattern. No bullet glyph, no numbering, no nesting exists in the renderer, matching SPEC 2.1 line 32: "Ruled rows and lists instead of bullets: `.rows` with a key column … `.plain` at 24 px with `.no` strike; semantic color only on Heroicons 20 solid icons in key cells (20 px) and at list row starts (24 px), never inside a sentence".
+
+### B8 Lint rules that read text
+
+`packages/schema/src/rules.json` lists the copy rules `copy/heading-period`, `copy/sentence-case`, `copy/token-first`, `copy/heading-is-name`, `copy/no-em-dash`, `copy/no-exclamation`, `copy/no-eyebrow`, `copy/full-sentence-caption`, `copy/contrast-pair` and `copy/metaphor-candidate`, plus `type/floor-15`, `type/weight-cap`, `type/face`, `type/ladder`, `rows/two-lines` and `export/non-native`. `packages/lint/src/static/copy.ts` reads every Text through `blockTexts` and `slideTexts` (`packages/lint/src/context.ts` lines 231 to 329), so a title slide's heading and lead and a statement's big text are checked like blocks. The template placeholder copy is written so that exactly one rule fires: "Every line is a contrast pair ("X, not Y"), which copy/contrast-pair flags at severity 1 with no fix, so the finding stays until the words are replaced" (`slide-templates.ts` lines 51 to 54). There is no spelling rule and no spell check anywhere in the editor (every field sets `spellCheck={false}`, and the run sets `spellcheck = false`).
+
+### B9 Export cost of a text change
+
+`packages/schema/src/export.ts`: `NATIVE_BLOCK_TYPES = ['heading', 'paragraph', 'credit', 'rows', 'plain', 'refs', 'ladder', 'panel', 'text', 'box', 'shape', 'rule']` are written as native text boxes in Editable text (`native`) mode; every other type is a 2x raster. Perfect (`flatten`, the default) is "one 2x raster per page … placed over the slide's text as invisible runs" (report 06 section 6 item 12), so any text change re-renders and re-measures the page raster; report 06 records 190 to 222 s for 85 slides. `packages/export/src/scene/measure.ts` reads, per `[data-run]`, the computed family, weight, size, letter spacing, line height and colour, and "a per-character caret walk over Range.getClientRects() groups characters into lines and splits the string at the line boundaries, so the PPTX gets one hard break per browser line and no renderer rewraps"; a `line-through` decoration is detected (line 260) and the hidden GT letters become a run at the mark's box. `packages/export/src/pptx/fonts-map.ts`: `EXPORT_WEIGHTS = [400, 500]`, `BOLD_FROM = 600`, and any other weight is reported as "exported as the Medium cut plus bold" or "the Regular cut". The word "italic" occurs in the export packages only in the OpenType header parser (`packages/export/src/ooxml/fonts.ts`), never in the scene or the writer, so an italic run has no export path today. A paragraph break would ride on the existing per line hard breaks (the scene already carries one line per browser line), but paragraph spacing (`spaceBelow`) and list bullets (`buChar`, `buAutoNum`) would be new writer features.
+
+### B10 Undo
+
+`packages/agent/src/window/history.ts` keeps one `HistoryEntry` per write with the reducer's inverse; undo commits the inverse as a forward write. An inline session ends in one commit (`finish` calls `onCommit` once, `endEdit` commits one mutation), so one Cmd Z undoes the whole retype. SPEC 6.7 ("typing coalesces into one `text.replace` per 400 ms pause per block") and the `text.replace` mutation of SPEC 4.2 (lines 585 to 591, "typing, coalesced") are not implemented (report 06 section 8).
+
+### B11 Tests
+
+`inline-text.test.ts` pins the DOM to markup walk and the commit mutation (B4). `editor-keys.test.ts` and `keys.test.ts` pin the key tables. No test asserts that Enter commits, that Escape discards, that a double click opens the editor or that a single click does not.
+
+## Part C: the delta
+
+### C1 Delta table
+
+Gap types: "interaction only" means the editor can change without touching the document, renderer or exporter; "document model" means a schema change with a validator and reducer path; "renderer" means `renderSlide` must draw something new; "export" means the scene or the PPTX writer must carry it. SPEC quotes are from `docs/spec/SPEC.md`; section 4.2 is quoted where it applies and the section is named where the constraint sits elsewhere.
+
+| Google behaviour | Turboslide today | Gap type | Smallest document change that closes it | SPEC constraint touched |
+| --- | --- | --- | --- | --- |
+| A single click inside a text box places the caret (A1) | A single click selects the innermost block; the caret needs a double click or Enter (`Editor.tsx` `onPointerDown`, `onDoubleClick`) | Interaction only | None | 6.4: "Selection is by click on the innermost `[data-block]`" |
+| A click on the border selects the box; the border is the drag surface (A1) | Any click selects; a body drag reorders within a slot on a grammar slide and moves on freeform | Interaction only (and the slot layout model on grammar slides) | None | 6.4: "There are no free x and y, no resize handles on text" (freeform round relaxed this for `freeform` slides only) |
+| The caret lands where the reader clicked (A1) | The caret goes to the end of the run: `range.collapse(false)` (`InlineText.tsx`) | Interaction only | None | none |
+| Double click selects a word, triple click a paragraph (A1, verified for Docs) | Double click opens the editor with the caret at the end | Interaction only | None | 6.4 gesture table: "Double-click text" |
+| Enter on a selected box starts editing (A3) | Enter on a selected block opens its first run (`firstRunOf`) | Parity | None | 6.9: "Enter starts text editing" |
+| Typing with a box selected inserts text (unverified) | Bare letters act as view keys: S, D, E, P, F, G, B, J, K, L, H, ? (`keys.ts`, `useShellKeys`) | Interaction only | None | 6.9 lists the shell keys; the edit mode addition must retire them while a block is selected |
+| Enter inserts a paragraph break (A2, verified in the model) | Enter commits the whole text (`finish(true)`); `textSchema` refuses `\n` | Document model, renderer, export | A paragraph separator inside a `Text`: allow `\n` as a paragraph break in `paragraph`, `text` and `box` texts (the renderer emits one `<span class="para">` or `<br>` per break; the scene already carries one hard break per browser line, and `spaceBelow` is optional). Alternative: `text: Text[]` on those blocks, which changes every pointer | 4.2 line 316: "No line breaks inside a string except in panel.code, where \n is honored." |
+| Shift+Enter inserts a line break (unverified) | Shift+Enter commits (no `shiftKey` check) | Document model, renderer | A soft break token in a `Text` (for example `\v` as in the browser's own line break convention, or a fifth rule), distinct from the paragraph break above | 4.2 line 316 (same quote) and "Four rules, nothing else" |
+| Enter at the end of a list item adds an item; Enter twice leaves the list (A2) | A new row is the inspector's "Add item" or the source drawer; the stage has no gesture (`Inspector.tsx` line 531) | Interaction first, then document model | None for the gesture: Enter at the end of a `rows`, `plain` or `refs` item writes `block.set /items` with a new blank item and opens it; Backspace on an empty item removes it | 4.2 rows and plain types (`items: RowItem[]`, `items: PlainItem[]`) |
+| Tab nests an item; Decrease indent or Enter twice lowers it (A2) | Tab cycles blocks; lists have one level | Document model, renderer, export | `level?: 1 | 2` on `PlainItem` and `RowItem` (renderer indents the row; the PPTX writer sets the paragraph indent) | 2.1 line 32: "Ruled rows and lists instead of bullets" |
+| Bulleted and numbered lists, Ctrl+Shift+8 and 7, nine levels (A2, A15) | No bullets by grammar; `plain` is a ruled list | Document model, renderer, export | `marker?: 'rule' | 'bullet' | 'number'` on `plain` (default `rule` keeps every existing deck); the renderer draws the glyph or number; the writer emits `buChar` or `buAutoNum` | 2.1 line 32 (same quote) |
+| Italic, Ctrl+I (A2) | No italic run; a browser `<i>` inserted during the session is dropped at commit (`runsFromNode` recurses unknown elements) | Document model, renderer, export | A fifth rule `_text_` and `Run.i`; `<i>` in `renderRuns`; an Inter italic instance in the export set (`EXPORT_WEIGHTS` holds Regular and Medium only) | 4.2: "Four rules, nothing else"; 4.2 line 305: "Text is a string in a four-rule inline markup" |
+| Underline, Ctrl+U; strikethrough (A2) | None inside a run; `plain` items have `no` (strike the whole row) | Document model, renderer, export | `Run.u` and `Run.s` with two more rules, or none: the grammar reserves strike for `.no` | 4.2 "Four rules, nothing else"; 2.1 line 32 "`.plain` at 24 px with `.no` strike" |
+| Text color and highlight color per selection (A10) | `color` on a `text` block only; semantic colour is for icons | Document model, renderer, export | None by grammar; the nearest is block level `color` on `paragraph` and `heading` | 2.1 line 32: "semantic color only on Heroicons 20 solid icons … never inside a sentence" |
+| Font size steps Ctrl+Shift+> and < (A2) | `typography.size` stepper in the inspector, on the ladder; no key | Interaction only | None: bind the keys to the next and previous ladder step | 2.1 line 31: "Display weight is capped at 500 and text under 15 px on the sheet is a defect"; `TYPE_LADDER` |
+| Alignment Ctrl+Shift+L, E, R, J (A2) | `typography.align` left, center, right in the inspector; no key; no justify | Interaction only (document model for justify) | None for the three; `'justify'` in `TYPE_ALIGNS` if wanted | `typography.ts` `TYPE_ALIGNS` (not in SPEC 4.2; added 2026-09-11) |
+| Bold Ctrl+B on a selection (A2) | Cmd or Ctrl+B writes the weight 500 run as `*x*`; the button reads "Weight 500 run" | Parity in behaviour; label differs | None; label it Bold | 4.2: "`*text*` the display run: weight 500, the deck's `<b>`" |
+| Ctrl+B with the box selected formats the whole box (unverified in UI, supported by the model) | Nothing: Cmd+B is unbound with a block selected | Interaction only | None: bind Cmd+B on a selected heading, paragraph or text block to `typography.weight` 500, or wrap the whole text in `*…*` | 4.2 `*text*` rule; `WEIGHT_CAP` |
+| Esc leaves editing and keeps the text; the box stays selected (A2) | Escape restores the original text and discards the edit, then selects the block (`finish(false)`, `escapeSelection`) | Interaction only | None: Escape must commit, and a separate Undo restores | 6.4: "Escape steps back from text edit to block to nothing" (the SPEC does not say Escape discards) |
+| Arrows move the caret in text and nudge the object when selected (A2, A3) | In text the browser moves the caret; with a block selected, grammar slides cycle the selection and freeform slides nudge 1 px, 8 px with Shift | Interaction only | None | 6.4 gesture table; docs/freeform.md |
+| Ctrl+A inside a box selects its text (A2) | The browser's default selects the editable run's contents; a `rows` block is many runs, so one Ctrl+A covers one cell | Document model (a block's text is several Texts) | None | 4.2 rows type: `items: { key: Text; value: Text }` |
+| Placeholder prompt text is fixed, not part of the content, hidden when presenting and exporting (A4) | Templates insert real copy "Placeholder heading, not final copy" that renders everywhere and fires `copy/contrast-pair` (`slide-templates.ts`) | Document model, renderer, export | A `placeholder?: true` flag (or an empty `Text`) on the block and slide fields; the renderer draws the prompt in the editor and thumbnails only, and `renderSlide` for present, embed and export draws nothing; the lint reads it as empty | 4.4: "`Text` parsed and re-serialized so escapes are canonical" (an empty Text is canonical today; a prompt needs a renderer mode) |
+| Autofit: Do not autofit, Shrink text on overflow, Resize shape to fit text (A5) | Grammar layouts flow; freeform `pos` is a fixed box; overflow is a `sheet/overflow` finding | Document model, renderer, export | `fit?: 'none' | 'shrink' | 'grow'` on a freeform block's `pos` (grow is the default for a new `text` block, shrink for template placeholders) | 4.2 pos on freeform (docs/freeform.md); 6.4: "no resize handles on text" (relaxed on freeform) |
+| Spelling: red underline, right click suggestions, Tools, Spelling (A6) | `element.spellcheck = false` on the run; no spelling surface | Interaction only | None: leave the browser's `spellcheck` on during the session | none |
+| Autocorrect, substitutions, automated lists, Backspace undoes the correction (A7) | None; the one at-once transform is GT to the mark (`markGtInEditable`) | Interaction only | None | 4.2 GT rule; 6.4 "a typed standalone `GT` renders as the mark at once" |
+| Markdown as you type (A7) | The markup is typed literally: a typed `*bold*` is escaped to `\*bold\*` at commit (`plainRuns` escapes `*` and `[`) | Interaction only | None: an optional Markdown mode that reads `*x*` as the run instead of escaping it | 4.2 line 305: "an agent can type it" |
+| Smart Compose (A7) | None | Out of scope | None | none |
+| Link detection when a URL is typed; chip with Change and Remove; Alt+Enter opens (A8) | Cmd+K opens a URL field; an empty URL removes the link; links are inert on the stage | Interaction only | None | 4.2: "`[text](https://…)` a link" |
+| Paste with and without formatting (A9) | Paste is always plain; line breaks become spaces | Interaction only (document model for breaks) | None; with the paragraph break above, pasted breaks can stay | 4.2 line 316 |
+| Text toolbar with font, size, styles, colour, lists, alignment, spacing (A10) | A three button run toolbar; typography lives in the inspector | Interaction only | None | 6.4 gesture table: "the run toolbar has weight 500 and link" |
+| Speaker notes pane under the canvas with the text toolbar (A11) | `slide.notes` as a plain string in the inspector's Slide section; Cmd Enter commits | Interaction only for plain notes; document model for formatted notes | None for plain notes; `notes: Text` with paragraph breaks for formatting | 4.2: "`notes?: string; // speaker notes; the only place notes live`" |
+| Word art: a text bar at the top of the canvas, Enter commits (A12) | None; the display text is a `heading` at `big` or `h1`, or a statement slide | Document model (out of grammar) | None: map Insert, Word art to a `heading` block at level `big` | 2.1 (the type ladder) |
+| Find and replace across the presentation (A13) | The sidebar filter finds slides by text; nothing replaces (report 06 row 51) | Interaction only | None: an action `text.replaceAll` over every Text through `blockTexts` and `slideTexts` | 4.2 mutations: `block.set`, `slide.set` |
+| Undo removes a burst of typing (granularity unverified) | One history entry per commit; one commit per session | Interaction only | None: implement the planned `text.replace` coalescing | 4.2 lines 585 to 591: "`op: 'text.replace'` … `// typing, coalesced`" |
+| Insert, Text box: click and drag on the canvas (A1) | The Insert menu inserts a `text` block "Text." (480 by 64 on freeform) into the slot or at the content origin (report 06 row 27) | Interaction only | None | 4.2 `text` block (freeform round) |
+| Delete removes a selected text box (A3) | Delete removes real blocks; the title and statement texts are slide fields and cannot be removed | Document model | None, or make the title and statement texts blocks in a `main` slot | 4.2: "`TitleSlide = SlideBase & { kind: 'title'; mark: …; heading: Text; lead: Text }`", "`StatementSlide … big: Text`" |
+| Line and paragraph spacing menu (A10) | `typography.leading` steps in the inspector | Interaction only | None | `TYPE_LEADING` (typography.ts) |
+| Font menu (A10) | Inter only | Document model (theme) | None by grammar | 2.1 line 31: "Inter is the only face" |
+
+### C2 The sales task traced
+
+The task: open a cloned deck, click the cover title, retype the customer name, add a second bullet on the agenda slide, fix a typo the spell checker underlines.
+
+Google Slides, as the sources above describe it:
+
+1. Open the deck from the Slides home page (Recent) or a Drive link. The editor opens on slide 1 in the "nothing selected" state.
+2. Click inside the cover title. The caret is placed where the click landed and the text toolbar appears (A1, A10). Triple click selects the whole title (A1, browser convention verified for Docs), or Ctrl+A selects the box's text (A2). Type the customer name; the placeholder styling of the layout is kept, the prompt text (if the title was empty) is gone at the first keystroke (A4, inferred from the model). The change is saved automatically ("Your edits are saved automatically", T8).
+3. Press Esc once. The text stays and the box is selected (A2). Press Esc again or click the filmstrip to go on.
+4. Click the agenda slide in the filmstrip. Click at the end of the last bullet. Press Enter: a new bullet appears at the same level (A2). Type the item. To make it a sub item press Tab; to leave the list press Enter twice (A2).
+5. A misspelt word shows a red underline (A6). Right click it and pick the suggestion, or press Ctrl+' to jump to it and use Tools, Spelling, Change (A6). Ctrl+Z undoes any of the above (A14).
+
+Keystrokes and clicks beyond the typing itself: about 8, none of them modal.
+
+Turboslide at `8c7056c`, as the code above behaves:
+
+1. The root address redirects to the most recently updated deck on the shared store, not necessarily the cloned deck (report 06 section 5); the seller opens `/edit/:id` from `/decks` instead. The editor opens in edit mode on the slide in the URL hash.
+2. The cover is a `title` slide. A single click on the heading selects the pseudo block `heading` (ring and chip "heading · heading", report 06 row 70). Typing now does not enter text: S hides the sidebar, D flips the theme, E leaves edit mode, P presents (B5). A double click on the heading (or Enter with it selected) opens the session with the caret at the end of the text; no word is selected (B4). Cmd+A inside the run selects the run's contents; typing replaces them. `markGtInEditable` turns a typed standalone GT into the mark as the customer name is typed (B4).
+3. To finish, press Enter or click elsewhere: one `slide.set /heading` is written (B4). If the seller presses Escape instead, the original name comes back and the retype is lost (B4). The status chip reads `Saved · rNN` (report 06).
+4. Go to the agenda slide (sidebar row, or J). The agenda is a `plain` or `rows` block. A double click on the last item opens that item's run; Enter commits and does not add an item; Shift+Enter commits too (B4). To add the item the seller opens the inspector's Text section, finds the items array and presses "Add item", which appends a blank item ("fill its fields in the rows above the button"), then types into the new one line field and presses Enter (B6). Line breaks pasted into the field become spaces. Alternatively Cmd / opens the source drawer and the seller edits JSON (report 06 row 134).
+5. No word is underlined: the run has `spellcheck = false` and no rule checks spelling (B8). The copy lint may show a `copy/sentence-case` or `copy/contrast-pair` mark, which is not the typo. The seller finds the typo by eye, double clicks the run, moves the caret with the arrows to the word, retypes it and presses Enter. Cmd Z removes the whole last commit, which is the whole retype of that run (B10).
+
+Keystrokes and clicks beyond the typing itself: about 14, two of them in a side panel, with one trap (Escape discards) and one hazard (bare letters act while a block is selected).
+
+### C3 The order to close the gaps
+
+The delta table sorts itself by cost. Interaction only rows need no schema, validator, renderer, CLI, MCP or export change and can ship together: single click places the caret, the caret lands at the click point, double click selects a word, Escape commits, bare letters retire while a block is selected, Enter at the end of a list item appends an item through `block.set /items`, spell check stays on, Cmd+B on a selected block writes `typography.weight`, the size and alignment keys bind to the ladder and `TYPE_ALIGNS`, the notes textarea moves under the canvas, and `text.replace` coalescing gives typing a fine undo. The document model rows need a SPEC 4.2 amendment before any code: a paragraph break inside a Text (the one rule that unblocks the most frequent edit), then a list `marker` and `level`, then a placeholder state, then autofit on freeform boxes. Italic, underline and per run colour are grammar questions for Kevin, since the grammar forbids them today and the export set has no italic cut; the table records their cost without recommending them.
+
+## Unverified
+
+Claims that no public page read for this report states. They are not asserted as fact in Part A.
+
+1. Shift+Enter inserts a line break inside a paragraph in Google Slides. The API concepts page documents only the newline character as a paragraph end and names no soft break character.
+2. A second Esc after leaving text editing deselects the box (Google states only that Escape returns focus to the container and that Esc exits the current mode).
+3. Typing while a shape or text box is selected, with no caret placed, starts text inside it (BrightCarbon documents double clicking a shape to type).
+4. Shift+Tab lowers a list item's level (Google documents Tab to nest, Enter twice to return, and Decrease indent with Ctrl+[).
+5. Tab outside a list inserts a tab character.
+6. Placeholder prompt text is hidden in the slideshow, in filmstrip thumbnails and in downloads, and disappears on the first keystroke (consistent with the file model, in which the prompt is not part of the shape's text content, but not stated on a page read). The prompt strings themselves come from third party pages via report 03.
+7. Ctrl+B with the whole box selected formats all of its text (the file model supports a style over `Range.Type.ALL`; no help page read states the UI behaviour).
+8. Ctrl+A with no caret selects every object on the slide.
+9. The autofit icon's glyph and exact position next to a new text box.
+10. Grammar suggestions (blue underline) exist in Slides; the spelling and grammar page read covers Docs only.
+11. The full contents of the Slides Preferences dialog (General and Substitutions tabs, "Automatically detect links", "Show link details"); the Google page read for autocorrect (12018052) is written for Docs, and report 01's Slides dialog rests on a third party walkthrough plus Google pages for the autofit and Smart Compose toggles.
+12. The appearance of the link chip in Slides (Change and Remove are verified; the chip's layout is not).
+13. Whether Find and replace searches speaker notes.
+14. The undo granularity for typing in Google Slides.
+15. Whether the toolbar tail differs between the caret state and the box selected state.
+16. A multi line entry key for Word art.
+17. Double click selecting a word and triple click a paragraph in Slides (verified on the Docs shortcut page, browser convention in Slides).
+18. Paste without formatting on Ctrl+Shift+V in Slides (CustomGuide and report 01's third parties state it; Google's Slides shortcut page does not list it).
+19. In Turboslide, what the browser does with Cmd+I or Cmd+U inside the editable run during a session (the walk drops any resulting `<i>` or `<u>` at commit; the transient rendering was not measured).
+
+## Sources
+
+All read on 2026-09-11 without signing in. Google pages first.
+
+| Key | Source | URL |
+| --- | --- | --- |
+| G1 | Google Docs Editors Help, Keyboard shortcuts for Google Slides | https://support.google.com/docs/answer/1696717 |
+| G2 | Google Docs Editors Help, Insert and arrange text, shapes, diagrams, and lines | https://support.google.com/docs/answer/1696521 |
+| G3 | Google Docs Editors Help, Use a screen reader with Google Slides (text navigation, Enter, Escape, Tab, notes) | https://support.google.com/docs/answer/1634140 |
+| G4 | Google Docs Editors Help, Change how text fits in placeholders & text boxes | https://support.google.com/docs/answer/10364036 |
+| G5 | Google Docs Editors Help, Check your spelling in Google Slides | https://support.google.com/docs/answer/9764808 |
+| G6 | Google Docs Editors Help, Add a numbered list, bulleted list, or checklist | https://support.google.com/docs/answer/3300615 |
+| G6a | Google Docs Editors Help, Search and use find and replace | https://support.google.com/docs/answer/62754 |
+| G7 | Google Docs Editors Help, Work with links & bookmarks | https://support.google.com/docs/answer/45893 |
+| G8 | Google Slides API, Text structure and styling (concepts) | https://developers.google.com/workspace/slides/api/concepts/text |
+| G9 | Google Slides API, Requests reference (InsertTextRequest, DeleteTextRequest, CreateParagraphBulletsRequest, DeleteParagraphBulletsRequest, UpdateTextStyleRequest) | https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations/request |
+| G10 | Google Docs Editors Help, Use Smart Compose and Smart Reply | https://support.google.com/docs/answer/9643962 |
+| G11 | Google Workspace Updates, Automated lists, backspace to undo autocorrections in Google Docs, Slides, and Drawings (2014-09-16) | https://workspaceupdates.googleblog.com/2014/09/automated-lists-backspace-to-undo.html |
+| G12 | Google Docs Editors Help, Keyboard shortcuts for Google Docs (text selection with mouse) | https://support.google.com/docs/answer/179738 |
+| G13 | Google Docs Editors Help, Change the theme, background, or layout in Google Slides | https://support.google.com/docs/answer/1705254 |
+| G14 | Google Slides API, Pages text reference (TextContent, TextElement, TextStyle, ParagraphStyle, Bullet) and Shapes reference (Shape, Placeholder) | https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations.pages/text and https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations.pages/shapes |
+| G15 | Google Docs Editors Help, Correct your spelling & grammar in Google Docs | https://support.google.com/docs/answer/57859 |
+| G16 | Google Docs Editors Help, Manage Autocorrect in Google Docs | https://support.google.com/docs/answer/12018052 |
+| G17 | Google Workspace Updates, Smart Compose now available in comments for Google Slides, Sheets, and Drawings (2021-08-02) | https://workspaceupdates.googleblog.com/2021/08/smart-compose-now-available-in-comments.html |
+| G18 | Google Workspace Updates, weekly recap with spelling autocorrect in comments in Sheets, Slides, and Drawings (2021-07-02) | https://workspaceupdates.googleblog.com/2021/07/google-workspace-updates-weekly-recap.html |
+| G19 | Google Docs Editors Help, Use Markdown in Google Docs, Slides, & Drawings | https://support.google.com/docs/answer/12014036 |
+| G20 | Google Docs Editors Help, Copy and paste text and images | https://support.google.com/docs/answer/161768 |
+| G21 | Google Apps Script reference, Class TextRange | https://developers.google.com/apps-script/reference/slides/text-range |
+| G22 | Google Docs Editors Help, Change the color of text, objects, and backgrounds | https://support.google.com/docs/answer/13267978 |
+| G23 | Google Docs Editors Help, topic pages Google Slides, Edit & customize slides, Shortcuts & tools (used to locate G6, G4, G5, G10, G19) | https://support.google.com/docs/topic/9052835, https://support.google.com/docs/topic/9052528, https://support.google.com/docs/topic/9055214 |
+| G24 | Google Workspace Learning Center, Google Slides cheat sheet and Google Slides training and help (no text detail) | https://support.google.com/a/users/answer/9300133 and https://support.google.com/a/users/answer/9282488 |
+| G25 | Google Workspace Updates, label and site searches for Google Slides posts on Smart Compose, autocorrect, autofit, placeholders and link chips (the autofit search returned no results; the placeholder search returned the 2021 image placeholder post) | https://workspaceupdates.googleblog.com/search/label/Google%20Slides and https://workspaceupdates.googleblog.com/2021/07/image-placeholders-make-it-easy-to-work.html |
+| T1 | BrightCarbon, Google Slides: the ultimate guide | https://www.brightcarbon.com/blog/google-slides-ultimate-guide/ |
+| T2 | Slidesgo School, How to add, copy and delete text boxes in Google Slides | https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-copy-and-delete-text-boxes-in-google-slides |
+| T3 | Slidesgo School, How to add a bulleted or numbered list in Google Slides | https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-a-bulleted-or-numbered-list-in-google-slides |
+| T4 | CustomGuide, Google Slides quick reference guide (PDF, 2024) | https://www.customguide.com/cheat-sheet/google-slides-quick-reference.pdf |
+| T5 | CustomGuide, How to clear formatting in Google Slides | https://www.customguide.com/course/google-slides/how-to-clear-formatting-in-google-slides |
+| T6 | Slidesgo School, How to add hyperlinks in Google Slides | https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-hyperlinks-in-google-slides |
+| T7 | Slidesgo School, How to add and work with speaker notes in Google Slides | https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-and-work-with-speaker-notes-in-google-slides |
+| T8 | How-To Geek, How to use speaker notes in Google Slides | https://www.howtogeek.com/748657/how-to-use-speaker-notes-in-google-slides/ |
+| T9 | GCFGlobal, Google Slides Text Basics: the canonical URL redirected to learnfree.org, which returned 404; the iiab.live mirror did not resolve. Not read | https://edu.gcfglobal.org/en/googleslides/text-basics/1/ |
+| T10 | Google Docs Editors Community thread on paste without formatting: the page returned only its shell. Not read | https://support.google.com/docs/thread/95597915 |
+
+Sibling reports read in full: `docs/gslides-parity/research/01-menu-bar.md` (Edit, Format, Tools menus, Preferences dialog, link popover, Word art), `02-editor-surface.md` (sections 4.1, 4.2, 6, 7), `03-home-themes-layouts-io.md` (placeholders and prompt text), `04-present-and-shortcuts.md` (Part B, G11 nudge change), `05-objects-and-format-options.md` (A1, A9, B7), `06-turboslide-inventory.md` (rows 27, 70, 88, 89, 99, 102, 111, 112, 134; sections 2.4, 6, 7, 8), `07-sales-users.md` (top tasks and shortcuts).
+
+Repository files read at `8c7056c`: `packages/schema/src/text.ts`, `typography.ts`, `blocks.ts` (lines 95 to 225, 438 to 456, 540 to 660, 965), `deck.ts` (lines 37 to 132, 270 to 330), `rules.json`, `export.ts` (lines 1 to 66, 230 to 340); `packages/viewer/src/InlineText.tsx`, `Editor.tsx` (lines 1 to 60, 210 to 250, 300 to 320, 476 to 495, 605 to 720, 740 to 880, 940 to 1020), `Selection.tsx` (lines 56 to 121), `keys.ts`, `__tests__/inline-text.test.ts`, the test folder listing; `packages/render/src/text.ts`, `blocks/lists.ts`, `slide.ts` (lines 158 to 211), `thumb.ts` (head); `packages/lint/src/text.ts`, `context.ts` (lines 231 to 329), `static/copy.ts` (head); `packages/export/src/scene/measure.ts` (lines 1 to 80, 150 to 300, 405 to 490), `pptx/fonts-map.ts` (lines 130 to 190), `ooxml/fonts.ts` (grep); `packages/chrome/src/inspector/text.tsx` (head), `inspector/generate.ts` (grep), `Inspector.tsx` (lines 470 to 545), `slide-templates.ts` (lines 40 to 72); `packages/agent/src/window/history.ts` (lines 1 to 70); `docs/spec/SPEC.md` (lines 21 to 41, 214 to 330, 575 to 600, 891 to 935, 1040 to 1083); `docs/EDITOR-DEPTH-STATUS.md` (grep).

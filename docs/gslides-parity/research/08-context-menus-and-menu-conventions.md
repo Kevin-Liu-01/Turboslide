@@ -1,0 +1,556 @@
+# Google Slides right-click menus and menu, dialog and snackbar conventions
+
+Report 08 of the Google Slides parity round for Turboslide. Written 2026-09-11. It closes the gap that reports 01, 02, 05 and 07 each flag: the right-click menus were reconstructed from a 2017 walkthrough, yet report 07 makes right-click the sales user's main route for duplicate, skip, delete and replace image. Part A enumerates the context menu for each target with a grade per row. Part B records the menu, dialog, snackbar and tooltip conventions the editor follows so the team can mimic behaviour and not only labels. Part C compares both with Turboslide at commit 8c7056c and maps each Google item to an action in `packages/schema/src/actions.ts` or to none.
+
+## How to read this report
+
+- Every source was read on 2026-09-11 from a public page without signing in to any account. The editor itself was not opened. Pages were read through a fetch tool that returns the page text, so a label is reported exactly as that text printed it.
+- Grades: Verified means a Google page (support.google.com, workspaceupdates.googleblog.com) states the item or behaviour. Corroborated means two or more independent third-party pages state it. Single source means one third-party page states it. Unverified means the row is expected from product knowledge or from a related menu and no page read here confirms it. Unverified rows are kept so the team sees the whole expected menu, and every one of them is repeated in the list at the end.
+- Google publishes no ordered list of any context menu. Where a table gives an order, the order comes from the one itemised public source (Alice Keeler's 2017 filmstrip list) or from the order a lesson happens to print; each table says which. Treat order as a hint.
+- Capitalisation differs between Google's own pages: the organize slides page prints "Skip Slide", the screen reader guide prints "Skip slide". Rows print the label as the cited page did and note the variant.
+- The web search budget for the session was exhausted before this report started, so every page was fetched by URL, and the Material 3 pages at m3.material.io (and the Material 2 pages at m2.material.io) returned an empty shell; the browser pane refused the domain. The Material component READMEs on GitHub and the WAI-ARIA Authoring Practices patterns stand in for them and are graded as conventions, not as Google Slides facts.
+- Sibling reports are cited as R01 to R07. Their tables are not repeated; where a row here depends on a fact they established, the row points to the report and section.
+- Google Slides is named as the reference product. No Google icon, artwork or trademarked asset is reproduced; Turboslide draws its glyphs from Heroicons 20 solid.
+
+## Part A: context menus by target
+
+Columns: Item (label as printed), Shortcut shown (the key Google's shortcut page assigns; whether the menu prints it beside the item is graded separately in row A1.15), Opens or does, Disabled when, Source and grade.
+
+### A1 Filmstrip thumbnail, one slide selected
+
+Order: rows 3 and 5 to 14 follow the only itemised public list (T01, November 2017). Rows 1, 2, 4 and 6 are confirmed as commands by 2023 to 2025 sources whose screenshots are described but not transcribed, so their position is unverified; they are placed where a reader of those sources would expect them.
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Cut | Ctrl+X (Cmd+X) | Removes the slide to the clipboard | Never | Unverified as a menu item; the key works in the filmstrip (G12 Verified, G16 Verified) |
+| 2 | Copy | Ctrl+C (Cmd+C) | Copies the slide | Never | Unverified as a menu item; the key works in the filmstrip (G12, G16 Verified) |
+| 3 | Paste | Ctrl+V (Cmd+V) | Inserts the clipboard slides after the selected slide; between decks the paste prompt of A25 follows | Clipboard holds no slides (expected) | Single source as a menu item (T01); the insertion point is Verified (G06: click the slide where you want them, then Paste) |
+| 4 | New slide | Ctrl+M (Cmd+M) | Inserts a slide after this one with the same layout | Never | Corroborated as a menu item (T04, T24); the key and the same-layout default are Verified (G21, G22, R04 section B) |
+| 5 | Duplicate slide | Ctrl+D (Cmd+D) | Inserts a copy after the slide | Never | Verified (G01, G21, G22; G16 for the key); T01 printed "Duplicate Slide" in 2017 |
+| 6 | Delete | Delete or Backspace | Removes the slide with no confirmation; undo restores | Never | Verified label "Delete" (G21, G22); T04 and T24 print "Delete"; T24 and R07 say no confirmation |
+| 7 | Skip slide | none | Toggles the skip flag; the thumbnail is greyed with a crossed-out eye; skipped slides do not play but remain visible to anyone the file is shared with | Never | Verified (G01 prints "Skip Slide", G12 prints "Skip slide"); appearance Corroborated (T01, T24) |
+| 8 | Change background | none | Opens the Background dialog (Color, Image Choose, Reset to theme, Add to theme, Done) | Never | Single source as a right-click item (T01); the dialog is Verified from the Slide menu (G10, R03 section on the Background dialog) |
+| 9 | Apply layout | none | Submenu of the theme's layouts; the current one is marked | Never; T01 notes it stays available while an object on the canvas is selected, unlike the toolbar Layout button | Corroborated (T01, T04, T05); the layout list is Verified (G10, R03) |
+| 10 | Change theme | none | Opens the Themes panel on the right | Never | Single source (T01) |
+| 11 | Transition | none | Opens the Motion panel on the right | Never | Corroborated (T27 prints "Transition", T01 printed "Change Transition" in 2017) |
+| 12 | Move slide to beginning, Move slide up, Move slide down, Move slide to end | Ctrl+Shift+Up, Ctrl+Up, Ctrl+Down, Ctrl+Shift+Down (Cmd on Mac) | Reorders the slide | Expected disabled at the first or last position; not confirmed | Single source for the items (T01 prints "Move Slide to Beginning" and companions); the keys are Verified (G16); W01 moved the four into a Move submenu of the Slide menu in 2018, and whether the context menu nests them is Unverified |
+| 13 | Comment | Ctrl+Alt+M (Cmd+Option+M) | Opens a comment card anchored to the whole slide | Never | Corroborated (T01, T04); the key is Verified (G16) |
+| 14 | Save to Keep notepad | none | Sends the slide to a Google Keep note in the side panel | Never | Single source (T01, 2017); current presence Unverified, the Keep help page for Docs editors could not be fetched |
+| 15 | Shortcuts printed beside items | as above | The menu prints the key to the right of Paste, Duplicate slide and Comment | not applicable | Single source (T01 recorded Ctrl+V, Ctrl+D and Ctrl+Alt+M beside the items) |
+
+Cut, Copy and Paste from this menu: Cut and Copy act on the selected slide or slides; Paste inserts them after the selected thumbnail (G06). Pasting into another presentation shows the prompt in A25.
+
+### A2 Filmstrip, several slides selected
+
+Selection: Shift-click for a range (G01), Ctrl-click for several (G22 via R02 section 5), Shift with the arrow keys (G16).
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Duplicate slide | Ctrl+D | Duplicates every selected slide | Never | Verified (G01: select several with Shift, then right-click and Duplicate slide) |
+| 2 | Delete | Delete or Backspace | Removes every selected slide | Never | Verified for the key on several slides (G01); the menu item on several is Unverified |
+| 3 | Skip slide | none | Skips every selected slide | Never | Verified (G01: right-click "the slide or slides") |
+| 4 | Apply layout | none | Applies one layout to every selected slide | Never | Unverified for several slides; expected |
+| 5 | Change background | none | Background dialog; Done applies to the selected slides | Never | Unverified for several slides; G10 states Done applies to one slide |
+| 6 | Cut, Copy, Paste, New slide, Comment, Transition, Change theme, Move items | as A1 | As A1 on the selection | As A1 | Unverified for several slides; expected |
+
+Cut, Copy and Paste: Cut and Copy take every selected slide; Paste inserts after the last selected thumbnail (expected, Unverified).
+
+### A3 Filmstrip, a skipped slide
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Skip slide (Google) or Unskip slide (BrightCarbon) | none | Clears the skip flag | Never | Verified that the same item is clicked again (G01: "click Skip Slide again"); T04 prints "Unskip slide", so the label may toggle; the current label is Unverified |
+| 2 | Every other item | as A1 | As A1 | As A1 | Unverified; expected identical |
+
+### A4 Grid view tile
+
+Grid view opens from the two buttons at the bottom left (G01), from View > Grid view (T33) or, per one source, Ctrl+Alt+1 (T42; not on Google's list, see R02 section 13). Drag reorders; double-click returns to filmstrip view (T33).
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | A right-click menu exists on a tile | none | Offers slide commands including move and delete | not applicable | Single source (T42 describes right-clicking a tile to move it and to remove it without printing labels); T33 prints no menu |
+| 2 | Items and order | as A1 | Expected identical to A1 | As A1 | Unverified |
+
+Cut, Copy and Paste: expected identical to A1 (Unverified).
+
+### A5 Empty canvas (a click on the slide background)
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Cut, Copy | Ctrl+X, Ctrl+C | Act on the slide | Nothing selected: Cut and Copy greyed (expected) | Unverified |
+| 2 | Paste | Ctrl+V | Pastes clipboard objects onto the slide, or slides after it | Empty clipboard (expected) | Unverified as a menu item; the key is Verified (G16) |
+| 3 | New slide, Duplicate slide, Delete slide, Skip slide | as A1 | As A1 for the current slide | As A1 | Unverified on the canvas; expected because Alice Keeler contrasts the filmstrip menu with clicking the visible background (T01) |
+| 4 | Change background | none | Background dialog | Never | Unverified on the canvas; T01 implies the canvas route exists |
+| 5 | Apply layout, Change theme, Transition | none | As A1 | Never | Unverified on the canvas; expected |
+| 6 | Comment | Ctrl+Alt+M | Comment on the slide | Never | Single source (T04: right-click on the slide to add a comment) |
+| 7 | Guides (submenu) | none | Show guides, Add vertical guide, Add horizontal guide, Edit guides, Clear guides | Never | Corroborated (T08 prints all five; T04 prints Show guides and Clear guides); the Edit guides dialog (Vertical and Horizontal tabs, a position field and colour per guide, X to remove, Add new guide, Done) is Single source (T08) |
+| 8 | Save to Keep notepad | none | As A1 | Never | Unverified |
+
+Cut, Copy and Paste: with nothing selected the menu acts on the slide, so Paste places objects on this slide; the position rule (same coordinates as the source, or an offset) is Unverified.
+
+### A6 Text box selected by its border
+
+Order: no public source prints this menu in order. Rows follow the Edit, Slide, Arrange, Format, Insert grouping of the menu bar (R01), which is how Google's other menus are grouped.
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Cut | Ctrl+X | Removes the box to the clipboard | Never | Unverified as a menu item; key Verified (G16) |
+| 2 | Copy | Ctrl+C | Copies the box | Never | Unverified as a menu item; key Verified (G16) |
+| 3 | Paste | Ctrl+V | Pastes the clipboard | Empty clipboard (expected) | Unverified as a menu item; key Verified (G16) |
+| 4 | Delete | Delete | Removes the box | Never | Single source (T13: select, right-click, Delete) |
+| 5 | Duplicate | Ctrl+D | Copies the box on the same slide | Never | Unverified; G16 lists Ctrl+D as "Duplicate slide" only |
+| 6 | Order (submenu) | Ctrl+Shift+Up, Ctrl+Up, Ctrl+Down, Ctrl+Shift+Down | Bring to front, Bring forward, Send backward, Send to back | The move that has no effect | Unverified as a right-click submenu; the Arrange menu items and keys are Verified (G05, G16); R05 section C1 records that only effective moves are enabled |
+| 7 | Rotate (submenu) | Alt+Left, Alt+Right for 15 degrees (R02 section 6) | Rotate clockwise 90°, Rotate counter-clockwise 90°, Flip horizontally, Flip vertically | Never | Single source for right-click (T29, 2016, prints Rotate then flip horizontally); items Verified in the Arrange menu (R05 section C5) |
+| 8 | Center on page (submenu) | none | Horizontally, Vertically | Never | Single source for right-click (T04) |
+| 9 | Align (submenu) | none | Left, Center, Right, Top, Middle, Bottom | Fewer than two objects selected (expected; R05 section C2) | Single source for right-click (T04 chose Left with four objects selected) |
+| 10 | Distribute (submenu) | none | Horizontally, Vertically | Fewer than three objects (R05 section C3) | Single source for right-click (T04) |
+| 11 | Group | Ctrl+Alt+G | Groups the selection | Fewer than two objects | Corroborated (T04, T12); key Verified (G16) |
+| 12 | Text fitting | none | Opens the Format options panel at Text fitting (Do not autofit, Shrink text on overflow, Resize shape to fit text) | Never | Verified (G14: "In the menu, click Text fitting") |
+| 13 | Format options | none | Opens the Format options panel | Never | Corroborated for objects (T04 on an image, T09 and T15 on a video); Verified on a video (G02) |
+| 14 | Animate | Ctrl+Alt+Shift+B opens the panel | Opens the Motion panel and adds a default animation | Never | Corroborated existence (T40 prints "Animate", T21 prints "Animation"); the current label is Unverified |
+| 15 | Link | Ctrl+K | Opens the link dialog for the whole box | More than one object selected | Single source for right-click (T04); the disabled rule is Single source (T17); key Verified (G16) |
+| 16 | Comment | Ctrl+Alt+M | Comment anchored to the box | Never | Unverified on an object; key Verified (G16) |
+| 17 | Alt text | Ctrl+Alt+Y (Cmd+Option+Y) | Opens the alt text fields (a description; Advanced options for a title) | Never | Verified for an image or drawing (G12, G15); Unverified for a text box |
+| 18 | Save to Keep notepad | none | As A1 | Never | Unverified |
+
+Cut, Copy and Paste: act on the box as an object; pasting on another slide keeps size and formatting (expected, Unverified).
+
+### A7 Caret or text selection inside a text box
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Spelling suggestions | none | The correctly spelled words at the top of the menu; choosing one replaces the word | No misspelling under the caret | Verified that suggestions sit in the context menu (G12: open it with Shift+F10, select the suggestion, Enter); labels for Ignore, Add to personal dictionary and Feedback are Verified for Docs only (G18) and Unverified for Slides |
+| 2 | Cut, Copy, Paste | Ctrl+X, Ctrl+C, Ctrl+V | Act on the selected text | Cut and Copy with no selection (expected) | Unverified as menu items; keys Verified (G16) |
+| 3 | Paste without formatting | Ctrl+Shift+V | Pastes plain text | Empty clipboard (expected) | Unverified; the row is absent from the Slides shortcut page as fetched (G16) and from R04, so it may be Docs only |
+| 4 | Delete | Delete | Removes the selection | No selection | Unverified |
+| 5 | Link | Ctrl+K | Link dialog with the Text field prefilled from the selection | Never with one selection | Single source (T04: right-click the text and choose Link); dialog fields Verified (G08) |
+| 6 | Comment | Ctrl+Alt+M | Comment anchored to the selected text | Never | Unverified as a right-click item; the anchor rule is Verified (G07 via R05 section A10) |
+| 7 | Restart numbering | none | Dialog with a start number | Caret not in a numbered list | Verified (G12, G09 via R01 Format menu) |
+| 8 | Define, translate, Explore | none | Not found | not applicable | Unverified; no page read names Define or a translate item in the Slides context menu; Tools holds Dictionary (R01), and Explore was removed in 2024 (R07) |
+| 9 | Text fitting, Format options, Alt text | as A6 | As A6 | As A6 | Unverified whether the text-level menu also carries the box-level items |
+
+Cut, Copy and Paste: act on the text run; Paste into text inserts at the caret with source formatting (expected, Unverified).
+
+### A8 Layout placeholder on a slide
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Every text box item of A6 and A7 | as A6 | As A6 | As A6 | Unverified as a distinct menu; expected identical |
+| 2 | Text fitting | none | The placeholder defaults to Shrink text on overflow; a text box defaults to Resize shape to fit text | Never | Verified (G14) |
+| 3 | Reset placeholder to the layout, Insert placeholder | none | Not found on a slide | not applicable | Unverified; placeholders are inserted only inside the theme builder through Insert > Placeholder (T06) |
+
+### A9 Image
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Cut, Copy, Paste, Delete, Duplicate | as A6 | As A6 | As A6 | Unverified as menu items |
+| 2 | Order, Rotate, Center on page, Align, Distribute, Group | as A6 | As A6 | As A6 | As A6 |
+| 3 | Replace image (submenu) | none | Upload from computer, Search the web, Drive, Photos, By URL, Camera; the frame, size and position are kept | Never | Verified (G02: right-click the image, Replace image); sources per R05 section B8; T32 corroborates |
+| 4 | Crop image | none | Enters crop mode with the blue handles; Enter or a click elsewhere finishes | Never | Unverified as a right-click item; G03 prints the toolbar Crop button only |
+| 5 | Reset image | none | Removes crop, mask and adjustments | Image unchanged (expected) | Verified (G03: right-click, Reset image); T19 corroborates |
+| 6 | Image options | none | Opens the Format options panel at the image sections | Never | Unverified as a right-click item; G15 prints "Image options" as a toolbar button |
+| 7 | Format options | none | Format options panel | Never | Single source on an image (T04) |
+| 8 | Alt text | Ctrl+Alt+Y | Alt text fields | Never | Verified (G12: context menu, Alt text; G15 for the fields and key) |
+| 9 | Edit image | none | Opens the Gemini image editing panel (Replace background, Expand image, custom prompt, Create; then Replace with image or Insert) | Plans without Gemini image editing (Business Standard and Plus, Enterprise Standard and Plus, Google AI Pro and Ultra and education add-ons have it) | Verified (W04: right-click an image and select Edit image; W05 for the prompt flow and plans) |
+| 10 | Animate, Link, Comment, Save to Keep notepad | as A6 | As A6 | As A6 | As A6 |
+
+Cut, Copy and Paste: the image pastes as an object; Google's copy page notes a single image can be copied from Slides as HTML (G17).
+
+### A10 Shape
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Every object item of A6 (Cut, Copy, Paste, Delete, Duplicate, Order, Rotate, Center on page, Align, Distribute, Group, Format options, Animate, Link, Comment, Alt text) | as A6 | As A6 | As A6 | Rotate then Flip horizontally is Single source on a shape (T29); Group and Ungroup Corroborated (T04, T12); the rest as A6 |
+| 2 | Text fitting | none | As A6 when the shape holds text | Never | Unverified on a shape; Verified on a text box (G14) |
+| 3 | Change shape, Edit points | none | Not found | not applicable | Unverified; R05 section A5 flags Change shape as a single third-party claim |
+
+### A11 Line, connector, curve, polyline or scribble
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Every object item of A6 except Text fitting | as A6 | As A6 | As A6 | Unverified; T30 (2016) describes lines with toolbar controls only and no right-click |
+
+### A12 Table cell
+
+Order: the first six rows follow the order CustomGuide prints (T36); the rest follow Google's page (G04), which prints no order.
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Insert row above | none | Adds a row | Never | Verified (G04); order Single source (T36) |
+| 2 | Insert row below | none | Adds a row | Never | Verified (G04) |
+| 3 | Insert column left | none | Adds a column | Never | Verified (G04) |
+| 4 | Insert column right | none | Adds a column | Never | Verified (G04) |
+| 5 | Delete row | none | Removes the row | Never | Verified (G04); T31 (2016) corroborates |
+| 6 | Delete column | none | Removes the column | Never | Verified (G04); T31 corroborates |
+| 7 | Delete table | none | Removes the table | Never | Verified (G04) |
+| 8 | Distribute rows | none | Equalises row heights | Never | Verified (G04) |
+| 9 | Distribute columns | none | Equalises column widths | Never | Verified (G04) |
+| 10 | Merge cells | none | Merges the selection | One cell selected (expected) | Verified (G04); see A13 |
+| 11 | Unmerge cells | none | Splits a merged cell | The cell is not merged (expected) | Verified (G04) |
+| 12 | Cut, Copy, Paste, Delete, Link, Comment, spelling suggestions | as A7 | Act on the cell text | As A7 | Unverified inside a table cell |
+| 13 | Sort table, Pin header rows, Split cell, Table options | none | Not in Slides | not applicable | Verified as Docs only (G04) |
+
+Cut, Copy and Paste: on cell text, as A7. Pasting a table from Sheets into a slide asks "Link to spreadsheet" or "Paste unlinked"; tables over 400 cells paste unlinked only (G06 Verified).
+
+### A13 Range of table cells
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Merge cells | none | Merges the dragged range into one cell | Never with a range | Verified (G04: drag to select the cells first); T31 corroborates |
+| 2 | Unmerge cells | none | Splits merged cells in the range | No merged cell in the range (expected) | Verified (G04) |
+| 3 | Distribute rows, Distribute columns | none | Act on the rows or columns of the range | Never | Verified (G04) |
+| 4 | Insert and delete rows and columns | none | Act relative to the range | Never | Verified as items (G04); behaviour on a range Unverified |
+
+### A14 Group
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Ungroup | Ctrl+Alt+Shift+G | Restores the members | Never on a group | Corroborated (T04, T12); key Verified (G16) |
+| 2 | Regroup | none | Not found | not applicable | Unverified (R01 and R05 also could not source it) |
+| 3 | Every object item of A6 | as A6 | Formatting applied to the group applies to every member (R05 section C6) | As A6 | Unverified on a group |
+
+### A15 Video
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Format options | none | Format options panel at Video playback: Play (on click), Play (automatically), Play (manual), Start at, End at, Mute audio | Never | Verified (G02: right-click the video, Format options); T09 and T15 corroborate |
+| 2 | Replace video | none | Not found | not applicable | Unverified; no page read names it |
+| 3 | Cut, Copy, Paste, Delete, Order, Center on page, Align, Alt text, Comment, Animate | as A6 | As A6 | As A6 | Unverified on a video |
+
+### A16 Audio icon
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Format options | none | Format options panel at Audio playback (start on click or automatically, volume, stop on slide change, loop, hide icon) plus the image sections | Never | Single source (T14) |
+| 2 | Replace image | none | Swaps the speaker icon for any picture | Never | Single source (T14) |
+| 3 | Other image items of A9 | as A9 | As A9 | As A9 | Unverified on an audio icon; T14 states the icon is an image |
+
+### A17 Linked chart or linked table
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Update (button on the object, top right) | none | Pulls the current source into the slide | Source unchanged (expected) | Verified (G06) |
+| 2 | Link options (drop-down on the object, top right) | none | Open source, Unlink | Never | Verified (G06); T16 corroborates Open source |
+| 3 | Tools > Linked objects, Update all | none | Side panel listing linked objects with one Update all at the bottom | Nothing stale (expected) | Verified (G06) |
+| 4 | Right-click items on a linked chart | none | Expected the image items of A9 plus the link controls | not applicable | Unverified; both pages route through the on-object controls |
+| 5 | Paste prompt for a chart or table from Sheets | none | "Link to spreadsheet" or "Paste unlinked" | Table over 400 cells: unlinked only | Verified (G06); T16 describes the same choice |
+
+### A18 Word art
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Every shape item of A10 | as A10 | Word art is a shape whose glyph outlines are the shape (R05 section A9) | As A10 | Unverified; no page read describes right-click on word art |
+
+### A19 Link chip (linked text or a linked object)
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Hover card: Change, Remove | none | Change reopens the link dialog; Remove strips the link | Never | Verified (G08: click Remove, click Change) |
+| 2 | Hover card: Copy link | none | Copies the URL | Never | Unverified |
+| 3 | Open link | Alt+Enter (Option+Enter) | Follows the link in a new tab | Never | Verified as a key (G16); Unverified as a menu item |
+| 4 | Right-click: Link | Ctrl+K | Reopens the dialog on the linked text | More than one object selected | Single source (T04); disabled rule Single source (T17) |
+| 5 | Right-click: Edit link, Remove link, Copy link | none | Expected | not applicable | Unverified |
+
+### A20 Guide
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Delete guide | none | Removes that guide on every slide | Never | Verified (G05); T08 corroborates |
+| 2 | Edit guides | none | The Edit guides dialog | Never | Single source (T08) |
+| 3 | Other items | none | Not found | not applicable | Unverified; T08 lists the two items only |
+
+### A21 Ruler
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Any menu | none | No page read describes a right-click menu on the ruler; View > Show ruler is the only ruler control (G05) | not applicable | Unverified; expected none |
+
+### A22 Speaker notes pane
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Text items of A7 (spelling suggestions, Cut, Copy, Paste, Link, Comment) | as A7 | Act on the notes text | As A7 | Unverified; T18 and G20 describe the pane and presenter view without a right-click; the pane takes the text toolbar (R02 section 7) |
+
+### A23 Layout inside the theme builder
+
+The theme builder opens from View > Theme builder or Slide > Edit theme and closes with the X at the top right or by clicking a slide in the filmstrip (T05, T06). The left panel lists the theme slide over the layouts (R03).
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | New layout | Ctrl+M inside the builder | Adds a blank layout | Never | Corroborated (T05, T06) |
+| 2 | Duplicate layout | none | Copies the layout | Never | Single source (T06) |
+| 3 | Rename layout | none | Names the layout; T06 reaches the same through a Rename button at the top of the canvas with an OK dialog | Never | Single source for right-click (T04) |
+| 4 | Delete layout | none | Removes the layout | The layout is in use (expected) | Unverified; R03 records the command from a secondary source without the label |
+| 5 | Right-click on the theme slide | none | Expected no New or Delete | not applicable | Unverified |
+| 6 | Insert placeholder | none | Insert > Placeholder: title, subtitle, body, slide number, image | not applicable | Verified route via the Insert menu (T06, R01 Insert menu); not a right-click item |
+
+### A24 What Cut, Copy and Paste do from each menu
+
+| Menu | Cut and Copy act on | Paste does | Source and grade |
+| --- | --- | --- | --- |
+| Filmstrip or grid tile | The selected slide or slides | Inserts the clipboard slides after the selected thumbnail; between decks the prompt of A25 follows | Verified for the insertion point and the link step (G06); keys Verified in the filmstrip (G12, G16) |
+| Empty canvas | The current slide (nothing selected) | Pastes objects onto the slide, or slides after it | Unverified |
+| Object (text box, shape, image, line, group, video, audio, word art) | The object as a whole | Pastes the object on the current slide | Unverified as menu items; keys Verified (G16) |
+| Text or table cell | The selected text | Inserts at the caret with formatting; a plain text variant is Docs' Ctrl+Shift+V and is Unverified for Slides | Unverified as menu items |
+| Chart or table from Sheets | not applicable | Prompt: Link to spreadsheet or Paste unlinked | Verified (G06) |
+
+Copy formatting and paste formatting exist as keys (Ctrl+Alt+C and Ctrl+Alt+V) and as the paint format toolbar button (G16, G17); no page read puts them in a context menu.
+
+### A25 The paste prompt between decks
+
+| # | Prompt or control | Where | Opens or does | Source and grade |
+| --- | --- | --- | --- | --- |
+| 1 | Link slides | After Edit > Paste (or right-click Paste) of slides copied from another presentation | The pasted slides carry a link icon; Update on each slide, or Tools > Linked objects > Update all, pulls changes from the source | Verified (G06) |
+| 2 | Do not link | The same prompt | Pastes plain copies | Single source (T02, 2017) |
+| 3 | Keep original styles | The same prompt, when the source theme differs | The pasted slides keep their source theme, which is added to the deck | Single source (T11) |
+| 4 | Link & keep original styles | The same prompt | Links and keeps the source theme | Single source (T11) |
+| 5 | Use destination theme | Expected as the alternative to row 3 | Restyles the pasted slides with the destination theme | Unverified; no page read prints it; the equivalent explicit choice Google documents is the Import slides checkbox "Keep original theme" (R03 section c.2, R07 table 1; T07 prints "Keep the original theme"), which unchecked restyles imported slides |
+| 6 | Placement of the prompt | Bottom of the window | A small card with the options | Unverified; T02 calls it a pop up and T11 shows it in an animation without describing the position |
+
+## Part B: menu, dialog, snackbar and tooltip conventions
+
+Columns as in Part A. "Convention" rows graded Convention come from the WAI-ARIA Authoring Practices (M01, M02) or the Material Components Web READMEs (M03 to M06), which describe the pattern Google's editors implement; a Google Slides specific confirmation is graded separately in the same cell.
+
+| # | Item | Shortcut shown | Opens or does | Disabled when | Source and grade |
+| --- | --- | --- | --- | --- | --- |
+| B1 | Menu bar menus open on click | Alt+F, Alt+E, Alt+V, Alt+I, Alt+O, Alt+T, Alt+H in Chrome on Windows; Ctrl+Option plus the letter on Mac | A click on a menu name opens it; the access key opens it from the keyboard and the underlined letter of an item runs it | Menus hidden by compact mode (Ctrl+Shift+F) | Verified for the keys and the underlined letters (G16); the click itself is Unverified in text but implied by every lesson |
+| B2 | Switching menus on hover while one is open | Left and Right arrows do the same from the keyboard | Moving the pointer to a neighbouring menu name opens it without a click | not applicable | Convention (M01: Right and Left arrows move between menubar menus); hover switching is Unverified for Slides in text |
+| B3 | Submenus (Apply layout, Order, Align, Rotate, Guides, Replace image) | Right arrow or Enter opens; Left arrow closes back to the parent | The submenu opens beside the item on hover after a short delay, or at once from the keyboard, and focus lands on its first item | not applicable | Convention (M01); Google's screen reader guide walks items with the Down arrow (G12); the hover delay in milliseconds is Unverified |
+| B4 | Icons beside menu items | none | Since October 2022 the Slides and Drawings menus carry an icon on the left of items and shorter, regrouped lists | not applicable | Verified (W02, 2022-10-17: shortened menus, regrouping, prominent icons; rollout from 2022-10-17 and 2022-10-31) |
+| B5 | Disabled items stay visible and greyed | none | An item that cannot apply stays in place, greyed, and is skipped by arrow keys | Link with more than one object; Order moves with no effect; Distribute below three objects; Ungroup outside a group | Single source for Link (T17); Order from R05 section C1; Convention for keyboard skipping (M03: disabled items excluded from keyboard navigation) |
+| B6 | Esc closes one level and focus returns | Esc | Esc closes the submenu that has focus and returns focus to its parent item; a second Esc closes the menu and returns focus to the trigger; Tab closes everything | not applicable | Convention (M01); Verified that Esc returns to the content in Slides (G13: press Escape to return) |
+| B7 | Context menu from the keyboard | Shift+F10, Ctrl+Shift+\ , Ctrl+Shift+X (Windows); Cmd+Shift+\ or Shift+F10 (Mac) | Opens the menu for the focused element | not applicable | Verified (G16, G12, G13) |
+| B8 | Dropdown buttons with a separate arrow | none | New slide: the plus adds a slide with the current layout, the arrow ("New slide with layout") lists the theme's layouts. Slideshow: the button presents, the arrow lists Presenter view, Start from beginning, Present using Chromecast, Presentation display options. Share: the button opens the Share dialog; an arrow beside it was added | not applicable | New slide Verified (G21, G22); Slideshow arrow Verified (G20) with items Single source (T03); Share arrow Single source (T03) with items Unverified |
+| B9 | Standard dialog layout | Esc cancels; Enter runs the default button | A centred modal over a scrim: a title, the body, and an actions row with the dismissive button first and the confirming button last; Google's pages print the confirming labels Done, Apply, OK, Import slides, Make a copy, Select | not applicable | Convention (M04: confirming action last, Escape and scrim click close, Enter triggers the default button, focus returns on close); the labels are Verified from Google pages via R01 and R03; the bottom right position and Enter behaviour are Unverified for Slides |
+| B10 | Side panel | Ctrl+Alt+Shift+B opens the Motion panel | Opens at the right of the canvas with an X at its top; the toolbar tail control that opened it stays pressed; one panel at a time | not applicable | Verified for the key (G16); the X is Verified for the Themes panel (R02 section 8.1) and the theme builder (T05, T06); the width in pixels is Unverified |
+| B11 | Snackbar placement and life | Esc dismisses while its button has focus | A one line message at the bottom of the window, centred by default or on the leading edge, that dismisses itself after 4 to 10 seconds (default 5) and carries at most one text action and an optional X | not applicable | Convention (M05); the bottom left position in Slides is Unverified |
+| B12 | Snackbars that offer Undo in Slides | none | Not confirmed for any case | not applicable | Unverified; no page read names an Undo snackbar in Slides. The bottom prompts that are confirmed are the paste choices of A25 and A17 row 5, which offer choices, not Undo. Undo itself is the toolbar button and Ctrl+Z (R01 Edit menu) |
+| B13 | Tooltip position and content | none | A small label below or above the control, 32 px inside the viewport edge, shown on hover and on keyboard focus, described to the control with aria-describedby, with configurable show and hide delays | not applicable | Convention (M06); whether Slides prints the shortcut inside the tooltip in parentheses is Unverified; the toolbar labels themselves are in R02 sections 3 and 4 |
+| B14 | Toolbar overflow at narrow widths | none | Expected: trailing controls collapse into a More button at the right end | not applicable | Unverified; no page read describes it (G23, T41 and T04 were checked); the documented narrow-width control is compact mode, Ctrl+Shift+F, which hides the menu bar and toolbar |
+| B15 | Compact mode | Ctrl+Shift+F | Hides or shows the menus; a down arrow at the top right restores them | not applicable | Verified (G16: "Hide or show menus (compact mode)"); T41 prints "Hide the menus" and "Show the menus" |
+| B16 | Menu dividers | none | Related items sit in groups separated by rules; the 2017 filmstrip list reads as clipboard, slide, design, move, comment groups | not applicable | Single source for the grouping (T01); Convention for the divider role (M03: divider with role separator) |
+| B17 | Menu bar reorganisations | none | 2018: Text submenu of Format, Table menu removed into Insert and Format, Move submenu of Slide, Align submenu of Arrange, Insert reordered. 2023: refreshed Material Design 3 surface with a simplified top area and status under one clock icon | not applicable | Verified (W01, W03) |
+
+## Part C: Turboslide at commit 8c7056c
+
+Files read: `packages/chrome/src/Sidebar.tsx` (the row and RowMenu), `Sidebar.css` (the menu plate), `Overlay.tsx` (handles and arrange bar), `InsertMenu.tsx`, `ExportMenu.tsx` (keyboard lines), `Toast.tsx`, `Toast.css`, `Tooltip.tsx`, `Tooltip.css`, `useShellKeys.ts` (the Escape ladder), `packages/viewer/src/InlineText.tsx` (paste), `packages/schema/src/actions.ts`, `deck.ts` and `blocks.ts` (properties), `docs/spec/SPEC.md` sections 6.6 to 6.8 and `docs/EDITOR-DEPTH-STATUS.md`.
+
+### C1 The only context menu: the sidebar row menu
+
+- Trigger: right-click on a filmstrip row (`onContextMenu` with `preventDefault`) or the ⋯ button at the row's right end (`aria-haspopup="menu"`, `data-control="sidebar.menu.<slideId>"`). Only edit mode has it. No other element in `packages/chrome`, `packages/viewer` or `apps/studio` handles `contextmenu`, so the canvas, a selected block, the grid tile, the notes field and the toolbar show the browser's own menu.
+- Placement: a fixed plate 220 px wide at the anchor's bottom edge plus 2 px, left clamped to the viewport minus 232 px, capped to the viewport height below the anchor and scrolling inside. Google's menu opens at the pointer position; the row menu opens under the row or the ⋯ button regardless of where the right-click landed.
+- Items in order, with headings and rules: heading "Insert after" over "Content slide", "Title slide", "Statement slide"; heading "Insert a template" over the templates the deck's assets allow (up to 15); rule; "Duplicate"; heading "Move to section" over one row per other section (only when the deck has more than one section); rule; "Render", "Lint this slide", "Copy id"; rule; "Delete". Nine to thirty rows depending on templates and sections.
+- No item prints a shortcut, no item carries an icon, no item is ever disabled, there are no submenus, and there is no Skip, Cut, Copy, Paste, New slide, Apply layout, Change background, Change theme, Transition, Comment or Move up and down item. Every item carries a tooltip naming its action id, for example "(slide.insert)".
+- Keyboard: the first item takes focus on open; Up and Down wrap; Home, End and character keys do nothing; Escape closes and stops the event so the shell's Escape ladder is untouched; focus is not returned to the row or the ⋯ button after Escape or after a run (Google and M01 return it). A mousedown outside closes it.
+- Feedback: every run closes the menu and toasts a result such as "Duplicated intro as intro-copy" or "Removed intro"; the Delete tooltip says History undoes it. There is no Undo action in the toast.
+
+### C2 The stage: arrange bar and handle chips instead of a menu
+
+- The arrange bar (`Overlay.tsx` `ARRANGE_BUTTONS`) appears under the selection ring on a freeform slide: Align left, center, right, top, middle, bottom; Distribute horizontally and vertically (disabled below three blocks); Bring forward and Send back (Cmd ] and Cmd [, or Alt with Up and Down on the chip). It hides during a drag, while editing text and during a marquee. This is Google's Arrange menu content as a floating toolbar, with two of Google's four order moves, no Rotate, no Center on page and no Group.
+- The chip above the ring names the block as `type · id` (or "3 blocks · ...") and is the drag handle; Alt with Up or Down changes the order. Google shows no chip.
+- Delete and Backspace remove the selection with a toast (R06 row 91). There is no duplicate, cut, copy or paste for blocks; `InlineText.tsx` handles paste only inside a text run and flattens it to plain text with line breaks turned into spaces.
+
+### C3 The Insert menu and Export menu as dropdown grammar
+
+- `InsertMenu.tsx`: a ToolButton opens a `role="menu"` card 6 px under the button, left clamped to the viewport minus 352 px. Groups: "Primitives" (Box, Shape as five glyph buttons, Rule, Text, Icon, Image, Material), "Blocks", "Slides". Rows carry an icon on the left (Google's 2022 convention, B4) and a tooltip with name and destination. Opened from the keyboard the first row takes focus; opened with the pointer the card itself takes focus. Up, Down, Home and End move with wrapping; Escape and a run close it and return focus to the Insert button (matches B6); a mousedown elsewhere closes it and leaves focus where the press landed. A row that cannot run shows its reason inline ("is-needs") instead of greying out.
+- `ExportMenu.tsx` follows the same grammar (Escape closes and refocuses the trigger, outside press closes).
+- Neither the Insert button nor any toolbar control is a split button with a separate arrow (B8).
+
+### C4 Toast against the snackbar
+
+- `Toast.tsx` and `Toast.css`: one line, `role="status"`, fixed at the bottom centre 22 px up (under the toolbar on phones), ink plate with paper text, 1400 ms hold restarted on every call, fades and rises 4 px, `pointer-events: none`. It carries no action, no X and no Undo; a caller may pass a longer hold.
+- Against B11: Material's snackbar lives 4 to 10 seconds, sits bottom centre or on the leading edge, holds one action and can be dismissed with Esc. Turboslide's 1400 ms is too short to read a sentence and act, and the plate cannot take a click. Undo after Delete is offered only as a key ("Cmd Z undoes") and through the History panel's "Undo to here" (`HistoryPanel.tsx`); SPEC 6.8 promised a toast with Undo for Delete and it is not built.
+
+### C5 Tooltip against the tooltip convention
+
+- `Tooltip.tsx` and `Tooltip.css`: one plate on the body, shown after 350 ms of hover and at once on keyboard focus (a press within 400 ms suppresses the focus tip), 6 px below the control and above it when the viewport ends first, clamped 8 px inside both edges, hidden on Escape, mousedown, scroll, resize and blur, `role="tooltip"` and `aria-describedby="pt-tip"` on the anchor, one at a time with the next anchor showing at once. Content: a bold name, a kbd chip for the key (as words such as "Cmd K"), and one sentence under them; the text is written with textContent.
+- Against B13: the shape matches Material's plain tooltip (below or above, described by aria-describedby, delay on hover and none on focus). Differences: Material keeps 32 px from the viewport edge against 8 px here; Google's toolbar tooltips carry the label and, by unverified convention, the shortcut in parentheses, while Turboslide adds a sentence and prints action ids and JSON pointers in some tooltips (R06 section 6), which the sales view must drop.
+
+### C6 The Escape ladder
+
+`useShellKeys.ts` line 304 onward: Escape closes the help card, then the panel, then clears the sidebar filter, then leaves the current mode, then leaves present mode, then closes the narrow sidebar. Menus (RowMenu, InsertMenu, ExportMenu) capture Escape first and stop it, so one Escape closes one level as Google does (B6), except that focus does not return to the trigger from the row menu.
+
+### C7 Google items mapped to actions in actions.ts
+
+`ACTION_IDS` at 8c7056c declares 54 ids (the round brief says 62; the file read here lists 54). "Action" names the id that performs the item today or the composition the row menu uses; "none" means no action can express it without a schema or action change.
+
+| Google item (target) | Turboslide surface today | Action | Status |
+| --- | --- | --- | --- |
+| New slide (A1) | Row menu "Insert after" and "Insert a template"; Insert menu Slides group | `slide.insert` | Exists; Google's one-click default (same layout as the current slide) is not the default here, the menu asks for a kind or template |
+| Duplicate slide (A1, A2) | Row menu "Duplicate" | `slide.get` then `slide.insert` with id `<id>-copy` | Composed; no `slide.duplicate`; Ctrl+D unbound (R06) |
+| Delete slide (A1, A2) | Row menu "Delete" | `slide.remove` | Exists; no Delete key on a focused row (R06 section 2.6) |
+| Skip slide (A1, A3) | none | none; `deck.ts` slides carry no skip or hidden flag | Missing; needs a schema field and export, viewer and present handling (R07 wants skipped slides out of shared outputs) |
+| Cut, Copy, Paste slides (A1, A24) | none | none; would compose from `slide.get`, `slide.remove`, `slide.insert` over a clipboard | Missing |
+| Move slide up, down, to beginning, to end (A1) | Drag; Alt with Up and Down on a focused row; row menu "Move to section" | `slide.move` | Exists; Google's four labelled items and Ctrl+Up and Down keys are not bound |
+| Apply layout (A1, A9) | Inspector Layout section on a content slide | `slide.setLayout` | Partial: Turboslide's layout is the grammar layout inside a kind, Google's is the theme layout; the kind itself is read only (R06 row 96) |
+| Change background (A1, A5) | none | none; slides have no background property; `material` is a block | Missing |
+| Change theme (A1) | Toolbar theme button (light or dark) | `view.theme` | Different: a view toggle, not a deck theme change |
+| Transition (A1) | none | none | Missing; out of scope for the flatten export |
+| Comment (A1, A6, A7) | none | none | Missing |
+| Save to Keep notepad (A1) | none | none | Out of scope |
+| Delete, Duplicate a block (A6, A9, A10) | Delete key; no duplicate | `block.remove`; duplicate would be `block.insert` with a copy | Remove exists; duplicate missing |
+| Cut, Copy, Paste a block (A6) | none | none | Missing |
+| Order (A6) | Arrange bar Bring forward and Send back; Alt Up and Down on the chip | `block.order` (supports forward, backward, front, back; front and back unbound) | Partial: two of four surfaced |
+| Align (A6) | Arrange bar six buttons | `block.align` | Exists; single block aligns to the content box, which also covers Google's Center on page |
+| Distribute (A6) | Arrange bar two buttons | `block.distribute` | Exists |
+| Center on page (A6) | Arrange bar Align center and Align middle with one block | `block.align` | Approximated |
+| Rotate, Flip (A6, A10) | none | none; `pos` is {x, y, w, h, z} with no angle | Missing |
+| Group, Ungroup (A6, A14) | Multi-selection ring only | none | Missing |
+| Text fitting (A6, A8) | none | none; `typography` has size, weight, align, tracking, leading but no autofit | Missing |
+| Format options (A6, A9, A15) | Inspector (generated from Zod annotations) | `block.set` | Exists; the panel is the Format options equivalent (R07 renames it) |
+| Animate (A6) | none | none | Missing; out of scope |
+| Link (A6, A7, A19) | none for blocks; Cmd K planned in SPEC 6.8 for selected text | none; `blocks.ts` has only the `links` boolean and the external glyph on a key value list | Missing |
+| Alt text (A6, A9) | Inspector Asset section alt field | `asset.add` (alt on intake); `block.set` on image blocks with an `alt` string | Partial: alt lives on the asset and on two block types, not on every object |
+| Replace image (A9, A16) | Inspector asset picker | `block.set` on the asset path, `asset.add` for a new file | Composed; no drop or paste target on the stage (R06 row 29) |
+| Crop image (A9) | Shot crop handle (top or center) | `block.set` on `crop` | Partial: a two-state anchor, not free cropping |
+| Reset image (A9) | none | none | Missing |
+| Image options (A9) | Inspector | `block.set` | Exists as the panel |
+| Edit image with Gemini (A9) | none | none | Out of scope |
+| Table items (A12, A13) | none | none; no table primitive | Missing |
+| Guides submenu, Delete guide, Edit guides (A5, A20) | Snap guides drawn during a drag only | none | Missing as user guides |
+| Video and audio Format options (A15, A16) | none | none; no media primitives | Missing |
+| Linked chart Update, Link options (A17) | none | none | Missing |
+| Spelling suggestions, Restart numbering (A7) | none | none | Missing |
+| Theme builder layout items (A23) | none | none; templates are code in `slide-templates.ts` | Missing |
+| Paste prompt Link slides, Keep original styles (A25) | none | `import.run` imports a whole deck; `deck.pull` and `deck.push` move decks between studios | Different: no slide-level paste between decks |
+
+Reading the table as a designer: the filmstrip menu can reach parity on New slide, Duplicate slide, Delete, Move and Apply layout with existing actions and label changes; Skip slide, clipboard, Change background, Comment and Transition need new actions or schema; the object menu can reach Order, Align, Distribute, Center on page, Format options and Alt text with existing actions, while Rotate, Group, Text fitting, Link, Crop, Reset image and Duplicate need new ones.
+
+## Claims that could not be confirmed from a public source
+
+1. The current contents and order of the filmstrip right-click menu beyond the 2017 list; whether Cut, Copy, Delete and New slide sit at the top; whether the four Move items are nested in a submenu as they are in the Slide menu since 2018.
+2. Whether the menu prints shortcuts beside items today (recorded only in 2017).
+3. Whether "Save to Keep notepad" is still present.
+4. Whether the skipped slide's item reads "Skip slide" or "Unskip slide" (Google says click Skip Slide again; BrightCarbon prints Unskip slide).
+5. The grid view tile menu's labels and order (one source describes move and remove without labels).
+6. The empty canvas menu: everything except the Guides submenu and Comment.
+7. The object menu as menu items: Cut, Copy, Paste, Delete (confirmed on a text box only), Duplicate, Order, Comment, Save to Keep; and the Rotate submenu as a current item (2016 source).
+8. The label "Animate" against "Animation" for the object animation item.
+9. The text menu: Cut, Copy, Paste, Paste without formatting (absent from the Slides shortcut page), Delete, Comment; any Define, dictionary or translate item; the Slides labels for Ignore, Ignore all and Add to personal dictionary.
+10. A distinct menu for a layout placeholder on a slide.
+11. Image menu items Crop image and Image options as right-click entries.
+12. Any right-click item specific to a line, word art, a video beyond Format options, a linked chart, a link chip (Edit link, Remove link, Copy link), the ruler, or the speaker notes pane.
+13. Delete layout inside the theme builder, and the theme slide's own menu.
+14. The paste prompt's "Use destination theme" option and the prompt's position on screen.
+15. Where pasted objects land on the destination slide.
+16. Hover switching between open menus and the submenu hover delay in milliseconds.
+17. The Share button arrow's items.
+18. The dialog button order and position in Slides (Cancel then the filled primary at the bottom right) and whether Enter confirms; only Material's convention and Google's confirming labels are sourced.
+19. Side panel width in pixels.
+20. The snackbar's position in Slides (bottom left) and any case where Slides offers Undo in a snackbar.
+21. Whether Slides prints the shortcut inside toolbar tooltips and in what format.
+22. Toolbar overflow behaviour at narrow widths (a More button).
+23. Whether the Material 3 guideline pages state anything different from the Material Components Web READMEs used here; the pages could not be read.
+24. The action count: the round brief says 62 actions, the file at 8c7056c lists 54.
+
+## Sources
+
+All read on 2026-09-11.
+
+Google help and Learning Center
+
+- G01 Add, delete & organize slides. https://support.google.com/docs/answer/1694830?hl=en&co=GENIE.Platform%3DDesktop
+- G02 Insert or delete images & videos. https://support.google.com/docs/answer/97447?hl=en&co=GENIE.Platform%3DDesktop
+- G03 Crop & adjust images. https://support.google.com/docs/answer/4600160?hl=en&co=GENIE.Platform%3DDesktop
+- G04 Add and edit tables. https://support.google.com/docs/answer/1696711?hl=en&co=GENIE.Platform%3DDesktop
+- G05 Insert and arrange text, shapes, diagrams, and lines. https://support.google.com/docs/answer/1696521?hl=en&co=GENIE.Platform%3DDesktop
+- G06 Link a chart, table, or slides to Google Docs or Slides. https://support.google.com/docs/answer/7009814?hl=en&co=GENIE.Platform%3DDesktop
+- G07 Use comments, action items, & emoji reactions. https://support.google.com/docs/answer/65129?hl=en&co=GENIE.Platform%3DDesktop
+- G08 Work with links & bookmarks. https://support.google.com/docs/answer/45893?hl=en&co=GENIE.Platform%3DDesktop
+- G09 Add a numbered list, bulleted list, or checklist (the page at 3300615 is the lists page, not a tables page). https://support.google.com/docs/answer/3300615?hl=en&co=GENIE.Platform%3DDesktop
+- G10 Use a Template or change the theme, background, or layout in Google Slides. https://support.google.com/docs/answer/1705254?hl=en&co=GENIE.Platform%3DDesktop
+- G11 Add or change animations and transitions (the page at 1689475 is the animations page, not a speaker notes page). https://support.google.com/docs/answer/1689475?hl=en&co=GENIE.Platform%3DDesktop
+- G12 Use Google Slides with a screen reader. https://support.google.com/docs/answer/1634140?hl=en&co=GENIE.Platform%3DDesktop
+- G13 Use Google Docs Editors with a screen reader. https://support.google.com/docs/answer/6282736?hl=en&co=GENIE.Platform%3DDesktop
+- G14 Change how text fits in placeholders & text boxes. https://support.google.com/docs/answer/10364036?hl=en
+- G15 Make your document, presentation, sheets & videos more accessible. https://support.google.com/docs/answer/6199477?hl=en&co=GENIE.Platform%3DDesktop
+- G16 Keyboard shortcuts for Google Slides. https://support.google.com/docs/answer/1696717?hl=en&co=GENIE.Platform%3DDesktop
+- G17 Copy and paste text and images. https://support.google.com/docs/answer/161768?hl=en&co=GENIE.Platform%3DDesktop
+- G18 Correct your spelling & grammar in Google Docs. https://support.google.com/docs/answer/57859?hl=en&co=GENIE.Platform%3DDesktop
+- G19 Share files from Google Drive. https://support.google.com/docs/answer/2494822?hl=en&co=GENIE.Platform%3DDesktop
+- G20 Present slides. https://support.google.com/docs/answer/1696787?hl=en&co=GENIE.Platform%3DDesktop
+- G21 Create your first presentation in Slides, Google Workspace Learning Center. https://support.google.com/a/users/answer/10665800
+- G22 Google Slides cheat sheet, Google Workspace Learning Center. https://support.google.com/a/users/answer/9300133?hl=en
+- G23 Change how paragraphs & fonts look (checked for a More button; none found). https://support.google.com/docs/answer/1663349?hl=en&co=GENIE.Platform%3DDesktop
+
+Google Workspace Updates
+
+- W01 Menu and toolbar updates in Google Docs editors, 2018-03-07. http://workspaceupdates.googleblog.com/2018/03/menu-and-toolbar-updates-in-google-docs.html (found through https://workspaceupdates.googleblog.com/2018/03/)
+- W02 Enhanced menus in Google Slides and Drawings improves findability of key features, 2022-10-17. https://workspaceupdates.googleblog.com/2022/10/enhanced-menus-google-slides-drawings%20.html (the URL carries an encoded space; found through https://workspaceupdates.googleblog.com/2022/10/, whose weekly recap of 2022-10-21 lists it)
+- W03 Refreshed interface for Google Drive, Google Docs, Google Sheets, and Google Slides, 2023-03-06. http://workspaceupdates.googleblog.com/2023/03/refreshed-ui-google-drive-docs-sheets-slides.html (found through https://workspaceupdates.googleblog.com/2023/03/)
+- W04 Adding AI image editing features to Google Slides and Google Vids, 2025-08-13. https://workspaceupdates.googleblog.com/2025/08/replace-expand-image-background-slides-vids.html
+- W05 Use Nano Banana to edit images in Google Slides and Vids, 2025-09-29. https://workspaceupdates.googleblog.com/2025/09/nano-banana-image-editing-gemini-slides-vids.html
+- W06 Label page, Google Slides (lists 2025 and 2026 posts only). https://workspaceupdates.googleblog.com/search/label/Google%20Slides
+
+Third-party walkthroughs
+
+- T01 Alice Keeler, Google Slides: Right Click on the Filmstrip, 2017-11-08. https://alicekeeler.com/2017/11/08/google-slides-right-click-filmstrip/
+- T02 Alice Keeler, Google Slides: Link Presentations, 2017-11-20. https://alicekeeler.com/2017/11/20/google-slides-link-presentations/
+- T03 Alice Keeler, Present Google Slides NOT Full Screen, 2024-09-19. https://alicekeeler.com/2024/09/19/present-google-slides-not-full-screen/
+- T04 BrightCarbon, Google Slides: The ULTIMATE guide, 2023. https://www.brightcarbon.com/blog/google-slides-ultimate-guide/
+- T05 BrightCarbon, Google Slides themes and layouts, 2020-09-25. https://www.brightcarbon.com/blog/editing-themes-and-layouts-in-google-slides/
+- T06 How-To Geek, How to Create Template Slides with Theme Builder in Google Slides, 2021-09-25. https://www.howtogeek.com/747178/how-to-create-template-slides-with-theme-builder-in-google-slides/
+- T07 How-To Geek, How to Import Slides From Another Presentation in Google Slides, 2022-03-27. https://www.howtogeek.com/787547/how-to-import-slides-from-another-presentation-in-google-slides/
+- T08 How-To Geek, How to Use Guides to Position Items in Google Slides, 2022-02-20. https://www.howtogeek.com/780332/how-to-use-guides-to-position-items-in-google-slides/
+- T09 How-To Geek, How to Add Videos and Customize Playback in Google Slides, 2021-12-31. https://www.howtogeek.com/772618/how-to-add-videos-and-customize-playback-in-google-slides/
+- T10 How-To Geek, How to Change the Background in Google Slides, 2019-11-19 (menu bar route only). https://www.howtogeek.com/446523/how-to-change-the-background-in-google-slides/
+- T11 Slidesgo, How to Merge Multiple Google Slides into One. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-merge-multiple-google-slides-into-one
+- T12 Slidesgo, How to Group or Ungroup Elements in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-group-or-ungroup-elements-in-google-slides
+- T13 Slidesgo, How to Add, Copy and Delete Text Boxes in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-copy-and-delete-text-boxes-in-google-slides
+- T14 Slidesgo, How to Add and Edit Audio or Music in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-and-edit-audio-or-music-in-google-slides
+- T15 Slidesgo, How to Add a Video in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-a-video-in-google-slides
+- T16 Slidesgo, How to Make Charts in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-make-charts-in-google-slides
+- T17 Slidesgo, How to Add Hyperlinks in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-hyperlinks-in-google-slides
+- T18 Slidesgo, How to Add and Work with Speaker Notes in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-and-work-with-speaker-notes-in-google-slides
+- T19 Slidesgo, How to Insert, Crop or Mask Images in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-insert-crop-or-mask-images-in-google-slides
+- T20 Slidesgo, How to Add and Edit Tables in Google Slides (names right-click without labels). https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-and-edit-tables-in-google-slides
+- T21 Slidesgo, How to Add Animations and Transitions in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-animations-and-transitions-in-google-slides
+- T22 Slidesgo, How to Arrange and Align Objects in Google Slides (menu bar route only). https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-arrange-and-align-objects-in-google-slides
+- T23 Slidesgo, How to Change the Background Image and Color in Google Slides (menu bar route only). https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-change-the-background-image-and-color-in-google-slides
+- T24 Slidestack, How to Easily Add, Duplicate, Move, Delete or Hide Slides in Google Slides, 2025-09-22. https://slidestack.com/blog/how-to-easily-add-duplicate-move-delete-or-hide-slides-in-google-slides
+- T25 SlideModel, How to Copy a Slide in Google Slides, 2024-06-03. https://slidemodel.com/how-to-copy-a-slide-in-google-slides/
+- T26 SlideModel, How to Align Objects in Google Slides, 2024-04-23 (menu bar route only). https://slidemodel.com/how-to-align-objects-in-google-slides/
+- T27 SlidesAI, How to Add Transitions on Google Slides, 2023-12-16, updated 2026-08-14. https://www.slidesai.io/blog/add-transitions-google-slides
+- T28 Baz Roberts, Google Slides: Working with text, 2016-05-10 (no right-click). https://bazroberts.com/2016/05/10/google-slides-working-with-text/
+- T29 Baz Roberts, Google Slides: Inserting & editing shapes, 2016-05-19. https://bazroberts.com/2016/05/19/google-slides-inserting-editing-shapes/
+- T30 Baz Roberts, Google Slides: Lines, connectors, scribble, 2016-05-21 (no right-click). https://bazroberts.com/2016/05/21/google-slides-lines-connectors-scribble/
+- T31 Baz Roberts, Google Slides: Tables, 2016-06-08. https://bazroberts.com/2016/06/08/google-slides-tables/
+- T32 ComputerCity, Image editing options in Google Slides, 2024-10-09. https://computercity.com/software/apps/image-editing-options-in-google-slides
+- T33 CustomGuide, Change Views in Google Slides. http://www.customguide.com/course/google-slides/how-to-change-view-in-google-slides
+- T34 CustomGuide, Move and Skip Slides (menu bar route only). http://www.customguide.com/course/google-slides/move-and-skip-slides
+- T35 CustomGuide, Edit Images in Google Slides (toolbar route only). http://www.customguide.com/course/google-slides/how-to-edit-images-in-google-slides
+- T36 CustomGuide, Insert Tables into Google Slides. http://www.customguide.com/course/google-slides/how-to-insert-tables-into-google-slides
+- T37 GCFGlobal (iiab.live mirror), Google Slides: Slide Basics. https://iiab.live/modules/en-gcf_learn_2021/edu.gcfglobal.org/en/googleslides/slide-basics/1/index.html
+- T38 GCFGlobal (iiab.live mirror), Google Slides: Text Basics (no right-click). https://iiab.live/modules/en-gcf_learn_2021/edu.gcfglobal.org/en/googleslides/text-basics/1/index.html
+- T39 GCFGlobal (iiab.live mirror), Google Slides: Arranging Objects (menu bar route only). https://iiab.live/modules/en-gcf_learn_2021/edu.gcfglobal.org/en/googleslides/arranging-objects/1/index.html
+- T40 GCFGlobal (iiab.live mirror), Google Slides: Adding Transitions and Animations. https://iiab.live/modules/en-gcf_learn_2021/edu.gcfglobal.org/en/googleslides/adding-transitions-and-animations/1/index.html
+- T41 Art of Presentations, Toolbar in Google Slides, 2023-02-24. https://artofpresentations.com/toolbar-in-google-slides/
+- T42 Art of Presentations, Slide Sorter View in Google Slides, 2023-02-24. https://artofpresentations.com/slide-sorter-view-in-google-slides/
+
+Conventions
+
+- M01 W3C WAI-ARIA Authoring Practices, Menu and Menubar Pattern. https://www.w3.org/WAI/ARIA/apg/patterns/menubar/
+- M02 W3C WAI-ARIA Authoring Practices, Menu Button Pattern. https://www.w3.org/WAI/ARIA/apg/patterns/menu-button/
+- M03 Material Components for the web, Menu README. https://raw.githubusercontent.com/material-components/material-components-web/master/packages/mdc-menu/README.md
+- M04 Material Components for the web, Dialog README. https://raw.githubusercontent.com/material-components/material-components-web/master/packages/mdc-dialog/README.md
+- M05 Material Components for the web, Snackbar README. https://raw.githubusercontent.com/material-components/material-components-web/master/packages/mdc-snackbar/README.md
+- M06 Material Components for the web, Tooltip README. https://raw.githubusercontent.com/material-components/material-components-web/master/packages/mdc-tooltip/README.md
+- M07 Material Design 3 guideline pages for menus, dialogs, snackbar and tooltips (fetched; each returned only its title, and the browser pane refused the domain): https://m3.material.io/components/menus/guidelines, https://m3.material.io/components/dialogs/guidelines, https://m3.material.io/components/snackbar/guidelines, https://m3.material.io/components/tooltips/guidelines. The Material 2 pages at https://m2.material.io/components/menus, /dialogs, /snackbars and /tooltips returned the same empty shell.
+
+Pages that could not be reached
+
+- https://www.learnfree.org/en/googleslides/ (the redirect target of edu.gcfglobal.org; 404)
+- https://iiab.live/modules/en-gcf_learn_2021/edu.gcfglobal.org/en/googleslides/getting-started-with-google-slides/1/index.html (404)
+- https://www.howtogeek.com/728650/how-to-copy-slides-to-a-different-google-slides-presentation/ (404)
+- https://support.google.com/keep/answer/7411085?hl=en (404; the Keep in Docs editors page was sought for "Save to Keep")
+
+Sibling reports and repository files
+
+- R01 docs/gslides-parity/research/01-menu-bar.md (menu bar items, Tools > Dictionary, Edit > Undo)
+- R02 docs/gslides-parity/research/02-editor-surface.md (sections 5 to 8 and 13)
+- R03 docs/gslides-parity/research/03-home-themes-layouts-io.md (Background dialog, Import slides, theme builder)
+- R04 docs/gslides-parity/research/04-present-and-shortcuts.md (shortcut tables)
+- R05 docs/gslides-parity/research/05-objects-and-format-options.md (sections A5, A9, A10, B8, C1 to C6)
+- R06 docs/gslides-parity/research/06-turboslide-inventory.md (rows 29, 56 to 68, 91, 143; sections 2.5, 2.6, 6)
+- R07 docs/gslides-parity/research/07-sales-users.md (table 1, design rules, unverified list)
+- Repository at commit 8c7056c: packages/chrome/src/Sidebar.tsx, Sidebar.css, Overlay.tsx, InsertMenu.tsx, ExportMenu.tsx, Toast.tsx, Toast.css, Tooltip.tsx, Tooltip.css, useShellKeys.ts, HistoryPanel.tsx; packages/viewer/src/InlineText.tsx; packages/schema/src/actions.ts, deck.ts, blocks.ts; docs/spec/SPEC.md sections 6.6 to 6.8; docs/EDITOR-DEPTH-STATUS.md

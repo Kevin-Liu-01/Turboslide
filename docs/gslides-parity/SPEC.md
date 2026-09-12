@@ -1,0 +1,1147 @@
+# Google Slides parity specification
+
+The one specification for the Google Slides parity round of Turboslide, written 2026-09-11 against `main` at `8c7056c`. It is the synthesis of the three design proposals in `docs/gslides-parity/design/` and the three judge reports beside them. Proposal 2 (sales first) is the spine, because two of the three judges chose it and it is the one round that ships without breaking `pnpm check`. Every graft the judges named is taken in, every idea they rejected is left out, and section 0 records each contested point with the judge who settled it. A builder who reads this document and the eleven research reports in `docs/gslides-parity/research/` (cited as R01 to R11) can build their part without opening the proposals.
+
+Kevin's directive, verbatim: "so i think when we land here we should be on a new slide, but its a template with repeated kind of slide templates you can use. but otherwise it has all the features and exact behaviors of google slides...literally search up and research everything google slidees offers and positioning of tabs to import stuff and do stuff and mimic it perfectly.then clean up our interface and make it so much easier to use, remember this is actually going to be used by majority sales in our org".
+
+## How to read this specification
+
+- Facts about Google Slides come from the research reports, which read the public pages on 2026-09-11. No Google page was opened for this specification and no account was signed in. Where a report marks a Google fact unverified, this document says so at the point of use and designs a behaviour that does not depend on it. The Sources section repeats every URL with the date the reports read it.
+- Facts about Turboslide are lines of source at `8c7056c`, named by path. `packages/schema/src/actions.ts` holds 54 action ids (the round brief said 62; the file is the authority). `packages/chrome/src/slide-templates.ts` holds 15 templates. `SCHEMA_VERSION` is 1. `ExportFormat` names `pdf` with no builder. `text.replace` is declared in `mutations.ts` and implemented in `reduce.ts` but unused by `InlineText.tsx`.
+- Status words. **Now** ships in this round. **Later** means the control is present in Google's position, disabled, with a tooltip that reads "Not available in Turboslide yet" followed by one clause saying what would make it available. **Omit** means the item is absent, and the reason is given. The counts per menu are in section 2.12.
+- Labels are Google's words in sentence case. Where Google's label names a Google service (Drive, Photos, Meet, Gemini, Keep, Sheets, Apps Script, AppSheet) the item is omitted or the Turboslide item takes a plain name. The words "Google Slides" appear only as the reference product. Icons are Heroicons 20 solid from the theme sprite; none of Google's artwork is copied.
+- Rules of the text: plain technical English, sentence case, no em dashes, no metaphors, no trailing periods on headings, full sentences in body text.
+
+## 0. The synthesis decisions
+
+Each row is a point where the proposals disagreed. The decision column is binding on the build.
+
+| # | Point | Decision | Settled by |
+| --- | --- | --- | --- |
+| 0.1 | Print on the toolbar head | Present at position 5 between Redo and Paint format (R02 section 4.1 row 5) | Judges 1 and 3 |
+| 0.2 | The bottom edge | The filmstrip and grid view toggle at the left, the Show side panel chevron at the right, nothing else; no slide counter, no zoom value (R02 section 9); the zoom value shows in the toolbar's Zoom box | Judge 1 |
+| 0.3 | Layout names and order | The first eleven entries are Google's eleven names in Google's order (R03 b.2, the PredefinedLayout reference); a labelled rule follows; the GT layouts Google lacks come after it under their GT names; the ruled rows layout is named Ruled rows, not Title and table, so it does not collide with the Table block | Judges 1 and 3 |
+| 0.4 | Apply layout and content with no home | Content that fits moves into the matching placeholder; unmatched content is appended to the last text slot on a content layout or to the plate on a picture layout; where the target has no block list (Title slide, Main point) it is dropped with a toast naming the count and one Undo through a single `slide.replace`; Apply layout never refuses and never hides content in `ext` | Judges 1, 2 and 3 |
+| 0.5 | Transition | Present and disabled at toolbar position 17, in Slide > Transition and in the filmstrip menu, with one tooltip; View > Motion and Insert > Animation are omitted, so the one stub appears in Google's three Transition positions and nowhere else | Judges 1 and 2 (stub) against judge 3 (omit); the majority holds |
+| 0.6 | The toolbar under 1100 px | The tail from position 8 collapses into a More button; nothing wraps | Judge 1 |
+| 0.7 | The right panel on a new presentation | Closed. The New slide arrow and the Layout button are the path to the layouts. Google's current default is unverified (R03 a.3) | Judge 3, recorded as decision 15.5 for Kevin because judge 1 recommended open |
+| 0.8 | The auto-title | A presentation still named Untitled presentation takes the first committed title slide heading as its name, once (R03 a.3, from Google's pages S4 and S9) | Judge 1 |
+| 0.9 | Snap to grid | Guides on, grid off by default, as Google (R02 section 6, R05 C7); View > Snap to > Grid toggles it | Judge 1 |
+| 0.10 | Shift+Enter in text | The same paragraph break as Enter until a soft break token exists (R09 unverified item 1) | Judge 1 |
+| 0.11 | The Bulleted list button | Keeps Google's label, key and position and produces the GT theme's list form, a ruled statement list (`plain`), the way Bold produces weight 500; the tooltip reads "Bulleted list (Cmd+Shift+8). The GT theme draws list bullets as ruled rows". Numbered list adds a tabular numeral (`plain.numbered`). Recorded as decision 15.1 for Kevin, with the `marker` field as the alternative | Judge 3, with judge 1's objection recorded |
+| 0.12 | Rotation and flip | Later. Arrange > Rotate is present and disabled with the tooltip "Not available in Turboslide yet. Rotation is not part of the GT theme"; Format options shows Rotate disabled; `docs/freeform.md` keeps its decision | Judges 1, 2 and 3 |
+| 0.13 | Italic and underline | Later stubs with the tooltip "Not available in Turboslide yet. The GT theme sets Inter in one style"; the export font set has no italic cut (R09 finding 7) | Judges 2 and 3 |
+| 0.14 | Groups, charts, new shape presets, word art, guides, autofit, comments, PPTX import, page setup, capitalization, special characters | Later or omitted, each with its reason in section 2; none is in R07's ten tasks | Judges 2 and 3 |
+| 0.15 | The `box` block | Stays. No fold into `shape` | Judges 1, 2 and 3 |
+| 0.16 | Schema version | Stays at 1. Every field the round adds is optional, so no migration runs and no client refuses a file. A migration test asserts the committed GT deck and template are unchanged by `migrate` | Judges 2 and 3 |
+| 0.17 | Placeholder strings in existing decks | Left as they are. The templates insert empty Texts from now on, so no new placeholder copy appears; a deck that carries the old strings keeps them and Check slides names them through `copy/contrast-pair` | Judges 2 and 3 |
+| 0.18 | Layout identity on a slide | A first class optional field `template?: LayoutId` on `SlideBase`, never `ext.layout` | Judges 2 and 3 |
+| 0.19 | Where the layout list lives | `packages/schema/src/layouts.ts`, framework free, one ordered table with a `make` per entry, read by the editor grid, `template.json`, `turboslide slide new --layout`, the MCP tool and the store | Judges 1, 2 and 3 |
+| 0.20 | The Themes panel's field | `Deck.defaults.appearance?: 'light' \| 'dark'`, never `theme.variant` | Judge 2 |
+| 0.21 | PDF | Now, through Chromium `page.pdf()` on the render worker, one slide per page, gated by a `pdftoppm` raster diff; the print preview's own Print and the browser's Save as PDF stand in if the gate fails | Judges 1, 2 and 3 |
+| 0.22 | The Download dialog | A dialog, not a toast: Perfect or Editable text with one sentence each, Include speaker notes and Include skipped slides checkboxes, a progress sentence with a time estimate, the report behind Details | Judges 1 and 3 |
+| 0.23 | Notes and skipped slides in downloads and links | Out by default; the two checkboxes put them back; the Share dialog states it. Recorded as decision 15.2 for Kevin because judge 1 recommended Google's PPTX default | Judges 2 and 3 |
+| 0.24 | Trash | A trashed deck stays until someone clicks Delete forever; no scheduled purge and no sweep inside a read | Judge 3 |
+| 0.25 | The view link | The three labelled links and the honest sentence ship now; a revocable per deck view token with Stop sharing is a named later item (R10 C3 item 6), because refusing requests without a token breaks every existing `/deck/:id` link and the Prototemplate embed | Judge 1, with judge 3's graft deferred to the next round |
+| 0.26 | Tools and Extensions naming | Tools carries Check slides and an Advanced submenu; the word Agent does not appear in the default view and the default view words test greps for it; Extensions carries one Agent access item and Embed in a site | Judges 1 and 3 |
+| 0.27 | New slide after a Title slide | Inserts Title and body rather than a second Title slide. This is judge 1's product knowledge, unverified by a public page | Judge 1 |
+| 0.28 | Retired bare letters | The editor binds no bare letter; a one time snackbar on the first press of a retired letter names the menu item that replaces it; the view route `/deck/:id` keeps its reading keys because it has no text input | Judges 1 and 3 |
+| 0.29 | The paragraph break | A second `multilineTextSchema` on `paragraph.text`, `text.text`, `box.text` and table cells; `textSchema` and every other Text keep the one line rule (SPEC 4.2 amended) | Judges 2 and 3 |
+| 0.30 | Undo granularity | `text.replace` is used by `InlineText` with a 400 ms coalescing pause, so one Cmd+Z removes one burst of typing (SPEC 6.7) | Judges 1, 2 and 3 |
+
+## 1. Screen anatomy
+
+The editor at `/edit/:deckId` and the draft at `/new`, default state: nothing selected, the filmstrip in thumbnail density, the notes pane at its one line height, the right panel closed. Sizes are CSS pixels at a 1440 by 900 window. Google publishes no pixel sizes; R02 section 11 estimates the three top rows at about 40, 24 and 40 px and the filmstrip at a fifth of the width, and the values below round those to the chrome's 4 px rhythm and Prototemplate's 32 px control height.
+
+```
+1440 x 900, right panel closed
++------------------------------------------------------------------------------------------------+
+| [GT] Untitled presentation      (cloud) All changes saved (clock)   [ Slideshow |v ] [ Share ] |  title row 44
+|  File  Edit  View  Insert  Format  Slide  Arrange  Tools  Extensions  Help                 [^] |  menu bar 28
+| [search] [+|v] [undo] [redo] [print] [paint] [Fit v] | [select] [T] [img v] [shape v] [line v] |  toolbar 40
+|  [comment] | Background  Layout v  Theme  Transition                                           |
++-----------+------------------------------------------------------------------------------------+
+| 1 [=====] |                                                                                    |
+|   [thumb] |          +--------------------------------------------------------+                |
+|           |          |                                                        |                |
+|           |          |          sheet 1600 x 900 at k = 0.705 (1128 x 634)    |                |
+|           |          |                                                        |                |
+|           |          +--------------------------------------------------------+                |
+|           |                                                                                    |
+|           |  ......                                                                            |
+|           |  Click to add speaker notes                                                        |  notes 64
++-----------+------------------------------------------------------------------------------------+
+| [filmstrip][grid]                                                                        [ > ] |  bottom bar 32
++------------------------------------------------------------------------------------------------+
+  256                                 canvas 1184 wide, 692 tall
+```
+
+With the right panel open the canvas is 864 wide and the sheet scales to k = 0.505 (808 by 454). The sheet scale is `k = min((stage width - 56) / 1600, (stage height - 56) / 900)` at Fit; a zoom value replaces the fit value (section 2.3).
+
+### 1.1 Regions
+
+| Region | Size | Contents | What changes from `8c7056c` |
+| --- | --- | --- | --- |
+| Title row | 44 tall, full width | Left: the GT mark as a link to `/decks`; the title field (click to rename, Enter commits, Esc restores, `deck.rename`); the save state as a cloud glyph plus words ("All changes saved", "Saving…", "Not saved yet" on the draft, "Couldn't save, retrying" on a refused write); the Last edit clock glyph whose tooltip reads "Last edit 2 minutes ago" and which opens Version history. Right: a Show all comments glyph (Later, disabled), Slideshow as a split button (the one solid button in the row), Share. No star, folder, avatar, Meet, Record or Gemini | New (`TitleRow.tsx`). The deck name leaves the toolbar (`DeckName.tsx`); the status chip's revision, lease and lint parts leave the default view (`StatusChip.tsx`) |
+| Menu bar | 28 tall | File, Edit, View, Insert, Format, Slide, Arrange, Tools, Extensions, Help, left aligned, 13 px Inter, 12 px horizontal padding per title; the Hide the menus chevron at the far right (Ctrl+Shift+F) | New (`MenuBar.tsx`, `menus/model.ts`, `Menu.tsx`) |
+| Toolbar | 40 tall | A fixed head and a contextual tail in Google's order (section 3); 32 px `ToolButton` controls on a 40 px row; two 1 px `--pt-hair` dividers 20 px tall, after Zoom and after Insert comment | Rebuilt (`Toolbar.tsx`). Edit and View, Twin, Lint, Source, Presentation, Present, Export, the mode Seg, the theme toggle, Fullscreen, Copy link, Help, Previous, Next and the count leave this row; their new homes are in section 2 and appendix A |
+| Filmstrip | 256 wide | One 16:9 card per slide (200 by 112) in a `--pt-edge` frame with its number in a 28 px gutter in tabular figures; the current card ringed in `--pt-ink` at 2 px; skipped cards at 40 percent opacity with an eye-slash glyph top right; passive section labels when the deck has more than one section; drag to reorder; the right-click menu of section 4.2; Shift and Cmd multi-select | `Sidebar.tsx` keeps its tree and drops the density Seg, the filter row, the count, the kind glyph, the lint badge, the lease dot, the hover preview and the row menu from the default view |
+| Canvas | the remaining width and height | The sheet at Fit or at a zoom value, 28 px padding; the selection ring and eight square handles from `Overlay.tsx`; ink alignment lines while dragging (Google's are red; the chrome has no red); the marquee on empty sheet | The selection chip no longer prints `type · id` |
+| Speaker notes | 64 tall by default, drag between 0 and 40 percent of the window height | A textarea bound to `slide.notes`, placeholder "Click to add speaker notes", a three dot drag handle on the divider, double click on the handle toggles the default height, View > Show speaker notes toggles it, Cmd+Option+Shift+S focuses it | New (`NotesPane.tsx`); the Notes textarea leaves the inspector |
+| Right panel | 320 wide, closed by default | One slot: Themes, Format options, Version history, Check slides. Opens from a toolbar button, a menu item or a right-click item; an X at the top closes it; one panel at a time (R03 finding 5); the control that opened it stays pressed while it is open | The Inspector (460 px, always open in edit mode) becomes Format options at 320 px on demand; sections regrouped in section 3.9 |
+| Bottom bar | 32 tall | Left: the filmstrip view and grid view toggle (two `ToolButton`s). Right: the Show side panel chevron that reopens the last right panel. Nothing else (R02 section 9) | New (`BottomBar.tsx`); replaces the toolbar's Previous, count and Next and the 2 px progress line |
+| Compact mode | Ctrl+Shift+F or the chevron | Hides the menu bar and the toolbar; the title row stays with a Show the menus chevron at its right; Esc restores | New |
+| Snackbar | bottom left, 8 px above the bottom bar, 5 s | One sentence, at most one action (Undo), an X; Esc dismisses while its action has focus (R08 B11; Google's exact position is unverified) | Replaces the 1.4 s toast plate (`Toast.tsx`) |
+
+### 1.2 Tokens and lines
+
+`packages/chrome/src/tokens.css` gains `--pt-title-h: 44px`, `--pt-menu-h: 28px`, `--pt-tool-h: 40px`, `--pt-notes-h: 64px`, `--pt-status-h: 32px`, `--pt-menu-w: 220px`; `--pt-panel-w` becomes `320px`; `--pt-sb-w` is 256 in the editor (the outline density retires from the default view). `--pt-bar-h` stays for the view route `/deck/:deckId`, which keeps today's viewer shell this round because it is the reading surface and the Prototemplate embed.
+
+The chrome line law holds (SPEC 2.2, every rule 1 px in one of three roles, none doubled within 4 px): the title row draws its bottom edge in `--pt-hair`; the menu bar draws no rule; the toolbar draws its bottom edge in `--pt-hair`; the filmstrip draws its right edge; the right panel its left edge; the notes divider is `--pt-hair` with the drag handle on it; the bottom bar draws `--pt-hair` above itself. `turboslide lint --chrome` at 1440, 1280 and 390 in both themes is the check (section 14).
+
+### 1.3 Widths
+
+At or below 1100 px the toolbar tail from position 8 collapses into a More button whose menu lists the same controls with their labels; the head (positions 1 to 7) never collapses. At or below 900 px the filmstrip becomes the overlay it already is (`Sidebar.css`), the right panel becomes a sheet over the canvas, and the notes pane hides by default. Nothing wraps to a second toolbar row.
+
+### 1.4 Appearance
+
+The editor stage, the thumbnails, present mode, the view route and the export default follow `deck.defaults.appearance` (section 5.7). The chrome follows the deck's appearance by default; View > Appearance > Light, Dark, Match the presentation is a Turboslide item for the chrome alone and is stored per browser. The former theme toggle button leaves the toolbar; this ends "Theme means two things" (R06 section 7 item 24).
+
+## 2. The menu bar
+
+Every Google menu item from R01, in Google's reported order, mapped to a Turboslide action, panel or route. "Action" names an id in `packages/schema/src/actions.ts`; an id marked new is one of the fourteen this round adds (section 7.5). Shortcuts are Google's (R01, R04 Part B), Mac form first; Windows uses Ctrl for Cmd and Alt for Option unless a row says otherwise. Every context menu item and every toolbar control is also in the menu bar, and the menu bar carries nothing Search the menus does not find (R07 rule 2).
+
+### 2.0 The title row controls above the menu bar
+
+| Google control | Turboslide | Round | Note |
+| --- | --- | --- | --- |
+| App icon | The GT mark, a link to `/decks` | Now | The Sidebar's Every deck link moves here |
+| Title field, Untitled presentation | `deck.rename` on Enter or blur; Esc restores | Now | `DeckName.tsx` moves into `TitleRow.tsx`; the auto-title of section 6.3 applies |
+| Star | none | Omit | Starring needs a person to star for; there are no accounts (R10 B1) |
+| Move (folder) | none | Omit | No folders |
+| Document status (cloud) | The save words | Now | "All changes saved" after every acknowledged write; "Saving…" while the queue is not empty; "Couldn't save, retrying" during the six retries of `edit.$deckId.tsx`; "Not saved yet" on the draft before the first edit |
+| Last edit (clock) | Opens Version history in the right panel | Now | Tooltip "Last edit 2 minutes ago"; the author label shows only when it is not the default `studio` |
+| Show all comments | none | Later | Comments are document data that can ship without accounts (R10 C3 item 4) and are not in the ten tasks; tooltip "Not available in Turboslide yet. Comments arrive in the next round" |
+| Meet, Record | none | Omit | Google services |
+| Slideshow with the arrow | `view.present`; the arrow's menu is section 9.2 | Now | The split button; Cmd+Enter (Windows Ctrl+F5) |
+| Share | The Share dialog (section 6.6) | Now | |
+| Account avatar, Ask Gemini | none | Omit | No accounts; agents reach the deck through Extensions > Agent access |
+
+### 2.1 File
+
+| Google item | Turboslide | Round | Note |
+| --- | --- | --- | --- |
+| New > Presentation | Opens `/new` in a new tab | Now | Section 6.1 |
+| New > From template gallery | Opens `/decks#templates` in a new tab (the home page scrolled to the template strip) | Now | The strip is the gallery; no separate page this round |
+| Open… (Cmd+O) | The Open dialog: a search field and this studio's presentations newest first with thumbnails, an Upload tab that takes a Turboslide bundle (.zip), Open | Now | `deck.list` (new) and the bundle upload route |
+| Import slides | Step 1: Presentations (this studio's decks) or Upload (a .zip bundle; a .pptx is refused with the sentence of section 12); step 2: slide thumbnails with All, None, Back, Import slides | Now | `slide.import` (new) copies the slides with fresh ids and their assets after the current slide. Keep original theme is omitted: one theme |
+| Make a copy > Entire presentation | The Copy dialog: Name prefilled "Copy of <title>", Remove speaker notes, Make a copy; the copy opens in a new tab | Now | `deck.copy` (new) |
+| Make a copy > Selected slides | The same dialog over the filmstrip selection | Now | `deck.copy` with `slideIds`; disabled unless the selection is a proper subset of the deck |
+| Share > Share with others | The Share dialog | Now | Section 6.6 |
+| Share > Publish to web | The Publish dialog: Link tab and Embed tab | Now | Section 6.6; Auto-advance slides and Start slideshow as soon as the player loads are Later inside the dialog; Stop publishing is omitted with the sentence "Every Turboslide presentation is reachable by anyone who has its link" |
+| Email > Email this file, Email collaborators | none | Omit | No mail service; Share > Copy link is the path |
+| Download > Microsoft PowerPoint (.pptx) | The Download dialog (section 6.7), Perfect by default | Now | `export.run` |
+| Download > ODP Document (.odp) | none | Omit | No ODP writer and no sales demand in R07 |
+| Download > PDF Document (.pdf) | The render worker's PDF, one slide per page (section 7.6) | Now | `export.run` with `format: 'pdf'`; the gate and the fallback are in section 7.6 |
+| Download > Plain Text (.txt) | Every slide's texts in order, then its notes when asked | Now | `export.text` (new) over `blockTexts` and `slideTexts` |
+| Download > JPEG image (.jpg, current slide) | `render.slide` at 2x, JPEG quality 92 | Now | The render route gains `format: 'jpg'` |
+| Download > PNG image (.png, current slide) | `render.slide` at 2x | Now | Exists |
+| Download > Scalable Vector Graphics (.svg, current slide) | none | Omit | The sheet carries rasters (icons, marks, pictures, dithers); an SVG wrapping rasters misrepresents the file type |
+| (Turboslide) Download > Web page (.html) | `build.run`, the standalone file | Now | Not a Google format; kept as the last item but one |
+| (Turboslide) Download > Turboslide bundle (.zip) | `deck.pack` through the bundle route | Now | Last item; the file the Open and Import slides Upload tabs read |
+| Rename | Focuses the title field | Now | |
+| Move, Add shortcut to Drive | none | Omit | No folders, no Drive |
+| Move to trash | `deck.trash` (new), the snackbar "Moved to trash · Undo" and navigation to `/decks` | Now | Section 6.4 |
+| Version history > Name current version | A small dialog: Name, Save | Now | `version.save` with the note |
+| Version history > See version history (Cmd+Option+Shift+H) | The Version history panel: versions grouped by day, Only show named versions, Restore this version, per version More with Name this version and Make a copy | Now | `version.list`, `version.restore`, `deck.copy` at a version; Show changes is Later inside the panel (`diff.run` has no editor handler, R06 section 3) |
+| Approvals | none | Omit | Workspace only |
+| Make available offline | none | Omit | Present mode keeps working after load without the network (R07 rule 29) |
+| Details | A small dialog: title, slides, sections, created, last edit | Now | `deck.info`; the revision number shows here and nowhere else in the default view |
+| Language | none | Omit | One face and English copy rules; spelling follows the browser |
+| Page setup | Disabled | Later | Tooltip "Not available in Turboslide yet. The GT theme is 16:9 at 1600 by 900" (R03 finding 11) |
+| Print settings and preview | The print preview at `/print/:deckId` (section 6.8) | Now | Handout layouts are Later inside its layout dropdown |
+| Print (Cmd+P) | Opens the print preview | Now | |
+
+### 2.2 Edit
+
+| Google item | Turboslide | Round | Note |
+| --- | --- | --- | --- |
+| Undo (Cmd+Z) | The client history's inverse write | Now | Exists on the key; gains the menu item and the toolbar button |
+| Redo (Cmd+Y or Cmd+Shift+Z) | Same | Now | Cmd+Y is new |
+| Cut (Cmd+X) | Slides in the filmstrip, blocks on the canvas, text in a run | Now | An in-page clipboard of slide or block JSON plus the system clipboard as `text/plain` with the prefix `turboslide:v1:` so paste works across tabs; a cut is a copy plus `slide.remove` or `block.remove` |
+| Copy (Cmd+C) | Same | Now | |
+| Paste (Cmd+V) | Slides after the selected slide (`slide.insert` with fresh ids, assets ensured through `slide.import` when the source is another deck); blocks onto the current slide (`block.insert`; on a freeform slide at the source box, offset 16 px when the source is the same slide); text at the caret; an image on the clipboard becomes a picture | Now | One theme, so R08 A25's link prompt is moot |
+| Paste without formatting (Cmd+Shift+V) | Plain text at the caret | Now | Today's paste path with the label |
+| Delete | The selected slides or blocks, or text | Now | No confirmation; the snackbar "Slide deleted · Undo" |
+| Duplicate (Cmd+D) | `slide.duplicate` (new) in the filmstrip, `block.duplicate` (new) on the canvas | Now | One action on every transport |
+| Select all (Cmd+A) | Every block on the slide when the canvas has focus; every slide when the filmstrip has focus; the run's text while editing | Now | |
+| Select none | Clears the selection | Later | Google's chord (hold Ctrl+Cmd, press u then a) is rarely known; Esc does it |
+| Find and replace (Cmd+Shift+H, Windows Ctrl+H) | The dialog: Find, Replace with, Match case, Prev, Next, Replace, Replace all | Now | `text.replaceAll` (new) over every Text and note in one write; Cmd+F opens the lighter Find bar over the same index with highlights in the filmstrip; Cmd+G and Cmd+Shift+G step the matches |
+
+### 2.3 View
+
+| Google item | Turboslide | Round | Note |
+| --- | --- | --- | --- |
+| Slideshow (Cmd+Enter, Windows Ctrl+F5) | `view.present` from the current slide | Now | |
+| Motion | none | Omit | Section 0.5; the one Transition stub sits in Google's three Transition positions |
+| Theme builder | none | Omit | The GT theme is edited in the repository (`packages/theme`); Slide > Edit theme is the Later stub |
+| Grid view | The existing Grid mode (`GridView.tsx`) | Now | A check item; the bottom bar toggle does the same |
+| Zoom > Zoom in (Cmd and plus), Zoom out (Cmd and minus), Fit, 50%, 100%, 200% | `view.zoom` (new): a zoom state on the stage; Fit is the default; Cmd+0 is 100% | Now | The toolbar Zoom box shows the value and accepts 25 to 400 typed |
+| Show ruler | none | Later | Tooltip "Not available in Turboslide yet. Rulers arrive with indents" |
+| Guides > Show guides, Add vertical guide, Add horizontal guide, Edit guides, Clear guides | none | Later | User guides need `Deck.guides` (section 7.7); the snap guides during a drag exist |
+| Snap to > Guides | The rails, content edges and centres, seams and plate edges | Now | On by default |
+| Snap to > Grid | The 8 px grid | Now | Off by default (section 0.9); stored per browser |
+| Comments > Hide, Minimize, Expand | none | Later | With comments; one grey row |
+| Live pointers | none | Omit | Needs presence (R10 C1) |
+| Show speaker notes | Toggles the notes pane | Now | |
+| Show filmstrip | Toggles the filmstrip | Now | `view.sidebar` |
+| Mode > Editing, Viewing | Editing is the editor; Viewing hides handles, the Format options button and the notes pane's edit state, as `?edit=0` does today | Now | The Edit and View Seg leaves the toolbar; Commenting is omitted until comments exist |
+| Full screen (Ctrl+Shift+F) | Compact mode; Esc restores | Now | Google names the same key for both labels (R01 View) |
+| (Turboslide) Show sections | Toggles the section labels in the filmstrip | Now | Checked by default when the deck has more than one section |
+| (Turboslide) Appearance > Light, Dark, Match the presentation | The chrome's appearance, stored per browser | Now | Section 1.4 |
+
+### 2.4 Insert
+
+| Google item | Turboslide | Round | Note |
+| --- | --- | --- | --- |
+| Image > Upload from computer | The OS file picker; one step; the picture lands on the slide | Now | `asset.add` (alt from the file name without its extension, role `capture`, source `file`, up to 25 MB) then `block.insert` of a `shot`, or `slide.set /picture/asset` on a picture layout; alt text is edited in Format options > Alt text |
+| Image > Stock & web, Drive & Photos, Camera | none | Omit | Google services and the licensing hazard R07 names |
+| Image > By URL | A field with a preview | Now | `asset.add` from the URL |
+| (Turboslide) Image > From this presentation | The asset picker | Now | The deck's pictures |
+| Text box | A `text` block: a click on a freeform slide places a 480 by 64 box at the click and a drag draws one; on a grammar slide the box lands in the slot under the pointer | Now | The caret is active at once (R09 A1) |
+| Audio, Video | none | Omit | No media primitive; not in the ten tasks; the Perfect export cannot carry them |
+| Shape > Shapes | Rectangle, Rounded rectangle, Ellipse (the `shape` block) | Now | The five existing kinds; more presets are Later (section 7.7) |
+| Shape > Arrows | Arrow | Now | Exists |
+| Shape > Callouts | none | Later | Tooltip "Not available in Turboslide yet. Callouts need a pointer handle" |
+| Shape > Equation | none | Omit | Not in the theme's grammar |
+| Table | A grid picker (hover picks columns by rows, up to 20 by 20) that inserts a `table` block | Now | Section 7.3 |
+| Chart > Bar, Column, Line, Pie | none | Later | One grey row; tooltip "Not available in Turboslide yet. Use a table for the numbers this quarter"; the design is in section 7.7 |
+| Chart > From Sheets | none | Omit | A Google service |
+| Diagram | none | Later | The `dia` block exists; a picker of the GT diagram shapes is content work |
+| Word art | none | Omit | The Big number layout and the ladder's 88 px size are the theme's answer (R11 A11) |
+| Line > Line, Arrow | The `shape` block's line and arrow kinds, and the `rule` block | Now | |
+| Line > Elbow connector, Curved connector, Curve, Polyline, Scribble | none | Omit | Not in the theme's stroke grammar (SPEC 2.1) |
+| Special characters | none | Omit | The operating system's character picker works in the editable run |
+| Animation | none | Omit | Section 0.5 |
+| Link (Cmd+K) | The link popover on a text selection or a selected block: Text, Link (URL), Slides in this presentation (Next, Previous, First, Last, then each slide by title), Apply; Change and Remove on a linked run or block | Now | Run links exist (`[text](url)`); slide targets `#s/<slideId>`, `#next`, `#previous`, `#first`, `#last` are new; block links are `BlockBase.link` (section 7.2) |
+| Comment (Cmd+Option+M) | none | Later | With comments |
+| New slide (Ctrl+M on every platform) | `slide.new` (new) with the current slide's layout, after the current slide | Now | Section 5.3 |
+| Slide numbers | A dialog: On, Off, Skip title slides, Apply | Now | Writes `deck.defaults.counter` through `deck.set` |
+| Placeholder | none | Omit | Theme builder only |
+| Templates | none | Later | Tooltip "Not available in Turboslide yet. A sales starter deck arrives in the next round" |
+| Building blocks, Speaker spotlight | none | Omit | Table, list and Big number cover the agendas, lists and statistics Google lists; Meet only |
+| (Turboslide) Icon | The Heroicons picker inserting an `icon` block | Now | Exists |
+| (Turboslide) Material | The material picker inserting a `material` block | Now | Exists; the last item |
+
+### 2.5 Format
+
+| Google item | Turboslide | Round | Note |
+| --- | --- | --- | --- |
+| Text > Bold (Cmd+B) | The weight 500 run (`*text*`) on a selection; `typography.weight` 500 on a selected block | Now | Relabelled from Weight 500 run |
+| Text > Italic (Cmd+I) | none | Later | Section 0.13 |
+| Text > Underline (Cmd+U) | none | Later | Same |
+| Text > Strikethrough (Cmd+Shift+X) | The `no` flag on a ruled list item | Now | Inside a run it is Later; the item is enabled only on a list item |
+| Text > Superscript, Subscript | none | Omit | Not in the type model |
+| Text > Size > Increase font size (Cmd+Shift+>), Decrease font size (Cmd+Shift+<) | One step along the type ladder on `typography.size` | Now | Heading, paragraph, text, box and table blocks |
+| Text > Capitalization | none | Omit | The copy rules want sentence case |
+| Align & indent > Left, Center, Right (Cmd+Shift+L, E, R) | `typography.align` | Now | |
+| Align & indent > Justified | none | Omit | `TYPE_ALIGNS` has no justify; the grammar sets ragged right |
+| Align & indent > Increase indent, Decrease indent (Cmd+], Cmd+[) | none | Later | With list levels; one grey row |
+| Align & indent > Indentation options | none | Omit | No indent model |
+| Line & paragraph spacing > Single, 1.15, 1.5, Double, Custom spacing | `typography.leading` steps shown by value (the `TYPE_LEADING` steps) | Now | Google's label, the theme's steps |
+| Bullets & numbering > Bulleted list (Cmd+Shift+8) | The selected paragraph or text block becomes a ruled statement list (`plain`), one item per paragraph; on a list, nothing changes | Now | Section 0.11 |
+| Bullets & numbering > Numbered list (Cmd+Shift+7) | The same `plain` block with `numbered: true` | Now | Section 7.2 |
+| Bullets & numbering > List options | none | Omit | |
+| Table > Insert row above, Insert row below, Insert column left, Insert column right, Delete row, Delete column, Delete table, Distribute rows, Distribute columns | The table block's nine commands, one `block.set` each | Now | Enabled with a cell selected; also on the cell right-click menu |
+| Table > Merge cells, Unmerge cells | none | Later | Spans are a second step; one grey row |
+| Image > Crop image | The `shot` crop anchor as two choices, Top and Centre | Now | Free crop offsets are Later; the tooltip says "Crop to the top or the centre" |
+| Image > Mask image | none | Omit | Not in the grammar |
+| Image > Replace image | Upload from computer, By URL, From this presentation | Now | `block.set /asset` or `slide.set /picture/asset`; a drop on the image does the same |
+| Image > Reset image | none | Later | Needs crop offsets to reset |
+| Image > Image options | Format options at the picture sections | Now | |
+| Borders & lines > Border color, Border weight | `stroke` and `strokeWidth` on box and shape; `border` on shot; `weight` on rule | Now | |
+| Borders & lines > Border dash | none | Later | The stroke grammar is solid |
+| Borders & lines > Line start, Line end | `arrowheads` none, end, both | Now | Lines and arrows |
+| Format options | The right panel (section 3.9) | Now | |
+| Clear formatting (Cmd+\) | Removes `typography`, `color`, `fill`, `stroke` and `strokeWidth` overrides in one write | Now | |
+
+Format carries six grey rows (Italic, Underline, the indent pair, Border dash, Merge and Unmerge, Reset image); they are one subject, the text and image extras the GT theme does not have, and Format is the one menu allowed more than four (section 2.12).
+
+### 2.6 Slide
+
+| Google item | Turboslide | Round | Note |
+| --- | --- | --- | --- |
+| New slide (Ctrl+M) | `slide.new` | Now | |
+| Duplicate slide (Cmd+D) | `slide.duplicate` | Now | |
+| Delete slide | `slide.remove` | Now | |
+| Skip slide | `slide.skip` (new); the item reads Unskip slide on a skipped slide | Now | Section 7.2 |
+| Move slide > Move slide up, Move slide down, Move slide to beginning, Move slide to end (Cmd+Up, Cmd+Down, Cmd+Shift+Up, Cmd+Shift+Down) | `slide.move` | Now | Disabled at the ends |
+| Change background | On Section header, Caption and Closing: the Replace image submenu for the picture. Elsewhere disabled with the tooltip "This layout has no background. Use Section header, Caption or Closing for a full picture" | Now | The grammar has no per slide background and the theme's paper is the background |
+| Apply layout | The layout grid (section 5) | Now | `slide.applyLayout` (new) |
+| Transition | Disabled | Later | Tooltip "Not available in Turboslide yet. The GT theme presents still slides" |
+| Edit theme | Disabled | Later | Tooltip "Not available in Turboslide yet. The GT theme is edited in the repository" |
+| Change theme | The Themes panel | Now | Section 5.7 |
+
+### 2.7 Arrange
+
+On a freeform slide every item acts on the selection. On a grammar slide (cols, split, center, left-mid, stack) Align, Distribute and Center on page are disabled with the tooltip "Blocks on this layout line up automatically. Choose the Blank layout to place them by hand", and Order moves the block within its slot.
+
+| Google item | Turboslide | Round | Note |
+| --- | --- | --- | --- |
+| Order > Bring to front (Cmd+Shift+Up), Bring forward (Cmd+Up), Send backward (Cmd+Down), Send to back (Cmd+Shift+Down) | `block.order` front, forward, backward, back on freeform; `block.move` one place within the slot on grammar slides | Now | front and back are unbound today (R06 row 87); moves with no effect are disabled |
+| Align > Left, Center, Right, Top, Middle, Bottom | `block.align` | Now | Two or more blocks |
+| Distribute > Horizontally, Vertically | `block.distribute` | Now | Three or more blocks |
+| Center on page > Horizontally, Vertically | `block.align` to the content box centre | Now | |
+| Rotate > Rotate clockwise 90°, Rotate counter-clockwise 90°, Flip horizontally, Flip vertically | none | Later | Section 0.12; one grey row |
+| Group (Cmd+Option+G), Ungroup | none | Later | Tooltip "Not available in Turboslide yet. Select several blocks and move them together"; one grey row |
+
+### 2.8 Tools
+
+| Google item | Turboslide | Round | Note |
+| --- | --- | --- | --- |
+| Spelling > Spell check | none | Later | Tooltip "Not available in Turboslide yet. Your browser underlines misspellings and offers suggestions on right-click" |
+| Spelling > Underline errors | Toggles `spellcheck` on the editable run and the notes pane | Now | On by default; `InlineText.tsx` sets it false today |
+| Spelling > Personal dictionary | none | Omit | The browser's dictionary applies |
+| Explore | none | Omit | Retired by Google in 2024 (R02 8.6) |
+| Linked objects, Dictionary, Q&A history, Dictate speaker notes, Accessibility settings, Activity dashboard | none | Omit | No linked sources; Google services; the browser's screen reader works on the DOM; no identity |
+| Preferences | none | Later | Autofit and autocorrect preferences arrive with autofit |
+| (Turboslide) Check slides | The lint panel in the right slot, titled "Suggestions for this slide": one row per finding in prose with Fix where a fix exists, a count in the panel header only | Now | `lint.run`, `fix.run`; nothing about it is on the toolbar or in the filmstrip |
+| (Turboslide) Advanced > Show source | The source drawer | Now | No key |
+| (Turboslide) Advanced > Light and dark side by side | The twin stage | Now | No key |
+| (Turboslide) Advanced > Show suggestion marks on the slide | The lint overlay | Now | |
+| (Turboslide) Advanced > Show slide and block ids | Restores the `type · id` chip, the id tooltips and the revision in the save word's tooltip | Now | Off by default |
+| (Turboslide) Advanced > Render this slide | `render.slide` | Now | The former row menu item |
+| (Turboslide) Advanced > Change history | The History panel with Undo to here | Now | |
+| (Turboslide) Advanced > Show sections as a tree | The collapsible section tree with counts | Now | |
+| (Turboslide) Advanced > Read as a book | The Book view | Now | The B key retires |
+| (Turboslide) Advanced > Pictures and materials | The Material and Dither sections as a panel | Now | |
+| (Turboslide) Advanced > Run an action… | The full command palette with the Actions group | Now | |
+
+### 2.9 Extensions
+
+| Google item | Turboslide | Round | Note |
+| --- | --- | --- | --- |
+| Add-ons > Get add-ons, Manage add-ons | none | Omit | No marketplace |
+| Apps Script, AppSheet | none | Omit | Google services; their names are not reused for unrelated things (section 0.26) |
+| (Turboslide) Agent access | One dialog: the MCP address (`/mcp?deck=<id>`), the API address (`/api/actions`), the `turboslide deck push` and `pull` commands with this deployment's URL, a Copy button each, and the sentence "A token is required and is never shown here" | Now | The Connect card leaves `/decks` and lives here |
+| (Turboslide) Embed in a site | The Publish dialog's Embed tab | Now | The Prototemplate iframe's entry point |
+
+### 2.10 Help
+
+| Google item | Turboslide | Round | Note |
+| --- | --- | --- | --- |
+| Search the menus (Option+/, Windows Alt+/ or Alt+Z) | The command palette filtered to menu items: label, menu path, key; Enter runs the item | Now | The Slides and Layouts groups stay; the Actions group moves to Tools > Advanced > Run an action…; Cmd+K becomes Insert link |
+| Help | A dialog with the ten tasks as one line how-tos and a link to `docs/` | Now | |
+| Training, Updates | none | Omit | |
+| Help Turboslide improve | none | Later | Decision 15.7 for Kevin: where feedback goes |
+| Privacy Policy, Terms of Service | none | Omit | |
+| Keyboard shortcuts (Cmd+/) | The shortcuts dialog with a search box and Google's groups (section 10) | Now | `HelpCard.tsx` rebuilt from the menu model |
+
+### 2.11 Menu behaviour
+
+From R01 and R08 Part B, the WAI-ARIA menubar pattern: click opens a menu; with one open, hover switches menus and Left and Right arrows do the same; Up and Down walk items; a submenu opens on hover after 120 ms or at once from Right or Enter, with focus on its first item; Esc closes one level and returns focus to the parent item, a second Esc closes the menu and returns focus to the title; Tab closes everything; every item shows its icon on the left and its key on the right in titanium; disabled items stay visible and grey and are skipped by the arrows; the underlined letter of an item runs it; access keys are Google's (Mac Ctrl+Option plus F, E, V, I, S, O, R, T, H; Windows Alt plus the letter in Chrome; Extensions takes Ctrl+Option+X because Google publishes none). Menus are 220 px wide (`--pt-menu-w`), items 28 px tall, 13 px Inter, a 16 px icon slot; dividers are 1 px `--pt-hair` between groups.
+
+### 2.12 The counts
+
+Counting the rows of the tables above (a row may carry several Google items, for example the four Move slide items).
+
+| Menu | Now | Later | Omit |
+| --- | --- | --- | --- |
+| Title row | 6 | 1 | 6 |
+| File | 24 | 1 | 9 |
+| Edit | 9 | 1 | 0 |
+| View | 12 | 3 | 3 |
+| Insert | 13 | 5 | 11 |
+| Format | 16 | 6 | 7 |
+| Slide | 8 | 2 | 0 |
+| Arrange | 4 | 2 | 0 |
+| Tools | 12 | 2 | 4 |
+| Extensions | 2 | 0 | 2 |
+| Help | 3 | 1 | 3 |
+| Total | 109 | 24 | 45 |
+
+Twenty of the Now rows are Turboslide additions Google does not have (Show sections, Appearance, From this presentation, Icon, Material, Check slides and the nine Advanced rows, Agent access, Embed in a site, the two extra Download formats). No menu other than Format carries more than four grey rows; Format's six are one subject.
+
+### 2.13 The menu model as data
+
+`packages/chrome/src/menus/model.ts` holds every row of sections 2.0 to 2.10 as data:
+
+```ts
+export type MenuEffect =
+  | { kind: 'action'; id: ActionId }
+  | { kind: 'dialog'; title: string }
+  | { kind: 'panel'; title: string }
+  | { kind: 'route'; path: string; newTab?: true }
+  | { kind: 'toggle'; setting: string }
+  | { kind: 'submenu' }
+  | { kind: 'client'; handler: string }; // undo, redo, clipboard, zoom
+
+export type MenuItem = {
+  id: string; // 'file.download.pptx'
+  label: string; // Google's label in sentence case
+  google?: string; // Google's own label when it differs, for the completeness test
+  key?: { mac: string; win: string };
+  icon?: IconName;
+  status: 'now' | 'later' | 'omit';
+  stubReason?: string; // the clause after "Not available in Turboslide yet"
+  effect?: MenuEffect;
+  enabled?: (ctx: MenuContext) => boolean;
+  items?: MenuItem[];
+  turboslide?: true; // an item Google does not have
+};
+```
+
+The menu bar, the context menus (section 4), Search the menus, the shortcuts dialog (section 10) and the parity audit (section 14.4) are generated from this one table; nothing draws a menu item that is not in it. `menu-model.test.ts` asserts every Google item named in R01 (a fixture of Google's labels per menu, `packages/chrome/src/menus/__fixtures__/google-menus.json`, transcribed from R01) is present in the model with a status, that every `now` item has an effect, that every `later` item has a `stubReason`, and that every `omit` item has no effect.
+
+## 3. The toolbar
+
+Google's order from R02 section 4.1. The head order is attested by two sources as a left to right walk; the order between Zoom and Background is corroborated by the screenshots the report describes and not stated as a list by a Google page (R02 section 13). Every button is a `ToolButton` with the Tooltip primitive reading the label and the key and nothing else (no action id, no pointer). Icons are Heroicons 20 solid names; the sprite gains the ones marked new.
+
+### 3.1 The fixed head, and the tail with nothing selected
+
+| # | Button | Icon | Turboslide | Round | Note |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Search the menus (Option+/) | magnifying-glass | The palette filtered to menu items | Now | The ⌘K pill leaves |
+| 2 | New slide, with the New slide with layout arrow (Ctrl+M) | plus, chevron-down | `slide.new` with the current layout; the arrow opens the layout grid | Now | The one split button on the toolbar |
+| 3 | Undo (Cmd+Z) | arrow-uturn-left | The client history | Now | New button |
+| 4 | Redo (Cmd+Y) | arrow-uturn-right | The client history | Now | New button |
+| 5 | Print (Cmd+P) | printer | The print preview | Now | Section 0.1 |
+| 6 | Paint format (Cmd+Option+C, Cmd+Option+V) | paint-brush (new) | Copies `typography`, `color`, `fill`, `stroke`, `strokeWidth` from the selection and applies them to the next clicked block in one `block.set` per field; double click keeps it armed; Esc disarms | Now | A composition of existing writes |
+| 7 | Zoom, reading Fit | a text button "Fit ▾" | `view.zoom`: Fit, 50%, 100%, 200%, or a typed value 25 to 400 | Now | The value shows here and nowhere else (section 0.2) |
+| | divider | | | | |
+| 8 | Select | cursor-arrow-rays | The default pointer; pressed after a draw tool finishes | Now | |
+| 9 | Text box | a T glyph (new) | `insert.block.text` | Now | |
+| 10 | Insert image ▾ | photo, chevron-down | Upload from computer, By URL, From this presentation | Now | |
+| 11 | Insert shape ▾ | square-2-stack, chevron-down | Rectangle, Rounded rectangle, Ellipse, Arrow; Callouts disabled | Now | |
+| 12 | Insert line ▾ | minus, chevron-down | Line, Arrow, Rule | Now | |
+| 13 | Insert comment (Cmd+Option+M) | chat-bubble-left | none | Later | Tooltip "Insert comment · Not available in Turboslide yet. Comments arrive in the next round" |
+| | divider | | | | |
+| 14 | Background | a text button | Picture layouts only; disabled otherwise with the tooltip of section 2.6 | Now | |
+| 15 | Layout ▾ | a text button, chevron-down | The layout grid, applied to every selected slide | Now | |
+| 16 | Theme | a text button | The Themes panel | Now | |
+| 17 | Transition | a text button | none | Later | Tooltip "Transition · Not available in Turboslide yet. The GT theme presents still slides" |
+| 18 | Hide the menus (Ctrl+Shift+F) | chevron-up, at the far right | Compact mode | Now | |
+
+The head (1 to 7) never changes. The tail (8 to 17) is replaced by the contextual tails below when something is selected, as R02 section 4 describes.
+
+### 3.2 A text box, heading, paragraph or box selected, or the caret in text
+
+Order from R02 section 4.2: fill and border first, then the text controls, then Format options.
+
+| # | Button | Turboslide | Round | Note |
+| --- | --- | --- | --- | --- |
+| 8 | Fill color | `fill` on a box (palette swatches, None, a custom hex) | Now | Disabled on heading, paragraph and text blocks, which have no fill |
+| 9 | Border color | `stroke` on a box | Now | Same |
+| 10 | Border weight | `strokeWidth` 0, 1, 1.5, 2 | Now | Same |
+| 11 | Border dash | none | Later | |
+| 12 | Font | "Inter", disabled, tooltip "The GT theme sets Inter" | Now | Present so the row reads as Google's |
+| 13 | Font size, minus and plus | `typography.size` along the ladder; the field shows the size; a typed value snaps to the nearest step with a snackbar naming it | Now | |
+| 14 | Bold (Cmd+B) | The weight 500 run, or `typography.weight` 500 on the block | Now | |
+| 15 | Italic (Cmd+I) | none | Later | |
+| 16 | Underline (Cmd+U) | none | Later | |
+| 17 | Text color | `color` on text and box blocks (palette swatches); `tone` ink or muted on heading and paragraph | Now | The grammar keeps semantic hues off sentences (SPEC 2.1), so heading and paragraph offer Ink and Muted only |
+| 18 | Highlight color | none | Omit | Not in the grammar |
+| 19 | Insert link (Cmd+K) | The link popover | Now | |
+| 20 | Insert comment | none | Later | |
+| 21 | Align ▾ | Left, Center, Right (`typography.align`); Top, Middle, Bottom enabled in a table cell (`valign`), disabled elsewhere with the tooltip "Vertical alignment is set by the layout" | Now | |
+| 22 | Line & paragraph spacing ▾ | `typography.leading` steps | Now | |
+| 23 | Bulleted list (Cmd+Shift+8) | The ruled list | Now | Section 0.11 |
+| 24 | Numbered list (Cmd+Shift+7) | The numbered ruled list | Now | |
+| 25 | Decrease indent, Increase indent | none | Later | |
+| 26 | Clear formatting (Cmd+\) | Removes overrides | Now | |
+| 27 | Format options | Opens the right panel | Now | |
+
+### 3.3 A shape selected
+
+Fill color, Border color, Border weight, Border dash (Later), then the text controls of 3.2 disabled with the tooltip "Use a text box for text over a shape, or insert a box" (a `shape` holds no text this round), then Format options.
+
+### 3.4 An image selected
+
+| # | Button | Turboslide | Round |
+| --- | --- | --- | --- |
+| 8 | Border color | `border` on shot, on or off; the colour is the hairline | Now |
+| 9 | Border weight | none | Later |
+| 10 | Border dash | none | Later |
+| 11 | Crop image, with the Mask arrow omitted | The crop anchor: Top, Centre | Now (anchor); free crop Later |
+| 12 | Replace image ▾ | Upload from computer, By URL, From this presentation | Now |
+| 13 | Image options | Format options at the picture sections | Now |
+| 14 | Reset image | none | Later |
+| 15 | Format options | | Now |
+
+### 3.5 A line or arrow selected
+
+Line color (`stroke`), Line weight (`width` 1 to 4), Line dash (Later), Line start and Line end (each a dropdown offering None and Arrow, writing `arrowheads`), Format options.
+
+### 3.6 A table cell selected
+
+Border color, Border weight, Border dash (Later), Fill color (the column fill), then the text controls of 3.2 with the Align control's vertical row enabled, then Format options. The nine row and column commands live on the cell's right-click menu and under Format > Table.
+
+### 3.7 A slide selected in the filmstrip, or nothing selected on the canvas
+
+Background, Layout, Theme, Transition, as in 3.1.
+
+### 3.8 Icons, materials and other blocks
+
+Format options only, plus Replace image for a picture block (pair, tiles, details).
+
+### 3.9 Format options, the right panel
+
+The Inspector (`packages/chrome/src/Inspector.tsx`, thirteen sections) becomes Format options: 320 px, opened on demand, one panel at a time, sections named in Google's words where a Google section exists (R05 B7), generated from the same Zod annotations. With nothing selected the panel reads "Select something on the slide to see its options".
+
+| Section | Shown for | Fields | Source today |
+| --- | --- | --- | --- |
+| Size & rotation | any block on a freeform slide | Width, Height, Lock aspect ratio; Rotate disabled with the tooltip of section 0.12 | the position composite |
+| Position | any block on a freeform slide | X, Y from the top left | the position composite |
+| Layout | a block on a grammar slide | The layout's fields in plain words: Columns 5/7, 4/8, 1/1; Gap; Alignment; and the slide's layout name with a Change button that opens the layout grid | the Layout section |
+| Text fitting | text, box | Later: Do not autofit, Shrink text on overflow, Resize shape to fit text (section 7.7) | none |
+| Text | heading, paragraph, text, box, table | Size, Weight, Alignment, Letter spacing, Line height, and Level or Role as a Seg | the Text section |
+| Colour | box, shape, rule, text, icon | Fill, Border, Text colour swatch rows | the Color section |
+| Picture | shot, pair, tiles, details, the picture of a picture layout | Replace image, Crop (Top, Centre), Border, Caption, Caption size | the Asset section's picker and the shot fields |
+| Table | table | Header row, Column widths, Column alignment, Fill per column, Border weight, Vertical alignment | new |
+| List | rows, plain | Items with Add and Remove, Key column width, Tight, Numbered | the array controls |
+| Alt text | shot, pair, tiles, details, icon, the picture of a picture layout | Description | the asset's alt |
+| Drop shadow, Reflection, Recolor, Adjustments | | Omit: not in the grammar; the section names do not appear | |
+
+Sections that leave the panel: Slide (kind, id, tags, section, title override) goes to Tools > Advanced > Show slide and block ids and to the layout grid; Notes goes under the canvas; Material and Dither go to Tools > Advanced > Pictures and materials; Lint goes to Tools > Check slides; Versions goes to File > Version history; History goes to Tools > Advanced > Change history; Deck tokens leaves the UI. No JSON pointer, action id or block id appears in a label or tooltip; the accessible label `<block id>: <property>` and `data-control` stay in the DOM for the window API (SPEC 7.4).
+
+## 4. The filmstrip, the right-click menus and grid view
+
+### 4.1 The filmstrip
+
+- One card per slide: a 200 by 112 thumbnail (the render worker capture at 320 px, the live clone as fallback, `Thumb.tsx`) in a `--pt-edge` frame, the number in a 28 px gutter in tabular figures, the current card ringed in `--pt-ink` at 2 px. No title under the card (Google shows none, R02 section 5); the slide title is the card's tooltip.
+- A skipped card sits at 40 percent opacity with an eye-slash glyph at its top right and the tooltip "Skipped: not shown when presenting or in downloads".
+- Section labels: when the deck has more than one section, a 20 px titanium row with the section name between groups, not collapsible by default; View > Show sections toggles them and Tools > Advanced > Show sections as a tree restores the collapsible tree with counts. A fresh presentation has one section and shows no label.
+- Selection: click selects one; Shift+click extends the range; Cmd+click (Ctrl on Windows) toggles; Shift+Up, Shift+Down, Shift+Home, Shift+End extend from the keyboard; Cmd+A selects all when the filmstrip has focus.
+- Drag: one or several selected cards, a drop line between cards, one `slide.move` per moved slide in one write. Dragging across a section label moves the slide into that section; an opener stays first in its section (the validator's rule, SPEC 4.4) and the drop line refuses the position before it with a 200 ms shake.
+- Keys with the filmstrip focused: Up, Down, Page Up, Page Down, Home, End move; Cmd+Up and Cmd+Down move the slide; Cmd+Shift+Up and Cmd+Shift+Down move it to the beginning or the end; Delete or Backspace deletes with the snackbar "Slide deleted · Undo" ("Deleted 3 slides · Undo" for several); Enter focuses the canvas; Ctrl+M inserts. Cmd+Option+Shift+F focuses the filmstrip and Cmd+Option+Shift+C the canvas (R04 B3).
+- The filter row, the count, the density Seg, the kind glyph, the lint badge, the lease dot, the hover preview card and the row menu leave the default filmstrip. Cmd+F's find bar replaces the filter for finding a slide by a word.
+
+### 4.2 The right-click menu on a card
+
+In the order of R08 A1 (rows 3 and 5 to 14 from the one itemised public list, 2017; the rest placed where the corroborating sources put them), Google's keys printed on the right:
+
+1. Cut (Cmd+X)
+2. Copy (Cmd+C)
+3. Paste (Cmd+V)
+4. divider
+5. New slide (Ctrl+M)
+6. Duplicate slide (Cmd+D)
+7. Delete
+8. Skip slide, reading Unskip slide on a skipped card
+9. divider
+10. Change background (disabled unless a picture layout)
+11. Apply layout ▸ (the layout grid as a submenu, the current layout checked)
+12. Change theme
+13. Transition (disabled, section 0.5)
+14. divider
+15. Move slide ▸ Move slide to beginning, Move slide up, Move slide down, Move slide to end
+16. divider
+17. Comment (disabled)
+
+On several selected cards the same menu acts on the selection (Duplicate, Delete, Skip, Apply layout, Move). Save to Keep notepad is omitted (a Google service). Render, Lint this slide, Copy id, Move to section and Insert a template leave this menu (Tools > Advanced holds the first three; the layout grid replaces the last; Move to section is a drag). The menu opens at the pointer, the first item takes focus, and Esc returns focus to the card (R08 C1 notes today's row menu does not).
+
+### 4.3 The canvas right-click menus
+
+From R08 A5 to A13, in the Edit, Slide, Arrange, Format grouping the report reconstructs (Google prints no order); the set is the union of what is verified for any object plus what the ten tasks need. Menus are 220 px wide, icons left, keys right, open at the pointer, and Esc returns focus to the element that was right-clicked.
+
+- Empty canvas: Paste, divider, New slide, Duplicate slide, Delete slide, Skip slide, divider, Change background, Apply layout ▸, Change theme, Transition (disabled), divider, Comment (disabled).
+- Text box, box or shape: Cut, Copy, Paste, Delete, Duplicate, divider, Order ▸, Rotate ▸ (disabled), Center on page ▸, Align ▸, Distribute ▸, Group (disabled), divider, Link (Cmd+K), Text fitting (disabled), Format options, Alt text (shape only), divider, Comment (disabled).
+- Image: Cut, Copy, Paste, Delete, Duplicate, divider, Order ▸, Center on page ▸, Align ▸, divider, Replace image ▸, Crop image, Reset image (disabled), Image options, Format options, Alt text, divider, Comment (disabled).
+- Table cell: Insert row above, Insert row below, Insert column left, Insert column right, Delete row, Delete column, Delete table, divider, Distribute rows, Distribute columns, Merge cells (disabled), divider, Cut, Copy, Paste, Link, Format options.
+- A text selection inside a run: the browser's spelling suggestions when the word is misspelled, divider, Cut, Copy, Paste, Paste without formatting, divider, Link, divider, Format options.
+- The notes pane: the browser's own menu (spelling, cut, copy, paste); no Turboslide items.
+
+Every item here is also in the menu bar (R07 rule 2). Disabled items follow the same tooltip formula as the menu bar.
+
+### 4.4 Grid view
+
+The bottom bar's grid toggle, View > Grid view, or a double click on the current card's frame opens the existing `GridView.tsx` over the canvas: tiles at 200, 300 or 400 px chosen by a minus and plus at the bottom left (R02 section 5), drag to reorder, the same right-click menu on a tile, double click a tile to return. The Book view leaves the default UI (Tools > Advanced > Read as a book) and the B key retires.
+
+### 4.5 Empty and edge states
+
+- Deleting the last slide: the filmstrip shows one empty card frame reading "Click + to add a slide"; the canvas shows nothing. Whether Google allows deleting the last slide is unverified; the design allows it because undo exists.
+- A deck with one section shows no labels; a deck with several shows them and View > Show sections is checked.
+- While thumbnails load, cards show the live clone and nothing else.
+
+## 5. The layout and theme system
+
+### 5.1 Definitions
+
+Google's words (R03 b.1): a theme is "a preset group of colors, fonts, background, and layouts"; a layout is "the way your text and images are arranged on a slide"; a template is "a pre-designed collection of slides". In Turboslide the theme is `gt-ink-paper`; its layouts are the entries of `packages/schema/src/layouts.ts`, which replaces `packages/chrome/src/slide-templates.ts` and the three blanks of `palette-data.ts` (R06 section 4.1); a template in Google's sense is a deck (the GT brand deck, later a sales starter). The rep sees one list in one order in four places: the New slide arrow, the Layout button, Slide > Apply layout and the filmstrip's Apply layout submenu (R03 finding 2). Chrome, store, CLI and MCP import the list from schema; nothing imports chrome (SPEC 3.3 rule 3).
+
+```ts
+// packages/schema/src/layouts.ts
+export type LayoutId = 'title' | 'opener' | 'split' | 'cols' | 'title-only' | 'one-column' | 'statement'
+  | 'section-description' | 'mood' | 'big-number' | 'blank' | 'rows' | 'plain' | 'table' | 'figure'
+  | 'pair' | 'tiles' | 'details' | 'board' | 'matrix' | 'closing';
+export type LayoutEntry = {
+  id: LayoutId;
+  label: string; // Google's name for the first eleven, the GT name after the rule
+  google: boolean; // true for the first eleven
+  kind: SlideKind;
+  layout?: LayoutType;
+  doc: string;
+  icon: string; // a sprite id, not an IconName import (schema does not import chrome)
+  needsPicture: boolean;
+  /** The slide with empty Texts, or null when the deck has no asset the layout needs. */
+  make: (id: SlideId, deck: Deck, sectionId: string) => Slide | null;
+};
+export const LAYOUTS: readonly LayoutEntry[];
+export const LAYOUT_IDS: readonly LayoutId[];
+```
+
+### 5.2 The layout list
+
+The first eleven take Google's names and order (R03 b.2, from the Apps Script PredefinedLayout reference); a labelled rule reading "GT layouts" follows; the GT layouts Google lacks come after it. The grid shows 21 tiles at 128 by 72 in three columns with the name under each, rendered from each entry's `make` with prompts drawn through `renderThumb`, in the deck's appearance, cached per appearance.
+
+| # | Layout name | Id | Kind and grammar layout | Blocks with empty Texts (prompt) | Google counterpart |
+| --- | --- | --- | --- | --- | --- |
+| 1 | Title slide | `title` | title | heading ("Click to add title"), lead ("Click to add subtitle") | Title slide |
+| 2 | Section header | `opener` | opener, theme starter picture | heading ("Click to add title"), paragraph ("Click to add text"), credit from the asset | Section header |
+| 3 | Title and body | `split` | content, split 4/8 | head: heading h2; body: paragraph | Title and body |
+| 4 | Title and two columns | `cols` | content, cols 1/1 | left: heading h2, paragraph; right: paragraph | Title and two columns |
+| 5 | Title only | `title-only` | content, stack | heading h2 | Title only |
+| 6 | One column text | `one-column` | content, stack | heading h2, paragraph at measure 56 | One column text |
+| 7 | Main point | `statement` | statement | big ("Click to add text") | Main point |
+| 8 | Section title and description | `section-description` | content, cols 5/7 | left: heading h2, paragraph role cap; right: paragraph role lead | Section title and description |
+| 9 | Caption | `mood` | mood, theme starter picture | heading ("Click to add title"), paragraph, credit | Caption |
+| 10 | Big number | `big-number` | content, center | heading level big ("Click to add a number"), paragraph role cap ("Click to add text") | Big number |
+| 11 | Blank | `blank` | content, freeform, no blocks | none | Blank |
+| | rule "GT layouts" | | | | |
+| 12 | Ruled rows | `rows` | content, cols 5/7 | heading h2, paragraph; rows with three key and value items | none |
+| 13 | Ruled statement list | `plain` | content, cols 5/7 | heading h2, paragraph; plain with four items | none |
+| 14 | Title and table | `table` | content, split 4/8 | heading h2; a 3 by 4 table with a header row | none |
+| 15 | Figure | `figure` | content, cols 4/8 | heading h2, paragraph; a shot with an empty caption ("Add a caption") | none |
+| 16 | Pair of figures | `pair` | content, split | heading h2; a pair with two empty captions | none |
+| 17 | Tile grid | `tiles` | content, split 4/8 | heading h2, paragraph; four tiles | none |
+| 18 | Detail grid | `details` | content, split 4/8 | heading h2, paragraph; three details | none |
+| 19 | Status board | `board` | content, split 4/8 | heading h2, paragraph; a board of three rows | none |
+| 20 | Matrix | `matrix` | content, cols 5/7 | heading h2, paragraph; a 4 by 4 matrix with a caption | none |
+| 21 | Closing | `closing` | closing, theme starter picture | heading, paragraph, credit | none |
+
+Title only is a `stack` with one heading so that `layout/empty-half` does not fire on it. Entries 5, 6, 8, 10, 11 and 14 are new `make` functions; the other fifteen are the existing templates with their placeholder copy replaced by empty Texts and their `label` changed where the table says so. `decks/templates/gt-brand/template.json` lists the same ids as archetypes.
+
+Picture layouts (2, 9, 21) and the figure layouts (15 to 18) need assets. The blank template gains a theme starter set: four 1-bit two-tone twins from the GT brand deck (two opener materials, one mood photograph, one closing picture, with their credits) copied into every new deck by `ensureAssets` on create, so Section header, Caption and Closing work on a fresh deck. The figure layouts draw a dashed plate reading "Click to add a picture" until an asset is chosen and need no starter. When a deck has none of the starter roles (an imported deck), the three picture tiles read "Add a picture first" and open the file picker on click.
+
+### 5.3 What New slide inserts
+
+- New slide (Ctrl+M, the plus button, Insert > New slide, Slide > New slide, the filmstrip's New slide) runs `slide.new` with the current slide's `template`, after the current slide in its section, with empty Texts; the new slide is selected and its first prompt is focused with the caret (R05 A15: Google inserts after the selection with the same layout; R09 A1: a new text box opens in the caret state). After a Title slide the layout is Title and body (section 0.27, unverified).
+- New slide with layout (the arrow) opens the grid; a tile inserts that layout. The last picked layout is remembered for the plus button in this browser (R05 A15 reports Google remembers the last layout used; single source).
+- The slide id is `<layout>-<n>` with the first free n; `template` is written to the layout id.
+- Every new slide is one `slide.insert`, so undo removes it.
+
+### 5.4 Placeholders and prompt text
+
+Google's placeholders show fixed prompt text that is not content and does not present or export (R03 b.1, R09 A4). Today the templates insert real copy that renders everywhere and fires `copy/contrast-pair` (R09 finding 5). This round:
+
+- A layout inserts empty Texts. An empty string passes `textSchema` today.
+- The renderer, when `live: true` (the editor stage only), draws the prompt for an empty heading, lead, big, paragraph, text, box, list item, table cell or caption: "Click to add title" for a heading at level h1, h2 or title and for the opener, mood and closing headings; "Click to add subtitle" for the title slide's lead; "Click to add a number" for the Big number heading; "Add a caption" for an empty caption; "Click to add text" for everything else. The prompt is drawn in `--titanium` at the block's own size, carries `data-prompt`, is not selectable and disappears on the first keystroke. Thumbnails, present mode, the view route, the standalone build and both PPTX modes draw nothing for an empty Text, and the Editable text export skips the box.
+- The linter gains `copy/empty-placeholder` at severity 1 ("Slide 4 has an empty title"), so Check slides names what is unfinished; the copy rules skip empty Texts and table cells.
+- Deleting a placeholder deletes that block on that slide only (R05 A1); Apply layout of the same layout brings it back.
+- `derivedSlideTitle` falls back to "Slide n" when the heading is empty.
+
+### 5.5 What Apply layout does to an existing slide
+
+Google moves placeholder content into the new layout's matching placeholders and leaves freestanding content where it is; it never drops and never refuses (R03 b.3, two secondary sources). `slide.applyLayout(slideId, layout)` emits one `slide.replace` per slide (so undo is one step) built by these rules. Roles derive from block type and order; there is no role field.
+
+| Content in the old slide | Where it goes in the new layout |
+| --- | --- |
+| The first heading (or the title slide's heading, the opener's heading, the statement's big) | The new layout's title placeholder (heading, title heading, opener heading, statement big, or the Big number heading) |
+| The second text (the title slide's lead, the mood's paragraph, the first paragraph) | The new layout's first body placeholder |
+| Further paragraphs and text blocks | Appended to the body slot in order; on a two column layout, the left column |
+| A list (rows, plain, refs) | The new layout's list placeholder if it has one, else appended to the body slot |
+| A table | The table placeholder (Title and table), else appended to the body slot |
+| Pictures (shot, pair, tiles, details, the picture of an opener, mood or closing) | The picture placeholders in order; a picture layout takes the first picture as its background picture |
+| The credit | The plate's credit on picture layouts; dropped otherwise |
+| Notes, id, section, skip, tags, ext | Kept |
+| Anything left over on a content layout | Appended to the last text slot |
+| Anything left over on a picture layout | Appended to the plate |
+| Anything left over where the target has no block list (Title slide, Main point) | Dropped, and the snackbar reads "Applied Main point. 1 picture did not fit this layout · Undo" |
+
+Blocks on a freeform slide keep their `pos` when the target is Blank; when the target is any other layout they refile by geometry through the existing `convertLayout` (docs/freeform.md section 4) and then the table applies. A grammar source to Blank runs today's `toFreeform` on the measured boxes. Applying the same layout to a slide resets its placeholders' positions and removes `typography`, `color`, `fill` and `stroke` overrides, which is R07 rule 30's reset to layout. Kind changes (content to opener, statement to content) are the same `slide.replace` with a new kind, so the inspector's "The kind is fixed" sentence retires. Apply layout to several selected slides is one write. `template` is written to the new layout id.
+
+### 5.6 Existing slides
+
+The 85 GT slides and every stored slide carry no `template`. The grid marks the current layout by deriving it once at read time from kind, layout type and slot signature against each entry's `make` (structural comparison), falling back to Title and body for a content slide and to the kind's own entry for the others; nothing is written until New slide or Apply layout runs. No migration touches the files (section 0.16).
+
+### 5.7 The Themes panel, transitions and the theme editor
+
+- Slide > Change theme, the Theme button and the filmstrip's Change theme open the Themes panel: the title "Themes", one theme "GT" with two thumbnails of slide 1, "Light" and "Dark", the current one ringed; clicking one writes `deck.defaults.appearance` through `deck.set`, and the editor stage, the thumbnails, present mode, the view route and the Download dialog default follow it (section 1.4). "In this presentation" lists the same two.
+- "Import theme" sits at the bottom right, disabled, tooltip "Not available in Turboslide yet. Turboslide has one theme, GT".
+- Transitions and animations: the one Transition stub in Google's three positions (section 0.5); the Perfect PPTX carries stills (SPEC 8.6) and R07's frustrations table says not to invest.
+- Slide > Edit theme is a Later stub; the theme lives in `packages/theme` and the layouts in `packages/schema/src/layouts.ts`.
+
+## 6. The root route, the home page, trash, rename, copy, import, share, download, print
+
+### 6.1 The root route and the fresh presentation
+
+`/` today redirects to the newest deck on the shared store, which on production is a drive's test deck (`apps/studio/src/routes/index.tsx`, R06 section 5, docs/EDITOR-DEPTH-STATUS.md section 10). This round:
+
+- `/` answers a 307 to `/new` and sends `X-Robots-Tag: noindex`. `/new` renders the editor (`ssr: false`, like `/edit`) on a presentation built in the browser from the `blank` template: title "Untitled presentation", one section "Deck", one Title slide with empty heading and lead, the theme starter pictures as assets, `defaults.appearance: 'dark'` (the deck's default, SPEC 2.1). The title row reads "Not saved yet". The right panel is closed (section 0.7). The caret is not placed until the rep clicks. `/new` carries `<meta name="robots" content="noindex">` because the root now renders an editor.
+- The presentation is created in the store on the first edit: the first write calls `deck.create` through `createStoredDeck` (the page's path, which uploads before it answers; `POST /api/actions` `deck.create` is instance local hosted, docs/EDITOR-DEPTH-STATUS.md section 10) with the id `untitled-<yyyymmdd>-<4 chars>` and `from: 'blank'`, then the write against revision 0, and the address becomes `/edit/<id>` through `history.replaceState`. A visit that only looks and leaves creates nothing, so the shared store does not gain a deck per visit or per crawler. Google creates the file on the click (R03 a.3); the shared store is the reason for the difference and the rep sees none.
+- Renaming before the first edit is the first edit. Slideshow before the first edit presents the in browser document without saving. Share before the first edit saves first and the dialog says "Saved as Untitled presentation so the link works".
+- A reload of `/new` before any write shows a fresh draft again. Two tabs on `/new` create two decks, which matches Google's home page closely enough.
+- The `blank` template of `packages/store/src/templates.ts` changes its title slide to empty Texts, its default title to Untitled presentation, and gains an `assets` folder with the four theme starter twins (1-bit PNGs, SPEC 5.4; small).
+
+### 6.2 The home page at /decks
+
+Google's home has three bands (R03 a.1): the app bar, "Start a new presentation" with the Blank card, template cards and a Template gallery link, and the recent list with a grid and list toggle, a sort control and a per item menu. R03 finding 13 lists exactly what parity needs. The page becomes:
+
+- App bar: the GT mark and "Turboslide", a search field ("Search presentations") that filters the list by title.
+- "Start a new presentation": the Blank card (a large plus, "Blank presentation", opens `/new`) and "GT brand deck" (creates a copy of the GT template, 85 slides, and opens it). "Template gallery" scrolls to this strip (the strip is the gallery). A sales starter card is next round.
+- "Recent presentations": a grid of cards (a 320 by 180 thumbnail of slide 1 in the deck's appearance, the title, "Opened 2 hours ago" from this browser's history in `localStorage`, else "Edited <date>") with a list view toggle (title, last edit, slides), a sort control (Last opened by me, Last modified, Title) and a per card menu: Open, Open in new tab, Rename, Make a copy, Move to trash. The sentence under the heading reads "Every presentation on this Turboslide is listed here" (no identity, R10 B6). Recent is ordered by this browser's own history first, then by the store's `updatedAt`, so a rep sees their decks before other people's.
+- At the bottom: "Trash" (a link to `/decks/trash`) and nothing else. The Connect card, the hosting notice, the count, the ids, the revisions, the bundle upload form and the footer leave the page (the bundle upload lives in File > Open's Upload tab; the connect facts in Extensions > Agent access).
+- Trashed decks and unsaved drafts never appear. `deck.list` (new) is the one call the page, the Open dialog, the Import slides dialog, the CLI and MCP share; it skips trashed decks unless `includeTrashed` is set.
+- Empty state: "No presentations yet. Start one above".
+
+### 6.3 Rename and the auto-title
+
+Click the title in the title row, type, Enter (`deck.rename`); File > Rename focuses the field; the home page's card menu offers Rename in place. A presentation whose title is still "Untitled presentation" when the title slide's heading is first committed takes that heading as its title, once (R03 a.3 reports Google offers the title slide text as the file name, from Google's pages S4 and S9); the rename is a second `deck.set` in the same write, so one undo removes both.
+
+### 6.4 Trash
+
+- File > Move to trash and the home card menu's Move to trash run `deck.trash` (new), which writes `trashedAt` (an ISO time) into `deck.json` at the store level; the deck's files stay. The editor shows the snackbar "Moved to trash · Undo" for 5 s and navigates to `/decks`; Undo is `deck.restore` (new).
+- `/decks/trash` lists trashed decks with Restore and Delete forever per card and an Empty trash button. Delete forever asks "Delete <title> forever? This cannot be undone" and runs `deck.remove` (new; on the Blob store `del` per prefix, the mechanism docs/EDITOR-DEPTH-STATUS.md section 10 names; on the file store the folder). Empty trash asks once and runs `deck.remove` per deck. Nothing deletes a deck automatically (section 0.24).
+- `/`, `/decks`, the Open dialog, the Import slides dialog and `deck.list` skip trashed decks. `/edit/<id>` of a trashed deck shows the banner "This presentation is in the trash · Restore" over a read only editor; `/deck/<id>` of a trashed deck answers 404.
+- `deck.set` refuses `/trashedAt` (it is not in `DECK_SET_ROOTS`); only `deck.trash` and `deck.restore` write it.
+- The dozen test decks on production are moved to trash by Kevin from the home page, one click each, then deleted forever from `/decks/trash` (decision 15.8).
+
+### 6.5 Make a copy and Import slides
+
+- `deck.copy` (new; server side): packs the source and unpacks it under a new id (`packages/store/src/zip.ts`, `unpack.ts`), keeps only `slideIds` and their sections when given (empty sections dropped), strips `notes` when `removeNotes` is set, never copies leases or `trashedAt`, writes one version record "Copied from <title>", and answers the new id. The dialog's Name field is prefilled "Copy of <title>" and selected; Enter runs it; the copy opens in a new tab.
+- `slide.import` (new; server side): reads the source deck through the store, renames slide and block ids that collide, ensures the assets the slides reference (`ensureAssets`), and emits one `slide.insert` per slide in one write after the current slide, in the current section.
+- PowerPoint import is next round. The Upload tab refuses a `.pptx` with the sentence of section 12 and points at the bundle path.
+
+### 6.6 Share and Publish
+
+There are no roles and no access control (R10 B7: anyone who loads the host can read and write). The Share dialog says exactly what a link does, in Google's layout minus what cannot be honest:
+
+- Title "Share <title>". A section "Links" with three rows, each with a Copy link button: "View link" (`/deck/<id>`, read only, opens on slide 1); "Present link" (`/deck/<id>?present=1`); "Edit link" (`/edit/<id>`) with the sentence "Anyone with this link can edit". Under the rows, two sentences: "Turboslide has no accounts yet. Anyone who has a link can open it." and "Skipped slides and speaker notes are not included in the view and present links." The people field, roles and General access are omitted. Done closes it.
+- Precondition (R10 C3 item 1): the view and embed payloads stop carrying `notes` (`apps/studio/src/server/decks.ts` `getDeck`, line 119 today) and drop skipped slides.
+- The revocable per deck view token and Stop sharing are next round (section 0.25); the dialog leaves a place for the row.
+- Publish to web (File > Share > Publish to web, Extensions > Embed in a site): a Link tab with the present link and Copy link; an Embed tab with the `/embed/<id>` iframe snippet and a size dropdown (Small 480 by 270, Medium 960 by 540, Large 1440 by 810, Custom); "Auto-advance slides" and "Start slideshow as soon as the player loads" are Later inside the dialog with the stub tooltip; "Published content & settings" and "Stop publishing" are omitted with the sentence "Every Turboslide presentation is reachable by anyone who has its link".
+
+### 6.7 Download
+
+File > Download > Microsoft PowerPoint (.pptx) opens the Download dialog rather than downloading at once, because the Perfect export takes 190 to 222 s for 85 slides (docs/EDITOR-DEPTH-STATUS.md section 10) and has options the rep must reach:
+
+- Title "Download". A Seg "Perfect | Editable text", Perfect selected, with one sentence under each: "Every slide looks exactly like the screen; the text is there but not editable" and "Text boxes you can edit in PowerPoint; layout within a few pixels". Checkboxes: "Include speaker notes" (off), "Include skipped slides" (off). A disclosure "More options" holding Light, Dark or Both (defaulting to the deck's appearance), fonts Exact or Standard, Embed fonts, Headings as pictures. Button "Download".
+- Progress as one sentence in the dialog: "Preparing your PowerPoint file, about 3 minutes for 85 slides" (the estimate is 2.5 s per slide, rounded up to the half minute); then "Your file is ready" as the download starts. The report card (`ExportReportCard.tsx`) is reachable from a "Details" link in the finished state and nowhere else. "Verify with LibreOffice" leaves the UI (it never runs hosted).
+- The notes and skipped slides defaults are a deliberate departure from Google, which includes notes in a PPTX (R07 rules 24 and 25; R10 A15 records that Google shows skipped slides to shared viewers). The checkboxes make the departure visible and one click to undo (decision 15.2).
+- PDF Document (.pdf): the same dialog without the Seg and More options; the same two checkboxes; one slide per page (section 7.6).
+- JPEG and PNG of the current slide download at once at 2x. Plain Text downloads at once. Web page (.html) shows the progress sentence (a few seconds). Turboslide bundle (.zip) downloads at once.
+- `export.run` gains `includeNotes` and `includeSkipped` (both default false), `build.run` gains the same two, and the export report counts the skipped slides it omitted.
+
+### 6.8 Print
+
+Print (Cmd+P) and Print settings and preview open `/print/:deckId`: the deck rendered one sheet per page with a toolbar holding a layout dropdown ("1 slide without notes", "1 slide with notes"; handouts with 2, 3, 4, 6 and 9 per page are Later inside it), "Include skipped slides" (off), "Download as PDF" (the Download dialog's PDF path), "Print" (the browser's print dialog through `window.print()` with `@page { size: 13.333in 7.5in; margin: 0 }`), "Close preview". The route is the fallback of section 7.6 when the worker's PDF misses its gate.
+
+## 7. The object model, the schema changes and the export path of every object
+
+Every change below is a schema field with a validator rule and a reducer path (SPEC 4.4), a renderer rule, a lint rule where named, and two export paths: Perfect (flatten, the 2x page raster over an invisible text layer built from `data-run` elements, SPEC 8.2) and Editable text (native, `NATIVE_BLOCK_TYPES`, docs/freeform.md section 7). Perfect carries whatever the renderer draws by construction, and a new object needs only to render its text through `data-run` to stay searchable; the Editable text column names the pptxgenjs 4.0.1 option the writer uses (its API pages were read 2026-09-11; section 16). The last column names what is refused, with the reason. This table is the acceptance document for the document builder and the renderer and export builder (section 14.5).
+
+### 7.1 Rules
+
+1. `SCHEMA_VERSION` stays 1. Every field is optional. `migrate` on the committed GT deck and the blank and GT templates returns identical documents, and a test asserts it.
+2. Unknown keys are refused at severity 3 (`validate.ts`), so every new field is a schema change, never an `ext` convenience; `ext` on a slide keeps firing "ext data kept at" at severity 1 and nothing in this round writes it.
+3. `pos` stays on top level blocks of a freeform slide only; no field below changes that invariant (`validate.ts` line 193, `locateBlock`, `freeform/overlap`, `freeform/off-sheet`, the measurer's `[data-block]` tagging).
+4. The string renderer cannot measure; nothing below is a render time fit.
+
+### 7.2 The field table
+
+| # | Google object or behaviour | Field or change | Validator | Renderer | Lint | Perfect | Editable text (pptxgenjs) | Refused, with the reason |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 7.2.1 | Skip slide | `SlideBase.skip?: true`; action `slide.skip` | any slide | n/a; the filmstrip dims the card; present mode, `/deck`, `/embed`, the standalone build, print, thumbnails' play list, PDF and PPTX omit the slide unless `includeSkipped`; `slide.list` reports the flag | none | page absent | page absent | showing skipped slides to shared viewers (R10 A15; R07 rule 24) |
+| 7.2.2 | Layout identity | `SlideBase.template?: LayoutId` | one of `LAYOUT_IDS` | n/a; the grid marks the current layout | none | n/a | n/a | `ext.layout` (severity 1 on every read) |
+| 7.2.3 | Theme appearance | `Deck.defaults.appearance?: 'light' \| 'dark'` (dark when absent) | enum | present mode, the view route, thumbnails and the stage default to it | none | the export's default theme | same | `theme.variant` (breaks every reader of `deck.theme`) |
+| 7.2.4 | Slide numbers | `Deck.defaults.counter?: 'on' \| 'off' \| 'skip-title'` (on when absent) | enum | the frame's counter obeys it (`renderStage`, SPEC 5.2) | none | drawn or not | the master's counter text box present or absent | per slide counters (Google's Apply to selected) this round |
+| 7.2.5 | Trash | `Deck.trashedAt?: string` (ISO) | string | hidden from `/decks`, `/new`, `deck.list` | none | n/a | n/a | writes through `deck.set` |
+| 7.2.6 | Numbered list | `PlainBlock.numbered?: true` | any layout | a tabular numeral in the key position where the icon sits, 24 px | the copy rules unchanged | raster plus runs | the numeral as its own run in the ruled rows construction (SPEC 8.2 stands for `plain` and `rows`) | glyph bullets and levels (decision 15.1; the `marker` field of 7.7 is the alternative) |
+| 7.2.7 | Link on an object | `BlockBase.link?: string \| { slide: SlideId \| 'next' \| 'previous' \| 'first' \| 'last' }` | a URL or a known slide id | an `<a>` wrapper active in present mode, the view route and the standalone build; inert on the editor stage | none | an invisible `addShape('rect')` with `hyperlink` over the block's box, `transparency: 100` | `hyperlink: { url }` or `{ slide: n }` on the text box, shape or picture (n is the 1 based index among exported slides) | links on grammar text blocks' whole box (use a run link) |
+| 7.2.8 | Link to a slide in text | `[text](#s/<slideId>)` and `#next`, `#previous`, `#first`, `#last` in the four rule markup | the parser accepts the forms; the validator checks the slide id exists at severity 2 | the viewer and the standalone runtime resolve them; the editor stage is inert | `copy/heading-is-name` unchanged | the invisible run carries `hyperlink: { slide: n }` (PowerPoint's honouring of a link on an invisible run is unverified; the report notes it) | `hyperlink: { slide: n }` on the run | a fifth markup rule |
+| 7.2.9 | Paragraph break | `multilineTextSchema` on `paragraph.text`, `text.text`, `box.text` and table cells (section 7.4) | `\n` allowed, `\r` refused, in those four pointers only | one `<span class="para">` per paragraph, display block, no added spacing (the grammar has none) | the copy rules run per paragraph | the scene already carries one hard break per browser line | `breakLine: true` on the last run of each paragraph | a break in headings, slide fields, rows, plain, refs, captions and labels (one line by grammar) |
+| 7.2.10 | Table | the `table` block (section 7.3) | at most 20 by 20; one cell per column per row | a CSS grid in the `.rows` idiom with `data-run` per cell | `table/size` (3); `rows/two-lines` on cells; the copy rules skip cells | raster plus every cell as an invisible run | `addTable` (section 7.3) with the ruled rows construction as the fallback | merged cells, dashed borders, per cell colour |
+| 7.2.11 | Spelling | none; `spellcheck` stays on in the run and the notes pane | n/a | n/a | n/a | n/a | n/a | a grammar service |
+| 7.2.12 | Z order | exists (`pos.z`, `block.order`) | exists | paint order | none | drawn in order | shapes emitted in z order | none |
+| 7.2.13 | Speaker notes | `notes?: string` stays; edited in the pane | exists | the pane | none | `addNotes` when `includeNotes` | same | formatted notes (a `string`, not a `Text`) |
+| 7.2.14 | Images | `shot` as today; one step insert: `asset.add` with alt from the file name, role `capture`, source `file`, then `block.insert` or `slide.set /picture/asset`; a drop on the stage inserts, a drop on an image replaces | exists | exists | `asset/*` unchanged | raster | picture at 2x (exists) | free crop offsets, mask, adjustments, recolor (7.7 and omitted) |
+| 7.2.15 | Undo granularity | `text.replace` (declared and reduced today) used by `InlineText` with a 400 ms coalescing pause; the same pause on `slide.set /notes` | exists | n/a | n/a | n/a | n/a | one entry per keystroke |
+| 7.2.16 | Zoom | `view.zoom` (a view action, no document field) | n/a | the stage's `k` | n/a | n/a | n/a | zoom in the URL this round |
+
+### 7.3 The table block
+
+```ts
+// packages/schema/src/blocks/table.ts
+export type TableBlock = BlockBase & {
+  type: 'table';
+  columns: { width?: number; align?: 'left' | 'center' | 'right'; fill?: Color }[];
+  rows: { cells: Text[]; header?: true }[]; // cells use multilineTextSchema
+  valign?: 'top' | 'middle' | 'bottom';
+  border?: { weight: 1 | 1.5 | 2 };
+  size?: 20 | 18 | 17 | 16 | 15; // the .rows ladder; 20 when absent
+};
+```
+
+- Validator: 1 to 20 columns, 1 to 20 rows, every row has exactly `columns.length` cells; the issue code is `table_size` at severity 3. `table` joins `NATIVE_BLOCK_TYPES` and the catalog (`packages/schema/src/catalog.ts`) under the plain name Table.
+- Insert: the grid picker writes the counts; the header row is on; column widths absent (equal); on a freeform slide the block takes a 960 by 320 box under the selected block or at the content box's top left (`palette-data.ts` rules).
+- Renderer: a CSS grid in the `.rows` idiom: a hairline above, a rule under every row, the header row at display weight 500 with an ink rule under it, tabular numerals, `text-align` per column, a plate fill per column when set, `data-run` per cell, `valign` through align-items.
+- Gestures (section 8 of R11, PowerPoint's conventions where Google's are unverified): a click in a cell places the caret; Tab commits and moves to the next cell, Shift+Tab to the previous; Tab in the last cell adds a row and shows the snackbar "Row added · Undo"; Enter inserts a paragraph break inside the cell; Esc commits and selects the table; the nine row and column commands each write one `block.set` of `/rows` or `/columns`; a column boundary handle writes `columns[i].width` with the key column's snaps; pasting tab separated text onto the stage creates a table.
+- Lint: `table/size` (3) over the cap or a cell over two lines at the theme's floor; `rows/two-lines` applies to cells; the copy rules (`copy/heading-period`, `copy/sentence-case`, `copy/contrast-pair` and the rest) skip table cells, or a 20 cell pricing table produces 20 findings.
+- Perfect: the raster plus every cell as an invisible run.
+- Editable text: `addTable` with `colW` and `rowH` from the measured grid in inches, per cell `align`, `valign`, `bold` for the header row, `fill` per column, `border: { type: 'solid', pt, color }` from the block's weight and the hairline colour, `fontFace` and `fontSize` from the export font map, `margin` from the cell padding. The verify loop measures each cell's text box against the 3 px native budget; when a table misses it the writer falls back to the ruled rows construction (hairlines plus grouped text boxes, SPEC 8.2) and the report names the block under `residual`. SPEC 8.2's sentence "never a PPTX table" is scoped to `rows` (section 7.9).
+
+### 7.4 The paragraph break
+
+`packages/schema/src/text.ts` gains `multilineTextSchema`, a string that refuses `\r` and allows `\n`; `textSchema` is unchanged. The catalog marks the four pointers that take it: `paragraph.text`, `text.text`, `box.text`, `table.rows[].cells[]`. `parseText` runs per paragraph; `serializeRuns` joins with `\n`; `blockTexts` and `slideTexts` return the whole string; the copy rules run per paragraph; `text.replace` and `text.replaceAll` treat `\n` as a character. In `InlineText`, Enter and Shift+Enter insert `\n` in those four; Enter commits in headings and slide fields; Enter at the end of a list item appends an item and Backspace on an empty item removes it (`block.set /items`); `BR` nodes map to `\n` at commit instead of being dropped. SPEC 4.2 line 316 is amended (section 7.9).
+
+### 7.5 New actions
+
+Fourteen actions join `packages/schema/src/actions.ts` in the shape of the existing entries (`id`, `label`, `doc`, `group`, `mutates`, `transports`, `milestone: 'GS1'`, `input`, `output`, `cli`, `mcp`, `example`). Every mutating action takes `baseRevision`. `pnpm generate:contracts` regenerates the CLI, MCP, OpenAPI, manifest and skill tables; the coverage test requires a parsing example and a test file naming each id. The table grows from 54 to 68.
+
+| Action | Group | Input | What it does | CLI | MCP |
+| --- | --- | --- | --- | --- | --- |
+| `slide.new` | slide | `layout: LayoutId`, `after?`, `sectionId?`, `id?` | one `slide.insert` built by the layout's `make` with empty Texts and `template` set | `turboslide slide new --layout <layout> --after <after>` | `deck_new_slide` |
+| `slide.duplicate` | slide | `slideIds[]` | `slide.get` and `slide.insert` per id with fresh ids, after the last selected | `turboslide slide duplicate <slideIds>` | `deck_duplicate_slide` |
+| `slide.skip` | slide | `slideIds[]`, `skip: boolean` | `slide.set /skip` per id in one write | `turboslide slide skip <slideIds> [--off]` | `deck_skip_slide` |
+| `slide.applyLayout` | slide | `slideIds[]`, `layout: LayoutId` | one `slide.replace` per slide by section 5.5, in one write; the output names dropped block ids | `turboslide slide apply-layout <slideIds> <layout>` | `deck_apply_layout` |
+| `slide.import` | slide | `sourceDeckId`, `slideIds[]`, `after?`, `sectionId?` | server side: ensures assets, renames colliding ids, one `slide.insert` per slide in one write | `turboslide slide import <sourceDeckId> <slideIds> --after <after>` | `deck_import_slides` |
+| `block.duplicate` | block | `slideId`, `blockIds[]` | `block.insert` copies with fresh ids; on freeform offset 16 px | `turboslide block duplicate <slideId> --blocks <ids>` | `deck_duplicate_block` |
+| `text.replaceAll` | slide | `find`, `replace`, `matchCase?`, `slideIds?` | `block.set` and `slide.set` per changed Text and note, one write; the output counts replacements | `turboslide text replace <find> <replace> [--match-case]` | `deck_replace_text` |
+| `deck.list` | deck | `includeTrashed?` | the manifest facts of every deck, newest first | `turboslide deck list` | `deck_list` |
+| `deck.copy` | deck | `id`, `name`, `slideIds?`, `removeNotes?` | a new deck under a new id (store level); the output is the new id | `turboslide deck copy <id> --name <name>` | `deck_copy` |
+| `deck.trash` | deck | `id` | writes `trashedAt` | `turboslide deck trash <id>` | `deck_trash` |
+| `deck.restore` | deck | `id` | clears `trashedAt` | `turboslide deck restore <id>` | `deck_restore` |
+| `deck.remove` | deck | `id`, `confirm: true` | deletes the folder or the prefix; transports http, cli and window (from the Trash page) | `turboslide deck remove <id> --confirm` | none |
+| `export.text` | export | `slideIds?`, `includeNotes?`, `includeSkipped?` | returns the plain text | `turboslide export txt` | `deck_export_text` |
+| `view.zoom` | view | `zoom: number \| 'fit'` | the stage scale; window and mcp | none | `deck_set_zoom` |
+
+Actions that exist and change: `export.run` implements `format: 'pdf'` and gains `includeSkipped` and `includeNotes`; `build.run` gains the same two; `render.slide` gains `format: 'jpg'`; `block.order` binds front and back in the editor; `deck.set` accepts `/defaults/appearance` and `/defaults/counter` and refuses `/trashedAt`; `slide.set` accepts `/skip` and `/template`. The declared `text.replace` mutation is used by `InlineText`. `slide.setLayout` stays for content to content layout changes and `slide.applyLayout` calls it where the rules of section 5.5 reduce to it.
+
+### 7.6 PDF, TXT, JPEG
+
+- PDF: `packages/export/src/pdf/build.ts` runs on the render worker (SPEC 3.3 rule 7). It loads the `renderStandalone` output of the deck (skipped slides removed unless asked, notes never, one appearance from `defaults.appearance` or the dialog), adds a print stylesheet with `@page { size: 13.333in 7.5in; margin: 0 }` and one sheet per page, and calls `page.pdf({ preferCSSPageSize: true, printBackground: true })`. The report carries pages and bytes. The gate: `pdftoppm -r 144` rasterises each page and the diff against the web render at 2x runs under the flatten budget (0.1 percent per page) as the target; a page between 0.1 and 0.5 percent ships with the worst page named in the report; a page over 0.5 percent fails the export and the menu item's handler opens the print preview of section 6.8 instead, with the snackbar "PDF is not available on this deployment yet. Use Print and Save as PDF". The gate runs in `turboslide export check` on the fixture deck (section 14.5) before the item is called Now on production.
+- TXT: `export.text` from `blockTexts` and `slideTexts` (`packages/lint/src/context.ts`): one block of paragraphs per slide in order, table cells joined by tabs, a blank line between slides, the notes after each slide's texts when asked.
+- JPEG and PNG of the current slide: the render route at 2x; JPEG quality 92.
+
+### 7.7 Later items, designed now so they land additive
+
+Each is a Later stub in section 2 and an optional field that a following round adds without a version bump.
+
+| Item | Field or action | Renderer | Editable text (pptxgenjs) | Why later |
+| --- | --- | --- | --- | --- |
+| Autofit (Do not autofit, Shrink text on overflow, Resize shape to fit text) | `autofit?: 'none' \| 'shrink' \| 'grow'` on `text` and `box` under freeform; the editor applies it after each commit by writing explicit `pos.h` (grow) or stepping `typography.size` down the ladder (shrink); `freeform/overflow` (2) reports none | nothing at render time; the document is always explicit | `fit` is never written (SPEC 8.5); the measured size travels | the string renderer cannot measure; the writes need the measurer in the editor |
+| Guides | `Deck.guides?: { x: number[]; y: number[] }` in sheet px; View > Guides items; `snapPosition` gains them | editor overlay only | not exported | not in the ten tasks |
+| Bullet glyphs and levels | `PlainBlock.marker?: 'rule' \| 'bullet' \| 'number'` and `PlainItem.level?: 1 \| 2 \| 3`; Cmd+] and Cmd+[ | a glyph or numeral in the key position, 24 px per level | `bullet: true` or `{ type: 'number' }`, `indentLevel` | decision 15.1 |
+| Groups | the flat tag `pos.group?: string` on freeform blocks; `block.group`, `block.ungroup` | the selection moves the tag's members together | one `<p:grpSp>` per tag through the existing `ooxml/groups.ts` | a tag with no renderer meaning is half a feature this round; never a nested block (breaks rule 3 of 7.1) |
+| Charts | the `chart` block: `kind: 'bar' \| 'column' \| 'line' \| 'pie'`, `categories: string[]`, `series: { name; values: number[]; color?: Color }[]`; a data grid in Format options | inline SVG in the diagram grammar | a 2x PNG with `altText` carrying the series (Google's chart is a picture, R11 A10) | the searchable labels claim needs SVG text measurement that does not exist; the table is the number slide this quarter |
+| Rotation and flip | `pos.rotate?: number`, `pos.flip?: 'h' \| 'v' \| 'hv'` on freeform blocks | `transform` on the `.free` wrapper | `rotate`, `flipH`, `flipV` | the measurer reads axis aligned boxes; `docs/freeform.md` records the decision |
+| Italic and underline | a fifth markup rule and `Run.i`, `Run.u`; an Inter italic instance | `<i>`, `<u>` | the italic instance in `fonts.json` and `EXPORT_WEIGHTS` | a font build, a licence check and a grammar change at once |
+| Shape presets | `packages/schema/src/shapes.ts`: per kind the SVG path generator on the half pixel grid and the ECMA `prstGeom` name; thirteen presets at most (triangle, right triangle, diamond, parallelogram, trapezoid, pentagon, hexagon, plus, the four block arrows, chevron) | inline SVG from the table | `pptx.ShapeType.<preset>` | not in the ten tasks |
+| Slide background | `ContentSlide.background?: { color: Color } \| { asset: AssetId }` | a layer under `.in` | `slide.background` | the theme's paper is the background; picture layouts cover the sales case |
+| Border dash | `dash?: 'solid' \| 'dash' \| 'dot'` on shape, rule, box and table | `stroke-dasharray` | `dashType` | the stroke grammar is solid |
+| Comments | `ext.comments` on a slide with label, time, anchor, resolved; a panel with All, Open, Resolved | the panel | not exported | needs a display name step first (R10 C3 items 2 and 4) |
+| PPTX import | `import.pptx` over jszip and a small OOXML reader: `p:sp` to `text` or `shape`, `p:pic` to `shot`, `a:tbl` to `table`, notes to `notes`, a report per dropped shape | n/a | n/a | competes with the editor for the same builders; the Upload tab says so |
+| View token | a per deck view token in the view URL, Stop sharing rotating it, a private flag hiding a deck from `/decks` | n/a | n/a | section 0.25 |
+
+### 7.8 Migration of existing decks
+
+None runs. The 86 files under `decks/gt-brand`, the blank template and every Blob deck validate unchanged at version 1. `packages/schema/src/migrations.test.ts` gains a test that `migrate` on the committed GT deck, on `decks/templates/gt-brand` and on the blank template returns documents deep equal to their inputs, and `pnpm check` step 12 (compare to shoot at 0.5 percent) runs on every builder's branch as the proof that the renderer changes touched nothing they should not have.
+
+### 7.9 Amendments to docs/spec/SPEC.md
+
+The integrator records these in the deviations list of `AGENTS.md` and edits the sentences:
+
+1. SPEC 4.2 line 316, "No line breaks inside a string except in panel.code": "No line breaks inside a string except a paragraph break in paragraph, text, box and table cell Texts (`multilineTextSchema`), and \n in panel.code".
+2. SPEC 8.2, "Rows are five hairlines plus key and value boxes, never a PPTX table": scoped to `rows` and `plain`; the `table` block is a PPTX table in Editable text.
+3. SPEC 2.1, "Ruled rows and lists instead of bullets": unchanged this round; the Bulleted list control produces the ruled list (decision 15.1).
+4. SPEC 6.9, the shell keys: the editor binds no bare letters; the view route keeps them (section 10.2).
+5. SPEC 3.4 and the routes: `/` redirects to `/new`; `/decks` is the home page; `/new`, `/decks/trash`, `/print/:deckId` and `/present/:deckId` are new routes.
+6. SPEC 6.1, the editor layout: the title row, the menu bar, the toolbar, the notes pane and the bottom bar of section 1.
+
+## 8. Speaker notes
+
+The pane under the canvas: full canvas width, 64 px tall by default (`--pt-notes-h`), the placeholder "Click to add speaker notes" in titanium, a three dot handle on the divider (drag to resize between 0 and 40 percent of the window, double click to toggle the default height, drag to the bottom to hide), Cmd+Option+Shift+S focuses it, View > Show speaker notes toggles it (R02 section 7; R09 A11). The textarea is bound to `slide.notes` with one `slide.set /notes` per 400 ms pause, so undo removes a burst of typing. Plain text with line breaks this round; the text toolbar over the notes is Later because notes are a `string`, not a `Text`; a disabled toolbar tail is not shown (nothing greys in the pane). Notes stay out of the view route, the embed, the present link, print and every download unless "Include speaker notes" is checked (section 6.7), and they show in Presenter view. `spellcheck` is on in the pane.
+
+## 9. Present mode and Presenter view
+
+### 9.1 The Slideshow button
+
+At the top right, a split button (R04 A1): the main part starts the slideshow from the current slide in this tab, full screen when the browser allows (`view.present` plus the Fullscreen API; Esc leaves both); the arrow lists:
+
+1. Presenter view: opens `/present/<id>` in a second window (SPEC 6.10) and puts this tab into the slideshow; the two sync over `BroadcastChannel('turboslide:<deckId>')` with `localStorage` as the fallback; `view.goto` drives both, so `deck_goto_slide` from MCP moves the audience window.
+2. Start from beginning (Cmd+Shift+Enter; Windows Ctrl+Shift+F5, which Google does not publish and R04 marks unverified).
+3. Present on another screen: disabled, tooltip "Not available in Turboslide yet. Presenter view opens a second window you can drag to another screen".
+4. Presentation display options: omitted (Chrome's multi screen permission flow; Presenter view covers the two window case).
+
+The second Presentation button and the P key leave (R06 finding 1).
+
+### 9.2 The slideshow surface and its toolbar
+
+Full screen, the sheet alone on an ink surround; a click on the slide advances (R04 A2). A toolbar at the bottom left appears when the pointer moves there and fades 2 s after it leaves (R04 A3): Previous, the slide number as a button that opens a list of slides (thumbnails, skipped ones absent), Next, and an Options menu (⋯):
+
+| Item | Turboslide | Round |
+| --- | --- | --- |
+| Open speaker notes | Opens Presenter view in a second window | Now |
+| Auto-play ▸ (1, 2, 3, 5, 10, 15, 30 s, 1 min; Loop; Play or pause) | none | Later |
+| Turn on the laser pointer (L) | A 12 px ink dot with a paper ring that follows the pointer on the sheet; the chrome has no red | Now |
+| Captions preferences | none | Omit (a browser speech service, English only) |
+| Enter or exit full screen (Cmd+Shift+F, Windows F11) | The Fullscreen API | Now |
+| Turn on the pen | none | Later |
+| More ▸ Download as PDF, Download as PPTX, Print, Keyboard shortcuts | Print opens the print preview; Keyboard shortcuts shows the presenting group; the two downloads open the Download dialog after the show | Now (print, shortcuts), Later (downloads inside the show) |
+| Exit (Esc) | Leaves present mode | Now |
+
+Keys while presenting, from Google's presenting table (R04 A10), every row bound: Esc stops; Right and Left; a number then Enter; Home and End; s opens Presenter view; a is inert with the snackbar "Audience tools are not available in Turboslide" once per show; l toggles the laser pointer; Cmd+P prints; Cmd+Shift+C is inert (captions omitted); Cmd+Shift+F or F11 full screen; b or . a black slide and any key returns; w or , a white slide and any key returns. Space, Enter, Page Down and Page Up also advance and Backspace goes back (PowerPoint convention; Google's page does not list them, R04 unverified 9). Skipped slides never appear; the counter shows "3 of 10" over the unskipped count. The slideshow keeps working after load with no network (the deck is in memory, R07 rule 29). Materials show their frames (SPEC 5.4).
+
+### 9.3 Presenter view
+
+A second window at `/present/<id>` (R04 A4; the layout comes from third party walkthroughs and is the shape to mimic, not pixels): a timer top left with Pause and Reset; the current slide with a slide list dropdown and Previous and Next buttons; the next slide preview at 0.3 scale; the notes body with plus and minus font size buttons (14 to 28 px) and "No speaker notes for this slide" when empty; an Audience tools tab present and disabled ("Not available in Turboslide yet"). Arrow keys in either window move both. Closing the presenter window leaves the slideshow running. The view route's `?present=1` is the audience form without the console and stays the shareable link. The console shows stored frames; live shaders do not run there.
+
+## 10. Keyboard shortcuts
+
+### 10.1 Bound this round
+
+Every row of R04 Part B that maps to a shipped feature is bound exactly, Mac and Windows, and listed in Help > Keyboard shortcuts (Cmd+/) under Google's group names with a search box. The binding source is Google's shortcut page, read 2026-09-11 by R04 (G1). Windows uses Ctrl for Cmd and Alt for Option unless a row says otherwise. `packages/chrome/src/menus/__fixtures__/google-shortcuts.json` is the fixture transcribed from R04 Part B, and `shortcuts.test.ts` asserts every fixture row is bound, bound as disabled, or listed as omitted with a reason.
+
+| Group | Bound |
+| --- | --- |
+| Common actions | New slide Ctrl+M (Ctrl on Mac too, as Google prints it); Duplicate Cmd+D; Undo Cmd+Z; Redo Cmd+Y or Cmd+Shift+Z; Copy Cmd+C, Cut Cmd+X, Paste Cmd+V, Paste without formatting Cmd+Shift+V; Copy formatting Cmd+Option+C, Paste formatting Cmd+Option+V; Insert or edit link Cmd+K; Open link Option+Enter; Delete; Select all Cmd+A; Find Cmd+F; Find and replace Cmd+Shift+H (Windows Ctrl+H); Find again Cmd+G, Find previous Cmd+Shift+G; Open Cmd+O; Print Cmd+P; Save Cmd+S (the snackbar "All changes are saved automatically"); Show shortcuts Cmd+/; Search the menus Option+/ (Windows Alt+/ or Alt+Z); Compact mode Ctrl+Shift+F; Alt text Cmd+Option+Y |
+| Film strip actions | Up, Down, Page Up, Page Down, Home, End (Fn+Left and Fn+Right on Mac); Move slide Cmd+Up and Cmd+Down; to beginning and end Cmd+Shift+Up and Cmd+Shift+Down; extend the selection Shift+Up, Shift+Down, Shift+Home, Shift+End |
+| Navigation | Zoom in Cmd and plus, Zoom out Cmd and minus, Zoom 100% Cmd+0 (R02 section 13 notes two readings of the zoom keys; R04's reading of Google's page is adopted); Move to filmstrip Cmd+Option+Shift+F; Move to canvas Cmd+Option+Shift+C; Open speaker notes Cmd+Option+Shift+S; Version history Cmd+Option+Shift+H; Present Cmd+Enter (Windows Ctrl+F5); Present from beginning Cmd+Shift+Enter; Exit the current mode Esc |
+| Menus | Context menu Cmd+Shift+\ or Shift+F10 (Windows also Ctrl+Shift+X); File Ctrl+Option+F, Edit E, View V, Insert I, Slide S, Format O, Arrange R, Tools T, Help H, Extensions X (Windows Alt plus the letter in Chrome, Alt+Shift elsewhere); the underlined letter inside an open menu |
+| Text | Bold Cmd+B; Increase and decrease font size Cmd+Shift+> and Cmd+Shift+<; Left, Center, Right align Cmd+Shift+L, E, R; Bulleted list Cmd+Shift+8; Numbered list Cmd+Shift+7; Clear formatting Cmd+\ (Windows Ctrl+\ or Ctrl+Space); Strikethrough Cmd+Shift+X on a list item (Windows Alt+Shift+5); Next and previous misspelling Cmd+' and Cmd+; where the browser exposes them, else listed as Later |
+| Move and arrange objects | Duplicate Cmd+D; Send backward Cmd+Down, Bring forward Cmd+Up, Send to back Cmd+Shift+Down, Bring to front Cmd+Shift+Up; Select next and previous shape Tab and Shift+Tab; Nudge one pixel with the arrows, 8 px (the grid) with Shift; Resize by keyboard Cmd+Ctrl+B, I, J, K, W (Windows Ctrl+Alt) one grid step each; Duplicate by drag Option+drag (Windows Ctrl+drag); Resize from centre Option+resize; Constrain to an axis Shift+drag; Constrain aspect Shift+resize; Suppress guides Cmd+drag (Windows Alt+drag); Exit crop mode Enter |
+| Presenting | Section 9.2 |
+
+Rows shown in the dialog greyed with the reason: Italic Cmd+I, Underline Cmd+U, Strikethrough inside a run, Superscript and Subscript, Justify Cmd+Shift+J, Increase and decrease indent Cmd+] and Cmd+[, Group and Ungroup, the rotate keys, Insert comment Cmd+Option+M, the comment chords, Select none, Move paragraph Option+Shift+Up and Down, Open animations panel Cmd+Option+Shift+B, the screen reader chords, the input tools keys, Open Explore (retired by Google), Turn on captions, the HTML view Cmd+Option+Shift+P, the cell border chord.
+
+### 10.2 Conflicts with today's keys and the resolution
+
+From R06 section 2 (every key Turboslide binds at `8c7056c`) against R04. Every conflict is resolved in Google's favour.
+
+| Turboslide key today | What it does | Google's meaning | Resolution |
+| --- | --- | --- | --- |
+| S, D, E, P, F, G, B, J, K, L, H, R, ? (`useShellKeys.ts`, `keys.ts`) | sidebar, theme, edit mode, present, fullscreen, grid, book, paging, help | Google binds no bare letters in the editor (R09 finding 4); s, a, l, b, w act only while presenting | Retired in the editor (`/edit`, `/new`); the view route `/deck/:id` keeps them as a reading surface; present mode keeps Google's letters; the first press of a retired letter in the editor shows the snackbar once per browser: "S now hides the filmstrip from the View menu" and the like |
+| Space, Backspace | next and previous slide | Backspace deletes; Space types | Retired in the editor; kept in present mode and the view route |
+| Digits then Enter | go to slide | presenting only | Present mode and the view route only |
+| Cmd+K | the command palette | Insert or edit link | Cmd+K is the link popover; the palette is Option+/ and the Search button |
+| Cmd+/ | the source drawer | Keyboard shortcuts | Cmd+/ opens the shortcuts dialog; the source drawer has no key (Tools > Advanced) |
+| Cmd+L | the lint layer | none | No key; Tools > Advanced |
+| Shift+D | the twin view | none | No key; Tools > Advanced |
+| Cmd+S | focus Name this version | Save (autosaved) | The snackbar "All changes are saved automatically"; naming a version is File > Version history > Name current version |
+| Cmd+] and Cmd+[ | z order on freeform | Increase and decrease indent | Reserved for indent (Later); z order is Cmd+Up and Cmd+Down |
+| Alt+Up and Alt+Down | reorder a block or a slide row | Google moves a paragraph | Dropped; Cmd+Up and Cmd+Down do both jobs by focus (the filmstrip moves the slide, the canvas orders the block) |
+| Enter on a selected block | start editing | same | Kept |
+| Enter while editing | commit | paragraph break | A paragraph break in paragraph, text, box and table cells; a new item in a list; commit in headings and slide fields; Shift+Enter the same as Enter (section 0.10) |
+| Esc while editing | discard the edit | keep the text, leave the box | Esc commits and selects the block; a second Esc deselects; Cmd+Z undoes (R09 finding 2 names this the most dangerous mismatch) |
+| Double click on a run | start editing | select a word | A single click inside text places the caret at the click; the block's frame edge is the drag surface; double click selects a word; triple click selects the paragraph (browser convention, verified for Docs, R09 A1) |
+| Arrow keys cycle blocks on grammar slides | | arrows nudge | On a grammar slide the arrows are inert with a block selected; on freeform they nudge |
+| Cmd+Enter in an inspector textarea | commit | none | Kept in Format options fields |
+| [ | sidebar | none | Retired in the editor |
+| The Escape ladder (`useShellKeys.ts` line 304) | help, panel, filter, mode, present, narrow sidebar | Esc exits the current mode | Esc closes a menu or dialog, then leaves text editing, then deselects, then closes a panel, then leaves present mode |
+
+The Turboslide only keys that remain in the editor's default view: none. `editor-keys.test.ts` asserts no bare letter handler runs on `/edit` and `/new` with nothing focused.
+
+## 11. What the sales user sees first, and the ten tasks traced
+
+### 11.1 First open
+
+The rep types the address and lands on `/new`. The title row reads "Untitled presentation" and "Not saved yet". The menu bar and the toolbar of section 3.1 sit above a canvas holding one Title slide: the GT mark, "Click to add title" in the h1 size, "Click to add subtitle" under it, both in titanium. The filmstrip holds slide 1. The notes pane reads "Click to add speaker notes". The right panel is closed. The bottom bar shows the two view toggles and the side panel chevron. Nothing else: no toast, no badge, no count, no revision, no lease, no id, no word that names an internal thing. A click on the title prompt places the caret and the prompt vanishes; typing the customer name writes the first `slide.set` after a 400 ms pause, the deck is created, the address becomes `/edit/untitled-20260911-k3f8`, the title row reads "Saving…" then "All changes saved", and because the title was still Untitled presentation the deck takes the heading as its name. Ctrl+M adds a Title and body slide; the New slide arrow shows the 21 layouts as pictures of GT slides with Google's eleven first.
+
+### 11.2 The ten tasks
+
+Counts are pointer presses and key presses beyond typing (the convention of R11 C2). "Google" is the reports' Google path; "Today" is `8c7056c` as R06, R09 and R11 trace it; "Here" is this specification. This table is the fixture of `apps/studio/e2e/ten-tasks.spec.ts` (section 14.3), which drives each Here column and asserts the count.
+
+| # | Task | Google | Today | Here |
+| --- | --- | --- | --- | --- |
+| 1 | Open the right deck | Home, click the card: 1 click | `/` opens someone else's deck; `/decks`, find the row among 14 by id, Open: 2 clicks after reading a table | Home, click the card (thumbnail, title, "Opened 2 hours ago"): 1 click; or Cmd+O, click: 1 key, 1 click |
+| 2 | Make a copy for a prospect and rename it | File > Make a copy > Entire presentation, OK, click the title, type, Enter: 4 clicks, 1 key | Export menu, Download deck bundle, `/decks`, Upload deck bundle, choose the file, Upload and open, rename in the toolbar: 7 clicks and a file dialog | File > Make a copy > Entire presentation (3 clicks); the Name field is selected with "Copy of GT pitch": type the prospect's name over it, tick Remove speaker notes if wanted, Enter (1 key): the copy opens named. 3 clicks, 1 key |
+| 3 | Retype the customer name on the cover and across the deck | Click the title (caret), triple click, type, Esc; Cmd+Shift+H, type, Replace all: about 4 clicks, 3 keys | Click selects the block; a bare letter typed now hides the sidebar or flips the theme; double click, Cmd+A, type, Enter (Esc would discard); no find and replace: per slide 2 clicks, 2 keys, and a hazard | Click into the title (1 click, the caret lands), triple click (2 more), type, Esc keeps it (1 key). Then Cmd+Shift+H, type the old and new name, Replace all (1 key, 1 click): every slide and the notes |
+| 4 | Swap a logo | Drop the file on the image: 1 drop | The inspector's Asset section, Alt text, Role and six optional fields, Add asset, pick it in the select: about 6 clicks and typing | Drop the file on the image: 1 drop; the frame, caption and crop anchor are kept. Or right-click, Replace image, Upload from computer: 3 clicks and the file dialog |
+| 5 | Add, duplicate, delete, reorder | Ctrl+M; Cmd+D; Delete; drag: 1 each | Row menu, Insert after, pick a kind (3 clicks); row menu, Duplicate (2); row menu, Delete (2); drag (1) | Ctrl+M; Cmd+D; Delete; drag: 1 each, plus the same four in the right-click menu and the Slide menu |
+| 6 | Hide slides that do not apply | Right-click, Skip slide: 2 clicks; multi-select first for several | Not possible; the slide is deleted for everyone | Shift+click the three pricing slides (3 clicks), right-click, Skip slide (2 clicks): the cards dim; the slideshow, the view link and the downloads leave them out |
+| 7 | Update the pricing table and the big number | Click the first cell, type, Tab through 20 cells (1 click, about 23 keys); click the number, Cmd+A, type (1 click, 1 key) | No table: 30 text blocks on a freeform slide, each a double click, Cmd+A and Enter: 51 clicks and 46 keys (R11 C2) | Click the first cell (1 click), type, Tab through the cells (20 keys); the header row stays weight 500 and the prices right aligned by the column; click the big number, Cmd+A, type (1 click, 1 key) |
+| 8 | Write a talk track | Click the notes pane, type: 1 click | The inspector's Slide section, Notes, click, type, Cmd+Enter: 3 clicks, 1 key | Click "Click to add speaker notes", type: 1 click; Cmd+Option+Shift+S from anywhere |
+| 9 | Present over a call | Slideshow arrow, Presenter view: 2 clicks; share the audience window in the call | Present or Presentation; no notes anywhere while presenting: 1 click and a missing console | Slideshow arrow, Presenter view: 2 clicks; the audience window is the one shared in the call, the presenter window has the notes, the timer and the next slide; Right in either moves both; b blanks the screen during a question |
+| 10 | Send a PDF or a link | File > Download > PDF Document: 3 clicks; Share, Copy link: 2 clicks | Export, Build and download an HTML file (2 clicks) or the PPTX after 3 minutes; Copy link copies the editor's own address, which lets the prospect edit and read the notes | Share, Copy link under View link: 2 clicks, a read only link with notes and skipped slides removed; or File > Download > PDF Document (.pdf), Download: 4 clicks and a progress sentence |
+
+The two tasks where this specification departs from Google by design: task 6, where skipped slides leave shared and downloaded outputs by default (R10 A15), and task 10, where downloads strip notes by default. Both are checkboxes away from Google's behaviour.
+
+### 11.3 Defaults, empty states and errors
+
+- Defaults that remove a decision: autosave with no Save command; New slide inherits the layout; Perfect is the PPTX default; the deck's appearance drives the stage, thumbnails, present mode and downloads; guides snap on, grid off; Fit zoom; the right panel closed; notes and skipped slides out of outputs.
+- Empty states, one sentence each: the prompts of section 5.4; "No presentations yet. Start one above"; "Trash is empty"; "No speaker notes for this slide"; "Select something on the slide to see its options"; "Click + to add a slide"; "Add a picture first".
+- Errors and interruptions, each with the next step in the sentence: "Couldn't save, retrying"; "Someone else changed this slide. Your change was reapplied" (a silent rebase, as a snackbar); "This slide changed while you were editing. Keep mine or Use theirs" (the conflict card as two buttons, no JSON in the default view); "Pictures up to 25 MB"; the PPTX import sentence of section 12; "Slide deleted · Undo", "Moved to trash · Undo", "Applied Big number. 1 picture did not fit this layout · Undo", "Row added · Undo". Snackbars hold 5 s, carry one action, and Esc dismisses them.
+- Discoverability without onboarding: every icon has a tooltip with its name and key (`scripts/tooltip-audit.mjs`); every toolbar and right-click action is in the menu bar; the menus print keys; Search the menus finds every item by name; Help > Keyboard shortcuts is Cmd+/; right-click works on a card, the canvas, an object, text, a table cell. The first visit toast ("Arrow keys move. Press ? for every shortcut.") is removed.
+
+## 12. Wording rules
+
+Every string the default view shows, in one vocabulary (R07 Naming; Google's writing guidance): sentence case, verbs on buttons, no trailing period on a label, no engineering noun. The strings below are the ones every builder uses; `packages/chrome/src/menus/strings.ts` holds them so the tests can read them.
+
+- The engineering terms that never reach the default view (R07's table and rule 22): lint, source, lease, revision, grammar, freeform, kind, toolchain, agent, block id, JSON pointer, flatten, native, twin, mutation, reducer, palette (as a control name), MCP outside Extensions > Agent access. `default-view-words.test.ts` renders the shell in its default state at `/new` and `/edit/gt-brand` and fails on any of them outside Tools > Advanced and the Agent access dialog.
+- Google's label is the label: New slide (not Insert block), Layout and Apply layout (not kind or grammar layout), Theme (not toolchain or tokens), Duplicate slide (not clone), Skip slide (not hide), Delete (not remove), Speaker notes (not notes field), Slideshow and Presenter view (not present mode or stage), Share and Copy link (not publish or embed URL), Download with the file type (not export, flatten, native), Version history, Name current version, Restore this version (not revisions or chips).
+- Title row: "Untitled presentation"; "Not saved yet"; "Saving…"; "All changes saved"; "Couldn't save, retrying"; "Last edit 2 minutes ago"; "Slideshow"; "Share".
+- Stubs: "Not available in Turboslide yet" followed by one clause; the clause never names an internal noun.
+- Prompts: "Click to add title", "Click to add subtitle", "Click to add text", "Click to add a number", "Add a caption", "Click to add a picture", "Click to add speaker notes".
+- Snackbars: "Slide deleted · Undo", "Deleted 3 slides · Undo", "Moved to trash · Undo", "Applied <layout>. <n> <things> did not fit this layout · Undo", "Row added · Undo", "Link copied", "All changes are saved automatically", "Someone else changed this slide. Your change was reapplied", "Skipped 3 slides · Undo", "S now hides the filmstrip from the View menu".
+- Dialogs: "Make a copy" (Name, Remove speaker notes, Make a copy, Cancel); "Import slides" (Presentations, Upload, All, None, Back, Import slides); "Download" (Perfect, Editable text, Include speaker notes, Include skipped slides, More options, Download, Details); "Share <title>" (View link, Present link, Edit link, Copy link, "Anyone with this link can edit", "Turboslide has no accounts yet. Anyone who has a link can open it", "Skipped slides and speaker notes are not included in the view and present links", Done); "Publish to the web" (Link, Embed, Small, Medium, Large, Custom); "Delete <title> forever? This cannot be undone" (Delete forever, Cancel); "Find and replace" (Find, Replace with, Match case, Prev, Next, Replace, Replace all); "Slide numbers" (On, Off, Skip title slides, Apply); "Details" (Title, Slides, Sections, Created, Last edit); "Open" (Search presentations, Presentations, Upload, Open); "Name current version" (Name, Save); "Agent access" (MCP address, API address, Push, Pull, Copy, "A token is required and is never shown here").
+- Panels: "Themes" (GT, Light, Dark, In this presentation, Import theme); "Format options" (Size & rotation, Position, Layout, Text, Colour, Picture, Table, List, Alt text); "Version history" (Only show named versions, Restore this version, Name this version, Make a copy); "Suggestions for this slide" (Fix).
+- Filmstrip: "Skipped: not shown when presenting or in downloads"; "Click + to add a slide"; "GT layouts" (the rule in the layout grid).
+- Home: "Start a new presentation", "Blank presentation", "GT brand deck", "Template gallery", "Recent presentations", "Search presentations", "Opened 2 hours ago", "Edited <date>", "Last opened by me", "Last modified", "Title", "Every presentation on this Turboslide is listed here", "Trash", "No presentations yet. Start one above", "Trash is empty", "Restore", "Delete forever", "Empty trash", "This presentation is in the trash · Restore".
+- Import: "PowerPoint import is not available in Turboslide yet. Import a Turboslide bundle (.zip), or open the file in Google Slides and paste the text".
+- Present mode: "3 of 10", "Open speaker notes", "Turn on the laser pointer", "Exit"; Presenter view: "Pause", "Reset", "Speaker notes", "No speaker notes for this slide", "Audience tools · Not available in Turboslide yet".
+
+## 13. Accessibility and keyboard rules
+
+1. The menu bar follows the WAI-ARIA menubar pattern: `role="menubar"`, `role="menu"`, `role="menuitem"`, `aria-haspopup` and `aria-expanded` on titles and submenu items, `aria-disabled` on stubs (never removed from the tree), `aria-keyshortcuts` carrying the key, roving tabindex, Left and Right between menus, Up and Down between items, Home and End, Enter and Space to run, Esc one level, Tab out; the access keys of section 2.11.
+2. Context menus follow the menu pattern and open from Shift+F10 and Cmd+Shift+\ on the focused element; focus returns to that element on close.
+3. Dialogs are `role="dialog"` with `aria-labelledby`, a focus trap, Esc to cancel, Enter to run the default button, the dismissive button first and the confirming button last, and focus returned to the opener on close (R08 B9).
+4. Every control, toolbar button, menu item, handle and chip carries the Tooltip primitive with its name and key (AGENTS.md); tooltips show on hover and on keyboard focus and are linked with `aria-describedby`; `node scripts/tooltip-audit.mjs --strict` walks `/new`, `/edit/gt-brand`, `/decks`, `/decks/trash`, `/print/gt-brand` and every menu and dialog and exits 1 on a miss or on a tooltip carrying an action id or a JSON pointer.
+5. The tab order is the title row, the menu bar (one stop), the toolbar (one stop, arrows inside), the filmstrip (one stop, arrows inside), the canvas (one stop; Tab and Shift+Tab walk blocks inside it; Cmd+Option+Shift+F and C jump), the notes pane, the right panel. No keyboard trap anywhere; Esc always leaves the current mode.
+6. Focus rings are visible: a 1 px `--pt-ink` outline at 2 px offset on every focusable control, in both themes.
+7. Snackbars are `role="status"`; the save words are `aria-live="polite"`; a skipped card's accessible name reads "Slide 3, skipped"; a slide card's name is its title or "Slide n"; a block's accessible name is its type and the first words of its text, never its id, unless Show slide and block ids is on.
+8. Colour contrast: the `--pt-` tokens in both themes as the chrome lint checks them; disabled items keep 3:1 against the paper; nothing conveys state by colour alone (the skipped card has the glyph, the current card has the ring width).
+9. Reduced motion: every duration reads the `--pt-dur-*` tokens, which the reduced motion block sets to 0 ms; the laser pointer and the snackbar included.
+10. The shortcuts dialog is searchable and every row is real text, so a screen reader reads it; Google's group names are headings.
+11. The canvas prompts carry `data-prompt` and `aria-hidden="true"`; the empty block's accessible name says "Empty title" so a screen reader user knows the field is a placeholder.
+12. Zoom to 200 percent in the browser keeps every control reachable: the toolbar's More button and the overlay filmstrip take over as at 1100 and 900 px.
+
+## 14. Acceptance
+
+### 14.1 pnpm check
+
+The 19 steps of `scripts/check.mjs` stay and must exit 0 on the merged tree. Two steps are added: step 20, `[server] node scripts/gslides-parity-audit.mjs --base http://localhost:4321` (section 14.4); step 21, `[server] pnpm exec playwright test apps/studio/e2e/ten-tasks.spec.ts apps/studio/e2e/text-editing.spec.ts apps/studio/e2e/filmstrip.spec.ts apps/studio/e2e/home.spec.ts apps/studio/e2e/present.spec.ts`. Step 18 (the chrome lint) gains `/new` and `/decks` at the same widths and themes. Step 3 (`pnpm generate:contracts` and an empty diff) is the named acceptance for every new action.
+
+### 14.2 New unit tests
+
+| Test | Package | Asserts |
+| --- | --- | --- |
+| `menus/__tests__/menu-model.test.ts` | chrome | every Google item of the R01 fixture is in the model with a status; every `now` item has an effect; every `later` item has a stub reason; every `omit` item has none; the toolbar order of section 3.1 by control id; the filmstrip menu order of section 4.2 |
+| `menus/__tests__/shortcuts.test.ts` | chrome | every row of the R04 Part B fixture is bound, bound as disabled, or listed as omitted with a reason; no two bound chords collide; no bare letter is bound in the editor map |
+| `__tests__/default-view-words.test.tsx` | chrome | the shell rendered in its default state at `/new` and `/edit` contains none of the words of section 12 outside Tools > Advanced and the Agent access dialog |
+| `__tests__/editor-keys.test.ts` (extended) | viewer | no bare letter handler runs with nothing focused; Esc commits; Enter breaks in the four multiline pointers and commits elsewhere; Tab moves between cells; one Cmd+Z removes one 400 ms burst |
+| `__tests__/inline-text.test.ts` (extended) | viewer | `\n` round trips; `BR` becomes `\n`; caret lands at the click; double click selects a word |
+| `layouts.test.ts` | schema | every entry's `make` produces a slide that validates with no severity 3 issue on the blank deck (picture entries with the starter set); the first eleven ids and labels match R03 b.2 in order; every `template.json` archetype names a layout id |
+| `migrations.test.ts` (extended) | schema | `migrate` returns the committed GT deck, the GT template and the blank template unchanged |
+| `text.test.ts` (extended) | schema | `multilineTextSchema` accepts `\n` and refuses `\r`; `textSchema` still refuses both |
+| `blocks/table.test.ts` | schema | the 20 by 20 cap; a ragged row is refused; the nine commands as `block.set` writes produce valid tables |
+| `apply-layout.test.ts` | schema | every source layout to every target layout of the 21 produces a valid slide; the mapping rows of section 5.5; the drop count on Title slide and Main point; the same layout resets overrides |
+| `coverage.test.ts` (exists) | agent | the fourteen new actions each have a parsing example and a test file naming them |
+| `lint.test.ts` (extended) | lint | `copy/empty-placeholder` fires at severity 1 on an empty title; the copy rules skip table cells; `table/size` fires over the cap; the GT deck's lint count does not rise |
+| render snapshots (extended) | render | the table block, a numbered plain list, a multiline paragraph, an empty Text with `live: true` (the prompt) and without (nothing), in both themes |
+| `export-pptx.test.ts` (extended) | export | the fixture deck of section 14.5 exports in both modes; the table is an `a:tbl` in Editable text; empty Texts produce no text box; skipped slides and notes obey the two flags; a slide hyperlink is written |
+| `pdf.test.ts` | export | the PDF of the fixture deck has one page per unskipped slide at 13.333 by 7.5 in |
+| `store` tests (extended) | store | `deck.list` skips trashed decks; `deck.trash` and `deck.restore` round trip; `deck.copy` with `slideIds` and `removeNotes`; `deck.remove` on the file, tmp and fake blob stores; the blank template carries the four starter assets |
+
+### 14.3 New end to end specs
+
+| Spec | Drives | Asserts |
+| --- | --- | --- |
+| `landing.spec.ts` (rewritten) | `/` | redirects to `/new`; the draft shows Untitled presentation, the two prompts and Not saved yet; nothing is written to the store until the first edit; the first edit creates the deck, moves the address to `/edit/<id>` and renames the deck to the heading |
+| `home.spec.ts` | `/decks`, `/decks/trash` | the strip, the recent cards with thumbnails, search, sort, the card menu; Move to trash hides the deck and Restore brings it back; Delete forever removes it; the Open dialog lists and opens |
+| `ten-tasks.spec.ts` | the Here column of section 11.2 | each task completes with at most the stated count of clicks and keys, measured by the spec's own counters |
+| `text-editing.spec.ts` | the canvas | caret on click, Esc keeps, Enter breaks, list append, Tab through a table, Cmd+Z removes one burst, no bare letter changes the view |
+| `filmstrip.spec.ts` | the filmstrip | multi-select drag, skip and unskip, the right-click items and order, Delete with Undo, the layout grid from the arrow and the Layout button |
+| `present.spec.ts` | present mode and `/present/:id` | the presenting keys, the black and white slides, skipped slides absent, the two windows in sync over BroadcastChannel |
+| `viewer.spec.ts` (exists, extended) | `/deck/:id`, `/embed/:id` | the payloads carry no `notes` and no skipped slide |
+| `deck-transfer.spec.ts` (exists, extended) | copy and import | Make a copy with selected slides and removed notes; Import slides copies assets |
+| `hosted-smoke.mjs` (extended) | the preview and production | `/new`, `/decks/trash`, `/print/<id>`, `/present/<id>` answer; `/deck/<id>` carries no `notes` key |
+
+### 14.4 The Google parity audit
+
+`scripts/gslides-parity-audit.mjs --base <origin> [--out docs/gslides-parity/verification/parity-audit.json]` opens `/new`, `/edit/gt-brand` and `/decks` in the built client with `playwright-core`, imports the menu model from `packages/chrome/src/menus/model.ts`, and for every item:
+
+1. A `now` item is present in the DOM (by `data-menu-item`), enabled when its `enabled` predicate says so in the audited state, and activating it produces its declared effect: a dialog whose title matches, a panel whose title matches, a route change, a toggle's state, or one write of the named action id observed through `window.turboslide.studio` (the audit registers a write listener and undoes each write).
+2. A `later` item is present, `aria-disabled`, and its tooltip starts with "Not available in Turboslide yet".
+3. An `omit` item is absent from the DOM by label and by id.
+4. The toolbar's `data-control` order matches section 3.1 in the default state and sections 3.2 to 3.6 after selecting a text block, a shape, an image, a line and a table cell on a fixture slide.
+5. The filmstrip context menu's item order matches section 4.2.
+6. Every bound shortcut of section 10.1 dispatched as a keydown fires its item's effect; every retired key of section 10.2 changes nothing.
+7. The default view's text contains none of the words of section 12.
+8. The tooltip audit passes on the same pages.
+
+It writes the JSON report (one row per item with pass or fail and the evidence) and exits 1 on any miss. The verifier commits the report under `docs/gslides-parity/verification/`.
+
+### 14.5 Gates per builder
+
+- Document and actions: `pnpm test` in schema, lint, store, cli; step 3's empty diff; the migration test; the coverage test; the GT deck's lint count not higher than at `8c7056c`; `turboslide slide new --layout big-number`, `slide apply-layout`, `text replace`, `deck copy`, `deck trash`, `deck list` end to end in a temp deck.
+- Renderer and export: render snapshots in both themes; step 12 at or under 0.5 percent worst mismatch on the GT deck; the export fixture deck `decks/fixture/gslides/` holding one of every new object (a table, a numbered list, a multiline paragraph, a block link, a run slide link, an empty prompt, a skipped slide, notes) exported in both modes, `turboslide export check` valid, the native budget of 3 px on the table's cells or the fallback named in `residual`, the flatten budget of 0.1 percent per page; the PDF gate of section 7.6 passing on the fixture and on the GT deck.
+- Chrome shell: step 18 at 1440, 1280 and 390 in both themes on `/new`, `/edit`, `/deck` and `/decks` with 0 findings; the tooltip audit with 0 misses; the three chrome unit tests of 14.2.
+- Filmstrip, canvas and text: the viewer unit tests; `text-editing.spec.ts` and `filmstrip.spec.ts`.
+- Routes, home and files: `landing.spec.ts`, `home.spec.ts`, the extended `deck-transfer.spec.ts` and `viewer.spec.ts`; `curl` of `/deck/<id>` shows no `notes` key; `hosted-smoke.mjs` on a preview.
+- Present: `present.spec.ts`; step 17 still 6 of 6.
+- Integrator: `pnpm check` 21 of 21 on the merged tree; contracts current; AGENTS.md and the SPEC amendments of section 7.9 recorded.
+- Verifier: the parity audit report, the ten task counts met or explained, one Perfect and one Editable text export of the fixture deck opened in LibreOffice, one PDF opened in Preview with one page per slide, the production `/` opening an untitled editor after the push, and a written status document with numbers (section 14.6).
+
+### 14.6 What the verifier records
+
+`docs/gslides-parity/VERIFICATION.md`, in the shape of `docs/EDITOR-DEPTH-STATUS.md`: the 21 check steps with their numbers, the parity audit totals (items passed per menu), the ten task counts against section 11.2, the tooltip audit, the chrome lint, the export and PDF results, the preview and production lines, the blockers, and what Kevin must do.
+
+## 15. Decisions for Kevin
+
+Each is a product or grammar decision the research cannot settle. The default in this specification is what the build does unless Kevin says otherwise; each alternative is pre-specified so the flip is small.
+
+1. Bullets. Default: the Bulleted list button makes a ruled statement list (section 0.11). Alternative: ship `PlainBlock.marker` with glyph bullets and `level` (section 7.7). SPEC 2.1 says ruled rows instead of bullets.
+2. The PPTX download's notes default. Default: off with a visible checkbox (R07 rule 25). Alternative: Google's default, on. The view link and the PDF strip notes either way.
+3. Italic and underline. Default: Later stubs. Shipping them is a font build, an OFL check and a fifth markup rule (SPEC 4.2).
+4. Rotation and flip. Default: Later stub; `docs/freeform.md` stands.
+5. The right panel on a fresh presentation. Default: closed (section 0.7). Alternative: the Themes panel open once per browser; one flag.
+6. The placeholder strings in existing decks. Default: left alone (section 0.17). Alternative: a one time `turboslide fix` rule that empties the fifteen known strings, run by hand, never inside `migrate`.
+7. Where Help > Help Turboslide improve sends feedback (a repository issue, a mail address, nothing).
+8. Trashing the production test decks from the home page after the push, then Delete forever from `/decks/trash`.
+9. Transition as three disabled stubs (section 0.5) or omitted everywhere (judge 3's preference).
+10. Title only and Section title and description in the layout grid: included for Google's eleven (section 0.3); Kevin may drop either as near duplicates.
+11. The SPEC amendments of section 7.9, which the integrator records as deviations until approved.
+
+## 16. Sources
+
+Research reports in this repository, all written 2026-09-11 from public pages read the same day; this specification cites them as R01 to R11 and did not reopen the pages:
+
+- R01 `docs/gslides-parity/research/01-menu-bar.md` (the ten menus item by item)
+- R02 `docs/gslides-parity/research/02-editor-surface.md` (anatomy, the toolbar order, the filmstrip, the notes pane, the bottom edge, sizes)
+- R03 `docs/gslides-parity/research/03-home-themes-layouts-io.md` (home page, themes and layouts, the File menu dialogs)
+- R04 `docs/gslides-parity/research/04-present-and-shortcuts.md` (present mode and the complete shortcut list)
+- R05 `docs/gslides-parity/research/05-objects-and-format-options.md` (Insert, Format and Arrange objects and options)
+- R06 `docs/gslides-parity/research/06-turboslide-inventory.md` (every Turboslide control, key and action at `8c7056c`)
+- R07 `docs/gslides-parity/research/07-sales-users.md` (the sales user, top tasks, conventions, frustrations, design rules)
+- R08 `docs/gslides-parity/research/08-context-menus-and-menu-conventions.md` (right-click menus, menu and dialog conventions)
+- R09 `docs/gslides-parity/research/09-canvas-text-editing-model.md` (text interaction and the text model delta)
+- R10 `docs/gslides-parity/research/10-identity-sharing-and-presence.md` (roles, sharing, comments, presence)
+- R11 `docs/gslides-parity/research/11-tables-charts-and-numbers.md` (tables, charts, big numbers)
+
+The three proposals and three judge reports in `docs/gslides-parity/design/`, read in full 2026-09-11.
+
+Google pages this specification depends on directly, read 2026-09-11 by the reports named (URLs as the reports record them):
+
+- Keyboard shortcuts for Google Slides, https://support.google.com/docs/answer/1696717 (R01, R04, R06, R09): every binding of sections 9.2 and 10
+- Add, delete & organize slides, https://support.google.com/docs/answer/1694830 (R01, R02, R08): New slide, Duplicate, Skip slide, the filmstrip and grid view, slide numbers
+- Use a template or change the theme, background, or layout in Google Slides, https://support.google.com/docs/answer/1705254 (R03): theme, layout, template, background, Apply layout, Change theme, Import theme
+- Present slides, https://support.google.com/docs/answer/1696787 (R04): the Slideshow button, the present toolbar, the presenting keys
+- Create, view, or download a file, https://support.google.com/docs/answer/49114 (R03): Download, Make a copy, Rename, the title offered from the title slide
+- Delete a document, spreadsheet, presentation, or video, https://support.google.com/docs/answer/6023494 (R03): Move to trash
+- Find what's changed in a file, https://support.google.com/docs/answer/190843 (R01, R10): Version history, named versions, Last edit
+- Share files from Google Drive, https://support.google.com/docs/answer/2494822 (R10): the Share dialog
+- Make Google Docs, Sheets, Slides & Forms public, https://support.google.com/docs/answer/183965 (R03): Publish to web
+- Insert or delete images & videos, https://support.google.com/docs/answer/97447 (R05): image sources, Replace image, drag to replace
+- Add and edit tables, https://support.google.com/docs/answer/1696711 (R11): the table commands and the 20 by 20 cap
+- Change how text fits in placeholders & text boxes, https://support.google.com/docs/answer/10364036 (R09): the three autofit modes
+- Insert and arrange text, shapes, diagrams, and lines, https://support.google.com/docs/answer/1696521 (R05): Arrange items, snapping, guides
+- Use Google Slides with a screen reader, https://support.google.com/docs/answer/1634140 (R01, R09): Enter starts editing, Escape returns to the container
+- Tool finder for Docs, Sheets, Slides & Vids, https://support.google.com/docs/answer/13466905 (R02): Search the menus at the far left of the toolbar
+- Zoom or change your document view, https://support.google.com/docs/answer/99753 (R02): Fit, the zoom range
+- Apps Script reference, Enum PredefinedLayout, https://developers.google.com/apps-script/reference/slides/predefined-layout (R03, R05): the eleven layout names
+- Slides API text concepts, https://developers.google.com/workspace/slides/api/concepts/text (R09): paragraphs end in a newline; the placeholder prompt is not content
+- Workspace Updates, More options for copying presentations, https://workspaceupdates.googleblog.com/2020/01/copy-presentation-options-slides.html (R07, R10): Selected slides and Remove speaker notes
+- Workspace Updates, Menu and toolbar updates, https://workspaceupdates.googleblog.com/2018/03/menu-and-toolbar-updates-in-google-docs.html (R01): the Text, Move and Align submenus
+- Computerworld, Google Slides cheat sheet, https://www.computerworld.com/article/1658651/how-to-use-google-slides.html (R02, R07): menu order, toolbar groups, home page
+- CustomGuide, Google Slides quick reference card, https://www.customguide.com/cheat-sheet/google-slides-quick-reference.pdf (R02, R07, R09): the screen diagram, Print, the side panel chevron
+- Alice Keeler, Right click on the filmstrip, https://alicekeeler.com/2017/11/08/google-slides-right-click-filmstrip/ (R08): the filmstrip menu order
+- How-To Geek, Speaker notes in Google Slides, https://www.howtogeek.com/748657/how-to-use-speaker-notes-in-google-slides/ (R02, R09): the notes pane and its handle
+- BrightCarbon, Google Slides: The ULTIMATE guide, https://www.brightcarbon.com/blog/google-slides-ultimate-guide/ (R02, R05, R07): the contextual toolbar, paint format, tables, charts
+- Nielsen Norman Group, Progressive disclosure, https://www.nngroup.com/articles/progressive-disclosure/, and Contextual menus, https://www.nngroup.com/articles/contextual-menus/ (R07): the rule that every context menu item is also in the main menu
+- Material Design writing guidance, https://m1.material.io/style/writing.html (R07): sentence case, plain words
+
+pptxgenjs 4.0.1 API pages, read 2026-09-11 by proposal 3 and checked against `node_modules/.pnpm/pptxgenjs@4.0.1/node_modules/pptxgenjs/types/index.d.ts` by judge 2: Tables https://gitbrent.github.io/PptxGenJS/docs/api-tables.html (`addTable`, `colW`, `rowH`, `align`, `valign`, `fill`, `border`, `margin`); Text https://gitbrent.github.io/PptxGenJS/docs/api-text.html (`breakLine`, `softBreakBefore`, `bullet`, `indentLevel`, `hyperlink`, `fit`); Shapes https://gitbrent.github.io/PptxGenJS/docs/api-shapes.html (`hyperlink`, `line`, `fill`, `rotate`, `flipH`, `flipV`); Images https://gitbrent.github.io/PptxGenJS/docs/api-images.html (`sizing`, `hyperlink`, `altText`).
+
+Repository files read for this specification on 2026-09-11 at `8c7056c`: `packages/schema/src/{actions,deck,text,position,blocks,export,mutations,catalog,typography,rules.json}`, `packages/chrome/src/{tokens.css,slide-templates.ts,palette-data.ts,useShellKeys.ts}`, `packages/viewer/src/keys.ts`, `packages/render/src/slide.ts`, `packages/store/src/templates.ts`, `packages/agent/src/__tests__/coverage.test.ts`, `apps/studio/src/routes/index.tsx`, `apps/studio/src/server/decks.ts`, `scripts/check.mjs` (`--list`), the file lists of `packages/*/src`, `apps/studio/src/{routes,server,components}`, `apps/studio/e2e`, `apps/cli/src/commands`, `scripts`, `decks`, `docs`; `docs/spec/SPEC.md` (sections 2.1, 2.2, 3.3, 4.2, 6.7, 6.9, 6.10, 8.2, 12), `docs/spec/MILESTONES.md` (head), `docs/EDITOR-DEPTH-STATUS.md` (headings, section 10), `docs/freeform.md` (sections 1 and 2), `AGENTS.md` (head).
+
+Facts this specification states as unverified by a public page: New slide after a Title slide inserting Title and body (section 0.27); whether the Themes panel opens on a new consumer presentation (R03 a.3); the filmstrip context menu's current order (R08 A1, one 2017 source); whether the context menu nests the Move items; the toolbar dividers; Shift+Enter as a soft break (R09); Space and Enter advancing in present mode (R04); the presenter window's layout (R04 A4); the Windows key for Start from beginning; Tab between table cells (R11 A2); whether Google allows deleting the last slide; whether PowerPoint honours a hyperlink on an invisible run; the snackbar's position in Slides (R08 B11).

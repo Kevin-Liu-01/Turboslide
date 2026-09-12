@@ -1,0 +1,579 @@
+# 06 Turboslide reader inventory
+
+What the Turboslide editor exposes to a person today, read from the code at commit `8c7056c` (main, after the editor depth round) on 2026-09-11, written in Google Slides vocabulary so a designer can map one to the other. Nothing in this report was measured in a browser: every fact is a line of source, and the file is named beside it. The Google Slides column of every table uses the words of Google's own help pages where those pages were read for this report (section 9 lists them with the date); menu labels that are not on those two pages come from general knowledge of the product and are marked "(label unverified here)" the first time they appear, so the sibling research reports can confirm them.
+
+Rules this report follows: plain technical English, sentence case, no em dashes, no metaphors, no trailing periods on headings, and no Google icons, artwork or trademarked assets are proposed for the codebase (Heroicons 20 solid and Inter stay).
+
+## Summary
+
+The editor at `/edit/:deckId` is the Prototemplate viewer shell (52 px toolbar, 208 or 256 px sidebar, stage, 2 px progress line) with an editing layer added in the toolbar's slot, a 460 px generated inspector on the right, a command palette on Cmd K, a JSON source drawer, a light and dark twin view, and a stage overlay for selection, handles and lint boxes. Every write anywhere is one action from a 54 entry action table (the brief said 62; `ACTION_IDS` in `packages/schema/src/actions.ts` holds 54) dispatched with the document's `baseRevision`, applied locally through the reducer and then sent to the server function. The root address redirects to the editor of the most recently updated deck, or creates a deck named "GT brand deck" from the 85 slide GT template when the store holds none; there is no home page with a template gallery, and `/decks` is a list with a New deck form (two templates: GT brand deck and Blank) and a bundle upload form.
+
+The findings a designer must not miss:
+
+1. There are two present buttons in the editor toolbar: Present (solid, `view.present`, present mode in the same tab, P) and Presentation (`present.open`, opens `/deck/:id?present=1` in a new tab). Google has one Slideshow button with a dropdown.
+2. There is no speaker notes pane. Notes exist in the document (`slide.notes`) and are exported into the PPTX notes, but the only place a person can type them is the Notes textarea inside the inspector's Slide section (`slide.notes`). The presenter console of SPEC 6.10 (`/present/:deckId`) does not exist in the routes folder.
+3. Editing is a mode. The toolbar carries an Edit | View segmented control (`edit.mode`, key E) and the URL carries `?edit=0`. In View the inspector, the sidebar row menus, drag and selection all disappear. Google Slides has no such switch.
+4. Undo and redo are keys only (Cmd Z, Shift Cmd Z). There is no Undo or Redo button anywhere, and no History control outside the inspector's History section (closed by default), whose action is "Undo to here".
+5. Slides have a fixed kind (content, opener, mood, closing, title, statement) and a layout that applies to content slides only. The inspector states "The kind is fixed; insert another slide for a different one." Google's Layout dropdown applies to every slide; here the six layouts (columns, head over body, center, left, stack, freeform) apply to content slides, and the picture kinds and the title and statement kinds carry no layout at all.
+6. Coordinates exist on one layout only. Only a content slide on the `freeform` layout carries `pos {x, y, w, h, z}` per top level block; the validator refuses `pos` anywhere else. On the five grammar layouts a drag reorders a block within its slot or into another slot and never moves it freely. Title and statement slides have no blocks at all: their text is a slide field with no chip, no drag and no delete.
+7. Text has four inline rules (weight 500 run written as `*text*`, a link, the GT word as the mark, escapes). There is no italic, underline, strike inside a run, no per run color, no bullets (the grammar's list is "never bullets"), no line breaks except in a code panel, and Inter is the only face. The inline toolbar has three buttons: "Weight 500 run", "Link" and "GT mark".
+8. Inserting an image requires an asset in the deck first. The Insert menu's Image entry answers "Add a picture in the Asset section first" when the deck has no asset, and the Asset section's intake form asks for alt text, role, title, artist, license, share-alike, source URL, two-tone and plate. The stage has no drop or paste handler (`packages/viewer/src/Editor.tsx` binds none), although a palette hint claims "Drop or paste a picture on the stage".
+9. Every new slide inserted from a template carries placeholder copy in the shape "Placeholder heading, not final copy", which the copy linter flags on purpose, so the Lint badge in the toolbar shows a count on every fresh slide until the words are replaced.
+10. Agent vocabulary is in the default view: Lint with a count badge, Twin, Source, a status chip reading `Saved · r412`, lease dots and "Leased by agent:… until 14:32" notices, action ids in tooltips ("(slide.insert)", "(view.goto)", "Runs export.run:"), JSON pointers in inspector label tooltips ("(/layout/ratio)"), slide ids in menu labels ("Menu for slide content-rule", "Inserted new-cols"), a palette whose footer teaches `#`, `+` and `>` prefixes, a Render menu item, a Copy id menu item, a Deck tokens section, a conflict card showing two JSON documents, and a Connect card with CLI commands.
+11. Single letter keys act globally whenever focus is not in a field: S or [ hides the slide list, D flips the theme, E leaves edit mode, P presents, F goes fullscreen, G and B switch views, J, K, L, H page, R is reserved, ? opens the help card. Google's editor binds no bare letters; its bare letters (S, A, L, B, W) act during a presentation only.
+12. The `/` route sends a visitor to whichever deck was saved last on the shared store, which on production is one of the drive's test decks (docs/EDITOR-DEPTH-STATUS.md section 12), not a fresh presentation.
+
+## 1. Every visible control and panel
+
+Disposition key: Keep means keep in the default view for sales users, possibly renamed; Advanced means move behind a View, Tools or developer area; Remove means drop from the product surface (the action may live on in the CLI and MCP). "GS" is Google Slides. Control ids are the `data-control` attributes the code writes (`packages/chrome/src/*.tsx`); a row without one has no id in the code.
+
+### 1.1 Toolbar, left group (`packages/chrome/src/Toolbar.tsx`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | List toggle (sidebar glyph) | first button at the left | Shows or hides the slide list; keys [ and S; inside the grid it is an override for the mode | `view.sidebar` | View > Show filmstrip (label unverified here) | Keep, under View |
+| 2 | Brand (GT mark plus "Turboslide") | after the list toggle, drawn only while the sidebar column is closed | Static | none | The Slides logo and the file title at the top left | Keep as the product mark at the top left |
+| 3 | Previous | after a separator, on paged routes | Steps to the slide before; left arrow, Page up, Backspace, K, H do the same | `view.prev` | None in the editor (the filmstrip's Up arrow); Left arrow while presenting | Remove from the editor bar; keep in present mode |
+| 4 | Count `01 / 85` button | between Previous and Next | A click opens a number field; Enter goes to that slide; hovering previews the next slide | `view.count` | None in the editor; "Go to specific slide: number followed by Enter" while presenting | Remove from the editor bar; keep in present mode |
+| 5 | Go to field | replaces the count while open | Type a slide number, Enter jumps, Escape closes; a bad number toasts "No slide 99" | `view.goto` | as above | as above |
+| 6 | Next | after the count | Steps forward; right arrow, Space, Page down, J, L do the same | `view.next` | Down arrow in the filmstrip; Right arrow while presenting | as row 3 |
+
+### 1.2 Toolbar, right group
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 7 | Deck name (`DeckName.tsx`) | the status slot, first in the right group | A button showing the deck title; a click opens a text field; Enter or blur writes `deck.rename`; Escape restores | `deck.name` | The document title field beside the logo (click to rename) | Keep, move to the top left beside the mark |
+| 8 | Status chip (`StatusChip.tsx`) | after the deck name | Reads `Saved · r412`, `Unsaved`, `Saving`, `Conflict` or `Offline`, then `lease <holder>` and `<n> lint` when present; a click focuses the version note field (Cmd S) | `edit.status` | The cloud icon beside the title ("Saving…", "All changes saved in Drive") | Keep the save word only; revision, lease and lint parts go Advanced |
+| 9 | Search pill with the ⌘K chip (`SearchPill`) | after the status slot | Opens the command palette (section 1.8) | `palette.open` | Tool finder (Alt+/ or Alt+Z; Option+/ on Mac), Help > Search the menus | Advanced (keep as a Help search, not a primary pill) |
+| 10 | Insert (`InsertMenu.tsx`) | first in the route's slot | Opens a card of primitives, blocks and slide templates filtered to what the current slide accepts (section 1.3) | `insert.open`, card `insert.menu` | The Insert menu and the toolbar's Text box, Image, Shape, Line buttons | Keep, rebuilt as an Insert menu with fixed entries |
+| 11 | Edit \| View seg (`EditTools`) | after Insert | Turns editing on or off; View shows the sheet as the viewer does; key E; `?edit=0` | `edit.mode.edit`, `edit.mode.view` | None (Slides is always editing; a viewer is a sharing permission) | Remove |
+| 12 | Twin | after the seg | Splits the stage into light and dark sheets at half scale (`TwinStage.tsx`); Shift D; `?twin=1` | `edit.twin` | None | Advanced, under View |
+| 13 | Lint with count badge | after Twin | Toggles the lint boxes on the sheet; the badge is the current slide's finding count; Cmd L; `?lint=1` | `edit.lint` | None (nearest: Tools > Spelling and grammar) | Advanced |
+| 14 | Source | after Lint | Opens the JSON source drawer (section 1.9); Cmd /; `?src=1` | `edit.source` | None | Advanced or Remove |
+| 15 | Presentation | after Source | Opens `/deck/<id>?present=1` in a new tab (the viewer in present mode); hidden at or below 900 px | `present.open` | The Slideshow button (top right) | Keep, merged with row 21 into one Slideshow button with a dropdown |
+| 16 | Export (`ExportMenu.tsx`) | last in the slot | Opens the export card (section 1.4) | `export.open`, card `export.menu` | File > Download (label unverified here) | Keep under File > Download |
+| 17 | Mode seg Slide \| Grid \| Book | after the slot | Switches the stage view; G and B; a click on the active non first option returns to Slide; `?mode=` | `view.mode.slide`, `view.mode.grid`, `view.mode.book` | View > Grid view for Grid (label unverified here); no equivalent for Book | Keep Grid under View; Remove Book |
+| 18 | Theme (◐ or ◑, `ThemeButton.tsx`) | after a separator | Flips chrome and sheet between light and dark through the `gt-theme` key; D | `view.theme` | Settings > Appearance for the app chrome (label unverified here); no equivalent for a deck twin | Advanced (a deck light or dark switch belongs in View) |
+| 19 | Present (solid) | slide mode only | Present mode in the same tab: chrome hidden, sheet alone; from the grid it opens the slide first; P; Escape returns | `view.present` | Slideshow (Ctrl+F5, ⌘+Enter) | Keep as Slideshow |
+| 20 | Fullscreen | after Present | Browser fullscreen with the chrome kept; F; hidden at or below 900 px | `view.fullscreen` | View > Full screen (label unverified here); F11 or ⌘+Shift+F while presenting | Keep under View |
+| 21 | Copy link | after Fullscreen | Copies the current address (slide and mode included) to the clipboard; the share sheet on a phone | `view.copyLink` | Share > Copy link (label unverified here) | Keep under a Share control |
+| 22 | Help (?) | last | Opens the keyboard shortcuts card (section 1.10) | `view.help` | Help > Keyboard shortcuts (Ctrl+/) | Keep under Help |
+| 23 | Label collapse tiers | the whole bar | Labels collapse in five measured tiers as the bar narrows, so the same control reads as an icon square at narrow widths | none | Slides collapses its toolbar into an overflow menu | Keep the behaviour |
+
+### 1.3 The Insert menu card (`InsertMenu.tsx`, entries from `palette-data.ts` `insertEntries`)
+
+The menu is built from the current slide. On a content slide the block entries land in the selected block's slot, else in the layout's first filled slot; on an opener, mood or closing slide they land in the plate; on a title or statement slide the card says "Nothing can be inserted here: open a content slide or a slide with a plate." and shows the slide templates only.
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 24 | Box | Primitives group, first row | Inserts a `box` block (stroke hair, padding 16, text "A box."); on a freeform slide with a 320 by 184 position under the selected block or at the content origin | `insert.block.box` | Insert > Shape > rectangle with text | Keep as a shape |
+| 25 | Shape row with five glyph buttons: rectangle, rounded rectangle, ellipse, line, arrow | Primitives group | Inserts a `shape` block of that kind (240 by 160 on freeform) | `insert.block.shape.rectangle`, `.rounded`, `.ellipse`, `.line`, `.arrow` | Insert > Shape, Insert > Line, the toolbar Shape and Line buttons | Keep |
+| 26 | Rule | Primitives group | Inserts a horizontal hairline `rule` block (320 by 8 on freeform) | `insert.block.rule` | Insert > Line | Keep, folded into Line |
+| 27 | Text box | Primitives group | Inserts a `text` block "Text." (480 by 64 on freeform) | `insert.block.text` | Insert > Text box, the toolbar Text box button | Keep |
+| 28 | Icon | Primitives group | Opens the sprite picker (section 1.12) and inserts an `icon` block with the picked name (48 by 48 on freeform) | `insert.block.icon`, picker `insert.icon.picker`, `insert.icon.filter` | Insert > Special characters or an icon add on (label unverified here) | Keep as Icon |
+| 29 | Image | Primitives group | Inserts a `shot` block using the deck's first capture, detail, thumb, render or other asset; with no asset it toasts "Add a picture in the Asset section first" | `insert.block.image` | Insert > Image (Upload from computer, Search the web, Drive, Photos, By URL, Camera) | Keep, must accept a file directly |
+| 30 | Material | Primitives group | Inserts a `material` block (paper:gem-smoke, brand-blue preset) | `insert.block.material` | None | Advanced |
+| 31 | Blocks group: Heading, Paragraph, Credit (plate only), Ruled rows, Ruled statement list, References, Two registers, Scales, Type specimen, Scripts, Type ladder, Swatches, Pair, Tile grid, Detail grid, Status board, Composite figure, Code panel, Diagram, Dither ramp, Mark, Mark sizes, Matrix, Logo plates, HTML escape | Blocks group, each row "<label> block" | Inserts the catalog's default instance of that block type into the slot (`CATALOG[type].make`); filtered by `allowedIn` (content or plate) | `insert.block.<type>` | Partly Insert > Table (rows, matrix), Insert > Diagram, Insert > Chart, Insert > Image; most have no equivalent | Keep Heading, Paragraph, Ruled rows, list, Pair, Tile grid, Detail grid, Diagram as named layouts or content; Advanced for specimens, dither, mark sizes, matrix, logo plates, composite, code panel, HTML escape |
+| 32 | Slides group: the 15 slide templates (section 4) | Slides group, each row "<label> slide" | Inserts the template after the current slide in its section with placeholder copy; templates whose asset the deck lacks are left out | `insert.slide.<templateId>` | Slide > New slide plus the Layout dropdown | Keep as New slide and Layout |
+| 33 | Keyboard walk | the card | Up, Down, Home and End move between rows and shape variants; Escape or a run returns focus to the Insert button | none | Menus walk with arrows | Keep |
+
+### 1.4 The Export menu card and the report card (`ExportMenu.tsx`, `ExportReportCard.tsx`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 34 | Mode seg Perfect \| Editable text | PPTX group | Chooses `flatten` (a 2x page raster over an invisible text layer) or `native` (text boxes) | `export.mode.flatten`, `export.mode.native` | File > Download > Microsoft PowerPoint (.pptx) has no mode | Keep as one PPTX download; the mode goes Advanced |
+| 35 | Mode note | under the seg | One sentence describing the chosen mode | `export.mode-note` | none | Remove |
+| 36 | Theme seg Both \| Light \| Dark | PPTX group | One file per theme, plus a zip of both | `export.theme.both`, `.light`, `.dark` | none | Advanced |
+| 37 | Fonts seg Exact \| Standard | PPTX group | Twelve per size Inter family names, or three | `export.fonts.exact`, `.standard` | none | Advanced |
+| 38 | Embed fonts check | PPTX group, enabled in Editable text only | Embeds the export faces as fntdata parts | `export.embed-fonts` | none | Advanced |
+| 39 | Headings as raster check | PPTX group | Draws display headings as PNG | `export.headings` | none | Advanced |
+| 40 | Verify with LibreOffice check | PPTX group | Renders the file back and measures every page (never runs hosted) | `export.verify` | none | Remove from the menu |
+| 41 | Export PPTX button (solid) | PPTX group | Runs `export.run`; the first file downloads when done; the menu shows the progress line meanwhile | `export.pptx` | File > Download > Microsoft PowerPoint (.pptx) | Keep |
+| 42 | Build and download | Standalone HTML group | Runs `build.run`: one HTML file with fonts and assets inlined under 16 MB | `export.build` | File > Download > Web page (.html) is Docs only; Slides offers PDF, PPTX, ODP, TXT, JPEG, PNG, SVG (labels unverified here) | Advanced |
+| 43 | Download deck bundle | Deck bundle group | Downloads the deck as one zip through a ticket (`deck.pack` on the CLI) | `export.bundle` | File > Make a copy or Download for transfer (label unverified here) | Advanced |
+| 44 | Worker note | bottom of the card | "The render worker runs elsewhere; the files stay on it and the report card lists them." when downloads are off | none | none | Remove |
+| 45 | Progress line | bottom of the card | The run's label and the worker's last log line | `export.progress` | The download toast | Keep a plain progress toast |
+| 46 | Export report card | over the stage after a run | Mode, pages, "Perfect: yes/no", page rasters, worst fraction, raster blocks, fonts embedded, geometry, revision, files with Download buttons, residual lines, Close | `export.report`, `export.download.<file>`, `export.report.close` | none (Slides downloads silently) | Advanced (show a one line success toast by default) |
+
+### 1.5 The sidebar (`Sidebar.tsx`, `SidebarFilter.tsx`, `Thumb.tsx`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 47 | Mark link "Every deck" | the 52 px head, left | Links to `/decks` | none | The Slides home button (logo) | Keep |
+| 48 | Product name "Turboslide" | the head | Static | none | none (the head of the filmstrip is empty) | Keep at the top left of the app, not in the filmstrip |
+| 49 | Density seg Thumbnails \| Outline | the head, right | Switches the list between numbered 16:9 cards (default) and 28 px rows with a kind glyph; remembered per browser | `sidebar.density.thumbs`, `sidebar.density.outline` | none (the filmstrip is always thumbnails) | Remove |
+| 50 | Close (narrow overlay only) | the head | Hides the overlay list at or below 900 px | none | none | Keep the behaviour |
+| 51 | Filter field | the 40 px filter row | Narrows every section to rows whose title, section, id, number or slide text matches; Enter opens the first match; Down moves into the list; Escape clears | `sidebar.filter` | Edit > Find and replace (Ctrl+F, Ctrl+H); Slides has no filmstrip filter | Advanced, or fold into Find |
+| 52 | Clear the filter (×) | the filter row, while text exists | Empties the field | none | as above | as above |
+| 53 | Count "85 slides" | the filter row, right | Static | none | none | Remove |
+| 54 | Section headers (chevron, name, count) | the tree, sticky | Collapse and expand a section; Left and Right fold from the keyboard; folds persist under `gt-shell-groups:<id>`; in edit mode a drop target | none | None. Slides has no sections; the nearest is skipping or reordering slides | Advanced (flat filmstrip by default) |
+| 55 | Slide row (card) | the tree | Number, 16:9 thumbnail (render worker capture, live clone fallback), kind glyph, title trimmed to 72 characters, lint badge at severity 2 or 3, lease dot; a click selects; Space activates; hover shows the preview card | `data-preview`, `data-id`; no data-control on the row | The filmstrip thumbnail with its number | Keep number, thumbnail, current marker; Remove the kind glyph, lint badge and lease dot |
+| 56 | Row menu button (⋯) and right click | the row's right end, edit mode | Opens the row menu | `sidebar.menu.<slideId>` | Right click on a filmstrip slide | Keep |
+| 57 | Row menu: Insert after: Content slide, Title slide, Statement slide | the row menu | Inserts a blank slide of that kind after this row (`slide.insert`) | `sidebar.menu.<id>.insert.content`, `.insert.title`, `.insert.statement` | New slide (Ctrl+M) | Keep as New slide with the layout picker |
+| 58 | Row menu: Insert a template (15 rows) | the row menu | Inserts the template with placeholder copy (`slide.insert`) | `sidebar.menu.<id>.template.<templateId>` | New slide with a layout, Slide > Apply layout | Keep, as the layout gallery |
+| 59 | Row menu: Duplicate | the row menu | `slide.get` then `slide.insert` under a free id `<id>-copy` | `sidebar.menu.<id>.duplicate` | Duplicate slide (Ctrl+D) | Keep |
+| 60 | Row menu: Move to section (one row per other section) | the row menu | `slide.move` to the end of the chosen section | `sidebar.menu.<id>.move.<sectionId>` | Drag in the filmstrip; Move slide up or down (Ctrl+Up, Ctrl+Down) | Advanced |
+| 61 | Row menu: Render | the row menu | `render.slide` in both themes through the render worker | `sidebar.menu.<id>.render` | none | Remove |
+| 62 | Row menu: Lint this slide | the row menu | `lint.run` on this slide, static layer | `sidebar.menu.<id>.lint` | none | Remove |
+| 63 | Row menu: Copy id | the row menu | Copies the slide id for the CLI and the agent surface | `sidebar.menu.<id>.copyId` | none | Remove |
+| 64 | Row menu: Delete | the row menu | `slide.remove`; "History undoes it" | `sidebar.menu.<id>.delete` | Delete slide (Delete key on a selected slide) | Keep |
+| 65 | Drag to reorder | any row, edit mode | HTML5 drag; a drop line shows the half of the row; one `slide.move` per drop, within or across sections | none | Drag in the filmstrip | Keep |
+| 66 | Alt with Up or Down | a focused row, edit mode | Moves the row one place, across a section edge | none | Move slide up or down (Ctrl+Up, Ctrl+Down) | Keep, rebound |
+| 67 | Empty section drop target | an empty section in edit mode | "No slides. Drop one here." | none | none | Advanced with sections |
+| 68 | "Nothing matches the filter." | the tree while the filter empties it | Static | none | none | Keep |
+
+### 1.6 The stage in edit mode (`packages/viewer/src/Editor.tsx`, `Gestures.tsx`, `Freeform.tsx`, `Selection.tsx`, `InlineText.tsx`; drawn by `packages/chrome/src/Overlay.tsx`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 69 | Hover outline | over the block under the pointer | A hairline box | none | Slides highlights on hover | Keep |
+| 70 | Selection ring and chip "type · id" | around the selected block, the chip above its top left | The ring is ink; the chip names `heading · h` and is the drag handle; with several blocks selected it reads "3 blocks · heading · h" | chip `handle.<blockId>.move` | The selection frame; Slides names nothing | Keep the ring; the chip text goes Remove or Advanced |
+| 71 | Extra rings and group box | around every other selected block and their union | Multi-selection on a freeform slide (Shift click or marquee) | none | Multi-selection frame | Keep |
+| 72 | Body drag on a grammar slide | any real block | After 4 px the press becomes the chip's gesture: reorders within the slot or into another slot of `cols` or `split`, a drop line and the target slot outline shown; one `block.move` | none | Dragging a placeholder moves it freely | Keep as the way blocks move on layout slides |
+| 73 | Body drag on a freeform slide | any block | Moves the block or the whole selection anywhere; snaps to the 8 px grid, rails, content edges and centers, column seams and plate edges (6 px snap); guides drawn while snapping; one `block.set /pos` per moved block as one write | none | Dragging an object; Slides draws red alignment guides and snaps to guides | Keep |
+| 74 | Eight resize squares | the edges and corners of a selected freeform block | Resize with the same snaps; Shift keeps the aspect; arrows step 1 px, Shift 8 px | `handle.<id>.resize.n/s/e/w/ne/nw/se/sw` | The eight resize handles | Keep |
+| 75 | Column seam handle | between the two columns of a `cols` slide | Drags the ratio: snaps to 4/8, 5/7, 1/1 then 10 px steps; Left and Right step it | `handle.layout.ratio` | none (Slides has no column layout property) | Keep on layout slides |
+| 76 | Plate edge handle | the plate's outer edge on opener, mood and closing slides | Drags `plate.maxWidth` through the set 740, 560, 720 | `handle.plate.maxWidth` | none | Advanced |
+| 77 | Plate side grip | the plate's top or bottom center | Drags the plate to the other half; Enter flips | `handle.plate.side` | none | Advanced |
+| 78 | Key column edge | the rows block's key column | Drags `key` through 90 to 300 | `handle.<id>.key` | Table column border drag | Keep on table like blocks |
+| 79 | Screenshot width edge and crop area | a shot block | Drags `width` (snaps to the column width, 425, the slot height) and flips `crop` between top and center | `handle.<id>.width`, `handle.<id>.crop` | Image resize and crop | Keep |
+| 80 | Pair figure swap | each figure of a pair block | Drag over the other figure to swap; Left and Right swap with a neighbour | `handle.<id>.figures.<i>` | none | Keep |
+| 81 | Scale markers | each bar of a scales block | Drag along the bar, 0 to 100; Left and Right step 1, Shift 10 | `handle.<id>.items.<i>.value` | none | Keep |
+| 82 | Diagram labels and markers (Alt only) | a declared `dia` block | Alt-drag on the half pixel grid; a 12 px clearance ring turns ink when a stroke intrudes | `handle.<id>.data.texts.<i>`, `handle.<id>.data.markers.<i>` | none | Advanced |
+| 83 | Drop line and target slot outline | while a block drags on a grammar slide | Where the block will land | none | none | Keep |
+| 84 | Lint boxes with rule chip | over the sheet while the lint layer is on | Severity 3 in ink, 1 and 2 in titanium, the rule id in a 13 px chip | none (`data-severity`, `data-rule`) | The red underline of spelling | Advanced |
+| 85 | Marquee | a press on the empty sheet of a freeform slide | Selects every block it hits; a plain click clears the selection | none | Drag select on the canvas | Keep |
+| 86 | Snap guides | while a freeform drag snaps | Titanium lines at the guide | none | Red alignment guides | Keep |
+| 87 | Arrange bar: Align left, Align center, Align right, Align top, Align middle, Align bottom, Distribute horizontally, Distribute vertically, Bring forward, Send back | under the selection on a freeform slide | One write each through `alignMutations`, `distributeMutations`, `zOrderMutations`; distribute needs three blocks | `arrange.align.left`, `.center`, `.right`, `.top`, `.middle`, `.bottom`, `arrange.distribute.x`, `.y`, `arrange.z.forward`, `arrange.z.back` | Arrange > Align, Arrange > Distribute, Arrange > Order (Bring forward Ctrl+Up, Send backward Ctrl+Down, Bring to front, Send to back) | Keep, also as an Arrange menu; add Bring to front and Send to back (the action supports `front` and `back`) |
+| 88 | Inline text editing | a double click on a run, or Enter on a selected block | `contenteditable` on the run; Enter commits, Escape restores, blur commits; paste is plain text; a typed standalone GT becomes the mark at once | none | Click into a text box and type | Keep, but Slides enters editing on a single click of a text box |
+| 89 | Run toolbar: Weight 500 run (B), Link, GT mark, link address field | above the run while editing | `execCommand('bold')`, `createLink`, inserts the mark span; Cmd B and Cmd K | `run.bold`, `run.link`, `run.link.href`, `run.gt` | The text toolbar: Bold (Ctrl+B), Insert link (Ctrl+K); no italic, underline, color, size, font, alignment, lists here | Keep and extend with what the grammar allows |
+| 90 | Tab and Shift Tab | the stage | Cycle the selection through the blocks in document order | none | Select next shape (Tab), previous (Shift+Tab) | Keep |
+| 91 | Delete or Backspace | a selected block | Removes every selected block in one write; the toast reads "Removed heading · h. Cmd Z undoes" | none | Delete | Keep |
+| 92 | Links on the stage | edit mode | Clicks on links are prevented (text, not navigation) | none | Alt+Enter opens a link | Keep |
+| 93 | Material mount | every material frame on the sheet | The live shader over the frame in the editor | none | none | Advanced |
+
+### 1.7 The inspector (`Inspector.tsx`, `inspector/*`, 460 px, docked right in edit mode only)
+
+Every section header is a button (`inspector.<sectionId>`) with an icon; its open or closed state is remembered under `ts-inspector-sections`; History and Deck tokens start closed. Every generated row carries the accessible label `<block id>: <property>` and `data-control` `block.<id>.<path>` or `slide.<path>`; the label's tooltip ends with the JSON pointer, for example "(/layout/ratio)".
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 94 | Notice line | the top of the panel | The last write error, role alert | none | none | Keep as a toast |
+| 95 | Lease line | the top, when another author holds the slide | "Leased by agent:run-12 until 14:32" | none | none (Slides shows collaborator cursors) | Advanced |
+| 96 | Slide section: Kind (read only) | Slide section | "Content", "Section opener", "Mood", "Closing", "Title", "Statement" with the tooltip "The kind is fixed; insert another slide for a different one." | `slide.kind` | The Layout dropdown (changeable) | Keep as a read only label until kinds become layouts |
+| 97 | Slide section: Id (read only) | Slide section | The slide's slug id | `slide.id` | none | Remove |
+| 98 | Slide section: Title override | Slide section | Replaces the derived title in the list | `slide.title` | none (Slides titles come from the title placeholder) | Advanced |
+| 99 | Slide section: Notes (textarea) | Slide section | Speaker notes; Cmd Enter commits, Escape restores | `slide.notes` | The speaker notes pane under the canvas (Ctrl+Alt+Shift+S) | Keep, but move under the canvas |
+| 100 | Slide section: Tags (JSON) | Slide section | A JSON array in a text field | `slide.tags` | none | Remove |
+| 101 | Slide section: Section (select, opener only) | Slide section | Which section the opener heads | `slide.sectionId` | none | Advanced |
+| 102 | Slide section: Heading and Lead (title slide), Statement (statement slide) | Slide section | The slide's own texts as fields | `slide.heading`, `slide.lead`, `slide.big` | Typing in the placeholder on the canvas | Keep, canvas editing is primary |
+| 103 | Layout section: Type seg or select | Layout section, content slides | The layout tag; a change is `slide.setLayout`, which refiles the blocks (to freeform from the measured boxes, back losslessly when unmoved) | `slide.layout.type` | The Layout dropdown and Slide > Apply layout | Keep as Layout |
+| 104 | Layout section: Ratio (select 5/7, 4/8, 1/1 plus custom JSON), Gap, Align (cols); Gap, Head, Body alignment (split); Gap (stack) | Layout section | `slide.set /layout/<field>` | `slide.layout.ratio`, `.gap`, `.align`, `.head`, `.body` | none | Advanced |
+| 105 | Layout section: Picture position, Plate side, Plate max width | Layout section, picture kinds | `slide.set` on the picture and plate | `slide.picture.position`, `slide.plate.side`, `slide.plate.maxWidth` | Slide > Change background (nearest, label unverified here) | Advanced |
+| 106 | Layout section: Mark width and height (title, closing), Measure (statement) | Layout section | Numbers with steppers | `slide.mark.w`, `slide.mark.h`, `slide.measure` | none | Advanced |
+| 107 | Block section head: type glyph and label, slot, id rename field | Block section, a block selected | Rename writes `slide.update` carrying `block.remove` plus `block.insert`; Enter commits, Escape restores | `block.<id>.id` | none (Slides has no object names) | Remove the rename; keep the type label |
+| 108 | Block section: the type's own properties | Block section | Generated from the Zod annotations: Level (heading), Role and Tone (paragraph), Key width, Tight, Link table, Minimum row height (rows), Size (plain), Shape, Stroke width, Corner radius, Padding, Arrowheads, Orientation, Weight (rule), Icon name and Size, Fit, Aspect, Crop anchor, Caption size, Width, Border (shot), Columns, Tile aspect, Label size (tiles), Row heights (details), Tracks, Gap, Justify, Align cells (composite), Code, Size, Preformatted, Terminal, Marks (panel), Fit, Alt text, Raw SVG (dia), CSS, HTML, Why the escape (html), and the material recipe fields moved to Material | `block.<id>.<path>` | Format options sidebar (Size and rotation, Position, Text fitting, Drop shadow, Reflection, Alt text) | Keep the common ones (size, alt text, corner radius, stroke); Advanced for the rest |
+| 109 | Block section: array items with Add item and Remove | Block section | Rows, list items, figures, tiles, cells: one header per item with a remove button, an Add item button appending a blank | `block.<id>.<array>.<n>.remove`, `block.<id>.<array>.add` | Table row and column add or remove | Keep for table like blocks |
+| 110 | Block section, nothing selected: the block list | Block section | One row per block (icon, type, id, slot); a click selects | `inspector.block.<blockId>` | none | Advanced (Slides has no object list) |
+| 111 | Text section: text fields | Text section | A one line field per Text (Enter commits, no line breaks) or a textarea (Cmd Enter); live copy lint lines under the field | `block.<id>.text`, `block.<id>.items.<n>.key` and the like | Typing on the canvas | Keep secondary |
+| 112 | Text section: Typography (Size, Weight, Align, Tracking, Leading) | Text section, heading, paragraph, text and box | Steppers through the type ladder, 300 to 700, tracking and leading steps, a Seg for align; the weight cap and off ladder marks | `block.<id>.typography.size`, `.weight`, `.align`, `.tracking`, `.leading` | The text toolbar: font size, bold, alignment, line spacing | Keep, but in a top toolbar not a side panel |
+| 113 | Color section: swatch rows (Ink, Paper, Ink 2, Titanium, Hairline, Soft hairline, Plate, Edge, Green, Amber, Red, GT blue), None, custom hex field with a contrast readout | Color section, box, shape, rule, text, icon | One `block.set` per pick; a hex shows the off palette mark | `block.<id>.fill`, `.stroke`, `.color`, each with `.<token>`, `.none`, `.hex` | Fill color, Border color, Text color pickers | Keep |
+| 114 | Position and size section: X, Y, W, H, Z steppers | Position section, freeform slides only | Steps by 8 px (Z by 1); a typed box is snapped; off sheet mark; "1600 right, 900 bottom of 1600 by 900" | `block.<id>.pos.x`, `.y`, `.w`, `.h`, `.z`, each with `.up` and `.down` | Format options > Size and rotation, Position | Keep |
+| 115 | Asset section: asset select and Browse | Asset section, shot and other asset blocks, or the slide's picture | A select over the deck's asset ids; Browse opens the asset picker (filter, role seg or select, rows with both twins) | `block.<id>.asset`, `.browse`, `.picker.filter`, `.picker.role`, `.picker.role.list`, `.picker.<assetId>`; `slide.picture.asset` | Replace image | Keep as Replace image |
+| 116 | Asset section: asset card | Asset section | Both twins, alt, role and size, title, credit, license, recipe, treatment, source file | none | Image options > Alt text | Advanced |
+| 117 | Asset section: Add a picture intake | Asset section | Drop zone, Choose a file, URL, Id, Alt text, Role select, Title, Artist, License, Share-alike, Source URL, Two-tone, Plate, Add asset; runs `asset.add` | `asset.intake.drop`, `.file`, `.url`, `.id`, `.alt`, `.role`, `.title`, `.artist`, `.license`, `.shareAlike`, `.sourceUrl`, `.twoTone`, `.plate`, `.add` | Insert > Image > Upload from computer (one step) | Keep the file step only in the default view; the rest Advanced |
+| 118 | Material section | Material section, a material block or a material picture | Material id, preset, one control per uniform, anchor, two-tone, plate, Capture frame, Reset | `block.<id>.materialId`, `.preset`, `.uniforms.<name>`, `.anchor`, `.twoTone`, `.plate`, `.capture`, `.reset`; `slide.picture.material.*` | none | Advanced |
+| 119 | Dither section | Dither section, two-tone or opener and mood assets | Treatment controls (crop, channel, invert, blur, black, white, gamma, minimum filter, polarity), plate seg, two preview canvases, metrics, Recapture (`asset.dither`), Measure | `asset.<id>.treatment.<field>` | Image options > Adjustments (brightness, contrast) is the nearest | Advanced |
+| 120 | Lint section | Lint section | One row per finding (severity, rule, block, theme, proposal, evidence); a click selects the block; Fix applies the mechanical fix through `slide.update` | `lint.<findingId>`, `lint.<findingId>.fix` | Spelling suggestions | Advanced |
+| 121 | Versions section | Versions section | "Name this version" field and Save (`version.save`, Cmd S); rows with author, revision, time and Restore (`version.restore`) | `version.save.note`, `version.save`, `version.restore.<n>` | File > Version history > Name current version, See version history | Keep under File |
+| 122 | History section (closed by default) | History section | The mutation log newest first in prose, with Undo to here | `history.undo.<n>` | Undo and Redo | Advanced |
+| 123 | Deck tokens section (closed by default) | last section | The nine theme tokens, read only | none | none | Remove |
+
+Control kinds the generator draws (`inspector/generate.ts` `kindFor`): a Seg for four or fewer options, a select for more, a stepper for a number with a snap set, a number field otherwise, a check row for a boolean or a literal flag, a text field or textarea for strings and Text, the sprite picker for an Icon, the asset picker for an AssetId, the palette for a Color, the typography composite, the position composite, a JSON field with a form select for structured values, and a read only value.
+
+### 1.8 The command palette (`Palette.tsx`, `palette-data.ts`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 124 | Query field "Search slides, actions, blocks and views" | a card over a scrim, Cmd K or the Search pill | Filters five groups; `#` restricts to slides, `+` to insert, `>` to actions; arrows move, Enter runs, Escape closes | `palette.query`, card `palette` | Tool finder (Alt+/): searches menus and actions | Advanced (a menu search under Help) |
+| 125 | Group Go to slide (#) | the list | Every slide as `01  Title` with its section; Enter runs `view.goto`; hover previews | `palette.slide:<id>` | The filmstrip, Find | Advanced |
+| 126 | Group Insert (+) | the list | The same entries as the Insert menu | `palette.insert:block:<type>`, `palette.insert:slide:<template>` | Insert menu | Advanced (duplicate of the menu) |
+| 127 | Group Actions (>) | the list | Every labelled action outside the view and studio groups with its id as meta and its doc as hint; some run with an input built from the view, some prompt for one field (deck name, version note), the rest report what they need ("Use the Insert group for a new slide", "Needs a URL: `turboslide asset capture <url> --theme both`") | `palette.action:<actionId>` | Tool finder | Remove from the sales view |
+| 128 | Group View | the list | Slide view, Grid view, Book view, Light or Dark theme, Edit or View only, Twin, lint layer, source drawer, Present or Leave presentation mode, each with its key | `palette.view:mode:<mode>`, `palette.view:theme`, `.view:edit`, `.view:twin`, `.view:lint`, `.view:source`, `.view:present` | View menu | Advanced |
+| 129 | Group Versions | the list | The last ten versions with author and revision; Enter restores as a mutation | `palette.version:<n>` | Version history | Advanced |
+| 130 | Prompt field | replaces the query for a prompt entry | One field ("Version note", "Deck name", "New deck name (from the GT brand template)"); Enter runs, Escape returns | `palette.prompt.<field>` | Dialogs | Advanced |
+| 131 | Icon pick | replaces the list for the Icon entry | The sprite picker | `palette.icon.picker` | none | Advanced |
+| 132 | Footer "Up and down arrows move, Enter runs, Escape closes, # slides + insert > actions" | the card's bottom | Static | none | none | Remove |
+
+### 1.9 The source drawer (`SourceDrawer.tsx`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 133 | Drawer head "slides/<id>.json r12 edited" | the drawer over the stage, Cmd / | The file name, the base revision and a dirty marker | `source.drawer` (`data-dirty`) | none | Remove from the sales view |
+| 134 | Apply | the head | Validates the JSON and writes one `slide.replace`; Cmd Enter in the editor | `source.apply` | none | Remove |
+| 135 | Reset | the head | Discards the edits | `source.reset` | none | Remove |
+| 136 | Copy | the head | Copies the JSON | `source.copy` | none | Remove |
+| 137 | Copy as command | the head | Copies a `turboslide slide put` command | `source.copyCommand` | none | Remove |
+| 138 | Close | the head | Closes the drawer | `source.close` | none | Remove |
+| 139 | External revision banner with Reload | under the head while the slide moved under a dirty draft | Names the author and revision; Reload replaces the draft | `source.reload` | none | Remove |
+| 140 | CodeMirror editor | the body | JSON with schema completion | `source.text` | none | Remove |
+| 141 | Issues list and Applied log | the side column | Validator issues at their pointers; the mutations of an applied change | `source.log` | none | Remove |
+
+### 1.10 Cards, banners and layers (`HelpCard.tsx`, `Toast.tsx`, `PreviewLayer.tsx`, `Progress.tsx`, `edit.$deckId.tsx`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 142 | Keyboard shortcuts card | over the shell, ? or the Help button | A table grouped Move, View, Panels, Theme built from `shellKeyRows`; a click anywhere closes; a footnote explains click halves and swipe | none | Help > Keyboard shortcuts (Ctrl+/) | Keep, rebuilt for the new keys |
+| 143 | Toast | over the shell, 1400 ms | "Link to slide 12 copied", "Slide 12, press Enter", the first visit hint "Arrow keys move. Press ? for every shortcut.", write errors, action results ("Inserted box", "Rendered content-rule") | none | The bottom left snackbar | Keep |
+| 144 | Hover preview card | beside any element with `data-preview` (rows, grid captions, the count) after 80 ms | A 320 by 180 live clone with the slide title | none | none | Remove |
+| 145 | Progress line | 2 px under the stage | Fills to the slide's place in the deck | none | none in the editor | Remove from the editor |
+| 146 | Conflict card | over the editor when a write conflicts | "Conflict at r14", the message, two JSON panes (server and this editor), Rebase and Discard | `conflict.rebase`, `conflict.discard` | none (Slides merges live) | Advanced, reworded |
+| 147 | External revision banner | bottom of the editor | "Revision r15 by agent:x arrived from outside this editor and is shown", Reload | `external.reload` | Collaborator changes appear live without a banner | Advanced |
+| 148 | Hosting banner | bottom of the editor when the store is not persistent | The store notice plus "Connect a Blob store to the Vercel project to keep them." | none | none | Remove from the sales view |
+| 149 | Sidebar scrim | at or below 900 px while the list is open | A click closes the list | none | none | Keep |
+| 150 | First visit hint | once per shell id | The toast of row 143 | none | none | Keep, reworded |
+
+### 1.11 Grid and Book views (`GridView.tsx`, `BookView.tsx`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 151 | Grid tiles | over the stage in Grid mode, G | Every slide as a 300 px minimum tile with number, capture or live clone and title, sections as row spanning labels; a click opens the slide; the sidebar column closes while the grid is up | `data-id` | View > Grid view | Keep as Grid view |
+| 152 | Book view | over the stage in Book mode, B | A masthead with the deck title, a lead sentence and a meta table (Sections, Slides, Revision), then every slide as a page with dividers "Slides 01 to 15"; scrolling selects the page in view; a click opens it | none | none | Remove |
+
+### 1.12 Pickers shared by several places (`IconPicker.tsx`, `AssetPicker.tsx`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 153 | Icon picker: filter, close, the 8 column grid of 67 Heroicons plus gt-mark, tone seg none \| ok \| warn \| no \| info, placement note | the inspector's icon control, the Insert menu's Icon entry, the palette | Picks a symbol name; Enter picks the first match | `<control>.picker`, `.filter`, `.color` | none built in (icon add ons) | Keep, without the placement note |
+| 154 | Asset picker: filter, role seg (All plus up to three roles) or role select, rows with twins, id, role and size | the inspector's asset control | Picks an asset id; arrows move, Enter picks | `<control>.filter`, `.role`, `.role.list`, `.<assetId>` | Replace image > from Drive or Photos | Keep as "Replace image" |
+
+### 1.13 The viewer route `/deck/:deckId` and the embed route (`DeckViewer.tsx`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 155 | The same shell without the editor slot | `/deck/:id` | The toolbar shows the deck title read only, the mode seg, Theme, Present, Fullscreen, Copy link and Help, no Search pill; `?present=1` enters present mode on load; `?mode=`, `?theme=` | as in section 1.1 and 1.2 | The published or view only presentation | Keep as the Slideshow target |
+| 156 | Fixture chip | the toolbar slot when a fixture deck stands in | "fixture" with a native title | none | none | Remove |
+| 157 | Present mode | `is-present` on the shell | Chrome hidden, the sheet alone, the list leaves with the chrome; Escape returns unless fullscreen; a click on the left or right half pages; swipe pages | none | Slideshow, with Google's bottom left toolbar (slide list, presenter view, laser pointer, print, download) which Turboslide lacks | Keep; add the present toolbar |
+| 158 | Embed route `/embed/:id` | for the Prototemplate iframe | The same viewer with the `#NN` hash and the `gt-deck-slide` and `gt-theme` messages | none | Publish to the web > Embed | Advanced |
+
+### 1.14 The deck list `/decks` (`decks.index.tsx`, `ConnectCard.tsx`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 159 | New deck (solid) | the tools row | Opens the form: Name, Template radios "GT brand deck" (85 slides in 8 sections, the assets) and "Blank" (one title slide), Create and open (`deck.create` through the server function), Cancel | `decks.new`, `decks.form`, `decks.name`, `decks.from.gt-brand`, `decks.from.blank`, `decks.create`, `decks.cancel` | The Slides home: Blank presentation and the template gallery | Keep as the home page's template gallery |
+| 160 | Upload deck bundle | the tools row | Opens the form: Bundle zip, "Replace a deck with the same id", Upload and open (POST `/api/decks/bundle` with a ticket), Cancel, progress, error | `decks.upload`, `decks.upload-form`, `decks.bundle-file`, `decks.bundle-replace`, `decks.bundle-submit`, `decks.upload-cancel`, `decks.upload-progress`, `decks.upload-error` | File > Open or Import slides (labels unverified here) | Advanced |
+| 161 | Deck count "14 decks" | the tools row | Static | none | none | Remove |
+| 162 | Deck row: title link, id, slide count, revision `r24`, updated stamp | the list, newest first | The title opens the editor | none on the link | The Recent presentations list | Keep title, thumbnail and date; Remove id and revision |
+| 163 | Deck row: Open, Present, Export, Download bundle | the row's right | Open the editor, the viewer in present mode, the editor with `?export=1`, or the bundle zip through a ticket | `decks.open.<id>`, `decks.present.<id>`, `decks.export.<id>`, `decks.bundle.<id>` | The row's three dot menu (Rename, Remove, Open in new tab) | Keep Open and Present; Advanced for the rest |
+| 164 | Connect card | under the list | "Connect a checkout": the `turboslide deck push` and `deck pull` commands with the deployment URL, a Copy button each, the token note | `connect.card`, `connect.push`, `connect.pull`, `connect.copy.push`, `connect.copy.pull`, `connect.note` | none | Remove from the sales view |
+| 165 | Hosting notice and footer | the head and the foot | The store's notice; "Node 24.13.0. The sheet is 1600 by 900. Store: blob (…)" | none | none | Remove |
+
+### 1.15 The twin stage (`TwinStage.tsx`)
+
+| # | Control | Where it sits | What it does | data-control | GS equivalent | Disposition |
+| --- | --- | --- | --- | --- | --- | --- |
+| 166 | Two panes with the captions Light and Dark | the stage, Twin on, slide mode | The same slide at half scale in both themes, with the selection ring and lint boxes on both; a click on a half pages when editing is off | none | none | Advanced |
+
+## 2. Every keyboard shortcut Turboslide binds
+
+Google's bindings come from Google's "Keyboard shortcuts for Google Slides" page, read on 2026-09-11 (section 9). The PC binding is given first and the Mac binding after it where they differ. "No key" means Google has the feature without a key; "none" means Google has no such feature.
+
+### 2.1 The shell keys (`useShellKeys.ts`; active on every route whenever focus is not in a field; Meta, Ctrl and Alt chords pass through except Cmd K)
+
+| # | Key | Action | Google's binding |
+| --- | --- | --- | --- |
+| 1 | Right arrow, Space, Page down, J, L | Next slide (Down arrow too in the book view) | Filmstrip: Page Down or Down arrow. Presenting: Right arrow |
+| 2 | Left arrow, Page up, Backspace, K, H | Previous slide (Up arrow too in the book view) | Filmstrip: Page Up or Up arrow. Presenting: Left arrow. Backspace deletes in the editor |
+| 3 | Home, End | First and last slide | Filmstrip: Home, End (Fn+Left, Fn+Right on Mac). Presenting: Home, End |
+| 4 | Digits, then Enter (1500 ms buffer, toast "Slide 12, press Enter") | Go to a slide by number; from the grid it opens the slide | Presenting only: number followed by Enter |
+| 5 | G | Grid view (again returns to the slide) | none as a key; View > Grid view |
+| 6 | B | Book view (again returns to the slide) | B shows a blank black slide while presenting |
+| 7 | P | Present mode; from the grid or the book it opens the slide first; again leaves | Present: Ctrl+F5 (⌘+Enter) |
+| 8 | F | Browser fullscreen | F11 (⌘+Shift+F) while presenting |
+| 9 | [ or S | Show or hide the slide list | No key for the filmstrip; Ctrl+Shift+F is compact mode. S opens speaker notes while presenting |
+| 10 | D | Dark or light theme | Ctrl+D (⌘+D) is Duplicate |
+| 11 | R | Index panel when a route offers one (no Turboslide route does; the key is inert) | none |
+| 12 | ? | Keyboard shortcuts card | Ctrl+/ (⌘+/) |
+| 13 | Cmd K or Ctrl K | The command palette | Ctrl+K (⌘+K) is Insert or edit link; Alt+/ is the tool finder |
+| 14 | Escape | Back one layer: help, the index panel, the list filter, a non default view, present mode when not fullscreen, the open narrow list; inside a field it blurs the field | Esc exits the current mode; Esc stops presenting |
+
+### 2.2 The editor route keys (`edit.$deckId.tsx`; capture phase on the window)
+
+| # | Key | Action | Google's binding |
+| --- | --- | --- | --- |
+| 15 | Cmd / or Ctrl / (works inside fields too) | Toggle the source drawer | Ctrl+/ shows keyboard shortcuts |
+| 16 | Cmd L or Ctrl L (works inside fields too) | Toggle the lint layer | none |
+| 17 | Cmd Z or Ctrl Z | Undo (a forward write carrying the inverse) | Ctrl+Z (⌘+Z) |
+| 18 | Shift Cmd Z or Shift Ctrl Z | Redo | Ctrl+Y or Ctrl+Shift+Z (⌘+Y or ⌘+Shift+Z) |
+| 19 | Cmd S or Ctrl S | Turns editing on if off and focuses the "Name this version" field | Ctrl+S (⌘+S) saves (Slides autosaves) |
+| 20 | Shift D | Toggle the twin view | none |
+| 21 | E | Toggle Edit and View | none |
+
+### 2.3 The stage keys in edit mode (`Editor.tsx`, capture phase; inert inside fields, the editable run and chrome controls)
+
+| # | Key | Action | Google's binding |
+| --- | --- | --- | --- |
+| 22 | Tab, Shift Tab | Select the next or previous block in document order; from the page with nothing selected the first or last | Select next shape Tab, previous Shift+Tab |
+| 23 | Escape | Run selection to block, block to nothing | Esc |
+| 24 | Arrow keys (freeform slide) | Nudge the selection 1 px | Nudge one pixel at a time: arrow keys |
+| 25 | Shift plus arrow keys (freeform slide) | Nudge 8 px | Nudge by larger increment: Shift+arrow keys |
+| 26 | Arrow keys (grammar slide) | Cycle the selection to the next or previous block | none |
+| 27 | Alt Up, Alt Down | Bring forward or send back one step (freeform), or reorder one place within the slot (grammar) | Bring forward Ctrl+Up (⌘+Up), Send backward Ctrl+Down (⌘+Down) |
+| 28 | Cmd ] or Ctrl ] (freeform) | Bring forward | Ctrl+] increases indent; Bring forward is Ctrl+Up |
+| 29 | Cmd [ or Ctrl [ (freeform) | Send back | Ctrl+[ decreases indent; Send backward is Ctrl+Down |
+| 30 | Enter | Start inline editing on the block's first run | Enter continues an animation preview or plays a video; text edits on click |
+| 31 | Delete, Backspace | Remove every selected block in one write, with a toast naming Cmd Z | Delete |
+| 32 | Shift click (freeform) | Add or remove a block from the selection | Shift+click |
+| 33 | Double click on a run | Start inline editing | A single click into a text box |
+| 34 | Alt held | Diagram label and marker handles take the pointer | none |
+
+### 2.4 Inline text (`InlineText.tsx`, while a run is editable)
+
+| # | Key | Action | Google's binding |
+| --- | --- | --- | --- |
+| 35 | Enter | Commit the text (no line break; a Text has none) | Enter inserts a paragraph |
+| 36 | Escape | Restore the original text | Esc leaves the text box |
+| 37 | Cmd B or Ctrl B | Toggle the weight 500 run | Bold Ctrl+B (⌘+B) |
+| 38 | Cmd K or Ctrl K | Open the link field | Insert or edit link Ctrl+K (⌘+K) |
+| 39 | Paste | Plain text, line breaks become spaces | Paste Ctrl+V; Paste without formatting Ctrl+Shift+V |
+| 40 | Link field: Enter, Escape | Apply the link, or close the field | as above |
+
+### 2.5 The overlay handles (`Overlay.tsx`, when a handle button has focus)
+
+| # | Key | Action | Google's binding |
+| --- | --- | --- | --- |
+| 41 | Left, Right (Up, Down on a two axis handle) | Step the property: the seam through 4/8, 5/7, 1/1 then 10 px; the key edge and plate edge through their sets; a marker by 1; a shot edge by 10 px; a positioned block by 1 px; a resize edge by 1 px | Arrow keys nudge, Shift nudges more |
+| 42 | Shift plus arrows | 10 on grammar handles, 8 px on a positioned block | Shift+arrow keys |
+| 43 | Enter or Space on a grip or area | Flip the plate side or the crop anchor | none |
+| 44 | Alt Up, Alt Down on a move chip | Bring forward or send back | Ctrl+Up, Ctrl+Down |
+
+### 2.6 The sidebar (`Sidebar.tsx`)
+
+| # | Key | Action | Google's binding |
+| --- | --- | --- | --- |
+| 45 | Filter: Escape | Clear the text, then blur | Esc |
+| 46 | Filter: Down arrow | Move into the list | none |
+| 47 | Filter: Enter | Open the first match | none |
+| 48 | List: Up, Down | Walk headers and rows; Up from the first returns to the filter | Filmstrip: Up and Down arrows move between slides |
+| 49 | List: Left, Right | Fold a header, or return to it; unfold and enter | none |
+| 50 | List: Alt Up, Alt Down (edit mode) | Move the slide one place, across sections | Move slide up Ctrl+Up (⌘+Up), down Ctrl+Down; to beginning Ctrl+Shift+Up, to end Ctrl+Shift+Down |
+| 51 | Row: Space, Enter | Select the slide | Enter opens the selected slide |
+| 52 | Row menu: Up, Down, Escape | Walk the items; close | Menus |
+| 53 | Header: click | Collapse or expand the section | none |
+
+### 2.7 The palette, the menus and the inspector fields
+
+| # | Key | Action | Google's binding |
+| --- | --- | --- | --- |
+| 54 | Palette: Up, Down, Home, End, Enter, Escape | Move, run, close or step back from a prompt | Tool finder: arrows and Enter |
+| 55 | Insert menu: Up, Down, Home, End, Escape | Walk the rows and shape variants; close and refocus the Insert button | Menus: arrows, Esc |
+| 56 | Export menu: Escape; Enter on a check row | Close; toggle the check | Dialogs: Esc |
+| 57 | Inspector text field: Enter commits, Escape restores | One line Text fields | none (the side panel has plain fields) |
+| 58 | Inspector textarea and JSON field: Cmd Enter or Ctrl Enter commits, Escape restores | Notes, code, CSS, HTML, JSON values | none |
+| 59 | Inspector steppers and position fields: Up, Down step; Enter commits; Escape restores | Numbers | none |
+| 60 | Inspector swatches: Enter, Space pick | Colors | none |
+| 61 | Inspector check rows: Space | Toggle | none |
+| 62 | Icon picker filter: Enter picks the first match, Escape closes | Icons | none |
+| 63 | Asset picker: Up, Down, Enter, Escape | Rows | none |
+| 64 | Deck name field: Enter commits, Escape restores, blur commits | Rename | Click the title, Enter |
+| 65 | Count field: Enter goes, Escape closes | Go to a slide | Presenting: number then Enter |
+| 66 | Version note field: Enter saves | Save a version | none as a key |
+
+Google shortcuts Turboslide does not bind at all: New slide Ctrl+M, Duplicate Ctrl+D (SPEC 6.9 planned Cmd D but no handler exists), Copy, Cut and Paste of objects or slides, Copy and paste formatting, Select all Ctrl+A, Find Ctrl+F and Find and replace Ctrl+H, Print Ctrl+P, Zoom in, out and 100 percent, Move to filmstrip and canvas, Open speaker notes Ctrl+Alt+Shift+S, Italic, Underline, Strikethrough, font size steps, text alignment Ctrl+Shift+L, E, R, J, bulleted and numbered lists, Group and Ungroup, Bring to front and Send to back (the action supports `front` and `back` but nothing binds them), Rotate, the resize chords, Insert comment, the menu accelerators, the compact mode toggle.
+
+## 3. The action table and what the UI exposes
+
+`packages/schema/src/actions.ts` declares 54 actions. "Editor handler" says whether `edit.$deckId.tsx` registers an `on(...)` handler; an action without one that the palette still lists fails in the editor with `NotImplementedError` (`packages/agent/src/dispatch.ts` line 86) shown as a toast. "UI" names every person facing surface that runs the action. The palette lists every action with a label whose group is not view or studio; where the palette cannot build an input it shows a "needs" reason instead of running.
+
+| # | Action | Label | Group | Mutates | Transports | Editor handler | UI exposure |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | deck.info | Deck info | deck | no | cli, mcp, http, window | yes | Palette (runs; the result is not shown beyond "Deck info: done") |
+| 2 | deck.create | New deck | deck | yes | all | yes | /decks New deck form; palette prompt "New deck name (from the GT brand template)" |
+| 3 | deck.rename | Rename deck | deck | yes | all | yes | Toolbar deck name field; palette prompt |
+| 4 | deck.pack | Pack deck bundle | deck | no | cli | no | Export menu "Download deck bundle" and /decks "Download bundle" run the bundle route with a ticket, not this action |
+| 5 | deck.unpack | Unpack deck bundle | deck | yes | cli | no | /decks "Upload deck bundle" posts to the bundle route |
+| 6 | deck.push | Push deck to a studio | deck | yes | cli | no | Connect card prints the command |
+| 7 | deck.pull | Pull deck from a studio | deck | yes | cli | no | Connect card prints the command |
+| 8 | slide.list | List slides | slide | no | all | yes | Palette (runs, result not shown) |
+| 9 | slide.get | Get slide | slide | no | all | yes | Palette; the row menu's Duplicate reads through it |
+| 10 | slide.insert | Insert slide | slide | yes | all | yes | Row menu Insert after and templates; Insert menu Slides group; palette Insert group; palette Actions row says "Use the Insert group for a new slide" |
+| 11 | slide.remove | Remove slide | slide | yes | all | yes | Row menu Delete; palette (current slide) |
+| 12 | slide.move | Move slide | slide | yes | all | yes | Sidebar drag, Alt arrows, row menu Move to section; palette says "Drag a row in the sidebar" |
+| 13 | slide.update | Patch slide | slide | yes | all | yes | Inspector slide fields and rename (as `slide.set`, `block.remove` plus `block.insert`), Lint Fix, stage gestures with several mutations, inline text on title and statement slides; palette says "Change a property in the inspector" |
+| 14 | slide.replace | Replace slide | slide | yes | all | yes | Source drawer Apply; the layout switch; palette says "Apply the source drawer" |
+| 15 | slide.setLayout | Set layout | slide | yes | all | yes | Inspector Layout type control; no palette input |
+| 16 | block.set | Set block property | block | yes | all | yes | Every inspector block control, the color, typography and position controls, every handle drag and nudge, inline text commit; palette says "Change a property in the inspector" |
+| 17 | block.insert | Insert block | block | yes | all | yes | Insert menu and palette Insert group; palette Actions row says "Use the Insert group for a new block" |
+| 18 | block.remove | Remove block | block | yes | all | yes | Delete key on the stage; palette (selected block) |
+| 19 | block.move | Move block | block | yes | all | yes | Body and chip drag on a grammar slide, Alt arrows; palette says "Drag the block on the stage" |
+| 20 | block.align | Align blocks | block | yes | all | yes | Arrange bar (through the stage's own mutations, the same arithmetic); no palette input |
+| 21 | block.distribute | Distribute blocks | block | yes | all | yes | Arrange bar; no palette input |
+| 22 | block.order | Order block | block | yes | all | yes | Arrange bar forward and back, Alt arrows, Cmd ] and [; front and back are unexposed |
+| 23 | section.set | Set sections | deck | yes | all | yes | No UI; palette says "Edit the manifest in the source drawer" (the drawer edits a slide, not the manifest) |
+| 24 | slide.lease | Lease slide | slide | yes | all | yes | Taken automatically for ten minutes on the active slide while editing; palette (current slide) |
+| 25 | asset.add | Add asset | asset | yes | all | yes (server side) | Inspector Asset section intake form; palette says "Drop or paste a picture on the stage, or fill the Add a picture form" (the stage has no drop handler) |
+| 26 | asset.dither | Dither asset | asset | yes | all | yes (server side) | Inspector Dither section Recapture and Measure |
+| 27 | asset.capture | Capture page | asset | yes | cli, mcp, http | no | Palette says "Needs a URL: `turboslide asset capture <url> --theme both`" |
+| 28 | material.capture | Capture material | asset | yes | all | yes (server side) | Inspector Material section Capture frame |
+| 29 | material.list | List materials | asset | no | all | yes (server side) | Palette (runs, result not shown); the Material section reads the catalog directly |
+| 30 | render.slide | Render | render | no | all | yes | Row menu Render; palette (current slide, both themes); thumbnails use the render route, not this action |
+| 31 | render.sheet | Contact sheet | render | no | all | no | Palette builds an input; running it fails with NotImplementedError in the editor |
+| 32 | lint.run | Lint | lint | no | all | yes | Row menu Lint this slide; palette (all slides); the Lint badge, the Lint section and the sidebar badges use `lintStatic` in the page, not this action |
+| 33 | fix.run | Fix | lint | yes | all | yes | Palette (current slide, not a dry run); the Lint section's Fix buttons use `slide.update` |
+| 34 | diff.run | Diff | version | no | all | no | Palette builds `{ staged: true }`; fails in the editor |
+| 35 | version.save | Save version | version | yes | all | yes | Versions section Save; Cmd S; status chip click; palette prompt "Version note" |
+| 36 | version.list | List versions | version | no | all | yes | Palette (refreshes the list) |
+| 37 | version.restore | Restore version | version | yes | all | yes | Versions section Restore; palette Versions group; palette Actions row says "Pick a version in the Versions group" |
+| 38 | judge.bundle | Judge bundle | lint | no | cli, mcp | no | Palette says "Needs an output directory: use the CLI" |
+| 39 | view.goto | Go to slide | view | no | window, mcp | yes | Palette Go to slide group; the count field and sidebar rows use the shell directly |
+| 40 | view.mode | View mode | view | no | window | yes | Palette View group; the mode seg uses the shell directly |
+| 41 | view.theme | View theme | view | no | window | yes | Palette View group; the Theme button and D use `toggleTheme` directly |
+| 42 | view.present | Present | view | no | window | yes | Palette View group; the Present button and P use the shell directly |
+| 43 | export.run | Export | export | no | all | yes | Export menu Export PPTX; palette (flatten, both themes) |
+| 44 | export.check | Check export file | export | no | cli | no | Palette lists it with "Needs an input the palette cannot build" |
+| 45 | build.run | Build standalone | export | no | all | yes | Export menu Build and download; palette |
+| 46 | fonts.build | Build export fonts | export | no | cli | no | Palette builds `{}`; fails in the editor |
+| 47 | import.run | Import deck | deck | yes | cli | no | Palette says "Needs a source directory: use the CLI" |
+| 48 | validate.run | Validate | deck | no | all | no | Palette builds a path; fails in the editor |
+| 49 | source.read | Read source | studio | no | window | window API only | Not in the palette; the source drawer's owner |
+| 50 | source.apply | Apply source | studio | yes | window | window API only | Not in the palette; Apply in the drawer runs the same validator |
+| 51 | controls.list | List controls | studio | no | window | window API only | Not in the palette |
+| 52 | control.activate | Activate control | studio | no | window | window API only | Not in the palette |
+| 53 | control.set | Set control | studio | no | window | window API only | Not in the palette |
+| 54 | artifact.download | Download artifact | studio | no | window | window API only | Not in the palette; the report card's Download buttons use signed URLs |
+
+Reading the table as a designer: the actions a salesperson needs are 2, 3, 10, 11, 12, 13, 16, 17, 18, 19, 20 to 22, 25, 35, 37, 39, 42 and 43; every one of them already has a handler in the editor, so the parity work is a surface change, not a new action. Missing actions Google Slides would need: copy and paste of blocks and slides, duplicate block, group and ungroup, slide skip, background change, transitions, comments, and a deck delete (docs/EDITOR-DEPTH-STATUS.md section 10 notes there is no `deck.remove`).
+
+## 4. Slide templates and grammar layouts, the candidates for the Layout dropdown
+
+### 4.1 The 15 slide templates (`packages/chrome/src/slide-templates.ts`; the same ids are the archetypes of `decks/templates/gt-brand/template.json`)
+
+Every template inserts a valid slide with placeholder copy of the form "Placeholder heading, not final copy" so the copy linter (`copy/contrast-pair`, severity 1) flags it until edited. Templates that need a picture take the deck's first asset of the named roles and are left out of the Insert menu and the row menu when the deck has none.
+
+| # | Template id | Label in the menu | Kind | Layout | Block slots filled | Needs an asset | GT deck source |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | opener | Section opener slide | opener | plate lower left, 740 px | plate: big heading, paragraph, credit | yes (opener, mood) | opener-brand |
+| 2 | mood | Mood slide | mood | plate lower right, 560 px | plate: title heading (44 px), paragraph, credit | yes (mood, opener) | mood-earth |
+| 3 | closing | Closing slide | closing | plate upper left, 720 px, mark 138 by 88 | plate: big heading, lead paragraph, credit | yes (opener, mood) | closing |
+| 4 | title | Title slide | title | fixed composition, mark 132 by 84 | heading and lead as slide fields | no | title |
+| 5 | statement | Statement slide | statement | fixed, one big line, measure 22ch | big as a slide field | no | thesis |
+| 6 | cols | Two columns slide | content | cols 5/7, gap 72, center | left: heading, paragraph; right: lead paragraph, cap paragraph | no | character |
+| 7 | split | Head over body slide | content | split 4/8 head, gap 56, body center | headLeft: heading; headRight: paragraph; body: plain list of three | no | engines |
+| 8 | rows | Ruled rows slide | content | cols 5/7 | left: heading, paragraph; right: rows (key 220, tight, three items) | no | surfaces |
+| 9 | plain | Ruled statement list slide | content | cols 5/7 | left: heading, paragraph; right: plain list of four | no | avoid |
+| 10 | tiles | Tile grid slide | content | split 4/8, gap 40 | head columns; body: tiles 4 columns 16/9, four tiles | yes (thumb, capture, detail) | engines |
+| 11 | details | Detail grid slide | content | split 4/8 | head columns; body: details 3 columns, row height 236, three items | yes (detail, capture, thumb) | details |
+| 12 | board | Status board slide | content | split 4/8, gap 32, body start | head columns; body: board with three rows | no (a capture if present) | state |
+| 13 | matrix | Matrix slide | content | cols 5/7 | left: heading, paragraph; right: matrix 4 by 4 with a caption | no | dither |
+| 14 | pair | Pair of figures slide | content | split single head, gap 56 | head: heading; body: pair of two figures with captions | yes (capture, detail, thumb) | pages-a |
+| 15 | figure | Figure slide | content | cols 4/8 | left: heading, paragraph; right: shot with caption at 16 px | yes (capture, detail, thumb) | blog-covers |
+
+The sidebar row menu additionally offers three blank kinds without placeholder copy (`palette-data.ts` `blankSlide`): Content slide (layout center, one h2 "Heading"), Title slide ("Title", "One line under the title."), Statement slide ("Statement", measure 22). `blankSlide` also defines opener, mood and closing blanks, which the menu does not list because they need a picture.
+
+### 4.2 The six layouts of a content slide (`LAYOUT_CATALOG` in `packages/schema/src/catalog.ts`, slots from `slotsForLayout` in `deck.ts`)
+
+| # | Layout | Label | Slots | Options | Notes |
+| --- | --- | --- | --- | --- | --- |
+| 1 | cols | Columns | left, right | ratio 5/7, 4/8, 1/1 or a fixed column in px; gap 72, 56, 48; align start or center | The column seam handle drags the ratio |
+| 2 | split | Head over body | head, body; or headLeft, headRight, body | gap 56, 44, 40, 36, 32, 26; head single or cols 5/7 or 4/8 with start or baseline alignment; body align start, center, end | |
+| 3 | center | Center | main | none | One centered block |
+| 4 | left-mid | Left, vertically centered | main | none | |
+| 5 | stack | Stack | main | gap in px (22 default) | A vertical column |
+| 6 | freeform | Freeform | main | none | Every top level block carries `pos`; flagged `layout/freeform` at severity 1 |
+
+### 4.3 The six slide kinds (`SLIDE_KIND_CATALOG`)
+
+| # | Kind | Label | What it carries | Google's nearest default layout |
+| --- | --- | --- | --- | --- |
+| 1 | content | Content | a layout and typed blocks in slots | Title and body, Title and two columns, One column text, Blank (labels unverified here) |
+| 2 | opener | Section opener | a section id, a full bleed two-tone picture, a plate lower left at 740 px | Section header |
+| 3 | mood | Mood | a full bleed picture, a plate lower right at 560 px with a 44 px title | Caption |
+| 4 | closing | Closing | a picture, a plate upper left at 720 px, an optional mark | Section title and description |
+| 5 | title | Title | the mark, a heading and a lead as fields | Title slide |
+| 6 | statement | Statement | one big line and a measure | Main point, Big number |
+
+A Google style Layout dropdown for the GT theme would therefore list the 15 templates (plus the three blanks) as the "repeated slide templates", grouped by kind, and the six content layouts as a second level that applies to a content slide only. Changing between kinds is not a layout change today: the inspector says the kind is fixed, and the only path is inserting another slide.
+
+### 4.4 The two deck templates (`packages/store/src/templates.ts`, `decks/templates/gt-brand/template.json`)
+
+`gt-brand` copies 85 slides in 8 sections (Brand 15, Design system 15, Website 11, Documentation 5, Blog and content 9, Developer experience 4, Prototemplate and Glyphfield 19, Status and plan 7) with the assets at revision 0. `blank` writes one section named "Deck" holding one title slide whose heading is the deck name and whose lead reads "What this deck covers, in one or two sentences."; it has no assets, so every picture template is unavailable in a blank deck until an asset is added.
+
+## 5. The root route and the deck list today
+
+`apps/studio/src/routes/index.tsx`: `beforeLoad` calls `listDecks()` (newest first by `updatedAt`, which the store rewrites on every write) and throws a 307 redirect to `/edit/<newest deck>`. With no deck it calls `createNewDeck({ name: 'GT brand deck', from: 'gt-brand' })` and redirects to that. If the store fails, the page renders "The studio could not open a deck: <error>" with a link to `/decks`. Consequences: there is no home page; a visitor lands inside whichever deck anyone saved last on the shared Blob store (docs/EDITOR-DEPTH-STATUS.md section 12 records production opening a drive's test deck); a fresh instance lands on the GT deck itself, not a new presentation built on it; nothing on the root offers "Blank" or a gallery.
+
+`apps/studio/src/routes/decks.index.tsx` (`/decks`, SSR): the header "Decks" with a lead sentence and the hosting notice; New deck (a form with Name, the two template radios and Create and open, which navigates to the editor); Upload deck bundle (a zip form with Replace); the count; the rows (title link, id, slides, `rNN`, a local time stamp, Open, Present, Export, Download bundle); the Connect card; a footer with the Node version, the sheet size and the store. Google's home instead shows "Start a new presentation" with Blank and the template gallery, then Recent presentations with thumbnails, an owner column and a last opened date; File > New, Open and Make a copy live inside the editor.
+
+`/edit/:deckId` (`ssr: false`) reads `?mode=slide|grid|book`, `?theme=light|dark`, `?edit=0|1`, `?twin=1`, `?lint=1`, `?src=1`, `?export=1` (opens the Export menu on load), `?author=`; the slide is the hash `#s/<slideId>`. `/deck/:deckId` (SSR) reads `?mode`, `?theme`, `?present=1`. `/embed/:deckId` is the framed viewer. There is no `/present/:deckId` route (SPEC 6.10) and no `/new` route.
+
+## 6. Block document facts that constrain a Google-like editor
+
+1. The sheet is 1600 by 900 sheet pixels; the content box is 1326 by 642 at (137, 129); rails and rules sit 56 px in; the frame, crosses, wordmark and counter are drawn by the renderer and never by a slide (`packages/schema/src/render.ts`, `Frame.tsx`). The PPTX page is 13.333 by 7.5 inches, one sheet pixel being 7,620 EMU (docs/pptx.md).
+2. Only a content slide on `layout.type === 'freeform'` has coordinates. `pos` is `{ x, y, w, h, z? }` on every top level block of that slide and forbidden elsewhere (`validate.ts` issue `position`, severity 3). The five grammar layouts place blocks in named slots in document order; a drag there is `block.move` (a slot and an `after` id), never a pixel. Title and statement slides have no blocks (their text is a slide field), and opener, mood and closing slides have one plate with a block list and no coordinates.
+3. Freeform snapping is shared arithmetic (`schema/freeform.ts`): an 8 px grid, guides within 6 px at the rails, the content edges and centers, the three cols seams and the three plate edges; `alignPositions`, `distributePositions` and `reorderZ` are what the arrange bar, the CLI and agents all write. `z` is dense after every order change; document order breaks ties.
+4. Layout changes are conversions (`slide.setLayout`): to freeform from the stage's measured boxes, recorded under `ext.grammar` so the way back is lossless while nothing moved; otherwise the blocks refile into slots by geometry. A plain `slide.set /layout` from freeform is refused because blocks would keep `pos`.
+5. There is no rotation, no grouping, no nested selection (mutations address top level blocks; a composite's inner blocks are not selectable), no per slide background other than the picture kinds, no transitions, no animations, no comments, and one theme (`gt-ink-paper`) with light and dark twins.
+6. Text is a string in the four rule markup: `*text*` is the weight 500 run, `[text](url)` a link, a standalone `GT` the mark, backslash escapes. No italic, underline, strike, color or size inside a run; no line breaks except in `panel.code`; a non breaking space is the nowrap device. Inline editing rebuilds the markup from the DOM (`runsFromNode`) and commits one `block.set` of the whole text, or `slide.set` on a title or statement field (the `text.replace` coalescing of SPEC 6.7 is not what the code does).
+7. Typography overrides exist on heading, paragraph, text and box only: size from the ladder 88, 72, 58, 44, 34, 26, 24, 22, 20, 18, 17, 16, 15 (off ladder is `type/ladder` severity 2), weight 300 to 700 (over 500 is `type/weight-cap` severity 3), align left, center, right, tracking and leading steps. Inter is the only face. Every other block's type is fixed by its kind (a heading level is h1 88, h2 44, big 72, title 44).
+8. Color is 12 palette names (ink, paper, ink-2, titanium, hair, hair-soft, plate, edge, green, amber, red, blue) or a `#rrggbb` hex flagged `color/off-palette` at severity 2, on box, shape, rule, text and icon only. Semantic hues are meant for icons.
+9. Pictures are assets in the manifest with light and dark twins, a role, alt text, provenance and an optional two-tone treatment; a `shot`, `pair`, `tiles`, `details`, `board` or picture slide references an asset id. Adding one is `asset.add` (a data URL, a file path or a URL; alt required; up to 25 MB), which runs on the server and returns over the watch channel; the stage accepts no drop.
+10. Every slide belongs to exactly one section and the section list is the only place order lives; an opener must be first in its section and names it. Ids are slugs (`content-rule`, `h`, `p1`), unique per deck for slides and per slide for blocks; renaming a block is remove plus insert.
+11. The renderer is one string function (`renderSlide`) whose HTML is set as `innerHTML`; every block root carries `data-block`, every run `data-run`, a positioned block sits in a `.free[data-free]` wrapper at its box; the editor measures boxes with `getBoundingClientRect` divided by the stage scale. Anything the editor draws must therefore come from the document, never from DOM edits, or the CLI and export would disagree.
+12. The Perfect PPTX (`flatten`, the default) is one 2x raster per page (3200 by 1800) placed over the slide's text as invisible runs, each page measured within 0.1 percent of its shot; fonts are never embedded; slide notes become PPTX notes; the slide title becomes a hidden title placeholder. It takes 190 to 222 s for 85 slides inside a hosted function whose limit is 300 s (docs/EDITOR-DEPTH-STATUS.md section 10). Editable text (`native`) writes text boxes for `NATIVE_BLOCK_TYPES` (text, box, shape and rule included), rasters icons, marks, diagrams, dithers and pictures, and carries weights 600 and 700 as Medium plus bold; layout within 3 px, pixels not promised. Anything the editor adds that the renderer cannot draw in HTML cannot be exported perfectly.
+13. Every write is one action with `baseRevision`; undo and redo are forward writes carrying inverse mutations; a stale base is a 409 with the current document; another author's lease on the slide blocks agent writes and warns human ones; external revisions arrive through a long poll within a second. A Google style live cursor model would sit on top of this log, not replace it.
+14. Thumbnails come from the render worker at 320 px per theme, at most three fetching at once, with a live clone of the HTML as the fallback; on a cold instance the cards settle in 1.6 to 4.9 s (docs/EDITOR-DEPTH-STATUS.md section 9).
+
+## 7. What would confuse a salesperson today
+
+A frank list, in the order a person meets it.
+
+1. The root address opens someone else's deck. `/` redirects to the most recently updated deck on the shared store; on production that has been a drive's test deck. There is no "new presentation" landing.
+2. Two present buttons: Present (solid, same tab) and Presentation (new tab), plus a P key. Google has one Slideshow button.
+3. The Edit | View segmented control. Sales people do not expect an editor to have a read only mode of its own; pressing E by accident removes the inspector, the row menus and drag.
+4. Agent words in the toolbar: Lint with a number badge, Twin, Source. None means anything to a seller. Lint counts every placeholder line on a fresh slide, so the badge shows a number the moment a slide is inserted.
+5. The status chip reads `Saved · r412`, then `lease agent:run-7` or `3 lint`. "Saved" is fine; the revision number, the lease and the lint count are internal.
+6. Tooltips name action ids and pointers: "Inserts a blank content slide after content-rule (slide.insert)", "Goes to the slide in Brand (view.goto)", "Runs export.run: one PPTX per theme", "Ratio of the layout (/layout/ratio)". `data-control` ids appear in the window API, and slide and block ids appear in labels ("Menu for slide content-rule", "Inserted new-cols", "Renamed h to heading-1", "Removed heading · h. Cmd Z undoes", "Insert a template … Inserted after content-rule").
+7. The selection chip reads `heading · h` or `3 blocks · paragraph · p1`. Google names nothing on the canvas.
+8. The command palette (Cmd K) with `#`, `+` and `>` prefixes and an Actions group listing "Judge bundle", "Build export fonts", "Contact sheet", "Check export file", "Validate", "Diff", "Lease slide", several of which fail with a "not implemented" toast when run from the editor.
+9. The Insert menu changes with the selection and says "Nothing can be inserted here: open a content slide or a slide with a plate." on a title or statement slide. Its rows are "Ruled statement list block", "Two registers block", "Type specimen block", "Scripts block", "Type ladder block", "Swatches block", "Mark sizes block", "Logo plates block", "Dither ramp block", "HTML escape block", "Material". Image needs an asset first.
+10. The sidebar's Thumbnails | Outline density toggle, the kind glyph per row, the lint badge, the lease dot, the sticky section headers with counts, and a row menu with Render, Lint this slide and Copy id beside Duplicate and Delete. Move to section lists section ids.
+11. The mode segmented control Slide | Grid | Book and the B key. Book view has no counterpart and shows a masthead with "Revision r24".
+12. Global single letter keys: typing S, D, E, P, F, G, B, J, K, L, H or ? with nothing focused changes the view, hides the list, flips the theme or leaves edit mode. A person who clicks the canvas and starts typing gets none of the letters into a text box and several surprises instead.
+13. Text editing starts on Enter or a double click, not on a click; Enter commits instead of adding a line; the run toolbar offers "Weight 500 run", "Link" and "GT mark" and nothing else; there are no bullets, no italic, no underline, no font menu, no size menu on the toolbar (size lives in the inspector's Typography stepper with an "of 13" counter and lint marks reading `type/ladder` and `type/weight-cap`).
+14. The kind is fixed. A title slide cannot become a content slide; the inspector shows "Kind: Title" read only with the sentence "insert another slide for a different one".
+15. Blocks on ordinary slides do not move freely. A drag reorders within a column or moves into the other column; free placement needs the Layout section's "freeform" type, whose tooltip mentions a `layout/freeform` finding.
+16. Adding a picture is a form: Drop zone, Choose a file, URL, Id, Alt text (required), Role (opener picture, mood photograph, page capture, detail crop, thumbnail, render, icon, logo, material frame, other), Title, Artist, License, Share-alike, Source URL, Two-tone, Plate, Add asset. Then the Image entry in Insert becomes available.
+17. The inspector has thirteen sections including Material, Dither, Lint, Versions, History and Deck tokens; row labels are JSON keys in words ("Measure (ch)", "Tracking (em)", "Z order", "Struck", "External link glyph", "Preformatted", "Why the escape"); the Block section shows the slot name and a rename field for the id.
+18. Export is a card of Perfect | Editable text, Both | Light | Dark, Exact | Standard fonts, Embed fonts, Headings as raster, Verify with LibreOffice, then "Build and download" (a standalone HTML) and "Download deck bundle" (a zip for the CLI), with a note about "the render worker" and a report card listing "Perfect: yes", "Worst fraction", "Raster blocks", "Fonts embedded", "Geometry in bounds", "Revision r24".
+19. Cmd S does not save the file (autosave already did); it focuses a "Name this version" field inside the inspector. The status chip click does the same.
+20. The source drawer (Cmd /) shows `slides/content-rule.json`, a JSON editor, Apply, Reset, Copy, Copy as command and an issues list; Cmd / also fires inside text fields.
+21. The conflict card shows two JSON documents with Rebase and Discard; the external revision banner reads "Revision r15 by agent:run-3 arrived from outside this editor and is shown"; the hosting banner asks to "Connect a Blob store to the Vercel project".
+22. The hover preview card that follows the pointer over rows, grid captions and the count; the progress line under the stage; the first visit toast "Arrow keys move. Press ? for every shortcut."; the toolbar count `01 / 85` as a clickable go to field.
+23. `/decks` is a table with ids, `rNN` revisions, a bundle upload, a Connect card printing `turboslide deck push <deck-id> --to https://… --token <TURBOSLIDE_TOKEN>`, and a footer naming Node and the store.
+24. Theme means two things: the ◐ button flips the whole app and the slide between light and dark twins; a seller reading "Theme" expects Google's slide theme gallery.
+25. Copy link copies the editor's own URL with the slide hash; it is not a share dialog and the deck has no sharing model.
+26. No undo or redo buttons, no zoom, no speaker notes pane, no comments, no Share, no File, Edit, View, Insert, Format, Slide, Arrange, Tools or Help menu bar; the toolbar is the only surface, and its labels collapse to icons at 1280 px with the list open.
+27. Missing features a seller will look for and not find: new slide on Ctrl+M, duplicate on Ctrl+D, copy and paste of shapes, tables, charts, bullets, transitions, images by drag and drop, a background picker, text color inside a sentence, fonts other than Inter, print.
+
+## 8. Discrepancies between the documents and the code, found while reading
+
+- The brief names 62 actions; `ACTION_IDS` holds 54.
+- SPEC 6.9 lists Cmd D for duplicating a slide and `text.replace` coalesced at 400 ms; the code binds no Cmd D and commits inline text as one `block.set` of the whole text on Enter or blur.
+- SPEC 6.10's presenter (`/present/:deckId`) is not in `apps/studio/src/routes`.
+- `palette-data.ts` tells the user to "Drop or paste a picture on the stage" for `asset.add`; `Editor.tsx` binds no drop or paste handler, only the intake form inside the inspector does.
+- The palette lists `render.sheet`, `diff.run`, `validate.run` and `fonts.build` with built inputs, but the editor registers no handler for them, so Enter produces a "not implemented" toast (`dispatch.ts` line 86).
+- SPEC 6.2 shows Outline as the first density; the code defaults to Thumbnails (Kevin, 2026-09-11) and remembers the choice per browser.
+- SPEC 6.5 lists seven inspector sections; the code has thirteen (Text, Color, Position and size, Material, Dither and Deck tokens added).
+- The Insert menu names the `shot` block "Image" while the inspector and the catalog name it "Screenshot".
+- `docs/EDITOR-DEPTH-STATUS.md` section 10 notes there is no `deck.remove` action; the deck list therefore has no delete.
+
+## 9. Sources
+
+Repository files read in full or in the parts named, at commit `8c7056c` on 2026-09-11: `packages/chrome/src/Toolbar.tsx`, `ViewerShell.tsx`, `Sidebar.tsx`, `SidebarFilter.tsx`, `Inspector.tsx`, `InspectorControl.tsx`, `inspector/{sections,generate,props}.ts`, `inspector/{position,typography,text,palette,asset,material,dither,icon,json,stepper,seg,select,check,lint-mark}.tsx`, `InsertMenu.tsx`, `ExportMenu.tsx`, `ExportReportCard.tsx`, `Palette.tsx`, `palette-data.ts`, `Overlay.tsx`, `HelpCard.tsx`, `HistoryPanel.tsx`, `VersionsPanel.tsx`, `LintPanel.tsx`, `SourceDrawer.tsx`, `AssetPicker.tsx`, `IconPicker.tsx`, `useShellKeys.ts`, `shell-context.ts`, `shell-data.ts`, `dispatch.ts`, `slide-templates.ts`, `DeckName.tsx`, `StatusChip.tsx`, `TwinStage.tsx`, `ThemeButton.tsx`, `ToolButton.tsx`, `Seg.tsx`, `Tooltip.tsx` (head), `ConnectCard.tsx`, `PreviewLayer.tsx` (head), `Progress.tsx`, `Toast.tsx`, `Thumb.tsx` (head), `ListRow.tsx` (head), `icons.tsx` (names); `packages/viewer/src/Editor.tsx`, `Gestures.tsx`, `Freeform.tsx`, `InlineText.tsx`, `Selection.tsx`, `keys.ts`, `Stage.tsx`, `Sheet.tsx`, `Frame.tsx`, `GridView.tsx`, `BookView.tsx` (head), `model.ts` (grep); `apps/studio/src/routes/index.tsx`, `decks.index.tsx`, `edit.$deckId.tsx`, `deck.$deckId.tsx`, `embed.$deckId.tsx`, `__root.tsx`; `apps/studio/src/components/DeckViewer.tsx`; `packages/schema/src/actions.ts`, `deck.ts`, `blocks.ts`, `freeform.ts`, `typography.ts`, `color.ts`, `position.ts`, `catalog.ts`, `validate.ts` (grep); `packages/agent/src/window/registry.ts` and `packages/agent/src/dispatch.ts` (grep); `packages/store/src/templates.ts` (the blank deck); `packages/export/src/scene/measure.ts` (grep); `decks/templates/gt-brand/template.json`; `docs/EDITOR-DEPTH-STATUS.md`, `docs/freeform.md`, `docs/pptx.md` (head), `docs/spec/SPEC.md` sections 1 to 6, `AGENTS.md` (head).
+
+Public pages read on 2026-09-11:
+
+- Google, "Keyboard shortcuts for Google Slides", https://support.google.com/docs/answer/1696717 (every Google binding in section 2).
+- Google, "Present slides", https://support.google.com/docs/answer/1696787 (the Slideshow button, presenter view, the present toolbar and the presenting keys named in section 1.13 and 2).
+
+Not verified in this report (from general knowledge of the product; the sibling research reports own the check): the exact labels of the Google Slides menu bar items named "(label unverified here)" in section 1 (View > Show filmstrip, View > Grid view, View > Full screen, File > Download and its formats, Share > Copy link, Settings > Appearance, Slide > Change background, File > Open, Import slides, Make a copy, the names of the default layouts in section 4.3, and the icon add on remark). No running instance was opened, so nothing about pixel positions, colors or timings beyond what docs/EDITOR-DEPTH-STATUS.md records was confirmed here.

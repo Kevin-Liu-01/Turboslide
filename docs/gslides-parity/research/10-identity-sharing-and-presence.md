@@ -1,0 +1,353 @@
+# Identity, sharing, comments and live presence
+
+Report 10 of the Turboslide Google Slides parity round, written 2026-09-11. It closes the gap the first seven reports left open: reports 01, 03 and 07 document the Share dialog and name "share a link after the call" and "manager reviews through comments" as core sales workflows, but none of them records how Google Slides behaves when two people are in a file at once, what each role sees, or how Google treats a person it cannot name. Nor does any report inventory the one Turboslide fact every one of those features depends on: at commit `8c7056c` there are no user accounts. A visitor is a string.
+
+Part A is Google Slides from public sources only. Part B is Turboslide read from the code at `8c7056c`. Part C sets them side by side, one row per Google behaviour, and traces the rep, manager and prospect workflow through both products. The report ends with the claims that could not be verified and every source with its URL and read date.
+
+Rules followed: plain technical English, sentence case, no em dashes, no metaphors, no trailing periods on headings. No Google icon, logo, artwork or asset is reproduced or proposed; Google Slides is named as a reference. No account was signed in; nothing was measured in the live product. Every source was read on 2026-09-11. Source keys (G for a Google help page, W for a Workspace Updates post, T for a third party page, L for a local file) resolve in the Sources section.
+
+## How to read this report
+
+- A label in quotation marks is the exact text of the source. Where a Google page and a Workspace Updates post disagree (for example where the "Following" badge appears), both readings are recorded.
+- "Verified" means a Google owned page states it. "Corroborated" means two or more independent third party pages state it. "Single source" means one third party page. "Unverified" means expected from product knowledge but not found on any page read for this report; every unverified claim is repeated in the Unverified section.
+- Part B cites files by path and, where it matters, by line at commit `8c7056c`. Nothing in Part B was run; it is a reading of the source.
+- The WebSearch budget of this session was exhausted before this report began, so Part A was built by fetching known URLs and the Workspace Updates blog's own search and label pages. Where a page could not be fetched (the 2010 Google Docs engineering posts render only through JavaScript, one Drive help id returned 404, two GCF lessons moved and returned 404, and archive.org is blocked for this tool), the report says so instead of paraphrasing memory.
+
+## Part A: what Google Slides does
+
+### A1 Collaborator avatars and Follow a collaborator
+
+Verified (G1, W1). Collaborator avatars appear at the top right of the presentation, in the title row, left of Share (report 01 places them there from the same page). Clicking an avatar follows that collaborator: "jump to the slide that the collaborator is on", and "If they navigate elsewhere, you will also move to that slide." Google's help page says a "Following" badge appears beneath the avatar while following is active; the launch post says "If you hover over a followed avatar, a 'Following' badge will appear." Both are recorded.
+
+Following stops when the follower clicks the avatar again, and also when: the collaborator refreshes or leaves the presentation; the follower edits content; the follower adds or edits a comment; the follower clicks a different slide; the follower enters Slideshow mode; the follower opens Version history (G1, W1). Following works only on a computer (G1). Following is refused when the collaborator "is anonymous", lacks "Edit permission to the presentation", is on an unsupported device, or has not selected a slide (G1). The feature rolled out in December 2022 to all Workspace customers, legacy G Suite customers and personal Google Accounts (W1).
+
+Reading for the designer: the avatar row is the presence surface, and Follow is its only click behaviour. Google ties it to a named editor with edit permission; an anonymous person can be seen as present but cannot be followed.
+
+### A2 Live pointers
+
+Verified (G2, W2). Live pointers show collaborators' mouse pointers in real time. The setting is under View > Live pointers: "Show my pointer" publishes your own pointer, and "Show collaborator pointers" (ticked by default) shows theirs; a pointer icon at the right end of the toolbar toggles the same setting (report 01 lists the menu item). The feature is off by default for your own pointer (W2). Showing your own pointer requires edit access; "all access levels can view pointers", so viewers and commenters see pointers but cannot show theirs (G2). Once on, "your pointer will remain visible in all Slides until you turn it off" (G2). Pointers do not work "if more than 20 collaborators are in the presentation" (G2). Collaborator pointers are hidden for the session in present mode (W2). Whether a pointer carries the collaborator's name or an assigned colour is not stated on either page; see Unverified.
+
+### A3 Cursors, selection outlines and the filmstrip
+
+Corroborated for the fact, unverified for the exact rendering. BrightCarbon's guide (T1): collaborators "appear as colourful circles with initials, or profile pictures if the user has one" at the top right, and "You can even see what your co-workers are editing... you can see them do this in real-time, and they can see you in turn." Wikipedia (T6): "An editor's current position is represented with an editor-specific color/cursor, so if another editor happens to be viewing that part of the document, they can see edits as they occur." No Google page read for this report describes the coloured selection outline around the object a collaborator is editing, the name flag on it, or the marker in the filmstrip showing which slide a collaborator has open; they are listed as unverified. Google's screen reader page gives the behaviour without the drawing (G5): the screen reader announces when collaborators enter or exit, announces "if editing occurs near your current location", a "Collaborators" list is reached with Shift+Tab from any open menu ("If all collaborators are inactive, there's no list of collaborators"), Enter on a name jumps to that person's editing location, and the Accessibility menu offers "Show live edits", a sidebar listing changes as they land. Tools > Accessibility holds "Turn on collaborator announcements" (G5; report 01 lists the dialog).
+
+### A4 Chat inside a file
+
+Verified for Slides (G11, G19). Chat is a title row control: "Show chat" at the top right, which "won't be available if you're the only one in the file". When several collaborators are present "there will be a blue circle showing the number of additional collaborators"; the user clicks the circle and "Join chat", types in the chat box and can close the window (G11). Scope and persistence: "All chats in Google Docs, Sheets, and Slides include anyone viewing the file. The chats aren't saved." (G11). The Google Slides cheat sheet lists "Chat with other people viewing the spreadsheet" as item 1 of "Collaborate with your team" (G19; the word spreadsheet is Google's own copy error on the Slides page). No role restriction is stated; the sentence "anyone viewing the file" implies viewers take part.
+
+### A5 Simultaneous edits to one text box
+
+Corroborated for the mechanism, unverified from a Google page. Two editors can type in the same text box at the same time and Google merges the edits without locking either person out. Wikipedia (T6): "To resolve concurrent edits from different users, Google Docs uses an operational transformation method based on the Jupiter algorithm, where the document is stored as a list of changes", citing Weidner, Gentle and Kleppmann, IEEE Transactions 2025. BrightCarbon (T2): "All editors can work simultaneously on the same slides." Google's own engineering explanation exists as three posts on the Google Docs blog, "What's different about the new Google Docs: Conflict resolution" (22 September 2010) and "Making collaboration fast" (23 September 2010) among them; their titles and dates were confirmed but their bodies render only through JavaScript and could not be read for this report, so the exact sentences are not quoted. The property that matters for Turboslide: there is no lease, no lock and no conflict dialog in Google Slides; the server orders the operations and every client converges.
+
+### A6 Viewer, Commenter, Editor and Owner
+
+Verified (G3). Google's permission table for Drive, Docs, Sheets, Slides and Vids:
+
+| Role | View | Comment | Edit | Download | Share | Change permissions |
+|---|---|---|---|---|---|---|
+| Viewer | yes | no | no | yes by default, owner controlled | no | no |
+| Commenter | yes | yes | no | yes by default, owner controlled | no | no |
+| Editor | yes | yes | yes | yes | yes, but "an editor can't change the owner" | yes |
+| Owner | yes | yes | yes | yes | yes | yes |
+
+The Share dialog's Settings gear carries "Editors can change permissions and share" and "Viewers and commenters can see the option to download, print, and copy" (G3; report 03 has the full dialog). Behaviour differences by role that the pages state:
+
+- Version history: "To browse earlier versions of a file, you need permission to edit that file." and "If you don't have permission to edit a file, you won't be able to see the version history." (G9). Viewers and commenters do not see it.
+- Live pointers: own pointer needs edit access; everyone sees others' pointers (G2).
+- Follow: only a collaborator with edit permission can be followed (G1).
+- Mode menu: see A7; viewers do not have it.
+- Activity dashboard: edit access and the owner's domain (A13).
+- Speaker notes while co-presenting in Meet: "A co-presenter will need edit access to the Google Slides file to see speaker notes while presenting." (G18).
+- Publish to web: "File owners and editors can publish files." (G10).
+- Chat: anyone viewing (G11).
+
+### A7 View only, the Mode menu and Request edit access
+
+Verified (G6, W6). View > Mode offers "Editing", "Commenting" and "Viewing". "Your access level determines the modes available to you": an editor has all three, a commenter has Commenting and Viewing, and for a viewer the menu "isn't available" (G6). Google recommends it as a guard: "You can use Commenting or Viewing modes to prevent unwanted changes to a presentation, even if you have edit access." (G6). Slides names the middle mode Commenting, not Suggesting as Docs does.
+
+The view only state: since July 2015 "Those with 'View only' access to a document, spreadsheet, slide, or drawing will see a new blue button in the toolbar", and "Clicking on the button allows one to easily request edit access from the file owner" (W6, read through the blog's search listing). The current label of that button and the wording of the banner beside it were not confirmed on a page read today; "Request edit access" is the label the 2015 post and the 2018 Sites post use, and is recorded as corroborated by product history rather than verified for 2026.
+
+### A8 Access requests and the You need access page
+
+Verified for the owner's side (W4, W5, G3). "When users request access to a file, the approvers receive an email with the option to share the file or decline the request." Approvers also "see a notification dot on the 'Share' button if they have a pending access request and a new banner at the top of the sharing dialog"; the flow is "open the file and click the Share button > select the Review button in the new banner to view the access request(s) > respond to the request(s)". "If the 'Notify' checkbox is selected when an approver responds to a request, the user who requested access will receive an email with the status of the request." (W4, June 2023, all Workspace customers and personal accounts). In Gmail the request email is dynamic: the owner can "review the request, choose the access level (e.g. edit, comment, or view), and grant access directly from the email" (W5). The Share help page carries the tip "If you open a document and there's a dot next to 'Share,' it means you have a share request." (G3).
+
+The requester's side, the page titled "You need access" with a message field and a "Request access" button, is product knowledge; the Drive help id this report tried (6283888) returned 404 and no other public page read today describes it. It is listed as unverified in wording, though the existence of a request with an optional message follows from W4 and W5.
+
+### A9 Anonymous viewers and anonymous editors
+
+Verified (G3, G12). "Anyone who has the link can use your file, without signing in to their Google Account." (G3). "People who aren't signed in to a Google Account show up as anonymous animals in your file." (G3). The anonymous animals page adds the second cause: "People you didn't invite individually will show as anonymous animals when they're in the file." and "You can only see other people's names when you give them individual permission to view a file or if they are part of a mailing list."; "People you invite individually will show by name when they're in the file." (G12). So a signed in person who arrived through an "Anyone with the link" link is also an animal. When a file is shared publicly "your name and email will be visible as the owner" (G3). An anonymous collaborator cannot be followed (G1).
+
+How Google treats a document with one anonymous editor: that person appears in the avatar row as an anonymous animal with a generated animal name, can edit if the link role is Editor, and cannot be followed. What Google's pages do not say: the colour assigned to the animal, whether the animal name is stable for the session, how the animal's edits are labelled in Version history, and whether the animal can comment under the animal name. Those four are in Unverified. The list of animal names is not on the Google page read; it is product folklore and is not reproduced.
+
+### A10 Link sharing, Remove access and expiry
+
+Verified (G3, G4). General access is "Restricted: Only people with access can open the file." or "Anyone with the link" with a role of Viewer, Commenter or Editor; "Copy link" copies the link (G3; report 03 has the dialog). To stop sharing with one person: "To the right of their name, click the Down arrow and then Remove access." (G4). "When you change an item's general access to Restricted, only people with access can open the file. This overrides inherited parent folder permissions." (G4). Expiry is per person, not per link: "Next to the person's name, click the Down arrow and then Add expiration.", "Choose a date within one year of the current date.", and "The expiration date feature is only available for eligible work or school accounts." (G3, G4). Owners can also prevent viewers and commenters from downloading, printing and copying, and prevent editors from changing permissions (G4). Google's limit: "you can't stop how others share the file content in other ways" (G4).
+
+### A11 Comments panel, filters and For you
+
+Verified (G7, W3). "Show all comments" at the top right opens the comments panel (G7; report 02 places it in the title row). The panel filters are "All comments", "comments for you", "open comments" and "resolved comments" (G7), and search "by using keywords or usernames" (G7). In February 2024 Google added View > Comments with "Show all comments" (a full length view), "Expand comments" (Docs and Slides), "Minimize comments" (Docs and Sheets) and "Hide comments", and "a curated 'For you' list, which surfaces all the comments you need to take action on" (W3, all Workspace customers, Individual subscribers and personal accounts). Comments are added by selecting content and "Add comment"; @ plus a name or email mentions a person, who gets an email; Reply, Resolve, the More menu to edit or delete, emoji reactions, and J, K and R to move and reply (G7; report 04 lists the shortcuts). Who can comment: Commenter and Editor roles (A6). Whether an anonymous animal can comment is unverified.
+
+### A12 Notification settings
+
+Verified (G15). Tools > Notification settings, or the comment history icon then "Notification settings". Under "Comments": "All comments" ("You'll be notified about all new comments."), "Comments for you" ("You'll be notified about @mentions and threads involving you."), "None". Under "Edits" (Google Docs only): "Added or removed content" and "None". "Changes to notification settings will only apply to the file you're on." Delivery by email or browser is chosen in Drive's notification settings (G15). Every option addresses a signed in person by their account.
+
+### A13 Activity dashboard viewers
+
+Verified (G8, W7, W8, W9). The dashboard "lets users with edit access see who has viewed the file and when they viewed it"; "Users with edit access to a file and who belong to the same domain as the file's owner will be able to see that file's Activity dashboard"; "Your users' viewing data will not be visible in Activity dashboards of files owned by users in other domains." (W7, March 2018). Its tabs are "Viewers" (renamed from "View time" in March 2019), "Viewer trend", "Comment trend" ("the number of new comment threads, replies, and unresolved comments over the lifetime of a document") and "Sharing history" ("who shared access with who and what level editing access they've been granted") (W8, W9). It is a work or school feature: "If someone with a work or school account shares a file with you, they may be able to see signed in people view it." (G8). Privacy: Tools > "Activity dashboard privacy" > "Show my view history for this document", and Menu > Settings > "Show your view history" for all files; "You won't be seen in Activity dashboard for anybody's files." when off (G8). Anonymous viewers are not in the dashboard by construction: the page speaks of "signed in people".
+
+### A14 Version history by editor and Show changes
+
+Verified for the frame (G9), corroborated for the colouring (T4, T5, T6). "At the top right, hover over Last edit to see who was the last person to update the file and when they last made changes."; a blue dot on the icon means the file changed since you last opened it (G9). Edit permission is required (A6). "At the top, click Restore this version and then Restore."; "next to the version you want to copy, click More and then Make a copy."; up to "40 named versions per document" (G9; report 01 has the panel's other controls). The per editor colouring: TechRepublic (T4): "Select the 'Show changes' checkbox in the lower right (at the bottom of the version history panel), to display edits made in your selected version." SlideEgg (T5): the preview shows "edits highlighted in colours" and "Only people with edit access can see the full version history." Wikipedia (T6): "each author distinguished by color". Google's own page (G9) names neither colours nor the checkbox; "Show editors" on a text selection is Docs only and needs Business Standard or higher (G9). How an anonymous animal's edit is named in the version list is unverified.
+
+### A15 Skipped slides and speaker notes by role
+
+Verified for skipping (G13, T8), corroborated for notes (T1, G14, G18, W11). Skip slide: "You can skip a slide when you present a presentation. The slide won't be deleted, and if you share your presentation with others, people will be able to see the skipped slides." (G13). "You can now choose to skip select slides without fully deleting them when you present" (T8, 2017). BrightCarbon: "When you are in slideshow mode this slide will no longer show." (T1). So every role that opens the editor, Viewer included, sees skipped slides in the filmstrip; only the slideshow omits them. Print settings has an "Include skipped slides" toggle (report 01).
+
+Speaker notes: "Speaker notes won't be visible when you present unless you use Presenter view." (T1); Google's present page reaches notes through Presenter view > "Speaker notes" (G14). The notes pane under the canvas is part of the editor that every role opens; no Google page read today states in one sentence that a Viewer sees the notes pane, but two Google facts imply it: File > Make a copy offers "Remove speaker notes" so a copy can go "to your team, audience, or other stakeholders" without them (W11, report 03), and a Meet co-presenter "will need edit access to the Google Slides file to see speaker notes while presenting" (G18), which is a rule for presenting, not for the editor. The viewer's access to the notes pane is therefore listed as corroborated by implication and named in Unverified.
+
+### A16 Publish to web viewers versus Share viewers
+
+Verified (G10). "File owners and editors can publish files." A published presentation is "A view-only version or a version in presentation mode with full-screen slides"; "Any changes you make to the original document will be updated in the published version. The automatic update might take a few minutes."; the "Automatically republish when changes are made" checkbox cannot be turned off for Slides; File > Share > Publish to web > "Published content & settings" > "Stop publishing" removes it; an administrator "might have turned off the ability to publish a file" (G10). The published player is a public URL that needs no sign in and shows no collaborators, comments, notes pane or filmstrip; the Share viewer opens the editor in view only mode with the filmstrip, skipped slides (A15) and, by implication, the notes pane. Whether the published player omits skipped slides is not stated on the pages read and is in Unverified. Report 03 documents the dialog and the URL parameters.
+
+### A17 Presence during a Meet presentation
+
+Verified (G16, G17, G18). The Meet button sits at the top right of the editor; "Just present this tab" presents the file to a meeting ("If you don't already have a meeting open and you click Just present this tab, you'll present your file but won't be able to view the Google Meet video meeting."); "Bring the call here" moves the meeting into the editor's side panel without presenting; "When you present a tab from your document, spreadsheet, or presentation, you can't change which tab you present."; Chrome or Edge on a computer is required (G16). Inside Meet: "If you present a Slides presentation through a tab, you can control it in Meet." and, on eligible work or school accounts, "you can control Google Slides presentations from within a video meeting" and "make other people in the video meeting co-presenters" (G17). Co-presenting requires the presentation "shared as a tab" in "slideshow mode"; both presenters get Next and Previous, jump to a slide, toggle speaker notes and open embedded links or media; a co-presenter is added "From the presented slide" with "Add a co-presenter", from the People panel's "More actions", or from a Gemini suggestion; "A co-presenter will need edit access to the Google Slides file to see speaker notes while presenting." (G18). The audience sees the slideshow tab, not the editor, so no avatars, pointers or cursors reach them.
+
+### A18 Where Google's pages stop
+
+The following are behaviours a designer will expect and that no page read today states: the colour and name flag on a live pointer; the coloured selection outline and name flag on the canvas; the filmstrip presence marker; the wording of the view only banner and the "You need access" page in 2026; the animal's colour, its stability, and how its edits and comments are attributed; whether the published player omits skipped slides; whether a Viewer can start the slideshow; whether the notes pane is visible to a Viewer in the editor. All appear in Unverified.
+
+## Part B: Turboslide at commit 8c7056c
+
+### B1 Who a visitor is: the Author type
+
+`packages/schema/src/mutations.ts` lines 79 to 80: `/** CLI and MCP: --author agent:<runId> */` and `export type Author = { kind: 'human' | 'agent'; name: string; runId?: string };`. Every `Write` carries `{ baseRevision, author, note?, mutations }` (line 81), every `Version` carries `author` (lines 82 to 89), and a `Lease` is `{ slideId, holder: Author, until }` with the comment "advisory in M3, enforced for agent writes in M4" (lines 90 to 91). `parseAuthor` (lines 185 to 191) turns `agent:<x>` into `{ kind: 'agent', name: 'agent', runId: x }` and any other string into `{ kind: 'human', name: value }`. There is no schema for a person: no id, no email, no avatar, no verification. A name is whatever the caller typed.
+
+The editor (`apps/studio/src/routes/edit.$deckId.tsx`): `DEFAULT_AUTHOR = 'studio'` with the comment "The author of a browser session when ?author= is absent (SPEC 7.2 names $USER for the CLI)" (lines 144 to 145). The search parameter `author?: string` (line 176) is accepted as any non empty string (`validateEditSearch`, lines 203 to 204), and `EditPage` computes `author = parseAuthor(search.author ?? DEFAULT_AUTHOR)` (line 244), keying the editor on `${deckId}:${authorLabel(author)}` (line 259). Consequences: every browser that opens `/edit/<id>` without `?author=` is the same human named `studio`; two reps in two cities are one author; a person can write as anyone by editing the URL; and the toolbar's Copy link copies `window.location.href` (`packages/chrome/src/Toolbar.tsx` lines 488 to 489), so a link copied from a session with `?author=kevin` hands the recipient Kevin's name for their writes.
+
+The agent surface names its own defaults: `DEFAULT_HTTP_AUTHOR = 'agent:http'` and the `x-turboslide-author` header or `?author=` (`packages/agent/src/http/auth.ts`), `HTTP_DEFAULT_AUTHOR = 'agent:http'` and `MCP_DEFAULT_AUTHOR = 'agent:mcp-http'` in `apps/studio/src/server/auth.ts`. Labels: `authorLabel` prints `agent:<runId>` for agents and the bare name for humans; `sameAuthor` is true when kind, name and runId agree (`packages/store/src/store.ts` lines 130 to 137). The chrome's `authorName` (`packages/chrome/src/dispatch.ts` lines 19 to 21) prints the same.
+
+### B2 Leases and what they mean to a second editor
+
+`packages/store/src/lease.ts`: `DEFAULT_LEASE_MINUTES = 10`, `MAX_LEASE_MINUTES = 120`; `leasePolicyFor(author)` is `'enforce'` for an agent and `'advisory'` for a human, with the comment "Agent writes are enforced, human writes advisory (SPEC 6.7 'enforced for agent writes in M4')". `takeLease` throws a `ConflictError` naming the holder when another author holds an unexpired lease and `force` is not set; `leaseConflict` uses `sameAuthor`, so a lease held by an author with the same label is not a conflict at all. The refusal text: `Slide "<id>" is leased by <label> until <until>; pass force to write anyway`. `FileStore.write` (`packages/store/src/file-store.ts` lines 225 to 240) checks every touched slide: under `enforce` the outcome is `{ ok: false, code: 'conflict', message, holder }`; under `advisory` the write goes through and `warnings` gains `describeLease(held)`. Leases live outside the committed tree in `.turboslide/leases.json` (gitignored) and, on the Blob backend, in `leases.json` under the deck prefix, pulled before every write, lease and release and pushed after, "last writer wins" (`packages/store/src/blob-store.ts` line 119; L3 section 4). Bundles never carry leases (L4 section 1).
+
+The editor takes a lease on the slide it edits: `LEASE_MINUTES = 10` (line 148) and `leaseActive` (lines 955 to 969) calls the `leaseSlide` server function when the active slide changes, releasing the previous one; the server function (`apps/studio/src/server/write.ts` lines 236 to 266) takes, renews or releases and throws `No lease held by this author on slide` when a release finds none. Every watch answer refreshes the editor's lease list (`publish({ leases: result.leases })`, line 1048). The chrome shows a lease as a dot on the sidebar row, a line in the inspector, `Leased by <name> until <time>` (`packages/chrome/src/Inspector.tsx` line 570), and `lease <holder>` in the status chip (`packages/chrome/src/StatusChip.tsx` line 43); report 06 rows 95 and 162 cover the surfaces.
+
+What a lease means to a second editor, plainly:
+
+- Two humans with the same label (the default): nothing. The second editor's lease replaces the first's for that slide (`takeLease` keeps other slides' leases and writes the new one), no dot appears, no warning is raised, and both write freely.
+- Two humans with different labels (`?author=` set differently): a dot and a "Leased by" line for ten minutes, and a warning string on the write outcome. The write still lands.
+- A human and an agent: the agent's write to the human's slide is refused with `409` and the holder unless it carries `force`; the human's write to an agent's slide lands with a warning.
+
+A lease is therefore an advisory presence marker between named people and a lock only against agents. It is the closest thing Turboslide has to "who is on which slide", and it is only honest when the labels differ.
+
+### B3 Conflicts and the conflict card
+
+A write carries `baseRevision`; a stale one is refused and never overwrites (SPEC 11, L5). The store's outcome is `{ ok: false, code: 'conflict', message, current, currentRevision, holder? }` (`store.ts` lines 43 to 53); the editor's server function adds `since: VersionRecord[]`, "the version records after the caller's baseRevision: what changed under it" (`write.ts` lines 121 to 130, 174). On the Blob backend a second instance committing first surfaces as a precondition failure on `deck.json` (`ifMatch`), re-pulled and returned as the same conflict shape (`blob-store.ts` lines 494 to 561; L3 section 4).
+
+In the editor, `onConflict` (lines 672 to 703) first tries to replay the pending writes on the newer document; on success it says `Rebased N pending changes onto rNN` (line 689) and continues. When a replayed mutation no longer applies it shows the conflict card with `Rebase` and `Discard` (lines 2801 to 2810) and `Rebase failed: <reason>` (line 2789); further writes throw `Resolve the conflict card before writing again` until one button is pressed. The card shows two JSON documents (report 06 item 21).
+
+What a conflict card means to a second editor, plainly: someone else committed to this deck after you last synced, and one of your queued changes cannot be re-applied to what they left. Rebase tries again from their document; Discard drops your queued changes and adopts theirs. No merge of two edits to one text is attempted anywhere; a `block.set` of a whole text run (report 06 fact 6) from two people is last writer wins after a rebase, and a removed block is a failed rebase.
+
+### B4 How a second editor's change arrives
+
+`packages/store/src/watch.ts` is `fs.watch` on the deck directory, recursive, debounced 80 ms, ignoring `.turboslide/`, reporting the changed paths and the revision `deck.json` carries. The Blob backend has no push channel: `watch()` polls the manifest's version every 3000 ms (`blob-store.ts` lines 239 to 258, 649 to 662). The editor reaches the channel as a long poll: `watchDeck({ deckId, since })` answers when the deck moves past `since` or after `WATCH_DEFAULT_MS = 20_000` (cap 25 000), with `changed`, the records written since, and the current leases (`write.ts` lines 271 to 330). `watchLoop` (lines 1042 to 1062) applies the records forward once the local queue is idle (`adoptExternal`, lines 991 onward) and shows the banner `Revision rN by <label> arrived from outside this editor and is shown` for `EXTERNAL_BANNER_MS = 8000` (lines 151, 2840). So on production a manager's edit reaches the rep's screen in roughly three seconds plus the poll, labelled `by studio` unless the manager set `?author=`. There are no cursors, no pointers, no selection outlines, no avatars and no chat; presence is the lease dot of B2 and the banner of this section.
+
+### B5 Versions and what the author field can honestly say
+
+`packages/store/src/versions.ts`: one file per committed write and per named save under `versions/<n>.json`, each a `Version` plus `baseRevision` and the inverse mutations; a named version is an entry whose `note` is not empty (`isNamed`); the document at any entry is rebuilt from the head by applying inverses (`documentAtVersion`), which requires a contiguous log (`assertContiguous`, whose error says the deck "was changed outside the store"). The `version.save`, `version.list` and `version.restore` actions exist (`packages/schema/src/actions.ts` lines 113 to 115). The chrome's VersionsPanel prints `<author> · r<revision> · <time>` with a Restore button, and HistoryPanel prints the author per entry (report 06 rows 121 and 129).
+
+What the author field can honestly say: `studio` for every browser edit that did not set `?author=`; `agent:<runId>` for an agent run that named itself, or `agent:http` and `agent:mcp-http` for one that did not; the shell's `$USER` for the CLI. It cannot say who a person was, because no one was asked; and it can be set to any string by anyone who can reach the page or the URL. Google's "who edited" column, its per editor colours, its "Last edit by" hover and Show changes all rest on an account behind the name. Turboslide can colour by label and diff between records today (`diff.run` exists in the table), but the name under the colour is self declared.
+
+### B6 The store, the deck list and what every visitor sees
+
+`packages/store/src/select.ts` picks `file`, `tmp` or `blob` from the environment; production runs `blob` with the store `turboslide-decks`, public access, one prefix per deck holding `deck.json`, `slides/`, `versions/`, `leases.json`, the sidecars and `assets/` whose URLs the browser reads directly (L3 sections 1, 4 and 5). `packages/store/src/hosted.ts` exposes one collection with `list`, `has`, `open`, `create`, `ensureAssets`, `assetFile`, `assetUrl` and `facts`; there is no remove, no owner and no permission on any call. A `DeckHead` is `{ id, title, slides, sections, revision, updatedAt, createdAt }` (`packages/store/src/templates.ts` lines 301 to 309); the manifest schema in `packages/schema/src/deck.ts` has no owner, author or createdBy field. The action table holds 62 ids; the deck family is `deck.info`, `deck.create`, `deck.rename`, `deck.pack`, `deck.unpack`, `deck.push`, `deck.pull`; there is no `deck.remove` (report 06 section 8; L6 section 10: "the removal is `vercel blob del` per prefix"). `deck.create` takes `from: 'gt-brand' | 'blank'`, a template, never an existing deck; a copy of a deck is a bundle download and re-upload with a new id (L4 section 3).
+
+`apps/studio/src/routes/index.tsx`: `/` lists the decks and redirects to the editor of the newest, or creates "GT brand deck" when the store is empty. `apps/studio/src/routes/decks.index.tsx`: `/decks` is server rendered from `listDecks()`, `getHostingFacts()` and `connectFacts()` with no authentication, and every visitor sees every deck's title, id, slide count, revision and stamp with Open, Present, Export and Download bundle, plus the Connect card printing the push and pull commands with the deployment URL and a note that a token is required (the token itself is never printed) (L4 section 5; report 06 section 1.14). On production on 2026-09-11 `/` answered 307 to `/edit/editor-depth-09120413`, a drive's deck, and `/decks` listed 14 decks (L6 section 12).
+
+What the shared Blob store shows every visitor, plainly: every deck anyone ever created on the deployment, with its full edit history, open for editing, with no owner, no "Owned by me", no recent list per person, no trash and no delete. "Recent presentations" means the newest write by anyone.
+
+### B7 The token boundary
+
+`packages/agent/src/http/auth.ts`: with `TURBOSLIDE_TOKEN` set, every request to the agent surface must carry `Authorization: Bearer <token>`; without it only requests addressed to localhost are served and any other host gets `401`. `apps/studio/src/server/auth.ts` applies that rule to `/api/actions/:action`, `/api/agent` and `/mcp`; `/api/export` and `/api/render` require the token when set except the `?w=` thumbnail variant, and the two bundle routes accept the bearer or a ticket (L3 section 6; L6 section 8). The tickets (`apps/studio/src/server/bundle-core.ts`) are HMAC-SHA256 over a purpose, a subject, a ten minute expiry and a nonce (`TICKET_TTL_MS = 10 * 60 * 1000`, line 46), keyed from `TURBOSLIDE_TOKEN`, else `TURBOSLIDE_DOWNLOAD_SECRET`, else a per process random key (line 68), and minted by server functions the page calls without any credential, so a visitor of `/decks` downloads any deck's bundle through the page's own button (report 06 row 163; L4 section 3).
+
+The editor's own server functions, `readEditorDeck`, `writeDeck`, `saveVersion`, `leaseSlide`, `watchDeck`, `createDeck` and `getDeck` (`apps/studio/src/server/write.ts`, `decks.ts`), carry no authentication beyond the CSRF middleware SPEC 11 names. The token therefore gates agents and raw routes, not people: "The token gates the agent surface and the raw routes, not the editor's compute; Deployment Protection remains a project setting Kevin can turn on." (L6 section 8; L3 section 6). Anyone who can load the host can read, write, lease, version and create.
+
+### B8 The viewer and embed routes
+
+`apps/studio/src/routes/deck.$deckId.tsx` and `embed.$deckId.tsx` both load `getDeck` (`apps/studio/src/server/decks.ts` line 187), which builds a `ViewerSlide` per slide with `id, n, title, kind, sectionId, html, picture` and `notes: slide.notes` (line 119). Both routes are public and server rendered; the embed adds the `#NN` hash and the `gt-deck-slide` and `gt-theme` messages for the Prototemplate iframe. The viewer's toolbar shows the deck title, the mode segment, Theme, Present, Fullscreen, Copy link and Help, and `?present=1` opens present mode (report 06 rows 155 to 158). The viewer UI never displays notes (`grep notes` in `packages/viewer/src` finds only the type in `model.ts`), but the notes travel in the payload of every public view and embed. Present mode is the sheet alone; there is no presenter console (`/present/:deckId` of SPEC 6.10 does not exist, report 06 section 5).
+
+What the embed route exposes, plainly: the whole deck at its current revision including every slide's speaker notes, to anyone who has the URL or reads `/decks`, and the same deck is one path edit away from `/edit/<id>` where the same person can write as `studio`.
+
+### B9 Skipped slides and notes in the document
+
+`packages/schema/src/deck.ts`: `notes?: string` on a slide with the comment "speaker notes; the only place notes live" (lines 50 to 51), edited in the inspector's Slide section as a textarea (line 277), and `deck.defaults.notes` (line 373). No field for a skipped or hidden slide exists (no match for `skip` or `hidden` in the schema), so a slide is either in a section's `slideIds` or removed; the viewer, present mode, export and the CLI all read the same list. The PPTX export writes notes into PPTX notes (report 06 fact 12).
+
+### B10 The spec's own position
+
+SPEC section 11 (L5): the agent surface is unauthenticated only on localhost, every deployed instance requires a bearer token, "Identity beyond a token is open question 3"; a stale `baseRevision` returns 409 and never overwrites; storage is `FileStore` behind `DeckStore`, with "a `SqliteStore` then Postgres with the same interface, leases and identity" to follow "when open question 1 says shared decks are wanted". Section 12: question 1 decides "whether leases and identity land in M4 or later"; question 2, "Users beyond agents and Kevin", states "Shared decks require identity for `Author` and hosted storage"; question 3 asks "who holds the bearer token for the hosted agent surface"; question 7, "Agent identity", asks whether the answer is `--author agent:<runId>` and `TURBOSLIDE_AUTHOR`, "a token, or a signed-in user, so the version list distinguishes Kevin, a designer and an agent run". None of the four is answered in the tree at `8c7056c`. Everything in Part C that says "waits for identity" waits for those answers.
+
+### B11 The five plain statements
+
+1. Who a visitor is to the store: an unauthenticated request whose author is the string `studio` unless the URL says otherwise; the store cannot tell two visitors apart, and cannot tell a visitor from a person impersonating one.
+2. What the shared Blob store shows every visitor: every deck on the deployment with its complete history, editable, downloadable as a bundle, with no owner, no trash and no delete.
+3. What a lease and a conflict card mean to a second editor: a lease is a ten minute presence marker that shows only when author labels differ and blocks only agents; a conflict card means someone committed first and one of your queued changes could not be replayed, so you Rebase or Discard; nothing merges two edits to one text.
+4. What a version's author field can honestly say: `studio`, `agent:<runId>`, `agent:http`, `agent:mcp-http`, or a shell user name; a self declared label, never a verified person.
+5. What the embed route exposes: the full current deck including every slide's speaker notes to anyone with the URL, with the editor one path segment away.
+
+## Part C: parity table and the workflow
+
+### C1 Table
+
+"Needs identity" is yes when the behaviour is meaningless without a verified person (roles, requests, attribution, ownership), partly when the mechanics can ship with a self declared name and improve later, and no when no person needs naming.
+
+| Google behaviour (Part A) | Needs identity | Turboslide today (Part B) | Ships without accounts | Waits for identity |
+|---|---|---|---|---|
+| Collaborator avatars in the title row (A1) | partly | None. A lease dot on the sidebar row when author labels differ (B2) | Presence chips in the title row built from the lease list the long poll already returns: one chip per distinct label with a colour derived from the label and initials; a display name prompt on first visit stored in the browser and sent as the author of every write | Real names, photos, a chip that means one person |
+| Follow a collaborator by clicking an avatar (A1) | partly | None | Click a chip to go to the slide that label leases; stop on edit, click or present, as Google does | Following a verified editor; refusing anonymous ones by rule |
+| Live pointers, off by default, everyone sees, editors show, 20 person cap (A2) | no | None | An ephemeral pointer channel (position per label at 10 Hz) over the watch long poll or a socket, View > Live pointers with Google's two toggles, hidden in present mode, capped at 20 | Nothing; the name on the pointer stays self declared |
+| Coloured cursors, selection outlines and filmstrip markers (A3) | partly | Own selection ring and lint boxes only | Outline the block of the leased slide per label from the same channel; the filmstrip marker is the lease dot recoloured | Trusting the name beside the colour |
+| Chat inside the file, not saved (A4) | partly | None | An in memory chat per deck keyed by label, cleared when the last visitor leaves, exactly as unsaved as Google's | Names people trust |
+| Simultaneous edits to one text box merged without locks (A5) | no | Block level writes with `baseRevision`, automatic rebase, a conflict card on failure, last writer wins on one text (B3) | Keep the log; rebase silently when the writes touch different blocks; take leases per block rather than per slide so two people on one slide stop warning each other | Nothing |
+| View only banner and the blue Request edit access button (A7) | partly | `/deck/:id` is read only by UI, `/edit/:id` is open to anyone; an Edit or View segmented control and `?edit=0` inside the editor (report 06) | A View only label on `/deck/:id`; Copy link on the editor offers the view route; the segmented control becomes View > Mode with Editing and Viewing | Request edit access, and any route that is view only by permission rather than by URL |
+| The Mode menu: Editing, Commenting, Viewing by role (A7) | partly | `edit.mode`, key E | View > Mode with Editing and Viewing | Commenting mode, and hiding the menu for viewers |
+| You need access page and access requests with a Share dot and Review banner (A8) | yes | None; every deck opens for everyone (B6, B7) | Nothing honest | All of it |
+| Anonymous viewers on link sharing shown as animals (A9) | no | Every visitor is anonymous and every visitor is `studio` (B1) | Give each browser session without a name a generated neutral label (not Google's animals) and a colour, so two anonymous people are two chips and two authors | Nothing |
+| Viewer, Commenter and Editor roles and the Settings gear (A6, A10) | yes | One role, editor, for anyone who reaches the host | A view route and an edit route are two URLs, not two roles; say so in the dialog | Roles, download and print controls, editors can share |
+| Remove access and per person expiry (A10) | partly | URLs are permanent, and `/decks` lists every deck | A revocable view token per deck in the view URL, rotated by "Stop sharing"; a private flag that hides a deck from `/decks` | Per person removal and expiry |
+| Comments panel with All, For you, Open, Resolved and search (A11) | partly | None | Comments stored on the slide (an `ext.comments` list or a sidecar) with text, label, time, resolved; a panel with All, Open and Resolved; anchor to a block id | For you, @mentions, attribution to a person, search by user |
+| Notification settings for comments and edits (A12) | yes | None | Nothing | All of it |
+| Activity dashboard: Viewers, Viewer trend, Comment trend, Sharing history (A13) | yes | None | Nothing that is the feature; a nameless view counter is not it | All of it |
+| Version history by editor with colours, Show changes, named versions, Restore (A14) | partly | Versions with author `studio`, Save with a note, Restore, History with Undo to here, `diff.run` (B5) | File > Version history with Name current version, Only show named versions, Show changes as a per record diff coloured by label, Restore this version, Make a copy through the bundle round trip | Names under the colours, Last edit by a person |
+| Skipped slides visible to collaborators, omitted from the slideshow (A15) | no | No skip field (B9) | A `skip: true` slide field honoured by present mode, `?present=1`, the view route's slideshow, print and export, and shown dimmed in the filmstrip | Nothing |
+| Speaker notes in the editor pane, only Presenter view while presenting (A15) | partly | Notes in the inspector's Slide section only; every public payload carries them (B8) | A notes pane under the canvas; strip `notes` from the `/deck` and `/embed` payloads; a Make a copy dialog with Remove speaker notes through the bundle path | Notes for editors only, by role |
+| Publish to web: a public player that always republishes, Stop publishing (A16) | partly | `/embed/:id` and `/deck/:id?present=1` are public and live (B8) | A Publish dialog that pins the published route to a named version, with Stop publishing rotating the token | Distinguishing published viewers from share viewers |
+| Meet: Just present this tab, Bring the call here, co-presenters with edit access see notes (A17) | partly | Present mode only; no presenter console (report 06) | A presenter console with notes and next slide, so a rep on a call has notes on a second window | Co-presenting, and the edit access rule on notes |
+| One anonymous editor: an animal name, cannot be followed (A9) | no | `studio`, indistinguishable from every other human | A generated label per session and a colour; version records then read by label | Nothing |
+| Recent presentations and Owned by me on the home page (report 03, A6) | partly | `/decks` lists everything for everyone, newest write first (B6) | Recent from the browser's own history in local storage; Blank and templates on the home page | Owned by me, Shared with me |
+| Move to trash and the trashed file notice (report 01) | partly | No `deck.remove` (B6) | A `deck.remove` action behind a confirmation and a soft delete prefix that `/decks` hides | Deciding who may remove |
+
+### C2 The workflow, step by step
+
+The workflow: a rep and a manager open the same deck at the same time; the manager leaves two comments; the rep resolves them and shares a view link with a prospect who must not see skipped slides or notes.
+
+Google Slides, from the pages in Part A:
+
+1. The rep opens the deck from the Slides home page (Recent presentations). The manager opens it from a Shared with me row or a link. Both are signed in and named; both are Editors.
+2. Each sees the other's avatar at the top right (A1). If the manager clicks the rep's avatar, the manager follows the rep to the slide the rep is on and moves with them until the manager edits, clicks a slide, presents or opens Version history (A1). If either turns on View > Live pointers > Show my pointer, the other sees the pointer (A2). Each sees the other's edits land as they type, in an editor specific colour (A3, A5); no lock, no banner, no conflict dialog.
+3. The manager selects an object on slide 4 and adds a comment, types "@" plus the rep's name to assign it, and adds a second comment on slide 9 (A11). The rep is notified by email if their notification setting is All comments or Comments for you (A12). The comments show in the comments panel under "For you" for the rep (A11).
+4. The rep edits the two slides, opens each comment and clicks Resolve (A11). The manager sees the threads resolved; the Activity dashboard's Comment trend records the day's threads and replies (A13).
+5. The rep right clicks the pricing slide and the internal appendix slide and chooses Skip slide; the thumbnails dim (A15). The rep knows from Google's warning that anyone the file is shared with still sees skipped slides in the filmstrip (A15).
+6. Because the prospect must see neither skipped slides nor notes, the rep does not share the working file. Two Google paths satisfy the requirement:
+   - File > Make a copy > Entire presentation with "Remove speaker notes" ticked (W11, report 03), then delete the skipped slides in the copy, then Share the copy with General access "Anyone with the link" as Viewer, gear: untick "Viewers and commenters can see the option to download, print, and copy", and Copy link (A10). The prospect opens a view only editor with the filmstrip and no notes, sees the "View only" state (A7), and appears in the rep's file as an anonymous animal if not signed in (A9). The prospect can request edit access; the rep sees a dot on Share and a Review banner (A8).
+   - Or File > Share > Publish to web on that copy, Publish, and send the published link (A16). The prospect sees a player with no filmstrip, no comments, no notes pane and no collaborators; the player follows every later edit to the copy within minutes, so the rep must not edit the copy afterwards (A16). Whether the player omits skipped slides is unverified, which is another reason the rep deletes them in the copy.
+7. Later the rep names the version sent to the prospect (File > Version history > Name current version) so it can be restored (A14), and removes the prospect's access from the Share dialog or stops publishing when the deal closes (A10, A16).
+
+Turboslide at `8c7056c`, from Part B:
+
+1. The rep opens `https://turboslide.vercel.app/` and lands in whichever deck anyone saved last, on production a drive's test deck (B6, L6 section 12). The rep finds the deck at `/decks` among 14 rows and clicks Open. The manager does the same. Both are `studio` (B1).
+2. Neither sees the other. There is no avatar, pointer, cursor or chat (B4). Each editor takes a ten minute lease on its active slide, and because both are `studio` the leases are the same author's and draw nothing (B2). When the manager commits an edit, the rep's editor learns of it within about three seconds plus the long poll and shows `Revision r15 by studio arrived from outside this editor and is shown` for eight seconds (B4). If the rep had a queued change on the same block, the editor rebases it silently or shows the conflict card with Rebase and Discard (B3). The rep cannot tell whether "studio" was the manager or a third person.
+3. The manager cannot comment. There is no comment action, panel, anchor or notification (C1). The nearest honest substitutes are a named version whose note carries the review ("Manager: fix the pricing line, cut the appendix", `version.save`), a change to the slide's own text, or a message outside the product. Neither is attributed to the manager in the log; both read `studio`.
+4. The rep makes the two edits. Nothing marks a review as resolved; the rep might save another named version.
+5. The rep cannot skip a slide (B9). The only way to keep the pricing and appendix slides out of a presentation is to remove them (`slide.remove`), which removes them for the manager too and from the one live deck.
+6. The rep clicks Copy link in the editor and gets the editor's own URL with the slide hash (B1, report 06 item 25). Sending it hands the prospect an editable deck as `studio`. The rep instead types `/deck/<id>?present=1` by hand (L4 section 5). That page is public, needs no sign in, and its server rendered payload carries every slide's notes even though the UI does not show them (B8); the prospect can change the path to `/edit/<id>` and edit, can open `/decks` and see every other deck on the deployment including other customers' decks, and can download any bundle through the page (B6, B7). To honour "no notes", the rep must clear `notes` on every slide with 85 inspector edits or a bundle edit, or produce a copy through Download bundle and Upload bundle under a new id and strip notes there (B6). The PPTX export carries notes into PPTX notes, so a PPTX handoff has the same problem (B9).
+7. There is no Remove access, no expiry and no Stop publishing; the URL works until the deck is deleted with `vercel blob del` by someone with the store token (B6). The version the prospect saw can be named and restored (B5), but the log says `studio` for every step.
+
+The gap the trace shows is not a missing panel. It is that Turboslide has one role, one name and one live copy of every deck, so a view link is an edit link, a comment is an edit, and a skipped slide is a deleted slide.
+
+### C3 What can ship without accounts, in the order that unblocks the sales workflow
+
+1. A view only route worth sending: strip `notes` from the `/deck` and `/embed` payloads; add a `skip` slide field honoured by present mode, the view route, print and export; make Copy link in the editor a Share dialog with "Copy link" to the view route and a second entry for the editor. This alone makes step 6 of the trace honest.
+2. A display name prompt on first visit, stored in the browser and sent as the author of every write and lease, with a generated neutral label when the person declines; then version records, the external banner and the lease notices read by label, and two people are two labels. This is self declared, and the UI must never claim otherwise.
+3. Presence from the lease channel: chips in the title row per label, a filmstrip marker per leased slide, and click to follow. The long poll already returns the leases on every answer; per block leases stop two people on one slide from warning each other.
+4. Comments as document data with a label, a time, an anchor and a resolved flag, and a panel with All, Open and Resolved. Sales managers review through comments (report 07); the mechanics do not need accounts, only the attribution does.
+5. Version history in Google's words: Name current version, Only show named versions, Show changes as a diff between records coloured by label, Restore this version, Make a copy through the bundle path, and a Last edit indicator that opens it. Revision chips and leases leave the default view (report 07).
+6. A revocable view token per deck in the view URL, a private flag that hides a deck from `/decks`, a `deck.remove` action behind a confirmation, and a Recent list from the browser's history on the home page. These are store features, not identity features, and they remove the "every deck to every visitor" exposure of B6.
+7. A presenter console with notes and the next slide, so the Meet workflow of report 07 has notes on a second window.
+
+### C4 What must wait for identity
+
+Roles (Viewer, Commenter, Editor), the Settings gear controls, Request edit access and the You need access page, access requests with the Share dot and Review banner, per person Remove access and expiry, comment attribution and For you, @mentions and notification settings, the Activity dashboard, Owned by me and Shared with me, Last edit by a person, per editor colours that mean a person, Follow that refuses anonymous editors by rule, co-presenting in Meet, and any rule that says "editors only" (version history, notes while presenting). Each of these requires SPEC open questions 1, 2, 3 and 7 answered and an account or a signed in user behind `Author`. Until then, every surface that shows a name must show it as what it is: a label the visitor typed.
+
+## Unverified
+
+Claims expected from product knowledge that no public page read for this report states:
+
+- The colour and name flag on a live pointer (A2); Google's pages describe the toggle, the access rule and the 20 person limit only.
+- The coloured selection outline around an object a collaborator is editing, the name flag on it, and the filmstrip marker showing which slide a collaborator has open (A3); BrightCarbon confirms real time visibility of edits and coloured avatar circles, not the drawing.
+- Google's own description of how two simultaneous edits to one text box are merged (A5); the three 2010 engineering posts exist by title and date but their bodies could not be read; the operational transformation statement comes from Wikipedia and its IEEE citation.
+- The 2026 label of the view only button and banner (A7); the 2015 post says "View only" and "request edit access" and was read through the blog's search listing rather than the post itself.
+- The wording of the requester's "You need access" page and "Request access" button with its optional message (A8); the Drive help id tried returned 404.
+- The colour of an anonymous animal, whether its name is stable for the session, how its edits appear in Version history, and whether it can comment (A9, A14).
+- Whether a Viewer can start the slideshow (A15).
+- That a Viewer sees the speaker notes pane in the editor (A15); implied by Remove speaker notes on Make a copy and by the co-presenter rule, not stated.
+- Whether the published player omits skipped slides (A16).
+- The exact filter labels in the 2024 comments panel beyond Google's list "All comments", "comments for you", "open comments", "resolved comments" and the "For you" list (A11).
+- The exact set of Google Slides menu items that disappear for a Commenter beyond View > Mode (A7).
+- Google's list of anonymous animal names; not reproduced and not needed.
+
+Turboslide claims are read from the code and are not in this list; nothing in Part B was measured at runtime.
+
+## Sources
+
+Read date for every entry: 2026-09-11.
+
+Google help pages (G):
+
+- G1 Follow a collaborator on Google Slides. https://support.google.com/docs/answer/12815819
+- G2 View live pointers on Google Slides. https://support.google.com/docs/answer/13853477
+- G3 Share files from Google Drive (Docs editors help, and the Drive help twin). https://support.google.com/docs/answer/2494822 and https://support.google.com/drive/answer/2494822
+- G4 Stop, limit, or change sharing (Docs editors help, and the Drive help twin). https://support.google.com/docs/answer/2494893 and https://support.google.com/drive/answer/2494893
+- G5 Collaborate and comment with a screen reader. https://support.google.com/docs/answer/6239410
+- G6 Switch view mode on Google Slides. https://support.google.com/docs/answer/14917995
+- G7 Use comments, action items and emoji reactions. https://support.google.com/docs/answer/65129
+- G8 View the activity on your Google Docs, Sheets and Slides. https://support.google.com/docs/answer/7378739
+- G9 Find what's changed in a file. https://support.google.com/docs/answer/190843
+- G10 Make Google Docs, Sheets, Slides and Forms public. https://support.google.com/docs/answer/183965
+- G11 Chat with others in a file. https://support.google.com/docs/answer/2494891
+- G12 Anonymous or unknown people in a file. https://support.google.com/docs/answer/2494888
+- G13 Add, delete and organize slides. https://support.google.com/docs/answer/1694830
+- G14 Present slides. https://support.google.com/docs/answer/1696787
+- G15 Manage your notifications. https://support.google.com/docs/answer/91588
+- G16 Use Google Meet with Google Docs, Sheets and Slides. https://support.google.com/docs/answer/10540294
+- G17 Present during a video meeting (Google Meet help). https://support.google.com/meet/answer/9308856
+- G18 Co-present Slides in Google Meet (Google Meet help). https://support.google.com/meet/answer/13882437
+- G19 Google Slides cheat sheet (Workspace Learning Center). https://support.google.com/a/users/answer/9300133
+
+Workspace Updates posts (W):
+
+- W1 Collaborate with colleagues in Google Slides through a new 'Follow' feature, 8 or 9 December 2022 (the index dates it 8 December, the post 9 December). http://workspaceupdates.googleblog.com/2022/12/follow-collaborator-google-slides.html
+- W2 Collaborate more seamlessly with live pointers in Google Slides, 18 September 2023. http://workspaceupdates.googleblog.com/2023/09/collaborate-more-seamlessly-with-live-pointers-google-slides.html
+- W3 Sort, filter and manage comments faster in Google Docs, Sheets and Slides, 15 February 2024. http://workspaceupdates.googleblog.com/2024/02/manage-comments-faster-google-docs-sheets-slides.html
+- W4 Respond to access requests for Google Workspace files more efficiently, 20 June 2023. http://workspaceupdates.googleblog.com/2023/06/respond-to-access-requests-for-google-workspace-files-efficiently.html
+- W5 Grant access to Drive files directly from Gmail, 20 October 2020. http://workspaceupdates.googleblog.com/2020/10/dynamic-emails-google-drive-access-requests-gmail.html
+- W6 Clearer indication of 'View' and 'Comment' access in Google Docs editors, 20 July 2015; read through the blog's search listing at https://workspaceupdates.googleblog.com/search?q=%22Request+edit+access%22, post URL http://workspaceupdates.googleblog.com/2015/07/clearer-indication-of-and-access-in.html
+- W7 Improve collaboration in Google Docs, Sheets, and Slides with Activity dashboard, 7 March 2018. http://workspaceupdates.googleblog.com/2018/03/docs-activity-dashboard-launch.html
+- W8 More collaboration insights in the Activity dashboard, 11 April 2019. http://workspaceupdates.googleblog.com/2019/04/collaboration-insights-activity-dash.html
+- W9 New interface for Activity dashboard in Google Docs, Sheets, and Slides, 29 October 2018, and Minor updates related to the Activity Dashboard, 19 March 2019; read through the blog's search listing at https://workspaceupdates.googleblog.com/search?q=%22Activity+dashboard%22, post URLs http://workspaceupdates.googleblog.com/2018/10/new-interface-for-activity-dashboard-in-docs-sheets-slides.html and http://workspaceupdates.googleblog.com/2019/03/activity-dashboard-updates.html
+- W10 Get on the same page: new Google Docs features help power team collaboration, 16 August 2017. http://workspaceupdates.googleblog.com/2017/08/get-on-same-page-new-google-docs.html
+- W11 More options for copying presentations in Google Slides, 8 January 2020. https://workspaceupdates.googleblog.com/2020/01/copy-presentation-options-slides.html
+- W12 The Google Slides label index (no presence or comments posts on its first page). https://workspaceupdates.googleblog.com/search/label/Google%20Slides
+- W13 Blog search pages used to locate posts: https://workspaceupdates.googleblog.com/search?q=%22live+pointers%22, https://workspaceupdates.googleblog.com/search?q=%22follow%22+collaborator+Slides, https://workspaceupdates.googleblog.com/search?q=comments+filter+%22For+you%22, https://workspaceupdates.googleblog.com/search?q=%22request+access%22+Drive, https://workspaceupdates.googleblog.com/search?q=%22version+history%22+Slides+%22named+versions%22; searches for Slides collaborator cursors, filmstrip presence, and anonymous users in the Docs editors returned no results; the Comments label page returned no results.
+
+Third party pages (T):
+
+- T1 BrightCarbon, Google Slides: the ultimate guide, 22 June 2023. https://www.brightcarbon.com/blog/google-slides-ultimate-guide/
+- T2 BrightCarbon, How to share your Google Slides presentation, 4 November 2020. https://www.brightcarbon.com/blog/how-to-share-google-slides-presentation/
+- T3 How-To Geek, How to check version history in Google Slides, 22 July 2021. https://www.howtogeek.com/733388/how-to-check-version-history-in-google-slides/
+- T4 TechRepublic, How to manage file versions in Google Docs, Sheets, and Slides, 14 March 2018. https://www.techrepublic.com/article/version-history-essentials-for-google-docs-sheets-and-slides/
+- T5 SlideEgg, How to see the edit history in Google Slides easily. https://www.slideegg.com/blog/google-slides-tutorials/how-to-see-the-edit-history-in-google-slides-easily/
+- T6 Wikipedia, Google Docs (collaboration and operational transformation; cites Weidner, Gentle and Kleppmann, IEEE Transactions 2025). https://en.wikipedia.org/wiki/Google_Docs
+- T7 Wikipedia, Google Drive (sharing without an account, access levels). https://en.wikipedia.org/wiki/Google_Drive
+- T8 Google, The Keyword, New updates in Slides designed to make you look good, 27 September 2017. https://blog.google/products-and-platforms/products/workspace/new-updates-in-slides-designed-make-you-look-good/
+
+Pages tried and not readable: Google Docs blog, What's different about the new Google Docs: Conflict resolution (22 September 2010) and Making collaboration fast (23 September 2010), https://drive.googleblog.com/2010/09/whats-different-about-new-google-docs_22.html and https://drive.googleblog.com/2010/09/whats-different-about-new-google-docs.html (titles and dates only; the bodies render through JavaScript); https://support.google.com/docs/answer/6283888 (404); https://support.google.com/a/answer/7573597 (redirects to a scripted knowledge page); https://edu.gcfglobal.org/en/googleslides/sharing-and-collaborating/1/ (moved, then 404 at the new host); mashable.com and web.archive.org (blocked for this tool).
+
+Local files (L), all at commit 8c7056c under /Users/kevinliu/repos/Turboslide:
+
+- L1 The sibling reports docs/gslides-parity/research/01-menu-bar.md, 02-editor-surface.md, 03-home-themes-layouts-io.md, 04-present-and-shortcuts.md, 05-objects-and-format-options.md, 06-turboslide-inventory.md, 07-sales-users.md.
+- L2 Code: packages/schema/src/mutations.ts, packages/schema/src/deck.ts, packages/schema/src/actions.ts, packages/store/src/store.ts, lease.ts, file-store.ts, blob-store.ts, watch.ts, versions.ts, hosted.ts, select.ts, templates.ts, packages/agent/src/http/auth.ts, apps/studio/src/server/auth.ts, bundle-core.ts, write.ts, decks.ts, sessions.ts, apps/studio/src/routes/index.tsx, decks.index.tsx, edit.$deckId.tsx, deck.$deckId.tsx, embed.$deckId.tsx, packages/chrome/src/Toolbar.tsx, StatusChip.tsx, Inspector.tsx, VersionsPanel.tsx, HistoryPanel.tsx, dispatch.ts, packages/viewer/src/model.ts.
+- L3 docs/hosting.md.
+- L4 docs/deck-transfer.md.
+- L5 docs/spec/SPEC.md, sections 11 and 12.
+- L6 docs/EDITOR-DEPTH-STATUS.md, sections 8, 10 and 12.

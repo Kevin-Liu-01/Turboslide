@@ -1,0 +1,478 @@
+# Google Slides menu bar
+
+Research report for the Google Slides parity round. It enumerates the ten menus of the Google Slides web editor (File, Edit, View, Insert, Format, Slide, Arrange, Tools, Extensions, Help), every item and submenu item that public sources document, the keyboard shortcut on Mac and Windows, what the item opens, when it is disabled, and behaviour notes. It also records where the menu bar sits and how menus behave.
+
+Read date for every source: 2026-09-11. Source keys (G01, T01, and so on) resolve in the "Sources" section at the end.
+
+## How to read this report
+
+- Labels are given exactly as the source prints them. Google's own pages are inconsistent in a few places (for example "Publish to web" and "Publish to the web"), and both spellings are recorded where they occur.
+- "Verified" in the Notes column means a Google page (support.google.com, workspaceupdates.googleblog.com, developers.google.com) states the item or path. "Corroborated" means two or more independent third-party walkthroughs state it. "Single source" means one third-party walkthrough states it. "Unverified" means the item is expected from product knowledge but no public page read for this report confirms it.
+- Item order inside each menu is the best reconstruction from screenshots described in the sources and from Google's own reordering announcements. Google has never published a canonical ordered list, so treat the order as a strong hint, not a specification.
+- No screenshot was taken of the live product and no account was signed in. Everything here comes from public text.
+- Shortcuts: Google's shortcut page lists Windows and Chrome OS together and Mac separately. Where the Windows shortcut needs Alt on other browsers, the table gives the Chrome form first.
+
+## Menu bar placement and behaviour
+
+### Where the menu bar sits
+
+The editor has three horizontal rows above the canvas. Google's screen reader guide describes the "top area" as "File name, Menu bar, Toolbar" and describes "top-level buttons" for presentation-level actions such as renaming, starring, sharing, and moving to a different folder sitting "between the Menu bar landmark and the menu bar" (G02, G03).
+
+Row 1, the title row:
+
+- Left: the Slides home icon, the presentation name (a new file is named "Untitled presentation" and is renamed by clicking the name), the star button, and the move-to-folder button (G12, T07, T01).
+- Right: the "Last edit" version-history clock icon (hover shows who edited last and when; a blue dot means the file changed since you last opened it), the comments icon ("Show all comments"), the Meet camera icon for "Present to a meeting", the Slideshow button with a drop-down arrow, the Share button with a drop-down arrow, and the account avatar (G16, G24, T01, T02, T04). Collaborator avatars appear left of Share when others are in the file; clicking one follows that collaborator (G22 related page, see "Follow a collaborator" in Sources G-extra).
+
+Row 2, the menu bar: left aligned, in this order: File, Edit, View, Insert, Format, Slide, Arrange, Tools, Extensions, Help. An eleventh menu, Accessibility, appears when screen reader support is on (G02, G01). The right end of this row carries the "Hide the menus" chevron; when menus are hidden a "Show the menus" chevron appears (T12, G03).
+
+Row 3, the toolbar: starts with the Tool finder search icon (G04), then the contextual buttons. The toolbar changes with the selection (T02, T19). The far right of the toolbar holds the live-pointer toggle (G23, T02) and, since March 2025, a vertical mini-toolbar with the sidebar panes: Templates, Building blocks, Stock images, image generation, Speaker spotlight, Slides recordings (G52, T02, T24, T25).
+
+### Slideshow button drop-down
+
+The Slideshow button (formerly labelled "Present", renamed before 2024) starts a full-screen slideshow from the current slide (G14, T03, T04). Its drop-down arrow offers:
+
+| Item | Shortcut Mac | Shortcut Windows | Opens | Notes | Source |
+|---|---|---|---|---|---|
+| Presenter view | none | none | Two windows: full-screen slideshow plus a Presenter view window with timer, slide list, previous and next thumbnails, Speaker notes tab, Audience tools tab | Verified. Audience tools starts Q&A ("Start new", "Continue recent", "Accepting questions from…"). | G14, G15, T16 |
+| Start from beginning | Cmd+Shift+Enter | Ctrl+Shift+F5 | Full-screen slideshow from slide 1 | Verified (Mac shortcut on G01, Windows on G02). Also labelled "Present from beginning" in older CustomGuide material. | G01, G02, T04, T07 |
+| Present using Chromecast | none | none | Cast picker | Single source (2024). Greyed out when no Chromecast device is available. Older label "Present on another screen" (2023). | T04, T01 |
+| Presentation display options | none | none | Dialog listing monitors with checkboxes "Presenter view", "Present from beginning", "Full screen", and a "Start slideshow" button | Verified. Requires Chrome and at least one extra monitor. Options reset when the presentation reloads. Unchecking "Full screen" plays the slideshow inside the tab. | G14, T04 |
+
+The Slideshow button itself is Ctrl+F5 on Windows, Cmd+Enter on Mac, and Ctrl+Search+5 on Chrome OS (G01).
+
+### Share button
+
+Share opens the "Share" dialog (add people and groups, role Viewer, Commenter, Editor, General access, Copy link, Settings gear for "Editors can change permissions and share" and download, print, copy controls) (G41, G42, T14). The small arrow next to Share exposes quick sharing actions (T04).
+
+### How menus behave
+
+- Click a menu title to open it. With any menu open, the left and right arrow keys move to the neighbouring menus (G03, G02). Pointer hover to switch between open menus is standard behaviour for these menus but was not captured in text by a public source read for this report; treat it as expected, not verified.
+- Menu access keys open a menu from the keyboard. Windows in Chrome: Alt plus the letter (File Alt+F, Edit Alt+E, View Alt+V, Insert Alt+I, Format Alt+O, Tools Alt+T, Help Alt+H, Accessibility Alt+A). Windows in other browsers: Alt+Shift plus the letter. Mac: Ctrl+Option plus the letter (File F, Edit E, View V, Insert I, Slide S, Format O, Arrange R, Tools T, Help H, Accessibility A) (G01, G02, G03). Google's Windows list omits Slide and Arrange; by pattern they are Alt+S and Alt+R but that is unverified. No access key for Extensions is published.
+- Inside an open menu, each item has an underlined letter; typing the letter selects it (for example Insert menu then "i" for Image) (G01).
+- Menus show their keyboard shortcut next to the item label, and screen readers announce those shortcuts (G02). Since October 2022 the menus are shorter, reorganised, and carry icons next to items (G51).
+- Compact mode: Ctrl+Shift+F (same on Mac) hides or shows the menus and toolbar; the chevron at the right of the menu bar does the same. Access keys do nothing while menus are hidden, but the Tool finder shortcut still works (G01, G03, T12).
+- Tool finder (formerly "Search the menus"): Alt+/ on Windows and Chrome OS, Option+/ on Mac; Alt+Z also works in Chrome on Windows, Ctrl+Option+Z on Mac, and Ctrl+~ in Firefox on Mac. It finds menu items and tools, shows recommended and recent actions, suggests related actions as you type, and can activate Find and replace when you type content from the document. It lives in the toolbar as a search icon and is still reachable as Help > Search the menus (G01, G04).
+- Context menu: Ctrl+Shift+\ or Ctrl+Shift+X or Shift+F10 on Windows; Cmd+Shift+\ or Shift+F10 on Mac (G01).
+- Keyboard shortcut list dialog: Ctrl+/ on Windows, Cmd+/ on Mac; it has a search box (G01, G03).
+- Disabled items are greyed. Documented cases: Arrange > Order hides or greys the directions that would have no effect for the selected object's stack position (G02); Insert > Link is disabled when more than one object is selected (T09 hyperlinks); Present using Chromecast is greyed without a device (T04); Extensions > Add-ons is absent while editing a Microsoft Office file without converting it (G21); View > Mode is absent for viewers and limited for commenters (G22).
+- Renames a designer will meet in older tutorials: Add-ons menu became Extensions; Present became Slideshow; View > Master became View > Theme builder and Slide > Edit master became Slide > Edit theme; Download as became Download; Change transition became Transition; Background became Change background; Change layout became Apply layout; Voice type speaker notes is now printed as Dictate speaker notes; Search the menus became Tool finder (G03, G04, G18, G51, T01, T03, T04, T36, T20).
+
+## File
+
+The File menu holds whole-presentation actions (T02). Reconstructed order follows Google Docs editors conventions and the 2023 and 2025 walkthroughs.
+
+| Item | Shortcut Mac | Shortcut Windows | Opens | Notes | Source |
+|---|---|---|---|---|---|
+| New | none | none | Submenu | Verified for the path File > New > From Template Gallery. Sibling items (Presentation and the other Docs editors file types) are unverified. | G06 |
+| New > From Template Gallery | none | none | Template gallery in a new tab; a copy of the chosen template opens | Verified. The Slides home page also has a "Template Gallery" button top right. CustomGuide describes the gallery with one tab for templates your organisation submitted and one for built-in templates. | G06, G40, T08 create-presentations |
+| Open… | Cmd+O | Ctrl+O | "Open a file" dialog with search, My Drive folders, and tabs Shared with me, Starred, Recent; Open button | Verified shortcut; dialog from CustomGuide. | G01, T08 open |
+| Import slides | none | none | "Import slides" dialog | Corroborated. Step 1 is a Drive picker with a Presentations tab (recent Google Slides files with search) and an Upload tab (browse or drag a PowerPoint file). Step 2 shows thumbnails of the chosen deck with a "Select all slides" control ("All" and "None" at the top right, "Back" to pick a different file), a "Keep original theme" checkbox, and an "Import slides" button. Unchecked, imported slides take the current theme. HowToGeek reports imported slides land at the end; Google's screen reader page says to focus the filmstrip position where you want them first. SlideTeam confirms the Upload tab accepts .pptx. | G02, T05, T06, T32, T03, T01 |
+| Make a copy | none | none | Submenu | Corroborated. | T01, T12 |
+| Make a copy > Entire presentation | none | none | "Copy document" dialog: Name, Folder, "Share it with the same people", "Copy comments" or "Copy comments and suggestions", OK | Verified dialog fields on G12 and G16; submenu label from T12 and T01. Also offered from a version in Version history (More > Make a copy). | G12, G16, T12, T01 |
+| Make a copy > Selected slides | none | none | Same dialog, copies only the slides selected in the filmstrip | Corroborated. | T12, T01 |
+| Share | none | none | Submenu | Verified as a submenu on G13 ("File > Share > Publish to web"). BrightCarbon (2020) shows Share at the top of the File menu opening the Share dialog directly, so the submenu is newer. | G13, T14 |
+| Share > Share with others | none | none | Share dialog (same as the Share button) | Label from a 2023 search snippet only; the Share dialog itself is verified. Treat the exact label as unverified. | G41, T14 |
+| Share > Publish to web | none | none | "Publish to the web" dialog with Link and Embed tabs | Verified. For presentations the dialog offers "Auto-advance slides" timing, "Start slideshow as soon as the player loads", "Restart the slideshow after the last slide", and on Embed a presentation size. "Published content & settings" holds "Stop publishing" and the "Automatically republish when changes are made" checkbox, which Slides cannot turn off. Owners and editors can publish; Workspace admins can disable publishing. The Present slides page prints the path as "File > Publish to the web". | G13, G14, T08 share, T34 |
+| Email | none | none | Submenu | Single source (Computerworld 2025). Older label "Email as attachment" appears in the Learning Center and CustomGuide. | T02, G43, G44, T07 |
+| Email > Email this file | none | none | Panel to email the presentation as an attachment; PDF is the default, drop-down offers Microsoft PowerPoint; "Attach as" plus recipients, subject, message, Send | Corroborated (Computerworld describes the panel; Learning Center describes "Attach as" PowerPoint or PDF under the older label). | T02, G44 |
+| Email > Email collaborators | none | none | Panel addressed to the people the file is shared with | Corroborated. | T02, T01 |
+| Download | none | none | Submenu | Verified path File > Download ("Choose a file type"). Older label "Download as". | G12, G11, T01 |
+| Download > Microsoft PowerPoint (.pptx) | none | none | Downloads the whole deck | Corroborated. | T13, T03, T01 |
+| Download > ODP Document (.odp) | none | none | Downloads the whole deck | Corroborated. | T13, T03 |
+| Download > PDF Document (.pdf) | none | none | Downloads the whole deck, one slide per page | Corroborated. For notes or handouts use Print settings and preview instead. | T13, T09 pdf, T01 |
+| Download > Plain Text (.txt) | none | none | Downloads the text of the deck | Corroborated. BrightCarbon suggests it as a word-count workaround. | T13, T03, T01 |
+| Download > JPEG image (.jpg, current slide) | none | none | Downloads only the selected slide | Corroborated. | T13, T14 |
+| Download > PNG image (.png, current slide) | none | none | Downloads only the selected slide | Corroborated. | T13, T14 |
+| Download > Scalable Vector Graphics (.svg, current slide) | none | none | Downloads only the selected slide | Corroborated. | T13, T03 |
+| Rename | none | none | Puts focus in the title field | Single source for the menu item; renaming by clicking the title is verified. | T21, G12 |
+| Move | none | none | Drive folder picker ("Move here") | Corroborated under the older label "Move to"; the folder icon next to the title does the same. | T07, T08 file-management |
+| Add shortcut to Drive | none | none | Drive folder picker | Unverified label. Google's sharing page still prints the older "File > Add to My Drive". | G42 |
+| Move to trash | none | none | Immediate; file goes to Drive trash and the editor shows a trashed-file notice | Verified. Collaborators keep a copy option until the owner empties the trash. | G36, T07, T08 file-management |
+| Version history | none | none | Submenu | Corroborated. | T08 version-history, T10, T11, G43 |
+| Version history > Name current version | none | none | Small dialog with a name field and Save | Corroborated. Limit 40 named versions per document. | T10, T11, G16 |
+| Version history > See version history | Cmd+Option+Shift+H | Ctrl+Alt+Shift+H | Version history panel on the right; the canvas shows the selected version | Verified shortcut; path corroborated. Panel: timestamps grouped with expand arrows, editor names with colours, "Only show named versions" toggle, "Show changes" checkbox, per-version More menu (Name this version, Make a copy, Delete this and older versions), "Restore this version" button at the top, back arrow to return. Requires edit access. The Last edit clock icon opens the same panel. | G01, G16, T08 version-history, T10, T11, T02 |
+| Approvals | none | none | Approvals side panel ("Make a request", approvers, message, due date, lock editing, "Send request") | Single source (2023). Workspace accounts only. | T01 |
+| Make available offline | none | none | Toggle; confirmation that the file is editable offline | Corroborated (TutKit describes the confirmation; Learning Center describes the Drive prerequisite: the Google Docs Offline extension and the Drive offline setting). | T21, G44 |
+| Details | none | none | Details side panel: location, owner, recent changes | Single source. | T21 |
+| Language | none | none | Submenu listing languages | Verified. Changes spell check language; switching from US to UK English switches measurements from imperial to metric; non-Latin languages add the Input tools menu to the toolbar (Ctrl+Alt+Shift+K, Cmd+Option+Shift+K). | G32, T01, T09 language |
+| Page setup | none | none | "Page setup" dialog | Verified. Drop-down: Standard (4:3), Widescreen (16:9), Widescreen (16:10), Custom. Custom exposes width and height with a unit drop-down (inches, centimeters, points, pixels). Confirm with OK (Google) or Apply (BrightCarbon, Slidesgo). Default deck is 16:9 at 25.4 x 14.29 cm; the change applies to every slide and scales content. | G10, T15, T09 size, T09 orientation |
+| Print settings and preview | none | none | Full-window print preview with its own toolbar: layout drop-down ("1 slide without notes", "1 slide with notes", handouts with several slides per page), Handout orientation (Landscape or Portrait), "Include skipped slides" toggle, "Hide background", "Download as PDF", "Print", "Close preview" | Verified path and the Handout and "1 slide with notes" controls; the rest corroborated. Older label "Print preview". Notes are only offered with one slide per page in portrait. | G11, T01, T08 print, T09 pdf |
+| Print | Cmd+P | Ctrl+P | Browser print dialog with a PDF preview; in Firefox and Safari a PDF downloads instead | Verified. | G01, G11, T09 print |
+
+## Edit
+
+| Item | Shortcut Mac | Shortcut Windows | Opens | Notes | Source |
+|---|---|---|---|---|---|
+| Undo | Cmd+Z | Ctrl+Z | Immediate | Verified. Also on the toolbar. | G01, T08 undo |
+| Redo | Cmd+Y or Cmd+Shift+Z | Ctrl+Y or Ctrl+Shift+Z | Immediate | Verified. The toolbar Redo button also repeats the last action on a new selection. | G01, T08 undo |
+| Cut | Cmd+X | Ctrl+X | Immediate | Verified. Works on slides in the filmstrip, objects, and text. Browsers may block clipboard access from menus; in Chrome the Docs Offline extension is needed for the menu items to work. | G01, G38, G02 |
+| Copy | Cmd+C | Ctrl+C | Immediate | Verified. Pasting a slide into another deck asks to keep original styles, match the destination theme, or "Link & keep original styles" (linked slides update from the source). | G01, G38, T06, T09 merge |
+| Paste | Cmd+V | Ctrl+V | Immediate | Verified. Pasting a Sheets chart asks whether to link the data. | G01, G38 |
+| Paste without formatting | Cmd+Shift+V | Ctrl+Shift+V | Immediate | Corroborated (CustomGuide 2024 cheat sheet and lesson). Not on Google's Slides shortcut page. | T07, T08 copy, T01 |
+| Delete | Delete | Delete or Backspace | Immediate | Verified shortcut; menu item named by Computerworld ("Edit > Delete" deletes the selected slide). | G01, T02 |
+| Duplicate | Cmd+D | Ctrl+D | Immediate; duplicates the selected slide or object | Verified shortcut (listed both as "Duplicate slide" and "Duplicate" for objects). Ctrl+drag (Option+drag on Mac) also duplicates an object. | G01, T02 |
+| Select all | Cmd+A | Ctrl+A | Immediate; all objects on the slide, or all slides when the filmstrip has focus | Verified. | G01, T09 merge |
+| Select none | Ctrl+Cmd then U then A | Ctrl+Alt then U then A | Immediate | Verified shortcut. | G01, T22 |
+| Find and replace | Cmd+Shift+H | Ctrl+H | "Find and replace" dialog: Find, Replace with, Match case, Prev, Next, Replace, Replace all | Verified. Ctrl+F (Cmd+F) opens the lighter Find bar; Ctrl+G and Ctrl+Shift+G find again and find previous. "Match using regular expressions" is Docs only. | G01, G31, T08 find |
+
+## View
+
+| Item | Shortcut Mac | Shortcut Windows | Opens | Notes | Source |
+|---|---|---|---|---|---|
+| Slideshow | Cmd+Enter | Ctrl+F5 | Full-screen slideshow from the current slide | Verified: Google's screen reader guide says "open the View menu. Select Slideshow." Older versions listed "Present" and "Presenter view" here. | G02, T20, T18 |
+| Motion | Cmd+Option+Shift+B | Ctrl+Alt+Shift+B | Motion side panel (slide transition at the top, object animations below, "Select an object to animate", Play) | Verified. Same panel as Insert > Animation and Slide > Transition. | G01, G26, T01 |
+| Theme builder | none | none | Theme builder view: dark background, left column with the Theme slide then Layouts, Colors button, Rename layout, New layout, close X | Corroborated. Formerly "Master". Slide > Edit theme opens the same view. Layouts shown here are what Slide > Apply layout and the New slide arrow offer. | T01, T36, T09 themes |
+| Grid view | none | none | Replaces the canvas with a grid of slide thumbnails; drag to reorder; double-click a slide to return | Corroborated. Checkmark item; filmstrip and grid icons at the bottom left of the filmstrip toggle the same state. | T01, T08 view, G05 |
+| Zoom | none | none | Submenu | Corroborated. | T28, T01 |
+| Zoom > Zoom in | Cmd+plus | Ctrl+plus | Immediate | Verified shortcut. BrightCarbon (2023) prints Ctrl+Alt+plus, the older binding. | G01, T28, T01 |
+| Zoom > Zoom out | Cmd+minus | Ctrl+minus | Immediate | Verified shortcut. | G01, T28 |
+| Zoom > Fit | none | none | Immediate; canvas as wide as the window | Verified. The toolbar zoom box also offers Fit and accepts 25 to 1600. Ctrl+0 (Cmd+0) is Zoom 100%. | G25, G01, T28 |
+| Zoom > 50%, 100%, 200% | none | none | Immediate | Corroborated. | T01, T28 |
+| Show ruler | none | none | Toggle; horizontal and vertical rulers with indent markers; label flips to "Hide ruler" | Corroborated. Clicking the ruler offers "Change units" and "Reset to presentation default". | T17, T29, G10 |
+| Guides | none | none | Submenu | Corroborated. Right-clicking the slide also offers Guides. | T01, T29 |
+| Guides > Show guides | none | none | Toggle | Corroborated. | T01, T29 |
+| Guides > Add vertical guide | none | none | Adds a draggable guide | Corroborated. | T01 |
+| Guides > Add horizontal guide | none | none | Adds a draggable guide | Corroborated. | T01 |
+| Guides > Clear guides | none | none | Removes all guides | Corroborated. An "Edit guides" dialog with numeric positions also exists. | T01, T29 |
+| Snap to | none | none | Submenu | Corroborated. | T09 arrange, G07 |
+| Snap to > Guides | none | none | Toggle, on by default; red alignment lines appear while dragging | Verified behaviour on G07, path on T09. Hold Alt (Cmd on Mac) while dragging to suppress guides. | G07, T09 arrange, G01 |
+| Snap to > Grid | none | none | Toggle; snaps to an invisible grid | Verified behaviour on G07, path on T09. | G07, T09 arrange |
+| Comments | none | none | Submenu | Verified. | G24 |
+| Comments > Hide comments | none | none | Hides all comments and closes the comments panel | Verified. | G24 |
+| Comments > Minimize comments | none | none | Reduces comments to icons | Verified for Docs and Sheets; Google lists it under the same menu for all editors. | G24 |
+| Comments > Expand comments | none | none | Shows full comment threads | Verified. | G24 |
+| Live pointers | none | none | Submenu | Verified. Also reachable from the pointer icon at the right of the toolbar. | G23 |
+| Live pointers > Show my pointer | none | none | Toggle; stays on across all decks until turned off | Verified. Needs edit access. | G23 |
+| Live pointers > Show collaborator pointers | none | none | Toggle | Verified. Pointers stop when more than 20 collaborators are present. | G23 |
+| Show speaker notes | none | none | Toggle for the notes pane under the canvas | Corroborated. Ctrl+Alt+Shift+S (Cmd+Option+Shift+S) moves focus to the notes pane. | T08 notes, T09 notes, T33, G01 |
+| Show filmstrip | none | none | Toggle for the left filmstrip; arrows at the bottom left do the same | Verified. | G05 |
+| Mode | none | none | Submenu | Verified. Absent for viewers. | G22 |
+| Mode > Editing | none | none | Immediate | Verified. Editors only. | G22 |
+| Mode > Commenting | none | none | Immediate | Verified. Editors and commenters. | G22 |
+| Mode > Viewing | none | none | Immediate | Verified. | G22 |
+| Full screen | Ctrl+Shift+F | Ctrl+Shift+F | Hides menus and toolbar; Esc restores | Verified. Google's shortcut page names the same key "Hide or show menus (compact mode)". | G25, G01 |
+
+## Insert
+
+Google reordered the Insert menu in March 2018 and moved table insertion here when the Table menu was removed (G50). The 2025 sidebar added Templates, Building blocks, and Stock & web entry points (G52, T02).
+
+| Item | Shortcut Mac | Shortcut Windows | Opens | Notes | Source |
+|---|---|---|---|---|---|
+| Image | none | none | Submenu | Verified. | G08, G09 |
+| Image > Upload from computer | none | none | OS file picker | Verified. JPEG, GIF, PNG under 50 MB and 25 megapixels; animated GIFs play. | G08, T01, T09 crop |
+| Image > Stock & web | none | none | Media side panel: stock images, GIFs, stickers, images from Google, with an "All" type filter | Verified (2025 label). Older label "Search the web" opened a Google Images side panel. | G09, G08, T09 crop, T01 |
+| Image > Drive & Photos | none | none | Picker | Verified (2025 label). Older menus listed "Drive" and "Photos" as two items. | G08, T09 crop |
+| Image > Camera | none | none | Webcam capture | Verified. | G08, T09 crop |
+| Image > By URL | none | none | URL field with preview | Verified. | G08, T09 crop |
+| Text box | none | none | Cursor changes; click or drag to place a box | Corroborated. New text boxes default to "Resize shape to fit text". | T01, G29, T09 textboxes |
+| Audio | none | none | Drive picker (My Drive, Shared with me, Recent) for .mp3 and .wav | Corroborated. A speaker icon is placed; Format options > Audio playback controls start (on click or automatically), volume, loop, stop on slide change, hide icon when presenting. | T01, T09 audio, T26 music |
+| Video | none | none | "Insert video" dialog with tabs Search (YouTube), By URL (YouTube), Google Drive; Select button | Corroborated. Format options > Video playback sets start and end time, "Autoplay when presenting", mute; play mode On click, Automatically, Manually. | T01, T09 video, T08 video |
+| Shape | none | none | Submenu | Corroborated. | T01, T20 |
+| Shape > Shapes | none | none | Shape gallery | Corroborated. | T09 filters, T20 |
+| Shape > Arrows | none | none | Shape gallery | Corroborated. | T20, T01 |
+| Shape > Callouts | none | none | Shape gallery | Corroborated. | T20, T01 |
+| Shape > Equation | none | none | Shape gallery | Corroborated. | T20, T01 |
+| Table | none | none | Grid picker; drag to choose rows and columns (up to 20 x 20) | Verified size limit and path. | G28, T08 tables, T09 tables |
+| Chart | none | none | Submenu | Corroborated. | T01, T08 charts |
+| Chart > Bar | none | none | Inserts a chart linked to a new Sheets file with placeholder data | Corroborated. Linked chart options: Open source, Update, Unlink. | T01, T08 charts, T09 charts |
+| Chart > Column | none | none | As above | Corroborated. | T01, T08 charts |
+| Chart > Line | none | none | As above | Corroborated. | T01, T08 charts |
+| Chart > Pie | none | none | As above | Corroborated. | T01, T08 charts |
+| Chart > From Sheets | none | none | Sheets picker, then chart picker with "Link to spreadsheet" checkbox and Import | Verified. | G44, G19 |
+| Diagram | none | none | Diagrams side panel: category, number of steps, colour scheme, style | Verified path; panel from CustomGuide. Latin-alphabet languages only. | G07, T08 diagrams |
+| Word art | none | none | Text entry bar at the top of the canvas; Enter commits | Corroborated. Word art is an object; the border tools apply to the letters. | T01, T08 wordart |
+| Line | none | none | Submenu | Corroborated. | T20, G07 |
+| Line > Line, Arrow, Elbow Connector, Curved Connector, Curve, Polyline, Scribble | none | none | Drawing cursor | Line, Arrow, Curve, Polyline, Scribble corroborated (2014 doc also listed Arc). Elbow Connector and Curved Connector are unverified labels. | T20, G07 |
+| Special characters | none | none | "Insert special characters" dialog with search | Corroborated. | T09 superscript, T03 |
+| Animation | none | none | Motion side panel with the selected object added as "Appear (On click)" | Verified. Start options On click, After previous, With previous; "By paragraph" checkbox; speed slider. | G26, T08 animations |
+| Link | Cmd+K | Ctrl+K | Link popover: Text, Link (URL, email, or search), "Slides in this presentation" (Next slide, Previous slide, First slide, Last slide, or a specific slide), Apply | Verified path and shortcut. Disabled with more than one object selected. | G33, G01, T08 links, T09 hyperlinks |
+| Comment | Cmd+Option+M | Ctrl+Alt+M | Comment card next to the slide with @mention, "Assign to" checkbox, Comment button | Verified. Also on the toolbar and the context menu. | G01, G24, T02 |
+| New slide | Ctrl+M | Ctrl+M | Adds a slide after the selection with the same layout | Verified. Google prints Ctrl+M for Mac too. | G01, G05 |
+| Slide numbers | none | none | "Slide numbers" dialog: On or Off, "Skip title slides", Apply, "Apply to selected" | Verified. Numbers renumber automatically. | G05, G02, T08 numbers, T09 numbers |
+| Placeholder | none | none | Submenu (theme builder only): Title, Subtitle, Body text, Slide number, Image placeholders | Single source for the "Insert placeholder" control inside the theme builder; the exact submenu labels are unverified. | T09 textboxes, T09 footers |
+| Templates | none | none | Templates side panel; click a slide to insert it or "Insert all slides" | Verified panel; "Insert > Templates" path from Computerworld. English (US) only. | G06, T02 |
+| Building blocks | none | none | Building blocks side panel grouped by category (Agendas, Lists, Key statistics, Quotes) | Verified. English (US) only. Inserted blocks are groups of native objects. | G34, G52, T02 |
+| Speaker spotlight | none | none | Sidebar of spotlight shapes | Verified ("Insert > speaker spotlight"). Certain Workspace editions only; Chrome only. | G35 |
+
+## Format
+
+Google moved text formatting into a "Text" submenu and table formatting into Format when it removed the Table menu in March 2018 (G50). Computerworld notes that Format items enable or disable according to whether text, an image, or the slide is selected (T02).
+
+| Item | Shortcut Mac | Shortcut Windows | Opens | Notes | Source |
+|---|---|---|---|---|---|
+| Text | none | none | Submenu | Verified as a submenu (2018 announcement). | G50, T01 |
+| Text > Bold | Cmd+B | Ctrl+B | Immediate | Verified shortcut. | G01 |
+| Text > Italic | Cmd+I | Ctrl+I | Immediate | Verified shortcut. | G01 |
+| Text > Underline | Cmd+U | Ctrl+U | Immediate | Verified shortcut. | G01 |
+| Text > Strikethrough | Cmd+Shift+X | Alt+Shift+5 | Immediate | Verified shortcut. | G01 |
+| Text > Superscript | Cmd+. | Ctrl+. | Immediate | Verified shortcut. | G01, T09 superscript |
+| Text > Subscript | Cmd+, | Ctrl+, | Immediate | Verified shortcut. | G01, T09 superscript |
+| Text > Size | none | none | Submenu | Corroborated ("Size" listed under Text). | T01 |
+| Text > Size > Increase font size | Cmd+Shift+> | Ctrl+Shift+> | Immediate | Verified shortcut. | G01 |
+| Text > Size > Decrease font size | Cmd+Shift+< | Ctrl+Shift+< | Immediate | Verified shortcut. | G01 |
+| Text > Capitalization | none | none | Submenu: lowercase, UPPERCASE, Title Case | Corroborated (CustomGuide describes the three options). | T08 format-text, T01 |
+| Align & indent | none | none | Submenu | Corroborated. | T17, T01, G30 |
+| Align & indent > Left, Center, Right, Justified | Cmd+Shift+L, E, R, J | Ctrl+Shift+L, E, R, J | Immediate | Verified shortcuts. | G01, T01 |
+| Align & indent > Increase indent | Cmd+] | Ctrl+] | Immediate | Verified shortcut. | G01 |
+| Align & indent > Decrease indent | Cmd+[ | Ctrl+[ | Immediate | Verified shortcut. | G01 |
+| Align & indent > Indentation options | none | none | Dialog: Left, Right, Special (None, First line, Hanging), By | Single source (SlideEgg 2026). Google documents the same fields under Format options > Text fitting. | T17, G30 |
+| Line & paragraph spacing | none | none | Submenu: Single, 1.15, 1.5, Double, Custom spacing | Corroborated. "Add space before paragraph" and "Add space after paragraph" exist in Docs and are unverified for Slides. | T17, T09 format-text |
+| Bullets & numbering | none | none | Submenu | Verified. | G30 |
+| Bullets & numbering > Numbered list | none | none | Submenu of numbering presets | Verified. | G30, T09 lists |
+| Bullets & numbering > Bulleted list | none | none | Submenu of bullet presets | Verified. | G30, T09 lists |
+| Bullets & numbering > List options | none | none | Submenu | Verified. | G30 |
+| Bullets & numbering > List options > Restart numbering | none | none | Dialog with a start number | Verified. Also on the context menu. | G30, G02 |
+| Bullets & numbering > List options > Edit prefix and suffix | none | none | Dialog | Single source. | T09 lists |
+| Bullets & numbering > List options > More bullets | none | none | Special characters dialog | Verified. "Continue previous numbering" is Docs only. | G30 |
+| Table | none | none | Submenu; enabled when the cursor is in a table | Verified (2018 announcement, CustomGuide). | G50, T08 tables |
+| Table > Insert row above, Insert row below, Insert column left, Insert column right | none | none | Immediate | Verified labels (context menu and Format > Table). | G28, T08 tables |
+| Table > Delete row, Delete column, Delete table | none | none | Immediate | Verified. | G28, T08 tables |
+| Table > Distribute rows, Distribute columns | none | none | Immediate | Verified labels (context menu). | G28 |
+| Table > Merge cells, Unmerge cells | none | none | Immediate | Verified labels (context menu). | G28 |
+| Image | none | none | Submenu; enabled when an image is selected | Corroborated. | T01, G27 |
+| Image > Crop image | none | none | Crop handles; Enter or click away commits | Verified behaviour (toolbar Crop). | G27, T09 crop |
+| Image > Mask image | none | none | Shape gallery | Verified behaviour (arrow next to Crop). | G27, T08 images |
+| Image > Replace image | none | none | Submenu with the same sources as Insert > Image | Verified (context menu "Replace image"). | G08, T09 audio |
+| Image > Reset image | none | none | Immediate | Verified (context menu). | G27 |
+| Image > Image options | none | none | Format options sidebar | Verified label ("Image options > All image options"). | G08, G37 |
+| Borders & lines | none | none | Submenu: Border color, Border weight, Border dash (plus line start and end for lines) | Corroborated for the submenu name; the toolbar buttons Border color, Border weight, Border dash are verified. Line start and Line end labels are unverified. | T01, G28, T26 border |
+| Format options | none | none | Format options sidebar | Verified. Sections: Size & rotation (width, height, lock aspect ratio, rotate), Position (X, Y from top left or center), Text fitting (indentation, Special indent, autofit: Do not autofit, Shrink text on overflow, Resize shape to fit text; padding), Recolor, Adjustments (Opacity or Transparency, Brightness, Contrast, Reset), Drop shadow (color, transparency, angle, distance, blur radius), Reflection (transparency, distance, size), Alt text (description, Advanced options title), Video playback, Audio playback. Also on the toolbar and the context menu. | G27, G29, G30, G37, T09 effects, T09 video, T09 audio, T08 format-objects |
+| Clear formatting | Cmd+\ | Ctrl+\ or Ctrl+Space | Immediate | Verified. | G01, T08 clear |
+
+## Slide
+
+Google moved the four move-slide items into a "Move" submenu in March 2018 (G50).
+
+| Item | Shortcut Mac | Shortcut Windows | Opens | Notes | Source |
+|---|---|---|---|---|---|
+| New slide | Ctrl+M | Ctrl+M | Adds a slide with the current layout | Verified. The toolbar "New slide" button and its arrow ("New slide with layout") do the same. | G01, G05, T20 |
+| Duplicate slide | Cmd+D | Ctrl+D | Inserts a copy after the selection | Verified. Multi-select with Shift first. | G01, G05, T08 duplicate |
+| Delete slide | none | none | Immediate | Corroborated. Delete or Backspace also works in the filmstrip. | T20, G05 |
+| Skip slide | none | none | Toggle; thumbnail dims and shows an icon; label reads "Unskip slide" when skipped | Verified. Skipped slides remain visible to collaborators and can be excluded from print. | G05, G02, T08 move-skip, T01 |
+| Move slide | none | none | Submenu | Verified as a submenu (2018 announcement). | G50 |
+| Move slide > Move slide up | Cmd+Up | Ctrl+Up | Immediate | Verified shortcut. | G01 |
+| Move slide > Move slide down | Cmd+Down | Ctrl+Down | Immediate | Verified shortcut. | G01 |
+| Move slide > Move slide to beginning | Cmd+Shift+Up | Ctrl+Shift+Up | Immediate | Verified shortcut. | G01 |
+| Move slide > Move slide to end | Cmd+Shift+Down | Ctrl+Shift+Down | Immediate | Verified shortcut. | G01 |
+| Change background | none | none | "Background" dialog: Color (solid, gradient, custom with hex and transparency), Image "Choose" (upload, URL, camera, Drive, Photos, Google Images), "Reset to theme", "Add to theme", Done | Verified. Done applies to the selected slide; Add to theme applies to the whole theme. Images must be .gif, .jpg, .png under 50 MB. | G06, T09 background, T01 |
+| Apply layout | none | none | Submenu of the theme's layouts, current one marked selected | Verified. Lists whatever the theme builder defines; the default theme ships Title slide, Section header, Title and body, Title and two columns, Title only, One column text, Main point, Section title and description, Caption, Big number, Blank (CustomGuide counts eleven). Right-click and the toolbar Layout button offer the same list. | G02, G06, T01, T08 delete-slide, T09 design |
+| Transition | none | none | Motion side panel with "Slide Transition" at the top: transition type, speed slider, "Apply to all slides", "Add animation" | Verified. Older label "Change transition". | G26, T08 transitions, T08 animations |
+| Edit theme | none | none | Theme builder | Corroborated. Slide > Edit theme > Colors opens the theme colour editor (Text and background 1 to 4, Accent 1 to 6, Link). | G06, T01, T09 colors |
+| Change theme | none | none | Themes side panel with an "In this presentation" drop-down and an "Import theme" button at the bottom | Verified. Import theme opens a picker for a Google Slides or PowerPoint file (Upload tab), then a theme chooser and an "Import theme" button. The toolbar Theme button opens the same panel. | G06, T09 themes, T01 |
+
+## Arrange
+
+Google folded "Align horizontally" and "Align vertically" into one "Align" submenu in March 2018 (G50). Every item is also on the right-click menu (T01).
+
+| Item | Shortcut Mac | Shortcut Windows | Opens | Notes | Source |
+|---|---|---|---|---|---|
+| Order | none | none | Submenu | Verified. Items that would have no effect at the object's current stack position are unavailable. | G02, G07 |
+| Order > Bring to front | Cmd+Shift+Up | Ctrl+Shift+Up | Immediate | Verified. | G01, G02 |
+| Order > Bring forward | Cmd+Up | Ctrl+Up | Immediate | Verified. | G01, G02 |
+| Order > Send backward | Cmd+Down | Ctrl+Down | Immediate | Verified. | G01, G02 |
+| Order > Send to back | Cmd+Shift+Down | Ctrl+Shift+Down | Immediate | Verified. | G01, G02 |
+| Align | none | none | Submenu | Verified. Google documents Align for multiple selected objects ("align the edges of the objects"); behaviour with a single object selected (alignment to the slide) is not stated on any page read and is unverified. | G07, T09 arrange |
+| Align > Left, Center, Right | none | none | Immediate | Corroborated. | T09 arrange, T30, T20 |
+| Align > Top, Middle, Bottom | none | none | Immediate | Corroborated. | T30, T20, T31 |
+| Distribute | none | none | Submenu | Verified. Requires three or more objects. | G07 |
+| Distribute > Horizontally | none | none | Immediate | Verified. | G07, T09 arrange |
+| Distribute > Vertically | none | none | Immediate | Verified. | G07, T09 arrange |
+| Center on page | none | none | Submenu | Verified. Works with a single object. | G07, T09 arrange |
+| Center on page > Horizontally | none | none | Immediate | Verified. | G07, T20 |
+| Center on page > Vertically | none | none | Immediate | Verified. | G07, T20 |
+| Rotate | none | none | Submenu | Verified. | G07 |
+| Rotate > Rotate clockwise 90° | none | none | Immediate | Corroborated (2014 label "Rotate right 90"). | T30, T08 arrange, T20 |
+| Rotate > Rotate counter-clockwise 90° | none | none | Immediate | Corroborated. | T30, T08 arrange |
+| Rotate > Flip horizontally | none | none | Immediate | Corroborated. | T30, T08 arrange, T20 |
+| Rotate > Flip vertically | none | none | Immediate | Corroborated. | T30, T08 arrange, T20 |
+| Group | Cmd+Option+G | Ctrl+Alt+G | Immediate | Verified. Needs two or more objects on the same slide. | G01, G07, T09 group |
+| Ungroup | Cmd+Option+Shift+G | Ctrl+Alt+Shift+G | Immediate | Verified shortcut. | G01, T09 group |
+| Regroup | none | none | Immediate | Unverified; expected from product knowledge only. | none |
+
+## Tools
+
+| Item | Shortcut Mac | Shortcut Windows | Opens | Notes | Source |
+|---|---|---|---|---|---|
+| Spelling | none | none | Submenu | Verified. | G17 |
+| Spelling > Spell check | none | none | Spell check card with Change, Change all, Ignore, Ignore all | Verified. No Slides shortcut is published; Ctrl+' and Ctrl+; jump between misspellings. | G17, G01 |
+| Spelling > Underline errors | none | none | Toggle for red underlines in all presentations | Verified. | G17 |
+| Spelling > Personal dictionary | none | none | Dialog to add words | Verified. | G17 |
+| Explore | Cmd+Option+Shift+I | Ctrl+Alt+Shift+I | Explore side panel: layout suggestions for the current slide, search with Cloud search, Web, Images tabs | Shortcut still on Google's page ("Open Explore"); the menu item is documented in 2023. Whether the item survived the 2025 sidebar is unverified. | G01, T01, T19 |
+| Linked objects | none | none | Linked objects side panel listing linked charts, tables, and slides with Update, "Update all", Link options > Unlink | Verified. | G19, T01 |
+| Dictionary | Cmd+Shift+Y | Ctrl+Shift+Y | Dictionary side panel for the selected word | Verified shortcut ("Open dictionary"); item corroborated. | G01, T01 |
+| Q&A history | none | none | Side panel of recent Q&A sessions | Verified. | G15, T01 |
+| Dictate speaker notes | none | none | Opens the notes pane and a microphone box | Verified (2026 label). Older label "Voice type speaker notes". Chrome, Edge, Safari; voice commands are not available in notes. No shortcut is published for Slides. | G18, T01 |
+| Preferences | none | none | "Preferences" dialog with General and Substitutions tabs | Verified. General: autocorrect toggles (automatically detect links, capitalise words, and so on), Smart Compose and Smart Reply, "Use custom autofit preferences", "Use measurement unit preferences" (inches, centimeters, pixels), "Show link details". Substitutions: text replacement pairs with checkboxes and Remove. | G17, G10, G29, G33, T01 |
+| Accessibility settings | none | none | Dialog: "Turn on screen reader support", "Turn on braille support", collaborator announcements, screen magnifier support | Verified for the first two checkboxes; the last two from BrightCarbon. Also labelled "Accessibility". Turning on screen reader support adds the Accessibility menu to the menu bar. | G03, G02, T01 |
+| Activity dashboard | none | none | Activity dashboard: Viewers, Viewer trend, Comment trend, Sharing history, Privacy settings | Corroborated for the item; Google documents the sibling "Activity dashboard privacy" with "Show my view history for this document". Work or school accounts only. | G20, T01, T07 |
+
+## Extensions
+
+The Add-ons menu was renamed Extensions (T03, T01). Install and manage flows live under Extensions > Add-ons (G21).
+
+| Item | Shortcut Mac | Shortcut Windows | Opens | Notes | Source |
+|---|---|---|---|---|---|
+| Add-ons | none | none | Submenu | Verified. Absent while editing an unconverted Microsoft Office file. | G21 |
+| Add-ons > Get add-ons | none | none | Google Workspace Marketplace dialog with featured add-ons and search; Install, Continue, Allow, Done | Verified. | G21, T03, T01 |
+| Add-ons > Manage add-ons | none | none | Dialog listing installed add-ons with Options: "Use in this document", Uninstall, "Report an issue" | Verified. | G21 |
+| Installed add-on entries | none | none | Each installed add-on appears as its own item with its own submenu | Corroborated. | T01, T08 addons |
+| Apps Script | none | none | Apps Script editor bound to the presentation, in a new tab | Verified ("select Extensions > Apps Script from within Slides"). | G49 |
+| AppSheet | none | none | Submenu ("Create an app") | Unverified for Slides; Google documents AppSheet under the same help article for Sheets data sources only. | G21 |
+
+## Help
+
+| Item | Shortcut Mac | Shortcut Windows | Opens | Notes | Source |
+|---|---|---|---|---|---|
+| Search the menus | Option+/ | Alt+/ | Tool finder field | Verified. Formerly a text field at the top of the Help menu; now the Tool finder in the toolbar, still listed here. | G04, G01, T08 help, T12 |
+| Help | none | none | Help dialog with "Popular help resources" and a "Search Help" field; results open in the dialog | Verified ("Open the Help menu and select Help"). Older label "Slides Help". | G02, T08 help, T07 |
+| Training | none | none | Learning Center (Google Slides training and help) in a new tab | Single source (Art of Presentations describes "basic training material"). Label unverified. | T12 |
+| Updates | none | none | What's new panel | Unverified. | none |
+| Help Slides improve | none | none | Feedback dialog with screenshot | Single source ("provide feedback to Google on ways to improve"). Label unverified. | T12 |
+| Privacy Policy | none | none | Opens policies.google.com | Unverified. | none |
+| Terms of Service | none | none | Opens the terms page | Unverified. | none |
+| Keyboard shortcuts | Cmd+/ | Ctrl+/ | Keyboard shortcuts dialog with a search box | Verified ("select Help > Keyboard shortcuts"). | T02, G01, G03 |
+
+## Accessibility menu
+
+Appears only when screen reader support is on (Tools > Accessibility settings or Ctrl+Alt+Z, Cmd+Option+Z). Access key Alt+A (Chrome), Alt+Shift+A (other browsers), Ctrl+Option+A (Mac). Documented items: "Verbalize to screen reader" with "Verbalize selection formatting" (Ctrl+Alt then A then F) and "Verbalize selection" (Ctrl+Alt+X); navigation commands for comments and formatting changes (G01, G02).
+
+## Dialog and panel details referenced above
+
+- Import slides: two-step dialog (file picker with Presentations and Upload tabs, then slide thumbnails with All, None, Back, "Keep original theme", "Import slides"). Accepts Google Slides files and .pptx uploads (G02, T05, T06, T32).
+- Download formats: Microsoft PowerPoint (.pptx), ODP Document (.odp), PDF Document (.pdf), Plain Text (.txt), JPEG image (.jpg, current slide), PNG image (.png, current slide), Scalable Vector Graphics (.svg, current slide) (T13, T03, T20).
+- Page setup: Standard (4:3), Widescreen (16:9), Widescreen (16:10), Custom with inches, centimeters, points, pixels (G10, T15).
+- Print settings and preview: layout drop-down (1 slide without notes, 1 slide with notes, handouts of several slides per page), Handout orientation Landscape or Portrait, Include skipped slides, Hide background, Download as PDF, Print, Close preview (G11, T01, T08 print, T09 pdf, T20).
+- Publish to the web: Link and Embed tabs, Auto-advance slides timing, Start slideshow as soon as the player loads, Restart the slideshow after the last slide, presentation size on Embed, Publish, Published content & settings, Stop publishing (G13, G14, T08 share, T34).
+- Version history panel: timestamps, editor colours, Only show named versions, Show changes, per-version More menu (Name this version, Make a copy, Delete this and older versions), Restore this version, back arrow (G16, T10, T11, T08 version-history).
+- Slide numbers dialog: On, Off, Skip title slides, Apply, Apply to selected (G05, T08 numbers).
+- Background dialog: Color, Image Choose, Reset to theme, Add to theme, Done (G06, T09 background).
+- Link popover: Text, Link, Slides in this presentation (Next slide, Previous slide, First slide, Last slide, numbered slides), Apply; later Change and Remove (G33, T09 hyperlinks, T08 links).
+- Insert video dialog: Search, By URL, Google Drive tabs, Select (T09 video, T01).
+- Format options sidebar sections: Size & rotation, Position, Text fitting, Recolor, Adjustments, Drop shadow, Reflection, Alt text, Video playback, Audio playback (G27, G29, G37, T09 effects, T09 video, T09 audio).
+- Preferences dialog: General and Substitutions tabs (G17, G29, G10).
+- Accessibility settings dialog: Turn on screen reader support, Turn on braille support (G03).
+- Theme builder: Theme slide and Layouts column, Colors panel (Text and background 1 to 4, Accent 1 to 6, Link), Rename layout, New layout, Insert placeholder control, close X (T36, T09 colors, T09 textboxes, G06).
+
+## Disabled and hidden states collected
+
+- Arrange > Order directions unavailable at the front or back of the stack (G02).
+- Arrange > Align documented for multiple objects; Distribute needs three or more (G07).
+- Insert > Link disabled with a multi-object selection (T09 hyperlinks).
+- Present using Chromecast greyed without a device (T04).
+- Extensions > Add-ons absent in Office editing mode (G21).
+- View > Mode absent for viewers, two options for commenters, three for editors (G22).
+- File > Share > Publish to web absent when a Workspace admin disables publishing (G13).
+- File > Approvals, Tools > Activity dashboard, Insert > Speaker spotlight, Slides recordings are limited to work or school accounts or specific editions (T01, G20, G35, G47).
+- Templates and Building blocks appear only in the English (US) locale (G06, G34).
+- Version history requires edit permission (G16).
+- Live pointers stop above 20 collaborators (G23).
+
+## Claims that could not be verified from a public source
+
+- Exact top-to-bottom order of every menu; Google publishes no ordered list.
+- File > New sibling items other than "From Template Gallery"; File > Add shortcut to Drive label; File > Share > "Share with others" label; File > Details and File > Rename as menu items (single source each).
+- Insert > Line submenu labels "Elbow Connector" and "Curved Connector"; Insert > Placeholder submenu labels.
+- Format > Line & paragraph spacing "Add space before paragraph" and "Add space after paragraph" in Slides; Format > Borders & lines "Line start" and "Line end"; Format > Text > Capitalization exact labels beyond the three described.
+- Arrange > Regroup; Arrange > Align behaviour with a single object selected.
+- Tools > Explore in the 2025 or 2026 menu; Tools > Spell check shortcut; Tools > Dictate speaker notes shortcut.
+- Extensions > AppSheet in Slides.
+- Help > Updates, Help > Privacy Policy, Help > Terms of Service labels; exact labels for Training and Help Slides improve.
+- Windows access keys for the Slide, Arrange, and Extensions menus.
+- Pointer-hover switching between open menus (standard but not captured in text).
+
+## Sources
+
+Google pages (all read 2026-09-11):
+
+- G01 Keyboard shortcuts for Google Slides. https://support.google.com/docs/answer/1696717
+- G02 Use Google Slides with a screen reader. https://support.google.com/docs/answer/1634140
+- G03 Use Google Docs Editors with a screen reader. https://support.google.com/docs/answer/6282736
+- G04 Tool finder for Docs, Sheets, Slides & Vids. https://support.google.com/docs/answer/13466905
+- G05 Add, delete & organize slides. https://support.google.com/docs/answer/1694830
+- G06 Use a Template or change the theme, background, or layout in Google Slides. https://support.google.com/docs/answer/1705254
+- G07 Insert and arrange text, shapes, diagrams, and lines. https://support.google.com/docs/answer/1696521
+- G08 Insert or delete images & videos. https://support.google.com/docs/answer/97447
+- G09 Add stock media & web images in Google Slides & Vids. https://support.google.com/docs/answer/15001094
+- G10 Change slide size & measurement units in Google Slides. https://support.google.com/docs/answer/3447672
+- G11 Print a file. https://support.google.com/docs/answer/143346
+- G12 Create, view, or download a file. https://support.google.com/docs/answer/49114
+- G13 Make Google Docs, Sheets, Slides & Forms public. https://support.google.com/docs/answer/183965
+- G14 Present slides. https://support.google.com/docs/answer/1696787
+- G15 Accept and present audience questions. https://support.google.com/docs/answer/6386827
+- G16 Find what's changed in a file. https://support.google.com/docs/answer/190843
+- G17 Check your spelling in Google Slides. https://support.google.com/docs/answer/9764808
+- G18 Type & edit with your voice. https://support.google.com/docs/answer/4492226
+- G19 Link a chart, table, or slides to Google Docs or Slides. https://support.google.com/docs/answer/7009814
+- G20 View the activity on your Google Docs, Sheets & Slides. https://support.google.com/docs/answer/7378739
+- G21 Use add-ons, Apps Script, AppSheet & Data Studio. https://support.google.com/docs/answer/2942256
+- G22 Switch view mode on Google Slides. https://support.google.com/docs/answer/14917995
+- G23 View live pointers on Google Slides. https://support.google.com/docs/answer/13853477
+- G24 Use comments, action items, & emoji reactions. https://support.google.com/docs/answer/65129
+- G25 Zoom or change your document view. https://support.google.com/docs/answer/99753
+- G26 Add or change animations and transitions. https://support.google.com/docs/answer/1689475
+- G27 Crop & adjust images. https://support.google.com/docs/answer/4600160
+- G28 Add and edit tables. https://support.google.com/docs/answer/1696711
+- G29 Change how text fits in placeholders & text boxes. https://support.google.com/docs/answer/10364036
+- G30 Add a numbered list, bulleted list, or checklist. https://support.google.com/docs/answer/3300615
+- G31 Search and use find and replace. https://support.google.com/docs/answer/62754
+- G32 Translate documents or write in a different language. https://support.google.com/docs/answer/187189
+- G33 Work with links & bookmarks. https://support.google.com/docs/answer/45893
+- G34 Use building blocks in Google Slides. https://support.google.com/docs/answer/15720996
+- G35 Use speaker spotlight. https://support.google.com/docs/answer/14260821
+- G36 Delete a document, spreadsheet, presentation, or video. https://support.google.com/docs/answer/6023494
+- G37 Make your document, presentation, sheets & videos more accessible. https://support.google.com/docs/answer/6199477
+- G38 Copy and paste text and images. https://support.google.com/docs/answer/161768
+- G39 Use Google Keep in a document or presentation. https://support.google.com/docs/answer/7298487
+- G40 Use templates. https://support.google.com/docs/answer/148833
+- G41 Share files from Google Drive. https://support.google.com/docs/answer/2494822
+- G42 Stop, limit, or change sharing. https://support.google.com/docs/answer/2494893
+- G43 Google Slides cheat sheet (Learning Center). https://support.google.com/a/users/answer/9300133
+- G44 Switch from Microsoft PowerPoint to Google Slides (Learning Center). https://support.google.com/a/users/answer/9310378
+- G45 Share a presentation (Learning Center). https://support.google.com/a/users/answer/9310270
+- G46 Change the color of text, objects, and backgrounds. https://support.google.com/docs/answer/13267978
+- G47 Use slides recording in Google Slides. https://support.google.com/docs/answer/14221290
+- G48 Present slides with captions. https://support.google.com/docs/answer/9109474
+- G49 Extend Google Slides (Apps Script). https://developers.google.com/apps-script/guides/slides
+- G50 Menu and toolbar updates in Google Docs editors, 2018-03-07. https://workspaceupdates.googleblog.com/2018/03/menu-and-toolbar-updates-in-google-docs.html
+- G51 Enhanced menus in Google Slides and Drawings, 2022-10-17. https://workspaceupdates.googleblog.com/2022/10/enhanced-menus-google-slides-drawings%20.html
+- G52 New sidebar with design elements in Google Slides, 2025-03-31. https://workspaceupdates.googleblog.com/2025/03/new-sidebar-with-design-elements-in-google-slides.html
+- G-extra Follow a collaborator on Google Slides. https://support.google.com/docs/answer/12815819
+
+Third-party pages (all read 2026-09-11; publication date in parentheses where the page states one):
+
+- T01 BrightCarbon, Google Slides: The ULTIMATE guide (22 Jun 2023). https://www.brightcarbon.com/blog/google-slides-ultimate-guide/
+- T02 Computerworld, Google Slides cheat sheet (updated Sep 4, 2025). https://www.computerworld.com/article/1658651/how-to-use-google-slides.html
+- T03 Drag, Google Slides: The 2026 Ultimate Guide (updated Jul 28, 2026). https://www.dragapp.com/blog/google-slides-guide/
+- T04 Alice Keeler, Present Google Slides NOT Full Screen (Sep 19, 2024). https://alicekeeler.com/2024/09/19/present-google-slides-not-full-screen/
+- T05 How-To Geek, How to Import Slides From Another Presentation in Google Slides (Mar 27, 2022). https://www.howtogeek.com/787547/how-to-import-slides-from-another-presentation-in-google-slides/
+- T06 Cloud Skills Academy, Import slides. https://www.cloudskillsacademy.com/slides/getting-started-with-google-slides/import-slides
+- T07 CustomGuide, Google Slides Quick Reference Guide PDF (2024). https://www.customguide.com/cheat-sheet/google-slides-quick-reference.pdf
+- T08 CustomGuide Google Slides lessons: create-presentations, file-management, find-and-replace, format-objects, google-slides-add-ons, google-slides-animations, google-slides-help, google-slides-present, google-slides-presenter-view, google-slides-themes, how-to-add-a-border-in-google-slides, how-to-add-links-to-google-slides, how-to-add-slide-numbers-in-google-slides, how-to-add-slide-transitions-in-google-slides, how-to-add-speaker-notes-in-google-slides, how-to-change-view-in-google-slides, how-to-clear-formatting-in-google-slides, how-to-copy-a-slide-in-google-slides, how-to-delete-a-slide-on-google-slides, how-to-download-a-google-slides-presentation, how-to-duplicate-a-slide-in-google-slides, how-to-edit-images-in-google-slides, how-to-embed-a-video-in-google-slides, how-to-format-text-in-google-slides, how-to-insert-charts-in-google-slides, how-to-insert-diagrams-in-google-slides, how-to-insert-tables-into-google-slides, how-to-open-google-slides-presentation, how-to-print-google-slides, how-to-send-image-to-back-in-google-slides, how-to-share-google-slides-presentation-link, move-and-skip-slides, undo-and-redo, version-history-google-slides, word-art-in-google-slides. All under https://www.customguide.com/course/google-slides/
+- T09 Slidesgo School tutorials: how-to-arrange-and-align-objects-in-google-slides, how-to-add-a-border-in-google-slides, how-to-add-a-bulleted-or-numbered-list-in-google-slides, how-to-add-a-video-in-google-slides, how-to-add-and-edit-audio-or-music-in-google-slides, how-to-add-and-edit-tables-in-google-slides, how-to-add-and-work-with-speaker-notes-in-google-slides, how-to-add-animations-and-transitions-in-google-slides, how-to-add-copy-and-delete-text-boxes-in-google-slides, how-to-add-footers-in-google-slides, how-to-add-hyperlinks-in-google-slides, how-to-add-or-change-themes-in-google-slides, how-to-add-slide-numbers-in-google-slides, how-to-add-superscript-and-subscript-in-google-slides, how-to-apply-effects-to-an-image-in-google-slides-presentation, how-to-apply-filters-to-the-pictures-in-google-slides, how-to-change-slides-orientation-in-google-slides, how-to-change-the-background-image-and-color-in-google-slides, how-to-change-the-design-in-google-slides, how-to-change-the-language-settings-in-google-slides, how-to-change-the-slide-size-in-google-slides, how-to-export-your-google-slides-presentation-as-a-pdf-file, how-to-formt-the-text-in-google-slides, how-to-group-or-ungroup-elements-in-google-slides, how-to-insert-crop-or-mask-images-in-google-slides, how-to-make-charts-in-google-slides, how-to-merge-multiple-google-slides-into-one, how-to-print-presentations-in-google-slides, how-to-work-with-colors-in-a-google-slides-presentation. All under https://slidesgo.com/slidesgo-school/google-slides-tutorials/
+- T10 TechRepublic, How to manage file versions in Google Docs, Sheets, and Slides (2018). https://www.techrepublic.com/article/version-history-essentials-for-google-docs-sheets-and-slides/
+- T11 How-To Geek, How to Check Version History in Google Slides. https://www.howtogeek.com/733388/how-to-check-version-history-in-google-slides/
+- T12 Art of Presentations, Toolbar in Google Slides (Feb 24, 2023) and How to Make a Copy of Google Slides. https://artofpresentations.com/toolbar-in-google-slides/ and https://artofpresentations.com/make-a-copy-of-google-slides/
+- T13 Gadgetsfeed, How to Download Google Slides. https://gadgetsfeed.com/how-to-download-google-slides/
+- T14 BrightCarbon, How to share your Google Slides presentation (4 Nov 2020). https://www.brightcarbon.com/blog/how-to-share-google-slides-presentation/
+- T15 BrightCarbon, How to change slide size in Google Slides. https://www.brightcarbon.com/blog/how-to-change-slide-size-in-google-slides/
+- T16 BrightCarbon, How to use Presenter view in Google Slides (4 Aug 2021). https://www.brightcarbon.com/blog/presenter-view-google-slides/
+- T17 SlideEgg, How to Change Indentation & Spacing in Google Slides (2026). https://www.slideegg.com/blog/google-slides-tutorials/how-to-change-indentation-spacing-and-line-spacing-in-google-slides/
+- T18 Copresent, Google Slides Presenter View: Full Guide 2026. https://www.copresent.app/blog/google-slides-presenter-view/
+- T19 SFUSD, Google Slides for Families (Mar 9, 2021). https://www.sfusd.edu/learning/resources-learning/google/families/google-slides-families
+- T20 Eric Curts, Using Google Slides (2014, historical labels). https://docs.google.com/document/d/1Rxw4DRvWizdHh21CIOrE8sCdV92bQ2GetHFMAp0grC4/
+- T21 TutKit, Set up basic settings in Google Slides specifically. https://www.tutkit.com/en/text-tutorials/6575-set-up-google-slides-basic-settings-deliberately
+- T22 8apps, All Google Slides Keyboard Shortcuts. https://www.8apps.co/guides/accelerator-keys/google-slides-shortcuts
+- T23 SlidesAI, Google Slides Shortcuts For PC, Mac & Chrome OS. https://www.slidesai.io/blog/google-slides-shortcuts
+- T24 9to5Google, Google Slides getting new sidebar, building blocks, and more (Mar 31, 2025). https://9to5google.com/2025/03/31/google-slides-sidebar/
+- T25 Android Police, Google Slides combines new and existing controls in a streamlined sidebar (Mar 31, 2025). https://www.androidpolice.com/google-slides-new-sidebar-controls/
+- T26 Layerpath guides: how-to-import-slides-in-google-slides, how-to-add-a-border-in-google-slides, how-to-add-a-link-to-a-picture-in-google-slides, how-to-add-music-to-google-slides, how-to-see-edit-history-in-google-slides. All under https://www.layerpath.com/learn/
+- T27 MagicSlides, Where is the Adjustments Menu in Google Slides. https://www.magicslides.app/blog/where-is-the-adjustments-menu-in-google-slides
+- T28 Plus AI, How to zoom in on Google Slides. https://plusai.com/blog/how-to-zoom-in-on-google-slides/
+- T29 Wafflebytes, Google Slides - Rulers & Guides (Apr 2018). http://wafflebytes.blogspot.com/2018/04/google-slides-rulers-guides.html
+- T30 SlideModel, How to Align Objects in Google Slides. https://slidemodel.com/how-to-align-objects-in-google-slides/
+- T31 My Primary Paradise, Arrange Objects in Google Slides (Apr 12, 2021). https://www.myprimaryparadise.com/2021/04/12/arrange-objects-google-slides/
+- T32 SlideTeam, How to Import PowerPoint Templates and Themes into Google Slides. https://www.slideteam.net/blog/how-to-import-powerpoint-templates-and-themes-into-google-slides-a-step-by-step-tutorial
+- T33 We Thrive Together, Google Slides for Beginners. https://wethrivetogether.org/tech-training-hub/topics/google-slides/
+- T34 Envato Tuts+, How to Present Your Google Slides Slideshow Presentation. https://business.tutsplus.com/tutorials/present-google-slideshow--cms-29411
+- T35 Opt Node, How to Import Slides in Google Slides (Jul 1, 2025). https://optnode.com/index.php/2025/07/01/how-to-import-slides-in-google-slides-a-step-by-step-guide/
+- T36 BrightCarbon, Google Slides Themes and Layouts (25 Sep 2020). https://www.brightcarbon.com/blog/editing-themes-and-layouts-in-google-slides/

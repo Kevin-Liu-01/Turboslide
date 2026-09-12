@@ -1,0 +1,396 @@
+# Google Slides parity research 03: home page, themes and layouts, input and output
+
+Written 2026-09-11 for the Turboslide Google Slides parity round. Every source in this report was read on 2026-09-11 and is listed with its URL in the Sources section at the end. Nothing here was checked inside a signed-in Google account; every statement rests on public Google help pages, public Google product and developer documentation, or public third party articles. Where a claim could not be confirmed from a public source it is tagged unverified in the table and repeated in the Unverified section.
+
+The report covers three areas that Kevin's directive names as the entry experience for sales users:
+
+- (a) the Slides home page and the flow that creates a new presentation
+- (b) the theme, master and layout system, including the eleven default layouts and every menu entry that touches them
+- (c) input and output, which is the File menu and the dialogs behind it
+
+Each table uses the same four columns: Element or item, Behaviour, Position, Source. Source cells cite entries from the Sources section, for example S1, and a tag: Google means a Google owned page, secondary means a third party page, and unverified means no public page confirmed the exact label or behaviour. Google Slides is named as the reference product; no Google icon, logo, artwork or theme asset is reproduced here, and none should be copied into Turboslide. Turboslide uses Heroicons 20 solid and Inter.
+
+## How to read the positions
+
+Google Slides has three chrome layers that matter for this report.
+
+1. The home page at slides.google.com. It has an app bar, a template strip under the heading "Start a new presentation", and a recent presentations list.
+2. The editor. Its top area holds the title row (title box, star, shortcut, move and status icons), the menu bar (File, Edit, View, Insert, Format, Slide, Arrange, Tools, Extensions, Help), and the toolbar. Below that sit the filmstrip on the left, the canvas in the centre, the speaker notes under the canvas, and a right hand side panel that hosts Themes, Motion, Version history, the design sidebar and other panes (S38, S40, S52).
+3. Dialogs, which are centred modal windows (Open, Import slides, Import theme, Background, Page setup, Publish to the web, Make a copy, Email this file, Move, Details).
+
+## (a) Home page and the new presentation flow
+
+### a.1 Home page structure
+
+The Google help pages call this screen the "Slides home screen" (S3). The screen has three vertical bands: the app bar, the template strip, and the recent presentations list. Only the parts confirmed by public sources are listed.
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| Home URL | slides.google.com and docs.google.com/presentation open the home screen for a signed in user. Signed out, docs.google.com/presentation/u/0/ redirects to google.com/slides/about (observed with curl). | Browser address | S3 Google; S78 observed |
+| Main menu (hamburger) | Opens a drawer with the other editors and a Settings entry. The Google help page for templates names the path "Menu and then Settings" to reach the toggle "Display recent templates on home screens". Other drawer entries are not confirmed by a public page. | App bar, far left | S2 Google; drawer contents unverified |
+| Search field | Searches the user's Drive for presentations. Exact placeholder text not confirmed. | App bar, centre | S40 secondary; label unverified |
+| "Start a new presentation" heading | Heading over the template strip. Google's help text says "In the top left, under 'Start a new presentation,' click New" (S3). | Top of the page, under the app bar | S3 Google; S4 Google; S40 secondary |
+| Blank presentation card | First card in the strip. It shows a large plus mark and the label "Blank presentation" (S40, S54). Clicking it creates and opens a new presentation in the same tab (S3, S4). | Top left of the strip | S3 Google; S40 secondary; S54 secondary |
+| Featured template cards | A row of template thumbnails to the right of the Blank card. Clicking one opens a copy of that template as a new presentation (S2). By default only the most popular templates are shown (S89). | Strip, right of Blank | S2 Google; S40 secondary; S89 secondary |
+| "Template gallery" link | Opens the full gallery page. Google's help text says "At the top right, click Template Gallery" (S2). Third party guides place it at the right end of the strip header (S40, S90). Several guides describe up and down arrows next to it that expand or collapse the strip; the exact control is not confirmed by a Google page. | Right end of the strip header | S2 Google; S40 secondary; S90 secondary; arrow control unverified |
+| Hide or show the template strip | Main menu, Settings, toggle "Display recent templates on home screens" (S2). Third party guides also describe a three dot menu on the strip with a "Hide all templates" entry; not confirmed by a Google page. | Settings, and strip header | S2 Google; S57 secondary; three dot menu unverified |
+| Recent presentations list | Lists presentations the user owns or that were shared with them, in reverse chronological order of last opened (S40). | Below the strip, full width | S40 secondary |
+| Owned by filter | A dropdown that filters the list by ownership. One guide describes it as the choice between all presentations and only the ones you own (S55). The labels "Owned by anyone", "Owned by me" and "Not owned by me" are commonly reported but not confirmed by a public page read for this report. | List header, left | S55 secondary; labels unverified |
+| Grid and list view toggle | Switches the recent list between thumbnails (grid) and rows (list). The list view shows name, owner and last opened time (S55). | List header, right | S55 secondary |
+| Sort control (AZ icon) | Opens sort options. Computerworld names "Last modified by me", "Last modified" and alphabetical by title, with the default being most recently opened first (S40). The label of the default option is commonly reported as "Last opened by me" but not confirmed by a Google page. | List header, right of the view toggle | S40 secondary; default label unverified |
+| Folder icon (file picker) | Opens the Drive file picker so the user can browse to a folder and open a file (S40, S55). | List header, right of the sort icon | S40 secondary; S55 secondary |
+| Per item three dot menu | Each row or card has a menu with rename and remove actions (S55). "Open in new tab" is commonly reported and not confirmed. | Right end of each row or card | S55 secondary; "Open in new tab" unverified |
+| Available offline from the home screen | Once Drive offline is on, the home screen's More menu for a file offers "Available offline" (S12). | Per item menu | S12 Google |
+
+### a.2 Template gallery page
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| Gallery page | Full page listing Google's templates and, in Workspace accounts, the organisation's templates. Clicking a template opens a copy (S2). Hovering shows a preview (S90). | Replaces the home page | S2 Google; S90 secondary |
+| Tabs | A "General" tab holds Google's templates; a second tab carries the organisation's name and holds custom templates (S57). | Top of the gallery page | S57 secondary |
+| Categories for Slides | The Slides gallery groups Google's templates under "Personal", "Work" and "Education" (S56, S90). Template names reported under each: Personal has General Presentation, Your Slides Carnival, Big Idea, Portfolio, Photo Album, Look Book, Recipe Book, Recipe Showcase, Yearbook, Party Invite; Work has Professional Profiles, Prototyping, Consulting Proposals, Pitches, Status Reports, Case Studies, Employee Certificate; Education has Lesson Plans, Book Reports, Field Trips, Flash Cards, Science Projects, Science Fair, Student Certificate (S56). The list is from a third party and may lag the live gallery. | Section headings down the gallery page | S56 secondary; S90 secondary |
+| "Submit template" button | In the organisation tab. The user picks a file, picks a category and chooses whether to submit a copy or the original (S57). Admins set submission mode to Open, Moderated or Restricted and define the categories (S34). | Organisation tab, top right | S57 secondary; S34 Google |
+| Locale | Slide templates are only available in the English (US) locale (S1). The general templates help page lists 21 languages for templates across the editors (S2); the two pages disagree, and the Slides specific page is the narrower claim. | n/a | S1 Google; S2 Google |
+| Templates inside the editor | An open presentation has a "Templates" button at the top left; clicking a template offers a single slide or "Insert all slides" (S1, S4). Since November 2024 the same collection is reachable from Insert, Templates (S26), and since March 2025 from the design sidebar on the right (S25, S27). File, New, "From Template Gallery" also opens the gallery (S1). | Toolbar top left; Insert menu; right sidebar | S1 Google; S4 Google; S25 Google; S26 Google; S27 Google |
+| Organisation default templates | Workspace admins can set a domain template with branded slides, layouts, images, colours and fonts; it appears when creating a new presentation, in the template sidebar that opens by default on new documents, or via Insert, Templates (S32). Limits: up to 5 themes per presentation and up to 100 layouts per theme (S33). | Right sidebar on a new presentation | S32 Google; S33 Google |
+
+### a.3 Creating a new presentation
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| Create URL | slides.google.com/create returns 301 to docs.google.com/presentation/create, which creates a new presentation for a signed in user and returns 302 to the Google sign in page for a signed out visitor (S3, S78). | Browser address | S3 Google; S78 observed |
+| .new shortcuts | slides.new, slide.new, deck.new and presentation.new each return 302 to docs.google.com/presentation/u/0/create?usp=dot_new (S77, S78). | Browser address | S77 secondary; S78 observed |
+| Title | The new file is named "Untitled presentation". Clicking the title box selects the text for renaming; File, Rename does the same. If the title slide already has text, Slides offers that text as the file name (S4, S9, S53, S54). | Title box, top left of the editor | S4 Google; S9 Google; S53 secondary; S54 secondary |
+| Default theme | A blank presentation opens with the "Simple Light" theme (S43, S87). | Applied to the deck | S43 secondary; S87 secondary |
+| First slide | One slide using the "Title slide" layout with two placeholders that read "Click to add title" and "Click to add subtitle" (S53, S54). | Filmstrip slide 1, canvas | S53 secondary; S54 secondary |
+| Speaker notes | An area under the canvas reads "Click to add speaker notes" (S40). | Below the canvas | S40 secondary |
+| Right panel on open | Historically the Themes panel opens on the right when a new presentation is created (S54, S59). Since August 2023, Workspace accounts with default templates get a template sidebar that opens by default on new documents (S32). Since March 2025 a design sidebar with building blocks, stock images, templates and image generation opens on the right (S25). Which panel opens on a fresh consumer account today could not be confirmed without signing in. | Right side panel | S25 Google; S32 Google; S54 secondary; S59 secondary; current default unverified |
+| Title row icons | Next to the title: a star, and an "Add shortcut to Drive" button placed next to the star (S30). A folder icon shows the file location and lets the user move it (S70). | Title row, right of the title | S30 Google; S52 secondary; S70 secondary |
+| Slideshow and Share | "Slideshow" with a down arrow (Presenter view and more) and "Share" sit at the top right (S18, S19). | Top right of the editor | S18 Google; S19 Google |
+| Toolbar plus button | "New slide" (plus) at the top left of the toolbar; the arrow next to it is "New slide with layout" and shows the layouts of the current theme (S4, S5). Shortcut Ctrl+M (S15). | Toolbar, far left | S4 Google; S5 Google; S15 Google |
+| Import an existing file | Upload a PowerPoint file in Drive, then right click, Open with, Google Slides (S4). File, Open also accepts an upload (see c.2). | Drive, or File menu | S4 Google |
+
+## (b) Theme, master and layout system
+
+### b.1 Definitions and object model
+
+Google defines the words a sales user will meet in the menus.
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| Theme | "A preset group of colors, fonts, background, and layouts" (S1). A theme is one master plus its layouts plus a colour scheme and fonts. | Slide menu, Themes panel | S1 Google |
+| Background | "The picture or color behind your slide's content" (S1). | Slide, Change background | S1 Google |
+| Layout | "The way your text and images are arranged on a slide" (S1). | Layout button; Slide, Apply layout | S1 Google |
+| Template | "A pre-designed collection of slides" carrying a theme, layouts, backgrounds, fonts, colours and sample content (S1). | Template gallery; Templates button | S1 Google |
+| Page hierarchy | The Slides API models five page types: SLIDE, MASTER, LAYOUT, NOTES and NOTES_MASTER. A slide references its layout by layoutObjectId and its master by masterObjectId; a layout references its master. Slides inherit from layouts, which inherit from masters (S23). | Data model | S23 Google |
+| Theme colour slots | The colour scheme has twelve slots: DARK1, LIGHT1, DARK2, LIGHT2, ACCENT1 to ACCENT6, HYPERLINK and FOLLOWED_HYPERLINK (S21). In the editor these appear as "Text and background 1" to "Text and background 4", "Accent 1" to "Accent 6" and "Link" (S81). | Edit theme, Colors | S21 Google; S81 secondary |
+| Placeholder types | The API lists BODY, CHART, CLIP_ART, CENTERED_TITLE, DIAGRAM, DATE_AND_TIME, FOOTER, HEADER, MEDIA, OBJECT, PICTURE, SLIDE_NUMBER, SUBTITLE, TABLE, TITLE and SLIDE_IMAGE (S22). The editor exposes text placeholders for title, subtitle and body, and image placeholders (S28, S43, S64). | Theme builder | S22 Google; S28 Google; S43 secondary; S64 secondary |
+| Prompt text | Placeholders show fixed prompt text: "Click to add title", "Click to add subtitle", "Click to add text". Custom prompt text is not supported (S53, S65). | Canvas | S53 secondary; S65 secondary |
+| Limits | Up to 5 themes per presentation and up to 100 layouts per theme (S33). | n/a | S33 Google |
+
+### b.2 The eleven default layouts
+
+The Simple Light theme, and every Google built in theme, ships eleven layouts. The Apps Script reference gives the UI name for nine of them and describes the other two; a third party template author lists all eleven names as they appear in the Layout menu (S20, S49, S65).
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| Title slide | API TITLE: "Layout with a title and a subtitle." Used by the first slide of a new presentation. | Layout menu, first entry | S20 Google; S65 secondary |
+| Section header | API SECTION_HEADER: "Layout with a section title." | Layout menu | S20 Google; S65 secondary |
+| Title and body | API TITLE_AND_BODY: "Layout with a title and body." | Layout menu | S20 Google; S65 secondary |
+| Title and two columns | API TITLE_AND_TWO_COLUMNS: "Layout with a title and two columns." | Layout menu | S20 Google; S65 secondary |
+| Title only | API TITLE_ONLY: "Layout with only a title." | Layout menu | S20 Google; S65 secondary |
+| One column text | API ONE_COLUMN_TEXT: "Layout with one title and one body, arranged in a single column." | Layout menu | S20 Google; S65 secondary |
+| Main point | API MAIN_POINT: "Layout with a main point." | Layout menu | S20 Google; S65 secondary |
+| Section title and description | API SECTION_TITLE_AND_DESCRIPTION: "Layout with a title and subtitle on one side and description on the other." | Layout menu | S20 Google; S65 secondary |
+| Caption | API CAPTION_ONLY: "Layout with a caption at the bottom." | Layout menu | S20 Google; S65 secondary |
+| Big number | API BIG_NUMBER: "Layout with a big number heading." | Layout menu | S20 Google; S65 secondary |
+| Blank | API BLANK: "Blank layout, with no placeholders." | Layout menu, last entry | S20 Google; S65 secondary |
+| Count | "eleven different layouts to choose from" (S49). | n/a | S49 secondary |
+| Default for a new slide | A new slide takes the same layout as the selected slide unless a layout is chosen from the arrow (S49, S88). | n/a | S49 secondary; S88 secondary |
+
+### b.3 Layout controls
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| New slide (plus) | Inserts a slide after the selected one with the same layout (S4, S5, S49). Ctrl+M, Cmd+M (S15). | Toolbar, first button | S4 Google; S5 Google; S15 Google |
+| New slide with layout (arrow) | Dropdown of layout thumbnails with names; picking one inserts a slide with that layout (S4, S5, S49). | Toolbar, arrow attached to the plus | S4 Google; S5 Google; S49 secondary |
+| Layout button | Toolbar button that opens the same thumbnail list to change the selected slide's layout: "At the top, click Layout" (S1). | Toolbar, right hand group | S1 Google; S49 secondary |
+| Slide, Apply layout | Submenu with the layout thumbnails, applied to the selected slides (S41, S43). | Slide menu | S41 secondary; S43 secondary |
+| Right click, Apply layout | Same submenu from the filmstrip context menu (S43). | Filmstrip context menu | S43 secondary |
+| Behaviour on apply | Existing placeholder content is repositioned into the new layout's placeholders; content in freestanding boxes is left where it is. Changes to a layout in the theme builder flow to every slide that uses that layout (S42, S43). | n/a | S42 secondary; S43 secondary |
+| 2025 toolbar change | Community threads from 2025 report that the "New slide with layout" arrow was replaced by a "Templates" control for some users while the design sidebar rolled out (S83, S84). Google's sidebar post does not say what it replaced (S25). Treat the exact 2025 toolbar as unverified. | Toolbar | S83 secondary; S84 secondary; S25 Google; unverified |
+
+### b.4 Themes panel and Change theme
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| Slide, Change theme | Opens the Themes panel: "At the top, click Slide, Change theme. On the right, click the theme you want" (S1). The toolbar "Theme" button opens the same panel (S58, S59). | Slide menu; toolbar | S1 Google; S58 secondary; S59 secondary |
+| Themes panel | Right hand panel titled "Themes" showing large thumbnails of Google's built in themes with names under them. Clicking a thumbnail applies the theme to the whole presentation and removes the previous theme (S59, S60). | Right side panel | S59 secondary; S60 secondary |
+| "In this presentation" | Dropdown at the top of the panel listing the themes currently in the file (S59). | Top of the Themes panel | S59 secondary |
+| Built in theme count and names | TechRepublic counts 23 built in themes (S58). Names confirmed by public pages read for this report: Simple Light (default), Material, Modern (S87), Momentum, Focus (S91 as cited via Producing Paradise). The full list of 23 names could not be confirmed without signing in. | Themes panel | S58 secondary; S87 secondary; S91 secondary; full list unverified |
+| "Import theme" button | "In the bottom right, click Import theme" (S1). See b.5. | Bottom right of the Themes panel | S1 Google |
+| Organisation themes | Admin configured default themes appear for Workspace users (S32, S33). | Themes panel or template sidebar | S32 Google; S33 Google |
+
+### b.5 Import theme
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| Steps | Slide, Change theme, Import theme, double click the presentation, click the theme, click Import theme (S1, S17). | Dialog | S1 Google; S17 Google |
+| Dialog tabs | "Presentations" tab with My Drive, Shared drives, Shared with me and Recent, plus an "Upload" tab that accepts a dragged or browsed file, including a PowerPoint file (S58, S60). | Dialog top | S58 secondary; S60 secondary |
+| Select step | The user picks a file and clicks Select; if the file holds several themes a second step shows them; the final button is "Import theme" (S17, S60). | Dialog bottom right | S17 Google; S60 secondary |
+| Effect | The imported theme is applied to the whole presentation and replaces the current theme (S59, S60). | n/a | S59 secondary; S60 secondary |
+
+### b.6 Edit theme and the theme builder
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| Entry points | Slide, Edit theme (S1) and View, Theme builder (S24, S43). The view was called "Master" until 25 May 2021 (S24). | Slide menu; View menu | S1 Google; S24 Google; S43 secondary |
+| View | The canvas area switches to a dark background. The left panel shows the single theme slide under a "Theme" heading and the layouts under a "Layouts" heading (S42, S43, S64). | Whole editor | S42 secondary; S43 secondary; S64 secondary |
+| Rename | A "Rename" button above the canvas renames the theme (S42, S64). | Top of the builder | S42 secondary; S64 secondary |
+| Propagation | Changes to the theme slide apply to every slide; changes to a layout apply only to slides that use it (S42, S43). | n/a | S42 secondary; S43 secondary |
+| Layout context menu | Right click a layout for New layout (Ctrl+M inside the builder), Duplicate layout, Rename layout and delete (S42, S43). | Left panel | S42 secondary; S43 secondary |
+| Placeholders | The builder toolbar has an "Insert text placeholder" dropdown with "Title placeholder", "Subtitle placeholder" and "Body text placeholder", and an "Insert image placeholder" control with Rectangle, Rounded rectangle and Oval shapes (S64). The Insert menu also lists Placeholder with Title, Subtitle, Body and Image entries (S43). Image placeholders shipped July 2021; on a slide the user clicks the placeholder, picks a source and the image is inserted (S28). | Builder toolbar; Insert menu | S28 Google; S43 secondary; S64 secondary |
+| Colors | "At the top, click Colors. To the right, under 'Theme colors,' choose the color you want to edit from the drop-down"; pick a Default preset or a Custom hex value (S1). The dropdown lists Text and background 1 to 4, Accent 1 to 6 and Link (S81). | Builder toolbar; right panel | S1 Google; S81 secondary |
+| Other builder controls | Background, Shape and Line buttons appear in the builder toolbar (S64). The master shows nine text levels for body text styling (S65). | Builder toolbar | S64 secondary; S65 secondary |
+| Close | An X at the top right closes the builder; selecting a slide in the filmstrip also leaves it. Changes save automatically (S42, S43). | Top right of the builder | S42 secondary; S43 secondary |
+
+### b.7 Change background
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| Entry points | Slide, Change background (S1). A "Background" toolbar button is described by Computerworld among the toolbar commands (S40). | Slide menu; toolbar | S1 Google; S40 secondary |
+| Dialog | Title "Background" (S61). Row "Color" with a colour box that opens a picker with Solid, Gradient and Custom sections (S1, S61, S62). Row "Image" with a "Choose" button that opens the image picker: upload, by URL, camera, Photos, Drive, Google Images (S1, S86). | Centred modal | S1 Google; S61 secondary; S62 secondary; S86 secondary |
+| Buttons | "Done" applies to the selected slide; "Add to theme" applies to every slide (S1). A reset button that returns the slide to the theme background is reported by third parties, commonly labelled "Reset to theme"; the exact label is not confirmed by a Google page. | Dialog footer | S1 Google; S61 secondary; reset label unverified |
+| Image limits | ".gif, .jpg, or .png, and less than 50 MB" (S1). | n/a | S1 Google |
+
+### b.8 Transition
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| Entry points | Slide, Transition (S11); View, Motion (S11); toolbar "Transition" button (S40); right click, Transition (S63). | Slide menu; View menu; toolbar; context menu | S11 Google; S40 secondary; S63 secondary |
+| Motion panel | Right hand panel titled "Motion" with a "Slide Transition" section and an "Object Animations" section (S11, S63). | Right side panel | S11 Google; S63 secondary |
+| Transition types | Dropdown: None, Dissolve, Fade, Slide from right, Slide from left, Flip, Cube, Gallery (S63). | Slide Transition dropdown | S63 secondary |
+| Speed | "To adjust speed, drag the slider" (S11). | Under the dropdown | S11 Google |
+| Apply to all slides | Button that copies the transition to every slide (S63). | Under the slider | S63 secondary |
+| Play | "To preview the transition or animation, click Play" (S11). | Panel footer | S11 Google |
+| Add animation | "Click Add animation" starts an object animation (S11). | Object Animations section | S11 Google |
+
+## (c) Input and output: the File menu
+
+### c.1 Menu order
+
+Public pages confirm each File menu entry individually, but no Google page prints the full menu in order. The order below is the order third party guides and screenshots report and is consistent with the 2018 menu reorganisation post (S31, S41, S52). Treat the order as reported, not verified.
+
+1. New
+2. Open
+3. Import slides
+4. Make a copy
+5. Share
+6. Email
+7. Download
+8. Rename
+9. Move
+10. Add shortcut to Drive
+11. Move to trash
+12. Version history
+13. Make available offline
+14. Details
+15. Language
+16. Page setup
+17. Print preview (labelled "Print settings and preview" in Google's print help page)
+18. Print
+
+Workspace accounts also see an "Approvals" entry (S41).
+
+### c.2 Item by item
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| File, New | Submenu that creates a new Presentation and offers "From Template Gallery" (S1, S57). Other submenu entries (Document, Spreadsheet, Form, Drawing) are commonly reported and not confirmed by a Google page. | File menu, first item | S1 Google; S57 secondary; other entries unverified |
+| File, Open | Ctrl+O, Cmd+O (S15). Opens the Drive picker dialog with a search field, a Drive folder browser and tabs for Shared with me, Starred and Recent; the user selects a file and clicks Open (S50). The same picker family in Import slides and Import theme shows My Drive, Shared drives, Shared with me, Recent and an Upload tab (S44, S60), so the Open dialog is expected to match; the exact tab set and order for Open is unverified. | Centred modal | S15 Google; S50 secondary; S44 secondary; S60 secondary; tab set unverified |
+| File, Import slides | "Add slides from another presentation to your current slide deck" (S16). Steps: File, Import slides, choose a presentation from Drive or upload, click Select, click the slides, tick "Keep original theme" if wanted, click Import slides (S17). | File menu | S16 Google; S17 Google |
+| Import slides dialog | "Presentations" tab lists recent Slides files with a search box, list and grid toggles and sort; "Upload" tab takes a browsed or dragged file such as a PowerPoint file (S44). After Select, a grid of slide thumbnails appears with "All" and "None" links, a Back button, a selected count at the bottom, the "Keep original theme" checkbox and the "Import slides" button. Imported slides land at the end of the presentation (S44). | Centred modal | S44 secondary |
+| Keep original theme | Checked: slides keep their source theme, which adds a theme to the file. Unchecked: slides adopt the current theme (S17, S44). | Import slides dialog footer | S17 Google; S44 secondary |
+| File, Make a copy | Submenu "Entire presentation" and "Selected slides"; the second appears when slides are selected in the filmstrip with Ctrl or Cmd click (S69). | File menu | S69 secondary |
+| Make a copy dialog | Fields: Name (defaults to "Copy of" plus the title), Folder picker, "Share it with the same people", "Copy comments and suggestions" with an option to include resolved comments, and "Remove speaker notes" (S9, S51, S69). Google's help ends with "Click Ok"; third party pages report a "Make a copy" button (S9, S69). The copy opens in a new tab. | Centred modal | S9 Google; S51 secondary; S69 secondary |
+| File, Share | Submenu "Share with others" and "Publish to web" (S7). "Share with others" opens the same dialog as the Share button at the top right (S14, S18). | File menu | S7 Google; S14 Google; S18 Google |
+| Share dialog | Field to add people and groups; roles Viewer, Commenter, Editor; "Notify people" checkbox with a Message field and Send; "General access" with "Restricted" or "Anyone with the link" and a role; "Copy link"; "Done"; a gear with "Editors can change permissions and share" and "Viewers and commenters can see the option to download, print, and copy"; expiry dates on work and school accounts (S14). | Centred modal | S14 Google |
+| Publish to web | File, Share, Publish to web. "Choose how quickly to advance the slides", click Publish, copy the URL or the embed code (S7). Owners and editors can publish; admins can disable it (S7). Viewers get a view only presentation player (S7). | File, Share submenu | S7 Google |
+| Publish dialog, Link tab | Default tab (S47). "Auto-advance slides" dropdown with 1, 2, 3, 5, 10, 15, 30 or 60 seconds (S71); checkboxes "Start slideshow as soon as the player loads" and "Restart the slideshow after the last slide" (S47, S73); "Publish" button; confirmation "Are you sure you want to publish this selection?" then OK (S47, S71); the link appears with share icons (S47). | Dialog | S47 secondary; S71 secondary; S73 secondary |
+| Publish dialog, Embed tab | Same auto advance and checkboxes plus a "Slide size" dropdown with Small, Medium, Large and Custom; the published iframe carries width and height (S47, S48, S73). Pixel values for the presets are commonly reported as 480 by 299, 960 by 569 and 1440 by 839 but were not confirmed by any page read. | Dialog | S47 secondary; S48 secondary; S73 secondary; pixel values unverified |
+| Published URL parameters | The published link ends in /pub and the embed in /embed with start, loop and delayms parameters, default start=false&loop=false&delayms=3000; rm=minimal hides the player chrome (S48, S72). Google says Slides always republishes changes automatically (S7). | Generated URL | S7 Google; S48 secondary; S72 secondary |
+| Published content and settings | Expandable section with "Automatically republish when changes are made" (cannot be turned off for Slides) and "Stop publishing" (S7, S71). | Bottom of the dialog | S7 Google; S71 secondary |
+| File, Email | Submenu "Email this file" and "Email collaborators" (S40). "Email draft" is a Docs entry and is not confirmed for Slides. | File menu | S40 secondary; Email draft unverified |
+| Email this file dialog | Fields: "Send yourself a copy" checkbox, To, Subject (defaults to the title), Message, an attachment format dropdown and Send (S68 for the Docs version of the same dialog). For Slides the format list is PDF, Microsoft PowerPoint (.pptx) and Plain text, and an option to include the content in the email instead of attaching (S67 older labels "Attach as": PDF, pptx, Plain text; S68 "Don't Attach. Include Content in the Email"). The exact current Slides labels are not confirmed by a Google page. | Centred modal | S67 secondary; S68 secondary; labels unverified |
+| Email collaborators dialog | Lists the file's collaborators with checkboxes (all selected, a None link), a message field, "Send yourself a copy" and Send; recipients receive a link to the file (S67). | Centred modal | S67 secondary |
+| File, Download | "At the top, click File and then Download. Choose a file type. The file will download onto your computer" (S9). Seven entries: "Microsoft PowerPoint (.pptx)", "ODP Document (.odp)", "PDF Document (.pdf)", "Plain Text (.txt)", "JPEG image (.jpg, current slide)", "PNG image (.png, current slide)", "Scalable Vector Graphics (.svg, current slide)" (S66, S67). The three image formats export only the current slide; PDF, PPTX, ODP and TXT export the whole deck; TXT includes slide text and speaker notes (S66, S92). | File menu submenu | S9 Google; S66 secondary; S67 secondary; S92 secondary |
+| File, Rename | Selects the title box text for editing. Google's help: "Click the name at the top of the file. Type a new name. Press Enter" (S9). | File menu; title box | S9 Google; S52 secondary |
+| File, Move | Opens the Drive location picker with tabs "Suggested", "Starred" and "All locations", a breadcrumb once inside a folder, a New folder control and a Move button (S29). Older guides show "Move to" and a "Move here" button (S51, S52). | Centred picker | S29 Google; S51 secondary; S52 secondary |
+| File, Add shortcut to Drive | Creates a pointer to the file in another Drive location. The same command sits as a button next to the Star in the title row (S30). A shortcut "is a link that references another file or folder"; up to 500 shortcuts per person per file (S36). | File menu; title row | S30 Google; S36 Google |
+| File, Move to trash | "Click File and then Move to trash." The file moves to the Drive trash and stays until the trash is emptied; if the owner trashes a shared file collaborators lose access (S13). | File menu | S13 Google |
+| File, Version history | Submenu "Name current version" and "See version history" (S79). Ctrl+Alt+Shift+H, Cmd+Option+Shift+H (S15). A "Last edit" link at the top right of the editor opens the same panel (S8). | File menu; top right | S8 Google; S15 Google; S79 secondary |
+| Name current version | Dialog with a Name field and Save (S79). Up to 40 named versions per presentation (S8). | Centred modal | S8 Google; S79 secondary |
+| Version history panel | Right hand panel listing versions grouped by date with the editor's name; groups expand; "Only show named versions" toggle; "Show changes" checkbox; a "Restore this version" button at the top; a three dot menu per version with "Name this version", "Make a copy" and delete options; a back arrow returns to editing (S8, S46, S79, S80). Editing permission is required to see it (S8). | Right side panel | S8 Google; S46 secondary; S79 secondary; S80 secondary |
+| File, Make available offline | Marks the file for offline use. Requires Chrome or Edge, no private window, the Google Docs Offline extension and Drive offline turned on (S12). | File menu | S12 Google |
+| File, Details | Opens a "Document details" dialog with the file's folder location, owner, created date and modified date (S70). The 2016 label was "Document details"; the current menu label "Details" is commonly reported and not confirmed by a Google page. | Centred modal | S70 secondary; current label unverified |
+| File, Language | Submenu of languages. The choice controls spelling and input tools for the file (S37). | File menu | S37 Google |
+| File, Page setup | Dropdown "Standard (4:3)", "Widescreen (16:9)", "Widescreen (16:10)", "Custom" (S6). Custom shows width and height fields with a unit dropdown of inches, centimeters, points or pixels (S6). Confirm button is reported as "Apply" (S75, S76); the help page text says OK (S6). Default is Widescreen 16:9 at 960 by 540 pixels (S74, S75). Existing content shifts when the size changes (S74). Ruler units are set separately in Tools, Preferences or from the ruler's "Change units" (S6). | Centred modal | S6 Google; S74 secondary; S75 secondary; S76 secondary |
+| File, Print preview | Labelled "Print settings and preview" in Google's help (S10). Opens a full page preview with a toolbar. | File menu | S10 Google; S45 secondary |
+| Print preview toolbar | Left: "Close preview". Then a layout dropdown, default "1 slide without notes", with "1 slide with notes" and "Handout" options for 1, 2, 3, 4, 6 or 9 slides per page (S10, S45). Then an orientation dropdown Landscape or Portrait, a "Hide background" toggle and an "Include skipped slides" toggle. Right: "Download as PDF" and "Print" (S45). | Toolbar across the top of the preview | S10 Google; S45 secondary |
+| File, Print | Ctrl+P, Cmd+P (S15). Opens the browser print dialog for the current print settings (S10). | File menu | S10 Google; S15 Google |
+| Slideshow auto advance | Not a File item but adjacent: during a slideshow, Options, "Auto advance options" sets a timer (S19). The interval list in present mode was not confirmed. | Slideshow toolbar | S19 Google; interval list unverified |
+
+### c.3 Keyboard shortcuts that touch input and output
+
+| Element or item | Behaviour | Position | Source |
+|---|---|---|---|
+| New slide | Ctrl+M, Cmd+M | n/a | S15 Google |
+| Duplicate slide | Ctrl+D, Cmd+D | n/a | S15 Google |
+| Open | Ctrl+O, Cmd+O | n/a | S15 Google |
+| Print | Ctrl+P, Cmd+P | n/a | S15 Google |
+| Version history | Ctrl+Alt+Shift+H, Cmd+Option+Shift+H | n/a | S15 Google |
+| Present | Ctrl+F5 (PC), Cmd+Enter (Mac); from the first slide Ctrl+Shift+F5, Cmd+Shift+Enter | n/a | S15 Google; S82 secondary |
+| Compact controls | Ctrl+Shift+F | n/a | S15 Google |
+| Shortcut list | Ctrl+/ , Cmd+/ | n/a | S15 Google |
+| Menu access | Alt+F opens File on PC Chrome; Ctrl+Option+F on Mac | n/a | S15 Google; S38 Google |
+| Editor regions | Canvas Ctrl+Alt+Shift+C, filmstrip Ctrl+Alt+Shift+F, speaker notes Ctrl+Alt+Shift+S | n/a | S38 Google |
+
+## Findings a designer must not miss
+
+1. The root of the product is a new, untitled, single slide presentation with the Title slide layout and two prompt placeholders, not a document list. The list lives one level up on the home page. Turboslide's root should open the same way, on the GT theme, with the Themes or design panel available on the right.
+2. A theme is the unit users pick; layouts are the unit users insert. Every layout carries placeholders with fixed prompt text. Google ships exactly eleven layouts per theme and names them in the same order everywhere: New slide arrow, Layout button, Slide, Apply layout and the theme builder. Turboslide's GT template should expose its slide templates as eleven named layouts, or a deliberate subset in the same order, and the four entry points must show the same list.
+3. Applying a layout moves placeholder content into the new layout and leaves freestanding content alone. Changing the theme replaces the whole theme, including layouts, across the deck. Import slides can either adopt the current theme or keep the source theme, which adds a second theme to the file. Google caps a file at 5 themes and 100 layouts per theme.
+4. The theme builder is a mode of the same editor with a dark canvas, a Theme slide over a Layouts list, a Rename button, an X to close, and right click New, Duplicate, Rename and Delete on layouts. It is where Colors (twelve slots) and text and image placeholders are edited. It is an admin surface for sales users, so it belongs behind Slide, Edit theme and View, Theme builder, not in the default toolbar.
+5. The right side panel is one slot. Themes, Motion, Version history and, since 2025, the design sidebar all open there and replace one another. Turboslide should keep Inspector, Themes and Transition in one right slot rather than stacking panels.
+6. File menu order is stable and sales users navigate it by muscle memory. Keep the eighteen entries in the reported order, use Google's labels, and keep submenus for New, Make a copy (Entire presentation, Selected slides), Share (Share with others, Publish to web), Email (Email this file, Email collaborators), Download (seven formats in the listed order) and Version history (Name current version, See version history).
+7. Download has three per slide image formats that say "current slide" in the label, and four whole deck formats. Turboslide's PPTX, PDF and standalone HTML exports map onto this list; SVG, PNG and JPEG of the current slide are the gaps that sales users will look for.
+8. Publish to web is separate from Share. It produces a view only player URL with start, loop and delay parameters and an iframe embed, and it always republishes. Turboslide's /embed/:id route is the natural home for this, and the dialog should carry the Link and Embed tabs, the auto advance dropdown, the two checkboxes and the Published content and settings section with Stop publishing.
+9. Version history uses named versions (40 per file) and a right panel with Only show named versions, Show changes, Restore this version and per version Name, Make a copy and delete. Turboslide's VersionsPanel and HistoryPanel should merge behind File, Version history with these labels; revision chips and leases stay out of the default view.
+10. Print preview is a full page mode with a single toolbar: Close preview, layout dropdown (1 slide without notes, 1 slide with notes, handouts of 1, 2, 3, 4, 6, 9), orientation, Hide background, Include skipped slides, Download as PDF, Print. This is also Google's route to a notes PDF, which Turboslide does not have yet.
+11. Page setup has four presets and a Custom size in four units; the default is Widescreen 16:9 at 960 by 540 pixels. Turboslide's 1600 by 900 sheet is the same ratio, so the preset list can be honoured with a scale, but 4:3 and 16:10 imply a resize path that the renderer does not have today.
+12. Templates have moved twice since 2023: a Templates button at the top left of the toolbar, then Insert, Templates, then a design sidebar. Layouts are the stable primitive; templates are collections of slides. Turboslide should treat the GT slide templates as layouts of one theme and keep any "insert a whole template" action in the right sidebar.
+13. Home page controls are small in number: Blank card, featured cards, Template gallery link, a search field, an Owned by filter, a sort control, a grid and list toggle, a folder picker and per item Rename and Remove. Turboslide's /decks page needs exactly these and no more for parity.
+
+## Unverified claims
+
+These items could not be confirmed from any public page read on 2026-09-11 and are marked as such in the tables.
+
+- The exact labels of the home page ownership filter ("Owned by anyone", "Owned by me", "Not owned by me") and of the default sort option ("Last opened by me").
+- The "Open in new tab" entry in the home page per item menu, and the exact set of entries in that menu.
+- The up and down arrow control next to "Template gallery" and the three dot "Hide all templates" entry on the strip.
+- The full set of app bar controls on the home page beyond the main menu, Settings entry and search.
+- The complete list of Google's 23 built in theme names as shown in the Themes panel.
+- Which panel opens by default on a new presentation in a consumer account today (Themes panel versus the 2025 design sidebar).
+- The exact current toolbar after the March 2025 sidebar rollout, including whether "New slide with layout" was replaced by a "Templates" control.
+- The exact label of the reset button in the Background dialog ("Reset to theme").
+- The presence of a "Slide number placeholder" entry in the theme builder's text placeholder dropdown.
+- The pixel values of the Small, Medium and Large embed sizes in Publish to the web.
+- The complete tab set and order of the File, Open dialog (My Drive, Shared drives and Upload were confirmed only for the sibling Import dialogs).
+- The exact current labels of the Email this file attachment dropdown for Slides and whether "Email draft" appears in the Slides Email submenu.
+- The current label "Details" and the current field set of the Details dialog (the 2016 source shows "Document details" with location, owner, created and modified).
+- The confirm button label in Page setup (Apply per third parties, OK per the Google help text).
+- The confirm button label in Make a copy (Ok per the Google help text, Make a copy per third parties).
+- The interval list of the present mode auto advance option.
+- The exact order of the eighteen File menu items as a single Google confirmed list.
+- The submenu entries of File, New other than "From Template Gallery".
+
+## Sources
+
+All sources were read on 2026-09-11.
+
+Google owned pages
+
+- S1 Use a Template or change the theme, background, or layout in Google Slides. https://support.google.com/docs/answer/1705254?hl=en&co=GENIE.Platform%3DDesktop
+- S2 Use templates (create a file from a template, show or hide templates). https://support.google.com/docs/answer/148833?hl=en&co=GENIE.Platform%3DDesktop
+- S3 How to use Google Slides. https://support.google.com/docs/answer/2763168?hl=en&co=GENIE.Platform%3DDesktop
+- S4 Create your first presentation in Slides, Google Workspace Learning Center. https://support.google.com/a/users/answer/10665800?hl=en
+- S5 Add, delete and organize slides. https://support.google.com/docs/answer/1694830?hl=en&co=GENIE.Platform%3DDesktop
+- S6 Change slide size and measurement units in Google Slides. https://support.google.com/docs/answer/3447672?hl=en&co=GENIE.Platform%3DDesktop
+- S7 Make Google Docs, Sheets, Slides and Forms public. https://support.google.com/docs/answer/183965?hl=en&co=GENIE.Platform%3DDesktop
+- S8 Find what's changed in a file (version history). https://support.google.com/docs/answer/190843?hl=en&co=GENIE.Platform%3DDesktop
+- S9 Create, view, or download a file (make a copy, download, rename). https://support.google.com/docs/answer/49114?hl=en&co=GENIE.Platform%3DDesktop
+- S10 Print a file. https://support.google.com/docs/answer/143346?hl=en&co=GENIE.Platform%3DDesktop
+- S11 Add or change animations and transitions. https://support.google.com/docs/answer/1689475?hl=en&co=GENIE.Platform%3DDesktop
+- S12 Work on Google Docs, Sheets, and Slides offline. https://support.google.com/docs/answer/6388102?hl=en&co=GENIE.Platform%3DDesktop
+- S13 Delete a document, spreadsheet, presentation, or video. https://support.google.com/docs/answer/6023494?hl=en&co=GENIE.Platform%3DDesktop
+- S14 Share files from Google Drive. https://support.google.com/docs/answer/2494822?hl=en&co=GENIE.Platform%3DDesktop
+- S15 Keyboard shortcuts for Google Slides. https://support.google.com/docs/answer/1696717?hl=en&co=GENIE.Platform%3DDesktop
+- S16 Google Slides cheat sheet, Google Workspace Learning Center. https://support.google.com/a/users/answer/9300133?hl=en
+- S17 Tips for great presentations, Google Workspace Learning Center. https://support.google.com/a/users/answer/9282978?hl=en
+- S18 Share a presentation, Google Workspace Learning Center. https://support.google.com/a/users/answer/9310270?hl=en
+- S19 Present slides. https://support.google.com/docs/answer/1696787?hl=en&co=GENIE.Platform%3DDesktop
+- S20 Apps Script reference, Enum PredefinedLayout. https://developers.google.com/apps-script/reference/slides/predefined-layout
+- S21 Apps Script reference, Enum ThemeColorType. https://developers.google.com/apps-script/reference/slides/theme-color-type
+- S22 Apps Script reference, Enum PlaceholderType. https://developers.google.com/apps-script/reference/slides/placeholder-type
+- S23 Slides API reference, presentations.pages (PageType, layoutObjectId, masterObjectId). https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations.pages
+- S24 Google Workspace Updates, "Master" view in Google Slides renamed to "Theme Builder" (May 2021). https://workspaceupdates.googleblog.com/2021/05/theme-builder-for-google-slides.html
+- S25 Google Workspace Updates, New sidebar with design elements in Google Slides (March 2025). https://workspaceupdates.googleblog.com/2025/03/new-sidebar-with-design-elements-in-google-slides.html
+- S26 Google Workspace Updates, refreshed library of Google Slides templates (November 2024). https://workspaceupdates.googleblog.com/2024/11/new-templates-in-google-slides.html
+- S27 Google Workspace Updates, even more high quality Google Slides templates (April 2025). https://workspaceupdates.googleblog.com/2025/04/even-more-high-quality-google-slides-templates.html
+- S28 Google Workspace Updates, image placeholders in Slides themes and layouts (July 2021). https://workspaceupdates.googleblog.com/2021/07/image-placeholders-make-it-easy-to-work.html
+- S29 Google Workspace Updates, new Google Drive location picker (April 2023). https://workspaceupdates.googleblog.com/2023/04/streamlined-file-organization-google-drive-location-picker.html
+- S30 Google Workspace Updates, Drive shortcuts beta (August 2019). https://workspaceupdates.googleblog.com/2019/08/drive-shortcuts-beta.html
+- S31 Google Workspace Updates, menu and toolbar updates in Google Docs editors (March 2018). https://workspaceupdates.googleblog.com/2018/03/menu-and-toolbar-updates-in-google-docs.html
+- S32 Google Workspace Updates, expanding branding and customization in Slides and Forms (August 2023). https://workspaceupdates.googleblog.com/2023/08/expanding-branding-and-customization.html
+- S33 Google Workspace Admin Help, What are default templates and themes. https://knowledge.workspace.google.com/admin/drive/what-are-default-templates-and-themes?hl=en
+- S34 Google Workspace Admin Help, Turn custom Drive templates on or off for users. https://knowledge.workspace.google.com/admin/drive/turn-custom-drive-templates-on-or-off-for-users?hl=en
+- S35 Google Drive Help, Organize your files in Google Drive. https://support.google.com/drive/answer/2375091?hl=en&co=GENIE.Platform%3DDesktop
+- S36 Google Drive Help, Find files and folders with Google Drive shortcuts. https://support.google.com/drive/answer/9700156?hl=en&co=GENIE.Platform%3DDesktop
+- S37 Translate documents or write in a different language (File, Language). https://support.google.com/docs/answer/187189?hl=en&co=GENIE.Platform%3DDesktop
+- S38 Use Google Slides with a screen reader. https://support.google.com/accessibility/answer/1634140?hl=en
+
+Secondary pages
+
+- S40 Computerworld, Google Slides cheat sheet: How to get started. https://www.computerworld.com/article/1658651/how-to-use-google-slides.html
+- S41 BrightCarbon, Google Slides: The ULTIMATE guide. https://www.brightcarbon.com/blog/google-slides-ultimate-guide/
+- S42 BrightCarbon, Google Slides Themes and Layouts. https://www.brightcarbon.com/blog/editing-themes-and-layouts-in-google-slides/
+- S43 How-To Geek, How to Create Template Slides with Theme Builder in Google Slides. https://www.howtogeek.com/747178/how-to-create-template-slides-with-theme-builder-in-google-slides/
+- S44 How-To Geek, How to Import Slides From Another Presentation in Google Slides. https://www.howtogeek.com/787547/how-to-import-slides-from-another-presentation-in-google-slides/
+- S45 How-To Geek, How to Print a Google Slides Presentation. https://www.howtogeek.com/747859/how-to-print-a-google-slides-presentation/
+- S46 How-To Geek, How to Check Version History in Google Slides. https://www.howtogeek.com/733388/how-to-check-version-history-in-google-slides/
+- S47 Envato Tuts+, How to Publish and Embed Google Slides Presentations Online. https://business.tutsplus.com/tutorials/embed-google-slides-presentations-online--cms-29503
+- S48 Digital Inspiration (labnol), How to Embed Google Slides Like a Pro. https://www.labnol.org/embed-google-slides-200615
+- S49 CustomGuide, Add and Lay Out Slides. https://www.customguide.com/course/google-slides/how-to-delete-a-slide-on-google-slides
+- S50 CustomGuide, How to Open Google Slides Presentation. https://www.customguide.com/course/google-slides/how-to-open-google-slides-presentation
+- S51 CustomGuide, File Management. https://www.customguide.com/course/google-slides/file-management
+- S52 CustomGuide, Google Slides Quick Reference Card (2019 PDF hosted by San Diego Community College District). https://www.sdccd.edu/docs/it/QuickReference/Google%20Slides%20Quick%20Reference%20Card.pdf
+- S53 Indiana University IT Training, Beginning a new presentation. https://ittrainingcontent.iu.edu/training/gslides/files/pc/beginning-a-new-presentation.html
+- S54 Rowan University Libraries, Google Slides: Create Slide Presentation. https://libguides.rowan.edu/c.php?g=248114&p=4721915
+- S55 TutKit, Efficient sorting of Google Slides presentations. https://www.tutkit.com/en/text-tutorials/6573-effective-sorting-of-google-slides-presentations
+- S56 Alphr, Where to find free Google Slides templates. https://www.alphr.com/where-to-find-free-google-slides-templates/
+- S57 TechRepublic, 5 tips for working with templates in Google Workspace apps. https://www.techrepublic.com/article/5-tips-for-working-with-templates-in-google-workspace-apps/
+- S58 TechRepublic, How to select, import and customize Google Slides themes. https://www.techrepublic.com/article/how-to-select-import-and-customize-google-slides-themes/
+- S59 Slidesgo, How to Add or Change Themes in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-or-change-themes-in-google-slides
+- S60 SlidesAI, How to Import Themes into Google Slides. https://www.slidesai.io/blog/import-theme-google-slides
+- S61 SlidesAI, How to Change Background Color and Image on Google Slides. https://www.slidesai.io/blog/how-to-change-background-on-google-slides
+- S62 Slidesgo, How to change the background image and color in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-change-the-background-image-and-color-in-google-slides
+- S63 SlidesAI, How to Add Transitions on Google Slides. https://www.slidesai.io/blog/add-transitions-google-slides
+- S64 Art of Presentations, Slide Master in Google Slides. https://artofpresentations.com/slide-master-in-google-slides/
+- S65 Echo's Voice, Creating Google Slides Templates. https://echosvoice.com/creating-google-templates/
+- S66 Bricks, How to Export a Google Slides Presentation. https://www.thebricks.com/resources/how-to-export-a-google-slides-presentation
+- S67 Baz Roberts, Google Slides (12): Sharing, emailing and downloading (2016). https://bazroberts.com/2016/05/27/google-slides-sharing-emailing-downloading/
+- S68 How-To Geek, How to Email a Google Doc (same Email this file dialog family). https://www.howtogeek.com/771152/how-to-email-a-google-doc/
+- S69 SlideModel, How to Copy a Slide in Google Slides. https://slidemodel.com/how-to-copy-a-slide-in-google-slides/
+- S70 Alice Keeler, Google Docs: Find Document Details (2016). https://alicekeeler.com/2016/08/30/google-docs-find-document-details/
+- S71 How-To Geek, How to Share a Google Docs, Sheets, or Slides File as a Web Page. https://www.howtogeek.com/442426/how-to-share-a-google-docs-sheets-or-slides-file-as-a-web-page/
+- S72 University of Minnesota IT, Drupal Lite: Use an iFrame to Embed Google Slides in a Page. https://it.umn.edu/services-technologies/how-tos/drupal-lite-use-iframe-embed-google
+- S73 TinyGrab, How to embed Google Slides. https://tinygrab.com/how-to-embed-google-slides/
+- S74 Plus AI, Google Slides size and dimensions. https://plusai.com/blog/google-slides-size-and-dimensions/
+- S75 BrightCarbon, How to change slide size in Google Slides. https://www.brightcarbon.com/blog/how-to-change-slide-size-in-google-slides/
+- S76 How-To Geek, How to Change Slide Size in Google Slides. https://www.howtogeek.com/749450/how-to-change-slide-size-in-google-slides/
+- S77 The Edublogger, A Beginner's Guide To Google Slides In The Classroom (.new shortcuts). https://www.theedublogger.com/google-slides/
+- S78 Direct observation with curl of HTTP redirect headers for docs.google.com/presentation/create, slides.google.com/create, slides.new, slide.new, deck.new, presentation.new and docs.google.com/presentation/u/0/ (no sign in, headers only).
+- S79 TechRepublic, How to manage file versions in Google Docs, Sheets, and Slides. https://www.techrepublic.com/article/version-history-essentials-for-google-docs-sheets-and-slides/
+- S80 SlideEgg, How to See the Edit History in Google Slides Easily. https://www.slideegg.com/blog/google-slides-tutorials/how-to-see-the-edit-history-in-google-slides-easily/
+- S81 Slidesgo, How to Work with Colors in a Google Slides Presentation. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-work-with-colors-in-a-google-slides-presentation
+- S82 How-To Geek, All the Best Google Slides Keyboard Shortcuts. https://www.howtogeek.com/440137/all-the-best-google-slides-keyboard-shortcuts/
+- S83 Google Docs Editors Community thread, The 'New Slide With Layout' option is missing, 'Templates' has replaced it. https://support.google.com/docs/thread/307557064/the-new-slide-with-layout-option-is-missing-for-me-on-google-slides-templates-has-replaced-it?hl=en
+- S84 Google Docs Editors Community thread, My new slide with layout option disappeared in the toolbar. https://support.google.com/docs/thread/307343095/my-new-slide-with-layout-option-dissapeared-in-google-slides-in-the-toolbar-how-do-i-get-it-back?hl=en
+- S85 Drag, Google Slides: The 2026 Ultimate Guide (March 2025 sidebar note, download formats). https://www.dragapp.com/blog/google-slides-guide/
+- S86 How-To Geek, How to Change the Background in Google Slides. https://www.howtogeek.com/446523/how-to-change-the-background-in-google-slides/
+- S87 SlidesAI, How to Get Normal Google Slides Templates Back (names Simple Light, Material, Modern). https://www.slidesai.io/blog/how-to-get-normal-google-slides-templates-back
+- S88 TutorialBrain, Layouts in Google Slides. https://www.tutorialbrain.com/layouts-in-google-slides/
+- S89 Workona, How To Use Google Slide Templates. https://workona.com/blog/how-to-use-google-slide-templates/
+- S90 MagicSlides, How to Access Template Gallery in Google Slides. https://www.magicslides.app/blog/how-to-access-template-gallery-in-google-slides
+- S91 Producing Paradise, How to create a Google Slides theme (names Simple Light, Momentum, Focus). http://www.producingparadise.com/articles/tools/how-to-create-a-google-slides-theme
+- S92 How-To Geek, How to Save Google Slides Objects as Images (image downloads are current slide only). https://www.howtogeek.com/509046/how-to-save-google-slides-objects-as-images/

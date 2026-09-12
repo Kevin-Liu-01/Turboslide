@@ -1,0 +1,615 @@
+# Google Slides objects and format options
+
+Research report 05 for the Google Slides parity programme. Written 2026-09-11 for the Turboslide editor redesign (root address opens a fresh presentation on the GT template, editor mirrors Google Slides, interface simplified for sales users).
+
+## Scope and method
+
+This report enumerates every object type a Google Slides user can insert, and every formatting and arrangement surface that acts on those objects. It covers the Insert menu (text box, image, audio, video, shape, table, chart, diagram, word art, line, special characters, animation, link, comment, new slide, slide numbers, placeholder), the Format menu (text, align and indent, line and paragraph spacing, columns, bullets and numbering, headers and footers, format options, borders and lines, table, image options, crop and mask, replace image, reset image, clear formatting, paint format) and the Arrange menu (order, align, distribute, center on page, rotate, group, snapping and guides).
+
+Every fact comes from a public page read on 2026-09-11. Google's own help centre pages and the Slides API and Apps Script references are treated as primary sources. Third party tutorials (How-To Geek, Slidesgo, SlideModel, BrightCarbon, Baz Roberts, GCFGlobal, IU IT Training and others) are used where Google's pages do not print exact labels or lists, and are marked as third party in the Source column. Nothing was verified inside a signed in Google account. Where no public source confirms a label, value or count, the row says so and the claim is repeated in the "Unverified claims" section at the end. The web search budget for the session ran out after the first round of searches, so later pages were fetched directly by URL; this is why some third party pages are older (2016 to 2019). Where an older page and a 2026 Google page disagree, the Google page wins and the difference is noted.
+
+Sources are cited as S-numbers. The full list with URLs is in the "Sources" section. Labels are quoted the way the source prints them, including Google's own capitalisation ("Align & indent", "Size & rotation", "Format options").
+
+The tables use five columns: Item, Options and values, Where it lives, Behaviour, Source.
+
+## How Google Slides organises these surfaces
+
+Google Slides has four editing areas: the canvas, the filmstrip, the speaker notes and the top area (file name, menu bar, toolbar) (S16). The menu bar order is File, Edit, View, Insert, Format, Slide, Arrange, Tools, Extensions, Help, with an Accessibility menu when screen reader support is on (S16). The toolbar changes with the selection: an image selection shows crop, mask, border and replace controls; a line selection shows line colour, weight, dash, start and end (S59, S60). A context menu (right click, or Shift+F10) repeats the most used Format and Arrange items (S16, S18, S60). A "Format options" sidebar on the right holds the numeric controls (size, position, text fitting, shadow, reflection, adjustments, alt text, media playback) (S1, S48, S53). A "Motion" sidebar holds transitions and animations (S7). Tool finder (Alt+/ or Option+/) searches every menu item by name (S6, S16).
+
+Three menu reorganisations matter for parity. In March 2018 Google moved text formatting into a "Text" submenu of Format, removed the Table menu from Slides (insert and remove moved to Insert, table formatting moved to Format), moved "Align horizontally" and "Align vertically" into an "Align" submenu of Arrange, and reordered the Insert menu (S83). In 2022 Google announced "Enhanced menus in Google Slides and Drawings" to improve findability of key features; the search results page prints the title and summary but the post URL could not be resolved from the results markup (S84). In 2023 Google added a tool finder above the toolbar (S84).
+
+## Part A: Insert menu objects
+
+### A0 Insert menu inventory
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert menu contents | Image, Text box, Audio, Video, Shape, Table, Chart, Diagram, Word art, Line, Special characters, Animation, Link, Comment, New slide, Slide numbers, Placeholder | Menu bar, Insert (Alt+I in Chrome, Alt+Shift+I elsewhere, Ctrl+Option+I on Mac) | Every object type in this report is reachable from Insert. Placeholder is only enabled in the theme builder and sits at the bottom of the menu (S62, S2). Diagram sits directly under Chart (S72). Google reordered the Insert menu in 2018 (S83). The exact current top to bottom order was not printed by any public source read. | S1, S2, S7, S9, S11, S12, S13, S62, S72, S83 |
+| Alternative entry points | Toolbar buttons (Text box, Insert image, Shape, Line, Add comment, Insert link, New slide with layout dropdown, Transition), right click menu, tool finder | Toolbar and context menu | The toolbar duplicates menu actions and changes with the selection (S18, S60). Tool finder searches menu items by typed name (S6, S16). | S6, S16, S18, S60 |
+
+### A1 Text box
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert a text box | Click to drop a default sized box, or click and drag to draw one | Insert, Text box; toolbar Text box button | After placing the box the caret is active and typing starts immediately (S60, S67). On touch devices double tap to start typing (S1). | S1, S60, S67 |
+| Default autofit for new text boxes | "Resize shape to fit text" | Set at creation; changed in Tools, Preferences ("Use custom autofit preferences") | Since January 2021 a newly created text box resizes vertically to fit its text; boxes created before that date were not changed (S8). Theme text placeholders default to "Shrink text on overflow" (S8). | S8 |
+| Per box text fitting menu | Do not autofit; Shrink text on overflow; Resize shape to fit text | Icon that appears next to a newly created text box; right click, Text fitting; Format, Format options, Text fitting | The three options are mutually exclusive and apply per text box or placeholder (S8). See B7 for the Text fitting section. | S8 |
+| Type directly into a shape | Any enclosed shape | Double click a shape, or select it and type | Text inside shapes uses the same toolbar controls as a text box (S15, S60, S70). | S15, S60, S70 |
+| Delete a text box | Delete or Backspace, Edit, Delete | Keyboard or Edit menu | Deleting a placeholder on a slide removes that instance only (S1). | S1 |
+| Text box as a link target | The whole box or a text run can carry a link | Insert, Link | See A13. | S12, S56 |
+
+### A2 Image
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert, Image submenu (2026 labels) | "Upload from computer"; "Stock & web" (stock images, GIF files, stickers and Google image search); "Drive & Photos"; "Camera"; "By URL" | Insert, Image; toolbar Insert image button | Google's 2026 help page prints these five sources for Docs and Slides (S2). Older labels "Search the web", "Drive" and "Photos" appear on the same page in the Docs cover image flow and in third party guides written before the merge (S2, S60). Camera uses the device camera (S2). By URL accepts an image link or a .gif link (S2). | S2, S60 |
+| Insert, Image, "GIFs and stickers" | Search bar; filter "GIFs" (default) or "Stickers" | Insert, Image, GIFs and stickers; opens a right panel | Added to Slides in 2023 (S84). Animated GIFs keep playing on the canvas and in the slideshow after cropping or resizing (S60). | S2, S60, S84 |
+| Insert, Image, "Help me visualize" | Prompt text, optional style, "Create", pick a result | Insert, Image, Help me visualize; toolbar icon; design sidebar | Gemini image generation for Workspace editions; generated images insert onto the current slide (S84). "Edit image" with a custom prompt and "Replace with image" or "Insert" arrived with Nano Banana (S84). Not part of the free consumer feature set. | S84 |
+| Drag and paste | Drag an image from the desktop or a web page; copy and paste | Canvas | Dropping anywhere inserts the image; hovering the border of an empty slide before dropping sets it as the slide background (S2, S19, S84). | S2, S19, S84 |
+| Image toolbar | Crop; Mask image (down arrow next to Crop); Border color; Border weight; Border dash; Replace image; Image options or Format options | Toolbar when an image is selected | The mask dropdown offers the same four shape categories as Insert, Shape (S5, S60). See B11 for crop and mask. | S5, S60 |
+| Replace image | Same five sources as Insert, Image; drag and drop onto the image | Right click, Replace image; Format, Replace image; toolbar | The replacement keeps the frame; drag and drop replacement was added in May 2023 (S2, S84). | S2, S84 |
+| Reset image | Single action | Right click, Reset image; Format, Reset image | Returns the image to the original file, removing crop, mask and adjustments (S5). | S5 |
+| Image placeholder | Insert, Placeholder, Image placeholder, then choose a shape | Theme builder only (View, Theme builder) | On a slide built from that layout the user clicks "Insert image" inside the placeholder and picks a source; the image fills the placeholder shape (S2, S84). | S2, S84 |
+| Image properties in the file model | Source URL, crop offsets (left, right, top, bottom, angle), transparency, brightness, contrast, recolor, outline, shadow, link | Slides API ImageProperties | These are the properties the Format options sidebar edits (S42, S37). | S37, S42 |
+| Explore panel images | Web image search in the Explore side panel with a "+" to insert and a source link attached | Tools, Explore | Inserting from Explore attaches the source page link to the image (S60). | S60 |
+
+### A3 Audio
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert, Audio | Google Drive picker; .mp3 and .wav files stored in Drive | Insert, Audio | A speaker icon is placed on the slide (S2, S53, S61). Files must already be in Drive (S2, S53). BrightCarbon reports a URL option as well; Google's page only documents Drive (S60, S2). | S2, S53, S60, S61 |
+| Audio playback (Format options) | "Start playing": "On click" or "Automatically"; Volume slider; "Loop audio"; "Stop on slide change"; "Hide icon when presenting" | Format options sidebar, "Audio playback" section, with the icon selected | "Hide icon when presenting" can only be changed when "Automatically" is selected (S53). Loop repeats until the slide changes; stop on slide change ends playback when advancing (S53, S61). | S53, S61 |
+| Other sections for the audio icon | Size & rotation (width, height, lock aspect ratio); Position (top left or center reference, X and Y); Recolor presets; Adjustments (transparency, brightness, contrast); Drop shadow; Reflection | Format options sidebar | The icon is an image, so image sections apply (S53). Right click, Replace image swaps the icon for any picture (S53). | S53 |
+| Sharing | Access checker suggests permissions for embedded audio and video files | Share dialog | Google's access checker proposes permission changes so viewers can play media (S2). | S2 |
+| Presenting | Plays according to the start setting when the slide is shown | Present mode | Audio does not carry across slides; to play on every slide it must be added per slide (S53, S61). | S53, S61 |
+
+### A4 Video
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert, Video dialog | Tabs: "Search YouTube" (search bar), "By URL" (field labelled "Paste YouTube URL here"), "Google Drive" | Insert, Video | Pick a video and click "Select" (S2, S46, S61). Google Vids output is inserted by exporting it to Drive first (S2). Drive videos must be shared along with the deck (S61). | S2, S46, S61 |
+| Video playback (Format options) | "Play (on click)" default; "Play (automatically)"; "Play (manual)" (previous default); "Start at" and "End at" times with "Use current time" and reset arrows; "Mute audio" | Toolbar Format options, or right click, Format options, "Video playback" section | On click means the video starts when the slide is advanced (key, click or clicker); automatically starts on slide entry; manual requires clicking the video's play button (S2, S46). The preview player in the sidebar fills the start and end fields (S46). | S2, S46 |
+| Other sections | Size & rotation; Position; Drop shadow; outline (border) | Format options sidebar | The API models outline, autoPlay, start, end and mute on VideoProperties; sources are YOUTUBE and DRIVE (S41, S34). | S41, S34 |
+| Player shortcuts | k play or pause; u rewind 10 s; o forward 10 s; Shift+, and Shift+. step frames; Ctrl+Shift+, and Ctrl+Shift+. change rate; Shift+0..9 seek; c captions; f full screen; m mute; Enter plays the selected video | Editing and presenting | Listed on the Slides shortcuts page (S6). | S6 |
+| File formats | Third party pages report .mp4 and .mov for Drive uploads | Drive | Not printed on Google's help page; treat as unverified (S61). | S61 |
+
+### A5 Shape
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Shape picker categories | "Shapes", "Arrows", "Callouts", "Equation" | Insert, Shape; toolbar Shape button | Each category opens a flyout grid of glyphs (S58, S63, S71). The same picker is used for Mask image (S5). | S5, S58, S63, S71 |
+| Drawing a shape | Click and drag; hold Shift to keep the aspect ratio; Ctrl while resizing scales from the centre | Canvas | The cursor becomes a crosshair after picking a glyph (S63, S68). Shift+drag makes squares and circles (S63, S71, S6). | S6, S63, S68, S71 |
+| Default appearance | Fill from the theme accent colour (light grey in the default theme) with a thin dark border | Theme | Fill and border can be transparent (S58, S68). | S58, S68 |
+| Shape inventory ("Shapes" category) | Rectangle, rounded rectangle, one snipped corner, two same side snipped corners, two diagonal snipped corners, one snipped one rounded corner, one rounded corner, two same side rounded corners, two diagonal rounded corners, ellipse, triangle, right triangle, parallelogram, trapezoid, diamond, pentagon, hexagon, heptagon, octagon, decagon, dodecagon, pie, chord, teardrop, frame, half frame, corner (L shape), diagonal stripe, plus (cross), plaque, can, cube, bevel, donut, no smoking, block arc, folded corner, smiley face, heart, lightning bolt, sun, moon, cloud, arc, bracket pair, brace pair, left bracket, right bracket, left brace, right brace; 29 flowchart shapes; 12 stars, two irregular seals (explosions), two ribbons, two ellipse ribbons, vertical scroll, horizontal scroll, wave, double wave | Insert, Shape, Shapes | The list is the Slides API ShapeType enum, which maps each glyph to an ECMA-376 preset (S21). Google does not publish the picker's tooltip names; the category membership follows the picker's visible grouping as described by third parties (basic shapes first, flowchart shapes at the bottom) (S47, S71). See Appendix E1 for the full enum. | S21, S47, S71 |
+| Shape inventory ("Arrows" category) | Right, left, up, down, left right, up down, quad, left right up, bent, u turn, left up, bent up, curved right, curved left, curved up, curved down, striped right, notched right, home plate (pentagon arrow), chevron, right arrow callout, down arrow callout, left arrow callout, up arrow callout, left right arrow callout, quad arrow callout; the enum also lists east, north east and north arrows | Insert, Shape, Arrows | Enum values with ECMA presets (S21). Membership of the callout arrows in the Arrows category versus Callouts is not printed by Google. | S21 |
+| Shape inventory ("Callouts" category) | Wedge rectangle callout, wedge round rectangle callout, wedge ellipse callout, cloud callout; the enum also lists a "Speech" shape | Insert, Shape, Callouts | Callouts have a movable pointer handle (S58). | S21, S58 |
+| Shape inventory ("Equation" category) | Plus, minus, multiply, divide, equal, not equal | Insert, Shape, Equation | MATH_PLUS, MATH_MINUS, MATH_MULTIPLY, MATH_DIVIDE, MATH_EQUAL, MATH_NOT_EQUAL in the enum (S21). | S21 |
+| Text in a shape | Double click and type | Canvas | Same text tools as a text box; text wraps inside the shape (S70, S60). | S60, S70 |
+| Change shape | Pick a new glyph, styling preserved | Third party reports a "Change shape" control | Reported by Vegaslide; not found on a Google page. Unverified. | S70 |
+| Shape formatting surfaces | Fill color, Border color, Border weight, Border dash (toolbar); Format options (size, position, text fitting, shadow, reflection, alt text) | Toolbar and sidebar | See Part B. | S58, S63 |
+
+### A6 Table
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert, Table | Grid picker, hover to choose columns by rows, up to 20 x 20 | Insert, Table | The table is inserted at a default size and can be moved and resized (S3, S60). | S3, S60 |
+| Row and column commands | Insert column left; Insert column right; Insert row above; Insert row below; Delete column; Delete row; Delete table; Distribute rows; Distribute columns | Right click a cell; Format, Table | Table formatting moved into the Format menu when the Table menu was removed in 2018 (S83). "Distribute rows" and "Distribute columns" equalise sizes (S3). | S3, S83 |
+| Merge and unmerge | Merge cells; Unmerge cells | Right click a selection of cells | Drag to select the cells first (S3). | S3 |
+| Resize | Drag a gridline between rows or columns; drag a table corner to scale the whole table; Shift keeps proportions | Canvas | Slides has no table properties dialog with numeric row and column sizes; that dialog is Docs only (S3, S55). | S3, S55 |
+| Cell styling toolbar | Border color; Border weight; Border dash; Fill color | Toolbar with cells selected | Applies to the selected cells; a border can be set to Transparent (S3, S55). | S3, S55 |
+| Border selection | Small arrow at the top right of a cell selection; shortcut hold Ctrl+Alt, press e then p ("Open cell border selection") | Canvas and shortcuts | Lets the user pick which borders of the selection receive the style (S60, S6). | S6, S60 |
+| Cell text | Each cell behaves like a text box: font, size, colour, bold, alignment, indentation, padding | Toolbar and Format options | Cell text alignment uses the Align control; vertical content alignment exists in the file model (S55, S60, S40). | S40, S55, S60 |
+| Docs only table features (exclude) | Sort rows, pin header rows, split cell, quick layouts, wrap text, table alignment, table options dialog | Google Docs | Listed on the shared help page as Docs only (S3). | S3 |
+| Linked tables from Sheets | Paste with "Link to spreadsheet" or "Paste unlinked"; 400 cell limit for linked tables; Update; Link options (Open source, Unlink) | Edit, Paste after copying cells in Sheets | Tables over 400 cells paste unlinked (S4). | S4 |
+| File model | Row height, column width, cell span, cell background fill, content alignment, per edge border fill, weight and dash style | Slides API Table | Border properties are TableBorderFill, weight and DashStyle (S40). | S40 |
+
+### A7 Chart
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert, Chart submenu | "Bar", "Column", "Line", "Pie", "From Sheets" | Insert, Chart | Four built in chart types plus import (S60, S72, S4). Google's page says "Click the chart type you want to add" without listing the names (S4). | S4, S60, S72 |
+| New chart behaviour | Creates a new Google Sheet in the user's Drive and links the chart to it | Insert, Chart, then a type | Data is edited in the Sheet; the chart is a linked object (S4, S60). | S4, S60 |
+| From Sheets | Pick a spreadsheet, pick a chart, "Link to spreadsheet" checkbox, "Import" | Insert, Chart, From Sheets | Unchecking the box inserts an unlinked copy (S4). | S4 |
+| Linked object controls | "Update" button at the top right of the chart; "Link options" menu (down arrow) with "Open source" and "Unlink"; Tools, "Linked objects" sidebar with "Update all" and per object "Update" | On the chart and in Tools | Edits in the source override edits made in the deck when updating; edits in the deck do not flow back (S4). The same object can be linked into many files; viewers can see linked charts without access to the source (S4). | S4, S60 |
+| Styling | Series colours are edited in the Sheets chart editor; the chart image can be recoloured with Format options like an image | Sheets, then Update; Format options | The chart is rendered as an image in Slides (S60). | S60 |
+| Linked slides | Copy slides between decks and choose "Link slides"; slides pasted into Docs offer link options | Edit, Paste | Same update and unlink model as charts (S4). | S4 |
+
+### A8 Diagram
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert, Diagram panel | Types: "Grid", "Hierarchy", "Timeline", "Process", "Relationship", "Cycle"; "View all" | Insert, Diagram; opens a right sidebar | Only available for languages that use the Latin alphabet (S1). Choosing a type shows its variants (S47, S48, S73). | S1, S47, S48, S73 |
+| Per type controls | Colour picker; count control named for the type (levels for Hierarchy, steps for Process, dates for Timeline, and so on) | Top of the sidebar after a type is chosen | Set the count before inserting; changing it afterwards inserts a new diagram over the old one (S47, S66, S73). A third party snippet reports levels from 2 to 5; not confirmed on a Google page. | S47, S66, S69, S73 |
+| Insert | Click a variant | Sidebar | The diagram lands on the current slide as a group of native shapes, connectors and text boxes with placeholder text (S66, S69). | S66, S69 |
+| Editing after insert | Edit text, recolour via Border color and Text color, move boxes, reconnect connectors at anchor points, copy and paste a box plus its connector to add a node | Canvas | Diagrams are not a special object type; they are ordinary shapes and lines (S48, S66). Connector ends show handles and snap to anchor points on boxes (S66). | S48, S66 |
+| Format options for diagram parts | Size & rotation, Position, Text fitting, Drop shadow, Reflection, Alt text | Right click, Format options | Same sidebar as any shape (S48). | S48 |
+| Number of variants per type | Not printed by any source read | Sidebar | Unverified. | none |
+
+### A9 Word art
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert, Word art | A text entry box appears at the top of the canvas; type and press Enter | Insert, Word art | Inserts the text as a shape whose glyph outlines are the shape (S15, S60). Enter commits; a multi line entry key is not documented on the pages read (see unverified). | S15, S60 |
+| Formatting | Font and font colour from the toolbar; Fill color, Border color, Border weight, Border dash apply to the letter forms | Toolbar | Word art resizes like an object rather than by font size, which is why it is used for large numbers (S60). | S15, S60 |
+| Present mode | Renders as a shape | Present | Word art is a shape with glyph outlines and presents like any other shape (S15, S60). | S15, S60 |
+
+### A10 Line
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Line picker | "Line", "Arrow", "Elbow connector", "Curved connector", "Curve", "Polyline", "Scribble" | Toolbar Line dropdown; Insert, Line | Same seven tools as Google Drawings (S15, S59). | S15, S59 |
+| Drawing behaviour | Line, Arrow, Elbow connector, Curved connector: click and drag; Curve and Polyline: click at each point, double click or return to the start to finish; Scribble: press and drag | Canvas | Closing a Curve or Polyline on its start point produces a filled shape; a Scribble is never filled (S15, S59). Shift constrains a line to horizontal or vertical (S6, S70). | S6, S15, S59, S70 |
+| Connection points | Dots appear on shape borders while drawing; a line that starts or ends on a dot stays attached when the shape moves | Canvas | Connection snapping cannot be turned off; start or end away from a dot to avoid it (S59). The file model stores connectedObjectId and connectionSiteIndex per end (S38). | S38, S59 |
+| Line toolbar | Line color; Line weight; Line dash; Line start; Line end | Toolbar with a line selected | Start and end decorations: arrows, circles, squares and diamonds; arrowhead size follows line weight and cannot be set separately (S59). | S59 |
+| Decoration values | None, stealth arrow, filled arrow, filled circle, filled square, filled diamond, open arrow, open circle, open square, open diamond | Line start and Line end menus | ArrowStyle enum (S23, S38). | S23, S38 |
+| Dash values | Solid, dot, dash, dash dot, long dash, long dash dot | Line dash menu and Border dash menu | DashStyle enum; solid is the default (S24). | S24 |
+| Line kinds in the file model | Straight connector 1, bent connector 2 to 5, curved connector 2 to 5, straight line (not a connector) | Slides API Line.Type and LineCategory (STRAIGHT, BENT, CURVED) | Elbow connector maps to bent connectors and Curved connector to curved connectors; the plain Line tool creates a straight line (S25, S26). | S25, S26 |
+| Editing | Drag end handles to move or rotate a line; reroute a connector by dragging a handle to another anchor; lines accept links | Canvas | Lines can carry a hyperlink (S38). | S15, S38, S66 |
+
+### A11 Special characters
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert, Special characters | Dialog with category dropdowns, a search field that accepts a Unicode value, and a drawing box on the right | Insert, Special characters (Slides); Docs uses Insert, Symbols, Special characters | Click a character to insert it at the caret; works in Docs and Slides, not Sheets (S11). The help page names the actions (pick from categories, enter a Unicode value, write the character) but not the category labels. | S11 |
+| Emoji | Docs only via Insert, Symbols, Emoji or "@emoji" | Google Docs | Not documented for Slides (S11). | S11 |
+
+### A12 Animation (Motion panel)
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Opening the panel | Insert, Animation; View, Motion; right click an object, Animate; Slide, Transition; toolbar Transition button; shortcut Ctrl+Alt+Shift+B (Cmd+Option+Shift+B) | Menus, toolbar, shortcut | One right sidebar holds both transitions and object animations for the current slide (S7, S54, S64, S6). | S6, S7, S54, S60, S64 |
+| Slide transition section | Dropdown (default "None"); speed slider; "Apply to all slides"; "Play" | Motion panel, "Slide transition" | Applies to the transition into the selected slide (S7, S54). Selecting None then Apply to all slides clears every transition (S74). | S7, S54, S74 |
+| Transition names | None, Dissolve, Fade, Slide from right, Slide from left, Flip, Cube, Gallery | Transition dropdown | Names collected from BrightCarbon (Dissolve, Fade), SlideUpLift (Dissolve, Slide from the left, Fade), AiPPT (Fade, Slide from right, Flip, Cube, Gallery) and GCF (flip) (S60, S74, S77, S64). Google's page does not print the list. | S60, S64, S74, S77 |
+| Object animations section | List of animations for the slide; "Add animation"; "Select an object to animate" when nothing is selected; each entry has an animation dropdown, a start dropdown, a "By paragraph" checkbox for text, a speed slider, and a delete control | Motion panel, "Object animations" | New animations default to "Appear (On click)" (S7). Animations run top to bottom in list order (S60). An object can have several animations (S77). | S7, S60, S77 |
+| Animation names | Appear, Disappear, Fade in, Fade out, Fly in from left, Fly in from right, Fly in from bottom, Fly in from top, Fly out to left, right, bottom, top, Zoom in, Zoom out, Spin | Animation dropdown | Named across Slidestack, AiPPT and the GCF lesson ("Fade in (on click)", "spin", "Fly in from left") (S76, S77, S64). Google's page does not print the list. | S64, S76, S77 |
+| Start condition | "On click" (mouse click or space bar); "After previous" (starts when the previous animation ends); "With previous" (starts with the previous animation) | Second dropdown per animation | Definitions quoted from Google's page (S7). | S7 |
+| Speed | Slider with three positions: Slow, Medium, Fast | Per animation and per transition | Positions named by SlideUpLift; Google's page says "drag the slider" (S7, S74). BrightCarbon calls it a Duration slider (S60). | S7, S60, S74 |
+| By paragraph | Checkbox shown for text boxes and placeholders | Per animation | Animates each paragraph (each bullet) separately (S7, S64). | S7, S64 |
+| Preview | "Play" button; Enter continues the preview | Motion panel | Plays the transition or animation on the canvas (S7, S6). | S6, S7 |
+| Limits | No triggers, no looping, no animation on theme layouts, some browsers may not play some animations | Product behaviour | Google notes browser limits (S7); BrightCarbon notes the missing trigger and master animation features (S60). | S7, S60 |
+
+### A13 Link
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert, Link dialog | "Text" field; "Link" field accepting a URL, an email address or a search term; "Apply" | Insert, Link; Ctrl+K (Cmd+K); toolbar Insert link | Highlight text or select an object first; the Text field is prefilled from the selection (S12, S56). | S12, S56 |
+| Slides in this presentation | Dropdown "Slides in this presentation" with Next slide, Previous slide, First slide, Last slide, then each slide by number and title | Link dialog | Slide titles come from the title placeholder text (S56, S60). The file model stores NEXT_SLIDE, PREVIOUS_SLIDE, FIRST_SLIDE, LAST_SLIDE, a page object id or a slide index (S37, S36). | S36, S37, S56, S60 |
+| Drive files | Typing a name searches the user's Drive | Link field | Links to Docs, Sheets and other Drive files (S56, S60). | S56, S60 |
+| Change or remove | Click the linked text or object to show the link chip with "Change" and "Remove" | Canvas | Formatting applied to linked text does not remove the link (S12, S56). | S12, S56 |
+| Open link | Alt+Enter (Option+Enter) | Shortcut | Opens the link target (S6). | S6 |
+| Objects | Shapes, images, lines and any object accept one link; the Link item is disabled when more than one object is selected | Right click, Link; Ctrl+K | Links work in present mode and open in a new tab (S56, S60). | S38, S56, S60 |
+| Bookmarks | Not available in Slides | Google Docs | Docs only (S12). | S12 |
+
+### A14 Comment
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Add a comment | Highlight text, an image, an object or a slide; type; "Comment" | Insert, Comment; toolbar Add comment; right click; Ctrl+Alt+M (Cmd+Option+M) | The comment anchors to the selection and appears beside the slide (S13, S60, S6). | S6, S13, S60 |
+| Mentions and tasks | "@" or "+" followed by a name or email; "Assign to [name]" checkbox and "Assign"; "Reassign to [name]"; "Done" | Comment box | Mentioned people get an email; out of office status is shown (S13). Suggested action items appear for work and school accounts (S13). | S13 |
+| Thread actions | Reply; Resolve; Re-open; More (Edit, Delete); emoji reactions | Comment card | Resolved comments remain available in the comments panel (S13). | S13 |
+| Comments panel | "Show all comments" (top right); tabs for all comments or comments for you; "All types" filter (open or resolved); "Search all comments" | Top right of the window | Clicking a comment jumps to its location (S13). | S13 |
+| View, Comments | Hide comments; Minimize comments; Expand comments | View menu | Controls how comments display beside the canvas (S13). | S13 |
+| Comment limit | Alert "You've reached the document limit for comments..." | File | Make a copy with comments to continue (S13). | S13 |
+| Shortcuts | Enter current comment Ctrl+Enter; next or previous comment Ctrl+Alt then n or p then c; on a comment: j next, k previous, r reply, e resolve, u exit; Ctrl+Alt+Shift+A open thread; Ctrl+Alt+Shift+J hide comment | Keyboard | From the Slides shortcuts page (S6). | S6 |
+
+### A15 New slide
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| New slide | Same layout as the current slide | Insert, New slide; Slide, New slide; toolbar "New slide" (+); Ctrl+M (Cmd+M); Enter in the filmstrip | The new slide is inserted after the selected slide (S9, S16). | S6, S9, S16 |
+| New slide with layout | Dropdown arrow on the toolbar + button showing every layout of the current theme | Toolbar "New slide with layout" | Picks the layout at creation (S9). Slides remembers the last layout used for the next plus click (S62). | S9, S62 |
+| Default theme layouts | Title slide; Section header; Title and body; Title and two columns; Title only; One column text; Main point; Section title and description; Caption; Big number; Blank | Layout picker | The API PredefinedLayout enum names each UI layout (S29). | S29 |
+| Apply layout | Layout list for the current theme | Slide, Apply layout; right click a thumbnail, Apply layout; toolbar "Layout" | Changing layout keeps placeholder content where the new layout has matching placeholders (S16, S19, S60). | S16, S19, S60 |
+| Duplicate, delete, skip, reorder | Duplicate slide Ctrl+D; Delete or Backspace; right click, Skip slide (toggles to Unskip slide); drag, or Ctrl+Up and Ctrl+Down to move; Ctrl+Shift+Up or Down to move to start or end | Filmstrip and Slide menu | Skipped slides are hidden when presenting but visible to editors (S9, S16, S6). | S6, S9, S16 |
+| Filmstrip views | Filmstrip view; Grid view; Show or hide filmstrip | Bottom left buttons; View menu | Grid view supports drag reordering (S9, S60). | S9, S60 |
+| Templates and building blocks | "Templates" button (top left) with "Insert all slides" or single slide insert; design sidebar with "Building blocks" (agendas, quotes, key statistics) that ungroup into native elements | Sidebar | Templates are English (US) only (S19). Building blocks and stock images sidebar were announced in 2024 (S84). | S19, S84 |
+| Theme builder | View, Theme builder or Slide, Edit theme; theme slide at the top, layouts below; New layout, Rename layout, delete unused layouts; Colors panel | Theme builder view | Changes to the theme slide flow to every layout and slide (S60, S62, S19). | S19, S60, S62 |
+| Change background | Slide, Change background: Color, Image (Choose), "Done" for one slide or "Add to theme" | Slide menu | Background images: .gif, .jpg or .png under 50 MB (S19). | S19 |
+
+### A16 Slide numbers
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert, Slide numbers dialog | "On" or "Off"; "Skip title slides" checkbox; "Apply"; "Apply to selected" | Insert, Slide numbers | Apply numbers every slide; Apply to selected numbers only the selected slides (S9, S16, S57). Skip title slides leaves title layouts unnumbered without changing the count (S9). | S9, S16, S57 |
+| Rendering | A slide number text box per slide, positioned by the theme's slide number placeholder (a box containing "#") | Slide and theme builder | Each number box can be edited per slide; editing the "#" box on the theme slide changes every slide (S57). The placeholder type is SLIDE_NUMBER (S22). | S22, S57 |
+| Total page count | Not available | none | Only the current number is rendered; there is no "of N" field on a Google page. Community threads request it. | S9 |
+
+### A17 Placeholder
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert, Placeholder | Text placeholders (title, subtitle, body and slide number types) and "Image placeholder" (then choose a shape) | Insert, Placeholder, enabled only in View, Theme builder | Placeholders define where slide content goes; on the layout their prompt text ("Click to add title") cannot be edited (S62, S2). | S2, S62 |
+| Placeholder types in the file model | TITLE, SUBTITLE, BODY, CENTERED_TITLE, SLIDE_NUMBER, PICTURE, plus CHART, CLIP_ART, DIAGRAM, DATE_AND_TIME, FOOTER, HEADER, MEDIA, OBJECT, TABLE, SLIDE_IMAGE | Slides API PlaceholderType | Only the text types and the image placeholder are offered by the Insert menu; the others exist for imported PowerPoint files (S22). Alice Keeler (2019) counted three text options; the image placeholder was added later (S62, S84). | S22, S62, S84 |
+| Inheritance | Placeholders on slides inherit position, size, fill, outline, shadow and text style from the layout and master | Theme builder | Unset properties inherit; slide level edits override (S37, S42). | S37, S42 |
+| Text box versus placeholder | A text box on a layout is fixed content; a placeholder is editable per slide | Theme builder | The rule "textbox is for the author, placeholder is for the editor" (S62). | S62 |
+
+## Part B: Format menu items
+
+### B0 Format menu inventory
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Format menu contents (Slides) | Text; Align & indent; Line & paragraph spacing; Bullets & numbering; Table (when a table is selected); Format options; Borders & lines; Image options, Crop image, Replace image, Reset image (when an image is selected); Clear formatting | Menu bar, Format (Alt+O in Chrome, Ctrl+Option+O on Mac) | Text became a submenu in 2018; table formatting moved here in 2018 (S83). Items appear or disable with the selection (S60, S3, S5). | S3, S5, S10, S52, S60, S83 |
+| Not in Slides | Columns; Headers & footers; Paragraph styles; Table options dialog | Google Docs | No Slides source prints a Columns item; the headers and footers page is Docs only (S17, S3). See B4 and B6. | S3, S17 |
+
+### B1 Text
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Bold, Italic, Underline | Toggles | Format, Text; toolbar; Ctrl+B, Ctrl+I, Ctrl+U | Apply to the selection or to the whole text box when the box is selected (S6, S60). | S6, S60 |
+| Strikethrough | Toggle | Format, Text, Strikethrough; Alt+Shift+5 (Cmd+Shift+X on Mac) | Stored as the strikethrough text style (S6, S39). | S6, S39 |
+| Superscript, Subscript | Toggles | Format, Text; Ctrl+. and Ctrl+, | Baseline offset SUPERSCRIPT or SUBSCRIPT; BrightCarbon notes their use for footnote markers (S6, S33, S60). | S6, S33, S60 |
+| Size | Increase font size Ctrl+Shift+>; Decrease font size Ctrl+Shift+<; toolbar font size field | Format, Text, Size | Font size is stored in points (S6, S39). | S6, S39 |
+| Capitalization | Submenu (lowercase, UPPERCASE, Title Case in Docs) | Format, Text, Capitalization | BrightCarbon confirms a Capitalisation submenu exists in Slides and that it is only reachable from this menu; the three option labels were not printed by a Slides source (S60). | S60 |
+| Font and colours | Font dropdown (Google Fonts), Text color, Highlight color | Toolbar | Highlight colour is available in Docs and Slides; colour palettes offer preset, theme and custom colours (S20, S67). Unrecognised fonts render as Arial in the file model (S39). | S20, S39, S67 |
+| Small caps | Not exposed in the menus | File model only | smallCaps exists on TextStyle; no menu item found (S39). | S39 |
+
+### B2 Align and indent
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Horizontal alignment | Left Ctrl+Shift+L; Center Ctrl+Shift+E; Right Ctrl+Shift+R; Justified Ctrl+Shift+J | Format, Align & indent; toolbar Align dropdown | Paragraph level; START, CENTER, END, JUSTIFIED in the file model (S6, S32, S60). | S6, S32, S60 |
+| Vertical alignment | Top; Middle; Bottom | Toolbar Align dropdown (vertical group); Format, Align & indent | Content alignment of the whole text box; TOP, MIDDLE, BOTTOM (S31, S81). | S31, S81 |
+| Indent | Increase indent Ctrl+]; Decrease indent Ctrl+[ ; Tab and Shift+Tab at the start of a list item change list level | Format, Align & indent; toolbar | In lists these change nesting level (S6, S10, S52, S80). | S6, S10, S52, S80 |
+| Indentation options | Left, Right, Special (None, First line, Hanging) with a By value | Google's page places these under Format, Format options, Text fitting for Slides; SlideEgg reports an "Indentation options" item under Align & indent | Follow Google's page: hanging indents in Slides are set in the Text fitting section (S10, S60). The SlideEgg claim is unverified. | S10, S60, S80 |
+| Ruler | View, Show ruler; drag the left indent and first line markers; Shift drags both | View menu | Ruler indents apply to the selected paragraphs (S52, S80). | S52, S80 |
+
+### B3 Line and paragraph spacing
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Line spacing presets | Single; 1.15; 1.5; Double | Format, Line & paragraph spacing; toolbar Line spacing button | Multiples of the font size; stored as a percentage of normal (S78, S79, S80, S39). | S39, S67, S78, S79, S80 |
+| Paragraph spacing toggles | "Add space before paragraph"; "Add space after paragraph"; each turns into "Remove space before paragraph" or "Remove space after paragraph" once applied | Format, Line & paragraph spacing | Adds a fixed amount above or below the paragraph (S52). | S52, S78 |
+| Custom spacing dialog | "Line spacing" value; "Paragraph spacing (pts)" with "Before" and "After"; Apply | Format, Line & paragraph spacing, Custom spacing | Accepts decimal line spacing such as 1.3 (S52, S80). | S52, S80 |
+| Spacing mode | Never collapse; collapse between list items | File model only | SpacingMode controls whether paragraph spacing is skipped between list items; no menu item found (S30, S39). | S30, S39 |
+| Move paragraph | Alt+Shift+Up and Alt+Shift+Down | Shortcut | Reorders paragraphs inside a text box (S6). | S6 |
+
+### B4 Columns
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Text columns | Not available in Slides | Google Docs has Format, Columns | No Slides help page, API property or third party Slides tutorial read for this report describes a Columns item; the Slides text model has no column property (S39). The "Title and two columns" layout is the Slides answer to two column text (S29). Treat any Columns item in a Slides parity list as out of scope. | S29, S39 |
+
+### B5 Bullets and numbering
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Start a list | Bulleted list Ctrl+Shift+8; Numbered list Ctrl+Shift+7; toolbar buttons with preset dropdowns (under "More" on narrow toolbars) | Toolbar; Format, Bullets & numbering | Tab nests, Enter twice returns to the parent level (S10, S16, S67). | S10, S16, S67 |
+| Format, Bullets & numbering | "List options" (with "More bullets" for a custom glyph and, on a number, "Restart numbering" with a start value); "Numbered list" presets; "Bulleted list" presets | Format menu | "Continue previous numbering" and checklists are Docs only (S10). Restart numbering is also on the context menu of a list item (S16). | S10, S16 |
+| Bullet presets in the file model | Disc, circle, square; diamond x, 3D arrow, square; checkbox; arrow, diamond, disc; star, circle, square; 3D arrow, circle, square; left triangle, diamond, disc; diamond x, hollow diamond, square; diamond, circle, square | BulletGlyphPreset and ListPreset | Each preset defines glyphs for the first three nesting levels; the checkbox preset is the Docs checklist (S43, S28). The UI preset grid shows a subset; its exact count was not printed by a source. | S28, S43 |
+| Numbered presets in the file model | 1. a. i.; 1) a) i); 1. 1.1. 1.1.1. (nested digits); A. a. i.; I. A. 1.; 01. a. i. | BulletGlyphPreset | Six numbered patterns (S43, S28). | S28, S43 |
+| List colour | Text color applies to the glyph when the caret is on the bullet | Toolbar | Bullet colour follows text colour (S10). | S10 |
+| Nesting depth | Up to five levels reported | Third party | SlideEgg reports five indent levels; not printed by Google (S80). | S80 |
+
+### B6 Headers and footers
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Headers and footers | Not available in Slides | Google Docs: Insert, Page elements, Header or Footer; Format, Headers & footers, More options | The Docs help page lists only Docs and links to "Add numbers to a slide in Google Slides" as the Slides equivalent (S17). | S17 |
+| Slides equivalents | Insert, Slide numbers; text boxes on the theme slide or layouts in the theme builder | Insert menu and theme builder | Footer style text on every slide is done by placing it on the theme slide (S57, S60). | S57, S60 |
+
+### B7 Format options sidebar
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Opening | Format, Format options; toolbar "Format options"; right click, Format options; the sidebar section names change with the object type | Menu, toolbar, context menu | Sections shown depend on whether a shape, text box, image, diagram element, audio icon or video is selected (S1, S48, S49, S53). Google's help page calls the size section "Size & Position" while the sidebar labels it "Size & rotation" and "Position" (S1, S53). | S1, S48, S49, S53 |
+| Size & rotation | Width; Height; "Lock aspect ratio" checkbox; Rotate angle in degrees | First section for any object | Entering a degree value rotates precisely (S60). Lock aspect ratio keeps proportions while resizing (S1, S63). Flip lives in Arrange, Rotate (see C5); whether the sidebar also offers flip buttons or percentage scale fields was not printed by a source. | S1, S53, S60, S63 |
+| Position | "From": Top-left or Center; X; Y | Second section | Values are in the document's measurement unit (inches or centimetres) (S53, S60). | S53, S60 |
+| Text fitting: Indentation | Left; Right; "Special": None, First line, Hanging; "By" amount | Text fitting section for text boxes, shapes with text and placeholders | Values in inches or centimetres depending on the file's locale (S60, S10). | S10, S60 |
+| Text fitting: Autofit | "Do not autofit"; "Shrink text on overflow"; "Resize shape to fit text" | Text fitting section; also right click, Text fitting | Shrink adjusts font size, line spacing and letter spacing to fit (S60). The API names them NONE, TEXT_AUTOFIT and SHAPE_AUTOFIT (S27). Defaults are described in A1 (S8). | S8, S27, S60 |
+| Text fitting: Padding | Top; Bottom; Left; Right | Text fitting section | The inset between the shape edge and the text; setting the left padding to 0 aligns text with the shape edge (S60, S10). | S10, S60 |
+| Drop shadow | Enable checkbox; "Color"; "Transparency" slider; "Angle" slider; "Distance" slider; "Blur radius" slider | Section for shapes, images, text boxes, word art | The angle can only be set by slider (S49). SlideModel recommends 70 to 80 percent transparency (S49). The file model stores blurRadius, color, alpha, a transform and an alignment point; type and rotateWithShape are read only (S37). | S37, S49, S50, S63 |
+| Reflection | Enable checkbox; "Transparency"; "Distance"; "Size" | Section for shapes and images | Size sets how much of the object is mirrored (S50, S63). | S50, S63 |
+| Recolor | Dropdown of presets built from the theme palette, plus "No recolor" | Images and audio icons | Preset names in the file model: NONE, LIGHT1 to LIGHT10, DARK1 to DARK10, GRAYSCALE, NEGATIVE, SEPIA, CUSTOM (S37). Light and dark variants use the page's colour scheme in order (S37, S50). | S37, S50, S53 |
+| Adjustments | "Transparency" (Google's 2026 page calls it "Opacity"); "Brightness"; "Contrast"; a reset control | Images and audio icons | Changes preview live (S5, S50). Reset image (B13) also clears them (S5). | S5, S50 |
+| Alt text | "Description" field; "Advanced options" reveals "Title" | Last section; right click, Alt text; Ctrl+Alt+Y (Cmd+Option+Y) | Some images get automatic alt text that should be checked (S14, S16). | S6, S14, S16 |
+| Video playback and Audio playback | See A4 and A3 | Media objects | Replaces Text fitting for media (S2, S53). | S2, S53 |
+
+### B8 Borders and lines
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Format, Borders & lines | Border color; Border weight; Border dash; for lines also Line start and Line end | Format menu; the same controls sit on the toolbar as "Border color", "Border weight", "Border dash" (shapes, images, tables) and "Line color", "Line weight", "Line dash", "Line start", "Line end" (lines) | Weight is a thickness in pixels or points; dash uses the six DashStyle patterns; decorations use the ten ArrowStyle values (S3, S59, S60, S23, S24). Border colour palettes include Transparent (S55). | S3, S23, S24, S55, S59, S60 |
+| Weight values | Numeric menu of increasing thicknesses | Border weight or Line weight dropdown | The specific values were not printed by any source read; Baz Roberts describes choosing "a bigger number" (S58). Unverified. | S58 |
+| Legacy "Border type" | Single, double, triple line styles reported in 2016 | Format, Borders and lines, Border type (2016) | Present in the 2016 tutorial; not seen in any 2021 or later source. Treat as removed unless verified. | S58 |
+| Outline in the file model | outlineFill, weight, dashStyle, propertyState | Slides API Outline | Setting propertyState to NOT_RENDERED removes the border (S37). | S37 |
+
+### B9 Table (Format menu)
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Format, Table | Insert row above; Insert row below; Insert column left; Insert column right; Delete row; Delete column; Delete table; Distribute rows; Distribute columns; Merge cells; Unmerge cells | Format, Table (only with a table selected); right click a cell | Same command set as the context menu (S3, S83). | S3, S83 |
+| Cell borders and fill | Border color, Border weight, Border dash, Fill color on the toolbar; border selection arrow or Ctrl+Alt then e then p | Toolbar and canvas | Applies to the selected cells or to the chosen edges (S3, S6, S60). | S3, S6, S60 |
+| Not in Slides | Table options dialog, pin header rows, sort, split cell, quick layouts | Google Docs | Docs only (S3). | S3 |
+
+### B10 Image options
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Format, Image options | Opens the Format options sidebar for the image: Size & rotation, Position, Recolor, Adjustments, Drop shadow, Reflection, Alt text | Format menu and toolbar with an image selected; "Image options, Alt text" is the documented route to alt text | Same sidebar as B7 with image sections (S5, S14, S60). | S5, S14, S60 |
+
+### B11 Crop image and mask image
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Crop | Toolbar Crop button; double click the image; Format, Crop image; drag the black crop handles; Enter or click away to finish; Enter exits crop mode | Toolbar, Format menu, canvas | Crop hides parts of the image without deleting them; Reset image restores (S5, S60, S6). Dragging a blue node instead of a black handle resizes the image (S60). | S5, S6, S60 |
+| Mask image | Down arrow next to Crop, then Shapes, Arrows, Callouts or Equation; drag the coloured handles to adjust the mask; double click to reposition the image inside the mask | Toolbar | The image is clipped to the chosen shape (S5, S60). | S5, S60 |
+| Crop in the file model | leftOffset, rightOffset, topOffset, bottomOffset, angle | ImageProperties.cropProperties | Offsets can be negative to extend beyond the original bounds (S42). | S42 |
+
+### B12 Replace image
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Replace image | Upload from computer; Stock & web; Drive & Photos; Camera; By URL | Right click, Replace image; Format, Replace image; toolbar; drag and drop onto the image | Keeps size and position; also replaces an audio icon (S2, S53, S84). | S2, S53, S84 |
+
+### B13 Reset image
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Reset image | Single action | Right click, Reset image; Format, Reset image | Removes crop, mask, recolour and adjustments and restores the original photo (S5). | S5 |
+
+### B14 Clear formatting
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Clear formatting | Ctrl+\ or Ctrl+Space; Format, Clear formatting; toolbar Clear formatting button | Menu, toolbar, shortcut | Removes most text formatting and returns the selection to the default style; also removes border and fill changes on objects (S6, S60, S67). | S6, S60, S67 |
+
+### B15 Paint format
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Paint format | Toolbar paint roller; Copy formatting Ctrl+Alt+C, Paste formatting Ctrl+Alt+V; double click the tool to keep applying; Esc stops | Toolbar and shortcuts | Copies fill colour, line colour and line width between shapes and text formatting between text runs (S60, S6). | S6, S60 |
+
+### B16 Colour pickers (fill, border, text, highlight)
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Palette | Solid and Gradient tabs; "Theme" colours; "Custom" with "Add a custom color" (Hex, RGB, RGBA and transparency) and "Pick a custom color" (eyedropper, Chrome and Edge only); "Transparent" | Fill color, Border color, Text color, Highlight color | Custom colours become reusable within the file (S20, S58, S63, S84). Theme colours are edited in Slide, Edit theme, Colors (S19). | S19, S20, S58, S63, S84 |
+
+## Part C: Arrange menu items and snapping
+
+### C1 Order
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Order | Bring to front Ctrl+Shift+Up; Bring forward Ctrl+Up; Send backward Ctrl+Down; Send to back Ctrl+Shift+Down (Cmd on Mac) | Arrange, Order; right click, Order | Only the moves that have an effect are enabled (S16). Z order also defines the tab and screen reader reading order (S16). | S1, S6, S16, S51 |
+
+### C2 Align
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Align | Left; Center; Right; Top; Middle; Bottom | Arrange, Align; right click, Align | Google's page states it applies "when you select multiple objects" and aligns their edges to each other (S1, S51, S65). The submenu replaced "Align horizontally" and "Align vertically" in 2018 (S83). No source read describes an "Align to slide" toggle; single object alignment to the slide is done with Center on page (C4). | S1, S51, S65, S83 |
+
+### C3 Distribute
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Distribute | Horizontally; Vertically | Arrange, Distribute; right click | Requires three or more objects; spaces them evenly between the outer two (S1, S51, S65). | S1, S51, S65 |
+
+### C4 Center on page
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Center on page | Horizontally; Vertically | Arrange, Center on page; right click | Centres the selection on the slide; works for one object (S1, S51). The API AlignmentPosition has CENTER, HORIZONTAL_CENTER and VERTICAL_CENTER (S35). | S1, S35, S51 |
+
+### C5 Rotate
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Rotate menu | Rotate clockwise 90°; Rotate counter-clockwise 90°; Flip horizontally; Flip vertically | Arrange, Rotate; right click, Rotate | Exact labels "Rotate clockwise 90°" and "flip horizontally" appear in the GCF lesson and Baz Roberts (S65, S58). | S51, S58, S65 |
+| Rotation handle | Drag the circular handle above the object; Shift snaps to 15 degree steps; the angle shows while dragging | Canvas | Lines rotate by their end handles instead (S15, S60). | S15, S58, S60 |
+| Rotation shortcuts | Alt+Shift+Left or Right: 1 degree; Alt+Left or Right: 15 degrees | Keyboard | From the shortcuts page (S6). | S6 |
+| Numeric angle | Rotate field in Size & rotation | Format options | See B7 (S60). | S60 |
+
+### C6 Group and ungroup
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Group | Ctrl+Alt+G (Cmd+Option+G) | Arrange, Group; right click | Any number of objects on the same slide; objects can lie outside the slide bounds (S1, S6, S60). Formatting applied to a group applies to all members (S60). | S1, S6, S60 |
+| Ungroup | Ctrl+Alt+Shift+G | Arrange, Ungroup; right click | Restores independent objects (S6, S51). | S6, S51 |
+| Edit inside a group | Double click a member | Canvas | Selects the member without ungrouping (S51). | S51 |
+| Regroup | Not printed by any source read | Arrange menu | Unverified. | none |
+
+### C7 Snapping, guides and rulers
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Snap to guides | On by default | View, Snap to, Guides | Red lines appear while dragging to show edges and centres the object lines up with (S1, S51, S45). Hold Alt while dragging to suppress guides (S6). | S1, S6, S45, S51 |
+| Snap to grid | Off by default | View, Snap to, Grid | Dragged objects align to an invisible grid without visual lines (S1, S51). | S1, S51 |
+| Show guides | Toggle | View, Guides, Show guides; right click the slide, Guides | Guides start hidden; when shown they are the same on every slide and never appear in the presentation (S45, S60). | S45, S60 |
+| Add guides | Add vertical guide; Add horizontal guide | View, Guides; right click the slide, Guides | A new guide appears at the slide centre and can be dragged; its position shows while dragging (S1, S45, S58). | S1, S45, S58 |
+| Edit guides dialog | Vertical and Horizontal tabs; position field per guide; colour swatch per guide; X to remove; "Add new guide"; "Done" | View, Guides, Edit guides; right click a guide, Edit guides | Numeric positions in the document unit (S45, S58). | S45, S58 |
+| Delete and clear | Right click a guide, Delete guide; View, Guides, Clear guides | Menu and context menu | Clear removes every guide (S1, S45). | S1, S45 |
+| Guides in the theme builder | Guides added in the theme builder are locked on slides | View, Theme builder | Prevents accidental dragging on slides (S60). | S60 |
+| Rulers | View, Show ruler (toggles to Hide ruler) | View menu | Rulers appear at the top and left; indent markers appear when text is selected (S1, S52, S80). | S1, S52, S80 |
+| Direct manipulation shortcuts | Arrow keys nudge one pixel; Shift+arrows nudge more; Ctrl+drag duplicates; Ctrl+resize scales from the centre; Shift+drag constrains to an axis; Shift+resize keeps aspect ratio; Ctrl+Alt+B, I, J, K, 9, W resize by keyboard; Tab and Shift+Tab cycle selection | Canvas | From the shortcuts page (S6). | S6 |
+
+## Part D: Object and formatting shortcuts (Windows and Chrome OS, Mac in brackets)
+
+| Item | Options and values | Where it lives | Behaviour | Source |
+| --- | --- | --- | --- | --- |
+| Insert and edit link | Ctrl+K (Cmd+K); Open link Alt+Enter (Option+Enter) | Keyboard | Opens the link dialog or follows the link (S6). | S6 |
+| Copy and paste formatting | Ctrl+Alt+C, Ctrl+Alt+V (Cmd+Option+C, Cmd+Option+V) | Keyboard | Paint format (S6). | S6 |
+| Alt text | Ctrl+Alt+Y (Cmd+Option+Y) | Keyboard | Opens the Alt text section (S6). | S6 |
+| Insert comment | Ctrl+Alt+M (Cmd+Option+M) | Keyboard | See A14 (S6). | S6 |
+| New slide, duplicate | Ctrl+M (Ctrl+M), Ctrl+D (Cmd+D) | Keyboard | Duplicate also duplicates a selected object (S6). | S6 |
+| Text | Bold Ctrl+B; Italic Ctrl+I; Underline Ctrl+U; Subscript Ctrl+,; Superscript Ctrl+.; Strikethrough Alt+Shift+5 (Cmd+Shift+X); Clear formatting Ctrl+\ or Ctrl+Space; font size Ctrl+Shift+> and <; align Ctrl+Shift+L, R, E, J; indent Ctrl+] and [; lists Ctrl+Shift+8 and 7; move paragraph Alt+Shift+Up or Down | Keyboard | From the shortcuts page (S6). | S6 |
+| Arrange | Group Ctrl+Alt+G; Ungroup Ctrl+Alt+Shift+G; order Ctrl+Up, Down, Shift+Up, Shift+Down; rotate Alt+Left, Right and Alt+Shift+Left, Right; nudge arrows and Shift+arrows | Keyboard | From the shortcuts page (S6). | S6 |
+| Panels | Animations panel Ctrl+Alt+Shift+B; speaker notes Ctrl+Alt+Shift+S; filmstrip Ctrl+Alt+Shift+F; canvas Ctrl+Alt+Shift+C; Explore Ctrl+Alt+Shift+I; revision history Ctrl+Alt+Shift+H; side panel Ctrl+Alt+. or ,; HTML view Ctrl+Alt+Shift+P; cell border selection Ctrl+Alt then e then p | Keyboard | From the shortcuts page (S6). | S6 |
+| Menus | Context menu Ctrl+Shift+\ or Shift+F10; File Alt+F; Edit Alt+E; View Alt+V; Insert Alt+I; Format Alt+O; Tools Alt+T; Help Alt+H (Alt+Shift outside Chrome; Ctrl+Option on Mac); tool finder Alt+/ ; hide menus Ctrl+Shift+F | Keyboard | From the shortcuts page (S6). | S6 |
+| Present | Ctrl+F5 (Cmd+Enter); Esc exits; arrows navigate; number then Enter jumps; s notes; a audience tools; l laser; b or . black; w or , white; Ctrl+Shift+C captions; F11 full screen | Keyboard | From the shortcuts page (S6). | S6 |
+
+## Part E: Appendices from the Slides API and Apps Script references
+
+### E1 Shape types (Slides API and Apps Script ShapeType, 143 values)
+
+The enum lists UNSUPPORTED, TEXT_BOX, CUSTOM and 140 preset geometries. Each preset "Corresponds to ECMA-376 ST_ShapeType" with the named preset, which is the same geometry PowerPoint uses, so the picker glyphs can be reproduced from the ECMA-376 preset definitions (S21).
+
+Rectangles: RECTANGLE, ROUND_RECTANGLE, ROUND_1_RECTANGLE, ROUND_2_SAME_RECTANGLE, ROUND_2_DIAGONAL_RECTANGLE, SNIP_1_RECTANGLE, SNIP_2_SAME_RECTANGLE, SNIP_2_DIAGONAL_RECTANGLE, SNIP_ROUND_RECTANGLE.
+
+Basic shapes: ELLIPSE, TRIANGLE, RIGHT_TRIANGLE, PARALLELOGRAM, TRAPEZOID, DIAMOND, PENTAGON, HEXAGON, HEPTAGON, OCTAGON, DECAGON, DODECAGON, PIE, CHORD, TEARDROP, FRAME, HALF_FRAME, CORNER, DIAGONAL_STRIPE, PLUS, PLAQUE, CAN, CUBE, BEVEL, DONUT, NO_SMOKING, BLOCK_ARC, FOLDED_CORNER, SMILEY_FACE, HEART, LIGHTNING_BOLT, SUN, MOON, CLOUD, ARC, BRACKET_PAIR, BRACE_PAIR, LEFT_BRACKET, RIGHT_BRACKET, LEFT_BRACE, RIGHT_BRACE.
+
+Arrows: RIGHT_ARROW, LEFT_ARROW, UP_ARROW, DOWN_ARROW, LEFT_RIGHT_ARROW, UP_DOWN_ARROW, QUAD_ARROW, LEFT_RIGHT_UP_ARROW, BENT_ARROW, UTURN_ARROW, LEFT_UP_ARROW, BENT_UP_ARROW, CURVED_RIGHT_ARROW, CURVED_LEFT_ARROW, CURVED_UP_ARROW, CURVED_DOWN_ARROW, STRIPED_RIGHT_ARROW, NOTCHED_RIGHT_ARROW, HOME_PLATE, CHEVRON, RIGHT_ARROW_CALLOUT, DOWN_ARROW_CALLOUT, LEFT_ARROW_CALLOUT, UP_ARROW_CALLOUT, LEFT_RIGHT_ARROW_CALLOUT, QUAD_ARROW_CALLOUT, ARROW_EAST, ARROW_NORTH_EAST, ARROW_NORTH.
+
+Callouts: WEDGE_RECTANGLE_CALLOUT, WEDGE_ROUND_RECTANGLE_CALLOUT, WEDGE_ELLIPSE_CALLOUT, CLOUD_CALLOUT, SPEECH.
+
+Equation: MATH_PLUS, MATH_MINUS, MATH_MULTIPLY, MATH_DIVIDE, MATH_EQUAL, MATH_NOT_EQUAL.
+
+Flowchart (29): FLOW_CHART_PROCESS, FLOW_CHART_ALTERNATE_PROCESS, FLOW_CHART_DECISION, FLOW_CHART_INPUT_OUTPUT, FLOW_CHART_PREDEFINED_PROCESS, FLOW_CHART_INTERNAL_STORAGE, FLOW_CHART_DOCUMENT, FLOW_CHART_MULTIDOCUMENT, FLOW_CHART_TERMINATOR, FLOW_CHART_PREPARATION, FLOW_CHART_MANUAL_INPUT, FLOW_CHART_MANUAL_OPERATION, FLOW_CHART_CONNECTOR, FLOW_CHART_OFFPAGE_CONNECTOR, FLOW_CHART_PUNCHED_CARD, FLOW_CHART_PUNCHED_TAPE, FLOW_CHART_SUMMING_JUNCTION, FLOW_CHART_OR, FLOW_CHART_COLLATE, FLOW_CHART_SORT, FLOW_CHART_EXTRACT, FLOW_CHART_MERGE, FLOW_CHART_OFFLINE_STORAGE, FLOW_CHART_ONLINE_STORAGE, FLOW_CHART_MAGNETIC_TAPE, FLOW_CHART_MAGNETIC_DISK, FLOW_CHART_MAGNETIC_DRUM, FLOW_CHART_DELAY, FLOW_CHART_DISPLAY.
+
+Stars and banners: STAR_4, STAR_5, STAR_6, STAR_7, STAR_8, STAR_10, STAR_12, STAR_16, STAR_24, STAR_32, IRREGULAR_SEAL_1, IRREGULAR_SEAL_2, STARBURST, RIBBON, RIBBON_2, ELLIPSE_RIBBON, ELLIPSE_RIBBON_2, VERTICAL_SCROLL, HORIZONTAL_SCROLL, WAVE, DOUBLE_WAVE.
+
+### E2 Line enums
+
+LineCategory: STRAIGHT, BENT, CURVED (S25). Line.Type: STRAIGHT_CONNECTOR_1, BENT_CONNECTOR_2, BENT_CONNECTOR_3, BENT_CONNECTOR_4, BENT_CONNECTOR_5, CURVED_CONNECTOR_2, CURVED_CONNECTOR_3, CURVED_CONNECTOR_4, CURVED_CONNECTOR_5, STRAIGHT_LINE (S26). ArrowStyle: NONE, STEALTH_ARROW, FILL_ARROW, FILL_CIRCLE, FILL_SQUARE, FILL_DIAMOND, OPEN_ARROW, OPEN_CIRCLE, OPEN_SQUARE, OPEN_DIAMOND (S23, S38). DashStyle: SOLID (default), DOT, DASH, DASH_DOT, LONG_DASH, LONG_DASH_DOT (S24). LineProperties: lineFill, weight, dashStyle, startArrow, endArrow, link, startConnection, endConnection (S38).
+
+### E3 Text enums and properties
+
+TextStyle: backgroundColor, foregroundColor, bold, italic, fontFamily, fontSize, link, baselineOffset (NONE, SUPERSCRIPT, SUBSCRIPT), smallCaps, strikethrough, underline, weightedFontFamily (S39, S33). ParagraphStyle: lineSpacing (percent of normal), alignment (START, CENTER, END, JUSTIFIED), indentStart, indentEnd, indentFirstLine, spaceAbove, spaceBelow, direction, spacingMode (NEVER_COLLAPSE, COLLAPSE_LISTS) (S39, S32, S30). ContentAlignment: TOP, MIDDLE, BOTTOM (S31). AutofitType: NONE, TEXT_AUTOFIT, SHAPE_AUTOFIT (S27).
+
+BulletGlyphPreset bullet glyphs: ARROW (U+2794), ARROW3D (U+27A2), CHECKBOX (U+274F), CIRCLE (U+25CB), DIAMOND (U+25C6), DIAMONDX (U+2756), HOLLOWDIAMOND (U+25C7), DISC (U+25CF), SQUARE (U+25A0), STAR (U+2605), LEFTTRIANGLE (U+25C4); numbering glyphs ALPHA, UPPERALPHA, DIGIT, ZERODIGIT, ROMAN, UPPERROMAN (S43). Presets: BULLET_DISC_CIRCLE_SQUARE, BULLET_DIAMONDX_ARROW3D_SQUARE, BULLET_CHECKBOX, BULLET_ARROW_DIAMOND_DISC, BULLET_STAR_CIRCLE_SQUARE, BULLET_ARROW3D_CIRCLE_SQUARE, BULLET_LEFTTRIANGLE_DIAMOND_DISC, BULLET_DIAMONDX_HOLLOWDIAMOND_SQUARE, BULLET_DIAMOND_CIRCLE_SQUARE, NUMBERED_DIGIT_ALPHA_ROMAN, NUMBERED_DIGIT_ALPHA_ROMAN_PARENS, NUMBERED_DIGIT_NESTED, NUMBERED_UPPERALPHA_ALPHA_ROMAN, NUMBERED_UPPERROMAN_UPPERALPHA_DIGIT, NUMBERED_ZERODIGIT_ALPHA_ROMAN (S43, S28).
+
+### E4 Effects and image properties
+
+Shadow: type (read only), transform, alignment (RectanglePosition, read only), blurRadius, color, alpha (0.0 to 1.0), rotateWithShape (read only), propertyState (S37). Recolor: recolorStops (gradient, read only) and name: NONE, LIGHT1 to LIGHT10, DARK1 to DARK10, GRAYSCALE, NEGATIVE, SEPIA, CUSTOM (S37). ImageProperties: cropProperties (leftOffset, rightOffset, topOffset, bottomOffset, angle), transparency, brightness, contrast, recolor, outline, shadow, link (S42). Outline: outlineFill, weight, dashStyle, propertyState (S37). Link: url, relativeLink (NEXT_SLIDE, PREVIOUS_SLIDE, FIRST_SLIDE, LAST_SLIDE), pageObjectId, slideIndex (S37). VideoProperties: outline, autoPlay, start, end, mute; Video.Source: YOUTUBE, DRIVE (S41). TableBorderProperties: tableBorderFill, weight, dashStyle (S40).
+
+### E5 Layouts and placeholders
+
+PredefinedLayout with the UI names Google prints in the reference: BLANK ("Blank"), CAPTION_ONLY ("Caption"), TITLE ("Title slide"), TITLE_AND_BODY ("Title and body"), TITLE_AND_TWO_COLUMNS ("Title and two columns"), TITLE_ONLY ("Title only"), SECTION_HEADER ("Section header"), SECTION_TITLE_AND_DESCRIPTION ("Section title and description"), ONE_COLUMN_TEXT ("One column text"), MAIN_POINT ("Main point"), BIG_NUMBER ("Big number") (S29). PlaceholderType: NONE, BODY, CHART, CLIP_ART, CENTERED_TITLE, DIAGRAM, DATE_AND_TIME, FOOTER, HEADER, MEDIA, OBJECT, PICTURE, SLIDE_NUMBER, SUBTITLE, TABLE, TITLE, SLIDE_IMAGE (S22). SlidePosition for relative links: NEXT_SLIDE, PREVIOUS_SLIDE, FIRST_SLIDE, LAST_SLIDE (S36).
+
+## Part F: Implications for Turboslide
+
+These are observations for the designers, not decisions.
+
+1. The Insert menu is the object catalogue. Sales users expect the seventeen items in A0, and expect the toolbar to repeat text box, image, shape, line, comment and link. Turboslide's primitives (box, shape, rule, text, icon, image, material) cover text box, shape, line and image; audio, video, table, chart, diagram, word art and special characters have no primitive today.
+2. Google's shape picker is four categories over about 140 ECMA-376 presets. Because every preset is an ECMA-376 geometry, a parity picker can be generated from the preset definitions, and the same list serves Mask image.
+3. Format options is a single right sidebar whose sections vary by object type. The section order that sources describe is Size & rotation, Position, Text fitting (or Video playback or Audio playback), Recolor and Adjustments (images), Drop shadow, Reflection, Alt text. Turboslide's Inspector should present the same section names and field labels.
+4. Text fitting has three modes with fixed defaults (placeholders shrink, new text boxes grow). Autofit defaults are a user preference in Tools, Preferences.
+5. Arrange is small and fixed: Order (4), Align (6), Distribute (2), Center on page (2), Rotate (4), Group and Ungroup. Snapping is two toggles under View, Snap to, and guides are a per deck set shared by every slide with an Edit guides dialog.
+6. Google has no text columns, no headers and footers, no total slide count, no animation triggers and no border weight typed in as a number. Parity does not require these.
+7. Labels to copy exactly: "Format options", "Size & rotation", "Position", "Text fitting", "Drop shadow", "Reflection", "Alt text", "Align & indent", "Line & paragraph spacing", "Bullets & numbering", "Borders & lines", "Center on page", "Snap to", "Show guides", "Add vertical guide", "Add horizontal guide", "Clear guides", "Apply to all slides", "By paragraph", "On click", "After previous", "With previous", "Skip title slides", "Apply to selected", "Slides in this presentation".
+
+## Unverified claims
+
+The following could not be confirmed from a public source read on 2026-09-11 and should be checked in a signed in Google Slides session before they are copied into a spec.
+
+1. The exact top to bottom order of the current Insert menu (Placeholder is last and Diagram follows Chart; the rest is inferred).
+2. The tooltip names Google shows for each glyph in the Shape picker, and which category the arrow callouts belong to. The geometry list (E1) is confirmed; the labels are not.
+3. The number of variants shown per diagram type and the allowed level or step ranges (a third party snippet says 2 to 5 levels for Hierarchy).
+4. The category labels in the Special characters dialog.
+5. The three option labels under Format, Text, Capitalization in Slides (the submenu's existence is confirmed).
+6. Whether Format, Align & indent contains an "Indentation options" item in Slides (Google's page routes hanging indents through Format options, Text fitting).
+7. The numeric values in the Border weight and Line weight menus.
+8. Whether the Size & rotation section offers flip buttons or percentage scale fields in addition to width, height, lock aspect ratio and angle.
+9. Whether a "Regroup" item exists in the Arrange menu.
+10. Whether a "Change shape" control exists for shapes (one third party page reports it).
+11. Word art multi line entry (Shift+Enter) and any word art specific formatting beyond fill, border and font.
+12. The 2016 "Border type" submenu (single, double, triple) is assumed removed.
+13. Audio insertion by URL (one third party page mentions it; Google documents Drive only) and the Drive picker tab names.
+14. Supported video container formats for Drive uploads (.mp4 and .mov reported by a third party).
+15. The exact count and arrangement of bullet and numbered presets in the toolbar dropdown grids.
+16. The URL of the 2022 "Enhanced menus in Google Slides and Drawings" post and its full list of menu changes.
+17. Whether "Slides in this presentation" is a dropdown or a button that expands a list (both descriptions appear).
+18. The "Reset" control in the Adjustments section and the exact label "Opacity" versus "Transparency" in the current sidebar (Google's 2026 page says Opacity, tutorials say Transparency).
+
+## Sources
+
+All pages were read on 2026-09-11.
+
+Google help centre and product pages
+
+- S1 Insert and arrange text, shapes, diagrams, and lines. https://support.google.com/docs/answer/1696521?hl=en&co=GENIE.Platform%3DDesktop
+- S2 Insert or delete images & videos. https://support.google.com/docs/answer/97447?hl=en&co=GENIE.Platform%3DDesktop
+- S3 Add and edit tables. https://support.google.com/docs/answer/1696711?hl=en&co=GENIE.Platform%3DDesktop
+- S4 Link a chart, table, or slides to Google Docs or Slides. https://support.google.com/docs/answer/7009814?hl=en&co=GENIE.Platform%3DDesktop
+- S5 Crop & adjust images. https://support.google.com/docs/answer/4600160?hl=en&co=GENIE.Platform%3DDesktop
+- S6 Keyboard shortcuts for Google Slides. https://support.google.com/docs/answer/1696717?hl=en&co=GENIE.Platform%3DDesktop
+- S7 Add or change animations and transitions. https://support.google.com/docs/answer/1689475?hl=en&co=GENIE.Platform%3DDesktop
+- S8 Change how text fits in placeholders & text boxes. https://support.google.com/docs/answer/10364036?hl=en
+- S9 Add, delete & organize slides. https://support.google.com/docs/answer/1694830?hl=en&co=GENIE.Platform%3DDesktop
+- S10 Add a numbered list, bulleted list, or checklist. https://support.google.com/docs/answer/3300615?hl=en&co=GENIE.Platform%3DDesktop
+- S11 Insert emojis & special characters. https://support.google.com/docs/answer/3371015?hl=en&co=GENIE.Platform%3DDesktop
+- S12 Work with links & bookmarks. https://support.google.com/docs/answer/45893?hl=en&co=GENIE.Platform%3DDesktop
+- S13 Use comments, action items, & emoji reactions. https://support.google.com/docs/answer/65129?hl=en&co=GENIE.Platform%3DDesktop
+- S14 Make your document, presentation, sheets & videos more accessible. https://support.google.com/docs/answer/6199477?hl=en
+- S15 Learn how to use drawings & markups (Google Drawings line, shape, text box and word art tools). https://support.google.com/docs/answer/179740?hl=en&co=GENIE.Platform%3DDesktop
+- S16 Use Google Slides with a screen reader. https://support.google.com/docs/answer/1634140?hl=en
+- S17 Use headers, footers, page numbers & footnotes (Docs). https://support.google.com/docs/answer/86629?hl=en&co=GENIE.Platform%3DDesktop
+- S18 Use Google editors with a screen reader. https://support.google.com/docs/answer/6282736?hl=en
+- S19 Use a Template or change the theme, background, or layout in Google Slides. https://support.google.com/docs/answer/1705254?hl=en&co=GENIE.Platform%3DDesktop
+- S20 Change the color of text, objects, and backgrounds. https://support.google.com/docs/answer/13267978?hl=en
+
+Google developer references
+
+- S21 Apps Script Slides ShapeType. https://developers.google.com/apps-script/reference/slides/shape-type
+- S22 Apps Script Slides PlaceholderType. https://developers.google.com/apps-script/reference/slides/placeholder-type
+- S23 Apps Script Slides ArrowStyle. https://developers.google.com/apps-script/reference/slides/arrow-style
+- S24 Apps Script Slides DashStyle. https://developers.google.com/apps-script/reference/slides/dash-style
+- S25 Apps Script Slides LineCategory. https://developers.google.com/apps-script/reference/slides/line-category
+- S26 Apps Script Slides LineType. https://developers.google.com/apps-script/reference/slides/line-type
+- S27 Apps Script Slides AutofitType. https://developers.google.com/apps-script/reference/slides/autofit-type
+- S28 Apps Script Slides ListPreset. https://developers.google.com/apps-script/reference/slides/list-preset
+- S29 Apps Script Slides PredefinedLayout. https://developers.google.com/apps-script/reference/slides/predefined-layout
+- S30 Apps Script Slides SpacingMode. https://developers.google.com/apps-script/reference/slides/spacing-mode
+- S31 Apps Script Slides ContentAlignment. https://developers.google.com/apps-script/reference/slides/content-alignment
+- S32 Apps Script Slides ParagraphAlignment. https://developers.google.com/apps-script/reference/slides/paragraph-alignment
+- S33 Apps Script Slides TextBaselineOffset. https://developers.google.com/apps-script/reference/slides/text-baseline-offset
+- S34 Apps Script Slides VideoSourceType. https://developers.google.com/apps-script/reference/slides/video-source-type
+- S35 Apps Script Slides AlignmentPosition. https://developers.google.com/apps-script/reference/slides/alignment-position
+- S36 Apps Script Slides SlidePosition. https://developers.google.com/apps-script/reference/slides/slide-position
+- S37 Slides API, presentations.pages other types (Shadow, Recolor, Link, Outline). https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations.pages/other
+- S38 Slides API, presentations.pages lines. https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations.pages/lines
+- S39 Slides API, presentations.pages text. https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations.pages/text
+- S40 Slides API, presentations.pages tables. https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations.pages/tables
+- S41 Slides API, presentations.pages videos. https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations.pages/videos
+- S42 Slides API, presentations.pages images. https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations.pages/images
+- S43 Slides API, presentations request types (BulletGlyphPreset). https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations/request
+- S44 Slides API, presentations.pages shapes. https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations.pages/shapes
+
+Google Workspace Updates blog
+
+- S83 Menu and toolbar updates in Google Docs editors (March 2018). https://workspaceupdates.googleblog.com/2018/03/menu-and-toolbar-updates-in-google-docs.html
+- S84 Workspace Updates search result pages (snippets for enhanced menus 2022, GIFs and stickers, drag and drop image replacement 2023, image placeholders, design sidebar with building blocks 2024, Help me visualize, Nano Banana image editing, RGBA and eyedropper colours). https://workspaceupdates.googleblog.com/search?q=%22Google+Slides%22+columns and https://workspaceupdates.googleblog.com/search?q=%22Google+Slides%22+%22insert+image%22 and https://workspaceupdates.googleblog.com/search?q=%22Google+Slides%22+table+toolbar
+
+Third party tutorials
+
+- S45 How-To Geek, How to Use Guides to Position Items in Google Slides (2022). https://www.howtogeek.com/780332/how-to-use-guides-to-position-items-in-google-slides/
+- S46 How-To Geek, How to Add Videos and Customize Playback in Google Slides (2021). https://www.howtogeek.com/772618/how-to-add-videos-and-customize-playback-in-google-slides/
+- S47 How-To Geek, How to Add Flowcharts and Diagrams to Google Docs or Slides (2019). https://www.howtogeek.com/442036/how-to-add-flowcharts-and-diagrams-to-google-docs-or-slides/
+- S48 SlideModel, How to Insert and Edit Google Slides Diagrams (2024). https://slidemodel.com/google-slides-diagram/
+- S49 SlideModel, How To Add Drop Shadows in Google Slides (2024). https://slidemodel.com/how-to-add-drop-shadows-in-google-slides/
+- S50 Slidesgo, How to Apply Effects to an Image in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-apply-effects-to-an-image-in-google-slides-presentation
+- S51 Slidesgo, How to Arrange and Align Objects in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-arrange-and-align-objects-in-google-slides
+- S52 Slidesgo, How to Change Indentation, Spacing and Line Spacing in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-change-indentation-spacing-and-line-spacing-in-google-slides
+- S53 Slidesgo, How to Add and Edit Audio or Music in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-and-edit-audio-or-music-in-google-slides
+- S54 Slidesgo, How to Add Animations and Transitions in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-animations-and-transitions-in-google-slides
+- S55 Slidesgo, How to Add and Edit Tables in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-and-edit-tables-in-google-slides
+- S56 Slidesgo, How to Add Hyperlinks in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-hyperlinks-in-google-slides
+- S57 Slidesgo, How to Add Slide Numbers in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-slide-numbers-in-google-slides
+- S58 Baz Roberts, Google Slides, Inserting & editing shapes (2016). https://bazroberts.com/2016/05/19/google-slides-inserting-editing-shapes/
+- S59 Baz Roberts, Google Slides, Lines, connectors, scribble (2016). https://bazroberts.com/2016/05/21/google-slides-lines-connectors-scribble/
+- S60 BrightCarbon, Google Slides: The ULTIMATE guide. https://www.brightcarbon.com/blog/google-slides-ultimate-guide/
+- S61 BrightCarbon, How to insert video and audio into Google Slides. https://www.brightcarbon.com/blog/insert-video-and-audio-into-google-slides/
+- S62 Alice Keeler, How to Add a Placeholder in Google Slides (2019). https://alicekeeler.com/2019/04/03/google-slides-add-placeholder/
+- S63 Art of Presentations, How to Format Shapes in Google Slides. https://artofpresentations.com/how-to-format-shapes-in-google-slides/
+- S64 GCFGlobal (iiab.live mirror), Google Slides: Adding Transitions and Animations. https://iiab.live/modules/en-gcf_learn_2021/edu.gcfglobal.org/en/googleslides/adding-transitions-and-animations/1/index.html
+- S65 GCFGlobal (iiab.live mirror), Google Slides: Arranging Objects. https://iiab.live/modules/en-gcf_learn_2021/edu.gcfglobal.org/en/googleslides/arranging-objects/1/index.html
+- S66 GCFGlobal (iiab.live mirror), Google Slides: Inserting and Editing Diagrams. https://iiab.live/modules/en-gcf_learn_2021/edu.gcfglobal.org/en/googleslides/inserting-and-editing-diagrams/1/index.html
+- S67 GCFGlobal (iiab.live mirror), Google Slides: Text Basics. https://iiab.live/modules/en-gcf_learn_2021/edu.gcfglobal.org/en/googleslides/text-basics/1/index.html
+- S68 Indiana University IT Training, Google Slides: Working with shapes. https://ittrainingcontent.iu.edu/training/gslides2/files/pc/working-with-shapes.html
+- S69 Indiana University IT Training, Google Slides: Creating a diagram. https://ittrainingcontent.iu.edu/training/gslides2/files/pc/creating-a-diagram.html
+- S70 Vegaslide, How to Use Shapes in Google Slides. https://vegaslide.com/how-to-use-shapes-in-google-slides/
+- S71 Free Google Slides Templates, How to Insert Shapes in Google Slides (2016). https://freegoogleslidestemplates.com/blog/insert-shapes-google-slides/
+- S72 Simple Slides, Learn How To Insert a Diagram In Google Slides. https://www.simpleslides.co/blog/how-to-insert-diagram-in-google-slides
+- S73 Keystroke Learning, Using diagrams in Google Slides. https://keystrokelearning.com.au/using-diagrams-in-google-slides/
+- S74 SlideUpLift, Custom Animations in Google Slides: Add, Edit & Remove. https://slideuplift.com/blog/how-to-add-remove-animation-transition-in-google-slides/
+- S75 Tella, Google Slides: Animations & Transitions. https://www.tella.com/blog/google-slides-animations-transitions
+- S76 Slidestack, How to Add Animation to Google Slides. https://slidestack.com/blog/how-to-add-animation-to-google-slides-a-step-by-step-guide
+- S77 AiPPT, How to Add Animation in Google Slides. https://www.aippt.com/blog/animate-google-slides
+- S78 Slidestack, How to Easily Change Indentation, Spacing, and Line Spacing in Google Slides. https://slidestack.com/blog/how-to-easily-change-indentation-spacing-and-line-spacing-in-google-slides
+- S79 Smallppt, How to Change Indentation, Spacing, and Line Spacing in Google Slides. https://smallppt.com/blog/basics/how-to-change-indentation-spacing-and-line-spacing-in-google-slides
+- S80 SlideEgg, How to Change Indentation, Spacing, and Line Spacing in Google Slides (2026). https://www.slideegg.com/blog/google-slides-tutorials/how-to-change-indentation-spacing-and-line-spacing-in-google-slides/
+- S81 SlideEgg, How to Perfectly Align Text in Google Slides Easily. https://www.slideegg.com/blog/google-slides-tutorials/how-to-perfectly-align-text-in-google-slides-easily/
+- S82 MagicSlides, How to Fit Text Boxes to Text Google Slides. https://www.magicslides.app/blog/how-to-fit-text-boxes-to-text-google-slides
+
+Pages fetched but not cited because they rendered only a script shell or contained no additional facts: GCFGlobal live lesson pages (edu.gcfglobal.org), CustomGuide Insert and Edit Shapes, PageOn Motion panel guide, Shake Up Learning autofit post, several Slidesgo tutorials (word art, crop, lists, group, charts, text, diagram), How-To Geek align objects, The Bricks hierarchy chart page, Google Docs Editors Help 6239410 (collaborate with a screen reader).

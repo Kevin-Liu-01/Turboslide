@@ -593,3 +593,64 @@ at the end; ports 3005 and 4401 (another session's `vite preview` from 2026-09-1
   step logs kept for the record.
 - `verification/preview-deploy.txt`, `preview-smoke.txt`, `local-smoke.txt`: the deployment lines
   and the two smoke tables.
+
+## 13. The ship step and production
+
+Written by the ship step on 2026-09-12 (PDT) after sections 1 to 12; `docs/gslides-parity/build/ship.md`
+is its record. Findings 1 and 2 of section 9 are closed there and this section supersedes the
+verdict's two open severity 2 items: a format pass over the 20 documents and a `.prettierignore`
+line for the audit's reports (finding 1); the Order rows read the block's place in its slot on a
+grammar slide and plan `block.move`, with three unit tests (finding 2). Finding 3's two rows are
+skipped by name in the audit as a recorded deviation (`RECORDED_DEVIATIONS` in
+`scripts/gslides-parity-audit.mjs`), so `node scripts/check.mjs` is 21 of 21 in 641 s: the audit
+1,006 pass, 0 fail, 172 skipped; the parity round's specs 44 of 44 on a quiet machine (finding 16
+did not recur; nothing else ran during the chain). Commit `e8c6ba3` on `main` carries the round
+(446 paths; `.github/workflows/check.yml` stays untracked); this section is the second commit.
+
+The production deployment: Vercel `dpl_7YWuvaqguDXkKLXsVddZq8x3Cws9`
+(`turboslide-lhgurbsn4-kl01s-projects.vercel.app`, created 10:05:29 PDT from the push of `e8c6ba3`
+at 10:05:25, built in 47 s, aliased to `https://turboslide.vercel.app`). The poll read the old
+deploy at 10:05:40 and 10:06:14 and the new one at 10:06:46 (`verification/production-ssr-markers.txt`):
+`/` 307 to `/new`; `/new` 200 with the noindex meta and the title "Untitled presentation,
+Turboslide"; the SSR page of `/edit/gt-brand` 18,623 bytes (17,235 before) linking 11 stylesheets
+(9 before), in which the new chrome's class prefixes count, as bytes, `ts-title-` 34, `ts-menubar`
+11, `ts-toolbar` 3, `ts-bottombar` 6, `ts-notes` 15 (0 in every stylesheet of the old deploy). The
+route is `ssr: false`, so the title row's markup is not in the SSR document itself; the rendered
+load below is the proof of the row.
+
+`node scripts/hosted-smoke.mjs --base https://turboslide.vercel.app` at 10:07 PDT
+(`verification/production-smoke.txt`), 10 of 10:
+
+| Path                                        | Status | ms    | Result | Detail                                    |
+| ------------------------------------------- | ------ | ----- | ------ | ----------------------------------------- |
+| `/`                                         | 307    | 356   | pass   | location /new; x-robots-tag noindex       |
+| `/new`                                      | 200    | 208   | pass   | 18,537 chars; 3 of 3 shell marks; noindex |
+| `/deck/gt-brand`                            | 200    | 1,952 | pass   | 375,223 chars; 0 notes keys               |
+| `/edit/gt-brand`                            | 200    | 143   | pass   | 18,623 chars; 3 of 3 shell marks          |
+| `/decks`                                    | 200    | 3,270 | pass   | 14 cards                                  |
+| `/decks/trash`                              | 200    | 292   | pass   | 21,445 chars                              |
+| `/print/gt-brand`                           | 200    | 266   | pass   | 85 pages                                  |
+| `/present/gt-brand`                         | 200    | 113   | pass   | 18,915 chars                              |
+| `/decks/gt-brand/assets/cover-fumadocs.png` | 200    | 247   | pass   | image/png 335,538 B                       |
+| `/api/agent`                                | 401    | 178   | pass   | bearer rule                               |
+
+The root and the draft editor: `/` answers 307 to `/new` (the old deploy answered 307 to
+`/edit/editor-depth-09120307`). One Playwright load of `/new` at 1440 by 900
+(`verification/production-new.txt`; the screenshot `verification/production-new.jpg`): status 200,
+the shell ready in 2.65 s, the address stays `/new` (deferred create, no deck written), the document
+title "Untitled presentation, Turboslide", one menu bar with File, Edit, View, Insert, Format,
+Slide, Arrange, Tools, Extensions and Help, the title field present and empty over its "Untitled
+presentation" placeholder, "Not saved yet" in the title row, slide 1 in the filmstrip, the Title
+slide with "Click to add title" and "Click to add subtitle", the speaker notes field, the bottom
+bar, 0 page errors.
+
+One synchronous Perfect export against production, `POST /api/export/gt-brand?sync=1&format=json`
+with the host's bearer read from `~/.config/turboslide/hosts.json` in code and the body
+`{format: pptx, mode: flatten, theme: [light], slideIds: [title]}` (`verification/production-export.txt`):
+status 200, `x-turboslide-sync: requested`, 8.0 s, `perfect: true`, one page, `gt-brand-light.pptx`
+66,967 bytes.
+
+Not run by the ship step: the parity audit against production (it writes a scratch deck into the
+Blob store and takes about 20 minutes; the local audit is step 20 of the chain) and the items of
+section 10 that are Kevin's, among them the 14 decks on the production home page to trash and
+delete forever (decision 15.8) and the two readers of item 7.

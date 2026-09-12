@@ -1,0 +1,30 @@
+{
+  "status": 200,
+  "sync": "requested",
+  "ms": 8035,
+  "perfect": true,
+  "mode": "flatten",
+  "pages": 1,
+  "files": [
+    {
+      "path": "/tmp/turboslide/.turboslide/worker/jobs/mtyn2ymu-a3180e/export/gt-brand-light.pptx",
+      "bytes": 66967
+    }
+  ],
+  "keys": [
+    "deckId",
+    "revision",
+    "format",
+    "mode",
+    "theme",
+    "fontSet",
+    "fontSetVersion",
+    "files",
+    "fonts",
+    "slides",
+    "geometryInBounds",
+    "perfect",
+    "passed",
+    "residual"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "status": 200,
+  "ms": 2654,
+  "title": "Untitled presentation, Turboslide",
+  "url": "https://turboslide.vercel.app/new",
+  "menubar": 1,
+  "titleField": 1,
+  "titleValue": "",
+  "menus": [
+    "File",
+    "Edit",
+    "View",
+    "Insert",
+    "Format",
+    "Slide",
+    "Arrange",
+    "Tools",
+    "Extensions",
+    "Help"
+  ],
+  "filmstrip": 1,
+  "slides": 2,
+  "notes": 2,
+  "pageErrors": []
+}

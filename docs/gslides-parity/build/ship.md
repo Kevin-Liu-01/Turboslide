@@ -86,12 +86,49 @@ stopped by the runner at the end (`scratchpad/check-ship.log`, outside the check
 
 ## 5. The commit and the push
 
-COMMIT_SECTION
+Commit `e8c6ba3` on `main`, "Turboslide Google Slides parity, round one: menu bar, toolbar,
+layouts, home, trash, notes, present mode, table block, fourteen actions", authored as the
+repository's local identity (Kevin <kk23907751@gmail.com>) with the body carrying the acceptance
+summary and the trailer `Co-Authored-By: Claude Fable 5.1 <noreply@anthropic.com>`. 446 paths by
+explicit list (239 added, 206 modified, 1 deleted: `packages/chrome/src/__tests__/slide-templates.test.ts`),
+the list being `git status --porcelain --untracked-files=all` minus `.github/`, `*.log` and the
+ignored outputs; before the commit the index was asserted free of `.github`, `.turboslide`,
+`.vercel`, dist, target, node_modules, logs, env files and `.tsbuildinfo`. Pushed
+`14da621..e8c6ba3` to `origin/main` at 10:05:25 PDT. The second commit, "Turboslide Google Slides
+parity, round one: the production table", carries VERIFICATION.md section 13, this file's sections
+5 to 7 and the five production evidence files under `verification/` (`production-smoke.txt`,
+`production-ssr-markers.txt`, `production-new.txt`, `production-new.jpg`, `production-export.txt`).
 
 ## 6. Production
 
-PRODUCTION_SECTION
+VERIFICATION.md section 13 has the table and the sentences; in brief: the Vercel deployment
+`dpl_7YWuvaqguDXkKLXsVddZq8x3Cws9` built in 47 s and answered at 10:06:46 PDT, 81 s after the push;
+`hosted-smoke.mjs` 10 of 10; `/` 307 to `/new`; `/new` 200 with noindex and the draft editor
+rendered at 1440 by 900 with the title row, the ten menus, the toolbar, the filmstrip, the Title
+slide's placeholders, the notes field and the bottom bar (`verification/production-new.jpg`); the
+`/edit/gt-brand` SSR's linked stylesheets count `ts-title-` 34 and `ts-menubar` 11 where the old
+deploy counted 0; one Perfect export of the `title` slide in 8.0 s, `perfect: true`, 66,967 bytes.
 
 ## 7. Commands run
 
-COMMANDS_SECTION
+All from `/Users/kevinliu/repos/Turboslide` on 2026-09-12 (PDT). The git write commands here are
+the ship step's own (`git add` by explicit path list, two commits, two pushes); no `pnpm install`,
+`pnpm build` or `pnpm exec` ran outside `check.mjs`, and no Docker command ran.
+
+| Command                                                                         | Result                                                                              |
+| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `node packages/agent/src/generate/main.ts --check`                              | every committed contract is current                                                 |
+| `git grep -n '<<<<<<<'`                                                         | one hit, the sentence in MILESTONES.md line 274; no marker                          |
+| `node_modules/.bin/prettier --write` over the 20 documents; `--check .`         | clean (finding 1)                                                                   |
+| `node_modules/.bin/tsc -b` after the Order fix                                  | exit 0                                                                              |
+| `node_modules/.bin/vitest run --dir packages/chrome` (the workspace ran)        | 149 files, 1,489 passed, 3 skipped                                                  |
+| `git add` of the six contract pathspecs of check step 3                         | 13 files staged                                                                     |
+| `node scripts/check.mjs`                                                        | 21 of 21 in 641 s (section 4); the runner's server on 4321 stopped, no browser left |
+| `git commit -F <message file>`; `git push origin main`                          | `e8c6ba3`; `14da621..e8c6ba3`                                                       |
+| the poll (`/`, `/new`, `/edit/gt-brand` every 30 s)                             | the new deploy at 10:06:46, third poll                                              |
+| `node scripts/hosted-smoke.mjs --base https://turboslide.vercel.app`            | 10 of 10                                                                            |
+| the Python byte counts over the SSR page and its stylesheets                    | section 6                                                                           |
+| one Playwright load of `/new` at 1440 by 900 with a screenshot                  | `production-new.jpg`, 0 page errors                                                 |
+| `POST /api/export/gt-brand?sync=1&format=json`, the bearer read from hosts.json | 200, perfect true, 66,967 B, 8.0 s                                                  |
+| `vercel ls turboslide --prod`; `vercel inspect <deployment>`                    | Ready, 47 s, aliased to turboslide.vercel.app                                       |
+| the second commit and push                                                      | the hash in the ship report                                                         |

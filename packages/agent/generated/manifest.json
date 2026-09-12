@@ -76,10 +76,16 @@
       "deck.info",
       "deck.create",
       "deck.rename",
+      "deck.set",
       "deck.pack",
       "deck.unpack",
       "deck.push",
       "deck.pull",
+      "deck.list",
+      "deck.copy",
+      "deck.trash",
+      "deck.restore",
+      "deck.remove",
       "section.set",
       "import.run",
       "validate.run"
@@ -93,6 +99,12 @@
       "slide.update",
       "slide.replace",
       "slide.setLayout",
+      "slide.new",
+      "slide.duplicate",
+      "slide.skip",
+      "slide.applyLayout",
+      "slide.import",
+      "text.replaceAll",
       "slide.lease"
     ],
     "block": [
@@ -102,7 +114,8 @@
       "block.move",
       "block.align",
       "block.distribute",
-      "block.order"
+      "block.order",
+      "block.duplicate"
     ],
     "asset": [
       "asset.add",
@@ -130,11 +143,13 @@
       "view.goto",
       "view.mode",
       "view.theme",
-      "view.present"
+      "view.present",
+      "view.zoom"
     ],
     "export": [
       "export.run",
       "export.check",
+      "export.text",
       "build.run",
       "fonts.build"
     ],
@@ -147,7 +162,7 @@
       "artifact.download"
     ]
   },
-  "actionCount": 54,
+  "actionCount": 69,
   "resources": [
     {
       "uri": "deck://manifest",

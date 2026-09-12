@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { CONTENT_RULE, WORKED_DECK, WORKED_SLIDES, workedDocument } from './fixtures.ts';
+import {
+  CONTENT_RULE,
+  THE_PRODUCTION_SITE,
+  WORKED_DECK,
+  WORKED_SLIDES,
+  workedDocument,
+} from './fixtures.ts';
 import { validateDeck, validateSlide, validateManifest } from './validate.ts';
 
 function clone<T>(value: T): T {
@@ -195,5 +201,106 @@ describe('cross references', () => {
   it('rejects an input that is not { deck, slides }', () => {
     expect(validateDeck(null).ok).toBe(false);
     expect(validateDeck({ slides: [] }).issues[0]?.code).toBe('not_object');
+  });
+});
+
+describe('the gslides-parity fields (SPEC 7.2)', () => {
+  it('accepts skip, template, numbered, the defaults and trashedAt, and refuses the wrong values', () => {
+    const slide = clone(CONTENT_RULE);
+    (slide as Record<string, unknown>).skip = true;
+    (slide as Record<string, unknown>).template = 'split';
+    if (slide.kind !== 'content') throw new Error('fixture');
+    const list = slide.slots.right?.[0];
+    if (list?.type !== 'plain') throw new Error('fixture');
+    list.numbered = true;
+    expect(validateSlide(slide).ok).toBe(true);
+    (slide as Record<string, unknown>).template = 'not-a-layout';
+    expect(validateSlide(slide).ok).toBe(false);
+    const deck = clone(WORKED_DECK);
+    deck.defaults = { appearance: 'light', counter: 'off' };
+    deck.trashedAt = '2026-09-12T10:00:00.000Z';
+    expect(validateManifest(deck).ok).toBe(true);
+    (deck as Record<string, unknown>).trashedAt = 'yesterday';
+    expect(validateManifest(deck).ok).toBe(false);
+  });
+
+  it('refuses a whole-box link on a grammar text block and accepts one on a shape or a picture', () => {
+    const slide = clone(CONTENT_RULE);
+    if (slide.kind !== 'content') throw new Error('fixture');
+    const heading = slide.slots.left?.[0];
+    if (heading?.type !== 'heading') throw new Error('fixture');
+    heading.link = 'https://generaltranslation.com';
+    const refused = validateSlide(slide);
+    expect(refused.ok).toBe(false);
+    expect(refused.issues).toContainEqual(
+      expect.objectContaining({ code: 'link', severity: 3, pointer: '/slots/left/0/link' }),
+    );
+    const picture = clone(THE_PRODUCTION_SITE);
+    if (picture.kind !== 'content') throw new Error('fixture');
+    const shot = picture.slots.right?.[0];
+    if (shot?.type !== 'shot') throw new Error('fixture');
+    shot.link = { slide: 'thesis' };
+    expect(validateSlide(picture).ok).toBe(true);
+  });
+
+  it('checks slide link targets against the deck at severity 2, run links and block links alike', () => {
+    const slides = clone(WORKED_SLIDES);
+    const content = slides.find((row) => row.id === 'content-rule');
+    const production = slides.find((row) => row.id === 'the-production-site');
+    if (content?.kind !== 'content' || production?.kind !== 'content') throw new Error('fixture');
+    const paragraph = content.slots.left?.[1];
+    if (paragraph?.type !== 'paragraph') throw new Error('fixture');
+    paragraph.text = 'See [the thesis](#s/thesis), [the end](#last) and [a ghost](#s/ghost).';
+    const shot = production.slots.right?.[0];
+    if (shot?.type !== 'shot') throw new Error('fixture');
+    shot.link = { slide: 'missing' };
+    const result = validateDeck({ deck: WORKED_DECK, slides });
+    expect(result.ok).toBe(true);
+    const links = result.issues.filter((issue) => issue.code === 'link');
+    expect(links).toEqual([
+      expect.objectContaining({
+        severity: 2,
+        file: 'slides/content-rule.json',
+        pointer: '/slots/left/1/text',
+      }),
+      expect.objectContaining({
+        severity: 2,
+        file: 'slides/the-production-site.json',
+        pointer: '/slots/right/0/link/slide',
+      }),
+    ]);
+  });
+
+  it('allows a paragraph break in the four multiline pointers only', () => {
+    const slide = clone(CONTENT_RULE);
+    if (slide.kind !== 'content') throw new Error('fixture');
+    const paragraph = slide.slots.left?.[1];
+    if (paragraph?.type !== 'paragraph') throw new Error('fixture');
+    paragraph.text = 'One.\nTwo.';
+    expect(validateSlide(slide).ok).toBe(true);
+    const list = slide.slots.right?.[0];
+    if (list?.type !== 'plain') throw new Error('fixture');
+    list.items[0] = { text: 'Two\nlines' };
+    const refused = validateSlide(slide);
+    expect(refused.ok).toBe(false);
+    expect(refused.issues.some((issue) => issue.pointer === '/slots/right/0/items/0/text')).toBe(
+      true,
+    );
+  });
+
+  it('accepts an empty picture reference on a figure and skips its reference check', () => {
+    const slide = clone(THE_PRODUCTION_SITE);
+    if (slide.kind !== 'content') throw new Error('fixture');
+    const shot = slide.slots.right?.[0];
+    if (shot?.type !== 'shot') throw new Error('fixture');
+    shot.asset = '';
+    const result = validateDeck({
+      deck: {
+        ...WORKED_DECK,
+        sections: [{ id: 'website', name: 'Website', slideIds: [slide.id] }],
+      },
+      slides: [slide],
+    });
+    expect(result.issues.filter((issue) => issue.severity === 3)).toEqual([]);
   });
 });

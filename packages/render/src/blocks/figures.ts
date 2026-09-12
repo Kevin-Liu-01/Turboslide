@@ -8,40 +8,59 @@ import {
   imageFor,
   imgAttrs,
   iconSvg,
+  isEmptyPicture,
   markSvg,
   raster,
   rootAttrs,
   runAttr,
 } from './context.ts';
 import type { BlockContext } from './context.ts';
+import { emptyPictureHtml, renderTextOrPrompt } from './prompt.ts';
+
+/**
+ * A figure caption: the Text, the prompt "Add a caption" for an empty one with prompts on, or no
+ * figcaption at all when the block has none. An empty caption without prompts draws nothing but
+ * keeps its carrier so the caption stays addressable.
+ */
+function figcaption(
+  caption: string | undefined,
+  ctx: BlockContext,
+  block: BlockOf<'shot'> | BlockOf<'pair'> | BlockOf<'details'>,
+  path: string,
+  pointer: string,
+  extra: Record<string, string | undefined> = {},
+): string {
+  if (caption === undefined) return '';
+  return el(
+    'figcaption',
+    { ...extra, 'data-run': runAttr(ctx, block.id, pointer) },
+    renderTextOrPrompt(caption, ctx, block, path),
+  );
+}
 
 /**
  * `shot`: a bordered screenshot (head:88-89) in a figure with an optional caption at 16 or 15 px
  * (s33:3-4, s38:11). `fit: 'fit'` is `.shot.fit`, `aspect` plus `crop` writes the cover crop of
  * s41:4-5 and s49:4 onto the image, `width` fixes the figure (s48:3, s66:5). `border: false` drops
- * the hairline for images that carry a plate of their own.
+ * the hairline for images that carry a plate of their own. The empty picture reference of a
+ * figure layout draws the dashed plate with prompts on and nothing otherwise (SPEC 5.2).
  */
 export function renderShot(block: BlockOf<'shot'>, ctx: BlockContext): string {
-  const image = imageFor(ctx, block.asset, block.id);
   const imgStyle = style(
     block.aspect && `aspect-ratio:${block.aspect}`,
     block.aspect && 'object-fit:cover',
     block.aspect && `object-position:${block.crop ?? 'center'}`,
     block.border === false && 'border:0',
   );
-  const img = voidEl('img', {
-    class: classes('shot', block.fit === 'fit' && 'fit'),
-    ...imgAttrs(image),
-    style: imgStyle,
-    ...raster(ctx, block.id, 'shot', false),
-  });
-  const caption = block.caption
-    ? el(
-        'figcaption',
-        { 'data-run': runAttr(ctx, block.id, 'caption') },
-        renderText(block.caption, { gtWord: ctx.gtWord }),
-      )
-    : '';
+  const img = isEmptyPicture(block.asset)
+    ? emptyPictureHtml(ctx, 'shot')
+    : voidEl('img', {
+        class: classes('shot', block.fit === 'fit' && 'fit'),
+        ...imgAttrs(imageFor(ctx, block.asset, block.id)),
+        style: imgStyle,
+        ...raster(ctx, block.id, 'shot', false),
+      });
+  const caption = figcaption(block.caption, ctx, block, '/caption', 'caption');
   return el(
     'figure',
     rootAttrs(block, ctx, {
@@ -66,19 +85,21 @@ export function renderPair(block: BlockOf<'pair'>, ctx: BlockContext): string {
     .map((figure, index) => {
       const images = figure.assets
         .map((assetId) =>
-          voidEl('img', {
-            ...imgAttrs(imageFor(ctx, assetId, block.id)),
-            ...raster(ctx, block.id, 'shot', false),
-          }),
+          isEmptyPicture(assetId)
+            ? emptyPictureHtml(ctx)
+            : voidEl('img', {
+                ...imgAttrs(imageFor(ctx, assetId, block.id)),
+                ...raster(ctx, block.id, 'shot', false),
+              }),
         )
         .join('');
-      const caption = figure.caption
-        ? el(
-            'figcaption',
-            { 'data-run': runAttr(ctx, block.id, `figures/${index}/caption`) },
-            renderText(figure.caption, { gtWord: ctx.gtWord }),
-          )
-        : '';
+      const caption = figcaption(
+        figure.caption,
+        ctx,
+        block,
+        `/figures/${index}/caption`,
+        `figures/${index}/caption`,
+      );
       return el('figure', {}, images + caption);
     })
     .join('');
@@ -173,18 +194,20 @@ export function renderDetails(block: BlockOf<'details'>, ctx: BlockContext): str
       const row = Math.floor(index / block.columns);
       const heights = block.rowHeights ?? [];
       const height = heights[row] ?? heights[heights.length - 1];
-      const img = voidEl('img', {
-        ...imgAttrs(imageFor(ctx, item.asset, block.id)),
-        style: height !== undefined ? `height:${height}px` : undefined,
-        ...raster(ctx, block.id, 'shot', false),
-      });
-      const caption = item.caption
-        ? el(
-            'figcaption',
-            { 'data-run': runAttr(ctx, block.id, `items/${index}/caption`) },
-            renderText(item.caption, { gtWord: ctx.gtWord }),
-          )
-        : '';
+      const img = isEmptyPicture(item.asset)
+        ? emptyPictureHtml(ctx)
+        : voidEl('img', {
+            ...imgAttrs(imageFor(ctx, item.asset, block.id)),
+            style: height !== undefined ? `height:${height}px` : undefined,
+            ...raster(ctx, block.id, 'shot', false),
+          });
+      const caption = figcaption(
+        item.caption,
+        ctx,
+        block,
+        `/items/${index}/caption`,
+        `items/${index}/caption`,
+      );
       return el('figure', {}, img + caption);
     })
     .join('');

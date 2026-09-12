@@ -139,3 +139,75 @@
     transition: none;
   }
 }
+
+/* ---- the Version history panel (gslides-parity SPEC 2.1): grouped by day, newest first ---- */
+.ts-versions.is-history {
+  padding: 8px 0 12px;
+}
+
+.ts-versions-named {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 32px;
+  padding: 0 16px;
+  color: var(--pt-ink-2);
+  cursor: pointer;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-versions-named input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.ts-versions-named-box {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+}
+
+.ts-versions-named input:checked + .ts-versions-named-box {
+  background: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+.ts-versions-named input:focus-visible + .ts-versions-named-box {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-versions-day-head {
+  margin: 12px 16px 4px;
+  font: 500 12px/1 var(--pt-text);
+  color: var(--pt-titanium);
+}
+
+.ts-versions.is-history .ts-version {
+  padding: 6px 8px 6px 16px;
+}
+
+.ts-versions.is-history .ts-version.is-current .ts-version-note {
+  font-weight: 500;
+}
+
+.ts-versions.is-history .ts-version-more {
+  width: 28px;
+  padding: 0;
+}
+
+.ts-versions-foot {
+  margin: 12px 16px 0;
+  font-size: 12px;
+  color: var(--pt-titanium);
+}

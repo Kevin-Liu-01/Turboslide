@@ -138,3 +138,104 @@
     transition: none;
   }
 }
+
+/* ---- the editor's grid (gslides-parity SPEC 4.4) ---- */
+
+/* the tile width is the page's setting: 200, 300 or 400 px (GRID_TILE_SIZES) */
+.pt-grid.is-edit .pt-thumbs {
+  grid-template-columns: repeat(auto-fill, minmax(var(--pt-grid-tile, 300px), 1fr));
+}
+
+/* a card of the filmstrip: number and frame, no title (SPEC 4.1: Google shows none) */
+.pt-grid.is-edit .pt-thumb {
+  contain-intrinsic-size: auto calc(var(--pt-grid-tile, 300px) * 9 / 16 + 6px);
+}
+
+/* the selected cards ring in ink; the current card is one of them */
+.pt-grid.is-edit .pt-thumb.is-selected .pt-thumb-frame {
+  border-color: var(--pt-ink);
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.pt-grid.is-edit .pt-thumb:not(.is-selected).is-active .pt-thumb-frame {
+  outline: none;
+}
+
+/* a skipped slide: 40 percent with the eye-slash glyph at the top right (SPEC 4.1) */
+.pt-thumb.is-skipped .pt-thumb-frame > .ts-sheet,
+.pt-thumb.is-skipped .pt-thumb-frame > .pt-thumb-shot {
+  opacity: 0.4;
+}
+
+.pt-thumb-skip {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--pt-paper);
+  color: var(--pt-ink-2);
+  border: 1px solid var(--pt-hair);
+}
+
+.pt-thumb-skip svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* drag: the dragged tiles fade; the drop line is 2px ink at the left or right edge of the tile
+   under the pointer (ink as a state, SPEC 2.2) */
+.pt-thumb.is-dragging {
+  opacity: 0.4;
+}
+
+.pt-thumb[data-drop]::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  width: 2px;
+  background: var(--pt-ink);
+  pointer-events: none;
+}
+
+.pt-grid.is-edit .pt-thumb {
+  position: relative;
+}
+
+.pt-thumb[data-drop='before']::after {
+  left: -14px;
+}
+
+.pt-thumb[data-drop='after']::after {
+  right: -14px;
+}
+
+/* the minus and plus at the bottom left (R02 section 5): a 32px paper bar with the shell's icon
+   squares, pinned over the region's corner */
+.pt-grid-size {
+  position: sticky;
+  bottom: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  margin: 0 0 12px 12px;
+  background: var(--pt-paper);
+  border: 1px solid var(--pt-hair);
+  z-index: 1;
+}
+
+.pt-grid-size .pt-ib {
+  width: 30px;
+  height: 30px;
+}
+
+.pt-grid-size .pt-ib:disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+  opacity: 0.5;
+}

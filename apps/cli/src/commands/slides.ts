@@ -18,11 +18,19 @@ export async function slides(ctx: CommandContext): Promise<number> {
   const counts = countsBySlide(findings);
   const rows = slideRows(loaded)
     .filter((r) => !sectionId || r.sectionId === sectionId)
-    .map((r) => ({ ...r, lint: { s3: counts[r.id]?.s3 ?? 0, s2: counts[r.id]?.s2 ?? 0 } }));
+    .map((r) => ({
+      ...r,
+      lint: { s3: counts[r.id]?.s3 ?? 0, s2: counts[r.id]?.s2 ?? 0 },
+      // the parity round's flags (gslides-parity SPEC 7.2.1, 7.2.2), so an agent reads them per slide
+      ...(loaded.slides[r.id]?.skip === true ? { skip: true } : {}),
+      ...(loaded.slides[r.id]?.template !== undefined
+        ? { template: loaded.slides[r.id]?.template }
+        : {}),
+    }));
   ctx.out.result(rows);
   for (const r of rows)
     ctx.out.human(
-      `${String(r.n).padStart(2)}  ${r.id.padEnd(32)} ${r.kind.padEnd(9)} s3 ${r.lint.s3}  s2 ${r.lint.s2}  ${r.title}`,
+      `${String(r.n).padStart(2)}  ${r.id.padEnd(32)} ${r.kind.padEnd(9)} s3 ${r.lint.s3}  s2 ${r.lint.s2}  ${r.title}${r.skip === true ? '  (skipped)' : ''}`,
     );
   return 0;
 }

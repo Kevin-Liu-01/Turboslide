@@ -393,6 +393,56 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
   generator does not write it; it serves `packages/agent/generated/openapi.json`. Step 3 of
   `scripts/check.mjs` names the file through git's `:(literal)` pathspec magic so the brackets
   are not read as a glob class.
+- The Google Slides parity round (`docs/gslides-parity/SPEC.md`, section 7.9, decision 15.11)
+  amends six sentences of this spec; the integrator edited them into `docs/spec/SPEC.md` and
+  records them here until Kevin approves them:
+  1. SPEC 4.2 text markup: line breaks are allowed as a paragraph break in paragraph, text, box
+     and table cell Texts (`multilineTextSchema`) and as `\n` in `panel.code`; nowhere else.
+  2. SPEC 8.2: "five hairlines plus key and value boxes, never a PPTX table" is scoped to `rows`
+     and `plain`; the `table` block is a PPTX table in Editable text.
+  3. SPEC 2.1: ruled rows and lists instead of bullets is unchanged; the Bulleted list control
+     produces the ruled list (decision 15.1) and `plain.numbered` draws a tabular numeral.
+  4. SPEC 6.9: the editor binds no bare letters; the view route keeps the shell keys (parity
+     SPEC 10.2 retires E, `⌘/`, `⌘L` and `⇧D` in the editor).
+  5. SPEC 3.4: `/` redirects to `/new`; `/decks` is the home page; `/new`, `/decks/trash`,
+     `/print/:deckId` and `/present/:deckId` (Presenter view) are routes.
+  6. SPEC 6.1: the editor's frame is the title row, the menu bar, the toolbar, the filmstrip, the
+     canvas with the notes pane, the right panels and the bottom bar of parity SPEC 1; the status
+     chip and the revision leave the default view.
+- The builders' deviations from the parity SPEC, each argued in `docs/gslides-parity/build/
+<key>.md` and listed in `docs/gslides-parity/BUILD-STATUS.md`, recorded for Kevin (parity SPEC
+  15.11):
+  - B2: the PDF gate rasterizes at 3200 by 1800 instead of `pdftoppm -r 144` (parity SPEC 7.6),
+    because the diff needs the 2x render's pixel grid; picture regions are compared separately
+    and never gated (every viewer resamples the twins with its own filter); speaker notes travel
+    in a PPTX only under `includeNotes` (parity SPEC 7.2.13, decision 15.2).
+  - B3: parity SPEC 2.12's printed tally does not follow from its tables (the model counts 106
+    Now, 24 Later, 38 Omit, plus one Omit for Regroup); parity SPEC 4.3's "Every item here is
+    also in the menu bar" gains two exceptions, Text fitting and Alt text, which are Format
+    options sections; parity SPEC 14.4 item 2's stub tooltip check reads the tooltip's sentence
+    span, not the plate's whole text; Hide the menus sits on the toolbar row (parity SPEC 3.1 row
+    18), not the menu bar row of 1.1.
+  - B4: a right-click inside an editing run opens the browser's own menu (parity SPEC 4.3 lists
+    a text selection menu), because only the browser's menu carries its spelling suggestions;
+    several dragged cards write one `section.set` (parity SPEC 4.1 says one `slide.move` per
+    slide in one write; no action carries several moves); deleting several cards is several
+    `slide.remove` writes with one Undo each.
+  - B6: the slideshow surround is `--pt-panel-ink`, not `--pt-ink` (parity SPEC 9.2), so a light
+    sheet sits on black in both themes; the present toolbar draws eight controls where Google's
+    compact bar has four; no new action for the blank slide, the laser pointer or full screen
+    (parity SPEC 7.5 lists none), which stay readable through `describe().state` and drivable by
+    the keys and the menu.
+  - Fix round (integrator): after a write, an undo or an external change removes the current
+    slide, the editor selects the slide now at the removed slide's index, clamped to the end
+    (`replacementSlide` in `apps/studio/src/routes/edit.$deckId.tsx`). The research (R02, R07)
+    records that Google deletes without confirmation and does not record which slide it selects
+    next; the rule follows Google's observed behaviour (the next slide, the previous one at the
+    end) and is recorded here as an assumption until the audit checks it against Google. In the
+    same round the editor's write queue treats a lease refusal (SPEC 6.7: an agent's write to a
+    slide another author holds answers 409 with the holder) as a conflict card with the holder
+    and Force, never as a revision conflict to rebase on: the server changed nothing, so a rebase
+    re-sent the same write to the same refusal in a loop (measured at one write every 2 ms). A
+    lease still outlives the tab that took it, ten minutes at most.
 
 ## License
 

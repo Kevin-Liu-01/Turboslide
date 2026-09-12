@@ -51,8 +51,15 @@ export type ToolButtonProps = {
   className?: string;
   /** a locale-independent control id for the window API (SPEC 6.5) */
   control?: string;
+  /** the menu model item the button stands for (`data-menu-item`, gslides-parity SPEC 14.4) */
+  menuItem?: string;
   /** the button takes no input; the tooltip still names it */
   disabled?: boolean;
+  /**
+   * A stub (gslides-parity SPEC 13.1): the button stays in the tab order with aria-disabled, so
+   * its tooltip shows on hover and focus and reads the stub sentence; the click does nothing.
+   */
+  ariaDisabled?: boolean;
   /** replaces the icon: the theme glyph */
   children?: ReactNode;
 };
@@ -75,7 +82,9 @@ export function ToolButton({
   ariaLabel,
   className,
   control,
+  menuItem,
   disabled,
+  ariaDisabled = false,
   children,
 }: ToolButtonProps) {
   const iconOnly = label === undefined;
@@ -84,6 +93,7 @@ export function ToolButton({
     iconOnly ? 'pt-icon' : '',
     !iconOnly && !icon && !children ? 'is-text' : '',
     pressed && !quiet ? 'is-on' : '',
+    ariaDisabled ? 'is-disabled' : '',
     solid ? 'is-solid' : '',
     hideSm ? 'hide-sm' : '',
     className ?? '',
@@ -101,9 +111,11 @@ export function ToolButton({
       className={classes}
       aria-label={name}
       aria-pressed={pressed}
+      aria-disabled={ariaDisabled ? true : undefined}
       data-control={control}
+      data-menu-item={menuItem}
       disabled={disabled}
-      onClick={onClick}
+      onClick={ariaDisabled ? undefined : onClick}
       {...tipProps(tip)}
     >
       {icon ? <Icon name={icon} /> : children}

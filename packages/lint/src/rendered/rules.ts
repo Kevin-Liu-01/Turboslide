@@ -117,21 +117,39 @@ export function lintRecord(
   }
 
   for (const [key, block] of Object.entries(record.blocks)) {
+    // a rows value is `<blockId>/<row>` of type row; a table cell is `<blockId>/<row>/<column>`
+    // of type cell (gslides-parity SPEC 7.3): rows/two-lines reads both
     const isRow = block.type === 'row';
-    const [blockId, rowIndex] = isRow
-      ? [key.slice(0, key.lastIndexOf('/')), Number(key.slice(key.lastIndexOf('/') + 1))]
-      : [key, -1];
+    const isCell = block.type === 'cell';
+    const segments = key.split('/');
+    const blockId = isRow
+      ? key.slice(0, key.lastIndexOf('/'))
+      : isCell
+        ? segments.slice(0, -2).join('/')
+        : key;
+    const rowIndex = isRow
+      ? Number(key.slice(key.lastIndexOf('/') + 1))
+      : isCell
+        ? Number(segments[segments.length - 2])
+        : -1;
+    const columnIndex = isCell ? Number(segments[segments.length - 1]) : -1;
     const path = paths.get(blockId);
-    if (isRow) {
+    if (isRow || isCell) {
       if ((block.lines ?? 0) > 2) {
         out.push(
           ctx.finding('rows/two-lines', record.slideId, {
             blockId,
-            path: path ? `${path}/items/${rowIndex}/value` : undefined,
+            path: path
+              ? isCell
+                ? `${path}/rows/${rowIndex}/cells/${columnIndex}`
+                : `${path}/items/${rowIndex}/value`
+              : undefined,
             theme,
             box: block.box,
             measured: { lines: block.lines ?? 0 },
-            proposal: `Row ${rowIndex + 1} wraps to ${block.lines} lines; values are at most two lines (DECK-GRAMMAR.md:36). Shorten the value or widen the column.`,
+            proposal: isCell
+              ? `The cell at row ${rowIndex + 1}, column ${columnIndex + 1} wraps to ${block.lines} lines; cells are at most two lines (gslides-parity SPEC 7.3). Shorten the text or widen the column.`
+              : `Row ${rowIndex + 1} wraps to ${block.lines} lines; values are at most two lines (DECK-GRAMMAR.md:36). Shorten the value or widen the column.`,
           }),
         );
       }

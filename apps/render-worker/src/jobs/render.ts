@@ -1,7 +1,8 @@
-// The render job: `turboslide render <ids> --theme <t> --scale <s> --out <job dir> --json` for
-// the slides not yet in the content-addressed cache, then the PNGs and records are copied under
-// cache/<deckId>/<revision>/<theme>@<scale>x/ so a repeated request for the same revision is served
-// without a browser (SPEC 11, Hosting). Records in the result carry absolute image paths.
+// The render job: `turboslide render <ids> --theme <t> --scale <s> [--format jpg] --out <job dir>
+// --json` for the slides not yet in the content-addressed cache, then the images and records are
+// copied under cache/<deckId>/<revision>/<theme>@<scale>x/ (`-jpg` appended for a JPEG render,
+// gslides-parity SPEC 7.6) so a repeated request for the same revision is served without a
+// browser (SPEC 11, Hosting). Records in the result carry absolute image paths.
 import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { isAbsolute, join, resolve } from 'node:path';
@@ -24,6 +25,8 @@ export const renderJobInput = z.strictObject({
     .min(1)
     .default(['light', 'dark']),
   scale: z.literal([1, 2]).default(1),
+  /** PNG (default) or a JPEG at quality 92 (render.slide `format`, gslides-parity SPEC 7.6). */
+  format: z.enum(['png', 'jpg']).default('png'),
   /** Screenshot the data-raster elements too; such a run bypasses the cache. */
   rasters: z.boolean().optional(),
 });
@@ -43,20 +46,33 @@ export type RenderJobResult = {
   ms: number;
 };
 
-/** The two cache files of one slide render. */
-export function cacheFiles(dir: string, slideId: string): { png: string; json: string } {
-  return { png: join(dir, `${slideId}.png`), json: join(dir, `${slideId}.json`) };
+/** The two cache files of one slide render; `png` names the image whatever its format. */
+export function cacheFiles(
+  dir: string,
+  slideId: string,
+  format: 'png' | 'jpg' = 'png',
+): { png: string; json: string } {
+  return { png: join(dir, `${slideId}.${format}`), json: join(dir, `${slideId}.json`) };
 }
 
-async function readCached(dir: string, slideId: string): Promise<RenderRecord | null> {
-  const files = cacheFiles(dir, slideId);
+async function readCached(
+  dir: string,
+  slideId: string,
+  format: 'png' | 'jpg',
+): Promise<RenderRecord | null> {
+  const files = cacheFiles(dir, slideId, format);
   if (!existsSync(files.png) || !existsSync(files.json)) return null;
   return JSON.parse(await readFile(files.json, 'utf8')) as RenderRecord;
 }
 
-async function store(dir: string, record: RenderRecord, imagePath: string): Promise<RenderRecord> {
+async function store(
+  dir: string,
+  record: RenderRecord,
+  imagePath: string,
+  format: 'png' | 'jpg',
+): Promise<RenderRecord> {
   await mkdir(dir, { recursive: true });
-  const files = cacheFiles(dir, record.slideId);
+  const files = cacheFiles(dir, record.slideId, format);
   await copyFile(imagePath, files.png);
   const stored: RenderRecord = { ...record, image: files.png };
   await writeFile(files.json, `${JSON.stringify(stored, null, 2)}\n`);
@@ -80,11 +96,11 @@ export async function runRenderJob(
   let cached = 0;
   let rendered = 0;
   for (const theme of input.themes as Theme[]) {
-    const dir = cacheDir(paths, input.deckId, head.revision, theme, input.scale);
+    const dir = cacheDir(paths, input.deckId, head.revision, theme, input.scale, input.format);
     const have = new Map<string, RenderRecord>();
     if (!input.rasters) {
       for (const id of ids) {
-        const record = await readCached(dir, id);
+        const record = await readCached(dir, id, input.format);
         if (record) have.set(id, record);
       }
     }
@@ -101,6 +117,7 @@ export async function runRenderJob(
         theme,
         '--scale',
         String(input.scale),
+        ...(input.format === 'jpg' ? ['--format', 'jpg'] : []),
         '--out',
         outDir,
         ...(input.rasters ? ['--rasters'] : []),
@@ -119,7 +136,7 @@ export async function runRenderJob(
         const imagePath = isAbsolute(record.image) ? record.image : resolve(outDir, record.image);
         const stored = input.rasters
           ? { ...record, image: imagePath }
-          : await store(dir, record, imagePath);
+          : await store(dir, record, imagePath, input.format);
         have.set(record.slideId, stored);
         rendered += 1;
       }

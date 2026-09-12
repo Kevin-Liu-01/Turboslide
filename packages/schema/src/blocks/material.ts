@@ -15,8 +15,8 @@ import type { AssetId, BlockId } from '../ids.ts';
 import { blockIdSchema, slugSchema } from '../ids.ts';
 import type { Position } from '../position.ts';
 import { positionSchema } from '../position.ts';
-import type { Text } from '../text.ts';
-import { textSchema } from '../text.ts';
+import type { BlockLink, Text } from '../text.ts';
+import { blockLinkField, textSchema } from '../text.ts';
 
 /** The uniform value forms a recipe records (Asset.source.uniforms, SPEC 4.2). */
 export type MaterialUniformValue = number | number[] | string;
@@ -34,6 +34,8 @@ export type MaterialBlock = {
   ext?: Record<string, unknown>;
   /** The box on a freeform slide (position.ts), as on every block. */
   pos?: Position;
+  /** A whole-object link (gslides-parity SPEC 7.2.7), as on every block. */
+  link?: BlockLink;
   type: 'material';
   /** The catalog id: `paper:liquid-metal`, `paper:gem-smoke`. */
   materialId: string;
@@ -71,6 +73,7 @@ export const materialBlockSchema = z.strictObject({
   id: annotate(blockIdSchema, { label: 'Id', control: 'readonly', group: 'Advanced' }),
   ext: z.record(z.string(), z.unknown()).optional(),
   pos: positionSchema,
+  link: blockLinkField,
   type: z.literal('material'),
   materialId: annotate(z.string().min(1), {
     label: 'Material',

@@ -36,6 +36,8 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'to',
   'quality',
   'format',
+  'tables',
+  'appearance',
   'mode',
   'fonts',
   'plate',
@@ -107,13 +109,19 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'head',
   'align',
   'body',
+  // the Google Slides parity round (docs/gslides-parity): `deck copy --name --slides`,
+  // `text replace --slides`
+  'name',
+  'slides',
 ]);
 
 /**
  * Valued flags that also work bare: `lint --render <dir>` names a render directory while
  * `diff --render` is a switch, so a following `--flag` or the end of the line leaves it `true`.
+ * `slide update --unset <pointer>` names a pointer while `deck set <path> --unset` is a switch
+ * (gslides-parity SPEC 7.2.3 to 7.2.5).
  */
-const OPTIONAL_VALUE_FLAGS: ReadonlySet<string> = new Set(['render']);
+const OPTIONAL_VALUE_FLAGS: ReadonlySet<string> = new Set(['render', 'unset']);
 
 /** Short flags: `-m <note>` on version save (the acceptance line), `-h` for help. */
 const SHORT_FLAGS: Readonly<Record<string, string>> = { m: 'm', h: 'help' };

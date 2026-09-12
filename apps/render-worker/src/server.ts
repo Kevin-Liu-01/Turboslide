@@ -7,8 +7,9 @@
 //   GET  /jobs/:id[/wait?timeout=ms]      one record, optionally after it finishes
 //   GET  /jobs/:id/files/<path>           a file the job wrote (confined to the job directory)
 //   GET  /cache/<path>                    a cached render (confined to the cache directory)
-//   GET  /render/:deckId/:slideId?theme=&scale=&format=png|json
-//                                         one slide: the PNG with X-Turboslide-Record, or JSON
+//   GET  /render/:deckId/:slideId?theme=&scale=&format=png|jpg|json
+//                                         one slide: the PNG (or a JPEG at quality 92) with
+//                                         X-Turboslide-Record, or JSON
 //
 // TURBOSLIDE_WORKER_TOKEN, when set, is required as a bearer token on every route but /healthz.
 // Bodies are capped at 1 MB. The container has no credentials and reads only the decks directory
@@ -233,8 +234,15 @@ export function createWorkerServer(options: WorkerServerOptions): Server {
         throw new HttpError(400, 'deckId and slideId must be slugs');
       const theme = url.searchParams.get('theme') === 'dark' ? 'dark' : 'light';
       const scale = url.searchParams.get('scale') === '2' ? 2 : 1;
-      const format = url.searchParams.get('format') === 'json' ? 'json' : 'png';
-      const record = submit('render', { deckId, slideIds: [slideId], themes: [theme], scale });
+      const wanted = url.searchParams.get('format');
+      const format = wanted === 'json' ? 'json' : wanted === 'jpg' ? 'jpg' : 'png';
+      const record = submit('render', {
+        deckId,
+        slideIds: [slideId],
+        themes: [theme],
+        scale,
+        ...(format === 'jpg' ? { format: 'jpg' } : {}),
+      });
       const done = await options.queue.wait(record.id, 300_000);
       if (done.status !== 'done') throw new HttpError(500, done.error?.message ?? 'render failed');
       const result = done.result as RenderJobResult;

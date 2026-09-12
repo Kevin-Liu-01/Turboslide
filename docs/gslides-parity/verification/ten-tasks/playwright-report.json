@@ -1,0 +1,675 @@
+{
+  "config": {
+    "argv": [
+      "/Users/kevinliu/.nvm/versions/node/v24.13.0/bin/node",
+      "/Users/kevinliu/repos/Turboslide/node_modules/@playwright/test/cli.js",
+      "test",
+      "--config",
+      ".turboslide/verifier/playwright.ten-tasks.config.ts",
+      "apps/studio/e2e/ten-tasks.spec.ts"
+    ],
+    "configFile": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/playwright.ten-tasks.config.ts",
+    "rootDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/kevinliu/repos/Turboslide/apps/studio/e2e",
+        "testIgnore": [],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
+        "timeout": 90000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      ["list", null],
+      [
+        "json",
+        {
+          "outputFile": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks.report.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.62.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "ten-tasks.spec.ts",
+      "file": "ten-tasks.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "task 1: open the right deck from the home page in one click",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "count",
+                  "description": "task 1: 1 click(s), 0 key(s); budget 1, 0"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1035,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:14:40.249Z",
+                  "annotations": [
+                    {
+                      "type": "count",
+                      "description": "task 1: 1 click(s), 0 key(s); budget 1, 0"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-task-1-open-the--08cc3--the-home-page-in-one-click/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-98586aa6de0c067ab939",
+          "file": "ten-tasks.spec.ts",
+          "line": 240,
+          "column": 1
+        },
+        {
+          "title": "task 2: make a copy for a prospect and name it in three clicks and one key",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "count",
+                  "description": "task 2: 3 click(s), 1 key(s); budget 3, 1"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4813,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:14:41.391Z",
+                  "annotations": [
+                    {
+                      "type": "count",
+                      "description": "task 2: 3 click(s), 1 key(s); budget 3, 1"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-task-2-make-a-co-9c03b-in-three-clicks-and-one-key/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-b29b88bebf730ebc9532",
+          "file": "ten-tasks.spec.ts",
+          "line": 250,
+          "column": 1
+        },
+        {
+          "title": "task 3: retype the customer name on the cover and across the deck",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "settle",
+                  "description": "task 3: the rename's write settled in 3 ms"
+                },
+                {
+                  "type": "count",
+                  "description": "task 3: 4 click(s), 3 key(s); budget 4, 3"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1533,
+                  "errors": [],
+                  "stdout": [
+                    {
+                      "text": "task 3: the rename's write settled in 3 ms\n"
+                    }
+                  ],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:14:46.209Z",
+                  "annotations": [
+                    {
+                      "type": "settle",
+                      "description": "task 3: the rename's write settled in 3 ms"
+                    },
+                    {
+                      "type": "count",
+                      "description": "task 3: 4 click(s), 3 key(s); budget 4, 3"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-task-3-retype-th-6493b-e-cover-and-across-the-deck/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-36973d1c6a9c77ef9a4c",
+          "file": "ten-tasks.spec.ts",
+          "line": 282,
+          "column": 1
+        },
+        {
+          "title": "task 4: swap a logo with one drop",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "count",
+                  "description": "task 4: 1 click(s), 0 key(s); budget 1, 0"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 6423,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:14:47.748Z",
+                  "annotations": [
+                    {
+                      "type": "count",
+                      "description": "task 4: 1 click(s), 0 key(s); budget 1, 0"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-task-4-swap-a-logo-with-one-drop/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-54281e50abc357ce1798",
+          "file": "ten-tasks.spec.ts",
+          "line": 320,
+          "column": 1
+        },
+        {
+          "title": "task 5: add, duplicate, delete and reorder slides in one press each",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "count",
+                  "description": "task 5: 1 click(s), 3 key(s); budget 1, 3"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 7111,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:14:54.177Z",
+                  "annotations": [
+                    {
+                      "type": "count",
+                      "description": "task 5: 1 click(s), 3 key(s); budget 1, 3"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-task-5-add-dupli-6f9cd-er-slides-in-one-press-each/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-14894b2c0659d4c7b52e",
+          "file": "ten-tasks.spec.ts",
+          "line": 357,
+          "column": 1
+        },
+        {
+          "title": "task 6: hide the slides that do not apply",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "count",
+                  "description": "task 6: 5 click(s), 0 key(s); budget 5, 0"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5413,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:15:01.293Z",
+                  "annotations": [
+                    {
+                      "type": "count",
+                      "description": "task 6: 5 click(s), 0 key(s); budget 5, 0"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-task-6-hide-the-slides-that-do-not-apply/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-d3e46d71cd2a684b379f",
+          "file": "ten-tasks.spec.ts",
+          "line": 393,
+          "column": 1
+        },
+        {
+          "title": "task 7: update the pricing table and the big number",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "count",
+                  "description": "task 7: 2 click(s), 12 key(s); budget 2, 21"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 3200,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:15:06.713Z",
+                  "annotations": [
+                    {
+                      "type": "count",
+                      "description": "task 7: 2 click(s), 12 key(s); budget 2, 21"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-task-7-update-the-pricing-table-and-the-big-number/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-8444a90e533c1ca3febc",
+          "file": "ten-tasks.spec.ts",
+          "line": 417,
+          "column": 1
+        },
+        {
+          "title": "task 8: write a talk track in one click",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "count",
+                  "description": "task 8: 1 click(s), 0 key(s); budget 1, 0"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 5682,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:15:09.918Z",
+                  "annotations": [
+                    {
+                      "type": "count",
+                      "description": "task 8: 1 click(s), 0 key(s); budget 1, 0"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-task-8-write-a-talk-track-in-one-click/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-4f518aabea073c42368e",
+          "file": "ten-tasks.spec.ts",
+          "line": 470,
+          "column": 1
+        },
+        {
+          "title": "task 9: present over a call with Presenter view in two clicks",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "count",
+                  "description": "task 9: 2 click(s), 0 key(s); budget 2, 0"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1906,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:15:15.605Z",
+                  "annotations": [
+                    {
+                      "type": "count",
+                      "description": "task 9: 2 click(s), 0 key(s); budget 2, 0"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-task-9-present-o-106db-resenter-view-in-two-clicks/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-9d055055e879521c63ac",
+          "file": "ten-tasks.spec.ts",
+          "line": 484,
+          "column": 1
+        },
+        {
+          "title": "task 10: send a link or a PDF",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 90000,
+              "annotations": [
+                {
+                  "type": "count",
+                  "description": "task 10: 6 click(s), 0 key(s); budget 6, 0"
+                }
+              ],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1464,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:15:17.516Z",
+                  "annotations": [
+                    {
+                      "type": "count",
+                      "description": "task 10: 6 click(s), 0 key(s); budget 6, 0"
+                    }
+                  ],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-task-10-send-a-link-or-a-PDF/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-480119849f46a63ff6e6",
+          "file": "ten-tasks.spec.ts",
+          "line": 500,
+          "column": 1
+        },
+        {
+          "title": "the current slide follows a removal: Delete slide, and Undo after New slide and Duplicate slide",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 1728,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:15:18.984Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-the-current-slid-73779-w-slide-and-Duplicate-slide/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-a65d878d709713a113c1",
+          "file": "ten-tasks.spec.ts",
+          "line": 540,
+          "column": 1
+        },
+        {
+          "title": "Edit > Copy, Paste and Cut from the menu bar act on the selected slide card",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [],
+              "expectedStatus": "passed",
+              "projectId": "",
+              "projectName": "",
+              "results": [
+                {
+                  "workerIndex": 0,
+                  "parallelIndex": 0,
+                  "status": "passed",
+                  "duration": 4727,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-09-12T16:15:20.717Z",
+                  "annotations": [],
+                  "attachments": [
+                    {
+                      "name": "screenshot",
+                      "contentType": "image/png",
+                      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/ten-tasks/ten-tasks-Edit-Copy-Paste--3eebb--on-the-selected-slide-card/test-finished-1.png"
+                    }
+                  ]
+                }
+              ],
+              "status": "expected"
+            }
+          ],
+          "id": "c6593563aa3364ffb646-d463a9b5633eb600f401",
+          "file": "ten-tasks.spec.ts",
+          "line": 609,
+          "column": 1
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-12T16:14:40.005Z",
+    "duration": 45557.217000000004,
+    "expected": 12,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

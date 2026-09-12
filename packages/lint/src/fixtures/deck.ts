@@ -229,6 +229,17 @@ const badRaw: unknown[] = [
           key: 170,
           items: [{ key: 'Locales.', icon: { name: 'no-such-icon' }, value: 'Eight' }],
         },
+        // table/size (a ragged second row); the cells carry copy the copy rules must skip
+        // (a trailing period, an exclamation mark, a contrast pair, Title Case) (gslides-parity SPEC 7.3)
+        {
+          id: 'pricing',
+          type: 'table',
+          columns: [{}, {}, {}],
+          rows: [
+            { cells: ['Plan.', 'Seats!', 'Fast, not slow'], header: true },
+            { cells: ['Starter Plan', '5'] },
+          ],
+        },
         // copy/full-sentence-caption, asset/twin-or-border (neutral twin, border false)
         {
           id: 'shot',
@@ -264,6 +275,15 @@ const badRaw: unknown[] = [
     layout: { type: 'center' },
     slots: {
       main: [
+        // copy/empty-placeholder (gslides-parity SPEC 5.4): an empty heading and an empty table
+        // cell, the placeholders a layout leaves for copy; the empty Texts trip no other copy rule
+        { id: 'empty', type: 'heading', level: 'h2', text: '' },
+        {
+          id: 'grid',
+          type: 'table',
+          columns: [{}, {}],
+          rows: [{ cells: ['Key', 'Value'], header: true }, { cells: ['', 'Set'] }],
+        },
         // escape/html-block; color/tokens-only (#ff0000); color/semantic-icons-only (#12a37a on a span);
         // type/weight-cap (700); type/sizes-ladder (19px); type/svg-label-min (14px in svg); icon/placement (icon in a <p>);
         // scales/marker-equals-value (authored marker); dia raw checks through the svg string

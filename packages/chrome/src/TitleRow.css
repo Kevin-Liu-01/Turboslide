@@ -1,0 +1,195 @@
+/* TitleRow (TitleRow.tsx): the first of the editor's rows (gslides-parity SPEC 1.1, 1.2), 44 px
+   (--pt-title-h), full width, its bottom edge in --pt-hair (the menu bar under it draws no rule).
+   Left group: the mark, the title as a 13.5 px display button (a field over the same box while
+   renaming), the save words in titanium with the cloud glyph, the clock. Right group: the
+   disabled comments glyph, the Slideshow split button (the one solid pair of the row), Share
+   ruled in --pt-hair. 8 px gaps; radius 0; colors are tokens only. */
+.ts-title-row {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  box-sizing: border-box;
+  height: var(--pt-title-h, 44px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 12px 0 10px;
+  border-bottom: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.ts-title-l,
+.ts-title-r {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ts-title-l {
+  flex: 1 1 auto;
+}
+
+.ts-title-r {
+  flex: 0 0 auto;
+}
+
+.ts-title-home {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--pt-ink);
+  border: 1px solid transparent;
+}
+
+.ts-title-home:hover {
+  border-color: var(--pt-hair);
+}
+
+.ts-title-home:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+/* the title: a button in the display face, a field over the same box while renaming */
+.ts-title-name,
+.ts-title-field {
+  box-sizing: border-box;
+  height: 32px;
+  min-width: 96px;
+  max-width: 360px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink);
+  font: 500 14px/1 var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  letter-spacing: -0.005em;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-title-name {
+  appearance: none;
+  cursor: text;
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.ts-title-name:hover {
+  border-color: var(--pt-hair);
+}
+
+.ts-title-name:focus-visible,
+.ts-title-field:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-title-field {
+  width: 280px;
+  border-color: var(--pt-hair);
+}
+
+/* the save words: the cloud glyph and a sentence in titanium; the pending states read in ink-2 */
+.ts-title-save {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 0;
+  height: 32px;
+  padding: 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pt-titanium);
+  font: 12.5px/1 var(--pt-text);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.ts-title-save svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-title-save.is-busy {
+  color: var(--pt-ink-2);
+}
+
+.ts-title-save:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-title-clock {
+  color: var(--pt-titanium);
+}
+
+.ts-title-comments {
+  color: var(--pt-titanium);
+}
+
+/* the Slideshow split button: two solid halves; the arrow owns the one divider between them in
+   --pt-edge (the line law's seam role), and the main half draws no right edge so the seam is
+   drawn once */
+.ts-title-slideshow {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.ts-title-present {
+  gap: 6px;
+  padding: 0 12px 0 10px;
+  border-right-width: 0;
+}
+
+.ts-title-present-arrow {
+  width: 28px;
+  padding: 0;
+  justify-content: center;
+  border-left: 1px solid var(--pt-edge);
+}
+
+.ts-title-share {
+  border-color: var(--pt-hair);
+  gap: 6px;
+}
+
+.ts-title-share svg {
+  width: 14px;
+  height: 14px;
+}
+
+@media (max-width: 900px) {
+  .ts-title-save span,
+  .ts-title-present .pt-lb,
+  .ts-title-share .pt-lb {
+    display: none;
+  }
+
+  .ts-title-present {
+    padding: 0 8px;
+  }
+
+  .ts-title-share {
+    width: 32px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .ts-title-name,
+  .ts-title-field {
+    max-width: 160px;
+  }
+}

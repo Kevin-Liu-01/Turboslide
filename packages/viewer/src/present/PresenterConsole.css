@@ -1,0 +1,371 @@
+/* The presenter console (PresenterConsole.tsx; gslides-parity SPEC 9.3). The whole window on the
+   paper with the chrome tokens: a 52 px head row (the timer group at the left, the title in the
+   middle, the connection status and the clock at the right), then two columns: the stage column
+   with the current slide between the two step buttons, the counter dropdown under it and the
+   previous and next previews at 0.3 of the current frame, and the side column with the tabs and
+   the notes. Frames are 16:9 boxes with the hair line; the current one keeps the edge ring. Text
+   buttons take the shell's button grammar (32 px, hair on hover, ink ring on focus). */
+.ts-presenter {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: var(--pt-bar-h, 52px) minmax(0, 1fr);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.4 var(--pt-text);
+}
+
+.ts-presenter-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-presenter-timer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-presenter-label {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pt-titanium);
+}
+
+.ts-presenter-elapsed {
+  min-width: 56px;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-variant-numeric: tabular-nums;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+.ts-presenter-title {
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.ts-presenter-facts {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  min-width: 0;
+}
+
+.ts-presenter-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--pt-titanium);
+  white-space: nowrap;
+}
+
+.ts-presenter-link::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  box-sizing: border-box;
+}
+
+.ts-presenter-link.is-on {
+  color: var(--pt-ink);
+}
+
+.ts-presenter-link.is-on::before {
+  background: currentColor;
+}
+
+.ts-presenter-clock {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ts-presenter-text-btn,
+.ts-presenter-step,
+.ts-presenter-size,
+.ts-presenter-counter,
+.ts-presenter-tab {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 0;
+  color: var(--pt-ink-2);
+  font: 13px/1 var(--pt-text);
+  height: 32px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ts-presenter-text-btn:hover,
+.ts-presenter-step:hover:not(:disabled),
+.ts-presenter-size:hover:not(:disabled),
+.ts-presenter-counter:hover,
+.ts-presenter-tab:hover {
+  color: var(--pt-ink);
+  border-color: var(--pt-hair);
+}
+
+.ts-presenter-text-btn:focus-visible,
+.ts-presenter-step:focus-visible,
+.ts-presenter-size:focus-visible,
+.ts-presenter-counter:focus-visible,
+.ts-presenter-tab:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-presenter-text-btn[aria-pressed='true'] {
+  color: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+.ts-presenter-step:disabled,
+.ts-presenter-size:disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+  opacity: 0.6;
+}
+
+.ts-presenter-step svg,
+.ts-presenter-size svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-presenter-step,
+.ts-presenter-size {
+  width: 32px;
+  padding: 0;
+}
+
+/* ---- the body ---- */
+.ts-presenter-body {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(280px, 2fr);
+  min-height: 0;
+}
+
+.ts-presenter-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  padding: 24px 24px 24px 16px;
+  overflow-y: auto;
+  border-right: 1px solid var(--pt-hair);
+}
+
+.ts-presenter-row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 12px;
+}
+
+.ts-presenter-current {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.ts-presenter-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--pt-paper);
+  border: 1px solid var(--pt-hair);
+  overflow: hidden;
+}
+
+.ts-presenter-frame.is-current {
+  border-color: var(--pt-edge);
+  box-shadow:
+    0 0 0 1px var(--pt-paper),
+    0 0 0 2px var(--pt-hair-soft);
+}
+
+.ts-presenter-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--pt-titanium);
+  font-size: 12px;
+}
+
+.ts-presenter-pick {
+  position: relative;
+}
+
+.ts-presenter-counter {
+  width: 100%;
+  justify-content: flex-start;
+  padding: 0 10px;
+  border-color: var(--pt-hair);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-presenter-counter.is-on {
+  border-color: var(--pt-ink);
+  color: var(--pt-ink);
+}
+
+.ts-presenter-counter b {
+  font-weight: 500;
+  color: var(--pt-ink);
+}
+
+.ts-presenter-counter-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+
+.ts-presenter-caret {
+  color: var(--pt-titanium);
+}
+
+.ts-presenter-pick .ts-slide-list.is-down {
+  width: 100%;
+}
+
+/* the two previews at 0.3 of the current frame's width (SPEC 9.3) */
+.ts-presenter-previews {
+  display: flex;
+  gap: 16px;
+  padding-left: 44px;
+}
+
+.ts-presenter-preview {
+  margin: 0;
+  width: 30%;
+  min-width: 160px;
+}
+
+.ts-presenter-preview figcaption {
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pt-titanium);
+}
+
+/* ---- the side: tabs and notes ---- */
+.ts-presenter-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.ts-presenter-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 8px 12px 0;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-presenter-tab {
+  height: 36px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.ts-presenter-tab.is-on {
+  color: var(--pt-ink);
+  border-bottom-color: var(--pt-ink);
+}
+
+.ts-presenter-tab.is-disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+.ts-presenter-tab.is-disabled:hover {
+  border-color: transparent;
+  color: var(--pt-titanium);
+}
+
+.ts-presenter-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 12px 16px 16px;
+  overflow-y: auto;
+}
+
+.ts-presenter-notes-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ts-presenter-size-readout {
+  min-width: 44px;
+  text-align: center;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-presenter-notes-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.5;
+}
+
+.ts-presenter-notes-empty {
+  margin: 0;
+  color: var(--pt-titanium);
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .ts-presenter-body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .ts-presenter-stage {
+    border-right: 0;
+    border-bottom: 1px solid var(--pt-hair);
+  }
+
+  .ts-presenter-head {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .ts-presenter-title {
+    display: none;
+  }
+}

@@ -1,0 +1,131 @@
+{
+  "deckId": "gslides",
+  "revision": 1,
+  "format": "pptx",
+  "mode": "native",
+  "theme": "light",
+  "fontSet": "exact",
+  "fontSetVersion": "4.001+gt.1",
+  "files": [
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/exports/gs-native/gslides-light.pptx",
+      "bytes": 40893,
+      "sha256": "77a337e226c0c510ec84da0103b752172cdc48894fc6c4c71531e81c013a7386"
+    },
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/exports/gs-native/gslides-dark.pptx",
+      "bytes": 41308,
+      "sha256": "d4e31e035788cc24fb7050a5a6f770f510de87a9baa1208482d53d13620b2587"
+    },
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/exports/gs-native/gslides-both.zip",
+      "bytes": 82445,
+      "sha256": "2390c5414d6290e5f33e3c445c7b6ff59c2a7781d1f59fe2555c7b1aa6757250"
+    }
+  ],
+  "fonts": {
+    "embedded": [],
+    "requiredOnViewer": [
+      "GT Inter Display",
+      "GT Inter Text 26",
+      "GT Inter Text 14",
+      "GT Inter Text 22",
+      "GT Inter Text 20 Medium",
+      "GT Inter Text 20",
+      "GT Inter Text 24 Medium"
+    ],
+    "substitutedIn": ["every viewer"]
+  },
+  "slides": [
+    {
+      "slideId": "title",
+      "theme": "light",
+      "native": ["heading", "lead"],
+      "raster": []
+    },
+    {
+      "slideId": "breaks",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": []
+    },
+    {
+      "slideId": "table",
+      "theme": "light",
+      "native": ["h", "table"],
+      "raster": []
+    },
+    {
+      "slideId": "numbered",
+      "theme": "light",
+      "native": ["h", "p1", "list"],
+      "raster": []
+    },
+    {
+      "slideId": "links",
+      "theme": "light",
+      "native": ["h", "box", "shape", "t1"],
+      "raster": []
+    },
+    {
+      "slideId": "prompt",
+      "theme": "light",
+      "native": ["h"],
+      "raster": []
+    },
+    {
+      "slideId": "title",
+      "theme": "dark",
+      "native": ["heading", "lead"],
+      "raster": []
+    },
+    {
+      "slideId": "breaks",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": []
+    },
+    {
+      "slideId": "table",
+      "theme": "dark",
+      "native": ["h", "table"],
+      "raster": []
+    },
+    {
+      "slideId": "numbered",
+      "theme": "dark",
+      "native": ["h", "p1", "list"],
+      "raster": []
+    },
+    {
+      "slideId": "links",
+      "theme": "dark",
+      "native": ["h", "box", "shape", "t1"],
+      "raster": []
+    },
+    {
+      "slideId": "prompt",
+      "theme": "dark",
+      "native": ["h"],
+      "raster": []
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": false,
+  "passed": true,
+  "residual": [
+    "merged report over light and dark; theme names the first, per-theme reports are beside this file",
+    "renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "native (editable text): text boxes at the browser boxes, layout within 3 px; the glyph antialiasing is the viewer's",
+    "rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x",
+    "package: 47 parts, 58 relationships, valid against the content types and relationships",
+    "skipped: 1 slide(s) left out (skipped); pass includeSkipped to carry them",
+    "table: table#table written as a:tbl (4 by 4); the per cell 3 px budget is measured by the verify loop, which falls back to ruled rows when a cell misses it",
+    "package: 5 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)",
+    "package: 22 kern=\"0\" attribute(s) and 0 empty ext list(s) removed; 0 custGeom",
+    "links: 10 hyperlink(s) written (a URL as is, a slide link as a jump to its number in this file; SPEC 7.2.7, 7.2.8)",
+    "notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)",
+    "fonts not embedded: GT Inter Display, GT Inter Text 26, GT Inter Text 14, GT Inter Text 22, GT Inter Text 20 Medium, GT Inter Text 20, GT Inter Text 24 Medium; a viewer without them installed substitutes (SPEC 8.4); --embed-fonts embeds them",
+    "both: gslides-both.zip holds the light and dark files"
+  ]
+}

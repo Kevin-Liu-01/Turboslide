@@ -11,7 +11,7 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { ensureDeckAssets, workerClientOptions } from '../../server/root';
 import { getThumbnail, isThumbWidth, thumbResponse } from '../../server/thumbs';
 
-// GET /api/render/:slideId?deck=gt-brand&theme=light&scale=1[&format=json]: the facade over the
+// GET /api/render/:slideId?deck=gt-brand&theme=light&scale=1[&format=json|jpg]: the facade over the
 // render worker (SPEC 3.4; MILESTONES M2 item 6). With ?w=160|320|640 the response is the
 // downsampled thumbnail from server/thumbs.ts (M3 item 5), cached on disk per revision; a request
 // that also names a stamp (?r=) is immutable for the browser. The worker is reached over HTTP when
@@ -77,6 +77,8 @@ export const Route = createFileRoute('/api/render/$slideId')({
           );
         const theme = url.searchParams.get('theme') === 'dark' ? 'dark' : 'light';
         const scale = url.searchParams.get('scale') === '2' ? 2 : 1;
+        // JPEG at quality 92 (gslides-parity SPEC 7.6; the render worker's jpg format)
+        const jpg = url.searchParams.get('format') === 'jpg';
         const w = url.searchParams.get('w');
         if (w !== null) {
           const width = Number(w);
@@ -102,11 +104,17 @@ export const Route = createFileRoute('/api/render/$slideId')({
         try {
           // the hosted seed and the deck's twins are on disk before the job runs (server/root.ts)
           await ensureDeckAssets(deckId);
-          const rendered = await worker().renderSlide({ deckId, slideId, theme, scale });
+          const rendered = await worker().renderSlide({
+            deckId,
+            slideId,
+            theme,
+            scale,
+            ...(jpg ? { format: 'jpg' as const } : {}),
+          });
           if (wantsJson) {
             return Response.json({
               record: rendered.record,
-              image: `/api/render/${slideId}?deck=${deckId}&theme=${theme}&scale=${scale}`,
+              image: `/api/render/${slideId}?deck=${deckId}&theme=${theme}&scale=${scale}${jpg ? '&format=jpg' : ''}`,
               job: rendered.jobId,
               cached: rendered.cached,
               worker: worker().mode,
@@ -115,7 +123,7 @@ export const Route = createFileRoute('/api/render/$slideId')({
           }
           return new Response(rendered.png, {
             headers: {
-              'content-type': 'image/png',
+              'content-type': jpg ? 'image/jpeg' : 'image/png',
               'content-length': String(rendered.png.byteLength),
               'cache-control': 'private, max-age=60',
               'x-turboslide-record': JSON.stringify(rendered.record),

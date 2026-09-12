@@ -1,0 +1,288 @@
+/* Print settings and preview (/print/:deckId), gslides-parity SPEC 6.8. On screen: Google's one
+   toolbar across the top (--pt-bar-h, one --pt-hair rule under it) and the sheets stacked on the
+   plate, each in a 16:9 box scaled by --k = width / 1600 (the route measures it). In print: one
+   sheet per 13.333 by 7.5 inch page with no margin, the toolbar gone, --k fixed at 0.8 because a
+   13.333 inch page is 1280 CSS pixels wide; the "1 slide with notes" layout gives the sheet the
+   upper part of the page and the notes the rest. Colors are the chrome's tokens on screen; the
+   sheet keeps the theme's own tokens (sheet.css) so the paper prints as the deck draws it. */
+.ts-print {
+  min-height: 100vh;
+  background: var(--pt-plate);
+  color: var(--pt-ink);
+}
+
+.ts-print-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: var(--pt-bar-h, 48px);
+  padding: 0 12px;
+  background: var(--pt-paper);
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-print-bar .pt-ib {
+  text-decoration: none;
+  border-color: var(--pt-hair);
+}
+
+.ts-print-bar .pt-ib:hover {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-print-bar .pt-ib.is-solid {
+  border-color: var(--pt-ink);
+}
+
+.ts-print-bar .pt-ib:disabled {
+  color: var(--pt-titanium);
+  border-color: var(--pt-hair-soft);
+  cursor: default;
+}
+
+.ts-print-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 13.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-print-title svg {
+  fill: currentColor;
+  flex: none;
+}
+
+.ts-print-layout select {
+  height: 32px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px var(--pt-text);
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--pt-ink-2) 50%),
+    linear-gradient(135deg, var(--pt-ink-2) 50%, transparent 50%);
+  background-position:
+    calc(100% - 15px) 13px,
+    calc(100% - 10px) 13px;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.ts-print-layout select:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-print-check {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ts-print-check input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.ts-print-check .ts-hm-dialog-box {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+}
+
+.ts-print-check input:checked ~ .ts-hm-dialog-box {
+  background: var(--pt-ink);
+  border-color: var(--pt-ink);
+}
+
+.ts-print-check input:focus-visible ~ .ts-hm-dialog-box {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-print-spacer {
+  flex: 1;
+}
+
+.ts-print-progress {
+  font-size: 12.5px;
+  color: var(--pt-ink-2);
+  white-space: nowrap;
+}
+
+/* ---- the pages on screen: centred sheets, 960px wide at most ---- */
+.ts-print-pages {
+  display: grid;
+  gap: 24px;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 24px 96px;
+}
+
+.ts-print-page {
+  display: grid;
+  gap: 12px;
+  background: var(--pt-paper);
+  border: 1px solid var(--pt-hair);
+  padding: 16px;
+}
+
+.ts-print-page[data-skipped] {
+  opacity: 0.72;
+}
+
+.ts-print-sheet {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+/* the theme's sheet box is 1600 by 900 absolute (stage.css); here it fills the scaled frame and
+   the stage carries the scale, as the viewer's clones do (LiveClone.css) */
+.ts-print-sheet > .ts-sheet.sheet {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  border: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.ts-print-sheet > .ts-sheet.sheet > .ts-stage {
+  transform: scale(var(--k, 0.5));
+}
+
+.ts-print-sheet .ts-stage > .pt-slide {
+  position: absolute;
+  inset: 0;
+}
+
+.ts-print-sheet .ts-stage > .pt-slide > .slide {
+  display: block;
+}
+
+.ts-print-notes {
+  display: grid;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid var(--pt-hair-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ts-print-notes b {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--pt-ink-2);
+}
+
+.ts-print-notes p {
+  margin: 0;
+  white-space: pre-wrap;
+  color: var(--pt-ink);
+}
+
+/* ---- the printed pages ---- */
+@page {
+  size: 13.333in 7.5in;
+  margin: 0;
+}
+
+@media print {
+  .ts-print {
+    background: none;
+    min-height: 0;
+  }
+
+  .ts-print-bar,
+  .ts-snackbar {
+    display: none;
+  }
+
+  .ts-print-pages {
+    display: block;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ts-print-page {
+    display: block;
+    width: 13.333in;
+    height: 7.5in;
+    padding: 0;
+    border: 0;
+    background: none;
+    break-after: page;
+    page-break-after: always;
+    overflow: hidden;
+    opacity: 1;
+  }
+
+  .ts-print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+
+  /* 13.333 inches is 1280 CSS pixels: the sheet scales by 0.8 to fill the page */
+  .ts-print-sheet {
+    width: 1280px;
+    height: 720px;
+    aspect-ratio: auto;
+    --k: 0.8;
+  }
+
+  /* with notes: the sheet takes the upper 60 percent of the page, the notes the rest */
+  .ts-print[data-layout='notes'] .ts-print-sheet {
+    width: 768px;
+    height: 432px;
+    margin: 24px auto 0;
+    --k: 0.48;
+  }
+
+  .ts-print-notes {
+    height: calc(7.5in - 432px - 24px);
+    margin: 0 48px;
+    padding: 12px 0 0;
+    overflow: hidden;
+    border-top: 1px solid #ccc;
+    color: #000;
+  }
+
+  .ts-print-notes b {
+    color: #444;
+  }
+}

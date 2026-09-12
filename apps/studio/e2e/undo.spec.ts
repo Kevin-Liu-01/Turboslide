@@ -110,7 +110,16 @@ test('ten mutations and ten Cmd Z leave the document byte identical after twenty
   const seedFile = readFileSync(SLIDE_FILE);
   const manifestBefore = manifestWithoutClock();
   expect(versionFiles()).toBe(0);
-  await expect(page.locator('.ts-status')).toHaveText(/^Saved · r\d+$/);
+  /* the parity shell prints no revision in the default view (gslides-parity SPEC 1.1); the
+     confirmed revision is read through describe().state */
+  await page.waitForFunction(() => {
+    const state = window.turboslide!.studio.describe().state as {
+      revision?: number;
+      serverRevision?: number;
+      pending?: number;
+    };
+    return state.pending === 0 && state.revision === state.serverRevision;
+  });
   const startRevision = await page.evaluate(
     () => window.turboslide!.studio.describe().state.revision as number,
   );
@@ -150,7 +159,9 @@ test('ten mutations and ten Cmd Z leave the document byte identical after twenty
   await expect
     .poll(() => page.evaluate(() => window.turboslide!.studio.describe().state.revision as number))
     .toBe(startRevision + 10);
-  await expect(page.locator('.ts-status')).toHaveText(`Saved · r${startRevision + 10}`);
+  await expect
+    .poll(() => page.evaluate(() => window.turboslide!.studio.describe().state.revision as number))
+    .toBe(startRevision + 10);
   expect(readFileSync(SLIDE_FILE).equals(slideBefore)).toBe(false);
   expect(versionFiles()).toBe(10);
 
@@ -159,9 +170,12 @@ test('ten mutations and ten Cmd Z leave the document byte identical after twenty
     await page.locator('body').press('ControlOrMeta+z');
   }
 
-  await expect(page.locator('.ts-status')).toHaveText(`Saved · r${startRevision + 20}`, {
-    timeout: 30_000,
-  });
+  await expect
+    .poll(
+      () => page.evaluate(() => window.turboslide!.studio.describe().state.revision as number),
+      { timeout: 30_000 },
+    )
+    .toBe(startRevision + 20);
   await expect.poll(() => versionFiles()).toBe(20);
 
   // byte identical: the slide file against the start, and the manifest apart from revision and updatedAt
@@ -195,9 +209,12 @@ test('ten mutations and ten Cmd Z leave the document byte identical after twenty
   // the editor's undo stack is empty and redo brings one forward write back
   await page.locator('body').press('ControlOrMeta+z');
   await page.locator('body').press('ControlOrMeta+Shift+z');
-  await expect(page.locator('.ts-status')).toHaveText(`Saved · r${startRevision + 21}`, {
-    timeout: 30_000,
-  });
+  await expect
+    .poll(
+      () => page.evaluate(() => window.turboslide!.studio.describe().state.revision as number),
+      { timeout: 30_000 },
+    )
+    .toBe(startRevision + 21);
   expect(versionFiles()).toBe(21);
   expect(JSON.parse(readFileSync(SLIDE_FILE, 'utf8')).slots.right[0].size).toBe(22);
 });

@@ -354,14 +354,30 @@ export function applyMutation(
     }
     case 'deck.set': {
       const root = mutation.path.split('/')[1] ?? '';
+      if (root === 'trashedAt') {
+        throw new TypeError(
+          'deck.set does not write trashedAt; deck.trash and deck.restore move a deck to and from the trash at the store level (gslides-parity SPEC 7.2.5)',
+        );
+      }
       if (!DECK_SET_ROOTS.has(root)) {
         throw new TypeError(
-          `deck.set writes title, theme or defaults; sections and assets have their own mutations`,
+          `deck.set writes title, theme or defaults (/defaults/appearance, /defaults/counter, /defaults/notes); sections and assets have their own mutations`,
         );
       }
       const existed = hasAt(document.deck, mutation.path);
       const old = existed ? cloneJson(getAt(document.deck, mutation.path)) : undefined;
+      // A pointer under /defaults on a deck without the object (every deck written before the
+      // parity round) creates it, the way the Themes panel's first write does; the inverse then
+      // removes the whole object so undo returns the manifest exactly (gslides-parity SPEC 7.2.3,
+      // 7.2.4).
+      const createsDefaults =
+        root === 'defaults' &&
+        mutation.path !== '/defaults' &&
+        mutation.value !== undefined &&
+        document.deck.defaults === undefined;
+      if (createsDefaults) document.deck.defaults = {};
       setAt(document.deck, mutation.path, cloneJson(mutation.value));
+      if (createsDefaults) return [{ op: 'deck.set', path: '/defaults' }];
       return [{ op: 'deck.set', path: mutation.path, ...(existed ? { value: old } : {}) }];
     }
     case 'version.restore': {

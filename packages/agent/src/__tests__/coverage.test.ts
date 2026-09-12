@@ -97,7 +97,7 @@ describe('every action', () => {
 
   it('is named in at least one test or spec file once its milestone has landed', () => {
     const files = testFiles();
-    const landed: ReadonlySet<string> = new Set(['M1', 'M2', 'M3', 'M4']);
+    const landed: ReadonlySet<string> = new Set(['M1', 'M2', 'M3', 'M4', 'GS1']);
     const named = (spec: (typeof rows)[number][1]): string[] => [
       `'${spec.id}'`,
       `"${spec.id}"`,

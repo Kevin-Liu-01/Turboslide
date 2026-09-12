@@ -71,12 +71,13 @@ import { exportCommand } from './export.ts';
 import { judge } from './judge.ts';
 import { render } from './render.ts';
 import { sheet } from './sheet.ts';
+import { registerSlideImportAction } from './slide.ts';
 
 type Theme = 'light' | 'dark';
 type SlideIds = 'all' | string[];
 
 /** What every handler works with: the deck directory, the store, the derived directory and the author. */
-type HandlerEnv = {
+export type HandlerEnv = {
   dir: string;
   store: FileStore;
   derived: string;
@@ -213,7 +214,10 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
         sections: loaded.deck.sections.length,
         assets: Object.keys(loaded.deck.assets).length,
         htmlBlocks: htmlBlockCount(loaded),
+        skipped: rows.filter((row) => loaded.slides[row.id]?.skip === true).length,
       },
+      ...(loaded.deck.defaults !== undefined ? { defaults: loaded.deck.defaults } : {}),
+      ...(loaded.deck.trashedAt !== undefined ? { trashedAt: loaded.deck.trashedAt } : {}),
     };
   });
 
@@ -231,6 +235,10 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
         title: row.title,
         kind: row.kind,
         lint: { s3: counts[row.id]?.s3 ?? 0, s2: counts[row.id]?.s2 ?? 0 },
+        ...(loaded.slides[row.id]?.skip === true ? { skip: true } : {}),
+        ...(loaded.slides[row.id]?.template !== undefined
+          ? { template: loaded.slides[row.id]?.template }
+          : {}),
       }));
   });
 
@@ -549,6 +557,43 @@ function fileDeckSource(env: HandlerEnv, deckId: string): DeckSource {
 // ---------------------------------------------------------------------------------------------
 // The command
 
+/**
+ * The dispatcher `turboslide mcp` serves: the read actions, the store actions over the deck's
+ * FileStore, the deck level actions over the deck's decks/ folder, and slide.import from a sibling
+ * deck in that folder. Exported so a test derives the tool list without a transport.
+ */
+export function createDeckDispatcher(env: HandlerEnv): Dispatcher {
+  const dispatcher = createDispatcher();
+  registerReadActions(dispatcher, env);
+  const deps = { store: env.store, lint: lintLists(), renderRecords: () => renderRecords(env) };
+  registerStoreActions(dispatcher, deps);
+  /* deck.create and deck.copy make a sibling of this deck under the same decks/ folder; deck.rename
+     and deck.set write this deck; deck.list, deck.trash and deck.restore read and stamp the folder */
+  const decksDir = decksDirOfDeck(env.dir);
+  registerDeckActions(dispatcher, { ...deps, decksDir });
+  /* slide.import (deck_import_slides) copies slides and their assets from a sibling deck, as the
+     CLI's `slide import` does (gslides-parity SPEC 7.5) */
+  registerSlideImportAction(dispatcher, deps, decksDir, env.dir);
+  return dispatcher;
+}
+
+/** The MCP server over a deck directory; connect it with serveStdio or any SDK transport. */
+export function createDeckServer(
+  env: HandlerEnv,
+  deckId: string,
+  version: string,
+): ReturnType<typeof createMcpServer> {
+  const context: ActionContext = { author: env.author, deckDir: env.dir };
+  return createMcpServer({
+    dispatcher: createDeckDispatcher(env),
+    source: fileDeckSource(env, deckId),
+    author: context.author,
+    deckDir: context.deckDir,
+    version,
+    log: env.log,
+  });
+}
+
 /** `turboslide mcp [--deck <dir>] [--derived <dir>] [--author agent:<runId>]`: serve until the client disconnects. */
 export async function mcp(ctx: CommandContext): Promise<number> {
   const dir = findDeckDir(ctx.cwd, flagString(ctx.args, 'deck'), ctx.env);
@@ -564,28 +609,7 @@ export async function mcp(ctx: CommandContext): Promise<number> {
     author: ctx.author,
     log: (line) => ctx.out.warn(line),
   };
-  const dispatcher = createDispatcher();
-  registerReadActions(dispatcher, env);
-  registerStoreActions(dispatcher, {
-    store: env.store,
-    lint: lintLists(),
-    renderRecords: () => renderRecords(env),
-  });
-  /* deck.create makes a sibling of this deck under the same decks/ folder; deck.rename writes this deck */
-  registerDeckActions(dispatcher, {
-    store: env.store,
-    lint: lintLists(),
-    decksDir: decksDirOfDeck(dir),
-  });
-  const context: ActionContext = { author: ctx.author, deckDir: dir };
-  const { server, tools } = createMcpServer({
-    dispatcher,
-    source: fileDeckSource(env, loaded.deck.id),
-    author: context.author,
-    deckDir: context.deckDir,
-    version: await cliVersion(),
-    log: env.log,
-  });
+  const { server, tools } = createDeckServer(env, loaded.deck.id, await cliVersion());
   ctx.out.warn(
     `turboslide mcp: ${loaded.deck.id} at revision ${loaded.deck.revision} from ${dir}; ${tools.length} tools; derived files under ${derived}; stdio`,
   );

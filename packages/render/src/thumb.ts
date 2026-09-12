@@ -11,6 +11,11 @@ export type ThumbOptions = Partial<Omit<RenderOptions, 'theme' | 'chrome' | 'cou
   k?: number;
 };
 
+/**
+ * A thumbnail never draws a prompt (an empty Text is nothing outside the editor, gslides-parity
+ * SPEC 5.4) unless the caller asks with `prompts: true`, which the layout grid does for its 21
+ * tiles (SPEC 5.2).
+ */
 export function renderThumb(
   deck: Deck,
   slide: Slide,
@@ -26,6 +31,7 @@ export function renderThumb(
     blockAttrs: rest.blockAttrs ?? false,
     gtWord: rest.gtWord ?? true,
     live: false,
+    ...(rest.prompts === true ? { prompts: true } : {}),
     active: true,
   });
   const style = k !== undefined ? ` style="--k:${k}"` : '';

@@ -16,13 +16,19 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 import { openFileStore } from './file-store.ts';
 import {
+  DEFAULT_BLANK_TITLE,
+  StaleRevisionError,
   byNewest,
+  copyDeck,
   createDeck,
   deckIdFor,
   listDeckHeads,
   listTemplates,
   parseTemplateRecord,
   readTemplate,
+  removeDeck,
+  restoreDeck,
+  trashDeck,
 } from './templates.ts';
 
 // deck.create over a scratch decks/ folder: the blank template writes one title slide the
@@ -32,6 +38,7 @@ import {
 // committed GT template against the working deck it is cut from.
 const REPO_DECKS = join(import.meta.dirname, '..', '..', '..', 'decks');
 const REPO_TEMPLATE = join(REPO_DECKS, 'templates', 'gt-brand');
+const REPO_BLANK_TEMPLATE = join(REPO_DECKS, 'templates', 'blank');
 const REPO_DECK = join(REPO_DECKS, 'gt-brand');
 
 /** The manifest fields the template tests read; the rest is compared as data. */
@@ -144,7 +151,7 @@ describe('deckIdFor', () => {
 });
 
 describe('createDeck', () => {
-  it('writes a blank deck with one title slide that the store reads back at revision 0', async () => {
+  it('writes a blank deck with one title slide when the decks folder has no blank template (the fallback)', async () => {
     const result = createDeck(
       decksDir,
       { name: 'Blank one', from: 'blank' },
@@ -201,6 +208,9 @@ describe('templates and deck heads', () => {
     const template = readTemplate(join(decksDir, 'templates', 'gt-brand'));
     expect(template.record.assets).toBe('pictures');
     expect(listTemplates(decksDir).map((entry) => entry.record.name)).toEqual(['Tiny template']);
+    const blank = readTemplate(REPO_BLANK_TEMPLATE);
+    expect(blank.record.id).toBe('blank');
+    expect(blank.record.assets).toBe('assets');
     expect(() => parseTemplateRecord({ schemaVersion: 2 }, 'x')).toThrow(/schemaVersion/);
     expect(() => parseTemplateRecord({ schemaVersion: 1, id: 'nope' }, 'x')).toThrow(/id must/);
   });
@@ -303,5 +313,145 @@ describe('the committed GT template is the working deck', () => {
       unlinkSync(join(decks, 'templates', 'gt-brand'));
       rmSync(scratch, { recursive: true, force: true });
     }
+  });
+});
+
+describe('the committed blank template (gslides-parity SPEC 5.2, 6.1)', () => {
+  it('deck.create --from blank copies one title slide with empty placeholders and the four starter pictures', () => {
+    const scratch = mkdtempSync(join(tmpdir(), 'turboslide-blank-template-'));
+    const decks = join(scratch, 'decks');
+    mkdirSync(join(decks, 'templates'), { recursive: true });
+    symlinkSync(REPO_BLANK_TEMPLATE, join(decks, 'templates', 'blank'));
+    try {
+      const result = createDeck(
+        decks,
+        { name: DEFAULT_BLANK_TITLE, from: 'blank' },
+        { now: () => '2026-09-12T03:00:00.000Z' },
+      );
+      expect(result).toMatchObject({
+        deckId: 'untitled-presentation',
+        title: 'Untitled presentation',
+        revision: 0,
+        counts: { slides: 1, sections: 1, assets: 4 },
+      });
+      const manifest = readJsonFile<Manifest>(join(result.dir, 'deck.json'));
+      expect(Object.keys(manifest.assets)).toEqual([
+        'opener-brand',
+        'opener-prototemplate',
+        'mood-earth',
+        'opener-closing',
+      ]);
+      for (const asset of Object.values(manifest.assets)) {
+        for (const twin of Object.values(asset.twins)) {
+          expect(existsSync(join(result.dir, twin)), twin).toBe(true);
+        }
+      }
+      const slide = readJsonFile<Record<string, unknown>>(join(result.dir, 'slides', 'title.json'));
+      expect(slide).toMatchObject({ kind: 'title', heading: '', lead: '', template: 'title' });
+    } finally {
+      unlinkSync(join(decks, 'templates', 'blank'));
+      rmSync(scratch, { recursive: true, force: true });
+    }
+  });
+});
+
+describe('copy, trash, restore and remove (gslides-parity SPEC 7.5)', () => {
+  const NOW = '2026-09-12T04:00:00.000Z';
+
+  it('copies a deck under a new id with a new title, revision 0 and the assets folder', async () => {
+    const result = copyDeck(
+      decksDir,
+      { id: 'from-tiny', name: 'Copy of tiny' },
+      { now: () => NOW },
+    );
+    expect(result).toMatchObject({
+      deckId: 'copy-of-tiny',
+      sourceDeckId: 'from-tiny',
+      title: 'Copy of tiny',
+      revision: 0,
+      counts: { slides: 2, sections: 1, assets: 0 },
+    });
+    expect(existsSync(join(result.dir, 'assets', 'photo.jpg'))).toBe(true);
+    expect(existsSync(join(result.dir, 'versions'))).toBe(false);
+    const store = openFileStore({ dir: result.dir });
+    const read = await store.read();
+    expect(read.ok).toBe(true);
+    expect(read.document.deck).toMatchObject({
+      id: 'copy-of-tiny',
+      createdAt: NOW,
+      updatedAt: NOW,
+    });
+    expect(() => copyDeck(decksDir, { id: 'from-tiny', name: 'Copy of tiny' })).toThrow(
+      /exists already/,
+    );
+    expect(() => copyDeck(decksDir, { id: 'missing', name: 'x' })).toThrow(RangeError);
+    expect(() => copyDeck(decksDir, { id: 'from-tiny', name: 'From tiny' })).toThrow(/other than/);
+  });
+
+  it('copies the named slides only and strips the notes when asked', async () => {
+    // give the source a note first
+    const source = openFileStore({ dir: join(decksDir, 'from-tiny') });
+    const noted = await source.write({
+      baseRevision: 0,
+      author: { kind: 'human', name: 'kevin' },
+      mutations: [{ op: 'slide.set', slideId: 'thesis', path: '/notes', value: 'Say it slowly.' }],
+    });
+    expect(noted.ok).toBe(true);
+    const partial = copyDeck(
+      decksDir,
+      { id: 'from-tiny', name: 'Thesis only', slideIds: ['thesis'], removeNotes: true },
+      { now: () => NOW },
+    );
+    expect(partial.counts).toEqual({ slides: 1, sections: 1, assets: 0 });
+    const read = await openFileStore({ dir: partial.dir }).read();
+    expect(Object.keys(read.document.slides)).toEqual(['thesis']);
+    expect(read.document.deck.sections).toEqual([{ id: 'one', name: 'One', slideIds: ['thesis'] }]);
+    expect(read.document.slides.thesis).not.toHaveProperty('notes');
+    const kept = copyDeck(
+      decksDir,
+      { id: 'from-tiny', name: 'With notes', slideIds: ['thesis'] },
+      { now: () => NOW },
+    );
+    const withNotes = await openFileStore({ dir: kept.dir }).read();
+    expect(withNotes.document.slides.thesis?.notes).toBe('Say it slowly.');
+    expect(() =>
+      copyDeck(decksDir, { id: 'from-tiny', name: 'Ghost', slideIds: ['ghost'] }),
+    ).toThrow(RangeError);
+  });
+
+  it('moves a deck to the trash and back without touching the revision, and the list hides it', async () => {
+    const before = listDeckHeads(decksDir).map((head) => head.id);
+    expect(before).toContain('copy-of-tiny');
+    const trashed = trashDeck(decksDir, 'copy-of-tiny', { now: () => NOW });
+    expect(trashed).toEqual({ id: 'copy-of-tiny', trashedAt: NOW, revision: 0 });
+    expect(listDeckHeads(decksDir).map((head) => head.id)).not.toContain('copy-of-tiny');
+    const withTrash = listDeckHeads(decksDir, { includeTrashed: true });
+    expect(withTrash.find((head) => head.id === 'copy-of-tiny')?.trashedAt).toBe(NOW);
+    const read = await openFileStore({ dir: join(decksDir, 'copy-of-tiny') }).read();
+    expect(read.ok).toBe(true);
+    expect(read.document.deck).toMatchObject({ trashedAt: NOW, revision: 0 });
+    // a second trash keeps the first stamp; a stale base is refused
+    expect(trashDeck(decksDir, 'copy-of-tiny', { now: () => 'later' })).toEqual(trashed);
+    expect(() => trashDeck(decksDir, 'copy-of-tiny', { baseRevision: 9 })).toThrow(
+      StaleRevisionError,
+    );
+    const restored = restoreDeck(decksDir, 'copy-of-tiny', { baseRevision: 0 });
+    expect(restored).toEqual({ id: 'copy-of-tiny', trashedAt: null, revision: 0 });
+    expect(listDeckHeads(decksDir).map((head) => head.id)).toContain('copy-of-tiny');
+    const again = await openFileStore({ dir: join(decksDir, 'copy-of-tiny') }).read();
+    expect(again.document.deck).not.toHaveProperty('trashedAt');
+    expect(restoreDeck(decksDir, 'copy-of-tiny')).toEqual(restored);
+  });
+
+  it('removes a deck folder for good and refuses the templates folder and an unknown id', () => {
+    expect(removeDeck(decksDir, 'thesis-only')).toEqual({ id: 'thesis-only', removed: true });
+    expect(existsSync(join(decksDir, 'thesis-only'))).toBe(false);
+    expect(() => removeDeck(decksDir, 'thesis-only')).toThrow(RangeError);
+    expect(() => removeDeck(decksDir, 'templates')).toThrow(TypeError);
+    expect(() => removeDeck(decksDir, 'with-notes', { baseRevision: 3 })).toThrow(
+      StaleRevisionError,
+    );
+    expect(existsSync(join(decksDir, 'with-notes'))).toBe(true);
+    expect(existsSync(join(decksDir, 'templates', 'gt-brand'))).toBe(true);
   });
 });

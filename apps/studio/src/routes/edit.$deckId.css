@@ -22,8 +22,8 @@
   z-index: 3;
 }
 
-/* ---- the conflict card and the external revision banner (SPEC 6.7) ---- */
-.ts-card {
+/* ---- the conflict card and the external revision banner (SPEC 6.7); ts-conflict, because ts-card is the filmstrip card (gslides-parity SPEC 4.1) ---- */
+.ts-conflict {
   position: fixed;
   left: 50%;
   top: calc(var(--pt-bar-h) + 24px);
@@ -39,43 +39,43 @@
   font: 13px/1.5 var(--pt-text);
 }
 
-.ts-card-head {
+.ts-conflict-head {
   display: grid;
   gap: 4px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--pt-hair);
 }
 
-.ts-card-head b {
+.ts-conflict-head b {
   font-family: var(--pt-display);
   font-weight: 500;
   font-size: 15px;
 }
 
-.ts-card-head span,
-.ts-card-error {
+.ts-conflict-head span,
+.ts-conflict-error {
   color: var(--pt-ink-2);
 }
 
-.ts-card p {
+.ts-conflict p {
   margin: 12px 0 0;
 }
 
-.ts-card-both {
+.ts-conflict-both {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-top: 12px;
 }
 
-.ts-card-both h4 {
+.ts-conflict-both h4 {
   margin: 0 0 6px;
   font-size: 12px;
   font-weight: 500;
   color: var(--pt-titanium);
 }
 
-.ts-card-both pre {
+.ts-conflict-both pre {
   margin: 0;
   max-height: 240px;
   overflow: auto;
@@ -85,7 +85,7 @@
   white-space: pre-wrap;
 }
 
-.ts-card-actions {
+.ts-conflict-actions {
   display: flex;
   gap: 8px;
   margin-top: 16px;
@@ -109,7 +109,7 @@
 }
 
 @media (max-width: 900px) {
-  .ts-card-both {
+  .ts-conflict-both {
     grid-template-columns: 1fr;
   }
 }

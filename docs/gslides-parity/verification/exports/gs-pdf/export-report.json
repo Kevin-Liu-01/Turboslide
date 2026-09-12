@@ -1,0 +1,125 @@
+{
+  "deckId": "gslides",
+  "revision": 1,
+  "format": "pdf",
+  "mode": "flatten",
+  "theme": "light",
+  "fontSet": "exact",
+  "fontSetVersion": "inter-variable",
+  "files": [
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/exports/gs-pdf/gslides-light.pdf",
+      "bytes": 203032,
+      "sha256": "caf7935892c211885bdbc144387392de31979e196c9673e96883b8765e3d44fa"
+    }
+  ],
+  "fonts": {
+    "embedded": ["Inter"],
+    "requiredOnViewer": [],
+    "substitutedIn": []
+  },
+  "slides": [
+    {
+      "slideId": "title",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 947,
+        "fraction": 0.00016440972222222223,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/01-title@2x.png",
+        "got": "pages/page-1.png",
+        "diff": "01-title.diff.png"
+      }
+    },
+    {
+      "slideId": "breaks",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 2026,
+        "fraction": 0.0003517361111111111,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/02-breaks@2x.png",
+        "got": "pages/page-2.png",
+        "diff": "02-breaks.diff.png"
+      }
+    },
+    {
+      "slideId": "table",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 954,
+        "fraction": 0.000165625,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/03-table@2x.png",
+        "got": "pages/page-3.png",
+        "diff": "03-table.diff.png"
+      }
+    },
+    {
+      "slideId": "numbered",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 1268,
+        "fraction": 0.00022013888888888889,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/04-numbered@2x.png",
+        "got": "pages/page-4.png",
+        "diff": "04-numbered.diff.png"
+      }
+    },
+    {
+      "slideId": "links",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 901,
+        "fraction": 0.0001564236111111111,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/05-links@2x.png",
+        "got": "pages/page-5.png",
+        "diff": "05-links.diff.png"
+      }
+    },
+    {
+      "slideId": "prompt",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 179,
+        "fraction": 0.00003107638888888889,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/06-prompt@2x.png",
+        "got": "pages/page-6.png",
+        "diff": "06-prompt.diff.png"
+      }
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": true,
+  "passed": true,
+  "residual": [
+    "renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "pdf: 6 page(s) at 960 by 540 pt (13.333 by 7.5 in), 203032 bytes, light; the text is vector and searchable; notes never travel",
+    "pdf gate: the file holds 6 page(s) for 6 slide(s)",
+    "pdf: the first page measures 960 by 540 pt",
+    "skipped: 1 slide(s) left out (skipped); pass includeSkipped to carry them",
+    "pdf gate: pdftoppm at 3200 by 1800 against the 2x web render, pixelmatch threshold 0.1, the picture regions (img, canvas, raster elements) compared separately; target 0.1 percent per page, fail over 0.5; 6 page(s) measured, 0 over the target, 0 over the fail line",
+    "pdf gate: worst page 2 (breaks) at 0.035 percent outside its pictures"
+  ]
+}

@@ -2,14 +2,14 @@
 // A heading or paragraph may carry `typography` (typography.ts): its declarations are written
 // inline after the margins, so an absent record leaves the grammar's step untouched.
 import { el, style } from '../html.ts';
-import { renderText } from '../text.ts';
 import type { BlockOf } from '@turboslide/schema/blocks';
 import { typographyDeclarations } from '@turboslide/schema/typography';
 import { rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
+import { renderMultiline, renderTextOrPrompt } from './prompt.ts';
 
 export function renderHeading(block: BlockOf<'heading'>, ctx: BlockContext): string {
-  const text = renderText(block.text, { gtWord: ctx.gtWord });
+  const text = renderTextOrPrompt(block.text, ctx, block, '/text');
   const inline = style(
     block.marginTop !== undefined && `margin-top:${block.marginTop}px`,
     block.marginBottom !== undefined && `margin-bottom:${block.marginBottom}px`,
@@ -66,7 +66,8 @@ export function renderParagraph(block: BlockOf<'paragraph'>, ctx: BlockContext):
       ...rootAttrs(block, ctx, { className: className || undefined, style: inline }),
       'data-run': runAttr(ctx, block.id, 'text'),
     },
-    renderText(block.text, { gtWord: ctx.gtWord }),
+    // one of the four multiline pointers (SPEC 7.4): a paragraph break is one .para span each
+    renderMultiline(block.text, ctx, block, '/text'),
   );
 }
 
@@ -78,6 +79,6 @@ export function renderCredit(block: BlockOf<'credit'>, ctx: BlockContext): strin
       ...rootAttrs(block, ctx, { className: 'credit' }),
       'data-run': runAttr(ctx, block.id, 'text'),
     },
-    renderText(block.text, { gtWord: ctx.gtWord }),
+    renderTextOrPrompt(block.text, ctx, block, '/text'),
   );
 }

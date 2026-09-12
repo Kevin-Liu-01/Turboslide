@@ -1,0 +1,94 @@
+/* The slide list of a show and of the presenter console (SlideList.tsx; gslides-parity SPEC 9.2,
+   9.3). A paper plate with a hair frame, 320 px wide, at most 60 percent of the viewport tall and
+   scrolling inside; one 56 px row per slide with the number, a 16:9 live thumbnail 96 px wide and
+   the title on one line. The current slide carries the ink ring; the focused row takes the plate
+   ground. .is-up sits above the show's toolbar at the bottom left; .is-down hangs under the
+   console's counter button. */
+.ts-slide-list {
+  position: absolute;
+  z-index: 7;
+  box-sizing: border-box;
+  width: 320px;
+  max-height: min(60vh, 520px);
+  overflow-y: auto;
+  padding: 4px 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  font: 13px/1.3 var(--pt-text);
+  outline: none;
+  animation: ts-present-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
+}
+
+.ts-slide-list.is-up {
+  left: 12px;
+  bottom: 60px;
+}
+
+.ts-slide-list.is-down {
+  left: 0;
+  top: calc(100% + 4px);
+}
+
+.ts-slide-list-item {
+  display: grid;
+  grid-template-columns: 28px 96px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 10px 0 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.ts-slide-list-item:hover,
+.ts-slide-list-item:focus {
+  background: var(--pt-plate);
+}
+
+.ts-slide-list-item:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-slide-list-n {
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.ts-slide-list-frame {
+  position: relative;
+  display: block;
+  width: 96px;
+  height: 54px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  overflow: hidden;
+}
+
+.ts-slide-list-item.is-current .ts-slide-list-frame {
+  border-color: var(--pt-ink);
+  box-shadow: 0 0 0 1px var(--pt-ink);
+}
+
+.ts-slide-list-title {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.ts-slide-list-item.is-current .ts-slide-list-title {
+  font-weight: 500;
+}
+
+@keyframes ts-present-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}

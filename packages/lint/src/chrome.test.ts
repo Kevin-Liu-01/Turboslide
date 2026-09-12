@@ -24,7 +24,11 @@ const empty: AuditResult = {
 };
 
 describe('chrome audit configuration', () => {
-  test("the allow list is the deck's five devices plus the selection ring (SPEC 2.2)", () => {
+  test("the allow list is the deck's five devices, the selection ring and the two ringed frames (SPEC 2.2)", () => {
+    // ts-card-frame (the filmstrip card, gslides-parity SPEC 1.1: "the current card ringed in
+    // --pt-ink at 2 px") and ts-themes-frame (the Themes panel tile, SPEC 5.7: "the current one
+    // ringed") are devices in the sense of the deck's thumb-frame and page-frame: one frame with
+    // the current item's ring drawn outside it, two parallel strokes by design.
     expect([...CHROME_ALLOW]).toEqual([
       'sheet',
       'thumb-frame',
@@ -32,6 +36,8 @@ describe('chrome audit configuration', () => {
       'pt-tile',
       'pt-preview',
       'ts-select',
+      'ts-card-frame',
+      'ts-themes-frame',
     ]);
   });
 

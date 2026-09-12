@@ -17,6 +17,8 @@ export type LineEmitOptions = {
   /** The paper hex the translucent tokens composite on; undefined keeps alpha (over a picture). */
   paperHex?: string;
   namePrefix: string;
+  /** A block link on the shape (gslides-parity SPEC 7.2.7), resolved by the builder. */
+  hyperlink?: PptxGenJS.HyperlinkProps;
 };
 
 /** The line color options: composite on paper, or the raw color with its alpha as transparency. */
@@ -120,7 +122,34 @@ export function addSceneRect(
     fill: fillProps(rect.fill, options.paperHex),
     line,
     ...(shape === 'roundRect' ? { rectRadius: pxToIn(rect.radius ?? 0) } : {}),
+    ...(options.hyperlink ? { hyperlink: options.hyperlink } : {}),
     objectName: `${options.namePrefix}#${name}${rect.group ? `@${rect.group}` : ''}`,
+  });
+}
+
+/**
+ * The invisible hit target of a linked block in the flatten file (gslides-parity SPEC 7.2.7): a
+ * rectangle over the block's box with a fully transparent fill (a filled shape is clickable
+ * inside, a shape with no fill only on its edge in PowerPoint) and no outline, above the cover
+ * picture so the click reaches it.
+ */
+export function addLinkRect(
+  slide: PptxGenJS.Slide,
+  box: Box,
+  hyperlink: PptxGenJS.HyperlinkProps,
+  paperHex: string,
+  name: string,
+): void {
+  const [x, y, w, h] = box;
+  slide.addShape('rect', {
+    x: pxToIn(x),
+    y: pxToIn(y),
+    w: pxToIn(w),
+    h: pxToIn(h),
+    fill: { color: paperHex, transparency: 100 },
+    line: { type: 'none' },
+    hyperlink,
+    objectName: name,
   });
 }
 
@@ -151,6 +180,7 @@ export function addSceneLine(
     ...(x2 < x1 ? { flipH: true } : {}),
     ...(y2 < y1 ? { flipV: true } : {}),
     line: props,
+    ...(options.hyperlink ? { hyperlink: options.hyperlink } : {}),
     objectName: `${options.namePrefix}#${name}`,
   });
 }

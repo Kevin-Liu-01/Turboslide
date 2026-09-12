@@ -31,6 +31,9 @@ export type SheetFitInput = {
   pad: number;
 };
 
+/** The stage scale the editor asked for (gslides-parity SPEC 7.2.16): a factor of the sheet size, or the fit. */
+export type SheetZoom = number | 'fit';
+
 /**
  * The fit math from the deck viewer (tail.html fit(); Prototemplate
  * Sheet.tsx fitSheet). The 1600 by 900 stage scales to the space left after
@@ -52,9 +55,32 @@ export function fitSheet({ aw, ah, w = SHEET_W, h = SHEET_H, pad }: SheetFitInpu
   };
 }
 
+/**
+ * The fit at a zoom factor (gslides-parity SPEC 2.3, 7.2.16; the editor's View > Zoom): the
+ * sheet at `zoom` times its 1600 by 900 size, centred in the stage while it fits and pinned to
+ * the pad's top left corner while it does not, so the stage scrolls to the rest. `'fit'` is the
+ * plain fit above. Pure; sheet.test.ts pins it.
+ */
+export function fitSheetAt(input: SheetFitInput & { zoom: SheetZoom }): SheetFit {
+  if (input.zoom === 'fit') return fitSheet(input);
+  const { aw, ah, w = SHEET_W, h = SHEET_H, pad } = input;
+  const scale = Math.max(0.05, input.zoom);
+  const width = Math.round(w * scale);
+  const height = Math.round(h * scale);
+  return {
+    scale: width / w,
+    width,
+    height,
+    left: Math.max(pad, Math.round((aw - width) / 2)) - 1,
+    top: Math.max(pad, Math.round((ah - height) / 2)) - 1,
+  };
+}
+
 export type SheetProps = {
   /** the stage box, measured by the shell's ResizeObserver */
   stageSize: { width: number; height: number };
+  /** the editor's zoom (gslides-parity SPEC 7.2.16); the fit when absent */
+  zoom?: SheetZoom;
   present: boolean;
   /** window.innerWidth at or below 900: a 12px pad, the sheet under the toolbar */
   narrow: boolean;
@@ -81,6 +107,7 @@ export type SheetProps = {
  */
 export function Sheet({
   stageSize,
+  zoom = 'fit',
   present,
   narrow,
   dir,
@@ -92,14 +119,21 @@ export function Sheet({
   const sheet = useRef<HTMLDivElement>(null);
   const touchX = useRef<number | null>(null);
   const pad = present ? SHEET_PAD.present : narrow ? SHEET_PAD.narrow : SHEET_PAD.wide;
-  const fitted = fitSheet({ aw: stageSize.width, ah: stageSize.height, pad });
+  const fitted = fitSheetAt({ aw: stageSize.width, ah: stageSize.height, pad, zoom });
   /* on a narrow viewport the sheet sits under the toolbar instead of centered, so the plate below it can hold the title */
-  const fit: SheetFit = narrow && !present ? { ...fitted, top: pad } : fitted;
+  const fit: SheetFit = narrow && !present && zoom === 'fit' ? { ...fitted, top: pad } : fitted;
+  /* a zoomed sheet larger than the stage: the stage scrolls to the rest (Editor.css [data-zoom]) */
+  const zoomed = zoom !== 'fit';
 
   const onClick = (e: MouseEvent<HTMLDivElement>) => {
     if (!onStep) return;
     const target = e.target as Element;
     if (target.closest('a, button, input, textarea, select')) return;
+    /* presenting: a click anywhere on the slide advances (gslides-parity SPEC 9.2, R04 A2) */
+    if (present) {
+      onStep(1);
+      return;
+    }
     const box = sheet.current?.getBoundingClientRect();
     if (!box) return;
     onStep(e.clientX > box.left + box.width / 2 ? 1 : -1);
@@ -123,6 +157,7 @@ export function Sheet({
     <div
       className="pt-sheet-stage"
       data-dir={dir}
+      data-zoom={zoomed ? String(fit.scale) : undefined}
       hidden={hidden}
       onClick={onClick}
       onTouchStart={onTouchStart}
@@ -136,6 +171,9 @@ export function Sheet({
           top: fit.top,
           width: fit.width,
           height: fit.height,
+          /* a zoomed sheet keeps the pad past its far edges so the scroll region reaches them */
+          marginRight: zoomed ? pad : undefined,
+          marginBottom: zoomed ? pad : undefined,
           visibility: stageSize.width > 0 ? undefined : 'hidden',
         }}
       >

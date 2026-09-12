@@ -10,8 +10,10 @@ import type { Locator, Page } from '@playwright/test';
 // opens the source drawer and asserts Apply and applySource produce identical mutation logs for
 // the same edit, asserts the lint panel's Fix applies a fix and clears the finding, and asserts
 // the keys of SPEC 6.9 on the stage: Tab from the page selects the first block once, Shift Tab
-// the last, Delete removes the block with a toast that names the undo key, and a write never
-// restarts the theme's entrance cut.
+// the last, Delete removes the block with a toast that names the undo key, a write never
+// restarts the theme's entrance cut, and Cmd Down on the focused move chip (Google's Send
+// backward, gslides-parity SPEC 10.1; the Alt chord of the editor depth round is retired by SPEC
+// 10.2) writes one block.move that moves the block one place down its slot.
 //
 // The spec works on a scratch copy of decks/fixture under decks/e2e-editor and seeds the rows
 // block and the em dash it needs only through applySource (SPEC 7.4). Every step below reads the
@@ -67,7 +69,16 @@ async function openEditor(page: Page): Promise<void> {
     window.turboslide!.studio.invoke('view.goto', { slideId: 'content-rule' }),
   );
   await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', SLIDE);
-  await expect(page.locator('.ts-status')).toHaveText(/^Saved · r\d+$/);
+  /* the parity shell prints no revision (gslides-parity SPEC 1.1): the confirmed state is read
+     through describe().state */
+  await page.waitForFunction(() => {
+    const state = window.turboslide!.studio.describe().state as {
+      revision?: number;
+      serverRevision?: number;
+      pending?: number;
+    };
+    return state.pending === 0 && state.revision === state.serverRevision;
+  });
 }
 
 async function versions(page: Page): Promise<Version[]> {
@@ -204,15 +215,16 @@ test('inline text with a bare GT renders the mark and keeps the letters', async 
   await expect(page.locator('.ts-stagewrap.ts-editor[data-editing]')).toHaveCount(1);
   await page.keyboard.press('End');
   await page.keyboard.type(' with GT now');
-  await page.keyboard.press('Enter');
+  /* Esc keeps the text (gslides-parity SPEC 10.2); the typing is one text.replace burst (7.2.15) */
+  await page.keyboard.press('Escape');
   await expect.poll(async () => (await versions(page)).length).toBe(before + 1);
   const write = (await versions(page)).at(-1)!;
   expect(write.mutations[0]).toMatchObject({
-    op: 'block.set',
+    op: 'text.replace',
     blockId: 'list',
     path: '/items/0/text',
   });
-  expect(String(write.mutations[0]!.value)).toContain('with GT now');
+  expect(String((write.mutations[0] as { text?: string }).text)).toContain('with GT now');
   // the document keeps the letters; the render shows the mark
   const text = (await source(page)).slots.right.find((b) => b.id === 'list')?.items?.[0]?.text;
   expect(text).toContain('GT');
@@ -235,7 +247,10 @@ test('Apply in the source drawer and applySource produce identical mutation logs
   const editedText = `${JSON.stringify(edited, null, 2)}\n`;
 
   // 1. through the drawer's Apply button, with the text typed into CodeMirror
-  await page.locator('body').press('ControlOrMeta+/');
+  /* Tools > Advanced > Show source (gslides-parity SPEC 10.2: Cmd+/ is Keyboard shortcuts now) */
+  await page.locator('[data-control="menubar.tools"]').click();
+  await page.locator('[data-menu-item="tools.advanced"]').click();
+  await page.locator('[data-menu-item="tools.advanced.showSource"]').click();
   const drawer = page.locator('.ts-drawer');
   await expect(drawer).toBeVisible();
   await expect
@@ -256,7 +271,10 @@ test('Apply in the source drawer and applySource produce identical mutation logs
   );
 
   // back to the start through the same public API, then the same edit through applySource
-  await page.locator('body').press('ControlOrMeta+/');
+  /* Tools > Advanced > Show source (gslides-parity SPEC 10.2: Cmd+/ is Keyboard shortcuts now) */
+  await page.locator('[data-control="menubar.tools"]').click();
+  await page.locator('[data-menu-item="tools.advanced"]').click();
+  await page.locator('[data-menu-item="tools.advanced.showSource"]').click();
   await expect(drawer).toBeHidden();
   await expect
     .poll(() => page.evaluate(() => window.turboslide!.studio.describe().owner))
@@ -277,13 +295,17 @@ test("the lint panel's Fix applies the fix and clears the finding", async ({ pag
   await openEditor(page);
   // the seeded paragraph carries an em dash: copy/no-em-dash with a fix (DECK-GRAMMAR.md:23)
   expect((await source(page)).slots.left.find((b) => b.id === 'p')?.text).toContain('—');
-  await page.locator('[data-control="inspector.lint"]').scrollIntoViewIfNeeded();
-  const row = page.locator('[data-control^="lint."]:not([data-control$=".fix"])', {
-    hasText: 'copy/no-em-dash',
-  });
+  /* Tools > Check slides opens the suggestions panel (gslides-parity SPEC 2.8): one prose row
+     per finding with Fix; the rule id is on the row's data attribute, never in its text */
+  await page.locator('[data-control="menubar.tools"]').click();
+  await page.locator('[data-menu-item="tools.checkSlides"]').click();
+  const row = page.locator('[data-control="panel.checkSlides"] li[data-rule="copy/no-em-dash"]');
   await expect(row).toHaveCount(1);
-  const id = (await row.getAttribute('data-control'))!.slice('lint.'.length);
-  const fix = page.locator(`[data-control="lint.${id}.fix"]`);
+  const id = (await row
+    .locator('[data-control^="suggestion."]')
+    .first()
+    .getAttribute('data-control'))!.slice('suggestion.'.length);
+  const fix = page.locator(`[data-control="suggestion.${id}.fix"]`);
   await expect(fix).toHaveCount(1);
   const before = (await versions(page)).length;
   await fix.click();
@@ -316,7 +338,10 @@ test('Tab from the page selects the first block once, Delete removes it after a 
   expect(await selected()).toBeNull();
   await page.keyboard.press('Tab');
   await expect.poll(selected).toBe(first);
-  await expect(page.locator('.ts-overlay .ts-select-chip')).toHaveText(new RegExp(` · ${first}$`));
+  /* the chip prints the block's plain name, never its id, unless Show slide and block ids is on
+     (gslides-parity SPEC 1.1, 13.7) */
+  await expect(page.locator('.ts-overlay .ts-select-chip')).toBeVisible();
+  await expect(page.locator('.ts-overlay .ts-select-chip')).not.toContainText(first);
   await page.keyboard.press('Escape');
   await expect.poll(selected).toBeNull();
   await page.keyboard.press('Shift+Tab');
@@ -325,9 +350,9 @@ test('Tab from the page selects the first block once, Delete removes it after a 
   // Delete: one block.remove, and a toast naming the block and the undo key (SPEC 6.9)
   const before = (await versions(page)).length;
   await page.keyboard.press('Delete');
-  await expect(page.locator('.pt-toast')).toHaveText(
-    new RegExp(`^Removed [a-z]+ · ${last}\\. (Cmd|Ctrl) Z undoes$`),
-  );
+  /* the snackbar names the deletion and offers Undo (gslides-parity SPEC 11.3) */
+  await expect(page.locator('[data-control="snackbar"]')).toContainText(/deleted/);
+  await expect(page.locator('[data-control="snackbar.action"]')).toHaveText('Undo');
   await expect.poll(async () => (await versions(page)).length).toBe(before + 1);
   const write = (await versions(page)).at(-1)!;
   expect(write.mutations).toHaveLength(1);
@@ -344,7 +369,7 @@ test('Tab from the page selects the first block once, Delete removes it after a 
   expect(paint).toEqual({ opacity: '1', animation: 'none' });
 });
 
-test('Alt with Down on the focused move chip reorders the block within its slot as one block.move', async ({
+test('Cmd Down on the focused move chip sends the block one place back in its slot as one block.move', async ({
   page,
 }) => {
   test.setTimeout(120_000);
@@ -357,15 +382,17 @@ test('Alt with Down on the focused move chip reorders the block within its slot 
   await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
   await page.keyboard.press('Tab');
   const chip = page.locator('.ts-overlay .ts-select-chip');
-  await expect(chip).toHaveText(new RegExp(` · ${first}$`));
-  // the chip is a button: focused, its tooltip names it and Alt with Down is the order key
+  /* the chip prints the block's plain name (gslides-parity SPEC 13.7); the id only under Show ids */
+  await expect(chip).toBeVisible();
+  await expect(chip).not.toContainText(first);
+  /* the chip is a button: focused, its tooltip names it and Cmd Down (Ctrl on Windows) is the
+     order key, Google's Send backward (gslides-parity SPEC 10.1); SPEC 10.2 retires the Alt chord
+     of the editor depth round, so the tooltip names the Cmd keys */
   await chip.focus();
   await expect(chip).toHaveAttribute('data-tip', `${first}: Move`);
-  await expect(page.locator('#pt-tip .pt-tip-doc')).toContainText(
-    'Alt with Up or Down moves it one step',
-  );
+  await expect(page.locator('#pt-tip .pt-tip-doc')).toContainText('Down move it one step');
   const before = (await versions(page)).length;
-  await page.keyboard.press('Alt+ArrowDown');
+  await page.keyboard.press('ControlOrMeta+ArrowDown');
   await expect.poll(async () => (await versions(page)).length).toBe(before + 1);
   const write = (await versions(page)).at(-1)!;
   expect(write.mutations).toHaveLength(1);

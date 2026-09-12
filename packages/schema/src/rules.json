@@ -38,6 +38,8 @@
   "copy/full-sentence-caption",
   "copy/contrast-pair",
   "copy/metaphor-candidate",
+  "copy/empty-placeholder",
+  "table/size",
   "contrast/both-themes",
   "layout/empty-half",
   "layout/pair-gaps",

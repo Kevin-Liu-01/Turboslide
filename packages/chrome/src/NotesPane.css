@@ -1,0 +1,87 @@
+/* The speaker notes pane (NotesPane.tsx; gslides-parity SPEC 8, 1.1): the full canvas width under
+   the stage, 64px by default (--pt-notes-h), the divider above it in --pt-hair with the three dot
+   handle sitting on it (the one line the pane draws, SPEC 1.2), the textarea in 13px Inter with
+   the prompt in titanium. Nothing greys in the pane. Colors are tokens only. */
+.ts-notes {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  min-height: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border-top: 1px solid var(--pt-hair);
+}
+
+/* hidden: the divider and its handle stay so the pane can be dragged open again */
+.ts-notes.is-hidden {
+  overflow: visible;
+}
+
+.ts-notes-handle {
+  position: absolute;
+  left: 50%;
+  top: -7px;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 13px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-titanium);
+  cursor: row-resize;
+  display: grid;
+  place-items: center;
+  appearance: none;
+  z-index: 1;
+}
+
+.ts-notes-handle:hover,
+.ts-notes-handle:focus-visible {
+  color: var(--pt-ink);
+}
+
+.ts-notes-handle:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-notes-dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.ts-notes-dots i {
+  display: block;
+  width: 3px;
+  height: 3px;
+  background: currentColor;
+}
+
+.ts-notes-field {
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 10px 28px;
+  border: 0;
+  border-radius: 0;
+  resize: none;
+  background: none;
+  color: var(--pt-ink);
+  font: 13px/1.5 var(--pt-text);
+  outline: none;
+}
+
+.ts-notes-field::placeholder {
+  color: var(--pt-titanium);
+}
+
+.ts-notes-field:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}

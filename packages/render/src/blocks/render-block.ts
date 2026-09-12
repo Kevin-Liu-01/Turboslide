@@ -17,11 +17,18 @@ import { renderMaterial } from './material.ts';
 import { renderDither, renderMark, renderMarkSizes, renderMatrix } from './misc.ts';
 import { renderPanel } from './panel.ts';
 import { renderBox, renderIcon, renderRule, renderShape, renderTextBlock } from './primitives.ts';
+import { linkWrap } from './prompt.ts';
 import { renderScales } from './scales.ts';
 import { renderLadder, renderLang, renderSpec, renderSwatches } from './specimen.ts';
+import { renderTable } from './table.ts';
 import { renderCredit, renderHeading, renderParagraph } from './text-blocks.ts';
 
+/** One block as HTML, wrapped in its link when it carries one (gslides-parity SPEC 7.2.7). */
 export function renderBlock(block: Block, ctx: BlockContext): string {
+  return linkWrap(renderBlockBody(block, ctx), block, ctx);
+}
+
+function renderBlockBody(block: Block, ctx: BlockContext): string {
   switch (block.type) {
     case 'heading':
       return renderHeading(block, ctx);
@@ -85,6 +92,8 @@ export function renderBlock(block: Block, ctx: BlockContext): string {
       return renderTextBlock(block, ctx);
     case 'icon':
       return renderIcon(block, ctx);
+    case 'table':
+      return renderTable(block, ctx);
     case 'html':
       return renderHtmlEscape(block, ctx);
   }

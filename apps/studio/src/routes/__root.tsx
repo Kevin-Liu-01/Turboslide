@@ -1,5 +1,5 @@
 import { TanStackDevtools } from '@tanstack/react-devtools';
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router';
+import { HeadContent, Link, Scripts, createRootRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import type { ReactNode } from 'react';
 
@@ -17,23 +17,37 @@ import appCss from '../styles.css?url';
 // before first paint; the chrome tokens (--pt-), the sheet theme (.ts-sheet),
 // the stage rules, the renderer's block CSS and the one face (Inter) load once
 // for every route.
+
+/**
+ * The routes a crawler is told to leave alone (gslides-parity SPEC 6.1, 6.8, 13.4): the fresh
+ * presentation, because the root now renders an editor; the trash; the print preview. The
+ * presenter window carries its own meta in its route (SPEC 9.3). `/deck` and `/embed` stay
+ * indexable: they are the links a rep sends.
+ */
+const NOINDEX_ROUTES: ReadonlySet<string> = new Set(['/new', '/decks/trash', '/print/$deckId']);
+
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Turboslide' },
-    ],
-    links: [
-      /* no favicon file yet: an empty data URL keeps the browser from asking for /favicon.ico */
-      { rel: 'icon', href: 'data:,' },
-      { rel: 'stylesheet', href: interCss },
-      { rel: 'stylesheet', href: tokensCss },
-      { rel: 'stylesheet', href: sheetCss },
-      { rel: 'stylesheet', href: stageCss },
-      { rel: 'stylesheet', href: appCss },
-    ],
-  }),
+  head: ({ matches }) => {
+    const leaf = matches[matches.length - 1];
+    const noindex = leaf !== undefined && NOINDEX_ROUTES.has(leaf.routeId);
+    return {
+      meta: [
+        { charSet: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { title: 'Turboslide' },
+        ...(noindex ? [{ name: 'robots', content: 'noindex' }] : []),
+      ],
+      links: [
+        /* no favicon file yet: an empty data URL keeps the browser from asking for /favicon.ico */
+        { rel: 'icon', href: 'data:,' },
+        { rel: 'stylesheet', href: interCss },
+        { rel: 'stylesheet', href: tokensCss },
+        { rel: 'stylesheet', href: sheetCss },
+        { rel: 'stylesheet', href: stageCss },
+        { rel: 'stylesheet', href: appCss },
+      ],
+    };
+  },
   shellComponent: RootDocument,
   notFoundComponent: NotFound,
 });
@@ -42,7 +56,10 @@ function NotFound() {
   return (
     <main className="ts-home">
       <h1>Not found</h1>
-      <p>No page at this address. The deck list is at /decks; / opens the newest deck.</p>
+      <p>
+        No page at this address. <Link to="/new">Start a new presentation</Link> or open{' '}
+        <Link to="/decks">your presentations</Link>.
+      </p>
     </main>
   );
 }

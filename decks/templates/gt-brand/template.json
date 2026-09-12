@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "gt-brand",
   "name": "GT brand deck",
-  "description": "The General Translation brand deck as a template: 85 slides in 8 sections in the gt-ink-paper theme, cut from decks/gt-brand at revision 24. deck.create copies deck.json, slides/ and the assets folder named below into decks/<id> with a new id, title and revision 0. The archetypes are the slide templates the editor inserts (palette Insert group, sidebar row menu); their documents live in packages/chrome/src/slide-templates.ts and carry placeholder copy the copy lints flag until it is edited.",
+  "description": "The General Translation brand deck as a template: 85 slides in 8 sections in the gt-ink-paper theme, cut from decks/gt-brand at revision 24. deck.create copies deck.json, slides/ and the assets folder named below into decks/<id> with a new id, title and revision 0. The archetypes are the layouts the editor inserts (the New slide arrow, the Layout button, Slide > Apply layout); their documents live in packages/schema/src/layouts.ts and insert empty placeholders that the editor draws as prompts (docs/gslides-parity/SPEC.md 5.2, 5.4). The ids here are the twenty-one of the layout list in its order (packages/schema/src/layouts.ts);  names the GT slide an archetype was cut from where one exists.",
   "theme": "gt-ink-paper",
   "deck": "deck.json",
   "slides": "slides",
@@ -51,48 +51,72 @@
   ],
   "archetypes": [
     {
-      "id": "opener",
-      "label": "Section opener",
-      "kind": "opener",
-      "source": "opener-brand"
-    },
-    {
-      "id": "mood",
-      "label": "Mood",
-      "kind": "mood",
-      "source": "mood-earth"
-    },
-    {
-      "id": "closing",
-      "label": "Closing",
-      "kind": "closing",
-      "source": "closing"
-    },
-    {
       "id": "title",
-      "label": "Title",
+      "label": "Title slide",
       "kind": "title",
       "source": "title"
     },
     {
-      "id": "statement",
-      "label": "Statement",
-      "kind": "statement",
-      "source": "thesis"
+      "id": "opener",
+      "label": "Section header",
+      "kind": "opener",
+      "source": "opener-brand"
+    },
+    {
+      "id": "split",
+      "label": "Title and body",
+      "kind": "content",
+      "layout": "split",
+      "source": "engines"
     },
     {
       "id": "cols",
-      "label": "Two columns",
+      "label": "Title and two columns",
       "kind": "content",
       "layout": "cols",
       "source": "character"
     },
     {
-      "id": "split",
-      "label": "Head over body",
+      "id": "title-only",
+      "label": "Title only",
       "kind": "content",
-      "layout": "split",
-      "source": "engines"
+      "layout": "stack"
+    },
+    {
+      "id": "one-column",
+      "label": "One column text",
+      "kind": "content",
+      "layout": "stack"
+    },
+    {
+      "id": "statement",
+      "label": "Main point",
+      "kind": "statement",
+      "source": "thesis"
+    },
+    {
+      "id": "section-description",
+      "label": "Section title and description",
+      "kind": "content",
+      "layout": "cols"
+    },
+    {
+      "id": "mood",
+      "label": "Caption",
+      "kind": "mood",
+      "source": "mood-earth"
+    },
+    {
+      "id": "big-number",
+      "label": "Big number",
+      "kind": "content",
+      "layout": "center"
+    },
+    {
+      "id": "blank",
+      "label": "Blank",
+      "kind": "content",
+      "layout": "freeform"
     },
     {
       "id": "rows",
@@ -107,6 +131,26 @@
       "kind": "content",
       "layout": "cols",
       "source": "avoid"
+    },
+    {
+      "id": "table",
+      "label": "Title and table",
+      "kind": "content",
+      "layout": "split"
+    },
+    {
+      "id": "figure",
+      "label": "Figure",
+      "kind": "content",
+      "layout": "cols",
+      "source": "blog-covers"
+    },
+    {
+      "id": "pair",
+      "label": "Pair of figures",
+      "kind": "content",
+      "layout": "split",
+      "source": "pages-a"
     },
     {
       "id": "tiles",
@@ -137,18 +181,10 @@
       "source": "dither"
     },
     {
-      "id": "pair",
-      "label": "Pair of figures",
-      "kind": "content",
-      "layout": "split",
-      "source": "pages-a"
-    },
-    {
-      "id": "figure",
-      "label": "Figure",
-      "kind": "content",
-      "layout": "cols",
-      "source": "blog-covers"
+      "id": "closing",
+      "label": "Closing",
+      "kind": "closing",
+      "source": "closing"
     }
   ]
 }

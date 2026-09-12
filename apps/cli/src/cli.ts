@@ -24,6 +24,7 @@ import { sections } from './commands/sections.ts';
 import { sheet } from './commands/sheet.ts';
 import { slide } from './commands/slide.ts';
 import { slides } from './commands/slides.ts';
+import { text } from './commands/text.ts';
 import { validate } from './commands/validate.ts';
 import { version } from './commands/version.ts';
 import { parseAuthor } from './context.ts';
@@ -41,6 +42,13 @@ Commands
   deck create <name> --from gt-brand|blank [--id <id>] [--decks <dir>]
                                     decks/<id> from the GT brand template (85 slides) or as one title slide (deck.create)
   deck rename <name>                set the deck title (deck.rename)
+  deck set <path> <value> [--unset] write /title, /theme or a /defaults field of the manifest (deck.set)
+  deck list [--include-trashed]     every deck under decks/, newest first (deck.list)
+  deck copy <id> --name <name> [--id <newId>] [--slides <id,...>] [--remove-notes]
+                                    a copy under a new id at revision 0 (deck.copy)
+  deck trash <id> | deck restore <id>
+                                    move a deck to the trash and back (deck.trash, deck.restore)
+  deck remove <id> --confirm        delete a deck for good (deck.remove)
   deck pack <id> [--out <file.zip>] [--no-versions]
                                     decks/<id> as one bundle zip with manifest.json (deck.pack; docs/deck-transfer.md)
   deck unpack <file.zip> [--as <id>] [--replace]
@@ -58,10 +66,22 @@ Commands
   slide move <id> --to <s> [--after <id>]
   slide set-layout <id> --type <layout> [--ratio --gap --head --align --body] | --layout '<json>'
                                     move a content slide to another layout and refile its blocks (slide.setLayout, docs/freeform.md)
+  slide new --layout <layout> [--after <id>] [--section <s>] [--id <id>]
+                                    one slide from a layout with empty placeholders (slide.new)
+  slide duplicate <id,...>          copies after the last of them (slide.duplicate)
+  slide skip <id,...> [--off]       leave slides out of the slideshow and the downloads, or show them again (slide.skip)
+  slide apply-layout <id,...> <layout>
+                                    move a slide's content into another layout's placeholders (slide.applyLayout)
+  slide import <sourceDeckId> <id,...> [--after <id>] [--section <s>]
+                                    copy slides and their assets from another deck under decks/ (slide.import)
+  text replace <find> <replace> [--match-case] [--slides <id,...>]
+                                    find and replace across the deck's text and notes in one write (text.replaceAll)
   block set <slide>#<block> <pointer> <value> [--delete]
   block insert <slide> --slot <slot> [--after <block>] < block.json
   block remove <slide>#<block>
   block move <slide>#<block> --slot <slot> [--after <block>] [--z <n>]
+  block duplicate <slide> --blocks <id,...>
+                                    copies after their originals, 16 px offset on a freeform slide (block.duplicate)
   block align <slide> --blocks <id,...> --edge left|center|right|top|middle|bottom [--to selection|content|sheet] [--no-snap]
   block distribute <slide> --blocks <id,...> --axis horizontal|vertical [--gap <px>] [--snap]
   block order <slide>#<block> --move front|back|forward|backward | --z <n>
@@ -101,7 +121,17 @@ Commands
                                     [--exclude-share-alike] [--baseline-target libreoffice|none] [--no-jpeg] [--verify] --out <dir>
                                     PPTX per theme (flatten is perfect, native is editable text), <deckId>-both.zip for both
                                     themes, export-report.json; exit 1 when the report fails
-  export check <file.pptx> [--python <bin>] [--no-quick-look] [--out <dir>] [--json]
+  export pptx ... [--include-skipped] [--include-notes] [--tables auto|table|rows]
+                                    skipped slides stay out unless asked (slide.skip); the table block as a:tbl,
+                                    ruled rows when a cell misses the budget
+  export pdf [<deck>] [ids|all] [--appearance light|dark] [--include-skipped] [--verify] --out <dir>
+                                    one page per slide at 13.333 by 7.5 in; --verify gates every page against the
+                                    web render where poppler exists
+  export jpeg [<deck>] [ids|all] [--theme light|dark] [--scale 1|2] --out <dir>
+                                    JPEGs at quality 92
+  export txt [<deck>] [ids|all] [--include-notes] [--include-skipped]
+                                    the deck as plain text: one block per slide, cells tab separated (export.text)
+  export check <file.pptx | dir> [--python <bin>] [--no-quick-look] [--out <dir>] [--json]
                                     read an exported file back with python-pptx: pages, size, media formats, fonts,
                                     slide names, invalid parts (ExportCheck with --json); exit 1 when it is not valid
   fonts build [--check] [--python <bin>] [--out <dir>]
@@ -131,6 +161,7 @@ const COMMANDS: Record<string, Command> = {
   slides,
   slide,
   block,
+  text,
   sections,
   asset,
   material,

@@ -4,7 +4,7 @@
 // severity 1 candidates the copy judge reads (contrast pairs and metaphors).
 import type { Finding, Mutation, Slide } from '../contracts.ts';
 import type { LintContext } from '../context.ts';
-import { blockTexts, slideTexts } from '../context.ts';
+import { blockTexts, emptySlideTexts, emptyTexts, isMultilineRef, slideTexts } from '../context.ts';
 import { plainText, words } from '../text.ts';
 
 export const METAPHOR_WORDS: readonly string[] = [
@@ -61,8 +61,15 @@ type TextHit = {
   text: string;
   role: string;
   block?: { type: string };
+  /** the Text takes paragraph breaks; the per line checks read its last paragraph */
+  multiline?: boolean;
 };
 
+/**
+ * Every non-empty Text of a slide but the table cells: a 20 cell pricing table would produce 20
+ * findings for copy that is not prose (gslides-parity SPEC 7.3), and an empty Text is a
+ * placeholder that copy/empty-placeholder names on its own (SPEC 5.4).
+ */
 function allTexts(ctx: LintContext, slide: Slide): TextHit[] {
   const out: TextHit[] = slideTexts(slide).map((ref) => ({
     slide,
@@ -71,7 +78,8 @@ function allTexts(ctx: LintContext, slide: Slide): TextHit[] {
     role: ref.role,
   }));
   for (const ref of ctx.blocksOf(slide)) {
-    for (const t of blockTexts(ref.block))
+    for (const t of blockTexts(ref.block)) {
+      if (t.role === 'cell') continue;
       out.push({
         slide,
         blockId: ref.block.id,
@@ -79,7 +87,42 @@ function allTexts(ctx: LintContext, slide: Slide): TextHit[] {
         text: t.text,
         role: t.role,
         block: ref.block,
+        ...(isMultilineRef(ref.block, t) ? { multiline: true } : {}),
       });
+    }
+  }
+  return out;
+}
+
+/** The last paragraph of a multiline Text: what the caption's terminal period is read on. */
+function lastParagraph(plain: string): string {
+  const parts = plain.split('\n');
+  return parts[parts.length - 1] ?? plain;
+}
+
+/** copy/empty-placeholder (gslides-parity SPEC 5.4): the empty Texts a layout left for copy. */
+function checkEmptyPlaceholders(ctx: LintContext, slide: Slide): Finding[] {
+  const out: Finding[] = [];
+  const n = ctx.slideN(slide.id);
+  const where = n > 0 ? `Slide ${n}` : `Slide ${slide.id}`;
+  for (const empty of emptySlideTexts(slide)) {
+    out.push(
+      ctx.finding('copy/empty-placeholder', slide.id, {
+        path: empty.path,
+        proposal: `${where} has an empty ${empty.what}; type the copy or remove the placeholder (gslides-parity SPEC 5.4).`,
+      }),
+    );
+  }
+  for (const ref of ctx.blocksOf(slide)) {
+    for (const empty of emptyTexts(ref.block)) {
+      out.push(
+        ctx.finding('copy/empty-placeholder', slide.id, {
+          blockId: ref.block.id,
+          path: `${ref.path}${empty.path}`,
+          proposal: `${where} has an empty ${empty.what}; type the copy or remove the placeholder (gslides-parity SPEC 5.4).`,
+        }),
+      );
+    }
   }
   return out;
 }
@@ -134,6 +177,7 @@ export function checkCopy(ctx: LintContext): Finding[] {
   const out: Finding[] = [];
   const { properNouns, tokens, headingCase } = ctx.options;
   for (const slide of ctx.slideList()) {
+    out.push(...checkEmptyPlaceholders(ctx, slide));
     const hits = allTexts(ctx, slide);
     for (const hit of hits) {
       const plain = plainText(hit.text);
@@ -212,7 +256,8 @@ export function checkCopy(ctx: LintContext): Finding[] {
           }
         }
       }
-      if (hit.role === 'caption' && plain.length > 0 && !/[.?)"”]$/.test(plain)) {
+      const tail = hit.multiline ? lastParagraph(plain) : plain;
+      if (hit.role === 'caption' && tail.length > 0 && !/[.?)"”]$/.test(tail)) {
         out.push(
           ctx.finding('copy/full-sentence-caption', slide.id, {
             ...base,

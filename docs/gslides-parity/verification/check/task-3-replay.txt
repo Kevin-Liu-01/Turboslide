@@ -1,0 +1,14 @@
+The verifier's replay of ten-tasks task 3 on a fresh copy of decks/fixture/gslides (decks/verifier-t3,
+removed afterwards), against the dev server on 4321, 2026-09-12 07:09 PDT. The spec's steps: open the
+editor on the title slide, triple click the heading, type "Acme review", Esc; then describe().state
+sampled once a second (rev = revision, server = serverRevision).
+
+start {"rev":1,"server":1,"pending":0,"slide":"title","block":null} save words All changes saved
+after triple click: {"rev":1,"server":1,"pending":0,"slide":"title","block":"heading"}
+1s {"rev":2,"server":1,"pending":1,"slide":"title","block":"heading"} Saving… "Acme review"
+2s {"rev":2,"server":1,"pending":1,"slide":"title","block":"heading"} Saving… "Acme review"
+3s {"rev":2,"server":1,"pending":1,"slide":"title","block":"heading"} Saving… "Acme review"
+4s {"rev":2,"server":1,"pending":1,"slide":"title","block":"heading"} Saving… "Acme review"
+5s {"rev":2,"server":1,"pending":1,"slide":"title","block":"heading"} Saving… "Acme review"
+6s {"rev":2,"server":2,"pending":0,"slide":"title","block":"heading"} All changes saved "Acme review"
+deck.json revision on disk 2

@@ -25,10 +25,18 @@ import type { Runners } from './server.ts';
 
 export type PublicJob = ReturnType<typeof publicJob>;
 
-export type RenderSlideRequest = { deckId: string; slideId: string; theme: Theme; scale: 1 | 2 };
+export type RenderSlideRequest = {
+  deckId: string;
+  slideId: string;
+  theme: Theme;
+  scale: 1 | 2;
+  /** PNG (default) or a JPEG at quality 92 (render.slide `format`, gslides-parity SPEC 7.6). */
+  format?: 'png' | 'jpg';
+};
 
 export type RenderSlideResponse = {
   record: RenderRecord;
+  /** The image bytes: a PNG, or a JPEG when the request asked for one. */
   png: Uint8Array<ArrayBuffer>;
   jobId: string;
   cached: boolean;
@@ -265,6 +273,7 @@ function createLocalClient(options: WorkerClientOptions): WorkerClient {
           slideIds: [request.slideId],
           themes: [request.theme],
           scale: request.scale,
+          ...(request.format === 'jpg' ? { format: 'jpg' } : {}),
         },
         (i: unknown, ctx) => runners.render(i, ctx),
         300_000,
@@ -339,7 +348,7 @@ function createHttpClient(url: string, options: WorkerClientOptions): WorkerClie
     freeBytes: async () => null,
     health: () => getJson<unknown>('/healthz'),
     renderSlide: async (request) => {
-      const path = `/render/${encodeURIComponent(request.deckId)}/${encodeURIComponent(request.slideId)}?theme=${request.theme}&scale=${request.scale}`;
+      const path = `/render/${encodeURIComponent(request.deckId)}/${encodeURIComponent(request.slideId)}?theme=${request.theme}&scale=${request.scale}${request.format === 'jpg' ? '&format=jpg' : ''}`;
       const response = await fetch(`${base}${path}`, { headers: headers() });
       if (!response.ok)
         throw new Error(

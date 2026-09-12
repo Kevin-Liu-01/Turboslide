@@ -1,5 +1,6 @@
-// Screenshots at 1x and 2x (SPEC 5.3): the sheet clip at the page's device scale factor, PNG,
-// and element screenshots of the data-raster elements for the exporter (SPEC 5.2 RasterRef).
+// Screenshots at 1x and 2x (SPEC 5.3): the sheet clip at the page's device scale factor, PNG (or
+// a JPEG at quality 92 for render.slide's `jpg` format, gslides-parity SPEC 7.6), and element
+// screenshots of the data-raster elements for the exporter (SPEC 5.2 RasterRef).
 import { mkdir } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
@@ -10,19 +11,36 @@ import type { MeasuredRaster } from './measure.ts';
 
 export type ScreenshotResult = { path: string; ms: number };
 
-/** The sheet as a PNG. The clip is in CSS pixels; the file is clip times the device scale factor. */
+/** The image formats a sheet screenshot is written in (render.slide `format`, gslides-parity SPEC 7.6). */
+export type ScreenshotFormat = 'png' | 'jpg';
+
+/** The JPEG quality of a `jpg` render (SPEC 7.6: JPEG quality 92). */
+export const JPEG_QUALITY = 92;
+
+export type ScreenshotOptions = {
+  /** PNG (default) or a JPEG at JPEG_QUALITY. */
+  format?: ScreenshotFormat;
+};
+
+/**
+ * The sheet as a PNG, or a JPEG when asked. The clip is in CSS pixels; the file is clip times the
+ * device scale factor.
+ */
 export async function screenshotSheet(
   page: Page,
   path: string,
   sheet: Box,
+  options: ScreenshotOptions = {},
 ): Promise<ScreenshotResult> {
   await mkdir(dirname(path), { recursive: true });
   const t = performance.now();
   // a degenerate box (an unsized sheet wrapper) falls back to the 1600 by 900 viewport
   const [x, y, width, height] = sheet[2] >= 1 && sheet[3] >= 1 ? sheet : [0, 0, 1600, 900];
+  const jpeg = options.format === 'jpg';
   await page.screenshot({
     path,
-    type: 'png',
+    type: jpeg ? 'jpeg' : 'png',
+    ...(jpeg ? { quality: JPEG_QUALITY } : {}),
     clip: { x, y, width, height },
     animations: 'disabled',
     caret: 'hide',

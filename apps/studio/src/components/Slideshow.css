@@ -1,0 +1,33 @@
+/* The slideshow surface (Slideshow.tsx; gslides-parity SPEC 9.2): a layer over the whole stage
+   box that lets the pointer through to the sheet (a click on the slide advances) and holds the
+   toolbar, the slide list, the options menu, the blank slides, the laser and the snackbar. While
+   the laser is on the pointer itself is hidden over the stage and the blank slide. The snackbar
+   moves up above the toolbar's row here; the bottom bar it usually clears is not on screen. */
+.ts-slideshow {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.ts-slideshow > * {
+  pointer-events: auto;
+}
+
+.ts-slideshow > .ts-menu-root {
+  pointer-events: none;
+}
+
+.ts-slideshow .ts-menu {
+  pointer-events: auto;
+}
+
+.pt-stagewrap:has(> .ts-slideshow.is-laser),
+.ts-slideshow.is-laser .ts-present-blank {
+  cursor: none;
+}
+
+.ts-slideshow .ts-snackbar {
+  bottom: 64px;
+  left: 12px;
+}

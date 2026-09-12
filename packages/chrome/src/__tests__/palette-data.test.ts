@@ -13,7 +13,7 @@ import {
   matchScore,
   parsePaletteQuery,
 } from '../palette-data';
-import { SLIDE_TEMPLATES } from '../slide-templates';
+import { LAYOUTS } from '@turboslide/schema/layouts';
 
 // The palette's five groups and its filter (SPEC 6.3).
 const document = workedDocument();
@@ -55,16 +55,22 @@ const ctx: PaletteContext = {
 describe('buildPaletteEntries', () => {
   const entries = buildPaletteEntries(ctx);
 
-  it('has the five groups in order', () => {
+  it('has the groups in order: the five of the full palette plus the two of Search the menus', () => {
     expect(PALETTE_GROUPS.map((group) => group.id)).toEqual([
+      'menus',
       'slides',
       'insert',
       'actions',
       'view',
       'versions',
+      'layouts',
     ]);
     const present = new Set(entries.map((entry) => entry.group));
-    for (const group of PALETTE_GROUPS) expect(present.has(group.id)).toBe(true);
+    for (const group of PALETTE_GROUPS) {
+      /* the menus and layouts groups belong to Search the menus (ToolFinder.tsx) and stay empty here */
+      if (group.id === 'menus' || group.id === 'layouts') expect(present.has(group.id)).toBe(false);
+      else expect(present.has(group.id)).toBe(true);
+    }
   });
 
   it('lists every slide with its section and a preview id', () => {
@@ -79,21 +85,29 @@ describe('buildPaletteEntries', () => {
     });
   });
 
-  it('lists every slide template and every block the selection allows, with the constraint as a hint', () => {
+  it('lists every layout as a New slide entry and every block the selection allows, with the constraint as a hint', () => {
     const insert = entries.filter((entry) => entry.group === 'insert');
     const templates = insert.filter((entry) => entry.id.startsWith('insert:slide:'));
-    /* the worked deck has an opener, a mood and a capture asset, so every template is offered */
+    /* the worked deck has an opener, a mood and a capture asset, so every layout is offered, in the
+       one order of gslides-parity SPEC 5.2 (Google's eleven first) */
     expect(templates.map((entry) => entry.id.split(':')[2])).toEqual(
-      SLIDE_TEMPLATES.map((template) => template.id),
+      LAYOUTS.map((entry) => entry.id),
     );
     const rows = templates.find((entry) => entry.id === 'insert:slide:rows');
-    expect(rows?.title).toBe('Ruled rows slide');
+    expect(rows?.title).toBe('Ruled rows');
     expect(rows?.run.kind).toBe('dispatch');
     if (rows?.run.kind === 'dispatch') {
-      const input = rows.run.input as { sectionId: string; after?: string; slide: { id: string } };
+      expect(rows.run.action).toBe('slide.new');
+      const input = rows.run.input as {
+        sectionId: string;
+        after?: string;
+        layout: string;
+        baseRevision: number;
+      };
       expect(input.sectionId).toBe('brand');
       expect(input.after).toBe('content-rule');
-      expect(input.slide.id).toBe('new-rows');
+      expect(input.layout).toBe('rows');
+      expect(input.baseRevision).toBe(412);
     }
     const plain = insert.find((entry) => entry.id === 'insert:block:plain');
     expect(plain?.hint).toBeTruthy();

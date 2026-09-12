@@ -1,0 +1,684 @@
+import type {
+  KeyboardEvent as ReactKeyboardEvent,
+  PointerEvent as ReactPointerEvent,
+  ReactNode,
+} from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+
+import { Icon } from './icons';
+import { cn } from './lib/cn';
+import { useMountEffect } from './lib/useMountEffect';
+import { shortcutLabel, ariaKeyShortcuts, tooltipKey } from './menus/keys.ts';
+import type { MenuContext, MenuItem } from './menus/model.ts';
+import {
+  DIVIDER,
+  isChecked,
+  isEnabled,
+  resolveLabel,
+  tooltipDoc,
+  visibleItems,
+} from './menus/model.ts';
+import { sentence, tipProps } from './Tooltip';
+
+import './Menu.css';
+
+/**
+ * The one menu primitive of the chrome (SPEC 13.1, 2.11): the menu bar's dropdowns, the
+ * right-click menus and the toolbar's arrow menus all draw a `Menu` over items of the menu model
+ * (`menus/model.ts`). It follows the WAI-ARIA menu pattern: `role="menu"` with `role="menuitem"`,
+ * `menuitemcheckbox` and `menuitemradio` rows, roving tabindex with the focused row at 0, Up and
+ * Down between enabled rows with wrapping, Home and End, type ahead on the label, the underlined
+ * access key runs its row, Right or Enter opens a submenu with focus on its first row, a submenu
+ * also opens on hover after 120 ms, Left closes a submenu and returns focus to its parent row,
+ * Esc closes one level and returns focus to the parent row or the trigger, Tab closes everything
+ * and lets focus move on from the trigger, a press outside closes everything. Left and Right at
+ * the top level call `onNavigate`, which the menu bar uses to switch menus; hovering a row while
+ * another submenu is open switches to it. Disabled rows (a Later stub or a predicate that says
+ * no) stay in the tree with `aria-disabled` and are skipped by the arrows; every row carries the
+ * Tooltip primitive with its name, its key and, on a stub, the sentence of the stub formula.
+ * The plate is placed by `placeMenu` to stay inside the viewport: below its anchor for the bar,
+ * to the right of its parent row for a submenu (to the left when the viewport ends), at the
+ * pointer for a context menu. New in Turboslide (no Prototemplate source).
+ */
+
+export type MenuAnchor =
+  { kind: 'element'; element: HTMLElement } | { kind: 'point'; x: number; y: number };
+
+export type MenuPlacement = 'below' | 'right' | 'point';
+
+export type MenuCloseReason = 'escape' | 'select' | 'outside' | 'tab';
+
+export type MenuProps = {
+  items: ReadonlyArray<MenuItem>;
+  context: MenuContext;
+  /** the accessible name of the menu */
+  label: string;
+  anchor: MenuAnchor;
+  /** below the anchor (the bar), at the point (a context menu); a submenu is always to the right */
+  placement?: 'below' | 'point';
+  /** a row without a submenu was activated; the menu closes after this */
+  onSelect: (item: MenuItem) => void;
+  /** the whole menu closed; the reason names what closed it */
+  onClose: (reason: MenuCloseReason) => void;
+  /** Left and Right at the top level: the menu bar switches menus */
+  onNavigate?: (direction: -1 | 1) => void;
+  /** where focus returns on Esc and Tab: the title or the element that was right-clicked */
+  returnFocusTo?: HTMLElement | null;
+  /** focus the first row on open; false for a pointer opened bar menu that wants no tooltip */
+  autoFocus?: boolean;
+  /** draw context-only rows too (the right-click menus pass their own lists) */
+  includeContextOnly?: boolean;
+  /** the content of a dynamic submenu (Apply layout draws the layout grid) */
+  renderDynamic?: (item: MenuItem) => ReactNode;
+  id?: string;
+  className?: string;
+};
+
+/** How long a pointer rests on a submenu row before it opens (SPEC 2.11). */
+export const SUBMENU_HOVER_MS = 120;
+
+/** The plate stays this far inside the viewport. */
+const VIEWPORT_MARGIN = 8;
+
+/** A submenu overlaps its parent by this much, as Google's do. */
+const SUBMENU_OVERLAP = 4;
+
+/** The gap under a bar title. */
+const BELOW_GAP = 2;
+
+export type Rect = { left: number; top: number; right: number; bottom: number };
+export type Size = { width: number; height: number };
+
+export type MenuPosition = { left: number; top: number; maxHeight: number };
+
+/**
+ * Where the plate goes so it stays inside the viewport: below the anchor and left aligned for the
+ * bar, moving above when the viewport ends first; to the right of the parent row for a submenu,
+ * flipping to its left when the right edge is out; at the pointer for a context menu, flipping
+ * left and up when it would overflow. Every result is clamped 8 px inside both edges.
+ */
+export function placeMenu(input: {
+  anchor: Rect;
+  size: Size;
+  viewport: Size;
+  placement: MenuPlacement;
+}): MenuPosition {
+  const { anchor, size, viewport, placement } = input;
+  const maxHeight = Math.max(56, viewport.height - VIEWPORT_MARGIN * 2);
+  const height = Math.min(size.height, maxHeight);
+  let left: number;
+  let top: number;
+  if (placement === 'below') {
+    left = anchor.left;
+    top = anchor.bottom + BELOW_GAP;
+    if (
+      top + height > viewport.height - VIEWPORT_MARGIN &&
+      anchor.top - BELOW_GAP - height >= VIEWPORT_MARGIN
+    ) {
+      top = anchor.top - BELOW_GAP - height;
+    }
+  } else if (placement === 'right') {
+    left = anchor.right - SUBMENU_OVERLAP;
+    top = anchor.top - SUBMENU_OVERLAP;
+    if (left + size.width > viewport.width - VIEWPORT_MARGIN) {
+      left = anchor.left - size.width + SUBMENU_OVERLAP;
+    }
+  } else {
+    left = anchor.left;
+    top = anchor.top;
+    if (left + size.width > viewport.width - VIEWPORT_MARGIN) left = anchor.left - size.width;
+    if (top + height > viewport.height - VIEWPORT_MARGIN) top = anchor.top - height;
+  }
+  left = clamp(
+    left,
+    VIEWPORT_MARGIN,
+    Math.max(VIEWPORT_MARGIN, viewport.width - VIEWPORT_MARGIN - size.width),
+  );
+  top = clamp(
+    top,
+    VIEWPORT_MARGIN,
+    Math.max(VIEWPORT_MARGIN, viewport.height - VIEWPORT_MARGIN - height),
+  );
+  return { left: Math.round(left), top: Math.round(top), maxHeight };
+}
+
+function clamp(value: number, low: number, high: number): number {
+  return Math.min(Math.max(value, low), Math.max(low, high));
+}
+
+function rectOf(anchor: MenuAnchor): Rect {
+  if (anchor.kind === 'point')
+    return { left: anchor.x, top: anchor.y, right: anchor.x, bottom: anchor.y };
+  const rect = anchor.element.getBoundingClientRect();
+  return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
+}
+
+/** True for a row that opens a submenu: children to draw, or a dynamic submenu with a renderer. */
+function hasSubmenu(item: MenuItem, renderDynamic: MenuProps['renderDynamic']): boolean {
+  if (item.effect?.kind === 'submenu' && item.effect.dynamic !== undefined)
+    return renderDynamic !== undefined;
+  return item.items !== undefined && visibleItems(item.items).length > 0;
+}
+
+/** The label with its access key letter underlined once. */
+function AccessLabel({ label, accessKey }: { label: string; accessKey: string | undefined }) {
+  if (accessKey === undefined) return <>{label}</>;
+  const at = label.toLowerCase().indexOf(accessKey.toLowerCase());
+  if (at < 0) return <>{label}</>;
+  return (
+    <>
+      {label.slice(0, at)}
+      <u className="ts-menu-ak">{label.slice(at, at + 1)}</u>
+      {label.slice(at + 1)}
+    </>
+  );
+}
+
+type ListProps = {
+  items: ReadonlyArray<MenuItem>;
+  context: MenuContext;
+  label: string;
+  anchor: MenuAnchor;
+  placement: MenuPlacement;
+  level: number;
+  autoFocus: boolean;
+  includeContextOnly: boolean;
+  renderDynamic: MenuProps['renderDynamic'];
+  onSelect: (item: MenuItem) => void;
+  /** this level closes: Esc or Left in a submenu, or the root's reasons */
+  onCloseLevel: (reason: MenuCloseReason) => void;
+  onNavigate: MenuProps['onNavigate'];
+  id: string;
+  className?: string;
+};
+
+function MenuList({
+  items,
+  context,
+  label,
+  anchor,
+  placement,
+  level,
+  autoFocus,
+  includeContextOnly,
+  renderDynamic,
+  onSelect,
+  onCloseLevel,
+  onNavigate,
+  id,
+  className,
+}: ListProps) {
+  const root = useRef<HTMLDivElement>(null);
+  const rows = useRef(new Map<string, HTMLElement>());
+  const [position, setPosition] = useState<MenuPosition | null>(null);
+  const [focusId, setFocusId] = useState<string | null>(null);
+  /* bumped to focus the row again when focusId does not change (a submenu closing back to its parent) */
+  const [focusTick, setFocusTick] = useState(0);
+  const [openId, setOpenId] = useState<string | null>(null);
+  /* a submenu opened from the keyboard focuses its first row; from the pointer it does not */
+  const openViaKeyboard = useRef(false);
+  const hoverTimer = useRef(0);
+  const typed = useRef({ buffer: '', at: 0 });
+
+  const visible = useMemo(
+    () => visibleItems(items, { contextOnly: includeContextOnly }),
+    [items, includeContextOnly],
+  );
+  const enabled = useMemo(
+    () => visible.filter((item) => isEnabled(item, context)),
+    [visible, context],
+  );
+
+  useLayoutEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    setPosition(
+      placeMenu({
+        anchor: rectOf(anchor),
+        size: { width: el.offsetWidth || 220, height: el.offsetHeight },
+        viewport: { width: window.innerWidth, height: window.innerHeight },
+        placement,
+      }),
+    );
+  }, [anchor, placement, visible.length]);
+
+  /* the first enabled row takes focus on open when asked; a pointer opened root list takes focus
+     itself so keys land here; a pointer opened submenu leaves focus on its parent row */
+  useMountEffect(() => {
+    if (autoFocus) {
+      const first = enabled[0];
+      if (first !== undefined) {
+        setFocusId(first.id);
+        return;
+      }
+    }
+    if (level === 0) root.current?.focus();
+  });
+
+  useEffect(() => {
+    if (focusId === null) return;
+    rows.current.get(focusId)?.focus();
+  }, [focusId, focusTick]);
+
+  useEffect(() => () => window.clearTimeout(hoverTimer.current), []);
+
+  const focusStep = useCallback(
+    (step: number) => {
+      if (enabled.length === 0) return;
+      const index = enabled.findIndex((item) => item.id === focusId);
+      const next =
+        index < 0
+          ? step > 0
+            ? 0
+            : enabled.length - 1
+          : (index + step + enabled.length) % enabled.length;
+      setFocusId(enabled[next]?.id ?? null);
+    },
+    [enabled, focusId],
+  );
+
+  const openSubmenu = useCallback((item: MenuItem, viaKeyboard: boolean) => {
+    window.clearTimeout(hoverTimer.current);
+    openViaKeyboard.current = viaKeyboard;
+    setOpenId(item.id);
+    setFocusId(item.id);
+  }, []);
+
+  const closeSubmenu = useCallback(
+    (refocus: boolean) => {
+      window.clearTimeout(hoverTimer.current);
+      if (openId !== null && refocus) {
+        setFocusId(openId);
+        setFocusTick((tick) => tick + 1);
+      }
+      setOpenId(null);
+    },
+    [openId],
+  );
+
+  const activate = useCallback(
+    (item: MenuItem, viaKeyboard: boolean) => {
+      if (!isEnabled(item, context)) return;
+      if (hasSubmenu(item, renderDynamic)) {
+        if (openId === item.id && !viaKeyboard) closeSubmenu(true);
+        else openSubmenu(item, viaKeyboard);
+        return;
+      }
+      onSelect(item);
+    },
+    [context, renderDynamic, openId, closeSubmenu, openSubmenu, onSelect],
+  );
+
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    /* a nested list handles its own keys; the event must not reach this list too */
+    event.stopPropagation();
+    const focused = visible.find((item) => item.id === focusId);
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        focusStep(1);
+        return;
+      case 'ArrowUp':
+        event.preventDefault();
+        focusStep(-1);
+        return;
+      case 'Home':
+        event.preventDefault();
+        setFocusId(enabled[0]?.id ?? null);
+        return;
+      case 'End':
+        event.preventDefault();
+        setFocusId(enabled.at(-1)?.id ?? null);
+        return;
+      case 'ArrowRight':
+        event.preventDefault();
+        if (
+          focused !== undefined &&
+          hasSubmenu(focused, renderDynamic) &&
+          isEnabled(focused, context)
+        ) {
+          openSubmenu(focused, true);
+          return;
+        }
+        onNavigate?.(1);
+        return;
+      case 'ArrowLeft':
+        event.preventDefault();
+        if (level > 0) {
+          onCloseLevel('escape');
+          return;
+        }
+        onNavigate?.(-1);
+        return;
+      case 'Enter':
+      case ' ':
+        event.preventDefault();
+        if (focused !== undefined) activate(focused, true);
+        return;
+      case 'Escape':
+        event.preventDefault();
+        onCloseLevel('escape');
+        return;
+      case 'Tab':
+        onCloseLevel('tab');
+        return;
+      default:
+        break;
+    }
+    if (event.key.length === 1 && !event.metaKey && !event.ctrlKey && !event.altKey) {
+      const char = event.key.toLowerCase();
+      const byKey = enabled.find((item) => item.accessKey === char);
+      if (byKey !== undefined) {
+        event.preventDefault();
+        activate(byKey, true);
+        return;
+      }
+      /* type ahead: the buffer holds while keys arrive within a second */
+      const now = Date.now();
+      typed.current = {
+        buffer: now - typed.current.at < 1000 ? typed.current.buffer + char : char,
+        at: now,
+      };
+      const start = enabled.findIndex((item) => item.id === focusId);
+      const order = [...enabled.slice(start + 1), ...enabled.slice(0, start + 1)];
+      const match = order.find((item) =>
+        resolveLabel(item, context).toLowerCase().startsWith(typed.current.buffer),
+      );
+      if (match !== undefined) {
+        event.preventDefault();
+        setFocusId(match.id);
+      }
+    }
+  };
+
+  const onRowPointerEnter = (item: MenuItem) => (event: ReactPointerEvent<HTMLElement>) => {
+    if (event.pointerType === 'touch') return;
+    window.clearTimeout(hoverTimer.current);
+    if (isEnabled(item, context)) setFocusId(item.id);
+    if (hasSubmenu(item, renderDynamic) && isEnabled(item, context)) {
+      if (openId !== item.id) {
+        hoverTimer.current = window.setTimeout(() => openSubmenu(item, false), SUBMENU_HOVER_MS);
+      }
+    } else if (openId !== null) {
+      hoverTimer.current = window.setTimeout(() => closeSubmenu(false), SUBMENU_HOVER_MS);
+    }
+  };
+
+  const openItem = openId === null ? undefined : visible.find((item) => item.id === openId);
+  const openRow = openId === null ? null : (rows.current.get(openId) ?? null);
+
+  return (
+    <div
+      ref={root}
+      id={id}
+      role="menu"
+      aria-label={label}
+      tabIndex={-1}
+      className={cn('ts-menu', level > 0 && 'is-sub', className)}
+      data-level={level}
+      style={
+        position
+          ? {
+              left: position.left,
+              top: position.top,
+              maxHeight: position.maxHeight,
+              zIndex: 30 + level,
+            }
+          : { visibility: 'hidden' }
+      }
+      onKeyDown={onKeyDown}
+    >
+      {visible.map((item, index) => {
+        const rowEnabled = isEnabled(item, context);
+        const checked = isChecked(item, context);
+        const submenu = hasSubmenu(item, renderDynamic);
+        const text = resolveLabel(item, context);
+        const key =
+          item.key === undefined
+            ? ''
+            : shortcutLabel(
+                item.key,
+                context.platform,
+                context.platform === 'mac' ? 'symbols' : 'words',
+              );
+        const role =
+          checked === undefined
+            ? 'menuitem'
+            : (item.effect?.kind === 'toggle' && item.effect.value !== undefined) ||
+                item.checked?.value !== undefined
+              ? 'menuitemradio'
+              : 'menuitemcheckbox';
+        const doc = tooltipDoc(item, context);
+        const tip = tipProps({
+          name: text,
+          key: tooltipKey(item.key, context.platform),
+          doc: doc === undefined ? undefined : sentence(doc),
+        });
+        const isOpen = openId === item.id;
+        const rowIndex = index;
+        return (
+          <div key={item.id} className="ts-menu-group">
+            {item.dividerBefore === true && rowIndex > 0 ? (
+              <div className="ts-menu-divider" role="separator" />
+            ) : null}
+            <div
+              ref={(el) => {
+                if (el) rows.current.set(item.id, el);
+                else rows.current.delete(item.id);
+              }}
+              role={role}
+              tabIndex={focusId === item.id ? 0 : -1}
+              aria-disabled={rowEnabled ? undefined : true}
+              aria-checked={checked}
+              aria-haspopup={submenu ? 'menu' : undefined}
+              aria-expanded={submenu ? isOpen : undefined}
+              aria-keyshortcuts={ariaKeyShortcuts(item.key, context.platform)}
+              className={cn(
+                'ts-menu-item',
+                !rowEnabled && 'is-disabled',
+                isOpen && 'is-open',
+                checked === true && 'is-checked',
+              )}
+              data-menu-item={item.id}
+              data-control={`menu.${item.id}`}
+              data-status={item.status}
+              onPointerEnter={onRowPointerEnter(item)}
+              onClick={(event) => {
+                event.stopPropagation();
+                activate(item, false);
+              }}
+              {...tip}
+            >
+              <span className="ts-menu-ic" aria-hidden="true">
+                {checked === true ? (
+                  <span className="ts-menu-check" />
+                ) : item.icon ? (
+                  <Icon name={item.icon} />
+                ) : null}
+              </span>
+              <span className="ts-menu-label">
+                <AccessLabel label={text} accessKey={item.accessKey} />
+              </span>
+              {submenu ? (
+                <span className="ts-menu-sub" aria-hidden="true">
+                  <Icon name="next" />
+                </span>
+              ) : key !== '' ? (
+                <span className="ts-menu-key" aria-hidden="true">
+                  {key}
+                </span>
+              ) : null}
+            </div>
+            {isOpen && openItem?.id === item.id && openRow !== null ? (
+              openItem.items !== undefined && visibleItems(openItem.items).length > 0 ? (
+                <MenuList
+                  items={openItem.items}
+                  context={context}
+                  label={text}
+                  anchor={{ kind: 'element', element: openRow }}
+                  placement="right"
+                  level={level + 1}
+                  autoFocus={openViaKeyboard.current}
+                  includeContextOnly={includeContextOnly}
+                  renderDynamic={renderDynamic}
+                  onSelect={onSelect}
+                  onCloseLevel={(reason) => {
+                    if (reason === 'escape') closeSubmenu(true);
+                    else onCloseLevel(reason);
+                  }}
+                  onNavigate={onNavigate}
+                  id={`${id}-${item.id}`}
+                />
+              ) : (
+                <DynamicPlate
+                  label={text}
+                  anchor={openRow}
+                  level={level}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape' || event.key === 'ArrowLeft') {
+                      event.preventDefault();
+                      event.stopPropagation();
+                      closeSubmenu(true);
+                    }
+                  }}
+                >
+                  {renderDynamic?.(openItem)}
+                </DynamicPlate>
+              )
+            ) : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+let menuCount = 0;
+
+export function Menu({
+  items,
+  context,
+  label,
+  anchor,
+  placement = 'below',
+  onSelect,
+  onClose,
+  onNavigate,
+  returnFocusTo,
+  autoFocus = true,
+  includeContextOnly = false,
+  renderDynamic,
+  id,
+  className,
+}: MenuProps) {
+  const rootId = useMemo(() => id ?? `ts-menu-${++menuCount}`, [id]);
+  const container = useRef<HTMLDivElement>(null);
+
+  const close = useCallback(
+    (reason: MenuCloseReason) => {
+      if (reason !== 'outside' && reason !== 'select') returnFocusTo?.focus();
+      onClose(reason);
+    },
+    [onClose, returnFocusTo],
+  );
+
+  /* a press outside closes everything; Esc anywhere in the document closes when focus is elsewhere */
+  useEffect(() => {
+    const onDown = (event: MouseEvent) => {
+      if (!(event.target instanceof Node)) return;
+      if (container.current?.contains(event.target)) return;
+      if (returnFocusTo?.contains(event.target)) return;
+      close('outside');
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      if (event.target instanceof Node && container.current?.contains(event.target)) return;
+      event.preventDefault();
+      close('escape');
+    };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [close, returnFocusTo]);
+
+  return (
+    <div ref={container} className="ts-menu-root" data-control={`menu.${rootId}`}>
+      <MenuList
+        items={items}
+        context={context}
+        label={label}
+        anchor={anchor}
+        placement={placement}
+        level={0}
+        autoFocus={autoFocus}
+        includeContextOnly={includeContextOnly}
+        renderDynamic={renderDynamic}
+        onSelect={(item) => {
+          onSelect(item);
+          close('select');
+        }}
+        onCloseLevel={close}
+        onNavigate={onNavigate}
+        id={rootId}
+        className={className}
+      />
+    </div>
+  );
+}
+
+export { DIVIDER };
+
+/**
+ * The plate of a dynamic submenu (the Apply layout list or grid): to the right of its row, and
+ * clamped inside the viewport once its content is measured, the way placeMenu keeps every other
+ * plate (measured: the 21 layout rows from a card low in the filmstrip ran past the bottom of a
+ * 900 px window and the last rows could not be clicked; integrator, merge 2).
+ */
+function DynamicPlate({
+  label,
+  anchor,
+  level,
+  onKeyDown,
+  children,
+}: {
+  label: string;
+  anchor: HTMLElement;
+  level: number;
+  onKeyDown: (event: ReactKeyboardEvent<HTMLDivElement>) => void;
+  children: ReactNode;
+}) {
+  const plate = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState<MenuPosition | null>(null);
+  useLayoutEffect(() => {
+    const el = plate.current;
+    if (!el) return;
+    setPosition(
+      placeMenu({
+        anchor: anchor.getBoundingClientRect(),
+        size: { width: el.offsetWidth || 220, height: el.offsetHeight },
+        viewport: { width: window.innerWidth, height: window.innerHeight },
+        placement: 'right',
+      }),
+    );
+  }, [anchor]);
+  return (
+    <div
+      ref={plate}
+      role="menu"
+      aria-label={label}
+      className="ts-menu is-sub is-dynamic"
+      style={{
+        left: position?.left ?? anchor.getBoundingClientRect().right - SUBMENU_OVERLAP,
+        top: position?.top ?? anchor.getBoundingClientRect().top - SUBMENU_OVERLAP,
+        ...(position?.maxHeight === undefined ? {} : { maxHeight: position.maxHeight }),
+        zIndex: 31 + level,
+      }}
+      onKeyDown={onKeyDown}
+    >
+      {children}
+    </div>
+  );
+}

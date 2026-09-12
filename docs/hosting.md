@@ -76,6 +76,51 @@ instance only and do not persist until a Blob store is connected" (`.ts-banner[d
 `@turboslide/store/select` `NOT_PERSISTENT_NOTICE`) and the deck list repeats it. This is the mode
 the production URL runs in until a store is connected.
 
+### Room on the temp volume
+
+The function's `/tmp` is 525 MB (`docs/hosting-chromium.md` section 3b) and both hosted kinds
+share it between the inflated browser (about 205 MB), the overlay's decks and package files
+(about 43 MB with the seed's twins, plus 30 MB per deck created from the GT template) and every
+derived file the studio writes: the worker's job folders (`.turboslide/worker/jobs/<id>`; a
+render job keeps a copy of every image it made beside the cache's), its render cache
+(`worker/cache/<deck>/<revision>/<theme>@<scale>x`), the thumbnails
+(`.turboslide/thumbs/<deck>/<revision>/<theme>@<width>`) and the standalone builds
+(`worker/builds/<deck>/<deck>.html`). Nothing removed them before the Google Slides parity round:
+one audit's worth of renders, an HTML build and an export filled a preview instance's volume and
+its next write, a Blob sync inside `deck.list`, answered `ENOSPC` as a 500 (verification finding
+20).
+
+`root.ts` sweeps those four folders on the hosted kinds ahead of the collection's work
+(`ensureDecks`, which every render, export, build, thumbnail and list passes through):
+
+- Every 30 s (`DERIVED_SWEEP_INTERVAL_MS`) the routine sweep removes what nothing can ask for
+  again: finished job folders and builds older than the download window (15 min,
+  `DERIVED_KEEP_MS`, the life of a download token and of the tmp backend's job file URL), and the
+  render and thumbnail caches of every revision but the deck's newest (a render always runs at
+  the deck's current revision, so an older revision's cache is never read again). Then it keeps
+  the rest under 160 MB (`DERIVED_BUDGET_BYTES`), oldest first.
+- Under 128 MB free on the volume (`DERIVED_LOW_WATER_BYTES`, checked with `statfs` on every
+  pass) the budget drops to 32 MB (`DERIVED_PRESSURE_BUDGET_BYTES`): the newest few megabytes,
+  which are the open deck's thumbnails, stay.
+- Nothing younger than 60 s is evicted (`DERIVED_GRACE_MS`), because a job in flight may still
+  read it, and a job folder without a `job.json` (the queue writes it last) is never touched.
+  `decks/` and `packages/` are never touched either: on the tmp backend they are the store.
+- A write that meets `ENOSPC` inside `ensureDecks`, `listStoredDecks`, `openDeckStore`,
+  `ensureDeckAssets` or `storedAssetFile` sweeps everything derived older than 10 s and runs
+  once more; `createStoredDeck` sweeps and does not run twice. A second `ENOSPC` is a
+  `DiskFullError` (`status: 503`, `code: disk_full`, `retryAfterSeconds`) whose message tells
+  the caller to retry in a few seconds; the agent transport still maps unknown error classes to
+  500 until `@turboslide/schema/errors` `errorStatus` reads the `status` an error carries
+  (`docs/gslides-parity/build/b5.md`, fix round request 1).
+- A materialization that failed (the packages or the seed) is not cached for the life of the
+  instance: `root.ts` forgets its promise so the next request tries again.
+
+Every sweep that removed something, and every pressure sweep, writes one line to the function's
+log: `turboslide hosting: sweep (routine|low-water|disk-full): removed N entries, X MB (jobs a,
+cache b, thumbs c, builds d); kept M entries, Y MB; Z MB free`. The rules are unit tested on a
+temp tree (`apps/studio/src/server/root.test.ts`); the Docker worker's own folder
+(`apps/render-worker`, a long-lived container) has no sweep yet and grows the same way.
+
 ## 4. The Blob backend
 
 ### Layout
@@ -282,11 +327,14 @@ the document's revision, and fetches the slides those records touched whatever t
 
 ## 7. Verify a deployment
 
-`node scripts/hosted-smoke.mjs <url>` probes `/` (307 to `/edit/<deck>`), `/deck/gt-brand` (200),
-`/edit/gt-brand` (200, the SSR shell with the theme boot script), `/decks` (200, naming the deck),
-one twin (200 image or 302 to one; the first twin of `decks/gt-brand/deck.json` in the checkout, or
-`--asset <file>`) and `/api/agent` (401 off localhost without a token), prints a table and exits 1 on
-a failure. A preview sits behind Vercel Authentication, so the script sends the project's
+`node scripts/hosted-smoke.mjs <url>` (or `--base <url>`) probes `/` (307 to `/new` with
+`X-Robots-Tag: noindex`, gslides-parity SPEC 6.1), `/new` (200, the SSR shell with the theme boot
+script and a `noindex` meta), `/deck/gt-brand` (200, and the payload carries no `notes` key, SPEC
+6.6), `/edit/gt-brand` (200, the SSR shell), `/decks` (200, naming the deck), `/decks/trash` (200),
+`/print/gt-brand` (200, the print bar and one page per slide, SPEC 6.8), `/present/gt-brand` (200,
+SPEC 9.3), one twin (200 image or 302 to one; the first twin of `decks/gt-brand/deck.json` in the
+checkout, or `--asset <file>`) and `/api/agent` (401 off localhost without a token), prints a table
+and exits 1 on a failure. Ten rows since the Google Slides parity round (six before it). A preview sits behind Vercel Authentication, so the script sends the project's
 development token in the Trusted Sources header when `VERCEL_OIDC_TOKEN` is in the environment
 (`vercel env pull <file>`, never printed or committed); `vercel curl` does the same for one request,
 and so do `turboslide deck push` and `deck pull` (docs/deck-transfer.md) and the editor depth
@@ -378,6 +426,25 @@ version as a `ConflictError`, the watch poll), and the tmp and blob collections 
 materialization, list, open, create from the template with the twins, the twin URL of a deck made
 elsewhere, the seed uploaded once across instances). 71 tests.
 
+### The routes of the Google Slides parity round
+
+Every route below runs on the file, tmp and Blob backends through the same server functions
+(`apps/studio/src/server/decks.ts` and `write.ts` over `root.ts`'s collection):
+
+- `/` is a 307 to `/new`; `/new` edits a draft of the blank template under an id of the shape
+  `untitled-<yyyymmdd>-<4 chars>` that the store has not seen. The first write against revision 0
+  creates the deck through `createStoredDeck` (on Blob the upload happens before the write lands)
+  and the address becomes `/edit/<id>`; a visit that only looks creates nothing, so the shared
+  store gains no deck per crawler. A lease, a watch poll or a thumbnail warm on an unsaved draft
+  answers as an empty deck would.
+- `/decks` lists `deck.list` (the trash left out) with a 320 by 180 thumbnail per card from the
+  render route's `?w=320` variant, which stays open when the token is set; the card menu's Rename,
+  Make a copy, Move to trash and Download run `deck.rename`, `deck.copy`, `deck.trash` and the
+  bundle ticket through the collection, so on Blob a copy is pushed and a trash stamp is written
+  with `ifMatch`. `/decks/trash` runs `deck.restore` and `deck.remove` (the prefix on Blob).
+- `/deck/<id>` and `/embed/<id>` answer 404 for a deck in the trash and carry neither speaker notes
+  nor skipped slides; `/present/<id>` and `/print/<id>` ask for what they need.
+
 ## 8. What this round did not cover
 
 - The agent surface's writes (`/api/actions`, `/mcp`, the window actions that run on the server)
@@ -412,8 +479,11 @@ elsewhere, the seed uploaded once across instances). 71 tests.
   (`prj_g7MnEbMtpUvd4dBoCAGfSC0fiUfK`, root directory `.`) before the integrator found that Kevin's
   project is `turboslide`; nothing was deployed to it, and deleting it is Kevin's call.
 - No deck deletion exists; a deck created by mistake stays in the store until `vercel blob del`.
-- `/tmp` holds the seed (31 MB), every created deck's copy of the twins (30 MB each) and the
-  inflated browser; Vercel does not state its size in the limits page.
+- `/tmp` (525 MB measured) holds the seed (31 MB), every created deck's copy of the twins
+  (30 MB each) and the inflated browser (205 MB); the derived files are swept since the Google
+  Slides parity round (section 3, "Room on the temp volume"), the decks are not, so an instance
+  that creates many decks from the GT template still fills up and starts answering
+  `DiskFullError` until it is recycled.
 - The version log is rebuilt from inverses (SPEC 6.7) and needs a contiguous chain; a push that
   failed after the manifest committed (step 1 of section 4) leaves the log short of one entry, which
   `documentAt` reports as a break. It is a rare network failure, not a conflict, and the document

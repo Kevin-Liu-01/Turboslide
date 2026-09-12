@@ -1,0 +1,6691 @@
+{
+  "base": "https://turboslide-arpbhvdi5-kl01s-projects.vercel.app",
+  "at": "2026-09-12T14:37:25.965Z",
+  "commit": "14da621",
+  "seconds": 209,
+  "scratchDeck": "untitled-20260912-cvo0",
+  "summary": {
+    "pass": 535,
+    "fail": 22,
+    "skip": 69
+  },
+  "perSection": {
+    "firstOpen": {
+      "pass": 12,
+      "fail": 0,
+      "skip": 0
+    },
+    "defaultViewWords": {
+      "pass": 3,
+      "fail": 1,
+      "skip": 0
+    },
+    "toolbar:new": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0
+    },
+    "rows:scratch": {
+      "pass": 246,
+      "fail": 19,
+      "skip": 36
+    },
+    "contextMenu:scratch": {
+      "pass": 2,
+      "fail": 0,
+      "skip": 0
+    },
+    "effects:scratch": {
+      "pass": 2,
+      "fail": 0,
+      "skip": 0
+    },
+    "rows:gt-brand": {
+      "pass": 266,
+      "fail": 2,
+      "skip": 33
+    },
+    "toolbar:gt-brand": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0
+    },
+    "contextMenu:gt-brand": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0
+    },
+    "rows:decks": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "totals": {
+    "scratch": {
+      "title": {
+        "now": {
+          "pass": 7,
+          "fail": 1,
+          "skip": 0
+        },
+        "later": {
+          "pass": 1,
+          "fail": 1,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 7,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "file": {
+        "now": {
+          "pass": 12,
+          "fail": 15,
+          "skip": 0
+        },
+        "later": {
+          "pass": 0,
+          "fail": 1,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 10,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "edit": {
+        "now": {
+          "pass": 9,
+          "fail": 1,
+          "skip": 0
+        },
+        "later": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "view": {
+        "now": {
+          "pass": 23,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 8
+        },
+        "omit": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "insert": {
+        "now": {
+          "pass": 22,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 5,
+          "fail": 0,
+          "skip": 4
+        },
+        "omit": {
+          "pass": 18,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "format": {
+        "now": {
+          "pass": 41,
+          "fail": 0,
+          "skip": 3
+        },
+        "later": {
+          "pass": 9,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 10,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "slide": {
+        "now": {
+          "pass": 12,
+          "fail": 0,
+          "skip": 3
+        },
+        "later": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "arrange": {
+        "now": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 14
+        },
+        "later": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 4
+        },
+        "omit": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "tools": {
+        "now": {
+          "pass": 14,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "extensions": {
+        "now": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "help": {
+        "now": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    "gt-brand": {
+      "title": {
+        "now": {
+          "pass": 7,
+          "fail": 1,
+          "skip": 0
+        },
+        "later": {
+          "pass": 1,
+          "fail": 1,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 7,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "file": {
+        "now": {
+          "pass": 27,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 10,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "edit": {
+        "now": {
+          "pass": 10,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "view": {
+        "now": {
+          "pass": 23,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 8
+        },
+        "omit": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "insert": {
+        "now": {
+          "pass": 22,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 5,
+          "fail": 0,
+          "skip": 4
+        },
+        "omit": {
+          "pass": 18,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "format": {
+        "now": {
+          "pass": 41,
+          "fail": 0,
+          "skip": 3
+        },
+        "later": {
+          "pass": 9,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 10,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "slide": {
+        "now": {
+          "pass": 15,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "arrange": {
+        "now": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 14
+        },
+        "later": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 4
+        },
+        "omit": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "tools": {
+        "now": {
+          "pass": 14,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "extensions": {
+        "now": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "help": {
+        "now": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
+    "decks": {
+      "title": {
+        "now": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "section": "firstOpen",
+      "id": "address /new",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "title \"Untitled presentation\"",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "save words \"Not saved yet\"",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the two prompts",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the notes prompt",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "one card in the filmstrip",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the right panel closed",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "no snackbar",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the ten menus in order",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the bottom bar: filmstrip, grid, the panel chevron",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "/new",
+      "evidence": "30 text nodes, 43 tooltips, none of 18 words",
+      "pass": true
+    },
+    {
+      "section": "toolbar:new",
+      "id": "toolbar.default",
+      "kind": "default",
+      "wanted": [
+        "toolbar.search",
+        "toolbar.newSlide",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.transition",
+        "toolbar.hideMenus"
+      ],
+      "observed": [
+        "toolbar.search",
+        "toolbar.newSlide",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.transition",
+        "toolbar.hideMenus"
+      ],
+      "evidence": "18 controls in the order of SPEC 3",
+      "check": "order",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the first write creates the deck and moves the address",
+      "evidence": "https://turboslide-arpbhvdi5-kl01s-projects.vercel.app/edit/untitled-20260912-cvo0; save words \"All changes saved\"; title \"Audit scratch\"",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "auto title from the first heading (SPEC 6.3)",
+      "evidence": "title \"Audit scratch\"",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.appIcon",
+      "menu": "title",
+      "status": "now",
+      "label": "Turboslide home",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.name",
+      "menu": "title",
+      "status": "now",
+      "label": "Rename",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.star",
+      "menu": "title",
+      "status": "omit",
+      "label": "Star",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.move",
+      "menu": "title",
+      "status": "omit",
+      "label": "Move",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.saveState",
+      "menu": "title",
+      "status": "now",
+      "label": "Document status",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.lastEdit",
+      "menu": "title",
+      "status": "now",
+      "label": "Last edit",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.comments",
+      "menu": "title",
+      "status": "later",
+      "label": "Show all comments",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.meet",
+      "menu": "title",
+      "status": "omit",
+      "label": "Meet",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.record",
+      "menu": "title",
+      "status": "omit",
+      "label": "Record",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.slideshow",
+      "menu": "title",
+      "status": "now",
+      "label": "Slideshow",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.slideshow.presenterView",
+      "menu": "title",
+      "status": "now",
+      "label": "Presenter view",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.slideshow.startFromBeginning",
+      "menu": "title",
+      "status": "now",
+      "label": "Start from beginning",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.slideshow.presentOnAnotherScreen",
+      "menu": "title",
+      "status": "later",
+      "label": "Present on another screen",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.slideshow.displayOptions",
+      "menu": "title",
+      "status": "omit",
+      "label": "Presentation display options",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.share",
+      "menu": "title",
+      "status": "now",
+      "label": "Share",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.account",
+      "menu": "title",
+      "status": "omit",
+      "label": "Account avatar",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.gemini",
+      "menu": "title",
+      "status": "omit",
+      "label": "Ask Gemini",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.new",
+      "menu": "file",
+      "status": "now",
+      "label": "New",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.new.presentation",
+      "menu": "file",
+      "status": "now",
+      "label": "Presentation",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.new.templateGallery",
+      "menu": "file",
+      "status": "now",
+      "label": "From template gallery",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.open",
+      "menu": "file",
+      "status": "now",
+      "label": "Open…",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.importSlides",
+      "menu": "file",
+      "status": "now",
+      "label": "Import slides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.makeCopy",
+      "menu": "file",
+      "status": "now",
+      "label": "Make a copy",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.makeCopy.entire",
+      "menu": "file",
+      "status": "now",
+      "label": "Entire presentation",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.makeCopy.selected",
+      "menu": "file",
+      "status": "now",
+      "label": "Selected slides",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.share",
+      "menu": "file",
+      "status": "now",
+      "label": "Share",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.share.withOthers",
+      "menu": "file",
+      "status": "now",
+      "label": "Share with others",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.share.publish",
+      "menu": "file",
+      "status": "now",
+      "label": "Publish to web",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.email",
+      "menu": "file",
+      "status": "omit",
+      "label": "Email",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.email.thisFile",
+      "menu": "file",
+      "status": "omit",
+      "label": "Email this file",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.email.collaborators",
+      "menu": "file",
+      "status": "omit",
+      "label": "Email collaborators",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download",
+      "menu": "file",
+      "status": "now",
+      "label": "Download",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.pptx",
+      "menu": "file",
+      "status": "now",
+      "label": "Microsoft PowerPoint (.pptx)",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.odp",
+      "menu": "file",
+      "status": "omit",
+      "label": "ODP Document (.odp)",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.pdf",
+      "menu": "file",
+      "status": "now",
+      "label": "PDF Document (.pdf)",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.txt",
+      "menu": "file",
+      "status": "now",
+      "label": "Plain Text (.txt)",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.jpg",
+      "menu": "file",
+      "status": "now",
+      "label": "JPEG image (.jpg, current slide)",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.png",
+      "menu": "file",
+      "status": "now",
+      "label": "PNG image (.png, current slide)",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.svg",
+      "menu": "file",
+      "status": "omit",
+      "label": "Scalable Vector Graphics (.svg, current slide)",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.html",
+      "menu": "file",
+      "status": "now",
+      "label": "Web page (.html)",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.zip",
+      "menu": "file",
+      "status": "now",
+      "label": "Turboslide bundle (.zip)",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.rename",
+      "menu": "file",
+      "status": "now",
+      "label": "Rename",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.move",
+      "menu": "file",
+      "status": "omit",
+      "label": "Move",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.addShortcut",
+      "menu": "file",
+      "status": "omit",
+      "label": "Add shortcut to Drive",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.moveToTrash",
+      "menu": "file",
+      "status": "now",
+      "label": "Move to trash",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.versionHistory",
+      "menu": "file",
+      "status": "now",
+      "label": "Version history",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.versionHistory.nameCurrent",
+      "menu": "file",
+      "status": "now",
+      "label": "Name current version",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.versionHistory.see",
+      "menu": "file",
+      "status": "now",
+      "label": "See version history",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.approvals",
+      "menu": "file",
+      "status": "omit",
+      "label": "Approvals",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.offline",
+      "menu": "file",
+      "status": "omit",
+      "label": "Make available offline",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.details",
+      "menu": "file",
+      "status": "now",
+      "label": "Details",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.language",
+      "menu": "file",
+      "status": "omit",
+      "label": "Language",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.pageSetup",
+      "menu": "file",
+      "status": "later",
+      "label": "Page setup",
+      "check": "row",
+      "evidence": ["stub tooltip \"\" does not start with \"Not available in Turboslide yet\""],
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.printPreview",
+      "menu": "file",
+      "status": "now",
+      "label": "Print settings and preview",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.print",
+      "menu": "file",
+      "status": "now",
+      "label": "Print",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.undo",
+      "menu": "edit",
+      "status": "now",
+      "label": "Undo",
+      "check": "row",
+      "evidence": ["disabled while the predicate canUndo says enabled"],
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.redo",
+      "menu": "edit",
+      "status": "now",
+      "label": "Redo",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.cut",
+      "menu": "edit",
+      "status": "now",
+      "label": "Cut",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.copy",
+      "menu": "edit",
+      "status": "now",
+      "label": "Copy",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.paste",
+      "menu": "edit",
+      "status": "now",
+      "label": "Paste",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.pasteWithoutFormatting",
+      "menu": "edit",
+      "status": "now",
+      "label": "Paste without formatting",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.delete",
+      "menu": "edit",
+      "status": "now",
+      "label": "Delete",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.duplicate",
+      "menu": "edit",
+      "status": "now",
+      "label": "Duplicate",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.selectAll",
+      "menu": "edit",
+      "status": "now",
+      "label": "Select all",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.selectNone",
+      "menu": "edit",
+      "status": "later",
+      "label": "Select none",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.findReplace",
+      "menu": "edit",
+      "status": "now",
+      "label": "Find and replace",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.slideshow",
+      "menu": "view",
+      "status": "now",
+      "label": "Slideshow",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.motion",
+      "menu": "view",
+      "status": "omit",
+      "label": "Motion",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.themeBuilder",
+      "menu": "view",
+      "status": "omit",
+      "label": "Theme builder",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.gridView",
+      "menu": "view",
+      "status": "now",
+      "label": "Grid view",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.in",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom in",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.out",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom out",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.fit",
+      "menu": "view",
+      "status": "now",
+      "label": "Fit",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.50",
+      "menu": "view",
+      "status": "now",
+      "label": "50%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.100",
+      "menu": "view",
+      "status": "now",
+      "label": "100%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.200",
+      "menu": "view",
+      "status": "now",
+      "label": "200%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.showRuler",
+      "menu": "view",
+      "status": "later",
+      "label": "Show ruler",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides",
+      "menu": "view",
+      "status": "later",
+      "label": "Guides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides.show",
+      "menu": "view",
+      "status": "later",
+      "label": "Show guides",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides.addVertical",
+      "menu": "view",
+      "status": "later",
+      "label": "Add vertical guide",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides.addHorizontal",
+      "menu": "view",
+      "status": "later",
+      "label": "Add horizontal guide",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides.edit",
+      "menu": "view",
+      "status": "later",
+      "label": "Edit guides",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides.clear",
+      "menu": "view",
+      "status": "later",
+      "label": "Clear guides",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.snapTo",
+      "menu": "view",
+      "status": "now",
+      "label": "Snap to",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.snapTo.guides",
+      "menu": "view",
+      "status": "now",
+      "label": "Guides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.snapTo.grid",
+      "menu": "view",
+      "status": "now",
+      "label": "Grid",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.comments",
+      "menu": "view",
+      "status": "later",
+      "label": "Comments",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.comments.hide",
+      "menu": "view",
+      "status": "later",
+      "label": "Hide comments",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.comments.minimize",
+      "menu": "view",
+      "status": "later",
+      "label": "Minimize comments",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.comments.expand",
+      "menu": "view",
+      "status": "later",
+      "label": "Expand comments",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.livePointers",
+      "menu": "view",
+      "status": "omit",
+      "label": "Live pointers",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.livePointers.mine",
+      "menu": "view",
+      "status": "omit",
+      "label": "Show my pointer",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.livePointers.collaborators",
+      "menu": "view",
+      "status": "omit",
+      "label": "Show collaborator pointers",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.showSpeakerNotes",
+      "menu": "view",
+      "status": "now",
+      "label": "Show speaker notes",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.showFilmstrip",
+      "menu": "view",
+      "status": "now",
+      "label": "Show filmstrip",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.mode",
+      "menu": "view",
+      "status": "now",
+      "label": "Mode",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.mode.editing",
+      "menu": "view",
+      "status": "now",
+      "label": "Editing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.mode.commenting",
+      "menu": "view",
+      "status": "omit",
+      "label": "Commenting",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.mode.viewing",
+      "menu": "view",
+      "status": "now",
+      "label": "Viewing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.fullScreen",
+      "menu": "view",
+      "status": "now",
+      "label": "Full screen",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.showSections",
+      "menu": "view",
+      "status": "now",
+      "label": "Show sections",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.appearance",
+      "menu": "view",
+      "status": "now",
+      "label": "Appearance",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.appearance.light",
+      "menu": "view",
+      "status": "now",
+      "label": "Light",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.appearance.dark",
+      "menu": "view",
+      "status": "now",
+      "label": "Dark",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.appearance.match",
+      "menu": "view",
+      "status": "now",
+      "label": "Match the presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image",
+      "menu": "insert",
+      "status": "now",
+      "label": "Image",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.upload",
+      "menu": "insert",
+      "status": "now",
+      "label": "Upload from computer",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.stockWeb",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Stock & web",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.drivePhotos",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Drive & Photos",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.camera",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Camera",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.byUrl",
+      "menu": "insert",
+      "status": "now",
+      "label": "By URL",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.fromThisPresentation",
+      "menu": "insert",
+      "status": "now",
+      "label": "From this presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.textBox",
+      "menu": "insert",
+      "status": "now",
+      "label": "Text box",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.audio",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Audio",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.video",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Video",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape",
+      "menu": "insert",
+      "status": "now",
+      "label": "Shape",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.shapes",
+      "menu": "insert",
+      "status": "now",
+      "label": "Shapes",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.shapes.rectangle",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rectangle",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.shapes.rounded",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rounded rectangle",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.shapes.ellipse",
+      "menu": "insert",
+      "status": "now",
+      "label": "Ellipse",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.arrows",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrows",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.arrows.arrow",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrow",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.callouts",
+      "menu": "insert",
+      "status": "later",
+      "label": "Callouts",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.equation",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Equation",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.table",
+      "menu": "insert",
+      "status": "now",
+      "label": "Table",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart",
+      "menu": "insert",
+      "status": "later",
+      "label": "Chart",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart.bar",
+      "menu": "insert",
+      "status": "later",
+      "label": "Bar",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart.column",
+      "menu": "insert",
+      "status": "later",
+      "label": "Column",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart.line",
+      "menu": "insert",
+      "status": "later",
+      "label": "Line",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart.pie",
+      "menu": "insert",
+      "status": "later",
+      "label": "Pie",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart.fromSheets",
+      "menu": "insert",
+      "status": "omit",
+      "label": "From Sheets",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.diagram",
+      "menu": "insert",
+      "status": "later",
+      "label": "Diagram",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.wordArt",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Word art",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line",
+      "menu": "insert",
+      "status": "now",
+      "label": "Line",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.line",
+      "menu": "insert",
+      "status": "now",
+      "label": "Line",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.arrow",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrow",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.rule",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rule",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.elbowConnector",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Elbow Connector",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.curvedConnector",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Curved Connector",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.curve",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Curve",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.polyline",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Polyline",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.scribble",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Scribble",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.specialCharacters",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Special characters",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.animation",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Animation",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.link",
+      "menu": "insert",
+      "status": "now",
+      "label": "Link",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.comment",
+      "menu": "insert",
+      "status": "later",
+      "label": "Comment",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.newSlide",
+      "menu": "insert",
+      "status": "now",
+      "label": "New slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.slideNumbers",
+      "menu": "insert",
+      "status": "now",
+      "label": "Slide numbers",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.placeholder",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Placeholder",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.templates",
+      "menu": "insert",
+      "status": "later",
+      "label": "Templates",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.buildingBlocks",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Building blocks",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.speakerSpotlight",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Speaker spotlight",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.icon",
+      "menu": "insert",
+      "status": "now",
+      "label": "Icon",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.material",
+      "menu": "insert",
+      "status": "now",
+      "label": "Material",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text",
+      "menu": "format",
+      "status": "now",
+      "label": "Text",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.bold",
+      "menu": "format",
+      "status": "now",
+      "label": "Bold",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.italic",
+      "menu": "format",
+      "status": "later",
+      "label": "Italic",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.underline",
+      "menu": "format",
+      "status": "later",
+      "label": "Underline",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.strikethrough",
+      "menu": "format",
+      "status": "now",
+      "label": "Strikethrough",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.superscript",
+      "menu": "format",
+      "status": "omit",
+      "label": "Superscript",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.subscript",
+      "menu": "format",
+      "status": "omit",
+      "label": "Subscript",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.size",
+      "menu": "format",
+      "status": "now",
+      "label": "Size",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.size.increase",
+      "menu": "format",
+      "status": "now",
+      "label": "Increase font size",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.size.decrease",
+      "menu": "format",
+      "status": "now",
+      "label": "Decrease font size",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.capitalization",
+      "menu": "format",
+      "status": "omit",
+      "label": "Capitalization",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent",
+      "menu": "format",
+      "status": "now",
+      "label": "Align & indent",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.left",
+      "menu": "format",
+      "status": "now",
+      "label": "Left",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.center",
+      "menu": "format",
+      "status": "now",
+      "label": "Center",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.right",
+      "menu": "format",
+      "status": "now",
+      "label": "Right",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.justified",
+      "menu": "format",
+      "status": "omit",
+      "label": "Justified",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.increaseIndent",
+      "menu": "format",
+      "status": "later",
+      "label": "Increase indent",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.decreaseIndent",
+      "menu": "format",
+      "status": "later",
+      "label": "Decrease indent",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.indentationOptions",
+      "menu": "format",
+      "status": "omit",
+      "label": "Indentation options",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing",
+      "menu": "format",
+      "status": "now",
+      "label": "Line & paragraph spacing",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.single",
+      "menu": "format",
+      "status": "now",
+      "label": "Single",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.1_15",
+      "menu": "format",
+      "status": "now",
+      "label": "1.15",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.1_5",
+      "menu": "format",
+      "status": "now",
+      "label": "1.5",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.double",
+      "menu": "format",
+      "status": "now",
+      "label": "Double",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.custom",
+      "menu": "format",
+      "status": "now",
+      "label": "Custom spacing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering",
+      "menu": "format",
+      "status": "now",
+      "label": "Bullets & numbering",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.numbered",
+      "menu": "format",
+      "status": "now",
+      "label": "Numbered list",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.bulleted",
+      "menu": "format",
+      "status": "now",
+      "label": "Bulleted list",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.listOptions",
+      "menu": "format",
+      "status": "omit",
+      "label": "List options",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.listOptions.restart",
+      "menu": "format",
+      "status": "omit",
+      "label": "Restart numbering",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.listOptions.prefixSuffix",
+      "menu": "format",
+      "status": "omit",
+      "label": "Edit prefix and suffix",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.listOptions.moreBullets",
+      "menu": "format",
+      "status": "omit",
+      "label": "More bullets",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table",
+      "menu": "format",
+      "status": "now",
+      "label": "Table",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.insertRowAbove",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert row above",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.insertRowBelow",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert row below",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.insertColumnLeft",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert column left",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.insertColumnRight",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert column right",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.deleteRow",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete row",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.deleteColumn",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete column",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.deleteTable",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete table",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.distributeRows",
+      "menu": "format",
+      "status": "now",
+      "label": "Distribute rows",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.distributeColumns",
+      "menu": "format",
+      "status": "now",
+      "label": "Distribute columns",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.mergeCells",
+      "menu": "format",
+      "status": "later",
+      "label": "Merge cells",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.unmergeCells",
+      "menu": "format",
+      "status": "later",
+      "label": "Unmerge cells",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image",
+      "menu": "format",
+      "status": "now",
+      "label": "Image",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.cropImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Crop image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.maskImage",
+      "menu": "format",
+      "status": "omit",
+      "label": "Mask image",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.replaceImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Replace image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.replaceImage.upload",
+      "menu": "format",
+      "status": "now",
+      "label": "Upload from computer",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.replaceImage.byUrl",
+      "menu": "format",
+      "status": "now",
+      "label": "By URL",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.replaceImage.fromThisPresentation",
+      "menu": "format",
+      "status": "now",
+      "label": "From this presentation",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.resetImage",
+      "menu": "format",
+      "status": "later",
+      "label": "Reset image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.imageOptions",
+      "menu": "format",
+      "status": "now",
+      "label": "Image options",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines",
+      "menu": "format",
+      "status": "now",
+      "label": "Borders & lines",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderColor",
+      "menu": "format",
+      "status": "now",
+      "label": "Border color",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderWeight",
+      "menu": "format",
+      "status": "now",
+      "label": "Border weight",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderDash",
+      "menu": "format",
+      "status": "later",
+      "label": "Border dash",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart",
+      "menu": "format",
+      "status": "now",
+      "label": "Line start",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd",
+      "menu": "format",
+      "status": "now",
+      "label": "Line end",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.formatOptions",
+      "menu": "format",
+      "status": "now",
+      "label": "Format options",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.clearFormatting",
+      "menu": "format",
+      "status": "now",
+      "label": "Clear formatting",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.altText",
+      "menu": "format",
+      "status": "now",
+      "label": "Alt text",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.textFitting",
+      "menu": "format",
+      "status": "later",
+      "label": "Text fitting",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.newSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "New slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.duplicateSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Duplicate slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.deleteSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Delete slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.skipSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Skip slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.moveSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.moveSlide.up",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide up",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.moveSlide.down",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide down",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.moveSlide.toBeginning",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide to beginning",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.moveSlide.toEnd",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide to end",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.changeBackground",
+      "menu": "slide",
+      "status": "now",
+      "label": "Change background",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.changeBackground.upload",
+      "menu": "slide",
+      "status": "now",
+      "label": "Upload from computer",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.changeBackground.byUrl",
+      "menu": "slide",
+      "status": "now",
+      "label": "By URL",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.changeBackground.fromThisPresentation",
+      "menu": "slide",
+      "status": "now",
+      "label": "From this presentation",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.applyLayout",
+      "menu": "slide",
+      "status": "now",
+      "label": "Apply layout",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.transition",
+      "menu": "slide",
+      "status": "later",
+      "label": "Transition",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.editTheme",
+      "menu": "slide",
+      "status": "later",
+      "label": "Edit theme",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.changeTheme",
+      "menu": "slide",
+      "status": "now",
+      "label": "Change theme",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.order",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Order",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.order.bringToFront",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bring to front",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.order.bringForward",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bring forward",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.order.sendBackward",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Send backward",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.order.sendToBack",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Send to back",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Align",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.left",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Left",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.center",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Center",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.right",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Right",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.top",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Top",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.middle",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Middle",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.bottom",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bottom",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.distribute",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Distribute",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.distribute.horizontally",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Horizontally",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.distribute.vertically",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Vertically",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.centerOnPage",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Center on page",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.centerOnPage.horizontally",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Horizontally",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.centerOnPage.vertically",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Vertically",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.rotate",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Rotate",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.rotate.clockwise",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Rotate clockwise 90°",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.rotate.counterClockwise",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Rotate counter-clockwise 90°",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.rotate.flipHorizontally",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Flip horizontally",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.rotate.flipVertically",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Flip vertically",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.group",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Group",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.ungroup",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Ungroup",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.regroup",
+      "menu": "arrange",
+      "status": "omit",
+      "label": "Regroup",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.spelling",
+      "menu": "tools",
+      "status": "now",
+      "label": "Spelling",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.spelling.spellCheck",
+      "menu": "tools",
+      "status": "later",
+      "label": "Spell check",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.spelling.underlineErrors",
+      "menu": "tools",
+      "status": "now",
+      "label": "Underline errors",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.spelling.personalDictionary",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Personal dictionary",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.explore",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Explore",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.linkedObjects",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Linked objects",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.dictionary",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Dictionary",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.qaHistory",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Q&A history",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.dictateNotes",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Dictate speaker notes",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.preferences",
+      "menu": "tools",
+      "status": "later",
+      "label": "Preferences",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.accessibilitySettings",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Accessibility settings",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.activityDashboard",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Activity dashboard",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.checkSlides",
+      "menu": "tools",
+      "status": "now",
+      "label": "Check slides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced",
+      "menu": "tools",
+      "status": "now",
+      "label": "Advanced",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.showSource",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show source",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.sideBySide",
+      "menu": "tools",
+      "status": "now",
+      "label": "Light and dark side by side",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.suggestionMarks",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show suggestion marks on the slide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.showIds",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show slide and block ids",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.renderSlide",
+      "menu": "tools",
+      "status": "now",
+      "label": "Render this slide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.changeHistory",
+      "menu": "tools",
+      "status": "now",
+      "label": "Change history",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.sectionsTree",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show sections as a tree",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.readAsBook",
+      "menu": "tools",
+      "status": "now",
+      "label": "Read as a book",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.picturesMaterials",
+      "menu": "tools",
+      "status": "now",
+      "label": "Pictures and materials",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.runAction",
+      "menu": "tools",
+      "status": "now",
+      "label": "Run an action…",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.addOns",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.addOns.get",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Get add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.addOns.manage",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Manage add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.installedAddOns",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Installed add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.appsScript",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Apps Script",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.appSheet",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "AppSheet",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.agentAccess",
+      "menu": "extensions",
+      "status": "now",
+      "label": "Agent access",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.embedInSite",
+      "menu": "extensions",
+      "status": "now",
+      "label": "Embed in a site",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.searchMenus",
+      "menu": "help",
+      "status": "now",
+      "label": "Search the menus",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.help",
+      "menu": "help",
+      "status": "now",
+      "label": "Help",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.training",
+      "menu": "help",
+      "status": "omit",
+      "label": "Training",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.updates",
+      "menu": "help",
+      "status": "omit",
+      "label": "Updates",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.improve",
+      "menu": "help",
+      "status": "later",
+      "label": "Help Turboslide improve",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.privacyPolicy",
+      "menu": "help",
+      "status": "omit",
+      "label": "Privacy Policy",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.termsOfService",
+      "menu": "help",
+      "status": "omit",
+      "label": "Terms of Service",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.keyboardShortcuts",
+      "menu": "help",
+      "status": "now",
+      "label": "Keyboard shortcuts",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "/edit/untitled-20260912-cvo0",
+      "evidence": "32 text nodes, 43 tooltips, none of 18 words",
+      "pass": true
+    },
+    {
+      "section": "contextMenu:scratch",
+      "id": "filmstripCard",
+      "wanted": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "-",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "edit.delete",
+        "slide.skipSlide",
+        "-",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.transition",
+        "-",
+        "slide.moveSlide",
+        "-",
+        "insert.comment"
+      ],
+      "observed": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "-",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "edit.delete",
+        "slide.skipSlide",
+        "-",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.transition",
+        "-",
+        "slide.moveSlide",
+        "-",
+        "insert.comment"
+      ],
+      "check": "order",
+      "pass": true
+    },
+    {
+      "section": "contextMenu:scratch",
+      "id": "emptyCanvas",
+      "wanted": [
+        "edit.paste",
+        "-",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "slide.deleteSlide",
+        "slide.skipSlide",
+        "-",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.transition",
+        "-",
+        "insert.comment"
+      ],
+      "observed": [
+        "edit.paste",
+        "-",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "slide.deleteSlide",
+        "slide.skipSlide",
+        "-",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.transition",
+        "-",
+        "insert.comment"
+      ],
+      "check": "order",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.moveToTrash",
+      "menu": "file",
+      "effect": "action",
+      "label": "Move to trash",
+      "evidence": "https://turboslide-arpbhvdi5-kl01s-projects.vercel.app/edit/untitled-20260912-cvo0 -> /decks \"\"",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "trash.delete",
+      "menu": "home",
+      "label": "Delete forever",
+      "evidence": "the card of untitled-20260912-cvo0 left the trash",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.appIcon",
+      "menu": "title",
+      "status": "now",
+      "label": "Turboslide home",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.name",
+      "menu": "title",
+      "status": "now",
+      "label": "Rename",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.star",
+      "menu": "title",
+      "status": "omit",
+      "label": "Star",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.move",
+      "menu": "title",
+      "status": "omit",
+      "label": "Move",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.saveState",
+      "menu": "title",
+      "status": "now",
+      "label": "Document status",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.lastEdit",
+      "menu": "title",
+      "status": "now",
+      "label": "Last edit",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.comments",
+      "menu": "title",
+      "status": "later",
+      "label": "Show all comments",
+      "check": "present",
+      "evidence": "no [data-menu-item] rendered on its path",
+      "pass": false
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.meet",
+      "menu": "title",
+      "status": "omit",
+      "label": "Meet",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.record",
+      "menu": "title",
+      "status": "omit",
+      "label": "Record",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.slideshow",
+      "menu": "title",
+      "status": "now",
+      "label": "Slideshow",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.slideshow.presenterView",
+      "menu": "title",
+      "status": "now",
+      "label": "Presenter view",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.slideshow.startFromBeginning",
+      "menu": "title",
+      "status": "now",
+      "label": "Start from beginning",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.slideshow.presentOnAnotherScreen",
+      "menu": "title",
+      "status": "later",
+      "label": "Present on another screen",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.slideshow.displayOptions",
+      "menu": "title",
+      "status": "omit",
+      "label": "Presentation display options",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.share",
+      "menu": "title",
+      "status": "now",
+      "label": "Share",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.account",
+      "menu": "title",
+      "status": "omit",
+      "label": "Account avatar",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "title.gemini",
+      "menu": "title",
+      "status": "omit",
+      "label": "Ask Gemini",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.new",
+      "menu": "file",
+      "status": "now",
+      "label": "New",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.new.presentation",
+      "menu": "file",
+      "status": "now",
+      "label": "Presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.new.templateGallery",
+      "menu": "file",
+      "status": "now",
+      "label": "From template gallery",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.open",
+      "menu": "file",
+      "status": "now",
+      "label": "Open…",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.importSlides",
+      "menu": "file",
+      "status": "now",
+      "label": "Import slides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.makeCopy",
+      "menu": "file",
+      "status": "now",
+      "label": "Make a copy",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.makeCopy.entire",
+      "menu": "file",
+      "status": "now",
+      "label": "Entire presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.makeCopy.selected",
+      "menu": "file",
+      "status": "now",
+      "label": "Selected slides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.share",
+      "menu": "file",
+      "status": "now",
+      "label": "Share",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.share.withOthers",
+      "menu": "file",
+      "status": "now",
+      "label": "Share with others",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.share.publish",
+      "menu": "file",
+      "status": "now",
+      "label": "Publish to web",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.email",
+      "menu": "file",
+      "status": "omit",
+      "label": "Email",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.email.thisFile",
+      "menu": "file",
+      "status": "omit",
+      "label": "Email this file",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.email.collaborators",
+      "menu": "file",
+      "status": "omit",
+      "label": "Email collaborators",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.download",
+      "menu": "file",
+      "status": "now",
+      "label": "Download",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.download.pptx",
+      "menu": "file",
+      "status": "now",
+      "label": "Microsoft PowerPoint (.pptx)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.download.odp",
+      "menu": "file",
+      "status": "omit",
+      "label": "ODP Document (.odp)",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.download.pdf",
+      "menu": "file",
+      "status": "now",
+      "label": "PDF Document (.pdf)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.download.txt",
+      "menu": "file",
+      "status": "now",
+      "label": "Plain Text (.txt)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.download.jpg",
+      "menu": "file",
+      "status": "now",
+      "label": "JPEG image (.jpg, current slide)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.download.png",
+      "menu": "file",
+      "status": "now",
+      "label": "PNG image (.png, current slide)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.download.svg",
+      "menu": "file",
+      "status": "omit",
+      "label": "Scalable Vector Graphics (.svg, current slide)",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.download.html",
+      "menu": "file",
+      "status": "now",
+      "label": "Web page (.html)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.download.zip",
+      "menu": "file",
+      "status": "now",
+      "label": "Turboslide bundle (.zip)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.rename",
+      "menu": "file",
+      "status": "now",
+      "label": "Rename",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.move",
+      "menu": "file",
+      "status": "omit",
+      "label": "Move",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.addShortcut",
+      "menu": "file",
+      "status": "omit",
+      "label": "Add shortcut to Drive",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.moveToTrash",
+      "menu": "file",
+      "status": "now",
+      "label": "Move to trash",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.versionHistory",
+      "menu": "file",
+      "status": "now",
+      "label": "Version history",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.versionHistory.nameCurrent",
+      "menu": "file",
+      "status": "now",
+      "label": "Name current version",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.versionHistory.see",
+      "menu": "file",
+      "status": "now",
+      "label": "See version history",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.approvals",
+      "menu": "file",
+      "status": "omit",
+      "label": "Approvals",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.offline",
+      "menu": "file",
+      "status": "omit",
+      "label": "Make available offline",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.details",
+      "menu": "file",
+      "status": "now",
+      "label": "Details",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.language",
+      "menu": "file",
+      "status": "omit",
+      "label": "Language",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.pageSetup",
+      "menu": "file",
+      "status": "later",
+      "label": "Page setup",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.printPreview",
+      "menu": "file",
+      "status": "now",
+      "label": "Print settings and preview",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "file.print",
+      "menu": "file",
+      "status": "now",
+      "label": "Print",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "edit.undo",
+      "menu": "edit",
+      "status": "now",
+      "label": "Undo",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "edit.redo",
+      "menu": "edit",
+      "status": "now",
+      "label": "Redo",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "edit.cut",
+      "menu": "edit",
+      "status": "now",
+      "label": "Cut",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "edit.copy",
+      "menu": "edit",
+      "status": "now",
+      "label": "Copy",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "edit.paste",
+      "menu": "edit",
+      "status": "now",
+      "label": "Paste",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "edit.pasteWithoutFormatting",
+      "menu": "edit",
+      "status": "now",
+      "label": "Paste without formatting",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "edit.delete",
+      "menu": "edit",
+      "status": "now",
+      "label": "Delete",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "edit.duplicate",
+      "menu": "edit",
+      "status": "now",
+      "label": "Duplicate",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "edit.selectAll",
+      "menu": "edit",
+      "status": "now",
+      "label": "Select all",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "edit.selectNone",
+      "menu": "edit",
+      "status": "later",
+      "label": "Select none",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "edit.findReplace",
+      "menu": "edit",
+      "status": "now",
+      "label": "Find and replace",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.slideshow",
+      "menu": "view",
+      "status": "now",
+      "label": "Slideshow",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.motion",
+      "menu": "view",
+      "status": "omit",
+      "label": "Motion",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.themeBuilder",
+      "menu": "view",
+      "status": "omit",
+      "label": "Theme builder",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.gridView",
+      "menu": "view",
+      "status": "now",
+      "label": "Grid view",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.zoom",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.zoom.in",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom in",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.zoom.out",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom out",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.zoom.fit",
+      "menu": "view",
+      "status": "now",
+      "label": "Fit",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.zoom.50",
+      "menu": "view",
+      "status": "now",
+      "label": "50%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.zoom.100",
+      "menu": "view",
+      "status": "now",
+      "label": "100%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.zoom.200",
+      "menu": "view",
+      "status": "now",
+      "label": "200%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.showRuler",
+      "menu": "view",
+      "status": "later",
+      "label": "Show ruler",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.guides",
+      "menu": "view",
+      "status": "later",
+      "label": "Guides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.guides.show",
+      "menu": "view",
+      "status": "later",
+      "label": "Show guides",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.guides.addVertical",
+      "menu": "view",
+      "status": "later",
+      "label": "Add vertical guide",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.guides.addHorizontal",
+      "menu": "view",
+      "status": "later",
+      "label": "Add horizontal guide",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.guides.edit",
+      "menu": "view",
+      "status": "later",
+      "label": "Edit guides",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.guides.clear",
+      "menu": "view",
+      "status": "later",
+      "label": "Clear guides",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.snapTo",
+      "menu": "view",
+      "status": "now",
+      "label": "Snap to",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.snapTo.guides",
+      "menu": "view",
+      "status": "now",
+      "label": "Guides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.snapTo.grid",
+      "menu": "view",
+      "status": "now",
+      "label": "Grid",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.comments",
+      "menu": "view",
+      "status": "later",
+      "label": "Comments",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.comments.hide",
+      "menu": "view",
+      "status": "later",
+      "label": "Hide comments",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.comments.minimize",
+      "menu": "view",
+      "status": "later",
+      "label": "Minimize comments",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.comments.expand",
+      "menu": "view",
+      "status": "later",
+      "label": "Expand comments",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.livePointers",
+      "menu": "view",
+      "status": "omit",
+      "label": "Live pointers",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.livePointers.mine",
+      "menu": "view",
+      "status": "omit",
+      "label": "Show my pointer",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.livePointers.collaborators",
+      "menu": "view",
+      "status": "omit",
+      "label": "Show collaborator pointers",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.showSpeakerNotes",
+      "menu": "view",
+      "status": "now",
+      "label": "Show speaker notes",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.showFilmstrip",
+      "menu": "view",
+      "status": "now",
+      "label": "Show filmstrip",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.mode",
+      "menu": "view",
+      "status": "now",
+      "label": "Mode",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.mode.editing",
+      "menu": "view",
+      "status": "now",
+      "label": "Editing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.mode.commenting",
+      "menu": "view",
+      "status": "omit",
+      "label": "Commenting",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.mode.viewing",
+      "menu": "view",
+      "status": "now",
+      "label": "Viewing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.fullScreen",
+      "menu": "view",
+      "status": "now",
+      "label": "Full screen",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.showSections",
+      "menu": "view",
+      "status": "now",
+      "label": "Show sections",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.appearance",
+      "menu": "view",
+      "status": "now",
+      "label": "Appearance",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.appearance.light",
+      "menu": "view",
+      "status": "now",
+      "label": "Light",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.appearance.dark",
+      "menu": "view",
+      "status": "now",
+      "label": "Dark",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "view.appearance.match",
+      "menu": "view",
+      "status": "now",
+      "label": "Match the presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.image",
+      "menu": "insert",
+      "status": "now",
+      "label": "Image",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.image.upload",
+      "menu": "insert",
+      "status": "now",
+      "label": "Upload from computer",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.image.stockWeb",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Stock & web",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.image.drivePhotos",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Drive & Photos",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.image.camera",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Camera",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.image.byUrl",
+      "menu": "insert",
+      "status": "now",
+      "label": "By URL",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.image.fromThisPresentation",
+      "menu": "insert",
+      "status": "now",
+      "label": "From this presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.textBox",
+      "menu": "insert",
+      "status": "now",
+      "label": "Text box",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.audio",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Audio",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.video",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Video",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.shape",
+      "menu": "insert",
+      "status": "now",
+      "label": "Shape",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.shape.shapes",
+      "menu": "insert",
+      "status": "now",
+      "label": "Shapes",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.shape.shapes.rectangle",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rectangle",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.shape.shapes.rounded",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rounded rectangle",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.shape.shapes.ellipse",
+      "menu": "insert",
+      "status": "now",
+      "label": "Ellipse",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.shape.arrows",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrows",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.shape.arrows.arrow",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrow",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.shape.callouts",
+      "menu": "insert",
+      "status": "later",
+      "label": "Callouts",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.shape.equation",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Equation",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.table",
+      "menu": "insert",
+      "status": "now",
+      "label": "Table",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.chart",
+      "menu": "insert",
+      "status": "later",
+      "label": "Chart",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.chart.bar",
+      "menu": "insert",
+      "status": "later",
+      "label": "Bar",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.chart.column",
+      "menu": "insert",
+      "status": "later",
+      "label": "Column",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.chart.line",
+      "menu": "insert",
+      "status": "later",
+      "label": "Line",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.chart.pie",
+      "menu": "insert",
+      "status": "later",
+      "label": "Pie",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.chart.fromSheets",
+      "menu": "insert",
+      "status": "omit",
+      "label": "From Sheets",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.diagram",
+      "menu": "insert",
+      "status": "later",
+      "label": "Diagram",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.wordArt",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Word art",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.line",
+      "menu": "insert",
+      "status": "now",
+      "label": "Line",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.line.line",
+      "menu": "insert",
+      "status": "now",
+      "label": "Line",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.line.arrow",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrow",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.line.rule",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rule",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.line.elbowConnector",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Elbow Connector",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.line.curvedConnector",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Curved Connector",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.line.curve",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Curve",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.line.polyline",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Polyline",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.line.scribble",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Scribble",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.specialCharacters",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Special characters",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.animation",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Animation",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.link",
+      "menu": "insert",
+      "status": "now",
+      "label": "Link",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.comment",
+      "menu": "insert",
+      "status": "later",
+      "label": "Comment",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.newSlide",
+      "menu": "insert",
+      "status": "now",
+      "label": "New slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.slideNumbers",
+      "menu": "insert",
+      "status": "now",
+      "label": "Slide numbers",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.placeholder",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Placeholder",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.templates",
+      "menu": "insert",
+      "status": "later",
+      "label": "Templates",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.buildingBlocks",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Building blocks",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.speakerSpotlight",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Speaker spotlight",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.icon",
+      "menu": "insert",
+      "status": "now",
+      "label": "Icon",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "insert.material",
+      "menu": "insert",
+      "status": "now",
+      "label": "Material",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.text",
+      "menu": "format",
+      "status": "now",
+      "label": "Text",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.text.bold",
+      "menu": "format",
+      "status": "now",
+      "label": "Bold",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.text.italic",
+      "menu": "format",
+      "status": "later",
+      "label": "Italic",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.text.underline",
+      "menu": "format",
+      "status": "later",
+      "label": "Underline",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.text.strikethrough",
+      "menu": "format",
+      "status": "now",
+      "label": "Strikethrough",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.text.superscript",
+      "menu": "format",
+      "status": "omit",
+      "label": "Superscript",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.text.subscript",
+      "menu": "format",
+      "status": "omit",
+      "label": "Subscript",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.text.size",
+      "menu": "format",
+      "status": "now",
+      "label": "Size",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.text.size.increase",
+      "menu": "format",
+      "status": "now",
+      "label": "Increase font size",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.text.size.decrease",
+      "menu": "format",
+      "status": "now",
+      "label": "Decrease font size",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.text.capitalization",
+      "menu": "format",
+      "status": "omit",
+      "label": "Capitalization",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.alignIndent",
+      "menu": "format",
+      "status": "now",
+      "label": "Align & indent",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.alignIndent.left",
+      "menu": "format",
+      "status": "now",
+      "label": "Left",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.alignIndent.center",
+      "menu": "format",
+      "status": "now",
+      "label": "Center",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.alignIndent.right",
+      "menu": "format",
+      "status": "now",
+      "label": "Right",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.alignIndent.justified",
+      "menu": "format",
+      "status": "omit",
+      "label": "Justified",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.alignIndent.increaseIndent",
+      "menu": "format",
+      "status": "later",
+      "label": "Increase indent",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.alignIndent.decreaseIndent",
+      "menu": "format",
+      "status": "later",
+      "label": "Decrease indent",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.alignIndent.indentationOptions",
+      "menu": "format",
+      "status": "omit",
+      "label": "Indentation options",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.spacing",
+      "menu": "format",
+      "status": "now",
+      "label": "Line & paragraph spacing",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.spacing.single",
+      "menu": "format",
+      "status": "now",
+      "label": "Single",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.spacing.1_15",
+      "menu": "format",
+      "status": "now",
+      "label": "1.15",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.spacing.1_5",
+      "menu": "format",
+      "status": "now",
+      "label": "1.5",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.spacing.double",
+      "menu": "format",
+      "status": "now",
+      "label": "Double",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.spacing.custom",
+      "menu": "format",
+      "status": "now",
+      "label": "Custom spacing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bulletsNumbering",
+      "menu": "format",
+      "status": "now",
+      "label": "Bullets & numbering",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bulletsNumbering.numbered",
+      "menu": "format",
+      "status": "now",
+      "label": "Numbered list",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bulletsNumbering.bulleted",
+      "menu": "format",
+      "status": "now",
+      "label": "Bulleted list",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bulletsNumbering.listOptions",
+      "menu": "format",
+      "status": "omit",
+      "label": "List options",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bulletsNumbering.listOptions.restart",
+      "menu": "format",
+      "status": "omit",
+      "label": "Restart numbering",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bulletsNumbering.listOptions.prefixSuffix",
+      "menu": "format",
+      "status": "omit",
+      "label": "Edit prefix and suffix",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bulletsNumbering.listOptions.moreBullets",
+      "menu": "format",
+      "status": "omit",
+      "label": "More bullets",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table",
+      "menu": "format",
+      "status": "now",
+      "label": "Table",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table.insertRowAbove",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert row above",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table.insertRowBelow",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert row below",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table.insertColumnLeft",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert column left",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table.insertColumnRight",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert column right",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table.deleteRow",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete row",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table.deleteColumn",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete column",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table.deleteTable",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete table",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table.distributeRows",
+      "menu": "format",
+      "status": "now",
+      "label": "Distribute rows",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table.distributeColumns",
+      "menu": "format",
+      "status": "now",
+      "label": "Distribute columns",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table.mergeCells",
+      "menu": "format",
+      "status": "later",
+      "label": "Merge cells",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.table.unmergeCells",
+      "menu": "format",
+      "status": "later",
+      "label": "Unmerge cells",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.image",
+      "menu": "format",
+      "status": "now",
+      "label": "Image",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.image.cropImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Crop image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.image.maskImage",
+      "menu": "format",
+      "status": "omit",
+      "label": "Mask image",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.image.replaceImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Replace image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.image.replaceImage.upload",
+      "menu": "format",
+      "status": "now",
+      "label": "Upload from computer",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.image.replaceImage.byUrl",
+      "menu": "format",
+      "status": "now",
+      "label": "By URL",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.image.replaceImage.fromThisPresentation",
+      "menu": "format",
+      "status": "now",
+      "label": "From this presentation",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.image.resetImage",
+      "menu": "format",
+      "status": "later",
+      "label": "Reset image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.image.imageOptions",
+      "menu": "format",
+      "status": "now",
+      "label": "Image options",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bordersLines",
+      "menu": "format",
+      "status": "now",
+      "label": "Borders & lines",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bordersLines.borderColor",
+      "menu": "format",
+      "status": "now",
+      "label": "Border color",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bordersLines.borderWeight",
+      "menu": "format",
+      "status": "now",
+      "label": "Border weight",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bordersLines.borderDash",
+      "menu": "format",
+      "status": "later",
+      "label": "Border dash",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bordersLines.lineStart",
+      "menu": "format",
+      "status": "now",
+      "label": "Line start",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.bordersLines.lineEnd",
+      "menu": "format",
+      "status": "now",
+      "label": "Line end",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.formatOptions",
+      "menu": "format",
+      "status": "now",
+      "label": "Format options",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.clearFormatting",
+      "menu": "format",
+      "status": "now",
+      "label": "Clear formatting",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.altText",
+      "menu": "format",
+      "status": "now",
+      "label": "Alt text",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "format.textFitting",
+      "menu": "format",
+      "status": "later",
+      "label": "Text fitting",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.newSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "New slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.duplicateSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Duplicate slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.deleteSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Delete slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.skipSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Skip slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.moveSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.moveSlide.up",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide up",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.moveSlide.down",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide down",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.moveSlide.toBeginning",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide to beginning",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.moveSlide.toEnd",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide to end",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.changeBackground",
+      "menu": "slide",
+      "status": "now",
+      "label": "Change background",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.changeBackground.upload",
+      "menu": "slide",
+      "status": "now",
+      "label": "Upload from computer",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.changeBackground.byUrl",
+      "menu": "slide",
+      "status": "now",
+      "label": "By URL",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.changeBackground.fromThisPresentation",
+      "menu": "slide",
+      "status": "now",
+      "label": "From this presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.applyLayout",
+      "menu": "slide",
+      "status": "now",
+      "label": "Apply layout",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.transition",
+      "menu": "slide",
+      "status": "later",
+      "label": "Transition",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.editTheme",
+      "menu": "slide",
+      "status": "later",
+      "label": "Edit theme",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "slide.changeTheme",
+      "menu": "slide",
+      "status": "now",
+      "label": "Change theme",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.order",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Order",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.order.bringToFront",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bring to front",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.order.bringForward",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bring forward",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.order.sendBackward",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Send backward",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.order.sendToBack",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Send to back",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.align",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Align",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.align.left",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Left",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.align.center",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Center",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.align.right",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Right",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.align.top",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Top",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.align.middle",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Middle",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.align.bottom",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bottom",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.distribute",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Distribute",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.distribute.horizontally",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Horizontally",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.distribute.vertically",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Vertically",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.centerOnPage",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Center on page",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.centerOnPage.horizontally",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Horizontally",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.centerOnPage.vertically",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Vertically",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.rotate",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Rotate",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.rotate.clockwise",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Rotate clockwise 90°",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.rotate.counterClockwise",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Rotate counter-clockwise 90°",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.rotate.flipHorizontally",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Flip horizontally",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.rotate.flipVertically",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Flip vertically",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.group",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Group",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.ungroup",
+      "menu": "arrange",
+      "status": "later",
+      "label": "Ungroup",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "arrange.regroup",
+      "menu": "arrange",
+      "status": "omit",
+      "label": "Regroup",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.spelling",
+      "menu": "tools",
+      "status": "now",
+      "label": "Spelling",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.spelling.spellCheck",
+      "menu": "tools",
+      "status": "later",
+      "label": "Spell check",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.spelling.underlineErrors",
+      "menu": "tools",
+      "status": "now",
+      "label": "Underline errors",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.spelling.personalDictionary",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Personal dictionary",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.explore",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Explore",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.linkedObjects",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Linked objects",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.dictionary",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Dictionary",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.qaHistory",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Q&A history",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.dictateNotes",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Dictate speaker notes",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.preferences",
+      "menu": "tools",
+      "status": "later",
+      "label": "Preferences",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.accessibilitySettings",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Accessibility settings",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.activityDashboard",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Activity dashboard",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.checkSlides",
+      "menu": "tools",
+      "status": "now",
+      "label": "Check slides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.advanced",
+      "menu": "tools",
+      "status": "now",
+      "label": "Advanced",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.advanced.showSource",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show source",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.advanced.sideBySide",
+      "menu": "tools",
+      "status": "now",
+      "label": "Light and dark side by side",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.advanced.suggestionMarks",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show suggestion marks on the slide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.advanced.showIds",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show slide and block ids",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.advanced.renderSlide",
+      "menu": "tools",
+      "status": "now",
+      "label": "Render this slide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.advanced.changeHistory",
+      "menu": "tools",
+      "status": "now",
+      "label": "Change history",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.advanced.sectionsTree",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show sections as a tree",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.advanced.readAsBook",
+      "menu": "tools",
+      "status": "now",
+      "label": "Read as a book",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.advanced.picturesMaterials",
+      "menu": "tools",
+      "status": "now",
+      "label": "Pictures and materials",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "tools.advanced.runAction",
+      "menu": "tools",
+      "status": "now",
+      "label": "Run an action…",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "extensions.addOns",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "extensions.addOns.get",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Get add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "extensions.addOns.manage",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Manage add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "extensions.installedAddOns",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Installed add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "extensions.appsScript",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Apps Script",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "extensions.appSheet",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "AppSheet",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "extensions.agentAccess",
+      "menu": "extensions",
+      "status": "now",
+      "label": "Agent access",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "extensions.embedInSite",
+      "menu": "extensions",
+      "status": "now",
+      "label": "Embed in a site",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "help.searchMenus",
+      "menu": "help",
+      "status": "now",
+      "label": "Search the menus",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "help.help",
+      "menu": "help",
+      "status": "now",
+      "label": "Help",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "help.training",
+      "menu": "help",
+      "status": "omit",
+      "label": "Training",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "help.updates",
+      "menu": "help",
+      "status": "omit",
+      "label": "Updates",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "help.improve",
+      "menu": "help",
+      "status": "later",
+      "label": "Help Turboslide improve",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "help.privacyPolicy",
+      "menu": "help",
+      "status": "omit",
+      "label": "Privacy Policy",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "help.termsOfService",
+      "menu": "help",
+      "status": "omit",
+      "label": "Terms of Service",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:gt-brand",
+      "id": "help.keyboardShortcuts",
+      "menu": "help",
+      "status": "now",
+      "label": "Keyboard shortcuts",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "toolbar:gt-brand",
+      "id": "toolbar.default",
+      "kind": "default",
+      "wanted": [
+        "toolbar.search",
+        "toolbar.newSlide",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.transition",
+        "toolbar.hideMenus"
+      ],
+      "observed": [
+        "toolbar.search",
+        "toolbar.newSlide",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.transition",
+        "toolbar.hideMenus"
+      ],
+      "evidence": "18 controls in the order of SPEC 3",
+      "check": "order",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "/edit/gt-brand",
+      "evidence": [
+        {
+          "tip": "Open source and platform",
+          "words": ["source"]
+        },
+        {
+          "tip": "The agent API",
+          "words": ["agent"]
+        }
+      ],
+      "pass": false
+    },
+    {
+      "section": "contextMenu:gt-brand",
+      "id": "filmstripCard",
+      "wanted": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "-",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "edit.delete",
+        "slide.skipSlide",
+        "-",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.transition",
+        "-",
+        "slide.moveSlide",
+        "-",
+        "insert.comment"
+      ],
+      "observed": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "-",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "edit.delete",
+        "slide.skipSlide",
+        "-",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.transition",
+        "-",
+        "slide.moveSlide",
+        "-",
+        "insert.comment"
+      ],
+      "check": "order",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "/decks",
+      "evidence": "54 text nodes, 51 tooltips, none of 18 words",
+      "pass": true
+    },
+    {
+      "section": "rows:decks",
+      "id": "omitted labels",
+      "check": "absent",
+      "evidence": "no omitted label stands as a line of /decks",
+      "pass": true
+    }
+  ],
+  "pageErrors": []
+}

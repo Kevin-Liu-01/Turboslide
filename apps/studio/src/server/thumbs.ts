@@ -9,7 +9,13 @@ import type { RenderJobResult } from '@turboslide/render-worker/jobs/render';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import type { RenderRecord, Theme } from '@turboslide/schema/render';
 
-import { ensureDeckAssets, openDeckStore, stateDir, workerClientOptions } from './root';
+import {
+  ensureDeckAssets,
+  isUnsavedDraft,
+  openDeckStore,
+  stateDir,
+  workerClientOptions,
+} from './root';
 
 /**
  * Static thumbnails for the grid and the sidebar (SPEC 5.5, 6.2; MILESTONES M3
@@ -223,6 +229,10 @@ async function writeThumb(
 export async function getThumbnail(request: ThumbRequest): Promise<ThumbResult> {
   assertSlug('deckId', request.deckId);
   assertSlug('slideId', request.slideId);
+  // an unsaved draft (gslides-parity SPEC 6.1) has no folder yet: opening its store would create
+  // one, and a visit to /new must write nothing; the filmstrip keeps its live clone on the 404
+  if (await isUnsavedDraft(request.deckId))
+    throw new RangeError(`no deck ${request.deckId} until its first write`);
   const revision = await deckRevision(request.deckId);
   const path = thumbPath(request.deckId, revision, request.theme, request.width, request.slideId);
   if (existsSync(path)) return { png: new Uint8Array(readFileSync(path)), revision, cached: true };
@@ -286,6 +296,18 @@ export type WarmResult = {
 export async function warmThumbs(input: WarmInput): Promise<WarmResult> {
   const t = performance.now();
   assertSlug('deckId', input.deckId);
+  // an unsaved draft (gslides-parity SPEC 6.1) has nothing the worker can read: the filmstrip
+  // keeps its live clones until the first write creates the deck and the editor warms again
+  if (await isUnsavedDraft(input.deckId)) {
+    return {
+      revision: 0,
+      ready: [],
+      failed: [],
+      rendered: 0,
+      cached: 0,
+      ms: Math.round(performance.now() - t),
+    };
+  }
   const width = input.width ?? DEFAULT_THUMB_WIDTH;
   const { revision, order } = await deckFacts(input.deckId);
   const wanted = input.slideIds ? input.slideIds.filter((id) => order.includes(id)) : order;

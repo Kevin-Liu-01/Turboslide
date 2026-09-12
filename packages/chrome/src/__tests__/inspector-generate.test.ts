@@ -42,7 +42,9 @@ describe('blockControls for a rows block', () => {
     const annotated = Object.keys(inspectorsOf(rowsBlockSchema)).filter(
       (key) => key !== 'id' && key !== 'pos',
     );
-    expect(annotated).toEqual(['key', 'tight', 'links', 'minRowHeight']);
+    /* `link` is the whole-box link every block carries since the Google Slides parity round
+       (gslides-parity SPEC 7.2.7, blockLinkField in schema/text.ts) */
+    expect(annotated).toEqual(['link', 'key', 'tight', 'links', 'minRowHeight']);
     for (const key of annotated) expect(byPath.has(`/${key}`)).toBe(true);
     expect(byPath.has('/id')).toBe(false);
     expect(byPath.has('/type')).toBe(false);

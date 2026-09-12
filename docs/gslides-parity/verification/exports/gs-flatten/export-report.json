@@ -1,0 +1,228 @@
+{
+  "deckId": "gslides",
+  "revision": 1,
+  "format": "pptx",
+  "mode": "flatten",
+  "theme": "light",
+  "fontSet": "exact",
+  "fontSetVersion": "4.001+gt.1",
+  "files": [
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/exports/gs-flatten/gslides-light.pptx",
+      "bytes": 229099,
+      "sha256": "d8bd0b793bcbd0d938953dd6161c3d6b324fd617ecc28b745549c4d8fa613c8a"
+    },
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/exports/gs-flatten/gslides-dark.pptx",
+      "bytes": 229410,
+      "sha256": "3950c8efa894786ae5072fc86bbf0364b4449a53441f7b7d2055f5678d0dc96c"
+    },
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/exports/gs-flatten/gslides-both.zip",
+      "bytes": 458753,
+      "sha256": "5d7191b7c7d5159df34394ca2efeca9254f13e1bc913edc0990a9bf5160a68c8"
+    }
+  ],
+  "fonts": {
+    "embedded": [],
+    "requiredOnViewer": [
+      "GT Inter Display",
+      "GT Inter Text 26",
+      "GT Inter Text 14",
+      "GT Inter Text 22",
+      "GT Inter Text 20 Medium",
+      "GT Inter Text 20",
+      "GT Inter Text 24 Medium"
+    ],
+    "substitutedIn": ["every viewer"]
+  },
+  "slides": [
+    {
+      "slideId": "title",
+      "theme": "light",
+      "native": ["heading", "lead"],
+      "raster": [],
+      "sheet": "work/sheets/light/01-title@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 37321,
+        "colors": 637,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "breaks",
+      "theme": "light",
+      "native": ["h", "p1", "p2"],
+      "raster": [],
+      "sheet": "work/sheets/light/02-breaks@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 46517,
+        "colors": 406,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "table",
+      "theme": "light",
+      "native": ["h", "table"],
+      "raster": [],
+      "sheet": "work/sheets/light/03-table@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31846,
+        "colors": 408,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "numbered",
+      "theme": "light",
+      "native": ["h", "p1", "list"],
+      "raster": [],
+      "sheet": "work/sheets/light/04-numbered@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 35300,
+        "colors": 406,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "links",
+      "theme": "light",
+      "native": ["h", "box", "shape", "t1"],
+      "raster": [],
+      "sheet": "work/sheets/light/05-links@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31388,
+        "colors": 411,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "prompt",
+      "theme": "light",
+      "native": ["h"],
+      "raster": [],
+      "sheet": "work/sheets/light/06-prompt@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 12189,
+        "colors": 178,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "title",
+      "theme": "dark",
+      "native": ["heading", "lead"],
+      "raster": [],
+      "sheet": "work/sheets/dark/01-title@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 37139,
+        "colors": 808,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "breaks",
+      "theme": "dark",
+      "native": ["h", "p1", "p2"],
+      "raster": [],
+      "sheet": "work/sheets/dark/02-breaks@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 46554,
+        "colors": 431,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "table",
+      "theme": "dark",
+      "native": ["h", "table"],
+      "raster": [],
+      "sheet": "work/sheets/dark/03-table@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31940,
+        "colors": 433,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "numbered",
+      "theme": "dark",
+      "native": ["h", "p1", "list"],
+      "raster": [],
+      "sheet": "work/sheets/dark/04-numbered@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 35278,
+        "colors": 432,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "links",
+      "theme": "dark",
+      "native": ["h", "box", "shape", "t1"],
+      "raster": [],
+      "sheet": "work/sheets/dark/05-links@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31608,
+        "colors": 445,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "prompt",
+      "theme": "dark",
+      "native": ["h"],
+      "raster": [],
+      "sheet": "work/sheets/dark/06-prompt@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 12352,
+        "colors": 197,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": true,
+  "passed": true,
+  "residual": [
+    "merged report over light and dark; theme names the first, per-theme reports are beside this file",
+    "renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "flatten (perfect): the slide is a 2x raster of the sheet under the page raster policy; text is an invisible native layer; the slide title is the slide name and a hidden title placeholder",
+    "rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x",
+    "package: 51 parts, 62 relationships, valid against the content types and relationships",
+    "skipped: 1 slide(s) left out (skipped); pass includeSkipped to carry them",
+    "links: a slide link on an invisible run of the flatten layer is written as a slide jump; whether PowerPoint honours it under the cover picture is unverified (gslides-parity SPEC 7.2.8)",
+    "package: 5 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)",
+    "package: 22 kern=\"0\" attribute(s) and 0 empty ext list(s) removed; 0 custGeom",
+    "pages: 6 png-palette; 0.19 MiB of page rasters; worst decoded mismatch 0.000 percent at threshold 0.1 (perfect budget 0.1)",
+    "links: 8 hyperlink(s) written (a URL as is, a slide link as a jump to its number in this file; SPEC 7.2.7, 7.2.8)",
+    "notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)",
+    "fonts not embedded: GT Inter Display, GT Inter Text 26, GT Inter Text 14, GT Inter Text 22, GT Inter Text 20 Medium, GT Inter Text 20, GT Inter Text 24 Medium; the text layer is invisible, so no viewer draws them (docs/pptx.md)",
+    "both: gslides-both.zip holds the light and dark files"
+  ]
+}

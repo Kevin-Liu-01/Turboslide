@@ -1,0 +1,12 @@
+path                                       status  ms     result  detail
+/                                          307     26     pass    location /new; x-robots-tag noindex
+/new                                       200     7      pass    17440 chars; 3/3 shell marks; noindex
+/deck/gt-brand                             200     53     pass    447473 chars; 0 notes key(s)
+/edit/gt-brand                             200     5      pass    17423 chars; 3/3 shell marks
+/decks                                     200     8      pass    3 card(s)
+/decks/trash                               200     6      pass    21562 chars
+/print/gt-brand                            200     47     pass    85 page(s)
+/present/gt-brand                          200     5      pass    17490 chars
+/decks/gt-brand/assets/cover-fumadocs.png  200     1      pass    image/png 0 B
+/api/agent                                 200     4      pass    
+10/10 passed against http://localhost:4321/

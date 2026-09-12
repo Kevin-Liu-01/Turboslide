@@ -1,13 +1,15 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { basename, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 
 import { createDispatcher } from '@turboslide/agent/dispatch';
-import type { Dispatcher } from '@turboslide/agent/dispatch';
+import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
 import { registerReadActions } from '@turboslide/agent/http/readers';
 import type { StudioSession } from '@turboslide/agent/http/sessions';
 import { registerDeckActions } from '@turboslide/cli/commands/deck';
-import { registerStoreActions } from '@turboslide/cli/store-actions';
+import type { DeckCopyInput, DeckIdInput, DeckListInput } from '@turboslide/cli/commands/deck';
+import { registerStoreActions, slideImport } from '@turboslide/cli/store-actions';
+import type { SlideImportInput, StoreActionDeps } from '@turboslide/cli/store-actions';
 import type { DeckSource } from '@turboslide/mcp/resources';
 import { parseJsonResult, runTurboslide } from '@turboslide/render-worker/cli';
 import { createWorkerClient } from '@turboslide/render-worker/client';
@@ -15,12 +17,17 @@ import type { WorkerClient } from '@turboslide/render-worker/client';
 import type { SheetJobResult } from '@turboslide/render-worker/jobs/sheet';
 import { cacheDir, defaultPaths } from '@turboslide/render-worker/paths';
 import type { DeckDocument } from '@turboslide/schema/deck';
+import { ConflictError } from '@turboslide/schema/errors';
 import type { ExportReport } from '@turboslide/schema/export';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { THEME_NAMES } from '@turboslide/schema/render';
 import type { RenderRecord, Theme } from '@turboslide/schema/render';
+import { blobContentType, deckPrefix } from '@turboslide/store/blob-store';
 import { loadDeckDir, openFileStore } from '@turboslide/store/file-store';
 import type { FileStore } from '@turboslide/store/file-store';
+import type { HostedDecks } from '@turboslide/store/hosted';
+import { StaleRevisionError } from '@turboslide/store/templates';
+import type { CreateDeckInput } from '@turboslide/store/templates';
 import {
   COMPOSITE,
   CONTENT,
@@ -35,7 +42,15 @@ import {
 } from '@turboslide/theme/tokens';
 
 import { lintLists } from './lint';
-import { deckDir, ensureDeckAssets, openDeckStore, repoRoot, workerClientOptions } from './root';
+import {
+  deckDir,
+  ensureDeckAssets,
+  ensureDecks,
+  exportBlobClient,
+  openDeckStore,
+  repoRoot,
+  workerClientOptions,
+} from './root';
 import { studioSessions } from './sessions';
 
 /**
@@ -352,6 +367,108 @@ function registerViewActions(dispatcher: Dispatcher, deckId: string): void {
   });
 }
 
+/** A stale baseRevision against the collection is the ConflictError every transport maps to 409. */
+async function mapStale<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch (error) {
+    if (error instanceof StaleRevisionError)
+      throw new ConflictError(error.message, { currentRevision: error.currentRevision });
+    throw error;
+  }
+}
+
+/**
+ * The deck collection actions of the Google Slides parity round (gslides-parity SPEC 7.5:
+ * deck.list, deck.copy, deck.trash, deck.restore, deck.remove) over the hosted collection
+ * (@turboslide/store/hosted), registered after registerDeckActions so they replace the CLI's
+ * folder handlers: on the Blob backend the collection pushes the copy, stamps the trash with
+ * ifMatch and deletes the prefix, which a handler over the mirror folder alone would not do.
+ */
+function registerHostedDeckActions(dispatcher: Dispatcher, decks: HostedDecks): void {
+  // deck.create lands in the store (HostedDecks.create is what createStoredDeck calls), not in
+  // the instance's overlay the folder handler wrote to (docs/EDITOR-DEPTH-STATUS.md section 10)
+  dispatcher.register('deck.create', (input) => decks.create(input as CreateDeckInput));
+  dispatcher.register('deck.list', (input) => {
+    const { includeTrashed } = input as DeckListInput;
+    return decks.list(includeTrashed === true ? { includeTrashed: true } : {});
+  });
+  dispatcher.register('deck.copy', (input) => {
+    const { baseRevision, ...rest } = input as DeckCopyInput;
+    return mapStale(() => decks.copy(rest, baseRevision));
+  });
+  dispatcher.register('deck.trash', (input) => {
+    const { id, baseRevision } = input as DeckIdInput;
+    return mapStale(() => decks.trash(id, baseRevision));
+  });
+  dispatcher.register('deck.restore', (input) => {
+    const { id, baseRevision } = input as DeckIdInput;
+    return mapStale(() => decks.restore(id, baseRevision));
+  });
+  dispatcher.register('deck.remove', (input) => {
+    const { id, confirm, baseRevision } = input as DeckIdInput & { confirm: true };
+    if (confirm !== true) throw new TypeError('deck.remove needs confirm: true');
+    return mapStale(() => decks.remove(id, baseRevision));
+  });
+}
+
+/** An asset file path a deck record may name: under assets/, no traversal (SPEC 4.1, 4.3). */
+function isAssetRelative(relative: string): boolean {
+  return (
+    relative.startsWith('assets/') &&
+    !relative.includes('..') &&
+    !relative.includes('\\') &&
+    !relative.includes('//')
+  );
+}
+
+/**
+ * slide.import on the studio (gslides-parity SPEC 7.5): the source deck is read through the
+ * collection, its twins are on disk before the copy, each asset file the imported slides need is
+ * copied under this deck and, on the Blob backend, pushed under the deck's prefix (the store's
+ * write pushes documents, not twins); the slide copies are then one write through the store
+ * actions' slideImport, the implementation the CLI runs.
+ */
+function registerSlideImport(
+  dispatcher: Dispatcher,
+  deckId: string,
+  deps: StoreActionDeps,
+  targetDir: string,
+  decks: HostedDecks,
+): void {
+  dispatcher.register('slide.import', async (input, context: ActionContext) => {
+    const request = input as SlideImportInput;
+    const sourceDeckId = request.sourceDeckId;
+    if (sourceDeckId === deckId)
+      throw new RangeError(
+        'slide.import copies from another deck; slide.duplicate copies within one',
+      );
+    const sourceStore = await decks.open(sourceDeckId);
+    const document = (await sourceStore.read()).document;
+    await decks.ensureAssets(sourceDeckId);
+    const sourceDir = join(decks.decksDir, sourceDeckId);
+    const client = decks.kind === 'blob' ? await exportBlobClient() : null;
+    return slideImport(deps, context, request, {
+      document,
+      copyAsset: async (relative) => {
+        if (!isAssetRelative(relative))
+          throw new RangeError(`${sourceDeckId} names a file outside assets/: ${relative}`);
+        const from = join(sourceDir, ...relative.split('/'));
+        const to = join(targetDir, ...relative.split('/'));
+        if (!existsSync(from)) throw new RangeError(`${sourceDeckId} has no file ${relative}`);
+        mkdirSync(dirname(to), { recursive: true });
+        cpSync(from, to);
+        if (client !== null) {
+          await client.put(`${deckPrefix(deckId)}${relative}`, new Uint8Array(readFileSync(to)), {
+            overwrite: true,
+            contentType: blobContentType(relative),
+          });
+        }
+      },
+    });
+  });
+}
+
 export type DeckDispatcher = {
   deckId: string;
   store: FileStore;
@@ -410,12 +527,18 @@ export async function deckDispatcher(
     renderRecords: () => renderRecords(loadDeckDir(store.dir).document),
   });
   // deck.create makes a sibling under decks/; deck.rename writes this deck's title
-  registerDeckActions(dispatcher, {
+  const storeDeps: StoreActionDeps = {
     store: deckStore,
     lint: lintLists(),
     renderRecords: () => renderRecords(loadDeckDir(store.dir).document),
-    decksDir: join(repoRoot(), 'decks'),
-  });
+  };
+  registerDeckActions(dispatcher, { ...storeDeps, decksDir: join(repoRoot(), 'decks') });
+  // the collection actions over the hosted backend (they replace the folder handlers
+  // registerDeckActions put on the same ids) and slide.import, which no CLI registration offers
+  // because it needs the source deck
+  const decks = await ensureDecks();
+  registerHostedDeckActions(dispatcher, decks);
+  registerSlideImport(dispatcher, deckId, storeDeps, store.dir, decks);
   registerAssetActionsLazily(dispatcher, deckId, store);
   registerWorkerActions(dispatcher, deckId, store);
   const session = options.withView ? studioSessions().attached(deckId, 'view.goto') : undefined;

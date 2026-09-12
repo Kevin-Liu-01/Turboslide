@@ -103,6 +103,8 @@ describe('turboslide export pptx arguments', () => {
         files: [],
         renderer: 'mock',
         scenes: [],
+        omitted: [],
+        tableFallbacks: {},
       };
       return result;
     });
@@ -212,7 +214,7 @@ describe('turboslide export pptx arguments', () => {
       for (const option of action?.options ?? [])
         expect(USAGE, `${id} ${option.flag}`).toContain(spelled[option.flag] ?? option.flag);
     }
-    expect(USAGE).toContain('export check <file.pptx>');
+    expect(USAGE).toContain('export check <file.pptx | dir>');
     for (const flag of ['--embed-fonts', '--headings raster', '--raster-scale', '--picture-scale'])
       expect(USAGE).toContain(flag);
     expect(USAGE).not.toContain('gslides');

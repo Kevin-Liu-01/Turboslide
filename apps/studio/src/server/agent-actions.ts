@@ -22,12 +22,25 @@ import { deckDir } from './root';
  * JSON text, as write.ts explains. createServerFn appears only under apps/studio/src/server.
  */
 
-/** The window-transport actions the editor runs here rather than in the page. */
+/**
+ * The window-transport actions the editor runs here rather than in the page: the asset and
+ * material pipelines (sharp, the capture browser, the catalog), and the Google Slides parity
+ * round's deck collection actions and slide.import (gslides-parity SPEC 7.5), which read other
+ * decks and write the collection through @turboslide/store/hosted, the backend the page cannot
+ * reach. The document write slide.import ends in comes back over the watch channel like an
+ * asset.add.
+ */
 export const SERVER_SIDE_WINDOW_ACTIONS = [
   'asset.add',
   'asset.dither',
   'material.capture',
   'material.list',
+  'deck.list',
+  'deck.copy',
+  'deck.trash',
+  'deck.restore',
+  'deck.remove',
+  'slide.import',
 ] as const satisfies readonly ActionId[];
 
 export type ServerSideWindowAction = (typeof SERVER_SIDE_WINDOW_ACTIONS)[number];

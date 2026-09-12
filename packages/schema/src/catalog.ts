@@ -28,6 +28,11 @@ export type BlockCatalogEntry = {
   allowedIn: ReadonlyArray<'content' | 'plate'>;
   /** Fields in the four-rule markup (SPEC 4.2 "Text"). */
   textPaths: ReadonlyArray<PathTemplate>;
+  /**
+   * The Text fields that take paragraph breaks (multilineTextSchema, gslides-parity SPEC 7.4):
+   * paragraph.text, text.text, box.text and the table cells; a subset of textPaths.
+   */
+  multilineTextPaths?: ReadonlyArray<PathTemplate>;
   /** Fields that hold an AssetId. */
   assetPaths: ReadonlyArray<PathTemplate>;
   /** Fields that hold an Icon. */
@@ -66,6 +71,7 @@ export const CATALOG: Readonly<Record<BlockType, BlockCatalogEntry>> = {
     source: 'head:62-68',
     allowedIn: ['content', 'plate'],
     textPaths: ['/text'],
+    multilineTextPaths: ['/text'],
     assetPaths: [],
     iconPaths: [],
     export: 'native',
@@ -445,6 +451,7 @@ export const CATALOG: Readonly<Record<BlockType, BlockCatalogEntry>> = {
     source: 'docs/freeform.md',
     allowedIn: ['content'],
     textPaths: ['/text'],
+    multilineTextPaths: ['/text'],
     assetPaths: [],
     iconPaths: [],
     export: 'native',
@@ -484,6 +491,7 @@ export const CATALOG: Readonly<Record<BlockType, BlockCatalogEntry>> = {
     source: 'head:62; docs/freeform.md',
     allowedIn: ['content', 'plate'],
     textPaths: ['/text'],
+    multilineTextPaths: ['/text'],
     assetPaths: [],
     iconPaths: [],
     export: 'native',
@@ -501,6 +509,30 @@ export const CATALOG: Readonly<Record<BlockType, BlockCatalogEntry>> = {
     iconPaths: [],
     export: 'raster',
     make: (id) => ({ id, type: 'icon', name: 'check-circle', size: 24 }),
+  }),
+  table: entry({
+    type: 'table',
+    label: 'Table',
+    group: 'list',
+    doc: 'A grid of Text cells in the .rows idiom: a hairline above, a rule under every row, the header row at display weight 500 with an ink rule, tabular numerals, text alignment per column; at most 20 by 20.',
+    source: 'gslides-parity SPEC 7.3; R11 A1, A8',
+    allowedIn: ['content'],
+    textPaths: ['/rows/*/cells/*'],
+    multilineTextPaths: ['/rows/*/cells/*'],
+    assetPaths: [],
+    iconPaths: [],
+    export: 'native',
+    make: (id) => ({
+      id,
+      type: 'table',
+      columns: [{}, {}, {}],
+      rows: [
+        { cells: ['', '', ''], header: true },
+        { cells: ['', '', ''] },
+        { cells: ['', '', ''] },
+        { cells: ['', '', ''] },
+      ],
+    }),
   }),
   html: entry({
     type: 'html',
@@ -682,6 +714,18 @@ export function expandPaths(value: unknown, template: PathTemplate): string[] {
 /** Every Text pointer inside a block, in document order. */
 export function blockTextPaths(block: Block): string[] {
   return CATALOG[block.type].textPaths.flatMap((template) => expandPaths(block, template));
+}
+
+/** The Text pointers of a block that take paragraph breaks (gslides-parity SPEC 7.4). */
+export function blockMultilinePaths(block: Block): string[] {
+  return (CATALOG[block.type].multilineTextPaths ?? []).flatMap((template) =>
+    expandPaths(block, template),
+  );
+}
+
+/** True when the pointer inside the block is one of the four multiline pointers. */
+export function isMultilinePath(block: Block, pointer: string): boolean {
+  return blockMultilinePaths(block).includes(pointer);
 }
 
 /** Every asset reference inside a block: pointer and the referenced id. */

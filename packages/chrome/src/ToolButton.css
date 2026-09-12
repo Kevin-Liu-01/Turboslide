@@ -57,3 +57,14 @@
     display: none;
   }
 }
+
+/* a stub (gslides-parity SPEC 13.1): titanium, in the tab order, no pointer change, no hover frame */
+.pt-ib.is-disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+.pt-ib.is-disabled:hover {
+  color: var(--pt-titanium);
+  border-color: transparent;
+}

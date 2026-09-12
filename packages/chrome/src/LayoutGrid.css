@@ -1,0 +1,131 @@
+/* LayoutGrid (LayoutGrid.tsx): 21 tiles at 128 by 72 in three columns with the name under each
+   (gslides-parity SPEC 5.2); Google's eleven, the rule reading "GT layouts" in titanium, then the
+   GT layouts. A tile is a --pt-edge frame around the live clone of the layout's slide; the
+   current one draws the ink ring at 2 px offset (the frame law's active state). 12 px Inter
+   names; 8 px gaps; radius 0; colors are tokens only. The plate this grid sits in is the menu
+   primitive's dynamic submenu or the toolbar's dropdown (EditorShell.css .ts-layout-plate). */
+.ts-layout-grid {
+  box-sizing: border-box;
+  width: 424px;
+  padding: 4px 0;
+  font: 12px/1.3 var(--pt-text);
+  color: var(--pt-ink);
+  outline: none;
+}
+
+.ts-layout-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 128px);
+  gap: 10px 8px;
+}
+
+.ts-layout-tile {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink-2);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 128px;
+}
+
+.ts-layout-frame {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 128px;
+  height: 72px;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  overflow: hidden;
+}
+
+/* the clone fills the frame: LiveClone measures its own width and writes --k */
+.ts-layout-frame .ts-sheet.is-clone {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.ts-layout-tile:hover .ts-layout-frame {
+  border-color: var(--pt-ink);
+}
+
+.ts-layout-tile.is-current .ts-layout-frame {
+  border-color: var(--pt-ink);
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-layout-tile:focus-visible {
+  outline: none;
+}
+
+.ts-layout-tile:focus-visible .ts-layout-frame {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-layout-tile.is-current:hover .ts-layout-frame {
+  outline-color: var(--pt-ink);
+}
+
+.ts-layout-missing {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  color: var(--pt-titanium);
+  text-align: center;
+  background: var(--pt-plate);
+}
+
+.ts-layout-name {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--pt-ink-2);
+}
+
+.ts-layout-tile.is-current .ts-layout-name,
+.ts-layout-tile:hover .ts-layout-name {
+  color: var(--pt-ink);
+}
+
+/* the rule between Google's eleven and the GT layouts: a hairline with the label on it */
+.ts-layout-rule {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  margin: 6px 0 4px;
+  color: var(--pt-titanium);
+  font-size: 11.5px;
+}
+
+.ts-layout-rule::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--pt-hair-soft);
+}
+
+.ts-layout-rule span {
+  position: relative;
+  padding: 0 8px 0 0;
+  background: var(--pt-paper);
+}

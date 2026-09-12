@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "links",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Block links",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 800,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "box",
+        "type": "box",
+        "stroke": "hair",
+        "padding": 16,
+        "text": "A box linked to the first slide.\nTwo paragraphs inside the box.",
+        "link": {
+          "slide": "first"
+        },
+        "pos": {
+          "x": 137,
+          "y": 241,
+          "w": 560,
+          "h": 160,
+          "z": 1
+        }
+      },
+      {
+        "id": "shape",
+        "type": "shape",
+        "shape": "rounded",
+        "fill": "plate",
+        "stroke": "hair",
+        "link": "https://generaltranslation.com",
+        "pos": {
+          "x": 761,
+          "y": 241,
+          "w": 400,
+          "h": 160,
+          "z": 2
+        }
+      },
+      {
+        "id": "t1",
+        "type": "text",
+        "text": "A text box linked to the table slide.",
+        "link": {
+          "slide": "table"
+        },
+        "pos": {
+          "x": 137,
+          "y": 449,
+          "w": 560,
+          "h": 48,
+          "z": 3
+        }
+      }
+    ]
+  },
+  "template": "blank"
+}

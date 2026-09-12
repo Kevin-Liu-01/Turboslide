@@ -4,7 +4,9 @@
 // spcPts val="1980"), one `softBreakBefore` per browser line, weight 500 as a family name and a
 // weight of 600 or more as the Medium family plus the bold flag (fonts-map.ts; the report's
 // residual names every weight the set has no cut for), links
-// as hyperlinks in the ink with a hairline underline, `.no` rows struck, and 0.02 in of width
+// as hyperlinks in the ink with a hairline underline (a slide link as a slide jump through
+// pptx/links.ts, gslides-parity SPEC 7.2.8), a paragraph break as a new paragraph (SPEC 7.2.9),
+// `.no` rows struck, and 0.02 in of width
 // slack so no renderer wraps early (pptx report section 4.1). In flatten mode every run carries
 // transparency 100 (`<a:alpha val="0"/>`), the searchable layer over the raster.
 import type PptxGenJS from 'pptxgenjs';
@@ -16,6 +18,8 @@ import type { BaselineTarget } from './baseline.ts';
 import { faceAdvanceExcess } from './face-advance.ts';
 import type { FontSet } from './fonts-map.ts';
 import { MONO_FAMILY, pickFamily, weightSubstitution } from './fonts-map.ts';
+import { isSlideLink } from './links.ts';
+import type { LinkResolver } from './links.ts';
 
 /** Width slack on every text box, in inches (pptx report section 4.1). */
 export const WIDTH_SLACK_IN = 0.02;
@@ -34,6 +38,11 @@ export type TextEmitOptions = {
   baseline?: BaselineTarget;
   /** Residual lines the runs add (a weight the set has no cut for), for the report. */
   residual?: Set<string>;
+  /**
+   * Resolves a link href to hyperlink props for this slide (pptx/links.ts): a URL as is, a slide
+   * link to its number in the file. Without it a URL link is written and a slide link dropped.
+   */
+  links?: LinkResolver;
 };
 
 /** The family for a style: the mono stack for the code panel, else the set's pick. */
@@ -82,12 +91,28 @@ function runOptions(
   if (options.invisible || run.gt) out.transparency = 100;
   else if (color.alpha < 1) out.transparency = Math.round((1 - color.alpha) * 100);
   if (run.style.strike) out.strike = 'sngStrike';
-  if (run.style.link && !options.invisible) {
-    out.hyperlink = { url: run.style.link };
-    out.underline = { style: 'sng', color: options.hairHex };
+  if (run.style.link) {
+    // A slide link travels in both modes as a slide jump (gslides-parity SPEC 7.2.8; whether
+    // PowerPoint honours it on the invisible run of a flatten file is unverified, the report
+    // says so); a URL on a visible run is a hyperlink with the hairline underline, and on the
+    // invisible layer nothing, because the cover picture takes the click.
+    const link = linkFor(run.style.link, options);
+    if (link !== undefined && (!options.invisible || isSlideLink(run.style.link))) {
+      out.hyperlink = link;
+      if (!options.invisible) out.underline = { style: 'sng', color: options.hairHex };
+    }
   }
   if (lineStart && !first) out.softBreakBefore = true;
   return out;
+}
+
+/** The hyperlink props of a href through the slide's resolver; a bare URL without one. */
+export function linkFor(
+  href: string,
+  options: Pick<TextEmitOptions, 'links'>,
+): PptxGenJS.HyperlinkProps | undefined {
+  if (options.links) return options.links(href);
+  return isSlideLink(href) ? undefined : { url: href };
 }
 
 /**
@@ -129,15 +154,29 @@ export function gapFiller(run: SceneRun, options: TextEmitOptions): PptxGenJS.Te
   };
 }
 
-/** The pptxgenjs run list of a measured text: lines joined by soft breaks, runs by style. */
+/**
+ * The pptxgenjs run list of a measured text: lines joined by soft breaks, runs by style, and a
+ * paragraph break (`breakLine` on the last run of the paragraph, gslides-parity SPEC 7.2.9) where
+ * the browser's line starts a new `.para` span, so the file holds one `<a:p>` per paragraph with
+ * the same alignment and pitch.
+ */
 export function textRuns(text: SceneText, options: TextEmitOptions): PptxGenJS.TextProps[] {
   const out: PptxGenJS.TextProps[] = [];
   text.lines.forEach((line, li) => {
+    const previous = li > 0 ? text.lines[li - 1] : undefined;
+    const newParagraph =
+      previous !== undefined &&
+      line.paragraph !== undefined &&
+      previous.paragraph !== undefined &&
+      line.paragraph !== previous.paragraph;
+    if (newParagraph) {
+      const last = out[out.length - 1];
+      if (last) last.options = { ...last.options, breakLine: true };
+    }
     guardLinkSpaces(line.runs).forEach((run, ri) => {
-      out.push({
-        text: run.text,
-        options: runOptions(run, options, li === 0 && ri === 0, ri === 0),
-      });
+      const runProps = runOptions(run, options, li === 0 && ri === 0, ri === 0);
+      if (newParagraph && ri === 0) delete runProps.softBreakBefore;
+      out.push({ text: run.text, options: runProps });
       const filler = gapFiller(run, options);
       if (filler) out.push(filler);
     });
@@ -181,6 +220,11 @@ export function textBoxOptions(
     isTextBox: true,
     objectName: `${options.namePrefix}#${text.id}${text.group ? `@${text.group}` : ''}`,
   };
+  // the owning block's link on the text box itself (gslides-parity SPEC 7.2.7)
+  if (text.link !== undefined && !options.invisible) {
+    const link = linkFor(text.link, options);
+    if (link !== undefined) opts.hyperlink = link;
+  }
   return opts;
 }
 

@@ -1,14 +1,25 @@
 import type { DragEvent, KeyboardEvent, MouseEvent, ReactNode, RefObject } from 'react';
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-import type { Deck, Slide, SlideKind } from '@turboslide/schema/deck';
+import { applyLayout, appliedLabel } from '@turboslide/schema/apply-layout';
+import type { Deck, DeckDocument, Slide, SlideKind } from '@turboslide/schema/deck';
+import type { LayoutId } from '@turboslide/schema/layouts';
+import { derivedLayout, isLayoutId } from '@turboslide/schema/layouts';
+import { clipboardStore, pastedSlideInserts } from '@turboslide/viewer/clipboard';
+import type { ClipboardPayload, ClipboardStore } from '@turboslide/viewer/clipboard';
 import { useTheme } from '@turboslide/viewer/theme';
 
+import { ContextMenu } from './ContextMenu';
 import type { EditorDispatch } from './dispatch';
+import { EditorShellContext } from './editor-shell-context';
 import { GtMark } from './GtMark';
 import { Icon } from './icons';
 import { cn } from './lib/cn';
 import { useMountEffect } from './lib/useMountEffect';
+import { detectPlatform } from './menus/keys.ts';
+import type { MenuContext, MenuItem, MenuSetting } from './menus/model.ts';
+import { DEFAULT_MENU_CONTEXT } from './menus/model.ts';
+import { FILMSTRIP, SNACKBARS } from './menus/strings.ts';
 import { blankSlide, freeSlideId } from './palette-data';
 import { Seg } from './Seg';
 import type { SegOption } from './Seg';
@@ -25,12 +36,14 @@ import './Sidebar.css';
 /** What ViewerShell reads from the filter for the Escape ladder: whether it holds text, and how to clear it. */
 export type SidebarFilter = { active: boolean; clear: () => void };
 
+/** The snackbar the filmstrip speaks through (gslides-parity SPEC 12): one sentence, one action. */
+export type SidebarSnack = (text: string, action?: { label: string; run: () => void }) => void;
+
 /**
- * Edit mode for the tree (SPEC 6.2): rows drag to reorder within and across sections and the
- * drop is one slide.move; Alt with the up and down arrows moves a focused row the same way; a
- * row's menu offers Insert after (a blank kind or a slide template), Duplicate, Move to section,
- * Delete, Render, Lint this slide and Copy id, each one action through the dispatcher with the
- * revision as baseRevision.
+ * Edit mode (SPEC 6.2; gslides-parity SPEC 4): the filmstrip of cards with Google's right-click
+ * menu, multi-select, drag and keys, every write one action through the dispatcher with the
+ * revision as baseRevision. `settings.sectionsTree` (Tools > Advanced > Show sections as a tree)
+ * restores the collapsible tree whose rows drag, take Alt with the arrows and carry the row menu.
  */
 export type SidebarEdit = {
   revision: number;
@@ -39,6 +52,25 @@ export type SidebarEdit = {
   onNotice?: (message: string) => void;
   /** the manifest, so the slide templates that need a picture asset can take one from the deck */
   deck?: Deck;
+  /** the document, so the cards know skip, template and kind without asking; slide.list answers when absent */
+  document?: DeckDocument;
+  /** the snackbar with one action (SPEC 12); onNotice carries the text alone when absent */
+  snack?: SidebarSnack;
+  /** the page's history, for the Undo action of the snackbars and the menu's Undo predicate */
+  undo?: () => void;
+  history?: { undo: boolean; redo: boolean };
+  /** the View, Tools and Snap to toggles the menu model reads (sections, sectionsTree, showIds) */
+  settings?: Readonly<Partial<Record<MenuSetting, boolean | string>>>;
+  /** the selected cards changed (Make a copy > Selected slides; the menu context) */
+  onSelectionChange?: (slideIds: string[]) => void;
+  /** a right-click item the filmstrip does not run itself (a dialog, a panel, a stub), with the selection */
+  onMenuItem?: (item: MenuItem, slideIds: string[]) => void;
+  /** Enter on a card moves focus to the canvas (SPEC 4.1) */
+  onFocusCanvas?: () => void;
+  /** the clipboard store; the module's shared one when absent */
+  clipboard?: ClipboardStore;
+  /** the deck id the clipboard payloads carry */
+  deckId?: string;
 };
 
 /** Where the reader's folds live: one key per shell holding a JSON map of section id to open or closed. */
@@ -573,7 +605,29 @@ export type SidebarProps = {
  * arrows moves a focused row, empty sections stay listed as drop targets,
  * and every row has its menu.
  */
-export function Sidebar({
+export function Sidebar(props: SidebarProps) {
+  const { edit } = props;
+  const settings = useFilmstripSettings(edit);
+  if (edit !== undefined && settings?.sectionsTree !== true) {
+    return (
+      <Filmstrip {...props} edit={{ ...edit, ...(settings === undefined ? {} : { settings }) }} />
+    );
+  }
+  return <TreeSidebar {...props} />;
+}
+
+/**
+ * The View, Tools and Snap to toggles the filmstrip reads: the route's, else the editor shell's
+ * own settings when the sidebar is drawn inside EditorShell (the shell keeps them per browser and
+ * the route does not see them; integrator, docs/gslides-parity/build/integrator.md).
+ */
+function useFilmstripSettings(edit: SidebarEdit | undefined): SidebarEdit['settings'] | undefined {
+  const shell = useContext(EditorShellContext);
+  return edit?.settings ?? shell?.settings;
+}
+
+/** The collapsible tree of sections and rows: the view route's list, and the editor's under Tools > Advanced > Show sections as a tree. */
+function TreeSidebar({
   title,
   count,
   sections,
@@ -1017,4 +1071,901 @@ export function Sidebar({
       ) : null}
     </aside>
   );
+}
+
+// ---------------------------------------------------------------------------------------------
+// The filmstrip (gslides-parity SPEC 4.1, 4.2, 4.5)
+
+/** What a card knows beyond its ShellItem: the parity round's facts (SPEC 7.2.1, 7.2.2). */
+type CardFacts = {
+  skip: boolean;
+  template: LayoutId | undefined;
+  kind: string;
+  pictureLayout: boolean;
+};
+
+/** Where dragged cards would land: before or after a card, or first in a section. */
+type FilmDrop = { id: string; half: 'before' | 'after' } | { sectionId: string };
+
+type FilmMenu = { ids: string[]; x: number; y: number; anchor: HTMLElement; layout?: LayoutId };
+
+/** Page Up and Page Down move this many cards. */
+const PAGE_STEP = 5;
+/** How long a refused drop line shakes (SPEC 4.1). */
+export const DROP_SHAKE_MS = 200;
+
+/**
+ * The layout New slide inserts after a slide (SPEC 5.3, 0.27): the slide's own layout; Title and
+ * body after a Title slide, and after a Section header too, since a second header would open a
+ * second section (B1's rule for an opener). Title and body when the slide names no layout.
+ */
+export function newSlideLayout(current: {
+  template: LayoutId | undefined;
+  kind: string;
+}): LayoutId {
+  if (current.kind === 'title' || current.kind === 'opener') return 'split';
+  return current.template ?? 'split';
+}
+
+/**
+ * The order after a drop (pure; sidebar-filmstrip.test.tsx pins it): the dragged ids leave every
+ * section and land at the target, in their deck order. Null when the drop breaks the opener rule
+ * (SPEC 4.1, validator 4.4): a Section header stays first in its section, so nothing lands before
+ * one and a header lands nowhere but first.
+ */
+export function droppedOrder(
+  sections: ReadonlyArray<{ id: string; slideIds: ReadonlyArray<string> }>,
+  kinds: ReadonlyMap<string, string>,
+  dragged: ReadonlyArray<string>,
+  at: FilmDrop,
+): { id: string; slideIds: string[] }[] | null {
+  const moving = sections.flatMap((section) =>
+    section.slideIds.filter((id) => dragged.includes(id)),
+  );
+  if (moving.length === 0) return null;
+  const next = sections.map((section) => ({
+    id: section.id,
+    slideIds: section.slideIds.filter((id) => !dragged.includes(id)),
+  }));
+  const target =
+    'sectionId' in at
+      ? next.find((section) => section.id === at.sectionId)
+      : next.find((section) =>
+          sections.find((row) => row.id === section.id)?.slideIds.includes(at.id),
+        );
+  if (!target) return null;
+  let index: number;
+  if ('sectionId' in at) index = 0;
+  else {
+    const rest = target.slideIds.indexOf(at.id);
+    if (rest < 0) {
+      /* the card under the pointer is one of the dragged: nothing moves */
+      return null;
+    }
+    index = at.half === 'before' ? rest : rest + 1;
+  }
+  const movesOpener = moving.some((id) => kinds.get(id) === 'opener');
+  if (movesOpener && index !== 0) return null;
+  const first = target.slideIds[0];
+  if (index === 0 && first !== undefined && kinds.get(first) === 'opener' && !movesOpener)
+    return null;
+  target.slideIds.splice(index, 0, ...moving);
+  return next;
+}
+
+/** The one `slide.move` a single dragged card is, from the dropped order. */
+function moveOf(
+  order: ReadonlyArray<{ id: string; slideIds: ReadonlyArray<string> }>,
+  slideId: string,
+): { sectionId: string; after?: string } | null {
+  for (const section of order) {
+    const at = section.slideIds.indexOf(slideId);
+    if (at < 0) continue;
+    const after = section.slideIds[at - 1];
+    return after === undefined ? { sectionId: section.id } : { sectionId: section.id, after };
+  }
+  return null;
+}
+
+type FilmCardProps = {
+  item: ShellItem;
+  facts: CardFacts;
+  current: boolean;
+  selected: boolean;
+  theme: 'light' | 'dark';
+  dragging: boolean;
+  drop: 'before' | 'after' | null;
+  refused: boolean;
+  onPick: (item: ShellItem, event: MouseEvent<HTMLElement>) => void;
+  onOpenGrid: () => void;
+  onMenu: (item: ShellItem, point: { x: number; y: number }, anchor: HTMLElement) => void;
+  onDragStart: (item: ShellItem, event: DragEvent<HTMLElement>) => void;
+  onDragOver: (item: ShellItem, event: DragEvent<HTMLElement>) => void;
+  onDrop: (event: DragEvent<HTMLElement>) => void;
+  onDragEnd: () => void;
+  follow?: (el: HTMLElement | null) => void;
+};
+
+/**
+ * One card (SPEC 4.1): the number in a 28 px gutter in tabular figures, the 16:9 thumbnail in a
+ * --pt-edge frame (the render worker's capture over the live clone, Thumb.tsx), the current card
+ * ringed in ink at 2 px, a skipped card at 40 percent with the eye-slash glyph; the title is the
+ * tooltip. No title under the card, no kind glyph, no lint badge, no lease dot, no row menu.
+ */
+function FilmCard({
+  item,
+  facts,
+  current,
+  selected,
+  theme,
+  dragging,
+  drop,
+  refused,
+  onPick,
+  onOpenGrid,
+  onMenu,
+  onDragStart,
+  onDragOver,
+  onDrop,
+  onDragEnd,
+  follow,
+}: FilmCardProps) {
+  const n = item.n ? String(Number(item.n)) : '';
+  const name = `Slide ${n}${facts.skip ? ', skipped' : ''}`;
+  const tip = tipProps({
+    name: item.title,
+    ...(facts.skip ? { doc: FILMSTRIP.skipped } : {}),
+  });
+  return (
+    <div
+      className={cn(
+        'ts-card',
+        current && 'is-current',
+        selected && 'is-selected',
+        facts.skip && 'is-skipped',
+        dragging && 'is-dragging',
+        refused && 'is-refused',
+      )}
+      role="option"
+      tabIndex={current ? 0 : -1}
+      aria-selected={selected}
+      aria-label={name}
+      aria-current={current ? 'true' : undefined}
+      data-id={item.id}
+      data-control={`filmstrip.slide.${item.id}`}
+      data-skip={facts.skip ? '' : undefined}
+      data-drop={drop ?? undefined}
+      draggable
+      onClick={(event) => onPick(item, event)}
+      onDoubleClick={(event) => {
+        event.preventDefault();
+        onOpenGrid();
+      }}
+      onContextMenu={(event) => {
+        event.preventDefault();
+        onMenu(item, { x: event.clientX, y: event.clientY }, event.currentTarget);
+      }}
+      onDragStart={(event) => onDragStart(item, event)}
+      onDragOver={(event) => onDragOver(item, event)}
+      onDrop={onDrop}
+      onDragEnd={onDragEnd}
+      ref={follow}
+      {...tip}
+    >
+      <span className="ts-card-n">{n}</span>
+      <span className="ts-card-frame">
+        <Thumb shot={item.shot} html={item.html} theme={theme} frame={false} fallbackText={n} />
+        {facts.skip ? (
+          <span className="ts-card-skip" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="currentColor">
+              <use href="#i-eye-slash" />
+            </svg>
+          </span>
+        ) : null}
+      </span>
+    </div>
+  );
+}
+
+/**
+ * The filmstrip (gslides-parity SPEC 4.1, 4.2, 4.5): one card per slide, passive section labels
+ * when the deck has more than one section, Shift and Cmd multi-select with Shift plus the arrows
+ * and Cmd A from the keyboard, drag with the drop line and the opener rule (a refused position
+ * shakes for 200 ms), Google's card menu on right-click and Shift F10, the keys of SPEC 4.1 (Up,
+ * Down, Page Up, Page Down, Home, End move; Cmd Up and Down move the slide; Cmd Shift Up and Down
+ * to the ends; Delete with the snackbar; Enter focuses the canvas; Ctrl M inserts), and the empty
+ * frame "Click + to add a slide" when the deck has no slide. The filter row, the count, the
+ * density toggle, the kind glyph, the lint badge, the lease dot, the hover preview card and the
+ * row menu of the tree leave the default view. Every write is one action through the dispatcher.
+ */
+function Filmstrip({
+  title,
+  sections,
+  homeHref,
+  aside,
+  edit,
+}: Omit<SidebarProps, 'edit'> & { edit: SidebarEdit }) {
+  const shell = usePtShell();
+  const theme = useTheme();
+  const { active, select, narrow, sidebarOpen, sidebarShown, present, setSidebar, ready } = shell;
+  const hidden = !(sidebarShown ?? (sidebarOpen && !present));
+  const overlay = narrow && !hidden;
+  const listRef = useRef<HTMLDivElement>(null);
+  const readyRef = useRef(ready ?? true);
+  readyRef.current = ready ?? true;
+  const [follow] = useState(() => makeFollow(listRef, readyRef));
+
+  const order = sections.flatMap((section) => section.items.map((item) => item.id));
+  const items = new Map(
+    sections.flatMap((section) => section.items.map((item) => [item.id, item] as const)),
+  );
+  const sectionOf = (id: string) =>
+    sections.find((section) => section.items.some((item) => item.id === id));
+
+  /* the selection: the current card and whatever Shift, Cmd and the keys added; a current card
+     the page moved from outside the selection resets it */
+  const [selected, setSelected] = useState<string[]>(active ? [active] : []);
+  const anchorRef = useRef<string>(active);
+  const selectedRef = useRef(selected);
+  selectedRef.current = selected;
+  const onSelectionRef = useRef(edit.onSelectionChange);
+  onSelectionRef.current = edit.onSelectionChange;
+  const setSelection = (ids: string[]) => {
+    const ordered = order.filter((id) => ids.includes(id));
+    if (
+      ordered.length === selectedRef.current.length &&
+      ordered.every((id, i) => selectedRef.current[i] === id)
+    )
+      return;
+    selectedRef.current = ordered;
+    setSelected(ordered);
+    onSelectionRef.current?.(ordered);
+  };
+  useEffect(() => {
+    if (active && !selectedRef.current.includes(active)) {
+      anchorRef.current = active;
+      setSelection([active]);
+    }
+    // the selection follows the current card; setSelection reads refs
+  }, [active]);
+
+  /* the parity facts per card: from the document when the page passes it, else slide.list */
+  const [rows, setRows] = useState<ReadonlyMap<string, { skip?: boolean; template?: string }>>(
+    new Map(),
+  );
+  useEffect(() => {
+    if (edit.document !== undefined) return;
+    let cancelled = false;
+    Promise.resolve(edit.dispatch('slide.list', {}))
+      .then((result) => {
+        if (cancelled || !Array.isArray(result)) return;
+        setRows(
+          new Map(
+            (result as { id: string; skip?: boolean; template?: string }[]).map((row) => [
+              row.id,
+              row,
+            ]),
+          ),
+        );
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [edit.revision, edit.dispatch, edit.document]);
+
+  const factsOf = (item: ShellItem): CardFacts => {
+    const record = edit.document?.slides[item.id];
+    if (record) {
+      return {
+        skip: record.skip === true,
+        template: derivedLayout(record),
+        kind: record.kind,
+        pictureLayout:
+          record.kind === 'opener' || record.kind === 'mood' || record.kind === 'closing',
+      };
+    }
+    const row = rows.get(item.id);
+    const kind = item.kind ?? 'content';
+    return {
+      skip: row?.skip === true,
+      template: row?.template !== undefined && isLayoutId(row.template) ? row.template : undefined,
+      kind,
+      pictureLayout: kind === 'opener' || kind === 'mood' || kind === 'closing',
+    };
+  };
+  const kinds = new Map(order.map((id) => [id, factsOf(items.get(id) ?? { id, title: id }).kind]));
+
+  const say = (text: string) => edit.onNotice?.(text);
+  const snack = (text: string, undo?: boolean) => {
+    if (edit.snack) {
+      edit.snack(text, undo && edit.undo ? { label: SNACKBARS.undo, run: edit.undo } : undefined);
+    } else say(undo ? `${text} · ${SNACKBARS.undo}` : text);
+  };
+  const fail = (error: unknown) => say(error instanceof Error ? error.message : String(error));
+
+  /* the writes: each one action, the revision counted up across the writes of one tick because the
+     page's reducer applies a write before the prop re-renders */
+  const revision = useRef(edit.revision);
+  revision.current = edit.revision;
+  const dispatch = (id: string, input: Record<string, unknown>): Promise<unknown> => {
+    const base = revision.current;
+    revision.current = base + 1;
+    return Promise.resolve(
+      edit.dispatch(id as Parameters<EditorDispatch>[0], { ...input, baseRevision: base }),
+    ).catch((error: unknown) => {
+      fail(error);
+      throw error;
+    });
+  };
+  const read = (id: string, input: Record<string, unknown>): Promise<unknown> =>
+    Promise.resolve(edit.dispatch(id as Parameters<EditorDispatch>[0], input));
+
+  const pickOne = (id: string) => {
+    anchorRef.current = id;
+    setSelection([id]);
+    if (id !== active) select(id);
+  };
+
+  const onPick = (item: ShellItem, event: MouseEvent<HTMLElement>) => {
+    if (event.button !== 0) return;
+    event.preventDefault();
+    if (event.shiftKey) {
+      const from = order.indexOf(anchorRef.current);
+      const to = order.indexOf(item.id);
+      const [a, b] = from <= to ? [from, to] : [to, from];
+      setSelection(order.slice(Math.max(0, a), b + 1));
+      return;
+    }
+    if (event.metaKey || event.ctrlKey) {
+      const next = selectedRef.current.includes(item.id)
+        ? selectedRef.current.filter((id) => id !== item.id)
+        : [...selectedRef.current, item.id];
+      if (next.length > 0) setSelection(next);
+      return;
+    }
+    pickOne(item.id);
+    if (narrow) setSidebar(false);
+  };
+
+  const focusCard = (id: string) => {
+    listRef.current
+      ?.querySelector<HTMLElement>(`.ts-card[data-id="${id}"]`)
+      ?.focus({ preventScroll: true });
+  };
+
+  const moveActive = (to: number, extend: boolean) => {
+    const id = order[Math.max(0, Math.min(order.length - 1, to))];
+    if (id === undefined) return;
+    if (extend) {
+      const from = order.indexOf(anchorRef.current);
+      const at = order.indexOf(id);
+      const [a, b] = from <= at ? [from, at] : [at, from];
+      setSelection(order.slice(a, b + 1));
+      select(id);
+    } else pickOne(id);
+    window.setTimeout(() => focusCard(id), 0);
+  };
+
+  // ---- the writes of SPEC 4.2
+
+  const slidesOf = async (ids: string[]): Promise<Slide[]> => {
+    const document = edit.document;
+    if (document) {
+      return ids.flatMap((id) => {
+        const slide = document.slides[id];
+        return slide ? [slide] : [];
+      });
+    }
+    const got = await Promise.all(ids.map((id) => read('slide.get', { slideId: id })));
+    return got.flatMap((row) =>
+      (row as { slide?: Slide }).slide ? [(row as { slide: Slide }).slide] : [],
+    );
+  };
+
+  const copySlides = async (ids: string[]): Promise<void> => {
+    const slides = await slidesOf(ids);
+    if (slides.length === 0) return;
+    const payload: ClipboardPayload = {
+      kind: 'slides',
+      deckId: edit.deckId ?? edit.deck?.id ?? edit.document?.deck.id ?? '',
+      slides: JSON.parse(JSON.stringify(slides)) as Slide[],
+    };
+    await (edit.clipboard ?? clipboardStore).write(payload);
+  };
+
+  const removeSlides = (ids: string[]) => {
+    const ordered = order.filter((id) => ids.includes(id));
+    if (ordered.length === 0) return;
+    for (const id of ordered) void dispatch('slide.remove', { slideId: id }).catch(() => undefined);
+    const count = ordered.length;
+    if (edit.snack && edit.undo) {
+      const undoAll = edit.undo;
+      edit.snack(count === 1 ? SNACKBARS.slideDeleted : SNACKBARS.slidesDeleted(count), {
+        label: SNACKBARS.undo,
+        run: () => {
+          for (let i = 0; i < count; i += 1) undoAll();
+        },
+      });
+    } else snack(count === 1 ? SNACKBARS.slideDeleted : SNACKBARS.slidesDeleted(count), true);
+  };
+
+  const pasteSlides = async (afterId: string | undefined): Promise<void> => {
+    const payload = await (edit.clipboard ?? clipboardStore).read();
+    if (payload === null || payload.kind !== 'slides') return;
+    const deckId = edit.deckId ?? edit.deck?.id ?? edit.document?.deck.id ?? '';
+    if (payload.deckId !== deckId && payload.deckId !== '') {
+      await dispatch('slide.import', {
+        sourceDeckId: payload.deckId,
+        slideIds: payload.slides.map((slide) => slide.id),
+        ...(afterId !== undefined ? { after: afterId } : {}),
+      }).catch(() => undefined);
+      return;
+    }
+    const view = {
+      sections: sections.map((section) => ({
+        id: section.id,
+        slideIds: section.items.map((item) => item.id),
+      })),
+    };
+    for (const input of pastedSlideInserts(view, payload, afterId)) {
+      void dispatch('slide.insert', input).catch(() => undefined);
+    }
+  };
+
+  const newSlide = (afterId: string) => {
+    const item = items.get(afterId);
+    const facts = item ? factsOf(item) : undefined;
+    const layout = newSlideLayout(facts ?? { template: undefined, kind: 'content' });
+    void dispatch('slide.new', { layout, after: afterId }).catch(() => undefined);
+  };
+
+  const skipSlides = (ids: string[]) => {
+    const facts = ids.map((id) => factsOf(items.get(id) ?? { id, title: id }));
+    const skip = !facts.every((row) => row.skip);
+    void dispatch('slide.skip', { slideIds: ids, skip }).catch(() => undefined);
+    if (skip && ids.length > 1) snack(SNACKBARS.skipped(ids.length), true);
+  };
+
+  const applyLayoutTo = (ids: string[], layout: LayoutId) => {
+    let dropped = 0;
+    const document = edit.document;
+    if (document) {
+      for (const id of ids) {
+        const slide = document.slides[id];
+        const section = document.deck.sections.find((row) => row.slideIds.includes(id));
+        if (!slide || !section) continue;
+        dropped += applyLayout({ slide, layout, deck: document.deck, sectionId: section.id })
+          .dropped.length;
+      }
+    }
+    const run = dispatch('slide.applyLayout', { slideIds: ids, layout });
+    const label = appliedLabel(layout);
+    if (document) {
+      if (dropped > 0)
+        snack(SNACKBARS.appliedLayout(label, dropped, dropped === 1 ? 'item' : 'items'), true);
+      return;
+    }
+    run
+      .then((result) => {
+        const droppedRows = (result as { dropped?: { blockIds: string[] }[] }).dropped ?? [];
+        const count = droppedRows.reduce((sum, row) => sum + row.blockIds.length, 0);
+        if (count > 0)
+          snack(SNACKBARS.appliedLayout(label, count, count === 1 ? 'item' : 'items'), true);
+      })
+      .catch(() => undefined);
+  };
+
+  /** Cmd Up and Down move the selected slides one place; Shift to the beginning or the end (SPEC 4.1). */
+  const moveSelected = (where: 'up' | 'down' | 'start' | 'end') => {
+    const ids = order.filter((id) => selectedRef.current.includes(id));
+    const first = ids[0];
+    const last = ids[ids.length - 1];
+    if (first === undefined || last === undefined) return;
+    const view = sections.map((section) => ({
+      id: section.id,
+      slideIds: section.items.map((item) => item.id),
+    }));
+    let at: FilmDrop | null = null;
+    if (where === 'start') {
+      const section = view[0];
+      if (section)
+        at =
+          section.slideIds.length > 0 && !ids.includes(section.slideIds[0] ?? '')
+            ? { id: section.slideIds[0] as string, half: 'before' }
+            : { sectionId: section.id };
+    } else if (where === 'end') {
+      const section = view[view.length - 1];
+      const tail = section?.slideIds.filter((id) => !ids.includes(id)).at(-1);
+      if (section)
+        at = tail !== undefined ? { id: tail, half: 'after' } : { sectionId: section.id };
+    } else if (where === 'up') {
+      const before = order
+        .slice(0, order.indexOf(first))
+        .filter((id) => !ids.includes(id))
+        .at(-1);
+      if (before === undefined) return;
+      at = { id: before, half: 'before' };
+    } else {
+      const after = order.slice(order.indexOf(last) + 1).find((id) => !ids.includes(id));
+      if (after === undefined) return;
+      at = { id: after, half: 'after' };
+    }
+    if (at === null) return;
+    writeOrder(ids, at);
+  };
+
+  const [refused, setRefused] = useState<string | null>(null);
+  const shake = (id: string) => {
+    setRefused(id);
+    window.setTimeout(
+      () => setRefused((current) => (current === id ? null : current)),
+      DROP_SHAKE_MS,
+    );
+  };
+
+  /** The one write of a drop: `slide.move` for one card, `section.set` for several (one revision, one undo). */
+  const writeOrder = (ids: string[], at: FilmDrop) => {
+    const view = sections.map((section) => ({
+      id: section.id,
+      slideIds: section.items.map((item) => item.id),
+    }));
+    const next = droppedOrder(view, kinds, ids, at);
+    if (next === null) {
+      shake('id' in at ? at.id : at.sectionId);
+      return;
+    }
+    if (
+      view.every((section, i) => {
+        const after = next[i];
+        return after !== undefined && section.slideIds.join(',') === after.slideIds.join(',');
+      })
+    )
+      return;
+    const single = ids.length === 1 ? ids[0] : undefined;
+    if (single !== undefined) {
+      const target = moveOf(next, single);
+      if (target)
+        void dispatch('slide.move', { slideId: single, ...target }).catch(() => undefined);
+      return;
+    }
+    const full = edit.document?.deck.sections ?? edit.deck?.sections;
+    const named = next.map((section) => ({
+      id: section.id,
+      name:
+        full?.find((row) => row.id === section.id)?.name ??
+        sectionOf(section.slideIds[0] ?? '')?.label ??
+        sections.find((row) => row.id === section.id)?.label ??
+        section.id,
+      slideIds: section.slideIds,
+    }));
+    void dispatch('section.set', { sections: named }).catch(() => undefined);
+  };
+
+  // ---- drag (SPEC 4.1)
+
+  const [dragging, setDragging] = useState<string[] | null>(null);
+  const [drop, setDrop] = useState<FilmDrop | null>(null);
+
+  const onDragStart = (item: ShellItem, event: DragEvent<HTMLElement>) => {
+    const ids = selectedRef.current.includes(item.id)
+      ? order.filter((id) => selectedRef.current.includes(id))
+      : [item.id];
+    event.dataTransfer.setData('text/plain', ids.join(','));
+    event.dataTransfer.effectAllowed = 'move';
+    setDragging(ids);
+    setMenu(null);
+  };
+  const onDragOverCard = (item: ShellItem, event: DragEvent<HTMLElement>) => {
+    if (!dragging || dragging.includes(item.id)) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    const rect = event.currentTarget.getBoundingClientRect();
+    const half = event.clientY < rect.top + rect.height / 2 ? 'before' : 'after';
+    if (!drop || !('id' in drop) || drop.id !== item.id || drop.half !== half)
+      setDrop({ id: item.id, half });
+  };
+  const onDragOverSection = (section: ShellSection, event: DragEvent<HTMLElement>) => {
+    if (!dragging) return;
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'move';
+    if (!drop || !('sectionId' in drop) || drop.sectionId !== section.id)
+      setDrop({ sectionId: section.id });
+  };
+  const onDrop = (event: DragEvent<HTMLElement>) => {
+    event.preventDefault();
+    const ids = dragging ?? event.dataTransfer.getData('text/plain').split(',').filter(Boolean);
+    const at = drop;
+    setDragging(null);
+    setDrop(null);
+    if (ids.length === 0 || !at) return;
+    writeOrder(ids, at);
+  };
+  const onDragEnd = () => {
+    setDragging(null);
+    setDrop(null);
+  };
+
+  // ---- the right-click menu (SPEC 4.2)
+
+  const [menu, setMenu] = useState<FilmMenu | null>(null);
+  const platform = detectPlatform();
+  const openMenu = (item: ShellItem, point: { x: number; y: number }, anchor: HTMLElement) => {
+    if (!selectedRef.current.includes(item.id)) pickOne(item.id);
+    const ids = order.filter((id) => selectedRef.current.includes(id) || id === item.id);
+    const anchorId = ids.includes(active) ? active : (ids[0] ?? item.id);
+    const facts = factsOf(items.get(anchorId) ?? item);
+    setMenu({ ids, x: point.x, y: point.y, anchor, layout: facts.template });
+    /* without the document the layout of a slide with no template is derived from its record,
+       read through slide.get, so the Apply layout submenu checks the right row (SPEC 5.6) */
+    if (edit.document === undefined && facts.template === undefined) {
+      void read('slide.get', { slideId: anchorId })
+        .then((got) => {
+          const slide = (got as { slide?: Slide }).slide;
+          if (!slide) return;
+          const layout = derivedLayout(slide);
+          setMenu((current) =>
+            current && current.anchor === anchor ? { ...current, layout } : current,
+          );
+        })
+        .catch(() => undefined);
+    }
+  };
+  const menuContext = (ids: string[]): MenuContext => {
+    const anchorId = ids.includes(active) ? active : (ids[0] ?? active);
+    const facts = factsOf(items.get(anchorId) ?? { id: anchorId, title: anchorId });
+    const record = edit.document?.slides[anchorId];
+    return {
+      ...DEFAULT_MENU_CONTEXT,
+      platform,
+      focus: 'filmstrip',
+      slide: {
+        index: Math.max(0, order.indexOf(anchorId)),
+        count: order.length,
+        skipped: ids.every((id) => factsOf(items.get(id) ?? { id, title: id }).skip),
+        freeform: record?.kind === 'content' && record.layout.type === 'freeform',
+        pictureLayout: facts.pictureLayout,
+      },
+      selectedSlides: ids.length,
+      clipboard: (edit.clipboard ?? clipboardStore).kind(),
+      history: edit.history ?? DEFAULT_MENU_CONTEXT.history,
+      sections: sections.length,
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, ...edit.settings },
+    };
+  };
+  const runMenuItem = (item: MenuItem, ids: string[]) => {
+    const anchorId = ids.includes(active) ? active : (ids[0] ?? active);
+    const last = ids[ids.length - 1] ?? anchorId;
+    switch (item.id) {
+      case 'edit.cut':
+        void copySlides(ids).then(() => removeSlides(ids));
+        return;
+      case 'edit.copy':
+        void copySlides(ids);
+        return;
+      case 'edit.paste':
+        void pasteSlides(last);
+        return;
+      case 'slide.newSlide':
+        newSlide(last);
+        return;
+      case 'slide.duplicateSlide':
+        void dispatch('slide.duplicate', { slideIds: ids }).catch(() => undefined);
+        return;
+      case 'edit.delete':
+      case 'slide.deleteSlide':
+        removeSlides(ids);
+        return;
+      case 'slide.skipSlide':
+        skipSlides(ids);
+        return;
+      case 'slide.moveSlide.up':
+        moveSelected('up');
+        return;
+      case 'slide.moveSlide.down':
+        moveSelected('down');
+        return;
+      case 'slide.moveSlide.toBeginning':
+        moveSelected('start');
+        return;
+      case 'slide.moveSlide.toEnd':
+        moveSelected('end');
+        return;
+      default:
+        edit.onMenuItem?.(item, ids);
+    }
+  };
+
+  // ---- keys (SPEC 4.1)
+
+  const onListKey = (event: KeyboardEvent<HTMLElement>) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement) || !target.classList.contains('ts-card')) return;
+    const meta = event.metaKey || event.ctrlKey;
+    const at = order.indexOf(active);
+    const ids = order.filter((id) => selectedRef.current.includes(id));
+    const stop = () => {
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    /* Ctrl M on every platform, as Google prints it (SPEC 10.1) */
+    if (event.ctrlKey && !event.metaKey && !event.altKey && event.key.toLowerCase() === 'm') {
+      stop();
+      newSlide(ids[ids.length - 1] ?? active);
+      return;
+    }
+    if ((event.key === 'F10' && event.shiftKey) || (meta && event.shiftKey && event.key === '\\')) {
+      stop();
+      const item = items.get(active);
+      if (item) openMenu(item, centerOf(target), target);
+      return;
+    }
+    if (meta && event.key.toLowerCase() === 'a' && !event.shiftKey) {
+      stop();
+      setSelection(order);
+      return;
+    }
+    if (meta && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+      stop();
+      if (event.shiftKey) moveSelected(event.key === 'ArrowUp' ? 'start' : 'end');
+      else moveSelected(event.key === 'ArrowUp' ? 'up' : 'down');
+      return;
+    }
+    if (meta || event.altKey) return;
+    switch (event.key) {
+      case 'ArrowUp':
+        stop();
+        moveActive(at - 1, event.shiftKey);
+        return;
+      case 'ArrowDown':
+        stop();
+        moveActive(at + 1, event.shiftKey);
+        return;
+      case 'PageUp':
+        stop();
+        moveActive(at - PAGE_STEP, event.shiftKey);
+        return;
+      case 'PageDown':
+        stop();
+        moveActive(at + PAGE_STEP, event.shiftKey);
+        return;
+      case 'Home':
+        stop();
+        moveActive(0, event.shiftKey);
+        return;
+      case 'End':
+        stop();
+        moveActive(order.length - 1, event.shiftKey);
+        return;
+      case 'Delete':
+      case 'Backspace':
+        stop();
+        removeSlides(ids.length > 0 ? ids : [active]);
+        return;
+      case 'Enter':
+        stop();
+        edit.onFocusCanvas?.();
+        return;
+      default:
+        return;
+    }
+  };
+
+  const showSections = sections.length > 1 && edit.settings?.sections !== false;
+  const openGrid = () => {
+    if (shell.modes.includes('grid')) shell.setMode('grid');
+  };
+
+  return (
+    <aside
+      className={cn('pt-sb ts-filmstrip is-edit', hidden && 'is-hidden', overlay && 'is-overlay')}
+      aria-label={title}
+      aria-hidden={hidden || undefined}
+    >
+      {overlay ? (
+        <div className="pt-sb-head">
+          {homeHref ? (
+            <a
+              className="pt-sb-mark"
+              href={homeHref}
+              aria-label="Every presentation"
+              {...tipProps({ name: 'Turboslide', doc: 'Every presentation on this Turboslide.' })}
+            >
+              <GtMark />
+            </a>
+          ) : (
+            <span className="pt-sb-mark">
+              <GtMark />
+            </span>
+          )}
+          {aside}
+          <ToolButton
+            icon="close"
+            title="Close the list (Esc)"
+            doc="Hides the overlay list."
+            onClick={() => setSidebar(false)}
+          />
+        </div>
+      ) : null}
+      <div
+        ref={listRef}
+        className="ts-film pt-scroll"
+        role="listbox"
+        aria-label="Slides"
+        aria-multiselectable="true"
+        data-control="filmstrip"
+        onKeyDown={onListKey}
+      >
+        {order.length === 0 ? (
+          <div className="ts-card is-empty" role="presentation" data-control="filmstrip.empty">
+            <span className="ts-card-n" />
+            <span className="ts-card-frame">
+              <span className="ts-card-empty">{FILMSTRIP.empty}</span>
+            </span>
+          </div>
+        ) : null}
+        {sections.map((section) => (
+          <Fragment key={section.id}>
+            {showSections ? (
+              <div
+                className={cn(
+                  'ts-film-section',
+                  drop !== null &&
+                    'sectionId' in drop &&
+                    drop.sectionId === section.id &&
+                    'is-drop',
+                  refused === section.id && 'is-refused',
+                )}
+                role="presentation"
+                data-section={section.id}
+                onDragOver={(event) => onDragOverSection(section, event)}
+                onDrop={onDrop}
+              >
+                {section.label}
+              </div>
+            ) : null}
+            {section.items.map((item) => (
+              <FilmCard
+                key={item.id}
+                item={item}
+                facts={factsOf(item)}
+                current={item.id === active}
+                selected={selected.includes(item.id)}
+                theme={theme}
+                dragging={dragging?.includes(item.id) ?? false}
+                drop={drop !== null && 'id' in drop && drop.id === item.id ? drop.half : null}
+                refused={refused === item.id}
+                onPick={onPick}
+                onOpenGrid={openGrid}
+                onMenu={openMenu}
+                onDragStart={onDragStart}
+                onDragOver={onDragOverCard}
+                onDrop={onDrop}
+                onDragEnd={onDragEnd}
+                follow={item.id === active ? follow : undefined}
+              />
+            ))}
+          </Fragment>
+        ))}
+      </div>
+      {menu ? (
+        <ContextMenu
+          target="filmstripCard"
+          context={menuContext(menu.ids)}
+          anchor={{ x: menu.x, y: menu.y }}
+          returnFocusTo={menu.anchor}
+          layout={menu.layout}
+          onLayout={(layout) => applyLayoutTo(menu.ids, layout)}
+          onSelect={(item) => runMenuItem(item, menu.ids)}
+          onClose={() => setMenu(null)}
+        />
+      ) : null}
+    </aside>
+  );
+}
+
+/** The centre of an element in client pixels, where the keyboard opens its menu. */
+function centerOf(el: HTMLElement): { x: number; y: number } {
+  const rect = el.getBoundingClientRect();
+  return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 }

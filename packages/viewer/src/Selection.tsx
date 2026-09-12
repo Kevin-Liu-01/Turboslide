@@ -195,3 +195,113 @@ export function selectionOf(ids: readonly string[]): { selection: Selection; ext
     ? { selection: null, extra: [] }
     : { selection: { kind: 'block', blockId: anchor }, extra: rest };
 }
+
+// ---------------------------------------------------------------------------------------------
+// Google's words for the chip and the menus (gslides-parity SPEC 12, 13.7)
+
+/** The plain name of a block type as the default view says it: Google's word where one exists. */
+const DISPLAY_NAMES: Readonly<Partial<Record<string, string>>> = {
+  heading: 'Title',
+  paragraph: 'Text',
+  text: 'Text box',
+  box: 'Box',
+  shape: 'Shape',
+  rule: 'Line',
+  shot: 'Image',
+  pair: 'Images',
+  tiles: 'Image grid',
+  details: 'Detail grid',
+  material: 'Picture',
+  table: 'Table',
+  rows: 'List',
+  plain: 'List',
+  refs: 'List',
+  say: 'Quotes',
+  icon: 'Icon',
+  credit: 'Credit',
+  scales: 'Scales',
+  board: 'Board',
+  matrix: 'Matrix',
+  dia: 'Diagram',
+  panel: 'Code',
+  html: 'Embedded content',
+  composite: 'Group',
+  mark: 'Mark',
+  marks: 'Marks',
+  logos: 'Logos',
+  spec: 'Type specimen',
+  lang: 'Scripts',
+  ladder: 'Type ladder',
+  swatches: 'Swatches',
+  ramp: 'Ramp',
+};
+
+/** The name the chip and the accessible label use for a block: its type in Google's words (SPEC 13.7), never its id. */
+export function blockDisplayName(slide: Slide, blockId: string): string {
+  if (slide.kind === 'title' && blockId === 'lead') return 'Subtitle';
+  if (slide.kind === 'title' && blockId === 'heading') return 'Title';
+  const type = blockTypeOf(slide, blockId);
+  if (type === undefined) return 'Block';
+  return DISPLAY_NAMES[type] ?? type.charAt(0).toUpperCase() + type.slice(1);
+}
+
+/** The family a selected block belongs to, as the menu model's predicates read it (menus/model.ts BlockFamily). */
+export type BlockFamily = 'text' | 'shape' | 'image' | 'line' | 'table' | 'other';
+
+export function blockFamily(type: string | undefined): BlockFamily {
+  switch (type) {
+    case 'heading':
+    case 'paragraph':
+    case 'text':
+    case 'box':
+    case 'credit':
+      return 'text';
+    case 'shape':
+      return 'shape';
+    case 'rule':
+      return 'line';
+    case 'shot':
+    case 'pair':
+    case 'tiles':
+    case 'details':
+    case 'material':
+      return 'image';
+    case 'table':
+      return 'table';
+    default:
+      return 'other';
+  }
+}
+
+/** True for the block types whose text takes typography (SPEC 3.2: heading, paragraph, text, box, table). */
+export function isTextBlockType(type: string | undefined): boolean {
+  return (
+    type === 'heading' ||
+    type === 'paragraph' ||
+    type === 'text' ||
+    type === 'box' ||
+    type === 'table'
+  );
+}
+
+/** The cell a table run pointer names (`rows/<r>/cells/<c>`), or null for any other pointer. */
+export function cellPointer(pointer: string): { row: number; col: number } | null {
+  const match = /^rows\/(\d+)\/cells\/(\d+)$/.exec(pointer);
+  if (!match) return null;
+  return { row: Number(match[1]), col: Number(match[2]) };
+}
+
+/**
+ * The list item a run pointer names: `items/<i>/text` (plain), `items/<i>/key` or `/value`
+ * (rows), `items/<i>` (refs); null for any other pointer.
+ */
+export function listItemPointer(pointer: string): { index: number; field: string | null } | null {
+  const match = /^items\/(\d+)(?:\/([a-z]+))?$/.exec(pointer);
+  if (!match) return null;
+  return { index: Number(match[1]), field: match[2] ?? null };
+}
+
+/** The ids of the real blocks of a slide in document order, for Select all (SPEC 2.2). */
+export function allBlockIds(slide: Slide): string[] {
+  return slideBlocks(slide).map(({ block }) => block.id);
+}

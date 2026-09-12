@@ -29,10 +29,21 @@
   --pt-scrim: rgba(7, 7, 7, 0.28);
   --pt-panel-ink: #101010;
   --pt-panel-text: rgba(255, 255, 255, 0.87);
+  /* the view route's one bar (/deck/:deckId keeps today's viewer shell, gslides-parity SPEC 1.2) */
   --pt-bar-h: 52px;
-  /* the sidebar in outline density; ViewerShell.css widens it to 256px for thumbnails */
+  /* the editor's rows (gslides-parity SPEC 1.1, 1.2): the title row, the menu bar, the toolbar,
+     the notes pane at its one line height, the bottom bar; a menu plate's width */
+  --pt-title-h: 44px;
+  --pt-menu-h: 28px;
+  --pt-tool-h: 40px;
+  --pt-notes-h: 64px;
+  --pt-status-h: 32px;
+  --pt-menu-w: 220px;
+  /* the sidebar in outline density; ViewerShell.css widens it to 256px for thumbnails, the
+     editor's filmstrip width (gslides-parity SPEC 1.2) */
   --pt-sb-w: 208px;
-  --pt-panel-w: 460px;
+  /* the right panel: Format options, Themes, Version history, Check slides (gslides-parity SPEC 1.2) */
+  --pt-panel-w: 320px;
   --pt-rail: 1170px;
   /* The one corner in chrome (Kevin's directive): the Search pill's 6px,
      shared by the segmented control at both sizes (the toolbar's format seg,

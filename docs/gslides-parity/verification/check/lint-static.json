@@ -1,0 +1,2067 @@
+[
+  {
+    "id": "picture/plate-clear|opener-brand||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 2,
+    "kind": "defect",
+    "slideId": "opener-brand",
+    "evidence": {
+      "text": "opener-brand",
+      "box": [137, 500, 740, 271],
+      "measured": {
+        "litUnder": 1237,
+        "litInBand": 564,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "1237 lit cell(s) sit under the plate; move or retone the picture, or move the plate to the other side (OPENERS.md:105, 176).",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "opener/sentence-lists-section|opener-brand||/plate/blocks|",
+    "rule": "opener/sentence-lists-section",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "opener-brand",
+    "evidence": {
+      "text": "Reputation; Why the redesign; Open source and platform; Audience; Brand personality; Writing style; Visual references"
+    },
+    "proposal": "The sentence should name each family of the section in order; not mentioned: Reputation, Why the redesign, Open source and platform, Audience, Brand personality, Writing style, Visual references (OPENERS.md:44).",
+    "source": "lint",
+    "path": "/plate/blocks"
+  },
+  {
+    "id": "dia/stroke-grammar|reputation|dia1|/slots/right/0/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "reputation",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/right/0/svg"
+  },
+  {
+    "id": "dia/fit-slot|reputation|dia1|/slots/right/0/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "reputation",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 620,
+        "slotWidth": 627
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel (the slot is 627 px wide).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/right/0/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "reputation",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|reputation|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "reputation",
+    "evidence": {
+      "text": "dia1, p1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia). Native text with raster parts: p1 (mark); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|why|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "why",
+    "evidence": {
+      "text": "rows",
+      "measured": {
+        "rasterBlocks": 0,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "Native text with raster parts: rows (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|positioning|dia1|/slots/right/0/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "positioning",
+    "evidence": {
+      "text": "fill var(--plate; fill var(--ink-2"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/right/0/svg"
+  },
+  {
+    "id": "dia/fit-slot|positioning|dia1|/slots/right/0/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "positioning",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 730,
+        "slotWidth": 731.5
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel (the slot is 731.5 px wide).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/right/0/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "positioning",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|positioning|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "positioning",
+    "evidence": {
+      "text": "dia1, p1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia). Native text with raster parts: p1 (mark); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|audience|dia1|/slots/left/2/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "audience",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/2/svg"
+  },
+  {
+    "id": "export/non-native|audience|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "audience",
+    "evidence": {
+      "text": "dia1, p1, rows",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 2
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia). Native text with raster parts: p1 (mark), rows (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|values|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "values",
+    "evidence": {
+      "text": "rows",
+      "measured": {
+        "rasterBlocks": 0,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "Native text with raster parts: rows (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "picture/plate-clear|mood-rosetta||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 1,
+    "kind": "defect",
+    "slideId": "mood-rosetta",
+    "evidence": {
+      "text": "mood-rosetta",
+      "box": [851, 539, 612, 232],
+      "measured": {
+        "litUnder": 6108,
+        "litInBand": 1697,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "6108 lit cell(s) sit under the mood plate and 1697 within 30 px of it; the plate is opaque, so this is allowed (OPENERS.md, Mood slide), listed for the art direction judge.",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "export/non-native|character|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "character",
+    "evidence": {
+      "text": "scales",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: scales (scales).",
+    "source": "lint"
+  },
+  {
+    "id": "copy/full-sentence-caption|voice|say|/slots/right/0/items/0/note|",
+    "rule": "copy/full-sentence-caption",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "voice",
+    "evidence": {
+      "text": "Acceptable"
+    },
+    "proposal": "Write the caption as a full sentence with a terminal period.",
+    "source": "lint",
+    "blockId": "say",
+    "path": "/slots/right/0/items/0/note",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "voice",
+        "blockId": "say",
+        "path": "/items/0/note",
+        "value": "Acceptable."
+      }
+    ]
+  },
+  {
+    "id": "copy/full-sentence-caption|voice|say|/slots/right/0/items/1/note|",
+    "rule": "copy/full-sentence-caption",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "voice",
+    "evidence": {
+      "text": "Not acceptable"
+    },
+    "proposal": "Write the caption as a full sentence with a terminal period.",
+    "source": "lint",
+    "blockId": "say",
+    "path": "/slots/right/0/items/1/note",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "voice",
+        "blockId": "say",
+        "path": "/items/1/note",
+        "value": "Not acceptable."
+      }
+    ]
+  },
+  {
+    "id": "copy/full-sentence-caption|voice|say|/slots/right/0/items/2/note|",
+    "rule": "copy/full-sentence-caption",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "voice",
+    "evidence": {
+      "text": "Acceptable"
+    },
+    "proposal": "Write the caption as a full sentence with a terminal period.",
+    "source": "lint",
+    "blockId": "say",
+    "path": "/slots/right/0/items/2/note",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "voice",
+        "blockId": "say",
+        "path": "/items/2/note",
+        "value": "Acceptable."
+      }
+    ]
+  },
+  {
+    "id": "copy/full-sentence-caption|voice|say|/slots/right/0/items/3/note|",
+    "rule": "copy/full-sentence-caption",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "voice",
+    "evidence": {
+      "text": "Not acceptable"
+    },
+    "proposal": "Write the caption as a full sentence with a terminal period.",
+    "source": "lint",
+    "blockId": "say",
+    "path": "/slots/right/0/items/3/note",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "voice",
+        "blockId": "say",
+        "path": "/items/3/note",
+        "value": "Not acceptable."
+      }
+    ]
+  },
+  {
+    "id": "copy/metaphor-candidate|voice|say|/slots/right/0/items/1/quote|",
+    "rule": "copy/metaphor-candidate",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "voice",
+    "evidence": {
+      "text": "Supercharge your global growth with cutting-edge AI."
+    },
+    "proposal": "Candidate metaphor: supercharge, cutting-edge. Replace with the mechanism or the number.",
+    "source": "lint",
+    "blockId": "say",
+    "path": "/slots/right/0/items/1/quote"
+  },
+  {
+    "id": "copy/metaphor-candidate|voice|say|/slots/right/0/items/3/quote|",
+    "rule": "copy/metaphor-candidate",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "voice",
+    "evidence": {
+      "text": "Unlock global markets with our game-changing localization platform."
+    },
+    "proposal": "Candidate metaphor: unlock, game-changing. Replace with the mechanism or the number.",
+    "source": "lint",
+    "blockId": "say",
+    "path": "/slots/right/0/items/3/quote"
+  },
+  {
+    "id": "export/non-native|voice|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "voice",
+    "evidence": {
+      "text": "say",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: say (say).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|inspirations|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "inspirations",
+    "evidence": {
+      "text": "tiles",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: tiles (tiles).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|naming|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "naming",
+    "evidence": {
+      "text": "logos, rows",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: logos (logoPlates). Native text with raster parts: rows (icons and mark); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|mark|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "mark",
+    "evidence": {
+      "text": "mark",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: mark (mark).",
+    "source": "lint"
+  },
+  {
+    "id": "picture/plate-clear|opener-design-system||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 2,
+    "kind": "defect",
+    "slideId": "opener-design-system",
+    "evidence": {
+      "text": "opener-design-system",
+      "box": [137, 500, 740, 271],
+      "measured": {
+        "litUnder": 6291,
+        "litInBand": 1949,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "6291 lit cell(s) sit under the plate; move or retone the picture, or move the plate to the other side (OPENERS.md:105, 176).",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "opener/sentence-lists-section|opener-design-system||/plate/blocks|",
+    "rule": "opener/sentence-lists-section",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "opener-design-system",
+    "evidence": {
+      "text": "Small sizes; Typography; Type scale; Line rules; The doubled line; Animated text; Anti-patterns"
+    },
+    "proposal": "The sentence should name each family of the section in order; not mentioned: Small sizes, Typography, Type scale, Line rules, The doubled line, Animated text, Anti-patterns (OPENERS.md:44).",
+    "source": "lint",
+    "path": "/plate/blocks"
+  },
+  {
+    "id": "export/non-native|compression|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "compression",
+    "evidence": {
+      "text": "sizes",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: sizes (markSizes).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|color|dia1|/slots/body/1/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "color",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/1/svg"
+  },
+  {
+    "id": "export/non-native|color|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "color",
+    "evidence": {
+      "text": "swatches, dia1",
+      "measured": {
+        "rasterBlocks": 2,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: swatches (swatches), dia1 (dia).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|type|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "type",
+    "evidence": {
+      "text": "spec",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: spec (spec).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|multilingual|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "multilingual",
+    "evidence": {
+      "text": "lang",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: lang (lang).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/half-pixel|lines|dia1|/slots/right/0/svg|",
+    "rule": "dia/half-pixel",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "lines",
+    "evidence": {
+      "text": "x 451; x 691"
+    },
+    "proposal": "Put 1 px strokes on the half pixel (report 03 section 5.11).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/right/0/svg"
+  },
+  {
+    "id": "export/non-native|lines|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "lines",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|doubled-line|dia1|/slots/right/0/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "doubled-line",
+    "evidence": {
+      "text": "stroke-width 6; stroke-width 3; fill var(--ink; fill var(--paper"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/right/0/svg"
+  },
+  {
+    "id": "dia/fit-slot|doubled-line|dia1|/slots/right/0/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "doubled-line",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 800,
+        "slotWidth": 731.5
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel (the slot is 731.5 px wide).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/right/0/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "doubled-line",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|doubled-line|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "doubled-line",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia).",
+    "source": "lint"
+  },
+  {
+    "id": "picture/plate-clear|mood-calligraphy||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 1,
+    "kind": "defect",
+    "slideId": "mood-calligraphy",
+    "evidence": {
+      "text": "mood-calligraphy",
+      "box": [851, 539, 612, 232],
+      "measured": {
+        "litUnder": 10327,
+        "litInBand": 3608,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "10327 lit cell(s) sit under the mood plate and 3608 within 30 px of it; the plate is opaque, so this is allowed (OPENERS.md, Mood slide), listed for the art direction judge.",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "dia/stroke-grammar|diagrams|dia1|/slots/body/0/cells/1/blocks/0/cells/0/blocks/0/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "diagrams",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/0/cells/1/blocks/0/cells/0/blocks/0/svg"
+  },
+  {
+    "id": "dia/stroke-grammar|diagrams|dia2|/slots/body/0/cells/1/blocks/0/cells/1/blocks/0/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "diagrams",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia2",
+    "path": "/slots/body/0/cells/1/blocks/0/cells/1/blocks/0/svg"
+  },
+  {
+    "id": "dia/stroke-grammar|diagrams|dia3|/slots/body/0/cells/1/blocks/0/cells/2/blocks/0/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "diagrams",
+    "evidence": {
+      "text": "fill var(--plate"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia3",
+    "path": "/slots/body/0/cells/1/blocks/0/cells/2/blocks/0/svg"
+  },
+  {
+    "id": "dia/stroke-grammar|diagrams|dia4|/slots/body/0/cells/1/blocks/0/cells/3/blocks/0/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "diagrams",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia4",
+    "path": "/slots/body/0/cells/1/blocks/0/cells/3/blocks/0/svg"
+  },
+  {
+    "id": "export/non-native|diagrams|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "diagrams",
+    "evidence": {
+      "text": "dia1, dia2, dia3, dia4",
+      "measured": {
+        "rasterBlocks": 4,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia), dia2 (dia), dia3 (dia), dia4 (dia).",
+    "source": "lint"
+  },
+  {
+    "id": "numbers/contradiction|diagrams|rows2||",
+    "rule": "numbers/contradiction",
+    "severity": 1,
+    "kind": "accuracy",
+    "slideId": "diagrams",
+    "evidence": {
+      "text": "30 degree (diagrams, iso, engines); 45 degree (shell-numbers)"
+    },
+    "proposal": "The same noun carries different numerals across slides: 30 degree (diagrams, iso, engines); 45 degree (shell-numbers). Confirm the right one (for the accuracy judge).",
+    "source": "lint",
+    "blockId": "rows2"
+  },
+  {
+    "id": "export/non-native|dither|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "dither",
+    "evidence": {
+      "text": "dither, matrix",
+      "measured": {
+        "rasterBlocks": 2,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dither (dither), matrix (matrix).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|iso|dia1|/slots/right/0/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "iso",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/right/0/svg"
+  },
+  {
+    "id": "copy/full-sentence-caption|iso|p2|/slots/left/2/text|",
+    "rule": "copy/full-sentence-caption",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "iso",
+    "evidence": {
+      "text": "project(x, y, z) = [(x - y) cos 30, (x + y) sin 30 - z]"
+    },
+    "proposal": "Write the caption as a full sentence with a terminal period.",
+    "source": "lint",
+    "blockId": "p2",
+    "path": "/slots/left/2/text",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "iso",
+        "blockId": "p2",
+        "path": "/text",
+        "value": "project(x, y, z) = \\[(x - y) cos 30, (x + y) sin 30 - z]."
+      }
+    ]
+  },
+  {
+    "id": "dia/fit-slot|iso|dia1|/slots/right/0/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "iso",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 800,
+        "slotWidth": 731.5
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel (the slot is 731.5 px wide).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/right/0/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "iso",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|iso|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "iso",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|language-as-material|dia1|/slots/left/2/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "language-as-material",
+    "evidence": {
+      "text": "stroke-width 6; stroke-width 3; fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/2/svg"
+  },
+  {
+    "id": "dia/fit-slot|language-as-material|dia1|/slots/left/2/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "language-as-material",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 600,
+        "slotWidth": 627
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel (the slot is 627 px wide).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/2/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "language-as-material",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|language-as-material|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "language-as-material",
+    "evidence": {
+      "text": "dia1, rows",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia). Native text with raster parts: rows (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|motion|dia1|/slots/left/1/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "motion",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/1/svg"
+  },
+  {
+    "id": "dia/fit-slot|motion|dia1|/slots/left/1/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "motion",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 640,
+        "slotWidth": 627
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel (the slot is 627 px wide).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/1/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "motion",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "dia/half-pixel|motion|dia1|/slots/left/1/svg|",
+    "rule": "dia/half-pixel",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "motion",
+    "evidence": {
+      "text": "x 120; y 200; x 120; x 225; x 330; x 435; x 540; y 70"
+    },
+    "proposal": "Put 1 px strokes on the half pixel (report 03 section 5.11).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/1/svg"
+  },
+  {
+    "id": "export/non-native|motion|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "motion",
+    "evidence": {
+      "text": "dia1, rows",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia). Native text with raster parts: rows (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|avoid|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "avoid",
+    "evidence": {
+      "text": "p1, list",
+      "measured": {
+        "rasterBlocks": 0,
+        "partialBlocks": 2
+      }
+    },
+    "proposal": "Native text with raster parts: p1 (mark), list (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "picture/plate-clear|opener-website||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 2,
+    "kind": "defect",
+    "slideId": "opener-website",
+    "evidence": {
+      "text": "opener-website",
+      "box": [137, 500, 740, 271],
+      "measured": {
+        "litUnder": 1789,
+        "litInBand": 681,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "1789 lit cell(s) sit under the plate; move or retone the picture, or move the plate to the other side (OPENERS.md:105, 176).",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "opener/sentence-lists-section|opener-website||/plate/blocks|",
+    "rule": "opener/sentence-lists-section",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "opener-website",
+    "evidence": {
+      "text": "Public surfaces; Pricing and enterprise; Contact and report card; Details; Three close-ups; The horizon field"
+    },
+    "proposal": "The sentence should name each family of the section in order; not mentioned: Public surfaces, Pricing and enterprise, Contact and report card, Details, Three close-ups, The horizon field (OPENERS.md:44).",
+    "source": "lint",
+    "path": "/plate/blocks"
+  },
+  {
+    "id": "export/non-native|surfaces|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "surfaces",
+    "evidence": {
+      "text": "rows",
+      "measured": {
+        "rasterBlocks": 0,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "Native text with raster parts: rows (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|site|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "site",
+    "evidence": {
+      "text": "fig",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|dark-mode|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "dark-mode",
+    "evidence": {
+      "text": "pair",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: pair (pair).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|pages-a|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "pages-a",
+    "evidence": {
+      "text": "pair",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: pair (pair).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|pages-b|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "pages-b",
+    "evidence": {
+      "text": "pair",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: pair (pair).",
+    "source": "lint"
+  },
+  {
+    "id": "picture/plate-clear|mood-lighthouse||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 1,
+    "kind": "defect",
+    "slideId": "mood-lighthouse",
+    "evidence": {
+      "text": "mood-lighthouse",
+      "box": [851, 539, 612, 232],
+      "measured": {
+        "litUnder": 30358,
+        "litInBand": 10684,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "30358 lit cell(s) sit under the mood plate and 10684 within 30 px of it; the plate is opaque, so this is allowed (OPENERS.md, Mood slide), listed for the art direction judge.",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "export/non-native|details|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "details",
+    "evidence": {
+      "text": "grid",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: grid (details).",
+    "source": "lint"
+  },
+  {
+    "id": "numbers/contradiction|details|grid||",
+    "rule": "numbers/contradiction",
+    "severity": 1,
+    "kind": "accuracy",
+    "slideId": "details",
+    "evidence": {
+      "text": "404 page (details); 393 page (opener-documentation, docs); 51 page (books-and-templates)"
+    },
+    "proposal": "The same noun carries different numerals across slides: 404 page (details); 393 page (opener-documentation, docs); 51 page (books-and-templates). Confirm the right one (for the accuracy judge).",
+    "source": "lint",
+    "blockId": "grid"
+  },
+  {
+    "id": "export/non-native|details-two|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "details-two",
+    "evidence": {
+      "text": "fig, fig2, fig3",
+      "measured": {
+        "rasterBlocks": 3,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot), fig2 (shot), fig3 (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/fit-slot|shell-numbers|dia1|/slots/left/2/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "shell-numbers",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 520,
+        "slotWidth": 522.5
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel (the slot is 522.5 px wide).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/2/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "shell-numbers",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "dia/half-pixel|shell-numbers|dia1|/slots/left/2/svg|",
+    "rule": "dia/half-pixel",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "shell-numbers",
+    "evidence": {
+      "text": "x 8; x 60; x 80; y 116; y 176; y 256"
+    },
+    "proposal": "Put 1 px strokes on the half pixel (report 03 section 5.11).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/2/svg"
+  },
+  {
+    "id": "export/non-native|shell-numbers|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "shell-numbers",
+    "evidence": {
+      "text": "dia1, rows",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia). Native text with raster parts: rows (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|horizon|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "horizon",
+    "evidence": {
+      "text": "fig",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "numbers/contradiction|horizon|p1||",
+    "rule": "numbers/contradiction",
+    "severity": 1,
+    "kind": "accuracy",
+    "slideId": "horizon",
+    "evidence": {
+      "text": "130 second (horizon); 9 second (horizon); 5 second (horizon); 2 second (off-the-site)"
+    },
+    "proposal": "The same noun carries different numerals across slides: 130 second (horizon); 9 second (horizon); 5 second (horizon); 2 second (off-the-site). Confirm the right one (for the accuracy judge).",
+    "source": "lint",
+    "blockId": "p1"
+  },
+  {
+    "id": "picture/plate-clear|opener-documentation||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 2,
+    "kind": "defect",
+    "slideId": "opener-documentation",
+    "evidence": {
+      "text": "opener-documentation",
+      "box": [137, 500, 740, 271],
+      "measured": {
+        "litUnder": 2570,
+        "litInBand": 1216,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "2570 lit cell(s) sit under the plate; move or retone the picture, or move the plate to the other side (OPENERS.md:105, 176).",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "export/non-native|docs|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "docs",
+    "evidence": {
+      "text": "fig",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|nearest-page-routing|dia1|/slots/body/0/cells/0/blocks/0/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "nearest-page-routing",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/0/cells/0/blocks/0/svg"
+  },
+  {
+    "id": "export/non-native|nearest-page-routing|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "nearest-page-routing",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia).",
+    "source": "lint"
+  },
+  {
+    "id": "picture/plate-clear|mood-dictionary||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 1,
+    "kind": "defect",
+    "slideId": "mood-dictionary",
+    "evidence": {
+      "text": "mood-dictionary",
+      "box": [851, 539, 612, 232],
+      "measured": {
+        "litUnder": 9817,
+        "litInBand": 3786,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "9817 lit cell(s) sit under the mood plate and 3786 within 30 px of it; the plate is opaque, so this is allowed (OPENERS.md, Mood slide), listed for the art direction judge.",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "dia/stroke-grammar|docs-for-agents|dia1|/slots/left/2/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "docs-for-agents",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/2/svg"
+  },
+  {
+    "id": "dia/fit-slot|docs-for-agents|dia1|/slots/left/2/fit|",
+    "rule": "dia/fit-slot",
+    "severity": 1,
+    "kind": "diagram",
+    "slideId": "docs-for-agents",
+    "evidence": {
+      "measured": {
+        "viewBoxWidth": 520,
+        "slotWidth": 522.5
+      }
+    },
+    "proposal": "Set fit to \"slot\" so one unit is one sheet pixel (the slot is 522.5 px wide).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/2/fit",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "docs-for-agents",
+        "blockId": "dia1",
+        "path": "/fit",
+        "value": "slot"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|docs-for-agents|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "docs-for-agents",
+    "evidence": {
+      "text": "dia1, rows",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia). Native text with raster parts: rows (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "opener/sentence-lists-section|opener-blog||/plate/blocks|",
+    "rule": "opener/sentence-lists-section",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "opener-blog",
+    "evidence": {
+      "text": "Blog index; Site copy and founder posts"
+    },
+    "proposal": "The sentence should name each family of the section in order; not mentioned: Blog index, Site copy and founder posts (OPENERS.md:44).",
+    "source": "lint",
+    "path": "/plate/blocks"
+  },
+  {
+    "id": "export/non-native|blog-index|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "blog-index",
+    "evidence": {
+      "text": "fig",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|blog-covers|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "blog-covers",
+    "evidence": {
+      "text": "fig",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "picture/plate-clear|mood-devanagari||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 1,
+    "kind": "defect",
+    "slideId": "mood-devanagari",
+    "evidence": {
+      "text": "mood-devanagari",
+      "box": [851, 539, 612, 232],
+      "measured": {
+        "litUnder": 16420,
+        "litInBand": 7119,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "16420 lit cell(s) sit under the mood plate and 7119 within 30 px of it; the plate is opaque, so this is allowed (OPENERS.md, Mood slide), listed for the art direction judge.",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "export/non-native|gem-smoke|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "gem-smoke",
+    "evidence": {
+      "text": "pair",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: pair (pair).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|blog-vision|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "blog-vision",
+    "evidence": {
+      "text": "fig, rows",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot). Native text with raster parts: rows (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|content-rule|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "content-rule",
+    "evidence": {
+      "text": "list",
+      "measured": {
+        "rasterBlocks": 0,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "Native text with raster parts: list (icons and mark); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|two-registers|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "two-registers",
+    "evidence": {
+      "text": "rows",
+      "measured": {
+        "rasterBlocks": 0,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "Native text with raster parts: rows (icons and mark); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|off-the-site|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "off-the-site",
+    "evidence": {
+      "text": "pair",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: pair (pair).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|dx|dia1|/slots/right/0/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "dx",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/right/0/svg"
+  },
+  {
+    "id": "export/non-native|dx|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "dx",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia).",
+    "source": "lint"
+  },
+  {
+    "id": "picture/plate-clear|mood-cable||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 1,
+    "kind": "defect",
+    "slideId": "mood-cable",
+    "evidence": {
+      "text": "mood-cable",
+      "box": [851, 539, 612, 232],
+      "measured": {
+        "litUnder": 10630,
+        "litInBand": 5559,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "10630 lit cell(s) sit under the mood plate and 5559 within 30 px of it; the plate is opaque, so this is allowed (OPENERS.md, Mood slide), listed for the art direction judge.",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "export/non-native|cli|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "cli",
+    "evidence": {
+      "text": "rows",
+      "measured": {
+        "rasterBlocks": 0,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "Native text with raster parts: rows (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "opener/sentence-lists-section|opener-prototemplate||/plate/blocks|",
+    "rule": "opener/sentence-lists-section",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "opener-prototemplate",
+    "evidence": {
+      "text": "Skills and marks; The viewer shell; The shell in use; The line law in chrome; Compare and the presenter; The Dossier; Directions; The archive; Shared engines; The build log; 134 live materials; The agent API"
+    },
+    "proposal": "The sentence should name each family of the section in order; not mentioned: Skills and marks, The viewer shell, The shell in use, The line law in chrome, Compare and the presenter, The Dossier, Directions, The archive, Shared engines, The build log, 134 live materials, The agent API (OPENERS.md:44).",
+    "source": "lint",
+    "path": "/plate/blocks"
+  },
+  {
+    "id": "export/non-native|lab|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "lab",
+    "evidence": {
+      "text": "fig",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|knowledge-base|dia1|/slots/body/0/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "knowledge-base",
+    "evidence": {
+      "text": "fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/0/svg"
+  },
+  {
+    "id": "export/non-native|knowledge-base|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "knowledge-base",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|skills-marks|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "skills-marks",
+    "evidence": {
+      "text": "pair",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: pair (pair).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|viewer-shell|dia1|/slots/left/2/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "viewer-shell",
+    "evidence": {
+      "text": "fill var(--plate; fill var(--ink; fill var(--paper; fill var(--ink-2"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/2/svg"
+  },
+  {
+    "id": "export/non-native|viewer-shell|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "viewer-shell",
+    "evidence": {
+      "text": "dia1, rows",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia). Native text with raster parts: rows (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|shell-views|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "shell-views",
+    "evidence": {
+      "text": "grid",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: grid (details).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|line-law|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "line-law",
+    "evidence": {
+      "text": "fig, dia1",
+      "measured": {
+        "rasterBlocks": 2,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot), dia1 (dia).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|presenter-compare|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "presenter-compare",
+    "evidence": {
+      "text": "fig, fig2, fig3, fig4",
+      "measured": {
+        "rasterBlocks": 4,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot), fig2 (shot), fig3 (shot), fig4 (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "copy/sentence-case|dossier|h|/slots/left/0/text|",
+    "rule": "copy/sentence-case",
+    "severity": 2,
+    "kind": "copy",
+    "slideId": "dossier",
+    "evidence": {
+      "text": "The Dossier"
+    },
+    "proposal": "Sentence case: lowercase \"Dossier\" unless it is a proper noun (add it to the list).",
+    "source": "lint",
+    "blockId": "h",
+    "path": "/slots/left/0/text",
+    "fix": [
+      {
+        "op": "block.set",
+        "slideId": "dossier",
+        "blockId": "h",
+        "path": "/text",
+        "value": "The dossier"
+      }
+    ]
+  },
+  {
+    "id": "export/non-native|dossier|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "dossier",
+    "evidence": {
+      "text": "fig",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|directions|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "directions",
+    "evidence": {
+      "text": "tiles",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: tiles (tiles).",
+    "source": "lint"
+  },
+  {
+    "id": "picture/plate-clear|mood-wave||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 1,
+    "kind": "defect",
+    "slideId": "mood-wave",
+    "evidence": {
+      "text": "mood-wave",
+      "box": [851, 539, 612, 232],
+      "measured": {
+        "litUnder": 12177,
+        "litInBand": 2818,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "12177 lit cell(s) sit under the mood plate and 2818 within 30 px of it; the plate is opaque, so this is allowed (OPENERS.md, Mood slide), listed for the art direction judge.",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "export/non-native|archive|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "archive",
+    "evidence": {
+      "text": "fig",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|engines|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "engines",
+    "evidence": {
+      "text": "tiles",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: tiles (tiles).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|build-log|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "build-log",
+    "evidence": {
+      "text": "fig, list",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot). Native text with raster parts: list (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|glyphfield|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "glyphfield",
+    "evidence": {
+      "text": "fig",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|glyphfield-tools|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "glyphfield-tools",
+    "evidence": {
+      "text": "fig",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: fig (shot).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|books-and-templates|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "books-and-templates",
+    "evidence": {
+      "text": "pair",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: pair (pair).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|glyphfield-materials|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "glyphfield-materials",
+    "evidence": {
+      "text": "pair",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: pair (pair).",
+    "source": "lint"
+  },
+  {
+    "id": "dia/stroke-grammar|agent-api|dia1|/slots/left/2/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "agent-api",
+    "evidence": {
+      "text": "fill var(--ink-2; fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/left/2/svg"
+  },
+  {
+    "id": "export/non-native|agent-api|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "agent-api",
+    "evidence": {
+      "text": "dia1",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia).",
+    "source": "lint"
+  },
+  {
+    "id": "opener/sentence-lists-section|opener-status||/plate/blocks|",
+    "rule": "opener/sentence-lists-section",
+    "severity": 1,
+    "kind": "copy",
+    "slideId": "opener-status",
+    "evidence": {
+      "text": "Current status"
+    },
+    "proposal": "The sentence should name each family of the section in order; not mentioned: Current status (OPENERS.md:44).",
+    "source": "lint",
+    "path": "/plate/blocks"
+  },
+  {
+    "id": "export/non-native|state|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "state",
+    "evidence": {
+      "text": "board",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 0
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: board (board).",
+    "source": "lint"
+  },
+  {
+    "id": "picture/plate-clear|mood-compass||/picture/asset|",
+    "rule": "picture/plate-clear",
+    "severity": 1,
+    "kind": "defect",
+    "slideId": "mood-compass",
+    "evidence": {
+      "text": "mood-compass",
+      "box": [851, 539, 612, 232],
+      "measured": {
+        "litUnder": 6742,
+        "litInBand": 2380,
+        "nearestLitPx": 0
+      }
+    },
+    "proposal": "6742 lit cell(s) sit under the mood plate and 2380 within 30 px of it; the plate is opaque, so this is allowed (OPENERS.md, Mood slide), listed for the art direction judge.",
+    "source": "lint",
+    "path": "/picture/asset"
+  },
+  {
+    "id": "dia/stroke-grammar|identity-project|dia1|/slots/body/1/svg|",
+    "rule": "dia/stroke-grammar",
+    "severity": 2,
+    "kind": "diagram",
+    "slideId": "identity-project",
+    "evidence": {
+      "text": "fill var(--plate; fill var(--ink"
+    },
+    "proposal": "Strokes 1 or 1.5 px in ink, mid or hair with square caps, no arrowheads, fills only ink, paper or plate (DECK-GRAMMAR.md:44).",
+    "source": "lint",
+    "blockId": "dia1",
+    "path": "/slots/body/1/svg"
+  },
+  {
+    "id": "export/non-native|identity-project|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "identity-project",
+    "evidence": {
+      "text": "dia1, rows",
+      "measured": {
+        "rasterBlocks": 1,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia). Native text with raster parts: rows (icons and mark); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "copy/token-first|fixed-points|h4|/slots/body/0/cells/0/blocks/0/cells/1/blocks/0/cells/1/blocks/0/cells/1/blocks/0/cells/0/blocks/0/text|",
+    "rule": "copy/token-first",
+    "severity": 2,
+    "kind": "copy",
+    "slideId": "fixed-points",
+    "evidence": {
+      "text": "gt, gt-⁠next, gt-⁠react, gt-⁠vue, gt-⁠node, gt-⁠python"
+    },
+    "proposal": "Start the heading with a noun; \"gt\" is a product token (DECK-GRAMMAR.md:22).",
+    "source": "lint",
+    "blockId": "h4",
+    "path": "/slots/body/0/cells/0/blocks/0/cells/1/blocks/0/cells/1/blocks/0/cells/1/blocks/0/cells/0/blocks/0/text"
+  },
+  {
+    "id": "export/non-native|fixed-points|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "fixed-points",
+    "evidence": {
+      "text": "dia1, dia2, list",
+      "measured": {
+        "rasterBlocks": 2,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia), dia2 (dia). Native text with raster parts: list (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  },
+  {
+    "id": "export/non-native|goals|||",
+    "rule": "export/non-native",
+    "severity": 1,
+    "kind": "polish",
+    "slideId": "goals",
+    "evidence": {
+      "text": "dia1, fig, list",
+      "measured": {
+        "rasterBlocks": 2,
+        "partialBlocks": 1
+      }
+    },
+    "proposal": "In native mode these blocks export as 2x rasters: dia1 (dia), fig (shot). Native text with raster parts: list (icons); icons and the GT mark are PNGs in every office format (SPEC 8.6).",
+    "source": "lint"
+  }
+]

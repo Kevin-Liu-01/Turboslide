@@ -1,17 +1,21 @@
 #!/usr/bin/env node
-// Probes a deployed (or locally served) studio for the pages the hosting round must answer and
-// prints one table (docs/hosting.md):
+// Probes a deployed (or locally served) studio for the pages the hosting and the Google Slides
+// parity rounds must answer and prints one table (docs/hosting.md section 7):
 //
-//   node scripts/hosted-smoke.mjs https://studio-delta-six-40.vercel.app
+//   node scripts/hosted-smoke.mjs https://turboslide.vercel.app
 //   node scripts/hosted-smoke.mjs http://localhost:4321 --deck gt-brand
+//   node scripts/hosted-smoke.mjs --base <preview origin>
 //
-// Checks, in order: `/` is a 307 to /edit/<deck>; /deck/<deck> is a 200 page; /edit/<deck> is a
-// 200 with the SSR shell (the document, the theme boot script and a script tag, since the route is
-// ssr: false and the client does the rest); /decks is a 200 list; one asset twin of the deck
-// (the first twin in decks/<deck>/deck.json of this checkout, or --asset <file>) is a 200 image or
-// a 302 to one; /api/agent answers 401 or 200 (401 is the bearer rule off localhost without a
-// token, SPEC 11). Exit code 1 when any row fails. Redirects are not followed, so the table shows
-// what the server said. Nothing here needs the repository except the deck manifest for the twin.
+// Checks, in order: `/` is a 307 to /new carrying X-Robots-Tag: noindex (gslides-parity SPEC 6.1);
+// /new is a 200 SSR shell (the route is ssr: false, so the document, the theme boot script and a
+// script tag) with the noindex meta; /deck/<deck> is a 200 page whose payload carries no `notes`
+// key (SPEC 6.6, R10 C3 item 1); /edit/<deck> is a 200 SSR shell; /decks is a 200 list naming the
+// deck; /decks/trash is a 200 page; /print/<deck> and /present/<deck> are 200 pages (SPEC 6.8,
+// 9.3); one asset twin of the deck (the first twin in decks/<deck>/deck.json of this checkout, or
+// --asset <file>) is a 200 image or a 302 to one; /api/agent answers 401 or 200 (401 is the bearer
+// rule off localhost without a token, SPEC 11). Exit code 1 when any row fails. Redirects are not
+// followed, so the table shows what the server said. Nothing here needs the repository except the
+// deck manifest for the twin.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,6 +28,7 @@ function parseArgs(argv) {
     const arg = argv[i];
     if (arg === '--deck') out.deck = argv[++i] ?? out.deck;
     else if (arg === '--asset') out.asset = argv[++i] ?? null;
+    else if (arg === '--base' || arg === '--url') out.url = argv[++i] ?? null;
     else if (arg === '--timeout') out.timeoutMs = Number(argv[++i] ?? out.timeoutMs);
     else if (arg === '--help' || arg === '-h') out.help = true;
     else if (out.url === null) out.url = arg;
@@ -74,6 +79,7 @@ async function probe(base, path, timeoutMs) {
       status: response.status,
       type,
       location: response.headers.get('location') ?? '',
+      robots: response.headers.get('x-robots-tag') ?? '',
       text,
       bytes,
       ms: Math.round(performance.now() - started),
@@ -84,6 +90,7 @@ async function probe(base, path, timeoutMs) {
       status: 0,
       type: '',
       location: '',
+      robots: '',
       text: '',
       bytes: 0,
       ms: Math.round(performance.now() - started),
@@ -95,43 +102,78 @@ async function probe(base, path, timeoutMs) {
 }
 
 const SHELL_MARKS = ['<!DOCTYPE html>', 'gt-theme', '<script'];
+const NOINDEX_META = /<meta\s+name="robots"\s+content="noindex"\s*\/?>/;
+
+const isPage = (r) => r.status === 200 && r.type.includes('text/html');
+const isShell = (r) => isPage(r) && SHELL_MARKS.every((m) => r.text.includes(m));
+const shellDetail = (r) =>
+  `${r.bytes} chars; ${SHELL_MARKS.filter((m) => r.text.includes(m)).length}/${SHELL_MARKS.length} shell marks`;
 
 function checks(deck, asset) {
   const rows = [
     {
       name: '/',
       path: '/',
-      expect: 'a 307 to /edit/<deck>',
-      pass: (r) => (r.status === 307 || r.status === 302) && /\/edit\/[a-z0-9-]+/.test(r.location),
-      detail: (r) => (r.location ? `location ${r.location}` : ''),
+      expect: 'a 307 to /new with X-Robots-Tag: noindex',
+      pass: (r) =>
+        (r.status === 307 || r.status === 302) &&
+        /^(?:https?:\/\/[^/]+)?\/new$/.test(r.location) &&
+        /noindex/i.test(r.robots),
+      detail: (r) =>
+        `${r.location ? `location ${r.location}` : 'no location'}${r.robots ? `; x-robots-tag ${r.robots}` : '; no x-robots-tag'}`,
+    },
+    {
+      name: '/new',
+      path: '/new',
+      expect: 'a 200 SSR shell with a noindex meta',
+      pass: (r) => isShell(r) && NOINDEX_META.test(r.text),
+      detail: (r) =>
+        `${shellDetail(r)}; ${NOINDEX_META.test(r.text) ? 'noindex' : 'no noindex meta'}`,
     },
     {
       name: `/deck/${deck}`,
       path: `/deck/${deck}`,
-      expect: 'a 200 page',
-      pass: (r) => r.status === 200 && r.type.includes('text/html'),
-      detail: (r) => `${r.bytes} chars`,
+      expect: 'a 200 page without a notes key',
+      pass: (r) => isPage(r) && !r.text.includes('"notes"'),
+      detail: (r) => `${r.bytes} chars; ${r.text.split('"notes"').length - 1} notes key(s)`,
     },
     {
       name: `/edit/${deck}`,
       path: `/edit/${deck}`,
       expect: 'a 200 SSR shell',
-      pass: (r) =>
-        r.status === 200 &&
-        r.type.includes('text/html') &&
-        SHELL_MARKS.every((m) => r.text.includes(m)),
-      detail: (r) =>
-        `${r.bytes} chars; ${SHELL_MARKS.filter((m) => r.text.includes(m)).length}/${SHELL_MARKS.length} shell marks`,
+      pass: isShell,
+      detail: shellDetail,
     },
     {
       name: '/decks',
       path: '/decks',
       expect: 'a 200 list naming the deck',
       pass: (r) => r.status === 200 && r.text.includes(`data-deck="${deck}"`),
+      detail: (r) => `${r.text.split('data-deck="').length - 1} card(s)`,
+    },
+    {
+      name: '/decks/trash',
+      path: '/decks/trash',
+      expect: 'a 200 page',
+      pass: (r) => isPage(r) && r.text.includes('data-control="trash.'),
+      detail: (r) => `${r.bytes} chars`,
+    },
+    {
+      name: `/print/${deck}`,
+      path: `/print/${deck}`,
+      expect: 'a 200 page with the print bar',
+      pass: (r) => isPage(r) && r.text.includes('data-control="print.bar"'),
       detail: (r) => {
-        const store = /Store:\s*(?:<!-- -->)?\s*([a-z]+)/.exec(r.text);
-        return store ? `store ${store[1]}` : `${r.bytes} chars`;
+        const count = /data-count="(\d+)"/.exec(r.text);
+        return count ? `${count[1]} page(s)` : `${r.bytes} chars`;
       },
+    },
+    {
+      name: `/present/${deck}`,
+      path: `/present/${deck}`,
+      expect: 'a 200 page',
+      pass: isPage,
+      detail: (r) => `${r.bytes} chars`,
     },
   ];
   if (asset !== null) {
@@ -163,7 +205,9 @@ function pad(value, width) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || args.url === null) {
-    console.log('usage: node scripts/hosted-smoke.mjs <url> [--deck gt-brand] [--asset <file>]');
+    console.log(
+      'usage: node scripts/hosted-smoke.mjs <url> [--deck gt-brand] [--asset <file>] [--timeout <ms>]',
+    );
     process.exit(args.help ? 0 : 2);
   }
   const base = args.url.endsWith('/') ? args.url : `${args.url}/`;

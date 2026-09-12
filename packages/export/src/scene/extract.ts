@@ -80,6 +80,11 @@ export type ExtractOptions = {
   mode: ExportMode;
   /** Slide ids to export, in deck order; default every slide. */
   slideIds?: string[];
+  /**
+   * The play list the counter counts over (`n / total`), in deck order: the deck without its
+   * skipped slides for a download (gslides-parity SPEC 7.2.1); default the deck order.
+   */
+  numbering?: string[];
   /** Where the sheet PNGs, the rasters and the regenerated pictures land. */
   workDir: string;
   excludeShareAlike?: boolean;
@@ -161,18 +166,6 @@ async function swapPicture(page: Page, dataUri: string): Promise<void> {
   }, dataUri);
 }
 
-/** Writes `nn / total` into the stage counter (stage.ts counterText), the deck's numbering. */
-async function setCounter(page: Page, n: number, total: number): Promise<void> {
-  await page.evaluate(
-    ({ n: index, total: count }) => {
-      const pad = (v: number): string => (v < 10 ? `0${v}` : String(v));
-      const counter = document.querySelector('.ts-stage .counter, .counter');
-      if (counter) counter.textContent = `${pad(index)} / ${pad(count)}`;
-    },
-    { n, total },
-  );
-}
-
 async function hidePicture(page: Page): Promise<void> {
   await page.evaluate(() => {
     const img = document.querySelector<HTMLImageElement>(
@@ -202,6 +195,10 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
   const order = slideOrder(deck);
   const wanted = options.slideIds ? new Set(options.slideIds) : null;
   const ids = order.filter((id) => !wanted || wanted.has(id));
+  // the counter counts over the play list (render deck.ts renderSlides), the slides' data-counter
+  // carries the text and the render surface's runtime shows it, so nothing is written by hand
+  const play = options.numbering ?? order;
+  const total = play.length;
   const bundle = loadThemeBundle();
   const assetBase = fileUrl(options.deckDir, true);
   const tmp = await mkdtemp(join(tmpdir(), 'turboslide-export-'));
@@ -222,6 +219,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
         gtWord: true,
         present: true,
         slideIds: ids,
+        numbering: play,
         title: `${deck.title} (${theme})`,
       });
       warnings.push(...rendered.warnings.map((w) => `render [${theme}]: ${w}`));
@@ -265,12 +263,6 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
               sheetPage.takeErrors();
               await showSlide(sheetPage.page, doc.url, slideHash(slideId));
               await waitForReady(sheetPage.page);
-              // the render surface counts the slides in its document; the export counts the deck's
-              await setCounter(
-                sheetPage.page,
-                doc.n.get(slideId) ?? order.indexOf(slideId) + 1,
-                order.length,
-              );
             }
 
             // The picture: excluded, regenerated at 2x or 3x for a two-tone treatment, or the twin file.
@@ -323,7 +315,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
             const scene = await measureScene(measurePage.page, {
               slideId,
               n: doc.n.get(slideId) ?? order.indexOf(slideId) + 1,
-              total: order.length,
+              total,
               theme,
               kind: slide.kind,
               nativeTypes,

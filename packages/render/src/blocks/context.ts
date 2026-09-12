@@ -3,6 +3,8 @@
 import { classes, escapeAttr, style } from '../html.ts';
 import type { AssetId, BlockId, SlideId } from '@turboslide/schema/ids';
 import type { Block, Icon } from '@turboslide/schema/blocks';
+import { EMPTY_ASSET_REF } from '@turboslide/schema/blocks';
+import type { LayoutId, SlideKind } from '@turboslide/schema/deck';
 import type { RasterKind, Theme } from '@turboslide/schema/render';
 import { importResidual } from '@turboslide/schema/ext';
 
@@ -33,6 +35,14 @@ export type BlockContext = {
   slotHeight?: number;
   /** A live render (RenderOptions.live): material roots carry data-live for the editor's mount. */
   live?: boolean;
+  /**
+   * Draw the prompt of an empty Text and the dashed plate of an empty picture (gslides-parity
+   * SPEC 5.4): the editor stage and the layout grid's tiles; implied by `live`. Every other
+   * surface draws nothing for an empty Text.
+   */
+  prompts?: boolean;
+  /** The slide the block sits on, for the prompt wording (promptFor) and the slide link forms. */
+  slide?: { kind: SlideKind; template?: LayoutId | undefined };
   rasters: RasterRef[];
   warnings: string[];
   /** Counter for unique raster ids within the slide. */
@@ -117,11 +127,21 @@ export function markSvg(
   return `${out}><use href="#gt-mark"/></svg>`;
 }
 
-/** Paths of the image twins for the theme, or a warning and an empty src. */
+/** True for the empty picture reference a figure layout inserts (gslides-parity SPEC 5.2). */
+export function isEmptyPicture(assetId: AssetId): boolean {
+  return assetId === EMPTY_ASSET_REF;
+}
+
+/**
+ * Paths of the image twins for the theme, or a warning and an empty src. The empty picture
+ * reference of a figure layout is not a missing asset: it draws the dashed plate (prompt.ts) and
+ * warns nothing.
+ */
 export function imageFor(ctx: BlockContext, assetId: AssetId, blockId: BlockId): ResolvedImage {
   const found = ctx.image(assetId);
   if (found) return found;
-  ctx.warnings.push(`${ctx.slideId}#${blockId}: asset ${assetId} is not in the deck`);
+  if (!isEmptyPicture(assetId))
+    ctx.warnings.push(`${ctx.slideId}#${blockId}: asset ${assetId} is not in the deck`);
   return { src: '', alt: '' };
 }
 

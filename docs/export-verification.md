@@ -234,6 +234,34 @@ hair (45), and 30 sits in it with room for the blur. The loop also skips composi
 union box only re-measured the edges of the blocks inside it (`details-two#group` read dw +26 in
 the dark theme from the plate border of its last shot).
 
+## The table cells and the PDF gate (gslides-parity SPEC 7.3, 7.6)
+
+The render record of a slide with a table block carries one entry per cell, `<blockId>/<r>/<c>` of
+type `cell` (packages/headless/src/measure.ts), beside the `rows` entries `<blockId>/<i>`; the
+verify loop compares every cell as a text block against the 3 px budget (`blocksOfRecord` keeps
+the cell entries, `verify/budgets.ts` lists `cell` and `table` as text kinds) and the loop's
+per slide verifications carry the cell deltas (the report's `verify.blocks` keeps block ids only,
+because a cell id is not a block id). `tableCellFailures(slides)` reads them, and `exportPptx`
+with a `verify` option rewrites a theme's file with the failing tables as ruled rows and verifies
+again (docs/pptx.md). Neither LibreOffice nor the fallback has run on a table on this machine
+(LibreOffice is in the render worker image only); the fixture deck's `--tables rows` form is what
+the unit test exercises, and the a:tbl form is what `export check` and python-pptx reopen.
+
+The PDF gate (`packages/export/src/pdf/build.ts`) is the flatten loop's shape for a vector page:
+poppler rasterizes the page at 3200 by 1800 (`pdftoppm -r 240 -scale-to-x 3200 -scale-to-y 1800`;
+pdftocairo when it is the one installed), the reference is the 2x render surface shot in the same
+browser, pixelmatch at threshold 0.1, the picture boxes of the slide (img, canvas and raster
+elements) taken out of the gated fraction and reported as `pictureFraction`. Target 0.1 percent per
+page, fail over 0.5 percent, the worst page named. Measured on 2026-09-12 on Kevin's machine
+(Chrome for Testing 147.0.7727.15, pdftoppm 26.08.0): the fixture deck's six pages at 0.003 to
+0.035 percent; the GT deck's 85 pages at a mean of 0.092 percent outside their pictures, 41 pages
+between the target and the fail line, none over it, the worst `details` at 0.264; inside the
+picture boxes the worst is `mood-dictionary` at 20.5 percent (a 1x dither twin upscaled to 2x by
+two engines with two filters), which is why pictures are reported and not gated. Before the fixes
+recorded in docs/pptx.md the same gate read 0.5 to 2.5 percent on text pages (a CSS zoom snapped
+the hairlines) and lost whole blocks on pages that had pages after them (fragmentation without
+`contain: strict`); the gate found both.
+
 ## Manual PowerPoint checklist
 
 PowerPoint cannot run headless on Linux, so this pass is scheduled, not automated (SPEC 8.5 step

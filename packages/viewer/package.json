@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
   "description": "React: Stage, Sheet, SlideView, GridView, BookView, LiveClone, theme boot, keys, hash sync; the editor's stage (Editor, Selection, Gestures, InlineText, snap tables, the freeform layout with Freeform, Marquee and Guides); standalone/ is the framework-free tail.html port used by renderStandalone.",
   "exports": {
     "./model": "./src/model.ts",
@@ -25,7 +28,18 @@
     "./Gestures": "./src/Gestures.tsx",
     "./InlineText": "./src/InlineText.tsx",
     "./Editor": "./src/Editor.tsx",
+    "./clipboard": "./src/clipboard.ts",
     "./MaterialMount": "./src/MaterialMount.tsx",
+    "./present/presentModel": "./src/present/presentModel.ts",
+    "./present/presentKeys": "./src/present/presentKeys.ts",
+    "./present/presentSync": "./src/present/presentSync.ts",
+    "./present/strings": "./src/present/strings.ts",
+    "./present/ui": "./src/present/ui.tsx",
+    "./present/PresentToolbar": "./src/present/PresentToolbar.tsx",
+    "./present/SlideList": "./src/present/SlideList.tsx",
+    "./present/SlideshowLayer": "./src/present/SlideshowLayer.tsx",
+    "./present/PresentShortcuts": "./src/present/PresentShortcuts.tsx",
+    "./present/PresenterConsole": "./src/present/PresenterConsole.tsx",
     "./standalone/source": "./standalone/source.ts",
     "./standalone/runtime.ts": "./standalone/runtime.ts",
     "./package.json": "./package.json"

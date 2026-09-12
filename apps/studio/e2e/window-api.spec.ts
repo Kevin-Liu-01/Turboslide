@@ -149,12 +149,18 @@ test('describe().actions equals the generated list and the owners hand over', as
   const agent = (await (await request.get('/api/agent')).json()) as { actions: string[] };
   expect(described.actions).toEqual(agent.actions);
 
-  // View hands the global to the viewer owner; Edit hands it back
-  await page.getByRole('group', { name: 'Editing' }).getByRole('button', { name: 'View' }).click();
+  // View > Mode > Viewing hands the global to the viewer owner; Editing hands it back
+  // (gslides-parity SPEC 2.3: the Edit and View seg left the toolbar)
+  const mode = async (item: 'viewing' | 'editing') => {
+    await page.locator('[data-control="menubar.view"]').click();
+    await page.locator('[data-menu-item="view.mode"]').click();
+    await page.locator(`[data-menu-item="view.mode.${item}"]`).click();
+  };
+  await mode('viewing');
   await expect
     .poll(() => page.evaluate(() => window.turboslide!.studio.describe().owner))
     .toBe('viewer');
-  await page.getByRole('group', { name: 'Editing' }).getByRole('button', { name: 'Edit' }).click();
+  await mode('editing');
   await expect
     .poll(() => page.evaluate(() => window.turboslide!.studio.describe().owner))
     .toBe('editor');
@@ -199,9 +205,12 @@ test('set by label and by data-control id are one action call each, and the rend
   const rowsBefore = await rowStarts(page, beforeRecord!.image, column);
   expect(rowsBefore.length).toBeGreaterThan(1);
 
-  // select the list block so the inspector generates its controls
+  // select the list block and open Format options (gslides-parity SPEC 3.9: the generated
+  // controls live in the right panel, on demand) so the size control is in the document
   await page.locator('.ts-stagewrap.ts-editor .pt-slide [data-block="list"]').click();
-  await expect(page.getByRole('group', { name: 'list: Size' })).toBeVisible();
+  await page.locator('[data-control="menubar.format"]').click();
+  await page.locator('[data-menu-item="format.formatOptions"]').click();
+  await expect(page.locator('[data-control="block.list.size"]')).toBeVisible();
 
   // one call by accessible label
   const countA = await versionCount(page);
@@ -236,7 +245,14 @@ test('set by label and by data-control id are one action call each, and the rend
   expect(last?.mutations).toEqual([
     { op: 'block.set', slideId: 'content-rule', blockId: 'list', path: '/size', value: 22 },
   ]);
-  await expect.poll(() => page.locator('.ts-status').textContent()).toMatch(/^Saved · r\d+$/);
+  await page.waitForFunction(() => {
+    const state = window.turboslide!.studio.describe().state as {
+      revision?: number;
+      serverRevision?: number;
+      pending?: number;
+    };
+    return state.pending === 0 && state.revision === state.serverRevision;
+  });
 
   // the render after the change: the list block is shorter and its rows sit closer together
   const after = (await page.evaluate(() =>
@@ -258,7 +274,10 @@ test('set by label and by data-control id are one action call each, and the rend
 
 test('the source drawer is a delegating owner over the same validator', async ({ page }) => {
   await openEditor(page);
-  await page.locator('body').press('ControlOrMeta+/');
+  /* Tools > Advanced > Show source (gslides-parity SPEC 10.2: Cmd+/ is Keyboard shortcuts now) */
+  await page.locator('[data-control="menubar.tools"]').click();
+  await page.locator('[data-menu-item="tools.advanced"]').click();
+  await page.locator('[data-menu-item="tools.advanced.showSource"]').click();
   await expect(page.locator('.ts-drawer')).toBeVisible();
   await expect
     .poll(() => page.evaluate(() => window.turboslide!.studio.describe().owner))
@@ -300,7 +319,10 @@ test('the source drawer is a delegating owner over the same validator', async ({
   );
   expect(otherSlide).toBe('RangeError');
   expect(await versionCount(page)).toBe(before);
-  await page.locator('body').press('ControlOrMeta+/');
+  /* Tools > Advanced > Show source (gslides-parity SPEC 10.2: Cmd+/ is Keyboard shortcuts now) */
+  await page.locator('[data-control="menubar.tools"]').click();
+  await page.locator('[data-menu-item="tools.advanced"]').click();
+  await page.locator('[data-menu-item="tools.advanced.showSource"]').click();
   await expect(page.locator('.ts-drawer')).toBeHidden();
   await expect
     .poll(() => page.evaluate(() => window.turboslide!.studio.describe().owner))

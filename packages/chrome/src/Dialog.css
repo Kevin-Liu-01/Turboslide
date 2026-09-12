@@ -1,0 +1,580 @@
+/* Dialog (Dialog.tsx): a centred paper card over the scrim (gslides-parity SPEC 13.3; R08 B9).
+   The card keeps the frame weight (--pt-edge) because it floats over a scrim, where the hairline
+   would vanish (SPEC 2.2, the help card's rule); rows inside it are ruled in --pt-hair-soft and
+   the actions row draws --pt-hair above itself. 13 px Inter, 24 px padding, radius 0, no shadow;
+   the scrim fades over the toast duration and the card rises 8 px over the enter duration; off
+   under reduced motion. Colors are tokens only. */
+.ts-dialog-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: var(--pt-scrim);
+  animation: pt-fade-in var(--pt-dur-toast) var(--pt-ease-out) both;
+}
+
+.ts-dialog {
+  box-sizing: border-box;
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-edge);
+  font: 13px/1.45 var(--pt-text);
+  outline: none;
+  animation: ts-dialog-in var(--pt-dur-enter) var(--pt-ease-out) both;
+}
+
+@keyframes ts-dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.ts-dialog-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 20px 16px 0 24px;
+}
+
+.ts-dialog-title {
+  margin: 0;
+  font: 500 18px/1.25 var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  letter-spacing: -0.01em;
+  color: var(--pt-ink);
+}
+
+.ts-dialog-x {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 0;
+  width: 32px;
+  height: 32px;
+  margin: -6px -4px 0 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pt-ink-2);
+  cursor: pointer;
+}
+
+.ts-dialog-x svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-dialog-x:hover {
+  color: var(--pt-ink);
+  border-color: var(--pt-hair);
+}
+
+.ts-dialog-x:focus-visible,
+.ts-dialog-btn:focus-visible,
+.ts-dialog-tab:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-dialog-lead {
+  margin: 6px 24px 0;
+  color: var(--pt-ink-2);
+}
+
+.ts-dialog-body {
+  padding: 16px 24px 20px;
+  overflow-y: auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ts-dialog-body p {
+  margin: 0;
+  color: var(--pt-ink-2);
+}
+
+.ts-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-dialog-btn.is-text {
+  border-color: var(--pt-hair);
+}
+
+/* fields: the label over the control, the control a 32 px ruled box */
+.ts-dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ts-dialog-field-label {
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-dialog-hint {
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-dialog input[type='text'],
+.ts-dialog input[type='search'],
+.ts-dialog input[type='url'],
+.ts-dialog input[type='number'],
+.ts-dialog select,
+.ts-dialog textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.4 var(--pt-text);
+}
+
+.ts-dialog textarea {
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+.ts-dialog input:focus-visible,
+.ts-dialog select:focus-visible,
+.ts-dialog textarea:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+/* a check row: the native input stays in the tree, clipped; the 16 px box fills ink when on */
+.ts-dialog-check,
+.ts-dialog-radio {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  cursor: pointer;
+  color: var(--pt-ink-2);
+}
+
+.ts-dialog-check.is-disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+.ts-dialog-check input,
+.ts-dialog-radio input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.ts-dialog-check-box,
+.ts-dialog-radio-dot {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+}
+
+.ts-dialog-radio-dot {
+  border-radius: 50%;
+}
+
+.ts-dialog-check input:checked + .ts-dialog-check-box {
+  background: var(--pt-ink);
+  border-color: var(--pt-ink);
+  background-image: linear-gradient(var(--pt-paper), var(--pt-paper));
+  background-size: 6px 2px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.ts-dialog-radio input:checked + .ts-dialog-radio-dot {
+  border-color: var(--pt-ink);
+  background: radial-gradient(circle, var(--pt-ink) 0 4px, var(--pt-paper) 4.5px);
+}
+
+.ts-dialog-check input:focus-visible + .ts-dialog-check-box,
+.ts-dialog-radio input:focus-visible + .ts-dialog-radio-dot {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-dialog-radios {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* tabs: a ruled row, the current tab underlined in ink */
+.ts-dialog-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-dialog-tab {
+  appearance: none;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 6px 12px 8px;
+  color: var(--pt-ink-2);
+  font: 13px/1 var(--pt-text);
+  cursor: pointer;
+}
+
+.ts-dialog-tab.is-on {
+  color: var(--pt-ink);
+  border-bottom-color: var(--pt-ink);
+}
+
+/* a list of rows inside a dialog (decks, slides, links): 36 px rows ruled in --pt-hair-soft */
+.ts-dialog-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--pt-hair);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.ts-dialog-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 36px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  color: var(--pt-ink);
+}
+
+.ts-dialog-row:last-child {
+  border-bottom: 0;
+}
+
+.ts-dialog-row.is-button {
+  width: 100%;
+  appearance: none;
+  background: none;
+  border-left: 0;
+  border-right: 0;
+  border-top: 0;
+  border-radius: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-dialog-row.is-button:hover,
+.ts-dialog-row.is-on {
+  background: var(--pt-plate);
+}
+
+.ts-dialog-row.is-button:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-dialog-row-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-dialog-row-meta {
+  flex: 0 0 auto;
+  color: var(--pt-titanium);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-dialog-empty {
+  color: var(--pt-titanium);
+}
+
+/* a code line with its Copy button (Share, Publish, Agent access) */
+.ts-dialog-code {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-dialog-code code {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--pt-hair);
+  font: 12px/1.5 var(--pt-mono);
+  color: var(--pt-ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-dialog-code textarea {
+  min-height: 72px;
+  font: 12px/1.5 var(--pt-mono);
+}
+
+.ts-dialog-progress {
+  color: var(--pt-ink-2);
+}
+
+/* the disclosure (More options) */
+.ts-dialog details {
+  border-top: 1px solid var(--pt-hair-soft);
+  padding-top: 8px;
+}
+
+.ts-dialog summary {
+  cursor: pointer;
+  color: var(--pt-ink-2);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ts-dialog summary::-webkit-details-marker {
+  display: none;
+}
+
+.ts-dialog summary svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  transition: transform var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-dialog details[open] summary svg {
+  transform: rotate(180deg);
+}
+
+.ts-dialog details > div {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 10px;
+}
+
+/* the segmented Perfect | Editable text pair of Download with one sentence under each */
+.ts-dialog-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ts-dialog-mode {
+  appearance: none;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink-2);
+  font: 13px/1.4 var(--pt-text);
+  cursor: pointer;
+}
+
+.ts-dialog-mode b {
+  display: block;
+  color: var(--pt-ink);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.ts-dialog-mode.is-on {
+  border-color: var(--pt-ink);
+}
+
+.ts-dialog-mode:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+/* the ten how-tos of Help */
+.ts-dialog-howto {
+  margin: 0;
+  padding: 0 0 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--pt-ink-2);
+}
+
+.ts-dialog-howto b {
+  color: var(--pt-ink);
+  font-weight: 500;
+}
+
+/* the facts table of Details */
+.ts-dialog-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+
+.ts-dialog-facts dt {
+  color: var(--pt-titanium);
+}
+
+.ts-dialog-facts dd {
+  margin: 0;
+  color: var(--pt-ink);
+}
+
+/* the slide thumbnails of Import slides */
+.ts-dialog-slides {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.ts-dialog-slide {
+  position: relative;
+  appearance: none;
+  padding: 0;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-plate);
+  cursor: pointer;
+  text-align: left;
+  color: var(--pt-ink-2);
+  font: 12px/1.3 var(--pt-text);
+}
+
+.ts-dialog-slide.is-on {
+  border-color: var(--pt-ink);
+}
+
+.ts-dialog-slide:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-dialog-slide-frame {
+  aspect-ratio: 16 / 9;
+  background: var(--pt-paper);
+  border-bottom: 1px solid var(--pt-hair-soft);
+  display: grid;
+  place-items: center;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-dialog-slide-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ts-dialog-slide-title {
+  display: block;
+  padding: 4px 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* the sentence a dialog shows when its write is refused (Slide numbers, the Insert pickers) */
+.ts-dialog-error {
+  margin: 8px 0 0;
+  color: var(--pt-ink);
+  font: 13px/1.4 var(--pt-text);
+}
+
+/* Insert > Table (dialogs/InsertTable.tsx): Google's grid picker, 20 by 20 cells of 18 px on the
+   8 px rhythm; the cells inside the pointed size fill with the plate and take the ink edge, the
+   caption under the grid reads the size. One --pt-hair frame around the grid; the cells draw
+   --pt-hair-soft so the grid reads as a grid without a rule under every row. */
+.ts-tablegrid {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  cursor: pointer;
+}
+
+.ts-tablegrid:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-tablegrid-row {
+  display: flex;
+  gap: 2px;
+}
+
+.ts-tablegrid-cell {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair-soft);
+  background: transparent;
+}
+
+.ts-tablegrid-cell.is-in {
+  border-color: var(--pt-ink);
+  background: var(--pt-plate);
+}
+
+.ts-tablegrid-size {
+  margin: 8px 0 0;
+  color: var(--pt-ink-2);
+  font: 13px/1 var(--pt-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Insert > Icon (dialogs/InsertIcon.tsx): the symbol picker fills the dialog's body; the dialog
+   draws the frame, so the card's own edge and fade leave */
+.ts-dialog .ts-iconpicker.is-embedded {
+  width: 100%;
+  border: 0;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-dialog-scrim,
+  .ts-dialog {
+    animation: none;
+  }
+}

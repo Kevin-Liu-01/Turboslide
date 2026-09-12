@@ -486,6 +486,68 @@ describe('hosted stores', () => {
       expect(blank.counts).toEqual({ slides: 1, sections: 1, assets: 0 });
     });
 
+    it('copies, trashes, restores and removes a deck (gslides-parity SPEC 7.5)', async () => {
+      clock = '2026-09-12T05:00:00.000Z';
+      const copy = await decks.copy({
+        id: 'gt-brand',
+        name: 'GT copy',
+        slideIds: ['title', 'thesis'],
+        removeNotes: true,
+      });
+      expect(copy).toMatchObject({
+        deckId: 'gt-copy',
+        sourceDeckId: 'gt-brand',
+        revision: 0,
+        counts: { slides: 2, sections: 1 },
+      });
+      expect(existsSync(join(decks.decksDir, 'gt-copy', 'assets', 'mood-earth-light.png'))).toBe(
+        true,
+      );
+      if (fake !== null) {
+        expect(blobsOf(fake, 'decks/gt-copy/')).toContain('decks/gt-copy/deck.json');
+        expect(blobsOf(fake, 'decks/gt-copy/')).toContain(
+          'decks/gt-copy/assets/mood-earth-light.png',
+        );
+      }
+      const copied = await (await decks.open('gt-copy')).read();
+      expect(Object.keys(copied.document.slides).sort()).toEqual(['thesis', 'title']);
+      expect(copied.document.slides.thesis).not.toHaveProperty('notes');
+      expect((await decks.list()).map((head) => head.id)).toEqual(['gt-copy', 'gt-brand']);
+      await expect(decks.copy({ id: 'gt-brand', name: 'GT copy' }, 412)).rejects.toThrow(
+        /exists already/,
+      );
+      await expect(decks.copy({ id: 'gt-brand', name: 'Stale' }, 7)).rejects.toThrow(/stale/);
+
+      // the trash: hidden from the list, present with includeTrashed, the revision untouched
+      clock = '2026-09-12T05:10:00.000Z';
+      const trashed = await decks.trash('gt-copy', 0);
+      expect(trashed).toEqual({ id: 'gt-copy', trashedAt: clock, revision: 0 });
+      expect((await decks.list()).map((head) => head.id)).toEqual(['gt-brand']);
+      const withTrash = await decks.list({ includeTrashed: true });
+      expect(withTrash.find((head) => head.id === 'gt-copy')?.trashedAt).toBe(clock);
+      expect(await decks.has('gt-copy')).toBe(true);
+      const inTrash = await (await decks.open('gt-copy')).read();
+      expect(inTrash.document.deck.trashedAt).toBe(clock);
+      await expect(decks.trash('gt-copy', 5)).rejects.toThrow(/stale/);
+      const restored = await decks.restore('gt-copy', 0);
+      expect(restored).toEqual({ id: 'gt-copy', trashedAt: null, revision: 0 });
+      expect((await decks.list()).map((head) => head.id)).toEqual(['gt-copy', 'gt-brand']);
+      expect((await (await decks.open('gt-copy')).read()).document.deck).not.toHaveProperty(
+        'trashedAt',
+      );
+
+      // delete forever
+      expect(await decks.remove('gt-copy', 0)).toEqual({ id: 'gt-copy', removed: true });
+      expect(await decks.has('gt-copy')).toBe(false);
+      expect((await decks.list({ includeTrashed: true })).map((head) => head.id)).toEqual([
+        'gt-brand',
+      ]);
+      expect(existsSync(join(decks.decksDir, 'gt-copy'))).toBe(false);
+      if (fake !== null) expect(blobsOf(fake, 'decks/gt-copy/')).toEqual([]);
+      await expect(decks.remove('gt-copy')).rejects.toThrow(RangeError);
+      await expect(decks.open('gt-copy')).rejects.toThrow(RangeError);
+    });
+
     it('describes itself', () => {
       const facts = decks.facts();
       expect(facts.store).toBe(kind);
@@ -579,6 +641,41 @@ describe('hosted stores', () => {
       expect(synced.document.deck.revision).toBe(2);
       const list = synced.document.slides['content-rule'];
       expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 24 });
+    });
+
+    it('shows one instance’s trash stamp and removal to another', async () => {
+      const fake = memoryBlobClient();
+      const first = collection('blob', join(root, 'overlay-1'), fake);
+      await first.ready();
+      clock = '2026-09-11T11:00:00.000Z';
+      await first.create({ name: 'Second deck', from: 'gt-brand' });
+      const second = collection('blob', join(root, 'overlay-2'), fake);
+      await second.ready();
+      expect((await second.list()).map((head) => head.id)).toEqual(['second-deck', 'gt-brand']);
+      clock = '2026-09-12T06:00:00.000Z';
+      await first.trash('second-deck');
+      expect((await second.list()).map((head) => head.id)).toEqual(['gt-brand']);
+      expect(
+        (await second.list({ includeTrashed: true })).find((h) => h.id === 'second-deck')
+          ?.trashedAt,
+      ).toBe(clock);
+      // a write on the second instance still lands on the trashed deck, and keeps the stamp
+      const store = await second.open('second-deck');
+      const outcome = await store.write({
+        baseRevision: 0,
+        author: kevin,
+        mutations: [setSize(22)],
+      });
+      expect(outcome.ok).toBe(true);
+      expect((await (await first.open('second-deck')).read()).document.deck).toMatchObject({
+        revision: 1,
+        trashedAt: clock,
+      });
+      await second.restore('second-deck', 1);
+      expect((await first.list()).map((head) => head.id)).toEqual(['second-deck', 'gt-brand']);
+      await first.remove('second-deck', 1);
+      expect(await second.has('second-deck')).toBe(false);
+      expect((await second.list()).map((head) => head.id)).toEqual(['gt-brand']);
     });
 
     it('refuses to open without a client', () => {

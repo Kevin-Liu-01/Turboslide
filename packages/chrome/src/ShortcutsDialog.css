@@ -1,0 +1,74 @@
+/* ShortcutsDialog (ShortcutsDialog.tsx): the key table in the dialog grammar (Dialog.css).
+   A 32 px search field, then the groups under 12 px titanium heads, rows ruled in --pt-hair-soft
+   with the action at the left and the keys as kbd chips (12 px, --pt-plate ground, --pt-hair
+   frame) at the right; a Later row reads in titanium with its reason under the action. */
+.ts-shortcuts .ts-dialog-body {
+  gap: 10px;
+}
+
+.ts-shortcuts-search input {
+  width: 100%;
+}
+
+.ts-shortcuts-list {
+  max-height: min(60vh, 560px);
+  margin: 0 -8px;
+  padding: 0 8px;
+}
+
+.ts-shortcuts-group h3 {
+  margin: 12px 0 4px;
+  font: 500 12px/1 var(--pt-text);
+  color: var(--pt-titanium);
+  text-transform: none;
+}
+
+.ts-shortcuts-group:first-child h3 {
+  margin-top: 0;
+}
+
+.ts-shortcuts-group table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ts-shortcuts-group td {
+  padding: 6px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  vertical-align: top;
+  color: var(--pt-ink);
+}
+
+.ts-shortcuts-group tr:last-child td {
+  border-bottom: 0;
+}
+
+.ts-shortcuts-keys {
+  text-align: right;
+  white-space: nowrap;
+  width: 40%;
+}
+
+.ts-shortcuts-keys kbd {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-plate);
+  color: var(--pt-ink-2);
+  font: 12px/1.3 var(--pt-text);
+}
+
+tr.is-later td {
+  color: var(--pt-titanium);
+}
+
+tr.is-later .ts-shortcuts-keys kbd {
+  color: var(--pt-titanium);
+}
+
+.ts-shortcuts-reason {
+  display: block;
+  font-size: 12px;
+  color: var(--pt-titanium);
+}

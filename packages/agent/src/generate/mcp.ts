@@ -102,6 +102,10 @@ const DESTRUCTIVE = new Set<ActionId>([
   'version.restore',
   'asset.dither',
   'fix.run',
+  // the Google Slides parity round, matching packages/mcp/src/tools.ts DESTRUCTIVE_ACTIONS
+  'deck.trash',
+  'slide.applyLayout',
+  'text.replaceAll',
 ]);
 
 export type McpContract = {

@@ -90,6 +90,10 @@ export const CHROME_ALLOW: readonly string[] = [
   'pt-tile',
   'pt-preview',
   'ts-select',
+  /* the filmstrip card's frame with the current card's 2 px ring outside it (gslides-parity SPEC 1.1, 4.1) */
+  'ts-card-frame',
+  /* the Themes panel's tile frame with the current appearance's ring outside it (SPEC 5.7) */
+  'ts-themes-frame',
 ];
 
 /** The Prototemplate shell's scope (lint-lines.mjs SHELL_CHROME). */
@@ -116,7 +120,7 @@ export const SHELL_CHROME: ChromeScope = {
 export const TURBOSLIDE_CHROME: ChromeScope = {
   ...SHELL_CHROME,
   roots:
-    '.pt-viewer, .pt-corner, .pt-corner-layer, .pt-help, .pt-toast, .pt-preview, .ts-studio, .ts-chrome',
+    '.pt-viewer, .pt-corner, .pt-corner-layer, .pt-help, .pt-toast, .pt-preview, .ts-studio, .ts-chrome, .ts-home-page, .ts-trash-page, .ts-menu, .ts-dialog, .ts-layout-plate',
   content: '.ts-stage, .ts-sheet, .stage, .sheet-flow .sheet > *, .pt-page-body, .pt-root, iframe',
   active: `${SHELL_CHROME.active}, .is-selected, [data-selected="true"]`,
   lint: '.ts-lint-box',
@@ -151,6 +155,9 @@ export type ShellProbeState = {
   selected: boolean;
   source: boolean;
   twin: boolean;
+  /** the editor shell (gslides-parity SPEC 1.1): a bar or context menu open, the right panel open */
+  menu: boolean;
+  rpanel: string | null;
 };
 
 /**
@@ -215,6 +222,8 @@ export const probeState = (): ShellProbeState => {
     selected: Boolean(document.querySelector('.ts-overlay .ts-select')),
     source: Boolean(document.querySelector('.ts-drawer')),
     twin: Boolean(document.querySelector('.ts-twin')),
+    menu: Boolean(document.querySelector('.ts-menu')),
+    rpanel: document.querySelector<HTMLElement>('.pt-viewer[data-rpanel]')?.dataset.rpanel ?? null,
   };
 };
 

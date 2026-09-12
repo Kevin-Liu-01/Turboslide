@@ -71,8 +71,15 @@ export function cacheDir(
   revision: number,
   theme: Theme,
   scale: 1 | 2,
+  format: 'png' | 'jpg' = 'png',
 ): string {
-  return join(paths.workerDir, 'cache', deckId, String(revision), `${theme}@${scale}x`);
+  return join(
+    paths.workerDir,
+    'cache',
+    deckId,
+    String(revision),
+    `${theme}@${scale}x${format === 'jpg' ? '-jpg' : ''}`,
+  );
 }
 
 export function jobsDir(paths: WorkerPaths): string {

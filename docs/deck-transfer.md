@@ -123,20 +123,31 @@ A Vercel function accepts a 4.5 MB request body and answers at most 4.5 MB
 
 ## 5. The studio pages
 
-- `/decks`: New deck (the GT brand template or one title slide, `deck.create` through the store,
-  which on the blob backend uploads the new deck before it answers, so it works on the production
-  URL), Upload deck bundle (a file field and a Replace check, the ticket, then the editor opens on
-  the created deck), a row per deck with Open, Present (`/deck/<id>?present=1`), Export and
-  Download bundle, and the Connect card (`@turboslide/chrome/ConnectCard`): the push and pull
-  commands with this deployment's URL filled in (from the request's forwarded host, then
-  `VERCEL_PROJECT_PRODUCTION_URL`), a Copy button each and the token note when the deployment
-  requires one.
-- The editor's Export menu has Download deck bundle (the same ticket route), and its toolbar a
-  Presentation button that opens `/deck/<id>?present=1` in a new tab; the shell's own Present
-  button (P) still enters present mode in place.
+Since the Google Slides parity round (gslides-parity SPEC 6.2 to 6.5) the pages read as Google's:
+
+- `/decks` is the home page: "Start a new presentation" with the Blank card (`/new`) and the GT
+  brand deck card (`deck.create` from the GT template through the store, which on the blob backend
+  uploads the new deck before it answers), then "Recent presentations" as cards or rows over
+  `deck.list`, each with a menu: Open, Open in new tab, Present (`/deck/<id>?present=1` in a new
+  tab), Rename (in place, one `deck.set /title` through the deck's store), Make a copy (the dialog
+  below), Download (the bundle zip through the same ticket route as before) and Move to trash
+  (`deck.trash`, with Undo in the snackbar). Trash at the bottom opens `/decks/trash`, where
+  Restore and Delete forever run `deck.restore` and `deck.remove`. The Connect card and the bundle
+  upload form left the page: the connect facts live in Extensions > Agent access, the upload in
+  File > Open's Upload tab, which posts the zip to `POST /api/decks/bundle` with a ticket from
+  `bundleUploadTicket` exactly as the old form did.
+- Make a copy (`deck.copy`, server side in `apps/studio/src/server/decks.ts` `copyStoredDeck` over
+  the collection): the dialog's Name is prefilled "Copy of <title>" and selected, "Remove speaker
+  notes" is off, Enter runs it, and the copy opens in a new tab. From the editor, File > Make a
+  copy > Selected slides passes `slideIds`; the copy keeps only those slides and their sections,
+  never copies leases or the trash stamp, and starts at revision 0.
+- Import slides (`slide.import`, server side in `apps/studio/src/server/actions.ts`): the dialog
+  lists `deck.list`, then the source deck's slides through `readSourceDeckSlides` (decks.ts), and
+  one write inserts the copies after the current slide with the assets they reference copied under
+  the target deck (and pushed under its prefix on the blob backend).
 - `/deck/<id>?present=1` opens the viewer in present mode on load (the GT template presentation is
-  `/deck/gt-brand?present=1` on any studio that holds the deck), through the shell's own
-  `setPresent`.
+  `/deck/gt-brand?present=1` on any studio that holds the deck); `/deck` and `/embed` payloads
+  carry no speaker notes and no skipped slides (SPEC 6.6), and a deck in the trash answers 404.
 
 ## 6. Tests
 

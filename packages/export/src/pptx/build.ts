@@ -38,12 +38,15 @@ import type { FontSet, FontsCatalog } from './fonts-map.ts';
 import { entryFor, pickFamily } from './fonts-map.ts';
 import { addPicture, addRaster, dataUri, mimeOf } from './images.ts';
 import type { PictureSource } from './images.ts';
-import { addCross, addSceneLine, addSceneRect, addSceneRule } from './lines.ts';
+import { addCross, addLinkRect, addSceneLine, addSceneRect, addSceneRule } from './lines.ts';
+import { linkResolver } from './links.ts';
+import type { LinkResolver } from './links.ts';
 import { defineLayout, defineMasters, paperMasterName, pictureMasterName } from './masters.ts';
 import { addSceneNotes } from './notes.ts';
 import type { BaselineTarget } from './baseline.ts';
 import { describeFormats, encodePageRaster } from './page-raster.ts';
 import type { PageRaster } from './page-raster.ts';
+import { addSceneTable } from './table.ts';
 import { addSceneText, familyFor } from './text.ts';
 import type { TextEmitOptions } from './text.ts';
 
@@ -68,7 +71,31 @@ export type BuildOptions = {
   baseline?: BaselineTarget;
   /** Skip the JPEG candidate of the page raster policy (a PNG-only flatten file). */
   noJpeg?: boolean;
+  /**
+   * Carry the speaker notes (`addNotes`, one notes part per slide); off by default
+   * (gslides-parity SPEC 7.2.13, decision 15.2).
+   */
+  includeNotes?: boolean;
+  /**
+   * How a table block travels in Editable text (gslides-parity SPEC 7.3): `auto` (default) writes
+   * `addTable` unless the block is in `tableFallback`, `table` always does, `rows` always writes
+   * the ruled rows construction (hairlines plus grouped text boxes).
+   */
+  tableMode?: TableMode;
+  /** `<slideId>#<blockId>` of the tables that missed the per cell budget and fall back to ruled rows. */
+  tableFallback?: ReadonlySet<string>;
   onPage?: (scene: Scene, raster: PageRaster) => void;
+};
+
+export type TableMode = 'auto' | 'table' | 'rows';
+
+/** How one table block left the builder. */
+export type TableOutcome = {
+  slideId: string;
+  blockId: string;
+  written: 'table' | 'rows';
+  rows: number;
+  columns: number;
 };
 
 export type BuildSlideReport = {
@@ -109,6 +136,10 @@ export type BuildResult = {
   contentTypes: ContentTypesClean;
   /** kern attributes and empty ext lists removed over every slide part; custGeom counted. */
   stripped: { kern: number; extLst: number; custGeom: number };
+  /** Every table block of a native build and how it was written (gslides-parity SPEC 7.3). */
+  tables: TableOutcome[];
+  /** Block and run links written (SPEC 7.2.7, 7.2.8), and the slide links with no target in the file. */
+  links: { written: number; unresolved: string[] };
   residual: string[];
   warnings: string[];
 };
@@ -183,8 +214,12 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
   const warnings: string[] = [];
   const slidesReport: BuildSlideReport[] = [];
   const pages: PageRaster[] = [];
+  const tables: TableOutcome[] = [];
+  const links = { written: 0, unresolved: [] as string[] };
+  const fileSlideIds = scenes.map((scene) => scene.slideId);
+  const tableMode = options.tableMode ?? 'auto';
 
-  for (const scene of scenes) {
+  for (const [sceneIndex, scene] of scenes.entries()) {
     const paperHex = parseCssColor(scene.paper).hex;
     const hairHex = parseCssColor(scene.frame.rules[0]?.color ?? scene.ink).hex;
     const namePrefix = `ts:${scene.slideId}`;
@@ -196,6 +231,21 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         ? pictureMasterName(options.theme)
         : paperMasterName(options.theme),
     });
+    // links resolve against this file's slides (gslides-parity SPEC 7.2.7, 7.2.8); a slide link
+    // whose target is not in the file (a skipped slide) is dropped and named
+    const resolve = linkResolver(fileSlideIds, sceneIndex);
+    const linkOf: LinkResolver = (href) => {
+      const props = resolve(href);
+      if (props === undefined) {
+        const note = `${scene.slideId}: ${href}`;
+        if (!links.unresolved.includes(note)) links.unresolved.push(note);
+      } else links.written += 1;
+      return props;
+    };
+    const blockLink = (blockId: string): PptxGenJS.HyperlinkProps | undefined => {
+      const href = scene.blocks.find((b) => b.blockId === blockId)?.link;
+      return href === undefined ? undefined : linkOf(href);
+    };
     const textOptions: TextEmitOptions = {
       fontSet: options.fontSet,
       invisible: options.mode === 'flatten',
@@ -204,6 +254,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       namePrefix,
       baseline: options.baseline ?? 'libreoffice',
       residual,
+      links: linkOf,
     };
     let page: PageRasterEntry | undefined;
 
@@ -249,6 +300,21 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
           `${scene.slideId}: no sheet screenshot; the slide shows the text layer on paper`,
         );
       }
+      // a linked block is an invisible hit target over its box, above the cover (SPEC 7.2.7)
+      for (const block of scene.blocks) {
+        if (block.link === undefined) continue;
+        const props = linkOf(block.link);
+        if (props)
+          addLinkRect(slide, block.box, props, paperHex, `${namePrefix}#${block.blockId}/link`);
+      }
+      if (
+        scene.texts.some((t) =>
+          t.lines.some((l) => l.runs.some((r) => r.style.link && r.style.link.startsWith('#'))),
+        )
+      )
+        residual.add(
+          'links: a slide link on an invisible run of the flatten layer is written as a slide jump; whether PowerPoint honours it under the cover picture is unverified (gslides-parity SPEC 7.2.8)',
+        );
     } else {
       // The picture, then the chrome over it.
       if (hasPicture) {
@@ -295,13 +361,62 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         );
       }
       const onPaper = { paperHex, namePrefix };
+      const withLink = (
+        blockId: string | undefined,
+      ): typeof onPaper & { hyperlink?: PptxGenJS.HyperlinkProps } => {
+        const hyperlink = blockId === undefined ? undefined : blockLink(blockId);
+        return hyperlink ? { ...onPaper, hyperlink } : onPaper;
+      };
+      // Tables (gslides-parity SPEC 7.3): `a:tbl` through addTable unless the mode or the
+      // fallback set says ruled rows; a table written as a:tbl keeps its rules and cell texts out
+      // of the shape list below, the fallback leaves them in (the rows construction)
+      const asTable = new Set<string>();
+      for (const table of scene.tables ?? []) {
+        const key = `${scene.slideId}#${table.blockId}`;
+        const useTable =
+          tableMode === 'table' ||
+          (tableMode === 'auto' && !(options.tableFallback?.has(key) ?? false));
+        if (useTable) {
+          const written = addSceneTable(slide, table, scene.texts, { ...textOptions, paperHex });
+          asTable.add(table.blockId);
+          tables.push({
+            slideId: scene.slideId,
+            blockId: table.blockId,
+            written: 'table',
+            ...written,
+          });
+          residual.add(
+            `table: ${key} written as a:tbl (${written.rows} by ${written.columns}); the per cell 3 px budget is measured by the verify loop, which falls back to ruled rows when a cell misses it`,
+          );
+        } else {
+          tables.push({
+            slideId: scene.slideId,
+            blockId: table.blockId,
+            written: 'rows',
+            rows: table.rows.length,
+            columns: table.columns.length,
+          });
+          residual.add(
+            options.tableFallback?.has(key)
+              ? `table: ${key} missed the per cell 3 px budget as a:tbl; written as ruled rows (hairlines plus grouped text boxes, SPEC 8.2)`
+              : `table: ${key} written as ruled rows (hairlines plus grouped text boxes) by request`,
+          );
+        }
+      }
       scene.plates.forEach((plate, i) => addSceneRect(slide, plate, onPaper, `plate/${i}`));
-      scene.rects.forEach((rect, i) => addSceneRect(slide, rect, onPaper, `rect/${i}`));
-      scene.rules.forEach((rule, i) => addSceneRule(slide, rule, onPaper, `rule/${i}`));
+      scene.rects.forEach((rect, i) =>
+        addSceneRect(slide, rect, withLink(rect.blockId), `rect/${i}`),
+      );
+      scene.rules
+        .filter((rule) => rule.blockId === undefined || !asTable.has(rule.blockId))
+        .forEach((rule, i) => addSceneRule(slide, rule, onPaper, `rule/${i}`));
       // the lines and arrows of shape blocks (docs/freeform.md), native with triangle heads
-      (scene.lines ?? []).forEach((line, i) => addSceneLine(slide, line, onPaper, `line/${i}`));
+      (scene.lines ?? []).forEach((line, i) =>
+        addSceneLine(slide, line, withLink(line.blockId), `line/${i}`),
+      );
       for (const text of scene.texts) {
         if (!text.native) continue;
+        if (asTable.has(text.blockId)) continue;
         addSceneText(slide, text, textOptions);
         if (text.lines.some((l) => l.runs.some((r) => r.gt)))
           residual.add(
@@ -311,7 +426,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       if (scene.counter) addSceneText(slide, scene.counter, textOptions);
       for (const raster of scene.rasters) {
         if (raster.blockId === 'wordmark') continue;
-        if (!addRaster(slide, raster, namePrefix))
+        if (!addRaster(slide, raster, namePrefix, undefined, blockLink(raster.blockId)))
           warnings.push(`${scene.slideId}#${raster.blockId}: raster ${raster.id} has no file`);
       }
       if (scene.texts.some((t) => t.style.mono))
@@ -319,7 +434,8 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
           'code panels travel in DejaVu Sans Mono (Menlo on a Mac without it); the face differs per machine unless a mono font is installed (SPEC 8.6)',
         );
     }
-    addSceneNotes(slide, scene.notes, options.defaultNotes);
+    // the notes travel only when asked (gslides-parity SPEC 7.2.13, decision 15.2)
+    if (options.includeNotes === true) addSceneNotes(slide, scene.notes, options.defaultNotes);
     slidesReport.push({
       slideId: scene.slideId,
       title: scene.title ?? scene.slideId,
@@ -396,6 +512,19 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       `pages: ${describeFormats(pages)}; ${(bytes / (1024 * 1024)).toFixed(2)} MiB of page rasters; worst decoded mismatch ${(worst * 100).toFixed(3)} percent at threshold ${PAGE_RASTER_BUDGETS.threshold} (perfect budget ${PAGE_RASTER_BUDGETS.perfect * 100})`,
     );
   }
+  if (links.written > 0)
+    residual.add(
+      `links: ${links.written} hyperlink(s) written (a URL as is, a slide link as a jump to its number in this file; SPEC 7.2.7, 7.2.8)`,
+    );
+  if (links.unresolved.length > 0)
+    residual.add(
+      `links: ${links.unresolved.length} slide link(s) with no target in this file were dropped: ${links.unresolved.join('; ')}`,
+    );
+  residual.add(
+    options.includeNotes === true
+      ? 'notes: the speaker notes travel as notes parts (includeNotes)'
+      : 'notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)',
+  );
   const geometry = await readGeometry(zip);
   const perfect =
     options.mode === 'flatten' &&
@@ -415,6 +544,8 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     validation,
     contentTypes,
     stripped,
+    tables,
+    links,
     residual: [...residual],
     warnings,
   };

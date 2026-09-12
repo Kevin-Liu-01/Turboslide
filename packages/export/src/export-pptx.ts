@@ -4,6 +4,15 @@
 // native ("Editable text") ships text for the archetypes measured in the pptx report. The files
 // are `<deckId>-<theme>.pptx` under the output directory, plus `<deckId>-both.zip` holding both
 // when both themes are exported, the reports `export-report-<theme>.json` and `export-report.json`.
+//
+// The Google Slides parity round (gslides-parity SPEC 7.2.1, 7.2.13, 7.3): skipped slides stay
+// out of the file unless `includeSkipped`, and the counter counts what the file holds; the notes
+// travel only under `includeNotes`; a table block is an `a:tbl` in Editable text unless a verify
+// pass finds one of its cells outside the 3 px budget, in which case the theme's file is rebuilt
+// with that table as ruled rows and verified again, and the report names it under `residual`.
+// That loop needs the verify pass inside the export, so `verify` here runs the LibreOffice loop
+// per theme (the caller no longer verifies afterwards); the merged report is the union of the
+// verified per theme reports.
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { basename, join, relative } from 'node:path';
@@ -11,12 +20,14 @@ import { basename, join, relative } from 'node:path';
 import JSZip from 'jszip';
 
 import type { DeckDocument } from '@turboslide/schema/deck';
+import { slideOrder, unskippedSlideOrder } from '@turboslide/schema/deck';
 import type { ExportMode, ExportReport } from '@turboslide/schema/export';
 import { exportReportSchema, NATIVE_BLOCK_TYPES } from '@turboslide/schema/export';
 import type { Theme } from '@turboslide/schema/render';
 
 import { ENTRY_DATE } from './ooxml/zip.ts';
 import { buildPptx } from './pptx/build.ts';
+import type { BuildResult, TableMode } from './pptx/build.ts';
 import { DEFAULT_BASELINE } from './pptx/baseline.ts';
 import type { BaselineTarget } from './pptx/baseline.ts';
 import { loadFontsCatalog } from './pptx/fonts-map.ts';
@@ -27,6 +38,24 @@ import { extractScenes } from './scene/extract.ts';
 import type { RasterScalePolicy } from './scene/extract.ts';
 import type { PictureScale } from './scene/two-tone.ts';
 import type { Scene } from './scene/types.ts';
+import { tableCellFailures, verifyPptx } from './verify/report.ts';
+import type { SlideVerification, VerifyOptions } from './verify/report.ts';
+
+export type { TableMode } from './pptx/build.ts';
+
+/** The verify pass inside the export: the loop's options minus what the export supplies itself. */
+export type ExportVerifyOptions = Pick<
+  VerifyOptions,
+  | 'deckDir'
+  | 'referenceDir'
+  | 'budgets'
+  | 'tools'
+  | 'timeoutMs'
+  | 'renderPages'
+  | 'quickLook'
+  | 'log'
+  | 'env'
+>;
 
 export type ExportPptxOptions = {
   deckDir: string;
@@ -50,7 +79,19 @@ export type ExportPptxOptions = {
   noJpeg?: boolean;
   /** Write `<deckId>-both.zip` when both themes are exported; default true. */
   zip?: boolean;
+  /** A subset of the play list, in deck order; default every slide of it. */
   slideIds?: string[];
+  /** Carry the skipped slides too; left out by default (gslides-parity SPEC 7.2.1). */
+  includeSkipped?: boolean;
+  /** Carry the speaker notes; left out by default (gslides-parity SPEC 7.2.13, decision 15.2). */
+  includeNotes?: boolean;
+  /** How a table block travels in Editable text (gslides-parity SPEC 7.3); default auto. */
+  tableMode?: TableMode;
+  /**
+   * Run the verify loop on every theme's file inside the export (SPEC 8.5), and fall a table back
+   * to ruled rows when a cell misses the 3 px budget (SPEC 7.3). Needs LibreOffice and poppler.
+   */
+  verify?: ExportVerifyOptions;
   /** Write `scene-<theme>.json` beside the files for inspection. */
   writeScenes?: boolean;
   fontsCatalog?: FontsCatalog;
@@ -69,6 +110,10 @@ export type ExportPptxResult = {
   zipPath?: string;
   renderer: string;
   scenes: Scene[];
+  /** The slides left out because they are skipped (gslides-parity SPEC 7.2.1). */
+  omitted: string[];
+  /** Tables rebuilt as ruled rows after the verify pass, as `<slideId>#<blockId>` per theme. */
+  tableFallbacks: Record<string, string[]>;
 };
 
 export const DEFAULT_MODE: ExportMode = 'flatten';
@@ -84,6 +129,23 @@ export async function zipFiles(paths: readonly string[], out: string): Promise<n
   return bytes.byteLength;
 }
 
+/**
+ * The slides a download holds, in deck order (gslides-parity SPEC 7.2.1): the deck without its
+ * skipped slides unless asked, narrowed to `slideIds` when given. Returns the play list (what the
+ * counter counts over), the ids to export and the skipped ids left out.
+ */
+export function playList(
+  document: DeckDocument,
+  options: { includeSkipped?: boolean; slideIds?: readonly string[] },
+): { play: string[]; ids: string[]; omitted: string[] } {
+  const order = slideOrder(document.deck);
+  const play = options.includeSkipped === true ? order : unskippedSlideOrder(document);
+  const omitted = order.filter((id) => !play.includes(id));
+  const wanted = options.slideIds ? new Set(options.slideIds) : null;
+  const ids = play.filter((id) => wanted === null || wanted.has(id));
+  return { play, ids, omitted };
+}
+
 export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptxResult> {
   const mode = options.mode ?? DEFAULT_MODE;
   const themes = options.themes ?? ['light', 'dark'];
@@ -96,12 +158,15 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
     options.headings === 'raster'
       ? NATIVE_BLOCK_TYPES.filter((type) => type !== 'heading')
       : [...NATIVE_BLOCK_TYPES];
+  const { play, ids, omitted } = playList(options.document, options);
+  if (ids.length === 0) throw new RangeError('exportPptx: every selected slide is skipped');
   const extracted = await extractScenes({
     deckDir: options.deckDir,
     document: options.document,
     themes,
     mode,
-    slideIds: options.slideIds,
+    slideIds: ids,
+    numbering: play,
     workDir,
     excludeShareAlike: options.excludeShareAlike,
     nativeTypes,
@@ -112,6 +177,7 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
   const reports: ExportReport[] = [];
   const reportPaths: Record<string, string> = {};
   const files: string[] = [];
+  const tableFallbacks: Record<string, string[]> = {};
   for (const theme of themes) {
     const scenes = extracted.scenes.filter((s) => s.theme === theme);
     if (scenes.length === 0) continue;
@@ -121,70 +187,63 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
         `${JSON.stringify(scenes, null, 2)}\n`,
       );
     const wordmarkPath = extracted.wordmark[theme];
-    const built = await buildPptx(scenes, {
-      deckId: deck.id,
-      deckTitle: deck.title,
-      revision: deck.revision,
-      theme,
-      mode,
-      fontSet,
-      fontsCatalog: catalog,
-      baseline: options.baseline ?? DEFAULT_BASELINE,
-      ...(options.embedFonts === true ? { embedFonts: true } : {}),
-      ...(options.noJpeg ? { noJpeg: true } : {}),
-      wordmarkPng:
-        wordmarkPath && existsSync(wordmarkPath) ? readFileSync(wordmarkPath) : undefined,
-      defaultNotes: deck.defaults?.notes,
-      onPage: options.onPage,
-    });
-    // The verify loop reads the sheet shot and the picture region per slide (SPEC 8.5 step 3).
-    const slidesWithScene = built.slides.map(({ title: _title, ...entry }) => {
-      const scene = scenes.find((s) => s.slideId === entry.slideId);
-      if (!scene) return entry;
-      const out: ExportReport['slides'][number] = { ...entry };
-      if (scene.sheetImage) out.sheet = relative(options.outDir, scene.sheetImage);
-      if (scene.picture && !scene.pictureExcluded) {
-        out.pictures = [{ box: scene.picture.box, regenerated: scene.pictureRegenerated === true }];
-      }
-      return out;
-    });
     const path = join(options.outDir, `${deck.id}-${theme}.pptx`);
-    await writeFile(path, built.bytes);
-    files.push(path);
-    options.onFile?.(path, built.bytes.byteLength);
-    const report = buildReport({
-      deckId: deck.id,
-      revision: deck.revision,
-      mode,
-      theme,
-      fontSet,
-      fontSetVersion: catalog.version,
-      files: [path],
-      families: built.families,
-      embedded: built.embedded,
-      slides: slidesWithScene,
-      geometryInBounds: built.geometryInBounds,
-      perfect: built.perfect,
-      residual: [
-        `renderer: ${extracted.renderer}`,
-        ...(mode === 'flatten'
-          ? [
-              'flatten (perfect): the slide is a 2x raster of the sheet under the page raster policy; text is an invisible native layer; the slide title is the slide name and a hidden title placeholder',
-            ]
-          : [
-              "native (editable text): text boxes at the browser boxes, layout within 3 px; the glyph antialiasing is the viewer's",
-            ]),
-        ...(options.headings === 'raster'
-          ? ['headings: rasterized as PNG (--headings raster)']
-          : []),
-        `rasters: ${options.rasterScale ?? 'auto'} scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at ${options.pictureScale ?? 2}x`,
-        `package: ${built.validation.parts} parts, ${built.validation.relationships} relationships, ${built.validation.valid ? 'valid' : 'INVALID'} against the content types and relationships`,
-        ...built.residual,
-      ],
-      warnings: [...extracted.warnings, ...built.warnings],
-    });
     const reportPath = join(options.outDir, `export-report-${theme}.json`);
-    await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+    const write = async (fallback: ReadonlySet<string>): Promise<ExportReport> => {
+      const built = await buildPptx(scenes, {
+        deckId: deck.id,
+        deckTitle: deck.title,
+        revision: deck.revision,
+        theme,
+        mode,
+        fontSet,
+        fontsCatalog: catalog,
+        baseline: options.baseline ?? DEFAULT_BASELINE,
+        ...(options.embedFonts === true ? { embedFonts: true } : {}),
+        ...(options.noJpeg ? { noJpeg: true } : {}),
+        ...(options.includeNotes === true ? { includeNotes: true } : {}),
+        tableMode: options.tableMode ?? 'auto',
+        tableFallback: fallback,
+        wordmarkPng:
+          wordmarkPath && existsSync(wordmarkPath) ? readFileSync(wordmarkPath) : undefined,
+        defaultNotes: deck.defaults?.notes,
+        onPage: options.onPage,
+      });
+      await writeFile(path, built.bytes);
+      options.onFile?.(path, built.bytes.byteLength);
+      const report = themeReport(built, {
+        options,
+        scenes,
+        mode,
+        theme,
+        fontSet,
+        catalog,
+        path,
+        renderer: extracted.renderer,
+        extractWarnings: extracted.warnings,
+        omitted,
+      });
+      await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`);
+      return report;
+    };
+    let report = await write(new Set());
+    if (options.verify) {
+      const verified = await verifyTheme(reportPath, options.verify, options.deckDir);
+      report = verified.report;
+      const failures = tableCellFailures(verified.slides);
+      // The gate of SPEC 7.3: a table whose cell missed the 3 px budget as a:tbl is rewritten as
+      // ruled rows (hairlines plus grouped text boxes) and the file verified again; the report
+      // names the block under residual (buildPptx writes the line).
+      if (mode === 'native' && (options.tableMode ?? 'auto') === 'auto' && failures.size > 0) {
+        options.verify.log?.(
+          `export: ${failures.size} table(s) missed the per cell budget as a:tbl in ${theme}; rebuilding as ruled rows: ${[...failures].join(', ')}`,
+        );
+        tableFallbacks[theme] = [...failures];
+        await write(failures);
+        report = (await verifyTheme(reportPath, options.verify, options.deckDir)).report;
+      }
+    }
+    if (!files.includes(path)) files.push(path);
     reportPaths[theme] = reportPath;
     reports.push(report);
   }
@@ -222,5 +281,84 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
     ...(zipPath ? { zipPath } : {}),
     renderer: extracted.renderer,
     scenes: extracted.scenes,
+    omitted,
+    tableFallbacks,
   };
+}
+
+/** One verify pass over a theme's report, collecting the per slide verifications for the table gate. */
+async function verifyTheme(
+  reportPath: string,
+  verify: ExportVerifyOptions,
+  deckDir: string,
+): Promise<{ report: ExportReport; slides: SlideVerification[] }> {
+  const slides: SlideVerification[] = [];
+  const report = await verifyPptx(reportPath, {
+    ...verify,
+    deckDir: verify.deckDir ?? deckDir,
+    onSlide: (slide) => slides.push(slide),
+  });
+  return { report, slides };
+}
+
+type ThemeReportInput = {
+  options: ExportPptxOptions;
+  scenes: Scene[];
+  mode: ExportMode;
+  theme: Theme;
+  fontSet: FontSet;
+  catalog: FontsCatalog;
+  path: string;
+  renderer: string;
+  extractWarnings: string[];
+  omitted: string[];
+};
+
+/** The per theme report of one built file. */
+function themeReport(built: BuildResult, input: ThemeReportInput): ExportReport {
+  const { options, scenes, mode, theme, fontSet, catalog, path } = input;
+  // The verify loop reads the sheet shot and the picture region per slide (SPEC 8.5 step 3).
+  const slidesWithScene = built.slides.map(({ title: _title, ...entry }) => {
+    const scene = scenes.find((s) => s.slideId === entry.slideId);
+    if (!scene) return entry;
+    const out: ExportReport['slides'][number] = { ...entry };
+    if (scene.sheetImage) out.sheet = relative(options.outDir, scene.sheetImage);
+    if (scene.picture && !scene.pictureExcluded) {
+      out.pictures = [{ box: scene.picture.box, regenerated: scene.pictureRegenerated === true }];
+    }
+    return out;
+  });
+  return buildReport({
+    deckId: options.document.deck.id,
+    revision: options.document.deck.revision,
+    mode,
+    theme,
+    fontSet,
+    fontSetVersion: catalog.version,
+    files: [path],
+    families: built.families,
+    embedded: built.embedded,
+    slides: slidesWithScene,
+    geometryInBounds: built.geometryInBounds,
+    perfect: built.perfect,
+    residual: [
+      `renderer: ${input.renderer}`,
+      ...(mode === 'flatten'
+        ? [
+            'flatten (perfect): the slide is a 2x raster of the sheet under the page raster policy; text is an invisible native layer; the slide title is the slide name and a hidden title placeholder',
+          ]
+        : [
+            "native (editable text): text boxes at the browser boxes, layout within 3 px; the glyph antialiasing is the viewer's",
+          ]),
+      ...(options.headings === 'raster' ? ['headings: rasterized as PNG (--headings raster)'] : []),
+      `rasters: ${options.rasterScale ?? 'auto'} scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at ${options.pictureScale ?? 2}x`,
+      `package: ${built.validation.parts} parts, ${built.validation.relationships} relationships, ${built.validation.valid ? 'valid' : 'INVALID'} against the content types and relationships`,
+      // the report counts the slides the download left out (gslides-parity SPEC 7.2.1)
+      input.omitted.length > 0
+        ? `skipped: ${input.omitted.length} slide(s) left out (${input.omitted.join(', ')}); pass includeSkipped to carry them`
+        : 'skipped: none; every slide of the deck is in the file',
+      ...built.residual,
+    ],
+    warnings: [...input.extractWarnings, ...built.warnings],
+  });
 }

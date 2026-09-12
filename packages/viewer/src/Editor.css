@@ -55,3 +55,30 @@
 .ts-editor[data-marquee] .pt-slide [data-run] {
   cursor: crosshair;
 }
+
+/* ---- the Google Slides parity round (gslides-parity SPEC 3.1, 7.2.16) ---- */
+
+/* a draw tool is up: the crosshair over the whole stage, above the blocks' cursors */
+.ts-editor[data-tool] .pt-sheet-stage,
+.ts-editor[data-tool] .pt-slide [data-block],
+.ts-editor[data-tool] .pt-slide [data-run] {
+  cursor: crosshair;
+}
+
+/* paint format armed: the next click paints, so every block reads as a target */
+.ts-editor[data-paint] .pt-slide [data-block],
+.ts-editor[data-paint] .pt-slide [data-run] {
+  cursor: copy;
+}
+
+/* View > Zoom at a factor: the stage scrolls to the parts of the sheet past its box; at Fit the
+   sheet is placed and never scrolls (Sheet.css) */
+.ts-editor .pt-sheet-stage[data-zoom] {
+  overflow: auto;
+}
+
+/* the stage root takes focus from the handle's focus() and the canvas jump key without a ring of
+   its own: the selection ring is the focus indication (SPEC 13.6 applies to controls) */
+.ts-editor:focus {
+  outline: none;
+}

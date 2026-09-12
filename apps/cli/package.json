@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "description": "The turboslide binary: the file transport that needs no browser page (SPEC 7.2). No React.",
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run"
+  },
   "bin": {
     "turboslide": "./bin/turboslide.mjs"
-  },
-  "scripts": {
-    "build": "tsdown"
   },
   "exports": {
     "./cli": "./src/cli.ts",

@@ -346,6 +346,24 @@
       "packages/lint/src/lint.test.ts"
     ]
   },
+  "copy/empty-placeholder": {
+    "layer": "static",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
+  "table/size": {
+    "layer": "static",
+    "slides": [
+      "bad-copy"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
   "contrast/both-themes": {
     "layer": "rendered",
     "slides": [],

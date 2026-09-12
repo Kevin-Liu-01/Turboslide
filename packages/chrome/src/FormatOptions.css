@@ -1,0 +1,89 @@
+/* FormatOptions (FormatOptions.tsx): the Inspector's controls at 320 px under Google's section
+   names (gslides-parity SPEC 3.9). The panel frame is Panel.css; the control rows keep
+   Inspector.css and InspectorControl.css, so one grammar draws a field in both panels. Two-up
+   number fields for Size & rotation and Position; the layout name with its Change button; the
+   alt text as a textarea. Radius 0; colors are tokens only. */
+.ts-fo .ts-insp-row {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.ts-fo-notice {
+  margin: 0;
+  padding: 8px 16px;
+  color: var(--pt-ink);
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-fo-lead {
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-fo-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ts-fo-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ts-fo-field-label {
+  font-size: 12px;
+  color: var(--pt-titanium);
+}
+
+.ts-fo-field input,
+.ts-fo-alt textarea {
+  box-sizing: border-box;
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.4 var(--pt-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-fo-field.is-disabled input {
+  color: var(--pt-titanium);
+  border-color: var(--pt-hair-soft);
+}
+
+.ts-fo-field input:focus-visible,
+.ts-fo-alt textarea:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-fo-alt {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-fo-alt textarea {
+  height: auto;
+  min-height: 64px;
+  padding: 6px 8px;
+  resize: vertical;
+}
+
+.ts-fo-layout {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.ts-fo-layout-name {
+  color: var(--pt-ink);
+  font-weight: 500;
+}

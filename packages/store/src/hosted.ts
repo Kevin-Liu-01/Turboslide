@@ -10,13 +10,29 @@ import { join, normalize, resolve, sep } from 'node:path';
 
 import type { BlobClient } from './blob-store.ts';
 import { blobDecks } from './blob-store.ts';
-import { openFileStore } from './file-store.ts';
+import { loadDeckDir, openFileStore } from './file-store.ts';
 import type { SeedSource } from './seed.ts';
 import type { StoreKind, StoreSelection } from './select.ts';
 import { NOT_PERSISTENT_NOTICE } from './select.ts';
 import type { DeckStore } from './store.ts';
-import { createDeck, listDeckHeads } from './templates.ts';
-import type { CreateDeckInput, CreateDeckResult, DeckHead } from './templates.ts';
+import {
+  StaleRevisionError,
+  copyDeck,
+  createDeck,
+  listDeckHeads,
+  removeDeck,
+  restoreDeck,
+  trashDeck,
+} from './templates.ts';
+import type {
+  CopyDeckInput,
+  CopyDeckResult,
+  CreateDeckInput,
+  CreateDeckResult,
+  DeckHead,
+  ListDecksOptions,
+  TrashState,
+} from './templates.ts';
 import { tmpDecks } from './tmp-store.ts';
 
 /** What the deck list and the editor banner show about the store. */
@@ -43,12 +59,20 @@ export type HostedDecks = {
   readonly decksDir: string;
   /** the seed is materialized (and, for blob, uploaded once); a no-op in file mode */
   ready: () => Promise<void>;
-  /** every deck, newest first */
-  list: () => Promise<DeckHead[]>;
+  /** every deck, newest first; the decks in the trash only with includeTrashed (gslides-parity SPEC 7.2.5) */
+  list: (options?: ListDecksOptions) => Promise<DeckHead[]>;
   has: (deckId: string) => Promise<boolean>;
   /** the store for a deck; a RangeError when the deck is missing */
   open: (deckId: string) => Promise<DeckStore>;
   create: (input: CreateDeckInput) => Promise<CreateDeckResult>;
+  /** Make a copy (gslides-parity SPEC 7.5 deck.copy): a new deck from an existing one */
+  copy: (input: CopyDeckInput, baseRevision?: number) => Promise<CopyDeckResult>;
+  /** Move to trash (deck.trash): writes trashedAt on the manifest at the store level */
+  trash: (deckId: string, baseRevision?: number) => Promise<TrashState>;
+  /** Restore from trash (deck.restore): clears trashedAt */
+  restore: (deckId: string, baseRevision?: number) => Promise<TrashState>;
+  /** Delete forever (deck.remove): the folder or the prefix and everything under it */
+  remove: (deckId: string, baseRevision?: number) => Promise<{ id: string; removed: true }>;
   /** a deck's twins are on disk, so a render or export job that reads them finds them; a no-op in file mode */
   ensureAssets: (deckId: string) => Promise<void>;
   /** the local file of an asset twin, confined to the deck's assets folder; null when absent */
@@ -139,8 +163,8 @@ export function fileDecks(
     root,
     decksDir,
     async ready() {},
-    async list() {
-      return listDeckHeads(decksDir);
+    async list(listOptions) {
+      return listDeckHeads(decksDir, listOptions);
     },
     async has(deckId) {
       return existsSync(join(decksDir, deckId, 'deck.json'));
@@ -154,6 +178,22 @@ export function fileDecks(
     async create(input) {
       return createDeck(decksDir, input, createOptions);
     },
+    async copy(input, baseRevision) {
+      if (baseRevision !== undefined) checkRevision(decksDir, input.id, baseRevision);
+      return copyDeck(decksDir, input, createOptions);
+    },
+    async trash(deckId, baseRevision) {
+      return trashDeck(decksDir, deckId, {
+        ...createOptions,
+        ...(baseRevision !== undefined ? { baseRevision } : {}),
+      });
+    },
+    async restore(deckId, baseRevision) {
+      return restoreDeck(decksDir, deckId, baseRevision !== undefined ? { baseRevision } : {});
+    },
+    async remove(deckId, baseRevision) {
+      return removeDeck(decksDir, deckId, baseRevision !== undefined ? { baseRevision } : {});
+    },
     async ensureAssets() {},
     async assetFile(deckId, relative) {
       const file = assetPathWithin(decksDir, deckId, relative);
@@ -166,6 +206,14 @@ export function fileDecks(
       return factsFor(selection, decksDir, null);
     },
   };
+}
+
+/** A stale baseRevision against a deck folder is the StaleRevisionError the transports map to 409. */
+export function checkRevision(decksDir: string, deckId: string, baseRevision: number): void {
+  const dir = join(decksDir, deckId);
+  if (!existsSync(join(dir, 'deck.json'))) throw new RangeError(`No deck ${deckId} under decks/`);
+  const revision = loadDeckDir(dir).document.deck.revision;
+  if (revision !== baseRevision) throw new StaleRevisionError(deckId, baseRevision, revision);
 }
 
 /** The collection for a selection; a TypeError when the backend's inputs are missing. */

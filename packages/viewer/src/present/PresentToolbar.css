@@ -1,0 +1,131 @@
+/* The present mode toolbar (PresentToolbar.tsx; gslides-parity SPEC 9.2, R04 A3). A 40 px plate
+   at the bottom left of the show, 12 px in from both edges, drawn on the panel tokens because the
+   show's surround is the same near black in both themes: --pt-panel-ink for the plate and
+   --pt-panel-text for the glyphs, the line between the two groups mixed from the text. Hidden by
+   opacity alone so Tab still reaches the buttons; .is-shown is the translucent rest state the
+   parent sets while the pointer is near, and hover or focus inside the bar makes it opaque. The
+   fade reads --pt-dur-toast, which the reduced motion block zeroes. Radius 0, no shadow, no red
+   anywhere (the chrome has no red). */
+.ts-present-bar {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 40px;
+  padding: 0 4px;
+  background: var(--pt-panel-ink, #101010);
+  color: var(--pt-panel-text, rgba(255, 255, 255, 0.87));
+  border: 1px solid color-mix(in srgb, var(--pt-panel-text, #fff) 28%, transparent);
+  font: 13px/1 var(--pt-text);
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--pt-dur-toast) var(--pt-ease-out);
+}
+
+.ts-present-bar.is-shown {
+  opacity: 0.72;
+  pointer-events: auto;
+}
+
+.ts-present-bar.is-shown:hover,
+.ts-present-bar.is-shown:focus-within,
+.ts-present-bar:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ts-present-btn,
+.ts-present-count {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 0;
+  color: inherit;
+  font: inherit;
+  height: 32px;
+  min-width: 32px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.ts-present-count {
+  padding: 0 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-present-btn:hover,
+.ts-present-count:hover {
+  border-color: color-mix(in srgb, var(--pt-panel-text, #fff) 40%, transparent);
+}
+
+.ts-present-btn:focus-visible,
+.ts-present-count:focus-visible {
+  outline: 1px solid var(--pt-panel-text, #fff);
+  outline-offset: 2px;
+}
+
+.ts-present-btn.is-on,
+.ts-present-count.is-on {
+  border-color: var(--pt-panel-text, #fff);
+}
+
+.ts-present-btn.is-disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.ts-present-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  flex: 0 0 auto;
+}
+
+.ts-present-sep {
+  width: 1px;
+  height: 18px;
+  margin: 0 4px;
+  background: color-mix(in srgb, var(--pt-panel-text, #fff) 28%, transparent);
+}
+
+/* the text glyphs drawn when no icon is handed in */
+.ts-present-glyph {
+  display: inline-block;
+  min-width: 16px;
+  text-align: center;
+  font-family: var(--pt-display);
+  font-size: 15px;
+  line-height: 16px;
+}
+
+.ts-present-glyph[data-glyph='captions'] {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.ts-present-glyph[data-glyph='laser'] {
+  width: 12px;
+  height: 12px;
+  min-width: 0;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 2px var(--pt-panel-ink, #101010) inset;
+  color: inherit;
+  font-size: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-present-bar {
+    transition: none;
+  }
+}

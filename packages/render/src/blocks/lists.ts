@@ -4,6 +4,10 @@ import { renderText } from '../text.ts';
 import type { BlockOf } from '@turboslide/schema/blocks';
 import { iconSvg, rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
+import { renderTextOrPrompt } from './prompt.ts';
+
+/** The hanging indent of a numbered item: the icon's 24 px plus its 12 px margin (head:119-120). */
+export const NUMERAL_INDENT = 36;
 
 /**
  * `.rows`: a top hairline, then one grid row per item with the key in `<b>` and the value in a
@@ -26,12 +30,15 @@ export function renderRows(block: BlockOf<'rows'>, ctx: BlockContext): string {
           class: mixedIcons && !item.icon ? 'no-ic' : undefined,
           'data-run': runAttr(ctx, block.id, `items/${index}/key`),
         },
-        icon + renderText(item.key, { gtWord: ctx.gtWord }),
+        icon + renderTextOrPrompt(item.key, ctx, block, `/items/${index}/key`),
       );
       const value = el(
         'span',
         { 'data-run': runAttr(ctx, block.id, `items/${index}/value`) },
-        renderText(item.value, { gtWord: ctx.gtWord, linkGlyph: block.links === true }),
+        renderTextOrPrompt(item.value, ctx, block, `/items/${index}/value`, {
+          gtWord: ctx.gtWord,
+          linkGlyph: block.links === true,
+        }),
       );
       return el(
         'div',
@@ -61,24 +68,35 @@ export function renderRows(block: BlockOf<'rows'>, ctx: BlockContext): string {
  * 22 px and 20 px sizes are the slide-level overrides of s73:5 and s84:8-11.
  */
 export function renderPlain(block: BlockOf<'plain'>, ctx: BlockContext): string {
+  const numbered = block.numbered === true;
   const items = block.items
     .map((item, index) => {
       const icon = item.icon ? iconSvg(item.icon, ctx, block.id) : '';
-      return el(
+      const text = el(
         'span',
         {
           class: item.no ? 'no' : undefined,
           'data-run': runAttr(ctx, block.id, `items/${index}/text`),
         },
-        icon + renderText(item.text, { gtWord: ctx.gtWord }),
+        icon + renderTextOrPrompt(item.text, ctx, block, `/items/${index}/text`),
       );
+      if (!numbered) return text;
+      // A numbered list (gslides-parity SPEC 7.2.6): a tabular numeral in the key position where
+      // the icon sits, outside the Text's carrier so the inline editor never reads it as copy;
+      // data-num names it for the exporter, which writes it as its own run (scene/measure.ts).
+      const numeral = el(
+        'span',
+        { class: 'num', 'data-num': ctx.blockAttrs ? `${block.id}/items/${index}` : undefined },
+        String(index + 1),
+      );
+      return el('span', { class: 'item' }, numeral + text);
     })
     .join('');
   const size = block.size ?? 24;
   return el(
     'div',
     rootAttrs(block, ctx, {
-      className: classes('plain', size !== 24 && `plain-${size}`),
+      className: classes('plain', size !== 24 && `plain-${size}`, numbered && 'numbered'),
     }),
     items,
   );
@@ -91,7 +109,7 @@ export function renderRefs(block: BlockOf<'refs'>, ctx: BlockContext): string {
       el(
         'span',
         { 'data-run': runAttr(ctx, block.id, `items/${index}`) },
-        renderText(item, { gtWord: ctx.gtWord }),
+        renderTextOrPrompt(item, ctx, block, `/items/${index}`),
       ),
     )
     .join('');

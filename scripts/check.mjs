@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // `pnpm check`: the M1 acceptance chain from MILESTONES.md, run in order from the repo root, plus
-// the M2 format gate as the last step. Every step is the literal command from the milestone plan,
+// the M2 format gate (step 19) and the two steps of the Google Slides parity round (steps 20 and
+// 21, docs/gslides-parity/SPEC.md 14.1). Every step is the literal command from the milestone plan,
 // with one guard: step 3 first proves the generated files are tracked, because
 // `git diff --exit-code` passes trivially on untracked paths. The runner adds only what the plan
 // assumes about its environment: it creates .turboslide/, it skips the steps that read Kevin's
@@ -32,10 +33,21 @@ const SERVER_TIMEOUT_MS = 120_000;
 // them (measured: `--only 18` on a cold server failed three runs of three with `state "list" did
 // not apply` on the first audit, while the same step passed in the full chain after step 17 had
 // warmed the server; the shell driver now also waits for hydration, this keeps that wait short).
-const WARM_PATHS = ['/deck/gt-brand', '/edit/gt-brand'];
+const WARM_PATHS = ['/deck/gt-brand', '/edit/gt-brand', '/new', '/decks'];
 const WARM_TIMEOUT_MS = 120_000;
 const WARM_MODULE_CAP = 4000;
 const WARM_CONCURRENCY = 8;
+
+// The editor shell binds no bare letters (gslides-parity SPEC 10.2), so its chrome lint enters its
+// states through what exists at every audited width: grid view from the bottom bar, the File
+// menu from the menu bar, the Version history panel from Google's Cmd+Option+Shift+H
+// (packages/headless/src/shell.ts SHELL_STATES; the toolbar's Theme button collapses into More at
+// 390 px and the bottom bar's panel button sits under the dev server's devtools trigger). The
+// home page has no states.
+const EDITOR_STATES = 'editorGrid,editorMenu,editorPanel';
+// Step 20 (gslides-parity SPEC 14.1): the Google parity audit once the verifier has written it;
+// until then the menu model tests stand in, so the step is never a silent pass.
+const PARITY_AUDIT = 'scripts/gslides-parity-audit.mjs';
 
 // MILESTONES.md, M1 acceptance, in order. `needs` marks the environment a step depends on.
 const steps = [
@@ -82,13 +94,29 @@ const steps = [
     // the viewer, then the editor: the editor's toolbar carries the deck name, the status chip,
     // Search and the Export menu, and the M5 verification found its chip drawn under Search at
     // 1280 while only /deck was audited here
-    cmd: `pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/deck/gt-brand --widths 1440,1280,390 --themes light,dark && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/edit/gt-brand --widths 1440,1280,390 --themes light,dark`,
+    // gslides-parity SPEC 14.1: the editor, the draft and the home page join the audit
+    cmd: `pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/deck/gt-brand --widths 1440,1280,390 --themes light,dark && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/edit/gt-brand --widths 1440,1280,390 --themes light,dark --states ${EDITOR_STATES} && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/new --widths 1440,1280,390 --themes light,dark --states ${EDITOR_STATES} && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/decks --widths 1440,1280,390 --themes light,dark --states ''`,
     needs: 'server',
   },
   // MILESTONES.md M2 acceptance, added after the M2 review found 41 files that `pnpm format` had
   // not touched: the tree is prettier-clean (AGENTS.md code rules). Last, so the M1 step numbers
   // that AGENTS.md and the status documents cite stay valid.
   { cmd: 'pnpm format:check' },
+  // gslides-parity SPEC 14.1, steps 20 and 21: the Google parity audit (the verifier's script;
+  // the menu model tests until it exists) and the parity round's end to end specs, the ten tasks
+  // of SPEC 11.2 first
+  existsSync(PARITY_AUDIT)
+    ? {
+        cmd: `node ${PARITY_AUDIT} --base ${STUDIO_URL} --out docs/gslides-parity/verification/parity-audit.json`,
+        needs: 'server',
+      }
+    : {
+        cmd: 'pnpm exec vitest run --dir packages/chrome menus/__tests__',
+      },
+  {
+    cmd: 'pnpm exec playwright test apps/studio/e2e/ten-tasks.spec.ts apps/studio/e2e/text-editing.spec.ts apps/studio/e2e/filmstrip.spec.ts apps/studio/e2e/home.spec.ts apps/studio/e2e/present.spec.ts apps/studio/e2e/landing.spec.ts apps/studio/e2e/gslides-actions.spec.ts apps/studio/e2e/deck-transfer.spec.ts',
+    needs: 'server',
+  },
 ];
 
 const argv = process.argv.slice(2);

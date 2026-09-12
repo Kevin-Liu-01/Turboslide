@@ -53,6 +53,12 @@ export type SceneLine = {
   /** The line box: the inline box centered in the computed line height. */
   box: Box;
   runs: SceneRun[];
+  /**
+   * The paragraph the line belongs to (gslides-parity SPEC 7.4): the index of the `.para` span
+   * it sits in, 0 for a one paragraph Text. A line whose index differs from the previous line's
+   * starts a new paragraph in the file (`breakLine`), else a soft break.
+   */
+  paragraph?: number;
 };
 
 export type SceneText = {
@@ -69,6 +75,8 @@ export type SceneText = {
   native: boolean;
   /** Shapes that share a group key are wrapped in one grpSp (a ruled row and its two boxes). */
   group?: string;
+  /** The owning block's link (gslides-parity SPEC 7.2.7), as the href the renderer wrote. */
+  link?: string;
 };
 
 export type SceneRule = {
@@ -159,6 +167,50 @@ export type SceneBlock = {
   type: string;
   box: Box;
   native: boolean;
+  /**
+   * The block's link (gslides-parity SPEC 7.2.7): a URL, or a slide link (`#s/<id>`, `#next`,
+   * `#previous`, `#first`, `#last`) the builder resolves to a slide number in the file.
+   */
+  link?: string;
+};
+
+/** One cell of a measured table (gslides-parity SPEC 7.3): its box, alignment, fill and margins. */
+export type SceneTableCell = {
+  box: Box;
+  /** The data-run id of the cell's text carrier (`<blockId>/rows/<r>/cells/<c>`). */
+  textId: string;
+  align: 'left' | 'center' | 'right';
+  /** The cell's computed background when the column sets a fill. */
+  fill?: string;
+  /** The cell padding in sheet px: top, right, bottom, left. */
+  margin: [number, number, number, number];
+};
+
+export type SceneTableRow = {
+  y: number;
+  h: number;
+  header: boolean;
+  cells: SceneTableCell[];
+};
+
+/**
+ * A table block as the grid the renderer drew (gslides-parity SPEC 7.3): the column and row
+ * geometry `addTable` takes as `colW` and `rowH`, the rules from the computed borders, the
+ * vertical alignment and the font size. The cells' texts are the scene's `texts` entries named
+ * by `textId`, grouped per row like a ruled row so the fallback construction needs nothing more.
+ */
+export type SceneTable = {
+  blockId: string;
+  box: Box;
+  columns: { x: number; w: number }[];
+  rows: SceneTableRow[];
+  /** The rule under an ordinary row (and the hairline above the table). */
+  rule: { color: string; width: number };
+  /** The rule under a header row (the ink), when the table has one. */
+  headerRule?: { color: string; width: number };
+  valign: 'top' | 'middle' | 'bottom';
+  /** The computed font size in sheet px. */
+  size: number;
 };
 
 export type Scene = {
@@ -187,6 +239,8 @@ export type Scene = {
   rects: SceneRect[];
   /** Lines and arrows of shape blocks; absent on a scene measured before the freeform round. */
   lines?: SceneSegment[];
+  /** Table blocks as grids (gslides-parity SPEC 7.3); absent on a scene measured before them. */
+  tables?: SceneTable[];
   rasters: SceneRaster[];
   blocks: SceneBlock[];
   notes?: string;

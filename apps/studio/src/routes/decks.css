@@ -1,53 +1,511 @@
-/* The deck list (/decks). The page grammar comes from styles.css (.ts-home, .ts-home-head,
-   .ts-home-foot); this sheet holds the tools row, the New deck form and the deck rows. Lines are
-   1px, drawn once: the tools row draws --pt-hair under itself, the form its own --pt-hair frame,
-   each deck row --pt-hair-soft under itself (SPEC 2.2 line law). Buttons are the shell's .pt-ib;
-   the one solid button is New deck (Create and open while the form is up). Colors are tokens
-   only, radius 0, Inter at 13px. */
-.ts-decks-page {
-  max-width: 880px;
+/* The home page (/decks) and the trash (/decks/trash), gslides-parity SPEC 6.2 and 6.4. The page
+   grammar (.ts-home, .ts-home-empty) comes from styles.css; this sheet holds Google's three bands
+   in the chrome's tokens: the app bar, the template strip, the recent list as cards or rows, the
+   card menu button, the in place rename, the dialog primitive and the trash cards. Lines are 1px
+   and drawn once (SPEC 2.2 line law): the app bar draws --pt-hair under itself, a card draws its
+   own --pt-hair frame, a row --pt-hair-soft under itself. Buttons are the shell's .pt-ib; the one
+   solid button is a dialog's confirming action. Colors are tokens only, radius 0, Inter at 13px. */
+.ts-home-page {
+  max-width: 1120px;
+  padding-top: 24px;
 }
 
-.ts-decks-tools {
-  display: flex;
+.ts-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* the links of the plain pages (the pending draft, Not found, the fallbacks) in ink, underlined */
+.ts-home a:not(.pt-ib) {
+  color: var(--pt-ink);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* ---- the app bar: the mark and the name at the left, the search field in the middle ---- */
+.ts-appbar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px 0;
+  gap: 24px;
+  padding: 8px 0 16px;
   border-bottom: 1px solid var(--pt-hair);
 }
 
-.ts-decks-count {
-  font-size: 12.5px;
-  color: var(--pt-titanium);
-  font-variant-numeric: tabular-nums;
+.ts-appbar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--pt-ink);
+  text-decoration: none;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 20px;
+  letter-spacing: -0.01em;
 }
 
-.ts-decks-page .pt-ib.is-text:not(.is-solid) {
-  border-color: var(--pt-hair);
+.ts-appbar-brand:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
 }
 
-.ts-decks-page .pt-ib.is-text:not(.is-solid):hover {
-  border-color: var(--pt-ink-2);
+.ts-appbar-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 720px;
+  justify-self: center;
+  width: 100%;
 }
 
-/* ---- the New deck form ---- */
-.ts-decks-form {
-  display: grid;
-  gap: 14px;
-  margin: 16px 0 0;
-  padding: 16px;
+.ts-appbar-search svg {
+  position: absolute;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  fill: var(--pt-ink-2);
+  pointer-events: none;
+}
+
+.ts-appbar-search input {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px 0 38px;
   border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-plate);
+  color: var(--pt-ink);
+  font: 14px var(--pt-text);
+  outline: none;
+  appearance: none;
 }
 
-.ts-decks-field {
+.ts-appbar-search input:focus {
+  border-color: var(--pt-ink);
+  background: var(--pt-paper);
+}
+
+/* ---- Start a new presentation ---- */
+.ts-strip {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-strip-head,
+.ts-recent-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.ts-strip h2,
+.ts-recent h2 {
+  margin: 0;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--pt-ink);
+}
+
+.ts-strip-gallery {
+  font-size: 13px;
+  color: var(--pt-ink-2);
+  text-decoration: none;
+}
+
+.ts-strip-gallery:hover {
+  color: var(--pt-ink);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-strip-gallery:focus-visible,
+.ts-hm-card-open:focus-visible,
+.ts-hm-card-title:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-strip-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* a template card: a 160 by 120 plate over a label, the way Google's strip draws its cards */
+.ts-template {
+  appearance: none;
   display: grid;
-  gap: 6px;
+  gap: 8px;
+  width: 160px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pt-ink);
+  text-decoration: none;
+  text-align: left;
+  font: 13px var(--pt-text);
+  cursor: pointer;
+}
+
+.ts-template:disabled {
+  cursor: default;
+  color: var(--pt-ink-2);
+}
+
+.ts-template-plate {
+  display: grid;
+  place-items: center;
+  height: 120px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-template-plate svg {
+  fill: currentColor;
+}
+
+.ts-template-gt {
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  /* the plate is its own ink field: no rule of its own (the chrome line law draws ink only as a state) */
+  border-color: transparent;
+}
+
+.ts-template:hover .ts-template-plate,
+.ts-template:focus-visible .ts-template-plate {
+  border-color: var(--pt-ink);
+}
+
+.ts-template:focus-visible {
+  outline: none;
+}
+
+.ts-template-label {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 13.5px;
+}
+
+/* ---- Recent presentations ---- */
+.ts-recent {
+  padding: 24px 0 0;
+}
+
+.ts-recent-lead {
+  margin: 4px 0 0;
   font-size: 12.5px;
   color: var(--pt-ink-2);
 }
 
-.ts-decks-field input {
+.ts-recent-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ts-seg {
+  display: inline-flex;
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-seg .pt-ib {
+  height: 30px;
+  width: 30px;
+}
+
+.ts-sort select {
+  height: 32px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px var(--pt-text);
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--pt-ink-2) 50%),
+    linear-gradient(135deg, var(--pt-ink-2) 50%, transparent 50%);
+  background-position:
+    calc(100% - 15px) 13px,
+    calc(100% - 10px) 13px;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.ts-sort select:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+/* cards: 4 up at 1120px, the thumbnail's 16:9 plate, the title row with the menu button */
+.ts-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(232px, 1fr));
+  gap: 20px;
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-hm-card {
+  display: grid;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-hm-card:hover,
+.ts-hm-card:focus-within {
+  border-color: var(--pt-ink);
+}
+
+.ts-hm-card-open {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.ts-hm-card-thumb {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  background: var(--pt-plate);
+}
+
+.ts-hm-card-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* the plate while the capture has not arrived (or the render failed): the title in the deck's appearance */
+.ts-hm-card-plate {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 16px;
+  text-align: center;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--pt-ink-2);
+}
+
+.ts-hm-card-thumb[data-theme='dark'] .ts-hm-card-plate {
+  background: #000;
+  color: #fff;
+}
+
+.ts-hm-card-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 32px;
+  grid-template-rows: auto auto;
+  column-gap: 8px;
+  padding: 10px 8px 10px 12px;
+}
+
+.ts-hm-card-title {
+  grid-column: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--pt-ink);
+  text-decoration: none;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 13.5px;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-hm-card-title svg {
+  width: 16px;
+  height: 16px;
+  fill: var(--pt-ink-2);
+  flex: none;
+}
+
+.ts-hm-card-title:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+}
+
+.ts-hm-card-when {
+  grid-column: 1;
+  font-size: 12px;
+  color: var(--pt-ink-2);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-hm-card-more {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.ts-hm-card-dots {
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* the in place rename: the title's box becomes the field */
+.ts-hm-card-rename {
+  grid-column: 1;
+  margin: 0;
+  min-width: 0;
+}
+
+.ts-hm-card-rename input {
+  width: 100%;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--pt-ink);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13.5px var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  outline: none;
+}
+
+/* rows: the list view */
+.ts-rows {
+  width: 100%;
+  margin: 12px 0 0;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.ts-rows th {
+  text-align: left;
+  padding: 8px 12px;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--pt-ink-2);
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-rows td {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.ts-row-title {
+  width: 60%;
+  color: var(--pt-ink);
+}
+
+.ts-row-title .ts-hm-card-title {
+  font-size: 13.5px;
+}
+
+.ts-row-more {
+  width: 40px;
+  text-align: right;
+}
+
+.ts-row-count {
+  width: 80px;
+}
+
+/* ---- the tail: Trash ---- */
+.ts-home-tail {
+  margin-top: 32px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-home-tail .pt-ib {
+  text-decoration: none;
+  border-color: var(--pt-hair);
+}
+
+.ts-home-tail .pt-ib:hover {
+  border-color: var(--pt-ink-2);
+}
+
+/* ---- the dialog primitive (SPEC 13.3): one ink frame on paper over a scrim ---- */
+.ts-hm-dialog-scrim {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--pt-scrim);
+  z-index: 30;
+}
+
+.ts-hm-dialog {
+  width: min(480px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  padding: 20px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-ink);
+  font: 13px/1.5 var(--pt-text);
+}
+
+.ts-hm-dialog-title {
+  margin: 0 0 14px;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 17px;
+  letter-spacing: -0.01em;
+}
+
+.ts-hm-dialog p {
+  margin: 0 0 12px;
+  color: var(--pt-ink-2);
+}
+
+.ts-hm-dialog-field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 12.5px;
+  color: var(--pt-ink-2);
+}
+
+.ts-hm-dialog-field input {
   height: 34px;
   padding: 0 10px;
   border: 1px solid var(--pt-hair);
@@ -56,47 +514,24 @@
   color: var(--pt-ink);
   font: 13.5px var(--pt-text);
   outline: none;
-  appearance: none;
 }
 
-.ts-decks-field input:focus {
+.ts-hm-dialog-field input:focus {
   border-color: var(--pt-ink);
 }
 
-.ts-decks-templates {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  display: grid;
-  gap: 0;
-}
-
-.ts-decks-templates legend {
-  padding: 0;
-  margin-bottom: 6px;
-  font-size: 12.5px;
-  color: var(--pt-ink-2);
-}
-
-/* a template option: a 16px box that fills ink when chosen, the label in the display face, the
-   detail in ink-2; rows draw --pt-hair-soft under themselves */
-.ts-decks-template {
+.ts-hm-dialog-check {
   position: relative;
-  display: grid;
-  grid-template-columns: 16px auto minmax(0, 1fr);
+  display: flex;
   align-items: center;
-  column-gap: 10px;
-  min-height: 34px;
-  padding: 4px 0;
-  border-bottom: 1px solid var(--pt-hair-soft);
+  gap: 10px;
+  min-height: 28px;
+  font-size: 13px;
+  color: var(--pt-ink);
   cursor: pointer;
 }
 
-.ts-decks-template:last-child {
-  border-bottom: 0;
-}
-
-.ts-decks-template input {
+.ts-hm-dialog-check input {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -107,254 +542,124 @@
   clip-path: inset(50%);
 }
 
-.ts-decks-radio {
+.ts-hm-dialog-box {
   display: inline-block;
   width: 16px;
   height: 16px;
   box-sizing: border-box;
   border: 1px solid var(--pt-hair);
   background: var(--pt-paper);
+  flex: none;
 }
 
-.ts-decks-template input:checked ~ .ts-decks-radio {
+.ts-hm-dialog-check:hover .ts-hm-dialog-box {
+  border-color: var(--pt-ink-2);
+}
+
+.ts-hm-dialog-check input:checked ~ .ts-hm-dialog-box {
   background: var(--pt-ink);
   border-color: var(--pt-ink);
 }
 
-.ts-decks-template input:focus-visible ~ .ts-decks-radio {
+.ts-hm-dialog-check input:focus-visible ~ .ts-hm-dialog-box {
   outline: 1px solid var(--pt-ink);
   outline-offset: 2px;
 }
 
-.ts-decks-template b {
-  font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
-  font-weight: 500;
-  font-size: 13.5px;
-  white-space: nowrap;
-}
-
-.ts-decks-detail {
-  font-size: 12.5px;
-  color: var(--pt-ink-2);
-  min-width: 0;
-}
-
-.ts-decks-actions {
+.ts-hm-dialog-actions {
   display: flex;
-  align-items: center;
+  justify-content: flex-end;
   gap: 8px;
+  margin-top: 20px;
 }
 
-.ts-decks-actions .pt-ib:disabled {
+.ts-hm-dialog-actions .pt-ib:not(.is-solid) {
+  border-color: var(--pt-hair);
+}
+
+.ts-hm-dialog-actions .pt-ib:disabled {
   color: var(--pt-titanium);
   border-color: var(--pt-hair-soft);
   cursor: default;
 }
 
-.ts-decks-actions .pt-ib.is-solid:disabled {
+.ts-hm-dialog-actions .pt-ib.is-solid:disabled {
   background: var(--pt-hair);
   border-color: transparent;
   color: var(--pt-paper);
 }
 
-.ts-decks-error {
-  font-size: 12.5px;
-  color: var(--pt-ink);
-}
-
-/* ---- the rows ---- */
-.ts-decks-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.ts-decks-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 80px 56px 128px auto;
-  align-items: center;
+/* ---- the trash (SPEC 6.4): the same cards, two buttons under each ---- */
+.ts-trash-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
   gap: 16px;
-  min-height: 56px;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--pt-hair-soft);
+  padding: 24px 0 16px;
 }
 
-.ts-decks-name {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-
-.ts-decks-title {
+.ts-trash-head h1 {
+  margin: 0;
   font-family: var(--pt-display);
   font-feature-settings: 'cv11', 'ss01';
   font-weight: 500;
-  font-size: 15px;
-  letter-spacing: -0.01em;
-  color: var(--pt-ink);
-  text-decoration: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 22px;
+  letter-spacing: -0.02em;
 }
 
-.ts-decks-title:hover {
-  text-decoration: underline;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 4px;
-}
-
-.ts-decks-id {
-  font-family: var(--pt-mono);
-  font-size: 12px;
-  color: var(--pt-titanium);
-}
-
-.ts-decks-cell {
+.ts-trash-head p {
+  margin: 4px 0 0;
   font-size: 12.5px;
   color: var(--pt-ink-2);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 
-.ts-decks-links {
+.ts-trash-actions {
   display: inline-flex;
   gap: 8px;
 }
 
-.ts-decks-links .pt-ib {
+.ts-trash-actions .pt-ib,
+.ts-trash-card-actions .pt-ib {
+  border-color: var(--pt-hair);
   text-decoration: none;
-  height: 28px;
 }
 
-/* ---- the Upload deck bundle form (docs/deck-transfer.md): the New deck form's frame, a file
-   field in the input grammar, one check row, the one solid button while a file is chosen ---- */
-.ts-decks-upload {
-  display: grid;
-  gap: 12px;
-  margin: 16px 0 0;
-  padding: 16px;
-  border: 1px solid var(--pt-hair);
-}
-
-.ts-decks-upload-lead {
-  margin: 0;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--pt-ink-2);
-  max-width: 72ch;
-}
-
-.ts-decks-file {
-  display: grid;
-  gap: 6px;
-  font-size: 12.5px;
-  color: var(--pt-ink-2);
-}
-
-.ts-decks-file input {
-  height: 34px;
-  padding: 6px 10px;
-  border: 1px solid var(--pt-hair);
-  border-radius: var(--pt-radius);
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  font: 13px var(--pt-text);
-  outline: none;
-}
-
-.ts-decks-file input:focus-visible {
-  border-color: var(--pt-ink);
-}
-
-.ts-decks-file input::file-selector-button {
-  height: 20px;
-  margin: 0 10px 0 0;
-  padding: 0 8px;
-  border: 1px solid var(--pt-hair);
-  border-radius: 0;
-  background: var(--pt-paper);
-  color: var(--pt-ink);
-  font: 12px var(--pt-text);
-  cursor: pointer;
-}
-
-.ts-decks-file input::file-selector-button:hover {
+.ts-trash-actions .pt-ib:hover,
+.ts-trash-card-actions .pt-ib:hover {
   border-color: var(--pt-ink-2);
 }
 
-/* a check row: the label at the left, the 16px box at the right (the Export menu's check grammar) */
-.ts-decks-check {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 28px;
-  font-size: 12.5px;
-  color: var(--pt-ink-2);
-  cursor: pointer;
-}
-
-.ts-decks-check input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  overflow: hidden;
-  clip-path: inset(50%);
-}
-
-.ts-decks-box {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  box-sizing: border-box;
-  border: 1px solid var(--pt-hair);
-  background: var(--pt-paper);
-  flex: 0 0 auto;
-}
-
-.ts-decks-check:hover .ts-decks-box {
-  border-color: var(--pt-ink-2);
-}
-
-.ts-decks-check input:checked ~ .ts-decks-box {
-  background: var(--pt-ink);
-  border-color: var(--pt-ink);
-}
-
-.ts-decks-check input:focus-visible ~ .ts-decks-box {
-  outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
-}
-
-.ts-decks-progress {
-  font-size: 12.5px;
-  color: var(--pt-ink-2);
-}
-
-/* the row's buttons stay one line; the bundle button reads as text like Open and Export */
-.ts-decks-links .pt-ib:disabled {
+.ts-trash-actions .pt-ib:disabled {
   color: var(--pt-titanium);
   border-color: var(--pt-hair-soft);
   cursor: default;
 }
 
+.ts-trash-card-actions {
+  display: flex;
+  gap: 8px;
+  padding: 0 8px 10px;
+}
+
+.ts-trash-card-actions .pt-ib {
+  height: 28px;
+}
+
 @media (max-width: 720px) {
-  .ts-decks-row {
-    grid-template-columns: minmax(0, 1fr) auto;
+  .ts-appbar {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .ts-decks-cell {
+  .ts-recent-head,
+  .ts-strip-head,
+  .ts-trash-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ts-rows th:nth-child(2),
+  .ts-rows td:nth-child(2) {
     display: none;
-  }
-
-  .ts-decks-links {
-    flex-wrap: wrap;
-    justify-content: flex-end;
   }
 }

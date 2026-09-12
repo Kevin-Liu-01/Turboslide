@@ -5,7 +5,13 @@
 // write; anything else is refused with a clear message. Encoding writes RGBA with filter 0 and is
 // used by the tests and by callers that want to store a sampled crop. No image library: the
 // package depends on schema and render only (SPEC 3.3 item 3).
-import { crc32, deflateSync, inflateSync } from 'node:zlib';
+//
+// The namespace import, not named bindings: this module reaches the browser through
+// @turboslide/lint/run (the editor imports the store actions of @turboslide/cli, which lint the
+// document after a write), where Vite replaces node:zlib with a shim that throws on every named
+// access at module evaluation. The rendered rules never run in a page, so touching zlib only at
+// call time keeps the import inert there (gslides-parity merge 1, docs/gslides-parity/build).
+import * as zlib from 'node:zlib';
 
 /** Four bytes per pixel, row major, RGBA. */
 export type Bitmap = { width: number; height: number; data: Uint8Array };
@@ -147,7 +153,7 @@ export function decodePng(bytes: Uint8Array): Bitmap {
     compressed.set(part, offset);
     offset += part.length;
   }
-  const raw = inflateSync(compressed);
+  const raw = zlib.inflateSync(compressed);
   const { width, height } = header;
   const expected = (width * channels + 1) * height;
   if (raw.length < expected)
@@ -209,7 +215,7 @@ function chunk(type: string, body: Uint8Array): Uint8Array {
   const crcInput = new Uint8Array(4 + body.length);
   crcInput.set(typeBytes, 0);
   crcInput.set(body, 4);
-  view.setUint32(8 + body.length, crc32(crcInput) >>> 0);
+  view.setUint32(8 + body.length, zlib.crc32(crcInput) >>> 0);
   return out;
 }
 
@@ -228,7 +234,7 @@ export function encodePng(bitmap: Bitmap, level = 6): Uint8Array {
   view.setUint32(4, height);
   ihdr[8] = 8;
   ihdr[9] = 6;
-  const deflated = deflateSync(scanlines, { level });
+  const deflated = zlib.deflateSync(scanlines, { level });
   const parts = [
     Uint8Array.from(SIGNATURE),
     chunk('IHDR', ihdr),

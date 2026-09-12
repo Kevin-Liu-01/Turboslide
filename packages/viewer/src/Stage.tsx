@@ -52,11 +52,12 @@ export function Stage({
     () => (picture ? (theme === 'dark' ? picture.dark : picture.light) : undefined),
     [picture, theme],
   );
+  /* present mode: the sheet alone on the show's surround (gslides-parity SPEC 9.2) */
+  const classes = ['ts-stagewrap', 'ts-sheet'];
+  if (isPicture) classes.push('is-picture');
+  if (present) classes.push('is-present');
   return (
-    <div
-      className={isPicture ? 'ts-stagewrap ts-sheet is-picture' : 'ts-stagewrap ts-sheet'}
-      data-theme={theme}
-    >
+    <div className={classes.join(' ')} data-theme={theme} data-present={present ? '' : undefined}>
       <div className="backdrop" aria-hidden="true">
         {backdropSrc ? <img src={backdropSrc} alt="" /> : null}
       </div>

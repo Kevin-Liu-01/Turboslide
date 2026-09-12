@@ -21,15 +21,31 @@ describe('registerReadActions', () => {
     ]);
     const info = (await dispatcher.dispatch('deck.info', {}, context)) as {
       id: string;
-      counts: { slides: number };
+      counts: { slides: number; skipped: number };
+      defaults?: unknown;
+      trashedAt?: string;
     };
     expect(info.id).toBe(document.deck.id);
     expect(info.counts.slides).toBeGreaterThan(0);
+    // the parity round's facts (gslides-parity SPEC 7.2.1, 7.2.3 to 7.2.5): the skipped count is
+    // always there, the defaults and the trash stamp only when the manifest carries them
+    expect(info.counts.skipped).toBe(
+      Object.values(document.slides).filter((slide) => slide.skip === true).length,
+    );
+    expect(info.defaults).toEqual(document.deck.defaults);
+    expect(info.trashedAt).toEqual(document.deck.trashedAt);
     const rows = (await dispatcher.dispatch('slide.list', {}, context)) as {
       id: string;
       n: number;
+      skip?: boolean;
+      template?: string;
     }[];
     expect(rows.map((row) => row.n)).toEqual(rows.map((_row, i) => i + 1));
+    for (const row of rows) {
+      const slide = document.slides[row.id];
+      expect(row.skip, row.id).toEqual(slide?.skip === true ? true : undefined);
+      expect(row.template, row.id).toEqual(slide?.template);
+    }
     const first = rows[0]!;
     const slide = (await dispatcher.dispatch('slide.get', { slideId: first.id }, context)) as {
       slide: { id: string };

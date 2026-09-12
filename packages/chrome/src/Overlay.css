@@ -242,53 +242,13 @@
   border-color: var(--pt-ink);
 }
 
-/* the arrange bar of a freeform selection: the run toolbar's 32px paper bar (InlineText.css) with
-   the shell's icon squares, placed under the selection by Overlay.tsx. Line law: the bar draws its
-   one hair ring; the two group seams (before distribute, before the order pair) are one rule each */
-.ts-arrange {
+/* the frame of a positioned block is its drag surface (gslides-parity SPEC 10.2): four 8px edge
+   strips centred on the ring take the pointer with the move cursor and draw nothing, so the ring
+   stays the one line */
+.ts-frame-edge {
   position: absolute;
-  z-index: 4;
-  display: inline-flex;
-  align-items: center;
-  height: 32px;
-  padding: 0;
-  background: var(--pt-paper);
-  border: 1px solid var(--pt-hair);
-  color: var(--pt-ink-2);
-  font: 13px/1 var(--pt-text);
+  box-sizing: border-box;
   pointer-events: auto;
-  white-space: nowrap;
-}
-
-.ts-arrange .pt-ib {
-  height: 30px;
-  width: 30px;
-}
-
-.ts-arrange .pt-ib.ts-arrange-group {
-  border-left: 1px solid var(--pt-hair);
-}
-
-.ts-arrange .pt-ib:disabled {
-  color: var(--pt-titanium);
-  cursor: default;
-  opacity: 0.5;
-}
-
-.ts-arrange .pt-ib:disabled:hover {
-  border-color: transparent;
-}
-
-.ts-arrange .pt-ib.ts-arrange-group:disabled:hover {
-  border-left-color: var(--pt-hair);
-}
-
-/* the align top, middle and bottom glyphs are the align left, center and right bars turned a
-   quarter turn; send back is bring forward turned over */
-.ts-arrange-rotated {
-  transform: rotate(90deg);
-}
-
-.ts-arrange-flipped {
-  transform: rotate(180deg);
+  cursor: move;
+  touch-action: none;
 }

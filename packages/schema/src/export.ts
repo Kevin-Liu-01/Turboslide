@@ -61,6 +61,9 @@ export const NATIVE_BLOCK_TYPES = [
   'box',
   'shape',
   'rule',
+  // the table block is a PPTX table in Editable text, with the ruled rows construction as the
+  // fallback named in `residual` when a cell misses the 3 px budget (gslides-parity SPEC 7.3)
+  'table',
 ] as const;
 
 export type NativeBlockType = (typeof NATIVE_BLOCK_TYPES)[number];

@@ -30,8 +30,10 @@ function drawAllDither(root, dark) {
 `;
 
 /**
- * The render surface runtime: shows the slide named by the hash (`#12` or `#s/<slideId>`; the first
- * slide when none), swaps `img[data-light], img[data-dark]` to the sheet's theme, sets the counter, draws the dither
+ * The render surface runtime: shows the slide named by the hash (`#12`, `#s/<slideId>`, or a slide
+ * link keyword `#next`, `#previous`, `#first`, `#last` resolved against the shown slide; the first
+ * slide when none), swaps `img[data-light], img[data-dark]` to the sheet's theme, sets the counter
+ * from the slide's `data-counter` (the deck's counter mode, gslides-parity SPEC 7.2.4), draws the dither
  * canvases and stamps `data-ts-ready="1"` on the root when done, which the headless driver waits
  * for instead of a fixed settle (SPEC 5.3).
  */
@@ -43,16 +45,30 @@ ${DITHER_SCRIPT}
   var counter = stage.querySelector('.counter');
   var dark = sheet.getAttribute('data-theme') === 'dark';
   function pad(n) { return (n < 10 ? '0' : '') + n; }
+  var current = 0;
+  function keywordIndex(h) {
+    if (h === 'next') return Math.min(slides.length - 1, current + 1);
+    if (h === 'previous') return Math.max(0, current - 1);
+    if (h === 'first') return 0;
+    if (h === 'last') return slides.length - 1;
+    return -1;
+  }
   function fromHash() {
     var h = location.hash.replace(/^#/, '');
     if (h.indexOf('s/') === 0) { var id = decodeURIComponent(h.slice(2)); for (var k = 0; k < slides.length; k += 1) if (slides[k].getAttribute('data-slide') === id) return k; return 0; }
+    var kw = keywordIndex(h); if (kw >= 0) return kw;
     var n = parseInt(h, 10); return isNaN(n) ? 0 : Math.max(0, Math.min(slides.length - 1, n - 1));
+  }
+  function counterFor(i) {
+    var own = slides[i] ? slides[i].getAttribute('data-counter') : null;
+    return own !== null ? own : pad(i + 1) + ' / ' + pad(slides.length);
   }
   function show() {
     var i = fromHash();
+    current = i;
     document.documentElement.removeAttribute('data-ts-ready');
     slides.forEach(function (s, k) { s.classList.toggle('is-on', k === i); });
-    if (counter) counter.textContent = pad(i + 1) + ' / ' + pad(slides.length);
+    if (counter) counter.textContent = counterFor(i);
     Array.prototype.forEach.call(stage.querySelectorAll('img[data-light], img[data-dark]'), function (img) {
       if (!img.getAttribute('data-light')) img.setAttribute('data-light', img.getAttribute('src'));
       if (!img.getAttribute('data-dark')) img.setAttribute('data-dark', img.getAttribute('src'));
@@ -113,7 +129,7 @@ ${DITHER_SCRIPT}
     n = Math.max(0, Math.min(slides.length - 1, n));
     slides.forEach(function (s, k) { s.classList.toggle('is-on', k === n); });
     i = n;
-    if (counter) counter.textContent = pad(n + 1) + ' / ' + pad(slides.length);
+    if (counter) { var own = slides[n] ? slides[n].getAttribute('data-counter') : null; counter.textContent = own !== null ? own : pad(n + 1) + ' / ' + pad(slides.length); }
     document.title = 'GT Brand deck, ' + (n + 1) + ' of ' + slides.length;
     if (opts.hash !== false) {
       try { history.replaceState(null, '', '#' + (n + 1)); } catch (e) {}
@@ -121,11 +137,20 @@ ${DITHER_SCRIPT}
     }
     drawAllDither(slides[n], isDark());
   }
+  function keywordIndex(h) {
+    if (h === 'next') return Math.min(slides.length - 1, i + 1);
+    if (h === 'previous') return Math.max(0, i - 1);
+    if (h === 'first') return 0;
+    if (h === 'last') return slides.length - 1;
+    return -1;
+  }
   function fromHash() {
     var h = location.hash.replace(/^#/, '');
     if (h.indexOf('s/') === 0) { var id = decodeURIComponent(h.slice(2)); for (var k = 0; k < slides.length; k += 1) if (slides[k].getAttribute('data-slide') === id) return k; return 0; }
+    var kw = keywordIndex(h); if (kw >= 0) return kw;
     var n = parseInt(h, 10); return isNaN(n) ? 0 : n - 1;
   }
+  function isKeyword(h) { return h === 'next' || h === 'previous' || h === 'first' || h === 'last'; }
   document.addEventListener('keydown', function (e) {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     var k = e.key;
@@ -144,7 +169,10 @@ ${DITHER_SCRIPT}
     if (!d || d.type !== 'gt-theme' || (d.theme !== 'dark' && d.theme !== 'light') || e.origin !== location.origin) return;
     if (root.getAttribute('data-theme') !== d.theme) { root.setAttribute('data-theme', d.theme); store('gt-deck-theme', d.theme); applyTheme(); }
   });
-  window.addEventListener('hashchange', function () { show(fromHash(), { hash: false }); });
+  // a slide link (#s/<id>, #next, #previous, #first, #last; gslides-parity SPEC 7.2.7, 7.2.8):
+  // a keyword resolves against the current slide and is rewritten to the numeric hash so the
+  // same link fires again on the next click
+  window.addEventListener('hashchange', function () { var h = location.hash.replace(/^#/, ''); show(fromHash(), { hash: isKeyword(h) }); });
   window.addEventListener('resize', fit);
   setTheme(storedTheme(), false);
   fit();

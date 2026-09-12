@@ -456,3 +456,143 @@ describe('applyMutations', () => {
     ).toThrow(RangeError);
   });
 });
+
+describe('the gslides-parity fields (SPEC 7.2)', () => {
+  it('writes skip and template through slide.set and clears them with an absent value', () => {
+    const document = base();
+    const first = applyWrite(
+      document,
+      write([
+        { op: 'slide.set', slideId: 'content-rule', path: '/skip', value: true },
+        { op: 'slide.set', slideId: 'content-rule', path: '/template', value: 'plain' },
+      ]),
+      { now: NOW },
+    );
+    if (!first.ok) throw new Error(first.message);
+    expect(first.document.slides['content-rule']).toMatchObject({ skip: true, template: 'plain' });
+    expect(first.inverse).toEqual([
+      { op: 'slide.set', slideId: 'content-rule', path: '/template' },
+      { op: 'slide.set', slideId: 'content-rule', path: '/skip' },
+    ]);
+    const second = applyWrite(
+      first.document,
+      write([{ op: 'slide.set', slideId: 'content-rule', path: '/skip' }], 413),
+      { now: NOW },
+    );
+    if (!second.ok) throw new Error(second.message);
+    expect(second.document.slides['content-rule']).not.toHaveProperty('skip');
+    // skip takes only true and template only a layout id
+    const bad = applyWrite(
+      document,
+      write([{ op: 'slide.set', slideId: 'content-rule', path: '/skip', value: false }]),
+    );
+    expect(bad.ok).toBe(false);
+    const badTemplate = applyWrite(
+      document,
+      write([{ op: 'slide.set', slideId: 'content-rule', path: '/template', value: 'nope' }]),
+    );
+    expect(badTemplate.ok).toBe(false);
+  });
+
+  it('writes /defaults/appearance and /defaults/counter through deck.set and refuses /trashedAt', () => {
+    const document = base();
+    const result = applyWrite(
+      document,
+      write([
+        { op: 'deck.set', path: '/defaults', value: {} },
+        { op: 'deck.set', path: '/defaults/appearance', value: 'light' },
+        { op: 'deck.set', path: '/defaults/counter', value: 'skip-title' },
+      ]),
+      { now: NOW },
+    );
+    if (!result.ok) throw new Error(result.message);
+    expect(result.document.deck.defaults).toEqual({ appearance: 'light', counter: 'skip-title' });
+    const trashed = applyWrite(
+      document,
+      write([{ op: 'deck.set', path: '/trashedAt', value: NOW }]),
+    );
+    expect(trashed.ok).toBe(false);
+    if (trashed.ok || trashed.code !== 'invalid') throw new Error('expected invalid');
+    expect(trashed.message).toMatch(/deck\.trash/);
+    const badAppearance = applyWrite(
+      document,
+      write([
+        { op: 'deck.set', path: '/defaults', value: {} },
+        { op: 'deck.set', path: '/defaults/appearance', value: 'sepia' },
+      ]),
+    );
+    expect(badAppearance.ok).toBe(false);
+  });
+
+  it('creates /defaults when a pointer under it is written on a deck without the object, and the inverse removes the object', () => {
+    // Every deck written before the parity round has no `defaults`; the Themes panel's first
+    // write and `turboslide deck set /defaults/appearance light` land on such a deck.
+    const before = base();
+    expect(before.deck.defaults).toBeUndefined();
+    const forward = applyWrite(
+      before,
+      write([{ op: 'deck.set', path: '/defaults/appearance', value: 'light' }]),
+      { now: NOW },
+    );
+    if (!forward.ok) throw new Error(forward.message);
+    expect(forward.document.deck.defaults).toEqual({ appearance: 'light' });
+    expect(forward.inverse).toEqual([{ op: 'deck.set', path: '/defaults' }]);
+    const back = applyWrite(forward.document, write(forward.inverse, 413), { now: NOW });
+    if (!back.ok) throw new Error(back.message);
+    expect(stable(back.document)).toEqual(stable(before));
+    // once the object exists a write under it is an ordinary set with a field level inverse
+    const second = applyWrite(
+      forward.document,
+      write([{ op: 'deck.set', path: '/defaults/counter', value: 'off' }], 413),
+      { now: NOW },
+    );
+    if (!second.ok) throw new Error(second.message);
+    expect(second.document.deck.defaults).toEqual({ appearance: 'light', counter: 'off' });
+    expect(second.inverse).toEqual([{ op: 'deck.set', path: '/defaults/counter' }]);
+    // removing a field under a missing object changes nothing and does not create it
+    const removeMissing = applyWrite(
+      before,
+      write([{ op: 'deck.set', path: '/defaults/counter' }]),
+      { now: NOW },
+    );
+    if (!removeMissing.ok) throw new Error(removeMissing.message);
+    expect(removeMissing.document.deck.defaults).toBeUndefined();
+  });
+
+  it('accepts a paragraph break in text.replace on a paragraph and refuses it on a heading', () => {
+    const document = base();
+    const ok = applyWrite(
+      document,
+      write([
+        {
+          op: 'text.replace',
+          slideId: 'content-rule',
+          blockId: 'p1',
+          path: '/text',
+          range: [0, 0],
+          text: 'First paragraph.\n',
+        },
+      ]),
+      { now: NOW },
+    );
+    if (!ok.ok) throw new Error(ok.message);
+    const p1 = ok.document.slides['content-rule'];
+    expect(p1?.kind === 'content' && p1.slots.left?.[1]).toMatchObject({
+      text: expect.stringMatching(/^First paragraph\.\n/),
+    });
+    const refused = applyWrite(
+      document,
+      write([
+        {
+          op: 'text.replace',
+          slideId: 'content-rule',
+          blockId: 'h',
+          path: '/text',
+          range: [0, 0],
+          text: 'Two\nlines ',
+        },
+      ]),
+    );
+    expect(refused.ok).toBe(false);
+  });
+});

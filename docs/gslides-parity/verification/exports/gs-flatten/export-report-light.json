@@ -1,0 +1,126 @@
+{
+  "deckId": "gslides",
+  "revision": 1,
+  "format": "pptx",
+  "mode": "flatten",
+  "theme": "light",
+  "fontSet": "exact",
+  "fontSetVersion": "4.001+gt.1",
+  "files": [
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/exports/gs-flatten/gslides-light.pptx",
+      "bytes": 229099,
+      "sha256": "d8bd0b793bcbd0d938953dd6161c3d6b324fd617ecc28b745549c4d8fa613c8a"
+    }
+  ],
+  "fonts": {
+    "embedded": [],
+    "requiredOnViewer": [
+      "GT Inter Display",
+      "GT Inter Text 26",
+      "GT Inter Text 14",
+      "GT Inter Text 22",
+      "GT Inter Text 20 Medium",
+      "GT Inter Text 20",
+      "GT Inter Text 24 Medium"
+    ],
+    "substitutedIn": ["every viewer"]
+  },
+  "slides": [
+    {
+      "slideId": "title",
+      "native": ["heading", "lead"],
+      "raster": [],
+      "sheet": "work/sheets/light/01-title@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 37321,
+        "colors": 637,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "breaks",
+      "native": ["h", "p1", "p2"],
+      "raster": [],
+      "sheet": "work/sheets/light/02-breaks@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 46517,
+        "colors": 406,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "table",
+      "native": ["h", "table"],
+      "raster": [],
+      "sheet": "work/sheets/light/03-table@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31846,
+        "colors": 408,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "numbered",
+      "native": ["h", "p1", "list"],
+      "raster": [],
+      "sheet": "work/sheets/light/04-numbered@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 35300,
+        "colors": 406,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "links",
+      "native": ["h", "box", "shape", "t1"],
+      "raster": [],
+      "sheet": "work/sheets/light/05-links@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31388,
+        "colors": 411,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "prompt",
+      "native": ["h"],
+      "raster": [],
+      "sheet": "work/sheets/light/06-prompt@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 12189,
+        "colors": 178,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": true,
+  "passed": true,
+  "residual": [
+    "renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "flatten (perfect): the slide is a 2x raster of the sheet under the page raster policy; text is an invisible native layer; the slide title is the slide name and a hidden title placeholder",
+    "rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x",
+    "package: 51 parts, 62 relationships, valid against the content types and relationships",
+    "skipped: 1 slide(s) left out (skipped); pass includeSkipped to carry them",
+    "links: a slide link on an invisible run of the flatten layer is written as a slide jump; whether PowerPoint honours it under the cover picture is unverified (gslides-parity SPEC 7.2.8)",
+    "package: 5 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)",
+    "package: 22 kern=\"0\" attribute(s) and 0 empty ext list(s) removed; 0 custGeom",
+    "pages: 6 png-palette; 0.19 MiB of page rasters; worst decoded mismatch 0.000 percent at threshold 0.1 (perfect budget 0.1)",
+    "links: 8 hyperlink(s) written (a URL as is, a slide link as a jump to its number in this file; SPEC 7.2.7, 7.2.8)",
+    "notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)",
+    "fonts not embedded: GT Inter Display, GT Inter Text 26, GT Inter Text 14, GT Inter Text 22, GT Inter Text 20 Medium, GT Inter Text 20, GT Inter Text 24 Medium; the text layer is invisible, so no viewer draws them (docs/pptx.md)"
+  ]
+}

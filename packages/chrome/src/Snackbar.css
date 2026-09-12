@@ -1,0 +1,93 @@
+/* Snackbar (Snackbar.tsx): paper text on an ink plate with a 1 px paper outline, the toast's
+   grammar (Toast.css), at the bottom left 8 px above the bottom bar (--pt-status-h, 32 px until
+   tokens.css carries it) and 8 px from the left edge; 40 px tall, one sentence, the one action
+   as a paper text button at weight 500, the X as a 32 px icon square. It fades and rises 4 px
+   over the toast duration and settles the same way; it takes the pointer only while on. */
+.ts-snackbar {
+  position: fixed;
+  left: 8px;
+  bottom: calc(var(--pt-status-h, 32px) + 8px);
+  z-index: 21;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  max-width: min(560px, calc(100vw - 16px));
+  padding: 0 4px 0 14px;
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  outline: 1px solid var(--pt-paper);
+  font: 13px/1.4 var(--pt-text);
+  font-variant-numeric: tabular-nums;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity var(--pt-dur-toast) var(--pt-ease-out),
+    transform var(--pt-dur-toast) var(--pt-ease-out);
+  pointer-events: none;
+}
+
+.ts-snackbar.is-on {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.ts-snackbar-text {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-snackbar-action,
+.ts-snackbar-x {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 0;
+  color: var(--pt-paper);
+  cursor: pointer;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 13px/1 var(--pt-text);
+}
+
+.ts-snackbar-action {
+  padding: 0 10px;
+  margin-left: 4px;
+  font-weight: 500;
+}
+
+.ts-snackbar-x {
+  width: 32px;
+  padding: 0;
+}
+
+.ts-snackbar-x svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-snackbar-action:hover,
+.ts-snackbar-x:hover {
+  border-color: var(--pt-paper);
+}
+
+.ts-snackbar-action:focus-visible,
+.ts-snackbar-x:focus-visible {
+  outline: 1px solid var(--pt-paper);
+  outline-offset: -1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-snackbar,
+  .ts-snackbar.is-on {
+    transition: none;
+    transform: none;
+  }
+}

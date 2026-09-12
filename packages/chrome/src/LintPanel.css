@@ -153,3 +153,22 @@
 .ts-lint-fix.is-busy {
   color: var(--pt-titanium);
 }
+
+/* Check slides (gslides-parity SPEC 2.8): prose rows, 12 px of padding, no rule ids or severities */
+.ts-lint.is-suggestions .ts-lint-row {
+  padding: 8px 8px 8px 16px;
+}
+
+.ts-lint.is-suggestions .ts-lint-pick {
+  color: var(--pt-ink);
+}
+
+.ts-lint.is-suggestions .ts-lint-proposal {
+  display: block;
+  white-space: normal;
+  line-height: 1.45;
+}
+
+.ts-lint.is-suggestions .ts-lint-empty {
+  padding: 16px;
+}

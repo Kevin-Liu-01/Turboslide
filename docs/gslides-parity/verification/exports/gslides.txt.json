@@ -1,0 +1,5 @@
+{
+  "text": "Export fixture\nOne of every object the Google Slides parity round added, for both export modes.\n\nParagraph breaks and slide links\nThe first paragraph of the head.\nThe second paragraph follows a line break.\nThe table is on the next slide and the last slide holds an empty placeholder.\nA third paragraph closes the body.\n\nPricing table\nPlan\tSeats\tLocales\tPrice\nStarter\t5\t2\t$0\nTeam\t25\t10\t$99\nEnterprise\tUnlimited\tEvery locale\tContact sales\n\nRollout steps\nA numbered list with a tabular numeral in the key position.\nConnect the repository\nPick the locales\nShip the first release\n\nBlock links\nA box linked to the first slide.\nTwo paragraphs inside the box.\nA text box linked to the table slide.",
+  "slides": 6,
+  "bytes": 689
+}

@@ -87,6 +87,10 @@ export const TEXT_BLOCK_TYPES: ReadonlySet<string> = new Set([
   // the freeform round's text carriers (docs/freeform.md)
   'text',
   'box',
+  // the table block and its cells (gslides-parity SPEC 7.3): a cell is a record entry
+  // `<blockId>/<r>/<c>` of type cell measured against the text budget, the 3 px gate
+  'table',
+  'cell',
 ]);
 
 /** Blocks that are mostly hairlines: declared diagrams, scales, and the rule and shape primitives. */

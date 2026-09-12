@@ -26,6 +26,11 @@ export type ShellKeyOptions = {
   clearFilter?: () => boolean;
   /** opens the search palette on Cmd K or Ctrl K (SPEC 6.3, M3) */
   openSearch?: () => void;
+  /**
+   * False under the editor shell (gslides-parity SPEC 0.28, 10.2): the editor binds no bare
+   * letter and useEditorKeys owns the document; the view route /deck/:deckId keeps this map.
+   */
+  enabled?: boolean;
 };
 
 /** The help card's four groups (directive 7.6). */
@@ -172,6 +177,7 @@ export function useShellKeys(state: ShellState, options: ShellKeyOptions): void 
     const onKeyDown = (e: KeyboardEvent) => {
       const s = stateRef.current;
       const o = optionsRef.current;
+      if (o.enabled === false) return;
       const noun = s.noun;
       const key = e.key;
       const low = key.length === 1 ? key.toLowerCase() : key;

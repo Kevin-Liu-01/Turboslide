@@ -6,7 +6,8 @@
 // returns issues with JSON pointers. The input is the manifest plus the slide files, since a deck
 // on disk is deck.json plus slides/<id>.json (SPEC 4.1).
 import type { z } from 'zod';
-import type { Block } from './blocks.ts';
+import type { Block, BlockType } from './blocks.ts';
+import { tableSizeProblem } from './blocks/table.ts';
 import { CATALOG, SLIDE_KIND_CATALOG, blockAssetRefs, blockTextPaths } from './catalog.ts';
 import type { Deck, DeckDocument, Slide, SlotName } from './deck.ts';
 import { deckSchema, normalizeLayout, slideBlocks, slideSchema, slotsForLayout } from './deck.ts';
@@ -14,7 +15,7 @@ import type { Severity } from './findings.ts';
 import type { SlideId } from './ids.ts';
 import { isRecord, migrate } from './migrations.ts';
 import { getAt, joinPointer, setAt } from './pointer.ts';
-import { canonicalText } from './text.ts';
+import { SLIDE_LINK_KEYWORDS, canonicalText, slideLinksOf } from './text.ts';
 
 export type IssueCode =
   | 'not_object'
@@ -30,7 +31,11 @@ export type IssueCode =
   | 'unlisted'
   | 'opener'
   /** a freeform block without `pos`, or `pos` on a block outside a freeform slide's top level */
-  | 'position';
+  | 'position'
+  /** a table over 20 by 20, or a row without one cell per column (gslides-parity SPEC 7.3) */
+  | 'table_size'
+  /** a block link on a grammar text block, or a slide link whose slide is not in the deck (SPEC 7.2.7, 7.2.8) */
+  | 'link';
 
 export type Issue = {
   code: IssueCode;
@@ -168,6 +173,28 @@ function extPointers(slide: Slide): string[] {
 /** A block pointer of the form /slots/<slot>/<index>: a top-level block of a content slide. */
 const TOP_LEVEL_SLOT_BLOCK = /^\/slots\/[A-Za-z]+\/\d+$/;
 
+/**
+ * The grammar text blocks: a whole-box link is refused on them and a run link inside the Text is
+ * the way (gslides-parity SPEC 7.2.7, "links on grammar text blocks' whole box"). Every other
+ * block (pictures, shapes, boxes, text boxes, icons, diagrams, marks, tables) may carry `link`.
+ */
+export const LINK_REFUSED_BLOCK_TYPES: ReadonlySet<BlockType> = new Set<BlockType>([
+  'heading',
+  'paragraph',
+  'credit',
+  'rows',
+  'plain',
+  'refs',
+  'say',
+  'scales',
+  'spec',
+  'lang',
+  'ladder',
+  'swatches',
+  'panel',
+  'matrix',
+]);
+
 function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
   const freeform = slide.kind === 'content' && slide.layout.type === 'freeform';
   if (slide.kind === 'content') {
@@ -240,9 +267,56 @@ function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
           ),
         );
       }
+      if (block.type === 'table') {
+        const problem = tableSizeProblem(block);
+        if (problem !== null) {
+          issues.push(
+            issue('table_size', 3, file, `${pointer}${problem.pointer}`, problem.message),
+          );
+        }
+      }
+      if (block.link !== undefined && LINK_REFUSED_BLOCK_TYPES.has(block.type)) {
+        issues.push(
+          issue(
+            'link',
+            3,
+            file,
+            `${pointer}/link`,
+            `A ${block.type} block takes no whole-box link; write the link inside its Text as [text](url) (gslides-parity SPEC 7.2.7)`,
+          ),
+        );
+      }
     });
   }
   canonicalizeSlideText(slide);
+}
+
+/**
+ * The slide links of a slide (gslides-parity SPEC 7.2.7, 7.2.8): every block `link` naming a
+ * slide and every `#s/<id>` run link, with the pointer of the field that carries it. The four
+ * keywords (next, previous, first, last) name positions and are never checked against the deck.
+ */
+export function slideLinkRefs(slide: Slide): { pointer: string; slideId: string }[] {
+  const out: { pointer: string; slideId: string }[] = [];
+  const keywords: ReadonlyArray<string> = SLIDE_LINK_KEYWORDS;
+  const push = (pointer: string, target: string): void => {
+    if (!keywords.includes(target)) out.push({ pointer, slideId: target });
+  };
+  for (const path of SLIDE_KIND_CATALOG[slide.kind].textPaths) {
+    const value = getAt(slide, path);
+    if (typeof value === 'string') for (const link of slideLinksOf(value)) push(path, link.slide);
+  }
+  for (const list of blockLists(slide)) {
+    walkBlocks(list.blocks, list.pointer, (block, pointer) => {
+      if (typeof block.link === 'object') push(`${pointer}/link/slide`, block.link.slide);
+      for (const path of blockTextPaths(block)) {
+        const value = getAt(block, path);
+        if (typeof value === 'string')
+          for (const link of slideLinksOf(value)) push(`${pointer}${path}`, link.slide);
+      }
+    });
+  }
+  return out;
 }
 
 /**
@@ -571,6 +645,21 @@ export function validateDeck(input: unknown): ValidationResult {
             }
           }
         });
+      }
+      // slide links name a slide the deck lists (gslides-parity SPEC 7.2.7, 7.2.8); severity 2,
+      // so a link to a slide that was removed reads as a defect and not as a refused file
+      for (const ref of slideLinkRefs(slide)) {
+        if (!listed.has(ref.slideId)) {
+          issues.push(
+            issue(
+              'link',
+              2,
+              file,
+              ref.pointer,
+              `Slide link to "${ref.slideId}", which is not in the deck; link a listed slide id, or next, previous, first or last (gslides-parity SPEC 7.2.8)`,
+            ),
+          );
+        }
       }
     }
   }

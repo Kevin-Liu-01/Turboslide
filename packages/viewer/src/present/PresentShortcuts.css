@@ -1,0 +1,108 @@
+/* The Keyboard shortcuts card of a show (PresentShortcuts.tsx). The help card's grammar: a scrim
+   over the viewport, a paper card with the edge frame (the one card that keeps the frame weight
+   because it floats over a scrim), 26 px padding, the presenting table with the keys in the first
+   column. Fades over the toast duration; still under reduced motion. */
+.ts-present-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 28;
+  display: grid;
+  place-items: center;
+  background: var(--pt-scrim);
+  animation: ts-present-fade-in var(--pt-dur-toast) var(--pt-ease-out) both;
+}
+
+.ts-present-card {
+  box-sizing: border-box;
+  width: min(560px, 92vw);
+  max-height: 92vh;
+  overflow-y: auto;
+  padding: 22px 26px 24px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-edge);
+  font: 13px/1.45 var(--pt-text);
+}
+
+.ts-present-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ts-present-card h2 {
+  margin: 0;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.ts-present-card h3 {
+  margin: 18px 0 8px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--pt-titanium);
+}
+
+.ts-present-card-x {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  color: var(--pt-ink-2);
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.ts-present-card-x:hover {
+  color: var(--pt-ink);
+  border-color: var(--pt-hair);
+}
+
+.ts-present-card-x:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-present-card-x svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-present-keys {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ts-present-keys th,
+.ts-present-keys td {
+  padding: 7px 0;
+  border-top: 1px solid var(--pt-hair-soft);
+  vertical-align: top;
+  text-align: left;
+}
+
+.ts-present-keys th {
+  width: 44%;
+  padding-right: 16px;
+  font-weight: 500;
+  color: var(--pt-ink);
+}
+
+.ts-present-keys td {
+  color: var(--pt-ink-2);
+}
+
+.ts-present-keys-note {
+  color: var(--pt-titanium);
+}

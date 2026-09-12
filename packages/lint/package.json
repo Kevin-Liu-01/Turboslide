@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "description": "The grammar linter: every static rule of SPEC 7.7, the rendered rules over RenderRecords, the known-findings gate, and the line law auditor for lint --chrome.",
+  "scripts": {
+    "test": "vitest run"
+  },
   "exports": {
     "./contracts": "./src/contracts.ts",
     "./context": "./src/context.ts",

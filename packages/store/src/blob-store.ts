@@ -32,7 +32,7 @@ import { STATE_DIR, loadDeckDir, openFileStore, slidePath, writeManifest } from 
 import { documentAtVersion, readVersions } from './versions.ts';
 import type { FileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
-import { assetPathWithin, factsFor } from './hosted.ts';
+import { assetPathWithin, checkRevision, factsFor } from './hosted.ts';
 import { eachLimit, isAssetKey, isSafeKey } from './seed.ts';
 import type {
   DeckStore,
@@ -44,7 +44,15 @@ import type {
   WriteOptions,
   WriteOutcome,
 } from './store.ts';
-import { createDeck, deckIdFor, listDeckHeads } from './templates.ts';
+import {
+  copyDeck,
+  createDeck,
+  deckIdFor,
+  listDeckHeads,
+  restoreDeck,
+  trashDeck,
+} from './templates.ts';
+import type { TrashState } from './templates.ts';
 import { createOverlay } from './tmp-store.ts';
 import type { Overlay } from './tmp-store.ts';
 import { readRevision } from './watch.ts';
@@ -804,20 +812,62 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       .sort();
   };
 
+  /**
+   * The trash stamp on deck.json, pushed conditionally on the version the mirror synced so two
+   * instances never overwrite each other's manifest (gslides-parity SPEC 7.2.5). The write goes
+   * around the version log, like the local trashDeck, so the mirror's proof of the new manifest
+   * is its body's etag (pull's fresh path), not a replayed record.
+   */
+  const stamp = async (deckId: string, apply: () => TrashState): Promise<TrashState> => {
+    await ready();
+    const c = await client();
+    const store = await storeFor(deckId);
+    const state = await store.sync(true);
+    if (!state.present) throw new RangeError(`No deck ${deckId} in the Blob store`);
+    const before = readManifest(store.dir).files['deck.json'];
+    const result = apply();
+    const bytes = new Uint8Array(readFileSync(join(store.dir, 'deck.json')));
+    try {
+      const entry = await c.put(`${deckPrefix(deckId)}deck.json`, bytes, {
+        overwrite: true,
+        contentType: blobContentType('deck.json'),
+        ...(before === undefined ? {} : { ifMatch: before }),
+      });
+      const manifest = readManifest(store.dir);
+      manifest.files['deck.json'] = entry.version;
+      writeManifestFile(store.dir, manifest);
+    } catch (error) {
+      // the store moved under us: forget the mirror's manifest so the next sync pulls the truth
+      writeManifestFile(store.dir, { files: {} });
+      if (error instanceof BlobPreconditionError) {
+        await store.sync(true);
+        const current = loadDeckDir(store.dir).document;
+        throw new ConflictError(
+          `Another instance wrote ${deckId} first; the current document is attached`,
+          { currentRevision: current.deck.revision, current },
+        );
+      }
+      throw error;
+    }
+    return result;
+  };
+
   return {
     kind: 'blob',
     persistent: true,
     root: overlay.root,
     decksDir,
     ready,
-    async list() {
+    async list(listOptions) {
       await ready();
       const ids = await deckIds();
+      // the listing always asks the store: a trash stamp or a title written on another instance
+      // must show on the next home page load, not after the sync window (gslides-parity SPEC 6.2)
       await eachLimit(ids, 4, async (deckId) => {
-        await (await storeFor(deckId)).sync();
+        await (await storeFor(deckId)).sync(true);
       });
       const wanted = new Set(ids);
-      return listDeckHeads(decksDir).filter((head) => wanted.has(head.id));
+      return listDeckHeads(decksDir, listOptions).filter((head) => wanted.has(head.id));
     },
     async has(deckId) {
       await ready();
@@ -855,6 +905,76 @@ export function blobDecks(options: HostedOptions): HostedDecks {
         throw error;
       }
       return result;
+    },
+    async copy(input, baseRevision) {
+      await ready();
+      const c = await client();
+      const source = await storeFor(input.id);
+      const state = await source.sync(true);
+      if (!state.present) throw new RangeError(`No deck ${input.id} in the Blob store`);
+      // the copy takes the assets folder whole, so every twin of the source must be on disk
+      await overlay.ensureAssets(input.id);
+      await source.pullAssets();
+      if (baseRevision !== undefined) checkRevision(decksDir, input.id, baseRevision);
+      const deckId = deckIdFor({
+        name: input.name,
+        from: 'blank',
+        ...(input.newId !== undefined ? { id: input.newId } : {}),
+      });
+      if ((await c.head(`${deckPrefix(deckId)}deck.json`)) !== null) {
+        throw new TypeError(`decks/${deckId} exists already; pick another name`);
+      }
+      const dir = join(decksDir, deckId);
+      rmSync(dir, { recursive: true, force: true });
+      const result = copyDeck(
+        decksDir,
+        input,
+        options.now === undefined ? {} : { now: options.now },
+      );
+      try {
+        await pushDeckDir(c, deckId, dir, { overwrite: false, log });
+      } catch (error) {
+        rmSync(dir, { recursive: true, force: true });
+        if (error instanceof BlobExistsError) {
+          throw new TypeError(`decks/${deckId} exists already; pick another name`);
+        }
+        throw error;
+      }
+      return result;
+    },
+    async trash(deckId, baseRevision) {
+      return stamp(deckId, () =>
+        trashDeck(decksDir, deckId, {
+          ...(options.now === undefined ? {} : { now: options.now }),
+          ...(baseRevision !== undefined ? { baseRevision } : {}),
+        }),
+      );
+    },
+    async restore(deckId, baseRevision) {
+      return stamp(deckId, () =>
+        restoreDeck(decksDir, deckId, baseRevision !== undefined ? { baseRevision } : {}),
+      );
+    },
+    async remove(deckId, baseRevision) {
+      await ready();
+      const c = await client();
+      const prefix = deckPrefix(deckId);
+      if ((await c.head(`${prefix}deck.json`)) === null)
+        throw new RangeError(`No deck ${deckId} in the Blob store`);
+      if (baseRevision !== undefined) {
+        const store = await storeFor(deckId);
+        await store.sync(true);
+        checkRevision(decksDir, deckId, baseRevision);
+      }
+      // the manifest goes first, so a reader that lists the prefix never sees a deck without one
+      await c.del([`${prefix}deck.json`]);
+      const rest = (await c.list(prefix)).map((entry) => entry.pathname);
+      await c.del(rest);
+      stores.delete(deckId);
+      for (const pathname of [...urls.keys()])
+        if (pathname.startsWith(prefix)) urls.delete(pathname);
+      rmSync(join(decksDir, deckId), { recursive: true, force: true });
+      return { id: deckId, removed: true as const };
     },
     async ensureAssets(deckId) {
       await ready();

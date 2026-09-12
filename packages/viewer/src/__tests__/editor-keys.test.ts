@@ -2,6 +2,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { isChromeControlTarget } from '../Editor';
+import { editorKeyAction, isBareCharacterKey, NUDGE_PX, NUDGE_SHIFT_PX } from '../keys';
+import type { EditorKeyContext } from '../keys';
 
 // The stage's edit keys and the chrome's controls (this round): a key pressed on an inspector
 // button, a palette swatch, a field or a menu row is that control's, so Enter activates the
@@ -23,6 +25,7 @@ function tree(): { stage: HTMLElement; inspector: HTMLElement; overlay: HTMLElem
       <select data-control="block.p.size"><option>22</option></select>
     </aside>
     <div role="menu" id="menu"><button type="button" role="menuitem">Box</button></div>
+    <div role="listbox" id="filmstrip"><div role="option" tabindex="0" data-id="s1">1</div></div>
   `;
   return {
     stage: document.getElementById('stage') as HTMLElement,
@@ -32,16 +35,18 @@ function tree(): { stage: HTMLElement; inspector: HTMLElement; overlay: HTMLElem
 }
 
 describe('isChromeControlTarget', () => {
-  it('is true for a button, a field, a menu row and anything inside the inspector', () => {
+  it('is true for a button, a field, a menu row, a filmstrip card and anything inside the inspector', () => {
     const { stage } = tree();
     const swatch = document.querySelector('[data-control="block.p.fill.plate"]');
     const contrast = document.querySelector('[data-control="block.p.fill.contrast"]');
     const select = document.querySelector('select');
     const row = document.querySelector('[role="menuitem"]');
+    const card = document.querySelector('[role="option"]');
     expect(isChromeControlTarget(swatch, stage)).toBe(true);
     expect(isChromeControlTarget(contrast, stage)).toBe(true);
     expect(isChromeControlTarget(select, stage)).toBe(true);
     expect(isChromeControlTarget(row, stage)).toBe(true);
+    expect(isChromeControlTarget(card, stage)).toBe(true);
   });
 
   it('is false for the body and the stage; an overlay handle counts as a control', () => {
@@ -55,5 +60,132 @@ describe('isChromeControlTarget', () => {
        which the Editor's listener already yields to before this check */
     expect(isChromeControlTarget(chip, stage)).toBe(true);
     expect(isChromeControlTarget(null, stage)).toBe(false);
+  });
+});
+
+// The stage's key table (gslides-parity SPEC 10.1, 10.2, 0.28): Google's chords and nothing else.
+// No bare letter, digit, Space or Shift letter does anything in any state, so a seller who clicks
+// the title and types never hides the filmstrip or flips the theme (R09 finding 4).
+
+const selected: EditorKeyContext = {
+  selected: true,
+  freeform: false,
+  editing: false,
+  editable: false,
+  apple: true,
+};
+const free: EditorKeyContext = { ...selected, freeform: true };
+const nothing: EditorKeyContext = { ...selected, selected: false };
+
+const LETTERS = 'abcdefghijklmnopqrstuvwxyz'.split('');
+const BARE = [
+  ...LETTERS,
+  ...LETTERS.map((l) => l.toUpperCase()),
+  ..."0123456789?[]/\\;',.".split(''),
+  ' ',
+];
+
+describe('editorKeyAction', () => {
+  it('binds no bare letter, digit, Space or Shift letter in any state (SPEC 0.28)', () => {
+    for (const ctx of [selected, free, nothing]) {
+      for (const key of BARE) {
+        expect(editorKeyAction({ key }, ctx)).toBeNull();
+        expect(editorKeyAction({ key, shiftKey: true }, ctx)).toBeNull();
+        expect(isBareCharacterKey({ key })).toBe(true);
+      }
+    }
+    expect(isBareCharacterKey({ key: 'a', metaKey: true })).toBe(false);
+    expect(isBareCharacterKey({ key: 'Escape' })).toBe(false);
+  });
+
+  it('yields inside a field, a chrome control and an editing session', () => {
+    expect(editorKeyAction({ key: 'Escape' }, { ...selected, editable: true })).toBeNull();
+    expect(editorKeyAction({ key: 'Delete' }, { ...selected, editing: true })).toBeNull();
+    expect(editorKeyAction({ key: 'd', metaKey: true }, { ...selected, editing: true })).toBeNull();
+  });
+
+  it('Esc leaves the mode, Enter edits, Delete and Backspace remove, with a block selected only', () => {
+    expect(editorKeyAction({ key: 'Escape' }, selected)).toEqual({ type: 'escape' });
+    expect(editorKeyAction({ key: 'Enter' }, selected)).toEqual({ type: 'enter' });
+    expect(editorKeyAction({ key: 'Delete' }, selected)).toEqual({ type: 'delete' });
+    expect(editorKeyAction({ key: 'Backspace' }, selected)).toEqual({ type: 'delete' });
+    expect(editorKeyAction({ key: 'Escape' }, nothing)).toBeNull();
+    expect(editorKeyAction({ key: 'Enter' }, nothing)).toBeNull();
+    expect(editorKeyAction({ key: 'Backspace' }, nothing)).toBeNull();
+  });
+
+  it('Tab and Shift Tab walk the blocks in every state', () => {
+    expect(editorKeyAction({ key: 'Tab' }, nothing)).toEqual({ type: 'tab', delta: 1 });
+    expect(editorKeyAction({ key: 'Tab', shiftKey: true }, selected)).toEqual({
+      type: 'tab',
+      delta: -1,
+    });
+  });
+
+  it('the arrows nudge on a freeform slide, 1 px and 8 px with Shift, and are inert on a grammar slide', () => {
+    expect(editorKeyAction({ key: 'ArrowRight' }, free)).toEqual({
+      type: 'nudge',
+      dx: NUDGE_PX,
+      dy: 0,
+    });
+    expect(editorKeyAction({ key: 'ArrowUp', shiftKey: true }, free)).toEqual({
+      type: 'nudge',
+      dx: 0,
+      dy: -NUDGE_SHIFT_PX,
+    });
+    expect(editorKeyAction({ key: 'ArrowDown' }, selected)).toEqual({ type: 'inert' });
+    expect(editorKeyAction({ key: 'ArrowLeft' }, nothing)).toBeNull();
+  });
+
+  it('Cmd D duplicates, Cmd A selects all, Cmd X, C, V are the clipboard and Shift V pastes plain', () => {
+    expect(editorKeyAction({ key: 'd', metaKey: true }, selected)).toEqual({ type: 'duplicate' });
+    expect(editorKeyAction({ key: 'd', metaKey: true }, nothing)).toBeNull();
+    expect(editorKeyAction({ key: 'a', metaKey: true }, nothing)).toEqual({ type: 'selectAll' });
+    expect(editorKeyAction({ key: 'x', metaKey: true }, selected)).toEqual({ type: 'cut' });
+    expect(editorKeyAction({ key: 'c', metaKey: true }, selected)).toEqual({ type: 'copy' });
+    expect(editorKeyAction({ key: 'v', metaKey: true }, nothing)).toEqual({
+      type: 'paste',
+      plain: false,
+    });
+    expect(editorKeyAction({ key: 'v', metaKey: true, shiftKey: true }, nothing)).toEqual({
+      type: 'paste',
+      plain: true,
+    });
+  });
+
+  it('Cmd Up and Down order, Shift for the ends; Cmd K links; Cmd B weights; Cmd Option C and V paint', () => {
+    expect(editorKeyAction({ key: 'ArrowUp', metaKey: true }, free)).toEqual({
+      type: 'order',
+      move: 'forward',
+    });
+    expect(editorKeyAction({ key: 'ArrowDown', metaKey: true }, free)).toEqual({
+      type: 'order',
+      move: 'backward',
+    });
+    expect(editorKeyAction({ key: 'ArrowUp', metaKey: true, shiftKey: true }, free)).toEqual({
+      type: 'order',
+      move: 'front',
+    });
+    expect(editorKeyAction({ key: 'ArrowDown', metaKey: true, shiftKey: true }, selected)).toEqual({
+      type: 'order',
+      move: 'back',
+    });
+    expect(editorKeyAction({ key: 'k', metaKey: true }, selected)).toEqual({ type: 'link' });
+    expect(editorKeyAction({ key: 'b', metaKey: true }, selected)).toEqual({ type: 'bold' });
+    expect(editorKeyAction({ key: 'c', metaKey: true, altKey: true }, selected)).toEqual({
+      type: 'paintCopy',
+    });
+    expect(editorKeyAction({ key: 'v', metaKey: true, altKey: true }, selected)).toEqual({
+      type: 'paintPaste',
+    });
+  });
+
+  it('reads Ctrl as the command key on Windows and Cmd there as nothing', () => {
+    const win: EditorKeyContext = { ...selected, apple: false };
+    expect(editorKeyAction({ key: 'd', ctrlKey: true }, win)).toEqual({ type: 'duplicate' });
+    expect(editorKeyAction({ key: 'd', metaKey: true }, win)).toBeNull();
+    /* the retired Turboslide chords of SPEC 10.2 are nothing on the stage */
+    expect(editorKeyAction({ key: ']', metaKey: true }, free)).toBeNull();
+    expect(editorKeyAction({ key: 'ArrowUp', altKey: true }, free)).toBeNull();
   });
 });

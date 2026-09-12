@@ -4,8 +4,12 @@
 // (SPEC 4.2, AGENTS.md contracts); the loader takes the render directory from the caller and
 // falls back to the working directory and to the CLI's default `.turboslide/render`, so
 // `turboslide lint all` from the repository root finds the last render without a flag.
-import { existsSync, readFileSync } from 'node:fs';
-import { isAbsolute, resolve } from 'node:path';
+// Namespace imports, not named bindings: this module reaches the browser through
+// @turboslide/lint/run (the editor imports the store actions of @turboslide/cli), where Vite's
+// shim for a node built-in throws on every named access at module evaluation; the rendered rules
+// never run in a page, so the built-ins are touched at call time only (gslides-parity merge 1).
+import * as nodeFs from 'node:fs';
+import * as nodePath from 'node:path';
 
 import type { Box, RenderRecord } from '../contracts.ts';
 import type { Rgb } from './palette.ts';
@@ -27,13 +31,13 @@ export const DEFAULT_RENDER_DIR = '.turboslide/render';
 /** The first existing path a record image can mean, or undefined. */
 export function resolveRecordImage(image: string, renderDir?: string): string | undefined {
   if (!image) return undefined;
-  if (isAbsolute(image)) return existsSync(image) ? image : undefined;
+  if (nodePath.isAbsolute(image)) return nodeFs.existsSync(image) ? image : undefined;
   const candidates = [
-    ...(renderDir ? [resolve(renderDir, image)] : []),
-    resolve(process.cwd(), image),
-    resolve(process.cwd(), DEFAULT_RENDER_DIR, image),
+    ...(renderDir ? [nodePath.resolve(renderDir, image)] : []),
+    nodePath.resolve(process.cwd(), image),
+    nodePath.resolve(process.cwd(), DEFAULT_RENDER_DIR, image),
   ];
-  return candidates.find((path) => existsSync(path));
+  return candidates.find((path) => nodeFs.existsSync(path));
 }
 
 let last: { path: string; bitmap: Bitmap } | undefined;
@@ -44,7 +48,7 @@ export function loadRecordBitmap(record: RenderRecord, renderDir?: string): Bitm
   if (!path) return null;
   if (last && last.path === path) return last.bitmap;
   try {
-    const bitmap = decodePng(new Uint8Array(readFileSync(path)));
+    const bitmap = decodePng(new Uint8Array(nodeFs.readFileSync(path)));
     last = { path, bitmap };
     return bitmap;
   } catch {

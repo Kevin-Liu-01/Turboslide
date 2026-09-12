@@ -1,6 +1,8 @@
 // The export job: `turboslide export <format> --deck <dir> --mode --theme --fonts [--headings raster]
-// [--raster-scale] [--picture-scale] [--baseline-target] [--verify] [--embed-fonts] --out
-// <job dir>/export --json` (SPEC 7.2; the flags are export.run's input fields, SPEC 7.1), the ExportReport read from the CLI's result or from
+// [--raster-scale] [--picture-scale] [--baseline-target] [--tables] [--include-skipped]
+// [--include-notes] [--appearance] [--verify] [--embed-fonts] --out <job dir>/export --json`
+// (SPEC 7.2; the flags are export.run's input fields, SPEC 7.1; the PDF of gslides-parity SPEC
+// 7.6 takes the same path with format pdf), the ExportReport read from the CLI's result or from
 // export-report.json beside the files. A verify failure is exit 1 with a report whose `passed` is
 // false; the job is done, not failed, and the report says why. Exit 2 (usage, an export command
 // not wired yet, a browser error) fails the job with the CLI's `turboslide:` message line and the
@@ -8,8 +10,9 @@
 // whole of stderr.
 //
 // Verify needs LibreOffice and poppler (SPEC 8.5), which exist in the render worker image and
-// nowhere else the job runs (docs/hosting-chromium.md): when `verify` is asked for and `soffice`
-// does not answer, the export runs without it and the report says so in `residual`, with the
+// nowhere else the job runs (docs/hosting-chromium.md); the PDF gate needs poppler alone
+// (gslides-parity SPEC 7.6). When `verify` is asked for and the format's tools do not answer, the
+// export runs without it and the report says so in `residual`, with the
 // flatten note that the mode is pixel identical by construction (the slide is the 2x sheet raster
 // the browser painted, SPEC 8.2), so the file is still produced and `passed` reflects the checks
 // that ran. The result names which of the three happened in `verify`.
@@ -51,6 +54,14 @@ export const exportJobInput = z.strictObject({
   excludeShareAlike: z.boolean().optional(),
   /** A subset of the deck, as export.run's `slideIds`; the CLI takes them as positionals. */
   slideIds: z.union([z.literal('all'), z.array(slugSchema).min(1)]).optional(),
+  /** Carry the skipped slides too (gslides-parity SPEC 7.2.1). */
+  includeSkipped: z.boolean().optional(),
+  /** Carry the speaker notes (gslides-parity SPEC 7.2.13, decision 15.2). */
+  includeNotes: z.boolean().optional(),
+  /** How a table block travels in Editable text (gslides-parity SPEC 7.3). */
+  tables: z.enum(['auto', 'table', 'rows']).optional(),
+  /** The PDF's appearance (gslides-parity SPEC 7.6); the deck's `defaults.appearance` when absent. */
+  appearance: z.enum(['light', 'dark']).optional(),
 });
 
 export type ExportJobInput = z.input<typeof exportJobInput>;
@@ -81,7 +92,10 @@ export const VERIFY_UNAVAILABLE = 'verify: unavailable in this environment';
 export function verifySkippedNote(
   mode: 'native' | 'flatten' | undefined,
   tools: ToolVersions,
+  format: 'pptx' | 'pdf' = 'pptx',
 ): string {
+  if (format === 'pdf')
+    return `${VERIFY_UNAVAILABLE} (neither pdftoppm nor pdftocairo on PATH; the raster gate of gslides-parity SPEC 7.6 runs where poppler is installed); the page count is the gate`;
   const missing = [
     tools.soffice ? '' : 'soffice',
     tools.pdftocairo || tools.pdftoppm ? '' : 'pdftocairo/pdftoppm',
@@ -90,6 +104,48 @@ export function verifySkippedNote(
   return (mode ?? 'flatten') === 'flatten'
     ? `${base}; flatten is pixel identical by construction: each slide is the 2x sheet raster the browser painted (SPEC 8.2)`
     : `${base}; native text placement is unverified in this file`;
+}
+
+/** True when the tools a format's verify pass needs answer: LibreOffice for PPTX, poppler for PDF. */
+export function verifyToolsFor(format: 'pptx' | 'pdf', tools: ToolVersions): boolean {
+  if (format === 'pdf') return Boolean(tools.pdftoppm || tools.pdftocairo);
+  return Boolean(tools.soffice);
+}
+
+/**
+ * The CLI arguments of an export job (SPEC 7.2 `turboslide export <format> ...`): the flags are
+ * export.run's input fields; `verify` is passed only when the pass can run.
+ */
+export function exportJobArgs(
+  input: ExportJob,
+  deckDir: string,
+  outDir: string,
+  verify: boolean,
+): string[] {
+  return [
+    'export',
+    input.format,
+    ...(input.slideIds === undefined || input.slideIds === 'all' ? [] : input.slideIds),
+    '--deck',
+    deckDir,
+    ...(input.mode ? ['--mode', input.mode] : []),
+    ...(input.theme ? ['--theme', input.theme.join(',')] : []),
+    ...(input.appearance ? ['--appearance', input.appearance] : []),
+    ...(input.fonts ? ['--fonts', input.fonts] : []),
+    ...(input.headings ? ['--headings', input.headings] : []),
+    ...(input.rasterScale !== undefined ? ['--raster-scale', String(input.rasterScale)] : []),
+    ...(input.pictureScale !== undefined ? ['--picture-scale', String(input.pictureScale)] : []),
+    ...(input.baseline ? ['--baseline-target', input.baseline] : []),
+    ...(input.tables ? ['--tables', input.tables] : []),
+    ...(input.includeSkipped ? ['--include-skipped'] : []),
+    ...(input.includeNotes ? ['--include-notes'] : []),
+    ...(verify ? ['--verify'] : []),
+    ...(input.embedFonts ? ['--embed-fonts'] : []),
+    ...(input.excludeShareAlike ? ['--exclude-share-alike'] : []),
+    '--out',
+    outDir,
+    '--json',
+  ];
 }
 
 let toolsProbe: Promise<ToolVersions> | undefined;
@@ -108,37 +164,19 @@ export async function runExportJob(
   const t = performance.now();
   const deckDir = deckDirOf(paths, input.deckId);
   const outDir = join(ctx.dir, 'export');
-  // verify only where its tools answer; the report records the skip
+  // verify only where its tools answer (LibreOffice for PPTX, poppler for PDF); the report
+  // records the skip
   let verify: VerifyOutcome = input.verify ? 'ran' : 'not-requested';
   let verifyNote: string | undefined;
-  if (input.verify && input.format === 'pptx') {
+  if (input.verify) {
     const tools = await verifyTools(paths.env);
-    if (!tools.soffice) {
+    if (!verifyToolsFor(input.format, tools)) {
       verify = 'skipped';
-      verifyNote = verifySkippedNote(input.mode, tools);
+      verifyNote = verifySkippedNote(input.mode, tools, input.format);
       ctx.log(verifyNote);
     }
   }
-  const args = [
-    'export',
-    input.format,
-    ...(input.slideIds === undefined || input.slideIds === 'all' ? [] : input.slideIds),
-    '--deck',
-    deckDir,
-    ...(input.mode ? ['--mode', input.mode] : []),
-    ...(input.theme ? ['--theme', input.theme.join(',')] : []),
-    ...(input.fonts ? ['--fonts', input.fonts] : []),
-    ...(input.headings ? ['--headings', input.headings] : []),
-    ...(input.rasterScale !== undefined ? ['--raster-scale', String(input.rasterScale)] : []),
-    ...(input.pictureScale !== undefined ? ['--picture-scale', String(input.pictureScale)] : []),
-    ...(input.baseline ? ['--baseline-target', input.baseline] : []),
-    ...(verify === 'ran' ? ['--verify'] : []),
-    ...(input.embedFonts ? ['--embed-fonts'] : []),
-    ...(input.excludeShareAlike ? ['--exclude-share-alike'] : []),
-    '--out',
-    outDir,
-    '--json',
-  ];
+  const args = exportJobArgs(input, deckDir, outDir, verify === 'ran');
   ctx.log(`turboslide ${args.join(' ')}`);
   const run = await runTurboslide(args, {
     env: paths.env,

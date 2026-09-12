@@ -1,0 +1,28 @@
+{"t":136,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":null,"menuUndo":"menu closed"}
+{"t":688,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":1192,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":1695,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":2198,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":2702,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":3206,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":3709,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":4213,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":4715,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":5220,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":5724,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":6227,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":6735,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":7238,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":7743,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":8247,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":8750,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":9254,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":9757,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":10262,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":10765,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":11269,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":11771,"label":"poll","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"menu closed"}
+{"t":12359,"label":"edit menu open","url":"/edit/untitled-20260912-7elg","revision":1,"pending":0,"serverRevision":1,"save":"All changes saved","toolbarUndo":"true","menuUndo":"true"}
+{"label":"Cmd+Z on the first write","revisionBefore":1,"revisionAfter":1,"heading":"Undo probe"}
+{"cleanup":"deck trash untitled-20260912-7elg","status":0,"out":"{   \"id\": \"untitled-20260912-7elg\",   \"trashedAt\": \"2026-09-12T16:17:28.747Z\",   \"revision\": 1 } "}
+{"cleanup":"deck remove untitled-20260912-7elg --confirm","status":0,"out":"{   \"id\": \"untitled-20260912-7elg\",   \"removed\": true } "}

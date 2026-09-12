@@ -15,6 +15,10 @@ Every operation is one named action; the CLI subcommands, the MCP tools and the 
 
 Read [references/actions.md](references/actions.md) for every action with its input, transports, CLI usage, MCP tool and milestone. An action whose milestone has not landed answers `NotImplementedError` (501); do not retry it.
 
+## The Google Slides parity actions
+
+Fourteen actions cover what a person does in the editor's menus, on every transport that fits them (the generated tables carry the exact inputs). `slide.new` inserts one slide from a layout id with empty Texts and `template` set (`turboslide slide new --layout <layout> --after <slideId>`; the placeholder prompt shows in the editor and an empty Text exports nothing); `slide.duplicate` copies slides after the last selected; `slide.skip` sets or clears `skip` on several slides in one write (a skipped slide leaves the show and the downloads); `slide.applyLayout` keeps the content and never refuses; `slide.import` brings slides and their assets from another deck (`turboslide slide import <sourceDeckId> <slideIds> --after <slideId>`). `block.duplicate` copies blocks with fresh ids, offset 16 px on a freeform slide; `text.replaceAll` replaces a word across every Text and note in one write and counts the replacements (`turboslide text replace <find> <replace> [--match-case]`). `deck.list`, `deck.copy`, `deck.trash`, `deck.restore` and `deck.remove` (`confirm: true`, never over MCP) are the home page and the trash as actions; `deck.set` writes `/title` and `/defaults/*`. `export.text` returns the deck's plain text (`turboslide export txt`), `export.run` takes `format: 'pdf'` with `includeSkipped` and `includeNotes`, `render.slide` takes `format: 'jpg'`, and `view.zoom` (window and MCP) sets the stage scale. Every mutating action takes `baseRevision`; the ones that write several slides do it in one write, so one undo reverts the whole change.
+
 ## Write protocol
 
 1. Read the slide you will touch (`slide.get`) and keep its `revision`.

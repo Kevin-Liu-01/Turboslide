@@ -1,0 +1,152 @@
+/* Menu (Menu.tsx): the one menu plate of the chrome (SPEC 2.11). Paper, one --pt-hair frame,
+   220 px wide (--pt-menu-w), 4 px of padding top and bottom, 13 px Inter; rows 28 px tall with a
+   16 px icon slot on the left, the label, and the key in titanium on the right (or a chevron for a
+   submenu); dividers 1 px --pt-hair-soft between groups; hover and focus draw the plate ground
+   and ink text; disabled rows read in titanium and take no pointer. The check of a check row is
+   drawn with borders, so no artwork is copied. Radius 0, no shadow, the fade over the fast
+   duration; reduced motion drops it. Colors are tokens only. */
+.ts-menu-root {
+  display: contents;
+}
+
+.ts-menu {
+  position: fixed;
+  box-sizing: border-box;
+  width: var(--pt-menu-w, 220px);
+  padding: 4px 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  font: 13px/1.3 var(--pt-text);
+  outline: none;
+  animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
+}
+
+.ts-menu.is-dynamic {
+  width: auto;
+  padding: 8px;
+}
+
+.ts-menu-group {
+  display: contents;
+}
+
+.ts-menu-divider {
+  display: block;
+  height: 1px;
+  margin: 4px 0;
+  background: var(--pt-hair-soft);
+}
+
+.ts-menu-item {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 10px;
+  height: 28px;
+  padding: 0 12px;
+  color: var(--pt-ink-2);
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+
+.ts-menu-item:hover,
+.ts-menu-item:focus,
+.ts-menu-item.is-open {
+  background: var(--pt-plate);
+  color: var(--pt-ink);
+}
+
+.ts-menu-item:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-menu-item.is-disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+.ts-menu-item.is-disabled:hover {
+  background: none;
+}
+
+.ts-menu-ic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: var(--pt-titanium);
+}
+
+.ts-menu-item:hover .ts-menu-ic,
+.ts-menu-item:focus .ts-menu-ic {
+  color: var(--pt-ink);
+}
+
+.ts-menu-item.is-disabled .ts-menu-ic {
+  color: var(--pt-titanium);
+}
+
+.ts-menu-ic svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+/* the check: a 5 by 9 corner turned 45 degrees, drawn in the current color */
+.ts-menu-check {
+  display: block;
+  width: 5px;
+  height: 9px;
+  margin-top: -2px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  color: var(--pt-ink);
+}
+
+.ts-menu-label {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-menu-ak {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.ts-menu-key {
+  color: var(--pt-titanium);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-left: 8px;
+}
+
+.ts-menu-sub {
+  display: inline-flex;
+  color: var(--pt-titanium);
+}
+
+.ts-menu-sub svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-menu {
+    animation: none;
+  }
+}

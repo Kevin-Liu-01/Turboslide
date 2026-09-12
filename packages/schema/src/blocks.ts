@@ -16,12 +16,39 @@ import type { IconColor, IconName } from './icons.ts';
 import { ICON_COLORS, iconNameSchema } from './icons.ts';
 import type { Position } from './position.ts';
 import { positionSchema } from './position.ts';
-import type { Text } from './text.ts';
-import { textSchema } from './text.ts';
+import type { BlockLink, Text } from './text.ts';
+import { blockLinkField, multilineTextSchema, textSchema } from './text.ts';
 import type { Typography } from './typography.ts';
 import { typographySchema } from './typography.ts';
 import type { MaterialBlock } from './blocks/material.ts';
 import { materialBlockSchema } from './blocks/material.ts';
+import type { TableFields } from './blocks/table.ts';
+import { tableFieldsShape } from './blocks/table.ts';
+
+/** The table block's parts live in blocks/table.ts (gslides-parity SPEC 7.3). */
+export type {
+  TableAlign,
+  TableBorderWeight,
+  TableColumn,
+  TableCommand,
+  TableEdit,
+  TableRow,
+  TableSize,
+  TableValign,
+} from './blocks/table.ts';
+export {
+  TABLE_ALIGNS,
+  TABLE_BORDER_WEIGHTS,
+  TABLE_MAX_COLUMNS,
+  TABLE_MAX_ROWS,
+  TABLE_SIZES,
+  TABLE_VALIGNS,
+  applyTableCommand,
+  emptyTable,
+  tableColumnSchema,
+  tableRowSchema,
+  tableSizeProblem,
+} from './blocks/table.ts';
 
 /** The material block lives in blocks/material.ts (SPEC 5.3, 5.4; M5 item 3). */
 export type {
@@ -95,8 +122,17 @@ export type Diagram = {
   }[];
 };
 
-/** `pos` is the block's box on a freeform slide (position.ts); validate.ts keeps it there only. */
-export type BlockBase = { id: BlockId; ext?: Record<string, unknown>; pos?: Position };
+/** The whole-object link of gslides-parity SPEC 7.2.7 lives in text.ts beside the slide link forms. */
+export type { BlockLink } from './text.ts';
+export { blockLinkSchema, blockLinkField, blockLinkSlide } from './text.ts';
+
+/** `pos` is the block's box on a freeform slide (position.ts); validate.ts keeps it there only; `link` is SPEC 7.2.7. */
+export type BlockBase = {
+  id: BlockId;
+  ext?: Record<string, unknown>;
+  pos?: Position;
+  link?: BlockLink;
+};
 
 export type HeadingBlock = BlockBase & {
   type: 'heading';
@@ -215,7 +251,13 @@ export type RowsBlock = BlockBase & {
   minRowHeight?: number;
   items: RowItem[];
 };
-export type PlainBlock = BlockBase & { type: 'plain'; size?: 24 | 22 | 20; items: PlainItem[] };
+/** `numbered` draws a tabular numeral in the key position where the icon sits (gslides-parity SPEC 7.2.6). */
+export type PlainBlock = BlockBase & {
+  type: 'plain';
+  size?: 24 | 22 | 20;
+  numbered?: true;
+  items: PlainItem[];
+};
 export type RefsBlock = BlockBase & { type: 'refs'; items: Text[] };
 export type SayBlock = BlockBase & {
   type: 'say';
@@ -343,6 +385,8 @@ export type LogoPlatesBlock = BlockBase & {
 };
 /** The escape hatch: flagged by lint, raster on export. */
 export type HtmlBlock = BlockBase & { type: 'html'; css: string; html: string; note: string };
+/** Google's table as a grid of Text cells in the .rows idiom (gslides-parity SPEC 7.3; blocks/table.ts). */
+export type TableBlock = BlockBase & TableFields;
 
 export type Block =
   | HeadingBlock
@@ -376,6 +420,7 @@ export type Block =
   | RuleBlock
   | TextBlock
   | IconBlock
+  | TableBlock
   | HtmlBlock;
 
 export type BlockType = Block['type'];
@@ -415,6 +460,7 @@ export const BLOCK_TYPES = [
   'rule',
   'text',
   'icon',
+  'table',
   'html',
 ] as const satisfies ReadonlyArray<BlockType>;
 
@@ -528,6 +574,7 @@ const base = {
   id: annotate(blockIdSchema, { label: 'Id', control: 'readonly', group: 'Advanced' }),
   ext: extSchema,
   pos: positionSchema,
+  link: blockLinkField,
 };
 
 const captionSize = annotate(z.literal([16, 15]).optional(), {
@@ -538,8 +585,19 @@ const captionSize = annotate(z.literal([16, 15]).optional(), {
   help: 'The two caption sizes the deck uses (report 03 section 11 item 9).',
 });
 
-const assetRef = (label: string): z.ZodString =>
-  annotate(slugSchema, { label, control: 'asset', group: 'Asset' });
+/**
+ * An asset id, or `''` for a figure whose picture is not chosen yet: a layout's figure inserts
+ * the empty reference, the editor draws a dashed plate reading "Click to add a picture" in its
+ * place, every other surface draws nothing, and the validator skips the reference check
+ * (gslides-parity SPEC 5.2, the figure layouts).
+ */
+export const EMPTY_ASSET_REF = '';
+const assetRef = (label: string) =>
+  annotate(z.union([slugSchema, z.literal(EMPTY_ASSET_REF)]), {
+    label,
+    control: 'asset',
+    group: 'Asset',
+  });
 
 export const headingBlockSchema = z.strictObject({
   ...base,
@@ -569,7 +627,12 @@ export const headingBlockSchema = z.strictObject({
 export const paragraphBlockSchema = z.strictObject({
   ...base,
   type: z.literal('paragraph'),
-  text: annotate(textSchema, { label: 'Text', control: 'textarea', group: 'Text' }),
+  text: annotate(multilineTextSchema, {
+    label: 'Text',
+    control: 'textarea',
+    group: 'Text',
+    help: 'Paragraphs separated by a line break (gslides-parity SPEC 7.4).',
+  }),
   role: annotate(z.enum(['body', 'lead', 'cap']).optional(), {
     label: 'Role',
     control: 'select',
@@ -649,6 +712,12 @@ export const plainBlockSchema = z.strictObject({
     control: 'select',
     snap: [24, 22, 20],
     group: 'Block',
+  }),
+  numbered: annotate(z.literal(true).optional(), {
+    label: 'Numbered',
+    control: 'toggle',
+    group: 'Block',
+    help: 'A tabular numeral in the key position of every row (gslides-parity SPEC 7.2.6).',
   }),
   items: z.array(plainItemSchema).min(1),
 }) satisfies z.ZodType<PlainBlock>;
@@ -1157,7 +1226,12 @@ export const boxBlockSchema = z.strictObject({
     help: '16 px unless set; the plates pad 22 by 26 (head:8).',
   }),
   height: flowHeight,
-  text: annotate(textSchema.optional(), { label: 'Text', control: 'textarea', group: 'Text' }),
+  text: annotate(multilineTextSchema.optional(), {
+    label: 'Text',
+    control: 'textarea',
+    group: 'Text',
+    help: 'Paragraphs separated by a line break (gslides-parity SPEC 7.4).',
+  }),
   typography: typographySchema,
   color: colorField(
     'Text color',
@@ -1240,7 +1314,12 @@ export const ruleBlockSchema = z.strictObject({
 export const textBlockSchema = z.strictObject({
   ...base,
   type: z.literal('text'),
-  text: annotate(textSchema, { label: 'Text', control: 'textarea', group: 'Text' }),
+  text: annotate(multilineTextSchema, {
+    label: 'Text',
+    control: 'textarea',
+    group: 'Text',
+    help: 'Paragraphs separated by a line break (gslides-parity SPEC 7.4).',
+  }),
   typography: typographySchema,
   color: colorField('Color', 'The text color; the ink unless set.', 'Text'),
 }) satisfies z.ZodType<TextBlock>;
@@ -1261,6 +1340,11 @@ export const iconBlockSchema = z.strictObject({
     'The glyph color; the ink unless set. Green, amber, red and blue are the semantic hues.',
   ),
 }) satisfies z.ZodType<IconBlock>;
+
+export const tableBlockSchema = z.strictObject({
+  ...base,
+  ...tableFieldsShape,
+}) satisfies z.ZodType<TableBlock>;
 
 /** Recursive through composite cells; typed explicitly so the cycle resolves. */
 export const blockSchema: z.ZodType<Block> = z.lazy(() => blockUnionSchema);
@@ -1345,6 +1429,7 @@ export const blockUnionSchema = z.discriminatedUnion('type', [
   ruleBlockSchema,
   textBlockSchema,
   iconBlockSchema,
+  tableBlockSchema,
   htmlBlockSchema,
 ]);
 
@@ -1381,5 +1466,6 @@ export const BLOCK_SCHEMAS = {
   rule: ruleBlockSchema,
   text: textBlockSchema,
   icon: iconBlockSchema,
+  table: tableBlockSchema,
   html: htmlBlockSchema,
 } as const satisfies Record<BlockType, z.ZodType>;

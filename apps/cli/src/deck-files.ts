@@ -175,7 +175,8 @@ export function slideRows(
         n,
         section: section.name,
         sectionId: section.id,
-        title: slide ? slideTitle(slide) : id,
+        // a slide with an empty heading is "Slide n" (gslides-parity SPEC 5.4), as the studio titles it
+        title: slide ? slideTitle(slide, n) : id,
         kind: slide?.kind ?? 'missing',
       });
     }

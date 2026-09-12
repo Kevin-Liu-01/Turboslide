@@ -153,7 +153,8 @@ describe('the export font set (SPEC 8.4)', () => {
 });
 
 describe('the classification the lint rule shares (SPEC 4.2 export)', () => {
-  test('twelve native types: the eight measured archetypes and the four freeform primitives', () => {
+  test('thirteen native types: the eight measured archetypes, the four freeform primitives and the table', () => {
+    // the table block is a PPTX table in Editable text (gslides-parity SPEC 7.3, 7.9 item 2)
     expect([...NATIVE_BLOCK_TYPES]).toEqual([
       'heading',
       'paragraph',
@@ -167,6 +168,7 @@ describe('the classification the lint rule shares (SPEC 4.2 export)', () => {
       'box',
       'shape',
       'rule',
+      'table',
     ]);
     expect(isNativeBlockType('rows')).toBe(true);
     expect(isNativeBlockType('shape')).toBe(true);

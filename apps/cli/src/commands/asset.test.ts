@@ -208,5 +208,9 @@ describe('turboslide asset and material', () => {
       });
       expect(existsSync(join(deckDir, 'assets/liquid-metal-diamond.recipe.json'))).toBe(true);
     },
+    // a headless Chromium capture: it needs more than vitest's 5 s when the whole workspace runs
+    // (root `pnpm test`, check step 5); measured 5.0 s over the budget on the merge 1 tree and at
+    // 14da621, and 3 s alone
+    60_000,
   );
 });

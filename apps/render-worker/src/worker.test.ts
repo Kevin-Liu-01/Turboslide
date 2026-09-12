@@ -9,7 +9,9 @@ import type { RenderRecord } from '@turboslide/schema/render';
 
 import { createWorkerClient } from './client.ts';
 import { turboslideBin } from './cli.ts';
+import { exportJobArgs, exportJobInput, verifySkippedNote, verifyToolsFor } from './jobs/export.ts';
 import type { RenderJobResult } from './jobs/render.ts';
+import { cacheFiles } from './jobs/render.ts';
 import { cacheDir, defaultPaths, deckDirOf, readDeckHead } from './paths.ts';
 import type { WorkerPaths } from './paths.ts';
 import { createQueue } from './queue.ts';
@@ -133,6 +135,68 @@ describe('queue', () => {
     expect(queue.get('nope')).toBeUndefined();
     await expect(queue.wait('nope')).rejects.toThrow(RangeError);
     queue.close();
+  });
+});
+
+describe('export job (gslides-parity SPEC 7.2.1, 7.3, 7.6)', () => {
+  it('passes the parity round flags and the PDF format to the CLI', () => {
+    const input = exportJobInput.parse({
+      deckId: 'demo',
+      format: 'pdf',
+      appearance: 'light',
+      includeSkipped: true,
+      verify: true,
+    });
+    expect(exportJobArgs(input, '/decks/demo', '/work/out', true)).toEqual([
+      'export',
+      'pdf',
+      '--deck',
+      '/decks/demo',
+      '--appearance',
+      'light',
+      '--include-skipped',
+      '--verify',
+      '--out',
+      '/work/out',
+      '--json',
+    ]);
+    const native = exportJobInput.parse({
+      deckId: 'demo',
+      format: 'pptx',
+      mode: 'native',
+      theme: ['light', 'dark'],
+      tables: 'rows',
+      includeNotes: true,
+      slideIds: ['title', 'table'],
+    });
+    const args = exportJobArgs(native, '/decks/demo', '/work/out', false);
+    expect(args.slice(0, 4)).toEqual(['export', 'pptx', 'title', 'table']);
+    expect(args).toContain('--tables');
+    expect(args[args.indexOf('--tables') + 1]).toBe('rows');
+    expect(args).toContain('--include-notes');
+    expect(args).not.toContain('--verify');
+    expect(args).not.toContain('--include-skipped');
+  });
+
+  it('gates the verify pass on the tools its format needs', () => {
+    const none = { soffice: null, pdftocairo: null, pdftoppm: null };
+    expect(verifyToolsFor('pptx', { ...none, soffice: 'LibreOffice 25.2' })).toBe(true);
+    expect(verifyToolsFor('pptx', { ...none, pdftoppm: 'pdftoppm 26.08' })).toBe(false);
+    expect(verifyToolsFor('pdf', { ...none, pdftoppm: 'pdftoppm 26.08' })).toBe(true);
+    expect(verifyToolsFor('pdf', { ...none, pdftocairo: 'pdftocairo 26.08' })).toBe(true);
+    expect(verifyToolsFor('pdf', { ...none, soffice: 'LibreOffice 25.2' })).toBe(false);
+    expect(verifySkippedNote(undefined, none, 'pdf')).toContain('the page count is the gate');
+    expect(verifySkippedNote('native', none, 'pptx')).toContain(
+      'native text placement is unverified',
+    );
+  });
+
+  it('keeps JPEG renders in their own cache folder with the .jpg extension', () => {
+    const paths: WorkerPaths = { decksDir: '/d', workerDir: '/w', env: {} };
+    expect(cacheDir(paths, 'demo', 7, 'light', 1)).toBe('/w/cache/demo/7/light@1x');
+    expect(cacheDir(paths, 'demo', 7, 'dark', 2, 'jpg')).toBe('/w/cache/demo/7/dark@2x-jpg');
+    expect(cacheFiles('/c', 'thesis', 'jpg').png).toBe('/c/thesis.jpg');
+    expect(cacheFiles('/c', 'thesis').png).toBe('/c/thesis.png');
   });
 });
 

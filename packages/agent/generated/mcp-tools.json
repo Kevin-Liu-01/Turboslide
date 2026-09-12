@@ -1902,6 +1902,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "heading"
@@ -2194,6 +2236,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "paragraph"
@@ -2204,8 +2288,10 @@
               "x-inspector": {
                 "label": "Text",
                 "control": "textarea",
-                "group": "Text"
-              }
+                "group": "Text",
+                "help": "Paragraphs separated by a line break (gslides-parity SPEC 7.4)."
+              },
+              "description": "Paragraphs separated by a line break (gslides-parity SPEC 7.4)."
             },
             "role": {
               "title": "Role",
@@ -2499,6 +2585,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "credit"
@@ -2612,6 +2740,48 @@
                 "h"
               ],
               "additionalProperties": false
+            },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "type": {
               "type": "string",
@@ -2829,6 +2999,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "plain"
@@ -2851,6 +3063,18 @@
                 22,
                 20
               ]
+            },
+            "numbered": {
+              "title": "Numbered",
+              "x-inspector": {
+                "label": "Numbered",
+                "control": "toggle",
+                "group": "Block",
+                "help": "A tabular numeral in the key position of every row (gslides-parity SPEC 7.2.6)."
+              },
+              "description": "A tabular numeral in the key position of every row (gslides-parity SPEC 7.2.6).",
+              "type": "boolean",
+              "const": true
             },
             "items": {
               "minItems": 1,
@@ -2988,6 +3212,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "refs"
@@ -3103,6 +3369,48 @@
                 "h"
               ],
               "additionalProperties": false
+            },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "type": {
               "type": "string",
@@ -3247,6 +3555,48 @@
                 "h"
               ],
               "additionalProperties": false
+            },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "type": {
               "type": "string",
@@ -3406,6 +3756,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "spec"
@@ -3558,6 +3950,48 @@
                 "h"
               ],
               "additionalProperties": false
+            },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "type": {
               "type": "string",
@@ -3715,6 +4149,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "ladder"
@@ -3867,6 +4343,48 @@
                 "h"
               ],
               "additionalProperties": false
+            },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "type": {
               "type": "string",
@@ -4027,13 +4545,63 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "shot"
             },
             "asset": {
-              "type": "string",
-              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                {
+                  "type": "string",
+                  "const": ""
+                }
+              ],
               "title": "Asset",
               "x-inspector": {
                 "label": "Asset",
@@ -4237,6 +4805,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "pair"
@@ -4319,8 +4929,16 @@
                     "minItems": 1,
                     "type": "array",
                     "items": {
-                      "type": "string",
-                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "const": ""
+                        }
+                      ],
                       "title": "Asset",
                       "x-inspector": {
                         "label": "Asset",
@@ -4444,6 +5062,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "tiles"
@@ -4510,8 +5170,16 @@
                 "type": "object",
                 "properties": {
                   "asset": {
-                    "type": "string",
-                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                      },
+                      {
+                        "type": "string",
+                        "const": ""
+                      }
+                    ],
                     "title": "Asset",
                     "x-inspector": {
                       "label": "Asset",
@@ -4663,6 +5331,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "details"
@@ -4699,8 +5409,16 @@
                 "type": "object",
                 "properties": {
                   "asset": {
-                    "type": "string",
-                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                      },
+                      {
+                        "type": "string",
+                        "const": ""
+                      }
+                    ],
                     "title": "Asset",
                     "x-inspector": {
                       "label": "Asset",
@@ -4824,6 +5542,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "board"
@@ -4867,8 +5627,16 @@
                 "type": "object",
                 "properties": {
                   "asset": {
-                    "type": "string",
-                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                      },
+                      {
+                        "type": "string",
+                        "const": ""
+                      }
+                    ],
                     "title": "Asset",
                     "x-inspector": {
                       "label": "Asset",
@@ -5014,6 +5782,48 @@
                 "h"
               ],
               "additionalProperties": false
+            },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "type": {
               "type": "string",
@@ -5237,6 +6047,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "panel"
@@ -5397,6 +6249,48 @@
                 "h"
               ],
               "additionalProperties": false
+            },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "type": {
               "type": "string",
@@ -5946,6 +6840,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "dither"
@@ -6091,6 +7027,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "mark"
@@ -6217,6 +7195,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "markSizes"
@@ -6340,6 +7360,48 @@
                 "h"
               ],
               "additionalProperties": false
+            },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "type": {
               "type": "string",
@@ -6469,6 +7531,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "logoPlates"
@@ -6480,8 +7584,16 @@
                 "type": "object",
                 "properties": {
                   "asset": {
-                    "type": "string",
-                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                      },
+                      {
+                        "type": "string",
+                        "const": ""
+                      }
+                    ],
                     "title": "Logo",
                     "x-inspector": {
                       "label": "Logo",
@@ -6615,6 +7727,48 @@
                 "h"
               ],
               "additionalProperties": false
+            },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "type": {
               "type": "string",
@@ -6879,6 +8033,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "box"
@@ -7057,8 +8253,10 @@
               "x-inspector": {
                 "label": "Text",
                 "control": "textarea",
-                "group": "Text"
+                "group": "Text",
+                "help": "Paragraphs separated by a line break (gslides-parity SPEC 7.4)."
               },
+              "description": "Paragraphs separated by a line break (gslides-parity SPEC 7.4).",
               "type": "string"
             },
             "typography": {
@@ -7335,6 +8533,48 @@
                 "h"
               ],
               "additionalProperties": false
+            },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
             },
             "type": {
               "type": "string",
@@ -7661,6 +8901,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "rule"
@@ -7861,6 +9143,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "text"
@@ -7871,8 +9195,10 @@
               "x-inspector": {
                 "label": "Text",
                 "control": "textarea",
-                "group": "Text"
-              }
+                "group": "Text",
+                "help": "Paragraphs separated by a line break (gslides-parity SPEC 7.4)."
+              },
+              "description": "Paragraphs separated by a line break (gslides-parity SPEC 7.4)."
             },
             "typography": {
               "title": "Typography",
@@ -8150,6 +9476,48 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "icon"
@@ -8408,6 +9776,410 @@
               ],
               "additionalProperties": false
             },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "type": {
+              "type": "string",
+              "const": "table"
+            },
+            "columns": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "width": {
+                    "title": "Width",
+                    "x-inspector": {
+                      "label": "Width",
+                      "control": "number",
+                      "group": "Layout",
+                      "help": "The column width in px; equal columns when every width is absent."
+                    },
+                    "description": "The column width in px; equal columns when every width is absent.",
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "align": {
+                    "title": "Align",
+                    "x-inspector": {
+                      "label": "Align",
+                      "control": "select",
+                      "snap": [
+                        "left",
+                        "center",
+                        "right"
+                      ],
+                      "group": "Block"
+                    },
+                    "type": "string",
+                    "enum": [
+                      "left",
+                      "center",
+                      "right"
+                    ]
+                  },
+                  "fill": {
+                    "title": "Fill",
+                    "x-inspector": {
+                      "label": "Fill",
+                      "control": "color",
+                      "snap": [
+                        "ink",
+                        "paper",
+                        "ink-2",
+                        "titanium",
+                        "hair",
+                        "hair-soft",
+                        "plate",
+                        "edge",
+                        "green",
+                        "amber",
+                        "red",
+                        "blue"
+                      ],
+                      "group": "Block",
+                      "help": "A plate fill behind the column; none unless set."
+                    },
+                    "description": "A plate fill behind the column; none unless set.",
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "ink",
+                          "paper",
+                          "ink-2",
+                          "titanium",
+                          "hair",
+                          "hair-soft",
+                          "plate",
+                          "edge",
+                          "green",
+                          "amber",
+                          "red",
+                          "blue"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "pattern": "^#[0-9a-fA-F]{6}$"
+                      }
+                    ]
+                  }
+                },
+                "additionalProperties": false
+              },
+              "title": "Columns",
+              "x-inspector": {
+                "label": "Columns",
+                "control": "json",
+                "group": "Layout",
+                "help": "One entry per column, 20 at most (R11 A8)."
+              },
+              "description": "One entry per column, 20 at most (R11 A8)."
+            },
+            "rows": {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "cells": {
+                    "minItems": 1,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "title": "Cell",
+                      "x-inspector": {
+                        "label": "Cell",
+                        "control": "textarea",
+                        "group": "Text"
+                      }
+                    }
+                  },
+                  "header": {
+                    "title": "Header row",
+                    "x-inspector": {
+                      "label": "Header row",
+                      "control": "toggle",
+                      "group": "Block",
+                      "help": "Display weight 500 with an ink rule under it."
+                    },
+                    "description": "Display weight 500 with an ink rule under it.",
+                    "type": "boolean",
+                    "const": true
+                  }
+                },
+                "required": [
+                  "cells"
+                ],
+                "additionalProperties": false
+              },
+              "title": "Rows",
+              "x-inspector": {
+                "label": "Rows",
+                "control": "json",
+                "group": "Block",
+                "help": "One entry per row with one cell per column, 20 rows at most (R11 A8)."
+              },
+              "description": "One entry per row with one cell per column, 20 rows at most (R11 A8)."
+            },
+            "valign": {
+              "title": "Vertical alignment",
+              "x-inspector": {
+                "label": "Vertical alignment",
+                "control": "select",
+                "snap": [
+                  "top",
+                  "middle",
+                  "bottom"
+                ],
+                "group": "Block"
+              },
+              "type": "string",
+              "enum": [
+                "top",
+                "middle",
+                "bottom"
+              ]
+            },
+            "border": {
+              "type": "object",
+              "properties": {
+                "weight": {
+                  "type": "number",
+                  "enum": [
+                    1,
+                    1.5,
+                    2
+                  ],
+                  "title": "Border weight",
+                  "x-inspector": {
+                    "label": "Border weight",
+                    "control": "select",
+                    "snap": [
+                      1,
+                      1.5,
+                      2
+                    ],
+                    "group": "Block",
+                    "help": "1 is the sheet hairline, 1.5 the diagram stroke, 2 a plate edge."
+                  },
+                  "description": "1 is the sheet hairline, 1.5 the diagram stroke, 2 a plate edge."
+                }
+              },
+              "required": [
+                "weight"
+              ],
+              "additionalProperties": false
+            },
+            "size": {
+              "title": "Size",
+              "x-inspector": {
+                "label": "Size",
+                "control": "select",
+                "snap": [
+                  20,
+                  18,
+                  17,
+                  16,
+                  15
+                ],
+                "group": "Block",
+                "help": "The .rows ladder in px; 20 unless set."
+              },
+              "description": "The .rows ladder in px; 20 unless set.",
+              "type": "number",
+              "enum": [
+                20,
+                18,
+                17,
+                16,
+                15
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "columns",
+            "rows"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "title": "Id",
+              "x-inspector": {
+                "label": "Id",
+                "control": "readonly",
+                "group": "Advanced"
+              }
+            },
+            "ext": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "pos": {
+              "title": "Position",
+              "x-inspector": {
+                "label": "Position",
+                "control": "position",
+                "group": "Layout",
+                "help": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md)."
+              },
+              "description": "The box on the 1600 by 900 sheet in px; required under the freeform layout and forbidden elsewhere (docs/freeform.md).",
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "number",
+                  "title": "X",
+                  "x-inspector": {
+                    "label": "X",
+                    "control": "number",
+                    "group": "Layout"
+                  }
+                },
+                "y": {
+                  "type": "number",
+                  "title": "Y",
+                  "x-inspector": {
+                    "label": "Y",
+                    "control": "number",
+                    "group": "Layout"
+                  }
+                },
+                "w": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "title": "Width",
+                  "x-inspector": {
+                    "label": "Width",
+                    "control": "number",
+                    "group": "Layout"
+                  }
+                },
+                "h": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "title": "Height",
+                  "x-inspector": {
+                    "label": "Height",
+                    "control": "number",
+                    "group": "Layout"
+                  }
+                },
+                "z": {
+                  "title": "Z order",
+                  "x-inspector": {
+                    "label": "Z order",
+                    "control": "number",
+                    "group": "Layout",
+                    "help": "Higher draws over lower; block.order moves a block through the stack."
+                  },
+                  "description": "Higher draws over lower; block.order moves a block through the stack.",
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                }
+              },
+              "required": [
+                "x",
+                "y",
+                "w",
+                "h"
+              ],
+              "additionalProperties": false
+            },
+            "link": {
+              "title": "Link",
+              "x-inspector": {
+                "label": "Link",
+                "control": "json",
+                "group": "Block",
+                "help": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7)."
+              },
+              "description": "A URL, or { \"slide\": \"<id>\" | \"next\" | \"previous\" | \"first\" | \"last\" }; active when presenting, in the shared view and in the downloads (gslides-parity SPEC 7.2.7).",
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "slide": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                        },
+                        {
+                          "type": "string",
+                          "enum": [
+                            "next",
+                            "previous",
+                            "first",
+                            "last"
+                          ]
+                        }
+                      ]
+                    }
+                  },
+                  "required": [
+                    "slide"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
             "type": {
               "type": "string",
               "const": "html"
@@ -8556,6 +10328,71 @@
         "blockIds",
         "axis",
         "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "BlockDuplicateInput": {
+      "$id": "#/$defs/BlockDuplicateInput",
+      "type": "object",
+      "properties": {
+        "slideId": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "blockIds": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          }
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "slideId",
+        "blockIds",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "BlockDuplicateOutput": {
+      "$id": "#/$defs/BlockDuplicateOutput",
+      "type": "object",
+      "properties": {
+        "slide": {
+          "$ref": "#/$defs/Slide"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Finding"
+          }
+        },
+        "blockIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]*$"
+          },
+          "description": "The ids of the copies, in input order"
+        }
+      },
+      "required": [
+        "slide",
+        "revision",
+        "findings",
+        "blockIds"
       ],
       "additionalProperties": false
     },
@@ -8763,6 +10600,14 @@
           "type": "integer",
           "minimum": 1,
           "maximum": 100
+        },
+        "includeSkipped": {
+          "description": "Build the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)",
+          "type": "boolean"
+        },
+        "includeNotes": {
+          "description": "Carry the speaker notes into the file",
+          "type": "boolean"
         }
       },
       "required": [
@@ -8810,6 +10655,114 @@
         "path",
         "bytes",
         "assertions"
+      ],
+      "additionalProperties": false
+    },
+    "DeckCopyInput": {
+      "$id": "#/$defs/DeckCopyInput",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "The deck to copy"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The title of the copy; its id is the slug unless `newId` is given"
+        },
+        "newId": {
+          "description": "The id of the copy under decks/",
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "slideIds": {
+          "description": "Copy these slides only, in deck order; every slide when absent",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "removeNotes": {
+          "description": "Leave the speaker notes out of the copy",
+          "type": "boolean"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision of the source deck the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "DeckCopyOutput": {
+      "$id": "#/$defs/DeckCopyOutput",
+      "type": "object",
+      "properties": {
+        "deckId": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "The id of the copy"
+        },
+        "sourceDeckId": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "title": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "dir": {
+          "type": "string",
+          "description": "The deck directory"
+        },
+        "counts": {
+          "type": "object",
+          "properties": {
+            "slides": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "sections": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "assets": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          },
+          "required": [
+            "slides",
+            "sections",
+            "assets"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "deckId",
+        "sourceDeckId",
+        "title",
+        "revision",
+        "dir",
+        "counts"
       ],
       "additionalProperties": false
     },
@@ -9012,6 +10965,11 @@
               "type": "integer",
               "minimum": -9007199254740991,
               "maximum": 9007199254740991
+            },
+            "skipped": {
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
             }
           },
           "required": [
@@ -9021,6 +10979,33 @@
             "htmlBlocks"
           ],
           "additionalProperties": false
+        },
+        "defaults": {
+          "type": "object",
+          "properties": {
+            "notes": {
+              "type": "string"
+            },
+            "appearance": {
+              "type": "string",
+              "enum": [
+                "light",
+                "dark"
+              ]
+            },
+            "counter": {
+              "type": "string",
+              "enum": [
+                "on",
+                "off",
+                "skip-title"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "trashedAt": {
+          "type": "string"
         }
       },
       "required": [
@@ -9032,6 +11017,67 @@
         "counts"
       ],
       "additionalProperties": false
+    },
+    "DeckListInput": {
+      "$id": "#/$defs/DeckListInput",
+      "type": "object",
+      "properties": {
+        "includeTrashed": {
+          "description": "Also list the decks in the trash, each with its trashedAt",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DeckListOutput": {
+      "$id": "#/$defs/DeckListOutput",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slides": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "sections": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "updatedAt": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "trashedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "slides",
+          "sections",
+          "revision",
+          "updatedAt",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      }
     },
     "DeckRenameInput": {
       "$id": "#/$defs/DeckRenameInput",
@@ -9070,6 +11116,124 @@
       },
       "required": [
         "title",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "DeckRestoreInput": {
+      "$id": "#/$defs/DeckRestoreInput",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "The deck to restore"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "id",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "DeckSetInput": {
+      "$id": "#/$defs/DeckSetInput",
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "pattern": "^\\/(title|theme|defaults(\\/[a-zA-Z]+)?)$",
+          "description": "JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes"
+        },
+        "value": {
+          "description": "The new value; omit it to remove the field"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "path",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "DeckSetOutput": {
+      "$id": "#/$defs/DeckSetOutput",
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "value": {
+          "description": "The value now at the path; absent when removed"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "path",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
+    "DeckTrashInput": {
+      "$id": "#/$defs/DeckTrashInput",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "The deck to move to the trash"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "id",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "DeckTrashOutput": {
+      "$id": "#/$defs/DeckTrashOutput",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "trashedAt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "id",
+        "trashedAt",
         "revision"
       ],
       "additionalProperties": false
@@ -9625,6 +11789,14 @@
             }
           ]
         },
+        "includeSkipped": {
+          "description": "Export the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)",
+          "type": "boolean"
+        },
+        "includeNotes": {
+          "description": "Carry the speaker notes; left out by default (gslides-parity decision 15.2)",
+          "type": "boolean"
+        },
         "out": {
           "description": "Output directory; defaults to .turboslide/export",
           "type": "string"
@@ -9632,6 +11804,64 @@
       },
       "required": [
         "format"
+      ],
+      "additionalProperties": false
+    },
+    "ExportTextInput": {
+      "$id": "#/$defs/ExportTextInput",
+      "type": "object",
+      "properties": {
+        "slideIds": {
+          "description": "A subset; defaults to 'all'",
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "all"
+            },
+            {
+              "minItems": 1,
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              }
+            }
+          ]
+        },
+        "includeNotes": {
+          "description": "Append each slide’s speaker notes",
+          "type": "boolean"
+        },
+        "includeSkipped": {
+          "description": "Include the skipped slides",
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ExportTextOutput": {
+      "$id": "#/$defs/ExportTextOutput",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "slides": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "How many slides the text covers"
+        },
+        "bytes": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "text",
+        "slides",
+        "bytes"
       ],
       "additionalProperties": false
     },
@@ -9685,6 +11915,8 @@
             "copy/full-sentence-caption",
             "copy/contrast-pair",
             "copy/metaphor-candidate",
+            "copy/empty-placeholder",
+            "table/size",
             "contrast/both-themes",
             "layout/empty-half",
             "layout/pair-gaps",
@@ -9877,6 +12109,8 @@
             "copy/full-sentence-caption",
             "copy/contrast-pair",
             "copy/metaphor-candidate",
+            "copy/empty-placeholder",
+            "table/size",
             "contrast/both-themes",
             "layout/empty-half",
             "layout/pair-gaps",
@@ -10478,6 +12712,8 @@
             "copy/full-sentence-caption",
             "copy/contrast-pair",
             "copy/metaphor-candidate",
+            "copy/empty-placeholder",
+            "table/size",
             "contrast/both-themes",
             "layout/empty-half",
             "layout/pair-gaps",
@@ -12023,6 +14259,75 @@
                 "type": "string"
               }
             },
+            "skip": {
+              "title": "Skip slide",
+              "x-inspector": {
+                "label": "Skip slide",
+                "control": "toggle",
+                "group": "Slide",
+                "help": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1)."
+              },
+              "description": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).",
+              "type": "boolean",
+              "const": true
+            },
+            "template": {
+              "title": "Layout",
+              "x-inspector": {
+                "label": "Layout",
+                "control": "select",
+                "snap": [
+                  "title",
+                  "opener",
+                  "split",
+                  "cols",
+                  "title-only",
+                  "one-column",
+                  "statement",
+                  "section-description",
+                  "mood",
+                  "big-number",
+                  "blank",
+                  "rows",
+                  "plain",
+                  "table",
+                  "figure",
+                  "pair",
+                  "tiles",
+                  "details",
+                  "board",
+                  "matrix",
+                  "closing"
+                ],
+                "group": "Slide",
+                "help": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2)."
+              },
+              "description": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2).",
+              "type": "string",
+              "enum": [
+                "title",
+                "opener",
+                "split",
+                "cols",
+                "title-only",
+                "one-column",
+                "statement",
+                "section-description",
+                "mood",
+                "big-number",
+                "blank",
+                "rows",
+                "plain",
+                "table",
+                "figure",
+                "pair",
+                "tiles",
+                "details",
+                "board",
+                "matrix",
+                "closing"
+              ]
+            },
             "ext": {
               "type": "object",
               "propertyNames": {
@@ -12117,6 +14422,75 @@
                 "type": "string"
               }
             },
+            "skip": {
+              "title": "Skip slide",
+              "x-inspector": {
+                "label": "Skip slide",
+                "control": "toggle",
+                "group": "Slide",
+                "help": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1)."
+              },
+              "description": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).",
+              "type": "boolean",
+              "const": true
+            },
+            "template": {
+              "title": "Layout",
+              "x-inspector": {
+                "label": "Layout",
+                "control": "select",
+                "snap": [
+                  "title",
+                  "opener",
+                  "split",
+                  "cols",
+                  "title-only",
+                  "one-column",
+                  "statement",
+                  "section-description",
+                  "mood",
+                  "big-number",
+                  "blank",
+                  "rows",
+                  "plain",
+                  "table",
+                  "figure",
+                  "pair",
+                  "tiles",
+                  "details",
+                  "board",
+                  "matrix",
+                  "closing"
+                ],
+                "group": "Slide",
+                "help": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2)."
+              },
+              "description": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2).",
+              "type": "string",
+              "enum": [
+                "title",
+                "opener",
+                "split",
+                "cols",
+                "title-only",
+                "one-column",
+                "statement",
+                "section-description",
+                "mood",
+                "big-number",
+                "blank",
+                "rows",
+                "plain",
+                "table",
+                "figure",
+                "pair",
+                "tiles",
+                "details",
+                "board",
+                "matrix",
+                "closing"
+              ]
+            },
             "ext": {
               "type": "object",
               "propertyNames": {
@@ -12204,6 +14578,75 @@
                 "type": "string"
               }
             },
+            "skip": {
+              "title": "Skip slide",
+              "x-inspector": {
+                "label": "Skip slide",
+                "control": "toggle",
+                "group": "Slide",
+                "help": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1)."
+              },
+              "description": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).",
+              "type": "boolean",
+              "const": true
+            },
+            "template": {
+              "title": "Layout",
+              "x-inspector": {
+                "label": "Layout",
+                "control": "select",
+                "snap": [
+                  "title",
+                  "opener",
+                  "split",
+                  "cols",
+                  "title-only",
+                  "one-column",
+                  "statement",
+                  "section-description",
+                  "mood",
+                  "big-number",
+                  "blank",
+                  "rows",
+                  "plain",
+                  "table",
+                  "figure",
+                  "pair",
+                  "tiles",
+                  "details",
+                  "board",
+                  "matrix",
+                  "closing"
+                ],
+                "group": "Slide",
+                "help": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2)."
+              },
+              "description": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2).",
+              "type": "string",
+              "enum": [
+                "title",
+                "opener",
+                "split",
+                "cols",
+                "title-only",
+                "one-column",
+                "statement",
+                "section-description",
+                "mood",
+                "big-number",
+                "blank",
+                "rows",
+                "plain",
+                "table",
+                "figure",
+                "pair",
+                "tiles",
+                "details",
+                "board",
+                "matrix",
+                "closing"
+              ]
+            },
             "ext": {
               "type": "object",
               "propertyNames": {
@@ -12279,6 +14722,75 @@
               "items": {
                 "type": "string"
               }
+            },
+            "skip": {
+              "title": "Skip slide",
+              "x-inspector": {
+                "label": "Skip slide",
+                "control": "toggle",
+                "group": "Slide",
+                "help": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1)."
+              },
+              "description": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).",
+              "type": "boolean",
+              "const": true
+            },
+            "template": {
+              "title": "Layout",
+              "x-inspector": {
+                "label": "Layout",
+                "control": "select",
+                "snap": [
+                  "title",
+                  "opener",
+                  "split",
+                  "cols",
+                  "title-only",
+                  "one-column",
+                  "statement",
+                  "section-description",
+                  "mood",
+                  "big-number",
+                  "blank",
+                  "rows",
+                  "plain",
+                  "table",
+                  "figure",
+                  "pair",
+                  "tiles",
+                  "details",
+                  "board",
+                  "matrix",
+                  "closing"
+                ],
+                "group": "Slide",
+                "help": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2)."
+              },
+              "description": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2).",
+              "type": "string",
+              "enum": [
+                "title",
+                "opener",
+                "split",
+                "cols",
+                "title-only",
+                "one-column",
+                "statement",
+                "section-description",
+                "mood",
+                "big-number",
+                "blank",
+                "rows",
+                "plain",
+                "table",
+                "figure",
+                "pair",
+                "tiles",
+                "details",
+                "board",
+                "matrix",
+                "closing"
+              ]
             },
             "ext": {
               "type": "object",
@@ -12385,6 +14897,75 @@
               "items": {
                 "type": "string"
               }
+            },
+            "skip": {
+              "title": "Skip slide",
+              "x-inspector": {
+                "label": "Skip slide",
+                "control": "toggle",
+                "group": "Slide",
+                "help": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1)."
+              },
+              "description": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).",
+              "type": "boolean",
+              "const": true
+            },
+            "template": {
+              "title": "Layout",
+              "x-inspector": {
+                "label": "Layout",
+                "control": "select",
+                "snap": [
+                  "title",
+                  "opener",
+                  "split",
+                  "cols",
+                  "title-only",
+                  "one-column",
+                  "statement",
+                  "section-description",
+                  "mood",
+                  "big-number",
+                  "blank",
+                  "rows",
+                  "plain",
+                  "table",
+                  "figure",
+                  "pair",
+                  "tiles",
+                  "details",
+                  "board",
+                  "matrix",
+                  "closing"
+                ],
+                "group": "Slide",
+                "help": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2)."
+              },
+              "description": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2).",
+              "type": "string",
+              "enum": [
+                "title",
+                "opener",
+                "split",
+                "cols",
+                "title-only",
+                "one-column",
+                "statement",
+                "section-description",
+                "mood",
+                "big-number",
+                "blank",
+                "rows",
+                "plain",
+                "table",
+                "figure",
+                "pair",
+                "tiles",
+                "details",
+                "board",
+                "matrix",
+                "closing"
+              ]
             },
             "ext": {
               "type": "object",
@@ -12505,6 +15086,75 @@
                 "type": "string"
               }
             },
+            "skip": {
+              "title": "Skip slide",
+              "x-inspector": {
+                "label": "Skip slide",
+                "control": "toggle",
+                "group": "Slide",
+                "help": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1)."
+              },
+              "description": "A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).",
+              "type": "boolean",
+              "const": true
+            },
+            "template": {
+              "title": "Layout",
+              "x-inspector": {
+                "label": "Layout",
+                "control": "select",
+                "snap": [
+                  "title",
+                  "opener",
+                  "split",
+                  "cols",
+                  "title-only",
+                  "one-column",
+                  "statement",
+                  "section-description",
+                  "mood",
+                  "big-number",
+                  "blank",
+                  "rows",
+                  "plain",
+                  "table",
+                  "figure",
+                  "pair",
+                  "tiles",
+                  "details",
+                  "board",
+                  "matrix",
+                  "closing"
+                ],
+                "group": "Slide",
+                "help": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2)."
+              },
+              "description": "The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2).",
+              "type": "string",
+              "enum": [
+                "title",
+                "opener",
+                "split",
+                "cols",
+                "title-only",
+                "one-column",
+                "statement",
+                "section-description",
+                "mood",
+                "big-number",
+                "blank",
+                "rows",
+                "plain",
+                "table",
+                "figure",
+                "pair",
+                "tiles",
+                "details",
+                "board",
+                "matrix",
+                "closing"
+              ]
+            },
             "ext": {
               "type": "object",
               "propertyNames": {
@@ -12549,6 +15199,230 @@
           "additionalProperties": false
         }
       ]
+    },
+    "SlideApplyLayoutInput": {
+      "$id": "#/$defs/SlideApplyLayoutInput",
+      "type": "object",
+      "properties": {
+        "slideIds": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "description": "One or more slide ids"
+        },
+        "layout": {
+          "type": "string",
+          "enum": [
+            "title",
+            "opener",
+            "split",
+            "cols",
+            "title-only",
+            "one-column",
+            "statement",
+            "section-description",
+            "mood",
+            "big-number",
+            "blank",
+            "rows",
+            "plain",
+            "table",
+            "figure",
+            "pair",
+            "tiles",
+            "details",
+            "board",
+            "matrix",
+            "closing"
+          ],
+          "description": "One of the layout list (gslides-parity SPEC 5.2)"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "slideIds",
+        "layout",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "SlideApplyLayoutOutput": {
+      "$id": "#/$defs/SlideApplyLayoutOutput",
+      "type": "object",
+      "properties": {
+        "slides": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Slide"
+          }
+        },
+        "dropped": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slideId": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "blockIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9][a-z0-9-]*$"
+                }
+              }
+            },
+            "required": [
+              "slideId",
+              "blockIds"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "moved": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Finding"
+          }
+        }
+      },
+      "required": [
+        "slides",
+        "dropped",
+        "moved",
+        "revision",
+        "findings"
+      ],
+      "additionalProperties": false
+    },
+    "SlideDuplicateInput": {
+      "$id": "#/$defs/SlideDuplicateInput",
+      "type": "object",
+      "properties": {
+        "slideIds": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "description": "One or more slide ids"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "slideIds",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "SlideDuplicateOutput": {
+      "$id": "#/$defs/SlideDuplicateOutput",
+      "type": "object",
+      "properties": {
+        "slides": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Slide"
+          }
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "outline": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "slides": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "n": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "content",
+                        "opener",
+                        "mood",
+                        "closing",
+                        "title",
+                        "statement"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "n",
+                    "title",
+                    "kind"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "slides"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "slides",
+        "revision",
+        "outline"
+      ],
+      "additionalProperties": false
     },
     "SlideGetInput": {
       "$id": "#/$defs/SlideGetInput",
@@ -12607,6 +15481,161 @@
         "section",
         "assets",
         "render"
+      ],
+      "additionalProperties": false
+    },
+    "SlideImportInput": {
+      "$id": "#/$defs/SlideImportInput",
+      "type": "object",
+      "properties": {
+        "sourceDeckId": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "The deck the slides come from"
+        },
+        "slideIds": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "description": "The slides to copy, in the order they land"
+        },
+        "after": {
+          "description": "The slide the copies follow; first in the section when absent",
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "sectionId": {
+          "description": "The section; the anchor's section, or the last section, when absent",
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "sourceDeckId",
+        "slideIds",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "SlideImportOutput": {
+      "$id": "#/$defs/SlideImportOutput",
+      "type": "object",
+      "properties": {
+        "slides": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Slide"
+          }
+        },
+        "assets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "description": "The asset ids copied into this deck"
+        },
+        "renamed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "to": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              }
+            },
+            "required": [
+              "from",
+              "to"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "outline": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "slides": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "n": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "content",
+                        "opener",
+                        "mood",
+                        "closing",
+                        "title",
+                        "statement"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "n",
+                    "title",
+                    "kind"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "slides"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "slides",
+        "assets",
+        "renamed",
+        "revision",
+        "outline"
       ],
       "additionalProperties": false
     },
@@ -12808,6 +15837,36 @@
               "s2"
             ],
             "additionalProperties": false
+          },
+          "skip": {
+            "type": "boolean"
+          },
+          "template": {
+            "type": "string",
+            "enum": [
+              "title",
+              "opener",
+              "split",
+              "cols",
+              "title-only",
+              "one-column",
+              "statement",
+              "section-description",
+              "mood",
+              "big-number",
+              "blank",
+              "rows",
+              "plain",
+              "table",
+              "figure",
+              "pair",
+              "tiles",
+              "details",
+              "board",
+              "matrix",
+              "closing"
+            ],
+            "description": "One of the layout list (gslides-parity SPEC 5.2)"
           }
         },
         "required": [
@@ -12870,6 +15929,144 @@
       "required": [
         "sections",
         "revision"
+      ],
+      "additionalProperties": false
+    },
+    "SlideNewInput": {
+      "$id": "#/$defs/SlideNewInput",
+      "type": "object",
+      "properties": {
+        "layout": {
+          "type": "string",
+          "enum": [
+            "title",
+            "opener",
+            "split",
+            "cols",
+            "title-only",
+            "one-column",
+            "statement",
+            "section-description",
+            "mood",
+            "big-number",
+            "blank",
+            "rows",
+            "plain",
+            "table",
+            "figure",
+            "pair",
+            "tiles",
+            "details",
+            "board",
+            "matrix",
+            "closing"
+          ],
+          "description": "One of the layout list (gslides-parity SPEC 5.2)"
+        },
+        "after": {
+          "description": "The slide the new one follows; first in the section when absent",
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "sectionId": {
+          "description": "The section; the anchor's section, or the last section, when absent",
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "id": {
+          "description": "The slide id; <layout>-<n> with the first free n when absent",
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "layout",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "SlideNewOutput": {
+      "$id": "#/$defs/SlideNewOutput",
+      "type": "object",
+      "properties": {
+        "slide": {
+          "$ref": "#/$defs/Slide"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "outline": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "name": {
+                "type": "string"
+              },
+              "slides": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "n": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "content",
+                        "opener",
+                        "mood",
+                        "closing",
+                        "title",
+                        "statement"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "n",
+                    "title",
+                    "kind"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "slides"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "slide",
+        "revision",
+        "outline"
       ],
       "additionalProperties": false
     },
@@ -13020,6 +16217,64 @@
       ],
       "additionalProperties": false
     },
+    "SlideSkipInput": {
+      "$id": "#/$defs/SlideSkipInput",
+      "type": "object",
+      "properties": {
+        "slideIds": {
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "description": "One or more slide ids"
+        },
+        "skip": {
+          "type": "boolean",
+          "description": "true skips the slides, false shows them again"
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "slideIds",
+        "skip",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "SlideSkipOutput": {
+      "$id": "#/$defs/SlideSkipOutput",
+      "type": "object",
+      "properties": {
+        "slideIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "skip": {
+          "type": "boolean"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "slideIds",
+        "skip",
+        "revision"
+      ],
+      "additionalProperties": false
+    },
     "SlideUpdateInput": {
       "$id": "#/$defs/SlideUpdateInput",
       "type": "object",
@@ -13072,6 +16327,74 @@
         "slide",
         "revision",
         "findings"
+      ],
+      "additionalProperties": false
+    },
+    "TextReplaceAllInput": {
+      "$id": "#/$defs/TextReplaceAllInput",
+      "type": "object",
+      "properties": {
+        "find": {
+          "type": "string",
+          "minLength": 1
+        },
+        "replace": {
+          "type": "string"
+        },
+        "matchCase": {
+          "description": "Match the case exactly; off by default",
+          "type": "boolean"
+        },
+        "slideIds": {
+          "description": "Restrict to these slides",
+          "minItems": 1,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          }
+        },
+        "baseRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      },
+      "required": [
+        "find",
+        "replace",
+        "baseRevision"
+      ],
+      "additionalProperties": false
+    },
+    "TextReplaceAllOutput": {
+      "$id": "#/$defs/TextReplaceAllOutput",
+      "type": "object",
+      "properties": {
+        "replacements": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "slideIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "description": "The slides that changed"
+        },
+        "revision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "required": [
+        "replacements",
+        "slideIds",
+        "revision"
       ],
       "additionalProperties": false
     },
@@ -13294,6 +16617,18 @@
         },
         "edit": {
           "type": "boolean"
+        },
+        "zoom": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            {
+              "type": "string",
+              "const": "fit"
+            }
+          ]
         }
       },
       "required": [
@@ -13302,6 +16637,30 @@
         "mode",
         "theme",
         "present"
+      ],
+      "additionalProperties": false
+    },
+    "ViewZoomInput": {
+      "$id": "#/$defs/ViewZoomInput",
+      "type": "object",
+      "properties": {
+        "zoom": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 4
+            },
+            {
+              "type": "string",
+              "const": "fit"
+            }
+          ],
+          "description": "A factor between 0.25 and 4, or 'fit' for the stage's own fit"
+        }
+      },
+      "required": [
+        "zoom"
       ],
       "additionalProperties": false
     }
@@ -13417,6 +16776,11 @@
                 "type": "integer",
                 "minimum": -9007199254740991,
                 "maximum": 9007199254740991
+              },
+              "skipped": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
               }
             },
             "required": [
@@ -13426,6 +16790,33 @@
               "htmlBlocks"
             ],
             "additionalProperties": false
+          },
+          "defaults": {
+            "type": "object",
+            "properties": {
+              "notes": {
+                "type": "string"
+              },
+              "appearance": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ]
+              },
+              "counter": {
+                "type": "string",
+                "enum": [
+                  "on",
+                  "off",
+                  "skip-title"
+                ]
+              }
+            },
+            "additionalProperties": false
+          },
+          "trashedAt": {
+            "type": "string"
           }
         },
         "required": [
@@ -13608,6 +16999,385 @@
       "returnsImages": false
     },
     {
+      "name": "deck_set",
+      "action": "deck.set",
+      "description": "Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Themes panel and Slide numbers make; an absent value removes the field.",
+      "inputSchema": {
+        "$id": "#/$defs/DeckSetInput",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "pattern": "^\\/(title|theme|defaults(\\/[a-zA-Z]+)?)$",
+            "description": "JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes"
+          },
+          "value": {
+            "description": "The new value; omit it to remove the field"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "path",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/DeckSetOutput",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "value": {
+            "description": "The value now at the path; absent when removed"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "path",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Set a deck field",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_list",
+      "action": "deck.list",
+      "description": "The manifest facts of every deck under decks/ (id, title, slide and section counts, revision, the stamps), newest first; decks in the trash are left out unless asked.",
+      "inputSchema": {
+        "$id": "#/$defs/DeckListInput",
+        "type": "object",
+        "properties": {
+          "includeTrashed": {
+            "description": "Also list the decks in the trash, each with its trashedAt",
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/DeckListOutput",
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "title": {
+              "type": "string"
+            },
+            "slides": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "sections": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "revision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            "updatedAt": {
+              "type": "string"
+            },
+            "createdAt": {
+              "type": "string"
+            },
+            "trashedAt": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "title",
+            "slides",
+            "sections",
+            "revision",
+            "updatedAt",
+            "createdAt"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "annotations": {
+        "title": "List decks",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_copy",
+      "action": "deck.copy",
+      "description": "Copies a deck under a new id with a new title, every slide or the named ones, with or without the speaker notes, at revision 0 with an empty version log; the output names the new deck.",
+      "inputSchema": {
+        "$id": "#/$defs/DeckCopyInput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The deck to copy"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The title of the copy; its id is the slug unless `newId` is given"
+          },
+          "newId": {
+            "description": "The id of the copy under decks/",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "slideIds": {
+            "description": "Copy these slides only, in deck order; every slide when absent",
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "removeNotes": {
+            "description": "Leave the speaker notes out of the copy",
+            "type": "boolean"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision of the source deck the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/DeckCopyOutput",
+        "type": "object",
+        "properties": {
+          "deckId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The id of the copy"
+          },
+          "sourceDeckId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "dir": {
+            "type": "string",
+            "description": "The deck directory"
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "slides": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "sections": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "assets": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "slides",
+              "sections",
+              "assets"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "deckId",
+          "sourceDeckId",
+          "title",
+          "revision",
+          "dir",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Make a copy",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_trash",
+      "action": "deck.trash",
+      "description": "Moves a deck to the trash by writing trashedAt on its manifest: the home page, the fresh presentation route and deck.list leave it out until deck.restore clears the stamp or deck.remove deletes it; nothing else changes.",
+      "inputSchema": {
+        "$id": "#/$defs/DeckTrashInput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The deck to move to the trash"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "id",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/DeckTrashOutput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "trashedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "trashedAt",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Move to trash",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_restore",
+      "action": "deck.restore",
+      "description": "Clears trashedAt on a deck in the trash, so the home page and deck.list show it again.",
+      "inputSchema": {
+        "$id": "#/$defs/DeckRestoreInput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The deck to restore"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "id",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/DeckTrashOutput",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "trashedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "trashedAt",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Restore from trash",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
       "name": "deck_list_slides",
       "action": "slide.list",
       "description": "Every slide in deck order with its number, section, title, kind and lint counts.",
@@ -13674,6 +17444,36 @@
                 "s2"
               ],
               "additionalProperties": false
+            },
+            "skip": {
+              "type": "boolean"
+            },
+            "template": {
+              "type": "string",
+              "enum": [
+                "title",
+                "opener",
+                "split",
+                "cols",
+                "title-only",
+                "one-column",
+                "statement",
+                "section-description",
+                "mood",
+                "big-number",
+                "blank",
+                "rows",
+                "plain",
+                "table",
+                "figure",
+                "pair",
+                "tiles",
+                "details",
+                "board",
+                "matrix",
+                "closing"
+              ],
+              "description": "One of the layout list (gslides-parity SPEC 5.2)"
             }
           },
           "required": [
@@ -14262,6 +18062,727 @@
       "returnsImages": false
     },
     {
+      "name": "deck_new_slide",
+      "action": "slide.new",
+      "description": "Inserts one slide made from a layout with empty placeholders after the named slide (or first in the section), as one slide.insert with template set; a Section header starts a new section that takes the slides after the anchor.",
+      "inputSchema": {
+        "$id": "#/$defs/SlideNewInput",
+        "type": "object",
+        "properties": {
+          "layout": {
+            "type": "string",
+            "enum": [
+              "title",
+              "opener",
+              "split",
+              "cols",
+              "title-only",
+              "one-column",
+              "statement",
+              "section-description",
+              "mood",
+              "big-number",
+              "blank",
+              "rows",
+              "plain",
+              "table",
+              "figure",
+              "pair",
+              "tiles",
+              "details",
+              "board",
+              "matrix",
+              "closing"
+            ],
+            "description": "One of the layout list (gslides-parity SPEC 5.2)"
+          },
+          "after": {
+            "description": "The slide the new one follows; first in the section when absent",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "sectionId": {
+            "description": "The section; the anchor's section, or the last section, when absent",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "id": {
+            "description": "The slide id; <layout>-<n> with the first free n when absent",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "layout",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/SlideNewOutput",
+        "type": "object",
+        "properties": {
+          "slide": {
+            "$ref": "#/$defs/Slide"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "outline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "slides": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                      },
+                      "n": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "content",
+                          "opener",
+                          "mood",
+                          "closing",
+                          "title",
+                          "statement"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "n",
+                      "title",
+                      "kind"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "slides"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "slide",
+          "revision",
+          "outline"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "New slide",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_duplicate_slide",
+      "action": "slide.duplicate",
+      "description": "Copies the named slides with fresh ids after the last of them, in one write; a copied section header starts a new section.",
+      "inputSchema": {
+        "$id": "#/$defs/SlideDuplicateInput",
+        "type": "object",
+        "properties": {
+          "slideIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "One or more slide ids"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideIds",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/SlideDuplicateOutput",
+        "type": "object",
+        "properties": {
+          "slides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Slide"
+            }
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "outline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "slides": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                      },
+                      "n": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "content",
+                          "opener",
+                          "mood",
+                          "closing",
+                          "title",
+                          "statement"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "n",
+                      "title",
+                      "kind"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "slides"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "slides",
+          "revision",
+          "outline"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Duplicate slide",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_skip_slide",
+      "action": "slide.skip",
+      "description": "Sets or clears skip on the named slides in one write: a skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked.",
+      "inputSchema": {
+        "$id": "#/$defs/SlideSkipInput",
+        "type": "object",
+        "properties": {
+          "slideIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "One or more slide ids"
+          },
+          "skip": {
+            "type": "boolean",
+            "description": "true skips the slides, false shows them again"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideIds",
+          "skip",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/SlideSkipOutput",
+        "type": "object",
+        "properties": {
+          "slideIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "skip": {
+            "type": "boolean"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "slideIds",
+          "skip",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Skip slide",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_apply_layout",
+      "action": "slide.applyLayout",
+      "description": "Applies a layout to the named slides in one write, one slide.replace per slide: the title, the body, the lists, the tables and the pictures move into the matching placeholders and the rest is appended; only a Title slide or a Main point drops what does not fit, and the output names the dropped blocks.",
+      "inputSchema": {
+        "$id": "#/$defs/SlideApplyLayoutInput",
+        "type": "object",
+        "properties": {
+          "slideIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "One or more slide ids"
+          },
+          "layout": {
+            "type": "string",
+            "enum": [
+              "title",
+              "opener",
+              "split",
+              "cols",
+              "title-only",
+              "one-column",
+              "statement",
+              "section-description",
+              "mood",
+              "big-number",
+              "blank",
+              "rows",
+              "plain",
+              "table",
+              "figure",
+              "pair",
+              "tiles",
+              "details",
+              "board",
+              "matrix",
+              "closing"
+            ],
+            "description": "One of the layout list (gslides-parity SPEC 5.2)"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideIds",
+          "layout",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/SlideApplyLayoutOutput",
+        "type": "object",
+        "properties": {
+          "slides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Slide"
+            }
+          },
+          "dropped": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slideId": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "blockIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "pattern": "^[a-z0-9][a-z0-9-]*$"
+                  }
+                }
+              },
+              "required": [
+                "slideId",
+                "blockIds"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "moved": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Finding"
+            }
+          }
+        },
+        "required": [
+          "slides",
+          "dropped",
+          "moved",
+          "revision",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Apply layout",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_import_slides",
+      "action": "slide.import",
+      "description": "Copies slides from another deck after the named slide in one write: the assets they use are copied into this deck, colliding slide ids are renamed, and the output lists the slides and the assets that came over.",
+      "inputSchema": {
+        "$id": "#/$defs/SlideImportInput",
+        "type": "object",
+        "properties": {
+          "sourceDeckId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+            "description": "The deck the slides come from"
+          },
+          "slideIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The slides to copy, in the order they land"
+          },
+          "after": {
+            "description": "The slide the copies follow; first in the section when absent",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "sectionId": {
+            "description": "The section; the anchor's section, or the last section, when absent",
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "sourceDeckId",
+          "slideIds",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/SlideImportOutput",
+        "type": "object",
+        "properties": {
+          "slides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Slide"
+            }
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The asset ids copied into this deck"
+          },
+          "renamed": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "to": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "outline": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "slides": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                      },
+                      "n": {
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": [
+                          "content",
+                          "opener",
+                          "mood",
+                          "closing",
+                          "title",
+                          "statement"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "n",
+                      "title",
+                      "kind"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "slides"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "slides",
+          "assets",
+          "renamed",
+          "revision",
+          "outline"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Import slides",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_replace_text",
+      "action": "text.replaceAll",
+      "description": "Replaces every occurrence of a string in the visible text of the deck (every Text of every block, the title slide fields, the table cells and the speaker notes) in one write, case insensitive unless asked; the output counts the replacements.",
+      "inputSchema": {
+        "$id": "#/$defs/TextReplaceAllInput",
+        "type": "object",
+        "properties": {
+          "find": {
+            "type": "string",
+            "minLength": 1
+          },
+          "replace": {
+            "type": "string"
+          },
+          "matchCase": {
+            "description": "Match the case exactly; off by default",
+            "type": "boolean"
+          },
+          "slideIds": {
+            "description": "Restrict to these slides",
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            }
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "find",
+          "replace",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/TextReplaceAllOutput",
+        "type": "object",
+        "properties": {
+          "replacements": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "slideIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+            },
+            "description": "The slides that changed"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "replacements",
+          "slideIds",
+          "revision"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Find and replace",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
       "name": "deck_update_block",
       "action": "block.set",
       "description": "Writes one property of a block by JSON pointer; an absent value deletes it.",
@@ -14823,6 +19344,84 @@
         "idempotentHint": false
       },
       "milestone": "M6",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_duplicate_block",
+      "action": "block.duplicate",
+      "description": "Copies the named blocks of a slide with fresh ids, each after its original; on a freeform slide the copy sits 16 px right and down and on top of the stack.",
+      "inputSchema": {
+        "$id": "#/$defs/BlockDuplicateInput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "blockIds": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$"
+            }
+          },
+          "baseRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The revision the caller read; a stale value is rejected with 409"
+          }
+        },
+        "required": [
+          "slideId",
+          "blockIds",
+          "baseRevision"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/BlockDuplicateOutput",
+        "type": "object",
+        "properties": {
+          "slide": {
+            "$ref": "#/$defs/Slide"
+          },
+          "revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Finding"
+            }
+          },
+          "blockIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9-]*$"
+            },
+            "description": "The ids of the copies, in input order"
+          }
+        },
+        "required": [
+          "slide",
+          "revision",
+          "findings",
+          "blockIds"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Duplicate block",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      },
+      "milestone": "GS1",
       "returnsImages": false
     },
     {
@@ -18160,6 +22759,8 @@
               "copy/full-sentence-caption",
               "copy/contrast-pair",
               "copy/metaphor-candidate",
+              "copy/empty-placeholder",
+              "table/size",
               "contrast/both-themes",
               "layout/empty-half",
               "layout/pair-gaps",
@@ -18263,6 +22864,8 @@
               "copy/full-sentence-caption",
               "copy/contrast-pair",
               "copy/metaphor-candidate",
+              "copy/empty-placeholder",
+              "table/size",
               "contrast/both-themes",
               "layout/empty-half",
               "layout/pair-gaps",
@@ -18724,6 +23327,18 @@
           },
           "edit": {
             "type": "boolean"
+          },
+          "zoom": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "const": "fit"
+              }
+            ]
           }
         },
         "required": [
@@ -18742,6 +23357,99 @@
         "idempotentHint": true
       },
       "milestone": "M3",
+      "returnsImages": false
+    },
+    {
+      "name": "deck_set_zoom",
+      "action": "view.zoom",
+      "description": "Sets the stage scale in the editor, a factor of the sheet size or fit; a view action with no document field.",
+      "inputSchema": {
+        "$id": "#/$defs/ViewZoomInput",
+        "type": "object",
+        "properties": {
+          "zoom": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "maximum": 4
+              },
+              {
+                "type": "string",
+                "const": "fit"
+              }
+            ],
+            "description": "A factor between 0.25 and 4, or 'fit' for the stage's own fit"
+          }
+        },
+        "required": [
+          "zoom"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/ViewGotoOutput",
+        "type": "object",
+        "properties": {
+          "slideId": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "n": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "slide",
+              "grid",
+              "book"
+            ]
+          },
+          "theme": {
+            "type": "string",
+            "enum": [
+              "light",
+              "dark"
+            ]
+          },
+          "present": {
+            "type": "boolean"
+          },
+          "edit": {
+            "type": "boolean"
+          },
+          "zoom": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              {
+                "type": "string",
+                "const": "fit"
+              }
+            ]
+          }
+        },
+        "required": [
+          "slideId",
+          "n",
+          "mode",
+          "theme",
+          "present"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Zoom",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "milestone": "GS1",
       "returnsImages": false
     },
     {
@@ -18853,6 +23561,14 @@
                 }
               }
             ]
+          },
+          "includeSkipped": {
+            "description": "Export the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)",
+            "type": "boolean"
+          },
+          "includeNotes": {
+            "description": "Carry the speaker notes; left out by default (gslides-parity decision 15.2)",
+            "type": "boolean"
           },
           "out": {
             "description": "Output directory; defaults to .turboslide/export",
@@ -19203,6 +23919,77 @@
       "returnsImages": false
     },
     {
+      "name": "deck_export_text",
+      "action": "export.text",
+      "description": "The deck as plain text: one block of paragraphs per slide in order, table cells joined by tabs, a blank line between slides, the notes after each slide when asked; skipped slides left out unless asked.",
+      "inputSchema": {
+        "$id": "#/$defs/ExportTextInput",
+        "type": "object",
+        "properties": {
+          "slideIds": {
+            "description": "A subset; defaults to 'all'",
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "all"
+              },
+              {
+                "minItems": 1,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                }
+              }
+            ]
+          },
+          "includeNotes": {
+            "description": "Append each slide’s speaker notes",
+            "type": "boolean"
+          },
+          "includeSkipped": {
+            "description": "Include the skipped slides",
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$id": "#/$defs/ExportTextOutput",
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "slides": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991,
+            "description": "How many slides the text covers"
+          },
+          "bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "text",
+          "slides",
+          "bytes"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Download as plain text",
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      },
+      "milestone": "GS1",
+      "returnsImages": false
+    },
+    {
       "name": "deck_build",
       "action": "build.run",
       "description": "Writes the single-file HTML deck with fonts and assets inlined and asserts the size budget.",
@@ -19222,6 +24009,14 @@
             "type": "integer",
             "minimum": 1,
             "maximum": 100
+          },
+          "includeSkipped": {
+            "description": "Build the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)",
+            "type": "boolean"
+          },
+          "includeNotes": {
+            "description": "Carry the speaker notes into the file",
+            "type": "boolean"
           }
         },
         "required": [

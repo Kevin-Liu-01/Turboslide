@@ -1,7 +1,9 @@
 # PPTX export
 
 What "perfect PPTX" means in Turboslide, how the flatten file is built and measured, what the
-editable text mode promises, how a file is verified, and what PowerPoint is known to do with it.
+editable text mode promises, how a file is verified, what PowerPoint is known to do with it, what
+the Google Slides parity round added (skipped slides, notes, links, paragraph breaks, the table
+block) and how the PDF is printed and gated.
 Written on 2026-09-11 for Kevin's directive ("instead of exporting to google slides just make it
 perfect pptx"), which also removed the Google Slides exporter (SPEC 8.3 is not implemented; the
 `gslides` format, its dry run, the `/api/assets/:token` image host, `calibration/slides.json` and
@@ -46,6 +48,95 @@ family with the bold flag (`b="1"`), a run under 400 as the Regular family, and 
 residual carries one line per such weight (`fonts: weight 700 exported as the Medium cut plus
 bold ...`), so a file that differs from the web render in weight says so. The menu calls this
 mode "Editable text" and states the tolerance; nothing in it is called identical.
+
+## The Google Slides parity round (gslides-parity SPEC 7.2 to 7.6)
+
+Both modes take two flags: `--include-skipped` carries the slides marked `skip` (left out by
+default, SPEC 7.2.1; the counter counts the slides the file holds, so a deck of seven with one
+skipped slide numbers its pages 01 to 06 of 06, and the report's residual counts the slides left
+out), and `--include-notes` carries the speaker notes as notes parts (left out by default, decision
+15.2; the notes parts pptxgenjs writes for every slide stay empty without it). An empty Text (a
+layout's placeholder, SPEC 5.4) produces no run in either mode: the renderer draws nothing for it,
+so the measurer finds no line, and a slide whose heading is empty is named "Slide n".
+
+Links (SPEC 7.2.7, 7.2.8) travel in both modes. A run link that is a URL is a hyperlink with the
+hairline underline in Editable text and nothing on the invisible layer of Perfect (the cover
+picture takes the click); a run link to a slide (`#s/<id>`, `#next`, `#previous`, `#first`,
+`#last`) is a slide jump (`ppaction://hlinksldjump`) to the slide's number in the file in both
+modes, resolved against the slide the link sits on; whether PowerPoint honours a jump on an
+invisible run under the cover picture is unverified and the report says so. A block link is the
+hyperlink of the block's text box, rectangle, line or picture in Editable text, and an invisible
+rectangle over the block's box above the cover in Perfect (a fill at 100 percent transparency, so
+the whole box is a hit target; a shape with no fill is clickable on its edge only). A link to a
+slide that is not in the file (a skipped slide) is dropped and named in `residual`. The resolver is
+`packages/export/src/pptx/links.ts`.
+
+A paragraph break (SPEC 7.2.9, `\n` in a paragraph, text box, box or table cell) is one `.para`
+span per paragraph in the markup; the measurer records the paragraph of every line and the emitter
+writes `breakLine: true` on the last run of a paragraph, so the file holds one `<a:p>` per paragraph
+with the same alignment and pitch, and a soft break inside one.
+
+The table block (SPEC 7.3) is a CSS grid in the ruled rows idiom on the sheet and an `a:tbl` in
+Editable text: `addTable` with the measured column widths and row heights in inches (`colW`,
+`rowH`), per cell the alignment, the vertical alignment, the column fill, the cell padding as the
+margin (the top one lifted by the first-baseline constant of `baseline.ts` the way a text box is),
+the rules as cell borders (the hairline above the first row, the row rule under every row, the ink
+rule under a header row, no side borders) and the export faces on every run
+(`packages/export/src/pptx/table.ts`). The verify loop measures every cell as its own block against
+the 3 px text budget (the render record carries `<blockId>/<r>/<c>` entries of type `cell`); when a
+cell misses it, `exportPptx` rewrites the theme's file with that table as the ruled rows
+construction (hairlines plus grouped text boxes, the way `rows` travels) and verifies again, and
+the report names the block under `residual`. `--tables table|rows` forces either form. SPEC 8.2's
+"never a PPTX table" is scoped to `rows` and `plain` (SPEC 7.9 item 2). In Perfect the cells are
+invisible runs like every Text. A numbered list (SPEC 7.2.6) writes its numeral as its own run,
+grouped with the item's rule and text.
+
+Measured on the fixture deck `decks/fixture/gslides` on 2026-09-12 (Chrome for Testing
+147.0.7727.15 on ANGLE Metal, no LibreOffice on this machine): Perfect writes six pages of the
+seven slides (`skipped` left out) as palette PNGs with 0.000 percent decoded mismatch, `perfect`
+and `passed` true, 8 hyperlinks (two slide jumps on the breaks slide's invisible runs, one rectangle
+per linked block); Editable text writes the 4 by 4 pricing table as one `a:tbl`, 10 hyperlinks,
+one `<a:p>` per paragraph on the breaks slide, the notes when asked, 47 parts and 58 relationships
+valid, and python-pptx reopens it (6 slides, 32 shapes). The per cell budget of the table is
+measured where LibreOffice runs (the render worker image); on this machine the report says so.
+
+## PDF (gslides-parity SPEC 7.6)
+
+`turboslide export pdf [--appearance light|dark] [--include-skipped] [--verify] --out <dir>`
+(`export.run` with `format: 'pdf'`) writes `<deckId>-<theme>.pdf` through Chromium's own printer
+(`packages/export/src/pdf/build.ts` over `packages/headless/src/pdf.ts`): the render package's
+print document (`renderPrintDocument`, one 960 by 540 pt page per slide, PowerPoint's 13.333 by
+7.5 in, margin 0, the skipped slides removed unless asked, notes never) laid out at the sheet's own
+1600 by 900 px and printed with `page.pdf({ preferCSSPageSize: true, printBackground: true, scale:
+0.8 })`. The text is vector and searchable, the pictures travel as their twin files, the dither
+canvases are drawn one cell per 2 by 2 block so a viewer that interpolates the canvas bitmap shows
+the same cells. Two findings decided the construction: a CSS zoom or transform of 0.8 made Chromium
+snap every hairline to whole CSS pixels before scaling (every rule landed half a raster pixel off
+and a pixel wide), where the print scale keeps them exact; and without `contain: strict` on the
+page box, Chromium's print fragmentation dropped whole blocks from any page that had a page after
+it (the swatches of `color` and the twelve tile pictures of `engines` were absent from the GT
+deck's PDF while the same slides printed alone were complete).
+
+The gate runs under `--verify` where poppler exists: `pdftoppm` (pdftocairo when it is the one
+present; SPEC 7.6 names `pdftoppm -r 144`, and the rasterizer runs at 3200 by 1800 instead so the
+page sits on the 2x render's pixel grid) rasterizes each page and pixelmatch at threshold 0.1 diffs
+it against the 2x web render of the same slide, shot from the render surface in the same browser.
+Everything the browser draws itself is gated: a page at or under 0.1 percent is the target, a page
+between 0.1 and 0.5 percent ships with the worst page named in the report, a page over 0.5 percent
+fails the export. The picture regions (img, canvas and raster elements) are compared separately and
+reported, never gated: the file holds the picture bytes and every viewer resamples them with its own
+filter (a 1x dither twin upscaled to 2x differs by 20 percent between poppler and Chromium, a
+downscaled screenshot by 2 to 6, where the text around them sits at 0.02), the reading the flatten
+loop gives regenerated pictures. Without poppler the gate is the page count. The report is an
+ExportReport with `format: 'pdf'` so every reader of a PPTX report reads it: `files[0].bytes` is
+the size, `slides.length` the pages, each slide's `verify.fraction` its mismatch outside the
+pictures and `verify.pictureFraction` inside them.
+
+Measured on 2026-09-12 (pdftoppm 26.08.0): the fixture deck's PDF holds 6 pages at 960 by 540 pt,
+every page under the target (worst 0.035 percent, `breaks`), `perfect` and `passed` true, in 7 s;
+the GT deck's PDF holds 85 pages at 960 by 540 pt, 19.1 MB, 0 pages over the fail line, 41 between
+the target and the fail line (worst `details` at 0.264 percent outside its pictures, mean 0.092),
+`passed` true, in 147 s including the gate.
 
 ## The raster policy
 

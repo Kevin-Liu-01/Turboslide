@@ -150,6 +150,12 @@ export const BLOCK_CSS = `
 .ts-sheet .free > .rule-h { width: 100%; }
 .ts-sheet .free > .rule-v { height: 100%; }
 .ts-sheet .free > h1, .ts-sheet .free > h2, .ts-sheet .free > .big, .ts-sheet .free > p { margin: 0; }
+/* a linked block (gslides-parity SPEC 7.2.7) sits in its .link wrapper, which takes the box the block would have */
+.ts-sheet .free > .link { display: block; width: 100%; height: 100%; }
+.ts-sheet .free > .link > .box, .ts-sheet .free > .link > svg.shape { width: 100%; height: 100%; }
+.ts-sheet .free > .link > .rule-h { width: 100%; }
+.ts-sheet .free > .link > .rule-v { height: 100%; }
+.ts-sheet .free > .link > h1, .ts-sheet .free > .link > h2, .ts-sheet .free > .link > .big, .ts-sheet .free > .link > p { margin: 0; }
 /* box: a hairline rectangle with its text at the body size (head:62); the border color and width are inline */
 .ts-sheet .box { display: block; box-sizing: border-box; font-size: 22px; line-height: 1.5; color: var(--ink); }
 .ts-sheet .box .box-text { margin: 0; }

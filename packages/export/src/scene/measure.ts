@@ -4,7 +4,10 @@
 // walk over Range.getClientRects() groups characters into lines and splits the string at the line
 // boundaries, so the PPTX gets one hard break per browser line and no renderer rewraps. A `.rows`
 // key's inline `<svg>` icon is not text and never produces a line (pptx report section 6 item 1);
-// the hidden `GT` letters of a gt-word become a run at the mark's box (SPEC 5.2). Hairlines are
+// the hidden `GT` letters of a gt-word become a run at the mark's box (SPEC 5.2); a paragraph
+// break is the `.para` span a line sits in, a block link the `.link` wrapper around the block, a
+// numbered item's numeral its own `data-num` carrier, and a table block yields its rules and its
+// grid (gslides-parity SPEC 7.2.6, 7.2.7, 7.3, 7.4). Hairlines are
 // read from the computed borders of the native blocks, plates and chips from their boxes, and
 // every element the exporter must screenshot carries a `data-ts-rid` tag written by
 // `tagRasterElements`, which runs on every page of the extraction (the 1x page the scene is measured
@@ -21,6 +24,8 @@ import type {
   SceneRect,
   SceneRule,
   SceneSegment,
+  SceneTable,
+  SceneTableCell,
   SceneText,
 } from './types.ts';
 
@@ -182,8 +187,10 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         gtLetters?: number;
         gapAfter?: number;
         spaceWidth?: number;
+        /** The `.para` span the run sits in (gslides-parity SPEC 7.4); 0 without one. */
+        paragraph: number;
       };
-      type Line = { top: number; bottom: number; runs: Run[] };
+      type Line = { top: number; bottom: number; runs: Run[]; paragraph: number };
 
       const firstOf = (list: string): Element | null => {
         for (const sel of list.split(',')) {
@@ -232,15 +239,27 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
       const blockEls = [...slide.querySelectorAll<HTMLElement>('[data-block]')].filter(
         (el) => !isComposite(el),
       );
+      // A linked block sits in its `.link` wrapper (an anchor outside the editor, render
+      // blocks/prompt.ts); the wrapper's first element is the block itself, so a block inside a
+      // linked composite is not mistaken for a linked one (gslides-parity SPEC 7.2.7).
+      const linkOf = (el: Element): string | undefined => {
+        const wrapper = el.parentElement;
+        if (!wrapper || !wrapper.classList.contains('link') || wrapper.firstElementChild !== el)
+          return undefined;
+        return wrapper.getAttribute('href') ?? wrapper.getAttribute('data-link') ?? undefined;
+      };
       const blocks: SceneBlock[] = blockEls.map((el) => {
         const type = el.getAttribute('data-type') ?? el.tagName.toLowerCase();
+        const link = linkOf(el);
         return {
           blockId: el.getAttribute('data-block') ?? '',
           type,
           box: toBox(el.getBoundingClientRect()),
           native: nativeTypes.includes(type),
+          ...(link !== undefined ? { link } : {}),
         };
       });
+      const linkOfBlock = new Map(blocks.map((b) => [b.blockId, b.link]));
       const ownerOf = (el: Element): HTMLElement | null => {
         let cur: HTMLElement | null = el.closest('[data-block]');
         while (cur && isComposite(cur)) cur = cur.parentElement?.closest('[data-block]') ?? null;
@@ -314,17 +333,26 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           probe.remove();
           return round(width);
         };
+        // the paragraph spans of a multiline Text, in order (render blocks/prompt.ts)
+        const paras = [...el.querySelectorAll('.para')];
+        const paragraphOf = (node: Element): number => {
+          const para = node.closest('.para');
+          if (!para || !el.contains(para)) return 0;
+          const at = paras.indexOf(para);
+          return at < 0 ? 0 : at;
+        };
         const pushRun = (
           rect: DOMRect,
           text: string,
           style: Style,
           gt: boolean,
+          paragraph: number,
           gtLetters?: number,
         ): void => {
           const cy = rect.top + rect.height / 2;
           let line = lines.find((l) => cy >= l.top - 1 && cy <= l.bottom + 1);
           if (!line) {
-            line = { top: rect.top, bottom: rect.bottom, runs: [] };
+            line = { top: rect.top, bottom: rect.bottom, runs: [], paragraph };
             lines.push(line);
           }
           if (!gt) {
@@ -337,7 +365,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
             last.rect = union(last.rect, rect);
             return;
           }
-          const run: Run = { text, rect, style };
+          const run: Run = { text, rect, style, paragraph };
           if (gt) run.gt = true;
           if (gtLetters !== undefined) run.gtLetters = gtLetters;
           line.runs.push(run);
@@ -364,15 +392,20 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
               letters,
               styleOf(host, el),
               true,
+              paragraphOf(host),
               lettersWidth(host, letters),
             );
             continue;
           }
+          // a prompt is not content (gslides-parity SPEC 5.4); the render surface never draws
+          // one, and the guard keeps a live document honest too
+          if (parent.closest('[data-prompt]')) continue;
           const style = styleOf(parent, el);
+          const paragraph = paragraphOf(parent);
           let runText = '';
           let runRect: DOMRect | null = null;
           const flush = (): void => {
-            if (runRect && runText.length > 0) pushRun(runRect, runText, style, false);
+            if (runRect && runText.length > 0) pushRun(runRect, runText, style, false, paragraph);
             runText = '';
             runRect = null;
           };
@@ -442,6 +475,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           const top = inline.top - (lh - inline.height) / 2;
           return {
             box: [round(inline.left - ox), round(top - oy), round(inline.width), round(lh)] as Box,
+            paragraph: line.paragraph,
             runs: line.runs.map((r) => {
               const out: SceneText['lines'][number]['runs'][number] = {
                 text: r.text,
@@ -488,13 +522,17 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           native,
         };
         if (group !== undefined) text.group = group;
+        const link = linkOfBlock.get(blockId);
+        if (link !== undefined) text.link = link;
         return text;
       };
 
-      // Text carriers in document order.
+      // Text carriers in document order: every data-run Text, and the numeral of a numbered
+      // list item (data-num, gslides-parity SPEC 7.2.6), which travels as its own run.
       const texts: SceneText[] = [];
-      slide.querySelectorAll<HTMLElement>('[data-run]').forEach((el) => {
-        const id = el.getAttribute('data-run') ?? '';
+      slide.querySelectorAll<HTMLElement>('[data-run], [data-num]').forEach((el) => {
+        const numeral = el.getAttribute('data-num');
+        const id = numeral !== null ? `${numeral}/num` : (el.getAttribute('data-run') ?? '');
         const owner = ownerOf(el);
         const blockId = owner?.getAttribute('data-block') ?? id.split('/')[0] ?? '';
         const native = isNativeOwner(el);
@@ -506,6 +544,25 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         } else if (owner && el.parentElement === owner && owner.classList.contains('plain')) {
           const i = [...owner.children].indexOf(el);
           group = `${blockId}/item/${i}`;
+        } else if (
+          owner &&
+          row &&
+          row.parentElement === owner &&
+          owner.classList.contains('plain') &&
+          row.classList.contains('item')
+        ) {
+          // a numbered item: the numeral and the text share the item's group
+          const i = [...owner.children].indexOf(row);
+          group = `${blockId}/item/${i}`;
+        } else if (
+          owner &&
+          row &&
+          row.parentElement === owner &&
+          owner.classList.contains('table')
+        ) {
+          // a table cell shares its row's group (SPEC 7.3; the ruled rows construction)
+          const i = [...owner.children].indexOf(row);
+          group = `${blockId}/row/${i}`;
         }
         const text = toText(el, id, blockId, native, group);
         if (text) texts.push(text);
@@ -515,6 +572,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
       const rules: SceneRule[] = [];
       const rects: SceneRect[] = [];
       const lines: SceneSegment[] = [];
+      const tables: SceneTable[] = [];
       const borderRules = (
         el: Element,
         blockId: string,
@@ -567,6 +625,76 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           [...el.children].forEach((row, i) =>
             borderRules(row, blockId, 'rows', `${blockId}/row/${i}`, ['bottom']),
           );
+        } else if (type === 'table') {
+          // The table block (gslides-parity SPEC 7.3): the rules of the ruled rows construction
+          // (a hairline above, one under every row, grouped with the row's cells), and the grid
+          // addTable takes: the column and row boxes, the cells' alignment, fill and padding, the
+          // rule colors from the computed borders, the vertical alignment and the font size.
+          borderRules(el, blockId, 'rows', undefined, ['top']);
+          const rowEls = [...el.querySelectorAll<HTMLElement>(':scope > .tr')];
+          rowEls.forEach((row, i) =>
+            borderRules(row, blockId, 'rows', `${blockId}/row/${i}`, ['bottom']),
+          );
+          const rootStyleOf = getComputedStyle(el);
+          const alignOf = (value: string): 'left' | 'center' | 'right' =>
+            value === 'center' ? 'center' : value === 'right' || value === 'end' ? 'right' : 'left';
+          const valignOf = (value: string): 'top' | 'middle' | 'bottom' =>
+            value === 'center'
+              ? 'middle'
+              : value === 'end' || value === 'flex-end'
+                ? 'bottom'
+                : 'top';
+          let rule: SceneTable['rule'] | undefined;
+          let headerRule: SceneTable['headerRule'];
+          const rows = rowEls.map((row) => {
+            const r = row.getBoundingClientRect();
+            const c = getComputedStyle(row);
+            const header = row.classList.contains('header');
+            const width = parseFloat(c.borderBottomWidth);
+            const line = { color: c.borderBottomColor, width: round(width) };
+            if (header) headerRule ??= line;
+            else rule ??= line;
+            const cells: SceneTableCell[] = [
+              ...row.querySelectorAll<HTMLElement>(':scope > .td'),
+            ].map((cell) => {
+              const cs = getComputedStyle(cell);
+              const fill = parseFloat(cs.backgroundColor.split(',')[3] ?? '1');
+              const out: SceneTableCell = {
+                box: toBox(cell.getBoundingClientRect()),
+                textId: cell.getAttribute('data-run') ?? '',
+                align: alignOf(cs.textAlign),
+                margin: [
+                  round(parseFloat(cs.paddingTop)),
+                  round(parseFloat(cs.paddingRight)),
+                  round(parseFloat(cs.paddingBottom)),
+                  round(parseFloat(cs.paddingLeft)),
+                ],
+              };
+              if (cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && fill !== 0)
+                out.fill = cs.backgroundColor;
+              return out;
+            });
+            return { y: round(r.top - oy), h: round(r.height), header, cells };
+          });
+          const firstRow = rows[0];
+          const columns = firstRow
+            ? firstRow.cells.map((cell) => ({ x: cell.box[0], w: cell.box[2] }))
+            : [];
+          const fallbackRule = {
+            color: rootStyleOf.borderTopColor,
+            width: round(parseFloat(rootStyleOf.borderTopWidth) || 1),
+          };
+          const table: SceneTable = {
+            blockId,
+            box: toBox(el.getBoundingClientRect()),
+            columns,
+            rows,
+            rule: rule ?? headerRule ?? fallbackRule,
+            valign: valignOf(rowEls[0] ? getComputedStyle(rowEls[0]).alignItems : 'start'),
+            size: round(parseFloat(rootStyleOf.fontSize)),
+          };
+          if (headerRule) table.headerRule = headerRule;
+          tables.push(table);
         } else if (type === 'plain' || type === 'refs') {
           // a top hairline (plain) and a soft rule under every item; refs has no top border, and
           // borderRules reads the computed widths, so it emits none
@@ -795,6 +923,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         rules,
         rects,
         lines,
+        tables,
         rasters,
         blocks,
         fonts,

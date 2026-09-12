@@ -42,6 +42,8 @@ export type RenderSlidesInput = {
   slideIds: 'all' | string[];
   themes?: Theme[];
   scale?: 1 | 2;
+  /** PNG (default) or a JPEG at quality 92 (render.slide `format`, gslides-parity SPEC 7.6). */
+  format?: 'png' | 'jpg';
 };
 
 export type RenderSlidesResult = { records: RenderRecord[]; images: string[] };
@@ -53,8 +55,9 @@ function imageUrl(
   theme: Theme,
   scale: 1 | 2,
   revision: number,
+  format: 'png' | 'jpg' = 'png',
 ): string {
-  return `/api/render/${encodeURIComponent(slideId)}?deck=${encodeURIComponent(deckId)}&theme=${theme}&scale=${scale}&revision=${revision}`;
+  return `/api/render/${encodeURIComponent(slideId)}?deck=${encodeURIComponent(deckId)}&theme=${theme}&scale=${scale}&revision=${revision}${format === 'jpg' ? '&format=jpg' : ''}`;
 }
 
 function isTheme(value: unknown): value is Theme {
@@ -73,7 +76,15 @@ const renderSlideImagesFn = createServerFn({ method: 'POST' })
     }
     const scale: unknown = input.scale ?? 1;
     if (scale !== 1 && scale !== 2) throw new TypeError('scale must be 1 or 2');
-    return { deckId: input.deckId, slideIds: slideSelection(input.slideIds), themes, scale };
+    const format: unknown = input.format ?? 'png';
+    if (format !== 'png' && format !== 'jpg') throw new TypeError('format must be png or jpg');
+    return {
+      deckId: input.deckId,
+      slideIds: slideSelection(input.slideIds),
+      themes,
+      scale,
+      format,
+    };
   })
   .handler(async ({ data }): Promise<string> => {
     // a RangeError when the deck is missing; the open syncs the store's copy, the twins follow
@@ -87,13 +98,20 @@ const renderSlideImagesFn = createServerFn({ method: 'POST' })
       ids = data.slideIds;
     }
     const scale = data.scale ?? 1;
+    const format = data.format ?? 'png';
     const records: RenderRecord[] = [];
     const images: string[] = [];
     // sequential: the local queue runs one Chromium at a time and the machine is shared
     for (const slideId of ids) {
       for (const theme of data.themes ?? ['light', 'dark']) {
-        const rendered = await worker().renderSlide({ deckId: data.deckId, slideId, theme, scale });
-        const url = imageUrl(data.deckId, slideId, theme, scale, rendered.record.revision);
+        const rendered = await worker().renderSlide({
+          deckId: data.deckId,
+          slideId,
+          theme,
+          scale,
+          ...(format === 'jpg' ? { format: 'jpg' as const } : {}),
+        });
+        const url = imageUrl(data.deckId, slideId, theme, scale, rendered.record.revision, format);
         records.push({ ...rendered.record, image: url });
         images.push(url);
       }

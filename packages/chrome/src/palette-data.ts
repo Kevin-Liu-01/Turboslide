@@ -7,8 +7,10 @@
 // from the current view, or names the input it still needs. The Insert group (Kevin, 2026-09-11:
 // "reuse primitives and icons like boxes and shapes") leads with the primitives palette: Box,
 // Shape in its five kinds, Rule, Text, Icon (through the sprite picker), Image and Material,
-// then the grammar's other blocks and the slide templates; the same entries feed the toolbar's
-// Insert menu (InsertMenu.tsx). On a freeform slide every inserted block carries a position box
+// then the grammar's other blocks and the 21 layouts of @turboslide/schema/layouts as New slide
+// entries (gslides-parity SPEC 5.1: one list in one order everywhere; each runs slide.new); the same
+// entries feed the toolbar's Insert menu (InsertMenu.tsx). The `menus` and `layouts` groups are the
+// ToolFinder's (Search the menus, SPEC 2.10) and stay empty in the full palette. On a freeform slide every inserted block carries a position box
 // (docs/freeform.md) under the selected block or at the content box's top left.
 import type { ActionId, ActionSpec } from '@turboslide/schema/actions';
 import { actionsInOrder } from '@turboslide/schema/actions';
@@ -27,9 +29,10 @@ import { authorName } from './dispatch';
 import type { IconName } from './icons';
 import { BLOCK_ICONS, KIND_ICONS } from './inspector/sections';
 import type { ShellMode } from './shell-data';
-import { SLIDE_TEMPLATES, pickAsset, templateTitle } from './slide-templates';
+import { LAYOUTS, pickAsset } from '@turboslide/schema/layouts';
 
-export type PaletteGroupId = 'slides' | 'insert' | 'actions' | 'view' | 'versions';
+export type PaletteGroupId =
+  'slides' | 'insert' | 'actions' | 'view' | 'versions' | 'menus' | 'layouts';
 
 export type PaletteGroup = {
   id: PaletteGroupId;
@@ -39,13 +42,15 @@ export type PaletteGroup = {
   prefix?: '#' | '+' | '>';
 };
 
-/** The five groups in the order the palette shows them (SPEC 6.3). */
+/** The groups in the order the palette shows them (SPEC 6.3); the last two belong to Search the menus. */
 export const PALETTE_GROUPS: ReadonlyArray<PaletteGroup> = [
+  { id: 'menus', label: 'Menus' },
   { id: 'slides', label: 'Go to slide', prefix: '#' },
   { id: 'insert', label: 'Insert', prefix: '+' },
   { id: 'actions', label: 'Actions', prefix: '>' },
   { id: 'view', label: 'View' },
   { id: 'versions', label: 'Versions' },
+  { id: 'layouts', label: 'Layouts' },
 ];
 
 /**
@@ -177,6 +182,8 @@ const DEFAULT_SIZE: Readonly<Record<string, [number, number]>> = {
   material: [480, 272],
   heading: [800, 56],
   paragraph: [640, 104],
+  /* gslides-parity SPEC 7.3: the grid picker's table on a freeform slide */
+  table: [960, 320],
 };
 
 /**
@@ -357,29 +364,26 @@ function templateEntries(ctx: PaletteContext): PaletteEntry[] {
   const section = ctx.slideId === undefined ? undefined : sectionOf(ctx.deck, ctx.slideId);
   const sectionId = section?.id ?? ctx.deck.sections[0]?.id;
   if (sectionId === undefined) return out;
-  /* one entry per slide template (slide-templates.ts): the archetype kinds and layouts of the
-     GT template with placeholder copy; a template whose asset the deck lacks is not offered */
-  const taken = new Set(Object.keys(ctx.slides));
-  for (const template of SLIDE_TEMPLATES) {
-    const id = freeSlideId(taken, `new-${template.id}`);
-    const made = template.make(id, ctx.deck, sectionId);
-    if (made === null) continue;
+  /* one entry per layout (gslides-parity SPEC 5.1, 5.3): the New slide of that layout after the
+     current slide, one slide.new; a picture layout the deck cannot make yet is not offered */
+  for (const entry of LAYOUTS) {
+    if (entry.make(`preview-${entry.id}`, ctx.deck, sectionId) === null) continue;
     out.push({
-      id: `insert:slide:${template.id}`,
+      id: `insert:slide:${entry.id}`,
       group: 'insert',
-      title: templateTitle(template),
-      hint: template.doc,
+      title: entry.label,
+      hint: entry.doc,
       meta: section ? `after this slide in ${section.name}` : 'first',
-      icon: template.icon,
-      terms: `slide template ${template.id} ${template.kind} ${template.layout ?? ''} ${template.source}`,
+      icon: KIND_ICON[entry.kind],
+      terms: `slide layout ${entry.id} ${entry.kind} ${entry.layout ?? ''} ${entry.google ? 'google' : 'gt'}`,
       insert: 'slide',
       run: {
         kind: 'dispatch',
-        action: 'slide.insert',
+        action: 'slide.new',
         input: {
+          layout: entry.id,
           sectionId,
           ...(ctx.slideId !== undefined ? { after: ctx.slideId } : {}),
-          slide: made,
           baseRevision: ctx.revision,
         },
       },

@@ -23,7 +23,11 @@ export type ShellProbe = {
 };
 
 export type ShellStateSpec = {
-  /** The key that enters the state ('[' for the list, 'g' for the grid, 'Meta+k' for the search). */
+  /**
+   * The key that enters the state ('[' for the list, 'g' for the grid, 'Meta+k' for the search),
+   * or a click: `click:<selector>` presses the first element the selector finds (the editor binds
+   * no bare letters, gslides-parity SPEC 10.2, so its states enter through its controls).
+   */
   key: string;
   /** The audit name this state records under; may depend on the probe and the viewport width. */
   name?: (probe: ShellProbe, narrow: boolean) => string;
@@ -41,6 +45,31 @@ export type ShellStateSpec = {
  * (Cmd K) and twin (Shift D). The probe fields they read are packages/lint chrome.ts probeState.
  */
 export const SHELL_STATES: Record<string, ShellStateSpec> = {
+  /* the editor's states (gslides-parity SPEC 14.1 step 18, 14.5): grid view from the bottom bar,
+     a bar menu open, the right panel open through Google's Version history chord
+     (Cmd+Option+Shift+H, menus/model.ts file.versionHistory.see). Not the toolbar's Theme button,
+     which collapses into More at or below 1100 px (SPEC 0.6, 1.3) while step 18 audits 390 px;
+     not the bottom bar's Show side panel button either, which the dev server's TanStack devtools
+     trigger covers at the bottom right (Playwright refuses the intercepted click). The chord
+     works at every width and Escape closes the panel (the shell's Esc ladder). */
+  editorGrid: {
+    key: 'click:[data-control="view.gridView"]',
+    applied: (p) => p.grid,
+    leave: 'click:[data-control="view.filmstripView"]',
+    settleMs: 700,
+  },
+  editorMenu: {
+    key: 'click:[data-control="menubar.file"]',
+    applied: (p) => Boolean(p.menu),
+    leave: 'Escape',
+    settleMs: 500,
+  },
+  editorPanel: {
+    key: 'Meta+Alt+Shift+H',
+    applied: (p) => Boolean(p.rpanel),
+    leave: 'Escape',
+    settleMs: 600,
+  },
   list: {
     key: '[',
     name: (p, narrow) => (narrow || p.overlay ? 'list-open' : 'list-closed'),
@@ -110,7 +139,9 @@ export type ShellDrivePlan<TConfig, TAudit> = {
 const hydrated = (): boolean => {
   const w = window as Window & { turboslide?: { studio?: unknown } };
   if (w.turboslide?.studio) return true;
-  return document.querySelector('.pt-viewer[data-settled]') !== null;
+  if (document.querySelector('.pt-viewer[data-settled]') !== null) return true;
+  /* the home page and the trash announce their hydration themselves (apps/studio decks.index.tsx) */
+  return document.querySelector('[data-hydrated]') !== null;
 };
 
 /**
@@ -170,6 +201,13 @@ export type ShellDriveResult<TAudit> = {
 };
 
 async function press(target: Frame, key: string, deck: boolean): Promise<void> {
+  if (key.startsWith('click:')) {
+    const selector = key.slice('click:'.length);
+    const el = await target.$(selector);
+    if (el === null) throw new Error(`state control not found: ${selector}`);
+    await el.click();
+    return;
+  }
   if (!deck) {
     await target.page().keyboard.press(key);
     return;
@@ -233,13 +271,14 @@ export async function driveShell<TConfig, TAudit extends object>(
         deck = true;
       }
     } else {
-      await page.waitForSelector(plan.readySelector ?? '.pt-viewer, .ts-studio, .viewer', {
-        timeout,
-      });
+      await page.waitForSelector(
+        plan.readySelector ?? '.pt-viewer, .ts-studio, .viewer, .ts-home-page, .ts-trash-page',
+        { timeout },
+      );
     }
     // the ported shell hydrates (data-settled, or the window API owner); the Prototemplate deck
     // and any other page without the shell root keep the fixed settle
-    const shellRoot = deck ? null : await page.$('.pt-viewer');
+    const shellRoot = deck ? null : await page.$('.pt-viewer, .ts-home-page, .ts-trash-page');
     if (shellRoot) {
       const hydrateTimeout = plan.hydrateTimeoutMs ?? 30_000;
       try {

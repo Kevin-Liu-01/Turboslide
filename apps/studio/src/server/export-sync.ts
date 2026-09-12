@@ -15,7 +15,7 @@ import { ensureDeckAssets, exportBlobClient, workerClientOptions } from './root'
  * The synchronous export (docs/hosting-chromium.md): one call runs the export job to completion
  * on the worker client, reads the produced files back and returns their bytes with the
  * ExportReport, so a serverless invocation of POST /api/export/:deckId?sync=1 answers the PPTX
- * itself instead of a job to poll. The worker runs in this process there (cli.ts execMode
+ * (or the PDF of gslides-parity SPEC 7.6, one file per run) itself instead of a job to poll. The worker runs in this process there (cli.ts execMode
  * `inprocess`, a recorded deviation from SPEC 3.3 item 7) or over HTTP when TURBOSLIDE_WORKER_URL
  * is set, in which case the files come from the worker's files route. Two themes produce two files
  * and travel as one stored zip (the PPTX parts are deflated already, SPEC 8.2 post-process). The
@@ -40,6 +40,10 @@ export type SyncExportInput = {
   verify?: boolean;
   embedFonts?: boolean;
   slideIds?: 'all' | string[];
+  /** Carry the skipped slides too (gslides-parity SPEC 7.2.1). */
+  includeSkipped?: boolean;
+  /** Carry the speaker notes (gslides-parity SPEC 7.2.13). */
+  includeNotes?: boolean;
 };
 
 export type SyncExportFile = {

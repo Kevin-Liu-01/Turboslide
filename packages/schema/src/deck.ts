@@ -20,6 +20,45 @@ export const SCHEMA_VERSION = 1;
 export const THEMES = ['gt-ink-paper'] as const;
 export type ThemeId = (typeof THEMES)[number];
 
+/**
+ * The layout ids of the layout list (gslides-parity SPEC 5.2): Google's eleven names first, in
+ * Google's order, then the GT layouts. The entries themselves live in layouts.ts, which re-exports
+ * this list; it is declared here because `SlideBase.template` names one of them and layouts.ts
+ * imports this module.
+ */
+export const LAYOUT_IDS = [
+  'title',
+  'opener',
+  'split',
+  'cols',
+  'title-only',
+  'one-column',
+  'statement',
+  'section-description',
+  'mood',
+  'big-number',
+  'blank',
+  'rows',
+  'plain',
+  'table',
+  'figure',
+  'pair',
+  'tiles',
+  'details',
+  'board',
+  'matrix',
+  'closing',
+] as const;
+export type LayoutId = (typeof LAYOUT_IDS)[number];
+
+/** The Themes panel's choice (gslides-parity SPEC 7.2.3); dark when absent. */
+export const APPEARANCES = ['light', 'dark'] as const;
+export type Appearance = (typeof APPEARANCES)[number];
+
+/** Slide numbers (gslides-parity SPEC 7.2.4): on when absent. */
+export const COUNTER_MODES = ['on', 'off', 'skip-title'] as const;
+export type CounterMode = (typeof COUNTER_MODES)[number];
+
 // ---------------------------------------------------------------------------------------------
 // Types
 
@@ -34,14 +73,26 @@ export type Deck = {
   theme: ThemeId;
   sections: Section[];
   assets: Record<AssetId, Asset>;
-  defaults?: { notes?: string };
+  defaults?: {
+    notes?: string;
+    /** the theme appearance every surface defaults to; dark when absent (gslides-parity SPEC 7.2.3) */
+    appearance?: Appearance;
+    /** the frame's slide counter; on when absent (gslides-parity SPEC 7.2.4) */
+    counter?: CounterMode;
+  };
   /** increments on every committed write */
   revision: number;
   createdAt: string;
   updatedAt: string;
+  /**
+   * Set when the deck is in the trash (gslides-parity SPEC 7.2.5): hidden from deck.list, /decks
+   * and /new until deck.restore clears it or deck.remove deletes the folder. Written by deck.trash
+   * at the store level, never through deck.set.
+   */
+  trashedAt?: string;
 };
 
-type SlideBase = {
+export type SlideBase = {
   /** on every slide file so one slide can be read, validated and migrated alone */
   schemaVersion: 1;
   id: SlideId;
@@ -50,6 +101,13 @@ type SlideBase = {
   /** speaker notes; the only place notes live */
   notes?: string;
   tags?: string[];
+  /**
+   * Skip slide (gslides-parity SPEC 7.2.1): present mode, the view route, the standalone build,
+   * print, thumbnails' play list, PDF and PPTX omit the slide unless asked; the filmstrip dims it.
+   */
+  skip?: true;
+  /** The layout the slide was made from (gslides-parity SPEC 7.2.2); absent on every stored slide until New slide or Apply layout runs. */
+  template?: LayoutId;
   ext?: Record<string, unknown>;
 };
 
@@ -280,6 +338,19 @@ const slideBase = {
     control: 'json',
     group: 'Slide',
   }),
+  skip: annotate(z.literal(true).optional(), {
+    label: 'Skip slide',
+    control: 'toggle',
+    group: 'Slide',
+    help: 'A skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked (gslides-parity SPEC 7.2.1).',
+  }),
+  template: annotate(z.enum(LAYOUT_IDS).optional(), {
+    label: 'Layout',
+    control: 'select',
+    snap: LAYOUT_IDS,
+    group: 'Slide',
+    help: 'The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2).',
+  }),
   ext: extSchema,
 };
 
@@ -370,11 +441,50 @@ export const deckSchema = z.strictObject({
   }),
   sections: z.array(sectionSchema),
   assets: z.record(slugSchema, assetSchema),
-  defaults: z.strictObject({ notes: z.string().optional() }).optional(),
+  defaults: z
+    .strictObject({
+      notes: z.string().optional(),
+      appearance: annotate(z.enum(APPEARANCES).optional(), {
+        label: 'Theme appearance',
+        control: 'select',
+        snap: APPEARANCES,
+        group: 'Slide',
+        help: 'Light or dark; every surface defaults to it (gslides-parity SPEC 7.2.3). Dark when absent.',
+      }),
+      counter: annotate(z.enum(COUNTER_MODES).optional(), {
+        label: 'Slide numbers',
+        control: 'select',
+        snap: COUNTER_MODES,
+        group: 'Slide',
+        help: 'on draws the counter on every slide, off on none, skip-title on every slide but the title slide (gslides-parity SPEC 7.2.4). On when absent.',
+      }),
+    })
+    .optional(),
   revision: z.number().int().nonnegative(),
   createdAt: isoDateSchema,
   updatedAt: isoDateSchema,
+  trashedAt: isoDateSchema.optional(),
 }) satisfies z.ZodType<Deck>;
+
+/** The appearance a deck defaults to (gslides-parity SPEC 7.2.3): dark when absent. */
+export function deckAppearance(deck: Deck): Appearance {
+  return deck.defaults?.appearance ?? 'dark';
+}
+
+/** The counter mode a deck defaults to (gslides-parity SPEC 7.2.4): on when absent. */
+export function deckCounter(deck: Deck): CounterMode {
+  return deck.defaults?.counter ?? 'on';
+}
+
+/** True when the deck is in the trash. */
+export function isTrashed(deck: Pick<Deck, 'trashedAt'>): boolean {
+  return typeof deck.trashedAt === 'string' && deck.trashedAt !== '';
+}
+
+/** Slide ids in deck order without the skipped slides: what present mode, the view route, the standalone build, print, PDF and PPTX show unless asked (gslides-parity SPEC 7.2.1). */
+export function unskippedSlideOrder(document: DeckDocument): SlideId[] {
+  return slideOrder(document.deck).filter((id) => document.slides[id]?.skip !== true);
+}
 
 // ---------------------------------------------------------------------------------------------
 // Derived facts

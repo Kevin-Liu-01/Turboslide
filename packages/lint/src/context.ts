@@ -224,10 +224,25 @@ export function createContext(input: DeckDocument, options: LintOptions = {}): L
 export type TextRef = {
   path: string;
   text: Text;
-  role: 'heading' | 'title' | 'key' | 'value' | 'body' | 'caption' | 'credit' | 'label' | 'other';
+  /** `cell` is a table cell (gslides-parity SPEC 7.3): the copy rules skip it, find and replace and the text export read it */
+  role:
+    | 'heading'
+    | 'title'
+    | 'key'
+    | 'value'
+    | 'body'
+    | 'caption'
+    | 'credit'
+    | 'label'
+    | 'cell'
+    | 'other';
 };
 
-/** Every Text inside a block with its pointer relative to the block and the role the copy rules read. */
+/**
+ * Every non-empty Text inside a block with its pointer relative to the block and the role the
+ * copy rules read. An empty Text is a placeholder (gslides-parity SPEC 5.4): copy/empty-placeholder
+ * reports it through emptyTexts and every other rule leaves it alone.
+ */
 export function blockTexts(block: Block): TextRef[] {
   const out: TextRef[] = [];
   const push = (path: string, text: Text | undefined, role: TextRef['role']): void => {
@@ -311,9 +326,108 @@ export function blockTexts(block: Block): TextRef[] {
     case 'box':
       push('/text', block.text, 'body');
       break;
+    case 'table':
+      block.rows.forEach((row, r) =>
+        row.cells.forEach((cell, c) => push(`/rows/${r}/cells/${c}`, cell, 'cell')),
+      );
+      break;
     default:
       break;
   }
+  return out;
+}
+
+/** The Texts that take paragraph breaks, so the copy rules run per paragraph (gslides-parity SPEC 7.4). */
+export function isMultilineRef(block: Block, ref: TextRef): boolean {
+  return (
+    ((block.type === 'paragraph' || block.type === 'text' || block.type === 'box') &&
+      ref.path === '/text') ||
+    block.type === 'table'
+  );
+}
+
+/**
+ * The empty Texts of a block where a placeholder waits for copy (gslides-parity SPEC 5.4): the
+ * heading, paragraph, text box and box texts, the list items, the table cells and the captions.
+ * The role names what the finding calls it ("an empty title", "an empty paragraph").
+ */
+export function emptyTexts(block: Block): { path: string; what: string }[] {
+  const out: { path: string; what: string }[] = [];
+  const push = (path: string, text: Text | undefined, what: string): void => {
+    if (text === '') out.push({ path, what });
+  };
+  switch (block.type) {
+    case 'heading':
+      push('/text', block.text, block.level === 'big' ? 'title' : 'title');
+      break;
+    case 'paragraph':
+      push('/text', block.text, block.role === 'lead' ? 'subtitle' : 'paragraph');
+      break;
+    case 'text':
+      push('/text', block.text, 'text box');
+      break;
+    case 'box':
+      push('/text', block.text, 'box');
+      break;
+    case 'plain':
+      block.items.forEach((item, i) => push(`/items/${i}/text`, item.text, 'list item'));
+      break;
+    case 'rows':
+      block.items.forEach((item, i) => {
+        push(`/items/${i}/key`, item.key, 'key');
+        push(`/items/${i}/value`, item.value, 'value');
+      });
+      break;
+    case 'refs':
+      block.items.forEach((item, i) => push(`/items/${i}`, item, 'reference'));
+      break;
+    case 'table':
+      block.rows.forEach((row, r) =>
+        row.cells.forEach((cell, c) => push(`/rows/${r}/cells/${c}`, cell, 'table cell')),
+      );
+      break;
+    case 'shot':
+      push('/caption', block.caption, 'caption');
+      break;
+    case 'pair':
+      block.figures.forEach((figure, i) =>
+        push(`/figures/${i}/caption`, figure.caption, 'caption'),
+      );
+      break;
+    case 'details':
+      block.items.forEach((item, i) => push(`/items/${i}/caption`, item.caption, 'caption'));
+      break;
+    case 'tiles':
+      block.items.forEach((item, i) => {
+        push(`/items/${i}/label`, item.label, 'label');
+        push(`/items/${i}/sub`, item.sub, 'label');
+      });
+      break;
+    case 'board':
+      block.rows.forEach((row, i) => {
+        push(`/rows/${i}/name`, row.name, 'name');
+        push(`/rows/${i}/note`, row.note, 'note');
+      });
+      break;
+    case 'matrix':
+    case 'composite':
+    case 'material':
+      push('/caption', block.caption, 'caption');
+      break;
+    default:
+      break;
+  }
+  return out;
+}
+
+/** The empty slide-level texts of the fixed compositions: the title slide's heading and lead, the statement's big. */
+export function emptySlideTexts(slide: Slide): { path: string; what: string }[] {
+  const out: { path: string; what: string }[] = [];
+  if (slide.kind === 'title') {
+    if (slide.heading === '') out.push({ path: '/heading', what: 'title' });
+    if (slide.lead === '') out.push({ path: '/lead', what: 'subtitle' });
+  }
+  if (slide.kind === 'statement' && slide.big === '') out.push({ path: '/big', what: 'statement' });
   return out;
 }
 

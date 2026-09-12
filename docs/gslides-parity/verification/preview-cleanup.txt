@@ -1,0 +1,13 @@
+deck.info 200 {"id":"gt-brand","title":"GT brand deck","theme":"gt-ink-paper","revision":31,"s
+deck.list 200 decks 0 scratch present false rev undefined
+deck.trash 409 {"error":{"name":"ConflictError","status":409,"message":"baseRevision 0 is stale; untitled-20260912-
+deck.remove 400 {"error":{"name":"TypeError","status":400,"message":"deck.remove: invalid input at /baseRevision: In
+deck.list after 200 decks undefined scratch present true
+probe 409 baseRevision 0 is stale; untitled-20260912-xf9j is at revision 77
+current revision read as 77
+deck.trash 200 {"id":"untitled-20260912-xf9j","trashedAt":"2026-09-12T16:39:00.300Z","revision":77}
+deck.remove 400 {"error":{"name":"TypeError","status":400,"message":"deck.remove: invalid input at /confirm: Invalid input: expected tru
+deck.list after 200 count 0 scratch present true
+deck.remove 200 {"id":"untitled-20260912-xf9j","removed":true}
+deck.list after 200 count 0 scratch present false keys 0,1,2,3,4,5,6,7,8,9,10,11,12,13
+deck.list includeTrashed: scratch present false

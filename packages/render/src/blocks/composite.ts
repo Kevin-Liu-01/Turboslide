@@ -8,11 +8,11 @@
 // sheet pixels from the track arithmetic (schema blocks/composite.ts), so a slot-fit diagram or a
 // nested composite sizes itself the way it would in a slot.
 import { classes, el, px, style } from '../html.ts';
-import { renderText } from '../text.ts';
 import type { BlockOf } from '@turboslide/schema/blocks';
 import { cellWidths, COMPOSITE_DEFAULT_GAP } from '@turboslide/schema/blocks/composite';
 import { rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
+import { renderTextOrPrompt } from './prompt.ts';
 import { renderBlocks } from './render-block.ts';
 
 export function renderComposite(block: BlockOf<'composite'>, ctx: BlockContext): string {
@@ -42,7 +42,7 @@ export function renderComposite(block: BlockOf<'composite'>, ctx: BlockContext):
     ? el(
         'figcaption',
         { 'data-run': runAttr(ctx, block.id, 'caption'), style: 'grid-column:1 / -1' },
-        renderText(block.caption, { gtWord: ctx.gtWord }),
+        renderTextOrPrompt(block.caption, ctx, block, '/caption'),
       )
     : '';
   const attributes = rootAttrs(block, ctx, {

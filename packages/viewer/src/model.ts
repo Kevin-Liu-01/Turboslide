@@ -35,6 +35,10 @@ export type ViewerSlide = {
   lint?: { s3: number; s2: number };
   /** the render worker's static capture twins, shown over the live clone once decoded (M3 item 5) */
   shot?: { light: string; dark?: string };
+  /** Skip slide (gslides-parity SPEC 7.2.1): the filmstrip and the grid dim the card */
+  skip?: boolean;
+  /** the layout the slide was made from (gslides-parity SPEC 7.2.2), for the Apply layout check */
+  template?: string;
 };
 
 export type ViewerSection = { id: string; name: string; slideIds: readonly string[] };

@@ -10,3 +10,10 @@
   position: absolute;
   inset: 0;
 }
+
+/* present mode (gslides-parity SPEC 9.2): the sheet alone on an ink surround. The panel ink is
+   the one near black the tokens keep in both themes, so a light sheet reads as Google's black
+   surround and a dark sheet reads as one field with it. */
+.ts-stagewrap.is-present {
+  background: var(--pt-panel-ink, #101010);
+}

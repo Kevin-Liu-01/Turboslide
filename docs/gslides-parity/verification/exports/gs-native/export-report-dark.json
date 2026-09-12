@@ -1,0 +1,77 @@
+{
+  "deckId": "gslides",
+  "revision": 1,
+  "format": "pptx",
+  "mode": "native",
+  "theme": "dark",
+  "fontSet": "exact",
+  "fontSetVersion": "4.001+gt.1",
+  "files": [
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/verifier/exports/gs-native/gslides-dark.pptx",
+      "bytes": 41308,
+      "sha256": "d4e31e035788cc24fb7050a5a6f770f510de87a9baa1208482d53d13620b2587"
+    }
+  ],
+  "fonts": {
+    "embedded": [],
+    "requiredOnViewer": [
+      "GT Inter Display",
+      "GT Inter Text 26",
+      "GT Inter Text 14",
+      "GT Inter Text 22",
+      "GT Inter Text 20 Medium",
+      "GT Inter Text 20",
+      "GT Inter Text 24 Medium"
+    ],
+    "substitutedIn": ["every viewer"]
+  },
+  "slides": [
+    {
+      "slideId": "title",
+      "native": ["heading", "lead"],
+      "raster": []
+    },
+    {
+      "slideId": "breaks",
+      "native": ["h", "p1", "p2"],
+      "raster": []
+    },
+    {
+      "slideId": "table",
+      "native": ["h", "table"],
+      "raster": []
+    },
+    {
+      "slideId": "numbered",
+      "native": ["h", "p1", "list"],
+      "raster": []
+    },
+    {
+      "slideId": "links",
+      "native": ["h", "box", "shape", "t1"],
+      "raster": []
+    },
+    {
+      "slideId": "prompt",
+      "native": ["h"],
+      "raster": []
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": false,
+  "passed": true,
+  "residual": [
+    "renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "native (editable text): text boxes at the browser boxes, layout within 3 px; the glyph antialiasing is the viewer's",
+    "rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x",
+    "package: 47 parts, 58 relationships, valid against the content types and relationships",
+    "skipped: 1 slide(s) left out (skipped); pass includeSkipped to carry them",
+    "table: table#table written as a:tbl (4 by 4); the per cell 3 px budget is measured by the verify loop, which falls back to ruled rows when a cell misses it",
+    "package: 5 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)",
+    "package: 22 kern=\"0\" attribute(s) and 0 empty ext list(s) removed; 0 custGeom",
+    "links: 10 hyperlink(s) written (a URL as is, a slide link as a jump to its number in this file; SPEC 7.2.7, 7.2.8)",
+    "notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)",
+    "fonts not embedded: GT Inter Display, GT Inter Text 26, GT Inter Text 14, GT Inter Text 22, GT Inter Text 20 Medium, GT Inter Text 20, GT Inter Text 24 Medium; a viewer without them installed substitutes (SPEC 8.4); --embed-fonts embeds them"
+  ]
+}

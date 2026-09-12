@@ -93,8 +93,9 @@ export function windowActions(): string[] {
 /** True when an http action's handler is expected on this instance by its milestone. */
 export function expectedByMilestone(
   id: ActionId,
-  current: 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6',
+  current: 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1',
 ): boolean {
-  const order = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6'];
+  // GS1 is the Google Slides parity round, landed after M6 (docs/gslides-parity/MILESTONES.md)
+  const order = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'GS1'];
   return order.indexOf(ACTIONS[id].milestone) <= order.indexOf(current);
 }

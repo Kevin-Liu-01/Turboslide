@@ -59,12 +59,13 @@ export function addPicture(
   return 'cover';
 }
 
-/** One raster PNG at its measured box. */
+/** One raster PNG at its measured box, with the block's link when it carries one (SPEC 7.2.7). */
 export function addRaster(
   slide: PptxGenJS.Slide,
   raster: SceneRaster,
   namePrefix: string,
   bytes?: Uint8Array,
+  hyperlink?: PptxGenJS.HyperlinkProps,
 ): boolean {
   const file = raster.file;
   if (!file && !bytes) return false;
@@ -78,6 +79,7 @@ export function addRaster(
     w: pxToIn(w),
     h: pxToIn(h),
     altText: `${raster.blockId} (${raster.kind})`,
+    ...(hyperlink ? { hyperlink } : {}),
     objectName: `${namePrefix}#${raster.id}`,
   });
   return true;

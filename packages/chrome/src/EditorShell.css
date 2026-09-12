@@ -1,0 +1,192 @@
+/* EditorShell (EditorShell.tsx, ViewerShell.tsx with `editor`): the editor's frame of
+   gslides-parity SPEC 1.1 over the viewer shell's root. The root stays .pt-viewer (Sidebar.css
+   and the chrome lint key on it) and becomes a five row, three column grid when .is-editor is
+   set: the title row (44), the menu bar (28), the toolbar (40), the body (the filmstrip column,
+   the canvas column with the notes pane under the stage, the right panel column) and the bottom
+   bar (32). Compact mode (Ctrl+Shift+F) zeroes the menu bar and toolbar rows; present mode zeroes
+   every row but the body and closes every column but the canvas. Lines (SPEC 1.2): the title row
+   and the toolbar draw their bottom edges, the filmstrip its right edge (Sidebar.css), the right
+   panel its left edge (Panel.css), the notes divider is --pt-hair with the handle on it, the
+   bottom bar draws --pt-hair above itself; the menu bar, the canvas and the body draw no rule.
+   At or below 900 px the filmstrip is the overlay Sidebar.css draws (offset under the three top
+   rows here), the right panel floats over the canvas and the notes pane hides by default. */
+.pt-viewer.is-editor {
+  --ts-top-h: calc(var(--pt-title-h, 44px) + var(--pt-menu-h, 28px) + var(--pt-tool-h, 40px));
+  grid-template-columns: var(--pt-sb-w) minmax(0, 1fr) 0;
+  grid-template-rows:
+    var(--pt-title-h, 44px) var(--pt-menu-h, 28px) var(--pt-tool-h, 40px) minmax(0, 1fr)
+    var(--pt-status-h, 32px);
+}
+
+.pt-viewer.is-editor[data-rpanel] {
+  grid-template-columns: var(--pt-sb-w) minmax(0, 1fr) var(--pt-panel-w, 320px);
+}
+
+.pt-viewer.is-editor[data-sb='0'] {
+  grid-template-columns: 0 minmax(0, 1fr) 0;
+}
+
+.pt-viewer.is-editor[data-sb='0'][data-rpanel] {
+  grid-template-columns: 0 minmax(0, 1fr) var(--pt-panel-w, 320px);
+}
+
+/* compact mode: the menu bar and the toolbar leave, the title row keeps the Show the menus chevron */
+.pt-viewer.is-editor.is-compact {
+  --ts-top-h: var(--pt-title-h, 44px);
+  grid-template-rows: var(--pt-title-h, 44px) 0 0 minmax(0, 1fr) var(--pt-status-h, 32px);
+}
+
+.pt-viewer.is-editor.is-compact > .ts-menubar,
+.pt-viewer.is-editor.is-compact > .ts-toolbar {
+  display: none;
+}
+
+/* the filmstrip: the viewer shell's sidebar in the body row of the editor grid */
+.pt-viewer.is-editor > .pt-sb {
+  grid-column: 1;
+  grid-row: 4;
+}
+
+/* the narrow overlay sits under the top rows and over the bottom bar's seam */
+.pt-viewer.is-editor > .pt-sb.is-overlay {
+  top: var(--ts-top-h);
+  bottom: var(--pt-status-h, 32px);
+}
+
+.pt-viewer.is-editor > .pt-sb-scrim {
+  top: var(--ts-top-h);
+  bottom: var(--pt-status-h, 32px);
+}
+
+/* the canvas column: the stage over the notes pane, no rule of its own */
+.pt-viewer.is-editor > .pt-main {
+  grid-column: 2;
+  grid-row: 4;
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.pt-viewer.is-editor > .pt-main > .pt-stagewrap {
+  grid-row: 1;
+  grid-column: 1;
+}
+
+/* the notes pane slot: the divider is --pt-hair, the pane's own height comes from B4's NotesPane */
+.pt-viewer.is-editor > .pt-main > .ts-notes-slot {
+  grid-row: 2;
+  grid-column: 1;
+  min-height: 0;
+  border-top: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+}
+
+.pt-viewer.is-editor > .pt-main > .ts-notes-slot:empty {
+  display: none;
+}
+
+/* the source drawer over the stage column */
+.pt-viewer.is-editor > .pt-main > .ts-drawer {
+  right: 0;
+}
+
+/* the right panel column */
+.pt-viewer.is-editor > .ts-rpanel {
+  grid-column: 3;
+  grid-row: 4;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.pt-viewer.is-editor:not([data-rpanel]) > .ts-rpanel {
+  display: none;
+}
+
+/* present mode: the chrome leaves, the stage is the window */
+.pt-viewer.is-editor.is-present {
+  grid-template-columns: 0 minmax(0, 1fr) 0;
+  grid-template-rows: 0 0 0 minmax(0, 1fr) 0;
+}
+
+.pt-viewer.is-editor.is-present > .ts-title-row,
+.pt-viewer.is-editor.is-present > .ts-menubar,
+.pt-viewer.is-editor.is-present > .ts-toolbar,
+.pt-viewer.is-editor.is-present > .ts-bottombar,
+.pt-viewer.is-editor.is-present > .ts-rpanel,
+.pt-viewer.is-editor.is-present > .pt-main > .ts-notes-slot {
+  display: none;
+}
+
+.pt-viewer.is-editor.is-present > .pt-main {
+  grid-template-rows: minmax(0, 1fr) 0;
+}
+
+/* the layout grid's plate: the menu primitive's dynamic submenu or the toolbar's dropdown */
+.ts-layout-plate {
+  position: fixed;
+  z-index: 32;
+  box-sizing: border-box;
+  padding: 8px 8px 12px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  max-height: calc(100vh - 16px);
+  overflow-y: auto;
+  animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
+}
+
+.ts-layout-plate-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 6px;
+  padding: 0 0 6px;
+  font: 500 12px/1 var(--pt-text);
+  color: var(--pt-titanium);
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+/* the whole-window banner over a read only editor (a trashed presentation) */
+.ts-shell-banner {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  align-self: start;
+  z-index: 5;
+  margin: 8px 16px;
+  padding: 8px 12px;
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  font: 13px/1.4 var(--pt-text);
+}
+
+@media (max-width: 900px) {
+  .pt-viewer.is-editor,
+  .pt-viewer.is-editor[data-rpanel],
+  .pt-viewer.is-editor[data-sb='0'],
+  .pt-viewer.is-editor[data-sb='0'][data-rpanel] {
+    grid-template-columns: 0 minmax(0, 1fr) 0;
+  }
+
+  /* the right panel floats over the canvas as a sheet */
+  .pt-viewer.is-editor > .ts-rpanel {
+    position: absolute;
+    top: var(--ts-top-h);
+    right: 0;
+    bottom: var(--pt-status-h, 32px);
+    width: min(var(--pt-panel-w, 320px), 100vw);
+    grid-column: auto;
+    grid-row: auto;
+    z-index: 6;
+  }
+
+  .pt-viewer.is-editor > .pt-main > .ts-notes-slot {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-layout-plate {
+    animation: none;
+  }
+}

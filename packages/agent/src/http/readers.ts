@@ -208,14 +208,27 @@ export function validateLoaded(document: DeckDocument): ValidateOutput {
   };
 }
 
-export function deckInfo(document: DeckDocument): {
+export type DeckInfo = {
   id: string;
   title: string;
   theme: Deck['theme'];
   revision: number;
   sections: OutlineSection[];
-  counts: { slides: number; sections: number; assets: number; htmlBlocks: number };
-} {
+  counts: {
+    slides: number;
+    sections: number;
+    assets: number;
+    htmlBlocks: number;
+    /** slides with skip set, left out of the slideshow and the downloads unless asked */
+    skipped: number;
+  };
+  /** the deck's defaults as written (gslides-parity SPEC 7.2.3, 7.2.4); absent when none is set */
+  defaults?: Deck['defaults'];
+  /** the trash stamp (gslides-parity SPEC 7.2.5); absent unless the deck is in the trash */
+  trashedAt?: string;
+};
+
+export function deckInfo(document: DeckDocument): DeckInfo {
   const order = slideOrder(document.deck).filter((id) => document.slides[id] !== undefined);
   return {
     id: document.deck.id,
@@ -228,7 +241,10 @@ export function deckInfo(document: DeckDocument): {
       sections: document.deck.sections.length,
       assets: Object.keys(document.deck.assets).length,
       htmlBlocks: htmlBlockCount(document),
+      skipped: order.filter((id) => document.slides[id]?.skip === true).length,
     },
+    ...(document.deck.defaults !== undefined ? { defaults: document.deck.defaults } : {}),
+    ...(document.deck.trashedAt !== undefined ? { trashedAt: document.deck.trashedAt } : {}),
   };
 }
 
@@ -250,10 +266,15 @@ export function registerReadActions(dispatcher: Dispatcher, deps: ReaderDeps): v
       title: string;
       kind: Slide['kind'];
       lint: { s3: number; s2: number };
+      /** true for a skipped slide (gslides-parity SPEC 7.2.1) */
+      skip?: boolean;
+      /** the layout the slide was made from, when written (gslides-parity SPEC 7.2.2) */
+      template?: Slide['template'];
     }[] = [];
     for (const section of outlineOf(document)) {
       if (sectionId !== undefined && section.id !== sectionId) continue;
       for (const slide of section.slides) {
+        const record = document.slides[slide.id];
         rows.push({
           id: slide.id,
           n: slide.n,
@@ -261,6 +282,8 @@ export function registerReadActions(dispatcher: Dispatcher, deps: ReaderDeps): v
           title: slide.title,
           kind: slide.kind,
           lint: { s3: counts[slide.id]?.s3 ?? 0, s2: counts[slide.id]?.s2 ?? 0 },
+          ...(record?.skip === true ? { skip: true } : {}),
+          ...(record?.template !== undefined ? { template: record.template } : {}),
         });
       }
     }

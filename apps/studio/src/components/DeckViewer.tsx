@@ -14,6 +14,7 @@ import { BookView } from '@turboslide/viewer/BookView';
 import { GridView } from '@turboslide/viewer/GridView';
 import { pad2, trimTitle } from '@turboslide/viewer/model';
 import type { ViewerDeck } from '@turboslide/viewer/model';
+import { currentPlayIndex, playList, stepPlayIndex } from '@turboslide/viewer/present/presentModel';
 import { Stage } from '@turboslide/viewer/Stage';
 import {
   applyTheme,
@@ -26,6 +27,8 @@ import type { Theme } from '@turboslide/viewer/theme';
 
 import type { DeckPayload } from '../server/decks';
 import { renderSlideImages } from '../server/render';
+import { Slideshow } from './Slideshow';
+import type { SlideshowState } from './Slideshow';
 import { useMountEffect } from './useMountEffect';
 import { useStudioSession } from './useStudioSession';
 
@@ -94,6 +97,8 @@ export function DeckViewer({
 }: DeckViewerProps) {
   const { deck, sprite } = payload;
   const sections = useMemo(() => toSections(deck), [deck]);
+  /* the slideshow's facts (blank slide, laser, full screen) for describe().state while presenting */
+  const show = useRef<SlideshowState | null>(null);
 
   useMountEffect(() => {
     /* the route's theme wins over the stored one, once; the toggle then persists as usual */
@@ -140,9 +145,9 @@ export function DeckViewer({
           ) : undefined
         }
       >
-        <StageBridge deck={deck} serverTheme={theme ?? 'dark'} />
+        <StageBridge deck={deck} serverTheme={theme ?? 'dark'} show={show} />
         <PresentOnLoad on={present} />
-        <ViewerOwner deck={deck} attach={!embed} />
+        <ViewerOwner deck={deck} attach={!embed} show={show} />
       </ViewerShell>
     </>
   );
@@ -170,11 +175,32 @@ function PresentOnLoad({ on }: { on: boolean }) {
  * sheet keeps its fit; the grid and the book mount only while their mode is
  * up (SPEC 5.5: book mode builds lazily on first entry).
  */
-function StageBridge({ deck, serverTheme }: { deck: ViewerDeck; serverTheme: Theme }) {
+function StageBridge({
+  deck,
+  serverTheme,
+  show,
+}: {
+  deck: ViewerDeck;
+  serverTheme: Theme;
+  show: { current: SlideshowState | null };
+}) {
   const shell = usePtShell();
   const { stageSize } = usePtStage();
   const themeNow = useTheme(serverTheme);
   const slide = deck.slides.find((entry) => entry.id === shell.active) ?? deck.slides[0];
+  /* the show runs over the unskipped slides (gslides-parity SPEC 9.2); the audience payload
+     already leaves skipped slides out, and a flag the loader keeps is read as well */
+  const play = useMemo(() => playList(deck.slides), [deck.slides]);
+  /* a click on the sheet: the next slide of the show while presenting, the shell's paging otherwise */
+  const onStep = (delta: number) => {
+    if (!shell.present) {
+      shell.step(delta);
+      return;
+    }
+    const at = currentPlayIndex(deck.slides, play, shell.active);
+    const target = play[stepPlayIndex(at, delta, play.length)];
+    if (target && target.id !== shell.active) shell.select(target.id);
+  };
   return (
     <>
       <Stage
@@ -187,8 +213,22 @@ function StageBridge({ deck, serverTheme }: { deck: ViewerDeck; serverTheme: The
         narrow={shell.narrow}
         theme={themeNow}
         dir={shell.dir ?? 'next'}
-        onStep={shell.step}
+        onStep={onStep}
       />
+      {shell.present ? (
+        <Slideshow
+          deckId={deck.id}
+          slides={play}
+          activeId={shell.active}
+          theme={themeNow}
+          onGoto={shell.select}
+          onExit={() => shell.setPresent(false)}
+          say={shell.say}
+          onState={(state) => {
+            show.current = state;
+          }}
+        />
+      ) : null}
       {shell.mode === 'grid' ? (
         <GridView
           deck={deck}
@@ -232,13 +272,21 @@ function StageBridge({ deck, serverTheme }: { deck: ViewerDeck; serverTheme: The
  * them through this handle. The embed frame registers the owner but does not attach: the host
  * page drives it through the frame protocol.
  */
-function ViewerOwner({ deck, attach }: { deck: ViewerDeck; attach: boolean }) {
+function ViewerOwner({
+  deck,
+  attach,
+  show,
+}: {
+  deck: ViewerDeck;
+  attach: boolean;
+  show: { current: SlideshowState | null };
+}) {
   const shell = usePtShell();
   const shellRef = useRef<ShellState>(shell);
   shellRef.current = shell;
   const [ownerEl, setOwnerEl] = useState<HTMLElement | null>(null);
-  const live = useRef(createLiveAdapter(viewerAdapter(deck, shellRef)));
-  live.current.update(viewerAdapter(deck, shellRef));
+  const live = useRef(createLiveAdapter(viewerAdapter(deck, shellRef, show)));
+  live.current.update(viewerAdapter(deck, shellRef, show));
   useLayoutEffect(() => {
     if (!ownerEl) return;
     return registerStudioAutomation(live.current.adapter, ownerEl);
@@ -247,17 +295,30 @@ function ViewerOwner({ deck, attach }: { deck: ViewerDeck; attach: boolean }) {
   return <span ref={setOwnerEl} className="ts-owner" data-owner="viewer" data-active="true" />;
 }
 
-function viewerAdapter(deck: ViewerDeck, shellRef: { current: ShellState }): StudioAdapter {
+function viewerAdapter(
+  deck: ViewerDeck,
+  shellRef: { current: ShellState },
+  show: { current: SlideshowState | null },
+): StudioAdapter {
   const dispatcher: Dispatcher = createDispatcher();
   const context: ActionContext = { author: { kind: 'human', name: 'viewer' } };
   const on = <T,>(id: ActionId, run: (input: T) => Promise<unknown> | unknown): void => {
     dispatcher.register(id, (input) => run(input as T));
   };
+  /* the view.* outputs: exactly the view state the action table declares (viewStateSchema) */
   const viewState = () => {
     const shell = shellRef.current;
     const slideId = shell.active || deck.slides[0]?.id || '';
     const n = deck.slides.find((slide) => slide.id === slideId)?.n ?? 1;
     return { slideId, n, mode: shell.mode, theme: readTheme(), present: shell.present };
+  };
+  /* describe().state: the view state plus, while presenting, the show's facts (gslides-parity
+     SPEC 9.2): the blank slide up, the laser pointer and full screen */
+  const showFacts = () => {
+    const showing = shellRef.current.present ? show.current : null;
+    return showing
+      ? { blank: showing.blank, laser: showing.laser, fullscreen: showing.fullscreen }
+      : {};
   };
   on<{ slideId: string }>('view.goto', (input) => {
     if (!deck.slides.some((slide) => slide.id === input.slideId)) {
@@ -303,6 +364,6 @@ function viewerAdapter(deck: ViewerDeck, shellRef: { current: ShellState }): Stu
       }
       return dispatcher.dispatch(action, input ?? {}, context);
     },
-    state: () => ({ deckId: deck.id, revision: deck.revision, ...viewState() }),
+    state: () => ({ deckId: deck.id, revision: deck.revision, ...viewState(), ...showFacts() }),
   };
 }

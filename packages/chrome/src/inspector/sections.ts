@@ -234,6 +234,7 @@ export const BLOCK_ICONS: Readonly<Record<BlockType, IconName>> = {
   matrix: 'table',
   logoPlates: 'grid',
   material: 'beaker',
+  table: 'table',
   box: 'box',
   shape: 'cube',
   rule: 'minus',

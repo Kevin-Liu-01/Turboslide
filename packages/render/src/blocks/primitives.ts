@@ -7,7 +7,6 @@
 // `data-shape`, and for a line or arrow `data-from`, `data-to` and `data-heads` in the box's own
 // pixels, so the PPTX gets a native line with the same ends.
 import { classes, el, escapeAttr, px, style } from '../html.ts';
-import { renderText } from '../text.ts';
 import type { Arrowheads, BlockOf, ShapeOrientation } from '@turboslide/schema/blocks';
 import type { Color } from '@turboslide/schema/color';
 import { colorCss } from '@turboslide/schema/color';
@@ -15,6 +14,7 @@ import { iconSymbolId } from '@turboslide/schema/icons';
 import { typographyDeclarations } from '@turboslide/schema/typography';
 import { dataAttrs, raster, rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
+import { renderMultiline } from './prompt.ts';
 
 /** The filled arrowhead length in px, the largest dia/stroke-grammar allows (DECK-GRAMMAR.md:44). */
 export const ARROWHEAD = 8;
@@ -55,12 +55,13 @@ export function renderBox(block: BlockOf<'box'>, ctx: BlockContext): string {
     colorDeclaration('color', block.color),
     ...typographyDeclarations(block.typography),
   );
+  // the box text is one of the four multiline pointers (SPEC 7.4)
   const text =
     block.text !== undefined
       ? el(
           'div',
           { class: 'box-text', 'data-run': runAttr(ctx, block.id, 'text') },
-          renderText(block.text, { gtWord: ctx.gtWord }),
+          renderMultiline(block.text, ctx, block, '/text'),
         )
       : '';
   return el('div', rootAttrs(block, ctx, { className: 'box', style: inline }), text);
@@ -221,7 +222,8 @@ export function renderTextBlock(block: BlockOf<'text'>, ctx: BlockContext): stri
       ...rootAttrs(block, ctx, { className: 'text', style: inline }),
       'data-run': runAttr(ctx, block.id, 'text'),
     },
-    renderText(block.text, { gtWord: ctx.gtWord }),
+    // one of the four multiline pointers (SPEC 7.4)
+    renderMultiline(block.text, ctx, block, '/text'),
   );
 }
 

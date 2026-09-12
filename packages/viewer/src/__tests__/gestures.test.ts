@@ -7,6 +7,7 @@ import {
   actionForMutation,
   actionForMutations,
   blockMoveFor,
+  drawnBox,
   dropIndexFor,
   dropSlotFor,
   gestureMutation,
@@ -14,6 +15,9 @@ import {
   labelClearanceBox,
   nudgeMutation,
   sheetPoint,
+  TOOL_DEFAULT_SIZE,
+  toolBlockType,
+  toolInsertMutation,
 } from '../Gestures';
 import type { Handle, MeasuredBoxes } from '../Gestures';
 
@@ -643,5 +647,82 @@ describe('actionForMutations', () => {
     });
     const elsewhere = { op: 'block.remove', slideId: 'other', blockId: 'x' } as const;
     expect(() => actionForMutations([one, elsewhere], 13)).toThrow(RangeError);
+  });
+});
+
+// The draw tools (gslides-parity SPEC 3.1 rows 9 to 12): a click places the default box, a drag
+// draws one; the insert is one block.insert with pos on a freeform slide and into the slot on a
+// grammar slide.
+describe('draw tools', () => {
+  const free: Slide = {
+    schemaVersion: 1,
+    id: 'free',
+    kind: 'content',
+    layout: { type: 'freeform' },
+    slots: {
+      main: [
+        { id: 'a', type: 'paragraph', text: 'A', pos: { x: 200, y: 200, w: 300, h: 100, z: 2 } },
+      ],
+    },
+  };
+
+  it('places the default box on a click and the drawn box on a drag', () => {
+    expect(drawnBox({ kind: 'text' }, { x: 300, y: 300 }, { x: 303, y: 302 })).toEqual({
+      box: [300, 300, 480, 64],
+      dragged: false,
+    });
+    expect(
+      drawnBox({ kind: 'shape', shape: 'ellipse' }, { x: 300, y: 300 }, { x: 100, y: 500 }),
+    ).toEqual({
+      box: [100, 300, 200, 200],
+      dragged: true,
+    });
+    expect(TOOL_DEFAULT_SIZE.line).toEqual([320, 8]);
+  });
+
+  it('inserts on the 8 px grid on top of a freeform stack, and into the slot on a grammar slide', () => {
+    const onFree = toolInsertMutation(free, { kind: 'text' }, 'text', [301, 299, 480, 64], 'main');
+    expect(onFree).toEqual({
+      op: 'block.insert',
+      slideId: 'free',
+      slot: 'main',
+      after: 'a',
+      block: { id: 'text', type: 'text', text: '', pos: { x: 304, y: 296, w: 480, h: 64, z: 3 } },
+    });
+    const onGrammar = toolInsertMutation(
+      slide,
+      { kind: 'shape', shape: 'rectangle' },
+      'shape',
+      [0, 0, 240, 160],
+      'left',
+      'h',
+    );
+    expect(onGrammar).toEqual({
+      op: 'block.insert',
+      slideId: 'positioning',
+      slot: 'left',
+      after: 'h',
+      block: { id: 'shape', type: 'shape', shape: 'rectangle' },
+    });
+    expect(toolBlockType({ kind: 'line', line: 'rule' })).toBe('rule');
+    expect(toolBlockType({ kind: 'line', line: 'arrow' })).toBe('shape');
+    expect(toolInsertMutation(slide, { kind: 'text' }, 't', [0, 0, 1, 1], null)).toBeNull();
+    /* every insert applies through the reducer */
+    const doc: DeckDocument = {
+      deck: {
+        schemaVersion: 1,
+        id: 'd',
+        title: 'd',
+        theme: 'gt-ink-paper',
+        sections: [{ id: 's', name: 's', slideIds: ['free'] }],
+        assets: {},
+        revision: 1,
+        createdAt: '2026-01-01T00:00:00Z',
+        updatedAt: '2026-01-01T00:00:00Z',
+      },
+      slides: { free },
+    };
+    const after = applyMutations(doc, [onFree!]).document.slides['free'];
+    expect(after?.kind === 'content' && after.slots.main?.length).toBe(2);
   });
 });

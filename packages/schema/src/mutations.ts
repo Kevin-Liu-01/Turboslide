@@ -11,7 +11,7 @@ import { SLOT_NAMES, sectionSchema, slideSchema } from './deck.ts';
 import type { AssetId, BlockId, SectionId, SlideId } from './ids.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
 import type { Text } from './text.ts';
-import { textSchema } from './text.ts';
+import { multilineTextSchema } from './text.ts';
 
 /** Where a block lives: a content slot, or the plate of a full-picture slide. */
 export type BlockSlot = SlotName | 'plate';
@@ -51,7 +51,7 @@ export type Mutation =
   | { op: 'section.set'; sections: Section[] }
   | { op: 'asset.set'; asset: Asset }
   | { op: 'asset.remove'; assetId: AssetId }
-  /** JSON pointer into the manifest; title, theme and defaults only */
+  /** JSON pointer into the manifest; title, theme and defaults only (trashedAt is deck.trash's, gslides-parity SPEC 7.2.5) */
   | { op: 'deck.set'; path: string; value?: unknown }
   /** restore is a mutation, so it is undoable and visible */
   | { op: 'version.restore'; n: number };
@@ -144,7 +144,9 @@ export const mutationSchema = z.discriminatedUnion('op', [
     blockId: blockIdSchema,
     path: pointer,
     range: z.tuple([z.number().int().nonnegative(), z.number().int().nonnegative()]),
-    text: textSchema,
+    // a typed paragraph break is a character here; the validator refuses it outside the four
+    // multiline pointers after the write (gslides-parity SPEC 7.4)
+    text: multilineTextSchema,
   }),
   z.strictObject({ op: z.literal('section.set'), sections: z.array(sectionSchema) }),
   z.strictObject({ op: z.literal('asset.set'), asset: assetSchema }),

@@ -14,7 +14,9 @@ import { buildsDir, downloadUrl, signDownloadToken } from './tokens';
 
 /**
  * The export surface of the editor (SPEC 8; Kevin's directive: PPTX from the editor's toolbar,
- * docs/pptx.md). export.run and build.run in the browser reach these server functions:
+ * docs/pptx.md; the PDF of gslides-parity SPEC 7.6 takes the same path with `format: 'pdf'` and
+ * comes back as one file with an ExportReport whose slides are its pages). export.run and
+ * build.run in the browser reach these server functions:
  * startExport hands the action's validated input to the render worker facade (the same client
  * /api/export/:deckId uses: over HTTP when TURBOSLIDE_WORKER_URL is set, an in-process queue over
  * the turboslide CLI otherwise, so LibreOffice and Chromium never run in the web app, SPEC 3.3
@@ -93,6 +95,10 @@ export type ExportRunInput = {
   /** Editable text mode: embed the export faces as fntdata parts (docs/pptx.md) */
   embedFonts?: boolean;
   slideIds?: 'all' | string[];
+  /** Carry the skipped slides too (gslides-parity SPEC 7.2.1) */
+  includeSkipped?: boolean;
+  /** Carry the speaker notes (gslides-parity SPEC 7.2.13, decision 15.2) */
+  includeNotes?: boolean;
 };
 
 export type StartExportInput = { deckId: string; input: ExportRunInput };

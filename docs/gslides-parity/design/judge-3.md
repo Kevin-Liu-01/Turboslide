@@ -14,11 +14,11 @@ No Google page was opened for this judgment and no account was signed in. Every 
 
 Each criterion is scored 1 to 10; the total is the sum of the five.
 
-| Proposal | Fidelity to Google Slides | Ease for sales users | Architecture fit | Buildability in one round | Aesthetic fit with Prototemplate | Total |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1, the faithful clone | 9 | 7 | 7 | 5 | 9 | 37 |
-| 2, sales first | 8 | 10 | 8 | 8 | 8 | 42 |
-| 3, architecture first | 7 | 6 | 9 | 4 | 7 | 33 |
+| Proposal              | Fidelity to Google Slides | Ease for sales users | Architecture fit | Buildability in one round | Aesthetic fit with Prototemplate | Total |
+| --------------------- | ------------------------- | -------------------- | ---------------- | ------------------------- | -------------------------------- | ----- |
+| 1, the faithful clone | 9                         | 7                    | 7                | 5                         | 9                                | 37    |
+| 2, sales first        | 8                         | 10                   | 8                | 8                         | 8                                | 42    |
+| 3, architecture first | 7                         | 6                    | 9                | 4                         | 7                                | 33    |
 
 The winner is proposal 2. The reasoning per proposal follows, then the grafts the synthesis must take from proposals 1 and 3, then the ideas that must not ship.
 
@@ -110,26 +110,26 @@ The proposals leave three grammar decisions to Kevin. Judging as Kevin, and open
 
 ## Facts checked for this judgment
 
-| Claim in a proposal | Where it was checked | Result |
-| --- | --- | --- |
-| `actions.ts` holds 54 ids, not the brief's 62 | `packages/schema/src/actions.ts`, grep of the id literals | 54, confirmed |
-| "Rotation stays out" is a recorded product decision | `docs/EDITOR-DEPTH-STATUS.md` section 2; `docs/freeform.md` line 7 | Confirmed in both |
-| SPEC 4.2 says "Four rules, nothing else" and refuses line breaks outside `panel.code` | `docs/spec/SPEC.md` lines 310 and 316 | Confirmed |
-| SPEC 2.1 wants ruled rows and lists instead of bullets | `docs/spec/SPEC.md` line 32 | Confirmed |
-| SPEC 8.2 writes rows as hairlines plus text boxes, never a PPTX table | `docs/spec/SPEC.md` line 1239 | Confirmed |
-| `ExportFormat` names `pdf` and no builder exists | `packages/schema/src/export.ts` lines 11 and 118 ("Book mode through Chromium print (M6)") | Confirmed |
-| `SCHEMA_VERSION` is 1 and the only migration stamps version 0 files | `packages/schema/src/deck.ts` line 17; `packages/schema/src/migrations.ts` | Confirmed |
-| `/` redirects to the newest deck or creates "GT brand deck"; no `/new` or `/present` route | `apps/studio/src/routes/index.tsx`; the routes listing | Confirmed |
-| The Perfect export of 85 slides takes 190 to 222 s against a 300 s limit; `deck.remove` does not exist | `docs/EDITOR-DEPTH-STATUS.md` lines 349 and 355 | Confirmed |
-| The fifteen slide templates insert placeholder copy and the picture ones need an asset | R06 section 4.1 | Confirmed |
-| The pricing update costs 51 clicks and 46 keys today against Google's 9 clicks and 23 to 28 keys | R11 C2 | Confirmed; proposal 1's "40 and 40 today" quotes the replace step alone, not the total |
-| Google shows skipped slides to shared viewers | R10 A15 | Confirmed; proposals 2 and 3 depart on purpose and say so |
-| Whether the Themes panel opens on a new presentation | R03 a.3 and unverified list; R02 section 13 | Unverified, as all three proposals mark it |
-| Tab between table cells in Google Slides | R11 A2 | Unverified; all three bind it as the office convention |
-| The filmstrip menu order | R08 A1, one 2017 source | Single source, as all three mark it |
-| R07's task table is ordered by frequency (proposal 2 section 0) | R07 "Top tasks and how Google Slides handles them" | Not supported; the table is ordered by workflow and gives no frequencies. The task choice is still sound: the R07 summary names the cover, logo wall, agenda, pricing and number slides |
-| The pptxgenjs options proposal 3 names | Proposal 3 cites the public API pages read 2026-09-11 | Not reopened for this judgment |
-| Proposal 2's 98, 20 and 48 counts; proposal 3's 31 and 38 | Not recounted | The ratios are what matters for the "grey menu" argument and are visible in the tables |
+| Claim in a proposal                                                                                    | Where it was checked                                                                       | Result                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `actions.ts` holds 54 ids, not the brief's 62                                                          | `packages/schema/src/actions.ts`, grep of the id literals                                  | 54, confirmed                                                                                                                                                                           |
+| "Rotation stays out" is a recorded product decision                                                    | `docs/EDITOR-DEPTH-STATUS.md` section 2; `docs/freeform.md` line 7                         | Confirmed in both                                                                                                                                                                       |
+| SPEC 4.2 says "Four rules, nothing else" and refuses line breaks outside `panel.code`                  | `docs/spec/SPEC.md` lines 310 and 316                                                      | Confirmed                                                                                                                                                                               |
+| SPEC 2.1 wants ruled rows and lists instead of bullets                                                 | `docs/spec/SPEC.md` line 32                                                                | Confirmed                                                                                                                                                                               |
+| SPEC 8.2 writes rows as hairlines plus text boxes, never a PPTX table                                  | `docs/spec/SPEC.md` line 1239                                                              | Confirmed                                                                                                                                                                               |
+| `ExportFormat` names `pdf` and no builder exists                                                       | `packages/schema/src/export.ts` lines 11 and 118 ("Book mode through Chromium print (M6)") | Confirmed                                                                                                                                                                               |
+| `SCHEMA_VERSION` is 1 and the only migration stamps version 0 files                                    | `packages/schema/src/deck.ts` line 17; `packages/schema/src/migrations.ts`                 | Confirmed                                                                                                                                                                               |
+| `/` redirects to the newest deck or creates "GT brand deck"; no `/new` or `/present` route             | `apps/studio/src/routes/index.tsx`; the routes listing                                     | Confirmed                                                                                                                                                                               |
+| The Perfect export of 85 slides takes 190 to 222 s against a 300 s limit; `deck.remove` does not exist | `docs/EDITOR-DEPTH-STATUS.md` lines 349 and 355                                            | Confirmed                                                                                                                                                                               |
+| The fifteen slide templates insert placeholder copy and the picture ones need an asset                 | R06 section 4.1                                                                            | Confirmed                                                                                                                                                                               |
+| The pricing update costs 51 clicks and 46 keys today against Google's 9 clicks and 23 to 28 keys       | R11 C2                                                                                     | Confirmed; proposal 1's "40 and 40 today" quotes the replace step alone, not the total                                                                                                  |
+| Google shows skipped slides to shared viewers                                                          | R10 A15                                                                                    | Confirmed; proposals 2 and 3 depart on purpose and say so                                                                                                                               |
+| Whether the Themes panel opens on a new presentation                                                   | R03 a.3 and unverified list; R02 section 13                                                | Unverified, as all three proposals mark it                                                                                                                                              |
+| Tab between table cells in Google Slides                                                               | R11 A2                                                                                     | Unverified; all three bind it as the office convention                                                                                                                                  |
+| The filmstrip menu order                                                                               | R08 A1, one 2017 source                                                                    | Single source, as all three mark it                                                                                                                                                     |
+| R07's task table is ordered by frequency (proposal 2 section 0)                                        | R07 "Top tasks and how Google Slides handles them"                                         | Not supported; the table is ordered by workflow and gives no frequencies. The task choice is still sound: the R07 summary names the cover, logo wall, agenda, pricing and number slides |
+| The pptxgenjs options proposal 3 names                                                                 | Proposal 3 cites the public API pages read 2026-09-11                                      | Not reopened for this judgment                                                                                                                                                          |
+| Proposal 2's 98, 20 and 48 counts; proposal 3's 31 and 38                                              | Not recounted                                                                              | The ratios are what matters for the "grey menu" argument and are visible in the tables                                                                                                  |
 
 ## Sources
 

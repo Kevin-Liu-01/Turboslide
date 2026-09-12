@@ -24,6 +24,7 @@ import { UsageError } from '../exit.ts';
 import {
   blockAlign,
   blockDistribute,
+  blockDuplicate,
   blockInsert,
   blockMove,
   blockOrder,
@@ -43,12 +44,13 @@ import {
   writeContext,
 } from '../write.ts';
 
-const USAGE = `usage: turboslide block <set|insert|remove|move|align|distribute|order> ...
+const USAGE = `usage: turboslide block <set|insert|remove|move|duplicate|align|distribute|order> ...
   block set <slideId>#<blockId> <pointer> <value>     JSON when it parses (22, true, "x"), text otherwise (4/8)
   block set <slideId>#<blockId> <pointer> --delete    remove the property
   block insert <slideId> --slot <slot> [--after <blockId>] [--file block.json] < block.json
   block remove <slideId>#<blockId>
   block move <slideId>#<blockId> --slot <slot> [--after <blockId>] [--z <n>]
+  block duplicate <slideId> --blocks <id,id,...>       copies after their originals; 16 px right and down on a freeform slide (block.duplicate)
   block align <slideId> --blocks <id,id,...> --edge left|center|right|top|middle|bottom [--to selection|content|sheet] [--no-snap]
   block distribute <slideId> --blocks <id,id,...> --axis horizontal|vertical [--gap <px>] [--snap]
   block order <slideId>#<blockId> --move front|back|forward|backward | --z <n>
@@ -115,6 +117,8 @@ export async function block(ctx: CommandContext): Promise<number> {
       return blockRemoveCommand(inner);
     case 'move':
       return blockMoveCommand(inner);
+    case 'duplicate':
+      return blockDuplicateCommand(inner);
     case 'align':
       return blockAlignCommand(inner);
     case 'distribute':
@@ -124,6 +128,25 @@ export async function block(ctx: CommandContext): Promise<number> {
     default:
       throw new UsageError(`unknown subcommand "block ${sub ?? ''}"\n${USAGE}`);
   }
+}
+
+async function blockDuplicateCommand(ctx: CommandContext): Promise<number> {
+  const slideId = requirePositional(ctx, 0, USAGE);
+  const blockIds = requireBlocks(ctx, 1);
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    blockDuplicate(storeDeps(ctx, store), writeContext(ctx), {
+      slideId,
+      blockIds,
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  printSlideResult(
+    ctx,
+    `duplicated ${blockIds.join(', ')} as ${result.blockIds.join(', ')} on`,
+    result,
+  );
+  return 0;
 }
 
 async function blockAlignCommand(ctx: CommandContext): Promise<number> {

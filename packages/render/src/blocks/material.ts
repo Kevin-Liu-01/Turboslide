@@ -8,11 +8,11 @@
 // Before a capture the box is the plate ground with a 15 px titanium label naming the material.
 // The frame box is the raster the exporter screenshots (kind 'material', SPEC 5.2 RasterRef).
 import { classes, el, escapeText, style, voidEl } from '../html.ts';
-import { renderText } from '../text.ts';
 import type { BlockOf } from '@turboslide/schema/blocks';
 import { materialRecipeOf } from '@turboslide/schema/blocks';
 import { imageFor, imgAttrs, raster, rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
+import { renderTextOrPrompt } from './prompt.ts';
 
 export function renderMaterial(block: BlockOf<'material'>, ctx: BlockContext): string {
   const recipe = materialRecipeOf(block);
@@ -43,7 +43,7 @@ export function renderMaterial(block: BlockOf<'material'>, ctx: BlockContext): s
     ? el(
         'figcaption',
         { 'data-run': runAttr(ctx, block.id, 'caption') },
-        renderText(block.caption, { gtWord: ctx.gtWord }),
+        renderTextOrPrompt(block.caption, ctx, block, '/caption'),
       )
     : '';
   return el(

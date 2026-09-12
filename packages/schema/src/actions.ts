@@ -16,6 +16,9 @@ import {
 import { blockSchema } from './blocks.ts';
 import { materialCatalogEntrySchema, materialUniformsSchema } from './blocks/material.ts';
 import {
+  APPEARANCES,
+  COUNTER_MODES,
+  LAYOUT_IDS,
   layoutSchema,
   PLATE_SIDES,
   sectionSchema,
@@ -35,7 +38,8 @@ export type Transport = 'cli' | 'mcp' | 'http' | 'window';
 export const TRANSPORTS = ['cli', 'mcp', 'http', 'window'] as const;
 export const ALL_TRANSPORTS: ReadonlyArray<Transport> = TRANSPORTS;
 
-export type Milestone = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6';
+/** M1 to M6 are the first six milestones; GS1 is the Google Slides parity round (docs/gslides-parity). */
+export type Milestone = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1';
 
 /** The palette groups (SPEC 6.1) and the docs sections. */
 export type ActionGroup =
@@ -79,10 +83,16 @@ export const ACTION_IDS = [
   'deck.info',
   'deck.create',
   'deck.rename',
+  'deck.set',
   'deck.pack',
   'deck.unpack',
   'deck.push',
   'deck.pull',
+  'deck.list',
+  'deck.copy',
+  'deck.trash',
+  'deck.restore',
+  'deck.remove',
   'slide.list',
   'slide.get',
   'slide.insert',
@@ -91,6 +101,12 @@ export const ACTION_IDS = [
   'slide.update',
   'slide.replace',
   'slide.setLayout',
+  'slide.new',
+  'slide.duplicate',
+  'slide.skip',
+  'slide.applyLayout',
+  'slide.import',
+  'text.replaceAll',
   'block.set',
   'block.insert',
   'block.remove',
@@ -98,6 +114,7 @@ export const ACTION_IDS = [
   'block.align',
   'block.distribute',
   'block.order',
+  'block.duplicate',
   'section.set',
   'slide.lease',
   'asset.add',
@@ -118,8 +135,10 @@ export const ACTION_IDS = [
   'view.mode',
   'view.theme',
   'view.present',
+  'view.zoom',
   'export.run',
   'export.check',
+  'export.text',
   'build.run',
   'fonts.build',
   'import.run',
@@ -171,6 +190,9 @@ export const slideResultSchema = z.strictObject({
   findings: z.array(findingSchema),
 });
 
+const layoutId = z.enum(LAYOUT_IDS).describe('One of the layout list (gslides-parity SPEC 5.2)');
+const slideIdList = z.array(slugSchema).min(1).describe('One or more slide ids');
+
 const slideListRow = z.strictObject({
   id: slugSchema,
   n: z.number().int().positive(),
@@ -178,6 +200,10 @@ const slideListRow = z.strictObject({
   title: z.string(),
   kind: z.enum(SLIDE_KINDS),
   lint: z.strictObject({ s3: z.number().int().nonnegative(), s2: z.number().int().nonnegative() }),
+  /** true for a skipped slide (gslides-parity SPEC 7.2.1) */
+  skip: z.boolean().optional(),
+  /** the layout the slide was made from, when written (gslides-parity SPEC 7.2.2) */
+  template: layoutId.optional(),
 });
 
 export const viewStateSchema = z.strictObject({
@@ -187,6 +213,28 @@ export const viewStateSchema = z.strictObject({
   theme,
   present: z.boolean(),
   edit: z.boolean().optional(),
+  /** the stage scale, or 'fit' (gslides-parity SPEC 7.2.16) */
+  zoom: z.union([z.number().positive(), z.literal('fit')]).optional(),
+});
+
+/** One deck of the deck list (gslides-parity SPEC 7.5 deck.list): the manifest facts, newest first. */
+export const deckHeadSchema = z.strictObject({
+  id: slugSchema,
+  title: z.string(),
+  slides: z.number().int().nonnegative(),
+  sections: z.number().int().nonnegative(),
+  revision: z.number().int().nonnegative(),
+  updatedAt: z.string(),
+  createdAt: z.string(),
+  /** set when the deck is in the trash; such rows appear only with includeTrashed */
+  trashedAt: z.string().optional(),
+});
+
+const deckTrashState = z.strictObject({
+  id: slugSchema,
+  /** the trash stamp, or null when the deck is not in the trash */
+  trashedAt: z.string().nullable(),
+  revision,
 });
 
 const empty = z.strictObject({});
@@ -317,7 +365,18 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         sections: z.number().int(),
         assets: z.number().int(),
         htmlBlocks: z.number().int(),
+        /** skipped slides, left out of the slideshow and the downloads unless asked */
+        skipped: z.number().int().optional(),
       }),
+      /** the deck's appearance and counter defaults (gslides-parity SPEC 7.2.3, 7.2.4) */
+      defaults: z
+        .strictObject({
+          notes: z.string().optional(),
+          appearance: z.enum(APPEARANCES).optional(),
+          counter: z.enum(COUNTER_MODES).optional(),
+        })
+        .optional(),
+      trashedAt: z.string().optional(),
     }),
     cli: { usage: 'turboslide info' },
     mcp: 'deck_get_info',
@@ -371,6 +430,33 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     cli: { usage: 'turboslide deck rename <name>' },
     mcp: 'deck_rename',
     example: { name: 'GT brand deck, Q4', baseRevision: 412 },
+  }),
+  'deck.set': action({
+    id: 'deck.set',
+    label: 'Set a deck field',
+    doc: 'Writes one field of the deck manifest by JSON pointer (/title, /theme, /defaults/appearance, /defaults/counter, /defaults/notes) as one deck.set mutation, the write the Themes panel and Slide numbers make; an absent value removes the field.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({
+      path: z
+        .string()
+        .regex(/^\/(title|theme|defaults(\/[a-zA-Z]+)?)$/)
+        .describe(
+          'JSON pointer into the manifest: /title, /theme, /defaults/appearance, /defaults/counter or /defaults/notes',
+        ),
+      value: z.unknown().optional().describe('The new value; omit it to remove the field'),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      path: z.string(),
+      value: z.unknown().optional().describe('The value now at the path; absent when removed'),
+      revision,
+    }),
+    cli: { usage: 'turboslide deck set <path> <value>' },
+    mcp: 'deck_set',
+    example: { path: '/defaults/appearance', value: 'light', baseRevision: 412 },
   }),
   'deck.pack': action({
     id: 'deck.pack',
@@ -468,6 +554,126 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     output: bundleUnpackResultSchema,
     cli: { usage: 'turboslide deck pull <id> --from <from> --token <token> --as <as> --replace' },
     example: { id: 'gt-brand', from: 'https://turboslide.vercel.app', as: 'gt-brand-hosted' },
+  }),
+  'deck.list': action({
+    id: 'deck.list',
+    label: 'List decks',
+    doc: 'The manifest facts of every deck under decks/ (id, title, slide and section counts, revision, the stamps), newest first; decks in the trash are left out unless asked.',
+    group: 'deck',
+    mutates: false,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({
+      includeTrashed: z
+        .boolean()
+        .optional()
+        .describe('Also list the decks in the trash, each with its trashedAt'),
+    }),
+    output: z.array(deckHeadSchema),
+    cli: { usage: 'turboslide deck list --include-trashed' },
+    mcp: 'deck_list',
+    example: {},
+  }),
+  'deck.copy': action({
+    id: 'deck.copy',
+    label: 'Make a copy',
+    doc: 'Copies a deck under a new id with a new title, every slide or the named ones, with or without the speaker notes, at revision 0 with an empty version log; the output names the new deck.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({
+      id: slugSchema.describe('The deck to copy'),
+      name: z
+        .string()
+        .min(1)
+        .describe('The title of the copy; its id is the slug unless `newId` is given'),
+      newId: slugSchema.optional().describe('The id of the copy under decks/'),
+      slideIds: z
+        .array(slugSchema)
+        .min(1)
+        .optional()
+        .describe('Copy these slides only, in deck order; every slide when absent'),
+      removeNotes: z.boolean().optional().describe('Leave the speaker notes out of the copy'),
+      baseRevision: baseRevision.describe(
+        'The revision of the source deck the caller read; a stale value is rejected with 409',
+      ),
+    }),
+    output: z.strictObject({
+      deckId: slugSchema.describe('The id of the copy'),
+      sourceDeckId: slugSchema,
+      title: z.string(),
+      revision,
+      dir: z.string().describe('The deck directory'),
+      counts: z.strictObject({
+        slides: z.number().int().nonnegative(),
+        sections: z.number().int().nonnegative(),
+        assets: z.number().int().nonnegative(),
+      }),
+    }),
+    cli: {
+      usage:
+        'turboslide deck copy <id> --name <name> --id <newId> --slides <slideIds> --remove-notes',
+    },
+    mcp: 'deck_copy',
+    example: { id: 'gt-brand', name: 'Copy of GT brand deck', baseRevision: 412 },
+  }),
+  'deck.trash': action({
+    id: 'deck.trash',
+    label: 'Move to trash',
+    doc: 'Moves a deck to the trash by writing trashedAt on its manifest: the home page, the fresh presentation route and deck.list leave it out until deck.restore clears the stamp or deck.remove deletes it; nothing else changes.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({
+      id: slugSchema.describe('The deck to move to the trash'),
+      baseRevision: baseRevision.describe(
+        'The revision the caller read; a stale value is rejected with 409',
+      ),
+    }),
+    output: deckTrashState,
+    cli: { usage: 'turboslide deck trash <id>' },
+    mcp: 'deck_trash',
+    example: { id: 'q4-review', baseRevision: 3 },
+  }),
+  'deck.restore': action({
+    id: 'deck.restore',
+    label: 'Restore from trash',
+    doc: 'Clears trashedAt on a deck in the trash, so the home page and deck.list show it again.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({
+      id: slugSchema.describe('The deck to restore'),
+      baseRevision: baseRevision.describe(
+        'The revision the caller read; a stale value is rejected with 409',
+      ),
+    }),
+    output: deckTrashState,
+    cli: { usage: 'turboslide deck restore <id>' },
+    mcp: 'deck_restore',
+    example: { id: 'q4-review', baseRevision: 3 },
+  }),
+  'deck.remove': action({
+    id: 'deck.remove',
+    label: 'Delete forever',
+    doc: 'Deletes a deck: the folder under decks/ or the prefix in the Blob store, with its slides, assets and version log. Irreversible; the Trash page calls it, and `confirm` must be true.',
+    group: 'deck',
+    mutates: true,
+    transports: ['cli', 'http', 'window'],
+    milestone: 'GS1',
+    input: z.strictObject({
+      id: slugSchema.describe('The deck to delete'),
+      confirm: z.literal(true).describe('The caller has confirmed the deletion'),
+      baseRevision: baseRevision.describe(
+        'The revision the caller read; a stale value is rejected with 409',
+      ),
+    }),
+    output: z.strictObject({ id: slugSchema, removed: z.literal(true) }),
+    cli: { usage: 'turboslide deck remove <id> --confirm' },
+    example: { id: 'q4-review', confirm: true, baseRevision: 3 },
   }),
   'slide.list': action({
     id: 'slide.list',
@@ -631,6 +837,145 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     },
     mcp: 'deck_set_layout',
     example: { slideId: 'content-rule', layout: { type: 'freeform' }, baseRevision: 412 },
+  }),
+  'slide.new': action({
+    id: 'slide.new',
+    label: 'New slide',
+    doc: 'Inserts one slide made from a layout with empty placeholders after the named slide (or first in the section), as one slide.insert with template set; a Section header starts a new section that takes the slides after the anchor.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({
+      layout: layoutId,
+      after: slugSchema
+        .optional()
+        .describe('The slide the new one follows; first in the section when absent'),
+      sectionId: slugSchema
+        .optional()
+        .describe("The section; the anchor's section, or the last section, when absent"),
+      id: slugSchema
+        .optional()
+        .describe('The slide id; <layout>-<n> with the first free n when absent'),
+      baseRevision,
+    }),
+    output: z.strictObject({ slide: slideSchema, revision, outline: outlineSchema }),
+    cli: {
+      usage:
+        'turboslide slide new --layout <layout> --after <after> --section <sectionId> --id <id>',
+    },
+    mcp: 'deck_new_slide',
+    example: { layout: 'big-number', after: 'content-rule', baseRevision: 412 },
+  }),
+  'slide.duplicate': action({
+    id: 'slide.duplicate',
+    label: 'Duplicate slide',
+    doc: 'Copies the named slides with fresh ids after the last of them, in one write; a copied section header starts a new section.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({ slideIds: slideIdList, baseRevision }),
+    output: z.strictObject({ slides: z.array(slideSchema), revision, outline: outlineSchema }),
+    cli: { usage: 'turboslide slide duplicate <slideIds>' },
+    mcp: 'deck_duplicate_slide',
+    example: { slideIds: ['content-rule'], baseRevision: 412 },
+  }),
+  'slide.skip': action({
+    id: 'slide.skip',
+    label: 'Skip slide',
+    doc: 'Sets or clears skip on the named slides in one write: a skipped slide is left out of the slideshow, the shared view, the downloads and the print unless asked.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({
+      slideIds: slideIdList,
+      skip: z.boolean().describe('true skips the slides, false shows them again'),
+      baseRevision,
+    }),
+    output: z.strictObject({ slideIds: z.array(slugSchema), skip: z.boolean(), revision }),
+    cli: { usage: 'turboslide slide skip <slideIds> --off' },
+    mcp: 'deck_skip_slide',
+    example: { slideIds: ['content-rule'], skip: true, baseRevision: 412 },
+  }),
+  'slide.applyLayout': action({
+    id: 'slide.applyLayout',
+    label: 'Apply layout',
+    doc: 'Applies a layout to the named slides in one write, one slide.replace per slide: the title, the body, the lists, the tables and the pictures move into the matching placeholders and the rest is appended; only a Title slide or a Main point drops what does not fit, and the output names the dropped blocks.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({ slideIds: slideIdList, layout: layoutId, baseRevision }),
+    output: z.strictObject({
+      slides: z.array(slideSchema),
+      dropped: z.array(z.strictObject({ slideId: slugSchema, blockIds: z.array(blockIdSchema) })),
+      /** slides moved to the front of their section because they became a Section header */
+      moved: z.array(slugSchema),
+      revision,
+      findings: z.array(findingSchema),
+    }),
+    cli: { usage: 'turboslide slide apply-layout <slideIds> <layout>' },
+    mcp: 'deck_apply_layout',
+    example: { slideIds: ['content-rule'], layout: 'title', baseRevision: 412 },
+  }),
+  'slide.import': action({
+    id: 'slide.import',
+    label: 'Import slides',
+    doc: 'Copies slides from another deck after the named slide in one write: the assets they use are copied into this deck, colliding slide ids are renamed, and the output lists the slides and the assets that came over.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({
+      sourceDeckId: slugSchema.describe('The deck the slides come from'),
+      slideIds: slideIdList.describe('The slides to copy, in the order they land'),
+      after: slugSchema
+        .optional()
+        .describe('The slide the copies follow; first in the section when absent'),
+      sectionId: slugSchema
+        .optional()
+        .describe("The section; the anchor's section, or the last section, when absent"),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      slides: z.array(slideSchema),
+      assets: z.array(slugSchema).describe('The asset ids copied into this deck'),
+      renamed: z.array(z.strictObject({ from: slugSchema, to: slugSchema })),
+      revision,
+      outline: outlineSchema,
+    }),
+    cli: {
+      usage:
+        'turboslide slide import <sourceDeckId> <slideIds> --after <after> --section <sectionId>',
+    },
+    mcp: 'deck_import_slides',
+    example: { sourceDeckId: 'gt-brand', slideIds: ['thesis'], after: 'title', baseRevision: 412 },
+  }),
+  'text.replaceAll': action({
+    id: 'text.replaceAll',
+    label: 'Find and replace',
+    doc: 'Replaces every occurrence of a string in the visible text of the deck (every Text of every block, the title slide fields, the table cells and the speaker notes) in one write, case insensitive unless asked; the output counts the replacements.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({
+      find: z.string().min(1),
+      replace: z.string(),
+      matchCase: z.boolean().optional().describe('Match the case exactly; off by default'),
+      slideIds: z.array(slugSchema).min(1).optional().describe('Restrict to these slides'),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      replacements: z.number().int().nonnegative(),
+      slideIds: z.array(slugSchema).describe('The slides that changed'),
+      revision,
+    }),
+    cli: { usage: 'turboslide text replace <find> <replace> --match-case --slides <slideIds>' },
+    mcp: 'deck_replace_text',
+    example: { find: 'Acme', replace: 'Globex', baseRevision: 412 },
   }),
   'block.set': action({
     id: 'block.set',
@@ -817,6 +1162,26 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     cli: { usage: 'turboslide block order <slideId>#<blockId> --move <move> --z <z>' },
     mcp: 'deck_order_block',
     example: { slideId: 'content-rule', blockId: 'h', move: 'front', baseRevision: 412 },
+  }),
+  'block.duplicate': action({
+    id: 'block.duplicate',
+    label: 'Duplicate block',
+    doc: 'Copies the named blocks of a slide with fresh ids, each after its original; on a freeform slide the copy sits 16 px right and down and on top of the stack.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z.array(blockIdSchema).min(1),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({
+      blockIds: z.array(blockIdSchema).describe('The ids of the copies, in input order'),
+    }),
+    cli: { usage: 'turboslide block duplicate <slideId> --blocks <blockIds>' },
+    mcp: 'deck_duplicate_block',
+    example: { slideId: 'content-rule', blockIds: ['p1'], baseRevision: 412 },
   }),
   'section.set': action({
     id: 'section.set',
@@ -1324,6 +1689,23 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     mcp: 'deck_set_view',
     example: { on: true },
   }),
+  'view.zoom': action({
+    id: 'view.zoom',
+    label: 'Zoom',
+    doc: 'Sets the stage scale in the editor, a factor of the sheet size or fit; a view action with no document field.',
+    group: 'view',
+    mutates: false,
+    transports: ['window', 'mcp'],
+    milestone: 'GS1',
+    input: z.strictObject({
+      zoom: z
+        .union([z.number().positive().max(4), z.literal('fit')])
+        .describe("A factor between 0.25 and 4, or 'fit' for the stage's own fit"),
+    }),
+    output: viewStateSchema,
+    mcp: 'deck_set_zoom',
+    example: { zoom: 'fit' },
+  }),
   'export.run': action({
     id: 'export.run',
     label: 'Export',
@@ -1388,12 +1770,20 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
           'Render the files back through LibreOffice and diff every page against the web render (SPEC 8.5)',
         ),
       slideIds: slideIdsOrAll.optional().describe("A subset to export; defaults to 'all'"),
+      includeSkipped: z
+        .boolean()
+        .optional()
+        .describe('Export the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)'),
+      includeNotes: z
+        .boolean()
+        .optional()
+        .describe('Carry the speaker notes; left out by default (gslides-parity decision 15.2)'),
       out: z.string().optional().describe('Output directory; defaults to .turboslide/export'),
     }),
     output: exportReportSchema,
     cli: {
       usage:
-        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --verify --out <out>',
+        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --verify --out <out>',
     },
     mcp: 'deck_export',
     example: { format: 'pptx', mode: 'flatten', theme: ['light'], fonts: 'exact', verify: true },
@@ -1429,6 +1819,28 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     cli: { usage: 'turboslide export check <file> --python <python> --out <out>' },
     example: { file: '.turboslide/export/gt-brand-light.pptx' },
   }),
+  'export.text': action({
+    id: 'export.text',
+    label: 'Download as plain text',
+    doc: 'The deck as plain text: one block of paragraphs per slide in order, table cells joined by tabs, a blank line between slides, the notes after each slide when asked; skipped slides left out unless asked.',
+    group: 'export',
+    mutates: false,
+    transports: A,
+    milestone: 'GS1',
+    input: z.strictObject({
+      slideIds: slideIdsOrAll.optional().describe("A subset; defaults to 'all'"),
+      includeNotes: z.boolean().optional().describe('Append each slide’s speaker notes'),
+      includeSkipped: z.boolean().optional().describe('Include the skipped slides'),
+    }),
+    output: z.strictObject({
+      text: z.string(),
+      slides: z.number().int().nonnegative().describe('How many slides the text covers'),
+      bytes: z.number().int().nonnegative(),
+    }),
+    cli: { usage: 'turboslide export txt <slideIds> --include-notes --include-skipped' },
+    mcp: 'deck_export_text',
+    example: { slideIds: 'all', includeNotes: true },
+  }),
   'build.run': action({
     id: 'build.run',
     label: 'Build standalone',
@@ -1441,6 +1853,11 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       out: z.string(),
       budgetMB: z.number().positive().optional().describe('Defaults to 16'),
       quality: z.number().int().min(1).max(100).optional(),
+      includeSkipped: z
+        .boolean()
+        .optional()
+        .describe('Build the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)'),
+      includeNotes: z.boolean().optional().describe('Carry the speaker notes into the file'),
     }),
     output: z.strictObject({
       path: z.string(),

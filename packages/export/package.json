@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "Export as a client of the renderer (SPEC 8): scene extraction in headless Chromium, PPTX through pptxgenjs in flatten (perfect) and native (editable text) mode, the page raster policy, the OOXML post-process (repair-risk strip, grpSp rows, slide names and hidden titles, embedded font parts on request, stored media, package validation), the typed ExportReport, and export check. verify/ is the LibreOffice loop of the render worker plus the QuickLook smoke check.",
+  "description": "Export as a client of the renderer (SPEC 8): scene extraction in headless Chromium, PPTX through pptxgenjs in flatten (perfect) and native (editable text) mode, the page raster policy, the OOXML post-process (repair-risk strip, grpSp rows, slide names and hidden titles, embedded font parts on request, stored media, package validation), the typed ExportReport, export check, and the PDF export through Chromium print with its poppler gate (gslides-parity SPEC 7.6). verify/ is the LibreOffice loop of the render worker plus the QuickLook smoke check.",
   "scripts": {
     "test": "vitest run"
   },
@@ -11,6 +11,7 @@
     "./units": "./src/units.ts",
     "./report": "./src/report.ts",
     "./export-pptx": "./src/export-pptx.ts",
+    "./pdf/build": "./src/pdf/build.ts",
     "./check": "./src/check.ts",
     "./scene/types": "./src/scene/types.ts",
     "./scene/measure": "./src/scene/measure.ts",
@@ -19,6 +20,8 @@
     "./pptx/build": "./src/pptx/build.ts",
     "./pptx/masters": "./src/pptx/masters.ts",
     "./pptx/text": "./src/pptx/text.ts",
+    "./pptx/table": "./src/pptx/table.ts",
+    "./pptx/links": "./src/pptx/links.ts",
     "./pptx/lines": "./src/pptx/lines.ts",
     "./pptx/images": "./src/pptx/images.ts",
     "./pptx/notes": "./src/pptx/notes.ts",

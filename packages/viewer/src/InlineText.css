@@ -1,9 +1,9 @@
-/* The run toolbar (SPEC 6.4: weight 500 run, link, GT mark), a 32px paper bar over the run being
-   edited, in the chrome's vocabulary: the buttons are tokens.css .pt-ib icon squares, so they draw
-   the shell's hover hairline and pressed ink themselves. Line law (SPEC 2.2): the bar draws its one
-   1px --pt-hair ring; the link field draws the one rule between it and the buttons; nothing else
-   in the bar draws a line. Placed in CSS pixels inside the overlay layer by InlineText.tsx. */
-.ts-run-toolbar {
+/* The link popover of an editing session (InlineText.tsx, Cmd K; gslides-parity SPEC 10.2): a
+   32px paper plate over the run in the chrome's vocabulary, holding the one field. Line law (SPEC
+   2.2): the plate draws its one 1px --pt-hair ring; nothing else in it draws a line. Placed in CSS
+   pixels inside the overlay layer by InlineText.tsx. The run toolbar of the editor depth round is
+   gone: Google's text controls sit on the toolbar tail (SPEC 3.2). */
+.ts-link-pop {
   position: absolute;
   z-index: 4;
   display: inline-flex;
@@ -18,19 +18,6 @@
   white-space: nowrap;
 }
 
-.ts-run-toolbar .pt-ib {
-  height: 30px;
-}
-
-/* the weight 500 glyph, in the display face with the deck's alternates */
-.ts-run-glyph {
-  font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
-  font-weight: 500;
-  font-size: 14px;
-  line-height: 1;
-}
-
 .ts-run-link {
   appearance: none;
   height: 30px;
@@ -38,7 +25,6 @@
   margin: 0;
   padding: 0 8px;
   border: 0;
-  border-left: 1px solid var(--pt-hair);
   border-radius: 0;
   background: none;
   color: var(--pt-ink);

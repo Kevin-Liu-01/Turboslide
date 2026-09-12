@@ -1,9 +1,9 @@
 // dither, mark, markSizes and matrix.
 import { el, escapeText, escapeAttr } from '../html.ts';
-import { renderText } from '../text.ts';
 import type { BlockOf } from '@turboslide/schema/blocks';
 import { dataAttrs, markSvg, raster, rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
+import { renderTextOrPrompt } from './prompt.ts';
 
 /**
  * `dither`: `<canvas class="dither" data-dither='{"ramp":"linear-x"}'>` that the viewer runtime draws
@@ -84,7 +84,7 @@ export function renderMatrix(block: BlockOf<'matrix'>, ctx: BlockContext): strin
     ? el(
         'p',
         { class: 'cap', 'data-run': runAttr(ctx, block.id, 'caption') },
-        renderText(block.caption, { gtWord: ctx.gtWord }),
+        renderTextOrPrompt(block.caption, ctx, block, '/caption'),
       )
     : '';
   const columns = block.cells[0]?.length ?? 4;

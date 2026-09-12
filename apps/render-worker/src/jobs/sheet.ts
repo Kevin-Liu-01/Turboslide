@@ -60,7 +60,13 @@ export async function runSheetJob(
   const t = performance.now();
   const deckDir = deckDirOf(paths, input.deckId);
   const render = await runRenderJob(
-    { deckId: input.deckId, slideIds: input.slideIds, themes: input.themes, scale: 1 },
+    {
+      deckId: input.deckId,
+      slideIds: input.slideIds,
+      themes: input.themes,
+      scale: 1,
+      format: 'png',
+    },
     ctx,
     paths,
   );

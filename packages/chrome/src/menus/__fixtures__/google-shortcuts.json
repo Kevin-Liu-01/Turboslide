@@ -1,0 +1,887 @@
+{
+  "$comment": "Google's Slides shortcut page as R04 Part B transcribed it on 2026-09-11 (docs/gslides-parity/research/04-present-and-shortcuts.md, tables B1 to B9 and A10). One row per action; mac and win hold the chords in Google's spelling, alternates as separate strings; an empty array is a platform with no row. Chrome OS values and browser variants other than Chrome are left out. shortcuts.test.ts normalizes each string with normalizeGoogleChord.",
+  "groups": [
+    {
+      "group": "Common actions",
+      "rows": [
+        { "id": "new-slide", "action": "New slide", "mac": ["Ctrl + m"], "win": ["Ctrl + m"] },
+        {
+          "id": "duplicate-slide",
+          "action": "Duplicate slide",
+          "mac": ["Cmd + d"],
+          "win": ["Ctrl + d"]
+        },
+        { "id": "undo", "action": "Undo", "mac": ["Cmd + z"], "win": ["Ctrl + z"] },
+        {
+          "id": "redo",
+          "action": "Redo",
+          "mac": ["Cmd + y", "Cmd + Shift + z"],
+          "win": ["Ctrl + y", "Ctrl + Shift + z"]
+        },
+        { "id": "copy", "action": "Copy", "mac": ["Cmd + c"], "win": ["Ctrl + c"] },
+        { "id": "cut", "action": "Cut", "mac": ["Cmd + x"], "win": ["Ctrl + x"] },
+        { "id": "paste", "action": "Paste", "mac": ["Cmd + v"], "win": ["Ctrl + v"] },
+        {
+          "id": "copy-formatting",
+          "action": "Copy formatting of the selected text or shape",
+          "mac": ["Cmd + Option + c"],
+          "win": ["Ctrl + Alt + c"]
+        },
+        {
+          "id": "paste-formatting",
+          "action": "Paste formatting of the selected text or shape",
+          "mac": ["Cmd + Option + v"],
+          "win": ["Ctrl + Alt + v"]
+        },
+        {
+          "id": "insert-link",
+          "action": "Insert or edit link",
+          "mac": ["Cmd + k"],
+          "win": ["Ctrl + k"]
+        },
+        {
+          "id": "open-link",
+          "action": "Open link",
+          "mac": ["Option + Enter"],
+          "win": ["Alt + Enter"]
+        },
+        { "id": "delete", "action": "Delete", "mac": ["Delete"], "win": ["Delete"] },
+        { "id": "select-all", "action": "Select all", "mac": ["Cmd + a"], "win": ["Ctrl + a"] },
+        {
+          "id": "select-none",
+          "action": "Select none",
+          "mac": ["hold Ctrl + Cmd, press u then a"],
+          "win": ["hold Ctrl + Alt, press u then a"]
+        },
+        { "id": "find", "action": "Find", "mac": ["Cmd + f"], "win": ["Ctrl + f"] },
+        {
+          "id": "find-and-replace",
+          "action": "Find and replace",
+          "mac": ["Cmd + Shift + h"],
+          "win": ["Ctrl + h"]
+        },
+        { "id": "find-again", "action": "Find again", "mac": ["Cmd + g"], "win": ["Ctrl + g"] },
+        {
+          "id": "find-previous",
+          "action": "Find previous",
+          "mac": ["Cmd + Shift + g"],
+          "win": ["Ctrl + Shift + g"]
+        },
+        { "id": "open", "action": "Open...", "mac": ["Cmd + o"], "win": ["Ctrl + o"] },
+        { "id": "print", "action": "Print", "mac": ["Cmd + p"], "win": ["Ctrl + p"] },
+        {
+          "id": "save",
+          "action": "Save (every change is automatically saved in Drive)",
+          "mac": ["Cmd + s"],
+          "win": ["Ctrl + s"]
+        },
+        {
+          "id": "show-shortcuts",
+          "action": "Show common keyboard shortcuts",
+          "mac": ["Cmd + /"],
+          "win": ["Ctrl + /"]
+        },
+        {
+          "id": "tool-finder",
+          "action": "Tool finder (formerly Search the menus)",
+          "mac": ["Option + /", "Ctrl + Option + z"],
+          "win": ["Alt + /", "Alt + z"]
+        },
+        {
+          "id": "compact-mode",
+          "action": "Hide or show menus (compact mode)",
+          "mac": ["Ctrl + Shift + f"],
+          "win": ["Ctrl + Shift + f"]
+        },
+        {
+          "id": "captions-while-presenting",
+          "action": "Turn on captions while presenting",
+          "mac": ["Cmd + Shift + c"],
+          "win": ["Ctrl + Shift + c"]
+        },
+        {
+          "id": "alt-text",
+          "action": "Alt text",
+          "mac": ["Cmd + Option + y"],
+          "win": ["Ctrl + Alt + y"]
+        }
+      ]
+    },
+    {
+      "group": "Film strip actions",
+      "rows": [
+        {
+          "id": "previous-slide",
+          "action": "Move to previous slide",
+          "mac": ["Up arrow"],
+          "win": ["Page Up", "Up arrow"]
+        },
+        {
+          "id": "next-slide",
+          "action": "Move to next slide",
+          "mac": ["Down arrow"],
+          "win": ["Page Down", "Down arrow"]
+        },
+        {
+          "id": "first-slide",
+          "action": "Move focus to first slide",
+          "mac": ["Fn + Left arrow"],
+          "win": ["Home"]
+        },
+        {
+          "id": "last-slide",
+          "action": "Move focus to last slide",
+          "mac": ["Fn + Right arrow"],
+          "win": ["End"]
+        },
+        {
+          "id": "move-slide-up",
+          "action": "Move slide up",
+          "mac": ["Cmd + Up arrow"],
+          "win": ["Ctrl + Up arrow"]
+        },
+        {
+          "id": "move-slide-down",
+          "action": "Move slide down",
+          "mac": ["Cmd + Down arrow"],
+          "win": ["Ctrl + Down arrow"]
+        },
+        {
+          "id": "move-slide-to-beginning",
+          "action": "Move slide to beginning",
+          "mac": ["Cmd + Shift + Up arrow"],
+          "win": ["Ctrl + Shift + Up arrow"]
+        },
+        {
+          "id": "move-slide-to-end",
+          "action": "Move slide to end",
+          "mac": ["Cmd + Shift + Down arrow"],
+          "win": ["Ctrl + Shift + Down arrow"]
+        },
+        {
+          "id": "select-previous-slide",
+          "action": "Select previous slide",
+          "mac": ["Shift + Up arrow"],
+          "win": ["Shift + Up arrow"]
+        },
+        {
+          "id": "select-next-slide",
+          "action": "Select next slide",
+          "mac": ["Shift + Down arrow"],
+          "win": ["Shift + Down arrow"]
+        },
+        {
+          "id": "select-first-slide",
+          "action": "Select first slide",
+          "mac": ["Shift + Fn + Left arrow"],
+          "win": ["Shift + Home"]
+        },
+        {
+          "id": "select-last-slide",
+          "action": "Select last slide",
+          "mac": ["Shift + Fn + Right arrow"],
+          "win": ["Shift + End"]
+        }
+      ]
+    },
+    {
+      "group": "Navigation",
+      "rows": [
+        { "id": "zoom-in", "action": "Zoom in", "mac": ["Cmd + +"], "win": ["Ctrl + +"] },
+        { "id": "zoom-out", "action": "Zoom out", "mac": ["Cmd + -"], "win": ["Ctrl + -"] },
+        { "id": "zoom-100", "action": "Zoom 100%", "mac": ["Cmd + 0"], "win": ["Ctrl + 0"] },
+        {
+          "id": "move-to-filmstrip",
+          "action": "Move to filmstrip",
+          "mac": ["Cmd + Option + Shift + f"],
+          "win": ["Ctrl + Alt + Shift + f"]
+        },
+        {
+          "id": "move-to-canvas",
+          "action": "Move to canvas",
+          "mac": ["Cmd + Option + Shift + c"],
+          "win": ["Ctrl + Alt + Shift + c"]
+        },
+        {
+          "id": "open-speaker-notes",
+          "action": "Open speaker notes panel",
+          "mac": ["Cmd + Option + Shift + s"],
+          "win": ["Ctrl + Alt + Shift + s"]
+        },
+        {
+          "id": "html-view",
+          "action": "Change to HTML view of presentation",
+          "mac": ["Cmd + Option + Shift + p"],
+          "win": ["Ctrl + Alt + Shift + p"]
+        },
+        {
+          "id": "animations-panel",
+          "action": "Open animations panel",
+          "mac": ["Cmd + Option + Shift + b"],
+          "win": ["Ctrl + Alt + Shift + b"]
+        },
+        {
+          "id": "animation-preview",
+          "action": "Continue in animation preview",
+          "mac": ["Enter"],
+          "win": ["Enter"]
+        },
+        {
+          "id": "open-explore",
+          "action": "Open Explore",
+          "mac": ["Cmd + Option + Shift + i"],
+          "win": ["Ctrl + Alt + Shift + i"]
+        },
+        {
+          "id": "open-dictionary",
+          "action": "Open dictionary",
+          "mac": ["Cmd + Shift + y"],
+          "win": ["Ctrl + Shift + y"]
+        },
+        {
+          "id": "side-panel",
+          "action": "Go to side panel",
+          "mac": ["Cmd + Option + .", "Cmd + Option + ,"],
+          "win": ["Ctrl + Alt + .", "Ctrl + Alt + ,"]
+        },
+        {
+          "id": "revision-history",
+          "action": "Open revision history panel",
+          "mac": ["Cmd + Option + Shift + h"],
+          "win": ["Ctrl + Alt + Shift + h"]
+        },
+        {
+          "id": "cell-border-selection",
+          "action": "Open cell border selection (for tables)",
+          "mac": ["hold Ctrl + Cmd, press e then p"],
+          "win": ["hold Ctrl + Alt, press e then p"]
+        },
+        {
+          "id": "play-video",
+          "action": "Play the selected video",
+          "mac": ["Enter"],
+          "win": ["Enter"]
+        },
+        {
+          "id": "present",
+          "action": "Present slides",
+          "mac": ["Cmd + Enter"],
+          "win": ["Ctrl + F5"]
+        },
+        {
+          "id": "present-from-beginning",
+          "action": "Present slides from beginning",
+          "mac": ["Cmd + Shift + Enter"],
+          "win": []
+        },
+        {
+          "id": "exit-current-mode",
+          "action": "Exit the current mode",
+          "mac": ["Esc"],
+          "win": ["Esc"]
+        }
+      ]
+    },
+    {
+      "group": "Menus",
+      "rows": [
+        {
+          "id": "context-menu",
+          "action": "Context menu",
+          "mac": ["Cmd + Shift + \\", "Shift + F10"],
+          "win": ["Ctrl + Shift + \\", "Ctrl + Shift + x", "Shift + F10"]
+        },
+        {
+          "id": "menu-file",
+          "action": "File menu",
+          "mac": ["Ctrl + Option + f"],
+          "win": ["Alt + f"]
+        },
+        {
+          "id": "menu-edit",
+          "action": "Edit menu",
+          "mac": ["Ctrl + Option + e"],
+          "win": ["Alt + e"]
+        },
+        {
+          "id": "menu-view",
+          "action": "View menu",
+          "mac": ["Ctrl + Option + v"],
+          "win": ["Alt + v"]
+        },
+        {
+          "id": "menu-insert",
+          "action": "Insert menu",
+          "mac": ["Ctrl + Option + i"],
+          "win": ["Alt + i"]
+        },
+        { "id": "menu-slide", "action": "Slide menu", "mac": ["Ctrl + Option + s"], "win": [] },
+        {
+          "id": "menu-format",
+          "action": "Format menu",
+          "mac": ["Ctrl + Option + o"],
+          "win": ["Alt + o"]
+        },
+        { "id": "menu-arrange", "action": "Arrange menu", "mac": ["Ctrl + Option + r"], "win": [] },
+        {
+          "id": "menu-tools",
+          "action": "Tools menu",
+          "mac": ["Ctrl + Option + t"],
+          "win": ["Alt + t"]
+        },
+        {
+          "id": "menu-help",
+          "action": "Help menu",
+          "mac": ["Ctrl + Option + h"],
+          "win": ["Alt + h"]
+        },
+        {
+          "id": "accessibility-menu",
+          "action": "Accessibility menu (present when screen reader support is enabled)",
+          "mac": [],
+          "win": ["Alt + a"]
+        },
+        {
+          "id": "input-tools-menu",
+          "action": "Input tools menu (available in presentations in non-Latin languages)",
+          "mac": ["Cmd + Option + Shift + k"],
+          "win": ["Ctrl + Alt + Shift + k"]
+        },
+        {
+          "id": "toggle-input-controls",
+          "action": "Toggle input controls (available in presentations in non-Latin languages)",
+          "mac": ["Cmd + Shift + k"],
+          "win": ["Ctrl + Shift + k"]
+        }
+      ]
+    },
+    {
+      "group": "Comments",
+      "rows": [
+        {
+          "id": "insert-comment",
+          "action": "Insert comment",
+          "mac": ["Cmd + Option + m"],
+          "win": ["Ctrl + Alt + m"]
+        },
+        {
+          "id": "enter-comment",
+          "action": "Enter current comment",
+          "mac": ["hold Ctrl + Enter"],
+          "win": ["hold Ctrl + Enter"]
+        },
+        {
+          "id": "next-comment",
+          "action": "Move to next comment in the presentation",
+          "mac": ["hold Ctrl + Cmd, press n then c"],
+          "win": ["hold Ctrl + Alt, press n then c"]
+        },
+        {
+          "id": "previous-comment",
+          "action": "Move to previous comment in the presentation",
+          "mac": ["hold Ctrl + Cmd, press p then c"],
+          "win": ["hold Ctrl + Alt, press p then c"]
+        },
+        {
+          "id": "comment-focus-next",
+          "action": "When focus is on comment, move to next comment",
+          "mac": ["j"],
+          "win": ["j"]
+        },
+        {
+          "id": "comment-focus-previous",
+          "action": "When focus is on comment, move to previous comment",
+          "mac": ["k"],
+          "win": ["k"]
+        },
+        {
+          "id": "comment-focus-reply",
+          "action": "When focus is on comment, reply to comment",
+          "mac": ["r"],
+          "win": ["r"]
+        },
+        {
+          "id": "comment-focus-resolve",
+          "action": "When focus is on comment, resolve comment",
+          "mac": ["e"],
+          "win": ["e"]
+        },
+        {
+          "id": "comment-thread",
+          "action": "Open comment discussion thread",
+          "mac": ["Cmd + Option + Shift + a"],
+          "win": ["Ctrl + Alt + Shift + a"]
+        },
+        {
+          "id": "comment-reply-selected",
+          "action": "Reply to current comment (on selected comments)",
+          "mac": ["R"],
+          "win": ["R"]
+        },
+        {
+          "id": "comment-next-selected",
+          "action": "Move to next comment (on selected comments)",
+          "mac": ["J"],
+          "win": ["J"]
+        },
+        {
+          "id": "comment-previous-selected",
+          "action": "Move to previous comment (on selected comments)",
+          "mac": ["K"],
+          "win": ["K"]
+        },
+        {
+          "id": "comment-resolve-selected",
+          "action": "Resolve current comment (on selected comments)",
+          "mac": ["E"],
+          "win": ["E"]
+        },
+        {
+          "id": "comment-exit-selected",
+          "action": "Exit current comment (on selected comments)",
+          "mac": ["U"],
+          "win": ["U"]
+        },
+        {
+          "id": "hide-comment",
+          "action": "Hide comment",
+          "mac": ["Cmd + Option + Shift + j"],
+          "win": ["Ctrl + Alt + Shift + j"]
+        }
+      ]
+    },
+    {
+      "group": "Text",
+      "rows": [
+        { "id": "bold", "action": "Bold", "mac": ["Cmd + b"], "win": ["Ctrl + b"] },
+        { "id": "italic", "action": "Italic", "mac": ["Cmd + i"], "win": ["Ctrl + i"] },
+        { "id": "underline", "action": "Underline", "mac": ["Cmd + u"], "win": ["Ctrl + u"] },
+        { "id": "subscript", "action": "Subscript", "mac": ["Cmd + ,"], "win": ["Ctrl + ,"] },
+        { "id": "superscript", "action": "Superscript", "mac": ["Cmd + ."], "win": ["Ctrl + ."] },
+        {
+          "id": "strikethrough",
+          "action": "Strikethrough",
+          "mac": ["Cmd + Shift + x"],
+          "win": ["Alt + Shift + 5"]
+        },
+        {
+          "id": "clear-formatting",
+          "action": "Clear formatting",
+          "mac": ["Cmd + \\ (back slash)"],
+          "win": ["Ctrl + \\", "Ctrl + Space"]
+        },
+        {
+          "id": "increase-font-size",
+          "action": "Increase font size",
+          "mac": ["Cmd + Shift + >"],
+          "win": ["Ctrl + Shift + >"]
+        },
+        {
+          "id": "decrease-font-size",
+          "action": "Decrease font size",
+          "mac": ["Cmd + Shift + <"],
+          "win": ["Ctrl + Shift + <"]
+        },
+        {
+          "id": "left-align",
+          "action": "Left align",
+          "mac": ["Cmd + Shift + l"],
+          "win": ["Ctrl + Shift + l"]
+        },
+        {
+          "id": "right-align",
+          "action": "Right align",
+          "mac": ["Cmd + Shift + r"],
+          "win": ["Ctrl + Shift + r"]
+        },
+        {
+          "id": "center-align",
+          "action": "Center align",
+          "mac": ["Cmd + Shift + e"],
+          "win": ["Ctrl + Shift + e"]
+        },
+        {
+          "id": "justify",
+          "action": "Justify",
+          "mac": ["Cmd + Shift + j"],
+          "win": ["Ctrl + Shift + j"]
+        },
+        {
+          "id": "move-paragraph-down",
+          "action": "Move paragraph down",
+          "mac": ["Option + Shift + Down arrow"],
+          "win": ["Alt + Shift + Down arrow"]
+        },
+        {
+          "id": "move-paragraph-up",
+          "action": "Move paragraph up",
+          "mac": ["Option + Shift + Up arrow"],
+          "win": ["Alt + Shift + Up arrow"]
+        },
+        {
+          "id": "increase-indent",
+          "action": "Increase indent",
+          "mac": ["Cmd + ]"],
+          "win": ["Ctrl + ]"]
+        },
+        {
+          "id": "decrease-indent",
+          "action": "Decrease indent",
+          "mac": ["Cmd + ["],
+          "win": ["Ctrl + ["]
+        },
+        {
+          "id": "bulleted-list",
+          "action": "Bulleted list",
+          "mac": ["Cmd + Shift + 8"],
+          "win": ["Ctrl + Shift + 8"]
+        },
+        {
+          "id": "numbered-list",
+          "action": "Numbered list",
+          "mac": ["Cmd + Shift + 7"],
+          "win": ["Ctrl + Shift + 7"]
+        },
+        {
+          "id": "select-list-item",
+          "action": "Select list item",
+          "mac": ["hold Ctrl + Cmd + Shift, press e then i"],
+          "win": ["hold Ctrl + Alt + Shift, press e then i"]
+        },
+        {
+          "id": "select-list-items-level",
+          "action": "Select list items at current level",
+          "mac": ["hold Ctrl + Cmd + Shift, press e then o"],
+          "win": ["hold Ctrl + Alt + Shift, press e then o"]
+        },
+        {
+          "id": "next-formatting-change",
+          "action": "Move to next text formatting change",
+          "mac": ["hold Ctrl + Cmd, press n then w"],
+          "win": ["hold Ctrl + Alt, press n then w"]
+        },
+        {
+          "id": "previous-formatting-change",
+          "action": "Move to previous text formatting change",
+          "mac": ["hold Ctrl + Cmd, press p then w"],
+          "win": ["hold Ctrl + Alt, press p then w"]
+        },
+        {
+          "id": "next-misspelling",
+          "action": "Move to next misspelling",
+          "mac": ["Cmd + '"],
+          "win": ["Ctrl + '"]
+        },
+        {
+          "id": "previous-misspelling",
+          "action": "Move to previous misspelling",
+          "mac": ["Cmd + ;"],
+          "win": ["Ctrl + ;"]
+        }
+      ]
+    },
+    {
+      "group": "Move and arrange objects",
+      "rows": [
+        { "id": "duplicate", "action": "Duplicate", "mac": ["Cmd + d"], "win": ["Ctrl + d"] },
+        {
+          "id": "group",
+          "action": "Group",
+          "mac": ["Cmd + Option + g"],
+          "win": ["Ctrl + Alt + g"]
+        },
+        {
+          "id": "ungroup",
+          "action": "Ungroup",
+          "mac": ["Cmd + Option + Shift + g"],
+          "win": ["Ctrl + Alt + Shift + g"]
+        },
+        {
+          "id": "send-backward",
+          "action": "Send backward",
+          "mac": ["Cmd + Down arrow"],
+          "win": ["Ctrl + Down arrow"]
+        },
+        {
+          "id": "bring-forward",
+          "action": "Bring forward",
+          "mac": ["Cmd + Up arrow"],
+          "win": ["Ctrl + Up arrow"]
+        },
+        {
+          "id": "send-to-back",
+          "action": "Send to back",
+          "mac": ["Cmd + Shift + Down arrow"],
+          "win": ["Ctrl + Shift + Down arrow"]
+        },
+        {
+          "id": "bring-to-front",
+          "action": "Bring to front",
+          "mac": ["Cmd + Shift + Up arrow"],
+          "win": ["Ctrl + Shift + Up arrow"]
+        },
+        {
+          "id": "select-next-shape",
+          "action": "Select next shape",
+          "mac": ["Tab"],
+          "win": ["Tab"]
+        },
+        {
+          "id": "select-previous-shape",
+          "action": "Select previous shape",
+          "mac": ["Shift + Tab"],
+          "win": ["Shift + Tab"]
+        },
+        {
+          "id": "nudge",
+          "action": "Nudge one pixel at a time",
+          "mac": ["Arrow keys"],
+          "win": ["Arrow keys"]
+        },
+        {
+          "id": "nudge-larger",
+          "action": "Nudge by larger increment",
+          "mac": ["Shift + Arrow keys"],
+          "win": ["Shift + Arrow keys"]
+        },
+        {
+          "id": "rotate-ccw-1",
+          "action": "Rotate counterclockwise by 1 degree",
+          "mac": ["Option + Shift + Left arrow"],
+          "win": ["Alt + Shift + Left arrow"]
+        },
+        {
+          "id": "rotate-cw-1",
+          "action": "Rotate clockwise by 1 degree",
+          "mac": ["Option + Shift + Right arrow"],
+          "win": ["Alt + Shift + Right arrow"]
+        },
+        {
+          "id": "rotate-ccw-15",
+          "action": "Rotate counterclockwise by 15 degrees",
+          "mac": ["Option + Left arrow"],
+          "win": ["Alt + Left arrow"]
+        },
+        {
+          "id": "rotate-cw-15",
+          "action": "Rotate clockwise by 15 degrees",
+          "mac": ["Option + Right arrow"],
+          "win": ["Alt + Right arrow"]
+        },
+        {
+          "id": "resize-larger-horizontally",
+          "action": "Resize larger horizontally",
+          "mac": ["Cmd + Ctrl + b"],
+          "win": ["Ctrl + Alt + b"]
+        },
+        {
+          "id": "resize-larger-vertically",
+          "action": "Resize larger vertically",
+          "mac": ["Cmd + Ctrl + i"],
+          "win": ["Ctrl + Alt + i"]
+        },
+        {
+          "id": "resize-smaller",
+          "action": "Resize smaller",
+          "mac": ["Cmd + Ctrl + j"],
+          "win": ["Ctrl + Alt + j"]
+        },
+        {
+          "id": "resize-larger",
+          "action": "Resize larger",
+          "mac": ["Cmd + Ctrl + k"],
+          "win": ["Ctrl + Alt + k"]
+        },
+        {
+          "id": "resize-smaller-vertically",
+          "action": "Resize smaller vertically",
+          "mac": [],
+          "win": ["Ctrl + Alt + 9"]
+        },
+        {
+          "id": "resize-smaller-horizontally",
+          "action": "Resize smaller horizontally",
+          "mac": ["Cmd + Ctrl + w"],
+          "win": ["Ctrl + Alt + w"]
+        },
+        { "id": "exit-crop-mode", "action": "Exit crop mode", "mac": ["Enter"], "win": ["Enter"] },
+        {
+          "id": "suppress-guides",
+          "action": "Suppress guides",
+          "mac": ["Cmd + Move with mouse"],
+          "win": ["Alt + Move with mouse"],
+          "gesture": true
+        },
+        {
+          "id": "duplicate-drag",
+          "action": "Duplicate (drag)",
+          "mac": ["Option + Move with mouse"],
+          "win": ["Ctrl + Move with mouse"],
+          "gesture": true
+        },
+        {
+          "id": "resize-from-center",
+          "action": "Resize from center",
+          "mac": ["Option + Resize with mouse"],
+          "win": ["Ctrl + Resize with mouse"],
+          "gesture": true
+        },
+        {
+          "id": "constrain-axis",
+          "action": "Constrain to vertical or horizontal movements",
+          "mac": ["Shift + Move with mouse"],
+          "win": ["Shift + Move with mouse"],
+          "gesture": true
+        },
+        {
+          "id": "constrain-aspect",
+          "action": "Constrain to object's aspect ratio",
+          "mac": ["Shift + Resize with mouse"],
+          "win": ["Shift + Resize with mouse"],
+          "gesture": true
+        },
+        {
+          "id": "constrain-rotation",
+          "action": "Constrain to 15 degree rotation increments",
+          "mac": ["Shift + Rotate with mouse"],
+          "win": ["Shift + Rotate with mouse"],
+          "gesture": true
+        },
+        {
+          "id": "add-to-selection",
+          "action": "Add to selection",
+          "mac": [],
+          "win": [],
+          "gesture": true
+        }
+      ]
+    },
+    {
+      "group": "Presenting",
+      "rows": [
+        { "id": "present-stop", "action": "Stop presenting", "mac": ["Esc"], "win": ["Esc"] },
+        { "id": "present-next", "action": "Next", "mac": ["Right arrow"], "win": ["Right arrow"] },
+        {
+          "id": "present-previous",
+          "action": "Previous",
+          "mac": ["Left arrow"],
+          "win": ["Left arrow"]
+        },
+        {
+          "id": "present-goto",
+          "action": "Go to specific slide (7 followed by Enter goes to slide 7)",
+          "mac": ["Number followed by Enter"],
+          "win": ["Number followed by Enter"],
+          "gesture": true
+        },
+        { "id": "present-first", "action": "First slide", "mac": ["Home"], "win": ["Home"] },
+        { "id": "present-last", "action": "Last slide", "mac": ["End"], "win": ["End"] },
+        { "id": "present-notes", "action": "Open speaker notes", "mac": ["s"], "win": ["s"] },
+        { "id": "present-audience", "action": "Open audience tools", "mac": ["a"], "win": ["a"] },
+        { "id": "present-laser", "action": "Toggle laser pointer", "mac": ["l"], "win": ["l"] },
+        { "id": "present-print", "action": "Print", "mac": ["Cmd + p"], "win": ["Ctrl + p"] },
+        {
+          "id": "present-captions",
+          "action": "Toggle captions (English only)",
+          "mac": ["Cmd + Shift + c"],
+          "win": ["Ctrl + Shift + c"]
+        },
+        {
+          "id": "present-full-screen",
+          "action": "Toggle full screen",
+          "mac": ["Cmd + Shift + f"],
+          "win": ["F11"]
+        },
+        {
+          "id": "present-black",
+          "action": "Show a blank black slide",
+          "mac": ["b", "."],
+          "win": ["b", "."]
+        },
+        {
+          "id": "present-white",
+          "action": "Show a blank white slide",
+          "mac": ["w", ","],
+          "win": ["w", ","]
+        }
+      ]
+    },
+    {
+      "group": "Video player",
+      "rows": [
+        { "id": "video-play-pause", "action": "Toggle play/pause", "mac": ["k"], "win": ["k"] },
+        { "id": "video-rewind", "action": "Rewind 10 seconds", "mac": ["u"], "win": ["u"] },
+        { "id": "video-forward", "action": "Fast forward 10 seconds", "mac": ["o"], "win": ["o"] },
+        {
+          "id": "video-previous-frame",
+          "action": "Previous frame (while paused)",
+          "mac": ["Shift + ,"],
+          "win": ["Shift + ,"]
+        },
+        {
+          "id": "video-next-frame",
+          "action": "Next frame (while paused)",
+          "mac": ["Shift + ."],
+          "win": ["Shift + ."]
+        },
+        {
+          "id": "video-slower",
+          "action": "Decrease playback rate",
+          "mac": ["Cmd + Shift + ,"],
+          "win": ["Ctrl + Shift + ,"]
+        },
+        {
+          "id": "video-faster",
+          "action": "Increase playback rate",
+          "mac": ["Cmd + Shift + ."],
+          "win": ["Ctrl + Shift + ."]
+        },
+        {
+          "id": "video-seek",
+          "action": "Seek to specific point in the video",
+          "mac": ["Shift + 0..9"],
+          "win": ["Shift + 0..9"],
+          "gesture": true
+        },
+        { "id": "video-captions", "action": "Toggle captions on/off", "mac": ["c"], "win": ["c"] },
+        { "id": "video-full-screen", "action": "Toggle full screen", "mac": ["f"], "win": ["f"] },
+        { "id": "video-mute", "action": "Toggle mute", "mac": ["m"], "win": ["m"] }
+      ]
+    },
+    {
+      "group": "Screen reader support",
+      "rows": [
+        {
+          "id": "verbalize-selection",
+          "action": "Verbalize selection",
+          "mac": ["Ctrl + Cmd + x"],
+          "win": ["Ctrl + Alt + x"]
+        },
+        {
+          "id": "screen-reader-support",
+          "action": "Enable screen reader support",
+          "mac": ["Option + Cmd + z"],
+          "win": ["Ctrl + Alt + z"]
+        },
+        {
+          "id": "braille-support",
+          "action": "Enable braille support",
+          "mac": ["Cmd + Option + h"],
+          "win": ["Ctrl + Alt + h"]
+        },
+        {
+          "id": "verbalize-from-cursor",
+          "action": "Verbalize from cursor location",
+          "mac": ["Ctrl + Cmd + r"],
+          "win": ["Ctrl + Alt + r"]
+        },
+        {
+          "id": "announce-formatting",
+          "action": "Announce formatting at cursor location",
+          "mac": ["hold Ctrl + Cmd, press a then f"],
+          "win": ["hold Ctrl + Alt, press a then f"]
+        }
+      ]
+    }
+  ]
+}

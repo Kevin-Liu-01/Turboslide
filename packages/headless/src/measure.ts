@@ -1,7 +1,8 @@
 // Scene measurement in the page (SPEC 5.3, MILESTONES M1 item 8): the overflow scan ported from
 // shoot-slide.mjs lines 47 to 55 (any element inside the current slide whose bounding rect
 // leaves the 1600 by 900 sheet by more than one pixel), one box per data-block with its text
-// metrics, the row values of rows blocks, and the data-raster elements the exporter screenshots.
+// metrics, the row values of rows blocks, the cells of table blocks (gslides-parity SPEC 7.3),
+// and the data-raster elements the exporter screenshots.
 // Coordinates are sheet pixels relative to the sheet element, so the same function serves a
 // document where the sheet is offset or scaled.
 import type { Page } from 'playwright-core';
@@ -147,6 +148,20 @@ export async function measureSlide(
               box: toBox(value.getBoundingClientRect()),
               ...textInfo(value),
             };
+          });
+        }
+        if (type === 'table') {
+          // a table cell is `<blockId>/<row>/<column>` of type cell (gslides-parity SPEC 7.3):
+          // rows/two-lines reads its lines, the export's verify loop measures its ink box against
+          // the 3 px text budget (packages/export/src/verify/report.ts)
+          [...el.querySelectorAll(':scope > .tr')].forEach((row, r) => {
+            [...row.querySelectorAll(':scope > .td')].forEach((cell, c) => {
+              blocks[`${id}/${r}/${c}`] = {
+                type: 'cell',
+                box: toBox(cell.getBoundingClientRect()),
+                ...textInfo(cell),
+              };
+            });
           });
         }
       });

@@ -1,0 +1,154 @@
+/* Panel (Panel.tsx): the right panel's frame (gslides-parity SPEC 1.1, 1.2). 320 px wide
+   (--pt-panel-w), paper, the left edge in --pt-hair (the one seam with the canvas, SPEC 2.2), a
+   40 px title row with --pt-hair-soft under it, the body a scroll region. 13 px Inter; radius 0;
+   colors are tokens only. At or below 900 px the shell floats it over the canvas
+   (EditorShell.css). */
+.ts-panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border-left: 1px solid var(--pt-hair);
+  font: 13px/1.45 var(--pt-text);
+}
+
+.ts-panel-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 8px 0 16px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-panel-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font: 500 14px/1.2 var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  letter-spacing: -0.005em;
+  color: var(--pt-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-panel-count {
+  margin-left: 8px;
+  font: 12px/1 var(--pt-text);
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-panel-x {
+  appearance: none;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 0;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pt-ink-2);
+  cursor: pointer;
+}
+
+.ts-panel-x svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-panel-x:hover {
+  color: var(--pt-ink);
+  border-color: var(--pt-hair);
+}
+
+.ts-panel-x:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* the sentence a panel shows with nothing to act on */
+.ts-panel-empty {
+  margin: 0;
+  padding: 16px;
+  color: var(--pt-titanium);
+}
+
+/* a section inside a panel: a 32 px head in 12 px titanium caps and ruled rows */
+.ts-panel-section {
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-panel-section:last-child {
+  border-bottom: 0;
+}
+
+.ts-panel-section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 16px;
+  appearance: none;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  color: var(--pt-ink);
+  font: 500 13px/1 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-panel-section-head:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-panel-section-head svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  color: var(--pt-titanium);
+}
+
+.ts-panel-section-head .ts-panel-chev {
+  margin-left: auto;
+  transition: transform var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-panel-section.is-closed .ts-panel-chev {
+  transform: rotate(-90deg);
+}
+
+.ts-panel-section-head.is-disabled {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+.ts-panel-section-body {
+  padding: 4px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-panel-section-head .ts-panel-chev {
+    transition: none;
+  }
+}

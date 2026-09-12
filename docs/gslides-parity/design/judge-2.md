@@ -80,11 +80,11 @@ Apply layout refusing when content would be lost (5.3) is honest for the documen
 
 Each criterion 1 to 10. Total is the sum.
 
-| Proposal | Fidelity to Google Slides | Ease for sales users | Architecture fit | Buildability in one round | Aesthetic fit with Prototemplate | Total |
-| --- | --- | --- | --- | --- | --- | --- |
-| Proposal 1, faithful | 9 | 7 | 5 | 4 | 7 | 32 |
-| Proposal 2, sales first | 7 | 9 | 7 | 7 | 8 | 38 |
-| Proposal 3, architecture | 8 | 7 | 8 | 5 | 7 | 35 |
+| Proposal                 | Fidelity to Google Slides | Ease for sales users | Architecture fit | Buildability in one round | Aesthetic fit with Prototemplate | Total |
+| ------------------------ | ------------------------- | -------------------- | ---------------- | ------------------------- | -------------------------------- | ----- |
+| Proposal 1, faithful     | 9                         | 7                    | 5                | 4                         | 7                                | 32    |
+| Proposal 2, sales first  | 7                         | 9                    | 7                | 7                         | 8                                | 38    |
+| Proposal 3, architecture | 8                         | 7                    | 8                | 5                         | 7                                | 35    |
 
 Notes on the numbers. Proposal 1's architecture score carries `ext.parked`, the `placeholder` role, `fit` on `pos`, `theme.variant` and the italic cost; its buildability is the scope. Proposal 2's architecture score loses two points for the layout list left in chrome and the `ext.layout` identity, both graft fixable; its buildability is the best because the document changes are additive and bounded and every large item names a fallback. Proposal 3's architecture score is the highest method with three unsound moves (the fold, the content rewrite, the nested group); its buildability is the size.
 

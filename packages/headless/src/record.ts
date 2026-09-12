@@ -10,6 +10,7 @@ import type { MeasureOptions } from './measure.ts';
 import { launchLog } from './launch.ts';
 import { drawDitherCanvases, waitForReady } from './ready.ts';
 import { screenshotRasters, screenshotSheet } from './screenshot.ts';
+import type { ScreenshotFormat } from './screenshot.ts';
 
 export type RenderSlideInput = {
   /** file:// URL of the document (one slide, or every slide of a theme navigated by hash). */
@@ -19,8 +20,10 @@ export type RenderSlideInput = {
   deckId: string;
   slideId: string;
   revision: number;
-  /** Where the PNG lands. */
+  /** Where the image lands. */
   imagePath: string;
+  /** PNG (default) or a JPEG at quality 92 (render.slide `format`, gslides-parity SPEC 7.6). */
+  format?: ScreenshotFormat;
   /** The `image` field of the record: a path relative to the render directory or absolute. */
   imageRef?: string;
   /** The renderer string from launchBrowser. */
@@ -70,7 +73,9 @@ export async function renderSlideRecord(
   step(`ready (fonts ${ready.fonts.status}, frames ${ready.frames})`);
   const measured = await measureSlide(page, input.measure);
   step('measured');
-  const shot = await screenshotSheet(page, input.imagePath, measured.sheet);
+  const shot = await screenshotSheet(page, input.imagePath, measured.sheet, {
+    ...(input.format !== undefined ? { format: input.format } : {}),
+  });
   step('shot');
   const rasterFiles = input.rasterDir
     ? await screenshotRasters(page, measured.rasters, input.rasterDir, input.slideId)
@@ -114,15 +119,21 @@ export async function renderSlideRecord(
   return { record, readyMs: ready.readyMs, screenshotMs: shot.ms };
 }
 
-/** The file name of SPEC 7.2: `<nn>-<slideId>-<theme>.png`, nn zero padded to two digits. */
+/**
+ * The file name of SPEC 7.2: `<nn>-<slideId>-<theme>.png`, nn zero padded to two digits, `@2x`
+ * before the extension at 2x, `.jpg` for a JPEG render.
+ */
 export function renderImageName(
   n: number,
   slideId: string,
   theme: RenderTheme,
   scale: RenderScale = 1,
+  format: ScreenshotFormat = 'png',
 ): string {
   const nn = String(n).padStart(2, '0');
-  return scale === 1 ? `${nn}-${slideId}-${theme}.png` : `${nn}-${slideId}-${theme}@${scale}x.png`;
+  return scale === 1
+    ? `${nn}-${slideId}-${theme}.${format}`
+    : `${nn}-${slideId}-${theme}@${scale}x.${format}`;
 }
 
 /** A record image path relative to the render directory, as compare-to-shoot.mjs reads it. */

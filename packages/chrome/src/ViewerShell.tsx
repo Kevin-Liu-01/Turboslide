@@ -6,6 +6,8 @@ import { resolveSlideHash, writeSlideHash } from '@turboslide/viewer/hash';
 import type { SlideHashForm } from '@turboslide/viewer/hash';
 import { toggleTheme } from '@turboslide/viewer/theme';
 
+import { EditorShell } from './EditorShell';
+import type { EditorShellInput } from './editor-shell';
 import { HelpCard } from './HelpCard';
 import { cn } from './lib/cn';
 import { useMountEffect } from './lib/useMountEffect';
@@ -25,6 +27,7 @@ import type {
 } from './shell-data';
 import { Sidebar } from './Sidebar';
 import type { SidebarEdit, SidebarFilter } from './Sidebar';
+import { useSnackbar } from './Snackbar';
 import { Toast, useToast } from './Toast';
 import { Toolbar } from './Toolbar';
 import { useShellKeys } from './useShellKeys';
@@ -136,6 +139,15 @@ export type ViewerShellProps = {
   panel?: ReactNode;
   drawer?: ReactNode;
   sidebarEdit?: SidebarEdit;
+  /**
+   * The editor's chrome (gslides-parity SPEC 1, 2, 3): with this the shell draws the title row,
+   * the menu bar, the toolbar, the right panel and the bottom bar of EditorShell.tsx around the
+   * stage and the filmstrip, runs the editor key map instead of the reading keys, and replaces
+   * the toast with the snackbar and the help card with the shortcuts dialog. Without it the shell
+   * is the viewer of /deck/:deckId, unchanged. `toolbarSlot`, `toolbarStatus`, `panel` and
+   * `onSearch` are ignored while `editor` is set.
+   */
+  editor?: EditorShellInput;
   /** the stage content */
   children?: ReactNode;
 };
@@ -193,6 +205,7 @@ export function ViewerShell({
   panel,
   drawer,
   sidebarEdit,
+  editor,
   children,
 }: ViewerShellProps) {
   const items = useMemo(() => flattenShellItems(sections), [sections]);
@@ -212,6 +225,9 @@ export function ViewerShell({
   const [panelOpen, setPanelOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [present, setPresentState] = useState(false);
+  /* the editor's compact mode (SPEC 1.1): EditorShell owns the state and reports it here, so the
+     root carries `is-compact` for EditorShell.css and the parity audit */
+  const [compact, setCompact] = useState(false);
   const [narrow, setNarrow] = useState(false);
   const [active, setActive] = useState<string>(() => initialActive ?? items[0]?.id ?? '');
   const [dir, setDir] = useState<ShellDir>('next');
@@ -225,8 +241,13 @@ export function ViewerShell({
   const touchX = useRef<number | null>(null);
   const filter = useRef<SidebarFilter>({ active: false, clear: () => undefined });
   const toast = useToast();
-  const sayRef = useRef(toast.say);
-  sayRef.current = toast.say;
+  const snackbar = useSnackbar();
+  const editorInput = editor;
+  const isEditor = editorInput !== undefined;
+  /* the editor's messages go to the snackbar (SPEC 1.1); the viewer keeps its toast */
+  const sayNow = isEditor ? (msg: string) => snackbar.show(msg) : toast.say;
+  const sayRef = useRef(sayNow);
+  sayRef.current = sayNow;
 
   const transitionTimer = useRef(0);
   const transitionStamp = useRef(0);
@@ -464,9 +485,10 @@ export function ViewerShell({
     setSidebarOpen(startNarrow ? false : load(SIDEBAR_KEY) !== '0');
     setBooted(true);
 
-    /* the first visit to a shell: the toast names the arrows and the help key */
+    /* the first visit to a viewer shell: the toast names the arrows and the help key (the editor
+       shows no first visit toast, gslides-parity SPEC 11.3) */
     const seen = (load(HINT_KEY) ?? '').split(',').filter(Boolean);
-    if (!seen.includes(id)) {
+    if (!seen.includes(id) && !isEditor) {
       store(HINT_KEY, [...seen, id].join(','));
       sayRef.current(HINT_TEXT, HINT_HOLD_MS);
     }
@@ -567,7 +589,7 @@ export function ViewerShell({
       setPresent,
       select,
       step,
-      say: toast.say,
+      say: sayNow,
     }),
     // the handlers close over refs and setters only, so the state fields are the real dependencies
     [
@@ -592,13 +614,14 @@ export function ViewerShell({
       total,
       booted,
       onSearch,
-      toast.say,
+      sayNow,
     ],
   );
 
   const stage: StageState = useMemo(() => ({ stageSize }), [stageSize]);
 
   useShellKeys(state, {
+    enabled: !isEditor,
     toggleTheme,
     /* the Escape ladder's filter rung: true when the sidebar filter had text to clear */
     clearFilter: () => {
@@ -624,6 +647,69 @@ export function ViewerShell({
     const n = pagedRef.current.indexOf(item) + 1;
     return hash === 'n' && n > 0 ? `#${n}` : `#s/${encodeURIComponent(item.id)}`;
   };
+
+  const sidebarNode = (
+    <Sidebar
+      title={title}
+      count={count}
+      sections={sections}
+      thumb={thumb}
+      hrefFor={hrefFor}
+      filter={filter}
+      homeHref={homeHref}
+      aside={headAside}
+      edit={sidebarEdit}
+    />
+  );
+
+  if (editorInput !== undefined) {
+    return (
+      <ShellContext value={state}>
+        <StageContext value={stage}>
+          <div
+            className={cn(
+              'pt-viewer is-editor',
+              present && 'is-present',
+              compact && 'is-compact',
+              overlayOpen && 'sb-open',
+            )}
+            data-shell={id}
+            data-mode={mode}
+            data-active={active}
+            data-index={index}
+            data-total={total}
+            data-dir={dir}
+            data-sb={sb}
+            data-density={density}
+            data-settled={settledState ? '' : undefined}
+            data-sb-moving={sbMotion ?? undefined}
+            data-entering={transition && !transition.native ? transition.to : undefined}
+            onTouchStart={narrow ? onTouchStart : undefined}
+            onTouchEnd={narrow ? onTouchEnd : undefined}
+          >
+            {overlayOpen ? (
+              <button
+                type="button"
+                className="pt-sb-scrim"
+                aria-label="Close the filmstrip"
+                onClick={() => setSidebar(false)}
+              />
+            ) : null}
+            <EditorShell
+              input={{ ...editorInput, drawer: editorInput.drawer ?? drawer }}
+              sidebar={sidebarNode}
+              stageRef={stageRef}
+              snackbar={snackbar}
+              onCompactChange={setCompact}
+            >
+              {children}
+            </EditorShell>
+          </div>
+          <PreviewLayer resolve={resolvePreview} />
+        </StageContext>
+      </ShellContext>
+    );
+  }
 
   return (
     <ShellContext value={state}>
@@ -652,17 +738,7 @@ export function ViewerShell({
               onClick={() => setSidebar(false)}
             />
           ) : null}
-          <Sidebar
-            title={title}
-            count={count}
-            sections={sections}
-            thumb={thumb}
-            hrefFor={hrefFor}
-            filter={filter}
-            homeHref={homeHref}
-            aside={headAside}
-            edit={sidebarEdit}
-          />
+          {sidebarNode}
           <section className="pt-main" data-panel={panel ? '' : undefined}>
             <Toolbar
               title={title}

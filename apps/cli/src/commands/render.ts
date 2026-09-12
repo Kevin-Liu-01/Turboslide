@@ -46,6 +46,11 @@ export async function render(ctx: CommandContext): Promise<number> {
   const scaleN = flagNumber(ctx.args, 'scale', 1);
   if (scaleN !== 1 && scaleN !== 2) throw new UsageError('--scale wants 1 or 2');
   const scale = scaleN;
+  /* JPEG at quality 92 (render.slide format, gslides-parity SPEC 7.6) */
+  const formatFlag = flagString(ctx.args, 'format') ?? 'png';
+  if (formatFlag !== 'png' && formatFlag !== 'jpg')
+    throw new UsageError('--format wants png or jpg');
+  const format = formatFlag;
   const outDir = resolveOut(
     ctx.cwd,
     flagString(ctx.args, 'out'),
@@ -73,7 +78,7 @@ export async function render(ctx: CommandContext): Promise<number> {
           theme: t,
           url: file.url,
           hash: slideHash(slideId),
-          imagePath: join(outDir, renderImageName(n, slideId, t, scale)),
+          imagePath: join(outDir, renderImageName(n, slideId, t, scale, format)),
         });
       }
     }
@@ -95,6 +100,7 @@ export async function render(ctx: CommandContext): Promise<number> {
               slideId: job.slideId,
               revision: loaded.deck.revision,
               imagePath: job.imagePath,
+              format,
               imageRef: relativeImageRef(outDir, job.imagePath),
               renderer: launched.renderer,
               bayerTable: BAYER8.flat(),

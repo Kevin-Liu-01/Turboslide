@@ -11,10 +11,17 @@ import { join } from 'node:path';
 
 import { openFileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
-import { assetPathWithin, factsFor } from './hosted.ts';
+import { assetPathWithin, checkRevision, factsFor } from './hosted.ts';
 import type { SeedSource } from './seed.ts';
 import { isAssetKey, materializeSeed, seedDeckIds } from './seed.ts';
-import { createDeck, listDeckHeads } from './templates.ts';
+import {
+  copyDeck,
+  createDeck,
+  listDeckHeads,
+  removeDeck,
+  restoreDeck,
+  trashDeck,
+} from './templates.ts';
 
 export type SeedFacts = {
   /** the seed's deck ids, templates excluded */
@@ -125,9 +132,9 @@ export function tmpDecks(options: HostedOptions): HostedDecks {
     async ready() {
       await overlay.ready();
     },
-    async list() {
+    async list(listOptions) {
       await overlay.ready();
-      return listDeckHeads(decksDir);
+      return listDeckHeads(decksDir, listOptions);
     },
     async has(deckId) {
       await overlay.ready();
@@ -146,6 +153,28 @@ export function tmpDecks(options: HostedOptions): HostedDecks {
       // `assets: ../../gt-brand/assets`), so they must be on disk before createDeck copies them
       if (input.from !== 'blank') await overlay.ensureAllAssets();
       return createDeck(decksDir, input, storeOptions);
+    },
+    async copy(input, baseRevision) {
+      await overlay.ready();
+      // the source's twins must be on disk before the copy takes the assets folder whole
+      await overlay.ensureAssets(input.id);
+      if (baseRevision !== undefined) checkRevision(decksDir, input.id, baseRevision);
+      return copyDeck(decksDir, input, storeOptions);
+    },
+    async trash(deckId, baseRevision) {
+      await overlay.ready();
+      return trashDeck(decksDir, deckId, {
+        ...storeOptions,
+        ...(baseRevision !== undefined ? { baseRevision } : {}),
+      });
+    },
+    async restore(deckId, baseRevision) {
+      await overlay.ready();
+      return restoreDeck(decksDir, deckId, baseRevision !== undefined ? { baseRevision } : {});
+    },
+    async remove(deckId, baseRevision) {
+      await overlay.ready();
+      return removeDeck(decksDir, deckId, baseRevision !== undefined ? { baseRevision } : {});
     },
     async ensureAssets(deckId) {
       await overlay.ensureAssets(deckId);

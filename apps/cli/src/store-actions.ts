@@ -7,13 +7,21 @@
 // lease throws ConflictError with the current document (409); a mutation the reducer rejects
 // throws TypeError (400); an unknown version throws RangeError (404).
 import type { ActionContext, ActionHandler, Dispatcher } from '@turboslide/agent/dispatch';
+import { blockTexts, slideTexts } from '@turboslide/lint/context';
+import type { TextRef } from '@turboslide/lint/context';
 import { lintDeck, lintStatic } from '@turboslide/lint/run';
+import { applyLayout } from '@turboslide/schema/apply-layout';
+import type { Asset } from '@turboslide/schema/assets';
 import type { Block } from '@turboslide/schema/blocks';
-import type { DeckDocument, Layout, Section, Slide } from '@turboslide/schema/deck';
-import { slideBlocks, slideTitle } from '@turboslide/schema/deck';
+import { blockAssetRefs } from '@turboslide/schema/catalog';
+import type { DeckDocument, Layout, LayoutId, Section, Slide } from '@turboslide/schema/deck';
+import { sectionOfSlide, slideBlocks, slideOrder, slideTitle } from '@turboslide/schema/deck';
 import { describeMutation, diffDecks } from '@turboslide/schema/diff';
 import { ConflictError } from '@turboslide/schema/errors';
 import type { Finding } from '@turboslide/schema/findings';
+import { freeLayoutSlideId, layoutEntry } from '@turboslide/schema/layouts';
+import { parseParagraphs, plainText, serializeRuns } from '@turboslide/schema/text';
+import { walkBlocks } from '@turboslide/schema/validate';
 import type {
   AlignEdge,
   AlignTarget,
@@ -715,6 +723,654 @@ export async function slideSetLayout(
 }
 
 // ---------------------------------------------------------------------------------------------
+// The Google Slides parity round (docs/gslides-parity/SPEC.md 7.5): slide.new, slide.duplicate,
+// slide.skip, slide.applyLayout, slide.import, block.duplicate and text.replaceAll as functions
+// from the action's input to its output, each one Write through commit; export.text as a pure
+// read. A Section header (the opener kind) is first in its section by the validator's rule, so
+// inserting or making one after another slide starts a new section that takes the slides after
+// the anchor (the grammar's meaning of a section header), which the outputs report.
+
+export type SlideNewInput = Rev & {
+  layout: LayoutId;
+  after?: string;
+  sectionId?: string;
+  id?: string;
+};
+export type SlideDuplicateInput = Rev & { slideIds: string[] };
+export type SlideSkipInput = Rev & { slideIds: string[]; skip: boolean };
+export type SlideApplyLayoutInput = Rev & { slideIds: string[]; layout: LayoutId };
+export type SlideImportInput = Rev & {
+  sourceDeckId: string;
+  slideIds: string[];
+  after?: string;
+  sectionId?: string;
+};
+/** What slide.import reads from the source deck: its document, and a way to copy an asset file. */
+export type SlideImportSource = {
+  document: DeckDocument;
+  /** Copies `<source>/<relative>` to `<target>/<relative>`; the twins and the source file of an asset. */
+  copyAsset: (relative: string) => Promise<void>;
+};
+export type BlockDuplicateInput = Rev & { slideId: string; blockIds: string[] };
+export type TextReplaceAllInput = Rev & {
+  find: string;
+  replace: string;
+  matchCase?: boolean;
+  slideIds?: string[];
+};
+export type ExportTextInput = {
+  slideIds?: 'all' | string[];
+  includeNotes?: boolean;
+  includeSkipped?: boolean;
+};
+
+type Cursor = { sectionId: string; after: string | undefined };
+
+/** The section a new slide lands in: the named one, the anchor's, else the last section. */
+function resolveCursor(
+  document: DeckDocument,
+  input: { after?: string; sectionId?: string },
+): Cursor {
+  if (input.after !== undefined) {
+    requireSlide(document, input.after);
+    const section = sectionOfSlide(document.deck, input.after);
+    if (section === undefined) throw new RangeError(`Slide "${input.after}" is in no section`);
+    if (input.sectionId !== undefined && input.sectionId !== section.id) {
+      throw new TypeError(
+        `Slide "${input.after}" is in section "${section.id}", not "${input.sectionId}"`,
+      );
+    }
+    return { sectionId: section.id, after: input.after };
+  }
+  const section =
+    input.sectionId !== undefined
+      ? requireSection(document, input.sectionId)
+      : document.deck.sections[document.deck.sections.length - 1];
+  if (section === undefined) throw new TypeError('The deck has no section to insert into');
+  // first in the section, but a section header stays first: land after it
+  const first = section.slideIds[0];
+  const header =
+    first !== undefined && document.slides[first]?.kind === 'opener' ? first : undefined;
+  return { sectionId: section.id, after: header };
+}
+
+function requireSection(document: DeckDocument, sectionId: string): Section {
+  const section = document.deck.sections.find((row) => row.id === sectionId);
+  if (section === undefined) throw new RangeError(`No section "${sectionId}"`);
+  return section;
+}
+
+function takenSlideIds(document: DeckDocument): Set<string> {
+  return new Set([...Object.keys(document.slides), ...slideOrder(document.deck)]);
+}
+
+function freeId(base: string, taken: Set<string>): string {
+  if (!taken.has(base)) {
+    taken.add(base);
+    return base;
+  }
+  for (let n = 2; n < 100_000; n += 1) {
+    const candidate = `${base}-${n}`;
+    if (!taken.has(candidate)) {
+      taken.add(candidate);
+      return candidate;
+    }
+  }
+  throw new RangeError(`No free id for ${base}`);
+}
+
+function freeSectionId(base: string, sections: ReadonlyArray<Section>): string {
+  const taken = new Set(sections.map((section) => section.id));
+  if (!taken.has(base)) return base;
+  for (let n = 2; n < 100_000; n += 1) if (!taken.has(`${base}-${n}`)) return `${base}-${n}`;
+  throw new RangeError(`No free section id for ${base}`);
+}
+
+/**
+ * The mutations that insert one slide at a cursor, and the cursor for the next one. A plain slide
+ * is one slide.insert. A Section header after an anchor starts a new section right after the
+ * anchor's, taking the slides that followed the anchor; a Section header at the front of a section
+ * without one becomes that section's header; a Section header at the front of a section that has
+ * one is refused, since two headers cannot share a section.
+ */
+function insertAt(
+  document: DeckDocument,
+  slide: Slide,
+  cursor: Cursor,
+): { mutations: Mutation[]; next: Cursor; sections: Section[] | null } {
+  if (slide.kind !== 'opener') {
+    return {
+      mutations: [
+        {
+          op: 'slide.insert',
+          sectionId: cursor.sectionId,
+          ...(cursor.after !== undefined ? { after: cursor.after } : {}),
+          slide,
+        },
+      ],
+      next: { sectionId: cursor.sectionId, after: slide.id },
+      sections: null,
+    };
+  }
+  const sections = document.deck.sections.map((section) => ({
+    ...section,
+    slideIds: [...section.slideIds],
+  }));
+  const index = sections.findIndex((section) => section.id === cursor.sectionId);
+  const section = sections[index];
+  if (section === undefined) throw new RangeError(`No section "${cursor.sectionId}"`);
+  if (cursor.after === undefined) {
+    const first = section.slideIds[0];
+    if (first !== undefined && document.slides[first]?.kind === 'opener') {
+      throw new TypeError(
+        `Section "${section.id}" has a section header already ("${first}"); insert after a slide to start a new section`,
+      );
+    }
+    const header = { ...slide, sectionId: section.id };
+    return {
+      mutations: [{ op: 'slide.insert', sectionId: section.id, slide: header }],
+      next: { sectionId: section.id, after: slide.id },
+      sections: null,
+    };
+  }
+  const at = section.slideIds.indexOf(cursor.after);
+  const rest = section.slideIds.slice(at + 1);
+  section.slideIds = section.slideIds.slice(0, at + 1);
+  const newId = freeSectionId(slide.id, sections);
+  const created: Section = { id: newId, name: `Section ${sections.length + 1}`, slideIds: rest };
+  sections.splice(index + 1, 0, created);
+  const header = { ...slide, sectionId: newId };
+  return {
+    mutations: [
+      { op: 'section.set', sections },
+      { op: 'slide.insert', sectionId: newId, slide: header },
+    ],
+    next: { sectionId: newId, after: slide.id },
+    sections,
+  };
+}
+
+/** The slides a list of ids names, in deck order, each required to exist. */
+function slidesInOrder(document: DeckDocument, slideIds: ReadonlyArray<string>): Slide[] {
+  for (const id of slideIds) requireSlide(document, id);
+  const wanted = new Set(slideIds);
+  return slideOrder(document.deck)
+    .filter((id) => wanted.has(id))
+    .map((id) => requireSlide(document, id));
+}
+
+export async function slideNew(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: SlideNewInput,
+): Promise<{ slide: Slide; revision: number; outline: OutlineSection[] }> {
+  const current = (await deps.store.read()).document;
+  const cursor = resolveCursor(current, input);
+  const taken = takenSlideIds(current);
+  let id: string;
+  if (input.id !== undefined) {
+    if (taken.has(input.id)) throw new TypeError(`Slide "${input.id}" exists already`);
+    id = input.id;
+  } else {
+    id = freeLayoutSlideId(input.layout, taken);
+  }
+  const entry = layoutEntry(input.layout);
+  const made = entry.make(id, current.deck, cursor.sectionId);
+  if (made === null) {
+    throw new TypeError(
+      `The ${entry.label} layout needs a picture and the deck has none of the starter roles (opener, mood); add a picture first`,
+    );
+  }
+  const slide: Slide = { ...made, template: input.layout };
+  const { mutations } = insertAt(current, slide, cursor);
+  const committed = await commit(deps, ctx, input.baseRevision, mutations);
+  return {
+    slide: requireSlide(committed.document, id),
+    revision: committed.revision,
+    outline: outlineOf(committed.document),
+  };
+}
+
+export async function slideDuplicate(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: SlideDuplicateInput,
+): Promise<{ slides: Slide[]; revision: number; outline: OutlineSection[] }> {
+  const current = (await deps.store.read()).document;
+  const sources = slidesInOrder(current, input.slideIds);
+  const last = sources[sources.length - 1];
+  if (last === undefined) throw new TypeError('slide.duplicate needs at least one slide');
+  const section = sectionOfSlide(current.deck, last.id);
+  if (section === undefined) throw new RangeError(`Slide "${last.id}" is in no section`);
+  let cursor: Cursor = { sectionId: section.id, after: last.id };
+  let working = current;
+  const taken = takenSlideIds(current);
+  const mutations: Mutation[] = [];
+  const ids: string[] = [];
+  for (const source of sources) {
+    const id = freeId(`${source.id}-2`, taken);
+    const copy: Slide = { ...cloneSlide(source), id };
+    const step = insertAt(working, copy, cursor);
+    mutations.push(...step.mutations);
+    working = applyMutations(working, step.mutations).document;
+    cursor = step.next;
+    ids.push(id);
+  }
+  const committed = await commit(deps, ctx, input.baseRevision, mutations);
+  return {
+    slides: ids.map((id) => requireSlide(committed.document, id)),
+    revision: committed.revision,
+    outline: outlineOf(committed.document),
+  };
+}
+
+function cloneSlide(slide: Slide): Slide {
+  return JSON.parse(JSON.stringify(slide)) as Slide;
+}
+
+export async function slideSkip(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: SlideSkipInput,
+): Promise<{ slideIds: string[]; skip: boolean; revision: number }> {
+  const current = (await deps.store.read()).document;
+  const slides = slidesInOrder(current, input.slideIds);
+  const mutations: Mutation[] = slides.map((slide) => ({
+    op: 'slide.set',
+    slideId: slide.id,
+    path: '/skip',
+    ...(input.skip ? { value: true } : {}),
+  }));
+  const committed = await commit(deps, ctx, input.baseRevision, mutations);
+  return {
+    slideIds: slides.map((slide) => slide.id),
+    skip: input.skip,
+    revision: committed.revision,
+  };
+}
+
+export async function slideApplyLayout(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: SlideApplyLayoutInput,
+): Promise<{
+  slides: Slide[];
+  dropped: { slideId: string; blockIds: string[] }[];
+  moved: string[];
+  revision: number;
+  findings: Finding[];
+}> {
+  const current = (await deps.store.read()).document;
+  const slides = slidesInOrder(current, input.slideIds);
+  const mutations: Mutation[] = [];
+  const dropped: { slideId: string; blockIds: string[] }[] = [];
+  const moved: string[] = [];
+  let working = current;
+  for (const slide of slides) {
+    const section = sectionOfSlide(working.deck, slide.id);
+    if (section === undefined) throw new RangeError(`Slide "${slide.id}" is in no section`);
+    const result = applyLayout({
+      slide,
+      layout: input.layout,
+      deck: working.deck,
+      sectionId: section.id,
+    });
+    if (result.dropped.length > 0) dropped.push({ slideId: slide.id, blockIds: result.dropped });
+    const steps: Mutation[] = [];
+    let next = result.slide;
+    if (next.kind === 'opener' && section.slideIds[0] !== slide.id) {
+      // a Section header starts a new section at this slide, taking the slides after it
+      const sections = working.deck.sections.map((row) => ({
+        ...row,
+        slideIds: [...row.slideIds],
+      }));
+      const index = sections.findIndex((row) => row.id === section.id);
+      const own = sections[index];
+      if (own === undefined) throw new RangeError(`No section "${section.id}"`);
+      const at = own.slideIds.indexOf(slide.id);
+      const taken = own.slideIds.slice(at);
+      own.slideIds = own.slideIds.slice(0, at);
+      const newId = freeSectionId(slide.id, sections);
+      sections.splice(index + 1, 0, {
+        id: newId,
+        name: `Section ${sections.length + 1}`,
+        slideIds: taken,
+      });
+      next = { ...next, sectionId: newId };
+      steps.push({ op: 'section.set', sections });
+      moved.push(slide.id);
+    }
+    steps.push({ op: 'slide.replace', slideId: slide.id, slide: next });
+    mutations.push(...steps);
+    working = applyMutations(working, steps).document;
+  }
+  const committed = await commit(deps, ctx, input.baseRevision, mutations);
+  return {
+    slides: slides.map((slide) => requireSlide(committed.document, slide.id)),
+    dropped,
+    moved,
+    revision: committed.revision,
+    findings: slides.flatMap((slide) => findingsFor(deps, committed.document, slide.id)),
+  };
+}
+
+/** The asset ids a slide references: its picture and every block's asset paths, nested included. */
+export function slideAssetIds(slide: Slide): string[] {
+  const ids = new Set<string>();
+  if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing')
+    ids.add(slide.picture.asset);
+  const lists =
+    slide.kind === 'content'
+      ? Object.values(slide.slots)
+      : slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing'
+        ? [slide.plate.blocks]
+        : [];
+  for (const list of lists) {
+    walkBlocks(list, '', (block) => {
+      for (const ref of blockAssetRefs(block)) if (ref.assetId !== '') ids.add(ref.assetId);
+      if (block.type === 'material' && block.asset !== undefined) ids.add(block.asset);
+    });
+  }
+  return [...ids];
+}
+
+/** The files an asset record names under the deck directory: the twins and the source file. */
+export function assetFiles(asset: Asset): string[] {
+  const files = Object.values(asset.twins);
+  if (asset.sourceFile !== undefined) files.push(asset.sourceFile);
+  return files;
+}
+
+export async function slideImport(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: SlideImportInput,
+  source: SlideImportSource,
+): Promise<{
+  slides: Slide[];
+  assets: string[];
+  renamed: { from: string; to: string }[];
+  revision: number;
+  outline: OutlineSection[];
+}> {
+  const current = (await deps.store.read()).document;
+  const cursor0 = resolveCursor(current, input);
+  // the input order is the order the copies land in (SPEC 7.5 slide.import)
+  const sources = input.slideIds.map((id) => {
+    const slide = source.document.slides[id];
+    if (slide === undefined) throw new RangeError(`No slide "${id}" in ${input.sourceDeckId}`);
+    return slide;
+  });
+  const taken = takenSlideIds(current);
+  const mutations: Mutation[] = [];
+  const assets: string[] = [];
+  const renamed: { from: string; to: string }[] = [];
+  const ids: string[] = [];
+  let working = current;
+  let cursor = cursor0;
+  for (const original of sources) {
+    for (const assetId of slideAssetIds(original)) {
+      if (working.deck.assets[assetId] !== undefined || assets.includes(assetId)) continue;
+      const asset = source.document.deck.assets[assetId];
+      if (asset === undefined)
+        throw new RangeError(`Asset "${assetId}" is not in ${input.sourceDeckId}`);
+      for (const relative of assetFiles(asset)) await source.copyAsset(relative);
+      const step: Mutation = { op: 'asset.set', asset };
+      mutations.push(step);
+      working = applyMutations(working, [step]).document;
+      assets.push(assetId);
+    }
+    const id = freeId(original.id, taken);
+    if (id !== original.id) renamed.push({ from: original.id, to: id });
+    const copy: Slide = { ...cloneSlide(original), id };
+    const step = insertAt(working, copy, cursor);
+    mutations.push(...step.mutations);
+    working = applyMutations(working, step.mutations).document;
+    cursor = step.next;
+    ids.push(id);
+  }
+  const committed = await commit(deps, ctx, input.baseRevision, mutations);
+  return {
+    slides: ids.map((id) => requireSlide(committed.document, id)),
+    assets,
+    renamed,
+    revision: committed.revision,
+    outline: outlineOf(committed.document),
+  };
+}
+
+/** The offset a duplicated freeform block takes (gslides-parity SPEC 7.5 block.duplicate). */
+export const DUPLICATE_OFFSET_PX = 16;
+
+export async function blockDuplicate(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: BlockDuplicateInput,
+): Promise<SlideResult & { blockIds: string[] }> {
+  const current = (await deps.store.read()).document;
+  const slide = requireSlide(current, input.slideId);
+  const placed = slideBlocks(slide);
+  const taken = new Set(placed.map(({ block }) => block.id));
+  const maxZ = Math.max(0, ...placed.map(({ block }) => block.pos?.z ?? 0));
+  const mutations: Mutation[] = [];
+  const ids: string[] = [];
+  let z = maxZ;
+  for (const blockId of input.blockIds) {
+    const row = placed.find(({ block }) => block.id === blockId);
+    if (row === undefined) throw new RangeError(`No block "${blockId}" on slide "${slide.id}"`);
+    const id = freeId(`${blockId}-2`, taken);
+    const copy = JSON.parse(JSON.stringify(row.block)) as Block;
+    copy.id = id;
+    if (copy.pos !== undefined) {
+      z += 1;
+      copy.pos = {
+        ...copy.pos,
+        x: copy.pos.x + DUPLICATE_OFFSET_PX,
+        y: copy.pos.y + DUPLICATE_OFFSET_PX,
+        z,
+      };
+    }
+    mutations.push({
+      op: 'block.insert',
+      slideId: slide.id,
+      slot: row.slot,
+      after: blockId,
+      block: copy,
+    });
+    ids.push(id);
+  }
+  const committed = await commit(deps, ctx, input.baseRevision, mutations);
+  return { ...slideResult(deps, committed, input.slideId), blockIds: ids };
+}
+
+/** Every Text of a slide with the write that changes it: the slide fields, every block's texts (nested included) and the notes. */
+type TextTarget = { text: string; write: (value: string) => Mutation };
+
+function textTargets(slide: Slide): TextTarget[] {
+  const out: TextTarget[] = [];
+  for (const ref of slideTexts(slide)) {
+    out.push({
+      text: ref.text,
+      write: (value) => ({ op: 'slide.set', slideId: slide.id, path: ref.path, value }),
+    });
+  }
+  const lists: { pointer: string; blocks: Block[] }[] =
+    slide.kind === 'content'
+      ? Object.entries(slide.slots).map(([slot, blocks]) => ({ pointer: `/slots/${slot}`, blocks }))
+      : slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing'
+        ? [{ pointer: '/plate/blocks', blocks: slide.plate.blocks }]
+        : [];
+  for (const list of lists) {
+    walkBlocks(list.blocks, list.pointer, (block, pointer) => {
+      // `<list>/<index>` for a top-level block, `<list>/<index>/cells/<c>/blocks/<b>` for a
+      // nested one: the write addresses the top-level block with the rest as its pointer
+      const rest = pointer.slice(list.pointer.length + 1);
+      const slash = rest.indexOf('/');
+      const top = list.blocks[Number(slash < 0 ? rest : rest.slice(0, slash))];
+      if (top === undefined) return;
+      const relativeBase = slash < 0 ? '' : rest.slice(slash);
+      for (const ref of blockTexts(block)) {
+        out.push({
+          text: ref.text,
+          write: (value) => ({
+            op: 'block.set',
+            slideId: slide.id,
+            blockId: top.id,
+            path: `${relativeBase}${ref.path}`,
+            value,
+          }),
+        });
+      }
+    });
+  }
+  if (slide.notes !== undefined && slide.notes !== '') {
+    out.push({
+      text: slide.notes,
+      write: (value) => ({ op: 'slide.set', slideId: slide.id, path: '/notes', value }),
+    });
+  }
+  return out;
+}
+
+function escapeRegExp(text: string): string {
+  return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Replaces inside the visible runs of a Text (never inside a link URL or the GT mark) and counts. */
+export function replaceInText(
+  text: string,
+  find: string,
+  replace: string,
+  matchCase: boolean,
+): { text: string; count: number } {
+  const pattern = new RegExp(escapeRegExp(find), matchCase ? 'g' : 'gi');
+  let count = 0;
+  const paragraphs = parseParagraphs(text).map((runs) =>
+    serializeRuns(
+      runs.map((run) => {
+        if (run.gt) return run;
+        const next = run.t.replace(pattern, () => {
+          count += 1;
+          return replace;
+        });
+        return { ...run, t: next };
+      }),
+    ),
+  );
+  return { text: count === 0 ? text : paragraphs.join('\n'), count };
+}
+
+/** Replaces in a plain string (the notes) and counts. */
+function replaceInPlain(
+  text: string,
+  find: string,
+  replace: string,
+  matchCase: boolean,
+): { text: string; count: number } {
+  const pattern = new RegExp(escapeRegExp(find), matchCase ? 'g' : 'gi');
+  let count = 0;
+  const next = text.replace(pattern, () => {
+    count += 1;
+    return replace;
+  });
+  return { text: next, count };
+}
+
+export async function textReplaceAll(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: TextReplaceAllInput,
+): Promise<{ replacements: number; slideIds: string[]; revision: number }> {
+  const current = (await deps.store.read()).document;
+  const slides =
+    input.slideIds === undefined
+      ? slideOrder(current.deck).map((id) => requireSlide(current, id))
+      : slidesInOrder(current, input.slideIds);
+  const matchCase = input.matchCase === true;
+  const mutations: Mutation[] = [];
+  const changed: string[] = [];
+  let replacements = 0;
+  for (const slide of slides) {
+    let touched = false;
+    for (const target of textTargets(slide)) {
+      const isNotes = target.text === slide.notes && slide.notes !== undefined;
+      const result = isNotes
+        ? replaceInPlain(target.text, input.find, input.replace, matchCase)
+        : replaceInText(target.text, input.find, input.replace, matchCase);
+      if (result.count === 0) continue;
+      replacements += result.count;
+      mutations.push(target.write(result.text));
+      touched = true;
+    }
+    if (touched) changed.push(slide.id);
+  }
+  if (mutations.length === 0) {
+    if (input.baseRevision !== current.deck.revision) {
+      throw new ConflictError(
+        `baseRevision ${input.baseRevision} is stale; the document is at revision ${current.deck.revision}`,
+        { currentRevision: current.deck.revision, current },
+      );
+    }
+    return { replacements: 0, slideIds: [], revision: current.deck.revision };
+  }
+  const committed = await commit(deps, ctx, input.baseRevision, mutations);
+  return { replacements, slideIds: changed, revision: committed.revision };
+}
+
+/**
+ * export.text (gslides-parity SPEC 7.6): one block of paragraphs per slide in deck order, the
+ * table cells joined by tabs per row, a blank line between slides, the notes after each slide's
+ * texts when asked; the skipped slides left out unless asked. Pure over the document.
+ */
+export function deckText(
+  document: DeckDocument,
+  input: ExportTextInput = {},
+): {
+  text: string;
+  slides: number;
+  bytes: number;
+} {
+  const wanted =
+    input.slideIds === undefined || input.slideIds === 'all' ? null : new Set(input.slideIds);
+  const blocks: string[] = [];
+  let count = 0;
+  for (const id of slideOrder(document.deck)) {
+    const slide = document.slides[id];
+    if (slide === undefined) continue;
+    if (wanted !== null && !wanted.has(id)) continue;
+    if (slide.skip === true && input.includeSkipped !== true) continue;
+    count += 1;
+    // an empty placeholder writes nothing (SPEC 5.4); a blank line separates the notes from the texts
+    const lines: string[] = [];
+    for (const ref of slideTexts(slide)) lines.push(plainText(ref.text));
+    for (const { block } of slideBlocks(slide)) lines.push(...blockLines(block));
+    const kept = lines.filter((line) => line.trim() !== '');
+    if (input.includeNotes === true && slide.notes !== undefined && slide.notes !== '')
+      kept.push(...(kept.length > 0 ? ['', slide.notes] : [slide.notes]));
+    if (kept.length > 0) blocks.push(kept.join('\n'));
+  }
+  const text = blocks.join('\n\n');
+  // TextEncoder, not Buffer: export.text also runs in the editor page (gslides-parity merge 1)
+  return { text, slides: count, bytes: new TextEncoder().encode(text).length };
+}
+
+/** The text lines of one block: a table as one line per row with the cells tab separated, else one line per Text. */
+function blockLines(block: Block): string[] {
+  if (block.type === 'table') {
+    return block.rows.map((row) => row.cells.map((cell) => plainText(cell)).join('\t'));
+  }
+  if (block.type === 'composite') {
+    return block.cells
+      .flatMap((cell) => cell.blocks.flatMap(blockLines))
+      .concat(
+        block.caption !== undefined && block.caption !== '' ? [plainText(block.caption)] : [],
+      );
+  }
+  const refs: TextRef[] = blockTexts(block);
+  return refs.map((ref) => plainText(ref.text));
+}
+
+// ---------------------------------------------------------------------------------------------
 // Registration
 
 /** Registers every store-backed action on a dispatcher; inputs arrive validated by the action's schema. */
@@ -737,6 +1393,34 @@ export function registerStoreActions(dispatcher: Dispatcher, deps: StoreActionDe
   dispatcher.register(
     'slide.setLayout',
     on<SlideSetLayoutInput>((i, c) => slideSetLayout(deps, c, i)),
+  );
+  dispatcher.register(
+    'slide.new',
+    on<SlideNewInput>((i, c) => slideNew(deps, c, i)),
+  );
+  dispatcher.register(
+    'slide.duplicate',
+    on<SlideDuplicateInput>((i, c) => slideDuplicate(deps, c, i)),
+  );
+  dispatcher.register(
+    'slide.skip',
+    on<SlideSkipInput>((i, c) => slideSkip(deps, c, i)),
+  );
+  dispatcher.register(
+    'slide.applyLayout',
+    on<SlideApplyLayoutInput>((i, c) => slideApplyLayout(deps, c, i)),
+  );
+  dispatcher.register(
+    'block.duplicate',
+    on<BlockDuplicateInput>((i, c) => blockDuplicate(deps, c, i)),
+  );
+  dispatcher.register(
+    'text.replaceAll',
+    on<TextReplaceAllInput>((i, c) => textReplaceAll(deps, c, i)),
+  );
+  dispatcher.register(
+    'export.text',
+    on<ExportTextInput>(async (i) => deckText((await deps.store.read()).document, i)),
   );
   dispatcher.register(
     'slide.insert',

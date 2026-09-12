@@ -61,6 +61,17 @@
     "./ExportMenu": "./src/ExportMenu.tsx",
     "./ExportReportCard": "./src/ExportReportCard.tsx",
     "./ConnectCard": "./src/ConnectCard.tsx",
+    "./Menu": "./src/Menu.tsx",
+    "./Snackbar": "./src/Snackbar.tsx",
+    "./ContextMenu": "./src/ContextMenu.tsx",
+    "./NotesPane": "./src/NotesPane.tsx",
+    "./Dialog": "./src/Dialog.tsx",
+    "./LayoutGrid": "./src/LayoutGrid.tsx",
+    "./editor-shell": "./src/editor-shell.ts",
+    "./editor-shell-context": "./src/editor-shell-context.ts",
+    "./menus/model": "./src/menus/model.ts",
+    "./menus/strings": "./src/menus/strings.ts",
+    "./menus/keys": "./src/menus/keys.ts",
     "./package.json": "./package.json"
   },
   "dependencies": {

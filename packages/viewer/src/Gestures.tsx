@@ -1017,3 +1017,107 @@ export function actionForMutations(
   }
   return { id: 'slide.update', input: { slideId, baseRevision, mutations: [...mutations] } };
 }
+
+// ---------------------------------------------------------------------------------------------
+// The draw tools (gslides-parity SPEC 3.1 rows 9 to 12; R09 A1: a click places the default box,
+// a drag draws one, and a new text box opens in the caret state)
+
+/** The toolbar's Select, Text box, Shape and Line tools; the stage draws with everything but Select. */
+export type EditorTool =
+  | 'select'
+  | { kind: 'text' }
+  | { kind: 'shape'; shape: 'rectangle' | 'rounded' | 'ellipse' }
+  | { kind: 'line'; line: 'line' | 'arrow' | 'rule' };
+
+/** The default box a tool places on a click, in sheet pixels (palette-data.ts DEFAULT_SIZE). */
+export const TOOL_DEFAULT_SIZE: Readonly<Record<'text' | 'shape' | 'line', [number, number]>> = {
+  text: [480, 64],
+  shape: [240, 160],
+  line: [320, 8],
+};
+
+/** A drag shorter than this on both axes counts as a click and places the default box. */
+export const DRAW_MIN_PX = 8;
+
+/** The block type a tool inserts. */
+export function toolBlockType(tool: Exclude<EditorTool, 'select'>): BlockType {
+  if (tool.kind === 'text') return 'text';
+  if (tool.kind === 'shape') return 'shape';
+  return tool.line === 'rule' ? 'rule' : 'shape';
+}
+
+/** The block a tool inserts under `id`: an empty text box, a shape, a line or arrow shape, or a rule. */
+export function toolBlock(tool: Exclude<EditorTool, 'select'>, id: string): Block {
+  if (tool.kind === 'text') return { id, type: 'text', text: '' };
+  if (tool.kind === 'shape') return { id, type: 'shape', shape: tool.shape };
+  if (tool.line === 'rule') return { id, type: 'rule', orientation: 'horizontal' };
+  return { id, type: 'shape', shape: tool.line };
+}
+
+/** The box a draw drag stands for, or the default box at the press when the drag was a click. */
+export function drawnBox(
+  tool: Exclude<EditorTool, 'select'>,
+  start: Point,
+  now: Point,
+): { box: Box; dragged: boolean } {
+  const dx = now.x - start.x;
+  const dy = now.y - start.y;
+  const dragged = Math.abs(dx) >= DRAW_MIN_PX || Math.abs(dy) >= DRAW_MIN_PX;
+  if (!dragged) {
+    const [w, h] = TOOL_DEFAULT_SIZE[tool.kind];
+    return { box: [start.x, start.y, w, h], dragged: false };
+  }
+  return {
+    box: [Math.min(start.x, now.x), Math.min(start.y, now.y), Math.abs(dx), Math.abs(dy)],
+    dragged: true,
+  };
+}
+
+/** The 8 px grid position of a drawn box, with a 1 px floor on both sides. */
+export function drawnPosition(box: Box, z: number): Position {
+  const grid = 8;
+  const round = (v: number) => Math.round(v / grid) * grid;
+  return {
+    x: round(box[0]),
+    y: round(box[1]),
+    w: Math.max(grid, round(box[2])),
+    h: Math.max(grid, round(box[3])),
+    z,
+  };
+}
+
+/**
+ * The one `block.insert` a draw tool ends in: on a freeform slide the block takes the drawn box
+ * as `pos` on top of the stack; on a grammar slide the box is the layout's and the block lands in
+ * the slot after the selected block (the slot the caller names). Null when the slide has no slot.
+ */
+export function toolInsertMutation(
+  slide: Slide,
+  tool: Exclude<EditorTool, 'select'>,
+  id: string,
+  box: Box,
+  slot: BlockSlot | null,
+  after?: string,
+): Mutation | null {
+  const block = toolBlock(tool, id);
+  if (isFreeformSlide(slide)) {
+    const stack = slide.slots.main ?? [];
+    const maxZ = Math.max(0, ...stack.map((b) => b.pos?.z ?? 0));
+    const last = stack[stack.length - 1]?.id;
+    return {
+      op: 'block.insert',
+      slideId: slide.id,
+      slot: 'main',
+      ...(last !== undefined ? { after: last } : {}),
+      block: { ...block, pos: drawnPosition(box, maxZ + 1) },
+    };
+  }
+  if (slot === null) return null;
+  return {
+    op: 'block.insert',
+    slideId: slide.id,
+    slot,
+    ...(after !== undefined ? { after } : {}),
+    block,
+  };
+}

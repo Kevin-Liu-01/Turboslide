@@ -120,6 +120,12 @@ export type DitherDrawOptions = {
   table: readonly number[];
   theme: 'light' | 'dark';
   selector?: string;
+  /**
+   * `half` (default) draws one cell per canvas pixel at half the CSS size, the deck's pixelated
+   * look; `full` draws every cell as a 2 by 2 block at the CSS size, so a printer that
+   * interpolates the canvas bitmap (a PDF viewer, gslides-parity SPEC 7.6) shows the same cells.
+   */
+  cells?: 'half' | 'full';
 };
 
 /**
@@ -129,7 +135,7 @@ export type DitherDrawOptions = {
  */
 export async function drawDitherCanvases(page: Page, options: DitherDrawOptions): Promise<number> {
   return page.evaluate(
-    ({ table, theme, selector }) => {
+    ({ table, theme, selector, full }) => {
       const canvases = [...document.querySelectorAll<HTMLCanvasElement>(selector)];
       for (const canvas of canvases) {
         const cw = canvas.clientWidth;
@@ -140,17 +146,20 @@ export async function drawDitherCanvases(page: Page, options: DitherDrawOptions)
           W = 505;
           H = 110;
         }
-        canvas.width = W;
-        canvas.height = H;
+        // one cell per canvas pixel at half size, or a 2 by 2 block per cell at the CSS size
+        const k = full ? 2 : 1;
+        canvas.width = W * k;
+        canvas.height = H * k;
         const ctx = canvas.getContext('2d');
         if (!ctx) continue;
         const dark = theme === 'dark';
         ctx.fillStyle = dark ? '#070707' : '#ffffff';
-        ctx.fillRect(0, 0, W, H);
+        ctx.fillRect(0, 0, W * k, H * k);
         ctx.fillStyle = dark ? '#f2f2f0' : '#070707';
         for (let y = 0; y < H; y += 1) {
           for (let x = 0; x < W; x += 1) {
-            if ((table[(y % 8) * 8 + (x % 8)] ?? 0) / 64 < 1 - x / W) ctx.fillRect(x, y, 1, 1);
+            if ((table[(y % 8) * 8 + (x % 8)] ?? 0) / 64 < 1 - x / W)
+              ctx.fillRect(x * k, y * k, k, k);
           }
         }
         canvas.dataset.drawn = '1';
@@ -161,6 +170,7 @@ export async function drawDitherCanvases(page: Page, options: DitherDrawOptions)
       table: [...options.table],
       theme: options.theme,
       selector: options.selector ?? 'canvas.dither',
+      full: options.cells === 'full',
     },
   );
 }

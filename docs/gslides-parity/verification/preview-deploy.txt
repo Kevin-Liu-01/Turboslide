@@ -1,0 +1,21 @@
+<claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" />
+Vercel CLI 58.4.4 (Node.js 24.13.0)
+Retrieving project…
+Deploying kl01s-projects/turboslide
+  Inspect         https://vercel.com/kl01s-projects/turboslide/C5YUCXUyGqUtvtYA3z6i45cYLKe4
+  Preview         https://turboslide-mbd18o072-kl01s-projects.vercel.app
+Building…
+Building…
+Running build in Washington, D.C., USA (East) – iad1
+Build machine configuration: 4 cores, 8 GB
+Retrieving list of deployment files...
+Concatenating deployment archive files...
+[plugin rolldown:vite-resolve] Module "node:zlib" has been externalized for browser compatibility, imported by "/vercel/path0/packages/lint/src/rendered/png.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/vercel/path0/packages/lint/src/rendered/bitmap.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+[plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/vercel/path0/packages/lint/src/rendered/bitmap.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+✓ built in 3.51s
+✓ built in 3.46s
+✓ built in 8.59s
+Build Completed in /vercel/output [24s]
+Deploying outputs...
+  Preview         https://turboslide-mbd18o072-kl01s-projects.vercel.app

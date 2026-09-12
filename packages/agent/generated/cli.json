@@ -95,6 +95,30 @@
       "milestone": "M4"
     },
     {
+      "action": "deck.set",
+      "usage": "turboslide deck set <path> <value>",
+      "command": [
+        "deck",
+        "set"
+      ],
+      "positionals": [
+        "path",
+        "value"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS1"
+    },
+    {
       "action": "deck.pack",
       "usage": "turboslide deck pack <id> --out <out>",
       "command": [
@@ -256,6 +280,166 @@
       ],
       "mutates": true,
       "milestone": "M6"
+    },
+    {
+      "action": "deck.list",
+      "usage": "turboslide deck list --include-trashed",
+      "command": [
+        "deck",
+        "list"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "includeTrashed",
+          "flag": "--include-trashed",
+          "type": "boolean",
+          "required": false,
+          "description": "Also list the decks in the trash, each with its trashedAt"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--include-trashed"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS1"
+    },
+    {
+      "action": "deck.copy",
+      "usage": "turboslide deck copy <id> --name <name> --id <newId> --slides <slideIds> --remove-notes",
+      "command": [
+        "deck",
+        "copy"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "name",
+          "flag": "--name",
+          "type": "string",
+          "required": true,
+          "description": "The title of the copy; its id is the slug unless `newId` is given"
+        },
+        {
+          "key": "newId",
+          "flag": "--id",
+          "type": "string",
+          "required": false,
+          "description": "The id of the copy under decks/"
+        },
+        {
+          "key": "slideIds",
+          "flag": "--slides",
+          "type": "string[]",
+          "required": false,
+          "description": "Copy these slides only, in deck order; every slide when absent"
+        },
+        {
+          "key": "removeNotes",
+          "flag": "--remove-notes",
+          "type": "boolean",
+          "required": false,
+          "description": "Leave the speaker notes out of the copy"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision of the source deck the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--remove-notes"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS1"
+    },
+    {
+      "action": "deck.trash",
+      "usage": "turboslide deck trash <id>",
+      "command": [
+        "deck",
+        "trash"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS1"
+    },
+    {
+      "action": "deck.restore",
+      "usage": "turboslide deck restore <id>",
+      "command": [
+        "deck",
+        "restore"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS1"
+    },
+    {
+      "action": "deck.remove",
+      "usage": "turboslide deck remove <id> --confirm",
+      "command": [
+        "deck",
+        "remove"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "confirm",
+          "flag": "--confirm",
+          "type": "true",
+          "required": true,
+          "description": "The caller has confirmed the deletion"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--confirm"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS1"
     },
     {
       "action": "slide.list",
@@ -483,6 +667,235 @@
       ],
       "mutates": true,
       "milestone": "M6"
+    },
+    {
+      "action": "slide.new",
+      "usage": "turboslide slide new --layout <layout> --after <after> --section <sectionId> --id <id>",
+      "command": [
+        "slide",
+        "new"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "layout",
+          "flag": "--layout",
+          "type": "\"title\" | \"opener\" | \"split\" | \"cols\" | \"title-only\" | \"one-column\" | \"statement\" | \"section-description\" | \"mood\" | \"big-number\" | \"blank\" | \"rows\" | \"plain\" | \"table\" | \"figure\" | \"pair\" | \"tiles\" | \"details\" | \"board\" | \"matrix\" | \"closing\"",
+          "required": true,
+          "description": "One of the layout list (gslides-parity SPEC 5.2)",
+          "enum": [
+            "title",
+            "opener",
+            "split",
+            "cols",
+            "title-only",
+            "one-column",
+            "statement",
+            "section-description",
+            "mood",
+            "big-number",
+            "blank",
+            "rows",
+            "plain",
+            "table",
+            "figure",
+            "pair",
+            "tiles",
+            "details",
+            "board",
+            "matrix",
+            "closing"
+          ]
+        },
+        {
+          "key": "after",
+          "flag": "--after",
+          "type": "string",
+          "required": false,
+          "description": "The slide the new one follows; first in the section when absent"
+        },
+        {
+          "key": "sectionId",
+          "flag": "--section",
+          "type": "string",
+          "required": false,
+          "description": "The section; the anchor's section, or the last section, when absent"
+        },
+        {
+          "key": "id",
+          "flag": "--id",
+          "type": "string",
+          "required": false,
+          "description": "The slide id; <layout>-<n> with the first free n when absent"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS1"
+    },
+    {
+      "action": "slide.duplicate",
+      "usage": "turboslide slide duplicate <slideIds>",
+      "command": [
+        "slide",
+        "duplicate"
+      ],
+      "positionals": [
+        "slideIds"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS1"
+    },
+    {
+      "action": "slide.skip",
+      "usage": "turboslide slide skip <slideIds> --off",
+      "command": [
+        "slide",
+        "skip"
+      ],
+      "positionals": [
+        "slideIds"
+      ],
+      "options": [
+        {
+          "key": "skip",
+          "flag": "--skip",
+          "type": "boolean",
+          "required": true,
+          "description": "true skips the slides, false shows them again"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--off"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS1"
+    },
+    {
+      "action": "slide.applyLayout",
+      "usage": "turboslide slide apply-layout <slideIds> <layout>",
+      "command": [
+        "slide",
+        "apply-layout"
+      ],
+      "positionals": [
+        "slideIds",
+        "layout"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS1"
+    },
+    {
+      "action": "slide.import",
+      "usage": "turboslide slide import <sourceDeckId> <slideIds> --after <after> --section <sectionId>",
+      "command": [
+        "slide",
+        "import"
+      ],
+      "positionals": [
+        "sourceDeckId",
+        "slideIds"
+      ],
+      "options": [
+        {
+          "key": "after",
+          "flag": "--after",
+          "type": "string",
+          "required": false,
+          "description": "The slide the copies follow; first in the section when absent"
+        },
+        {
+          "key": "sectionId",
+          "flag": "--section",
+          "type": "string",
+          "required": false,
+          "description": "The section; the anchor's section, or the last section, when absent"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS1"
+    },
+    {
+      "action": "text.replaceAll",
+      "usage": "turboslide text replace <find> <replace> --match-case --slides <slideIds>",
+      "command": [
+        "text",
+        "replace"
+      ],
+      "positionals": [
+        "find",
+        "replace"
+      ],
+      "options": [
+        {
+          "key": "matchCase",
+          "flag": "--match-case",
+          "type": "boolean",
+          "required": false,
+          "description": "Match the case exactly; off by default"
+        },
+        {
+          "key": "slideIds",
+          "flag": "--slides",
+          "type": "string[]",
+          "required": false,
+          "description": "Restrict to these slides"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS1"
     },
     {
       "action": "block.set",
@@ -784,6 +1197,35 @@
       "custom": [],
       "mutates": true,
       "milestone": "M6"
+    },
+    {
+      "action": "block.duplicate",
+      "usage": "turboslide block duplicate <slideId> --blocks <blockIds>",
+      "command": [
+        "block",
+        "duplicate"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "blockIds",
+          "flag": "--blocks",
+          "type": "string[]",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS1"
     },
     {
       "action": "section.set",
@@ -1449,7 +1891,7 @@
         {
           "key": "rule",
           "flag": "--rule",
-          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
+          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"copy/empty-placeholder\" | \"table/size\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
           "required": false,
           "enum": [
             "sheet/overflow",
@@ -1491,6 +1933,8 @@
             "copy/full-sentence-caption",
             "copy/contrast-pair",
             "copy/metaphor-candidate",
+            "copy/empty-placeholder",
+            "table/size",
             "contrast/both-themes",
             "layout/empty-half",
             "layout/pair-gaps",
@@ -1527,7 +1971,7 @@
         {
           "key": "rule",
           "flag": "--rule",
-          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
+          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"copy/empty-placeholder\" | \"table/size\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
           "required": false,
           "enum": [
             "sheet/overflow",
@@ -1569,6 +2013,8 @@
             "copy/full-sentence-caption",
             "copy/contrast-pair",
             "copy/metaphor-candidate",
+            "copy/empty-placeholder",
+            "table/size",
             "contrast/both-themes",
             "layout/empty-half",
             "layout/pair-gaps",
@@ -1734,7 +2180,7 @@
     },
     {
       "action": "export.run",
-      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --verify --out <out>",
+      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --verify --out <out>",
       "command": [
         "export"
       ],
@@ -1836,6 +2282,20 @@
           "description": "A subset to export; defaults to 'all'"
         },
         {
+          "key": "includeSkipped",
+          "flag": "--include-skipped",
+          "type": "boolean",
+          "required": false,
+          "description": "Export the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)"
+        },
+        {
+          "key": "includeNotes",
+          "flag": "--include-notes",
+          "type": "boolean",
+          "required": false,
+          "description": "Carry the speaker notes; left out by default (gslides-parity decision 15.2)"
+        },
+        {
           "key": "out",
           "flag": "--out",
           "type": "string",
@@ -1885,6 +2345,40 @@
       "milestone": "M6"
     },
     {
+      "action": "export.text",
+      "usage": "turboslide export txt <slideIds> --include-notes --include-skipped",
+      "command": [
+        "export",
+        "txt"
+      ],
+      "positionals": [
+        "slideIds"
+      ],
+      "options": [
+        {
+          "key": "includeNotes",
+          "flag": "--include-notes",
+          "type": "boolean",
+          "required": false,
+          "description": "Append each slide’s speaker notes"
+        },
+        {
+          "key": "includeSkipped",
+          "flag": "--include-skipped",
+          "type": "boolean",
+          "required": false,
+          "description": "Include the skipped slides"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--include-skipped"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS1"
+    },
+    {
       "action": "build.run",
       "usage": "turboslide build --out <out> --budget <budgetMB>",
       "command": [
@@ -1910,6 +2404,20 @@
           "flag": "--quality",
           "type": "integer",
           "required": false
+        },
+        {
+          "key": "includeSkipped",
+          "flag": "--include-skipped",
+          "type": "boolean",
+          "required": false,
+          "description": "Build the skipped slides too; left out by default (gslides-parity SPEC 7.2.1)"
+        },
+        {
+          "key": "includeNotes",
+          "flag": "--include-notes",
+          "type": "boolean",
+          "required": false,
+          "description": "Carry the speaker notes into the file"
         }
       ],
       "custom": [],

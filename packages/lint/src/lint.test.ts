@@ -1,5 +1,9 @@
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { describe, expect, test } from 'vitest';
 
+import type { Deck, Slide } from './contracts.ts';
 import { RULES } from './contracts.ts';
 import type { RenderRecord, RuleId } from './contracts.ts';
 import { GOOD_SLIDE_IDS, document } from './fixtures/deck.ts';
@@ -55,7 +59,27 @@ const STATIC_EXPECTED: RuleId[] = [
   'freeform/off-sheet',
   'type/ladder',
   'color/off-palette',
+  // the Google Slides parity round (docs/gslides-parity/SPEC.md 5.4, 7.3)
+  'copy/empty-placeholder',
+  'table/size',
 ];
+
+/** The committed GT deck, read the way the store reads it, for the count that must not rise. */
+function readGtDeck(): { deck: Deck; slides: Record<string, Slide> } | null {
+  const dir = join(import.meta.dirname, '..', '..', '..', 'decks', 'gt-brand');
+  if (!existsSync(join(dir, 'deck.json'))) return null;
+  const deck = JSON.parse(readFileSync(join(dir, 'deck.json'), 'utf8')) as Deck;
+  const slides: Record<string, Slide> = {};
+  for (const file of readdirSync(join(dir, 'slides'))) {
+    if (!file.endsWith('.json')) continue;
+    const slide = JSON.parse(readFileSync(join(dir, 'slides', file), 'utf8')) as Slide;
+    slides[slide.id] = slide;
+  }
+  return { deck, slides };
+}
+
+/** The static count of the GT deck at 8c7056c, measured 2026-09-12 (`turboslide lint all --layers static`). */
+const GT_STATIC_FINDINGS_AT_8C7056C = 124;
 
 describe('text', () => {
   test('reads the four rules', () => {
@@ -171,6 +195,139 @@ describe('lintStatic', () => {
     expect(
       findings.filter((f) => f.slideId !== 'fixed-points' && f.rule.startsWith('freeform/')),
     ).toEqual([]);
+  });
+
+  test('copy/empty-placeholder names the empty title and the empty cell at severity 1, and the empty Texts trip no other rule', () => {
+    const empty = findings.filter((f) => f.rule === 'copy/empty-placeholder');
+    expect(empty).toHaveLength(2);
+    const title = empty.find((f) => f.blockId === 'empty');
+    const cell = empty.find((f) => f.blockId === 'grid');
+    expect(title).toMatchObject({
+      severity: 1,
+      slideId: 'bad-escape',
+      blockId: 'empty',
+      path: '/slots/main/0/text',
+    });
+    expect(title?.proposal).toMatch(/^Slide 5 has an empty title/);
+    expect(cell).toMatchObject({ blockId: 'grid', path: '/slots/main/1/rows/1/cells/0' });
+    expect(cell?.proposal).toMatch(/has an empty table cell/);
+    // the two planted blocks trip no other copy rule
+    expect(
+      findings.filter(
+        (f) =>
+          (f.blockId === 'empty' || f.blockId === 'grid') && f.rule !== 'copy/empty-placeholder',
+      ),
+    ).toEqual([]);
+    // the title slide's fields and a statement's big are placeholders too
+    const blank = lintStatic({
+      deck: { ...document.deck, sections: [{ id: 'one', name: 'One', slideIds: ['t', 's'] }] },
+      slides: {
+        t: {
+          schemaVersion: 1,
+          id: 't',
+          kind: 'title',
+          mark: { w: 132, h: 84 },
+          heading: '',
+          lead: '',
+        },
+        s: { schemaVersion: 1, id: 's', kind: 'statement', big: '' },
+      },
+    }).filter((f) => f.rule === 'copy/empty-placeholder');
+    expect(blank.map((f) => `${f.slideId}${f.path ?? ''}`)).toEqual([
+      't/heading',
+      't/lead',
+      's/big',
+    ]);
+    expect(blank[0]?.proposal).toMatch(/Slide 1 has an empty title/);
+    expect(blank[1]?.proposal).toMatch(/Slide 1 has an empty subtitle/);
+  });
+
+  test('the copy rules skip table cells and table/size names the ragged row at severity 3', () => {
+    const onTable = findings.filter((f) => f.blockId === 'pricing');
+    expect(onTable.map((f) => f.rule)).toEqual(['table/size']);
+    expect(onTable[0]).toMatchObject({
+      severity: 3,
+      path: '/slots/right/1/rows/1/cells',
+      evidence: { text: '3 by 2', measured: { columns: 3, rows: 2 } },
+    });
+    expect(onTable[0]?.proposal).toMatch(/Row 2 has 2 cell\(s\) for 3 column\(s\)/);
+    // over the cap
+    const columns = Array.from({ length: 21 }, () => ({}));
+    const wide = lintStatic({
+      deck: { ...document.deck, sections: [{ id: 'one', name: 'One', slideIds: ['w'] }] },
+      slides: {
+        w: {
+          schemaVersion: 1,
+          id: 'w',
+          kind: 'content',
+          layout: { type: 'center' },
+          slots: {
+            main: [{ id: 't', type: 'table', columns, rows: [{ cells: columns.map(() => 'x') }] }],
+          },
+        },
+      },
+    });
+    expect(wide.filter((f) => f.rule === 'table/size')).toHaveLength(1);
+    expect(wide.find((f) => f.rule === 'table/size')?.path).toBe('/slots/main/0/columns');
+    // a well formed table raises nothing
+    const fine = lintStatic({
+      deck: { ...document.deck, sections: [{ id: 'one', name: 'One', slideIds: ['f'] }] },
+      slides: {
+        f: {
+          schemaVersion: 1,
+          id: 'f',
+          kind: 'content',
+          layout: { type: 'center' },
+          slots: {
+            main: [
+              {
+                id: 't',
+                type: 'table',
+                columns: [{}, {}],
+                rows: [{ cells: ['Plan.', 'Fast, not slow!'], header: true }],
+              },
+            ],
+          },
+        },
+      },
+    });
+    expect(fine.filter((f) => f.blockId === 't')).toEqual([]);
+  });
+
+  test('the copy rules run per paragraph of a multiline Text: the caption period is read on the last paragraph', () => {
+    const slides: Record<string, Slide> = {
+      m: {
+        schemaVersion: 1,
+        id: 'm',
+        kind: 'content',
+        layout: { type: 'center' },
+        slots: {
+          main: [
+            { id: 'p', type: 'paragraph', text: 'First paragraph\nSecond paragraph.' },
+            {
+              id: 'fig',
+              type: 'shot',
+              asset: 'site-home',
+              caption: 'A caption with two paragraphs.\nThe last one has no period',
+            },
+          ],
+        },
+      },
+    };
+    const result = lintStatic({
+      deck: { ...document.deck, sections: [{ id: 'one', name: 'One', slideIds: ['m'] }] },
+      slides,
+    });
+    expect(result.filter((f) => f.blockId === 'p' && f.rule.startsWith('copy/'))).toEqual([]);
+    expect(result.find((f) => f.rule === 'copy/full-sentence-caption')?.blockId).toBe('fig');
+  });
+
+  test('the GT deck’s static count does not rise above 8c7056c', () => {
+    const gt = readGtDeck();
+    if (gt === null) return;
+    const count = lintStatic(gt).length;
+    expect(count).toBeLessThanOrEqual(GT_STATIC_FINDINGS_AT_8C7056C);
+    expect(lintStatic(gt).filter((f) => f.rule === 'copy/empty-placeholder')).toEqual([]);
   });
 
   test('the gate separates known severity 3 findings from blocking ones', () => {

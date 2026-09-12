@@ -8,7 +8,7 @@ import type { EditorDispatch } from './dispatch';
 import { IconPicker } from './IconPicker';
 import { Icon } from './icons';
 import { cn } from './lib/cn';
-import type { PaletteEntry, PaletteGroupRows, PaletteRun } from './palette-data';
+import type { PaletteEntry, PaletteGroupId, PaletteGroupRows, PaletteRun } from './palette-data';
 import { filterPalette, paletteCount } from './palette-data';
 import { tipProps } from './Tooltip';
 
@@ -34,6 +34,14 @@ export type PaletteProps = {
   onClose: () => void;
   /** a line for the toast: what ran, what an entry still needs, an error */
   onNotice?: (message: string) => void;
+  /** the field's placeholder and accessible name; the full palette's sentence unless set */
+  placeholder?: string;
+  /** the dialog's accessible name; Command palette unless set */
+  label?: string;
+  /** the groups drawn, in this order; every group of PALETTE_GROUPS with rows unless set */
+  groups?: ReadonlyArray<PaletteGroupId>;
+  /** the key the field's tooltip names; Cmd K or Ctrl K unless set */
+  shortcutKey?: string;
   className?: string;
 };
 
@@ -48,19 +56,23 @@ function isPlainClick(event: ReactMouseEvent): boolean {
   return event.button === 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 }
 
-/** The tooltip sentence of a row without a hint of its own, by group. */
+/** The tooltip sentence of a row without a hint of its own, by group (no action id, SPEC 12). */
 function rowDoc(row: PaletteEntry): string {
   switch (row.group) {
     case 'slides':
-      return `Goes to the slide${row.meta ? ` in ${row.meta}` : ''} (view.goto).`;
+      return `Goes to the slide${row.meta && row.meta !== 'current' ? ` in ${row.meta}` : ''}.`;
     case 'view':
-      return 'Changes the view; the URL follows.';
+      return 'Changes the view; the address follows.';
     case 'versions':
-      return 'Restores this version as a mutation, so History undoes it.';
+      return 'Restores this version; Undo brings the current one back.';
     case 'actions':
-      return `Runs ${row.meta ?? 'the action'} through the dispatcher.`;
+      return `Runs ${row.meta ?? 'the action'}.`;
     case 'insert':
       return 'Inserts it after the current selection.';
+    case 'menus':
+      return 'Runs the menu item.';
+    case 'layouts':
+      return 'Adds a slide with this layout after the current one.';
   }
 }
 
@@ -68,7 +80,18 @@ type Prompt = { entry: PaletteEntry; run: PaletteRun & { kind: 'prompt' }; value
 
 type IconPick = { entry: PaletteEntry; run: PaletteRun & { kind: 'icon' } };
 
-export function Palette({ open, entries, dispatch, onClose, onNotice, className }: PaletteProps) {
+export function Palette({
+  open,
+  entries,
+  dispatch,
+  onClose,
+  onNotice,
+  placeholder = TITLE,
+  label = 'Command palette',
+  groups: shownGroups,
+  shortcutKey = 'Cmd K or Ctrl K',
+  className,
+}: PaletteProps) {
   const [query, setQuery] = useState('');
   const [sel, setSel] = useState(0);
   const [prompt, setPrompt] = useState<Prompt | null>(null);
@@ -90,7 +113,9 @@ export function Palette({ open, entries, dispatch, onClose, onNotice, className 
 
   if (!open) return null;
 
-  const groups: readonly PaletteGroupRows[] = filterPalette(entries, query);
+  const groups: readonly PaletteGroupRows[] = filterPalette(entries, query).filter(
+    (group) => shownGroups === undefined || shownGroups.includes(group.group.id),
+  );
   const rows: readonly PaletteEntry[] = groups.flatMap((group) => group.rows);
   const at = Math.min(sel, Math.max(rows.length - 1, 0));
 
@@ -196,8 +221,11 @@ export function Palette({ open, entries, dispatch, onClose, onNotice, className 
 
   const queryTip = tipProps({
     name: 'Search',
-    doc: 'Type to filter; # restricts to slides, + to insert, > to actions; arrows move, Enter runs.',
-    key: 'Cmd K or Ctrl K',
+    doc:
+      shownGroups === undefined
+        ? 'Type to filter; # restricts to slides, + to insert, > to actions; arrows move, Enter runs.'
+        : 'Type the name of a menu item, a slide or a layout; arrows move, Enter runs.',
+    key: shortcutKey,
   });
   const promptTip = prompt
     ? tipProps({
@@ -222,7 +250,7 @@ export function Palette({ open, entries, dispatch, onClose, onNotice, className 
         className="pt-search-card"
         role="dialog"
         aria-modal="true"
-        aria-label="Command palette"
+        aria-label={label}
         data-control="palette"
         onKeyDown={onCardKey}
       >
@@ -275,8 +303,8 @@ export function Palette({ open, entries, dispatch, onClose, onNotice, className 
                   queryTip.onKeyDown(event);
                   onInputKey(event);
                 }}
-                placeholder={TITLE}
-                aria-label={TITLE}
+                placeholder={placeholder}
+                aria-label={placeholder}
                 aria-controls="pt-search-list"
                 aria-activedescendant={rows.length > 0 ? rowId(at) : undefined}
                 data-control="palette.query"
@@ -365,9 +393,11 @@ export function Palette({ open, entries, dispatch, onClose, onNotice, className 
           <span>Up and down arrows move</span>
           <span>Enter runs</span>
           <span>Escape closes</span>
-          <span className="pt-search-foot-prefixes">
-            <kbd>#</kbd> slides <kbd>+</kbd> insert <kbd>&gt;</kbd> actions
-          </span>
+          {shownGroups === undefined ? (
+            <span className="pt-search-foot-prefixes">
+              <kbd>#</kbd> slides <kbd>+</kbd> insert <kbd>&gt;</kbd> actions
+            </span>
+          ) : null}
         </p>
       </div>
     </div>

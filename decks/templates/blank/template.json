@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "blank",
+  "name": "Blank",
+  "description": "A fresh presentation (gslides-parity SPEC 6.1): one Title slide with empty placeholders, titled Untitled presentation, and the theme starter set of four two-tone pictures from the GT brand deck (two opener materials, one mood photograph, one closing picture, with their credits) so Section header, Caption and Closing work on a new deck. deck.create copies deck.json, slides/ and assets/ into decks/<id> with a new id, title and revision 0; the archetypes are the layout list of packages/schema/src/layouts.ts.",
+  "theme": "gt-ink-paper",
+  "deck": "deck.json",
+  "slides": "slides",
+  "assets": "assets",
+  "sections": [
+    {
+      "id": "deck",
+      "name": "Deck",
+      "slides": 1
+    }
+  ],
+  "archetypes": []
+}

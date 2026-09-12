@@ -14,19 +14,52 @@ import {
   viewerActionIds,
   windowActionIds,
 } from '@turboslide/agent/window/registry';
-import { DeckName } from '@turboslide/chrome/DeckName';
-import { ExportMenu } from '@turboslide/chrome/ExportMenu';
+import {
+  blockDuplicate,
+  deckText,
+  slideApplyLayout,
+  slideDuplicate,
+  slideNew,
+  slideSkip,
+  textReplaceAll,
+} from '@turboslide/cli/store-actions';
+import type {
+  BlockDuplicateInput,
+  ExportTextInput,
+  SlideApplyLayoutInput,
+  SlideDuplicateInput,
+  SlideNewInput,
+  SlideSkipInput,
+  StoreActionDeps,
+  TextReplaceAllInput,
+} from '@turboslide/cli/store-actions';
 import type {
   ExportCapabilities,
   ExportMenuInput,
   ExportProgress,
 } from '@turboslide/chrome/ExportMenu';
+import { ContextMenu, contextMenuLabel } from '@turboslide/chrome/ContextMenu';
+import type { EditorDispatch } from '@turboslide/chrome/dispatch';
+import type {
+  DrawTool,
+  EditorClipboard,
+  EditorSelection,
+  EditorShellInput,
+  PictureTarget,
+} from '@turboslide/chrome/editor-shell';
+import { useEditorShell } from '@turboslide/chrome/editor-shell-context';
+import type { EditorShellState } from '@turboslide/chrome/editor-shell-context';
+import { LayoutGrid } from '@turboslide/chrome/LayoutGrid';
+import type { MenuContext } from '@turboslide/chrome/menus/model';
+import { HOME, SNACKBARS } from '@turboslide/chrome/menus/strings';
+import { NOTES_DEFAULT_HEIGHT, NotesPane } from '@turboslide/chrome/NotesPane';
+import type { SidebarEdit } from '@turboslide/chrome/Sidebar';
+import type { SnackbarAction } from '@turboslide/chrome/Snackbar';
+import { tipProps } from '@turboslide/chrome/Tooltip';
 import { ExportReportCard } from '@turboslide/chrome/ExportReportCard';
 import type { ArtifactRun, ExportDownload } from '@turboslide/chrome/ExportReportCard';
-import { Inspector } from '@turboslide/chrome/Inspector';
 import type { DitherWorkerLike } from '@turboslide/chrome/inspector/dither';
 import { Overlay } from '@turboslide/chrome/Overlay';
-import { Palette } from '@turboslide/chrome/Palette';
 import { buildPaletteEntries } from '@turboslide/chrome/palette-data';
 import type { PaletteEntry } from '@turboslide/chrome/palette-data';
 import { usePtShell, usePtStage } from '@turboslide/chrome/shell-context';
@@ -34,15 +67,15 @@ import type { ShellState } from '@turboslide/chrome/shell-context';
 import type { ShellItem, ShellMode, ShellSection } from '@turboslide/chrome/shell-data';
 import { SourceDrawer } from '@turboslide/chrome/SourceDrawer';
 import type { SourceOwnerApi } from '@turboslide/chrome/SourceDrawer';
-import { StatusChip } from '@turboslide/chrome/StatusChip';
 import type { SaveState } from '@turboslide/chrome/StatusChip';
-import { EditTools } from '@turboslide/chrome/Toolbar';
-import { ToolButton } from '@turboslide/chrome/ToolButton';
 import { TwinStage } from '@turboslide/chrome/TwinStage';
 import { ViewerShell } from '@turboslide/chrome/ViewerShell';
 import { lintStatic } from '@turboslide/lint/lint-static';
 import { renderSlide } from '@turboslide/render/slide';
 import type { ActionId, DeckTemplateId } from '@turboslide/schema/actions';
+import { deckAppearance, isTrashed, unskippedSlideOrder } from '@turboslide/schema/deck';
+import type { LayoutId } from '@turboslide/schema/layouts';
+import { derivedLayout } from '@turboslide/schema/layouts';
 import type { Asset } from '@turboslide/schema/assets';
 import type { Block } from '@turboslide/schema/blocks';
 import { blockAssetRefs } from '@turboslide/schema/catalog';
@@ -72,31 +105,45 @@ import { applyMutations, applyWrite } from '@turboslide/schema/reduce';
 import { validateSlide } from '@turboslide/schema/validate';
 import type { Issue } from '@turboslide/schema/validate';
 import { authorLabel, sameAuthor, touchedSlides } from '@turboslide/store/store';
-import type { VersionRecord } from '@turboslide/store/store';
+import type { DeckStore, VersionRecord } from '@turboslide/store/store';
 import { PRODUCT_TOKENS, PROPER_NOUNS } from '@turboslide/theme/copy';
-import { SHEET, TOKENS, TOKEN_NAMES } from '@turboslide/theme/tokens';
+import { SHEET } from '@turboslide/theme/tokens';
 import { BookView } from '@turboslide/viewer/BookView';
+import { clipboardStore, pastedSlideInserts } from '@turboslide/viewer/clipboard';
 import { Editor as StageEditor } from '@turboslide/viewer/Editor';
+import type { EditorContextMenu, EditorHandle, EditorNotice } from '@turboslide/viewer/Editor';
 import {
   GRAMMAR_EXT_KEY,
   readStageBoxes,
   toFreeform,
   toGrammar,
 } from '@turboslide/viewer/Freeform';
-import { GridView } from '@turboslide/viewer/GridView';
+import type { EditorTool } from '@turboslide/viewer/Gestures';
+import { GRID_DEFAULT_TILE, GridView } from '@turboslide/viewer/GridView';
+import type { GridTileSize } from '@turboslide/viewer/GridView';
 import { isPictureKind, pad2, trimTitle } from '@turboslide/viewer/model';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
+import { currentPlayIndex, playList, stepPlayIndex } from '@turboslide/viewer/present/presentModel';
 import type { Selection as StageSelection } from '@turboslide/viewer/Selection';
+import { blockFamily, cellPointer, listItemPointer } from '@turboslide/viewer/Selection';
 import { Stage } from '@turboslide/viewer/Stage';
 import { applyTheme, installThemeBridge, readTheme, useTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
+import {
+  exitPresentFullscreen,
+  presenterView,
+  requestPresentFullscreen,
+  startSlideshow,
+} from '../components/presentActions';
+import type { PresentHost } from '../components/presentActions';
+import { Slideshow } from '../components/Slideshow';
 import { useMountEffect } from '../components/useMountEffect';
 import { useStudioSession } from '../components/useStudioSession';
 import { runDeckAction } from '../server/agent-actions';
 import type { ServerSideWindowAction } from '../server/agent-actions';
-import { bundleDownloadTicket } from '../server/bundle';
-import { createNewDeck } from '../server/decks';
+import { bundleDownloadTicket, bundleUploadTicket, connectFacts } from '../server/bundle';
+import { createNewDeck, listDecks, readSourceDeckSlides, restoreStoredDeck } from '../server/decks';
 import {
   EXPORT_POLL_MS,
   exportCapabilities,
@@ -111,6 +158,8 @@ import { lintSlides } from '../server/lint';
 import { renderSlideImages } from '../server/render';
 import { warmThumbnails } from '../server/warm';
 import {
+  DECK_CREATED_EVENT,
+  autoTitleMutations,
   leaseSlide,
   listVersions,
   readEditorDeck,
@@ -118,7 +167,14 @@ import {
   watchDeck,
   writeDeck,
 } from '../server/write';
-import type { EditorDeck, WatchDeckResult, WriteDeckResult } from '../server/write';
+import type {
+  DeckCreatedDetail,
+  EditorDeck,
+  WatchDeckResult,
+  WriteDeckResult,
+} from '../server/write';
+
+import { recordDeckOpened } from './decks.index';
 
 import './edit.$deckId.css';
 
@@ -336,6 +392,8 @@ export type EditorSnapshot = {
   };
   activeSlide: string;
   view: EditorView;
+  /** the stage scale view.zoom set, or 'fit' (gslides-parity SPEC 7.2.16); the Sheet draws it (B4) */
+  zoom: number | 'fit';
   selection: Selection | null;
   /** the last write or action error, for the toast and the status chip */
   error: string | null;
@@ -421,6 +479,25 @@ function outlineOf(document: DeckDocument) {
 
 function slideOrder(document: DeckDocument): string[] {
   return document.deck.sections.flatMap((section) => section.slideIds);
+}
+
+/**
+ * The slide that takes the current one's place when a write, an undo or an external change
+ * removes it (gslides-parity SPEC 4.1; Google selects the slide that moves into the deleted
+ * slide's position, and the previous slide when the last one was deleted): the slide now at the
+ * removed slide's index, clamped to the end; the first slide when the current id was never in
+ * the order (an empty deck that gained its first slide). Null while the current slide still
+ * exists, so nothing moves; the empty string when the deck has no slides left.
+ */
+function replacementSlide(
+  before: readonly string[],
+  after: readonly string[],
+  active: string,
+): string | null {
+  if (active !== '' && after.includes(active)) return null;
+  const at = before.indexOf(active);
+  if (at < 0) return after[0] ?? '';
+  return after[Math.min(at, after.length - 1)] ?? '';
 }
 
 /** Every mutation of slide.update must address the named slide (store-actions checkSlideMutations). */
@@ -557,6 +634,7 @@ function createEditorController(init: {
     history: { entries: [], log: [], versions: [], canUndo: false, canRedo: false },
     activeSlide: initialOrder[0] ?? '',
     view: { mode: 'slide', present: false },
+    zoom: 'fit',
     selection: null,
     error: null,
     versionPrompt: false,
@@ -615,13 +693,40 @@ function createEditorController(init: {
     return html;
   };
 
-  /** Replaces the document and drops the cached HTML of the slides that changed ('all' after a reload). */
+  /* the shell knows a new item after its next render: a select that found nothing runs once
+     more after a frame (measured: the new slide stayed unselected one run in five) */
+  const selectSoon = (slideId: string): void => {
+    shell?.select(slideId);
+    if (typeof requestAnimationFrame === 'function')
+      requestAnimationFrame(() => {
+        if (latest().activeSlide !== slideId) shell?.select(slideId);
+      });
+  };
+
+  /**
+   * Replaces the document and drops the cached HTML of the slides that changed ('all' after a
+   * reload). When the change removed the current slide (Delete, an undone New slide or Duplicate,
+   * an external write), the slide that took its place becomes current on the snapshot and on the
+   * shell, so describe().state, the filmstrip's ring and the next insert never name a slide the
+   * deck no longer has (gslides-parity SPEC 4.1; `replacementSlide`).
+   */
   const setDocument = (document: DeckDocument, changed: readonly string[] | 'all'): void => {
     const html = changed === 'all' ? new Map<string, string>() : new Map(snapshot.html);
     if (changed !== 'all') for (const id of changed) html.delete(id);
     for (const id of html.keys()) if (document.slides[id] === undefined) html.delete(id);
     findingsCache = null;
-    publish({ document, html: renderMissing(document, html) });
+    const replacement = replacementSlide(
+      slideOrder(snapshot.document),
+      slideOrder(document),
+      snapshot.activeSlide,
+    );
+    const moved = replacement !== null && replacement !== snapshot.activeSlide;
+    publish({
+      document,
+      html: renderMissing(document, html),
+      ...(moved ? { activeSlide: replacement, selection: null } : {}),
+    });
+    if (moved && replacement !== '') selectSoon(replacement);
   };
 
   const changedBy = (mutations: ReadonlyArray<Mutation>): readonly string[] | 'all' =>
@@ -678,8 +783,13 @@ function createEditorController(init: {
     const overlap = mine.filter((id) => outside.includes(id));
     const deckLevelMine = waiting.some((row) => row.write.mutations.some(isDeckLevel));
     // Pending mutations that touch other slides rebase on their own (SPEC 6.7); the card appears
-    // when both sides touched one slide, or when either side changed the deck itself.
-    if (overlap.length === 0 && !deckLevelOutside && !deckLevelMine) {
+    // when both sides touched one slide, or when either side changed the deck itself. A lease
+    // refusal (the result names the holder) is not a revision conflict: the server changed
+    // nothing, so `since` is empty and a rebase would re-send the same write to the same refusal
+    // (measured on the dev server: the pump re-sent it every 2 ms for two minutes against the
+    // ten minute lease a closed tab had left on the slide); the card names the holder instead.
+    const leaseRefused = result.holder !== undefined;
+    if (!leaseRefused && overlap.length === 0 && !deckLevelOutside && !deckLevelMine) {
       const replayed = replay(result.current, waiting);
       if (!('error' in replayed)) {
         queue = replayed.jobs;
@@ -819,8 +929,10 @@ function createEditorController(init: {
     return enqueue(write, label);
   };
 
+  /* the auto-title (gslides-parity SPEC 6.3): the first committed heading of an Untitled
+     presentation renames the deck in the same write, so one undo removes both */
   const commit = (mutations: Mutation[], label: string): Promise<Committed> =>
-    commitAs(mutations, label, 'edit');
+    commitAs([...mutations, ...autoTitleMutations(snapshot.document, mutations)], label, 'edit');
 
   const undo = async (): Promise<void> => {
     const entry = history.undo();
@@ -1139,7 +1251,11 @@ function createEditorController(init: {
   const viewState = () => {
     const document = snapshot.document;
     const order = slideOrder(document);
-    const slideId = shell?.active || snapshot.activeSlide || order[0] || '';
+    /* the shell's active id first, the snapshot's next, either only while the deck still has
+       the slide (the shell re-renders one frame after a removal moved the selection) */
+    const present = (id: string | undefined): string =>
+      id !== undefined && id !== '' && document.slides[id] !== undefined ? id : '';
+    const slideId = present(shell?.active) || present(snapshot.activeSlide) || order[0] || '';
     return {
       slideId,
       n: Math.max(1, order.indexOf(slideId) + 1),
@@ -1147,6 +1263,7 @@ function createEditorController(init: {
       theme: readTheme(),
       present: shell?.present ?? false,
       edit: editingRef.current,
+      zoom: snapshot.zoom,
     };
   };
 
@@ -1160,6 +1277,33 @@ function createEditorController(init: {
     );
     return { title: snapshot.document.deck.title, revision: committed.revision };
   });
+  /* deck.set (gslides-parity SPEC 7.2.3 to 7.2.5): the Themes panel's and Slide numbers' write as
+     an action, so an agent writes /defaults the way the panel does; the reducer keeps the roots */
+  on<{ path: string; value?: unknown; baseRevision: number }>('deck.set', async (input) => {
+    checkBase(input.baseRevision);
+    const committed = await commit(
+      [
+        {
+          op: 'deck.set',
+          path: input.path,
+          ...(input.value === undefined ? {} : { value: input.value }),
+        },
+      ],
+      'deck.set',
+    );
+    let value: unknown = snapshot.document.deck;
+    for (const key of input.path.split('/').slice(1)) {
+      value =
+        value !== null && typeof value === 'object'
+          ? (value as Record<string, unknown>)[key]
+          : undefined;
+    }
+    return {
+      path: input.path,
+      ...(value === undefined ? {} : { value }),
+      revision: committed.revision,
+    };
+  });
   on<{ name: string; from: DeckTemplateId; id?: string }>('deck.create', async (input) => {
     const created = await createNewDeck(input);
     say(`Created ${created.deckId} from ${created.from}: ${created.counts.slides} slides`);
@@ -1168,10 +1312,10 @@ function createEditorController(init: {
   });
   /* asset.add, asset.dither, material.capture and material.list run on the server (sharp, the
      capture browser, the catalog); the write they end in comes back over the watch channel */
-  const serverSide = (id: ServerSideWindowAction): void => {
+  const serverSide = (id: ServerSideWindowAction, options: { announce?: boolean } = {}): void => {
     on<unknown>(id, async (input) => {
       const output = await runDeckAction({ deckId, action: id, input, author });
-      if (id !== 'material.list') {
+      if (options.announce === true) {
         const outputs = Array.isArray(output) ? output : [output];
         const ids = outputs
           .map((entry) => (entry as { id?: string } | null)?.id)
@@ -1181,10 +1325,17 @@ function createEditorController(init: {
       return output;
     });
   };
-  serverSide('asset.add');
-  serverSide('asset.dither');
-  serverSide('material.capture');
+  serverSide('asset.add', { announce: true });
+  serverSide('asset.dither', { announce: true });
+  serverSide('material.capture', { announce: true });
   serverSide('material.list');
+  /* the deck collection actions of the parity round (gslides-parity SPEC 7.5) run on the server
+     over the hosted collection; the menu handlers word their own snackbars (SPEC 12) */
+  serverSide('deck.list');
+  serverSide('deck.copy');
+  serverSide('deck.trash');
+  serverSide('deck.restore');
+  serverSide('deck.remove');
   on<ExportRunInput>('export.run', async (input) => {
     const label = `${input.format.toUpperCase()} ${input.mode ?? 'flatten'}`;
     publish({ artifact: { progress: { label: `Exporting ${label}` }, run: null } });
@@ -1280,7 +1431,11 @@ function createEditorController(init: {
             sum + slideBlocks(slide).filter((row) => row.block.type === 'html').length,
           0,
         ),
+        skipped: slideOrder(document).filter((id) => document.slides[id]?.skip === true).length,
       },
+      // the parity round's manifest facts (gslides-parity SPEC 7.2.3 to 7.2.5), only when written
+      ...(document.deck.defaults !== undefined ? { defaults: document.deck.defaults } : {}),
+      ...(document.deck.trashedAt !== undefined ? { trashedAt: document.deck.trashedAt } : {}),
     };
   });
   on<{ sectionId?: string }>('slide.list', (input) => {
@@ -1291,12 +1446,15 @@ function createEditorController(init: {
       title: string;
       kind: Slide['kind'];
       lint: { s3: number; s2: number };
+      skip?: boolean;
+      template?: Slide['template'];
     }[] = [];
     const findings = allFindings();
     for (const section of outlineOf(snapshot.document)) {
       if (input.sectionId !== undefined && section.id !== input.sectionId) continue;
       for (const row of section.slides) {
         const mine = findings.filter((finding) => finding.slideId === row.id);
+        const record = snapshot.document.slides[row.id];
         rows.push({
           id: row.id,
           n: row.n,
@@ -1307,6 +1465,9 @@ function createEditorController(init: {
             s3: mine.filter((finding) => finding.severity === 3).length,
             s2: mine.filter((finding) => finding.severity === 2).length,
           },
+          // the parity round's facts (gslides-parity SPEC 7.2.1, 7.2.2), only when set
+          ...(record?.skip === true ? { skip: true } : {}),
+          ...(record?.template !== undefined ? { template: record.template } : {}),
         });
       }
     }
@@ -1718,6 +1879,115 @@ function createEditorController(init: {
     shell?.setPresent(input.on);
     return viewState();
   });
+  on<{ zoom: number | 'fit' }>('view.zoom', (input) => {
+    // the schema caps the factor at 4; the floor is Google's 25 percent (gslides-parity SPEC 3.1)
+    if (input.zoom !== 'fit' && input.zoom < 0.25)
+      throw new TypeError(`view.zoom: zoom must be at least 0.25 or 'fit'; got ${input.zoom}`);
+    publish({ zoom: input.zoom });
+    return viewState();
+  });
+
+  /*
+   * The document actions of the Google Slides parity round (gslides-parity SPEC 7.5: slide.new,
+   * slide.duplicate, slide.skip, slide.applyLayout, block.duplicate, text.replaceAll, export.text)
+   * run the store actions of @turboslide/cli/store-actions, the one implementation the CLI and the
+   * hosted dispatcher run (SPEC 7.1), over a DeckStore whose read is the local document and whose
+   * write is this editor's commit: the reducer applies the write now, the history takes the entry
+   * for undo, and the server confirms it in order. Only read, revision and write are reachable
+   * from those actions; the version, lease and watch methods belong to the server (server/write.ts)
+   * and throw if a later action reaches for them here.
+   */
+  const editorStore = (label: string): DeckStore => {
+    const unavailable = (method: string) => (): never => {
+      throw new TypeError(
+        `${method} is not available on the editor's store; commit is its write path`,
+      );
+    };
+    return {
+      id: deckId,
+      read: async () => ({ document: snapshot.document, issues: [], ok: true }),
+      revision: async () => snapshot.document.deck.revision,
+      write: async (write) => {
+        checkBase(write.baseRevision);
+        const committed = await commit(write.mutations, label);
+        return {
+          ok: true,
+          document: snapshot.document,
+          revision: committed.revision,
+          entry: committed.entry,
+          changed: [...touchedSlides(write.mutations)],
+          issues: [],
+          warnings: [],
+        };
+      },
+      saveVersion: unavailable('saveVersion'),
+      listVersions: unavailable('listVersions'),
+      records: unavailable('records'),
+      documentAt: unavailable('documentAt'),
+      documentAtRevision: unavailable('documentAtRevision'),
+      lease: unavailable('lease'),
+      release: unavailable('release'),
+      leases: unavailable('leases'),
+      watch: unavailable('watch'),
+    };
+  };
+  const storeDeps = (label: string): StoreActionDeps => ({
+    store: editorStore(label),
+    lint: lintLists(),
+  });
+  on<SlideNewInput>('slide.new', async (input) => {
+    const result = await slideNew(storeDeps('slide.new'), context, input);
+    // Google selects the new slide (R01 Slide > New slide); a grid stays a grid
+    selectSoon(result.slide.id);
+    return result;
+  });
+  on<SlideDuplicateInput>('slide.duplicate', async (input) => {
+    const result = await slideDuplicate(storeDeps('slide.duplicate'), context, input);
+    const last = result.slides[result.slides.length - 1];
+    if (last !== undefined) selectSoon(last.id);
+    return result;
+  });
+  on<SlideSkipInput>('slide.skip', (input) => slideSkip(storeDeps('slide.skip'), context, input));
+  on<SlideApplyLayoutInput>('slide.applyLayout', (input) =>
+    slideApplyLayout(storeDeps('slide.applyLayout'), context, input),
+  );
+  on<BlockDuplicateInput>('block.duplicate', (input) =>
+    blockDuplicate(storeDeps('block.duplicate'), context, input),
+  );
+  on<TextReplaceAllInput>('text.replaceAll', (input) =>
+    textReplaceAll(storeDeps('text.replaceAll'), context, input),
+  );
+  on<ExportTextInput>('export.text', (input) => deckText(snapshot.document, input));
+  /* slide.import reads another deck, so it runs on the server (server/actions.ts) and its write
+     comes back over the watch channel; the handler waits for that revision so a caller can address
+     the imported slides at once, then selects the first of them */
+  const awaitRevision = async (revision: number, ms: number): Promise<boolean> => {
+    const until = Date.now() + ms;
+    while (latest().document.deck.revision < revision) {
+      if (Date.now() > until) return false;
+      await sleep(40);
+    }
+    return true;
+  };
+  on<{
+    sourceDeckId: string;
+    slideIds: string[];
+    after?: string;
+    sectionId?: string;
+    baseRevision: number;
+  }>('slide.import', async (input) => {
+    const output = (await runDeckAction({
+      deckId,
+      action: 'slide.import',
+      input,
+      author,
+    })) as { slides: Slide[]; revision: number };
+    if (!(await awaitRevision(output.revision, 5000))) await reload();
+    const first = output.slides[0];
+    if (first !== undefined && latest().document.slides[first.id] !== undefined)
+      shell?.select(first.id);
+    return output;
+  });
 
   const invoke = (action: string, input?: unknown): Promise<unknown> =>
     dispatcher.dispatch(action, input ?? {}, context);
@@ -1737,6 +2007,7 @@ function createEditorController(init: {
       blockId: snapshot.selection?.blockId ?? null,
       mode: shell?.mode ?? 'slide',
       theme: readTheme(),
+      zoom: snapshot.zoom,
       author: authorLabel(author),
     }),
   });
@@ -1939,6 +2210,9 @@ function toViewerDeck(snap: EditorSnapshot): ViewerDeck {
         shot: thumbShotFor(snap.deckId, slide),
         ...(picture ? { picture } : {}),
         ...(slide.notes !== undefined ? { notes: slide.notes } : {}),
+        // the parity facts (gslides-parity SPEC 7.2.1, 7.2.2): the show and the grid read skip, the grid the layout
+        ...(slide.skip === true ? { skip: true } : {}),
+        ...(slide.template !== undefined ? { template: slide.template } : {}),
       });
     }
   }
@@ -1991,17 +2265,6 @@ function toSections(
   }));
 }
 
-function isEditable(target: EventTarget | null): target is HTMLElement {
-  if (!(target instanceof HTMLElement)) return false;
-  return (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement ||
-    target instanceof HTMLSelectElement ||
-    target.isContentEditable
-  );
-}
-
-/** The route's selection as the stage Editor's: a block, or the run being edited inside it. */
 /**
  * The slide slide.setLayout writes for a picked layout. To freeform the stage's measured boxes
  * place every block where it is drawn (toFreeform, which records the source under ext.grammar);
@@ -2024,6 +2287,7 @@ function convertedLayout(slide: ContentSlide, layout: Layout): ContentSlide {
   return convertLayout(slide, layout);
 }
 
+/** The route's selection as the stage Editor's: a block, or the run being edited inside it. */
 function toStageSelection(selection: Selection | null, slideId: string): StageSelection {
   if (!selection || selection.slideId !== slideId) return null;
   return selection.pointer !== undefined
@@ -2038,8 +2302,106 @@ function fromStageSelection(selection: StageSelection, slideId: string): Selecti
     : { slideId, blockId: selection.blockId };
 }
 
+/**
+ * The route's selection in the shell's words (gslides-parity SPEC 3.2 to 3.8): the block, whether
+ * the caret is in one of its runs, the table cell or the list item the run pointer names.
+ */
+function toShellSelection(selection: Selection | null): EditorSelection | null {
+  if (selection === null) return null;
+  const pointer = selection.pointer;
+  const cell = pointer === undefined ? null : cellPointer(pointer);
+  const item = pointer === undefined ? null : listItemPointer(pointer);
+  return {
+    blockId: selection.blockId,
+    text: pointer !== undefined,
+    ...(cell === null ? {} : { cell: { row: cell.row, column: cell.col } }),
+    ...(item === null ? {} : { listItem: true }),
+  };
+}
+
+/** The plain word of a deleted block for the snackbar (gslides-parity SPEC 13.7: the type, never the id). */
+function deletedWord(type: string): string {
+  switch (blockFamily(type)) {
+    case 'image':
+      return 'Image';
+    case 'table':
+      return 'Table';
+    case 'shape':
+      return 'Shape';
+    case 'line':
+      return 'Line';
+    case 'text':
+      return 'Text box';
+    default:
+      return 'Object';
+  }
+}
+
+/** The toolbar's draw tool (the shell's words) as the stage's (Gestures.tsx EditorTool). */
+function toEditorTool(tool: DrawTool): EditorTool {
+  switch (tool.kind) {
+    case 'text':
+      return { kind: 'text' };
+    case 'rule':
+      return { kind: 'line', line: 'rule' };
+    case 'shape':
+      return tool.shape === 'line' || tool.shape === 'arrow'
+        ? { kind: 'line', line: tool.shape }
+        : { kind: 'shape', shape: tool.shape };
+  }
+}
+
 function isApple(): boolean {
   return typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+}
+
+/** The region that has focus, for the Edit menu's Cut, Copy, Delete and Duplicate (SPEC 2.2). */
+type FocusRegion = 'filmstrip' | 'canvas' | 'notes';
+
+function regionOf(target: EventTarget | null): FocusRegion | null {
+  if (!(target instanceof HTMLElement)) return null;
+  if (target.closest('.ts-filmstrip')) return 'filmstrip';
+  if (target.closest('.ts-notes-slot')) return 'notes';
+  if (target.closest('.pt-stagewrap')) return 'canvas';
+  return null;
+}
+
+/**
+ * The Upload tab of Open and Import slides (SPEC 6.5): the bundle route with a ticket from the
+ * server function, the zip as the body; answers the new deck's id.
+ */
+async function uploadBundleFile(file: File): Promise<{ id: string }> {
+  const ticket = await bundleUploadTicket();
+  if (file.size > ticket.maxBytes) {
+    throw new Error(
+      `${file.name} is ${file.size} bytes; a bundle is at most ${ticket.maxBytes} bytes`,
+    );
+  }
+  const response = await fetch(new URL(ticket.url, window.location.origin), {
+    method: 'POST',
+    headers: { 'content-type': 'application/zip', accept: 'application/json' },
+    body: file,
+  });
+  const answer = (await response.json()) as { deckId?: string; error?: { message?: string } };
+  if (!response.ok || answer.deckId === undefined) {
+    throw new Error(answer.error?.message ?? `The upload answered ${response.status}`);
+  }
+  return { id: answer.deckId };
+}
+
+/** The OS file picker for one picture. */
+function pickPicture(onFile: (file: File) => void): void {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.style.display = 'none';
+  input.onchange = () => {
+    const file = input.files?.[0];
+    input.remove();
+    if (file) onFile(file);
+  };
+  document.body.appendChild(input);
+  input.click();
 }
 
 type EditorRootProps = {
@@ -2050,108 +2412,97 @@ type EditorRootProps = {
   onDeckCreated: (deckId: string) => void;
 };
 
-function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: EditorRootProps) {
+/**
+ * The editor page, on /edit/:deckId and on the draft of /new (gslides-parity SPEC 6.1). The
+ * chrome's ViewerShell takes the `editor` input, from which it draws the title row, the menu bar,
+ * the toolbar with its contextual tail, the filmstrip, the notes pane, the right panel, the bottom
+ * bar, the dialogs and the snackbar (EditorShell.tsx); this component supplies the document, the
+ * dispatcher and every handler a row needs, and mounts the stage, the slideshow and the canvas
+ * menus inside the shell.
+ */
+export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: EditorRootProps) {
   const [controller] = useState(() =>
     createEditorController({ deckId: payload.deckId, author, payload, onDeckCreated }),
   );
-  /* the Export menu (SPEC 8): open from the toolbar or from the deck list's Export link (?export=1) */
-  const [exportOpen, setExportOpen] = useState(search.export === 1);
   const [capabilities, setCapabilities] = useState<ExportCapabilities | null>(null);
+  /* Extensions > Agent access: whether the deployment asks for TURBOSLIDE_TOKEN */
+  const [tokenRequired, setTokenRequired] = useState(true);
+  /* the report card, from the Download dialog's Details link and nowhere else (SPEC 6.7) */
+  const [reportOpen, setReportOpen] = useState(false);
   const snap = useSyncExternalStore(
     controller.subscribe,
     controller.getSnapshot,
     controller.getSnapshot,
   );
   const theme = useTheme();
-  const editing = search.edit !== 0;
+  /* a trashed presentation is read only under its banner (SPEC 6.4) */
+  const trashed = isTrashed(snap.document.deck);
+  const editing = search.edit !== 0 && !trashed;
   const twin = search.twin === 1;
   const lintLayer = search.lint === 1;
   const src = search.src === 1;
-  const [paletteOpen, setPaletteOpen] = useState(false);
   controller.setEditing(editing);
 
-  const flags = useRef({ editing, twin, lintLayer, src });
-  flags.current = { editing, twin, lintLayer, src };
+  /* the draft of /new: Not saved yet until the first write has created the deck (SPEC 6.1) */
+  const [draft, setDraft] = useState(payload.draft === true);
+  /* the stage's imperative surface (null while the stage is not the editor) */
+  const [editorHandle, setEditorHandle] = useState<EditorHandle | null>(null);
+  /* the toolbar's draw tool; Select between inserts */
+  const [tool, setTool] = useState<EditorTool>('select');
+  /* the filmstrip's and the grid's multi-selection */
+  const [selectedSlideIds, setSelectedSlideIds] = useState<string[]>([]);
+  /* the region that last took focus */
+  const [region, setRegion] = useState<FocusRegion | null>(null);
+  /* the notes pane's height; 0 hides it (SPEC 8) */
+  const [notesHeight, setNotesHeight] = useState<number>(NOTES_DEFAULT_HEIGHT);
+  const clipboardKind = useSyncExternalStore(
+    clipboardStore.subscribe,
+    clipboardStore.kind,
+    () => 'empty' as const,
+  );
+  /* the shell's snackbar with an action and its runItem, captured by ShellBridge inside the shell */
+  const shellApi = useRef<EditorShellState | null>(null);
+
   const onSearchRef = useRef(onSearch);
   onSearchRef.current = onSearch;
+  const handleRef = useRef(editorHandle);
+  handleRef.current = editorHandle;
 
   useMountEffect(() => {
     if (search.theme) applyTheme(search.theme);
     const stopBridge = installThemeBridge();
     controller.start();
+    if (payload.draft !== true) recordDeckOpened(payload.deckId);
     exportCapabilities()
       .then((caps) => {
         controller.setExportSync(caps.sync);
         setCapabilities(caps);
       })
       .catch((error: unknown) => controller.say(`Export: ${errorMessage(error)}`));
-    const onKey = (event: KeyboardEvent) => {
-      if (event.isComposing) return;
-      const f = flags.current;
-      const patch = onSearchRef.current;
-      const meta = event.metaKey || event.ctrlKey;
-      const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
-      /* two chords work from any field, the drawer's own editor included: the drawer (Cmd /)
-         and the lint layer (Cmd L); CodeMirror never sees them (SPEC 6.9) */
-      if (meta && !event.altKey && key === '/') {
-        event.preventDefault();
-        event.stopPropagation();
-        patch({ src: f.src ? undefined : 1 });
-        return;
-      }
-      if (meta && !event.altKey && key === 'l') {
-        event.preventDefault();
-        event.stopPropagation();
-        patch({ lint: f.lintLayer ? undefined : 1 });
-        return;
-      }
-      if (isEditable(event.target)) {
-        /* keys are inert inside inputs except Escape (SPEC 6.9) */
-        return;
-      }
-      if (meta && !event.altKey && key === 'z') {
-        event.preventDefault();
-        if (event.shiftKey) void controller.redo();
-        else void controller.undo();
-        return;
-      }
-      if (meta && !event.altKey && key === 's') {
-        event.preventDefault();
-        if (!f.editing) patch({ edit: undefined });
-        controller.promptVersion(true);
-        return;
-      }
-      if (meta || event.altKey) return;
-      /* Tab, with or without a selection, belongs to the stage Editor (SPEC 6.4): a second
-         handler here moved the selection twice per keydown */
-      if (event.shiftKey && key === 'd') {
-        event.preventDefault();
-        patch({ twin: f.twin ? undefined : 1 });
-        return;
-      }
-      if (event.shiftKey) return;
-      if (key === 'e') {
-        event.preventDefault();
-        patch({ edit: f.editing ? 0 : undefined });
-      }
+    connectFacts()
+      .then((facts) => setTokenRequired(facts.tokenRequired))
+      .catch(() => undefined);
+    /* the first write of a draft created the deck: the save words change and Recent counts it */
+    const onCreated = (event: Event) => {
+      const detail = (event as CustomEvent<DeckCreatedDetail>).detail;
+      if (detail.deckId !== payload.deckId) return;
+      setDraft(false);
+      recordDeckOpened(detail.deckId);
     };
-    window.addEventListener('keydown', onKey, true);
+    window.addEventListener(DECK_CREATED_EVENT, onCreated);
+    /* which region has focus (the menus, the toolbar and the dialogs leave it as it was) */
+    const onFocus = (event: FocusEvent) => {
+      const next = regionOf(event.target);
+      if (next !== null) setRegion(next);
+    };
+    document.addEventListener('focusin', onFocus);
     return () => {
-      window.removeEventListener('keydown', onKey, true);
+      window.removeEventListener(DECK_CREATED_EVENT, onCreated);
+      document.removeEventListener('focusin', onFocus);
       stopBridge();
       controller.stop();
     };
   });
-
-  /* Cmd S and the status chip: the note field of the Versions section takes focus once the
-     inspector shows it; until then the prompt stays pending */
-  useLayoutEffect(() => {
-    if (!snap.versionPrompt) return;
-    const field = document.querySelector<HTMLElement>('[data-control="version.save.note"]');
-    if (!field) return;
-    field.focus();
-    controller.promptVersion(false);
-  }, [snap.versionPrompt, editing, snap.activeSlide, controller]);
 
   const viewerDeck = useMemo(() => toViewerDeck(snap), [snap.document, snap.html, snap.deckId]);
   const findings = useMemo(() => controller.allFindings(), [controller, snap.document]);
@@ -2164,15 +2515,14 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
     [findings, snap.activeSlide],
   );
   const { deck } = snap.document;
+  const deckId = snap.deckId;
+  const assetBase = ASSET_BASE(deckId);
   const slide = snap.document.slides[snap.activeSlide];
   const revision = deck.revision;
   const selection =
     snap.selection && snap.selection.slideId === snap.activeSlide ? snap.selection : null;
 
   const status: SaveState = snap.conflict ? 'conflict' : snap.pending > 0 ? 'unsaved' : 'saved';
-  const otherLease = snap.leases.find(
-    (lease) => lease.slideId === snap.activeSlide && !sameAuthor(lease.holder, author),
-  );
 
   /* the source drawer as a delegating owner (SPEC 6.6, 7.4): Apply from the drawer and
      applySource from an agent run one validator; an action the drawer does not know reaches
@@ -2192,7 +2542,7 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
                  written (SPEC 7.4: RangeError for an id the owner does not take) */
               if (checked.id !== api.slideId) {
                 throw new RangeError(
-                  `The source drawer replaces slide "${api.slideId}", not "${checked.id}"; close the drawer (Cmd /) to replace another slide through the editor`,
+                  `The source drawer replaces slide "${api.slideId}", not "${checked.id}"; close the drawer (Tools > Advanced > Show source) to replace another slide through the editor`,
                 );
               }
               await api.applySource(text);
@@ -2212,8 +2562,7 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
     [controller],
   );
 
-  /* built on every document change (not only while the palette is open) because the toolbar's
-     Insert menu lists the same insert entries; the work is one pass over the slides and actions */
+  /* the full palette (Tools > Advanced > Run an action): every action with the current facts */
   const paletteEntries = useMemo<readonly PaletteEntry[]>(() => {
     const patch = onSearchRef.current;
     return buildPaletteEntries({
@@ -2255,16 +2604,11 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
     src,
   ]);
 
-  const tokens = useMemo(
-    () => TOKEN_NAMES.map((name) => ({ name, value: TOKENS[theme][name] })),
-    [theme],
-  );
-
   /* the live copy lint of a Text field (SPEC 6.5): the same rules over a draft of the slide */
   const lintText = (text: string, spec: { path: string }): readonly string[] => {
     if (!slide || !selection) return [];
     try {
-      const draft = applyMutations(snap.document, [
+      const draftDocument = applyMutations(snap.document, [
         {
           op: 'block.set',
           slideId: slide.id,
@@ -2273,7 +2617,7 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
           value: text,
         },
       ]).document;
-      return lintStatic(draft, { ...lintLists(), slideIds: [slide.id] })
+      return lintStatic(draftDocument, { ...lintLists(), slideIds: [slide.id] })
         .filter(
           (finding) => finding.blockId === selection.blockId && finding.rule.startsWith('copy/'),
         )
@@ -2283,39 +2627,365 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
     }
   };
 
-  const scopeAttr = { [SCOPE_ATTRIBUTE]: `editor:${snap.deckId}` };
+  const scopeAttr = { [SCOPE_ATTRIBUTE]: `editor:${deckId}` };
 
-  /* the Export menu's runs are actions through the dispatcher (SPEC 7.1); the menu stays up with
-     the progress line while a run is in flight and closes when the report card takes over */
-  const runExport = (input: ExportMenuInput) => {
-    controller
-      .invoke('export.run', input)
-      .then(() => setExportOpen(false))
-      .catch((error: unknown) => controller.say(`Export: ${errorMessage(error)}`));
+  /* navigation for the menu's route effects and the dialogs: a new tab, or a full load of another route */
+  const go = (path: string, newTab?: boolean): void => {
+    if (newTab) {
+      window.open(path, '_blank', 'noopener');
+      return;
+    }
+    window.location.assign(path);
   };
-  const runBuildAction = () => {
-    controller
-      .invoke('build.run', { out: `.turboslide/${snap.deckId}.html`, budgetMB: 16 })
-      .then(() => setExportOpen(false))
-      .catch((error: unknown) => controller.say(`Build: ${errorMessage(error)}`));
+
+  /* the Slideshow button's host (SPEC 9.1): the play list's first slide, goto and present as actions */
+  const presentHost: PresentHost = {
+    deckId,
+    firstSlideId: () => unskippedSlideOrder(controller.getSnapshot().document)[0],
+    goto: (slideId) => {
+      controller.invoke('view.goto', { slideId }).catch(() => undefined);
+    },
+    present: (on) => {
+      controller.invoke('view.present', { on }).catch(() => undefined);
+    },
   };
-  /* deck.pack (docs/deck-transfer.md): the bundle route with a ticket from the server function,
-     so the download needs no bearer token in the page; the zip is an attachment */
-  const downloadBundle = () => {
-    bundleDownloadTicket({ deckId: snap.deckId })
-      .then(({ url }) => {
+
+  /*
+   * The shell's dispatcher: the controller's, plus two effects an action alone does not carry.
+   * Slideshow from the title row or the View menu (view.present on) asks for full screen while the
+   * click's gesture is live, as Google does (SPEC 9.1); the same action from the window API or an
+   * agent asks for nothing (the browser refuses full screen without a gesture). deck.pack from
+   * File > Download > Turboslide bundle downloads the zip through the bundle route's ticket: the
+   * page cannot run the CLI's packer.
+   */
+  const shellDispatch: EditorDispatch = (action, input) => {
+    if (action === 'view.present' && (input as { on?: boolean }).on === true) {
+      requestPresentFullscreen();
+    }
+    if (action === 'deck.pack') {
+      return bundleDownloadTicket({ deckId }).then(({ url }) => {
         triggerDownload(url);
-        setExportOpen(false);
-        controller.say(`Downloading the bundle of ${snap.deckId}`);
-      })
-      .catch((error: unknown) => controller.say(`Bundle: ${errorMessage(error)}`));
+        return { path: `${deckId}.zip`, url };
+      });
+    }
+    return controller.invoke(action, input);
   };
+
+  const shellSay = (text: string, action?: SnackbarAction): void => {
+    if (shellApi.current) shellApi.current.say(text, action);
+    else controller.say(text);
+  };
+
+  /* the clipboard handlers of the Edit menu (gslides-parity SPEC 2.2). The canvas's while a block
+     or a run is selected there; the slides' while the filmstrip last had focus or nothing is
+     selected on the canvas, which is what Google cuts, copies and pastes from the menu with a
+     slide card selected (the menu bar takes focus, so the region that last had it decides; the
+     filmstrip answers its own keys). The notes textarea keeps the browser's own clipboard, and
+     the menu's Delete with no canvas selection runs Delete slide through the plan. */
+  const liveSlideIds = (selectedSlideIds.length > 0 ? selectedSlideIds : [snap.activeSlide]).filter(
+    (id) => snap.document.slides[id] !== undefined,
+  );
+  const slideClipboard = region !== 'notes' && (region === 'filmstrip' || selection === null);
+  const canvasClipboard = region !== 'filmstrip' && region !== 'notes' && editorHandle !== null;
+  const copySlides = async (): Promise<void> => {
+    const slides = liveSlideIds.flatMap((id) => {
+      const record = snap.document.slides[id];
+      return record ? [record] : [];
+    });
+    if (slides.length === 0) return;
+    await clipboardStore.write({
+      kind: 'slides',
+      deckId,
+      slides: JSON.parse(JSON.stringify(slides)) as Slide[],
+    });
+  };
+  /* one slide.remove per slide with the revision each write will find (the reducer applies
+     locally before the next call), and the snackbar with one Undo per removed slide */
+  const removeSlides = (ids: readonly string[]): void => {
+    const ordered = slideOrder(snap.document).filter((id) => ids.includes(id));
+    if (ordered.length === 0) return;
+    let base = revision;
+    for (const id of ordered) {
+      void shellDispatch('slide.remove', { slideId: id, baseRevision: base }).catch(
+        (error: unknown) => shellSay(errorMessage(error)),
+      );
+      base += 1;
+    }
+    const count = ordered.length;
+    shellSay(count === 1 ? SNACKBARS.slideDeleted : SNACKBARS.slidesDeleted(count), {
+      label: SNACKBARS.undo,
+      run: () => {
+        for (let i = 0; i < count; i += 1) void controller.undo();
+      },
+    });
+  };
+  /* slides after the last selected card (slide.import when they come from another deck, so the
+     assets travel); anything else is the canvas's paste onto the current slide */
+  const pasteSlidesOrCanvas = async (plain: boolean): Promise<void> => {
+    const payload = await clipboardStore.read();
+    if (payload === null) return;
+    if (payload.kind !== 'slides') {
+      await editorHandle?.paste({ plain });
+      return;
+    }
+    const after = liveSlideIds[liveSlideIds.length - 1] ?? snap.activeSlide;
+    if (payload.deckId !== deckId && payload.deckId !== '') {
+      await shellDispatch('slide.import', {
+        sourceDeckId: payload.deckId,
+        slideIds: payload.slides.map((row) => row.id),
+        ...(after !== '' ? { after } : {}),
+        baseRevision: revision,
+      });
+      return;
+    }
+    let base = revision;
+    for (const input of pastedSlideInserts(
+      snap.document.deck,
+      payload,
+      after === '' ? undefined : after,
+    )) {
+      void shellDispatch('slide.insert', { ...input, baseRevision: base }).catch((error: unknown) =>
+        shellSay(errorMessage(error)),
+      );
+      base += 1;
+    }
+  };
+  const clipboard: EditorClipboard = {
+    kind: clipboardKind,
+    ...(slideClipboard
+      ? {
+          cut: () => void copySlides().then(() => removeSlides(liveSlideIds)),
+          copy: () => void copySlides(),
+          paste: () =>
+            void pasteSlidesOrCanvas(false).catch((e: unknown) => shellSay(errorMessage(e))),
+          pasteWithoutFormatting: () =>
+            void pasteSlidesOrCanvas(true).catch((e: unknown) => shellSay(errorMessage(e))),
+          /* Select all on the canvas selects every block of the slide; the filmstrip's is its own key */
+          ...(canvasClipboard ? { selectAll: () => editorHandle.selectAll() } : {}),
+        }
+      : canvasClipboard
+        ? {
+            cut: () => void editorHandle.cut(),
+            copy: () => void editorHandle.copy(),
+            paste: () => void editorHandle.paste(),
+            pasteWithoutFormatting: () => void editorHandle.paste({ plain: true }),
+            delete: () => editorHandle.remove(),
+            selectAll: () => editorHandle.selectAll(),
+          }
+        : {}),
+  };
+
+  const focus: MenuContext['focus'] =
+    region === 'filmstrip'
+      ? 'filmstrip'
+      : region === 'notes'
+        ? 'notes'
+        : selection?.pointer !== undefined
+          ? 'text'
+          : selection
+            ? 'canvas'
+            : 'none';
+
+  const uploadPicture = (target: PictureTarget): void => {
+    pickPicture((file) => {
+      const handle = handleRef.current;
+      if (!handle) {
+        controller.say('Open a slide in Editing mode to add a picture');
+        return;
+      }
+      const where =
+        target.kind === 'block'
+          ? { blockId: target.blockId, replace: true }
+          : target.kind === 'slide'
+            ? { replace: true }
+            : {};
+      handle
+        .insertPicture(file, where)
+        .catch((error: unknown) => controller.say(errorMessage(error)));
+    });
+  };
+
+  const editorInput: EditorShellInput = {
+    deckId,
+    document: snap.document,
+    slideId: snap.activeSlide,
+    selectedSlideIds: selectedSlideIds.length > 0 ? selectedSlideIds : [snap.activeSlide],
+    selection: toShellSelection(selection),
+    focus,
+    revision,
+    dispatch: shellDispatch,
+    commit: controller.commit,
+    history: {
+      canUndo: snap.history.canUndo,
+      canRedo: snap.history.canRedo,
+      undo: () => void controller.undo(),
+      redo: () => void controller.redo(),
+    },
+    save: {
+      state: status,
+      draft,
+      lastEditAt: deck.updatedAt,
+      ...(authorLabel(author) !== DEFAULT_AUTHOR ? { lastEditBy: authorLabel(author) } : {}),
+    },
+    clipboard,
+    toggles: {
+      viewing: !editing,
+      onViewing: (viewing) => onSearch({ edit: viewing ? 0 : undefined }),
+      sideBySide: twin,
+      onSideBySide: (on) => onSearch({ twin: on ? 1 : undefined }),
+      source: src,
+      onSource: (on) => onSearch({ src: on ? 1 : undefined }),
+      suggestionMarks: lintLayer,
+      onSuggestionMarks: (on) => onSearch({ lint: on ? 1 : undefined }),
+    },
+    findings,
+    versions: snap.versions,
+    historyEntries: snap.history.versions,
+    leases: snap.leases.filter((lease) => !sameAuthor(lease.holder, author)),
+    onUndoTo: (entry) => {
+      void controller.undoAfter(entry.n);
+    },
+    onSelectBlock: (blockId) =>
+      controller.select(
+        blockId === undefined || slide === undefined ? null : { slideId: slide.id, blockId },
+      ),
+    lintText,
+    assetUrl: (path) => assetBase + path,
+    createDitherWorker,
+    busy: snap.conflict !== null,
+    renderSlide: (record, renderTheme) =>
+      renderSlide(deck, record, {
+        theme: renderTheme,
+        chrome: false,
+        assetBase,
+        blockAttrs: false,
+        gtWord: true,
+        live: true,
+        active: true,
+      }).html,
+    paletteEntries,
+    onNotice: controller.say,
+    ...(slide !== undefined
+      ? {
+          notes: (
+            <NotesPane
+              slideId={slide.id}
+              notes={slide.notes ?? ''}
+              onCommit={(notes) => {
+                const current = controller.getSnapshot();
+                const target = current.document.slides[slide.id];
+                if (!target || (target.notes ?? '') === notes) return;
+                controller
+                  .invoke('slide.update', {
+                    slideId: slide.id,
+                    baseRevision: current.document.deck.revision,
+                    mutations: [
+                      {
+                        op: 'slide.set',
+                        slideId: slide.id,
+                        path: '/notes',
+                        ...(notes === '' ? {} : { value: notes }),
+                      },
+                    ],
+                  })
+                  .catch((error: unknown) => controller.say(errorMessage(error)));
+              }}
+              height={notesHeight}
+              onHeightChange={setNotesHeight}
+              readOnly={!editing}
+            />
+          ),
+        }
+      : {}),
+    ...(src && slide
+      ? {
+          drawer: (
+            <SourceDrawer
+              open
+              slide={slide}
+              revision={revision}
+              dispatch={controller.invoke}
+              onClose={() => onSearch({ src: undefined })}
+              deckId={deckId}
+              external={
+                snap.external
+                  ? {
+                      revision: snap.external.revision,
+                      author: snap.external.author ? authorLabel(snap.external.author) : 'outside',
+                    }
+                  : null
+              }
+              registerOwner={registerOwner}
+              onNotice={controller.say}
+            />
+          ),
+        }
+      : {}),
+    export: {
+      capabilities,
+      progress: snap.artifact.progress,
+      run: snap.artifact.run,
+      onDownload: (run, file) => {
+        void controller.downloadArtifact(run, file);
+      },
+      onClearRun: controller.clearArtifact,
+      onShowReport: () => setReportOpen(true),
+    },
+    listDecks: () => listDecks(),
+    readDeck: async (id) => {
+      const read = await readSourceDeckSlides({ deckId: id });
+      if (read === null) throw new RangeError(`No presentation named ${id}`);
+      return read;
+    },
+    uploadBundle: uploadBundleFile,
+    uploadPicture,
+    origin: typeof window === 'undefined' ? '' : window.location.origin,
+    tokenRequired,
+    onLink: () => {
+      if (handleRef.current) handleRef.current.link();
+      else controller.say('Select a block first');
+    },
+    onPaintFormat: () => {
+      const handle = handleRef.current;
+      if (!handle) return;
+      if (!handle.armPaint()) controller.say('Select a block with a look to copy first');
+    },
+    onDrawTool: (drawTool) => setTool(toEditorTool(drawTool)),
+    present: {
+      start: (fromBeginning) =>
+        startSlideshow(presentHost, { from: fromBeginning ? 'beginning' : 'current' }),
+      presenterView: () => presenterView(presentHost),
+    },
+    navigate: go,
+    onTrashed: () => {
+      void controller.reload();
+    },
+  };
+
+  const sidebarEdit: SidebarEdit | undefined = editing
+    ? {
+        revision,
+        dispatch: controller.invoke,
+        onNotice: controller.say,
+        deck,
+        document: snap.document,
+        deckId,
+        snack: shellSay,
+        undo: () => void controller.undo(),
+        history: { undo: snap.history.canUndo, redo: snap.history.canRedo },
+        onSelectionChange: setSelectedSlideIds,
+        onMenuItem: (item) => shellApi.current?.runItem(item),
+        onFocusCanvas: () => handleRef.current?.focus(),
+        clipboard: clipboardStore,
+      }
+    : undefined;
 
   return (
     <div
       className="ts-editor"
       data-editing={editing ? '1' : '0'}
       data-status={status}
+      {...(draft ? { 'data-draft': '' } : {})}
       {...scopeAttr}
     >
       <div
@@ -2324,7 +2994,7 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
         dangerouslySetInnerHTML={{ __html: payload.sprite }}
       />
       <ViewerShell
-        id={`edit:${snap.deckId}`}
+        id={`edit:${deckId}`}
         title={deck.title}
         count={`${viewerDeck.slides.length} slides`}
         sections={sections}
@@ -2338,131 +3008,11 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
         hash="id"
         onModeChange={(mode) => onSearch({ mode: mode === 'slide' ? undefined : mode })}
         homeHref="/decks"
-        onSearch={() => setPaletteOpen(true)}
-        searchOpen={paletteOpen}
-        toolbarStatus={
-          <>
-            <DeckName
-              title={deck.title}
-              revision={revision}
-              dispatch={controller.invoke}
-              onNotice={controller.say}
-            />
-            <StatusChip
-              revision={snap.serverRevision}
-              state={status}
-              lease={
-                otherLease
-                  ? { holder: authorLabel(otherLease.holder), until: otherLease.until }
-                  : null
-              }
-              onClick={() => controller.promptVersion(true)}
-            />
-          </>
-        }
-        toolbarSlot={
-          <>
-            <EditTools
-              edit={editing}
-              onEdit={(on) => onSearch({ edit: on ? undefined : 0 })}
-              twin={twin}
-              onTwin={() => onSearch({ twin: twin ? undefined : 1 })}
-              lint={lintLayer}
-              lintCount={activeFindings.length}
-              onLint={() => onSearch({ lint: lintLayer ? undefined : 1 })}
-              source={src}
-              onSource={() => onSearch({ src: src ? undefined : 1 })}
-              insert={{
-                entries: paletteEntries,
-                dispatch: controller.invoke,
-                onNotice: controller.say,
-              }}
-            />
-            <ToolButton
-              icon="present"
-              label="Presentation"
-              title={`Open the presentation view in a new tab: /deck/${snap.deckId}?present=1, the viewer in present mode`}
-              hideSm
-              control="present.open"
-              onClick={() => {
-                window.open(
-                  `/deck/${encodeURIComponent(snap.deckId)}?present=1`,
-                  '_blank',
-                  'noopener',
-                );
-              }}
-            />
-            <ExportMenu
-              open={exportOpen}
-              onOpenChange={(open) => {
-                setExportOpen(open);
-                if (!open && search.export === 1) onSearch({ export: undefined });
-              }}
-              capabilities={capabilities}
-              progress={snap.artifact.progress}
-              onExport={runExport}
-              onBuild={runBuildAction}
-              onDownloadBundle={downloadBundle}
-            />
-          </>
-        }
-        sidebarEdit={
-          editing
-            ? { revision, dispatch: controller.invoke, onNotice: controller.say, deck }
-            : undefined
-        }
-        panel={
-          editing && slide ? (
-            <Inspector
-              deck={deck}
-              slide={slide}
-              blockId={selection?.blockId}
-              revision={revision}
-              dispatch={controller.invoke}
-              findings={activeFindings}
-              versions={snap.versions}
-              history={snap.history.versions}
-              leases={snap.leases.filter((lease) => !sameAuthor(lease.holder, author))}
-              tokens={tokens}
-              onSelectBlock={(blockId) =>
-                controller.select(blockId === undefined ? null : { slideId: slide.id, blockId })
-              }
-              onUndoTo={(entry) => {
-                void controller.undoAfter(entry.n);
-              }}
-              lintText={lintText}
-              assetUrl={(path) => ASSET_BASE(snap.deckId) + path}
-              busy={snap.conflict !== null}
-              createDitherWorker={createDitherWorker}
-              onNotice={controller.say}
-            />
-          ) : undefined
-        }
-        drawer={
-          src && slide ? (
-            <SourceDrawer
-              open
-              slide={slide}
-              revision={revision}
-              dispatch={controller.invoke}
-              onClose={() => onSearch({ src: undefined })}
-              deckId={snap.deckId}
-              external={
-                snap.external
-                  ? {
-                      revision: snap.external.revision,
-                      author: snap.external.author ? authorLabel(snap.external.author) : 'outside',
-                    }
-                  : null
-              }
-              registerOwner={registerOwner}
-              onNotice={controller.say}
-            />
-          ) : undefined
-        }
+        sidebarEdit={sidebarEdit}
+        editor={editorInput}
       >
-        <ShellBridge controller={controller} editing={editing} />
-        <SessionBridge deckId={snap.deckId} author={author} />
+        <ShellBridge controller={controller} editing={editing} api={shellApi} />
+        <SessionBridge deckId={deckId} author={author} />
         <EditorStage
           controller={controller}
           snap={snap}
@@ -2471,27 +3021,27 @@ function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: Editor
           twin={twin}
           lintLayer={lintLayer}
           findings={activeFindings}
+          tool={tool}
+          onToolDone={() => setTool('select')}
+          onHandle={setEditorHandle}
+          selectedSlideIds={selectedSlideIds}
+          onSelectedSlideIds={setSelectedSlideIds}
         />
       </ViewerShell>
-      <Palette
-        open={paletteOpen}
-        entries={paletteEntries}
-        dispatch={controller.invoke}
-        onClose={() => setPaletteOpen(false)}
-        onNotice={controller.say}
-      />
-      {snap.artifact.run ? (
+      {reportOpen && snap.artifact.run ? (
         <ExportReportCard
           run={snap.artifact.run}
           downloads={capabilities?.downloads ?? true}
           onDownload={(run, file) => {
             void controller.downloadArtifact(run, file);
           }}
-          onClose={controller.clearArtifact}
+          onClose={() => setReportOpen(false)}
         />
       ) : null}
       {snap.conflict ? <ConflictCard controller={controller} conflict={snap.conflict} /> : null}
-      {snap.external ? (
+      {trashed ? (
+        <TrashedBanner deckId={deckId} controller={controller} />
+      ) : snap.external ? (
         <ExternalRevisionBanner controller={controller} external={snap.external} />
       ) : payload.hosting.notice !== null ? (
         <HostingBanner notice={payload.hosting.notice} store={payload.hosting.store} />
@@ -2512,15 +3062,26 @@ function SessionBridge({ deckId, author }: { deckId: string; author: Author }) {
 
 /**
  * Inside the shell: hands the shell state to the controller, keeps the active slide and the view
- * in step, takes the lease while editing (enforced against agent writes from M4), warms the thumbnails once the sidebar or the
- * grid asks for them, and registers the editor and viewer owners on two marker elements whose
- * data-active flags follow the Edit | View seg, so exactly one is active and the handoff fires one
- * ready event (SPEC 7.4).
+ * in step, takes the lease while editing (enforced against agent writes from M4), warms the
+ * thumbnails once the sidebar or the grid asks for them, registers the editor and viewer owners
+ * on two marker elements whose data-active flags follow Editing and Viewing, so exactly one is
+ * active and the handoff fires one ready event (SPEC 7.4), and captures the editor shell's
+ * snackbar and runItem for the route, which renders outside the shell's context.
  */
-function ShellBridge({ controller, editing }: { controller: EditorController; editing: boolean }) {
+function ShellBridge({
+  controller,
+  editing,
+  api,
+}: {
+  controller: EditorController;
+  editing: boolean;
+  api: { current: EditorShellState | null };
+}) {
   const shell = usePtShell();
+  const editorShell = useEditorShell();
   const theme = useTheme();
   controller.attachShell(shell);
+  api.current = editorShell;
   const [editorEl, setEditorEl] = useState<HTMLElement | null>(null);
   const [viewerEl, setViewerEl] = useState<HTMLElement | null>(null);
   useStudioOwner(controller.editorAdapter(), editorEl);
@@ -2533,6 +3094,10 @@ function ShellBridge({ controller, editing }: { controller: EditorController; ed
   useLayoutEffect(() => {
     if (shell.density === 'thumbs' || shell.mode === 'grid') controller.warmThumbs(theme);
   }, [controller, shell.density, shell.mode, theme]);
+  /* leaving the show leaves full screen too (SPEC 9.1: Esc leaves both) */
+  useLayoutEffect(() => {
+    if (!shell.present) exitPresentFullscreen();
+  }, [shell.present]);
   return (
     <>
       <span
@@ -2552,7 +3117,8 @@ function ShellBridge({ controller, editing }: { controller: EditorController; ed
 }
 
 // ---------------------------------------------------------------------------------------------
-// The stage: the viewer's Editor in edit mode, the Stage otherwise, the twin view, the grid, the book
+// The stage: the viewer's Editor in edit mode, the Stage otherwise, the slideshow, the twin view,
+// the grid, the book, and the canvas and grid right-click menus
 
 type EditorStageProps = {
   controller: EditorController;
@@ -2562,7 +3128,15 @@ type EditorStageProps = {
   twin: boolean;
   lintLayer: boolean;
   findings: readonly Finding[];
+  tool: EditorTool;
+  onToolDone: () => void;
+  onHandle: (handle: EditorHandle | null) => void;
+  selectedSlideIds: readonly string[];
+  onSelectedSlideIds: (ids: string[]) => void;
 };
+
+/** A right-click on a grid tile (SPEC 4.4): the card menu at the pointer. */
+type GridMenu = { slideId: string; x: number; y: number; element: HTMLElement };
 
 function EditorStage({
   controller,
@@ -2572,12 +3146,22 @@ function EditorStage({
   twin,
   lintLayer,
   findings,
+  tool,
+  onToolDone,
+  onHandle,
+  selectedSlideIds,
+  onSelectedSlideIds,
 }: EditorStageProps) {
   const shell = usePtShell();
+  const editorShell = useEditorShell();
   const { stageSize } = usePtStage();
   const theme = useTheme();
+  const [canvasMenu, setCanvasMenu] = useState<EditorContextMenu | null>(null);
+  const [gridMenu, setGridMenu] = useState<GridMenu | null>(null);
+  const [tile, setTile] = useState<GridTileSize>(GRID_DEFAULT_TILE);
   const slide =
     viewerDeck.slides.find((entry) => entry.id === shell.active) ?? viewerDeck.slides[0];
+  const record = snap.document.slides[shell.active];
   const showTwin = twin && shell.mode === 'slide' && !shell.present && slide !== undefined;
   const editStage =
     editing && shell.mode === 'slide' && !shell.present && !showTwin && slide !== undefined;
@@ -2585,6 +3169,62 @@ function EditorStage({
     snap.selection && slide && snap.selection.slideId === slide.id
       ? snap.selection.blockId
       : undefined;
+  /* the show runs over the unskipped slides (SPEC 9.2); a click on the sheet steps through them */
+  const play = useMemo(() => playList(viewerDeck.slides), [viewerDeck.slides]);
+  const onStep = (delta: number) => {
+    if (!shell.present) {
+      shell.step(delta);
+      return;
+    }
+    const at = currentPlayIndex(viewerDeck.slides, play, shell.active);
+    const target = play[stepPlayIndex(at, delta, play.length)];
+    if (target && target.id !== shell.active) shell.select(target.id);
+  };
+  const say = (text: string, hold?: number) => shell.say(text, hold);
+  const undoAction: SnackbarAction = {
+    label: SNACKBARS.undo,
+    run: () => void controller.undo(),
+  };
+  const notice = (n: EditorNotice) => editorShell.say(n.text, n.undo ? undoAction : undefined);
+  /* the layout grid inside the right-click menus' Apply layout submenu */
+  const renderLayouts = (pick: (layout: LayoutId) => void) => (
+    <div className="ts-layout-plate is-submenu">
+      <LayoutGrid
+        document={snap.document}
+        slide={record}
+        theme={deckAppearance(snap.document.deck)}
+        render={editorShell.input.renderSlide}
+        onPick={pick}
+        onAddPicture={() =>
+          editorShell.input.uploadPicture?.({
+            kind: 'slide',
+            slideId: shell.active,
+            path: '/picture/asset',
+          })
+        }
+        control="layout.apply"
+      />
+    </div>
+  );
+  const moveSlides = (ids: string[], target: { sectionId: string; after?: string }) => {
+    void (async () => {
+      let after = target.after;
+      for (const id of ids) {
+        try {
+          await controller.invoke('slide.move', {
+            slideId: id,
+            sectionId: target.sectionId,
+            ...(after === undefined ? {} : { after }),
+            baseRevision: controller.getSnapshot().document.deck.revision,
+          });
+        } catch (error) {
+          controller.say(errorMessage(error));
+          return;
+        }
+        after = id;
+      }
+    })();
+  };
   return (
     <>
       {editStage ? (
@@ -2605,11 +3245,18 @@ function EditorStage({
           lintLayer={lintLayer}
           overlay={(view) => <Overlay view={view} />}
           onError={(error) => controller.say(errorMessage(error))}
-          onRemoved={(block) =>
-            controller.say(
-              `Removed ${block.type} · ${block.id}. ${isApple() ? 'Cmd' : 'Ctrl'} Z undoes`,
-            )
-          }
+          onRemoved={(block) => editorShell.say(`${deletedWord(block.type)} deleted`, undoAction)}
+          zoom={snap.zoom}
+          tool={tool}
+          onToolDone={onToolDone}
+          showIds={editorShell.settings.showIds === true}
+          onContextMenu={setCanvasMenu}
+          onNotice={notice}
+          onUndo={() => void controller.undo()}
+          onRedo={() => void controller.redo()}
+          handle={onHandle}
+          clipboard={clipboardStore}
+          deckId={snap.deckId}
         />
       ) : showTwin ? (
         <TwinStage
@@ -2640,9 +3287,20 @@ function EditorStage({
           narrow={shell.narrow}
           theme={theme}
           dir={shell.dir ?? 'next'}
-          onStep={shell.step}
+          onStep={onStep}
         />
       )}
+      {shell.present ? (
+        <Slideshow
+          deckId={snap.deckId}
+          slides={play}
+          activeId={shell.active}
+          theme={theme}
+          onGoto={shell.select}
+          onExit={() => shell.setPresent(false)}
+          say={say}
+        />
+      ) : null}
       {shell.mode === 'grid' ? (
         <GridView
           deck={viewerDeck}
@@ -2652,6 +3310,27 @@ function EditorStage({
             shell.setMode('slide');
             shell.select(id);
           }}
+          {...(editing
+            ? {
+                edit: {
+                  selected: selectedSlideIds,
+                  onSelectionChange: onSelectedSlideIds,
+                  onMove: moveSlides,
+                  onContextMenu: (slideId, point, element) => {
+                    if (!selectedSlideIds.includes(slideId)) onSelectedSlideIds([slideId]);
+                    if (slideId !== shell.active) shell.select(slideId);
+                    setGridMenu({ slideId, x: point.x, y: point.y, element });
+                  },
+                  onOpen: (id) => {
+                    shell.setMode('slide');
+                    shell.select(id);
+                  },
+                  tile,
+                  onTile: setTile,
+                  sections: editorShell.settings.sections === true,
+                },
+              }
+            : {})}
         />
       ) : null}
       {shell.mode === 'book' ? (
@@ -2665,15 +3344,79 @@ function EditorStage({
             shell.setMode('slide');
             shell.select(id);
           }}
-          lead={`${viewerDeck.slides.length} slides in ${viewerDeck.sections.length} sections at revision ${viewerDeck.revision}.`}
+          lead={`${viewerDeck.slides.length} slides in ${viewerDeck.sections.length} sections.`}
           meta={[
             { key: 'Sections', value: String(viewerDeck.sections.length) },
             { key: 'Slides', value: String(viewerDeck.slides.length) },
-            { key: 'Revision', value: `r${viewerDeck.revision}` },
           ]}
         />
       ) : null}
+      {canvasMenu ? (
+        <ContextMenu
+          target={canvasMenu.target}
+          context={editorShell.menuContext}
+          anchor={{ x: canvasMenu.x, y: canvasMenu.y }}
+          returnFocusTo={canvasMenu.element}
+          onSelect={(item) => {
+            setCanvasMenu(null);
+            editorShell.runItem(item, canvasMenu.element);
+          }}
+          onClose={() => setCanvasMenu(null)}
+          label={contextMenuLabel(canvasMenu.target)}
+          {...(record === undefined ? {} : { layout: derivedLayout(record) })}
+          onLayout={(layout) => editorShell.pickLayout(layout, 'apply')}
+          renderLayouts={renderLayouts}
+          id="ts-menu-canvas"
+        />
+      ) : null}
+      {gridMenu ? (
+        <ContextMenu
+          target="filmstripCard"
+          context={editorShell.menuContext}
+          anchor={{ x: gridMenu.x, y: gridMenu.y }}
+          returnFocusTo={gridMenu.element}
+          onSelect={(item) => {
+            setGridMenu(null);
+            editorShell.runItem(item, gridMenu.element);
+          }}
+          onClose={() => setGridMenu(null)}
+          label={contextMenuLabel('filmstripCard')}
+          {...(record === undefined ? {} : { layout: derivedLayout(record) })}
+          onLayout={(layout) => editorShell.pickLayout(layout, 'apply')}
+          renderLayouts={renderLayouts}
+          id="ts-menu-grid"
+        />
+      ) : null}
     </>
+  );
+}
+
+/**
+ * The banner over a trashed presentation (gslides-parity SPEC 6.4): the editor is read only under
+ * it; Restore runs deck.restore through the store and reloads the document.
+ */
+function TrashedBanner({ deckId, controller }: { deckId: string; controller: EditorController }) {
+  const [busy, setBusy] = useState(false);
+  return (
+    <div className="ts-banner ts-chrome" role="status" data-state="trashed">
+      <span>{HOME.inTrash.split(' · ')[0]}</span>
+      <button
+        type="button"
+        className="pt-ib is-text"
+        data-control="deck.restore"
+        disabled={busy}
+        {...tipProps({ name: HOME.restore, doc: 'Takes the presentation out of the trash' })}
+        onClick={() => {
+          setBusy(true);
+          restoreStoredDeck({ deckId })
+            .then(() => controller.reload())
+            .catch((error: unknown) => controller.say(errorMessage(error)))
+            .finally(() => setBusy(false));
+        }}
+      >
+        <span className="pt-lb">{HOME.restore}</span>
+      </button>
+    </div>
   );
 }
 
@@ -2764,8 +3507,13 @@ function ConflictCard({
     conflict.overlap[0] ?? touchedSlides(conflict.pending.flatMap((write) => write.mutations))[0];
   const pendingCount = conflict.pending.reduce((sum, write) => sum + write.mutations.length, 0);
   return (
-    <div className="ts-card ts-chrome" role="dialog" aria-label="Conflict" data-state="conflict">
-      <div className="ts-card-head">
+    <div
+      className="ts-conflict ts-chrome"
+      role="dialog"
+      aria-label="Conflict"
+      data-state="conflict"
+    >
+      <div className="ts-conflict-head">
         <b>Conflict at r{conflict.currentRevision}</b>
         <span>{conflict.message}</span>
       </div>
@@ -2774,7 +3522,7 @@ function ConflictCard({
         {conflict.overlap.length > 0 ? `; both touched ${conflict.overlap.join(', ')}.` : '.'}
       </p>
       {slideId ? (
-        <div className="ts-card-both">
+        <div className="ts-conflict-both">
           <div>
             <h4>Current document (server)</h4>
             <pre>{slideJson(conflict.current, slideId)}</pre>
@@ -2786,9 +3534,9 @@ function ConflictCard({
         </div>
       ) : null}
       {conflict.error ? (
-        <p className="ts-card-error">{`Rebase failed: ${conflict.error}`}</p>
+        <p className="ts-conflict-error">{`Rebase failed: ${conflict.error}`}</p>
       ) : null}
-      <div className="ts-card-actions">
+      <div className="ts-conflict-actions">
         <button
           type="button"
           className="pt-ib is-text is-solid"

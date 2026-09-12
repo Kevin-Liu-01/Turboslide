@@ -244,7 +244,10 @@ test('the open editor shows the agent write with the agent as author within one 
   // the editor sits on the first slide and holds its lease as studio-e2e; the agent writes to
   // another slide, so the lease rule stays intact and the change arrives over the watch channel
   const before = revisionOnDisk();
-  await expect(page.locator('.ts-status')).toContainText(`r${before}`);
+  /* the parity shell prints no revision (gslides-parity SPEC 1.1): describe().state carries it */
+  await expect
+    .poll(() => page.evaluate(() => window.turboslide!.studio.describe().state.revision as number))
+    .toBe(before);
   const started = Date.now();
   const written = await post(request, 'slide.update', {
     slideId: SLIDE,
@@ -256,9 +259,12 @@ test('the open editor shows the agent write with the agent as author within one 
   await expect(banner).toBeVisible({ timeout: 1000 });
   await expect(banner).toContainText(`r${before + 1}`);
   await expect(banner).toContainText('agent:e2e-agent');
-  await expect(page.locator('.ts-status')).toContainText(`Saved · r${before + 1}`, {
-    timeout: 1000,
-  });
+  await expect
+    .poll(
+      () => page.evaluate(() => window.turboslide!.studio.describe().state.revision as number),
+      { timeout: 1000 },
+    )
+    .toBe(before + 1);
   const elapsed = Date.now() - started;
   expect(elapsed).toBeLessThan(2000);
   // the document in the page is the server's: the window API reads the agent's heading back

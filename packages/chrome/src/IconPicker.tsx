@@ -62,6 +62,12 @@ export type IconPickerProps = {
   control?: string;
   /** the card closes when the pointer presses outside it; off when the caller owns that */
   closeOnOutsidePress?: boolean;
+  /**
+   * Inside a Dialog (Insert > Icon, gslides-parity SPEC 2.4): the host owns the dialog role, the
+   * title, the close button and the focus trap, so the picker draws the filter and the grid alone
+   * and every symbol carries `<control>.pick.<name>` for the window API.
+   */
+  embedded?: boolean;
   className?: string;
 };
 
@@ -73,6 +79,7 @@ export function IconPicker({
   tone,
   control,
   closeOnOutsidePress = true,
+  embedded = false,
   className,
 }: IconPickerProps) {
   const [query, setQuery] = useState('');
@@ -80,14 +87,14 @@ export function IconPicker({
 
   /* a press outside the card closes it; the listener lives only while the card is mounted */
   useEffect(() => {
-    if (!closeOnOutsidePress) return;
+    if (!closeOnOutsidePress || embedded) return;
     const onDown = (event: MouseEvent) => {
       if (card.current && event.target instanceof Node && !card.current.contains(event.target))
         onClose();
     };
     document.addEventListener('mousedown', onDown);
     return () => document.removeEventListener('mousedown', onDown);
-  }, [closeOnOutsidePress, onClose]);
+  }, [closeOnOutsidePress, embedded, onClose]);
 
   const names = filterIcons(query);
   const filterTip = tipProps({
@@ -115,10 +122,12 @@ export function IconPicker({
   return (
     <div
       ref={card}
-      className={['ts-iconpicker', className ?? ''].filter(Boolean).join(' ')}
-      role="dialog"
-      aria-label={`${label} symbols`}
-      data-control={control ? `${control}.picker` : undefined}
+      className={['ts-iconpicker', embedded ? 'is-embedded' : '', className ?? '']
+        .filter(Boolean)
+        .join(' ')}
+      role={embedded ? undefined : 'dialog'}
+      aria-label={embedded ? undefined : `${label} symbols`}
+      data-control={control ? `${control}.${embedded ? 'symbols' : 'picker'}` : undefined}
     >
       <div className="ts-iconpicker-tools">
         <input
@@ -130,7 +139,7 @@ export function IconPicker({
           data-control={control ? `${control}.filter` : undefined}
           autoComplete="off"
           spellCheck={false}
-          ref={(el) => el?.focus()}
+          ref={embedded ? undefined : (el) => el?.focus()}
           {...filterTip}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
@@ -138,12 +147,14 @@ export function IconPicker({
             onFilterKey(event);
           }}
         />
-        <ToolButton
-          title="Close the picker (Esc)"
-          icon="close"
-          ariaLabel={`${label}: close the picker`}
-          onClick={onClose}
-        />
+        {embedded ? null : (
+          <ToolButton
+            title="Close the picker (Esc)"
+            icon="close"
+            ariaLabel={`${label}: close the picker`}
+            onClick={onClose}
+          />
+        )}
       </div>
       <div className="ts-iconpicker-grid pt-scroll" role="listbox" aria-label={`${label} symbols`}>
         {names.map((name) => (
@@ -154,6 +165,7 @@ export function IconPicker({
             aria-selected={name === value}
             className={name === value ? 'ts-iconpicker-cell is-on' : 'ts-iconpicker-cell'}
             aria-label={`${label} ${name}`}
+            data-control={embedded && control ? `${control}.pick.${name}` : undefined}
             onClick={() => onPick(name)}
             {...tipProps({ name, doc: `Heroicons 20 solid ${name} from the theme sprite.` })}
           >

@@ -14,161 +14,161 @@ Method note: the in-app browser pane refused to open docs.google.com, so no live
 
 The Slideshow control sits in the top right of the editor header, next to the Share button. It is a split button: the main part starts the slideshow from the current slide, and a down arrow beside it opens a menu of alternatives. A separate Meet button, also at the top right, brings a Google Meet call into the editor.
 
-| Control | Position | Behaviour | Source |
-| --- | --- | --- | --- |
-| Slideshow (main button) | Top right of the editor header | Starts a full-screen slideshow from the current slide. Google recommends Chrome. Arrow keys or the on-screen arrows change slides and Esc exits full screen. Keyboard: Ctrl + F5 (Windows), Cmd + Enter (Mac), Ctrl + Search + 5 (Chrome OS). | [G1] [G2] [G4] |
-| Down arrow beside Slideshow | Immediately right of the Slideshow label | Opens the slideshow menu listed in the rows below. Google's own steps say "next to Slideshow, click the Down arrow". | [G2] [G3] |
-| Presenter view (menu item) | First item of the slideshow menu in every source read | Opens a separate presenter window (timer, speaker notes, audience tools) and starts the slideshow in the main window. See A4. | [G2] [G3] [T3] [T13] |
-| Start from beginning (menu item) | Second item of the slideshow menu | Starts the slideshow at slide 1 instead of the current slide. Mac shortcut Cmd + Shift + Enter is on Google's shortcut page ("Present slides from beginning"). Google does not publish a Windows shortcut for this item; third parties quote Ctrl + Shift + F5, which is unverified. The 2020 walkthrough labels the item "Present from beginning", the 2024 walkthrough "Start from beginning"; the Presentation display options dialog still uses "Present from beginning". | [G1] [T12] [T13] |
-| Present on another screen / Present using Chromecast (menu item) | Third item of the slideshow menu | Casts the slideshow to a Chromecast-enabled display. The item is greyed out when no cast target is available. The 2020 source labels it "Present on another screen", the 2024 source "Present using Chromecast"; the current label could not be confirmed. Google's help says full-screen presentations work on a TV with Chromecast or AirPlay. | [G2] [T12] [T13] |
-| Presentation display options (menu item) | Last item of the slideshow menu | Opens a dialog for multi-monitor presenting. Requires Chrome and at least one extra monitor, and asks for the browser's multi-display permission on first use (Allow, Allow). Offers three checkboxes: "Presenter view", "Present from beginning" and "Full screen", plus a monitor picker and a "Start slideshow" button. "Presenter view" and "Full screen" cannot both be selected with one monitor. Deselecting "Full screen" presents inside the current browser tab on the current monitor. The options are cleared when the presentation reloads. | [G2] [T12] |
-| Meet button | Top right of the editor header | Joins a Google Meet call from inside Slides: click Meet, pick a scheduled meeting or "Use a meeting code", then "Join the call". To present, click "Share screen" at the bottom right, choose the current tab, then "Share"; "Stop presenting" ends it. The presented tab cannot be changed from inside Slides. Chrome or Edge is required. | [G6] [G7] |
-| URL form of present mode | Address bar | Replacing "/edit#slide=id..." with "/present?slide=id..." opens the deck directly in full-screen present mode with no way back to the editor or speaker notes. | [T1] |
+| Control                                                          | Position                                              | Behaviour                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Source               |
+| ---------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| Slideshow (main button)                                          | Top right of the editor header                        | Starts a full-screen slideshow from the current slide. Google recommends Chrome. Arrow keys or the on-screen arrows change slides and Esc exits full screen. Keyboard: Ctrl + F5 (Windows), Cmd + Enter (Mac), Ctrl + Search + 5 (Chrome OS).                                                                                                                                                                                                                                                                                                            | [G1] [G2] [G4]       |
+| Down arrow beside Slideshow                                      | Immediately right of the Slideshow label              | Opens the slideshow menu listed in the rows below. Google's own steps say "next to Slideshow, click the Down arrow".                                                                                                                                                                                                                                                                                                                                                                                                                                     | [G2] [G3]            |
+| Presenter view (menu item)                                       | First item of the slideshow menu in every source read | Opens a separate presenter window (timer, speaker notes, audience tools) and starts the slideshow in the main window. See A4.                                                                                                                                                                                                                                                                                                                                                                                                                            | [G2] [G3] [T3] [T13] |
+| Start from beginning (menu item)                                 | Second item of the slideshow menu                     | Starts the slideshow at slide 1 instead of the current slide. Mac shortcut Cmd + Shift + Enter is on Google's shortcut page ("Present slides from beginning"). Google does not publish a Windows shortcut for this item; third parties quote Ctrl + Shift + F5, which is unverified. The 2020 walkthrough labels the item "Present from beginning", the 2024 walkthrough "Start from beginning"; the Presentation display options dialog still uses "Present from beginning".                                                                            | [G1] [T12] [T13]     |
+| Present on another screen / Present using Chromecast (menu item) | Third item of the slideshow menu                      | Casts the slideshow to a Chromecast-enabled display. The item is greyed out when no cast target is available. The 2020 source labels it "Present on another screen", the 2024 source "Present using Chromecast"; the current label could not be confirmed. Google's help says full-screen presentations work on a TV with Chromecast or AirPlay.                                                                                                                                                                                                         | [G2] [T12] [T13]     |
+| Presentation display options (menu item)                         | Last item of the slideshow menu                       | Opens a dialog for multi-monitor presenting. Requires Chrome and at least one extra monitor, and asks for the browser's multi-display permission on first use (Allow, Allow). Offers three checkboxes: "Presenter view", "Present from beginning" and "Full screen", plus a monitor picker and a "Start slideshow" button. "Presenter view" and "Full screen" cannot both be selected with one monitor. Deselecting "Full screen" presents inside the current browser tab on the current monitor. The options are cleared when the presentation reloads. | [G2] [T12]           |
+| Meet button                                                      | Top right of the editor header                        | Joins a Google Meet call from inside Slides: click Meet, pick a scheduled meeting or "Use a meeting code", then "Join the call". To present, click "Share screen" at the bottom right, choose the current tab, then "Share"; "Stop presenting" ends it. The presented tab cannot be changed from inside Slides. Chrome or Edge is required.                                                                                                                                                                                                              | [G6] [G7]            |
+| URL form of present mode                                         | Address bar                                           | Replacing "/edit#slide=id..." with "/present?slide=id..." opens the deck directly in full-screen present mode with no way back to the editor or speaker notes.                                                                                                                                                                                                                                                                                                                                                                                           | [T1]                 |
 
 ### A2. The slideshow surface
 
-| Control | Position | Behaviour | Source |
-| --- | --- | --- | --- |
-| Full-screen stage | Whole screen (or the browser tab when "Full screen" is deselected in Presentation display options) | Shows the current slide. Clicking anywhere on the slide advances; the arrow keys move backwards and forwards. | [G2] [T1] |
-| Bottom toolbar | Bottom left corner | Appears on hover and fades when the cursor leaves. It is translucent and brightens under the cursor. Details in A3. | [T1] [T2] |
-| Q&A banner | Across the top of the presented slide | Visible only while a Q&A session is on: shows the URL the audience uses to submit questions. | [G3] [T3] |
-| Captions overlay | Bottom of the screen by default; top is also available | Live speech-to-text of the presenter's voice. Details in A6. | [G4] [G10] |
-| Pen annotations | Drawn over the slide | Persist while the slideshow runs and disappear when it ends. Details in A8. | [G2] [G9] |
-| Exit | Esc key, or "Stop presenting" in the options menu | Returns to the editor. | [G1] [G2] [T1] |
+| Control           | Position                                                                                           | Behaviour                                                                                                           | Source         |
+| ----------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | -------------- |
+| Full-screen stage | Whole screen (or the browser tab when "Full screen" is deselected in Presentation display options) | Shows the current slide. Clicking anywhere on the slide advances; the arrow keys move backwards and forwards.       | [G2] [T1]      |
+| Bottom toolbar    | Bottom left corner                                                                                 | Appears on hover and fades when the cursor leaves. It is translucent and brightens under the cursor. Details in A3. | [T1] [T2]      |
+| Q&A banner        | Across the top of the presented slide                                                              | Visible only while a Q&A session is on: shows the URL the audience uses to submit questions.                        | [G3] [T3]      |
+| Captions overlay  | Bottom of the screen by default; top is also available                                             | Live speech-to-text of the presenter's voice. Details in A6.                                                        | [G4] [G10]     |
+| Pen annotations   | Drawn over the slide                                                                               | Persist while the slideshow runs and disappear when it ends. Details in A8.                                         | [G2] [G9]      |
+| Exit              | Esc key, or "Stop presenting" in the options menu                                                  | Returns to the editor.                                                                                              | [G1] [G2] [T1] |
 
 ### A3. The present mode toolbar (bottom left)
 
 Google's help says: "When you present, you can choose more options from the toolbar at the bottom of the presentation window" and lists what it offers: select slides to present from a list, open Presenter view, turn on the laser pointer, print the presentation, download the presentation in PDF or PPTX format, and (in a separate section) auto-advance and the pen tool. The two dated walkthroughs (May and September 2021) describe the same layout: previous arrow, slide number box, next arrow, then a three-dot options menu at the right end. Google redesigned this toolbar in spring 2021 to the compact form described here.
 
-| Control | Position | Behaviour | Source |
-| --- | --- | --- | --- |
-| Toolbar container | Bottom left; hidden until the mouse moves there | Compact horizontal bar. Translucent at rest, opaque under the cursor, disappears when the cursor moves away. | [T1] [T2] |
-| Previous arrow | Leftmost button | Goes back one slide. Same as the Left arrow key. | [T1] [T2] |
-| Slide number box | Between the two arrows | Shows the current slide number. Clicking it opens a list of all slides for jumping to any slide, which Google describes as "Select slides to present from a list". | [G2] [T1] [T2] |
-| Next arrow | Right of the slide number | Advances one slide. Same as the Right arrow key or a click on the slide. | [T1] [T2] |
-| Options (three dots) | Right end of the toolbar | Opens the overflow menu with the items below. Google's help calls it "Options" and the captions help calls it "More options". | [G2] [G4] [T1] [T2] |
-| Options > Open speaker notes | Overflow menu | Opens the presenter window (Google's text: Open "Presenter" view). Third parties report that opening it can drop the stage out of full screen; Ctrl + Shift + F returns it. | [G2] [T2] [T4] [T6] |
-| Options > Auto-play (Google: "Auto advance options") | Overflow menu, with a submenu | Choose an interval and the slides advance on their own. The interval list reported by third parties is every 1, 2, 3, 5, 10, 15 and 30 seconds and every minute; the exact in-menu wording is unverified. The submenu also holds "Loop" to restart after the last slide, and a play or pause control. Google notes the auto advance settings must be set again each time you present. Clicking the presentation stops autoplay. | [G2] [T1] [T2] [T7] [T8] |
-| Options > Turn on the laser pointer | Overflow menu | Replaces the cursor with a red dot that follows the mouse. Toggle with the L key. Selecting the item again turns it off. | [G2] [T1] [T2] |
-| Options > Captions preferences > Toggle captions | Overflow menu, with a submenu | Turns live captions on or off (also Ctrl + Shift + C or Cmd + Shift + C). Details in A6. | [G4] [T1] |
-| CC indicator and its drop-down | Appears in the toolbar area while captions are on | Clicking CC turns captions off; the drop-down next to CC sets text size and position. | [G4] [G10] |
-| Options > Enter or Exit full screen | Overflow menu | Switches between full-screen and browser-window presenting. Third parties give Ctrl + Shift + F for this toggle; Google's shortcut page gives F11 (Windows and Chrome OS) and Cmd + Shift + F (Mac). | [G1] [T1] [T6] |
-| Options > Enable pen tool (2023 announcement wording: "Turn on the pen") | Overflow menu | Turns on drawing. A pen sub-toolbar appears at the bottom. Details in A8. | [G2] [G9] |
-| Options > More | Bottom of the overflow menu (2021 layout) | Holds Q&A (audience tools), Download as PDF, Download as PPTX, Print, and Keyboard shortcuts, which opens the present-mode shortcut list. Slidesgo also lists "Report a problem" here. | [G2] [T2] [T6] |
-| Options > Stop presenting | Overflow menu | Ends the slideshow, same as Esc. | [T1] |
+| Control                                                                  | Position                                          | Behaviour                                                                                                                                                                                                                                                                                                                                                                                                                       | Source                   |
+| ------------------------------------------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| Toolbar container                                                        | Bottom left; hidden until the mouse moves there   | Compact horizontal bar. Translucent at rest, opaque under the cursor, disappears when the cursor moves away.                                                                                                                                                                                                                                                                                                                    | [T1] [T2]                |
+| Previous arrow                                                           | Leftmost button                                   | Goes back one slide. Same as the Left arrow key.                                                                                                                                                                                                                                                                                                                                                                                | [T1] [T2]                |
+| Slide number box                                                         | Between the two arrows                            | Shows the current slide number. Clicking it opens a list of all slides for jumping to any slide, which Google describes as "Select slides to present from a list".                                                                                                                                                                                                                                                              | [G2] [T1] [T2]           |
+| Next arrow                                                               | Right of the slide number                         | Advances one slide. Same as the Right arrow key or a click on the slide.                                                                                                                                                                                                                                                                                                                                                        | [T1] [T2]                |
+| Options (three dots)                                                     | Right end of the toolbar                          | Opens the overflow menu with the items below. Google's help calls it "Options" and the captions help calls it "More options".                                                                                                                                                                                                                                                                                                   | [G2] [G4] [T1] [T2]      |
+| Options > Open speaker notes                                             | Overflow menu                                     | Opens the presenter window (Google's text: Open "Presenter" view). Third parties report that opening it can drop the stage out of full screen; Ctrl + Shift + F returns it.                                                                                                                                                                                                                                                     | [G2] [T2] [T4] [T6]      |
+| Options > Auto-play (Google: "Auto advance options")                     | Overflow menu, with a submenu                     | Choose an interval and the slides advance on their own. The interval list reported by third parties is every 1, 2, 3, 5, 10, 15 and 30 seconds and every minute; the exact in-menu wording is unverified. The submenu also holds "Loop" to restart after the last slide, and a play or pause control. Google notes the auto advance settings must be set again each time you present. Clicking the presentation stops autoplay. | [G2] [T1] [T2] [T7] [T8] |
+| Options > Turn on the laser pointer                                      | Overflow menu                                     | Replaces the cursor with a red dot that follows the mouse. Toggle with the L key. Selecting the item again turns it off.                                                                                                                                                                                                                                                                                                        | [G2] [T1] [T2]           |
+| Options > Captions preferences > Toggle captions                         | Overflow menu, with a submenu                     | Turns live captions on or off (also Ctrl + Shift + C or Cmd + Shift + C). Details in A6.                                                                                                                                                                                                                                                                                                                                        | [G4] [T1]                |
+| CC indicator and its drop-down                                           | Appears in the toolbar area while captions are on | Clicking CC turns captions off; the drop-down next to CC sets text size and position.                                                                                                                                                                                                                                                                                                                                           | [G4] [G10]               |
+| Options > Enter or Exit full screen                                      | Overflow menu                                     | Switches between full-screen and browser-window presenting. Third parties give Ctrl + Shift + F for this toggle; Google's shortcut page gives F11 (Windows and Chrome OS) and Cmd + Shift + F (Mac).                                                                                                                                                                                                                            | [G1] [T1] [T6]           |
+| Options > Enable pen tool (2023 announcement wording: "Turn on the pen") | Overflow menu                                     | Turns on drawing. A pen sub-toolbar appears at the bottom. Details in A8.                                                                                                                                                                                                                                                                                                                                                       | [G2] [G9]                |
+| Options > More                                                           | Bottom of the overflow menu (2021 layout)         | Holds Q&A (audience tools), Download as PDF, Download as PPTX, Print, and Keyboard shortcuts, which opens the present-mode shortcut list. Slidesgo also lists "Report a problem" here.                                                                                                                                                                                                                                          | [G2] [T2] [T6]           |
+| Options > Stop presenting                                                | Overflow menu                                     | Ends the slideshow, same as Esc.                                                                                                                                                                                                                                                                                                                                                                                                | [T1]                     |
 
 ### A4. The presenter view window
 
 Choosing Presenter view opens a second browser window for the presenter while the audience window shows the slideshow. Google's help only says "Click Presenter view. Click Speaker notes." and describes the Audience tools; the layout below is assembled from dated third-party walkthroughs and should be treated as the shape to mimic rather than pixel positions.
 
-| Control | Position | Behaviour | Source |
-| --- | --- | --- | --- |
-| Presenter window | Separate browser window (Chrome required for the multi-monitor flow) | Opens automatically when Presenter view is chosen; the slideshow starts at the same time. With one monitor it covers the audience view, so Google's display options dialog forbids Presenter view plus Full screen on one monitor. | [G2] [T3] [T5] |
-| Timer | Top left of the presenter window | Counts up from zero when presenting starts. Two buttons: "Pause" and "Reset". | [T3] [T5] [T13] |
-| Current slide preview with slide list | Below the timer, a dropdown bar with a thumbnail of the current slide | Clicking the bar lists every slide so the presenter can jump non-linearly. | [T3] [T13] |
-| Previous and Next buttons | Either side of the current slide preview | Move the slideshow and preview the adjacent slides. The 2020 source describes the window as showing the previous, current and next slides. | [T3] [T13] [T15] |
-| Speaker notes tab | Right side of the window, notes body on the left | Shows the notes typed under the slide in the editor. Plus and minus buttons change the notes font size. | [G2] [T3] [T15] |
-| Audience tools tab | Right side, next to Speaker notes | Hosts the Q&A feature. "Start new" begins a session, "Continue recent" resumes one, and an on/off switch ends it. For work and school accounts, "Accepting questions from..." restricts who can submit; Google does not enumerate the choices on the public page. | [G3] [T3] |
-| Q&A link bar | Top of the Audience tools area, turns blue when Q&A is on | Shows the audience URL. The same URL is shown across the top of the presented slides. | [G3] [T3] |
-| Question list | Below the link bar | Each submitted question appears with its vote count. "Present" shows a question full screen to the audience, choosing another question and clicking "Present" swaps it, and "Hide" removes it. | [G3] |
-| Speaker notes window from the toolbar | Opened from Options > Open speaker notes in a normal slideshow | Behaves like the presenter window: a smaller window the presenter can place anywhere. | [T4] |
-| Q&A history | Editor, Tools menu > "Q&A history" | Lists recent sessions on the right so questions can be reviewed after presenting. | [G3] |
+| Control                               | Position                                                              | Behaviour                                                                                                                                                                                                                                                         | Source           |
+| ------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| Presenter window                      | Separate browser window (Chrome required for the multi-monitor flow)  | Opens automatically when Presenter view is chosen; the slideshow starts at the same time. With one monitor it covers the audience view, so Google's display options dialog forbids Presenter view plus Full screen on one monitor.                                | [G2] [T3] [T5]   |
+| Timer                                 | Top left of the presenter window                                      | Counts up from zero when presenting starts. Two buttons: "Pause" and "Reset".                                                                                                                                                                                     | [T3] [T5] [T13]  |
+| Current slide preview with slide list | Below the timer, a dropdown bar with a thumbnail of the current slide | Clicking the bar lists every slide so the presenter can jump non-linearly.                                                                                                                                                                                        | [T3] [T13]       |
+| Previous and Next buttons             | Either side of the current slide preview                              | Move the slideshow and preview the adjacent slides. The 2020 source describes the window as showing the previous, current and next slides.                                                                                                                        | [T3] [T13] [T15] |
+| Speaker notes tab                     | Right side of the window, notes body on the left                      | Shows the notes typed under the slide in the editor. Plus and minus buttons change the notes font size.                                                                                                                                                           | [G2] [T3] [T15]  |
+| Audience tools tab                    | Right side, next to Speaker notes                                     | Hosts the Q&A feature. "Start new" begins a session, "Continue recent" resumes one, and an on/off switch ends it. For work and school accounts, "Accepting questions from..." restricts who can submit; Google does not enumerate the choices on the public page. | [G3] [T3]        |
+| Q&A link bar                          | Top of the Audience tools area, turns blue when Q&A is on             | Shows the audience URL. The same URL is shown across the top of the presented slides.                                                                                                                                                                             | [G3] [T3]        |
+| Question list                         | Below the link bar                                                    | Each submitted question appears with its vote count. "Present" shows a question full screen to the audience, choosing another question and clicking "Present" swaps it, and "Hide" removes it.                                                                    | [G3]             |
+| Speaker notes window from the toolbar | Opened from Options > Open speaker notes in a normal slideshow        | Behaves like the presenter window: a smaller window the presenter can place anywhere.                                                                                                                                                                             | [T4]             |
+| Q&A history                           | Editor, Tools menu > "Q&A history"                                    | Lists recent sessions on the right so questions can be reviewed after presenting.                                                                                                                                                                                 | [G3]             |
 
 ### A5. The Q&A audience page
 
-| Control | Position | Behaviour | Source |
-| --- | --- | --- | --- |
-| Audience link | Shown at the top of the presentation and in the presenter window while Q&A is on | Opens a separate page in the audience member's browser on any device. The short-link format (often quoted as slides.app.goo.gl) is unverified. | [G3] [T3] |
-| "Ask a question..." field | Top of the audience page | Type a question and click "Submit". | [G3] |
-| "Ask anonymously" checkbox | Next to the question field | Hides the asker's name from the presenter and other viewers. | [G3] |
-| Up vote and Down vote | Under each question | Audience members vote so the presenter can answer popular questions first. | [G3] [T3] |
-| Access restriction | Presenter side, "Accepting questions from..." | Work and school accounts can limit submissions to their organisation. | [G3] |
-| Session end | Automatic | The Q&A view closes shortly after the presentation ends even if the switch was left on. | [G3] |
+| Control                    | Position                                                                         | Behaviour                                                                                                                                      | Source    |
+| -------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Audience link              | Shown at the top of the presentation and in the presenter window while Q&A is on | Opens a separate page in the audience member's browser on any device. The short-link format (often quoted as slides.app.goo.gl) is unverified. | [G3] [T3] |
+| "Ask a question..." field  | Top of the audience page                                                         | Type a question and click "Submit".                                                                                                            | [G3]      |
+| "Ask anonymously" checkbox | Next to the question field                                                       | Hides the asker's name from the presenter and other viewers.                                                                                   | [G3]      |
+| Up vote and Down vote      | Under each question                                                              | Audience members vote so the presenter can answer popular questions first.                                                                     | [G3] [T3] |
+| Access restriction         | Presenter side, "Accepting questions from..."                                    | Work and school accounts can limit submissions to their organisation.                                                                          | [G3]      |
+| Session end                | Automatic                                                                        | The Q&A view closes shortly after the presentation ends even if the switch was left on.                                                        | [G3]      |
 
 ### A6. Captions
 
-| Control | Position | Behaviour | Source |
-| --- | --- | --- | --- |
-| Toggle captions | Options (More options) > Captions preferences > Toggle captions, or Ctrl + Shift + C (Windows, Chrome OS) / Cmd + Shift + C (Mac) | Starts live speech-to-text of the presenter's microphone. Captions appear at the bottom of the screen and have no punctuation. Clicking the CC button or pressing the shortcut again turns them off. | [G4] [T1] [T16] |
-| Text size and position drop-down | Next to the CC indicator in the toolbar | Sets caption text size and screen position. Google announced the controls in October 2019 and describes larger text for large rooms and smaller text to fit more words; the option names (for example bottom or top, small to extra large) are not listed on any Google page read and are unverified. | [G4] [G10] |
-| Language | Not selectable | Google's shortcut page marks the toggle "Toggle captions (English only)". A 2019 article says Google hoped to add other languages; no public page read shows a language picker. | [G1] [T14] |
-| Requirements | System | Working microphone, internet connection, latest Chrome, Edge or Safari. The browser does the speech recognition and sends text to Slides. | [G4] |
-| Limits | System | Captions are not stored. Captions and the microphone turn off after 30 minutes of inactivity. When presenting over video conferencing the captions appear on the shared screen and only the speaker is captioned. | [G4] |
+| Control                          | Position                                                                                                                          | Behaviour                                                                                                                                                                                                                                                                                             | Source          |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Toggle captions                  | Options (More options) > Captions preferences > Toggle captions, or Ctrl + Shift + C (Windows, Chrome OS) / Cmd + Shift + C (Mac) | Starts live speech-to-text of the presenter's microphone. Captions appear at the bottom of the screen and have no punctuation. Clicking the CC button or pressing the shortcut again turns them off.                                                                                                  | [G4] [T1] [T16] |
+| Text size and position drop-down | Next to the CC indicator in the toolbar                                                                                           | Sets caption text size and screen position. Google announced the controls in October 2019 and describes larger text for large rooms and smaller text to fit more words; the option names (for example bottom or top, small to extra large) are not listed on any Google page read and are unverified. | [G4] [G10]      |
+| Language                         | Not selectable                                                                                                                    | Google's shortcut page marks the toggle "Toggle captions (English only)". A 2019 article says Google hoped to add other languages; no public page read shows a language picker.                                                                                                                       | [G1] [T14]      |
+| Requirements                     | System                                                                                                                            | Working microphone, internet connection, latest Chrome, Edge or Safari. The browser does the speech recognition and sends text to Slides.                                                                                                                                                             | [G4]            |
+| Limits                           | System                                                                                                                            | Captions are not stored. Captions and the microphone turn off after 30 minutes of inactivity. When presenting over video conferencing the captions appear on the shared screen and only the speaker is captioned.                                                                                     | [G4]            |
 
 ### A7. Autoplay and published presentations
 
-| Control | Position | Behaviour | Source |
-| --- | --- | --- | --- |
-| Auto advance while presenting | Slideshow > Options > Auto advance options | Pick how quickly to advance. Reset it every time you present. Interval list per third parties: 1, 2, 3, 5, 10, 15, 30 seconds, 1 minute; plus Loop. | [G2] [T7] [T8] |
-| Auto-advance for a published deck | File > Share > Publish to web, Link or Embed tab | "Auto-advance slides" drop-down sets the interval between slides for viewers. Third parties list the same intervals and a "Restart the slideshow after the last slide" checkbox; a "Start slideshow as soon as the player loads" checkbox is commonly reported but was not confirmed on a page read today. Changing timing later requires copying a new link. | [G2] [G5] [T7] [T8] |
-| Embed size | Publish to web > Embed | Choose a presentation size and the advance interval, then copy the HTML. | [G5] |
-| Published view | Viewer side | Viewers see a view-only version or a full-screen presentation mode player. Automatic republishing cannot be turned off for Slides. | [G5] |
-| Stop publishing | Publish to web > Published content & settings > Stop publishing | Removes the public link. | [G2] [G5] |
+| Control                           | Position                                                        | Behaviour                                                                                                                                                                                                                                                                                                                                                     | Source              |
+| --------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| Auto advance while presenting     | Slideshow > Options > Auto advance options                      | Pick how quickly to advance. Reset it every time you present. Interval list per third parties: 1, 2, 3, 5, 10, 15, 30 seconds, 1 minute; plus Loop.                                                                                                                                                                                                           | [G2] [T7] [T8]      |
+| Auto-advance for a published deck | File > Share > Publish to web, Link or Embed tab                | "Auto-advance slides" drop-down sets the interval between slides for viewers. Third parties list the same intervals and a "Restart the slideshow after the last slide" checkbox; a "Start slideshow as soon as the player loads" checkbox is commonly reported but was not confirmed on a page read today. Changing timing later requires copying a new link. | [G2] [G5] [T7] [T8] |
+| Embed size                        | Publish to web > Embed                                          | Choose a presentation size and the advance interval, then copy the HTML.                                                                                                                                                                                                                                                                                      | [G5]                |
+| Published view                    | Viewer side                                                     | Viewers see a view-only version or a full-screen presentation mode player. Automatic republishing cannot be turned off for Slides.                                                                                                                                                                                                                            | [G5]                |
+| Stop publishing                   | Publish to web > Published content & settings > Stop publishing | Removes the public link.                                                                                                                                                                                                                                                                                                                                      | [G2] [G5]           |
 
 ### A8. The pen tool
 
-| Control | Position | Behaviour | Source |
-| --- | --- | --- | --- |
-| Enable pen tool | Slideshow > bottom left Options > Enable pen tool (announced in August 2023 as "Turn on the pen") | Click and drag on the slide to draw. | [G2] [G9] |
-| Pen tool colour | Pen sub-toolbar at the bottom: Pen tool > Select a color | Four colours are reported: black, red, blue and green. | [G2] [T9] [T10] |
-| Erase | Pen sub-toolbar: Erase > Erase all | Clears the annotations on the current slide. | [G2] [G9] |
-| Turn off | Pen tool > Turn off, or Options > Disable pen tool | Returns to the normal cursor. | [G2] |
-| Persistence | System | Annotations stay for the duration of the slideshow and disappear when it ends; the slide itself is not changed. No admin control exists. Rolled out from 2023-08-10. | [G2] [G9] |
+| Control         | Position                                                                                          | Behaviour                                                                                                                                                            | Source          |
+| --------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| Enable pen tool | Slideshow > bottom left Options > Enable pen tool (announced in August 2023 as "Turn on the pen") | Click and drag on the slide to draw.                                                                                                                                 | [G2] [G9]       |
+| Pen tool colour | Pen sub-toolbar at the bottom: Pen tool > Select a color                                          | Four colours are reported: black, red, blue and green.                                                                                                               | [G2] [T9] [T10] |
+| Erase           | Pen sub-toolbar: Erase > Erase all                                                                | Clears the annotations on the current slide.                                                                                                                         | [G2] [G9]       |
+| Turn off        | Pen tool > Turn off, or Options > Disable pen tool                                                | Returns to the normal cursor.                                                                                                                                        | [G2]            |
+| Persistence     | System                                                                                            | Annotations stay for the duration of the slideshow and disappear when it ends; the slide itself is not changed. No admin control exists. Rolled out from 2023-08-10. | [G2] [G9]       |
 
 ### A9. Presenting into Google Meet
 
-| Control | Position | Behaviour | Source |
-| --- | --- | --- | --- |
-| Meet button in Slides | Top right of the editor | Join a call and present the current tab (see A1). Chrome or Edge on a computer is required. | [G6] [G7] |
-| Present now > A tab (from Meet) | Bottom of the Meet screen | Sharing the Slides tab (not a window or the whole screen) enables Meet's slide controls and co-presenting. | [G8] |
-| Start slideshow tile control | Hover over the presented tile in Meet | Puts the shared tab into slideshow mode from inside Meet. Controls only work in slideshow mode. | [G8] |
-| In-Meet slide controls | On the presented tile | Next and Previous arrows, click the slide number to jump, toggle speaker notes, open embedded links or media, and end the slideshow. | [G8] |
-| Add a co-presenter | On the presented slide, or People panel > More actions > Add as co-presenter | Co-presenters get the same controls. A co-presenter needs edit access to the file to see speaker notes. Starting a new presentation makes that person the main presenter and clears co-presenters. | [G8] |
-| Eligibility | Account | Slides control inside Meet is limited to Workspace Individual, Business Standard and Plus, Enterprise Essentials, Starter, Standard and Plus, Education Plus, and Teaching & Learning Upgrade. | [G8] |
-| Speaker spotlight | Editor, Insert > Speaker spotlight or toolbar button | Puts the presenter's camera feed into a shape on the slide during Meet presentations and recordings; Business Standard and above. Adjacent to presenting but not a present-mode control. | [G12] |
+| Control                         | Position                                                                     | Behaviour                                                                                                                                                                                          | Source    |
+| ------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| Meet button in Slides           | Top right of the editor                                                      | Join a call and present the current tab (see A1). Chrome or Edge on a computer is required.                                                                                                        | [G6] [G7] |
+| Present now > A tab (from Meet) | Bottom of the Meet screen                                                    | Sharing the Slides tab (not a window or the whole screen) enables Meet's slide controls and co-presenting.                                                                                         | [G8]      |
+| Start slideshow tile control    | Hover over the presented tile in Meet                                        | Puts the shared tab into slideshow mode from inside Meet. Controls only work in slideshow mode.                                                                                                    | [G8]      |
+| In-Meet slide controls          | On the presented tile                                                        | Next and Previous arrows, click the slide number to jump, toggle speaker notes, open embedded links or media, and end the slideshow.                                                               | [G8]      |
+| Add a co-presenter              | On the presented slide, or People panel > More actions > Add as co-presenter | Co-presenters get the same controls. A co-presenter needs edit access to the file to see speaker notes. Starting a new presentation makes that person the main presenter and clears co-presenters. | [G8]      |
+| Eligibility                     | Account                                                                      | Slides control inside Meet is limited to Workspace Individual, Business Standard and Plus, Enterprise Essentials, Starter, Standard and Plus, Education Plus, and Teaching & Learning Upgrade.     | [G8]      |
+| Speaker spotlight               | Editor, Insert > Speaker spotlight or toolbar button                         | Puts the presenter's camera feed into a shape on the slide during Meet presentations and recordings; Business Standard and above. Adjacent to presenting but not a present-mode control.           | [G12]     |
 
 ### A10. Keys that work while presenting
 
 This is Google's "Presenting" table, which appears both in the shortcuts page and in the present slides page. The present slides page omits the "." and "," alternatives for the blank slides and shows the same values otherwise.
 
-| Action | Mac | Windows (Chrome OS where different) | Source |
-| --- | --- | --- | --- |
-| Stop presenting | Esc | Esc | [G1] [G2] |
-| Next | Right arrow | Right arrow | [G1] [G2] |
-| Previous | Left arrow | Left arrow | [G1] [G2] |
-| Go to specific slide (7 followed by Enter goes to slide 7) | Number followed by Enter | Number followed by Enter | [G1] [G2] |
-| First slide | Home | Home | [G1] [G2] |
-| Last slide | End | End | [G1] [G2] |
-| Open speaker notes | s | s | [G1] [G2] |
-| Open audience tools | a | a | [G1] [G2] |
-| Toggle laser pointer | l | l | [G1] [G2] |
-| Print | Cmd + p | Ctrl + p | [G1] [G2] |
-| Toggle captions (English only) | Cmd + Shift + c | Ctrl + Shift + c | [G1] [G2] |
-| Toggle full screen | Cmd + Shift + f | F11 | [G1] [G2] |
-| Show a blank black slide | b or . | b or . | [G1] |
-| Return to the presentation from a blank black slide | Press any key | Press any key | [G1] [G2] |
-| Show a blank white slide | w or , | w or , | [G1] |
-| Return to the presentation from a blank white slide | Press any key | Press any key | [G1] [G2] |
-| Advance by clicking the slide | Mouse click | Mouse click | [T1] |
-| Toggle full screen (third-party value) | not reported | Ctrl + Shift + F | [T1] [T6] |
+| Action                                                     | Mac                      | Windows (Chrome OS where different) | Source    |
+| ---------------------------------------------------------- | ------------------------ | ----------------------------------- | --------- |
+| Stop presenting                                            | Esc                      | Esc                                 | [G1] [G2] |
+| Next                                                       | Right arrow              | Right arrow                         | [G1] [G2] |
+| Previous                                                   | Left arrow               | Left arrow                          | [G1] [G2] |
+| Go to specific slide (7 followed by Enter goes to slide 7) | Number followed by Enter | Number followed by Enter            | [G1] [G2] |
+| First slide                                                | Home                     | Home                                | [G1] [G2] |
+| Last slide                                                 | End                      | End                                 | [G1] [G2] |
+| Open speaker notes                                         | s                        | s                                   | [G1] [G2] |
+| Open audience tools                                        | a                        | a                                   | [G1] [G2] |
+| Toggle laser pointer                                       | l                        | l                                   | [G1] [G2] |
+| Print                                                      | Cmd + p                  | Ctrl + p                            | [G1] [G2] |
+| Toggle captions (English only)                             | Cmd + Shift + c          | Ctrl + Shift + c                    | [G1] [G2] |
+| Toggle full screen                                         | Cmd + Shift + f          | F11                                 | [G1] [G2] |
+| Show a blank black slide                                   | b or .                   | b or .                              | [G1]      |
+| Return to the presentation from a blank black slide        | Press any key            | Press any key                       | [G1] [G2] |
+| Show a blank white slide                                   | w or ,                   | w or ,                              | [G1]      |
+| Return to the presentation from a blank white slide        | Press any key            | Press any key                       | [G1] [G2] |
+| Advance by clicking the slide                              | Mouse click              | Mouse click                         | [T1]      |
+| Toggle full screen (third-party value)                     | not reported             | Ctrl + Shift + F                    | [T1] [T6] |
 
 Space, Enter, Page Down and Page Up are not on Google's presenting list. Whether they advance slides in present mode is unverified. The Ctrl + Shift + F toggle reported by third parties is not on Google's list either, which gives F11.
 
 The video player shortcuts below also apply while a video is focused during a slideshow.
 
-| Action | Mac | Windows (Chrome OS where different) | Source |
-| --- | --- | --- | --- |
-| Toggle play/pause | k | k | [G1] |
-| Rewind 10 seconds | u | u | [G1] |
-| Fast forward 10 seconds | o | o | [G1] |
-| Previous frame (while paused) | Shift + , | Shift + , | [G1] |
-| Next frame (while paused) | Shift + . | Shift + . | [G1] |
-| Decrease playback rate | Cmd + Shift + , | Ctrl + Shift + , | [G1] |
-| Increase playback rate | Cmd + Shift + . | Ctrl + Shift + . | [G1] |
-| Seek to specific point in the video (Shift + 7 advances to 70% of duration) | Shift + 0..9 | Shift + 0..9 | [G1] |
-| Toggle captions on/off | c | c | [G1] |
-| Toggle full screen | f | f | [G1] |
-| Toggle mute | m | m | [G1] |
+| Action                                                                      | Mac             | Windows (Chrome OS where different) | Source |
+| --------------------------------------------------------------------------- | --------------- | ----------------------------------- | ------ |
+| Toggle play/pause                                                           | k               | k                                   | [G1]   |
+| Rewind 10 seconds                                                           | u               | u                                   | [G1]   |
+| Fast forward 10 seconds                                                     | o               | o                                   | [G1]   |
+| Previous frame (while paused)                                               | Shift + ,       | Shift + ,                           | [G1]   |
+| Next frame (while paused)                                                   | Shift + .       | Shift + .                           | [G1]   |
+| Decrease playback rate                                                      | Cmd + Shift + , | Ctrl + Shift + ,                    | [G1]   |
+| Increase playback rate                                                      | Cmd + Shift + . | Ctrl + Shift + .                    | [G1]   |
+| Seek to specific point in the video (Shift + 7 advances to 70% of duration) | Shift + 0..9    | Shift + 0..9                        | [G1]   |
+| Toggle captions on/off                                                      | c               | c                                   | [G1]   |
+| Toggle full screen                                                          | f               | f                                   | [G1]   |
+| Toggle mute                                                                 | m               | m                                   | [G1]   |
 
 ## Part B: editor keyboard shortcuts
 
@@ -180,180 +180,180 @@ Row conventions: a cell holding two values separated by "or" means either key wo
 
 ### B1. Common actions
 
-| Action | Mac | Windows (Chrome OS where different) | Source |
-| --- | --- | --- | --- |
-| New slide | Ctrl + m | Ctrl + m | [G1] |
-| Duplicate slide | Cmd + d | Ctrl + d | [G1] |
-| Undo | Cmd + z | Ctrl + z | [G1] |
-| Redo | Cmd + y or Cmd + Shift + z | Ctrl + y or Ctrl + Shift + z | [G1] |
-| Copy | Cmd + c | Ctrl + c | [G1] |
-| Cut | Cmd + x | Ctrl + x | [G1] |
-| Paste | Cmd + v | Ctrl + v | [G1] |
-| Copy formatting of the selected text or shape | Cmd + Option + c | Ctrl + Alt + c | [G1] |
-| Paste formatting of the selected text or shape | Cmd + Option + v | Ctrl + Alt + v | [G1] |
-| Insert or edit link | Cmd + k | Ctrl + k | [G1] |
-| Open link | Option + Enter | Alt + Enter | [G1] |
-| Delete | Delete | Delete. Chrome OS: Backspace | [G1] |
-| Select all | Cmd + a | Ctrl + a | [G1] |
-| Select none | hold Ctrl + Cmd, press u then a | hold Ctrl + Alt, press u then a | [G1] |
-| Find | Cmd + f | Ctrl + f | [G1] |
-| Find and replace | Cmd + Shift + h | Ctrl + h | [G1] |
-| Find again | Cmd + g | Ctrl + g | [G1] |
-| Find previous | Cmd + Shift + g | Ctrl + Shift + g | [G1] |
-| Open... | Cmd + o | Ctrl + o | [G1] |
-| Print | Cmd + p | Ctrl + p | [G1] |
-| Save (every change is automatically saved in Drive) | Cmd + s | Ctrl + s | [G1] |
-| Show common keyboard shortcuts | Cmd + / | Ctrl + / | [G1] |
-| Tool finder (formerly Search the menus) | Option + / or Ctrl + Option + z or (Firefox) Ctrl + ~ | Alt + / or Alt + z (Google Chrome). Chrome OS: Alt + / or Alt + z | [G1] |
-| Hide or show menus (compact mode) | Ctrl + Shift + f | Ctrl + Shift + f | [G1] |
-| Turn on captions while presenting | Cmd + Shift + c | Ctrl + Shift + c | [G1] |
-| Alt text | Cmd + Option + y | Ctrl + Alt + y | [G1] |
+| Action                                              | Mac                                                   | Windows (Chrome OS where different)                               | Source |
+| --------------------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------- | ------ |
+| New slide                                           | Ctrl + m                                              | Ctrl + m                                                          | [G1]   |
+| Duplicate slide                                     | Cmd + d                                               | Ctrl + d                                                          | [G1]   |
+| Undo                                                | Cmd + z                                               | Ctrl + z                                                          | [G1]   |
+| Redo                                                | Cmd + y or Cmd + Shift + z                            | Ctrl + y or Ctrl + Shift + z                                      | [G1]   |
+| Copy                                                | Cmd + c                                               | Ctrl + c                                                          | [G1]   |
+| Cut                                                 | Cmd + x                                               | Ctrl + x                                                          | [G1]   |
+| Paste                                               | Cmd + v                                               | Ctrl + v                                                          | [G1]   |
+| Copy formatting of the selected text or shape       | Cmd + Option + c                                      | Ctrl + Alt + c                                                    | [G1]   |
+| Paste formatting of the selected text or shape      | Cmd + Option + v                                      | Ctrl + Alt + v                                                    | [G1]   |
+| Insert or edit link                                 | Cmd + k                                               | Ctrl + k                                                          | [G1]   |
+| Open link                                           | Option + Enter                                        | Alt + Enter                                                       | [G1]   |
+| Delete                                              | Delete                                                | Delete. Chrome OS: Backspace                                      | [G1]   |
+| Select all                                          | Cmd + a                                               | Ctrl + a                                                          | [G1]   |
+| Select none                                         | hold Ctrl + Cmd, press u then a                       | hold Ctrl + Alt, press u then a                                   | [G1]   |
+| Find                                                | Cmd + f                                               | Ctrl + f                                                          | [G1]   |
+| Find and replace                                    | Cmd + Shift + h                                       | Ctrl + h                                                          | [G1]   |
+| Find again                                          | Cmd + g                                               | Ctrl + g                                                          | [G1]   |
+| Find previous                                       | Cmd + Shift + g                                       | Ctrl + Shift + g                                                  | [G1]   |
+| Open...                                             | Cmd + o                                               | Ctrl + o                                                          | [G1]   |
+| Print                                               | Cmd + p                                               | Ctrl + p                                                          | [G1]   |
+| Save (every change is automatically saved in Drive) | Cmd + s                                               | Ctrl + s                                                          | [G1]   |
+| Show common keyboard shortcuts                      | Cmd + /                                               | Ctrl + /                                                          | [G1]   |
+| Tool finder (formerly Search the menus)             | Option + / or Ctrl + Option + z or (Firefox) Ctrl + ~ | Alt + / or Alt + z (Google Chrome). Chrome OS: Alt + / or Alt + z | [G1]   |
+| Hide or show menus (compact mode)                   | Ctrl + Shift + f                                      | Ctrl + Shift + f                                                  | [G1]   |
+| Turn on captions while presenting                   | Cmd + Shift + c                                       | Ctrl + Shift + c                                                  | [G1]   |
+| Alt text                                            | Cmd + Option + y                                      | Ctrl + Alt + y                                                    | [G1]   |
 
 ### B2. Film strip actions
 
-| Action | Mac | Windows (Chrome OS where different) | Source |
-| --- | --- | --- | --- |
-| Move to previous slide (Chrome OS: move focus to previous slide) | Up arrow | Page Up or Up arrow. Chrome OS: Alt + Up arrow or Up arrow | [G1] |
-| Move to next slide (Chrome OS: move focus to next slide) | Down arrow | Page Down or Down arrow. Chrome OS: Alt + Down arrow or Down arrow | [G1] |
-| Move focus to first slide | Fn + Left arrow | Home. Chrome OS: Ctrl + Alt + Up arrow | [G1] |
-| Move focus to last slide | Fn + Right arrow | End. Chrome OS: Ctrl + Alt + Down arrow | [G1] |
-| Move slide up | Cmd + Up arrow | Ctrl + Up arrow | [G1] |
-| Move slide down | Cmd + Down arrow | Ctrl + Down arrow | [G1] |
-| Move slide to beginning | Cmd + Shift + Up arrow | Ctrl + Shift + Up arrow | [G1] |
-| Move slide to end | Cmd + Shift + Down arrow | Ctrl + Shift + Down arrow | [G1] |
-| Select previous slide (Chrome OS: extend selection to previous slide) | Shift + Up arrow | Shift + Up arrow | [G1] |
-| Select next slide (Chrome OS: extend selection to next slide) | Shift + Down arrow | Shift + Down arrow | [G1] |
-| Select first slide | Shift + Fn + Left arrow | Shift + Home (no Chrome OS row) | [G1] |
-| Select last slide | Shift + Fn + Right arrow | Shift + End (no Chrome OS row) | [G1] |
+| Action                                                                | Mac                      | Windows (Chrome OS where different)                                | Source |
+| --------------------------------------------------------------------- | ------------------------ | ------------------------------------------------------------------ | ------ |
+| Move to previous slide (Chrome OS: move focus to previous slide)      | Up arrow                 | Page Up or Up arrow. Chrome OS: Alt + Up arrow or Up arrow         | [G1]   |
+| Move to next slide (Chrome OS: move focus to next slide)              | Down arrow               | Page Down or Down arrow. Chrome OS: Alt + Down arrow or Down arrow | [G1]   |
+| Move focus to first slide                                             | Fn + Left arrow          | Home. Chrome OS: Ctrl + Alt + Up arrow                             | [G1]   |
+| Move focus to last slide                                              | Fn + Right arrow         | End. Chrome OS: Ctrl + Alt + Down arrow                            | [G1]   |
+| Move slide up                                                         | Cmd + Up arrow           | Ctrl + Up arrow                                                    | [G1]   |
+| Move slide down                                                       | Cmd + Down arrow         | Ctrl + Down arrow                                                  | [G1]   |
+| Move slide to beginning                                               | Cmd + Shift + Up arrow   | Ctrl + Shift + Up arrow                                            | [G1]   |
+| Move slide to end                                                     | Cmd + Shift + Down arrow | Ctrl + Shift + Down arrow                                          | [G1]   |
+| Select previous slide (Chrome OS: extend selection to previous slide) | Shift + Up arrow         | Shift + Up arrow                                                   | [G1]   |
+| Select next slide (Chrome OS: extend selection to next slide)         | Shift + Down arrow       | Shift + Down arrow                                                 | [G1]   |
+| Select first slide                                                    | Shift + Fn + Left arrow  | Shift + Home (no Chrome OS row)                                    | [G1]   |
+| Select last slide                                                     | Shift + Fn + Right arrow | Shift + End (no Chrome OS row)                                     | [G1]   |
 
 ### B3. Navigation
 
-| Action | Mac | Windows (Chrome OS where different) | Source |
-| --- | --- | --- | --- |
-| Zoom in | Cmd + + | Ctrl + + | [G1] |
-| Zoom out | Cmd + - | Ctrl + - | [G1] |
-| Zoom 100% | Cmd + 0 | Ctrl + 0 | [G1] |
-| Move to filmstrip | Cmd + Option + Shift + f | Ctrl + Alt + Shift + f | [G1] |
-| Move to canvas | Cmd + Option + Shift + c | Ctrl + Alt + Shift + c | [G1] |
-| Open speaker notes panel | Cmd + Option + Shift + s | Ctrl + Alt + Shift + s | [G1] |
-| Change to HTML view of presentation | Cmd + Option + Shift + p | Ctrl + Alt + Shift + p | [G1] |
-| Open animations panel | Cmd + Option + Shift + b | Ctrl + Alt + Shift + b | [G1] |
-| Continue in animation preview | Enter | Enter | [G1] |
-| Open Explore (Mac and Chrome OS wording: open explore tool) | Cmd + Option + Shift + i | Ctrl + Alt + Shift + i | [G1] |
-| Open dictionary (Mac and Chrome OS wording: define selected word in explore tool) | Cmd + Shift + y | Ctrl + Shift + y | [G1] |
-| Go to side panel | Cmd + Option + . or Cmd + Option + , | Ctrl + Alt + . or Ctrl + Alt + ,. Chrome OS: Alt + Shift + . or Alt + Shift + , | [G1] |
-| Open revision history panel | Cmd + Option + Shift + h | Ctrl + Alt + Shift + h (no Chrome OS row) | [G1] |
-| Open cell border selection (for tables) | hold Ctrl + Cmd, press e then p | hold Ctrl + Alt, press e then p | [G1] |
-| Play the selected video | Enter | Enter (no Chrome OS row) | [G1] |
-| Present slides | Cmd + Enter | Ctrl + F5. Chrome OS: Ctrl + Search + 5 | [G1] |
-| Present slides from beginning | Cmd + Shift + Enter | (no Windows or Chrome OS row; third parties report Ctrl + Shift + F5, unverified) | [G1] |
-| Exit the current mode | Esc | Esc | [G1] |
+| Action                                                                            | Mac                                  | Windows (Chrome OS where different)                                               | Source |
+| --------------------------------------------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------- | ------ |
+| Zoom in                                                                           | Cmd + +                              | Ctrl + +                                                                          | [G1]   |
+| Zoom out                                                                          | Cmd + -                              | Ctrl + -                                                                          | [G1]   |
+| Zoom 100%                                                                         | Cmd + 0                              | Ctrl + 0                                                                          | [G1]   |
+| Move to filmstrip                                                                 | Cmd + Option + Shift + f             | Ctrl + Alt + Shift + f                                                            | [G1]   |
+| Move to canvas                                                                    | Cmd + Option + Shift + c             | Ctrl + Alt + Shift + c                                                            | [G1]   |
+| Open speaker notes panel                                                          | Cmd + Option + Shift + s             | Ctrl + Alt + Shift + s                                                            | [G1]   |
+| Change to HTML view of presentation                                               | Cmd + Option + Shift + p             | Ctrl + Alt + Shift + p                                                            | [G1]   |
+| Open animations panel                                                             | Cmd + Option + Shift + b             | Ctrl + Alt + Shift + b                                                            | [G1]   |
+| Continue in animation preview                                                     | Enter                                | Enter                                                                             | [G1]   |
+| Open Explore (Mac and Chrome OS wording: open explore tool)                       | Cmd + Option + Shift + i             | Ctrl + Alt + Shift + i                                                            | [G1]   |
+| Open dictionary (Mac and Chrome OS wording: define selected word in explore tool) | Cmd + Shift + y                      | Ctrl + Shift + y                                                                  | [G1]   |
+| Go to side panel                                                                  | Cmd + Option + . or Cmd + Option + , | Ctrl + Alt + . or Ctrl + Alt + ,. Chrome OS: Alt + Shift + . or Alt + Shift + ,   | [G1]   |
+| Open revision history panel                                                       | Cmd + Option + Shift + h             | Ctrl + Alt + Shift + h (no Chrome OS row)                                         | [G1]   |
+| Open cell border selection (for tables)                                           | hold Ctrl + Cmd, press e then p      | hold Ctrl + Alt, press e then p                                                   | [G1]   |
+| Play the selected video                                                           | Enter                                | Enter (no Chrome OS row)                                                          | [G1]   |
+| Present slides                                                                    | Cmd + Enter                          | Ctrl + F5. Chrome OS: Ctrl + Search + 5                                           | [G1]   |
+| Present slides from beginning                                                     | Cmd + Shift + Enter                  | (no Windows or Chrome OS row; third parties report Ctrl + Shift + F5, unverified) | [G1]   |
+| Exit the current mode                                                             | Esc                                  | Esc                                                                               | [G1]   |
 
 ### B4. Menus
 
 On Windows the menu keys differ between Google Chrome and other browsers; Google gives both. On Mac the menu keys use Ctrl + Option and include Slide and Arrange, which the Windows and Chrome OS tabs do not list.
 
-| Action | Mac | Windows (Chrome OS where different) | Source |
-| --- | --- | --- | --- |
-| Context menu | Cmd + Shift + \ or Shift + F10 | Ctrl + Shift + \ or Ctrl + Shift + x or Shift + F10. Chrome OS: Ctrl + Shift + x or Shift + F10 | [G1] |
-| File menu | Ctrl + Option + f | Chrome: Alt + f; other browsers: Alt + Shift + f. Chrome OS: Alt + f | [G1] |
-| Edit menu | Ctrl + Option + e | Chrome: Alt + e; other browsers: Alt + Shift + e. Chrome OS: Alt + e | [G1] |
-| View menu | Ctrl + Option + v | Chrome: Alt + v; other browsers: Alt + Shift + v. Chrome OS: Alt + v | [G1] |
-| Insert menu | Ctrl + Option + i | Chrome: Alt + i; other browsers: Alt + Shift + i. Chrome OS: Alt + i | [G1] |
-| Slide menu | Ctrl + Option + s | (no Windows or Chrome OS row) | [G1] |
-| Format menu | Ctrl + Option + o | Chrome: Alt + o; other browsers: Alt + Shift + o. Chrome OS: Alt + o | [G1] |
-| Arrange menu | Ctrl + Option + r | (no Windows or Chrome OS row) | [G1] |
-| Tools menu | Ctrl + Option + t | Chrome: Alt + t; other browsers: Alt + Shift + t. Chrome OS: Alt + t | [G1] |
-| Help menu | Ctrl + Option + h | Chrome: Alt + h; other browsers: Alt + Shift + h. Chrome OS: Alt + h | [G1] |
-| Accessibility menu (present when screen reader support is enabled) | (no Mac row) | Chrome: Alt + a; other browsers: Alt + Shift + a. Chrome OS: Alt + a | [G1] |
-| Input tools menu (available in presentations in non-Latin languages) | Cmd + Option + Shift + k | Ctrl + Alt + Shift + k | [G1] |
-| Toggle input controls (available in presentations in non-Latin languages) | Cmd + Shift + k | Ctrl + Shift + k | [G1] |
+| Action                                                                    | Mac                            | Windows (Chrome OS where different)                                                             | Source |
+| ------------------------------------------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------- | ------ |
+| Context menu                                                              | Cmd + Shift + \ or Shift + F10 | Ctrl + Shift + \ or Ctrl + Shift + x or Shift + F10. Chrome OS: Ctrl + Shift + x or Shift + F10 | [G1]   |
+| File menu                                                                 | Ctrl + Option + f              | Chrome: Alt + f; other browsers: Alt + Shift + f. Chrome OS: Alt + f                            | [G1]   |
+| Edit menu                                                                 | Ctrl + Option + e              | Chrome: Alt + e; other browsers: Alt + Shift + e. Chrome OS: Alt + e                            | [G1]   |
+| View menu                                                                 | Ctrl + Option + v              | Chrome: Alt + v; other browsers: Alt + Shift + v. Chrome OS: Alt + v                            | [G1]   |
+| Insert menu                                                               | Ctrl + Option + i              | Chrome: Alt + i; other browsers: Alt + Shift + i. Chrome OS: Alt + i                            | [G1]   |
+| Slide menu                                                                | Ctrl + Option + s              | (no Windows or Chrome OS row)                                                                   | [G1]   |
+| Format menu                                                               | Ctrl + Option + o              | Chrome: Alt + o; other browsers: Alt + Shift + o. Chrome OS: Alt + o                            | [G1]   |
+| Arrange menu                                                              | Ctrl + Option + r              | (no Windows or Chrome OS row)                                                                   | [G1]   |
+| Tools menu                                                                | Ctrl + Option + t              | Chrome: Alt + t; other browsers: Alt + Shift + t. Chrome OS: Alt + t                            | [G1]   |
+| Help menu                                                                 | Ctrl + Option + h              | Chrome: Alt + h; other browsers: Alt + Shift + h. Chrome OS: Alt + h                            | [G1]   |
+| Accessibility menu (present when screen reader support is enabled)        | (no Mac row)                   | Chrome: Alt + a; other browsers: Alt + Shift + a. Chrome OS: Alt + a                            | [G1]   |
+| Input tools menu (available in presentations in non-Latin languages)      | Cmd + Option + Shift + k       | Ctrl + Alt + Shift + k                                                                          | [G1]   |
+| Toggle input controls (available in presentations in non-Latin languages) | Cmd + Shift + k                | Ctrl + Shift + k                                                                                | [G1]   |
 
 ### B5. Comments
 
-| Action | Mac | Windows (Chrome OS where different) | Source |
-| --- | --- | --- | --- |
-| Insert comment | Cmd + Option + m | Ctrl + Alt + m | [G1] |
-| Enter current comment | hold Ctrl + Enter | hold Ctrl + Enter. Chrome OS: Ctrl + Enter | [G1] |
-| Move to next comment in the presentation | hold Ctrl + Cmd, press n then c | hold Ctrl + Alt, press n then c | [G1] |
-| Move to previous comment in the presentation | hold Ctrl + Cmd, press p then c | hold Ctrl + Alt, press p then c | [G1] |
-| When focus is on comment, move to next comment | j | j | [G1] |
-| When focus is on comment, move to previous comment | k | k | [G1] |
-| When focus is on comment, reply to comment | r | r | [G1] |
-| When focus is on comment, resolve comment | e | e | [G1] |
-| Open comment discussion thread | Cmd + Option + Shift + a | Ctrl + Alt + Shift + a | [G1] |
-| Reply to current comment (on selected comments) | R | R | [G1] |
-| Move to next comment (on selected comments) | J | J | [G1] |
-| Move to previous comment (on selected comments) | K | K | [G1] |
-| Resolve current comment (on selected comments) | E | E | [G1] |
-| Exit current comment (on selected comments) | U | U | [G1] |
-| Hide comment | Cmd + Option + Shift + j | Ctrl + Alt + Shift + j | [G1] |
+| Action                                             | Mac                             | Windows (Chrome OS where different)        | Source |
+| -------------------------------------------------- | ------------------------------- | ------------------------------------------ | ------ |
+| Insert comment                                     | Cmd + Option + m                | Ctrl + Alt + m                             | [G1]   |
+| Enter current comment                              | hold Ctrl + Enter               | hold Ctrl + Enter. Chrome OS: Ctrl + Enter | [G1]   |
+| Move to next comment in the presentation           | hold Ctrl + Cmd, press n then c | hold Ctrl + Alt, press n then c            | [G1]   |
+| Move to previous comment in the presentation       | hold Ctrl + Cmd, press p then c | hold Ctrl + Alt, press p then c            | [G1]   |
+| When focus is on comment, move to next comment     | j                               | j                                          | [G1]   |
+| When focus is on comment, move to previous comment | k                               | k                                          | [G1]   |
+| When focus is on comment, reply to comment         | r                               | r                                          | [G1]   |
+| When focus is on comment, resolve comment          | e                               | e                                          | [G1]   |
+| Open comment discussion thread                     | Cmd + Option + Shift + a        | Ctrl + Alt + Shift + a                     | [G1]   |
+| Reply to current comment (on selected comments)    | R                               | R                                          | [G1]   |
+| Move to next comment (on selected comments)        | J                               | J                                          | [G1]   |
+| Move to previous comment (on selected comments)    | K                               | K                                          | [G1]   |
+| Resolve current comment (on selected comments)     | E                               | E                                          | [G1]   |
+| Exit current comment (on selected comments)        | U                               | U                                          | [G1]   |
+| Hide comment                                       | Cmd + Option + Shift + j        | Ctrl + Alt + Shift + j                     | [G1]   |
 
 ### B6. Text (formatting text and objects)
 
-| Action | Mac | Windows (Chrome OS where different) | Source |
-| --- | --- | --- | --- |
-| Bold | Cmd + b | Ctrl + b | [G1] |
-| Italic | Cmd + i | Ctrl + i | [G1] |
-| Underline | Cmd + u | Ctrl + u | [G1] |
-| Subscript | Cmd + , | Ctrl + , | [G1] |
-| Superscript | Cmd + . | Ctrl + . | [G1] |
-| Strikethrough | Cmd + Shift + x | Alt + Shift + 5 | [G1] |
-| Clear formatting | Cmd + \ (back slash) | Ctrl + \ or Ctrl + Space | [G1] |
-| Increase font size | Cmd + Shift + > | Ctrl + Shift + > | [G1] |
-| Decrease font size | Cmd + Shift + < | Ctrl + Shift + < | [G1] |
-| Left align | Cmd + Shift + l | Ctrl + Shift + l (no Chrome OS row) | [G1] |
-| Right align | Cmd + Shift + r | Ctrl + Shift + r | [G1] |
-| Center align | Cmd + Shift + e | Ctrl + Shift + e | [G1] |
-| Justify | Cmd + Shift + j | Ctrl + Shift + j | [G1] |
-| Move paragraph down (Mac wording: select paragraph below) | Option + Shift + Down arrow | Alt + Shift + Down arrow (no Chrome OS row) | [G1] |
-| Move paragraph up (Mac wording: select paragraph above) | Option + Shift + Up arrow | Alt + Shift + Up arrow (no Chrome OS row) | [G1] |
-| Increase indent | Cmd + ] | Ctrl + ] | [G1] |
-| Decrease indent | Cmd + [ | Ctrl + [ | [G1] |
-| Bulleted list | Cmd + Shift + 8 | Ctrl + Shift + 8 | [G1] |
-| Numbered list | Cmd + Shift + 7 | Ctrl + Shift + 7 | [G1] |
-| Select list item | hold Ctrl + Cmd + Shift, press e then i | hold Ctrl + Alt + Shift, press e then i | [G1] |
-| Select list items at current level | hold Ctrl + Cmd + Shift, press e then o | hold Ctrl + Alt + Shift, press e then o | [G1] |
-| Move to next text formatting change | hold Ctrl + Cmd, press n then w | hold Ctrl + Alt, press n then w | [G1] |
-| Move to previous text formatting change | hold Ctrl + Cmd, press p then w | hold Ctrl + Alt, press p then w | [G1] |
-| Move to next misspelling | Cmd + ' | Ctrl + ' | [G1] |
-| Move to previous misspelling | Cmd + ; | Ctrl + ; | [G1] |
+| Action                                                    | Mac                                     | Windows (Chrome OS where different)         | Source |
+| --------------------------------------------------------- | --------------------------------------- | ------------------------------------------- | ------ |
+| Bold                                                      | Cmd + b                                 | Ctrl + b                                    | [G1]   |
+| Italic                                                    | Cmd + i                                 | Ctrl + i                                    | [G1]   |
+| Underline                                                 | Cmd + u                                 | Ctrl + u                                    | [G1]   |
+| Subscript                                                 | Cmd + ,                                 | Ctrl + ,                                    | [G1]   |
+| Superscript                                               | Cmd + .                                 | Ctrl + .                                    | [G1]   |
+| Strikethrough                                             | Cmd + Shift + x                         | Alt + Shift + 5                             | [G1]   |
+| Clear formatting                                          | Cmd + \ (back slash)                    | Ctrl + \ or Ctrl + Space                    | [G1]   |
+| Increase font size                                        | Cmd + Shift + >                         | Ctrl + Shift + >                            | [G1]   |
+| Decrease font size                                        | Cmd + Shift + <                         | Ctrl + Shift + <                            | [G1]   |
+| Left align                                                | Cmd + Shift + l                         | Ctrl + Shift + l (no Chrome OS row)         | [G1]   |
+| Right align                                               | Cmd + Shift + r                         | Ctrl + Shift + r                            | [G1]   |
+| Center align                                              | Cmd + Shift + e                         | Ctrl + Shift + e                            | [G1]   |
+| Justify                                                   | Cmd + Shift + j                         | Ctrl + Shift + j                            | [G1]   |
+| Move paragraph down (Mac wording: select paragraph below) | Option + Shift + Down arrow             | Alt + Shift + Down arrow (no Chrome OS row) | [G1]   |
+| Move paragraph up (Mac wording: select paragraph above)   | Option + Shift + Up arrow               | Alt + Shift + Up arrow (no Chrome OS row)   | [G1]   |
+| Increase indent                                           | Cmd + ]                                 | Ctrl + ]                                    | [G1]   |
+| Decrease indent                                           | Cmd + [                                 | Ctrl + [                                    | [G1]   |
+| Bulleted list                                             | Cmd + Shift + 8                         | Ctrl + Shift + 8                            | [G1]   |
+| Numbered list                                             | Cmd + Shift + 7                         | Ctrl + Shift + 7                            | [G1]   |
+| Select list item                                          | hold Ctrl + Cmd + Shift, press e then i | hold Ctrl + Alt + Shift, press e then i     | [G1]   |
+| Select list items at current level                        | hold Ctrl + Cmd + Shift, press e then o | hold Ctrl + Alt + Shift, press e then o     | [G1]   |
+| Move to next text formatting change                       | hold Ctrl + Cmd, press n then w         | hold Ctrl + Alt, press n then w             | [G1]   |
+| Move to previous text formatting change                   | hold Ctrl + Cmd, press p then w         | hold Ctrl + Alt, press p then w             | [G1]   |
+| Move to next misspelling                                  | Cmd + '                                 | Ctrl + '                                    | [G1]   |
+| Move to previous misspelling                              | Cmd + ;                                 | Ctrl + ;                                    | [G1]   |
 
 ### B7. Move and arrange objects
 
 Google changed the arrow-key nudge on 2025-08-19: an arrow key now moves the selected object by one pixel and Shift plus an arrow key moves it by a larger increment; before that date a plain arrow key moved the object a long way [G11]. The rows below reflect the current help page.
 
-| Action | Mac | Windows (Chrome OS where different) | Source |
-| --- | --- | --- | --- |
-| Duplicate | Cmd + d | Ctrl + d | [G1] |
-| Group | Cmd + Option + g | Ctrl + Alt + g | [G1] |
-| Ungroup | Cmd + Option + Shift + g | Ctrl + Alt + Shift + g | [G1] |
-| Send backward | Cmd + Down arrow | Ctrl + Down arrow | [G1] |
-| Bring forward | Cmd + Up arrow | Ctrl + Up arrow | [G1] |
-| Send to back | Cmd + Shift + Down arrow | Ctrl + Shift + Down arrow | [G1] |
-| Bring to front | Cmd + Shift + Up arrow | Ctrl + Shift + Up arrow | [G1] |
-| Select next shape | Tab | Tab | [G1] |
-| Select previous shape | Shift + Tab | Shift + Tab | [G1] |
-| Nudge one pixel at a time | Arrow keys | Arrow keys | [G1] [G11] |
-| Nudge by larger increment | Shift + Arrow keys | Shift + Arrow keys | [G1] [G11] |
-| Rotate counterclockwise by 1 degree | Option + Shift + Left arrow | Alt + Shift + Left arrow | [G1] |
-| Rotate clockwise by 1 degree | Option + Shift + Right arrow | Alt + Shift + Right arrow | [G1] |
-| Rotate counterclockwise by 15 degrees | Option + Left arrow | Alt + Left arrow | [G1] |
-| Rotate clockwise by 15 degrees | Option + Right arrow | Alt + Right arrow | [G1] |
-| Resize larger horizontally | Cmd + Ctrl + b | Ctrl + Alt + b | [G1] |
-| Resize larger vertically | Cmd + Ctrl + i | Ctrl + Alt + i | [G1] |
-| Resize smaller | Cmd + Ctrl + j | Ctrl + Alt + j | [G1] |
-| Resize larger | Cmd + Ctrl + k | Ctrl + Alt + k | [G1] |
-| Resize smaller vertically | (no Mac row) | Ctrl + Alt + 9 | [G1] |
-| Resize smaller horizontally | Cmd + Ctrl + w | Ctrl + Alt + w | [G1] |
-| Exit crop mode | Enter | Enter | [G1] |
-| Suppress guides | Cmd + Move with mouse | Alt + Move with mouse (no Chrome OS row) | [G1] |
-| Duplicate (drag) | Option + Move with mouse | Ctrl + Move with mouse | [G1] |
-| Resize from center | Option + Resize with mouse | Ctrl + Resize with mouse | [G1] |
-| Constrain to vertical or horizontal movements | Shift + Move with mouse | Shift + Move with mouse | [G1] |
-| Constrain to object's aspect ratio | Shift + Resize with mouse | Shift + Resize with mouse | [G1] |
-| Constrain to 15 degree rotation increments | Shift + Rotate with mouse | Shift + Rotate with mouse | [G1] |
-| Add to selection | (no Mac row) | (no Windows row). Chrome OS: Shift + Click | [G1] |
+| Action                                        | Mac                          | Windows (Chrome OS where different)        | Source     |
+| --------------------------------------------- | ---------------------------- | ------------------------------------------ | ---------- |
+| Duplicate                                     | Cmd + d                      | Ctrl + d                                   | [G1]       |
+| Group                                         | Cmd + Option + g             | Ctrl + Alt + g                             | [G1]       |
+| Ungroup                                       | Cmd + Option + Shift + g     | Ctrl + Alt + Shift + g                     | [G1]       |
+| Send backward                                 | Cmd + Down arrow             | Ctrl + Down arrow                          | [G1]       |
+| Bring forward                                 | Cmd + Up arrow               | Ctrl + Up arrow                            | [G1]       |
+| Send to back                                  | Cmd + Shift + Down arrow     | Ctrl + Shift + Down arrow                  | [G1]       |
+| Bring to front                                | Cmd + Shift + Up arrow       | Ctrl + Shift + Up arrow                    | [G1]       |
+| Select next shape                             | Tab                          | Tab                                        | [G1]       |
+| Select previous shape                         | Shift + Tab                  | Shift + Tab                                | [G1]       |
+| Nudge one pixel at a time                     | Arrow keys                   | Arrow keys                                 | [G1] [G11] |
+| Nudge by larger increment                     | Shift + Arrow keys           | Shift + Arrow keys                         | [G1] [G11] |
+| Rotate counterclockwise by 1 degree           | Option + Shift + Left arrow  | Alt + Shift + Left arrow                   | [G1]       |
+| Rotate clockwise by 1 degree                  | Option + Shift + Right arrow | Alt + Shift + Right arrow                  | [G1]       |
+| Rotate counterclockwise by 15 degrees         | Option + Left arrow          | Alt + Left arrow                           | [G1]       |
+| Rotate clockwise by 15 degrees                | Option + Right arrow         | Alt + Right arrow                          | [G1]       |
+| Resize larger horizontally                    | Cmd + Ctrl + b               | Ctrl + Alt + b                             | [G1]       |
+| Resize larger vertically                      | Cmd + Ctrl + i               | Ctrl + Alt + i                             | [G1]       |
+| Resize smaller                                | Cmd + Ctrl + j               | Ctrl + Alt + j                             | [G1]       |
+| Resize larger                                 | Cmd + Ctrl + k               | Ctrl + Alt + k                             | [G1]       |
+| Resize smaller vertically                     | (no Mac row)                 | Ctrl + Alt + 9                             | [G1]       |
+| Resize smaller horizontally                   | Cmd + Ctrl + w               | Ctrl + Alt + w                             | [G1]       |
+| Exit crop mode                                | Enter                        | Enter                                      | [G1]       |
+| Suppress guides                               | Cmd + Move with mouse        | Alt + Move with mouse (no Chrome OS row)   | [G1]       |
+| Duplicate (drag)                              | Option + Move with mouse     | Ctrl + Move with mouse                     | [G1]       |
+| Resize from center                            | Option + Resize with mouse   | Ctrl + Resize with mouse                   | [G1]       |
+| Constrain to vertical or horizontal movements | Shift + Move with mouse      | Shift + Move with mouse                    | [G1]       |
+| Constrain to object's aspect ratio            | Shift + Resize with mouse    | Shift + Resize with mouse                  | [G1]       |
+| Constrain to 15 degree rotation increments    | Shift + Rotate with mouse    | Shift + Rotate with mouse                  | [G1]       |
+| Add to selection                              | (no Mac row)                 | (no Windows row). Chrome OS: Shift + Click | [G1]       |
 
 ### B8. Presenting and video player
 
@@ -361,13 +361,13 @@ The presenting rows and the video player rows are the two tables in section A10;
 
 ### B9. Screen reader support
 
-| Action | Mac | Windows (Chrome OS where different) | Source |
-| --- | --- | --- | --- |
-| Verbalize selection | Ctrl + Cmd + x | Ctrl + Alt + x | [G1] |
-| Enable screen reader support | Option + Cmd + z | Ctrl + Alt + z or Alt + Shift + ~ | [G1] |
-| Enable braille support | Cmd + Option + h | Ctrl + Alt + h | [G1] |
-| Verbalize from cursor location | Ctrl + Cmd + r | Ctrl + Alt + r | [G1] |
-| Announce formatting at cursor location | hold Ctrl + Cmd, press a then f | hold Ctrl + Alt, press a then f | [G1] |
+| Action                                 | Mac                             | Windows (Chrome OS where different) | Source |
+| -------------------------------------- | ------------------------------- | ----------------------------------- | ------ |
+| Verbalize selection                    | Ctrl + Cmd + x                  | Ctrl + Alt + x                      | [G1]   |
+| Enable screen reader support           | Option + Cmd + z                | Ctrl + Alt + z or Alt + Shift + ~   | [G1]   |
+| Enable braille support                 | Cmd + Option + h                | Ctrl + Alt + h                      | [G1]   |
+| Verbalize from cursor location         | Ctrl + Cmd + r                  | Ctrl + Alt + r                      | [G1]   |
+| Announce formatting at cursor location | hold Ctrl + Cmd, press a then f | hold Ctrl + Alt, press a then f     | [G1]   |
 
 ### B10. Platform differences worth designing for
 
@@ -387,38 +387,38 @@ These are the behaviours a Google Slides user will expect from Turboslide's pres
 
 All pages were read on 2026-09-11.
 
-| Tag | Page | URL |
-| --- | --- | --- |
-| G1 | Google Docs Editors Help, Keyboard shortcuts for Google Slides (PC, Mac and Chrome OS tabs) | https://support.google.com/docs/answer/1696717?hl=en |
-| G2 | Google Docs Editors Help, Present slides (Computer) | https://support.google.com/docs/answer/1696787?hl=en&co=GENIE.Platform%3DDesktop |
-| G3 | Google Docs Editors Help, Accept and present audience questions | https://support.google.com/docs/answer/6386827?hl=en&co=GENIE.Platform%3DDesktop |
-| G4 | Google Docs Editors Help, Present slides with captions | https://support.google.com/docs/answer/9109474?hl=en&co=GENIE.Platform%3DDesktop |
-| G5 | Google Docs Editors Help, Make Google Docs, Sheets, Slides & Forms public | https://support.google.com/docs/answer/183965?hl=en&co=GENIE.Platform%3DDesktop |
-| G6 | Google Meet Help, Present during a video meeting | https://support.google.com/meet/answer/9308856?hl=en&co=GENIE.Platform%3DDesktop |
-| G7 | Google Meet Help, Use Google Meet with Google Docs, Sheets, & Slides | https://support.google.com/meet/answer/10540294?hl=en |
-| G8 | Google Meet Help, Co-present Slides in Google Meet | https://support.google.com/meet/answer/13882437?hl=en |
-| G9 | Google Workspace Updates, Add annotations to your presentations in Google Slides (2023-08-10) | https://workspaceupdates.googleblog.com/2023/08/add-annotations-to-your-presentations.html |
-| G10 | Google Workspace Updates, Customize text size and position for captions in Google Slides (2019-10-14) | https://workspaceupdates.googleblog.com/2019/10/more-caption-options-slides.html |
-| G11 | Google Workspace Updates, Arrow keys now move an object by a pixel distance in Google Slides (2025-08-19) | http://workspaceupdates.googleblog.com/2025/08/move-object-one-pixel-google-slides.html |
-| G12 | Google Workspace Updates, Creating more immersive presentations in Google Slides (speaker spotlight, 2024-02-15) | https://workspaceupdates.googleblog.com/2024/02/create-immersive-presentations-in-google-slides.html |
-| G13 | Google Workspace Updates, posts labelled Google Slides (checked for present-mode changes from June 2025 to August 2026; none found) | https://workspaceupdates.googleblog.com/search/label/Google%20Slides |
-| T1 | BrightCarbon, How to present in Google Slides with Present mode toolbar (2021-09-13) | https://www.brightcarbon.com/blog/how-to-present-in-google-slides-with-present-mode-toolbar/ |
-| T2 | How-To Geek, How to Use the Google Slides Presenter Toolbar (2021-05-20) | https://www.howtogeek.com/724109/how-to-use-the-google-slides-presenter-toolbar/ |
-| T3 | BrightCarbon, How to use Presenter view in Google Slides | https://www.brightcarbon.com/blog/presenter-view-google-slides/ |
-| T4 | How-To Geek, How to Use Speaker Notes in Google Slides | https://www.howtogeek.com/748657/how-to-use-speaker-notes-in-google-slides/ |
-| T5 | SlideModel, How to Use the Presenter View in Google Slides | https://slidemodel.com/google-slides-presenter-view/ |
-| T6 | Slidesgo, How to use the Presenter view in Google Slides | https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-use-the-presenter-view-in-google-slides |
-| T7 | Android Police, Google Slides: How to autoplay your presentation | https://www.androidpolice.com/google-slides-autoplay-presentation/ |
-| T8 | Slidestack, How to make Google Slides play automatically | https://slidestack.com/blog/how-to-make-google-slides-play-automatically-simple-explanation |
-| T9 | Android Police, Google wants to make your next Slides presentation more engaging with new markup tool | https://www.androidpolice.com/google-slides-pen-annotate/ |
-| T10 | Engadget, Google Slides' new tool lets you annotate your presentations (2023-08-11) | https://www.engadget.com/google-slides-new-tool-lets-you-annotate-your-presentations-095524960.html |
-| T11 | Berkeley Lab IT, Google Workspace Updates, August 2023 | https://it.lbl.gov/google-workspace-updates-august-2023/ |
-| T12 | Alice Keeler, Present Google Slides NOT Full Screen (2024-09-19) | https://alicekeeler.com/2024/09/19/present-google-slides-not-full-screen/ |
-| T13 | The PowerPoint Blog, Presenting with Google Slides (2020-07-17) | https://thepowerpointblog.com/presenting-with-google-slides/ |
-| T14 | TCEA TechNotes, Closed Captions in Google Slides (2018-11-27, updated 2019-12-02) | https://blog.tcea.org/closed-captions-in-google-slides/ |
-| T15 | The Analyst Academy, How To Use "Presenter View" For Seamless Presentations | https://www.theanalystacademy.com/presenter-view-seamless-presentations/ |
-| T16 | CCA Portal, Presenting Slides with Live Captioning (last updated 2023-12-20) | https://portal.cca.edu/teaching/teaching-lab/inclusive-teaching/inclusive-studio-teaching-for-international-and-english-language-learners/studio-classroom-equity-and-access/presenting-slides-with-live-captioning/ |
-| T17 | Copresent, Google Slides Presenter View: Full Guide 2026 (read, but its claims of a P key toggle, a View menu entry and a "Notes Zoom" slider conflict with Google's pages and were not used) | https://www.copresent.app/blog/google-slides-presenter-view/ |
+| Tag | Page                                                                                                                                                                                          | URL                                                                                                                                                                                                                  |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| G1  | Google Docs Editors Help, Keyboard shortcuts for Google Slides (PC, Mac and Chrome OS tabs)                                                                                                   | https://support.google.com/docs/answer/1696717?hl=en                                                                                                                                                                 |
+| G2  | Google Docs Editors Help, Present slides (Computer)                                                                                                                                           | https://support.google.com/docs/answer/1696787?hl=en&co=GENIE.Platform%3DDesktop                                                                                                                                     |
+| G3  | Google Docs Editors Help, Accept and present audience questions                                                                                                                               | https://support.google.com/docs/answer/6386827?hl=en&co=GENIE.Platform%3DDesktop                                                                                                                                     |
+| G4  | Google Docs Editors Help, Present slides with captions                                                                                                                                        | https://support.google.com/docs/answer/9109474?hl=en&co=GENIE.Platform%3DDesktop                                                                                                                                     |
+| G5  | Google Docs Editors Help, Make Google Docs, Sheets, Slides & Forms public                                                                                                                     | https://support.google.com/docs/answer/183965?hl=en&co=GENIE.Platform%3DDesktop                                                                                                                                      |
+| G6  | Google Meet Help, Present during a video meeting                                                                                                                                              | https://support.google.com/meet/answer/9308856?hl=en&co=GENIE.Platform%3DDesktop                                                                                                                                     |
+| G7  | Google Meet Help, Use Google Meet with Google Docs, Sheets, & Slides                                                                                                                          | https://support.google.com/meet/answer/10540294?hl=en                                                                                                                                                                |
+| G8  | Google Meet Help, Co-present Slides in Google Meet                                                                                                                                            | https://support.google.com/meet/answer/13882437?hl=en                                                                                                                                                                |
+| G9  | Google Workspace Updates, Add annotations to your presentations in Google Slides (2023-08-10)                                                                                                 | https://workspaceupdates.googleblog.com/2023/08/add-annotations-to-your-presentations.html                                                                                                                           |
+| G10 | Google Workspace Updates, Customize text size and position for captions in Google Slides (2019-10-14)                                                                                         | https://workspaceupdates.googleblog.com/2019/10/more-caption-options-slides.html                                                                                                                                     |
+| G11 | Google Workspace Updates, Arrow keys now move an object by a pixel distance in Google Slides (2025-08-19)                                                                                     | http://workspaceupdates.googleblog.com/2025/08/move-object-one-pixel-google-slides.html                                                                                                                              |
+| G12 | Google Workspace Updates, Creating more immersive presentations in Google Slides (speaker spotlight, 2024-02-15)                                                                              | https://workspaceupdates.googleblog.com/2024/02/create-immersive-presentations-in-google-slides.html                                                                                                                 |
+| G13 | Google Workspace Updates, posts labelled Google Slides (checked for present-mode changes from June 2025 to August 2026; none found)                                                           | https://workspaceupdates.googleblog.com/search/label/Google%20Slides                                                                                                                                                 |
+| T1  | BrightCarbon, How to present in Google Slides with Present mode toolbar (2021-09-13)                                                                                                          | https://www.brightcarbon.com/blog/how-to-present-in-google-slides-with-present-mode-toolbar/                                                                                                                         |
+| T2  | How-To Geek, How to Use the Google Slides Presenter Toolbar (2021-05-20)                                                                                                                      | https://www.howtogeek.com/724109/how-to-use-the-google-slides-presenter-toolbar/                                                                                                                                     |
+| T3  | BrightCarbon, How to use Presenter view in Google Slides                                                                                                                                      | https://www.brightcarbon.com/blog/presenter-view-google-slides/                                                                                                                                                      |
+| T4  | How-To Geek, How to Use Speaker Notes in Google Slides                                                                                                                                        | https://www.howtogeek.com/748657/how-to-use-speaker-notes-in-google-slides/                                                                                                                                          |
+| T5  | SlideModel, How to Use the Presenter View in Google Slides                                                                                                                                    | https://slidemodel.com/google-slides-presenter-view/                                                                                                                                                                 |
+| T6  | Slidesgo, How to use the Presenter view in Google Slides                                                                                                                                      | https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-use-the-presenter-view-in-google-slides                                                                                                          |
+| T7  | Android Police, Google Slides: How to autoplay your presentation                                                                                                                              | https://www.androidpolice.com/google-slides-autoplay-presentation/                                                                                                                                                   |
+| T8  | Slidestack, How to make Google Slides play automatically                                                                                                                                      | https://slidestack.com/blog/how-to-make-google-slides-play-automatically-simple-explanation                                                                                                                          |
+| T9  | Android Police, Google wants to make your next Slides presentation more engaging with new markup tool                                                                                         | https://www.androidpolice.com/google-slides-pen-annotate/                                                                                                                                                            |
+| T10 | Engadget, Google Slides' new tool lets you annotate your presentations (2023-08-11)                                                                                                           | https://www.engadget.com/google-slides-new-tool-lets-you-annotate-your-presentations-095524960.html                                                                                                                  |
+| T11 | Berkeley Lab IT, Google Workspace Updates, August 2023                                                                                                                                        | https://it.lbl.gov/google-workspace-updates-august-2023/                                                                                                                                                             |
+| T12 | Alice Keeler, Present Google Slides NOT Full Screen (2024-09-19)                                                                                                                              | https://alicekeeler.com/2024/09/19/present-google-slides-not-full-screen/                                                                                                                                            |
+| T13 | The PowerPoint Blog, Presenting with Google Slides (2020-07-17)                                                                                                                               | https://thepowerpointblog.com/presenting-with-google-slides/                                                                                                                                                         |
+| T14 | TCEA TechNotes, Closed Captions in Google Slides (2018-11-27, updated 2019-12-02)                                                                                                             | https://blog.tcea.org/closed-captions-in-google-slides/                                                                                                                                                              |
+| T15 | The Analyst Academy, How To Use "Presenter View" For Seamless Presentations                                                                                                                   | https://www.theanalystacademy.com/presenter-view-seamless-presentations/                                                                                                                                             |
+| T16 | CCA Portal, Presenting Slides with Live Captioning (last updated 2023-12-20)                                                                                                                  | https://portal.cca.edu/teaching/teaching-lab/inclusive-teaching/inclusive-studio-teaching-for-international-and-english-language-learners/studio-classroom-equity-and-access/presenting-slides-with-live-captioning/ |
+| T17 | Copresent, Google Slides Presenter View: Full Guide 2026 (read, but its claims of a P key toggle, a View menu entry and a "Notes Zoom" slider conflict with Google's pages and were not used) | https://www.copresent.app/blog/google-slides-presenter-view/                                                                                                                                                         |
 
 Pages that could not be read on 2026-09-11: its.umich.edu/node/94324 (HTTP 403), www.ahead.ie/Google-Slides-Closed-Captions (connection refused), td.usd.edu knowledge base article 7856 (HTTP 503), support.google.com/meet/answer/10552294 and 10744538 (HTTP 404). A live look at docs.google.com through the in-app browser pane was refused by the pane.
 

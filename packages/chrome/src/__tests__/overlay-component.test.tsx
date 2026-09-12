@@ -8,14 +8,18 @@ import type { EditorOverlayView } from '@turboslide/viewer/Editor';
 import { handlesFor } from '@turboslide/viewer/Gestures';
 import type { MeasuredBoxes } from '@turboslide/viewer/Gestures';
 
-import { handleDoc, handleTitle, Overlay } from '../Overlay';
+import { FRAME_EDGE_PX, handleDoc, handleTitle, Overlay } from '../Overlay';
 import { TIP_ID, hideTooltip } from '../Tooltip';
 
-// The overlay in edit mode (SPEC 6.4) on a freeform slide (this round): the rings of a
-// multi-selection, the eight resize squares, the guides, the marquee, the target slot of a drag
-// and the arrange bar, every control with the chrome's tooltip (Tooltip.tsx, never a native
-// title) that names it, what it does and its key; Alt with Up or Down on a move chip changes the
-// order through onHandleOrder instead of nudging.
+// The overlay in edit mode (SPEC 6.4) on a freeform slide: the rings of a multi-selection, the
+// eight resize squares, the guides, the marquee, the target slot of a drag and the frame edges
+// that drag a positioned block (gslides-parity SPEC 10.2), every control with the chrome's
+// tooltip (Tooltip.tsx, never a native title) that names it, what it does and its key; Cmd Up or
+// Cmd Down on a move chip (Ctrl on Windows) changes the order through onHandleOrder instead of
+// nudging, Shift for the ends (gslides-parity SPEC 10.1), and Alt with an arrow is retired (SPEC
+// 10.2). The
+// arrange bar of the editor depth round is gone (SPEC 4.3: the Arrange menu and the right-click
+// menu carry align, distribute and order).
 
 /** The tooltip plate a focused control shows: its name and its sentence. */
 function tipShown(el: HTMLElement): { name: string; doc: string } {
@@ -59,7 +63,7 @@ function viewOf(over: Partial<EditorOverlayView> = {}): EditorOverlayView {
     hover: null,
     selection: { kind: 'block', blockId: 'a' },
     selectionBox: boxes.blocks['a'] ?? null,
-    chip: 'paragraph · a',
+    chip: 'Text',
     handles: handlesFor(slide, boxes, { kind: 'block', blockId: 'a' }),
     activeHandle: null,
     drop: null,
@@ -81,6 +85,7 @@ function viewOf(over: Partial<EditorOverlayView> = {}): EditorOverlayView {
       distribute: vi.fn(),
       zOrder: vi.fn(),
     },
+    paint: false,
     onHandleDown: vi.fn(),
     onHandleNudge: vi.fn(),
     onHandleOrder: vi.fn(),
@@ -105,8 +110,10 @@ describe('Overlay on a freeform slide', () => {
     expect(chip.getAttribute('data-tip')).toBe('a: Move');
     const chipTip = tipShown(chip);
     expect(chipTip.name).toBe('a: Move');
-    expect(chipTip.doc).toMatch(/Drag the chip or the block anywhere/);
+    expect(chipTip.doc).toMatch(/Drag the frame or the chip anywhere/);
     expect(chipTip.doc).toMatch(/Arrows nudge 1 px, Shift 8 px/);
+    /* the chip names the block in Google's words, never its id (SPEC 13.7) */
+    expect(chip.textContent).toBe('Text');
     const squares = container.querySelectorAll<HTMLButtonElement>(
       '.ts-handle[data-kind="free-resize"]',
     );
@@ -128,22 +135,30 @@ describe('Overlay on a freeform slide', () => {
     }
   });
 
-  it('changes the order with Alt and Up or Down on a move chip, and nudges with the plain arrows', () => {
+  it('changes the order with Cmd or Ctrl and Up or Down on a move chip, Shift for the ends, and nudges with the plain arrows', () => {
     const view = viewOf();
     const { container } = render(<Overlay view={view} />);
     const chip = container.querySelector<HTMLButtonElement>('.ts-select-chip');
     if (!chip) throw new Error('no chip');
+    fireEvent.keyDown(chip, { key: 'ArrowUp', metaKey: true });
+    fireEvent.keyDown(chip, { key: 'ArrowDown', metaKey: true });
+    fireEvent.keyDown(chip, { key: 'ArrowUp', ctrlKey: true, shiftKey: true });
+    fireEvent.keyDown(chip, { key: 'ArrowDown', ctrlKey: true, shiftKey: true });
+    const order = (view.onHandleOrder as ReturnType<typeof vi.fn>).mock.calls;
+    expect(order.map((call) => call[1])).toEqual(['forward', 'backward', 'front', 'back']);
+    expect(view.onHandleNudge).not.toHaveBeenCalled();
+    // the tooltip names the keys, never the retired Alt chord (SPEC 10.2)
+    expect(chip.getAttribute('data-tip')).toBe('a: Move');
+    // Cmd with a sideways arrow, Cmd with Alt, Alt with an arrow (retired), or Cmd Up on a
+    // resize square, is nothing
+    fireEvent.keyDown(chip, { key: 'ArrowLeft', metaKey: true });
+    fireEvent.keyDown(chip, { key: 'ArrowUp', metaKey: true, altKey: true });
     fireEvent.keyDown(chip, { key: 'ArrowUp', altKey: true });
     fireEvent.keyDown(chip, { key: 'ArrowDown', altKey: true });
-    const order = (view.onHandleOrder as ReturnType<typeof vi.fn>).mock.calls;
-    expect(order.map((call) => call[1])).toEqual(['forward', 'backward']);
-    expect(view.onHandleNudge).not.toHaveBeenCalled();
-    // Alt with a sideways arrow, or on a resize square, is nothing
-    fireEvent.keyDown(chip, { key: 'ArrowLeft', altKey: true });
     const se = container.querySelector<HTMLButtonElement>('[data-control="handle.a.resize.se"]');
     if (!se) throw new Error('no se square');
-    fireEvent.keyDown(se, { key: 'ArrowUp', altKey: true });
-    expect(view.onHandleOrder).toHaveBeenCalledTimes(2);
+    fireEvent.keyDown(se, { key: 'ArrowUp', metaKey: true });
+    expect(view.onHandleOrder).toHaveBeenCalledTimes(4);
     expect(view.onHandleNudge).not.toHaveBeenCalled();
     fireEvent.keyDown(chip, { key: 'ArrowUp' });
     expect(view.onHandleNudge).toHaveBeenCalledWith(expect.anything(), 1, 'y');
@@ -163,48 +178,53 @@ describe('Overlay on a freeform slide', () => {
     ]);
   });
 
-  it('shows the arrange bar with the two distribute buttons disabled under three blocks', () => {
+  it('draws four frame edges around a positioned block that start its move gesture, and no arrange bar', () => {
     const view = viewOf();
     const { container } = render(<Overlay view={view} />);
-    const bar = container.querySelector('.ts-arrange');
-    expect(bar).not.toBeNull();
-    const buttons = container.querySelectorAll<HTMLButtonElement>('.ts-arrange button');
-    expect(buttons).toHaveLength(10);
-    expect(
-      [...buttons].filter((button) => button.disabled).map((button) => button.dataset['control']),
-    ).toEqual(['arrange.distribute.x', 'arrange.distribute.y']);
-    const left = container.querySelector<HTMLButtonElement>('[data-control="arrange.align.left"]');
-    if (!left) throw new Error('no align left');
-    expect(left.getAttribute('data-tip')).toBe('Align left');
-    expect(left.hasAttribute('title')).toBe(false);
-    const leftTip = tipShown(left);
-    expect(leftTip.name).toBe('Align left');
-    expect(leftTip.doc).toMatch(/left edges meet the leftmost one/);
-    fireEvent.click(left);
-    expect(view.arrange?.align).toHaveBeenCalledWith('left');
-    const forward = container.querySelector<HTMLButtonElement>(
-      '[data-control="arrange.z.forward"]',
+    expect(container.querySelector('.ts-arrange')).toBeNull();
+    const edges = container.querySelectorAll<HTMLElement>('.ts-frame-edge');
+    expect(edges).toHaveLength(4);
+    const sides = [...edges].map((edge) => edge.dataset['side']).sort();
+    expect(sides).toEqual(['e', 'n', 's', 'w']);
+    /* the north edge is centred on the ring's top: 200 * 0.5 minus half the strip */
+    const north = [...edges].find((edge) => edge.dataset['side'] === 'n');
+    expect(north?.style.top).toBe(`${100 - FRAME_EDGE_PX / 2}px`);
+    expect(north?.style.left).toBe(`${100 - FRAME_EDGE_PX / 2}px`);
+    expect(north?.style.width).toBe(`${150 + FRAME_EDGE_PX}px`);
+    fireEvent.pointerDown(north!, { button: 0 });
+    expect(view.onHandleDown).toHaveBeenCalledTimes(1);
+    expect((view.onHandleDown as ReturnType<typeof vi.fn>).mock.calls[0]?.[0]).toMatchObject({
+      kind: 'free-move',
+    });
+    /* while a run is edited the frame edges leave with the chip */
+    cleanup();
+    const editing = render(<Overlay view={viewOf({ editing: true })} />);
+    expect(editing.container.querySelector('.ts-frame-edge')).toBeNull();
+    /* a grammar slide's block-move chip has no frame edges: the body drag reorders */
+    cleanup();
+    const grammar = render(
+      <Overlay
+        view={viewOf({
+          freeform: false,
+          handles: [
+            {
+              id: 'block-move:a',
+              kind: 'block-move',
+              box: boxes.blocks['a'] ?? [0, 0, 0, 0],
+              blockId: 'a',
+              cursor: 'grab',
+              label: 'a: Move',
+              control: 'handle.a.move',
+              shape: 'chip',
+              axis: 'y',
+              sign: 1,
+            },
+          ],
+        })}
+      />,
     );
-    if (!forward) throw new Error('no bring forward');
-    fireEvent.focus(forward);
-    expect(document.getElementById(TIP_ID)?.querySelector('kbd')?.textContent).toMatch(
-      /\] or Alt Up$/,
-    );
-    fireEvent.click(forward);
-    expect(view.arrange?.zOrder).toHaveBeenCalledWith('forward');
-    // the align glyphs are sprite symbols, not inlined paths
-    const uses = [...bar!.querySelectorAll('svg use')].map((use) => use.getAttribute('href'));
-    expect(uses.slice(0, 6)).toEqual([
-      '#i-bars-3-bottom-left',
-      '#i-bars-3-center-left',
-      '#i-bars-3-bottom-right',
-      '#i-bars-3-bottom-left',
-      '#i-bars-3-center-left',
-      '#i-bars-3-bottom-right',
-    ]);
-    expect(bar!.querySelector('svg path')).toBeNull();
-    // under the ring: the ring's bottom is 300 * 0.5 plus the 6px gap
-    expect((bar as HTMLElement).style.top).toBe('156px');
+    expect(grammar.container.querySelector('.ts-frame-edge')).toBeNull();
+    expect(grammar.container.querySelector('.ts-select-chip')).not.toBeNull();
   });
 
   it('draws every ring of a multi-selection, the group box and a count in the chip', () => {
@@ -223,9 +243,7 @@ describe('Overlay on a freeform slide', () => {
     const { container } = render(<Overlay view={view} />);
     expect(container.querySelectorAll('.ts-select.is-selected')).toHaveLength(2);
     expect(container.querySelector('.ts-group')).not.toBeNull();
-    expect(container.querySelector('.ts-select-chip')?.textContent).toBe(
-      '2 blocks · paragraph · a',
-    );
+    expect(container.querySelector('.ts-select-chip')?.textContent).toBe('2 blocks · Text');
   });
 
   it('draws the guides, the marquee and the target slot of a drag, and hides the bar meanwhile', () => {
@@ -245,7 +263,6 @@ describe('Overlay on a freeform slide', () => {
     expect(guides[1]?.style.top).toBe('65px');
     expect(container.querySelector<HTMLElement>('.ts-marquee')?.style.width).toBe('100px');
     expect(container.querySelector('.ts-drop-slot')).not.toBeNull();
-    expect(container.querySelector('.ts-arrange')).toBeNull();
   });
 
   it('names every handle kind in plain sentences without em dashes', () => {

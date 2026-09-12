@@ -32,6 +32,8 @@ p { font-size: 22px; line-height: 1.5; margin: 0; }
 .rows > div > b { font-weight: 500; }
 canvas.dither { display: block; width: 400px; height: 220px; image-rendering: pixelated; }
 .wide { position: absolute; left: 1400px; top: 700px; width: 400px; height: 40px; background: var(--hair); }
+.table > .tr { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--hair); font-size: 20px; line-height: 1.45; }
+.table .td { display: block; padding: 12px 16px; }
 `;
 
 const BODY = `
@@ -46,6 +48,10 @@ const BODY = `
         <div><b>Key two</b><span>A value long enough to wrap onto three lines when the column is this narrow at twenty pixels.</span></div>
       </div>
       <canvas class="dither" data-block="ramp" data-type="dither" data-raster="dither"></canvas>
+      <div class="table" data-block="grid" data-type="table" style="width: 700px; margin-top: 20px">
+        <div class="tr header"><span class="td first">Plan</span><span class="td last">Price</span></div>
+        <div class="tr"><span class="td first">Starter</span><span class="td last">A value long enough to wrap onto a second line at this width.</span></div>
+      </div>
       <div class="wide" data-block="wide" data-type="html"></div>
     </div>
   </section>
@@ -107,6 +113,13 @@ describe.skipIf(skip)('headless render pass', () => {
       expect(record.blocks['rows/0']?.type).toBe('row');
       expect(record.blocks['rows/0']?.lines).toBe(1);
       expect(record.blocks['rows/1']?.lines).toBeGreaterThanOrEqual(3);
+      // a table cell is `<blockId>/<row>/<column>` of type cell with its lines (gslides-parity SPEC 7.3)
+      expect(record.blocks['grid/0/0']?.type).toBe('cell');
+      expect(record.blocks['grid/0/0']?.lines).toBe(1);
+      expect(record.blocks['grid/1/1']?.lines).toBeGreaterThanOrEqual(2);
+      expect(record.blocks['grid/1/1']?.box[0]).toBeGreaterThan(
+        record.blocks['grid/1/0']?.box[0] ?? 0,
+      );
       expect(record.rasters).toHaveLength(1);
       expect(record.rasters[0]?.kind).toBe('dither');
       expect(record.fonts.status).toBe('partial');
@@ -115,6 +128,22 @@ describe.skipIf(skip)('headless render pass', () => {
       expect(png.readUInt32BE(16)).toBe(1600);
       expect(png.readUInt32BE(20)).toBe(900);
       expect(record.timing.readyMs).toBeGreaterThanOrEqual(0);
+      // the same slide as a JPEG (render.slide format jpg, gslides-parity SPEC 7.6)
+      const jpgPath = join(dir, '01-probe-dark.jpg');
+      const jpg = await renderSlideRecord(sheetPage, {
+        url: doc.url,
+        deckId: 'probe',
+        slideId: 'probe',
+        revision: 1,
+        imagePath: jpgPath,
+        renderer: launched().renderer,
+        bayerTable: BAYER8.flat(),
+        format: 'jpg',
+      });
+      const bytes = await readFile(jpgPath);
+      expect(bytes[0]).toBe(0xff);
+      expect(bytes[1]).toBe(0xd8);
+      expect(jpg.record.image).toBe(jpgPath);
     } finally {
       await sheetPage.close();
     }

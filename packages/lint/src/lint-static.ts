@@ -17,6 +17,7 @@ import { checkIcons } from './static/icon.ts';
 import { checkPictures } from './static/picture.ts';
 import { checkRows } from './static/rows.ts';
 import { checkStructure } from './static/structure.ts';
+import { checkTables } from './static/table.ts';
 import { checkType } from './static/type.ts';
 
 export function filterRules(findings: Finding[], rules?: readonly RuleId[]): Finding[] {
@@ -47,6 +48,7 @@ export function lintStatic(input: DeckDocument, options: LintOptions = {}): Find
     ...checkColor(ctx),
     ...checkIcons(ctx),
     ...checkRows(ctx),
+    ...checkTables(ctx),
     ...checkDia(ctx),
     ...checkAssets(ctx),
     ...checkPictures(ctx),

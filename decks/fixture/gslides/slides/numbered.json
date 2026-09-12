@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "numbered",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "5/7",
+    "gap": 72,
+    "align": "center"
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Rollout steps"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "text": "A numbered list with a tabular numeral in the key position.",
+        "measure": 56
+      }
+    ],
+    "right": [
+      {
+        "id": "list",
+        "type": "plain",
+        "numbered": true,
+        "items": [
+          {
+            "text": "Connect the repository"
+          },
+          {
+            "text": "Pick the locales"
+          },
+          {
+            "text": "Ship the first release"
+          }
+        ]
+      }
+    ]
+  },
+  "template": "plain"
+}

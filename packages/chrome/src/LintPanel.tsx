@@ -26,6 +26,12 @@ export type LintPanelProps = {
   onSelectBlock?: (blockId: BlockId | undefined) => void;
   /** inside the inspector: no head of its own */
   embedded?: boolean;
+  /**
+   * Check slides (gslides-parity SPEC 2.8, 12 "Panels"): one row per finding in prose with Fix
+   * where a fix exists and nothing else; the rule ids, severities, block ids and evidence stay off
+   * the default view (the count is in the panel header)
+   */
+  suggestions?: boolean;
   className?: string;
 };
 
@@ -39,6 +45,7 @@ export function LintPanel({
   selectedBlockId,
   onSelectBlock,
   embedded = false,
+  suggestions = false,
   className,
 }: LintPanelProps) {
   const [busy, setBusy] = useState<string | null>(null);
@@ -56,10 +63,68 @@ export function LintPanel({
       baseRevision: revision,
       mutations: finding.fix,
     })
-      .then(() => setNotice(`Fixed ${finding.rule}`))
+      .then(() => setNotice(suggestions ? 'Fixed' : `Fixed ${finding.rule}`))
       .catch((error: unknown) => setNotice(error instanceof Error ? error.message : String(error)))
       .finally(() => setBusy(null));
   };
+
+  if (suggestions) {
+    return (
+      <div className={cn('ts-lint is-suggestions', className)} data-count={rows.length}>
+        {notice ? (
+          <p className="ts-lint-notice" role="status">
+            {notice}
+          </p>
+        ) : null}
+        {rows.length === 0 ? (
+          <p className="ts-lint-empty">Nothing to suggest for this slide</p>
+        ) : (
+          <ul className="ts-lint-list">
+            {rows.map((finding) => (
+              <li
+                key={finding.id}
+                className={cn(
+                  'ts-lint-row',
+                  finding.blockId !== undefined &&
+                    finding.blockId === selectedBlockId &&
+                    'is-selected',
+                )}
+                data-severity={finding.severity}
+                data-rule={finding.rule}
+              >
+                <button
+                  type="button"
+                  className="ts-lint-pick"
+                  aria-label={finding.proposal}
+                  data-control={`suggestion.${finding.id}`}
+                  onClick={() => onSelectBlock?.(finding.blockId)}
+                  {...tipProps({
+                    name: finding.blockId ? 'Show me' : 'This slide',
+                    doc: finding.blockId
+                      ? 'Selects what the suggestion is about'
+                      : 'A suggestion about the whole slide',
+                  })}
+                >
+                  <span className="ts-lint-proposal">{finding.proposal}</span>
+                </button>
+                {finding.fix && finding.fix.length > 0 ? (
+                  <ToolButton
+                    label="Fix"
+                    title="Fix"
+                    doc="Applies the change; Undo brings the slide back"
+                    ariaLabel={`Fix: ${finding.proposal}`}
+                    className={cn('ts-lint-fix', busy === finding.id && 'is-busy')}
+                    control={`suggestion.${finding.id}.fix`}
+                    onClick={() => fix(finding)}
+                  />
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className={cn('ts-lint', embedded && 'is-embedded', className)} data-count={rows.length}>

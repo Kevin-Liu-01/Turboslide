@@ -3,22 +3,34 @@
 // --author and --json. Documents come from stdin or --file; patch takes --set <pointer>=<value>
 // and --unset <pointer>, or a mutation list as JSON. The freeform round adds slide set-layout
 // (slide.setLayout), which refiles the blocks when a slide changes layout (docs/freeform.md).
+import { cpSync, existsSync, mkdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+
+import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
 import type { Layout } from '@turboslide/schema/deck';
-import { layoutSchema } from '@turboslide/schema/deck';
+import { LAYOUT_IDS, layoutSchema } from '@turboslide/schema/deck';
+import { isLayoutId } from '@turboslide/schema/layouts';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { mutationSchema } from '@turboslide/schema/mutations';
+import { loadDeckDir } from '@turboslide/store/file-store';
 
 import { flagAll, flagBoolean, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
 import { UsageError } from '../exit.ts';
 import {
+  slideApplyLayout,
+  slideDuplicate,
+  slideImport,
   slideInsert,
   slideMove,
+  slideNew,
   slideRemove,
   slideReplace,
   slideSetLayout,
+  slideSkip,
   slideUpdate,
 } from '../store-actions.ts';
+import type { SlideImportInput, SlideImportSource, StoreActionDeps } from '../store-actions.ts';
 import {
   baseRevision,
   openStore,
@@ -30,9 +42,10 @@ import {
   storeDeps,
   writeContext,
 } from '../write.ts';
+import { decksDirFor } from './deck.ts';
 import { slideGet } from './slides.ts';
 
-const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-layout> ...
+const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-layout|new|duplicate|skip|apply-layout|import> ...
   slide get <id>
   slide put <id> [--file slide.json] < slide.json
   slide patch <id> --set <pointer>=<value> [--unset <pointer>] | --mutations [--file mutations.json]
@@ -41,6 +54,15 @@ const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-lay
   slide move <id> --to <sectionId> [--after <slideId>]
   slide set-layout <id> --type cols|split|center|left-mid|stack|freeform [--ratio 5/7] [--gap <px>] [--head single|5/7|4/8] [--align start|center] [--body start|center|end]
   slide set-layout <id> --layout '<json>'      the layout object as written in a slide file
+  slide new --layout <layout> [--after <slideId>] [--section <sectionId>] [--id <slideId>]
+                                               one slide from a layout with empty placeholders (slide.new); a Section
+                                               header after a slide starts a new section
+  slide duplicate <id,id,...>                  copies after the last of them (slide.duplicate)
+  slide skip <id,id,...> [--off]               skip the slides, or show them again (slide.skip)
+  slide apply-layout <id,id,...> <layout>      move the content into the layout's placeholders (slide.applyLayout)
+  slide import <sourceDeckId> <id,id,...> [--after <slideId>] [--section <sectionId>] [--decks <dir>]
+                                               copy slides and their assets from another deck under decks/ (slide.import)
+The layouts: ${LAYOUT_IDS.join(', ')}.
 Every write takes --base-revision <n> (default: the current revision), --author <name>, --note <text>, --force and --json.`;
 
 export async function slide(ctx: CommandContext): Promise<number> {
@@ -61,9 +83,197 @@ export async function slide(ctx: CommandContext): Promise<number> {
       return slideMoveCommand(inner);
     case 'set-layout':
       return slideSetLayoutCommand(inner);
+    case 'new':
+      return slideNewCommand(inner);
+    case 'duplicate':
+      return slideDuplicateCommand(inner);
+    case 'skip':
+      return slideSkipCommand(inner);
+    case 'apply-layout':
+      return slideApplyLayoutCommand(inner);
+    case 'import':
+      return slideImportCommand(inner);
     default:
       throw new UsageError(`unknown subcommand "slide ${sub ?? ''}"\n${USAGE}`);
   }
+}
+
+/** A layout id from a flag or a positional, checked against the list. */
+function requireLayout(value: string | undefined): (typeof LAYOUT_IDS)[number] {
+  if (value === undefined || !isLayoutId(value))
+    throw new UsageError(
+      `a layout is one of ${LAYOUT_IDS.join(', ')}, got ${value ?? 'nothing'}\n${USAGE}`,
+    );
+  return value;
+}
+
+/** `a,b,c` from the positional at `index`. */
+function requireSlideIds(ctx: CommandContext, index: number): string[] {
+  const raw = requirePositional(ctx, index, USAGE);
+  const ids = raw
+    .split(',')
+    .map((id) => id.trim())
+    .filter((id) => id !== '');
+  if (ids.length === 0) throw new UsageError(USAGE);
+  return ids;
+}
+
+async function slideNewCommand(ctx: CommandContext): Promise<number> {
+  const layout = requireLayout(flagString(ctx.args, 'layout'));
+  const after = flagString(ctx.args, 'after');
+  const sectionId = flagString(ctx.args, 'section');
+  const id = flagString(ctx.args, 'id');
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    slideNew(storeDeps(ctx, store), writeContext(ctx), {
+      layout,
+      ...(after !== undefined ? { after } : {}),
+      ...(sectionId !== undefined ? { sectionId } : {}),
+      ...(id !== undefined ? { id } : {}),
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  ctx.out.human(
+    `new ${layout} slide ${result.slide.id}${after !== undefined ? ` after ${after}` : ''}: revision ${result.revision}`,
+  );
+  return 0;
+}
+
+async function slideDuplicateCommand(ctx: CommandContext): Promise<number> {
+  const slideIds = requireSlideIds(ctx, 0);
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    slideDuplicate(storeDeps(ctx, store), writeContext(ctx), {
+      slideIds,
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  ctx.out.human(
+    `duplicated ${slideIds.join(', ')} as ${result.slides.map((slide) => slide.id).join(', ')}: revision ${result.revision}`,
+  );
+  return 0;
+}
+
+async function slideSkipCommand(ctx: CommandContext): Promise<number> {
+  const slideIds = requireSlideIds(ctx, 0);
+  const skip = !flagBoolean(ctx.args, 'off');
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    slideSkip(storeDeps(ctx, store), writeContext(ctx), {
+      slideIds,
+      skip,
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  ctx.out.human(
+    `${skip ? 'skipped' : 'showing'} ${result.slideIds.join(', ')}: revision ${result.revision}`,
+  );
+  return 0;
+}
+
+async function slideApplyLayoutCommand(ctx: CommandContext): Promise<number> {
+  const slideIds = requireSlideIds(ctx, 0);
+  const layout = requireLayout(ctx.rest[1]);
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    slideApplyLayout(storeDeps(ctx, store), writeContext(ctx), {
+      slideIds,
+      layout,
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  ctx.out.human(
+    `applied ${layout} to ${slideIds.join(', ')}: revision ${result.revision}, ${result.findings.length} finding(s)`,
+  );
+  for (const row of result.dropped)
+    ctx.out.human(
+      `  ${row.slideId}: ${row.blockIds.length} block(s) did not fit this layout (${row.blockIds.join(', ')})`,
+    );
+  for (const id of result.moved) ctx.out.human(`  ${id} starts a new section`);
+  return 0;
+}
+
+async function slideImportCommand(ctx: CommandContext): Promise<number> {
+  const sourceDeckId = requirePositional(ctx, 0, USAGE);
+  const slideIds = requireSlideIds(ctx, 1);
+  const after = flagString(ctx.args, 'after');
+  const sectionId = flagString(ctx.args, 'section');
+  const store = openStore(ctx);
+  const decksDir = decksDirFor(ctx);
+  const sourceDir = join(decksDir, sourceDeckId);
+  if (!existsSync(join(sourceDir, 'deck.json')))
+    throw new UsageError(`no deck ${sourceDeckId}: ${sourceDir} has no deck.json`);
+  const result = await runAction(ctx, async () =>
+    slideImport(
+      storeDeps(ctx, store),
+      writeContext(ctx),
+      {
+        sourceDeckId,
+        slideIds,
+        ...(after !== undefined ? { after } : {}),
+        ...(sectionId !== undefined ? { sectionId } : {}),
+        baseRevision: await baseRevision(ctx, store),
+      },
+      slideImportSource(decksDir, sourceDeckId, store.dir),
+    ),
+  );
+  ctx.out.result(result);
+  ctx.out.human(
+    `imported ${result.slides.map((slide) => slide.id).join(', ')} from ${sourceDeckId}: ${result.assets.length} asset(s) copied, revision ${result.revision}`,
+  );
+  for (const row of result.renamed) ctx.out.human(`  ${row.from} landed as ${row.to}`);
+  return 0;
+}
+
+/**
+ * What slide.import reads from a sibling deck under decks/: its document, and a copy of each asset
+ * file (the twins and the source file) into the target deck. RangeError when the deck or a file is
+ * missing; the slug schema on sourceDeckId keeps the path inside the decks folder.
+ */
+export function slideImportSource(
+  decksDir: string,
+  sourceDeckId: string,
+  targetDir: string,
+): SlideImportSource {
+  const sourceDir = join(decksDir, sourceDeckId);
+  if (!existsSync(join(sourceDir, 'deck.json')))
+    throw new RangeError(`No deck ${sourceDeckId} under ${decksDir}`);
+  return {
+    document: loadDeckDir(sourceDir).document,
+    copyAsset: async (relative) => {
+      const from = join(sourceDir, ...relative.split('/'));
+      const to = join(targetDir, ...relative.split('/'));
+      if (!existsSync(from)) throw new RangeError(`${sourceDeckId} has no file ${relative}`);
+      mkdirSync(dirname(to), { recursive: true });
+      cpSync(from, to);
+    },
+  };
+}
+
+/**
+ * Registers slide.import on a dispatcher (the stdio MCP server's deck_import_slides): the source
+ * deck is a sibling of the served deck under the same decks/ folder, read the way `slide import`
+ * reads it, so the CLI and the MCP tool run one implementation.
+ */
+export function registerSlideImportAction(
+  dispatcher: Dispatcher,
+  deps: StoreActionDeps,
+  decksDir: string,
+  targetDir: string,
+): void {
+  dispatcher.register('slide.import', (input, context: ActionContext) => {
+    const typed = input as SlideImportInput;
+    return slideImport(
+      deps,
+      context,
+      typed,
+      slideImportSource(decksDir, typed.sourceDeckId, targetDir),
+    );
+  });
 }
 
 /** The layout of `slide set-layout`: `--layout <json>`, or `--type` with the layout's options as flags. */

@@ -9,6 +9,7 @@ import type { RenderOptions, RenderedSlide } from './slide.ts';
 import { counterText, renderStage } from './stage.ts';
 import type { SlideId } from '@turboslide/schema/ids';
 import type { Deck, Slide } from '@turboslide/schema/deck';
+import { deckCounter } from '@turboslide/schema/deck';
 import type { Theme } from '@turboslide/schema/render';
 
 /**
@@ -32,6 +33,11 @@ export type RenderDeckOptions = Omit<RenderOptions, 'counter' | 'active'> & {
   bundle: ThemeBundle;
   /** Only these slides, in deck order; default every slide. */
   slideIds?: SlideId[];
+  /**
+   * The play list the counter counts over (`n / total`), in deck order: the unskipped slides for a
+   * download or a slideshow, the whole deck for a render of the editor's slides (default).
+   */
+  numbering?: SlideId[];
   /** The document title. */
   title?: string;
   /** Present mode: the sheet fills the viewport with no edge (default true). */
@@ -48,24 +54,45 @@ export type RenderedDeck = {
   warnings: string[];
 };
 
-/** Renders the slides of a deck in section order (SPEC 4.2: sections are the only place order lives). */
+/**
+ * The counter text of one slide under the deck's counter mode (gslides-parity SPEC 7.2.4): `n /
+ * total` over the play list, an empty string when the mode is off, when skip-title meets a title
+ * slide, or when the slide is not in the play list (a skipped slide rendered for the editor).
+ */
+export function slideCounter(deck: Deck, slide: Slide, n: number, total: number): string {
+  const mode = deckCounter(deck);
+  if (mode === 'off') return '';
+  if (mode === 'skip-title' && slide.kind === 'title') return '';
+  if (n < 1 || total < 1) return '';
+  return counterText(n, total);
+}
+
+/**
+ * Renders the slides of a deck in section order (SPEC 4.2: sections are the only place order
+ * lives). `slideIds` selects; `numbering` is the play list the counter counts over (default the
+ * deck order), so a download without skipped slides numbers what it holds.
+ */
 export function renderSlides(
   deck: Deck,
   slides: Slide[],
   options: RenderOptions,
   slideIds?: SlideId[],
+  numbering?: SlideId[],
 ): RenderedDeck['slides'] {
   const byId = slideMap(slides);
   const order = slideOrder(deck);
+  const play = numbering ?? order;
   const wanted = slideIds ? new Set(slideIds) : undefined;
   const out: RenderedDeck['slides'] = [];
   order.forEach((slideId, index) => {
     if (wanted && !wanted.has(slideId)) return;
     const slide = byId.get(slideId);
+    const played = play.indexOf(slideId);
+    const n = played >= 0 ? played + 1 : index + 1;
     if (!slide) {
       out.push({
         slideId,
-        n: index + 1,
+        n,
         rendered: {
           html: '',
           slots: {},
@@ -77,10 +104,10 @@ export function renderSlides(
     }
     out.push({
       slideId,
-      n: index + 1,
+      n,
       rendered: renderSlide(deck, slide, {
         ...options,
-        counter: counterText(index + 1, order.length),
+        counter: slideCounter(deck, slide, played >= 0 ? n : 0, play.length),
         active: false,
       }),
     });
@@ -89,12 +116,17 @@ export function renderSlides(
 }
 
 export function renderDeck(deck: Deck, slides: Slide[], options: RenderDeckOptions): RenderedDeck {
-  const { bundle, slideIds, title, present, extraCss, runtime, ...slideOptions } = options;
-  const rendered = renderSlides(deck, slides, slideOptions, slideIds);
-  const total = slideOrder(deck).length;
+  const { bundle, slideIds, numbering, title, present, extraCss, runtime, ...slideOptions } =
+    options;
+  const rendered = renderSlides(deck, slides, slideOptions, slideIds, numbering);
+  const total = (numbering ?? slideOrder(deck)).length;
+  const first = rendered[0];
+  const firstSlide = first ? slides.find((slide) => slide.id === first.slideId) : undefined;
   const stage = renderStage(rendered.map((entry) => entry.rendered.html).join('\n'), {
     theme: options.theme,
-    counter: counterText(rendered[0]?.n ?? 1, total),
+    counter: firstSlide
+      ? slideCounter(deck, firstSlide, first?.n ?? 1, total)
+      : counterText(first?.n ?? 1, total),
     sprite: bundle.sprite,
     present: present !== false,
     stageId: 'stage',

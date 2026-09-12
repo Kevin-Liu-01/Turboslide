@@ -1,55 +1,131 @@
-import type { ChangeEvent, FormEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import type { ChangeEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
+import { useCallback, useId, useMemo, useRef, useState } from 'react';
 
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Link, createFileRoute, useNavigate, useRouter } from '@tanstack/react-router';
 
-import { ConnectCard } from '@turboslide/chrome/ConnectCard';
-import { tipProps } from '@turboslide/chrome/Tooltip';
 import { GtMark } from '@turboslide/chrome/GtMark';
-import type { DeckTemplateId } from '@turboslide/schema/actions';
-import type { UnpackResult } from '@turboslide/store/unpack';
+import { Icon } from '@turboslide/chrome/icons';
+import { Menu } from '@turboslide/chrome/Menu';
+import type { MenuCloseReason } from '@turboslide/chrome/Menu';
+import { DEFAULT_MENU_CONTEXT } from '@turboslide/chrome/menus/model';
+import type { MenuItem } from '@turboslide/chrome/menus/model';
+import { DIALOGS, HOME, SNACKBARS } from '@turboslide/chrome/menus/strings';
+import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
+import { tipProps } from '@turboslide/chrome/Tooltip';
 
-import { bundleDownloadTicket, bundleUploadTicket, connectFacts } from '../server/bundle';
-import { createNewDeck, getHostingFacts, listDecks } from '../server/decks';
-import type { DeckSummary } from '../server/decks';
+import { useMountEffect } from '../components/useMountEffect';
+import { bundleDownloadTicket } from '../server/bundle';
+import {
+  copyStoredDeck,
+  createNewDeck,
+  listDecks,
+  renameStoredDeck,
+  restoreStoredDeck,
+  trashStoredDeck,
+} from '../server/decks';
+import type { DeckCard } from '../server/decks';
 import { getServerHealth } from '../server/health';
 
 import './decks.css';
 
-// The deck list at /decks (SPEC 3.4 put it at `/`; Kevin's directive moved `/` to the editor):
-// every deck the store holds, newest first, with a New deck form (the name and the template, one
-// deck.create through the server function), an Upload deck bundle form (docs/deck-transfer.md:
-// the zip goes to POST /api/decks/bundle with a ticket from the bundleUploadTicket server
-// function, so the page never holds the bearer token), a row per deck (name, slides, revision,
-// updated, Open, Present, Export, Download bundle through GET /api/decks/<id>/bundle with a ticket
-// from bundleDownloadTicket) and the Connect card naming the CLI's push and pull commands with
-// this deployment's URL. SSR. It also calls the health server function so every build exercises
-// the server-only marker scripts/check-client-bundle.mjs looks for (AGENTS.md, contracts between
-// builders), and the hosting facts so the footer names the store (file, tmp or blob) and its
-// notice. The file is decks.index.tsx, not decks.tsx: a decks.tsx would become the layout
-// route of decks.$deckId.assets.$ and run this loader for every asset request.
+/**
+ * The home page, /decks (gslides-parity SPEC 6.2; R03 a.1 and finding 13): Google's three bands.
+ * The app bar with the GT mark, the product name and a search field that filters the list by
+ * title; "Start a new presentation" with the Blank card (opens /new) and the GT brand deck card
+ * (a copy of the GT template, opened at once) under a Template gallery link that scrolls to the
+ * strip; "Recent presentations" as a grid of cards (a 320 by 180 thumbnail of slide 1 in the
+ * deck's appearance, the title, "Opened 2 hours ago" from this browser's history or "Edited
+ * <date>") with a list view toggle, a sort control and a per card menu (Open, Open in new tab,
+ * Present, Rename, Make a copy, Download, Move to trash). Trash at the bottom links to
+ * /decks/trash. Every read is `deck.list` through the store (server/decks.ts listDecks), the one
+ * call the Open dialog, the Import slides dialog, the CLI and MCP share, so decks in the trash and
+ * unsaved drafts never appear. Recent is this browser's own history first, then the store's
+ * updatedAt, so a rep sees their decks before other people's (R10 B6: there is no identity).
+ *
+ * The page is server rendered and announces hydration (`data-hydrated`): a click on the server's
+ * HTML before the handlers attach is lost (measured on the dev server), so the specs wait for it.
+ * The file is decks.index.tsx, not decks.tsx: a decks.tsx would become the layout route of
+ * decks.$deckId.assets.$ and run this loader for every asset request. The bundle upload form of
+ * the earlier /decks lives in File > Open's Upload tab now; the connect facts in Extensions >
+ * Agent access; the health call stays so every build carries the server-only marker
+ * scripts/check-client-bundle.mjs looks for (AGENTS.md).
+ */
 export const Route = createFileRoute('/decks/')({
   loader: async () => {
-    const [decks, health, hosting, connect] = await Promise.all([
-      listDecks(),
-      getServerHealth(),
-      getHostingFacts(),
-      connectFacts(),
-    ]);
-    return { decks, health, hosting, connect };
+    const [decks, health] = await Promise.all([listDecks(), getServerHealth()]);
+    return { decks, node: health.node };
   },
-  head: () => ({ meta: [{ title: 'Decks, Turboslide' }] }),
-  component: DecksPage,
+  head: () => ({ meta: [{ title: `${HOME.recent}, Turboslide` }] }),
+  component: HomePage,
 });
 
-const TEMPLATES: ReadonlyArray<{ id: DeckTemplateId; label: string; detail: string }> = [
-  {
-    id: 'gt-brand',
-    label: 'GT brand deck',
-    detail: '85 slides in 8 sections, the assets and the archetypes, from decks/templates/gt-brand',
-  },
-  { id: 'blank', label: 'Blank', detail: 'One title slide in the gt-ink-paper theme' },
-];
+// ---------------------------------------------------------------------------------------------
+// This browser's history and settings (SPEC 6.2 "Recent"), in localStorage; private to the browser
+
+/** deck id to the ISO time it was last opened from this browser. */
+export const RECENT_KEY = 'turboslide:opened';
+
+/** the view and sort the rep last chose */
+const HOME_SETTINGS_KEY = 'turboslide:home';
+
+export type HomeSort = 'opened' | 'modified' | 'title';
+export type HomeView = 'grid' | 'list';
+
+type HomeSettings = { sort: HomeSort; view: HomeView };
+
+const DEFAULT_SETTINGS: HomeSettings = { sort: 'opened', view: 'grid' };
+
+export function readOpened(): Record<string, string> {
+  try {
+    const raw = window.localStorage.getItem(RECENT_KEY);
+    const parsed: unknown = raw === null ? {} : JSON.parse(raw);
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
+    const out: Record<string, string> = {};
+    for (const [id, at] of Object.entries(parsed as Record<string, unknown>))
+      if (typeof at === 'string') out[id] = at;
+    return out;
+  } catch {
+    return {};
+  }
+}
+
+/** Marks a deck as opened now, for the home page's Recent order and its "Opened ..." line. */
+export function recordDeckOpened(deckId: string, now: Date = new Date()): void {
+  try {
+    const opened = readOpened();
+    opened[deckId] = now.toISOString();
+    window.localStorage.setItem(RECENT_KEY, JSON.stringify(opened));
+  } catch {
+    // private mode or storage full: the list keeps the store's order
+  }
+}
+
+function readSettings(): HomeSettings {
+  try {
+    const raw = window.localStorage.getItem(HOME_SETTINGS_KEY);
+    const parsed = (raw === null ? {} : JSON.parse(raw)) as Partial<HomeSettings>;
+    return {
+      sort:
+        parsed.sort === 'modified' || parsed.sort === 'title' || parsed.sort === 'opened'
+          ? parsed.sort
+          : DEFAULT_SETTINGS.sort,
+      view: parsed.view === 'list' ? 'list' : 'grid',
+    };
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+function writeSettings(settings: HomeSettings): void {
+  try {
+    window.localStorage.setItem(HOME_SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    // private mode: the choice lasts the page
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Dates
 
 /** `2026-09-10 22:35` from an ISO stamp, in the reader's zone; the raw value when it is not a date. */
 export function formatStamp(iso: string): string {
@@ -59,25 +135,58 @@ export function formatStamp(iso: string): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+const DAY = 24 * HOUR;
+
+/** `Sep 12, 2026`, or the time for a stamp of the same day. */
+export function shortDate(iso: string, now: Date = new Date()): string {
+  const date = new Date(iso);
+  if (iso === '' || Number.isNaN(date.getTime())) return iso;
+  const sameDay =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+  if (sameDay) return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+/** `just now`, `5 minutes ago`, `2 hours ago`, `3 days ago`, else the short date. */
+export function timeAgo(iso: string, now: Date = new Date()): string {
+  const date = new Date(iso);
+  if (iso === '' || Number.isNaN(date.getTime())) return iso;
+  const delta = Math.max(0, now.getTime() - date.getTime());
+  if (delta < MINUTE) return 'just now';
+  if (delta < HOUR) {
+    const minutes = Math.floor(delta / MINUTE);
+    return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+  }
+  if (delta < DAY) {
+    const hours = Math.floor(delta / HOUR);
+    return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  }
+  if (delta < 7 * DAY) {
+    const days = Math.floor(delta / DAY);
+    return `${days} day${days === 1 ? '' : 's'} ago`;
+  }
+  return shortDate(iso, now);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Helpers
+
+/** The thumbnail of a card: the render route's downsampled capture (server/thumbs.ts thumbUrl). */
+export function cardThumbUrl(card: DeckCard): string | null {
+  if (card.firstSlide === null) return null;
+  return `/api/render/${encodeURIComponent(card.firstSlide)}?deck=${encodeURIComponent(card.id)}&theme=${card.appearance}&w=320&r=${card.revision}`;
+}
+
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-type BundleAnswer = UnpackResult & { editUrl: string };
-type BundleRefusal = { error?: { message?: string; status?: number } };
-
-/** The upload route's answer as the message the form shows, or the created deck. */
-async function readUploadAnswer(response: Response): Promise<BundleAnswer> {
-  const body = (await response.json()) as BundleAnswer | BundleRefusal;
-  if (!response.ok) {
-    const refusal = body as BundleRefusal;
-    throw new Error(refusal.error?.message ?? `the upload answered ${response.status}`);
-  }
-  return body as BundleAnswer;
-}
-
 /** Downloads through a one-time anchor; a same-origin URL of ours is already an attachment. */
-function triggerDownload(url: string): void {
+export function triggerDownload(url: string): void {
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = '';
@@ -87,354 +196,882 @@ function triggerDownload(url: string): void {
   anchor.remove();
 }
 
-type Panel = 'new' | 'upload' | null;
+function editPath(deckId: string): string {
+  return `/edit/${encodeURIComponent(deckId)}`;
+}
 
-function DecksPage() {
-  const { decks, health, hosting, connect } = Route.useLoaderData();
-  const navigate = useNavigate();
-  const [panel, setPanel] = useState<Panel>(null);
-  const [name, setName] = useState('');
-  const [from, setFrom] = useState<DeckTemplateId>('gt-brand');
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [replace, setReplace] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [uploading, setUploading] = useState<string | null>(null);
-  const page = useRef<HTMLElement>(null);
+function presentPath(deckId: string): string {
+  return `/deck/${encodeURIComponent(deckId)}?present=1`;
+}
 
-  /* the page announces hydration: a click on the server's HTML before the handlers are attached
-     is lost (measured on the dev server: Upload at +0 ms opened nothing, at +1.5 s the panel
-     appeared), so the e2e specs and the drive wait for `.ts-decks-page[data-hydrated]` */
-  useEffect(() => {
-    page.current?.setAttribute('data-hydrated', '');
-  }, []);
+/** Sorts the cards for the Recent list: this browser's opens first for "Last opened by me". */
+export function sortCards(
+  cards: ReadonlyArray<DeckCard>,
+  sort: HomeSort,
+  opened: Record<string, string>,
+): DeckCard[] {
+  const byModified = (a: DeckCard, b: DeckCard) => b.updatedAt.localeCompare(a.updatedAt);
+  const list = [...cards];
+  if (sort === 'title')
+    return list.sort((a, b) => a.title.localeCompare(b.title) || byModified(a, b));
+  if (sort === 'modified') return list.sort(byModified);
+  return list.sort((a, b) => {
+    const openedA = opened[a.id];
+    const openedB = opened[b.id];
+    if (openedA !== undefined && openedB !== undefined) return openedB.localeCompare(openedA);
+    if (openedA !== undefined) return -1;
+    if (openedB !== undefined) return 1;
+    return byModified(a, b);
+  });
+}
 
-  const toggle = (which: Exclude<Panel, null>) =>
-    setPanel((open) => (open === which ? null : which));
+// ---------------------------------------------------------------------------------------------
+// The dialog primitive of the home page and the trash (SPEC 13.3)
 
-  const submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const title = name.trim();
-    if (title === '' || busy) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const created = await createNewDeck({ name: title, from });
-      await navigate({ to: '/edit/$deckId', params: { deckId: created.deckId } });
-    } catch (caught) {
-      setError(errorMessage(caught));
-      setBusy(false);
+export type DialogProps = {
+  title: string;
+  /** the id the audit and the specs address, `home.copy` */
+  control: string;
+  children?: ReactNode;
+  /** the dismissive button first, the confirming button last */
+  actions: ReactNode;
+  onClose: () => void;
+  /** Enter outside a textarea runs the default button */
+  onSubmit?: () => void;
+  className?: string;
+};
+
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+/**
+ * `role="dialog"` with `aria-labelledby`, a focus trap, Esc to cancel, Enter to run the default
+ * button, and focus returned to the opener on close (SPEC 13.3; R08 B9). The scrim closes it.
+ */
+export function Dialog({
+  title,
+  control,
+  children,
+  actions,
+  onClose,
+  onSubmit,
+  className,
+}: DialogProps) {
+  const titleId = useId();
+  const root = useRef<HTMLDivElement>(null);
+
+  useMountEffect(() => {
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const first = root.current?.querySelector<HTMLElement>('[data-autofocus], ' + FOCUSABLE);
+    first?.focus();
+    if (first instanceof HTMLInputElement && first.dataset.select === 'all') first.select();
+    return () => opener?.focus();
+  });
+
+  const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      onClose();
+      return;
     }
-  };
-
-  const onFile = (event: ChangeEvent<HTMLInputElement>) => {
-    setFile(event.target.files?.[0] ?? null);
-    setUploadError(null);
-  };
-
-  /* the zip goes to the route with a ticket from the server function; the page never holds the token */
-  const upload = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (file === null || uploading !== null) return;
-    setUploadError(null);
-    setUploading(`Uploading ${file.name}`);
-    try {
-      const ticket = await bundleUploadTicket();
-      if (file.size > ticket.maxBytes) {
-        throw new Error(
-          `${file.name} is ${file.size} bytes; a bundle is at most ${ticket.maxBytes} bytes`,
-        );
+    if (event.key === 'Enter' && onSubmit !== undefined) {
+      const target = event.target;
+      if (target instanceof HTMLTextAreaElement) return;
+      if (target instanceof HTMLButtonElement || target instanceof HTMLAnchorElement) return;
+      event.preventDefault();
+      onSubmit();
+      return;
+    }
+    if (event.key === 'Tab' && root.current) {
+      const items = Array.from(root.current.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
       }
-      const url = new URL(ticket.url, window.location.origin);
-      if (replace) url.searchParams.set('replace', '1');
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'content-type': 'application/zip', accept: 'application/json' },
-        body: file,
-      });
-      const answer = await readUploadAnswer(response);
-      setUploading(`${answer.replaced ? 'Replaced' : 'Created'} ${answer.deckId}, opening`);
-      await navigate({ to: '/edit/$deckId', params: { deckId: answer.deckId } });
-    } catch (caught) {
-      setUploadError(errorMessage(caught));
-      setUploading(null);
     }
   };
 
   return (
-    <main ref={page} className="ts-home ts-decks-page">
-      <header className="ts-home-head">
-        <GtMark width={38} height={24} />
-        <h1>Decks</h1>
-        <p>
-          Every deck this studio holds, newest first. The root address opens the newest one in the
-          editor; a new deck starts from the GT brand template or from one title slide, or arrives
-          as a bundle from another studio or a checkout.
-        </p>
-        {hosting.notice ? (
-          <p className="ts-home-notice" role="status" data-store={hosting.store}>
-            {hosting.notice}.
-          </p>
-        ) : null}
-      </header>
-      <div className="ts-decks-tools">
-        <span className="ts-decks-links">
-          <button
-            type="button"
-            className={panel === 'new' ? 'pt-ib is-text is-on' : 'pt-ib is-text is-solid'}
-            title="deck.create: a deck from the GT brand template or one title slide"
-            data-control="decks.new"
-            aria-expanded={panel === 'new'}
-            onClick={() => toggle('new')}
-          >
-            <span className="pt-lb">New deck</span>
-          </button>
-          <button
-            type="button"
-            className={panel === 'upload' ? 'pt-ib is-text is-on' : 'pt-ib is-text'}
-            title="deck.unpack: a deck from a bundle zip made by Download bundle or turboslide deck pack"
-            data-control="decks.upload"
-            aria-expanded={panel === 'upload'}
-            onClick={() => toggle('upload')}
-          >
-            <span className="pt-lb">Upload deck bundle</span>
-          </button>
-        </span>
-        <span className="ts-decks-count">{`${decks.length} deck${decks.length === 1 ? '' : 's'}`}</span>
+    <div className="ts-hm-dialog-scrim" onMouseDown={onClose} data-control={`${control}.scrim`}>
+      <div
+        ref={root}
+        className={className === undefined ? 'ts-hm-dialog' : `ts-hm-dialog ${className}`}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        data-control={control}
+        onKeyDown={onKeyDown}
+        onMouseDown={(event) => event.stopPropagation()}
+      >
+        <h2 id={titleId} className="ts-hm-dialog-title">
+          {title}
+        </h2>
+        {children}
+        <div className="ts-hm-dialog-actions">{actions}</div>
       </div>
-      {panel === 'new' ? (
-        <form className="ts-decks-form" onSubmit={submit} data-control="decks.form">
-          <label className="ts-decks-field">
-            <span>Name</span>
-            <input
-              type="text"
-              value={name}
-              autoFocus
-              placeholder="Q4 review"
-              aria-label="Deck name"
-              data-control="decks.name"
-              spellCheck={false}
-              autoComplete="off"
-              onChange={(event) => setName(event.target.value)}
-            />
-          </label>
-          <fieldset className="ts-decks-templates">
-            <legend>Template</legend>
-            {TEMPLATES.map((template) => (
-              <label key={template.id} className="ts-decks-template">
-                <input
-                  type="radio"
-                  name="from"
-                  value={template.id}
-                  checked={from === template.id}
-                  aria-label={template.label}
-                  data-control={`decks.from.${template.id}`}
-                  onChange={() => setFrom(template.id)}
-                />
-                <span className="ts-decks-radio" aria-hidden="true" />
-                <b>{template.label}</b>
-                <span className="ts-decks-detail">{template.detail}</span>
-              </label>
-            ))}
-          </fieldset>
-          <div className="ts-decks-actions">
-            <button
-              type="submit"
-              className="pt-ib is-text is-solid"
-              title="deck.create: make the deck and open it in the editor"
-              data-control="decks.create"
-              disabled={busy || name.trim() === ''}
-            >
-              <span className="pt-lb">{busy ? 'Creating' : 'Create and open'}</span>
-            </button>
-            <button
-              type="button"
-              className="pt-ib is-text"
-              title="Close the form"
-              data-control="decks.cancel"
-              onClick={() => setPanel(null)}
-            >
-              <span className="pt-lb">Cancel</span>
-            </button>
-            {error ? <span className="ts-decks-error">{error}</span> : null}
-          </div>
-        </form>
-      ) : null}
-      {panel === 'upload' ? (
-        <form className="ts-decks-upload" onSubmit={upload} data-control="decks.upload-form">
-          <p className="ts-decks-upload-lead">
-            A bundle is the zip Download bundle or <code>turboslide deck pack</code> writes:
-            deck.json, the slides, the assets and the versions with a manifest. It is validated
-            before anything is written; a deck of the same id gets a free sibling id unless you
-            replace it.
-          </p>
-          <label className="ts-decks-file">
-            <span>Bundle zip</span>
-            <input
-              type="file"
-              accept=".zip,application/zip"
-              aria-label="Bundle zip"
-              data-control="decks.bundle-file"
-              onChange={onFile}
-            />
-          </label>
-          <label
-            className="ts-decks-check"
-            title="Remove the deck that holds the bundle's id first, instead of writing a sibling"
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+// The card menu (SPEC 6.2): Google's per item menu, in the words of the File menu
+
+/** The rows of a card's menu: Google's Open, Open in new tab, Rename and Remove, plus ours. */
+export const CARD_MENU_ITEMS: ReadonlyArray<MenuItem> = [
+  { id: 'home.card.open', label: 'Open', icon: 'document', status: 'now' },
+  { id: 'home.card.openNewTab', label: 'Open in new tab', icon: 'external', status: 'now' },
+  { id: 'home.card.present', label: 'Present', icon: 'present', status: 'now', turboslide: true },
+  { id: 'home.card.rename', label: 'Rename', icon: 'pencil', status: 'now', dividerBefore: true },
+  { id: 'home.card.copy', label: DIALOGS.makeCopy.title, status: 'now' },
+  { id: 'home.card.download', label: 'Download', status: 'now', turboslide: true },
+  { id: 'home.card.trash', label: 'Move to trash', status: 'now', dividerBefore: true },
+];
+
+type CardMenuState = { deckId: string; anchor: HTMLElement };
+
+// ---------------------------------------------------------------------------------------------
+// The page
+
+/** The id a GT brand deck copy takes: unique per click, so the card works more than once. */
+function gtBrandDeckId(now: Date = new Date()): string {
+  return `gt-brand-${now.getTime().toString(36)}`;
+}
+
+function HomePage() {
+  const { decks, node } = Route.useLoaderData();
+  const router = useRouter();
+  const navigate = useNavigate();
+  const page = useRef<HTMLElement>(null);
+  const snackbar = useSnackbar();
+  const [query, setQuery] = useState('');
+  const [settings, setSettings] = useState<HomeSettings>(DEFAULT_SETTINGS);
+  const [opened, setOpened] = useState<Record<string, string>>({});
+  const [mounted, setMounted] = useState(false);
+  /* decks moved to the trash from this page and not yet reloaded: hidden at once, Undo shows them */
+  const [hidden, setHidden] = useState<ReadonlySet<string>>(new Set());
+  const [menu, setMenu] = useState<CardMenuState | null>(null);
+  const [renaming, setRenaming] = useState<string | null>(null);
+  const [copying, setCopying] = useState<DeckCard | null>(null);
+  const [creating, setCreating] = useState(false);
+
+  useMountEffect(() => {
+    /* this browser's history and choices are read after hydration, so the server's HTML and the
+       first client render agree (React 418 otherwise) */
+    setSettings(readSettings());
+    setOpened(readOpened());
+    setMounted(true);
+    page.current?.setAttribute('data-hydrated', '');
+  });
+
+  const choose = (patch: Partial<HomeSettings>) => {
+    setSettings((current) => {
+      const next = { ...current, ...patch };
+      writeSettings(next);
+      return next;
+    });
+  };
+
+  const refresh = useCallback(async () => {
+    await router.invalidate();
+  }, [router]);
+
+  const visible = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    const filtered = decks.filter(
+      (card) =>
+        !hidden.has(card.id) && (needle === '' || card.title.toLowerCase().includes(needle)),
+    );
+    return sortCards(filtered, settings.sort, opened);
+  }, [decks, hidden, query, settings.sort, opened]);
+
+  const cardById = (deckId: string): DeckCard | undefined =>
+    decks.find((card) => card.id === deckId);
+
+  const open = (deckId: string, newTab = false) => {
+    recordDeckOpened(deckId);
+    if (newTab) {
+      window.open(editPath(deckId), '_blank', 'noopener');
+      return;
+    }
+    void navigate({ to: '/edit/$deckId', params: { deckId } });
+  };
+
+  const present = (deckId: string) => {
+    recordDeckOpened(deckId);
+    window.open(presentPath(deckId), '_blank', 'noopener');
+  };
+
+  const download = async (deckId: string) => {
+    try {
+      const { url } = await bundleDownloadTicket({ deckId });
+      triggerDownload(url);
+    } catch (error) {
+      snackbar.show(`Download: ${errorMessage(error)}`);
+    }
+  };
+
+  const moveToTrash = async (card: DeckCard) => {
+    setHidden((current) => new Set([...current, card.id]));
+    try {
+      await trashStoredDeck({ deckId: card.id, baseRevision: card.revision });
+    } catch (error) {
+      setHidden((current) => {
+        const next = new Set(current);
+        next.delete(card.id);
+        return next;
+      });
+      snackbar.show(`Move to trash: ${errorMessage(error)}`);
+      return;
+    }
+    snackbar.show(SNACKBARS.movedToTrash, {
+      label: SNACKBARS.undo,
+      run: () => {
+        void (async () => {
+          try {
+            await restoreStoredDeck({ deckId: card.id });
+            setHidden((current) => {
+              const next = new Set(current);
+              next.delete(card.id);
+              return next;
+            });
+            await refresh();
+          } catch (error) {
+            snackbar.show(`Restore: ${errorMessage(error)}`);
+          }
+        })();
+      },
+    });
+  };
+
+  const onMenuSelect = (item: MenuItem) => {
+    const state = menu;
+    setMenu(null);
+    if (state === null) return;
+    const card = cardById(state.deckId);
+    if (card === undefined) return;
+    switch (item.id) {
+      case 'home.card.open':
+        open(card.id);
+        return;
+      case 'home.card.openNewTab':
+        open(card.id, true);
+        return;
+      case 'home.card.present':
+        present(card.id);
+        return;
+      case 'home.card.rename':
+        setRenaming(card.id);
+        return;
+      case 'home.card.copy':
+        setCopying(card);
+        return;
+      case 'home.card.download':
+        void download(card.id);
+        return;
+      case 'home.card.trash':
+        void moveToTrash(card);
+        return;
+      default:
+        return;
+    }
+  };
+
+  const onMenuClose = (_reason: MenuCloseReason) => setMenu(null);
+
+  const rename = async (card: DeckCard, name: string) => {
+    setRenaming(null);
+    const title = name.trim();
+    if (title === '' || title === card.title) return;
+    try {
+      const result = await renameStoredDeck({
+        deckId: card.id,
+        name: title,
+        baseRevision: card.revision,
+      });
+      if (!result.ok) {
+        snackbar.show(`Rename: ${result.message}`);
+        return;
+      }
+      await refresh();
+    } catch (error) {
+      snackbar.show(`Rename: ${errorMessage(error)}`);
+    }
+  };
+
+  const createGtBrandDeck = async () => {
+    if (creating) return;
+    setCreating(true);
+    try {
+      const created = await createNewDeck({
+        name: HOME.gtBrand,
+        from: 'gt-brand',
+        id: gtBrandDeckId(),
+      });
+      recordDeckOpened(created.deckId);
+      await navigate({ to: '/edit/$deckId', params: { deckId: created.deckId } });
+    } catch (error) {
+      snackbar.show(`${HOME.gtBrand}: ${errorMessage(error)}`);
+      setCreating(false);
+    }
+  };
+
+  const now = new Date();
+
+  return (
+    <main ref={page} className="ts-home ts-home-page" data-node={node}>
+      <header className="ts-appbar">
+        <Link
+          to="/decks"
+          className="ts-appbar-brand"
+          {...tipProps({ name: 'Turboslide', doc: 'Your presentations.' })}
+        >
+          <GtMark width={30} height={19} />
+          <span>Turboslide</span>
+        </Link>
+        <label className="ts-appbar-search">
+          <Icon name="search" />
+          <input
+            type="search"
+            value={query}
+            placeholder={HOME.search}
+            aria-label={HOME.search}
+            data-control="home.search"
+            autoComplete="off"
+            spellCheck={false}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value)}
+            {...tipProps({ name: HOME.search, doc: 'Filters the list by title.' })}
+          />
+        </label>
+      </header>
+
+      <section className="ts-strip" id="templates" aria-labelledby="ts-strip-heading">
+        <div className="ts-strip-head">
+          <h2 id="ts-strip-heading">{HOME.startNew}</h2>
+          <a
+            className="ts-strip-gallery"
+            href="#templates"
+            data-control="home.gallery"
+            {...tipProps({
+              name: HOME.gallery,
+              doc: 'The templates a presentation can start from.',
+            })}
           >
-            <span>Replace a deck with the same id</span>
-            <input
-              type="checkbox"
-              checked={replace}
-              aria-label="Replace a deck with the same id"
-              data-control="decks.bundle-replace"
-              onChange={(event) => setReplace(event.target.checked)}
-            />
-            <span className="ts-decks-box" aria-hidden="true" />
-          </label>
-          <div className="ts-decks-actions">
-            <button
-              type="submit"
-              className="pt-ib is-text is-solid"
-              title="deck.unpack: upload the bundle, create the deck and open it in the editor"
-              data-control="decks.bundle-submit"
-              disabled={file === null || uploading !== null}
+            {HOME.gallery}
+          </a>
+        </div>
+        <ul className="ts-strip-cards">
+          <li>
+            <Link
+              to="/new"
+              className="ts-template ts-template-blank"
+              data-control="home.blank"
+              {...tipProps({ name: HOME.blank, doc: 'Starts an untitled presentation.' })}
             >
-              <span className="pt-lb">{uploading !== null ? 'Uploading' : 'Upload and open'}</span>
-            </button>
+              <span className="ts-template-plate">
+                <Icon name="plus" size={40} />
+              </span>
+              <span className="ts-template-label">{HOME.blank}</span>
+            </Link>
+          </li>
+          <li>
             <button
               type="button"
-              className="pt-ib is-text"
-              title="Close the form"
-              data-control="decks.upload-cancel"
-              onClick={() => setPanel(null)}
+              className="ts-template"
+              data-control="home.gt-brand"
+              disabled={creating}
+              onClick={() => void createGtBrandDeck()}
+              {...tipProps({
+                name: HOME.gtBrand,
+                doc: 'Makes a copy of the GT brand template, 85 slides, and opens it.',
+              })}
             >
-              <span className="pt-lb">Cancel</span>
+              <span className="ts-template-plate ts-template-gt">
+                <GtMark width={56} height={36} />
+              </span>
+              <span className="ts-template-label">{creating ? 'Opening' : HOME.gtBrand}</span>
             </button>
-            {uploading !== null ? (
-              <span
-                className="ts-decks-progress"
-                role="status"
-                data-control="decks.upload-progress"
-              >
-                {uploading}
-              </span>
-            ) : null}
-            {uploadError ? (
-              <span className="ts-decks-error" data-control="decks.upload-error">
-                {uploadError}
-              </span>
-            ) : null}
-          </div>
-        </form>
-      ) : null}
-      {decks.length === 0 ? (
-        <p className="ts-home-empty">
-          No decks yet. Create one above, upload a bundle, run <code>turboslide deck create</code>,
-          or add a folder under decks/ with a deck.json.
-        </p>
-      ) : (
-        <ul className="ts-decks-list">
-          {decks.map((deck) => (
-            <DeckRow key={deck.id} deck={deck} />
-          ))}
+          </li>
         </ul>
-      )}
-      <ConnectCard url={connect.url} tokenRequired={connect.tokenRequired} deckId={decks[0]?.id} />
-      <footer className="ts-home-foot">
-        Node {health.node}. The sheet is {health.sheet[0]} by {health.sheet[1]}. Store:{' '}
-        {hosting.store} ({hosting.reason}){hosting.persistent ? '' : ', not persistent'}.
+      </section>
+
+      <section className="ts-recent" aria-labelledby="ts-recent-heading">
+        <div className="ts-recent-head">
+          <div>
+            <h2 id="ts-recent-heading">{HOME.recent}</h2>
+            <p className="ts-recent-lead">{HOME.listed}</p>
+          </div>
+          <div className="ts-recent-tools">
+            <span className="ts-seg" role="group" aria-label="View">
+              <button
+                type="button"
+                className={settings.view === 'grid' ? 'pt-ib pt-icon is-on' : 'pt-ib pt-icon'}
+                aria-pressed={settings.view === 'grid'}
+                data-control="home.view.grid"
+                onClick={() => choose({ view: 'grid' })}
+                {...tipProps({
+                  name: 'Grid view',
+                  doc: 'Cards with a thumbnail of the first slide.',
+                })}
+              >
+                <Icon name="grid" />
+              </button>
+              <button
+                type="button"
+                className={settings.view === 'list' ? 'pt-ib pt-icon is-on' : 'pt-ib pt-icon'}
+                aria-pressed={settings.view === 'list'}
+                data-control="home.view.list"
+                onClick={() => choose({ view: 'list' })}
+                {...tipProps({
+                  name: 'List view',
+                  doc: 'Rows with the title, the last edit and the slide count.',
+                })}
+              >
+                <Icon name="queue-list" />
+              </button>
+            </span>
+            <label className="ts-sort">
+              <span className="ts-visually-hidden">Sort by</span>
+              <select
+                value={settings.sort}
+                data-control="home.sort"
+                onChange={(event) => choose({ sort: event.target.value as HomeSort })}
+                {...tipProps({ name: 'Sort by', doc: 'The order of the list.' })}
+              >
+                <option value="opened">{HOME.sortOpened}</option>
+                <option value="modified">{HOME.sortModified}</option>
+                <option value="title">{HOME.sortTitle}</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        {visible.length === 0 ? (
+          <p className="ts-home-empty" data-control="home.empty">
+            {decks.length === 0 || hidden.size === decks.length
+              ? HOME.empty
+              : `No presentation matches "${query.trim()}"`}
+          </p>
+        ) : settings.view === 'grid' ? (
+          <ul className="ts-cards" data-control="home.cards">
+            {visible.map((card) => (
+              <DeckCardView
+                key={card.id}
+                card={card}
+                mounted={mounted}
+                now={now}
+                openedAt={opened[card.id]}
+                renaming={renaming === card.id}
+                menuOpen={menu?.deckId === card.id}
+                onOpen={() => open(card.id)}
+                onMenu={(anchor) => setMenu({ deckId: card.id, anchor })}
+                onRename={(name) => void rename(card, name)}
+                onCancelRename={() => setRenaming(null)}
+              />
+            ))}
+          </ul>
+        ) : (
+          <table className="ts-rows" data-control="home.rows">
+            <thead>
+              <tr>
+                <th scope="col">{HOME.sortTitle}</th>
+                <th scope="col">Last edit</th>
+                <th scope="col">Slides</th>
+                <th scope="col">
+                  <span className="ts-visually-hidden">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((card) => (
+                <DeckRowView
+                  key={card.id}
+                  card={card}
+                  mounted={mounted}
+                  now={now}
+                  renaming={renaming === card.id}
+                  menuOpen={menu?.deckId === card.id}
+                  onOpen={() => open(card.id)}
+                  onMenu={(anchor) => setMenu({ deckId: card.id, anchor })}
+                  onRename={(name) => void rename(card, name)}
+                  onCancelRename={() => setRenaming(null)}
+                />
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+
+      <footer className="ts-home-tail">
+        <Link
+          to="/decks/trash"
+          className="pt-ib is-text"
+          data-control="home.trash"
+          {...tipProps({
+            name: HOME.trash,
+            doc: 'Presentations moved to the trash; restore or delete them forever.',
+          })}
+        >
+          <Icon name="archive" />
+          <span className="pt-lb">{HOME.trash}</span>
+        </Link>
       </footer>
+
+      {menu !== null ? (
+        <Menu
+          id="home-card-menu"
+          items={CARD_MENU_ITEMS}
+          context={DEFAULT_MENU_CONTEXT}
+          label="Presentation actions"
+          anchor={{ kind: 'element', element: menu.anchor }}
+          placement="below"
+          onSelect={onMenuSelect}
+          onClose={onMenuClose}
+          returnFocusTo={menu.anchor}
+          autoFocus
+        />
+      ) : null}
+
+      {copying !== null ? (
+        <CopyDialog
+          card={copying}
+          onClose={() => setCopying(null)}
+          onCopied={() => {
+            setCopying(null);
+            void refresh();
+          }}
+          onError={(message) => snackbar.show(`${DIALOGS.makeCopy.title}: ${message}`)}
+        />
+      ) : null}
+
+      <Snackbar message={snackbar.message} onDismiss={snackbar.dismiss} />
     </main>
   );
 }
 
-function DeckRow({ deck }: { deck: DeckSummary }) {
-  const [downloading, setDownloading] = useState(false);
-  const [note, setNote] = useState<string | null>(null);
+// ---------------------------------------------------------------------------------------------
+// Cards and rows
 
-  /* the ticket comes from the server function; the route then answers the zip (or a 302 to a stored copy) */
-  const download = async () => {
-    if (downloading) return;
-    setDownloading(true);
-    setNote(null);
+type CardViewProps = {
+  card: DeckCard;
+  /** this browser's values (opened, the local date form) are drawn only after hydration */
+  mounted: boolean;
+  now: Date;
+  openedAt?: string;
+  renaming: boolean;
+  menuOpen: boolean;
+  onOpen: () => void;
+  onMenu: (anchor: HTMLElement) => void;
+  onRename: (name: string) => void;
+  onCancelRename: () => void;
+};
+
+/** "Opened 2 hours ago" from this browser, else "Edited <date>" from the store (SPEC 6.2). */
+function whenLine(card: DeckCard, mounted: boolean, now: Date, openedAt?: string): string {
+  if (openedAt !== undefined) return HOME.opened(timeAgo(openedAt, now));
+  // the server renders the ISO date; the reader's zone and form take over after hydration
+  return HOME.edited(mounted ? shortDate(card.updatedAt, now) : card.updatedAt.slice(0, 10));
+}
+
+function MoreButton({
+  card,
+  open,
+  onMenu,
+}: {
+  card: DeckCard;
+  open: boolean;
+  onMenu: (anchor: HTMLElement) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={open ? 'pt-ib pt-icon ts-hm-card-more is-on' : 'pt-ib pt-icon ts-hm-card-more'}
+      aria-haspopup="menu"
+      aria-expanded={open}
+      aria-controls={open ? 'home-card-menu' : undefined}
+      data-control={`home.more.${card.id}`}
+      onClick={(event) => onMenu(event.currentTarget)}
+      {...tipProps({
+        name: 'More actions',
+        doc: `Open, present, rename, copy, download or trash ${card.title}.`,
+      })}
+    >
+      <span aria-hidden="true" className="ts-hm-card-dots">
+        ⋮
+      </span>
+    </button>
+  );
+}
+
+function RenameField({
+  card,
+  onRename,
+  onCancel,
+}: {
+  card: DeckCard;
+  onRename: (name: string) => void;
+  onCancel: () => void;
+}) {
+  const [value, setValue] = useState(card.title);
+  const field = useRef<HTMLInputElement>(null);
+  useMountEffect(() => {
+    field.current?.focus();
+    field.current?.select();
+  });
+  const submit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onRename(value);
+  };
+  return (
+    <form className="ts-hm-card-rename" onSubmit={submit}>
+      <input
+        ref={field}
+        type="text"
+        value={value}
+        aria-label="Rename"
+        data-control={`home.rename.${card.id}`}
+        spellCheck={false}
+        autoComplete="off"
+        onChange={(event) => setValue(event.target.value)}
+        onBlur={() => onRename(value)}
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            onCancel();
+          }
+        }}
+      />
+    </form>
+  );
+}
+
+function Thumb({ card }: { card: DeckCard }) {
+  const [failed, setFailed] = useState(false);
+  const url = cardThumbUrl(card);
+  return (
+    <span className="ts-hm-card-thumb" data-theme={card.appearance} aria-hidden="true">
+      {url !== null && !failed ? (
+        <img
+          src={url}
+          width={320}
+          height={180}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          onError={() => setFailed(true)}
+        />
+      ) : (
+        <span className="ts-hm-card-plate">{card.title}</span>
+      )}
+    </span>
+  );
+}
+
+function DeckCardView({
+  card,
+  mounted,
+  now,
+  openedAt,
+  renaming,
+  menuOpen,
+  onOpen,
+  onMenu,
+  onRename,
+  onCancelRename,
+}: CardViewProps) {
+  return (
+    <li className="ts-hm-card" data-deck={card.id} data-control={`home.card.${card.id}`}>
+      <Link
+        to="/edit/$deckId"
+        params={{ deckId: card.id }}
+        className="ts-hm-card-open"
+        data-control={`home.open.${card.id}`}
+        onClick={(event) => {
+          event.preventDefault();
+          onOpen();
+        }}
+        {...tipProps({ name: card.title, doc: 'Opens the presentation.' })}
+      >
+        <Thumb card={card} />
+      </Link>
+      <div className="ts-hm-card-body">
+        {renaming ? (
+          <RenameField card={card} onRename={onRename} onCancel={onCancelRename} />
+        ) : (
+          <Link
+            to="/edit/$deckId"
+            params={{ deckId: card.id }}
+            className="ts-hm-card-title"
+            data-control={`home.title.${card.id}`}
+            {...tipProps({ name: card.title, doc: 'Opens the presentation in the editor.' })}
+            onClick={(event) => {
+              event.preventDefault();
+              onOpen();
+            }}
+          >
+            {card.title}
+          </Link>
+        )}
+        <span className="ts-hm-card-when" suppressHydrationWarning>
+          {whenLine(card, mounted, now, openedAt)}
+        </span>
+        <MoreButton card={card} open={menuOpen} onMenu={onMenu} />
+      </div>
+    </li>
+  );
+}
+
+function DeckRowView({
+  card,
+  mounted,
+  now,
+  renaming,
+  menuOpen,
+  onOpen,
+  onMenu,
+  onRename,
+  onCancelRename,
+}: Omit<CardViewProps, 'openedAt'>) {
+  return (
+    <tr className="ts-row" data-deck={card.id} data-control={`home.card.${card.id}`}>
+      <td className="ts-row-title">
+        {renaming ? (
+          <RenameField card={card} onRename={onRename} onCancel={onCancelRename} />
+        ) : (
+          <Link
+            to="/edit/$deckId"
+            params={{ deckId: card.id }}
+            className="ts-hm-card-title"
+            data-control={`home.title.${card.id}`}
+            {...tipProps({ name: card.title, doc: 'Opens the presentation in the editor.' })}
+            onClick={(event) => {
+              event.preventDefault();
+              onOpen();
+            }}
+          >
+            <Icon name="deck" />
+            <span>{card.title}</span>
+          </Link>
+        )}
+      </td>
+      <td className="ts-row-when" suppressHydrationWarning>
+        {mounted ? shortDate(card.updatedAt, now) : card.updatedAt.slice(0, 10)}
+      </td>
+      <td className="ts-row-count">{card.slides}</td>
+      <td className="ts-row-more">
+        <MoreButton card={card} open={menuOpen} onMenu={onMenu} />
+      </td>
+    </tr>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+// Make a copy (SPEC 6.5, 12 "Dialogs")
+
+function CopyDialog({
+  card,
+  onClose,
+  onCopied,
+  onError,
+}: {
+  card: DeckCard;
+  onClose: () => void;
+  onCopied: (deckId: string) => void;
+  onError: (message: string) => void;
+}) {
+  const [name, setName] = useState(`Copy of ${card.title}`);
+  const [removeNotes, setRemoveNotes] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const submit = async () => {
+    if (busy || name.trim() === '') return;
+    setBusy(true);
+    // the tab opens inside the click, before the copy's round trip, so a popup rule lets it
+    // through; it is pointed at the copy once the store answers
+    const tab = window.open('', '_blank');
     try {
-      const { url } = await bundleDownloadTicket({ deckId: deck.id });
-      triggerDownload(url);
-    } catch (caught) {
-      setNote(errorMessage(caught));
-    } finally {
-      setDownloading(false);
+      const copy = await copyStoredDeck({
+        deckId: card.id,
+        name: name.trim(),
+        removeNotes,
+        baseRevision: card.revision,
+      });
+      recordDeckOpened(copy.deckId);
+      if (tab !== null) tab.location.href = editPath(copy.deckId);
+      else window.location.assign(editPath(copy.deckId));
+      onCopied(copy.deckId);
+    } catch (error) {
+      tab?.close();
+      setBusy(false);
+      onError(errorMessage(error));
     }
   };
 
   return (
-    <li className="ts-decks-row" data-deck={deck.id}>
-      <div className="ts-decks-name">
-        <Link
-          to="/edit/$deckId"
-          params={{ deckId: deck.id }}
-          className="ts-decks-title"
-          {...tipProps({ name: deck.title, doc: `Opens ${deck.id} in the editor.` })}
-        >
-          {deck.title}
-        </Link>
-        <span className="ts-decks-id">{deck.id}</span>
-        {note ? <span className="ts-decks-error">{note}</span> : null}
-      </div>
-      <span className="ts-decks-cell">{`${deck.slides} slide${deck.slides === 1 ? '' : 's'}`}</span>
-      <span className="ts-decks-cell">{`r${deck.revision}`}</span>
-      {/* the reader's zone differs from the function's (UTC), so this text is the one hydration
-          mismatch on /decks (React 418, measured on the preview 2026-09-11); the client's value wins */}
-      <span
-        className="ts-decks-cell ts-decks-updated"
-        title={deck.updatedAt}
-        suppressHydrationWarning
-      >
-        {formatStamp(deck.updatedAt)}
-      </span>
-      <span className="ts-decks-links">
-        <Link
-          to="/edit/$deckId"
-          params={{ deckId: deck.id }}
-          className="pt-ib is-text"
-          title="Open the deck in the editor"
-          data-control={`decks.open.${deck.id}`}
-        >
-          <span className="pt-lb">Open</span>
-        </Link>
-        <Link
-          to="/deck/$deckId"
-          params={{ deckId: deck.id }}
-          search={{ present: 1 }}
-          className="pt-ib is-text"
-          title="Open the presentation: the viewer in present mode, chrome hidden"
-          data-control={`decks.present.${deck.id}`}
-        >
-          <span className="pt-lb">Present</span>
-        </Link>
-        <Link
-          to="/edit/$deckId"
-          params={{ deckId: deck.id }}
-          search={{ export: 1 }}
-          className="pt-ib is-text"
-          title="Open the deck with the Export menu"
-          data-control={`decks.export.${deck.id}`}
-        >
-          <span className="pt-lb">Export</span>
-        </Link>
-        <button
-          type="button"
-          className="pt-ib is-text"
-          title="deck.pack: download the deck as one bundle zip (deck.json, slides, assets, versions)"
-          data-control={`decks.bundle.${deck.id}`}
-          disabled={downloading}
-          onClick={() => void download()}
-        >
-          <span className="pt-lb">{downloading ? 'Preparing' : 'Download bundle'}</span>
-        </button>
-      </span>
-    </li>
+    <Dialog
+      title={DIALOGS.makeCopy.title}
+      control="home.copy"
+      onClose={onClose}
+      onSubmit={() => void submit()}
+      actions={
+        <>
+          <button
+            type="button"
+            className="pt-ib is-text"
+            data-control="home.copy.cancel"
+            onClick={onClose}
+            {...tipProps({ name: DIALOGS.makeCopy.cancel, doc: 'Closes without copying.' })}
+          >
+            <span className="pt-lb">{DIALOGS.makeCopy.cancel}</span>
+          </button>
+          <button
+            type="button"
+            className="pt-ib is-text is-solid"
+            data-control="home.copy.ok"
+            disabled={busy || name.trim() === ''}
+            onClick={() => void submit()}
+            {...tipProps({
+              name: DIALOGS.makeCopy.ok,
+              doc: 'Copies the presentation and opens the copy in a new tab.',
+              key: 'Enter',
+            })}
+          >
+            <span className="pt-lb">{busy ? 'Copying' : DIALOGS.makeCopy.ok}</span>
+          </button>
+        </>
+      }
+    >
+      <label className="ts-hm-dialog-field">
+        <span>{DIALOGS.makeCopy.name}</span>
+        <input
+          type="text"
+          value={name}
+          data-autofocus
+          data-select="all"
+          data-control="home.copy.name"
+          aria-label={DIALOGS.makeCopy.name}
+          spellCheck={false}
+          autoComplete="off"
+          onChange={(event) => setName(event.target.value)}
+        />
+      </label>
+      <label className="ts-hm-dialog-check">
+        <input
+          type="checkbox"
+          checked={removeNotes}
+          data-control="home.copy.remove-notes"
+          onChange={(event) => setRemoveNotes(event.target.checked)}
+        />
+        <span className="ts-hm-dialog-box" aria-hidden="true" />
+        <span>{DIALOGS.makeCopy.removeNotes}</span>
+      </label>
+    </Dialog>
   );
 }

@@ -1,6 +1,6 @@
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 
-import type { ArrangeActions, EditorOverlayView, LintBox } from '@turboslide/viewer/Editor';
+import type { EditorOverlayView, LintBox } from '@turboslide/viewer/Editor';
 import type { Box, Handle } from '@turboslide/viewer/Gestures';
 import { GuideLines } from '@turboslide/viewer/Guides';
 import { MarqueeRect } from '@turboslide/viewer/Marquee';
@@ -25,17 +25,22 @@ import './Overlay.css';
  * Alt-drag, M5), and a dragged label shows its 12 px clearance ring, ink as a state when a stroke
  * intrudes.
  *
- * This round (Kevin's direction of 2026-09-11) adds the freeform stage: the rings of every block
- * of a multi-selection and the hair box around the group, the eight resize squares of a
- * positioned block, the snap guides in titanium while a drag snaps, the marquee, and the arrange
- * bar under the selection (align, distribute, bring forward, send back) whose icons are Heroicons
- * 20 solid from the theme sprite. Every control carries the chrome's tooltip (Tooltip.tsx
- * tipProps) naming it, what it does and its key; a native title is never used, so the audit and
- * the reader see one plate. Alt with Up or Down on a focused move chip changes the order through
- * the view's onHandleOrder, the same write the arrange bar's order buttons make. Line law (SPEC 2.2
- * junction table): every rule here is 1px, the ring and an active handle draw ink as a state
- * (.is-selected, .is-active), a resting handle draws --pt-hair, guides draw --pt-titanium, and the
- * sheet's blocks draw nothing. New in Turboslide; no Prototemplate source.
+ * The freeform stage (Kevin's direction of 2026-09-11): the rings of every block of a
+ * multi-selection and the hair box around the group, the eight resize squares of a positioned
+ * block, the snap guides in titanium while a drag snaps, and the marquee. The Google Slides parity
+ * round (gslides-parity SPEC 1.1, 4.3, 10.2) makes the block's frame the drag surface: four edge
+ * strips around a positioned block start its move gesture, as Google's border does, since a click
+ * inside the text now places the caret; the chip names the block in Google's words (Text box,
+ * Image, Table) and prints the id only while Show slide and block ids is on (SPEC 13.7); the
+ * arrange bar of the editor depth round is gone, its actions live in the Arrange menu and the
+ * right-click menu (SPEC 4.3). Every control carries the chrome's tooltip (Tooltip.tsx tipProps)
+ * naming it, what it does and its key; a native title is never used, so the audit and the reader
+ * see one plate. Cmd Up and Cmd Down on a focused move chip (Ctrl on Windows) change the order
+ * through the view's onHandleOrder, Google's Bring forward and Send backward, Shift for the ends
+ * (SPEC 10.1); Alt with an arrow is retired (SPEC 10.2). Line law (SPEC 2.2 junction table): every rule here is 1px, the ring and an
+ * active handle draw ink as a state (.is-selected, .is-active), a resting handle draws --pt-hair,
+ * guides draw --pt-titanium, and the sheet's blocks draw nothing. New in Turboslide; no
+ * Prototemplate source.
  */
 export type OverlayProps = { view: EditorOverlayView };
 
@@ -47,11 +52,10 @@ function place(box: Box, k: number): CSSProperties {
 /** The chip's height plus its gap to the ring, in CSS pixels. */
 const CHIP_H = 18;
 const CHIP_GAP = 2;
-/** The arrange bar's height and its gap to the ring, in CSS pixels. */
-const BAR_H = 32;
-const BAR_GAP = 6;
 /** The clearance a diagram label keeps from a stroke, in sheet pixels (DECK-GRAMMAR.md:45). */
 const CLEARANCE_PX = 12;
+/** The frame edge strips of a positioned block: this many CSS pixels wide, centred on the ring (gslides-parity SPEC 10.2). */
+export const FRAME_EDGE_PX = 8;
 
 /** The chip sits above the ring's top left corner, or under its bottom left when the ring meets the sheet's top. */
 function chipStyle(box: Box, k: number): CSSProperties {
@@ -62,11 +66,34 @@ function chipStyle(box: Box, k: number): CSSProperties {
   };
 }
 
-/** The arrange bar sits under the ring's bottom left corner, or above its top right when the ring meets the sheet's bottom. */
-function barStyle(box: Box, k: number, sheetHeight: number): CSSProperties {
-  const below = (box[1] + box[3]) * k + BAR_GAP;
-  if (below + BAR_H <= sheetHeight) return { left: box[0] * k, top: below };
-  return { left: box[0] * k, top: Math.max(0, box[1] * k - BAR_H - BAR_GAP - CHIP_H - CHIP_GAP) };
+/** The four edge strips of a block's frame, each centred on the ring's edge (gslides-parity SPEC 10.2: the frame is the drag surface). */
+export function frameEdgeStyles(box: Box, k: number): Record<'n' | 's' | 'w' | 'e', CSSProperties> {
+  const half = FRAME_EDGE_PX / 2;
+  const left = box[0] * k;
+  const top = box[1] * k;
+  const width = box[2] * k;
+  const height = box[3] * k;
+  return {
+    n: { left: left - half, top: top - half, width: width + FRAME_EDGE_PX, height: FRAME_EDGE_PX },
+    s: {
+      left: left - half,
+      top: top + height - half,
+      width: width + FRAME_EDGE_PX,
+      height: FRAME_EDGE_PX,
+    },
+    w: {
+      left: left - half,
+      top: top + half,
+      width: FRAME_EDGE_PX,
+      height: Math.max(0, height - FRAME_EDGE_PX),
+    },
+    e: {
+      left: left + width - half,
+      top: top + half,
+      width: FRAME_EDGE_PX,
+      height: Math.max(0, height - FRAME_EDGE_PX),
+    },
+  };
 }
 
 /** A vertical edge handle is placed by its center and never thinner than its minimum hit width. */
@@ -139,9 +166,9 @@ export function handleDoc(handle: Handle): string {
     case 'dia-marker':
       return 'Alt-drag to move the marker on the half-pixel grid. Arrows step 1 unit, Shift 10.';
     case 'block-move':
-      return 'Drag the chip or the block to reorder it within its slot or into another slot. Alt with Up or Down moves it one step.';
+      return `Drag the chip or the block to reorder it within its slot or into another slot. ${modKey()}Up and ${modKey()}Down move it one step, and with Shift to the first or the last place in its slot.`;
     case 'free-move':
-      return `Drag the chip or the block anywhere: snaps to the 8 px grid, the rails, the content box and other blocks. Arrows nudge 1 px, Shift 8 px. Alt with Up or Down changes the order (${modKey()}] and ${modKey()}[).`;
+      return `Drag the frame or the chip anywhere: snaps to the 8 px grid, the rails, the content box and other blocks. Arrows nudge 1 px, Shift 8 px. ${modKey()}Up and ${modKey()}Down change the order.`;
     case 'free-resize':
       return `Drag the ${RESIZE_NAMES[handle.dir ?? ''] ?? 'edge'} to resize; Shift keeps the aspect. Arrows step 1 px, Shift 8 px.`;
   }
@@ -211,232 +238,6 @@ function LintMark({ lint, k }: { lint: LintBox; k: number }) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The arrange bar
-
-type ArrangeGlyph =
-  | 'align-left'
-  | 'align-center'
-  | 'align-right'
-  | 'align-top'
-  | 'align-middle'
-  | 'align-bottom'
-  | 'distribute-x'
-  | 'distribute-y'
-  | 'forward'
-  | 'back';
-
-/**
- * Heroicons 20 solid for the bar, every one a `<use>` of the theme sprite the stage inlines
- * (packages/theme/assets/sprite.svg; the round's rule). The three bars glyphs (bars-3-bottom-left,
- * bars-3-center-left, bars-3-bottom-right) read as align left, center and right, and rotated a
- * quarter turn as align top, middle and bottom; distribute and the order pair use arrows-right-left,
- * arrows-up-down and arrow-up (send back is bring forward turned over).
- */
-const ALIGN_SYMBOL: Record<'left' | 'center' | 'right', string> = {
-  left: '#i-bars-3-bottom-left',
-  center: '#i-bars-3-center-left',
-  right: '#i-bars-3-bottom-right',
-};
-
-function Glyph({ glyph }: { glyph: ArrangeGlyph }) {
-  switch (glyph) {
-    case 'align-left':
-    case 'align-center':
-    case 'align-right':
-    case 'align-top':
-    case 'align-middle':
-    case 'align-bottom': {
-      const symbol =
-        glyph === 'align-left' || glyph === 'align-top'
-          ? ALIGN_SYMBOL.left
-          : glyph === 'align-center' || glyph === 'align-middle'
-            ? ALIGN_SYMBOL.center
-            : ALIGN_SYMBOL.right;
-      const rotated = glyph === 'align-top' || glyph === 'align-middle' || glyph === 'align-bottom';
-      return (
-        <svg
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-          className={rotated ? 'ts-arrange-rotated' : undefined}
-        >
-          <use href={symbol} />
-        </svg>
-      );
-    }
-    case 'distribute-x':
-      return (
-        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <use href="#i-arrows-right-left" />
-        </svg>
-      );
-    case 'distribute-y':
-      return (
-        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <use href="#i-arrows-up-down" />
-        </svg>
-      );
-    case 'forward':
-      return (
-        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-          <use href="#i-arrow-up" />
-        </svg>
-      );
-    case 'back':
-      return (
-        <svg
-          viewBox="0 0 20 20"
-          fill="currentColor"
-          aria-hidden="true"
-          className="ts-arrange-flipped"
-        >
-          <use href="#i-arrow-up" />
-        </svg>
-      );
-  }
-}
-
-type ArrangeButton = {
-  glyph: ArrangeGlyph;
-  control: string;
-  /** the tooltip's name and the accessible name */
-  name: string;
-  /** the tooltip's sentence */
-  doc: string;
-  /** the tooltip's key chip, when the button has a key */
-  key?: string;
-  run: (arrange: ArrangeActions) => void;
-  /** disabled below this many selected blocks */
-  needs: number;
-};
-
-const ARRANGE_BUTTONS: ArrangeButton[] = [
-  {
-    glyph: 'align-left',
-    control: 'arrange.align.left',
-    name: 'Align left',
-    doc: 'Moves the selected blocks so their left edges meet the leftmost one; a single block goes to the content box edge.',
-    run: (a) => a.align('left'),
-    needs: 1,
-  },
-  {
-    glyph: 'align-center',
-    control: 'arrange.align.center',
-    name: 'Align center',
-    doc: 'Centers the selected blocks on the group center; a single block centers on the content box.',
-    run: (a) => a.align('center'),
-    needs: 1,
-  },
-  {
-    glyph: 'align-right',
-    control: 'arrange.align.right',
-    name: 'Align right',
-    doc: 'Moves the selected blocks so their right edges meet the rightmost one; a single block goes to the content box edge.',
-    run: (a) => a.align('right'),
-    needs: 1,
-  },
-  {
-    glyph: 'align-top',
-    control: 'arrange.align.top',
-    name: 'Align top',
-    doc: 'Moves the selected blocks so their top edges meet the topmost one; a single block goes to the content box top.',
-    run: (a) => a.align('top'),
-    needs: 1,
-  },
-  {
-    glyph: 'align-middle',
-    control: 'arrange.align.middle',
-    name: 'Align middle',
-    doc: 'Centers the selected blocks vertically on the group; a single block centers on the content box.',
-    run: (a) => a.align('middle'),
-    needs: 1,
-  },
-  {
-    glyph: 'align-bottom',
-    control: 'arrange.align.bottom',
-    name: 'Align bottom',
-    doc: 'Moves the selected blocks so their bottom edges meet the lowest one; a single block goes to the content box bottom.',
-    run: (a) => a.align('bottom'),
-    needs: 1,
-  },
-  {
-    glyph: 'distribute-x',
-    control: 'arrange.distribute.x',
-    name: 'Distribute horizontally',
-    doc: 'Keeps the leftmost and rightmost blocks and spaces the ones between with equal gaps. Needs three blocks.',
-    run: (a) => a.distribute('horizontal'),
-    needs: 3,
-  },
-  {
-    glyph: 'distribute-y',
-    control: 'arrange.distribute.y',
-    name: 'Distribute vertically',
-    doc: 'Keeps the top and bottom blocks and spaces the ones between with equal gaps. Needs three blocks.',
-    run: (a) => a.distribute('vertical'),
-    needs: 3,
-  },
-  {
-    glyph: 'forward',
-    control: 'arrange.z.forward',
-    name: 'Bring forward',
-    doc: 'Paints the selected block over the next one.',
-    key: `${modKey()}] or Alt Up`,
-    run: (a) => a.zOrder('forward'),
-    needs: 1,
-  },
-  {
-    glyph: 'back',
-    control: 'arrange.z.back',
-    name: 'Send back',
-    doc: 'Paints the selected block under the previous one.',
-    key: `${modKey()}[ or Alt Down`,
-    run: (a) => a.zOrder('backward'),
-    needs: 1,
-  },
-];
-
-function ArrangeBar({
-  arrange,
-  box,
-  k,
-  sheetHeight,
-}: {
-  arrange: ArrangeActions;
-  box: Box;
-  k: number;
-  sheetHeight: number;
-}) {
-  return (
-    <div
-      className="ts-arrange"
-      role="toolbar"
-      aria-label="Arrange"
-      style={barStyle(box, k, sheetHeight)}
-    >
-      {ARRANGE_BUTTONS.map((button, i) => (
-        <button
-          key={button.control}
-          type="button"
-          className={cn('pt-ib', 'pt-icon', (i === 6 || i === 8) && 'ts-arrange-group')}
-          aria-label={button.name}
-          data-control={button.control}
-          disabled={arrange.count < button.needs}
-          onPointerDown={(e) => e.preventDefault()}
-          onClick={() => button.run(arrange)}
-          {...tipProps({
-            name: button.name,
-            doc: button.doc,
-            ...(button.key !== undefined ? { key: button.key } : {}),
-          })}
-        >
-          <Glyph glyph={button.glyph} />
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------------------------
 // A handle button: the chip or a drawn handle, with its tooltip merged over its own keys
 
 type HandleButtonProps = {
@@ -482,14 +283,24 @@ export function Overlay({ view }: OverlayProps) {
   const { k } = view;
   const chipHandle = view.handles.find((handle) => handle.shape === 'chip');
   const drawn = view.handles.filter((handle) => handle.shape !== 'chip');
-  const sheetHeight = 900 * k;
   const onHandleKey = (e: ReactKeyboardEvent<HTMLButtonElement>, handle: Handle) => {
-    /* Alt with Up or Down on a move chip: the order, as the chip's tooltip promises, never a
-       nudge (measured on the editor depth preview: the block moved 1 px and kept its z) */
-    if (e.altKey && isMoveHandle(handle) && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+    /* Cmd Up and Cmd Down on a move chip (Ctrl on Windows): Google's Bring forward and Send
+       backward, Shift for the ends (gslides-parity SPEC 10.1), through the view's order and never
+       a nudge. The chord stops here so the shell's key table does not run the Arrange menu's row
+       a second time. Alt with an arrow is retired (SPEC 10.2) and does nothing on a handle. */
+    if (
+      (e.metaKey || e.ctrlKey) &&
+      !e.altKey &&
+      isMoveHandle(handle) &&
+      (e.key === 'ArrowUp' || e.key === 'ArrowDown')
+    ) {
       e.preventDefault();
       e.stopPropagation();
-      view.onHandleOrder(handle, e.key === 'ArrowUp' ? 'forward' : 'backward');
+      const up = e.key === 'ArrowUp';
+      view.onHandleOrder(
+        handle,
+        e.shiftKey ? (up ? 'front' : 'back') : up ? 'forward' : 'backward',
+      );
       return;
     }
     if (e.altKey || e.metaKey || e.ctrlKey) return;
@@ -506,6 +317,12 @@ export function Overlay({ view }: OverlayProps) {
   const chipText =
     view.count > 1 && view.chip !== null ? `${view.count} blocks · ${view.chip}` : view.chip;
   const ringBox = view.groupBox ?? view.selectionBox;
+  /* the frame of a positioned block is its drag surface (gslides-parity SPEC 10.2, R09 A1): four
+     edge strips start the same free-move gesture as the chip */
+  const frameEdges =
+    chipHandle && chipHandle.kind === 'free-move' && ringBox && !view.editing
+      ? frameEdgeStyles(ringBox, k)
+      : null;
   return (
     <>
       {view.hover ? (
@@ -555,6 +372,20 @@ export function Overlay({ view }: OverlayProps) {
           </span>
         )
       ) : null}
+      {frameEdges && chipHandle
+        ? (Object.keys(frameEdges) as Array<keyof typeof frameEdges>).map((side) => (
+            <div
+              key={`frame:${side}`}
+              className="ts-frame-edge"
+              data-side={side}
+              style={frameEdges[side]}
+              aria-hidden="true"
+              onPointerDown={(e) => {
+                if (e.button === 0) view.onHandleDown(chipHandle, e.nativeEvent);
+              }}
+            />
+          ))
+        : null}
       {view.drop ? (
         <div
           className="ts-drop is-active"
@@ -596,10 +427,6 @@ export function Overlay({ view }: OverlayProps) {
           onKey={onHandleKey}
         />
       ))}
-      {/* the arrange bar of a freeform selection (this round), hidden while a drag is on */}
-      {view.arrange && ringBox && !view.editing && view.activeHandle === null && !view.marquee ? (
-        <ArrangeBar arrange={view.arrange} box={ringBox} k={k} sheetHeight={sheetHeight} />
-      ) : null}
     </>
   );
 }

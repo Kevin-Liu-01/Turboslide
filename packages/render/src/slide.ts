@@ -6,7 +6,7 @@ import { pictureRecipeAttr } from './blocks/material.ts';
 import { measureStyle } from './blocks/text-blocks.ts';
 import { colsTemplate, colsWidths, COLS_GAP, CONTENT, slotBoxes } from './geometry.ts';
 import { attrs, classes, el, escapeAttr, px, style } from './html.ts';
-import { renderText } from './text.ts';
+import { renderTextOrPrompt } from './blocks/prompt.ts';
 import type { AssetId, SlideId } from '@turboslide/schema/ids';
 import type { Block } from '@turboslide/schema/blocks';
 import type { ContentSlide, Deck, Layout, Plate, Slide, SlotName } from '@turboslide/schema/deck';
@@ -18,6 +18,12 @@ export type RenderOptions = {
   theme: Theme;
   /** Emit the chips of a full-picture slide (what the deck scopes with `#stage >`, s01:6). */
   chrome: boolean;
+  /**
+   * The counter text of this slide (`03 / 85`), written as `data-counter` on the slide root so the
+   * runtimes show it (runtime.ts); an empty string means the counter is hidden on this slide
+   * (`defaults.counter` off, or skip-title on a title slide, gslides-parity SPEC 7.2.4); absent
+   * leaves the runtime's own count.
+   */
   counter?: string;
   /** Prefix for asset twin paths; ignored when `assetSrc` is given. */
   assetBase: string;
@@ -26,6 +32,11 @@ export type RenderOptions = {
   blockAttrs: boolean;
   gtWord: boolean;
   live?: boolean;
+  /**
+   * Draw the prompt of an empty Text and the dashed plate of an empty picture (gslides-parity
+   * SPEC 5.4); implied by `live`. The layout grid's tiles set it on a thumbnail.
+   */
+  prompts?: boolean;
   /** Write the `is-on` class so the slide is visible on its own (default true). */
   active?: boolean;
 };
@@ -87,6 +98,11 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     assetUrl: (path) =>
       options.assetSrc ? options.assetSrc('', options.theme, path) : `${options.assetBase}${path}`,
     ...(options.live === true ? { live: true } : {}),
+    ...(options.prompts === true ? { prompts: true } : {}),
+    slide: {
+      kind: slide.kind,
+      ...(slide.template !== undefined ? { template: slide.template } : {}),
+    },
     rasters: [],
     warnings: [],
     rasterCount: 0,
@@ -101,6 +117,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
   const common = {
     'data-slide': slide.id,
     'data-kind': slide.kind,
+    'data-counter': options.counter,
   };
   const active = options.active !== false ? 'is-on' : undefined;
   let html: string;
@@ -165,7 +182,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
             ? { 'data-block': 'heading', 'data-type': 'heading', 'data-run': 'heading/text' }
             : {}),
         },
-        renderText(slide.heading, { gtWord: ctx.gtWord }),
+        renderTextOrPrompt(slide.heading, ctx, undefined, '/heading'),
       );
       const lead = el(
         'p',
@@ -176,7 +193,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
             ? { 'data-block': 'lead', 'data-type': 'paragraph', 'data-run': 'lead/text' }
             : {}),
         },
-        renderText(slide.lead, { gtWord: ctx.gtWord }),
+        renderTextOrPrompt(slide.lead, ctx, undefined, '/lead'),
       );
       html = el(
         'section',
@@ -202,7 +219,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
             ? { 'data-block': 'big', 'data-type': 'heading', 'data-run': 'big/text' }
             : {}),
         },
-        renderText(slide.big, { gtWord: ctx.gtWord }),
+        renderTextOrPrompt(slide.big, ctx, undefined, '/big'),
       );
       html = el(
         'section',

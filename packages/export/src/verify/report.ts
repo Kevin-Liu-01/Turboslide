@@ -144,16 +144,20 @@ function defaultDeckDir(deckId: string, env: NodeJS.ProcessEnv): string {
 }
 
 /**
- * Top-level blocks of a record (row sub-entries `<blockId>/<i>` are folded into their block), with
- * the boxes multiplied by `scale` so they address a reference image at that scale, and the
- * recorded text color when the record carries one.
+ * Top-level blocks of a record (row sub-entries `<blockId>/<i>` are folded into their block) plus
+ * the cells of a table block (`<blockId>/<r>/<c>` of type cell, gslides-parity SPEC 7.3: each
+ * cell is measured against the text budget, the 3 px gate the table writer answers to), with the
+ * boxes multiplied by `scale` so they address a reference image at that scale, and the recorded
+ * text color when the record carries one.
  */
 export function blocksOfRecord(record: RenderRecord, scale: ReferenceScale = 1): BlockToCompare[] {
   return (
     Object.entries(record.blocks)
       // a composite is a grid with no ink of its own; its cells' blocks are records too and are
       // compared as themselves (M5), and its union box would only re-measure their edges
-      .filter(([id, block]) => !id.includes('/') && block.type !== 'composite')
+      .filter(
+        ([id, block]) => (!id.includes('/') || block.type === 'cell') && block.type !== 'composite',
+      )
       .map(([blockId, block]) => ({
         blockId,
         type: block.type,
@@ -490,7 +494,11 @@ export async function verifyPptx(
         ...(picture
           ? { pictureMismatch: picture.mismatch, pictureFraction: picture.fraction }
           : {}),
-        blocks: blocks.map((b) => ({ blockId: b.blockId, dx: b.dx, dy: b.dy, dw: b.dw, ok: b.ok })),
+        // the report's block ids are block ids (blockIdSchema); a table cell's `<id>/<r>/<c>`
+        // stays in the summary and the residual line, and decides `ok` like every block
+        blocks: blocks
+          .filter((b) => !b.blockId.includes('/'))
+          .map((b) => ({ blockId: b.blockId, dx: b.dx, dy: b.dy, dw: b.dw, ok: b.ok })),
         ref: slide.ref,
         got: slide.got,
         diff: slide.diff,
@@ -604,6 +612,23 @@ export async function verifyPptx(
     `verify: ${passed ? 'passed' : 'FAILED'}; ${files.reduce((n, f) => n + f.slides.length, 0)} slide(s) in ${summary.ms} ms; geometry ${verified.geometryInBounds ? 'in bounds' : 'OUT OF BOUNDS'}`,
   );
   return verified;
+}
+
+/**
+ * `<slideId>#<blockId>` of every table whose cells the loop measured out of budget, read from the
+ * per slide verifications (`onSlide`, or the summary's files): a cell entry is `<blockId>/<r>/<c>`
+ * (gslides-parity SPEC 7.3), the gate the table writer falls back on.
+ */
+export function tableCellFailures(slides: readonly SlideVerification[]): Set<string> {
+  const out = new Set<string>();
+  for (const slide of slides) {
+    for (const block of slide.blocks) {
+      if (block.ok) continue;
+      const parts = block.blockId.split('/');
+      if (parts.length === 3 && parts[0] !== undefined) out.add(`${slide.slideId}#${parts[0]}`);
+    }
+  }
+  return out;
 }
 
 export { DEFAULT_BUDGETS };

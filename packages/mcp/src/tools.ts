@@ -28,6 +28,10 @@ export const DESTRUCTIVE_ACTIONS: ReadonlySet<ActionId> = new Set<ActionId>([
   'version.restore',
   'asset.dither',
   'fix.run',
+  // the Google Slides parity round: a deck leaves the list, a slide loses blocks, text changes everywhere
+  'deck.trash',
+  'slide.applyLayout',
+  'text.replaceAll',
 ]);
 
 export type ToolEntry = {

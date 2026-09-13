@@ -4,8 +4,9 @@
 // of the freeform round carry Color fields (docs/freeform.md): a token is right by construction
 // and a custom hex is color/off-palette at severity 2, named with the block and the field.
 import type { Block, Finding } from '../contracts.ts';
-import { COLOR_TOKENS, isHexColor } from '../contracts.ts';
+import { COLOR_TOKENS, isHexColor, parseParagraphs } from '../contracts.ts';
 import type { LintContext } from '../context.ts';
+import { blockTexts } from '../context.ts';
 
 /** The Color fields per primitive block type (schema blocks.ts). */
 export function colorFields(block: Block): { field: string; value: string }[] {
@@ -22,17 +23,40 @@ export function colorFields(block: Block): { field: string; value: string }[] {
     case 'shape':
       push('fill', block.fill);
       push('stroke', block.stroke);
+      push('color', block.color);
       break;
     case 'rule':
-    case 'text':
     case 'icon':
       push('color', block.color);
+      break;
+    case 'text':
+      push('color', block.color);
+      push('outline/color', block.outline?.color);
+      break;
+    case 'shot':
+    case 'picture':
+      push('frame/color', block.frame?.color);
+      break;
+    case 'table':
+      push('border/color', block.border?.color);
+      block.cells?.forEach((cell, i) => {
+        push(`cells/${i}/fill`, cell.fill);
+        push(`cells/${i}/border/color`, cell.border?.color);
+      });
+      break;
+    case 'chart':
+      block.series.forEach((series, i) => push(`series/${i}/color`, series.color));
       break;
     default:
       break;
   }
+  // the drop shadow's colour on every block that carries one (gslides-parity SPEC-2 2.3.4)
+  if ('shadow' in block && block.shadow !== undefined) push('shadow/color', block.shadow.color);
   return out;
 }
+
+/** The semantic palette tokens, the hues a run may name (color.ts COLOR_TOKENS; DECK-GRAMMAR.md:30). */
+const SEMANTIC_TOKENS: ReadonlySet<string> = new Set(['green', 'amber', 'red', 'blue']);
 
 /** The four semantic hues, the same in both themes (head:106-109). */
 export const SEMANTIC_HUES: Readonly<Record<'ok' | 'warn' | 'no' | 'info', string>> = {
@@ -80,6 +104,45 @@ export function checkColor(ctx: LintContext): Finding[] {
             proposal: `Block "${block.id}" sets ${field} to ${value}, a custom color that stays the same in both themes; a palette token (${COLOR_TOKENS.join(', ')}) follows the theme (DECK-GRAMMAR.md:28; docs/freeform.md).`,
           }),
         );
+      }
+      // the mark span's colours (gslides-parity SPEC-2 2.2.5, 2.2.6, 0.6): a hex is off palette at
+      // the table severity; a semantic hue inside a sentence is a severity 1 note, never a refusal
+      for (const ref of blockTexts(block)) {
+        const paragraphs = parseParagraphs(ref.text);
+        let offset = 0;
+        paragraphs.forEach((runs, paragraph) => {
+          if (paragraph > 0) offset += 1;
+          for (const run of runs) {
+            const start = offset;
+            offset += run.t.length;
+            for (const [field, value] of [
+              ['color', run.color],
+              ['highlight', run.hl],
+            ] as const) {
+              if (value === undefined) continue;
+              if (isHexColor(value)) {
+                out.push(
+                  ctx.finding('color/off-palette', slide.id, {
+                    blockId: block.id,
+                    path: ref.path,
+                    text: `${value} at ${start}:${start + run.t.length}`,
+                    proposal: `The text "${run.t}" is coloured ${value}, a custom colour that stays the same in both themes; a palette token (${COLOR_TOKENS.join(', ')}) follows the theme (gslides-parity SPEC-2 2.2.5).`,
+                  }),
+                );
+              } else if (field === 'color' && SEMANTIC_TOKENS.has(value)) {
+                out.push(
+                  ctx.finding('color/semantic-icons-only', slide.id, {
+                    blockId: block.id,
+                    path: ref.path,
+                    text: `${value} at ${start}:${start + run.t.length}`,
+                    severity: 1,
+                    proposal: `The text "${run.t}" is coloured ${value}, one of the four semantic hues, which the grammar keeps for icons (DECK-GRAMMAR.md:30); the ink, ink-2 or titanium tokens colour text.`,
+                  }),
+                );
+              }
+            }
+          }
+        });
       }
       const sources: { path: string; text: string }[] = [];
       if (block.type === 'html')

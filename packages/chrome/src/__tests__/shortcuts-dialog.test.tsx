@@ -27,9 +27,13 @@ describe('ShortcutsDialog', () => {
     expect(rows.length).toBeGreaterThan(40);
     const undo = [...rows].find((row) => row.textContent?.startsWith('Undo'));
     expect(undo?.querySelector('kbd')?.textContent).toBe('Cmd Z');
+    /* Italic is bound since SPEC-2 0.1; Insert comment stays the greyed row with the stub sentence */
     const italic = dialog.querySelector('tr[data-binding="format.text.italic"]');
-    expect(italic?.classList.contains('is-later')).toBe(true);
-    expect(italic?.textContent).toContain('Not available in Turboslide yet');
+    expect(italic?.classList.contains('is-later')).toBe(false);
+    expect(italic?.querySelector('kbd')?.textContent).toBe('Cmd I');
+    const comment = dialog.querySelector('tr[data-binding="insert.comment"]');
+    expect(comment?.classList.contains('is-later')).toBe(true);
+    expect(comment?.textContent).toContain('Not available in Turboslide yet');
     for (const el of dialog.querySelectorAll('[title]')) expect(el, 'no native titles').toBeNull();
   });
 

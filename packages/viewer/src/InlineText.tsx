@@ -15,16 +15,26 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useLayoutEffect, useRef, useState } from 'react';
 
+import { renderParagraphs } from '@turboslide/render/blocks/prompt';
 import { GT_WORD_HTML } from '@turboslide/render/text';
 import type { Block } from '@turboslide/schema/blocks';
 import type { TableBlock } from '@turboslide/schema/blocks/table';
+import type { Color } from '@turboslide/schema/color';
 import type { Slide } from '@turboslide/schema/deck';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { getAt } from '@turboslide/schema/pointer';
 import type { Box } from '@turboslide/schema/render';
-import { mergeRuns, parseText, serializeRuns } from '@turboslide/schema/text';
-import type { Run, Text as Markup } from '@turboslide/schema/text';
+import {
+  canonicalText,
+  mergeRuns,
+  parseText,
+  plainLength,
+  serializeRuns,
+} from '@turboslide/schema/text';
+import type { Run, RunMarks, Text as Markup } from '@turboslide/schema/text';
 
+import { colorFromCss, colorRange, marksOf, toggleMark, wordRangeAt } from './marks';
+import type { ToggleMark } from './marks';
 import { blockById, cellPointer, listItemPointer } from './Selection';
 
 import './InlineText.css';
@@ -54,7 +64,33 @@ export const TEXT_BURST_MS = 400;
 /** The elements the browser or the renderer use as paragraph boxes inside an editable run. */
 const PARAGRAPH_ELEMENTS = new Set(['DIV', 'P', 'LI']);
 
-type Flags = { b?: true; link?: string };
+/** The marks the walk carries down the tree: bold, the link and the five span marks with the two colours (SPEC-2 7.2). */
+type Flags = {
+  b?: true;
+  link?: string;
+  i?: true;
+  u?: true;
+  s?: true;
+  sup?: true;
+  sub?: true;
+  color?: Color;
+  hl?: Color;
+};
+
+/** The marks of a flags record as a run carries them. */
+function markFlags(flags: Flags): Partial<Run> {
+  const out: Partial<Run> = {};
+  if (flags.b) out.b = true;
+  if (flags.i) out.i = true;
+  if (flags.u) out.u = true;
+  if (flags.s) out.s = true;
+  if (flags.sup) out.sup = true;
+  else if (flags.sub) out.sub = true;
+  if (flags.color !== undefined) out.color = flags.color;
+  if (flags.hl !== undefined) out.hl = flags.hl;
+  if (flags.link !== undefined) out.link = flags.link;
+  return out;
+}
 
 /** The one paragraph break marker inside a run list before the split. */
 const BREAK = '\n';
@@ -66,16 +102,12 @@ const BREAK = '\n';
 function plainRuns(text: string, flags: Flags): Run[] {
   if (flags.link !== undefined) {
     // link text is literal: the parser never flags GT inside a link (text.ts)
-    const run: Run = { t: text, link: flags.link };
-    if (flags.b) run.b = true;
-    return [run];
+    return [{ t: text, ...markFlags(flags) }];
   }
   const escaped = text.replace(/[*[]/g, '\\$&');
   return parseText(escaped).map((run) => {
-    const out: Run = { t: run.t };
+    const out: Run = { t: run.t, ...markFlags(flags) };
     if (run.gt) out.gt = true;
-    if (flags.b) out.b = true;
-    if (flags.link !== undefined) out.link = flags.link;
     return out;
   });
 }
@@ -113,13 +145,35 @@ function walk(node: RunNode, flags: Flags, out: Run[]): void {
     return;
   }
   if (node.classList?.contains(GT_WORD_CLASS)) {
-    const run: Run = { t: 'GT', gt: true };
-    if (flags.b) run.b = true;
+    const run: Run = { t: 'GT', gt: true, ...markFlags(flags) };
+    delete run.link;
     out.push(run);
     return;
   }
   const next: Flags = { ...flags };
   if (name === 'B' || name === 'STRONG') next.b = true;
+  /* the marks of SPEC-2 7.2 read back from the elements the renderer and the browser write */
+  if (name === 'I' || name === 'EM') next.i = true;
+  if (name === 'U') next.u = true;
+  if (name === 'S' || name === 'STRIKE' || name === 'DEL') next.s = true;
+  if (name === 'SUP') {
+    next.sup = true;
+    delete next.sub;
+  }
+  if (name === 'SUB' && !next.sup) next.sub = true;
+  const styleAttr = node.getAttribute?.('style') ?? null;
+  if (styleAttr !== null && (name === 'SPAN' || name === 'MARK' || name === 'FONT')) {
+    const color = /(?:^|;)\s*color\s*:\s*([^;]+)/i.exec(styleAttr)?.[1];
+    const background = /(?:^|;)\s*background(?:-color)?\s*:\s*([^;]+)/i.exec(styleAttr)?.[1];
+    if (color !== undefined) {
+      const parsed = colorFromCss(color);
+      if (parsed !== null) next.color = parsed;
+    }
+    if (background !== undefined) {
+      const parsed = colorFromCss(background);
+      if (parsed !== null) next.hl = parsed;
+    }
+  }
   if (name === 'A') {
     const href = node.getAttribute?.('href');
     if (href) next.link = href;
@@ -494,6 +548,163 @@ function linkAtCaret(root: HTMLElement): HTMLAnchorElement | null {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Plain text offsets (SPEC-2 0.54): the selection recorded before a rewrite and restored after
+
+type Segment = { node: Node; start: number; length: number; kind: 'text' | 'gt' | 'break' };
+
+/**
+ * The plain text of an editable as segments: text nodes (their length), the GT mark (two
+ * characters, one atom) and paragraph breaks (a BR, or the seam between two paragraph boxes, one
+ * character each on a multiline pointer; a space elsewhere), with the plain offset each starts at.
+ * The count matches `runsFromNode`, so an offset maps to the same character in the Text.
+ */
+function segmentsOf(root: HTMLElement, multiline: boolean): Segment[] {
+  const out: Segment[] = [];
+  let offset = 0;
+  const push = (node: Node, length: number, kind: Segment['kind']) => {
+    out.push({ node, start: offset, length, kind });
+    offset += length;
+  };
+  const visit = (node: Node) => {
+    if (node.nodeType === TEXT_NODE) {
+      const value = node.nodeValue ?? '';
+      if (value !== '') push(node, value.length, 'text');
+      return;
+    }
+    if (node.nodeType !== ELEMENT_NODE) return;
+    const el = node as HTMLElement;
+    const name = el.nodeName.toUpperCase();
+    if (name === 'SVG' || name === 'USE') return;
+    if (el.hasAttribute('data-prompt')) return;
+    if (name === 'BR') {
+      push(node, 1, 'break');
+      return;
+    }
+    if (el.classList.contains(GT_WORD_CLASS)) {
+      push(node, 2, 'gt');
+      return;
+    }
+    const paragraph = isParagraphBox(el as unknown as RunNode, name);
+    if (paragraph && out.length > 0) {
+      const last = out[out.length - 1];
+      if (last !== undefined && last.kind !== 'break') push(node, 1, 'break');
+    }
+    for (const child of Array.from(el.childNodes)) visit(child);
+  };
+  for (const child of Array.from(root.childNodes)) visit(child);
+  void multiline;
+  return out;
+}
+
+/** The plain length of the editable's text (every segment counted), for a caret at its end. */
+export function plainLengthOf(root: HTMLElement, multiline: boolean): number {
+  const segments = segmentsOf(root, multiline);
+  const last = segments[segments.length - 1];
+  return last === undefined ? 0 : last.start + last.length;
+}
+
+/** The plain offset of a DOM position inside the editable, or null when it lies outside. */
+export function plainOffsetOf(
+  root: HTMLElement,
+  node: Node,
+  offset: number,
+  multiline: boolean,
+): number | null {
+  if (!root.contains(node)) return null;
+  const segments = segmentsOf(root, multiline);
+  if (node.nodeType === TEXT_NODE) {
+    const segment = segments.find((s) => s.node === node);
+    return segment === undefined ? null : segment.start + Math.min(offset, segment.length);
+  }
+  /* an element position: the offset counts children; the plain offset is where the first segment
+     at or after that child starts (a child without a segment, the list item's leading icon svg or
+     a prompt, counts nothing: the browser places the caret before it after a click on it or Home) */
+  const children = Array.from(node.childNodes);
+  const starts = (n: Node): number | null => {
+    const own = segments.find((s) => s.node === n);
+    if (own) return own.start;
+    let found: number | null = null;
+    n.childNodes.forEach((c) => {
+      if (found === null) found = starts(c);
+    });
+    return found;
+  };
+  for (let index = offset; index < children.length; index += 1) {
+    const child = children[index];
+    const start = child === undefined ? null : starts(child);
+    if (start !== null) return start;
+  }
+  /* past the last child: the end of the element's last segment */
+  let end = 0;
+  for (const segment of segments) {
+    if (node === segment.node || node.contains(segment.node)) end = segment.start + segment.length;
+  }
+  return end;
+}
+
+/** The plain offsets of the window selection inside the editable, or null when it lies outside. */
+export function selectionOffsets(root: HTMLElement, multiline: boolean): [number, number] | null {
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0) return null;
+  const range = selection.getRangeAt(0);
+  const start = plainOffsetOf(root, range.startContainer, range.startOffset, multiline);
+  const end = plainOffsetOf(root, range.endContainer, range.endOffset, multiline);
+  if (start === null || end === null) return null;
+  return start <= end ? [start, end] : [end, start];
+}
+
+/** The DOM position of a plain offset, or null when the editable holds no such character. */
+function positionOf(
+  root: HTMLElement,
+  multiline: boolean,
+  at: number,
+): { node: Node; offset: number } | null {
+  const segments = segmentsOf(root, multiline);
+  for (const segment of segments) {
+    if (at < segment.start || at > segment.start + segment.length) continue;
+    if (segment.kind === 'text') return { node: segment.node, offset: at - segment.start };
+    /* an atom (the mark, a break): before it or after it */
+    const parent = segment.node.parentNode;
+    if (!parent) continue;
+    const index = Array.from(parent.childNodes).indexOf(segment.node as ChildNode);
+    return { node: parent, offset: at === segment.start ? index : index + 1 };
+  }
+  const last = segments[segments.length - 1];
+  if (last === undefined) return { node: root, offset: root.childNodes.length };
+  if (last.kind === 'text') return { node: last.node, offset: last.length };
+  const parent = last.node.parentNode ?? root;
+  return {
+    node: parent,
+    offset: Array.from(parent.childNodes).indexOf(last.node as ChildNode) + 1,
+  };
+}
+
+/** Restores the window selection to plain offsets inside the editable. */
+export function restoreSelection(
+  root: HTMLElement,
+  multiline: boolean,
+  range: readonly [number, number],
+): void {
+  const selection = window.getSelection();
+  if (!selection) return;
+  const start = positionOf(root, multiline, range[0]);
+  const end = positionOf(root, multiline, range[1]);
+  if (!start || !end) return;
+  const dom = document.createRange();
+  dom.setStart(start.node, start.offset);
+  dom.setEnd(end.node, end.offset);
+  selection.removeAllRanges();
+  selection.addRange(dom);
+}
+
+/** The editable's HTML from a canonical Text, as the renderer draws it (one `.para` per paragraph on a multiline pointer). */
+export function editableHtml(text: Markup, multiline: boolean): string {
+  return multiline
+    ? renderParagraphs(text, { gtWord: true }, true)
+    : renderParagraphs(text, { gtWord: true });
+}
+
+// ---------------------------------------------------------------------------------------------
 // The caret
 
 /** Where the caret lands on mount: at the client point of the click, at the end, or over everything. */
@@ -542,6 +753,24 @@ function isEmptyEditable(element: HTMLElement): boolean {
   return textFromNode(element, { multiline: true }).trim() === '';
 }
 
+/** The plain text of a Text with one character per paragraph break (the offsets the marks use). */
+function plainOf(text: Markup): string {
+  return text
+    .split('\n')
+    .map((paragraph) =>
+      parseText(paragraph)
+        .map((run) => run.t)
+        .join(''),
+    )
+    .join('\n');
+}
+
+/** True when the caret sits at the very start of the editable (a Tab there changes a list level). */
+function caretAtStart(element: HTMLElement, multiline: boolean): boolean {
+  const range = selectionOffsets(element, multiline);
+  return range !== null && range[0] === 0 && range[1] === 0;
+}
+
 // ---------------------------------------------------------------------------------------------
 // The component
 
@@ -556,7 +785,12 @@ export type InlineTextEndReason =
   | 'redo'
   | 'list-enter'
   | 'list-backspace'
+  /** Enter on an empty list item: the item leaves the list (SPEC-2 6.2 Lists) */
+  | 'list-leave'
   | 'unmount';
+
+/** What the toolbar reads about the caret: the plain range and the marks of the run it sits in (SPEC-2 6.2). */
+export type CaretInfo = { range: [number, number]; marks: RunMarks & { b?: true } };
 
 export type InlineTextProps = {
   /** the run element inside the rendered slide; the component makes it editable for its lifetime */
@@ -584,6 +818,25 @@ export type InlineTextProps = {
   /** Cmd Z and Cmd Shift Z end the session and run the page's history */
   onUndo?: () => void;
   onRedo?: () => void;
+  /** the caret moved or the marks changed: the toolbar's pressed state (SPEC-2 6.2) */
+  onCaret?: (info: CaretInfo) => void;
+  /** Tab or Shift Tab at the start of a list item, Cmd ] and Cmd [ anywhere in it: true when the Editor changed the level */
+  onListLevel?: (by: 1 | -1) => boolean;
+  /** Cmd ] and Cmd [ in a text block that is not a list: true when the Editor changed the indent */
+  onIndent?: (by: 1 | -1) => boolean;
+  /** Enter on an empty item of a list with more items: true when the Editor removes it and takes over */
+  onListLeave?: () => boolean;
+  /** an imperative surface for the toolbar: toggle a mark, write a colour, insert a string at the caret */
+  handle?: (handle: InlineTextHandle | null) => void;
+};
+
+/** What the toolbar and the menu drive on an open session (the marks, the colours, the special characters). */
+export type InlineTextHandle = {
+  toggleMark: (mark: ToggleMark) => void;
+  setColor: (which: 'color' | 'highlight', color: Color | null) => void;
+  insertText: (text: string) => void;
+  /** the plain range of the selection */
+  range: () => [number, number] | null;
 };
 
 /** The link popover sits this many CSS pixels above the run; below it when the run is at the sheet's top. */
@@ -614,6 +867,11 @@ export function InlineText({
   onInput,
   onUndo,
   onRedo,
+  onCaret,
+  onListLevel,
+  onIndent,
+  onListLeave,
+  handle: onHandle,
 }: InlineTextProps) {
   const originalHtml = useRef('');
   const originalText = useRef('');
@@ -633,21 +891,121 @@ export function InlineText({
     onInput,
     onUndo,
     onRedo,
+    onCaret,
+    onListLevel,
+    onIndent,
+    onListLeave,
+    onHandle,
   });
-  callbacks.current = { onBurst, onEnd, onListEnter, onListBackspace, onInput, onUndo, onRedo };
+  callbacks.current = {
+    onBurst,
+    onEnd,
+    onListEnter,
+    onListBackspace,
+    onInput,
+    onUndo,
+    onRedo,
+    onCaret,
+    onListLevel,
+    onIndent,
+    onListLeave,
+    onHandle,
+  };
   const options = useRef({ multiline, caret, autoLink });
   options.current = { multiline, caret, autoLink };
 
   const readText = (): Markup => textFromNode(element, { multiline: options.current.multiline });
+
+  /** The caret's range and marks, for the toolbar (SPEC-2 6.2). */
+  const reportCaret = () => {
+    if (done.current) return;
+    const range = selectionOffsets(element, options.current.multiline);
+    if (range === null) return;
+    callbacks.current.onCaret?.({ range, marks: marksOf(readText(), range) });
+  };
+
+  /**
+   * The rewrite rule (SPEC-2 0.54): the editable's HTML is rewritten from the canonical runs only
+   * at a burst boundary and only when what the DOM serializes to differs from the canonical string
+   * (the browser split a run, nested two wrappers, left an empty element); the selection is
+   * recorded as plain offsets before and restored after, so the caret survives. A mark toggle
+   * calls it at once with the new text.
+   */
+  const rewriteEditable = (text: Markup) => {
+    const range = selectionOffsets(element, options.current.multiline);
+    element.innerHTML = editableHtml(text, options.current.multiline);
+    element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((mark) => {
+      mark.contentEditable = 'false';
+    });
+    if (range !== null) restoreSelection(element, options.current.multiline, range);
+  };
 
   const flushBurst = () => {
     window.clearTimeout(burstTimer.current);
     burstTimer.current = 0;
     if (done.current) return;
     const text = readText();
+    const raw = options.current.multiline
+      ? paragraphsFromNode(element)
+          .map((runs) => serializeRuns(runs))
+          .join(BREAK)
+      : serializeRuns(runsFromNode(element));
+    if (raw !== text && text !== '' && document.activeElement === element) rewriteEditable(text);
     if (text === lastBurst.current) return;
     lastBurst.current = text;
     callbacks.current.onBurst?.(text);
+  };
+
+  /** One mark toggled over the selection, or the word at the caret (SPEC-2 6.2 "Text marks"). */
+  const applyMark = (mark: ToggleMark) => {
+    if (done.current) return;
+    const text = readText();
+    const selected = selectionOffsets(element, options.current.multiline);
+    if (selected === null) return;
+    const range: [number, number] =
+      selected[0] === selected[1]
+        ? wordRangeAt(plainOf(text), selected[0])
+        : [selected[0], Math.min(selected[1], plainLength(text))];
+    if (range[0] >= range[1]) return;
+    const next = canonicalText(toggleMark(text, range, mark));
+    if (next === text) return;
+    const keep = selected;
+    element.innerHTML = editableHtml(next, options.current.multiline);
+    element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((m) => {
+      m.contentEditable = 'false';
+    });
+    restoreSelection(element, options.current.multiline, keep);
+    callbacks.current.onInput?.();
+    reportCaret();
+    scheduleBurst();
+  };
+
+  const applyColor = (which: 'color' | 'highlight', color: Color | null) => {
+    if (done.current) return;
+    const text = readText();
+    const selected = selectionOffsets(element, options.current.multiline);
+    if (selected === null) return;
+    const range: [number, number] =
+      selected[0] === selected[1] ? wordRangeAt(plainOf(text), selected[0]) : selected;
+    if (range[0] >= range[1]) return;
+    const next = canonicalText(colorRange(text, range, which, color));
+    if (next === text) return;
+    element.innerHTML = editableHtml(next, options.current.multiline);
+    element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((m) => {
+      m.contentEditable = 'false';
+    });
+    restoreSelection(element, options.current.multiline, selected);
+    callbacks.current.onInput?.();
+    reportCaret();
+    scheduleBurst();
+  };
+
+  const insertAtCaret = (text: string) => {
+    if (done.current) return;
+    element.focus({ preventScroll: true });
+    document.execCommand('insertText', false, text);
+    callbacks.current.onInput?.();
+    scheduleBurst();
   };
 
   const scheduleBurst = () => {
@@ -726,6 +1084,11 @@ export function InlineText({
           scheduleBurst();
           return;
         }
+        /* Enter twice on an empty item leaves the list (SPEC-2 6.2 Lists) */
+        if (isEmptyEditable(element) && callbacks.current.onListLeave?.() === true) {
+          finish('list-leave');
+          return;
+        }
         if (callbacks.current.onListEnter?.() === true) {
           finish('list-enter');
           return;
@@ -738,7 +1101,40 @@ export function InlineText({
       } else if (e.key === 'Tab' && !meta && !e.altKey) {
         e.preventDefault();
         e.stopPropagation();
+        /* Tab at the start of a list item raises its level, Shift Tab lowers it (SPEC-2 6.2) */
+        if (
+          caretAtStart(element, options.current.multiline) &&
+          callbacks.current.onListLevel?.(e.shiftKey ? -1 : 1) === true
+        )
+          return;
         finish(e.shiftKey ? 'shift-tab' : 'tab');
+      } else if (meta && !e.altKey && (e.key === ']' || e.key === '[')) {
+        /* Increase and Decrease indent, Chrome's Forward and Back on macOS: always prevented (0.55) */
+        e.preventDefault();
+        e.stopPropagation();
+        const by: 1 | -1 = e.key === ']' ? 1 : -1;
+        if (callbacks.current.onListLevel?.(by) === true) return;
+        callbacks.current.onIndent?.(by);
+      } else if (meta && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'i') {
+        e.preventDefault();
+        e.stopPropagation();
+        applyMark('i');
+      } else if (meta && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'u') {
+        e.preventDefault();
+        e.stopPropagation();
+        applyMark('u');
+      } else if (meta && !e.altKey && e.shiftKey && e.key.toLowerCase() === 'x') {
+        e.preventDefault();
+        e.stopPropagation();
+        applyMark('s');
+      } else if (meta && !e.altKey && !e.shiftKey && e.key === '.') {
+        e.preventDefault();
+        e.stopPropagation();
+        applyMark('sup');
+      } else if (meta && !e.altKey && !e.shiftKey && e.key === ',') {
+        e.preventDefault();
+        e.stopPropagation();
+        applyMark('sub');
       } else if (e.key === 'Backspace' && !meta && callbacks.current.onListBackspace) {
         if (isEmptyEditable(element) && callbacks.current.onListBackspace() === true) {
           e.preventDefault();
@@ -755,10 +1151,11 @@ export function InlineText({
         e.stopPropagation();
         finish('redo');
         callbacks.current.onRedo?.();
-      } else if (meta && !e.altKey && e.key.toLowerCase() === 'b') {
+      } else if (meta && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'b') {
+        /* bold on the run model like the other marks, never execCommand (SPEC-2 0.54) */
         e.preventDefault();
-        document.execCommand('bold');
-        scheduleBurst();
+        e.stopPropagation();
+        applyMark('b');
       } else if (meta && !e.altKey && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         e.stopPropagation();
@@ -773,7 +1170,35 @@ export function InlineText({
       markGtInEditable(element);
       callbacks.current.onInput?.();
       scheduleBurst();
+      reportCaret();
     };
+    const onSelectionChange = () => {
+      if (document.activeElement !== element) return;
+      /* the caret stays inside the run: a click on an item's leading icon or Home before it puts
+         the browser's caret outside the editable (before it, in the item above's text); it comes
+         back to the start, or to the end when it landed after the run (SPEC-2 6.2 Lists) */
+      const selection = window.getSelection();
+      const anchor = selection?.anchorNode ?? null;
+      if (
+        anchor !== null &&
+        !element.contains(anchor) &&
+        selectionOffsets(element, options.current.multiline) === null
+      ) {
+        const before =
+          (element.compareDocumentPosition(anchor) & Node.DOCUMENT_POSITION_PRECEDING) !== 0;
+        const length = plainLengthOf(element, options.current.multiline);
+        restoreSelection(element, options.current.multiline, before ? [0, 0] : [length, length]);
+      }
+      reportCaret();
+    };
+    document.addEventListener('selectionchange', onSelectionChange);
+    callbacks.current.onHandle?.({
+      toggleMark: applyMark,
+      setColor: applyColor,
+      insertText: insertAtCaret,
+      range: () => selectionOffsets(element, options.current.multiline),
+    });
+    reportCaret();
     const onBlur = (e: FocusEvent) => {
       const to = e.relatedTarget;
       if (to instanceof Node && popover.current?.contains(to)) return;
@@ -798,6 +1223,8 @@ export function InlineText({
       element.removeEventListener('input', onInputEvent);
       element.removeEventListener('blur', onBlur);
       element.removeEventListener('paste', onPaste);
+      document.removeEventListener('selectionchange', onSelectionChange);
+      callbacks.current.onHandle?.(null);
     };
     return later;
     // one element is one session; finish and openLink read refs and state setters only

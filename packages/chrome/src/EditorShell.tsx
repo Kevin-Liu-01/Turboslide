@@ -1,13 +1,18 @@
 import type { ReactNode, RefObject } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+import { emptyTable } from '@turboslide/schema/blocks/table';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { layoutEntry } from '@turboslide/schema/layouts';
+import type { ShapeCategory } from '@turboslide/schema/shapes';
 import { applyTheme, readTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { BottomBar } from './BottomBar';
+import { DiagramPanel } from './DiagramPanel';
 import { AgentAccessDialog } from './dialogs/AgentAccess';
+import { BackgroundDialog } from './dialogs/Background';
+import { CustomSpacingDialog } from './dialogs/CustomSpacing';
 import { DetailsDialog } from './dialogs/Details';
 import { DownloadDialog } from './dialogs/Download';
 import { FindReplaceDialog } from './dialogs/FindReplace';
@@ -17,7 +22,6 @@ import { ImageByUrlDialog } from './dialogs/ImageByUrl';
 import { ImportSlidesDialog } from './dialogs/ImportSlides';
 import { InsertIconDialog } from './dialogs/InsertIcon';
 import { InsertMaterialDialog } from './dialogs/InsertMaterial';
-import { InsertTableDialog } from './dialogs/InsertTable';
 import { LinkDialog } from './dialogs/Link';
 import { MakeCopyDialog } from './dialogs/MakeCopy';
 import { NameVersionDialog } from './dialogs/NameVersion';
@@ -25,24 +29,42 @@ import { OpenDialog } from './dialogs/Open';
 import { PublishDialog } from './dialogs/Publish';
 import { ShareDialog } from './dialogs/Share';
 import { SlideNumbersDialog } from './dialogs/SlideNumbers';
+import { SpecialCharactersDialog } from './dialogs/SpecialCharacters';
+import { WordArtBar } from './dialogs/WordArtBar';
 import {
   APPEARANCE_STORAGE,
   DEFAULT_SETTINGS,
   LAST_LAYOUT_STORAGE,
+  PANEL_SECTION_OF,
   SETTINGS_STORAGE,
+  TOOL_SIZES,
   appearanceOf,
   buildMenuContext,
+  dashPlan,
   dialogIdOf,
+  effectiveZoomPercent,
   factsOf,
+  insertBlockPlan,
   insertIntentOf,
+  lineEndPlan,
+  listPlan,
+  memberWritePlan,
   menuActionPlan,
   panelIdOfTitle,
   pictureTargetOf,
   readLastLayout,
   readStoredSettings,
+  selectedBlock,
+  selectedBlocks,
+  shapeDrawTool,
+  shapePickPlan,
+  wordArtBlock,
   writeStoredSettings,
+  zoomStepFrom,
 } from './editor-shell';
 import type {
+  ActionPlan,
+  ActionRefusal,
   DialogId,
   EditorShellInput,
   InsertPicker,
@@ -53,21 +75,30 @@ import { EditorShellContext } from './editor-shell-context';
 import type { DialogRequest, EditorShellState, LayoutGridRequest } from './editor-shell-context';
 import { FormatOptions } from './FormatOptions';
 import { HistoryPanel } from './HistoryPanel';
+import type { FormatSectionId } from './inspector/format-sections';
 import { LayoutGrid } from './LayoutGrid';
 import { LintPanel } from './LintPanel';
 import { MenuBar } from './MenuBar';
 import { detectPlatform } from './menus/keys';
 import type { KeyBinding } from './menus/keys';
-import { evaluate, findItem, isEnabled, itemById } from './menus/model';
+import { evaluate, findItem, isEnabled, itemById, resolveEffect } from './menus/model';
 import type { MenuId, MenuItem, MenuSetting, Platform } from './menus/model';
-import { PANELS, SNACKBARS } from './menus/strings';
+import { CANVAS_NOTICES, PANELS, SNACKBARS } from './menus/strings';
 import type { TailControl } from './menus/toolbar-tails';
 import { Palette } from './Palette';
 import { Panel } from './Panel';
+import { ColorPlate } from './pickers/ColorPlate';
+import { DashList } from './pickers/DashList';
+import { LineEndPicker } from './pickers/LineEndPicker';
+import { PresetPicker } from './pickers/PresetPicker';
+import { ShapePicker } from './pickers/ShapePicker';
+import { TableGrid } from './pickers/TableGrid';
+import { WeightList } from './pickers/WeightList';
 import { PicturesPanel } from './PicturesPanel';
 import { usePtShell } from './shell-context';
 import type { ShellState } from './shell-context';
 import { ShortcutsDialog } from './ShortcutsDialog';
+import type { FilmstripHandle } from './Sidebar';
 import { Snackbar } from './Snackbar';
 import type { SnackbarAction, SnackbarState } from './Snackbar';
 import { ThemesPanel } from './ThemesPanel';
@@ -82,14 +113,18 @@ import { useMountEffect } from './lib/useMountEffect';
 import './EditorShell.css';
 
 /**
- * The editor's chrome (gslides-parity SPEC 1, 2, 3, 12, 13), composed inside ViewerShell when the
- * route passes `editor`: the title row, the menu bar, the toolbar with its contextual tail, the
- * right panel, the bottom bar, the snackbar, the dialogs, the layout grid, Search the menus, the
- * shortcuts dialog and the editor key map. The viewer shell keeps the slide state (mode, active
- * item, sidebar) and the filmstrip; this component owns everything the route does not: the per
- * browser settings, which panel and dialog are open, compact mode, the chrome appearance, and the
- * one `runItem` every menu, toolbar button, key and finder row goes through to run an effect.
- * New in Turboslide (no Prototemplate source).
+ * The editor's chrome (gslides-parity SPEC 1, 2, 3, 12, 13; SPEC-2 sections 4 to 6, 8.6, 9),
+ * composed inside ViewerShell when the route passes `editor`: the title row, the menu bar, the
+ * toolbar with its contextual tail, the right panel, the bottom bar, the snackbar, the dialogs,
+ * the layout grid, the pickers (the shape, preset, line decoration and dash plates as dynamic
+ * submenus; the colour and weight plates anchored to a menu row), Search the menus, the shortcuts
+ * dialog, the word art bar and the editor key map. The viewer shell keeps the slide state (mode,
+ * active item, sidebar) and the filmstrip; this component owns everything the route does not: the
+ * per browser settings (the snap, ruler and guide toggles included), which panel, section and
+ * dialog are open, compact mode, the chrome appearance, the set Ungroup left for Regroup, and the
+ * one `runItem` every menu, toolbar button, key and finder row goes through to run an effect. A
+ * canvas gesture the route has not wired yet dispatches its action where one exists and says what
+ * to do otherwise. New in Turboslide (no Prototemplate source).
  */
 export type EditorShellProps = {
   input: EditorShellInput;
@@ -107,12 +142,14 @@ export type EditorShellProps = {
   children?: ReactNode;
 };
 
-/** The dialog an Insert picker opens (SPEC 2.4). */
+/** The dialog an Insert picker opens (SPEC 2.4); Insert > Table is a plate inside the menu (SPEC-2 0.26). */
 const PICKER_DIALOG: Readonly<Record<InsertPicker, DialogId>> = {
-  table: 'insertTable',
   icon: 'insertIcon',
   material: 'insertMaterial',
 };
+
+/** A colour or weight plate anchored to a menu row (SPEC-2 0.27). */
+type AnchoredPicker = { kind: 'color' | 'weight'; anchor: HTMLElement };
 
 function load(key: string): string | null {
   try {
@@ -160,6 +197,7 @@ export function EditorShell({
   const [platform, setPlatform] = useState<Platform>('mac');
   const [settings, setSettings] = useState<ShellSettings>(DEFAULT_SETTINGS);
   const [panel, setPanel] = useState<PanelId | null>(null);
+  const [panelSection, setPanelSection] = useState<FormatSectionId | null>(null);
   const lastPanel = useRef<PanelId>('formatOptions');
   const [dialog, setDialog] = useState<DialogRequest | null>(null);
   const [layoutGrid, setLayoutGrid] = useState<LayoutGridRequest | null>(null);
@@ -167,7 +205,15 @@ export function EditorShell({
   const [compact, setCompactState] = useState(false);
   const [toolFinderOpen, setToolFinderOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [wordArtOpen, setWordArtOpen] = useState(false);
+  const [anchoredPicker, setAnchoredPicker] = useState<AnchoredPicker | null>(null);
   const [lastLayout, setLastLayout] = useState<LayoutId | null>(null);
+  /* the set the last Ungroup left, for Arrange > Regroup (SPEC-2 4.1) */
+  const [regroup, setRegroup] = useState<{ blockIds: string[]; group: string } | null>(null);
+  const regroupRef = useRef(regroup);
+  regroupRef.current = regroup;
+  const guideRef = useRef<{ axis: 'x' | 'y'; at: number } | null>(null);
+  const filmstripRef = useRef<FilmstripHandle | null>(null);
   const titleField = useRef<HTMLElement | null>(null);
   /* read in the initializer, so the first effect run sees the browser's choice (the editor routes render on the client only) */
   const [appearance, setAppearanceState] = useState<'light' | 'dark' | 'match'>(() =>
@@ -188,14 +234,24 @@ export function EditorShell({
   });
 
   /* Tools > Advanced > Show slide and block ids and Show sections as a tree: the root carries the
-     flags so the stage chip, the id tooltips and the filmstrip can read them (SPEC 2.8) */
+     flags so the stage chip, the id tooltips and the filmstrip can read them (SPEC 2.8); the
+     ruler and guide toggles too, so the stage draws them (SPEC-2 0.77) */
   useEffect(() => {
     const root = stageRef.current?.closest<HTMLElement>('.pt-viewer');
     if (!root) return;
     root.toggleAttribute('data-show-ids', settings.showIds === true);
     root.toggleAttribute('data-sections-tree', settings.sectionsTree === true);
     root.toggleAttribute('data-spellcheck', settings.spellcheck !== false);
-  }, [settings.showIds, settings.sectionsTree, settings.spellcheck, stageRef]);
+    root.toggleAttribute('data-show-ruler', settings.showRuler === true);
+    root.toggleAttribute('data-show-guides', settings.showGuides === true);
+  }, [
+    settings.showIds,
+    settings.sectionsTree,
+    settings.spellcheck,
+    settings.showRuler,
+    settings.showGuides,
+    stageRef,
+  ]);
 
   /* the right panel column opens on the root (EditorShell.css reads data-rpanel) */
   useEffect(() => {
@@ -210,6 +266,11 @@ export function EditorShell({
   useEffect(() => {
     if (appearance === 'match' && readTheme() !== deckAppearance) applyTheme(deckAppearance);
   }, [appearance, deckAppearance]);
+
+  /* the remembered ungrouped set is for one slide; a change of slide forgets it */
+  useEffect(() => {
+    setRegroup(null);
+  }, [input.slideId]);
 
   /* the settings the route owns are mirrored into the context so the menus check them */
   const effectiveSettings = useMemo<ShellSettings>(
@@ -238,8 +299,8 @@ export function EditorShell({
   );
 
   const menuContext = useMemo(
-    () => buildMenuContext(input, effectiveSettings, platform),
-    [input, effectiveSettings, platform],
+    () => buildMenuContext({ ...input, regroup: regroup !== null }, effectiveSettings, platform),
+    [input, effectiveSettings, platform, regroup],
   );
 
   const say = useCallback(
@@ -263,11 +324,15 @@ export function EditorShell({
     onCompactRef.current?.(on);
   }, []);
 
-  const openPanel = useCallback((id: PanelId) => {
+  const openPanel = useCallback((id: PanelId, options?: { section?: FormatSectionId }) => {
     lastPanel.current = id;
     setPanel(id);
+    setPanelSection(options?.section ?? null);
   }, []);
-  const closePanel = useCallback(() => setPanel(null), []);
+  const closePanel = useCallback(() => {
+    setPanel(null);
+    setPanelSection(null);
+  }, []);
   const reopenPanel = useCallback(() => setPanel(lastPanel.current), []);
 
   const openDialog = useCallback((request: DialogId | DialogRequest) => {
@@ -293,14 +358,57 @@ export function EditorShell({
     applyTheme(theme);
   }, []);
 
+  /** The facts the plans read: the shell's input plus the Regroup memory and the guide under the pointer. */
+  const facts = useCallback(
+    () =>
+      factsOf(inputRef.current, lastLayout, {
+        regroup: regroupRef.current,
+        guide: guideRef.current,
+      }),
+    [lastLayout],
+  );
+
+  /** Dispatches a plan built outside `menuActionPlan` (a picker's pick) and words its failure. */
+  const runBuilt = useCallback(
+    (plan: ActionPlan | ActionRefusal) => {
+      if ('refused' in plan) {
+        say(plan.refused);
+        return;
+      }
+      const current = inputRef.current;
+      current
+        .dispatch(plan.action, plan.input)
+        .then((result) => {
+          /* Ungroup leaves a set Regroup puts back; Group and Regroup forget it (SPEC-2 4.1) */
+          if (plan.action === 'block.ungroup') {
+            const ids = (plan.input.blockIds as string[] | undefined) ?? [];
+            const group = plan.input.group as string | undefined;
+            const members =
+              ids.length > 0
+                ? ids
+                : selectedBlocks(current.document.slides[current.slideId], current.selection).map(
+                    (b) => b.id,
+                  );
+            const tag = group ?? current.selection?.group ?? `group-${Date.now().toString(36)}`;
+            if (members.length >= 2) setRegroup({ blockIds: members, group: tag });
+          } else if (plan.action === 'block.group' || plan.action === 'block.regroup') {
+            setRegroup(null);
+          }
+          return result;
+        })
+        .catch((error: unknown) => say(errorText(error)));
+    },
+    [say],
+  );
+
   /** Dispatches an action plan and words its snackbar. */
   const runPlan = useCallback(
     (item: MenuItem) => {
       const current = inputRef.current;
-      /* the Insert rows (SPEC 2.4) act before any write: Text box, the shapes and the lines arm
-         the canvas's draw tool; Table, Icon and Material open their picker; Upload from computer
-         opens the OS file picker on the target the row names. The plan below is the write a row
-         makes when the route gave the shell no draw tool. */
+      /* the Insert rows (SPEC 2.4; SPEC-2 6.2) act before any write: Text box, the shapes and the
+         lines arm the canvas's draw tool; Icon and Material open their picker; Upload from
+         computer opens the OS file picker on the target the row names. The plan below is the write
+         a row makes when the route gave the shell no draw tool. */
       const intent = insertIntentOf(item);
       if (intent?.kind === 'upload') {
         if (current.uploadPicture)
@@ -318,7 +426,7 @@ export function EditorShell({
         current.onDrawTool(intent.tool);
         return;
       }
-      const plan = menuActionPlan(item, factsOf(current, lastLayout));
+      const plan = menuActionPlan(item, facts());
       if ('refused' in plan) {
         say(plan.refused);
         return;
@@ -327,6 +435,14 @@ export function EditorShell({
         plan.undo && current.history?.undo
           ? { label: SNACKBARS.undo, run: () => current.history?.undo() }
           : undefined;
+      if (
+        plan.action === 'block.ungroup' ||
+        plan.action === 'block.group' ||
+        plan.action === 'block.regroup'
+      ) {
+        runBuilt(plan);
+        return;
+      }
       current
         .dispatch(plan.action, plan.input)
         .then((result) => {
@@ -380,10 +496,35 @@ export function EditorShell({
         })
         .catch((error: unknown) => say(errorText(error)));
     },
-    [lastLayout, navigate, openDialog, say, setSetting],
+    [facts, navigate, openDialog, runBuilt, say, setSetting],
   );
 
-  /** Client handlers: the effects with no action of their own (SPEC 2.13). */
+  /** Zoom in and Zoom out step the ladder of SPEC-2 0.81 from the effective zoom. */
+  const zoomStep = useCallback(
+    (direction: 1 | -1) => {
+      const current = inputRef.current;
+      if (current.editor?.zoomStep) {
+        current.editor.zoomStep(direction);
+        return;
+      }
+      const next = zoomStepFrom(
+        effectiveZoomPercent(effectiveSettings.zoom, current.view?.zoom),
+        direction,
+      );
+      if (current.editor?.zoomTo) {
+        current.editor.zoomTo(next / 100);
+        setSetting('zoom', String(next));
+        return;
+      }
+      current
+        .dispatch('view.zoom', { zoom: next / 100 })
+        .then(() => setSetting('zoom', String(next)))
+        .catch((error: unknown) => say(errorText(error)));
+    },
+    [effectiveSettings.zoom, say, setSetting],
+  );
+
+  /** Client handlers: the effects with no action of their own (SPEC 2.13; SPEC-2 4.1). */
   const runClient = useCallback(
     (handler: string, item: MenuItem, anchor?: HTMLElement | null) => {
       const current = inputRef.current;
@@ -395,14 +536,24 @@ export function EditorShell({
         case 'redo':
           current.history?.redo();
           return;
+        case 'selectAll': {
+          /* Edit > Select all with the filmstrip focused selects every card (SPEC-2 8.6) */
+          if (current.focus === 'filmstrip' && filmstripRef.current) {
+            filmstripRef.current.selectAll();
+            return;
+          }
+          const fn = current.clipboard?.selectAll;
+          if (fn) fn();
+          else say(CANVAS_NOTICES.noEditor(item.label));
+          return;
+        }
         case 'cut':
         case 'copy':
         case 'paste':
-        case 'pasteWithoutFormatting':
-        case 'selectAll': {
+        case 'pasteWithoutFormatting': {
           const fn = current.clipboard?.[handler];
           if (fn) fn();
-          else say(`${item.label} works on the slides and the canvas once they are focused`);
+          else say(CANVAS_NOTICES.noEditor(item.label));
           return;
         }
         case 'delete':
@@ -420,22 +571,11 @@ export function EditorShell({
           else openDialog('link');
           return;
         case 'zoomIn':
-        case 'zoomOut': {
-          const zoom = effectiveSettings.zoom;
-          const now = zoom === 'fit' || zoom === undefined ? 100 : Number(zoom);
-          const steps = [25, 50, 75, 100, 125, 150, 200, 300, 400];
-          const at = steps.findIndex((step) => step >= now);
-          const next =
-            handler === 'zoomIn'
-              ? steps[Math.min(steps.length - 1, (at < 0 ? steps.length - 1 : at) + 1)]
-              : steps[Math.max(0, (at < 0 ? steps.length : at) - 1)];
-          if (next === undefined) return;
-          current
-            .dispatch('view.zoom', { zoom: next / 100 })
-            .then(() => setSetting('zoom', String(next)))
-            .catch((error: unknown) => say(errorText(error)));
+          zoomStep(1);
           return;
-        }
+        case 'zoomOut':
+          zoomStep(-1);
+          return;
         case 'focusTitle':
           titleField.current?.focus();
           titleField.current?.click();
@@ -470,12 +610,33 @@ export function EditorShell({
         case 'runAction':
           setPaletteOpen(true);
           return;
+        /* round two (SPEC-2 4.1) */
+        case 'cropMode':
+          if (current.editor?.cropMode) current.editor.cropMode();
+          else say('Double click the picture on the slide to crop it');
+          return;
+        case 'wordArt':
+          setWordArtOpen(true);
+          return;
+        case 'borderColorPicker':
+        case 'borderWeightPicker':
+          if (anchor)
+            setAnchoredPicker({
+              kind: handler === 'borderColorPicker' ? 'color' : 'weight',
+              anchor,
+            });
+          else say(`${item.label} opens from the Format menu or the toolbar`);
+          return;
+        case 'selectNone':
+          current.editor?.selectNone?.();
+          current.onSelectBlock?.(undefined);
+          filmstripRef.current?.selectNone();
+          return;
         default:
           say(`${item.label} is not available for the current selection`);
       }
-      void anchor;
     },
-    [effectiveSettings.zoom, openDialog, runPlan, say, setSetting],
+    [openDialog, runPlan, say, zoomStep],
   );
 
   const runToggle = useCallback(
@@ -521,7 +682,7 @@ export function EditorShell({
 
   const runItem = useCallback(
     (item: MenuItem, anchor?: HTMLElement | null) => {
-      const effect = item.effect;
+      const effect = resolveEffect(item, menuContext);
       if (item.status !== 'now' || effect === undefined) return;
       if (!isEnabled(item, menuContext)) {
         if (item.disabledReason !== undefined) say(item.disabledReason);
@@ -550,7 +711,9 @@ export function EditorShell({
         }
         case 'panel': {
           const id = panelIdOfTitle(effect.title);
-          if (id !== null) openPanel(id);
+          if (id === null) return;
+          const section = PANEL_SECTION_OF[item.id] as FormatSectionId | undefined;
+          openPanel(id, section === undefined ? undefined : { section });
           return;
         }
         case 'route':
@@ -562,6 +725,11 @@ export function EditorShell({
         case 'submenu':
           if (effect.dynamic === 'layouts' && anchor)
             openLayoutGrid({ purpose: 'apply', anchor, returnFocusTo: anchor });
+          /* the hover grid is drawn inside the menu; run as a command (Search the menus) the row
+             inserts the default table size (SPEC-2 6.2); the preset grids run the first preset */
+          else if (effect.dynamic === 'tableGrid') runPlan(item);
+          else if (effect.dynamic === 'bulletPresets' || effect.dynamic === 'numberPresets')
+            runPlan(item);
           return;
         case 'client':
           if (effect.handler === 'runAction' && item.id.startsWith('toolbar.more.')) return;
@@ -666,23 +834,181 @@ export function EditorShell({
     [closePanel, menuContext, openLayoutGrid, openPanel, panel, runItem, say],
   );
 
-  const renderLayoutSubmenu = useCallback(
-    (_item: MenuItem) => (
-      <div className="ts-layout-plate is-submenu">
-        <LayoutGrid
-          document={input.document}
-          slide={input.document.slides[input.slideId]}
-          theme={deckAppearance}
-          render={input.renderSlide}
-          onPick={(layout) => pickLayout(layout, 'apply')}
-          onAddPicture={() =>
-            input.uploadPicture?.({ kind: 'slide', slideId: input.slideId, path: '/picture/asset' })
-          }
-          control="layout.apply"
-        />
-      </div>
-    ),
-    [input, deckAppearance, pickLayout],
+  /**
+   * The write of an Insert > Table pick (SPEC-2 6.2): one block.insert of an empty table of the
+   * picked size with a header row, centred on the sheet as an object.
+   */
+  const pickTableSize = useCallback(
+    (columns: number, rows: number) => {
+      setMenuOpen(null);
+      runBuilt(insertBlockPlan(facts(), 'table', (id) => emptyTable(id, columns, rows), 'Table'));
+    },
+    [facts, runBuilt],
+  );
+
+  /** A shape picker pick (SPEC-2 4.1): the draw tool for an Insert row, the mask or the change of shape otherwise. */
+  const pickShape = useCallback(
+    (item: MenuItem, shape: string) => {
+      setMenuOpen(null);
+      const current = inputRef.current;
+      if (item.id.startsWith('insert.shape') && current.onDrawTool) {
+        current.onDrawTool(shapeDrawTool(shape));
+        return;
+      }
+      if (item.id === 'format.image.maskImage' && current.editor?.mask) {
+        current.editor.mask(shape);
+        return;
+      }
+      runBuilt(shapePickPlan(item, facts(), shape));
+    },
+    [facts, runBuilt],
+  );
+
+  /** The word art bar's insert (SPEC-2 0.14, 6.2): through the editor's handle, else one block.insert centred on the sheet. */
+  const insertWordArt = useCallback(
+    (text: string) => {
+      setWordArtOpen(false);
+      const current = inputRef.current;
+      if (current.editor?.wordArt) {
+        current.editor.wordArt(text);
+        return;
+      }
+      runBuilt(
+        insertBlockPlan(facts(), 'text', (id) => wordArtBlock(id, text), 'Word art', {
+          size: TOOL_SIZES.wordArt,
+        }),
+      );
+    },
+    [facts, runBuilt],
+  );
+
+  /**
+   * The plate of a dynamic submenu (menus/model.ts `MenuDynamic`): the layout grid for Apply
+   * layout, the hover grid for Insert > Table (SPEC-2 0.26), a shape category's glyph grid (4.1),
+   * the bullet and numbering preset grids, the line decoration grid and the dash list. Null for
+   * a row with no plate, so the menu lists the row's children or runs its action. A pick closes
+   * the bar menu and calls `onPicked`, which a right-click menu passes so it closes too (4.3).
+   */
+  const renderDynamicSubmenu = useCallback(
+    (item: MenuItem, options?: { viaKeyboard?: boolean; onPicked?: () => void }): ReactNode => {
+      const effect = resolveEffect(item, menuContext);
+      if (effect?.kind !== 'submenu') return null;
+      const autoFocus = options?.viaKeyboard === true;
+      const picked = (): void => options?.onPicked?.();
+      const current = inputRef.current;
+      const slide = current.document.slides[current.slideId];
+      const block = selectedBlock(slide, current.selection);
+      switch (effect.dynamic) {
+        case 'layouts':
+          return (
+            <div className="ts-layout-plate is-submenu">
+              <LayoutGrid
+                document={input.document}
+                slide={input.document.slides[input.slideId]}
+                theme={deckAppearance}
+                render={input.renderSlide}
+                onPick={(layout) => {
+                  pickLayout(layout, 'apply');
+                  picked();
+                }}
+                onAddPicture={() =>
+                  input.uploadPicture?.({
+                    kind: 'slide',
+                    slideId: input.slideId,
+                    path: '/picture/asset',
+                  })
+                }
+                control="layout.apply"
+              />
+            </div>
+          );
+        case 'tableGrid':
+          return (
+            <TableGrid
+              onPick={(columns, rows) => {
+                pickTableSize(columns, rows);
+                picked();
+              }}
+              autoFocus={autoFocus}
+            />
+          );
+        case 'shapes':
+          return (
+            <ShapePicker
+              category={effect.category as ShapeCategory | undefined}
+              picked={
+                item.id === 'format.changeShape' && block?.type === 'shape'
+                  ? block.shape
+                  : item.id === 'format.image.maskImage' &&
+                      (block?.type === 'shot' || block?.type === 'picture')
+                    ? block.mask
+                    : undefined
+              }
+              onPick={(shape) => {
+                pickShape(item, shape);
+                picked();
+              }}
+              autoFocus={autoFocus}
+              control={item.id}
+            />
+          );
+        case 'bulletPresets':
+        case 'numberPresets': {
+          const family = effect.dynamic === 'bulletPresets' ? 'bullet' : 'number';
+          return (
+            <PresetPicker
+              family={family}
+              picked={block?.type === 'plain' ? block.preset : undefined}
+              onPick={(preset) => {
+                setMenuOpen(null);
+                runBuilt(listPlan(facts(), { marker: family, preset }, item.label));
+                picked();
+              }}
+              autoFocus={autoFocus}
+              control={item.id}
+            />
+          );
+        }
+        case 'lineEnds': {
+          const end = item.id.endsWith('lineStart') ? 'start' : 'end';
+          return (
+            <LineEndPicker
+              end={end}
+              picked={
+                block?.type === 'shape'
+                  ? end === 'start'
+                    ? block.lineStart
+                    : block.lineEnd
+                  : undefined
+              }
+              onPick={(kind) => {
+                setMenuOpen(null);
+                runBuilt(lineEndPlan(facts(), end, kind, item.label));
+                picked();
+              }}
+              autoFocus={autoFocus}
+              control={item.id}
+            />
+          );
+        }
+        case 'dashes':
+          return (
+            <DashList
+              picked={block !== undefined && 'dash' in block ? (block.dash as never) : undefined}
+              onPick={(dash) => {
+                setMenuOpen(null);
+                runBuilt(dashPlan(facts(), dash === 'solid' ? null : dash, item.label));
+                picked();
+              }}
+              autoFocus={autoFocus}
+              control={item.id}
+            />
+          );
+        default:
+          return null;
+      }
+    },
+    [input, deckAppearance, facts, menuContext, pickLayout, pickShape, pickTableSize, runBuilt],
   );
 
   const focusTitle = useCallback(() => {
@@ -691,9 +1017,23 @@ export function EditorShell({
   const registerTitleField = useCallback((el: HTMLElement | null) => {
     if (el) titleField.current = el;
   }, []);
+  const registerFilmstrip = useCallback((handle: FilmstripHandle | null) => {
+    filmstripRef.current = handle;
+  }, []);
+  const setGuideUnderPointer = useCallback((guide: { axis: 'x' | 'y'; at: number } | null) => {
+    guideRef.current = guide;
+  }, []);
 
   /* the Esc ladder below a menu or a dialog (SPEC 10.2) */
   const escape = useCallback((): boolean => {
+    if (anchoredPicker !== null) {
+      setAnchoredPicker(null);
+      return true;
+    }
+    if (wordArtOpen) {
+      setWordArtOpen(false);
+      return true;
+    }
     if (layoutGrid !== null) {
       setLayoutGrid(null);
       return true;
@@ -703,7 +1043,7 @@ export function EditorShell({
       return true;
     }
     if (panel !== null) {
-      setPanel(null);
+      closePanel();
       return true;
     }
     const s = shellRef.current;
@@ -712,12 +1052,39 @@ export function EditorShell({
       return true;
     }
     return false;
-  }, [compact, layoutGrid, panel, setCompact]);
+  }, [anchoredPicker, closePanel, compact, layoutGrid, panel, setCompact, wordArtOpen]);
+
+  /** The rotate keys of SPEC-2 section 9 (Google's, and the Cmd+Option aliases of 0.78) as one block.rotate. */
+  const rotateBy = useCallback(
+    (by: number) => {
+      const current = inputRef.current;
+      const ids =
+        current.selection?.blockIds ??
+        (current.selection?.blockId === undefined ? [] : [current.selection.blockId]);
+      if (ids.length === 0) return false;
+      if (current.editor?.rotate) {
+        current.editor.rotate(by, ids.length > 1 ? 'selection' : 'each');
+        return true;
+      }
+      current
+        .dispatch('block.rotate', {
+          slideId: current.slideId,
+          blockIds: ids,
+          by,
+          ...(ids.length > 1 && current.selection?.group !== undefined
+            ? { about: 'selection' }
+            : {}),
+          baseRevision: current.revision,
+        })
+        .catch((error: unknown) => say(errorText(error)));
+      return true;
+    },
+    [say],
+  );
 
   const runBinding = useCallback(
     (binding: KeyBinding, _event: KeyboardEvent): boolean => {
       const current = inputRef.current;
-      const s = shellRef.current;
       switch (binding.id) {
         case 'key.find':
         case 'key.findAgain':
@@ -744,14 +1111,29 @@ export function EditorShell({
           return true;
         case 'key.contextMenu':
           return false;
+        /* SPEC-2 section 9: the rotate keys with an object selected and no caret */
+        case 'key.rotateLeft15':
+        case 'key.rotateLeft15Alias':
+          return current.selection?.text === true ? false : rotateBy(-15);
+        case 'key.rotateRight15':
+        case 'key.rotateRight15Alias':
+          return current.selection?.text === true ? false : rotateBy(15);
+        case 'key.rotateLeft1':
+          return current.selection?.text === true ? false : rotateBy(-1);
+        case 'key.rotateRight1':
+          return current.selection?.text === true ? false : rotateBy(1);
+        case 'key.commit':
+          if (current.editor?.exitCrop) {
+            current.editor.exitCrop();
+            return true;
+          }
+          return false;
         default:
           break;
       }
-      void current;
-      void s;
       return false;
     },
-    [openDialog, runClient, say],
+    [openDialog, rotateBy, say],
   );
 
   useEditorKeys(
@@ -770,7 +1152,9 @@ export function EditorShell({
         dialog !== null ||
         toolFinderOpen ||
         paletteOpen ||
-        layoutGrid !== null,
+        layoutGrid !== null ||
+        anchoredPicker !== null ||
+        wordArtOpen,
     },
   );
 
@@ -785,8 +1169,13 @@ export function EditorShell({
       runControl,
       panel,
       openPanel,
+      panelSection,
       closePanel,
       reopenPanel,
+      wordArtOpen,
+      setWordArtOpen,
+      registerFilmstrip,
+      setGuideUnderPointer,
       dialog,
       openDialog,
       closeDialog,
@@ -794,7 +1183,7 @@ export function EditorShell({
       openLayoutGrid,
       closeLayoutGrid,
       pickLayout,
-      renderLayoutSubmenu,
+      renderDynamicSubmenu,
       menuOpen,
       setMenuOpen,
       compact,
@@ -818,8 +1207,12 @@ export function EditorShell({
       runControl,
       panel,
       openPanel,
+      panelSection,
       closePanel,
       reopenPanel,
+      wordArtOpen,
+      registerFilmstrip,
+      setGuideUnderPointer,
       dialog,
       openDialog,
       closeDialog,
@@ -827,7 +1220,7 @@ export function EditorShell({
       openLayoutGrid,
       closeLayoutGrid,
       pickLayout,
-      renderLayoutSubmenu,
+      renderDynamicSubmenu,
       menuOpen,
       compact,
       setCompact,
@@ -869,6 +1262,7 @@ export function EditorShell({
             deck={input.document.deck}
             slide={slide}
             blockId={input.selection?.blockId}
+            selection={input.selection}
             revision={input.revision}
             dispatch={input.dispatch}
             commit={input.commit}
@@ -876,6 +1270,12 @@ export function EditorShell({
             lintText={input.lintText}
             assetUrl={input.assetUrl}
             busy={input.busy}
+            editor={input.editor}
+            measuredBoxes={input.measuredBoxes}
+            uploadPicture={input.uploadPicture}
+            say={say}
+            openSection={panelSection}
+            slots={input.formatSlots}
             onChangeLayout={(anchor) =>
               openLayoutGrid({ purpose: 'apply', anchor, returnFocusTo: anchor })
             }
@@ -948,6 +1348,18 @@ export function EditorShell({
             onClose={closePanel}
           />
         );
+      case 'diagram':
+        /* B5's Diagram panel (SPEC-2 section 5 "Diagram panel"), mounted by the integrator at merge 2 (b5.md request 3) */
+        return (
+          <DiagramPanel
+            slideId={input.slideId}
+            revision={input.revision}
+            dispatch={input.dispatch}
+            onClose={closePanel}
+            onNotice={say}
+            busy={input.busy}
+          />
+        );
       default:
         return null;
     }
@@ -990,13 +1402,115 @@ export function EditorShell({
         return <FromThisPresentationDialog target={dialog.target} />;
       case 'link':
         return <LinkDialog />;
-      case 'insertTable':
-        return <InsertTableDialog />;
       case 'insertIcon':
         return <InsertIconDialog />;
       case 'insertMaterial':
         return <InsertMaterialDialog />;
+      /* round two (SPEC-2 4.1) */
+      case 'background':
+        return <BackgroundDialog />;
+      case 'customSpacing':
+        return <CustomSpacingDialog />;
+      case 'specialCharacters':
+        return <SpecialCharactersDialog />;
     }
+  })();
+
+  /* Format > Borders & lines > Border color and Border weight anchored to the row (SPEC-2 0.27, 0.62) */
+  const anchoredNode = (() => {
+    if (anchoredPicker === null) return null;
+    const current = inputRef.current;
+    const currentSlide = current.document.slides[current.slideId];
+    const block = selectedBlock(currentSlide, current.selection);
+    const outlined = block?.type === 'text' && block.outline !== undefined;
+    const close = () => setAnchoredPicker(null);
+    if (anchoredPicker.kind === 'color') {
+      const currentColor = outlined
+        ? block.outline?.color
+        : block !== undefined && 'stroke' in block
+          ? (block.stroke as never)
+          : block?.type === 'rule'
+            ? block.color
+            : undefined;
+      return (
+        <ColorPlate
+          anchor={anchoredPicker.anchor}
+          label="Border color"
+          current={currentColor}
+          control="format.bordersLines.borderColor"
+          onClose={close}
+          onPick={(value) => {
+            close();
+            if (block === undefined) return;
+            if (outlined && block.type === 'text' && block.outline !== undefined) {
+              runBuilt({
+                action: 'block.set',
+                input: {
+                  slideId: current.slideId,
+                  blockId: block.id,
+                  path: '/outline',
+                  ...(value === 'none' ? {} : { value: { ...block.outline, color: value } }),
+                  baseRevision: current.revision,
+                },
+                label: 'Border color',
+              });
+              return;
+            }
+            runBuilt(
+              memberWritePlan(
+                facts(),
+                'stroke',
+                value === 'none' ? undefined : value,
+                'Border color',
+              ),
+            );
+          }}
+        />
+      );
+    }
+    const weights = outlined
+      ? [1, 1.5, 2]
+      : block?.type === 'shape'
+        ? [0, 1, 1.5, 2, 3, 4]
+        : [0, 1, 1.5, 2];
+    const currentWeight = outlined
+      ? block.outline?.width
+      : block !== undefined && 'strokeWidth' in block
+        ? (block.strokeWidth as number | undefined)
+        : block?.type === 'shape'
+          ? block.width
+          : block?.type === 'rule'
+            ? block.weight
+            : undefined;
+    return (
+      <WeightList
+        anchor={anchoredPicker.anchor}
+        label="Border weight"
+        weights={weights}
+        current={currentWeight}
+        control="format.bordersLines.borderWeight"
+        onClose={close}
+        onPick={(weight) => {
+          close();
+          if (block === undefined) return;
+          if (outlined && block.type === 'text' && block.outline !== undefined) {
+            runBuilt({
+              action: 'block.set',
+              input: {
+                slideId: current.slideId,
+                blockId: block.id,
+                path: '/outline',
+                value: { ...block.outline, width: weight },
+                baseRevision: current.revision,
+              },
+              label: 'Border weight',
+            });
+            return;
+          }
+          runBuilt(memberWritePlan(facts(), 'strokeWidth', weight, 'Border weight'));
+        }}
+      />
+    );
   })();
 
   const layoutPlate =
@@ -1028,6 +1542,9 @@ export function EditorShell({
       {sidebar}
       <section className="pt-main" data-editor-main="">
         <div ref={stageRef} className="pt-stagewrap">
+          {wordArtOpen ? (
+            <WordArtBar onInsert={insertWordArt} onCancel={() => setWordArtOpen(false)} />
+          ) : null}
           {children}
         </div>
         {speakerNotes && input.notes !== undefined ? (
@@ -1038,6 +1555,7 @@ export function EditorShell({
       <div className="ts-rpanel">{panelNode}</div>
       <BottomBar />
       {layoutPlate}
+      {anchoredNode}
       {dialogNode}
       <ToolFinder
         open={toolFinderOpen}

@@ -19,12 +19,20 @@ import { MENUS, TITLE_ROW_ITEMS, TOOLBAR_HEAD, TOOLBAR_TAIL_DEFAULT, walkItems }
  * becomes Ctrl+Alt. Letters are written in capitals; matching is case insensitive.
  *
  * The editor map (`buildEditorKeymap`) is derived from the menu model plus the bindings below
- * that have no menu item (the filmstrip keys, Find, Save, the navigation chords, the nudge and
- * resize keys, the context menu key). `shortcuts.test.ts` checks it against the R04 fixture: every
- * Google row is bound, bound as disabled, or listed in `OMITTED_SHORTCUTS` with a reason; no two
- * enabled chords in one scope collide unless `SHARED_CHORDS` says they dispatch by focus; and no
- * chord in the editor scopes is a bare letter (SPEC 0.28, 10.2). Relative imports here carry the
- * `.ts` extension so the parity audit script can load the module under Node.
+ * that have no menu item (the filmstrip keys, Find, Save, the navigation chords, the nudge,
+ * rotate and resize keys, the context menu key). `shortcuts.test.ts` checks it against the R04
+ * fixture: every Google row is bound, bound as disabled, or listed in `OMITTED_SHORTCUTS` with a
+ * reason; no two enabled chords in one scope collide unless `SHARED_CHORDS` says they dispatch by
+ * focus; and no chord in the editor scopes is a bare letter (SPEC 0.28, 10.2).
+ *
+ * Round two (SPEC-2 section 9) binds the text marks, Justify, the indents, Group and Ungroup,
+ * Google's rotate keys, and the canvas keys on every slide kind (the nudge, the resize chords, Tab
+ * in z order); a binding's `note` is the sentence the shortcuts dialog prints under its row (the
+ * browser keys of Subscript and Superscript, the Cmd+Option rotate alias of SPEC-2 0.78), an
+ * `alias` binding is a Turboslide alternate chord for a Google row (listed in
+ * `TURBOSLIDE_ONLY_KEYS`, folded into its row's note), and a `Gesture` without a Google row is a
+ * Turboslide addition (`turboslide: true`). Relative imports here carry the `.ts` extension so the
+ * parity audit script can load the module under Node.
  */
 
 export type Chord = {
@@ -433,6 +441,10 @@ export type KeyBinding = {
   items: ReadonlyArray<string>;
   /** when the handler runs: the predicate name, else always */
   enabled?: MenuPredicate;
+  /** one sentence the shortcuts dialog prints under the row (SPEC-2 section 9) */
+  note?: string;
+  /** the binding this chord is a Turboslide alternate for; the dialog folds it into that row's note */
+  alias?: string;
 };
 
 type Extra = Omit<KeyBinding, 'id' | 'items' | 'status'> & { id: string; status?: 'now' | 'later' };
@@ -442,6 +454,11 @@ function extra(binding: Extra): KeyBinding {
 }
 
 const K = (mac: string, win: string = winChordOf(mac)): Shortcut => ({ mac, win });
+
+/* the notes the shortcuts dialog prints under a row (SPEC-2 section 9, 0.78) */
+const ROTATE_ALIAS_NOTE =
+  'Cmd+Option+Left and Right also rotate when your browser lets them through';
+const BROWSER_KEY_NOTE = 'Your browser may take this key; the Format menu has the item';
 
 /**
  * Bindings with no menu item of their own (SPEC 10.1). The filmstrip and canvas scopes fire only
@@ -634,7 +651,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     scope: 'canvas',
     group: 'Move and arrange objects',
     google: ['nudge'],
-    enabled: 'freeformBlockSelected',
+    enabled: 'objectSelected',
   }),
   extra({
     id: 'nudgeMore',
@@ -643,7 +660,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     scope: 'canvas',
     group: 'Move and arrange objects',
     google: ['nudge-larger'],
-    enabled: 'freeformBlockSelected',
+    enabled: 'objectSelected',
   }),
   extra({
     id: 'resizeWider',
@@ -652,7 +669,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     scope: 'canvas',
     group: 'Move and arrange objects',
     google: ['resize-larger-horizontally'],
-    enabled: 'freeformBlockSelected',
+    enabled: 'objectSelected',
   }),
   extra({
     id: 'resizeTaller',
@@ -661,7 +678,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     scope: 'canvas',
     group: 'Move and arrange objects',
     google: ['resize-larger-vertically'],
-    enabled: 'freeformBlockSelected',
+    enabled: 'objectSelected',
   }),
   extra({
     id: 'resizeSmaller',
@@ -670,7 +687,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     scope: 'canvas',
     group: 'Move and arrange objects',
     google: ['resize-smaller'],
-    enabled: 'freeformBlockSelected',
+    enabled: 'objectSelected',
   }),
   extra({
     id: 'resizeLarger',
@@ -679,7 +696,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     scope: 'canvas',
     group: 'Move and arrange objects',
     google: ['resize-larger'],
-    enabled: 'freeformBlockSelected',
+    enabled: 'objectSelected',
   }),
   extra({
     id: 'resizeShorter',
@@ -688,7 +705,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     scope: 'canvas',
     group: 'Move and arrange objects',
     google: ['resize-smaller-vertically'],
-    enabled: 'freeformBlockSelected',
+    enabled: 'objectSelected',
   }),
   extra({
     id: 'resizeNarrower',
@@ -697,7 +714,7 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     scope: 'canvas',
     group: 'Move and arrange objects',
     google: ['resize-smaller-horizontally'],
-    enabled: 'freeformBlockSelected',
+    enabled: 'objectSelected',
   }),
   extra({
     id: 'commit',
@@ -707,25 +724,87 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     group: 'Move and arrange objects',
     google: ['exit-crop-mode'],
   }),
+  /* rotation (SPEC-2 section 9, 0.78, R04 B7): with an object selected and no caret, on every slide
+     kind; Option+Left and Option+Right move the caret by a word inside a run, so the canvas scope.
+     Cmd+Option+Left and Right are honoured as 15 degree aliases when the browser lets the event
+     through (Chrome on macOS switches tabs with the pair); the dialog prints Google's keys and the note */
   extra({
-    id: 'nextMisspelling',
-    label: 'Move to next misspelling',
-    key: K("Cmd+'"),
-    scope: 'text',
-    group: 'Text',
-    google: ['next-misspelling'],
-    status: 'later',
-    reason: 'Your browser marks misspellings and steps through them from its own menu',
+    id: 'rotateLeft15',
+    label: 'Rotate counterclockwise by 15 degrees',
+    key: K('Option+Left'),
+    scope: 'canvas',
+    group: 'Move and arrange objects',
+    google: ['rotate-ccw-15'],
+    enabled: 'rotatable',
+    note: ROTATE_ALIAS_NOTE,
   }),
   extra({
-    id: 'previousMisspelling',
-    label: 'Move to previous misspelling',
-    key: K('Cmd+;'),
+    id: 'rotateRight15',
+    label: 'Rotate clockwise by 15 degrees',
+    key: K('Option+Right'),
+    scope: 'canvas',
+    group: 'Move and arrange objects',
+    google: ['rotate-cw-15'],
+    enabled: 'rotatable',
+    note: ROTATE_ALIAS_NOTE,
+  }),
+  extra({
+    id: 'rotateLeft15Alias',
+    label: 'Rotate counterclockwise by 15 degrees',
+    key: K('Cmd+Option+Left'),
+    scope: 'canvas',
+    group: 'Move and arrange objects',
+    google: [],
+    enabled: 'rotatable',
+    alias: 'key.rotateLeft15',
+  }),
+  extra({
+    id: 'rotateRight15Alias',
+    label: 'Rotate clockwise by 15 degrees',
+    key: K('Cmd+Option+Right'),
+    scope: 'canvas',
+    group: 'Move and arrange objects',
+    google: [],
+    enabled: 'rotatable',
+    alias: 'key.rotateRight15',
+  }),
+  extra({
+    id: 'rotateLeft1',
+    label: 'Rotate counterclockwise by 1 degree',
+    key: K('Option+Shift+Left'),
+    scope: 'canvas',
+    group: 'Move and arrange objects',
+    google: ['rotate-ccw-1'],
+    enabled: 'rotatable',
+  }),
+  extra({
+    id: 'rotateRight1',
+    label: 'Rotate clockwise by 1 degree',
+    key: K('Option+Shift+Right'),
+    scope: 'canvas',
+    group: 'Move and arrange objects',
+    google: ['rotate-cw-1'],
+    enabled: 'rotatable',
+  }),
+  /* list levels (SPEC-2 section 9): Tab at the start of a list item; Google's shortcut page has
+     no row for it, so the pair is listed as ours (TURBOSLIDE_ONLY_KEYS) */
+  extra({
+    id: 'listLevelUp',
+    label: 'Move a list item down a level',
+    key: K('Tab', 'Tab'),
     scope: 'text',
     group: 'Text',
-    google: ['previous-misspelling'],
-    status: 'later',
-    reason: 'Your browser marks misspellings and steps through them from its own menu',
+    google: [],
+    enabled: 'listLevelUp',
+  }),
+  extra({
+    id: 'listLevelDown',
+    label: 'Move a list item up a level',
+    key: K('Shift+Tab'),
+    scope: 'text',
+    group: 'Text',
+    google: [],
+    enabled: 'listLevelDown',
   }),
   /* presenting (SPEC 9.2, R04 A10): B6 binds them; the dialog lists them from here */
   extra({
@@ -830,8 +909,12 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
 
 /**
  * Google rows the round does not bind, each with the reason the shortcuts dialog prints in grey
- * (SPEC 10.1, the "greyed with the reason" list) or leaves out. `status: 'later'` rows show in the
- * dialog greyed; `omit` rows are absent from it.
+ * (SPEC 10.1; SPEC-2 section 9 fixes the greyed list: Select none, Move paragraph, Open animations
+ * panel, Insert comment, the comment chords, the screen reader chords, the input tools keys, Open
+ * Explore, Turn on captions, the HTML view, the cell border chord, Select list item and Select
+ * list items at current level, Move to next and previous text formatting change) or leaves out.
+ * `status: 'later'` rows show in the dialog greyed with the stub formula, so their reasons are
+ * default view sentences; `omit` rows are absent from it.
  */
 export type OmittedShortcut = {
   google: string;
@@ -839,20 +922,31 @@ export type OmittedShortcut = {
   reason: string;
 };
 
+const COMMENTS_GREY = 'Leave a note in the speaker notes instead';
+const SCREEN_READER_GREY = 'Your screen reader reads the page as it is';
+const INPUT_TOOLS_GREY = 'The operating system input methods work in every field';
+const LIST_CHORD_GREY = 'A screen reader chord; lists are edited as text';
+
 export const OMITTED_SHORTCUTS: ReadonlyArray<OmittedShortcut> = [
+  /* SPEC-2 0.61: Select none is a menu item; its two key sequence stays unbound */
+  {
+    google: 'select-none',
+    status: 'later',
+    reason: 'Esc clears the selection; Edit > Select none does the same',
+  },
   {
     google: 'captions-while-presenting',
-    status: 'omit',
+    status: 'later',
     reason: 'Captions are a browser speech service in English only',
   },
   {
     google: 'html-view',
-    status: 'omit',
+    status: 'later',
     reason: 'The web page download is the HTML form of the presentation',
   },
   { google: 'animations-panel', status: 'later', reason: 'The GT theme presents still slides' },
   { google: 'animation-preview', status: 'omit', reason: 'No animations' },
-  { google: 'open-explore', status: 'omit', reason: 'Google retired Explore in 2024' },
+  { google: 'open-explore', status: 'later', reason: 'Google retired Explore in 2024' },
   {
     google: 'open-dictionary',
     status: 'omit',
@@ -862,80 +956,48 @@ export const OMITTED_SHORTCUTS: ReadonlyArray<OmittedShortcut> = [
   {
     google: 'cell-border-selection',
     status: 'later',
-    reason: 'Cell borders follow the table style',
+    reason: 'Border colour applies to the selected cells',
   },
   { google: 'play-video', status: 'omit', reason: 'No video' },
-  {
-    google: 'accessibility-menu',
-    status: 'omit',
-    reason: 'Your screen reader reads the page as it is',
-  },
-  {
-    google: 'input-tools-menu',
-    status: 'omit',
-    reason: 'The operating system input methods work in every field',
-  },
-  {
-    google: 'toggle-input-controls',
-    status: 'omit',
-    reason: 'The operating system input methods work in every field',
-  },
-  { google: 'enter-comment', status: 'later', reason: 'Comments arrive in the next round' },
-  { google: 'next-comment', status: 'later', reason: 'Comments arrive in the next round' },
-  { google: 'previous-comment', status: 'later', reason: 'Comments arrive in the next round' },
-  { google: 'comment-focus-next', status: 'later', reason: 'Comments arrive in the next round' },
-  {
-    google: 'comment-focus-previous',
-    status: 'later',
-    reason: 'Comments arrive in the next round',
-  },
-  { google: 'comment-focus-reply', status: 'later', reason: 'Comments arrive in the next round' },
-  { google: 'comment-focus-resolve', status: 'later', reason: 'Comments arrive in the next round' },
-  { google: 'comment-thread', status: 'later', reason: 'Comments arrive in the next round' },
-  {
-    google: 'comment-reply-selected',
-    status: 'later',
-    reason: 'Comments arrive in the next round',
-  },
-  { google: 'comment-next-selected', status: 'later', reason: 'Comments arrive in the next round' },
-  {
-    google: 'comment-previous-selected',
-    status: 'later',
-    reason: 'Comments arrive in the next round',
-  },
-  {
-    google: 'comment-resolve-selected',
-    status: 'later',
-    reason: 'Comments arrive in the next round',
-  },
-  { google: 'comment-exit-selected', status: 'later', reason: 'Comments arrive in the next round' },
-  { google: 'hide-comment', status: 'later', reason: 'Comments arrive in the next round' },
-  { google: 'subscript', status: 'omit', reason: 'Not in the GT type model' },
-  { google: 'superscript', status: 'omit', reason: 'Not in the GT type model' },
-  { google: 'justify', status: 'omit', reason: 'The GT theme sets ragged right text' },
+  { google: 'accessibility-menu', status: 'omit', reason: SCREEN_READER_GREY },
+  { google: 'input-tools-menu', status: 'later', reason: INPUT_TOOLS_GREY },
+  { google: 'toggle-input-controls', status: 'later', reason: INPUT_TOOLS_GREY },
+  { google: 'enter-comment', status: 'later', reason: COMMENTS_GREY },
+  { google: 'next-comment', status: 'later', reason: COMMENTS_GREY },
+  { google: 'previous-comment', status: 'later', reason: COMMENTS_GREY },
+  { google: 'comment-focus-next', status: 'later', reason: COMMENTS_GREY },
+  { google: 'comment-focus-previous', status: 'later', reason: COMMENTS_GREY },
+  { google: 'comment-focus-reply', status: 'later', reason: COMMENTS_GREY },
+  { google: 'comment-focus-resolve', status: 'later', reason: COMMENTS_GREY },
+  { google: 'comment-thread', status: 'later', reason: COMMENTS_GREY },
+  { google: 'comment-reply-selected', status: 'later', reason: COMMENTS_GREY },
+  { google: 'comment-next-selected', status: 'later', reason: COMMENTS_GREY },
+  { google: 'comment-previous-selected', status: 'later', reason: COMMENTS_GREY },
+  { google: 'comment-resolve-selected', status: 'later', reason: COMMENTS_GREY },
+  { google: 'comment-exit-selected', status: 'later', reason: COMMENTS_GREY },
+  { google: 'hide-comment', status: 'later', reason: COMMENTS_GREY },
   {
     google: 'move-paragraph-down',
-    status: 'omit',
+    status: 'later',
     reason: 'Paragraphs are moved by cut and paste',
   },
-  { google: 'move-paragraph-up', status: 'omit', reason: 'Paragraphs are moved by cut and paste' },
+  { google: 'move-paragraph-up', status: 'later', reason: 'Paragraphs are moved by cut and paste' },
+  { google: 'select-list-item', status: 'later', reason: LIST_CHORD_GREY },
+  { google: 'select-list-items-level', status: 'later', reason: LIST_CHORD_GREY },
+  { google: 'next-formatting-change', status: 'later', reason: 'A screen reader chord' },
+  { google: 'previous-formatting-change', status: 'later', reason: 'A screen reader chord' },
+  /* SPEC-2 section 9 leaves the misspelling rows out of the greyed list: the browser's spelling
+     marks have no key the page can drive */
   {
-    google: 'select-list-item',
+    google: 'next-misspelling',
     status: 'omit',
-    reason: 'A screen reader chord; lists are edited as text',
+    reason: 'Your browser marks misspellings and steps through them from its own menu',
   },
   {
-    google: 'select-list-items-level',
+    google: 'previous-misspelling',
     status: 'omit',
-    reason: 'A screen reader chord; lists have one level',
+    reason: 'Your browser marks misspellings and steps through them from its own menu',
   },
-  { google: 'next-formatting-change', status: 'omit', reason: 'A screen reader chord' },
-  { google: 'previous-formatting-change', status: 'omit', reason: 'A screen reader chord' },
-  { google: 'rotate-ccw-1', status: 'later', reason: 'Rotation is not part of the GT theme' },
-  { google: 'rotate-cw-1', status: 'later', reason: 'Rotation is not part of the GT theme' },
-  { google: 'rotate-ccw-15', status: 'later', reason: 'Rotation is not part of the GT theme' },
-  { google: 'rotate-cw-15', status: 'later', reason: 'Rotation is not part of the GT theme' },
-  { google: 'constrain-rotation', status: 'later', reason: 'Rotation is not part of the GT theme' },
   {
     google: 'add-to-selection',
     status: 'omit',
@@ -962,45 +1024,44 @@ export const OMITTED_SHORTCUTS: ReadonlyArray<OmittedShortcut> = [
   { google: 'video-captions', status: 'omit', reason: 'No video' },
   { google: 'video-full-screen', status: 'omit', reason: 'No video' },
   { google: 'video-mute', status: 'omit', reason: 'No video' },
-  {
-    google: 'verbalize-selection',
-    status: 'omit',
-    reason: 'Your screen reader reads the page as it is',
-  },
-  {
-    google: 'screen-reader-support',
-    status: 'omit',
-    reason: 'Your screen reader reads the page as it is',
-  },
-  {
-    google: 'braille-support',
-    status: 'omit',
-    reason: 'Your screen reader reads the page as it is',
-  },
-  {
-    google: 'verbalize-from-cursor',
-    status: 'omit',
-    reason: 'Your screen reader reads the page as it is',
-  },
-  {
-    google: 'announce-formatting',
-    status: 'omit',
-    reason: 'Your screen reader reads the page as it is',
-  },
+  { google: 'verbalize-selection', status: 'later', reason: SCREEN_READER_GREY },
+  { google: 'screen-reader-support', status: 'later', reason: SCREEN_READER_GREY },
+  { google: 'braille-support', status: 'later', reason: SCREEN_READER_GREY },
+  { google: 'verbalize-from-cursor', status: 'later', reason: SCREEN_READER_GREY },
+  { google: 'announce-formatting', status: 'later', reason: SCREEN_READER_GREY },
 ];
 
 /**
- * Mouse gestures with a modifier (SPEC 10.1, R04 B7): not chords, listed in the dialog under
- * Move and arrange objects. `mac` and `win` name the modifier the way Google prints it.
+ * Mouse gestures with a modifier (SPEC 10.1, R04 B7; SPEC-2 section 9): not chords, listed in the
+ * dialog under Move and arrange objects and Navigation. `mac` and `win` name the modifier the way
+ * Google prints it; a gesture with no Google row is a Turboslide addition (`turboslide: true`).
  */
-export type Gesture = { id: string; label: string; mac: string; win: string; google: string };
+export type Gesture = {
+  id: string;
+  label: string;
+  mac: string;
+  win: string;
+  group: ShortcutGroup;
+  /** the R04 fixture row; absent on a Turboslide gesture */
+  google?: string;
+  turboslide?: true;
+};
 
 export const GESTURES: ReadonlyArray<Gesture> = [
+  {
+    id: 'constrainRotation',
+    label: 'Constrain to 15 degree rotation increments',
+    mac: 'Shift+rotate',
+    win: 'Shift+rotate',
+    group: 'Move and arrange objects',
+    google: 'constrain-rotation',
+  },
   {
     id: 'suppressGuides',
     label: 'Suppress guides',
     mac: 'Cmd+drag',
     win: 'Alt+drag',
+    group: 'Move and arrange objects',
     google: 'suppress-guides',
   },
   {
@@ -1008,6 +1069,7 @@ export const GESTURES: ReadonlyArray<Gesture> = [
     label: 'Duplicate',
     mac: 'Option+drag',
     win: 'Ctrl+drag',
+    group: 'Move and arrange objects',
     google: 'duplicate-drag',
   },
   {
@@ -1015,6 +1077,7 @@ export const GESTURES: ReadonlyArray<Gesture> = [
     label: 'Resize from center',
     mac: 'Option+resize',
     win: 'Ctrl+resize',
+    group: 'Move and arrange objects',
     google: 'resize-from-center',
   },
   {
@@ -1022,6 +1085,7 @@ export const GESTURES: ReadonlyArray<Gesture> = [
     label: 'Constrain to vertical or horizontal movements',
     mac: 'Shift+drag',
     win: 'Shift+drag',
+    group: 'Move and arrange objects',
     google: 'constrain-axis',
   },
   {
@@ -1029,7 +1093,26 @@ export const GESTURES: ReadonlyArray<Gesture> = [
     label: "Constrain to object's aspect ratio",
     mac: 'Shift+resize',
     win: 'Shift+resize',
+    group: 'Move and arrange objects',
     google: 'constrain-aspect',
+  },
+  /* SPEC-2 0.81, section 9: zoom about the pointer and pan while zoomed; Google prints no row for
+     either (the wheel zoom is unverified for Google, the pan is a Turboslide addition) */
+  {
+    id: 'zoomWheel',
+    label: 'Zoom about the pointer',
+    mac: 'Cmd+scroll or pinch',
+    win: 'Ctrl+scroll or pinch',
+    group: 'Navigation',
+    turboslide: true,
+  },
+  {
+    id: 'pan',
+    label: 'Pan while zoomed',
+    mac: 'Space+drag',
+    win: 'Space+drag',
+    group: 'Navigation',
+    turboslide: true,
   },
 ];
 
@@ -1101,8 +1184,19 @@ function bindingOfItem(
   };
   if (item.stubReason !== undefined) binding.reason = item.stubReason;
   if (item.enabled !== undefined) binding.enabled = item.enabled;
+  const note = ITEM_NOTES[item.id];
+  if (note !== undefined) binding.note = note;
   return binding;
 }
+
+/**
+ * The sentence the shortcuts dialog prints under a menu item's row (SPEC-2 section 9): Cmd+, opens
+ * Chrome's settings on macOS before the page sees it, and Cmd+. is unverified on Safari.
+ */
+export const ITEM_NOTES: Readonly<Record<string, string>> = {
+  'format.text.subscript': BROWSER_KEY_NOTE,
+  'format.text.superscript': BROWSER_KEY_NOTE,
+};
 
 /**
  * The R04 fixture rows each menu item with a key answers (the fixture ids of
@@ -1125,7 +1219,6 @@ export const ITEM_GOOGLE_ROWS: Readonly<Record<string, ReadonlyArray<string>>> =
   'edit.delete': ['delete'],
   'edit.duplicate': ['duplicate-slide', 'duplicate'],
   'edit.selectAll': ['select-all'],
-  'edit.selectNone': ['select-none'],
   'edit.findReplace': ['find-and-replace'],
   'view.slideshow': ['present'],
   'view.zoom.in': ['zoom-in'],
@@ -1139,11 +1232,14 @@ export const ITEM_GOOGLE_ROWS: Readonly<Record<string, ReadonlyArray<string>>> =
   'format.text.italic': ['italic'],
   'format.text.underline': ['underline'],
   'format.text.strikethrough': ['strikethrough'],
+  'format.text.superscript': ['superscript'],
+  'format.text.subscript': ['subscript'],
   'format.text.size.increase': ['increase-font-size'],
   'format.text.size.decrease': ['decrease-font-size'],
   'format.alignIndent.left': ['left-align'],
   'format.alignIndent.center': ['center-align'],
   'format.alignIndent.right': ['right-align'],
+  'format.alignIndent.justified': ['justify'],
   'format.alignIndent.increaseIndent': ['increase-indent'],
   'format.alignIndent.decreaseIndent': ['decrease-indent'],
   'format.bulletsNumbering.bulleted': ['bulleted-list'],
@@ -1176,12 +1272,18 @@ export const ITEM_GOOGLE_ROWS: Readonly<Record<string, ReadonlyArray<string>>> =
 
 /**
  * Keys with no row on Google's shortcut page: Paste without formatting is Google's item with a key
- * the Slides page does not print (R01 Edit), and Extensions takes Ctrl+Option+X because Google
- * publishes no access key for it (SPEC 2.11).
+ * the Slides page does not print (R01 Edit), Extensions takes Ctrl+Option+X because Google
+ * publishes no access key for it (SPEC 2.11), Tab and Shift+Tab move a list item between levels
+ * as Google's editor does without a row for it (SPEC-2 section 9), and Cmd+Option+Left and Right
+ * are the 15 degree rotate aliases of SPEC-2 0.78.
  */
 export const TURBOSLIDE_ONLY_KEYS: ReadonlyArray<string> = [
   'edit.pasteWithoutFormatting',
   'menu.extensions',
+  'key.listLevelUp',
+  'key.listLevelDown',
+  'key.rotateLeft15Alias',
+  'key.rotateRight15Alias',
 ];
 
 /**

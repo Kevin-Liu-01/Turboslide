@@ -298,6 +298,22 @@ fetch of the route with `?sync=1&format=json`; `download.ts` `syncExport` is the
 `runSyncExport` and the same JSON answer as a server function, for the case where the route
 requires the bearer token (`docs/hosting.md` section 6).
 
+### The batched export in the function
+
+The Google Slides parity round two (gslides-parity SPEC-2 8.1; `docs/hosting.md` section 7 "The
+batched Perfect export") splits a long export into per slide batches, each one function call.
+`apps/studio/src/server/export-batch.ts` runs `extractScenes` in the function's process for one
+batch, the way the in-process CLI export of section 3 does (the same `launchBrowser`, the same
+serverless binary of section 2, the same `/tmp` budget of section 3b: a batch's work folder is a
+`mkdtemp` under `/tmp` removed when the batch's parts are stored), and the merge runs `buildPptx`
+over the stored scenes with no browser at all, so the merge call's cost is memory, not Chromium:
+its peak resident memory is sampled every second and answered as `peakMb`. Batch calls on one
+instance run one after the other (a module level slot), which keeps the one browser rule of
+section 3b for the batches themselves; a thumbnail render that lands on the same instance while a
+batch runs still goes through the worker's local queue and may overlap the batch's browser, the
+same way it may overlap the synchronous export's today. The recorded measurements of a batched
+export of the GT deck on a preview are in `docs/gslides-parity/build-2/b6.md`.
+
 ## 5. Renders and thumbnails
 
 `GET /api/render/:slideId` and the thumbnails (`server/thumbs.ts`) call `worker().renderSlide`,

@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-opener",
+  "template": "opener",
+  "grammar": {
+    "kind": "opener",
+    "slots": {
+      "plate": [
+        "big",
+        "p",
+        "credit"
+      ]
+    },
+    "boxes": {
+      "picture": {
+        "x": 0,
+        "y": 0,
+        "w": 1600,
+        "h": 900,
+        "z": 0
+      },
+      "plate": {
+        "x": 137,
+        "y": 506,
+        "w": 740,
+        "h": 265,
+        "z": 1,
+        "group": "plate"
+      },
+      "big": {
+        "x": 163,
+        "y": 528,
+        "w": 688,
+        "h": 76,
+        "z": 2,
+        "group": "plate"
+      },
+      "p": {
+        "x": 163,
+        "y": 618,
+        "w": 688,
+        "h": 99,
+        "z": 3,
+        "group": "plate"
+      },
+      "credit": {
+        "x": 163,
+        "y": 729,
+        "w": 688,
+        "h": 22,
+        "z": 4,
+        "group": "plate"
+      }
+    },
+    "fields": {
+      "picture": {
+        "asset": "fixture-photo",
+        "fit": "cover"
+      },
+      "plate": {
+        "side": "lower-left",
+        "maxWidth": 740
+      },
+      "sectionId": "canvas",
+      "template": "opener",
+      "autofit": [
+        "big",
+        "p"
+      ]
+    }
+  },
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "picture",
+        "pos": {
+          "x": 40,
+          "y": 0,
+          "w": 1600,
+          "h": 900,
+          "z": 0
+        },
+        "type": "picture",
+        "asset": "fixture-photo",
+        "trim": {
+          "left": 0.05,
+          "right": 0.05,
+          "top": 0,
+          "bottom": 0
+        },
+        "side": "lower-left"
+      },
+      {
+        "id": "plate",
+        "pos": {
+          "x": 137,
+          "y": 506,
+          "w": 740,
+          "h": 265,
+          "z": 1,
+          "rotate": 3,
+          "group": "plate"
+        },
+        "type": "box",
+        "fill": "paper",
+        "strokeWidth": 0,
+        "padding": {
+          "top": 22,
+          "right": 26,
+          "bottom": 20,
+          "left": 26
+        }
+      },
+      {
+        "id": "big",
+        "pos": {
+          "x": 167,
+          "y": 528,
+          "w": 688,
+          "h": 76,
+          "z": 2,
+          "rotate": 3,
+          "group": "plate"
+        },
+        "type": "heading",
+        "level": "big",
+        "text": "Canvas",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p",
+        "pos": {
+          "x": 161.5,
+          "y": 618,
+          "w": 688,
+          "h": 99,
+          "z": 3,
+          "rotate": 3,
+          "group": "plate"
+        },
+        "type": "paragraph",
+        "text": "A section header as a canvas: the photograph is the picture object at the bottom of the stack, moved and trimmed; the plate group is rotated 3 degrees.",
+        "measure": 56,
+        "marginTop": 14,
+        "autofit": "shrink"
+      },
+      {
+        "id": "credit",
+        "pos": {
+          "x": 157.5,
+          "y": 729,
+          "w": 688,
+          "h": 22,
+          "z": 4,
+          "rotate": 3,
+          "group": "plate"
+        },
+        "type": "credit",
+        "text": "Picture: fixture geometry, drawn for this deck"
+      }
+    ]
+  }
+}

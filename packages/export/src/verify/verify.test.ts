@@ -9,6 +9,7 @@ import type { Box, RenderRecord } from '@turboslide/schema/render';
 import type { ShapeBounds } from '../ooxml/geometry.ts';
 import { openPackage, listParts, readPart } from '../ooxml/zip.ts';
 import {
+  CELL_RULE_INSET_PX,
   DEFAULT_BUDGETS,
   MIN_INK_CONTRAST,
   blockKind,
@@ -384,7 +385,12 @@ describe('fixture and geometry', () => {
         },
         {
           paper: '070707',
-          rects: [{ name: 'oob', box: [1500, 800, 200, 200], fill: 'F6F6F6' }],
+          rects: [
+            // crossing the page edge: shown and clipped by the show (gslides-parity SPEC-2 0.96)
+            { name: 'crossing', box: [1500, 800, 200, 200], fill: 'F6F6F6' },
+            // wholly off the page: out of bounds
+            { name: 'oob', box: [1700, 950, 200, 200], fill: 'F6F6F6' },
+          ],
         },
       ],
     });
@@ -408,9 +414,11 @@ describe('fixture and geometry', () => {
     expect(geometry.slideParts).toBe(2);
     expect(geometry.inBounds).toBe(false);
     expect(geometry.outOfBounds.map((s) => s.name)).toEqual(['oob']);
+    expect(geometry.crossing.map((s) => s.name)).toEqual(['crossing']);
     expect(geometry.normAutofitCount).toBe(0);
     expect(geometry.kernZeroCount).toBe(0);
     expect(geometryResidual(geometry)[0]).toContain('"oob" leaves the page');
+    expect(geometryResidual(geometry)[1]).toContain('"crossing" crosses the page edge');
   });
 });
 
@@ -696,6 +704,26 @@ describe('verifyPptx', () => {
         },
       }),
     ).toHaveLength(1);
+    // a table cell is compared, drawn in from its top and bottom edges by CELL_RULE_INSET_PX so
+    // the row rules stay out of its region (the sheet draws them on the cell's edge, the file on
+    // the row's); a cell too thin for the inset keeps a quarter of its height each side
+    const cells = blocksOfRecord({
+      ...(record as RenderRecord),
+      blocks: {
+        table: { type: 'table', box: [100, 200, 600, 108] },
+        'table/0/1': { type: 'cell', box: [400, 200, 300, 54] },
+        'table/1/1': { type: 'cell', box: [400, 254, 300, 8] },
+      },
+    });
+    expect(cells).toHaveLength(3);
+    expect(cells[0]?.box).toEqual([100, 200, 600, 108]);
+    expect(cells[1]?.box).toEqual([
+      400,
+      200 + CELL_RULE_INSET_PX,
+      300,
+      54 - 2 * CELL_RULE_INSET_PX,
+    ]);
+    expect(cells[2]?.box).toEqual([400, 256, 300, 4]);
     expect(turboslideCommand({ TURBOSLIDE_BIN: '/x/turboslide' })).toEqual(['/x/turboslide']);
     const cmd = turboslideCommand({});
     expect(cmd.length).toBeGreaterThan(0);

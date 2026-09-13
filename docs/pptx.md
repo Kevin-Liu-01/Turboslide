@@ -78,15 +78,25 @@ with the same alignment and pitch, and a soft break inside one.
 
 The table block (SPEC 7.3) is a CSS grid in the ruled rows idiom on the sheet and an `a:tbl` in
 Editable text: `addTable` with the measured column widths and row heights in inches (`colW`,
-`rowH`), per cell the alignment, the vertical alignment, the column fill, the cell padding as the
-margin (the top one lifted by the first-baseline constant of `baseline.ts` the way a text box is),
-the rules as cell borders (the hairline above the first row, the row rule under every row, the ink
-rule under a header row, no side borders) and the export faces on every run
+`rowH`; in the grid form of merged cells and per cell rules a row's height is the track pitch, the
+next row's top less its own, not its cells' own height, which stays short of an explicit row
+height), per cell the alignment, the vertical alignment, the exact line pitch as `lineSpacing`
+(without it LibreOffice lays a cell out at the face's natural height and its first line lands
+about 6 px high), the column fill, the cell padding as the margin (the top one lifted by the
+first-baseline constant of `baseline.ts` the way a text box is, less `CELL_FIRST_BASELINE_PX`,
+the pixel a cell measured over the text box model in the render worker image), the rules as cell
+borders (the hairline above the first row, the row rule under every row, the ink rule under a
+header row, no side borders) and the export faces on every run
 (`packages/export/src/pptx/table.ts`). The verify loop measures every cell as its own block against
-the 3 px text budget (the render record carries `<blockId>/<r>/<c>` entries of type `cell`); when a
-cell misses it, `exportPptx` rewrites the theme's file with that table as the ruled rows
-construction (hairlines plus grouped text boxes, the way `rows` travels) and verifies again, and
-the report names the block under `residual`. `--tables table|rows` forces either form. SPEC 8.2's
+the 3 px text budget (the render record carries `<blockId>/<r>/<c>` entries of type `cell`, and
+`blocksOfRecord` draws a cell's region in by `CELL_RULE_INSET_PX` at the top and bottom so the
+row rules, on the cell's edge in the sheet and on the row's in the file, stay out of a text
+measurement); when a cell misses it, `exportPptx` rewrites the theme's file with that table as
+the ruled rows construction (hairlines plus grouped text boxes, the way `rows` travels) and
+verifies again, and the report names the block under `residual`. The table block sets
+proportional numerals (the `.rows` idiom keeps its tabular ones): a PPTX run carries no OpenType
+feature, and a tabular "1" in a right aligned cell measured 4 to 6 px outside the cell budget in
+the render worker image. `--tables table|rows` forces either form. SPEC 8.2's
 "never a PPTX table" is scoped to `rows` and `plain` (SPEC 7.9 item 2). In Perfect the cells are
 invisible runs like every Text. A numbered list (SPEC 7.2.6) writes its numeral as its own run,
 grouped with the item's rule and text.
@@ -99,6 +109,9 @@ per linked block); Editable text writes the 4 by 4 pricing table as one `a:tbl`,
 one `<a:p>` per paragraph on the breaks slide, the notes when asked, 47 parts and 58 relationships
 valid, and python-pptx reopens it (6 slides, 32 shapes). The per cell budget of the table is
 measured where LibreOffice runs (the render worker image); on this machine the report says so.
+In the image, on the fixture of SPEC-2 11.2 (2026-09-12, LibreOffice 25.2.3.2), both tables pass
+the cell budget as `a:tbl` in both themes and the gated file reads "2 table(s) with 3 merged
+cell(s)" (docs/export-verification.md, the fix round).
 
 ## PDF (gslides-parity SPEC 7.6)
 
@@ -137,6 +150,96 @@ every page under the target (worst 0.035 percent, `breaks`), `perfect` and `pass
 the GT deck's PDF holds 85 pages at 960 by 540 pt, 19.1 MB, 0 pages over the fail line, 41 between
 the target and the fail line (worst `details` at 0.264 percent outside its pictures, mean 0.092),
 `passed` true, in 147 s including the gate.
+
+## The Google Slides parity round two (gslides-parity SPEC-2 section 2)
+
+Round two added the canvas (a slide of any kind converted to positioned objects, SPEC-2
+section 1) and Google's formatting on those objects. Both export modes take the new fields as
+follows;
+the renderer column of SPEC-2 section 2 is what the sheet draws, the Perfect column is by
+construction (a 2x raster of that sheet) and the Editable text column is what
+`packages/export/src/pptx/build.ts` writes.
+
+**The measurement order (SPEC-2 1.5).** Every export first puts the `ts-measure` class on the
+sheet, which drops every object transform, so the measurer reads the unrotated boxes and the
+element screenshots of rotated blocks are the unrotated pixels; the transforms then travel as
+facts (`rotate`, `flipH`, `flipV` on the shape's `xfrm`) and pptxgenjs turns the object once.
+The class comes off before the flatten sheet screenshot, which shows the rotation. The document's
+facts the page does not show as pixels (a shadow's token, alt text, `valign`, padding, word art's
+outline, paragraph spacing, columns, a connector's attachments, a chart's data, a table's border
+weight, a numbered preset's form, the slide background) join the measured scene in
+`scene/enrich.ts`, in Node, from the slide itself. `extract.test.ts` proves the order on the
+fixture's rotated picture: the element screenshot is the 400 by 225 box at 2x, the sheet
+screenshot's ink spans the rotated frame's 445 by 321.
+
+**Perfect.** Unchanged by construction. The invisible runs of a rotated text box carry `rotate`
+(so the searchable text sits where the visible text does), the runs inside a shape's text layer
+and a chart's title run are written, and the report's `perfect` is true on the fixture deck with
+the converted slides included (26 pages, worst decoded mismatch 0.000 percent).
+
+**Editable text.** Rotation and flips as `rot`, `flipH` and `flipV` on the object's own `xfrm`;
+a rotated group is written per member with the group's angle (the fixture's plate group carries
+`rot="180000"` on its four members). A `pos.group` is one `p:grpSp` named `g:<tag>`; the plate
+box of a converted opener is a `SceneRect` in the `plate` group with its heading, paragraph and
+credit. The 135 shape presets travel as `prstGeom` with their ECMA names and the block's `adjust`
+values in the `avLst` (through the `prst()` cast for names the pptxgenjs enum lacks); a shape's
+text is the shape's own text body (`addText` with `shape`) with `valign` and the four sided
+padding as `lIns`, `tIns`, `rIns`, `bIns` (pptxgenjs reads its `margin` array as left, right,
+bottom, top, and `pptx/text.ts` orders it so; the top inset gives the first baseline shift to the
+bottom one, so a centred or bottom aligned text moves up by the same amount a top aligned box
+does). An outlined shape or box is written at its box drawn in by half the stroke (`outlineBox`):
+the viewer centres an outline on the geometry where the sheet keeps it inside the box, and the
+outer edge then lands on the sheet's. The line kinds: a straight line with its heads (`headEnd`
+and `tailEnd`, the ten decorations mapped to the six DrawingML types with the substitution named
+in the residual; the sheet draws them at the medium DrawingML size, three line widths over a
+0.7 mm floor, and centres the circle, square and diamond kinds on the line end the way the viewer
+draws `oval` and `diamond`, render `blocks/primitives.ts`), an elbow as `bentConnector3` and a
+curved connector as `curvedConnector3`, both rewritten to `p:cxnSp` with `stCxn` and `endCxn`
+when `connect` names their targets, so PowerPoint moves them with the shapes; a polyline and a
+scribble as `custGeom` paths through their points, and a curve as a `custGeom` of the sheet's
+Catmull-Rom cubics (`catmullRomSegments`, one `a:cubicBezTo` per point, the geometry box grown to
+the control points), named in the residual.
+`dashType` for the dashes, `shadow` as an outer shadow with the resolved hex, opacity, angle,
+offset and blur, word art's outline as a line on the run, `italic`, `underline`, `strike`,
+`superscript` and `subscript` (as `baseline`) and `highlight` as run properties, `align: 'justify'`,
+`paraSpaceBefore` and `paraSpaceAfter` per paragraph, `numCol` and `spcCol` for columns. A Google
+list item is a text box with `bullet` (the glyph's `characterCode`, or `type: 'number'` with the
+preset's scheme for the level: `arabicPeriod`, `alphaLcPeriod`, `romanLcPeriod` and their
+`ParenR` and upper case twins; the `zerodigit` and nested forms have no OOXML scheme and travel
+as `arabicPeriod`, named in the residual) and `indentLevel` up to 8; pptxgenjs 4.0.1 declares the
+scheme as `numberType` and its writer reads `style`, so both are set. A table with spans is one
+`a:tbl` with `rowspan` and `colspan`, a filled cell as its fill, a cell border of weight 0 as
+`type: 'none'` (`w="0"` with `noFill`), the table's dash on every rule. A chart is a native chart
+part (`addChart`: `barDir` for bar and column, the legend position, the title, the series colours
+as the theme resolved them, converted to hex from the computed colours the page measured, the
+number format as an Excel format code on the value axis and the labels, the export faces on the
+text); its box is a picture region in the verify loop, reported and never gated, because
+PowerPoint and LibreOffice lay a chart out with their own axes and label placement. A slide
+background colour is `slide.background = { color }` on a chrome free master; a picture object
+that covers the whole sheet at the bottom of the stack is the raster written as
+`slide.background = { data }` (the form an unconverted picture kind exports), and a picture
+object that does not cover the sheet (the fixture's opener picture, moved 40 px right) is a
+picture at its box. Trim, mask and adjust reach the file through the raster: the element
+screenshot shows the cropped, clipped and adjusted pixels, so the picture object needs no `srcRect`
+of its own. A block's `alt` is `descr` on the object. Every substitution is one residual line:
+`paths:`, `heads:`, `numbering:`, `connectors:`, `rotation:`, `chart:`, `table:`,
+`background-picture:`.
+
+**Measured on the fixture deck** `decks/fixture/gslides` (27 slides, 26 pages) on 2026-09-12 on
+Kevin's machine (Chrome for Testing 147.0.7727.15 on ANGLE Metal; no LibreOffice, so the verify
+loop's per block budgets are the render worker image's to measure): Perfect wrote both themes in
+22.7 s, 26 palette PNG pages per file (1.54 and 1.55 MiB of page rasters), worst decoded mismatch
+0.000 percent, `perfect` and `passed` true, 151 parts, `export check` valid; Editable text wrote
+both themes in 22.8 s, 200 shapes per file, 0 out of bounds, 146 parts, 13 RGBA PNGs (1.08 MiB),
+`export check` valid with the round two line "1 italic run(s), 6 rotated, 16 group(s), 3 chart
+part(s), 4 attached connector(s), 1 numCol, 1 avLst, 2 table(s) with 3 merged cell(s)" (the
+merged cells count the `a:tc` elements carrying `rowSpan` or `gridSpan`, three of the four cells
+of the 2 by 2 span; the fixture holds one italic run), 3 `custGeom`, python-pptx reopened both
+files (26 slides, 166 shapes), QuickLook rendered the first page at 3200 by 1805. The PDF holds 26
+pages at 960 by 540 pt (857 KB, light), every page under the fail line, 25 under the target and
+`word-art` at 0.103 percent (its stroked glyph edges rasterize a little differently through
+poppler; the residual names it), the picture regions of five pages reported (worst `shadow` at
+3.45 percent inside its boxes, informational).
 
 ## The raster policy
 
@@ -188,8 +291,21 @@ jszip: every `kern="0"` attribute is removed (it turns kerning off; SPEC 8.2), e
 hidden titles are written, the content types lose the overrides pptxgenjs writes for slide master
 parts the package does not hold (one per slide) and gain `image/jpeg` for `.jpg`, the media and
 font parts are stored without deflate, and every zip entry carries the DOS epoch as its date (a
-1970 date wrapped to 2098 on the stored parts before). `custGeom` is counted, never written: every
-shape is a `prstGeom` rectangle or line.
+1970 date wrapped to 2098 on the stored parts before). `custGeom` is counted; round two writes it
+for the three path kinds only (a polyline and a scribble travel as `custGeom` paths through their
+points, a curve as one through its cubic segments), every other shape is a `prstGeom`.
+
+Round two adds four rewrites on the shapes pptxgenjs wrote, addressed by their object names
+(`packages/export/src/ooxml/shapes.ts`, applied before the grouping): the adjust values of a
+preset as `<a:gd name="adjN" fmla="val …"/>` in its `avLst` (a callout's pointer, a snipped
+corner), the text columns of a text box as `numCol` and `spcCol` on its `a:bodyPr`, an attached
+connector rewritten from `p:sp` to `p:cxnSp` with `a:stCxn` and `a:endCxn` naming the target
+shapes' ids and sites, and a block's `alt` as `descr` on a shape's or a text box's `p:cNvPr`
+(pptxgenjs writes `descr` for pictures and charts only). The grouping nests: an object name
+`ts:<slide>#<block>@g:<tag>@<block>/row/<i>` puts the shape in the user group `g:<tag>` (the
+outer `p:grpSp`) and, inside it, the row group, and the shape regex matches `p:sp`, `p:pic`,
+`p:graphicFrame` and `p:cxnSp`, so a group can hold a table, a chart or a connector
+(`ooxml/groups.ts`).
 
 `packages/export/src/ooxml/validate.ts` then walks the zip the way the Open Packaging Conventions
 require: every part has a content type through an `Override` or a `Default` for its extension;
@@ -216,12 +332,19 @@ and the report's residual states the part and relationship counts.
 3. `turboslide export check <file.pptx> [--python <bin>] [--no-quick-look] [--json]`
    (`export.check`, `packages/export/src/check.ts`) reads any file back: the zip walk above, the
    page size and every shape's bounds, the checklist counts (`custGeom`, `normAutofit`,
-   `kern="0"`), the media parts classed by their bytes (the PNG header's color type and bit depth,
+   `kern="0"`), the round two counts (`italicRuns` as `i="1"` run properties, `rotated` as `rot`
+   attributes on an `xfrm`, `groups` as `p:grpSp`, `charts` as chart parts, `connectors` as
+   `p:cxnSp` with an `stCxn` or `endCxn`, `numCol`, `avLst` with a written guide on a preset that
+   is not a rounded rectangle, `tables` and `mergedCells` as `a:tc` elements carrying `rowSpan` or
+   `gridSpan`; the "round two:" line of the read-back), the media parts classed by their bytes (the PNG header's color type and bit depth,
    the JPEG marker) so the formats a flatten file uses are visible, the slide names and title
    placeholders, the embedded fonts, python-pptx reopening the file when an interpreter with the
    module exists (`TURBOSLIDE_PYTHON`, then the workspace's `.turboslide/venv/bin/python`), and
-   QuickLook. Exit 0 when the package is valid, the page size is right, every shape is in bounds
-   and python-pptx (when it ran) counts the same slides; 1 otherwise; 2 when the file is missing.
+   QuickLook. Exit 0 when the package is valid, the page size is right, every shape shows on the
+   page (round two: a shape whose box crosses an edge is in bounds and listed as `crossing`; a
+   shape wholly outside the page is out of bounds, the reading of SPEC-2 0.96 for a picture moved
+   past the sheet's edge) and python-pptx (when it ran) counts the same slides; 1 otherwise; 2
+   when the file is missing.
 4. The export test (`packages/export/src/export-pptx.test.ts`) runs both modes over four deck
    slides in both themes with Chrome for Testing and asserts the perfect flag, the page formats,
    the absence of font parts in the flatten files, the slide names and hidden titles (through the

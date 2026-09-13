@@ -4,9 +4,12 @@ Turboslide is a slides editor for the General Translation brand deck, built for 
 agents alike. A deck is a block document: a manifest plus one JSON file per slide plus assets with
 light and dark twins. A slide is a kind, a layout and typed blocks whose types are the GT deck
 grammar's classes made explicit, with stable slug ids. The grammar layouts carry no x or y
-coordinates; the freeform layout added on 2026-09-11 carries positioned blocks on the 1600 by
-900 sheet, and the primitive blocks box, shape, rule, text and icon take palette colors and
-typography fields (docs/freeform.md). One
+coordinates and are the templates; since the Google Slides parity round two (2026-09-12) every
+slide is a canvas: the first drag, resize, rotation, reorder or insert converts it losslessly to
+the freeform layout, where every object (the layout's own text, the photograph, the plate, the
+mark, pictures, shaders, shapes, lines, tables, charts, diagrams) carries a position with rotation
+and flip on the 1600 by 900 sheet and moves as it does in Google Slides, and the primitive blocks
+take palette colors and typography fields (docs/freeform.md, docs/gslides-parity/SPEC-2.md). One
 framework-free renderer turns the document into the same HTML and CSS the deck uses today, so the
 browser editor, the static viewer, the Prototemplate `/deck` iframe, the CLI's screenshots and the
 exporters draw from one source, and a render at revision N is the same pixels everywhere. Every
@@ -144,8 +147,14 @@ deck unpack <file.zip> [--as <id>]       a deck from a bundle; nothing is writte
 deck push <id> --to <url> [--token <t>]  pack decks/<id> and upload it to a hosted studio (the token is saved per host)
 deck pull <id> --from <url> [--token <t>] download a deck's bundle from a hosted studio and unpack it
 slides, slide get|put|patch|insert|remove|move, block set|insert|remove|move, sections set
-slide set-layout <id> --type <layout>    the layout; to freeform every block keeps its box, back is by geometry
+slide set-layout <id> --type <layout>    the layout; to freeform every block takes the box it is drawn at, back is by geometry
+slide to-canvas <id,id,...>              arrange slides by hand: every object takes its measured box (one headless page)
+slide measure <id,id,...> --json         the boxes and text fit the conversion reads, writing nothing
+slide background <ids> --color|--off, deck background, deck guides --add-vertical|--add-horizontal|--clear
 block align|distribute|order <slideId>   arrange positioned blocks (--blocks, --edge | --axis | --move); block move --z
+block group|ungroup|regroup|rotate|flip|crop|mask|reset-image|adjust|alt|shadow|autofit, block insert --pos
+text style|case|insert|list|spacing|columns|indent, table merge|unmerge|insert-rows|insert-columns|delete-rows|delete-columns|distribute|cell-style
+chart set-data|set-kind, shape set, line set (--connect-start, --connect-end, --detach), diagram insert --kind --count --style
 asset add <file|url> --role --alt        a picture with its license fields; --two-tone runs the screen
 asset capture <url> --theme both         a page at 1440 by 900 at 2x through a recipe (--recipe gt-site)
 asset dither <id> | --all-two-tone --from-recorded --verify-cells

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "gslides",
+  "title": "Export fixture",
+  "theme": "gt-ink-paper",
+  "sections": [
+    {
+      "id": "fixture",
+      "name": "Fixture",
+      "slideIds": [
+        "title",
+        "breaks",
+        "table",
+        "numbered",
+        "links",
+        "skipped",
+        "prompt"
+      ]
+    }
+  ],
+  "assets": {},
+  "defaults": {
+    "appearance": "light",
+    "counter": "on"
+  },
+  "revision": 1,
+  "createdAt": "2026-09-12T00:00:00.000Z",
+  "updatedAt": "2026-09-12T00:00:00.000Z"
+}

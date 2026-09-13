@@ -302,17 +302,20 @@ describe('applyLayout', () => {
       sectionId: 'deck',
     });
     if (slide.kind !== 'content') throw new Error('kind');
+    // the fresh placeholders carry Shrink text on overflow (gslides-parity SPEC-2 0.41)
     expect(slide.slots.left?.[0]).toEqual({
       id: 'h',
       type: 'heading',
       level: 'h2',
       text: 'The content rule',
+      autofit: 'shrink',
     });
     expect(slide.slots.left?.[1]).toEqual({
       id: 'p1',
       type: 'paragraph',
       text: 'Body.',
       measure: 56,
+      autofit: 'shrink',
     });
     // the list moved into the placeholder as it is (its size is its own setting, not an override)
     expect(slide.slots.right?.[0]).toMatchObject({

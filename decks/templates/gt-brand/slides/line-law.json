@@ -49,6 +49,7 @@
             "blocks": [
               {
                 "id": "dia1",
+                "alt": "A sketch of the shell in which the sidebar's right edge, the toolbar's bottom edge and the index panel's left edge are each drawn by one owner",
                 "type": "dia",
                 "fit": {
                   "viewBox": [
@@ -58,8 +59,7 @@
                     120
                   ]
                 },
-                "svg": "<svg class=\"dia\" viewBox=\"0 0 732 120\" aria-label=\"A sketch of the shell in which the sidebar's right edge, the toolbar's bottom edge and the index panel's left edge are each drawn by one owner\">\n            <rect x=\"0.5\" y=\"0.5\" width=\"731\" height=\"119\" fill=\"none\" class=\"hair\" stroke-width=\"1\"></rect>\n            <g class=\"ink\" stroke-width=\"1\" fill=\"none\">\n              <path d=\"M160.5 0.5 V119.5\"></path>\n              <path d=\"M160.5 40.5 H731.5\"></path>\n              <path d=\"M520.5 40.5 V119.5\"></path>\n            </g>\n            <text x=\"14\" y=\"28\">Sidebar</text>\n            <text x=\"174\" y=\"28\">Toolbar</text>\n            <text x=\"174\" y=\"86\">Stage</text>\n            <text x=\"534\" y=\"86\">Index panel</text>\n          </svg>",
-                "alt": "A sketch of the shell in which the sidebar's right edge, the toolbar's bottom edge and the index panel's left edge are each drawn by one owner"
+                "svg": "<svg class=\"dia\" viewBox=\"0 0 732 120\" aria-label=\"A sketch of the shell in which the sidebar's right edge, the toolbar's bottom edge and the index panel's left edge are each drawn by one owner\">\n            <rect x=\"0.5\" y=\"0.5\" width=\"731\" height=\"119\" fill=\"none\" class=\"hair\" stroke-width=\"1\"></rect>\n            <g class=\"ink\" stroke-width=\"1\" fill=\"none\">\n              <path d=\"M160.5 0.5 V119.5\"></path>\n              <path d=\"M160.5 40.5 H731.5\"></path>\n              <path d=\"M520.5 40.5 V119.5\"></path>\n            </g>\n            <text x=\"14\" y=\"28\">Sidebar</text>\n            <text x=\"174\" y=\"28\">Toolbar</text>\n            <text x=\"174\" y=\"86\">Stage</text>\n            <text x=\"534\" y=\"86\">Index panel</text>\n          </svg>"
               }
             ]
           },

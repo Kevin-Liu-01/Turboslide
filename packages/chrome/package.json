@@ -42,6 +42,8 @@
     "./inspector/dither": "./src/inspector/dither.tsx",
     "./inspector/material": "./src/inspector/material.tsx",
     "./inspector/sections": "./src/inspector/sections.ts",
+    "./inspector/chart": "./src/inspector/chart.tsx",
+    "./inspector/table": "./src/inspector/table.tsx",
     "./inspector/palette": "./src/inspector/palette.tsx",
     "./inspector/typography": "./src/inspector/typography.tsx",
     "./inspector/position": "./src/inspector/position.tsx",
@@ -94,6 +96,7 @@
   "devDependencies": {
     "@testing-library/dom": "catalog:",
     "@testing-library/react": "catalog:",
+    "@turboslide/lint": "workspace:*",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "jsdom": "catalog:",

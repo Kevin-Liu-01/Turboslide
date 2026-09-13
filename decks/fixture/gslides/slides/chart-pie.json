@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "id": "chart-pie",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "A pie chart with percent labels"
+      },
+      {
+        "id": "chart",
+        "type": "chart",
+        "kind": "pie",
+        "labels": true,
+        "numberFormat": "percent",
+        "legend": "right",
+        "height": 460,
+        "categories": [
+          "Docs",
+          "App",
+          "Marketing",
+          "Support"
+        ],
+        "series": [
+          {
+            "name": "Share",
+            "values": [
+              42,
+              31,
+              17,
+              10
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "template": "one-column"
+}

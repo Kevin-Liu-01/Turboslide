@@ -51,7 +51,7 @@ import { repoRootFor } from '../deck-files.ts';
 import { UsageError } from '../exit.ts';
 import { hostsPath, normalizeHost, resolveToken, saveHostToken } from '../hosts.ts';
 import { formatBytes } from '../output.ts';
-import { commit } from '../store-actions.ts';
+import { commit, deckGuides, deckSetBackground } from '../store-actions.ts';
 import type { StoreActionDeps, WriteContext } from '../store-actions.ts';
 import {
   baseRevision,
@@ -62,7 +62,7 @@ import {
   writeContext,
 } from '../write.ts';
 
-const USAGE = `usage: turboslide deck <create|rename|set|list|copy|trash|restore|remove|pack|unpack|push|pull> ...
+const USAGE = `usage: turboslide deck <create|rename|set|list|copy|trash|restore|remove|pack|unpack|push|pull|guides|background> ...
   deck create <name> --from gt-brand|blank [--id <id>] [--decks <dir>]
                                     decks/<id> from decks/templates/<from> (gt-brand: the GT brand deck, 85 slides; blank: one title slide with the starter pictures)
   deck rename <name>                set the deck title (--deck, --base-revision, --author, --note, --json)
@@ -83,7 +83,11 @@ const USAGE = `usage: turboslide deck <create|rename|set|list|copy|trash|restore
   deck push <id> --to <url> [--token <t>] [--as <id>] [--replace] [--from-url <url>] [--decks <dir>]
                                     upload the bundle to a hosted studio (deck.push); the token is kept in ~/.config/turboslide/hosts.json
   deck pull <id> --from <url> [--token <t>] [--as <id>] [--replace] [--decks <dir>]
-                                    download a deck bundle from a hosted studio into decks/ (deck.pull)`;
+                                    download a deck bundle from a hosted studio into decks/ (deck.pull)
+  deck guides --add-vertical <x> | --add-horizontal <y> | --remove-vertical <x> | --remove-horizontal <y> | --set '<json>' | --clear
+                                    the guide lines every slide shows in the editor, sheet px (deck.guides)
+  deck background --color <color> | --off
+                                    the background colour every slide without its own takes (deck.setBackground)`;
 
 export type DeckRenameInput = { name: string; baseRevision: number };
 export type DeckRenameResult = { title: string; revision: number };
@@ -263,6 +267,10 @@ export async function deck(ctx: CommandContext): Promise<number> {
       return push(inner);
     case 'pull':
       return pull(inner);
+    case 'guides':
+      return guides(inner);
+    case 'background':
+      return background(inner);
     default:
       throw new UsageError(`unknown subcommand "deck ${sub ?? ''}"\n${USAGE}`);
   }
@@ -332,6 +340,82 @@ async function set(ctx: CommandContext): Promise<number> {
     'value' in result
       ? `set ${result.path} to ${JSON.stringify(result.value)}: revision ${result.revision}`
       : `removed ${result.path}: revision ${result.revision}`,
+  );
+  return 0;
+}
+
+/** A numeric flag, repeated or comma separated, as numbers. */
+function numberList(ctx: CommandContext, flag: string): number[] {
+  return flagList(ctx.args, flag, []).map((raw) => {
+    const n = Number(raw);
+    if (!Number.isFinite(n)) throw new UsageError(`--${flag} wants a number, got ${raw}`);
+    return n;
+  });
+}
+
+async function guides(ctx: CommandContext): Promise<number> {
+  const add = [
+    ...numberList(ctx, 'add-vertical').map((at) => ({ axis: 'x' as const, at })),
+    ...numberList(ctx, 'add-horizontal').map((at) => ({ axis: 'y' as const, at })),
+  ];
+  const remove = [
+    ...numberList(ctx, 'remove-vertical').map((at) => ({ axis: 'x' as const, at })),
+    ...numberList(ctx, 'remove-horizontal').map((at) => ({ axis: 'y' as const, at })),
+  ];
+  const setRaw = flagString(ctx.args, 'set');
+  const clear = flagBoolean(ctx.args, 'clear');
+  if (add.length === 0 && remove.length === 0 && setRaw === undefined && !clear)
+    throw new UsageError(
+      `deck guides wants --add-vertical, --add-horizontal, --remove-vertical, --remove-horizontal, --set or --clear\n${USAGE}`,
+    );
+  let set: { x: number[]; y: number[] } | undefined;
+  if (setRaw !== undefined) {
+    const parsed = parseValue(setRaw);
+    if (
+      typeof parsed !== 'object' ||
+      parsed === null ||
+      !Array.isArray((parsed as { x?: unknown }).x) ||
+      !Array.isArray((parsed as { y?: unknown }).y)
+    )
+      throw new UsageError(`--set wants {"x":[...],"y":[...]}, got ${setRaw}`);
+    set = parsed as { x: number[]; y: number[] };
+  }
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    deckGuides(storeDeps(ctx, store), writeContext(ctx), {
+      ...(add.length > 0 ? { add } : {}),
+      ...(remove.length > 0 ? { remove } : {}),
+      ...(set !== undefined ? { set } : {}),
+      ...(clear ? { clear: true as const } : {}),
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  ctx.out.human(
+    result.guides === null
+      ? `no guides: revision ${result.revision}`
+      : `guides x ${result.guides.x.join(', ') || 'none'}; y ${result.guides.y.join(', ') || 'none'}: revision ${result.revision}`,
+  );
+  return 0;
+}
+
+async function background(ctx: CommandContext): Promise<number> {
+  const color = flagString(ctx.args, 'color');
+  const off = flagBoolean(ctx.args, 'off');
+  if ((color === undefined) === !off)
+    throw new UsageError(`deck background wants --color <color> or --off\n${USAGE}`);
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    deckSetBackground(storeDeps(ctx, store), writeContext(ctx), {
+      background: color === undefined ? null : { color: color as never },
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  ctx.out.human(
+    result.background === null
+      ? `removed the theme background: revision ${result.revision}`
+      : `set the theme background ${result.background.color}: revision ${result.revision}`,
   );
   return 0;
 }

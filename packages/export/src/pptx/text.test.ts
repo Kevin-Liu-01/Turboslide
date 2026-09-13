@@ -5,7 +5,14 @@ import { describe, expect, it } from 'vitest';
 
 import { rasterScaleFor, THREE_X_KINDS } from '../scene/extract.ts';
 import type { SceneRun, SceneStyle, SceneText } from '../scene/types.ts';
-import { guardLinkSpaces, textRuns } from './text.ts';
+import { firstBaselineShiftPx } from './baseline.ts';
+import {
+  WIDTH_SLACK_IN,
+  bulletCharacterCode,
+  guardLinkSpaces,
+  textBoxOptions,
+  textRuns,
+} from './text.ts';
 import type { TextEmitOptions } from './text.ts';
 
 const style: SceneStyle = {
@@ -139,5 +146,161 @@ describe('the off-cut face advance', () => {
     // -0.6 px tracking minus 0.2 px per character is -0.8 px, -0.48 pt
     expect(out[0]?.options?.charSpacing).toBeCloseTo(-0.48, 2);
     expect(options.families.has('GT Inter Text 26 Medium')).toBe(true);
+  });
+});
+
+describe('the run marks of gslides-parity SPEC-2 7.2', () => {
+  const marked: SceneText = {
+    id: 'p1/text',
+    blockId: 'p1',
+    box: [137, 300, 600, 66],
+    textBox: [137, 300, 600, 66],
+    style,
+    native: true,
+    lines: [
+      {
+        box: [137, 300, 600, 33],
+        paragraph: 0,
+        runs: [
+          run('A run in '),
+          run('italic', { style: { ...style, italic: true } }),
+          run(', one '),
+          run('underlined', { style: { ...style, underline: true } }),
+          run(', E = mc'),
+          run('2', { style: { ...style, baseline: 'super' } }),
+          run(', H'),
+          run('2', { style: { ...style, baseline: 'sub' } }),
+          run('O, a '),
+          run('coloured', { style: { ...style, color: 'rgb(18, 163, 122)' } }),
+          run(' and a '),
+          run('highlighted', { style: { ...style, highlight: 'rgb(240, 160, 32)' } }),
+          run(' run.'),
+        ],
+      },
+      { box: [137, 333, 600, 33], paragraph: 1, runs: [run('The second paragraph.')] },
+    ],
+    paraSpace: { before: 12, after: 8 },
+  };
+
+  it('writes italic, underline, baseline, colour and highlight per run', () => {
+    const out = textRuns(marked, options);
+    const by = (text: string) => out.find((r) => r.text === text)?.options ?? {};
+    expect(by('italic').italic).toBe(true);
+    expect(by('underlined').underline).toEqual({ style: 'sng' });
+    expect(
+      out.filter((r) => r.text === '2').map((r) => [r.options?.superscript, r.options?.subscript]),
+    ).toEqual([
+      [true, undefined],
+      [undefined, true],
+    ]);
+    expect(by('coloured').color).toBe('12A37A');
+    expect(by('highlighted').highlight).toBe('F0A020');
+    expect(by('A run in ').italic).toBeUndefined();
+  });
+
+  it('puts the paragraph spacing on the paragraphs it applies to (2.2.9)', () => {
+    const out = textRuns(marked, options);
+    const first = out[0]?.options ?? {};
+    const second = out.find((r) => r.text === 'The second paragraph.')?.options ?? {};
+    // the first paragraph takes no space before and 8 px (4.8 pt) after; the last no space after
+    expect(first.paraSpaceBefore).toBeUndefined();
+    expect(first.paraSpaceAfter).toBeCloseTo(4.8, 5);
+    expect(second.paraSpaceBefore).toBeCloseTo(7.2, 5);
+    expect(second.paraSpaceAfter).toBeUndefined();
+    // the paragraph break closes the first paragraph
+    expect(out.find((r) => r.text === ' run.')?.options?.breakLine).toBe(true);
+  });
+
+  it('writes a list item glyph or numeral as the bullet with its level (2.2.12, 2.2.13)', () => {
+    const item: SceneText = {
+      ...marked,
+      id: 'list/items/3/text',
+      blockId: 'list',
+      box: [173, 500, 400, 33],
+      textBox: [173, 500, 400, 33],
+      lines: [{ box: [173, 500, 400, 33], paragraph: 0, runs: [run('Level four')] }],
+      paraSpace: undefined,
+      bullet: { kind: 'bullet', glyph: '●', level: 4, index: 1 },
+    };
+    const out = textRuns(item, options);
+    expect(out[0]?.options?.bullet).toMatchObject({ characterCode: '25CF' });
+    expect((out[0]?.options?.bullet as { indent: number }).indent).toBeCloseTo(21.6, 5);
+    expect(out[0]?.options?.indentLevel).toBe(3);
+    expect(bulletCharacterCode('○')).toBe('25CB');
+    const numbered = textRuns(
+      {
+        ...item,
+        bullet: {
+          kind: 'number',
+          glyph: 'a.',
+          level: 2,
+          index: 1,
+          numberType: 'alphaLcPeriod',
+          startAt: 1,
+        },
+      },
+      options,
+    );
+    expect(numbered[0]?.options?.bullet).toMatchObject({
+      type: 'number',
+      numberType: 'alphaLcPeriod',
+      numberStartAt: 1,
+      // the key pptxgenjs 4.0.1's writer reads (its declaration names numberType)
+      style: 'alphaLcPeriod',
+    });
+    // the text box starts at the key position so the glyph sits in the margin, and for a nested
+    // item at the level's indent before it (pptxgenjs writes marL as the indent times the level
+    // plus one): a level 4 item starts four indents left of its text
+    const box = textBoxOptions(item, options);
+    expect(box.x).toBeCloseTo((173 - 36 * 4) / 120, 5);
+    expect(box.w).toBeCloseTo(400 / 120 + WIDTH_SLACK_IN + (36 * 4) / 120, 5);
+    const top = textBoxOptions({ ...item, bullet: { ...item.bullet!, level: 1 } }, options);
+    expect(top.x).toBeCloseTo((173 - 36) / 120, 5);
+  });
+
+  it('writes valign and a four number margin on a positioned text box, and the transform (2.2.18, 2.2.19, 2.1)', () => {
+    const fitted: SceneText = {
+      ...marked,
+      box: [700, 640, 420, 80],
+      textBox: [716, 656, 388, 33],
+      lines: [{ box: [716, 656, 388, 33], paragraph: 0, runs: [run('Padded')] }],
+      paraSpace: undefined,
+      valign: 'middle',
+      padding: [8, 24, 8, 24],
+      rotate: 37,
+      flip: 'h',
+      alt: 'A padded box',
+      shadow: { colorHex: '070707', opacity: 0.3, angle: 45, distance: 8, blur: 12 },
+      outline: { colorHex: '070707', width: 2 },
+    };
+    const box = textBoxOptions(fitted, options);
+    expect(box.valign).toBe('middle');
+    // the first baseline shift moves a centred box up as it does a top aligned one
+    const shift = firstBaselineShiftPx(22, 33);
+    expect(shift).toBeGreaterThan(0);
+    expect(box.y).toBeCloseTo((640 - shift) / 120, 5);
+    expect(textBoxOptions({ ...fitted, valign: 'bottom' }, options).y).toBeCloseTo(
+      (640 - shift) / 120,
+      5,
+    );
+    const margin = box.margin as [number, number, number, number];
+    expect(margin.map((v) => Math.round(v * 100) / 100)).toEqual([14.4, 14.4, 4.8, 4.8]);
+    // pptxgenjs reads the array as left, right, bottom, top: an asymmetric padding lands on its sides
+    const sides = textBoxOptions({ ...fitted, padding: [8, 24, 12, 32] }, options)
+      .margin as number[];
+    expect(sides.map((v) => Math.round(v * 100) / 100)).toEqual([19.2, 14.4, 7.2, 4.8]);
+    expect(box.x).toBeCloseTo(700 / 120, 5);
+    expect(box.h).toBeCloseTo(80 / 120, 5);
+    expect(box.rotate).toBe(37);
+    expect(box.flipH).toBe(true);
+    expect((box as { altText?: string }).altText).toBe('A padded box');
+    expect(box.shadow).toMatchObject({ type: 'outer', color: '070707', opacity: 0.3, angle: 45 });
+    expect(box.shadow?.offset).toBeCloseTo(4.8, 5);
+    expect(box.shadow?.blur).toBeCloseTo(7.2, 5);
+    expect(box.outline).toEqual({ color: '070707', size: 1.2 });
+    // the invisible layer carries no outline or highlight
+    const invisible = textBoxOptions(fitted, { ...options, invisible: true });
+    expect(invisible.outline).toBeUndefined();
+    expect(invisible.rotate).toBe(37);
   });
 });

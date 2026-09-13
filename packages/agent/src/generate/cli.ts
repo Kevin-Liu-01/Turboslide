@@ -108,8 +108,14 @@ export function cliActionFor(spec: ActionSpec): CliAction | undefined {
   }
   if (previousFlag !== undefined) custom.push({ flag: previousFlag });
   const stdin = spec.cli.stdin;
+  const omitted = new Set(spec.cli.omit ?? []);
   const options: CliOption[] = properties
-    .filter((property) => !positionals.includes(property.name) && property.name !== stdin)
+    .filter(
+      (property) =>
+        !positionals.includes(property.name) &&
+        property.name !== stdin &&
+        !omitted.has(property.name),
+    )
     .map((property) => {
       const option: CliOption = {
         key: property.name,

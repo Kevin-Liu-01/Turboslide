@@ -23,6 +23,9 @@ export const VERSIONS_DIR = 'versions';
 export const versionRecordSchema = versionSchema.extend({
   baseRevision: versionSchema.shape.revision,
   inverse: mutationSchema.array(),
+  // the Blob snapshot key of gslides-parity SPEC-2 8.2: optional, so every record written before
+  // the round and every file or tmp store record still parses
+  snapshot: versionSchema.shape.note.regex(/^[0-9a-f]{32}$/).optional(),
 });
 
 export function versionPath(dir: string, n: number): string {

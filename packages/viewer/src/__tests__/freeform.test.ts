@@ -150,10 +150,15 @@ describe('toFreeform and toGrammar', () => {
       ['p1', { x: 137, y: 211, w: 523, h: 90, z: 1 }],
       ['list', { x: 732, y: 129, w: 732, h: 300, z: 2 }],
     ]);
-    expect(slide.ext?.[GRAMMAR_EXT_KEY]).toMatchObject({
+    /* the record is the first class field `grammar` since gslides-parity SPEC-2 0.99, never an ext key */
+    expect(slide.grammar).toMatchObject({
+      kind: 'content',
       layout: cols.layout,
       slots: { left: ['h', 'p1'], right: ['list'] },
     });
+    expect(slide.ext?.[GRAMMAR_EXT_KEY]).toBeUndefined();
+    /* `template` names the layout the slide came from (derivedLayout reads the content, SPEC 5.6) */
+    expect(typeof slide.template).toBe('string');
   });
 
   it('is lossless back to the recorded grammar while nothing moved', () => {
@@ -185,10 +190,22 @@ describe('toFreeform and toGrammar', () => {
     expect(fit.reason).toMatch(/no grammar layout/);
     const back = toGrammar(moved);
     expect(back?.lossless).toBe(false);
-    expect(back?.slide.layout).toEqual({ type: 'stack' });
-    expect(back?.slide.slots.main?.map((block) => block.id)).toEqual(['h', 'list', 'p1']);
-    expect(back?.slide.slots.main?.every((block) => posOf(block) === null)).toBe(true);
-    expect(back?.slide.ext).toBeUndefined();
+    /* the schema's fromCanvas (SPEC-2 1.2) refiles a content source by geometry into the recorded
+       layout; round one refiled into a stack */
+    if (!back || back.slide.kind !== 'content') throw new Error('expected a content slide');
+    expect(back.slide.layout.type).toBe('cols');
+    const ids = Object.values(back.slide.slots)
+      .flat()
+      .map((block) => block?.id)
+      .sort();
+    expect(ids).toEqual(['h', 'list', 'p1']);
+    expect(
+      Object.values(back.slide.slots)
+        .flat()
+        .every((block) => block !== undefined && posOf(block) === null),
+    ).toBe(true);
+    expect(back.slide.ext).toBeUndefined();
+    expect(back.slide.grammar).toBeUndefined();
   });
 
   it('infers cols from two columns on a named seam and stack from one column without a record', () => {
@@ -234,8 +251,17 @@ describe('toFreeform and toGrammar', () => {
       op: 'slide.replace',
       slideId: 'free',
     });
+    /* every kind converts since gslides-parity SPEC-2 1.2: a statement's big line becomes a `big` heading object */
     const statement: Slide = { schemaVersion: 1, id: 's', kind: 'statement', big: 'One.' };
-    expect(layoutSwitchMutation(statement, freeBoxes, 'freeform')).toBeNull();
+    const bigBoxes: MeasuredBoxes = { ...freeBoxes, blocks: { big: [400, 380, 800, 140] } };
+    const converted = layoutSwitchMutation(statement, bigBoxes, 'freeform');
+    expect(converted).toMatchObject({ op: 'slide.replace', slideId: 's' });
+    if (!converted || converted.op !== 'slide.replace' || converted.slide.kind !== 'content')
+      throw new Error('expected a converted content slide');
+    expect(
+      converted.slide.slots.main?.map((block) => [block.id, block.type, posOf(block)]),
+    ).toEqual([['big', 'heading', { x: 400, y: 380, w: 800, h: 140, z: 0 }]]);
+    expect(converted.slide.grammar?.kind).toBe('statement');
   });
 });
 
@@ -325,9 +351,11 @@ describe('the freeform gestures', () => {
 
   it('offers the move chip and eight resize squares for a positioned block', () => {
     const handles = handlesFor(freeSlide(), freeBoxes, { kind: 'block', blockId: 'a' });
+    /* the rotation ring joins the eight squares (gslides-parity SPEC-2 6.1 row 11) */
     expect(handles.map((h) => h.kind)).toEqual([
       'free-move',
       ...Array<string>(8).fill('free-resize'),
+      'free-rotate',
     ]);
     const chip = handle('free-move', handles);
     expect(chip.shape).toBe('chip');
@@ -375,10 +403,11 @@ describe('the freeform gestures', () => {
     );
     const ctx = { slide, boxes: freeBoxes, free: { ids: ['a'], lines: [] } };
     const result = freeGesture(se, ctx, { x: 500, y: 300 }, { x: 550, y: 300 });
-    // the right edge, 550, rounds to 552 on the grid; the bottom edge, 300, is off the grid
-    // already and rounds to 304
+    // the right edge, 550, rounds to 552 on the grid; the bottom edge did not move (dy 0) and
+    // stays at 300 (gslides-parity SPEC-2 6.1 row 9: an edge snaps only when the pointer moved
+    // along its axis; round one snapped it to 304, a phantom resize on a sideways drag)
     expect(sets(result?.mutations ?? [])).toEqual([
-      ['a', { x: 200, y: 200, w: 352, h: 104, z: 0 }],
+      ['a', { x: 200, y: 200, w: 352, h: 100, z: 0 }],
     ]);
     const locked = freeGesture(se, ctx, { x: 500, y: 300 }, { x: 600, y: 300 }, { shift: true });
     expect(locked?.mutations[0]).toMatchObject({ value: { w: 400, h: 133 } });

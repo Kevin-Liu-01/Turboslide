@@ -117,7 +117,7 @@ function blockIds(slide: Slide): Set<string> {
 
 const FORBIDDEN_SLIDE_PATHS = new Set(['', '/id', '/schemaVersion']);
 const FORBIDDEN_BLOCK_PATHS = new Set(['', '/id']);
-const DECK_SET_ROOTS = new Set(['title', 'theme', 'defaults']);
+const DECK_SET_ROOTS = new Set(['title', 'theme', 'defaults', 'guides']);
 
 /**
  * Applies one mutation in place and returns its inverse. Throws RangeError for an unknown id or
@@ -361,7 +361,7 @@ export function applyMutation(
       }
       if (!DECK_SET_ROOTS.has(root)) {
         throw new TypeError(
-          `deck.set writes title, theme or defaults (/defaults/appearance, /defaults/counter, /defaults/notes); sections and assets have their own mutations`,
+          `deck.set writes title, theme, defaults (/defaults/appearance, /defaults/counter, /defaults/notes, /defaults/background) or guides; sections and assets have their own mutations`,
         );
       }
       const existed = hasAt(document.deck, mutation.path);

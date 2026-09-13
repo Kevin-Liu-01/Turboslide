@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Cut the export font set from InterVariable (SPEC 8.4; MILESTONES M2 item 5).
+"""Cut the export font set from InterVariable (SPEC 8.4; MILESTONES M2 item 5; gslides-parity
+SPEC-2 7.1 for the italic build).
 
 The deck renders with InterVariable 4.001 and font-optical-sizing auto, so text at 15 to 31 px uses
 an optical size no static Inter file has (pptx report section 4.10). PPTX and LibreOffice want
@@ -12,18 +13,24 @@ every instance its own family name:
   GT Inter Text <size> Medium      opsz <size>, wght 500 (the *display* run inside text, keys, plain)
   Inter, Inter Medium              opsz 14, wght 400 and 500: the --fonts standard set
 
-Renaming is allowed by the SIL OFL 1.1 only when the original declares no Reserved Font Name.
-The script reads the font's own name table (copyright, license description, license URL) and
-THIRD_PARTY_NOTICES.md and refuses to rename when a Reserved Font Name is declared (SPEC 11,
-open question 5). InterVariable 4.001 declares none; fonts.json records the check.
+The parity round two adds an italic twin of every face (SPEC-2 7.1) cut from
+InterVariable-Italic.woff2 of the same release: the same family, style Italic, the
+OS/2 and head italic bits set, post.italicAngle from the source, so PowerPoint and LibreOffice
+find the Italic style under the family name a run travels under.
 
-Output: <out>/<PostScriptName>.ttf per face and <out>/fonts.json mapping (size, weight, display)
-to a family name, with bytes and sha256 per file. The build is deterministic (head.modified is
-kept from the source) so the committed files can be checked with --check.
+Renaming is allowed by the SIL OFL 1.1 only when the original declares no Reserved Font Name.
+The script reads both fonts' own name tables (copyright, license description, license URL) and
+THIRD_PARTY_NOTICES.md and refuses to rename when a Reserved Font Name is declared (SPEC 11,
+open question 5). InterVariable 4.001 declares none; fonts.json records the check for both.
+
+Output: <out>/<PostScriptName>.ttf per face and <out>/fonts.json mapping (size, weight, display,
+italic) to a family name, with bytes and sha256 per file. The build is deterministic
+(head.modified is kept from the source) so the committed files can be checked with --check.
 
 Usage:
-  build-fonts.py [--source packages/fonts/assets/InterVariable.woff2] [--out packages/fonts/export]
-                 [--prefix "GT Inter"] [--check] [--json]
+  build-fonts.py [--source packages/fonts/assets/InterVariable.woff2]
+                 [--italic-source packages/fonts/assets/InterVariable-Italic.woff2]
+                 [--out packages/fonts/export] [--prefix "GT Inter"] [--check] [--json]
 
 Requires the packages of scripts/requirements.txt (fontTools with brotli for the woff2 source).
 Run it through `turboslide fonts build`, which creates .turboslide/venv from requirements.txt.
@@ -52,6 +59,7 @@ except ImportError as error:  # pragma: no cover - reported to the caller
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_SOURCE = REPO_ROOT / "packages" / "fonts" / "assets" / "InterVariable.woff2"
+DEFAULT_ITALIC_SOURCE = REPO_ROOT / "packages" / "fonts" / "assets" / "InterVariable-Italic.woff2"
 DEFAULT_OUT = REPO_ROOT / "packages" / "fonts" / "export"
 NOTICES = REPO_ROOT / "THIRD_PARTY_NOTICES.md"
 
@@ -67,7 +75,8 @@ DISPLAY_FEATURES = ["cv11", "ss01"]
 STANDARD_OPSZ = 14
 
 # Bump when the naming or the instance list changes; part of ExportReport.fontSetVersion.
-BUILD_VERSION = 1
+# 2: the italic twins of the parity round two (gslides-parity SPEC-2 7.1).
+BUILD_VERSION = 2
 
 WINDOWS = (3, 1, 0x409)
 MAC = (1, 0, 0)
@@ -151,7 +160,9 @@ def postscript_name(family: str, style: str) -> str:
 
 def rename(font: TTFont, family: str, style: str, version: str) -> str:
     """Give the instance its own family (SPEC 8.4). Keeps IDs 0, 5, 13, 14 (copyright, version,
-    license) as the OFL requires and rewrites 1, 2, 3, 4, 6, 16, 17; drops 21, 22 and 25."""
+    license) as the OFL requires and rewrites 1, 2, 3, 4, 6, 16, 17; drops 21, 22 and 25. An
+    italic face reads ID 2 Italic, ID 4 "<family> Italic", ID 6 "<PostScript>-Italic"
+    (SPEC-2 7.1)."""
     name = font["name"]
     ps_name = postscript_name(family, style)
     for record in list(name.names):
@@ -170,12 +181,17 @@ def rename(font: TTFont, family: str, style: str, version: str) -> str:
     return ps_name
 
 
-def set_style_bits(font: TTFont, weight: int) -> None:
+def set_style_bits(font: TTFont, weight: int, italic: bool = False) -> None:
     os2 = font["OS/2"]
     os2.usWeightClass = weight
-    # fsSelection: clear ITALIC (0), BOLD (5); set REGULAR (6); keep USE_TYPO_METRICS (7).
-    os2.fsSelection = (os2.fsSelection & ~((1 << 0) | (1 << 5))) | (1 << 6)
-    font["head"].macStyle &= ~0x3
+    if italic:
+        # fsSelection: set ITALIC (0), clear BOLD (5) and REGULAR (6); keep USE_TYPO_METRICS (7).
+        os2.fsSelection = (os2.fsSelection & ~((1 << 5) | (1 << 6))) | (1 << 0)
+        font["head"].macStyle = (font["head"].macStyle & ~0x3) | 0x2
+    else:
+        # fsSelection: clear ITALIC (0), BOLD (5); set REGULAR (6); keep USE_TYPO_METRICS (7).
+        os2.fsSelection = (os2.fsSelection & ~((1 << 0) | (1 << 5))) | (1 << 6)
+        font["head"].macStyle &= ~0x3
 
 
 def build_face(
@@ -195,14 +211,14 @@ def build_face(
     )
     remapped = freeze_features(font, features) if features else 0
     ps_name = rename(font, family, style, version)
-    set_style_bits(font, weight)
+    set_style_bits(font, weight, italic=(style == "Italic"))
     font["head"].modified = modified
     buffer = io.BytesIO()
     font.save(buffer)
     return buffer.getvalue(), ps_name, remapped
 
 
-def plan(prefix: str) -> list[dict]:
+def upright_plan(prefix: str) -> list[dict]:
     faces: list[dict] = []
     faces.append(
         {
@@ -247,7 +263,20 @@ def plan(prefix: str) -> list[dict]:
     return faces
 
 
-def build(source_path: Path, out: Path, prefix: str) -> tuple[dict, dict[str, bytes]]:
+def plan(prefix: str) -> list[dict]:
+    """Every upright face, then its italic twin with the same family and style Italic (SPEC-2 7.1):
+    17 upright and 17 italic, 34 files. The display italic freezes cv11 and ss01 as the upright does."""
+    faces = upright_plan(prefix)
+    italics: list[dict] = []
+    for face in faces:
+        italics.append({**face, "style": "Italic", "italic": True})
+    for face in faces:
+        face["italic"] = False
+    return faces + italics
+
+
+def open_source(source_path: Path, what: str) -> tuple[TTFont, bytes, str]:
+    """A variable source with its opsz and wght axes, no Reserved Font Name and installable embedding."""
     source_bytes = source_path.read_bytes()
     source = TTFont(io.BytesIO(source_bytes), recalcTimestamp=False)
     axes = {a.axisTag: [a.minValue, a.defaultValue, a.maxValue] for a in source["fvar"].axes}
@@ -257,29 +286,49 @@ def build(source_path: Path, out: Path, prefix: str) -> tuple[dict, dict[str, by
     reserved = reserved_font_name(source)
     if reserved is not None:
         raise SystemExit(
-            f"build-fonts: the source declares the Reserved Font Name {reserved!r}; the OFL forbids "
-            "a modified version under that name. Pass --prefix with a name that does not contain it "
-            "and record the decision in docs/M2-STATUS.md (SPEC 11, open question 5)."
+            f"build-fonts: the {what} source declares the Reserved Font Name {reserved!r}; the OFL "
+            "forbids a modified version under that name. Pass --prefix with a name that does not "
+            "contain it and record the decision (SPEC 11, open question 5; SPEC-2 7.1)."
         )
-    version = name_string(source, 5) or ""
-    version_short = re.sub(r"^Version\s+", "", version).split(";")[0]
-    modified = source["head"].modified
     fs_type = source["OS/2"].fsType
     if fs_type != 0:
-        raise SystemExit(f"build-fonts: fsType is {fs_type}; the export set needs installable embedding (0)")
+        raise SystemExit(f"build-fonts: {what} fsType is {fs_type}; the export set needs installable embedding (0)")
+    return source, source_bytes, name_string(source, 5) or ""
+
+
+def source_record(source_path: Path, source: TTFont, source_bytes: bytes) -> dict:
+    return {
+        "file": str(source_path.relative_to(REPO_ROOT)) if source_path.is_relative_to(REPO_ROOT) else str(source_path),
+        "family": name_string(source, 1),
+        "version": name_string(source, 5) or "",
+        "sha256": sha256_of(source_bytes),
+        "bytes": len(source_bytes),
+        "fsType": source["OS/2"].fsType,
+        "axes": {a.axisTag: [a.minValue, a.defaultValue, a.maxValue] for a in source["fvar"].axes},
+    }
+
+
+def build(source_path: Path, italic_path: Path, out: Path, prefix: str) -> tuple[dict, dict[str, bytes]]:
+    source, source_bytes, version = open_source(source_path, "upright")
+    italic, italic_bytes, italic_version = open_source(italic_path, "italic")
+    version_short = re.sub(r"^Version\s+", "", version).split(";")[0]
+    modified = source["head"].modified
+    italic_modified = italic["head"].modified
+    italic_angle = italic["post"].italicAngle
 
     files: dict[str, bytes] = {}
     faces: list[dict] = []
     for spec in plan(prefix):
+        is_italic = spec["italic"]
         data, ps_name, remapped = build_face(
-            source,
+            italic if is_italic else source,
             spec["opsz"],
             spec["weight"],
             spec["family"],
             spec["style"],
             spec["frozen"],
             version_short,
-            modified,
+            italic_modified if is_italic else modified,
         )
         file_name = f"{ps_name}.ttf"
         files[file_name] = data
@@ -288,6 +337,7 @@ def build(source_path: Path, out: Path, prefix: str) -> tuple[dict, dict[str, by
                 "file": file_name,
                 "family": spec["family"],
                 "style": spec["style"],
+                "italic": is_italic,
                 "postScriptName": ps_name,
                 "opsz": spec["opsz"],
                 "weight": spec["weight"],
@@ -305,19 +355,22 @@ def build(source_path: Path, out: Path, prefix: str) -> tuple[dict, dict[str, by
         "generatedBy": "scripts/build-fonts.py",
         "prefix": prefix,
         "source": {
-            "file": str(source_path.relative_to(REPO_ROOT)) if source_path.is_relative_to(REPO_ROOT) else str(source_path),
-            "family": name_string(source, 1),
-            "version": version,
-            "sha256": sha256_of(source_bytes),
-            "bytes": len(source_bytes),
-            "fsType": fs_type,
-            "axes": axes,
+            **source_record(source_path, source, source_bytes),
+            # the italic source of the same release (gslides-parity SPEC-2 7.1, 0.66): the file the
+            # italic twins are cut from, with its own name table version and post.italicAngle
+            "italic": {
+                **source_record(italic_path, italic, italic_bytes),
+                "italicAngle": italic_angle,
+                "release": "https://github.com/rsms/inter/releases/tag/v4.001",
+                "path": "web/InterVariable-Italic.woff2",
+            },
         },
         "license": {
             "id": "OFL-1.1",
             "reservedFontName": None,
+            "italicReservedFontName": None,
             "checked": ["name 0", "name 7", "name 13", "name 14", "THIRD_PARTY_NOTICES.md"],
-            "note": "No Reserved Font Name is declared, so renamed instances are permitted (OFL 1.1 condition 3).",
+            "note": "No Reserved Font Name is declared by the upright or the italic source, so renamed instances are permitted (OFL 1.1 condition 3).",
         },
         "textSizes": TEXT_SIZES,
         "weights": TEXT_WEIGHTS,
@@ -366,13 +419,14 @@ def check(out: Path, fonts_json: dict, files: dict[str, bytes]) -> list[str]:
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
+    parser.add_argument("--italic-source", type=Path, default=DEFAULT_ITALIC_SOURCE)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--prefix", default="GT Inter")
     parser.add_argument("--check", action="store_true", help="exit 1 when the committed set differs")
     parser.add_argument("--json", action="store_true", help="machine result on stdout")
     args = parser.parse_args(argv)
 
-    fonts_json, files = build(args.source, args.out, args.prefix)
+    fonts_json, files = build(args.source, args.italic_source, args.out, args.prefix)
     if args.check:
         stale = check(args.out, fonts_json, files)
         result = {"out": str(args.out), "faces": len(files), "stale": stale, "version": fonts_json["version"]}
@@ -388,7 +442,7 @@ def main(argv: list[str]) -> int:
         "out": str(args.out),
         "version": fonts_json["version"],
         "faces": [
-            {"file": f["file"], "family": f["family"], "opsz": f["opsz"], "weight": f["weight"], "bytes": f["bytes"]}
+            {"file": f["file"], "family": f["family"], "style": f["style"], "opsz": f["opsz"], "weight": f["weight"], "bytes": f["bytes"]}
             for f in fonts_json["faces"]
         ],
         "written": written,
@@ -398,7 +452,7 @@ def main(argv: list[str]) -> int:
         print(json.dumps(result, indent=2))
     else:
         for face in fonts_json["faces"]:
-            print(f"{face['file']:<36} {face['family']:<28} opsz {face['opsz']:>2} wght {face['weight']} {face['bytes']:>8} B")
+            print(f"{face['file']:<40} {face['family']:<28} {face['style']:<8} opsz {face['opsz']:>2} wght {face['weight']} {face['bytes']:>8} B")
         print(f"build-fonts: {len(files)} faces, {len(written)} file(s) written under {args.out}, version {fonts_json['version']}")
     return 0
 

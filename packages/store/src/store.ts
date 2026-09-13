@@ -28,7 +28,16 @@ export type WriteOptions = {
  * write appends one entry; `version save` appends one with an empty mutation list and a note.
  * `Version.note` is '' on a write entry, so a named version is one whose note is not empty.
  */
-export type VersionRecord = Version & { baseRevision: number; inverse: Mutation[] };
+export type VersionRecord = Version & {
+  baseRevision: number;
+  inverse: Mutation[];
+  /**
+   * The Blob backend's immutable document of this entry (gslides-parity SPEC-2 8.2): the md5 of
+   * the `deck.json` bytes the write pushed, naming `snapshots/<md5>.json`. Absent on the file and
+   * tmp stores and on records written before the round.
+   */
+  snapshot?: string;
+};
 
 export type ReadResult = {
   /** The normalized document; a deck with severity 3 issues is returned as parsed. */

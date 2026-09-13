@@ -7,8 +7,10 @@
 // on disk is deck.json plus slides/<id>.json (SPEC 4.1).
 import type { z } from 'zod';
 import type { Block, BlockType } from './blocks.ts';
+import { chartProblem } from './blocks/chart.ts';
 import { tableSizeProblem } from './blocks/table.ts';
 import { CATALOG, SLIDE_KIND_CATALOG, blockAssetRefs, blockTextPaths } from './catalog.ts';
+import { attachedEndsOnSites, canAttach, isConnector, siteCount } from './connect.ts';
 import type { Deck, DeckDocument, Slide, SlotName } from './deck.ts';
 import { deckSchema, normalizeLayout, slideBlocks, slideSchema, slotsForLayout } from './deck.ts';
 import type { Severity } from './findings.ts';
@@ -35,7 +37,13 @@ export type IssueCode =
   /** a table over 20 by 20, or a row without one cell per column (gslides-parity SPEC 7.3) */
   | 'table_size'
   /** a block link on a grammar text block, or a slide link whose slide is not in the deck (SPEC 7.2.7, 7.2.8) */
-  | 'link';
+  | 'link'
+  /** a chart over 12 categories or 6 series, a ragged series, or a pie with several (gslides-parity SPEC-2 2.8.1) */
+  | 'chart_size'
+  /** a connector attached to a block that is missing, unpositioned or a line, a site out of range, or an end off its site (SPEC-2 2.4.7) */
+  | 'connect'
+  /** the deck's guides unsorted or repeated (SPEC-2 2.10) */
+  | 'guides';
 
 export type Issue = {
   code: IssueCode;
@@ -240,6 +248,43 @@ function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
           ),
         );
       }
+      // the positioned only fields (gslides-parity SPEC-2 0.41, 2.2.18, 2.2.19): grow writes pos.h,
+      // valign places text inside a box, padding on a shape or a text box pads that box
+      if (block.pos === undefined) {
+        if ('autofit' in block && block.autofit === 'grow') {
+          issues.push(
+            issue(
+              'position',
+              3,
+              file,
+              `${pointer}/autofit`,
+              `Block "${block.id}" sets autofit to grow, which writes the box height and needs a position box; none and shrink work without one (gslides-parity SPEC-2 0.41)`,
+            ),
+          );
+        }
+        if ('valign' in block && block.valign !== undefined) {
+          issues.push(
+            issue(
+              'position',
+              3,
+              file,
+              `${pointer}/valign`,
+              `Block "${block.id}" sets valign, which places text inside a position box; the block has none (gslides-parity SPEC-2 2.2.18)`,
+            ),
+          );
+        }
+        if ((block.type === 'shape' || block.type === 'text') && block.padding !== undefined) {
+          issues.push(
+            issue(
+              'position',
+              3,
+              file,
+              `${pointer}/padding`,
+              `Block "${block.id}" sets padding, which pads a position box; the block has none (gslides-parity SPEC-2 2.2.19)`,
+            ),
+          );
+        }
+      }
       const first = seen.get(block.id);
       if (first !== undefined) {
         issues.push(
@@ -275,6 +320,14 @@ function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
           );
         }
       }
+      if (block.type === 'chart') {
+        const problem = chartProblem(block);
+        if (problem !== null) {
+          issues.push(
+            issue('chart_size', 3, file, `${pointer}${problem.pointer}`, problem.message),
+          );
+        }
+      }
       if (block.link !== undefined && LINK_REFUSED_BLOCK_TYPES.has(block.type)) {
         issues.push(
           issue(
@@ -288,7 +341,82 @@ function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
       }
     });
   }
+  checkConnectors(slide, file, issues);
   canonicalizeSlideText(slide);
+}
+
+/**
+ * A connector's attachments (gslides-parity SPEC-2 2.4.7): the target is a top level block of the
+ * same slide, positioned and not a line kind, and the site is under the target's site count
+ * (severity 3, the write is refused); an attached end that lies more than a pixel off its site is
+ * severity 2, because `followConnectors` keeps it there on every transport and a hand edited file
+ * is a defect to read, not a refused document.
+ */
+function checkConnectors(slide: Slide, file: string, issues: Issue[]): void {
+  if (slide.kind !== 'content' || slide.layout.type !== 'freeform') return;
+  const blocks = slide.slots.main ?? [];
+  const byId = new Map(blocks.map((block) => [block.id, block]));
+  blocks.forEach((block, index) => {
+    if (!isConnector(block) || block.connect === undefined) return;
+    const pointer = `/slots/main/${index}/connect`;
+    let complete = true;
+    for (const which of ['start', 'end'] as const) {
+      const attachment = block.connect[which];
+      if (attachment === undefined) continue;
+      const target = byId.get(attachment.block);
+      if (target === undefined) {
+        complete = false;
+        issues.push(
+          issue(
+            'connect',
+            3,
+            file,
+            `${pointer}/${which}/block`,
+            `Connector "${block.id}" is attached to "${attachment.block}", which is not on slide "${slide.id}" (gslides-parity SPEC-2 2.4.7)`,
+          ),
+        );
+        continue;
+      }
+      if (!canAttach(target)) {
+        complete = false;
+        issues.push(
+          issue(
+            'connect',
+            3,
+            file,
+            `${pointer}/${which}/block`,
+            `Connector "${block.id}" is attached to "${attachment.block}", which takes no connector: a target is a positioned block that is not a line (gslides-parity SPEC-2 2.4.7)`,
+          ),
+        );
+        continue;
+      }
+      const count = siteCount(target);
+      if (attachment.site >= count) {
+        complete = false;
+        issues.push(
+          issue(
+            'connect',
+            3,
+            file,
+            `${pointer}/${which}/site`,
+            `Connector "${block.id}" names site ${attachment.site} of "${attachment.block}", which has ${count} connection site(s) (gslides-parity SPEC-2 2.4.7)`,
+          ),
+        );
+      }
+    }
+    if (!complete) return;
+    for (const off of attachedEndsOnSites(block, byId)) {
+      issues.push(
+        issue(
+          'connect',
+          2,
+          file,
+          `${pointer}/${off.end}`,
+          `Connector "${block.id}" has its ${off.end} ${Math.round(off.distance)} px off the site it is attached to; line.set with connect moves it back (gslides-parity SPEC-2 2.4.7)`,
+        ),
+      );
+    }
+  });
 }
 
 /**
@@ -455,6 +583,30 @@ export function validateManifest(input: unknown): {
     }
     sectionIds.add(section.id);
   });
+  // the guides are sorted and distinct on each axis (gslides-parity SPEC-2 2.10); the schema keeps
+  // them inside the sheet
+  for (const axis of ['x', 'y'] as const) {
+    const list = deck.guides?.[axis];
+    if (list === undefined) continue;
+    for (let i = 1; i < list.length; i += 1) {
+      const previous = list[i - 1] ?? 0;
+      const current = list[i] ?? 0;
+      if (current <= previous) {
+        issues.push(
+          issue(
+            'guides',
+            3,
+            DECK_FILE,
+            `/guides/${axis}/${i}`,
+            current === previous
+              ? `Guide ${current} is listed twice on the ${axis} axis; deck.guides writes each position once (gslides-parity SPEC-2 2.10)`
+              : `The ${axis} guides are not sorted: ${current} follows ${previous}; deck.guides writes them in order (gslides-parity SPEC-2 2.10)`,
+          ),
+        );
+        break;
+      }
+    }
+  }
   for (const [key, asset] of Object.entries(deck.assets)) {
     if (asset.id !== key) {
       issues.push(

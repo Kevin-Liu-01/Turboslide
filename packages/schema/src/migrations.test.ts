@@ -1,6 +1,8 @@
-// The migration test of gslides-parity SPEC 7.8: SCHEMA_VERSION stays 1 and every field the round
-// added is optional, so `migrate` on the committed GT deck, the GT template and the blank template
-// returns documents deep equal to their inputs, and every file validates unchanged.
+// The migration test of gslides-parity SPEC 7.8 and SPEC-2 7.8: SCHEMA_VERSION stays 1 and every
+// field the rounds added is optional, so `migrate` on the committed GT deck, the GT template, the
+// blank template and the round one fixture deck (`__fixtures__/gslides-r1`, the a65b313 copy of
+// decks/fixture/gslides) returns documents deep equal to their inputs, and every file validates
+// unchanged.
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -16,6 +18,12 @@ const COMMITTED = [
   { name: 'the GT deck', dir: join(DECKS, 'gt-brand') },
   { name: 'the GT template', dir: join(DECKS, 'templates', 'gt-brand') },
   { name: 'the blank template', dir: join(DECKS, 'templates', 'blank') },
+  // the round one fixture deck as committed at a65b313, before round two grew decks/fixture/gslides
+  // (gslides-parity MILESTONES-2 B1 item 6): every round two field is optional, so it reads unchanged
+  {
+    name: 'the round one fixture deck',
+    dir: join(import.meta.dirname, '__fixtures__', 'gslides-r1'),
+  },
 ];
 
 function readJson(file: string): Record<string, unknown> {

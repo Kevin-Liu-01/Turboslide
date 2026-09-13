@@ -1,0 +1,35 @@
+check  4/25: pnpm exec tsc -b
+check  4/25: ok in 0.5 s
+check  5/25: pnpm test
+$ vitest run
+
+ RUN  v4.1.11 /Users/kevinliu/repos/Turboslide
+
+ ❯ |@turboslide/cli| src/commands/canvas.test.ts (5 tests | 1 failed) 18392ms
+     × slide set-layout --type freeform is the same measured conversion 5001ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@turboslide/cli| src/commands/canvas.test.ts > turboslide slide to-canvas > slide set-layout --type freeform is the same measured conversion
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/commands/canvas.test.ts:180:3
+    178|   });
+    179|
+    180|   test('slide set-layout --type freeform is the same measured conversi…
+       |   ^
+    181|     const other = join(root, 'decks', 'gt-copy');
+    182|     copyDeck(other);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 180 passed (181)
+      Tests  1 failed | 1986 passed | 3 skipped (1990)
+   Start at  10:00:50
+   Duration  80.45s (transform 162.80s, setup 0ms, import 281.20s, tests 305.67s, environment 94.71s)
+
+[ELIFECYCLE] Test failed. See above for more details.
+check  5/25: FAIL exit 1 after 81.3 s
+check: stopped after a failure (81.9 s)
+check exit 1

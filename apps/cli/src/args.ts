@@ -113,6 +113,56 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   // `text replace --slides`
   'name',
   'slides',
+  // the parity round two (docs/gslides-parity/SPEC-2.md section 3): the canvas, text, table,
+  // shape, line, chart and diagram commands
+  'group',
+  'by',
+  'about',
+  'transparency',
+  'brightness',
+  'contrast',
+  'color',
+  'opacity',
+  'angle',
+  'distance',
+  'blur',
+  'range',
+  'highlight',
+  'marker',
+  'items',
+  'level',
+  'line',
+  'before',
+  'at',
+  'count',
+  'total',
+  'adjust',
+  'fill',
+  'stroke',
+  'width',
+  'dash',
+  'radius',
+  'start',
+  'end',
+  'weight',
+  'bend',
+  'points',
+  'connect-start',
+  'connect-end',
+  'detach',
+  'style',
+  'pos',
+  'add-vertical',
+  'add-horizontal',
+  'remove-vertical',
+  'remove-horizontal',
+  'border-color',
+  'border-weight',
+  'border-dash',
+  'left',
+  'right',
+  'top',
+  'bottom',
 ]);
 
 /**
@@ -121,7 +171,17 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
  * `slide update --unset <pointer>` names a pointer while `deck set <path> --unset` is a switch
  * (gslides-parity SPEC 7.2.3 to 7.2.5).
  */
-const OPTIONAL_VALUE_FLAGS: ReadonlySet<string> = new Set(['render', 'unset']);
+const OPTIONAL_VALUE_FLAGS: ReadonlySet<string> = new Set([
+  'render',
+  'unset',
+  // `text indent --out` is a switch (the step out); `export --out <dir>` names a directory
+  'out',
+  // `block crop --left .1` names a fraction; `table insert-columns --left` is a switch
+  'left',
+  'right',
+  'top',
+  'bottom',
+]);
 
 /** Short flags: `-m <note>` on version save (the acceptance line), `-h` for help. */
 const SHORT_FLAGS: Readonly<Record<string, string>> = { m: 'm', h: 'help' };

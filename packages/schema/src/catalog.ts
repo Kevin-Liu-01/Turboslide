@@ -5,7 +5,7 @@
 // catalogued the same way. docs/grammar.md is generated from this file and from rules.ts.
 import type { z } from 'zod';
 import type { Block, BlockType } from './blocks.ts';
-import { BLOCK_SCHEMAS } from './blocks.ts';
+import { BLOCK_SCHEMAS, EMPTY_ASSET_REF } from './blocks.ts';
 import type { LayoutType, PlateSide, SlideKind, SlotName } from './deck.ts';
 import { SLIDE_SCHEMAS } from './deck.ts';
 import type { BlockId } from './ids.ts';
@@ -24,7 +24,10 @@ export type BlockCatalogEntry = {
   doc: string;
   /** The deck class or slide it comes from. */
   source: string;
-  /** 'content' for the slots of a content slide, 'plate' for a full-picture plate. */
+  /**
+   * 'content' for the slots of a content slide (a canvas slide is one, gslides-parity SPEC-2 1.1),
+   * 'plate' for a full-picture plate.
+   */
   allowedIn: ReadonlyArray<'content' | 'plate'>;
   /** Fields in the four-rule markup (SPEC 4.2 "Text"). */
   textPaths: ReadonlyArray<PathTemplate>;
@@ -83,7 +86,7 @@ export const CATALOG: Readonly<Record<BlockType, BlockCatalogEntry>> = {
     group: 'text',
     doc: 'The 15 px titanium credit line on a plate; required when the picture is share-alike.',
     source: 'OPENERS.md:255; slide 06',
-    allowedIn: ['plate'],
+    allowedIn: ['plate', 'content'],
     textPaths: ['/text'],
     assetPaths: [],
     iconPaths: [],
@@ -461,10 +464,11 @@ export const CATALOG: Readonly<Record<BlockType, BlockCatalogEntry>> = {
     type: 'shape',
     label: 'Shape',
     group: 'primitive',
-    doc: 'A rectangle, rounded rectangle, ellipse, line or arrow filling its box, with palette fill and stroke, a stroke width and filled 8 px arrowheads.',
-    source: 'docs/freeform.md',
+    doc: 'One of the 135 shape presets (Shapes, Arrows, Callouts, Equation) or a line kind (line, arrow, elbow connector, curved connector, curve, polyline, scribble) filling its box, with palette fill and stroke, a stroke width, a dash, a text inside a closed shape, adjust values and line decorations.',
+    source: 'docs/freeform.md; gslides-parity SPEC-2 2.3, 2.4',
     allowedIn: ['content'],
-    textPaths: [],
+    textPaths: ['/text'],
+    multilineTextPaths: ['/text'],
     assetPaths: [],
     iconPaths: [],
     export: 'native',
@@ -533,6 +537,38 @@ export const CATALOG: Readonly<Record<BlockType, BlockCatalogEntry>> = {
         { cells: ['', '', ''] },
       ],
     }),
+  }),
+  chart: entry({
+    type: 'chart',
+    label: 'Chart',
+    group: 'diagram',
+    doc: 'A bar, column, line or pie chart from categories and series, drawn in the diagram grammar with 1 px ink axes and palette series colours; a native chart in Editable text.',
+    source: 'gslides-parity SPEC-2 2.8; R11 A10',
+    allowedIn: ['content'],
+    textPaths: ['/title'],
+    assetPaths: [],
+    iconPaths: [],
+    export: 'native',
+    make: (id) => ({
+      id,
+      type: 'chart',
+      kind: 'column',
+      categories: ['Category 1', 'Category 2', 'Category 3'],
+      series: [{ name: 'Series 1', values: [30, 45, 20] }],
+    }),
+  }),
+  picture: entry({
+    type: 'picture',
+    label: 'Picture',
+    group: 'figure',
+    doc: 'A photograph as an object on a canvas slide, drawn at object-fit cover with the theme’s twins or the material’s shader at its box; the converted photograph of a picture slide, or the picture Change background inserts at the bottom of the stack.',
+    source: 'gslides-parity SPEC-2 2.6.4, 0.71',
+    allowedIn: ['content'],
+    textPaths: [],
+    assetPaths: ['/asset'],
+    iconPaths: [],
+    export: 'raster',
+    make: (id) => ({ id, type: 'picture', asset: EMPTY_ASSET_REF }),
   }),
   html: entry({
     type: 'html',

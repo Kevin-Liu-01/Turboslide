@@ -749,16 +749,18 @@
 }
 
 /* gslides-parity SPEC 7.3: the table block as a grid in the ruled rows idiom: a hairline above, a
-   rule under every row, the header row at display weight 500 with an ink rule under it, tabular
-   numerals, text-align per column, a plate fill per column, the vertical alignment through
-   align-items, the .rows size ladder (packages/render blocks/table.ts) */
+   rule under every row, the header row at display weight 500 with an ink rule under it,
+   text-align per column, a plate fill per column, the vertical alignment through align-items, the
+   .rows size ladder (packages/render blocks/table.ts). The numerals are proportional, not the
+   tabular ones of the .rows idiom: a PPTX run carries no OpenType feature, so the a:tbl the
+   Editable text export writes renders proportional digits in every viewer, and a tabular "1" in
+   a right aligned cell measured 4 to 6 px outside the 3 px cell budget (b2.md, fix round). */
 .ts-sheet .table {
   display: flex;
   flex-direction: column;
   border-top: var(--table-rule, 1px) solid var(--hair);
   font-size: 20px;
   line-height: 1.45;
-  font-variant-numeric: tabular-nums;
   --table-cols: minmax(0, 1fr);
 }
 .ts-sheet .table > .tr {
@@ -802,6 +804,57 @@
 }
 .ts-sheet .table.table-15 {
   font-size: 15px;
+}
+
+/* gslides-parity SPEC-2 7.2: the mark span's elements. An underline is a 1 px rule 3 px under the
+   baseline (2.2.2), a strike a line through (2.2.3), super and subscript 0.65 em with the line
+   height held (2.2.4), a highlight the run's background (2.2.6); the colour is inline */
+.ts-sheet .slide u {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+.ts-sheet .slide s {
+  text-decoration: line-through;
+}
+.ts-sheet .slide sup,
+.ts-sheet .slide sub {
+  font-size: 0.65em;
+  line-height: 0;
+  vertical-align: baseline;
+  position: relative;
+}
+.ts-sheet .slide sup {
+  top: -0.55em;
+}
+.ts-sheet .slide sub {
+  top: 0.25em;
+}
+.ts-sheet .slide mark {
+  color: inherit;
+  padding: 0;
+}
+
+/* gslides-parity SPEC-2 2.2.9: paragraph spacing, above every paragraph but the first and under
+   every paragraph but the last, from the block's --para-before and --para-after (0 unless set) */
+.ts-sheet .para:not(:first-child) {
+  padding-top: var(--para-before, 0);
+}
+.ts-sheet .para:not(:last-child) {
+  padding-bottom: var(--para-after, 0);
+}
+
+/* gslides-parity SPEC-2 2.7.3: the table rules take the block's colour and dash */
+.ts-sheet .table {
+  border-top-color: var(--table-rule-color, var(--hair));
+  border-top-style: var(--table-rule-style, solid);
+}
+.ts-sheet .table > .tr {
+  border-bottom-color: var(--table-rule-color, var(--hair));
+  border-bottom-style: var(--table-rule-style, solid);
+}
+.ts-sheet .table > .tr.header {
+  border-bottom-color: var(--ink);
 }
 
 /* gslides-parity SPEC 7.2.7: a block link wraps the block; the wrapper draws nothing of its own */

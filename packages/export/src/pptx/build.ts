@@ -20,6 +20,9 @@ import type { ExportMode, PageRasterEntry } from '@turboslide/schema/export';
 import { PAGE_RASTER_BUDGETS, isContinuousToneBlockType } from '@turboslide/schema/export';
 import type { Theme } from '@turboslide/schema/render';
 
+import { shapeGuides } from '@turboslide/schema/shapes';
+import { COLUMN_GAP_PX } from '@turboslide/schema/typography';
+
 import { cleanContentTypes, setAppTitles, stripRepairRisks } from '../ooxml/clean.ts';
 import type { ContentTypesClean } from '../ooxml/clean.ts';
 import { embedFonts } from '../ooxml/fonts.ts';
@@ -27,16 +30,18 @@ import type { EmbedFont } from '../ooxml/fonts.ts';
 import { readGeometry } from '../ooxml/geometry.ts';
 import type { ShapeBounds } from '../ooxml/geometry.ts';
 import { groupShapes } from '../ooxml/groups.ts';
+import { toConnector, writeAdjustValues, writeAltText, writeColumns } from '../ooxml/shapes.ts';
 import { addHiddenTitle, setSlideName } from '../ooxml/titles.ts';
 import type { HiddenTitle } from '../ooxml/titles.ts';
 import { validatePackage } from '../ooxml/validate.ts';
 import type { PackageValidation } from '../ooxml/validate.ts';
 import { openPackage, readPart, slideParts, writePackage, writePart } from '../ooxml/zip.ts';
-import type { Scene } from '../scene/types.ts';
-import { PAGE_EMU, PAGE_IN, parseCssColor, pxToEmu, szOf } from '../units.ts';
+import type { Scene, SceneText } from '../scene/types.ts';
+import { PAGE_EMU, PAGE_IN, compositeHex, parseCssColor, pxToEmu, szOf } from '../units.ts';
+import { addSceneChart } from './chart.ts';
 import type { FontSet, FontsCatalog } from './fonts-map.ts';
 import { entryFor, pickFamily } from './fonts-map.ts';
-import { addPicture, addRaster, dataUri, mimeOf } from './images.ts';
+import { addPicture, addPictureBackground, addRaster, dataUri, mimeOf } from './images.ts';
 import type { PictureSource } from './images.ts';
 import { addCross, addLinkRect, addSceneLine, addSceneRect, addSceneRule } from './lines.ts';
 import { linkResolver } from './links.ts';
@@ -46,8 +51,9 @@ import { addSceneNotes } from './notes.ts';
 import type { BaselineTarget } from './baseline.ts';
 import { describeFormats, encodePageRaster } from './page-raster.ts';
 import type { PageRaster } from './page-raster.ts';
+import { objectName } from './shapes.ts';
 import { addSceneTable } from './table.ts';
-import { addSceneText, familyFor } from './text.ts';
+import { addSceneText, addShapeText, familyFor } from './text.ts';
 import type { TextEmitOptions } from './text.ts';
 
 export type BuildOptions = {
@@ -96,6 +102,20 @@ export type TableOutcome = {
   written: 'table' | 'rows';
   rows: number;
   columns: number;
+  /** Merged cells written as rowspan or colspan anchors (gslides-parity SPEC-2 2.7.1). */
+  merged?: number;
+};
+
+/** The counts the parity round two reads back (gslides-parity SPEC-2 11.3). */
+export type RoundTwoCounts = {
+  italicRuns: number;
+  rotated: number;
+  charts: number;
+  connectors: number;
+  numCol: number;
+  avLst: number;
+  /** Shapes and text boxes whose block's alt text was written as `descr` (SPEC-2 2.5.6). */
+  altTexts: number;
 };
 
 export type BuildSlideReport = {
@@ -138,6 +158,8 @@ export type BuildResult = {
   stripped: { kern: number; extLst: number; custGeom: number };
   /** Every table block of a native build and how it was written (gslides-parity SPEC 7.3). */
   tables: TableOutcome[];
+  /** The parity round two counts of the written file (SPEC-2 11.3); absent on a result built elsewhere. */
+  counts?: RoundTwoCounts;
   /** Block and run links written (SPEC 7.2.7, 7.2.8), and the slide links with no target in the file. */
   links: { written: number; unresolved: string[] };
   residual: string[];
@@ -218,6 +240,25 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
   const links = { written: 0, unresolved: [] as string[] };
   const fileSlideIds = scenes.map((scene) => scene.slideId);
   const tableMode = options.tableMode ?? 'auto';
+  const counts: RoundTwoCounts = {
+    italicRuns: 0,
+    rotated: 0,
+    charts: 0,
+    connectors: 0,
+    numCol: 0,
+    avLst: 0,
+    altTexts: 0,
+  };
+  /**
+   * The post-process rewrites per slide index: connectors, adjust values, columns and the alt
+   * text of shapes and text boxes (SPEC-2 2.2.10, 2.3.2, 2.4.7, 2.5.6).
+   */
+  const rewrites: {
+    connectors: { name: string; ends: NonNullable<Scene['lines']>[number]['connect'] }[];
+    adjusts: { name: string; guides: string[]; values: number[] }[];
+    columns: { name: string; columns: number }[];
+    alts: { name: string; alt: string }[];
+  }[] = [];
 
   for (const [sceneIndex, scene] of scenes.entries()) {
     const paperHex = parseCssColor(scene.paper).hex;
@@ -225,7 +266,22 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     const namePrefix = `ts:${scene.slideId}`;
     const hasPicture =
       Boolean(scene.picture) && !scene.pictureExcluded && scene.pictureFile !== undefined;
-    const usePictureMaster = options.mode === 'flatten' || hasPicture;
+    // the picture object that covers the sheet at the bottom of the stack is the slide background
+    // (gslides-parity SPEC-2 2.6.4, 1.5): the chrome free master, the raster as the background,
+    // the frame as alpha lines over it, as an unconverted picture kind exports
+    const backgroundRaster =
+      options.mode === 'native' && scene.background?.pictureRasterId !== undefined
+        ? scene.rasters.find((r) => r.id === scene.background?.pictureRasterId && r.file)
+        : undefined;
+    const usePictureMaster =
+      options.mode === 'flatten' || hasPicture || backgroundRaster !== undefined;
+    const slideRewrites: (typeof rewrites)[number] = {
+      connectors: [],
+      adjusts: [],
+      columns: [],
+      alts: [],
+    };
+    rewrites.push(slideRewrites);
     const slide = pptx.addSlide({
       masterName: usePictureMaster
         ? pictureMasterName(options.theme)
@@ -255,6 +311,15 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       baseline: options.baseline ?? 'libreoffice',
       residual,
       links: linkOf,
+      paperHex,
+    };
+    // a text box with columns is rewritten with numCol after pptxgenjs wrote it (SPEC-2 2.2.10)
+    const noteColumns = (text: SceneText): void => {
+      if (text.columns !== undefined && text.columns > 1)
+        slideRewrites.columns.push({
+          name: objectName(namePrefix, text.id, text.userGroup, text.group),
+          columns: text.columns,
+        });
     };
     let page: PageRasterEntry | undefined;
 
@@ -316,15 +381,30 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
           'links: a slide link on an invisible run of the flatten layer is written as a slide jump; whether PowerPoint honours it under the cover picture is unverified (gslides-parity SPEC 7.2.8)',
         );
     } else {
+      // The slide background colour (SPEC-2 2.6.1, 2.6.2): the layer the page measured, composite
+      // on the paper; the deck default is the master's paper otherwise
+      if (scene.background?.color !== undefined && backgroundRaster === undefined) {
+        const parsed = parseCssColor(scene.background.color);
+        slide.background = {
+          color: parsed.alpha < 1 ? compositeHex(parsed, paperHex) : parsed.hex,
+        };
+      }
       // The picture, then the chrome over it.
-      if (hasPicture) {
-        const source = readPictureSource(scene);
-        if (source) {
-          const placed = addPicture(slide, scene, source, namePrefix);
-          if (placed === 'cover' && scene.picture && scene.picture.objectPosition !== '50% 50%')
-            residual.add(
-              `${scene.slideId}: the picture is a center cover crop; object-position ${scene.picture.objectPosition} is not carried`,
-            );
+      if (hasPicture || backgroundRaster !== undefined) {
+        if (backgroundRaster !== undefined) {
+          addPictureBackground(slide, backgroundRaster);
+          residual.add(
+            `${scene.slideId}: the picture object ${backgroundRaster.blockId} covers the sheet at the bottom of the stack and travels as the slide background, the form a picture kind exports (gslides-parity SPEC-2 2.6.4)`,
+          );
+        } else {
+          const source = readPictureSource(scene);
+          if (source) {
+            const placed = addPicture(slide, scene, source, namePrefix);
+            if (placed === 'cover' && scene.picture && scene.picture.objectPosition !== '50% 50%')
+              residual.add(
+                `${scene.slideId}: the picture is a center cover crop; object-position ${scene.picture.objectPosition} is not carried`,
+              );
+          }
         }
         const over = { namePrefix };
         scene.frame.rules.forEach((rule, i) => addSceneRule(slide, rule, over, `frame/${i}`));
@@ -360,13 +440,17 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
           `${scene.slideId}: share-alike picture excluded; the plate carries the credit (SPEC 11)`,
         );
       }
-      const onPaper = { paperHex, namePrefix };
+      const onPaper = { paperHex, namePrefix, residual };
       const withLink = (
         blockId: string | undefined,
       ): typeof onPaper & { hyperlink?: PptxGenJS.HyperlinkProps } => {
         const hyperlink = blockId === undefined ? undefined : blockLink(blockId);
         return hyperlink ? { ...onPaper, hyperlink } : onPaper;
       };
+      // the text layer of a shape with text (SPEC-2 2.2.17) merges into the shape's addText
+      const shapeTexts = new Map<string, SceneText>();
+      for (const text of scene.texts)
+        if (text.inShape !== undefined && text.lines.length > 0) shapeTexts.set(text.inShape, text);
       // Tables (gslides-parity SPEC 7.3): `a:tbl` through addTable unless the mode or the
       // fallback set says ruled rows; a table written as a:tbl keeps its rules and cell texts out
       // of the shape list below, the fallback leaves them in (the rows construction)
@@ -383,11 +467,17 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
             slideId: scene.slideId,
             blockId: table.blockId,
             written: 'table',
-            ...written,
+            rows: written.rows,
+            columns: written.columns,
+            ...(written.merged > 0 ? { merged: written.merged } : {}),
           });
           residual.add(
-            `table: ${key} written as a:tbl (${written.rows} by ${written.columns}); the per cell 3 px budget is measured by the verify loop, which falls back to ruled rows when a cell misses it`,
+            `table: ${key} written as a:tbl (${written.rows} by ${written.columns}${written.merged > 0 ? `, ${written.merged} merged cell(s)` : ''}); the per cell 3 px budget is measured by the verify loop, which falls back to ruled rows when a cell misses it`,
           );
+          if (written.rotated)
+            residual.add(
+              `table: ${key} is rotated on the sheet; pptxgenjs writes no rotation on a table, so the file holds it upright at its box (gslides-parity SPEC-2 2.1.1)`,
+            );
         } else {
           tables.push({
             slideId: scene.slideId,
@@ -404,31 +494,82 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         }
       }
       scene.plates.forEach((plate, i) => addSceneRect(slide, plate, onPaper, `plate/${i}`));
-      scene.rects.forEach((rect, i) =>
-        addSceneRect(slide, rect, withLink(rect.blockId), `rect/${i}`),
-      );
+      // a block's rect is named after the block (the verify loop reads `ts:<slide>#<block>` back,
+      // the connector post-process attaches to it); a plate, chip or panel keeps its index name
+      scene.rects.forEach((rect, i) => {
+        const name = rect.blockId ?? `rect/${i}`;
+        const shapeText = rect.blockId !== undefined ? shapeTexts.get(rect.blockId) : undefined;
+        if (shapeText && rect.role === 'shape') {
+          if (addShapeText(slide, rect, shapeText, textOptions, name)) {
+            noteColumns(shapeText);
+          } else addSceneRect(slide, rect, withLink(rect.blockId), name);
+        } else addSceneRect(slide, rect, withLink(rect.blockId), name);
+        if (rect.alt !== undefined && rect.alt !== '')
+          slideRewrites.alts.push({
+            name: objectName(namePrefix, name, rect.userGroup, rect.group),
+            alt: rect.alt,
+          });
+        if (rect.preset !== undefined && rect.adjust !== undefined && rect.adjust.length > 0)
+          slideRewrites.adjusts.push({
+            name: objectName(namePrefix, name, rect.userGroup, rect.group),
+            guides: shapeGuides(rect.preset),
+            values: rect.adjust,
+          });
+      });
       scene.rules
         .filter((rule) => rule.blockId === undefined || !asTable.has(rule.blockId))
         .forEach((rule, i) => addSceneRule(slide, rule, onPaper, `rule/${i}`));
-      // the lines and arrows of shape blocks (docs/freeform.md), native with triangle heads
-      (scene.lines ?? []).forEach((line, i) =>
-        addSceneLine(slide, line, withLink(line.blockId), `line/${i}`),
-      );
+      // the lines, arrows, connectors and paths of shape blocks (docs/freeform.md; SPEC-2 2.4)
+      (scene.lines ?? []).forEach((line) => {
+        addSceneLine(slide, line, withLink(line.blockId), line.blockId);
+        if (line.alt !== undefined && line.alt !== '')
+          slideRewrites.alts.push({
+            name: objectName(namePrefix, line.blockId, line.userGroup),
+            alt: line.alt,
+          });
+        if (line.connect !== undefined && (line.connect.start || line.connect.end))
+          slideRewrites.connectors.push({
+            name: objectName(namePrefix, line.blockId, line.userGroup),
+            ends: line.connect,
+          });
+      });
       for (const text of scene.texts) {
         if (!text.native) continue;
         if (asTable.has(text.blockId)) continue;
+        if (text.inShape !== undefined && shapeTexts.has(text.inShape)) continue;
         addSceneText(slide, text, textOptions);
+        noteColumns(text);
+        if (text.alt !== undefined && text.alt !== '')
+          slideRewrites.alts.push({
+            name: objectName(namePrefix, text.id, text.userGroup, text.group),
+            alt: text.alt,
+          });
         if (text.lines.some((l) => l.runs.some((r) => r.gt)))
           residual.add(
             `${scene.slideId}#${text.blockId}: the GT letters are an invisible run under the mark; text after the mark on that line may shift by the width difference`,
           );
       }
       if (scene.counter) addSceneText(slide, scene.counter, textOptions);
+      // the charts as chart parts (SPEC-2 2.8.1); their boxes are picture regions in the verify loop
+      for (const chart of scene.charts ?? []) {
+        addSceneChart(
+          slide,
+          chart,
+          { fontSet: options.fontSet, namePrefix, families, paperHex },
+          pptx,
+        );
+        counts.charts += 1;
+        residual.add(
+          `chart: ${scene.slideId}#${chart.blockId} written as a ${chart.kind} chart part (addChart); its box is a picture region in the verify loop, reported and never gated (gslides-parity SPEC-2 2.8.1)`,
+        );
+      }
       for (const raster of scene.rasters) {
         if (raster.blockId === 'wordmark') continue;
+        if (backgroundRaster !== undefined && raster.id === backgroundRaster.id) continue;
         if (!addRaster(slide, raster, namePrefix, undefined, blockLink(raster.blockId)))
           warnings.push(`${scene.slideId}#${raster.blockId}: raster ${raster.id} has no file`);
       }
+
       if (scene.texts.some((t) => t.style.mono))
         residual.add(
           'code panels travel in DejaVu Sans Mono (Menlo on a Mac without it); the face differs per machine unless a mono font is installed (SPEC 8.6)',
@@ -457,15 +598,50 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     stripped.kern += strip.kern;
     stripped.extLst += strip.extLst;
     stripped.custGeom += strip.custGeom;
-    const grouped = groupShapes(strip.xml);
+    let xml = strip.xml;
+    // the shape rewrites of SPEC-2 2.2.10, 2.3.2 and 2.4.7 on the named shapes, before grouping
+    const slideRewrites = rewrites[i];
+    if (slideRewrites) {
+      for (const adjust of slideRewrites.adjusts) {
+        const out = writeAdjustValues(xml, adjust.name, adjust.guides, adjust.values);
+        xml = out.xml;
+        if (out.written) counts.avLst += 1;
+      }
+      for (const column of slideRewrites.columns) {
+        const out = writeColumns(xml, column.name, column.columns, pxToEmu(COLUMN_GAP_PX));
+        xml = out.xml;
+        if (out.written) counts.numCol += 1;
+      }
+      for (const connector of slideRewrites.connectors) {
+        const out = toConnector(xml, connector.name, connector.ends ?? {});
+        xml = out.xml;
+        if (out.written) counts.connectors += 1;
+      }
+      for (const alt of slideRewrites.alts) {
+        const out = writeAltText(xml, alt.name, alt.alt);
+        xml = out.xml;
+        if (out.written) counts.altTexts += 1;
+      }
+    }
+    const grouped = groupShapes(xml);
     groups += grouped.groups.length;
-    let xml = grouped.xml;
+    xml = grouped.xml;
     if (scene) {
       xml = setSlideName(xml, scene.title ?? scene.slideId);
       xml = addHiddenTitle(xml, hiddenTitleFor(scene, options.fontSet));
     }
+    counts.italicRuns += (xml.match(/<a:rPr\b[^>]*\si="1"/g) ?? []).length;
+    counts.rotated += (xml.match(/<a:xfrm\b[^>]*\srot="-?\d+"/g) ?? []).length;
     writePart(zip, part, xml);
   }
+  if (counts.connectors > 0)
+    residual.add(
+      `connectors: ${counts.connectors} connector(s) written as p:cxnSp with stCxn and endCxn on their targets, so PowerPoint moves them with the shapes (gslides-parity SPEC-2 2.4.7)`,
+    );
+  if (counts.rotated > 0)
+    residual.add(
+      `rotation: ${counts.rotated} object(s) carry a rotation or a flip on their own xfrm; a rotated group is written per member (gslides-parity SPEC-2 2.1)`,
+    );
   const contentTypes = await cleanContentTypes(zip);
   await setAppTitles(
     zip,
@@ -545,6 +721,7 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
     contentTypes,
     stripped,
     tables,
+    counts,
     links,
     residual: [...residual],
     warnings,

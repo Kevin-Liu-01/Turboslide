@@ -240,11 +240,107 @@ describe('every row of Google’s shortcut page', () => {
       ).toBe(true);
   });
 
-  it('names fixture rows that exist from every omission and gesture', () => {
+  it('names fixture rows that exist from every omission and gesture, or marks the gesture as ours', () => {
     for (const entry of OMITTED_SHORTCUTS) expect(rows.has(entry.google), entry.google).toBe(true);
-    for (const gesture of GESTURES) expect(rows.has(gesture.google), gesture.google).toBe(true);
+    for (const gesture of GESTURES) {
+      if (gesture.google === undefined) expect(gesture.turboslide, gesture.id).toBe(true);
+      else expect(rows.has(gesture.google), gesture.google).toBe(true);
+    }
     for (const binding of table)
       for (const id of binding.google) expect(rows.has(id), `${binding.id} -> ${id}`).toBe(true);
+    /* SPEC-2 0.81, section 9: the wheel zoom and the pan are Turboslide gestures with no Google row */
+    expect(
+      GESTURES.filter((gesture) => gesture.turboslide === true).map((gesture) => gesture.id),
+    ).toEqual(['zoomWheel', 'pan']);
+  });
+
+  it('greys exactly the rows SPEC-2 section 9 lists, and binds or omits every other row', () => {
+    const greyed = new Set<string>();
+    for (const entry of OMITTED_SHORTCUTS) if (entry.status === 'later') greyed.add(entry.google);
+    for (const binding of table)
+      if (binding.status === 'later' && binding.scope !== 'present')
+        for (const id of binding.google) greyed.add(id);
+    expect([...greyed].sort()).toEqual(
+      [
+        'select-none',
+        'move-paragraph-up',
+        'move-paragraph-down',
+        'animations-panel',
+        'insert-comment',
+        'enter-comment',
+        'next-comment',
+        'previous-comment',
+        'comment-focus-next',
+        'comment-focus-previous',
+        'comment-focus-reply',
+        'comment-focus-resolve',
+        'comment-thread',
+        'comment-reply-selected',
+        'comment-next-selected',
+        'comment-previous-selected',
+        'comment-resolve-selected',
+        'comment-exit-selected',
+        'hide-comment',
+        'verbalize-selection',
+        'screen-reader-support',
+        'braille-support',
+        'verbalize-from-cursor',
+        'announce-formatting',
+        'input-tools-menu',
+        'toggle-input-controls',
+        'open-explore',
+        'captions-while-presenting',
+        'html-view',
+        'cell-border-selection',
+        'select-list-item',
+        'select-list-items-level',
+        'next-formatting-change',
+        'previous-formatting-change',
+      ].sort(),
+    );
+    /* the misspelling rows left the greyed list: the browser's marks have no key the page drives */
+    for (const id of ['next-misspelling', 'previous-misspelling']) {
+      expect(byGoogle.get(id)).toBeUndefined();
+      expect(omitted.get(id)?.status).toBe('omit');
+    }
+  });
+
+  it('binds the round two chords of SPEC-2 section 9 to Google’s rows', () => {
+    const mac = buildEditorKeymap('mac');
+    const ids = (chord: string) => mac.get(chord)?.bindings.map((binding) => binding.id) ?? [];
+    expect(ids('Cmd+I')).toEqual(['format.text.italic']);
+    expect(ids('Cmd+U')).toEqual(['format.text.underline']);
+    expect(ids('Cmd+Shift+X')).toEqual(['format.text.strikethrough']);
+    expect(ids('Cmd+.')).toEqual(['format.text.superscript']);
+    expect(ids('Cmd+,')).toEqual(['format.text.subscript']);
+    expect(ids('Cmd+Shift+J')).toEqual(['format.alignIndent.justified']);
+    expect(ids('Cmd+]')).toEqual(['format.alignIndent.increaseIndent']);
+    expect(ids('Cmd+[')).toEqual(['format.alignIndent.decreaseIndent']);
+    expect(ids('Cmd+Option+G')).toEqual(['arrange.group']);
+    expect(ids('Cmd+Option+Shift+G')).toEqual(['arrange.ungroup']);
+    expect(ids('Option+Left')).toEqual(['key.rotateLeft15']);
+    expect(ids('Option+Shift+Right')).toEqual(['key.rotateRight1']);
+    /* SPEC-2 0.78: the Cmd+Option pair is an alias with the note on Google's row */
+    expect(ids('Cmd+Option+Left')).toEqual(['key.rotateLeft15Alias']);
+    expect(ids('Cmd+Option+Right')).toEqual(['key.rotateRight15Alias']);
+    const alias = table.find((binding) => binding.id === 'key.rotateLeft15Alias');
+    expect(alias?.alias).toBe('key.rotateLeft15');
+    expect(alias?.google).toEqual([]);
+    expect(TURBOSLIDE_ONLY_KEYS).toContain('key.rotateLeft15Alias');
+    expect(table.find((binding) => binding.id === 'key.rotateLeft15')?.note).toBe(
+      'Cmd+Option+Left and Right also rotate when your browser lets them through',
+    );
+    expect(table.find((binding) => binding.id === 'format.text.subscript')?.note).toBe(
+      'Your browser may take this key; the Format menu has the item',
+    );
+    /* the canvas keys read the object predicate, so a grammar slide's block takes them (SPEC-2 1.1) */
+    for (const id of ['key.nudge', 'key.nudgeMore', 'key.resizeWider', 'key.rotateLeft15']) {
+      const binding = table.find((each) => each.id === id);
+      expect(binding?.scope, id).toBe('canvas');
+      expect(['objectSelected', 'rotatable']).toContain(binding?.enabled);
+    }
+    expect(ids('Cmd+Plus')).toEqual(['view.zoom.in']);
+    expect(ids('Cmd+0')).toEqual(['view.zoom.100']);
   });
 });
 
@@ -321,7 +417,10 @@ describe('the editor map', () => {
       'help.keyboardShortcuts',
     ]);
     expect(mac.get('Cmd+S')?.bindings.map((binding) => binding.id)).toEqual(['key.save']);
-    expect(mac.get('Cmd+]')).toBeUndefined();
+    /* Cmd+] and Cmd+[ were reserved in round one; SPEC-2 section 9 binds them to the indents */
+    expect(mac.get('Cmd+]')?.bindings.map((binding) => binding.id)).toEqual([
+      'format.alignIndent.increaseIndent',
+    ]);
     expect(
       mac
         .get('Cmd+Up')

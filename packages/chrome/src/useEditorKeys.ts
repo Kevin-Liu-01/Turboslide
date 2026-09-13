@@ -104,6 +104,16 @@ const RUN_OWNED: ReadonlySet<string> = new Set([
   'insert.link',
 ]);
 
+/** Cmd+] or Cmd+[ on a Mac, Ctrl+] or Ctrl+[ elsewhere, with no other modifier (SPEC-2 0.55). */
+export function isIndentChord(
+  event: Pick<KeyboardEvent, 'key' | 'metaKey' | 'ctrlKey' | 'altKey' | 'shiftKey'>,
+  platform: Platform,
+): boolean {
+  if (event.key !== ']' && event.key !== '[') return false;
+  if (event.altKey || event.shiftKey) return false;
+  return platform === 'mac' ? event.metaKey && !event.ctrlKey : event.ctrlKey && !event.metaKey;
+}
+
 /** The menu a `menu.<id>` binding opens. */
 function menuIdOf(binding: KeyBinding): MenuId | null {
   if (!binding.id.startsWith('menu.')) return null;
@@ -133,6 +143,22 @@ export function useEditorKeys(state: EditorKeyState, handlers: EditorKeyHandlers
       if (event.key === 'Escape') {
         if (h.overlayOpen() || inField || inCanvasText) return;
         if (h.escape()) event.preventDefault();
+        return;
+      }
+
+      /* Cmd+] and Cmd+[ are Chrome's Forward and Back on macOS (SPEC-2 0.55, section 9): the
+         editor takes both in every focus state, before the field early return, and always
+         prevents the default; the indent runs only when a list item or a text block is selected,
+         and the canvas run handles its own (InlineText) */
+      if (isIndentChord(event, s.platform)) {
+        event.preventDefault();
+        if (inCanvasText || h.overlayOpen()) return;
+        const id =
+          event.key === ']'
+            ? 'format.alignIndent.increaseIndent'
+            : 'format.alignIndent.decreaseIndent';
+        const item = findItem(id);
+        if (item !== undefined && isEnabled(item, s.menuContext)) h.runItem(item);
         return;
       }
 

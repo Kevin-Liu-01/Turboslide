@@ -327,19 +327,20 @@ describe('the editor shell in its default state', () => {
 // 9.7): every Insert row acts, Full screen hides the bars, the title field keeps what is typed,
 // and the title row's Last edit and Show all comments carry the audit's hook.
 describe('the Insert menu, compact mode and the title row', () => {
-  it('Insert > Text box arms the draw tool; without one it writes a text block into the current slot', async () => {
+  it('Insert > Text box arms the draw tool; without one it writes a text box as an object centred on the sheet', async () => {
     const onDrawTool = vi.fn();
     const first = render(<Harness input={input({ onDrawTool })} shell={shellState()} />);
     clickMenuPath(first.container, 'insert', 'insert.textBox');
     expect(onDrawTool).toHaveBeenCalledWith({ kind: 'text' });
     expect(dispatch).not.toHaveBeenCalled();
     clickMenuPath(first.container, 'insert', 'insert.shape', 'insert.shape.shapes');
-    fireEvent.click(
-      document.querySelector('[data-menu-item="insert.shape.shapes.ellipse"]') as HTMLElement,
-    );
+    /* the Shapes row opens the shape picker plate (SPEC-2 4.1); a tile arms the draw tool */
+    const ellipse = document.querySelector('[data-control="insert.shape.shapes.pick.ellipse"]');
+    expect(ellipse).not.toBeNull();
+    fireEvent.click(ellipse as HTMLElement);
     expect(onDrawTool).toHaveBeenLastCalledWith({ kind: 'shape', shape: 'ellipse' });
     clickMenuPath(first.container, 'insert', 'insert.line', 'insert.line.rule');
-    expect(onDrawTool).toHaveBeenLastCalledWith({ kind: 'rule' });
+    expect(onDrawTool).toHaveBeenLastCalledWith({ kind: 'line', line: 'rule' });
     cleanup();
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     clickMenuPath(container, 'insert', 'insert.textBox');
@@ -351,26 +352,26 @@ describe('the Insert menu, compact mode and the title row', () => {
     ];
     expect(action).toBe('block.insert');
     expect(written.slideId).toBe(SLIDE);
-    expect(typeof written.slot).toBe('string');
+    expect(written.slot).toBe('main');
     expect((written.block as Block).type).toBe('text');
+    expect((written.block as Block).pos).toBeDefined();
     expect(container.querySelector('[data-control="snackbar"]')?.textContent ?? '').toBe('');
   });
 
-  it('Insert > Table opens the size grid; a cell writes a table of that size with a header row', async () => {
+  it('Insert > Table opens the hover grid inside the menu; a cell writes a table of that size with a header row (SPEC-2 0.26)', async () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     clickMenuPath(container, 'insert', 'insert.table');
-    const dialog = screen.getByRole('dialog', { name: 'Table' });
-    const grid = dialog.querySelector('[data-control="dialog.insertTable.grid"]') as HTMLElement;
-    expect(document.activeElement).toBe(grid);
-    expect(dialog.querySelectorAll('[data-control^="dialog.insertTable.pick."]')).toHaveLength(400);
-    const cell = dialog.querySelector(
-      '[data-control="dialog.insertTable.pick.2x3"]',
-    ) as HTMLElement;
+    /* the plate is the Table row's submenu, not a dialog */
+    expect(screen.queryByRole('dialog', { name: 'Table' })).toBeNull();
+    const plate = screen.getByRole('menu', { name: 'Table' });
+    const grid = plate.querySelector('[data-control="insert.table.grid"]') as HTMLElement;
+    expect(grid.getAttribute('role')).toBe('grid');
+    expect(plate.querySelectorAll('[data-control^="insert.table.pick."]')).toHaveLength(400);
+    const cell = plate.querySelector('[data-control="insert.table.pick.2x3"]') as HTMLElement;
     fireEvent.mouseEnter(cell);
-    expect(dialog.querySelector('[data-control="dialog.insertTable.size"]')?.textContent).toBe(
-      '2 × 3',
-    );
-    expect(dialog.querySelectorAll('.ts-tablegrid-cell.is-in')).toHaveLength(6);
+    /* Google's caption: a plain x */
+    expect(plate.querySelector('[data-control="insert.table.size"]')?.textContent).toBe('2 x 3');
+    expect(plate.querySelectorAll('.ts-tablegrid-cell.is-in')).toHaveLength(6);
     fireEvent.click(cell);
     await flush();
     expect(dispatch).toHaveBeenCalledTimes(1);
@@ -385,17 +386,16 @@ describe('the Insert menu, compact mode and the title row', () => {
     expect(block.columns).toHaveLength(2);
     expect(block.rows).toHaveLength(3);
     expect(block.rows[0]?.header).toBe(true);
-    expect(screen.queryByRole('dialog', { name: 'Table' })).toBeNull();
+    /* the pick closes the menu */
+    expect(screen.queryByRole('menu', { name: 'Table' })).toBeNull();
     /* the arrow keys move the highlight and Enter inserts the pointed size */
     clickMenuPath(container, 'insert', 'insert.table');
-    const again = screen.getByRole('dialog', { name: 'Table' });
-    const grid2 = again.querySelector('[data-control="dialog.insertTable.grid"]') as HTMLElement;
+    const again = screen.getByRole('menu', { name: 'Table' });
+    const grid2 = again.querySelector('[data-control="insert.table.grid"]') as HTMLElement;
     fireEvent.keyDown(grid2, { key: 'ArrowRight' });
     fireEvent.keyDown(grid2, { key: 'ArrowRight' });
     fireEvent.keyDown(grid2, { key: 'ArrowDown' });
-    expect(again.querySelector('[data-control="dialog.insertTable.size"]')?.textContent).toBe(
-      '3 × 2',
-    );
+    expect(again.querySelector('[data-control="insert.table.size"]')?.textContent).toBe('3 x 2');
     fireEvent.keyDown(grid2, { key: 'Enter' });
     await flush();
     const [, second] = dispatch.mock.calls[1] as unknown as [string, Record<string, unknown>];

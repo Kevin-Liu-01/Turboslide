@@ -88,7 +88,7 @@ shapes verify. Measured cost in the image: 5 flatten pages convert in about 640 
 | Chrome for Testing | Playwright build `chromium-1217` (the Linux binary reports `Chromium 147.0.7727.0`; the macOS build of the same revision is Chrome for Testing 147.0.7727.15) | the build `shoot-slide.mjs` hard-codes; `TURBOSLIDE_CHROME` points at it, `TURBOSLIDE_GPU=swiftshader`; the headless package's renderer string reads `Chrome for Testing 147.0.7727.0, SwiftShader, Google` |
 | LibreOffice        | 25.2.3.2 (`4:25.2.3-2+deb13u6`)                                                                                                                               | the newest in Debian 13's repositories for arm64; TDF's 26.8 builds are x86_64 only, see below                                                                                                              |
 | poppler            | 25.03.0                                                                                                                                                       | `pdftocairo` (the rasterizer), `pdftoppm` (fallback), `pdfinfo`                                                                                                                                             |
-| Export fonts       | `packages/fonts/export/*.ttf`, 17 faces, 15 named `GT Inter`                                                                                                  | installed under `/usr/local/share/fonts/turboslide`; `fc-list                                                                                                                                               | grep -c "GT Inter"` is 15 |
+| Export fonts       | `packages/fonts/export/*.ttf`, 34 faces, 30 named `GT Inter` (round two adds the Italic and Medium Italic cuts of every size, SPEC-2 7.1)                     | installed under `/usr/local/share/fonts/turboslide`; `fc-list                                                                                                                                               | grep -c "GT Inter"` is 30; the Dockerfile asserts at least 30 at build time |
 | The repo           | `pnpm install` inside the image; `turboslide` on PATH                                                                                                         | the CLI runs its TypeScript source through Node's type stripping                                                                                                                                            |
 
 The default command is the job queue (`apps/render-worker/src/main.ts`) on port 4322: `render`,
@@ -234,6 +234,99 @@ hair (45), and 30 sits in it with room for the blur. The loop also skips composi
 union box only re-measured the edges of the blocks inside it (`details-two#group` read dw +26 in
 the dark theme from the plate border of its last shot).
 
+## The Google Slides parity round two (gslides-parity SPEC-2 sections 1 and 2, 11.3)
+
+The round added the canvas and Google's formatting on positioned objects; `docs/pptx.md` states
+what each mode writes. What the verify loop and the read-back changed:
+
+- **Geometry.** A shape whose box crosses a page edge is in bounds and listed as `crossing` in
+  the geometry pass (`ooxml/geometry.ts` `showsOnPage`); a shape wholly outside the page is out of
+  bounds, as before. SPEC-2 0.96 reads a picture moved past the sheet's edge as a finding at
+  severity 2 in the lint, and the file it produces is valid, so the loop stops failing it.
+- **Chart regions.** A chart block's box is a picture region in native mode (the report's
+  `pictures` with `regenerated: false`), compared separately and reported, never gated, and the
+  block is left out of the per block ink comparison: PowerPoint and LibreOffice lay a chart out
+  with their own axes, ticks and label placement. A picture object written as the slide background
+  is a region the same way.
+- **The read-back.** `export check` counts `italicRuns` (`i="1"` run properties), `rotated`
+  (`rot` on an `xfrm`), `groups` (`p:grpSp`), `charts` (chart parts), `connectors` (`p:cxnSp`
+  with an `stCxn` or `endCxn`), `numCol`, `avLst` (a written guide on a preset other than a
+  rounded rectangle), `tables` and `mergedCells` (`a:tc` carrying `rowSpan` or `gridSpan`) and
+  prints them on one "round two:" line; the container run of 11.3 records that line per file.
+  The fixture deck's native file reads "1 italic run(s), 6 rotated, 16 group(s), 3 chart part(s),
+  4 attached connector(s), 1 numCol, 1 avLst, 2 table(s) with 3 merged cell(s)".
+- **The conversion fidelity gate** (`scripts/canvas-fidelity.mjs`, check step 24, SPEC-2 0.95).
+  Every slide of the named decks that is not a canvas yet is rendered, measured with the one
+  measurer (`measureCanvas` of `@turboslide/headless` over `measureCanvasBoxes` of
+  `@turboslide/render/measure-dom`, on a 1x sheet page with the prompts drawn), converted through
+  `toCanvas`, rendered again as a canvas and compared with its grammar render in both themes with
+  the comparator of `compare-to-shoot.mjs` (pixelmatch at threshold 0.1), both renders with the
+  prompts drawn as the editor draws them. Diff PNGs of every failure land under
+  `.turboslide/canvas-fidelity/`; `--exact` keeps the measured boxes on the objects instead of the
+  integers the conversion rounds to, `--precision N` sets the measurer's rounding. Measured on
+  2026-09-12 over `decks/gt-brand`, `decks/templates/gt-brand` and `decks/templates/blank` (171
+  slides, 342 pairs, 75 s): with the conversion's integer boxes 64 pairs are over the 0.5 percent
+  budget (worst `off-the-site` dark at 2.628 percent, mean 0.265), because a measured box at a
+  fractional position (731.5, 420.4375) rounded to an integer moves the object up to half a pixel
+  and every glyph edge with it; with the measured boxes kept (`--exact`, the measurer at 1/64 px,
+  Chromium's layout unit) 10 pairs are over budget (mean 0.027, worst passing pair 0.262), all of
+  them the dark theme of the five GT slides with a code `panel`, whose dark theme draws a 1 px
+  border the light theme does not, while the conversion measures in light only. Precision 2, 4, 8
+  and 16 gave 8, 9, 2 and 0 failures on a subset; the measurer's default is 64, and B1's `boxPos`
+  keeping the measured value is the request in `docs/gslides-parity/build-2/b2.md`. The
+  fixture's own grammar slides convert at 0 pairs over budget in exact mode.
+- **The PDF** of the fixture deck holds 26 pages at 960 by 540 pt; through pdftoppm at 3200 by
+  1800 every page is under the fail line, 25 under the target and `word-art` at 0.103 percent
+  (the outline's stroked glyph edges), the picture regions of five pages reported (worst `shadow`
+  at 3.45 percent inside its boxes, informational). The GT deck's PDF (85 pages, 19.1 MB, dark)
+  measured 0 pages over the fail line and 41 between the target and the fail line (worst
+  `details` at 0.264 percent), `passed` true.
+
+### The fix round of round two (2026-09-12, VERIFICATION-2 finding 4)
+
+The verifier's container pass read `passed: false` on the fixture's native export in both themes:
+ten slides out of the per block budgets and both tables sent to the ruled rows fallback, so the
+gated file held no `a:tbl`. The fixer for B2 reran the pass in the same image with the working
+tree mounted over it (`.turboslide/fix-b2/`, `docs/gslides-parity/build-2/b2.md` "Fix round"
+for the per miss table). What the loop and the writers changed:
+
+- **Cells.** Every `a:tbl` cell carries the exact line pitch as `lineSpacing` (LibreOffice laid a
+  cell out at the face's natural height before and set its first line about 6 px high), the cell's
+  top margin keeps `CELL_FIRST_BASELINE_PX` (1 px) of the first baseline shift back (the 32 fixture
+  cells read dy -1 or -2 against the text box model, 0 or -1 with it), a grid form row's height is
+  the track pitch (cells of 54 px in 56 px tracks had written 54 px rows and LibreOffice's rows
+  drifted 2 px per row), and `blocksOfRecord` draws a cell's compared region in by
+  `CELL_RULE_INSET_PX` (3 px) at the top and bottom, because the sheet draws a row's rule on the
+  cell's bottom edge and the file on the row's, and an ink coloured or dashed rule entering one
+  region and not the other read dw -271 to -311 on the merged table's header cells. The table
+  block sets proportional numerals (a tabular "1" in a right aligned cell measured 4 to 6 px wider
+  than the viewer's, and no PPTX run carries the feature). Result: 18 of 18 and 14 of 14 cells in
+  budget in both themes, both tables kept as `a:tbl`, the gated file reads "2 table(s) with 3
+  merged cell(s)".
+- **Shapes and lines.** An outlined shape or box is written drawn in by half its stroke
+  (`outlineBox`; the 2 px dashed ellipse read -1, -1, 2, now 0, 0, 0), a curve travels as the
+  sheet's Catmull-Rom cubics (`lines#closed` read 8, 0, -8, now 0, 0, 0), and the sheet draws a
+  line decoration at the medium DrawingML size over the 0.7 mm floor of LibreOffice's import,
+  centred on the end for the circle, square and diamond kinds (`lines#decorated` read -5, -1, 4,
+  now 0, 0, -1).
+- **Text.** The first baseline shift moves a fitted text box for every vertical alignment and
+  moves from the top inset to the bottom one inside a shape (the diagram's centred labels read
+  1, 4, -1, now 1, -1, -1; word art in light 0, 18, 2, now 0, 1, 2); a nested list item's box
+  starts the level's indents before its text (the bullets blocks read dw 43 and 73, now in
+  budget); a two column carrier's lines are measured column by column in paragraph order (the
+  second column's first line had merged into the first paragraph's last, dw -15, now in budget).
+
+The misses that stay, each with its budget (`native-tbl5`, both themes, 62 s):
+
+| Slide      | Theme       | Block  | dx, dy, dw            | Budget       | Cause                                                                                                                                                                                                                                       |
+| ---------- | ----------- | ------ | --------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shapes`   | light, dark | `plus` | 29, 29, -58           | line 1, 1, 1 | `shapePath` in `packages/schema/src/shapes.ts` is the rectangle stub of merge 1, so the sheet draws every preset as its box while LibreOffice draws the ECMA geometry (a plus 73.49 percent of its box); B1's interpreter, b2.md request R9 |
+| `styles`   | light, dark | `p1`   | 1, -1, -11 (dark -10) | text 3, 1, 3 | superscript and subscript runs at 0.75 em on the sheet, 58 percent in LibreOffice (about two thirds in PowerPoint)                                                                                                                          |
+| `word-art` | dark        | `art`  | 0, 0, -548            | text 3, 1, 3 | LibreOffice draws no outline on a run; the paper coloured outline on the ink fill leaves no ink past the cut in dark (light passes at dy 1)                                                                                                 |
+
+The flatten export, the PDF gate and `compare-to-shoot` did not move (no GT slide carries a
+shape, a table or a decorated line).
+
 ## The table cells and the PDF gate (gslides-parity SPEC 7.3, 7.6)
 
 The render record of a slide with a table block carries one entry per cell, `<blockId>/<r>/<c>` of
@@ -243,9 +336,10 @@ the cell entries, `verify/budgets.ts` lists `cell` and `table` as text kinds) an
 per slide verifications carry the cell deltas (the report's `verify.blocks` keeps block ids only,
 because a cell id is not a block id). `tableCellFailures(slides)` reads them, and `exportPptx`
 with a `verify` option rewrites a theme's file with the failing tables as ruled rows and verifies
-again (docs/pptx.md). Neither LibreOffice nor the fallback has run on a table on this machine
-(LibreOffice is in the render worker image only); the fixture deck's `--tables rows` form is what
-the unit test exercises, and the a:tbl form is what `export check` and python-pptx reopen.
+again (docs/pptx.md). LibreOffice is in the render worker image only; there both fixture tables
+pass the cell budget as `a:tbl` since the fix round above (before it, every cell read dy -6 and
+the loop rewrote both as ruled rows). The fixture deck's `--tables rows` form is what the unit
+test exercises, and the a:tbl form is what `export check` and python-pptx reopen.
 
 The PDF gate (`packages/export/src/pdf/build.ts`) is the flatten loop's shape for a vector page:
 poppler rasterizes the page at 3200 by 1800 (`pdftoppm -r 240 -scale-to-x 3200 -scale-to-y 1800`;

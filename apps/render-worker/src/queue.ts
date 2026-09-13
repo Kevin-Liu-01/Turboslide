@@ -1,4 +1,4 @@
-// The job queue (MILESTONES M2 item 6): render, sheet, export and verify jobs run one at a time,
+// The job queue (MILESTONES M2 item 6): render, sheet, export, verify and measure jobs run one at a time,
 // in submission order, because the machine is shared and one browser page at a time is the rule
 // (AGENTS.md, dev server rules). A job has a directory under <workerDir>/jobs/<id> for its files, a
 // bounded log, and a record the HTTP surface serves; finished records are kept in memory up to
@@ -9,7 +9,7 @@ import { randomBytes } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-export const JOB_KINDS = ['render', 'sheet', 'export', 'verify'] as const;
+export const JOB_KINDS = ['render', 'sheet', 'export', 'verify', 'measure'] as const;
 export type JobKind = (typeof JOB_KINDS)[number];
 
 export type JobStatus = 'queued' | 'running' | 'done' | 'failed';

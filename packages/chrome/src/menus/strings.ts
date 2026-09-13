@@ -171,15 +171,8 @@ export const DIALOGS = {
   keyboardShortcuts: { title: 'Keyboard shortcuts', search: 'Search shortcuts' },
   imageByUrl: { title: 'Image by URL' },
   fromThisPresentation: { title: 'Pictures in this presentation' },
-  /* the Insert pickers (SPEC 2.4): Google's Table grid, and the Icon and Material rows of the theme */
-  insertTable: {
-    title: 'Table',
-    lead: 'Point at the size you want and click it. Up to 20 columns by 20 rows',
-    grid: 'Table size',
-    size: (columns: number, rows: number) => `${columns} × ${rows}`,
-    cell: (columns: number, rows: number) =>
-      `${columns} column${columns === 1 ? '' : 's'} by ${rows} row${rows === 1 ? '' : 's'}`,
-  },
+  /* the Insert pickers (SPEC 2.4): the Icon and Material rows of the theme; Insert > Table is the
+     hover grid inside the menu (PICKERS.tableGrid, SPEC-2 0.26) */
   insertIcon: {
     title: 'Icon',
     lead: 'One of the theme’s symbols; the tone is set in Format options',
@@ -189,6 +182,221 @@ export const DIALOGS = {
     lead: 'A shader picture from the theme; its recipe is edited in Pictures and materials',
     empty: 'No materials are available on this deployment',
   },
+  /* round two (SPEC-2 section 10): the dialogs of Custom spacing, Background and Special characters */
+  customSpacing: {
+    title: 'Custom spacing',
+    lineSpacing: 'Line spacing',
+    paragraphSpacing: 'Paragraph spacing',
+    before: 'Before (px)',
+    after: 'After (px)',
+    apply: 'Apply',
+    cancel: 'Cancel',
+  },
+  background: {
+    title: 'Background',
+    color: 'Color',
+    image: 'Image',
+    choose: 'Choose',
+    resetToTheme: 'Reset to theme',
+    addToTheme: 'Add to theme',
+    done: 'Done',
+  },
+  specialCharacters: {
+    title: 'Insert special characters',
+    search: 'Search by name',
+    recent: 'Recent',
+    categories: ['Arrows', 'Punctuation', 'Currency', 'Math', 'Symbols', 'Emoji'],
+    inserted: (name: string) => `Inserted ${name}`,
+    empty: 'No character matches that name',
+  },
+} as const;
+
+/** The in-menu pickers (SPEC-2 4.1, 6): the Insert > Table hover grid and the preset grids. */
+export const PICKERS = {
+  tableGrid: {
+    grid: 'Table size',
+    doc: 'Point at the size and click it; the arrow keys move the highlight',
+    /* Google's caption: "4 x 3" with a plain x */
+    size: (columns: number, rows: number) => `${columns} x ${rows}`,
+    cell: (columns: number, rows: number) =>
+      `${columns} column${columns === 1 ? '' : 's'} by ${rows} row${rows === 1 ? '' : 's'}`,
+  },
+  bullets: {
+    title: 'Bulleted list',
+    grid: 'Bullet styles',
+    doc: 'Nine bullet styles; the arrows move, Enter picks',
+  },
+  numbering: {
+    title: 'Numbered list',
+    grid: 'Numbering styles',
+    doc: 'Six numbering styles; the arrows move, Enter picks',
+  },
+  shapes: {
+    grid: 'Shapes',
+    doc: 'The arrows move, Enter picks; Esc closes',
+    categories: ['Shapes', 'Arrows', 'Callouts', 'Equation'],
+  },
+  lineEnds: { grid: 'Line decorations', doc: 'None, an arrow, a circle, a square or a diamond' },
+  dashes: { list: 'Dashes', doc: 'Solid, dot, dash, dash dot, long dash or long dash dot' },
+  colors: { plate: 'Colors', none: 'None', custom: 'Custom', hex: 'Six hex digits; Enter applies' },
+  weights: { list: 'Weights', none: 'None', px: (weight: number) => `${weight} px` },
+} as const;
+
+/** The canvas chips, readouts and bars of round two (SPEC-2 section 10, 0.86). */
+export const CANVAS = {
+  crop: 'Drag the handles to crop. Press Enter to finish',
+  wordArt: 'Type your text and press Enter',
+  group: 'Group',
+  /* the multi selection chip: "3 objects" */
+  objects: (count: number) => `${count} objects`,
+  /* the rotation chip: "37°" */
+  rotation: (degrees: number) => `${degrees}°`,
+  /* the size chip while a handle is down, in sheet pixels: "480 × 64" */
+  size: (width: number, height: number) => `${width} × ${height}`,
+} as const;
+
+/**
+ * The rulers and the guides (SPEC-2 0.77, 0.82, 6.1 rows 29 and 30): the View menu's labels and
+ * the readout while a guide drags, in inches (120 px per inch on the 1600 by 900 sheet).
+ */
+export const GUIDES = {
+  showRuler: 'Show ruler',
+  hideRuler: 'Hide ruler',
+  showGuides: 'Show guides',
+  addVertical: 'Add vertical guide',
+  addHorizontal: 'Add horizontal guide',
+  clear: 'Clear guides',
+  deleteGuide: 'Delete guide',
+  /* "6.67 in": the guide's position while it drags */
+  inches: (px: number) => `${(px / 120).toFixed(2)} in`,
+} as const;
+
+/**
+ * The sentences Check slides prints for the canvas rules (SPEC-2 0.76, 0.96): the one note on a
+ * slide arranged by hand and the two off-sheet findings. The rules live in the lint package; the
+ * default view words test holds the sentences here.
+ */
+export const CHECKS = {
+  arrangedByHand: 'This slide is arranged by hand; Apply layout re-flows it',
+  offSheet:
+    'This object is outside the slide and will not show. Move it onto the slide or delete it',
+  pastEdge: "Part of this object is past the slide's edge and will not show",
+} as const;
+
+/** Format options words of round two (SPEC-2 section 5, 10). */
+export const FORMAT = {
+  autofit: {
+    title: 'Autofit',
+    none: 'Do not autofit',
+    shrink: 'Shrink text on overflow',
+    grow: 'Resize shape to fit text',
+    growNote: 'Available on a text box placed on the slide',
+  },
+  size: {
+    width: 'Width',
+    height: 'Height',
+    lockAspect: 'Lock aspect ratio',
+    rotate: 'Rotate',
+    flipH: 'Flip horizontally',
+    flipV: 'Flip vertically',
+    /* a grammar slide's block before its first edit: the stage's box is not on hand */
+    unplaced: 'Move or resize the object once to see its size here',
+  },
+  position: { from: 'From', topLeft: 'Top-left', center: 'Center', x: 'X', y: 'Y' },
+  fitting: {
+    indentation: 'Indentation',
+    left: 'Left',
+    padding: 'Padding',
+    top: 'Top',
+    bottom: 'Bottom',
+    right: 'Right',
+    valign: 'Vertical alignment',
+    middle: 'Middle',
+    paddingNote:
+      'Padding and vertical alignment apply to a box, shape or text box placed on the slide',
+  },
+  text: {
+    lineSpacing: 'Line spacing',
+    single: 'Single',
+    double: 'Double',
+    custom: 'Custom',
+    spaceBefore: 'Space before',
+    spaceAfter: 'Space after',
+    columns: 'Columns',
+    textColor: 'Text color',
+    highlightColor: 'Highlight color',
+  },
+  colour: {
+    outlineColor: 'Outline color',
+    outlineWeight: 'Outline weight',
+  },
+  picture: {
+    replace: 'Replace image',
+    crop: 'Crop image',
+    mask: 'Mask',
+    none: 'None',
+    reset: 'Reset image',
+    frame: 'Frame',
+    weight: 'Weight',
+    color: 'Color',
+    dash: 'Dash',
+    anchor: 'Crop anchor',
+    top: 'Top',
+    centre: 'Centre',
+  },
+  adjustments: {
+    transparency: 'Transparency',
+    brightness: 'Brightness',
+    contrast: 'Contrast',
+    reset: 'Reset',
+  },
+  shadow: {
+    enable: 'Drop shadow',
+    color: 'Color',
+    transparency: 'Transparency',
+    angle: 'Angle',
+    distance: 'Distance',
+    blur: 'Blur radius',
+  },
+  line: {
+    kind: 'Line type',
+    start: 'Line start',
+    end: 'Line end',
+    weight: 'Weight',
+    dash: 'Dash',
+    bend: 'Bend',
+    points: 'Points',
+    pointsNote: 'Points are edited by drawing the line again',
+    attached: (end: string, target: string) => `${end} is attached to ${target}`,
+  },
+  shape: { shape: 'Shape', adjust: 'Adjust' },
+  list: {
+    marker: 'Marker',
+    bulleted: 'Bulleted',
+    numbered: 'Numbered',
+    preset: 'Preset',
+    level: 'Level',
+  },
+  alt: { description: 'Description', doc: 'The description a screen reader reads for this object' },
+  chartSlot: 'The chart data grid opens here once it is wired',
+  detach: 'Detach',
+  ruled: 'Ruled',
+  changeShape: 'Change shape',
+} as const;
+
+/** The word art bar over the canvas (SPEC-2 0.14, 6.2). */
+export const WORD_ART = {
+  label: 'Word art',
+  placeholder: 'Type your text and press Enter',
+  insert: 'Insert',
+  cancel: 'Cancel',
+} as const;
+
+/** What the shell says when the stage has not wired a canvas gesture yet (a snackbar, never a crash). */
+export const CANVAS_NOTICES = {
+  noEditor: (what: string) => `${what} works on the slide once it is focused`,
+  noGuide: 'Right-click a guide to delete it',
+  noCaret: 'Click inside a text box first',
 } as const;
 
 /** The right panel titles and their words (SPEC 12 "Panels"). */
@@ -227,6 +435,32 @@ export const PANELS = {
   suggestions: { title: 'Suggestions for this slide', fix: 'Fix' },
   changeHistory: { title: 'Change history' },
   picturesMaterials: { title: 'Pictures and materials' },
+  /* round two (SPEC-2 section 5, 10): the Diagram panel and the Chart data section */
+  diagram: {
+    title: 'Diagram',
+    types: ['Grid', 'Hierarchy', 'Timeline', 'Process', 'Relationship', 'Cycle'],
+    insert: 'Insert',
+  },
+  chart: {
+    title: 'Chart data',
+    type: 'Chart type',
+    legend: 'Legend',
+    numberFormat: 'Number format',
+    showValues: 'Show values',
+    addSeries: 'Add series',
+    addCategory: 'Add category',
+    remove: 'Remove',
+    series: (n: number) => `Series ${n}`,
+    category: (n: number) => `Category ${n}`,
+  },
+} as const;
+
+/** The Download dialog's progress sentences of the batched export (SPEC-2 0.31, 8.1). */
+export const DOWNLOAD_PROGRESS = {
+  preparing: (slide: number, total: number, left: string) =>
+    `Preparing slide ${slide} of ${total}, about ${left} left`,
+  merging: 'Merging your file',
+  ready: 'Your file is ready',
 } as const;
 
 /** The filmstrip (SPEC 12 "Filmstrip"). */
@@ -283,10 +517,13 @@ export const ERRORS = {
 } as const;
 
 /**
- * The engineering words that never reach the default view (SPEC 12, R07 rule 22). The default
- * view words test greps every label, tooltip and stub clause in the menu model for them, outside
- * Tools > Advanced and Extensions > Agent access. Matched as whole words, case insensitive;
- * `block id` and `JSON pointer` are phrases.
+ * The engineering words that never reach the default view (SPEC 12, R07 rule 22; SPEC-2 section
+ * 10 adds the words of the canvas work, the marks and the process words `round`, `convert`,
+ * `conversion` and `measure`). The default view words test greps every label, tooltip and stub
+ * clause in the menu model for them, outside Tools > Advanced and Extensions > Agent access.
+ * Matched as whole words, case insensitive; `block id`, `JSON pointer`, `mark span` and
+ * `preset id` are phrases. The nouns "canvas", "object", "guide" and "ruler" are Google's words
+ * and allowed.
  */
 export const FORBIDDEN_DEFAULT_VIEW_WORDS: ReadonlyArray<string> = [
   'lint',
@@ -307,6 +544,26 @@ export const FORBIDDEN_DEFAULT_VIEW_WORDS: ReadonlyArray<string> = [
   'reducer',
   'palette',
   'MCP',
+  /* round two (SPEC-2 section 10) */
+  'layer',
+  'overlay',
+  'trim',
+  'span',
+  'avLst',
+  'prstGeom',
+  'custGeom',
+  'snapshot',
+  'batch',
+  'mark span',
+  'run',
+  'glyph',
+  'preset id',
+  'numCol',
+  'round',
+  /* the canvas (SPEC-2 section 10): the first write's change of layout is never named to a person */
+  'convert',
+  'conversion',
+  'measure',
 ];
 
 /** The forbidden words a text contains, as written in the list; empty when it is clean. */

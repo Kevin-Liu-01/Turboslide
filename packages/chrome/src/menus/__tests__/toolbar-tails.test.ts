@@ -5,44 +5,74 @@ import { forbiddenWordsIn, stubClause } from '../strings.ts';
 import { HIDE_MENUS_CONTROL, TOOLBAR_TAILS, tailFor, tailLabels } from '../toolbar-tails.ts';
 import type { TailKind } from '../toolbar-tails.ts';
 
-// The contextual toolbar tails (gslides-parity SPEC 3.2 to 3.8): Google's order per selection
-// family, every control labelled in Google's words, every Later control with its stub clause,
-// every control that runs a menu item naming one that exists, and no engineering word anywhere.
+// The contextual toolbar tails (gslides-parity SPEC 3.2 to 3.8 with the round two flips of SPEC-2
+// 4.2): Google's order per selection family, every control labelled in Google's words, every
+// Later control with its stub clause, every control that runs a menu item naming one that exists,
+// the Turboslide additions marked as ours, and no engineering word anywhere.
 
-describe('the tails of SPEC 3.2 to 3.8', () => {
-  it('a text block: fill and border first, then the text controls, then Format options (3.2)', () => {
-    expect(tailLabels('text')).toEqual([
-      'Fill color',
-      'Border color',
-      'Border weight',
-      'Border dash',
-      'Font',
-      'Font size',
-      'Bold',
-      'Italic',
-      'Underline',
-      'Text color',
-      'Insert link',
-      'Insert comment',
-      'Align',
-      'Line & paragraph spacing',
-      'Bulleted list',
-      'Numbered list',
-      'Decrease indent',
-      'Increase indent',
-      'Clear formatting',
-      'Format options',
-    ]);
+const TEXT_LABELS = [
+  'Fill color',
+  'Border color',
+  'Border weight',
+  'Border dash',
+  'Font',
+  'Font size',
+  'Bold',
+  'Italic',
+  'Underline',
+  'Text color',
+  'Highlight color',
+  'Insert link',
+  'Insert comment',
+  'Align',
+  'Line & paragraph spacing',
+  'Bulleted list',
+  'Numbered list',
+  'Decrease indent',
+  'Increase indent',
+  'Clear formatting',
+  'Format options',
+];
+
+describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
+  it('a text block: fill and border first, then the text controls with Italic, Underline and Highlight color, then Format options (3.2)', () => {
+    expect(tailLabels('text')).toEqual(TEXT_LABELS);
+    const byId = (control: string) => TOOLBAR_TAILS.text.find((each) => each.control === control);
+    /* headings, paragraphs and text boxes take no fill; a box or word art takes a border (SPEC-2 0.62) */
+    expect(byId('toolbar.fillColor')?.enabled).toBe('boxSelected');
+    expect(byId('toolbar.borderColor')?.enabled).toBe('hasBorderField');
+    expect(byId('toolbar.borderWeight')?.enabled).toBe('hasBorderField');
+    expect(byId('toolbar.borderDash')?.enabled).toBe('boxSelected');
+    for (const control of ['toolbar.italic', 'toolbar.underline', 'toolbar.highlightColor'])
+      expect(byId(control)?.status, control).toBe('now');
+    expect(byId('toolbar.italic')?.item).toBe('format.text.italic');
+    expect(byId('toolbar.underline')?.item).toBe('format.text.underline');
+    expect(byId('toolbar.highlightColor')?.op).toBe('highlightColor');
+    expect(byId('toolbar.decreaseIndent')?.item).toBe('format.alignIndent.decreaseIndent');
+    expect(byId('toolbar.increaseIndent')?.item).toBe('format.alignIndent.increaseIndent');
+    /* the list buttons gain the preset grid arrow */
+    expect(byId('toolbar.bulletedList')?.arrow).toBe('format.bulletsNumbering.bulleted');
+    expect(byId('toolbar.numberedList')?.arrow).toBe('format.bulletsNumbering.numbered');
+    expect(byId('toolbar.borderDash')?.op).toBe('borderDash');
+    expect(byId('toolbar.font')?.enabled).toBe('never');
   });
 
-  it('a shape: the same row with the text controls greyed (3.3)', () => {
-    expect(tailLabels('shape')).toEqual(tailLabels('text'));
+  it('a shape: Change shape, then the text tail with the text controls enabled (3.3, SPEC-2 0.11)', () => {
+    expect(tailLabels('shape')).toEqual(['Change shape', ...TEXT_LABELS]);
+    const change = TOOLBAR_TAILS.shape.find((control) => control.control === 'toolbar.changeShape');
+    expect(change?.op).toBe('changeShape');
+    expect(change?.turboslide).toBe(true);
     const bold = TOOLBAR_TAILS.shape.find((control) => control.control === 'toolbar.bold');
-    expect(bold?.enabled).toBe('never');
-    expect(bold?.disabledReason).toBe('Use a text box for text over a shape, or insert a box');
+    expect(bold?.enabled).toBeUndefined();
+    /* a shape's fill and border always apply */
+    for (const control of ['toolbar.fillColor', 'toolbar.borderColor', 'toolbar.borderWeight'])
+      expect(
+        TOOLBAR_TAILS.shape.find((each) => each.control === control)?.enabled,
+        control,
+      ).toBeUndefined();
   });
 
-  it('an image (3.4)', () => {
+  it('an image: the frame controls, Crop with the Mask arrow, Replace, Image options, Reset (3.4)', () => {
     expect(tailLabels('image')).toEqual([
       'Border color',
       'Border weight',
@@ -53,9 +83,19 @@ describe('the tails of SPEC 3.2 to 3.8', () => {
       'Reset image',
       'Format options',
     ]);
+    const crop = TOOLBAR_TAILS.image.find((control) => control.control === 'toolbar.cropImage');
+    expect(crop?.op).toBe('crop');
+    expect(crop?.arrow).toBe('format.image.maskImage');
+    const reset = TOOLBAR_TAILS.image.find((control) => control.control === 'toolbar.resetImage');
+    expect(reset?.status).toBe('now');
+    expect(reset?.enabled).toBe('imageEdited');
+    for (const control of ['toolbar.borderWeight', 'toolbar.borderDash'])
+      expect(TOOLBAR_TAILS.image.find((each) => each.control === control)?.status, control).toBe(
+        'now',
+      );
   });
 
-  it('a line (3.5)', () => {
+  it('a line: colour, weight, dash, start and end, all Now (3.5)', () => {
     expect(tailLabels('line')).toEqual([
       'Line color',
       'Line weight',
@@ -64,18 +104,60 @@ describe('the tails of SPEC 3.2 to 3.8', () => {
       'Line end',
       'Format options',
     ]);
+    for (const control of TOOLBAR_TAILS.line) expect(control.status, control.control).toBe('now');
   });
 
-  it('a table cell: border first, then the fill, then the text controls (3.6)', () => {
+  it('a table cell: border first, then the fill, the merge buttons, then the text controls (3.6)', () => {
     const labels = tailLabels('table');
-    expect(labels.slice(0, 4)).toEqual([
+    expect(labels.slice(0, 6)).toEqual([
       'Border color',
       'Border weight',
       'Border dash',
       'Fill color',
+      'Merge cells',
+      'Unmerge cells',
     ]);
     expect(labels.at(-1)).toBe('Format options');
     expect(labels).toContain('Align');
+    /* the merge buttons are Turboslide additions (SPEC-2 4.2) that run the Format > Table rows */
+    const merge = TOOLBAR_TAILS.table.find((control) => control.control === 'toolbar.mergeCells');
+    expect(merge?.turboslide).toBe(true);
+    expect(merge?.item).toBe('format.table.mergeCells');
+    expect(merge?.enabled).toBe('cellRangeSelected');
+    const unmerge = TOOLBAR_TAILS.table.find(
+      (control) => control.control === 'toolbar.unmergeCells',
+    );
+    expect(unmerge?.item).toBe('format.table.unmergeCells');
+    expect(unmerge?.enabled).toBe('mergedCellSelected');
+  });
+
+  it('a chart: type, legend, number format, data and Format options, every one ours (SPEC-2 4.2)', () => {
+    expect(tailLabels('chart')).toEqual([
+      'Chart type',
+      'Legend',
+      'Number format',
+      'Edit data',
+      'Format options',
+    ]);
+    for (const control of TOOLBAR_TAILS.chart) {
+      if (control.control === 'toolbar.formatOptions') continue;
+      expect(control.turboslide, control.control).toBe(true);
+    }
+    expect(
+      TOOLBAR_TAILS.chart.find((control) => control.control === 'toolbar.editData')?.item,
+    ).toBe('format.editData');
+  });
+
+  it('a group: the fill and border controls over every member, then Format options (SPEC-2 0.102)', () => {
+    expect(tailLabels('group')).toEqual([
+      'Fill color',
+      'Border color',
+      'Border weight',
+      'Border dash',
+      'Format options',
+    ]);
+    for (const control of TOOLBAR_TAILS.group)
+      expect(control.enabled, control.control).toBeUndefined();
   });
 
   it('the default tail is the model tail of 3.1 with the Hide the menus chevron drawn apart', () => {
@@ -85,6 +167,13 @@ describe('the tails of SPEC 3.2 to 3.8', () => {
       ),
     );
     expect(TOOLBAR_TAIL_DEFAULT.at(-1)?.control).toBe(HIDE_MENUS_CONTROL);
+    /* the Insert shape and Insert line dropdowns open the categories and kinds of SPEC-2 4.1 */
+    expect(
+      TOOLBAR_TAILS.default.find((control) => control.control === 'toolbar.insertShape')?.arrow,
+    ).toBe('insert.shape');
+    expect(
+      TOOLBAR_TAILS.default.find((control) => control.control === 'toolbar.insertLine')?.arrow,
+    ).toBe('insert.line');
   });
 
   it('other blocks: Format options and Replace image (3.8)', () => {
@@ -119,6 +208,17 @@ describe('every tail control', () => {
         ).toBe(false);
       }
     }
+  });
+
+  it('leaves Insert comment as the one Later control outside the default tail', () => {
+    const later: string[] = [];
+    for (const kind of kinds)
+      if (kind !== 'default')
+        for (const control of TOOLBAR_TAILS[kind])
+          if (control.status === 'later') later.push(`${kind}:${control.control}`);
+    expect(new Set(later.map((each) => each.split(':')[1]))).toEqual(
+      new Set(['toolbar.insertComment']),
+    );
   });
 
   it('never wraps: every tail fits the More button rule with the same control ids', () => {

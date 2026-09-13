@@ -106,6 +106,14 @@ const DESTRUCTIVE = new Set<ActionId>([
   'deck.trash',
   'slide.applyLayout',
   'text.replaceAll',
+  // the parity round two: a picture loses its tools, rows and columns leave, cells merge, text is
+  // rewritten, a chart loses series
+  'block.resetImage',
+  'table.deleteRows',
+  'table.deleteColumns',
+  'table.merge',
+  'text.case',
+  'chart.setKind',
 ]);
 
 export type McpContract = {

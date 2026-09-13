@@ -1,0 +1,475 @@
+{
+  "base": "http://localhost:4321",
+  "at": "2026-09-13T06:03:48.150Z",
+  "copy": "verifier-canvas-mtzer06t",
+  "seconds": 39,
+  "walked": [
+    "opener-brand",
+    "mood-earth",
+    "title",
+    "thesis",
+    "books-and-templates",
+    "opener-prototemplate"
+  ],
+  "steps": [
+    {
+      "slide": "opener-brand",
+      "step": "drag picture",
+      "ok": true,
+      "evidence": "1 write; first mutation slide.replace (kind opener -> content, layout freeform, grammar opener, 5 objects); pos {\"x\":0,\"y\":0,\"w\":1600,\"h\":900,\"z\":0} -> {\"x\":57,\"y\":40,\"w\":1600,\"h\":900,\"z\":0}; snap guides sampled 1"
+    },
+    {
+      "slide": "opener-brand",
+      "step": "picture object at the bottom",
+      "ok": true,
+      "evidence": "picture {\"x\":57,\"y\":40,\"w\":1600,\"h\":900,\"z\":0} type picture side lower-left"
+    },
+    {
+      "slide": "opener-brand",
+      "step": "off-sheet finding at severity 2",
+      "ok": true,
+      "evidence": "1 freeform/off-sheet finding(s) [2]"
+    },
+    {
+      "slide": "opener-brand",
+      "step": "resize picture",
+      "ok": true,
+      "evidence": "1 write; w 1600 -> 1680 (w handle); size readout \"1680 × 900\""
+    },
+    {
+      "slide": "opener-brand",
+      "step": "bring forward (Cmd+Up)",
+      "ok": true,
+      "evidence": "1 write; z 0 -> 1"
+    },
+    {
+      "slide": "opener-brand",
+      "step": "send to back (Cmd+Shift+Down)",
+      "ok": true,
+      "evidence": "1 write; z 1 -> 0 (lowest 0)"
+    },
+    {
+      "slide": "opener-brand",
+      "step": "click the plate while the photograph is selected",
+      "ok": false,
+      "evidence": "chip \"Box\" (wanted Group: the plate is a group tagged plate)"
+    },
+    {
+      "slide": "opener-brand",
+      "step": "drag the plate (group)",
+      "ok": true,
+      "evidence": "1 write; chip \"Group\"; 4 members moved together true; snap guides sampled 1"
+    },
+    {
+      "slide": "opener-brand",
+      "step": "rotate h",
+      "ok": true,
+      "evidence": "1 write; rotate 15; angle readout \"15°\""
+    },
+    {
+      "slide": "mood-earth",
+      "step": "crop the picture",
+      "ok": false,
+      "evidence": "1 write(s) on entering crop mode, 1 on Enter (first mutation block.set); chip \"Drag the handles to crop. Press Enter to finish\"; trim {\"left\":0.1,\"right\":0,\"top\":0,\"bottom\":0}"
+    },
+    {
+      "slide": "title",
+      "step": "drag heading",
+      "ok": true,
+      "evidence": "1 write; first mutation slide.replace (kind title -> content, layout freeform, grammar title, 3 objects); pos {\"x\":137,\"y\":420.4375,\"w\":901.453125,\"h\":89.75,\"z\":1} -> {\"x\":176,\"y\":446,\"w\":901.453125,\"h\":89.75,\"z\":1}; snap guides sampled 2"
+    },
+    {
+      "slide": "title",
+      "step": "drag mark",
+      "ok": true,
+      "evidence": "1 write; mark {\"x\":137,\"y\":288.4375,\"w\":132,\"h\":84,\"z\":0} -> {\"x\":176,\"y\":312,\"w\":132,\"h\":84,\"z\":0}"
+    },
+    {
+      "slide": "thesis",
+      "step": "drag big",
+      "ok": true,
+      "evidence": "1 write; first mutation slide.replace (kind statement -> content, layout freeform, grammar statement, 1 objects); pos {\"x\":311.15625,\"y\":411.84375,\"w\":977.6875,\"h\":76.3125,\"z\":0} -> {\"x\":347,\"y\":436,\"w\":977.6875,\"h\":76.3125,\"z\":0}; snap guides sampled 1"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "drag p1",
+      "ok": true,
+      "evidence": "1 write; first mutation slide.replace (kind content -> content, layout freeform, grammar content, 3 objects); pos {\"x\":137,\"y\":195.390625,\"w\":1326,\"h\":66,\"z\":1} -> {\"x\":173,\"y\":219,\"w\":1326,\"h\":66,\"z\":1}; snap guides sampled 1"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "draw a rectangle",
+      "ok": true,
+      "evidence": "1 write; shape shape rect at {\"x\":900,\"y\":520,\"w\":220,\"h\":140,\"z\":3}"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "rotate shape",
+      "ok": true,
+      "evidence": "1 write; rotate 15; angle readout \"15°\""
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "draw an ellipse",
+      "ok": true,
+      "evidence": "1 write; shape shape-2 ellipse at {\"x\":1280,\"y\":520,\"w\":200,\"h\":140,\"z\":4}"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "draw an elbow connector between the shapes",
+      "ok": true,
+      "evidence": "1 write; connector shape-3 elbow connect {\"start\":{\"block\":\"shape\",\"site\":3},\"end\":{\"block\":\"shape-2\",\"site\":1}}; sites sampled while drawing 8"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "move a shape, the connector follows",
+      "ok": true,
+      "evidence": "1 write with 2 mutation(s) on shape-3; connector pos {\"x\":1120,\"y\":590,\"w\":160,\"h\":1,\"z\":5} -> {\"x\":1056,\"y\":590,\"w\":224,\"h\":40,\"z\":5}"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "marquee from empty sheet",
+      "ok": true,
+      "evidence": "chip \"4 objects\"; no write"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "Cmd+A selects every object",
+      "ok": false,
+      "evidence": "chip \"null\" over 6 objects"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "group two objects (Cmd+Option+G)",
+      "ok": true,
+      "evidence": "1 write; group group"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "move the group",
+      "ok": true,
+      "evidence": "1 write; chip \"Group\"; both members moved by -36.00, -30.00"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "View > Show ruler",
+      "ok": true,
+      "evidence": "rulers 2; numerals 14 and 8"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "drag a guide out of the ruler",
+      "ok": true,
+      "evidence": "1 write; guides {\"x\":[600],\"y\":[]} (was null); guide line drawn true; readout while dragging \"5.00 in\""
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "snap to the guide",
+      "ok": true,
+      "evidence": "1 write; p1.x 173 -> 600 (guide at 600); snap lines sampled while dragging 1"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "zoom to 200 percent and pan",
+      "ok": true,
+      "evidence": "sheet 1130 -> 3202 px wide; Zoom box \"200%\"; scrollable true; Space+drag scrollLeft 1036 -> 1236"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "duplicate (Cmd+D)",
+      "ok": true,
+      "evidence": "1 write; objects 6 -> 8; copy shape-2-2 at {\"x\":1260,\"y\":506,\"w\":200,\"h\":140,\"z\":6,\"group\":\"group-2\"}"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "Tab through objects",
+      "ok": true,
+      "evidence": "selection p1 -> pair -> shape -> shape-2; z order h, p1, pair, shape, shape-2, shape-3, shape-2-2, shape-2-3"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "Align > Left with one object aligns to the slide",
+      "ok": true,
+      "evidence": "1 write; p1.x 0"
+    },
+    {
+      "slide": "books-and-templates",
+      "step": "Center on page > Horizontally",
+      "ok": true,
+      "evidence": "1 write; centre 800"
+    },
+    {
+      "slide": "opener-prototemplate",
+      "step": "drag picture",
+      "ok": true,
+      "evidence": "1 write; first mutation slide.replace (kind opener -> content, layout freeform, grammar opener, 5 objects); pos {\"x\":0,\"y\":0,\"w\":1600,\"h\":900,\"z\":0} -> {\"x\":57,\"y\":35,\"w\":1600,\"h\":900,\"z\":0}; snap guides sampled 2"
+    },
+    {
+      "slide": "opener-prototemplate",
+      "step": "resize picture",
+      "ok": true,
+      "evidence": "1 write; w 1600 -> 1680 (w handle); size readout \"1680 × 900\""
+    },
+    {
+      "slide": "opener-prototemplate",
+      "step": "the shader re-mounts at the object box",
+      "ok": true,
+      "evidence": "live canvas 1184x634 vs wrapper 1184x634; pos {\"x\":-23,\"y\":35,\"w\":1680,\"h\":900,\"z\":0} (ratio 1.867)"
+    },
+    {
+      "slide": "deck",
+      "step": "untouched slides byte identical",
+      "ok": true,
+      "evidence": "79 slides compared; 0 differ"
+    },
+    {
+      "slide": "deck",
+      "step": "the committed GT deck is not written",
+      "ok": true,
+      "evidence": "98 files of decks/gt-brand unchanged by the walk (0 changed); git status lists 24 path(s) there from before the walk (the fix round's re-import); 85 slides in the copy"
+    },
+    {
+      "slide": "deck",
+      "step": "the copy validates (turboslide validate)",
+      "ok": true,
+      "evidence": "exit 0: verifier-canvas-mtzer06t: 85 slides, 0 error(s), 46 warning(s)"
+    },
+    {
+      "slide": "deck",
+      "step": "lint on the walked slides",
+      "ok": true,
+      "evidence": "0 findings above severity 2; layout/freeform on 6 of 6 walked slides, sentence \"This slide is arranged by hand; Apply layout re-flows it\""
+    },
+    {
+      "slide": "cli",
+      "step": "to-canvas opener-brand equals the editor",
+      "ok": true,
+      "evidence": "5 objects identical (1.6 s for 5 ids, one launch)"
+    },
+    {
+      "slide": "cli",
+      "step": "to-canvas title equals the editor",
+      "ok": true,
+      "evidence": "3 objects identical (1.6 s for 5 ids, one launch)"
+    },
+    {
+      "slide": "cli",
+      "step": "to-canvas thesis equals the editor",
+      "ok": true,
+      "evidence": "1 objects identical (1.6 s for 5 ids, one launch)"
+    },
+    {
+      "slide": "cli",
+      "step": "to-canvas opener-prototemplate equals the editor",
+      "ok": true,
+      "evidence": "5 objects identical (1.6 s for 5 ids, one launch)"
+    },
+    {
+      "slide": "cli",
+      "step": "to-canvas books-and-templates equals the editor",
+      "ok": true,
+      "evidence": "3 objects identical (1.6 s for 5 ids, one launch)"
+    }
+  ],
+  "conversions": {
+    "opener-brand": {
+      "deck": "gt-brand",
+      "slideId": "opener-brand",
+      "template": "opener",
+      "source": "docs/gslides-parity/verification-2/canvas-walk.mjs (Chromium, the editor, hidden 1x sheet)",
+      "objects": {
+        "picture": {
+          "x": 0,
+          "y": 0,
+          "w": 1600,
+          "h": 900,
+          "z": 0
+        },
+        "plate": {
+          "x": 137,
+          "y": 538.9375,
+          "w": 740,
+          "h": 232.0625,
+          "z": 1,
+          "group": "plate"
+        },
+        "h": {
+          "x": 163,
+          "y": 560.9375,
+          "w": 688,
+          "h": 76.3125,
+          "z": 2,
+          "group": "plate"
+        },
+        "p1": {
+          "x": 163,
+          "y": 651.25,
+          "w": 688,
+          "h": 66,
+          "z": 3,
+          "group": "plate"
+        },
+        "credit": {
+          "x": 163,
+          "y": 729.25,
+          "w": 688,
+          "h": 21.75,
+          "z": 4,
+          "group": "plate"
+        }
+      }
+    },
+    "title": {
+      "deck": "gt-brand",
+      "slideId": "title",
+      "template": "title",
+      "source": "docs/gslides-parity/verification-2/canvas-walk.mjs (Chromium, the editor, hidden 1x sheet)",
+      "objects": {
+        "mark": {
+          "x": 137,
+          "y": 288.4375,
+          "w": 132,
+          "h": 84,
+          "z": 0
+        },
+        "heading": {
+          "x": 137,
+          "y": 420.4375,
+          "w": 901.453125,
+          "h": 89.75,
+          "z": 1
+        },
+        "lead": {
+          "x": 137,
+          "y": 536.1875,
+          "w": 901.453125,
+          "h": 75.375,
+          "z": 2
+        }
+      }
+    },
+    "thesis": {
+      "deck": "gt-brand",
+      "slideId": "thesis",
+      "template": "statement",
+      "source": "docs/gslides-parity/verification-2/canvas-walk.mjs (Chromium, the editor, hidden 1x sheet)",
+      "objects": {
+        "big": {
+          "x": 311.15625,
+          "y": 411.84375,
+          "w": 977.6875,
+          "h": 76.3125,
+          "z": 0
+        }
+      }
+    },
+    "books-and-templates": {
+      "deck": "gt-brand",
+      "slideId": "books-and-templates",
+      "template": "split",
+      "source": "docs/gslides-parity/verification-2/canvas-walk.mjs (Chromium, the editor, hidden 1x sheet)",
+      "objects": {
+        "h": {
+          "x": 137,
+          "y": 129,
+          "w": 1326,
+          "h": 48.390625,
+          "z": 0
+        },
+        "p1": {
+          "x": 137,
+          "y": 195.390625,
+          "w": 1326,
+          "h": 66,
+          "z": 1
+        },
+        "pair": {
+          "x": 137,
+          "y": 297.640625,
+          "w": 1326,
+          "h": 469.09375,
+          "z": 2
+        }
+      }
+    },
+    "opener-prototemplate": {
+      "deck": "gt-brand",
+      "slideId": "opener-prototemplate",
+      "template": "opener",
+      "source": "docs/gslides-parity/verification-2/canvas-walk.mjs (Chromium, the editor, hidden 1x sheet)",
+      "objects": {
+        "picture": {
+          "x": 0,
+          "y": 0,
+          "w": 1600,
+          "h": 900,
+          "z": 0
+        },
+        "plate": {
+          "x": 137,
+          "y": 462.625,
+          "w": 740,
+          "h": 308.375,
+          "z": 1,
+          "group": "plate"
+        },
+        "h": {
+          "x": 163,
+          "y": 484.625,
+          "w": 688,
+          "h": 152.625,
+          "z": 2,
+          "group": "plate"
+        },
+        "p1": {
+          "x": 163,
+          "y": 651.25,
+          "w": 688,
+          "h": 66,
+          "z": 3,
+          "group": "plate"
+        },
+        "credit": {
+          "x": 163,
+          "y": 729.25,
+          "w": 688,
+          "h": 21.75,
+          "z": 4,
+          "group": "plate"
+        }
+      }
+    }
+  },
+  "cliComparison": [
+    {
+      "slideId": "opener-brand",
+      "same": true,
+      "diffs": []
+    },
+    {
+      "slideId": "title",
+      "same": true,
+      "diffs": []
+    },
+    {
+      "slideId": "thesis",
+      "same": true,
+      "diffs": []
+    },
+    {
+      "slideId": "opener-prototemplate",
+      "same": true,
+      "diffs": []
+    },
+    {
+      "slideId": "books-and-templates",
+      "same": true,
+      "diffs": []
+    }
+  ],
+  "pageErrors": [],
+  "summary": {
+    "pass": 40,
+    "fail": 3
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "id": "table-merge",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Merged cells"
+      }
+    ],
+    "body": [
+      {
+        "id": "table",
+        "type": "table",
+        "columns": [
+          {
+            "align": "left"
+          },
+          {
+            "align": "right"
+          },
+          {
+            "align": "right"
+          },
+          {
+            "align": "right"
+          }
+        ],
+        "rows": [
+          {
+            "cells": [
+              "Region",
+              "Q1",
+              "Q2",
+              "Q3"
+            ],
+            "header": true,
+            "height": 56
+          },
+          {
+            "cells": [
+              "North",
+              "One merged cell over four",
+              "",
+              "1,200"
+            ],
+            "height": 56
+          },
+          {
+            "cells": [
+              "South",
+              "",
+              "",
+              "980"
+            ],
+            "height": 56
+          },
+          {
+            "cells": [
+              "West",
+              "410",
+              "460",
+              "520"
+            ],
+            "height": 56
+          }
+        ],
+        "spans": [
+          {
+            "row": 1,
+            "column": 1,
+            "rows": 2,
+            "columns": 2
+          }
+        ],
+        "cells": [
+          {
+            "row": 0,
+            "column": 0,
+            "fill": "plate"
+          },
+          {
+            "row": 3,
+            "column": 3,
+            "border": {
+              "weight": 0
+            }
+          }
+        ],
+        "border": {
+          "weight": 1,
+          "dash": "dash"
+        }
+      }
+    ]
+  },
+  "template": "table"
+}

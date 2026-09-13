@@ -35,6 +35,9 @@ import { launchBrowser } from '@turboslide/headless/launch';
 import type { LaunchedBrowser } from '@turboslide/headless/launch';
 import { waitForReady } from '@turboslide/headless/ready';
 
+import { MEASURE_CLASS } from '@turboslide/render/measure-dom';
+
+import { enrichScene } from './enrich.ts';
 import { measureScene, tagRasterElements } from './measure.ts';
 import { twoToneTwinAt2x } from './two-tone.ts';
 import type { PictureScale } from './two-tone.ts';
@@ -175,6 +178,22 @@ async function hidePicture(page: Page): Promise<void> {
   });
 }
 
+/**
+ * The measurement class of gslides-parity SPEC-2 1.5 on every sheet root: on, a rotated or flipped
+ * object's wrapper drops its transform (render block-css.ts), so the boxes and the element
+ * screenshots are the unrotated ones and pptxgenjs `rotate` turns them once; off, the sheet
+ * screenshot shows the rotation. Two frames after each switch so layout and paint settle.
+ */
+async function setMeasureClass(page: Page, on: boolean, className: string): Promise<void> {
+  await page.evaluate(
+    async ({ on: flag, className: name }) => {
+      document.querySelectorAll('.ts-sheet').forEach((el) => el.classList.toggle(name, flag));
+      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+    },
+    { on, className },
+  );
+}
+
 /** Makes the page ground transparent around element screenshots so alpha rasters have no paper behind them. */
 async function setTransparentGround(page: Page, on: boolean): Promise<void> {
   await page.evaluate((transparent) => {
@@ -306,44 +325,38 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
               }
             }
 
+            // The order of one page pass (gslides-parity SPEC-2 1.5): the measurement class on
+            // every page, two frames, the tags, the measurement and the element screenshots (a
+            // rotated object at its unrotated box, `rotate` and `flip` from its wrapper), the class
+            // off, two frames, then the flatten sheet screenshot, which shows the rotation.
+            for (const sheetPage of pages)
+              await setMeasureClass(sheetPage.page, true, MEASURE_CLASS);
+
             // The same tags on every page: one document order, one rid per element.
             const tagOptions = { nativeTypes };
             const tags = await tagRasterElements(measurePage.page, tagOptions);
             for (const sheetPage of shotPages.values())
               await tagRasterElements(sheetPage.page, tagOptions);
 
-            const scene = await measureScene(measurePage.page, {
-              slideId,
-              n: doc.n.get(slideId) ?? order.indexOf(slideId) + 1,
-              total,
-              theme,
-              kind: slide.kind,
-              nativeTypes,
-              pictureAssetId: asset?.id,
-              notes: slide.notes,
-              tags,
-            });
+            const scene = enrichScene(
+              await measureScene(measurePage.page, {
+                slideId,
+                n: doc.n.get(slideId) ?? order.indexOf(slideId) + 1,
+                total,
+                theme,
+                kind: slide.kind,
+                nativeTypes,
+                pictureAssetId: asset?.id,
+                notes: slide.notes,
+                tags,
+              }),
+              slide,
+            );
             scene.title = slideTitle(slide, scene.n);
             if (pictureFile) scene.pictureFile = pictureFile;
             if (pictureExcluded) scene.pictureExcluded = true;
             if (pictureRegenerated) scene.pictureRegenerated = true;
             const nn = String(scene.n).padStart(2, '0');
-
-            if (options.mode === 'flatten') {
-              const sheetPage = shotPages.get(2);
-              if (sheetPage) {
-                const [x, y, w, h] = scene.sheet;
-                const path = join(sheetDir, `${nn}-${slideId}@2x.png`);
-                await sheetPage.page.screenshot({
-                  path,
-                  type: 'png',
-                  clip: { x, y, width: w, height: h },
-                  animations: 'disabled',
-                  caret: 'hide',
-                });
-                scene.sheetImage = path;
-              }
-            }
 
             const wantRasters: SceneRaster[] =
               options.mode === 'native'
@@ -407,6 +420,25 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
                 }
               } finally {
                 for (const sheetPage of touched) await setTransparentGround(sheetPage.page, false);
+              }
+            }
+
+            for (const sheetPage of pages)
+              await setMeasureClass(sheetPage.page, false, MEASURE_CLASS);
+
+            if (options.mode === 'flatten') {
+              const sheetPage = shotPages.get(2);
+              if (sheetPage) {
+                const [x, y, w, h] = scene.sheet;
+                const path = join(sheetDir, `${nn}-${slideId}@2x.png`);
+                await sheetPage.page.screenshot({
+                  path,
+                  type: 'png',
+                  clip: { x, y, width: w, height: h },
+                  animations: 'disabled',
+                  caret: 'hide',
+                });
+                scene.sheetImage = path;
               }
             }
             const errors = measurePage.takeErrors();

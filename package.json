@@ -16,7 +16,7 @@
     "generate:contracts": "pnpm --filter @turboslide/agent generate",
     "generate-routes": "tsr generate --config apps/studio/tsr.config.json",
     "typecheck": "tsc -b",
-    "lint": "eslint .",
+    "lint": "node scripts/lint-packages.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

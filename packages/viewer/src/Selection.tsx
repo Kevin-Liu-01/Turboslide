@@ -7,6 +7,7 @@
 import type { Block } from '@turboslide/schema/blocks';
 import type { Slide } from '@turboslide/schema/deck';
 import { slideBlocks } from '@turboslide/schema/deck';
+import { isLineKind } from '@turboslide/schema/shapes';
 
 export type Selection =
   | null
@@ -50,6 +51,33 @@ export function resolveBlock(target: EventTarget | null, root: Element): string 
   const el = target.closest<HTMLElement>('[data-block], .free[data-free]');
   if (!el || !root.contains(el)) return null;
   return el.dataset['block'] ?? el.dataset['free'] ?? null;
+}
+
+/**
+ * The object at or above an event target on any slide kind (gslides-parity SPEC-2 1.1): a block
+ * as `resolveBlock` reads it, else one of the kind's elements under the id the conversion gives
+ * it: the title's mark svg (`mark`), a picture kind's plate padding (`plate`), the closing's mark
+ * inside the plate (`mark`), and on a picture kind any press on the slide outside the plate, which
+ * lands on the photograph (`picture`; the stage hides the slide's own image and paints it as the
+ * backdrop, so the press reaches the slide element). Null on empty sheet elsewhere.
+ */
+export function resolveObject(
+  target: EventTarget | null,
+  root: Element,
+  slide: Slide,
+): string | null {
+  const block = resolveBlock(target, root);
+  if (block !== null) return block;
+  if (!(target instanceof Element) || !root.contains(target)) return null;
+  if (slide.kind === 'title') {
+    return target.closest('.left-mid svg[data-raster="mark"]') ? 'mark' : null;
+  }
+  if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') {
+    if (target.closest('[data-slot="plate"] svg.mark')) return 'mark';
+    if (target.closest('[data-slot="plate"]')) return 'plate';
+    if (target.closest('.slide')) return 'picture';
+  }
+  return null;
 }
 
 /** The `[data-run]` at or above an event target inside `root`, with its element, or null. */
@@ -127,10 +155,37 @@ export function blockById(slide: Slide, blockId: string): Block | undefined {
 export function blockTypeOf(slide: Slide, blockId: string): string | undefined {
   const block = blockById(slide, blockId);
   if (block) return block.type;
-  if (slide.kind === 'title' && (blockId === 'heading' || blockId === 'lead'))
-    return blockId === 'heading' ? 'heading' : 'paragraph';
+  if (slide.kind === 'title') {
+    if (blockId === 'heading') return 'heading';
+    if (blockId === 'lead') return 'paragraph';
+    if (blockId === 'mark') return 'mark';
+  }
   if (slide.kind === 'statement' && blockId === 'big') return 'heading';
+  if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') {
+    if (blockId === 'picture') return 'picture';
+    if (blockId === 'plate') return 'box';
+    if (blockId === 'mark') return 'mark';
+  }
   return undefined;
+}
+
+/**
+ * The right-click target of an object (gslides-parity SPEC-2 4.3): a shape of a closed kind, a
+ * line (a rule or a line kind), an image (a picture, a shot, the photograph), a chart, a table's
+ * body, else a text object.
+ */
+export type ObjectContextTarget = 'textBlock' | 'image' | 'shape' | 'line' | 'chart' | 'table';
+
+export function objectContextTarget(slide: Slide, blockId: string): ObjectContextTarget {
+  const block = blockById(slide, blockId);
+  const type = block?.type ?? blockTypeOf(slide, blockId);
+  if (type === 'shape' && block?.type === 'shape')
+    return isLineKind(block.shape) ? 'line' : 'shape';
+  if (type === 'rule') return 'line';
+  if (type === 'chart') return 'chart';
+  if (type === 'table') return 'table';
+  if (blockFamily(type) === 'image') return 'image';
+  return 'textBlock';
 }
 
 /** The chip text beside the ring, `type · id` (SPEC 6.4), with a middle dot. */
@@ -228,6 +283,8 @@ const DISPLAY_NAMES: Readonly<Partial<Record<string, string>>> = {
   composite: 'Group',
   mark: 'Mark',
   marks: 'Marks',
+  picture: 'Image',
+  chart: 'Chart',
   logos: 'Logos',
   spec: 'Type specimen',
   lang: 'Scripts',
@@ -240,6 +297,12 @@ const DISPLAY_NAMES: Readonly<Partial<Record<string, string>>> = {
 export function blockDisplayName(slide: Slide, blockId: string): string {
   if (slide.kind === 'title' && blockId === 'lead') return 'Subtitle';
   if (slide.kind === 'title' && blockId === 'heading') return 'Title';
+  if (
+    (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') &&
+    blockId === 'plate' &&
+    blockById(slide, blockId) === undefined
+  )
+    return 'Plate';
   const type = blockTypeOf(slide, blockId);
   if (type === undefined) return 'Block';
   return DISPLAY_NAMES[type] ?? type.charAt(0).toUpperCase() + type.slice(1);
@@ -265,6 +328,7 @@ export function blockFamily(type: string | undefined): BlockFamily {
     case 'tiles':
     case 'details':
     case 'material':
+    case 'picture':
       return 'image';
     case 'table':
       return 'table';
@@ -304,4 +368,12 @@ export function listItemPointer(pointer: string): { index: number; field: string
 /** The ids of the real blocks of a slide in document order, for Select all (SPEC 2.2). */
 export function allBlockIds(slide: Slide): string[] {
   return slideBlocks(slide).map(({ block }) => block.id);
+}
+
+/** True when the id names a slide field drawn as a pseudo block (the title's heading and lead, the statement's big). */
+export function isFieldObject(slide: Slide, blockId: string): boolean {
+  return (
+    (slide.kind === 'title' && (blockId === 'heading' || blockId === 'lead')) ||
+    (slide.kind === 'statement' && blockId === 'big')
+  );
 }

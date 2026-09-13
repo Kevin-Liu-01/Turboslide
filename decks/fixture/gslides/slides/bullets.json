@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "bullets",
+  "kind": "content",
+  "layout": {
+    "type": "cols",
+    "ratio": "1/1",
+    "gap": 72
+  },
+  "slots": {
+    "left": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Bullets and numbering"
+      },
+      {
+        "id": "bullets",
+        "type": "plain",
+        "marker": "bullet",
+        "preset": "disc-circle-square",
+        "items": [
+          {
+            "text": "Level one, a disc"
+          },
+          {
+            "text": "Level two, a circle",
+            "level": 2
+          },
+          {
+            "text": "Level three, a square",
+            "level": 3
+          },
+          {
+            "text": "Level four, the glyph cycle starts again",
+            "level": 4
+          }
+        ]
+      }
+    ],
+    "right": [
+      {
+        "id": "numbers",
+        "type": "plain",
+        "marker": "number",
+        "preset": "digit-alpha-roman",
+        "items": [
+          {
+            "text": "A digit at level one"
+          },
+          {
+            "text": "A letter at level two",
+            "level": 2
+          },
+          {
+            "text": "A roman numeral at level three",
+            "level": 3
+          },
+          {
+            "text": "Back to a digit"
+          }
+        ]
+      },
+      {
+        "id": "ruled",
+        "type": "plain",
+        "numbered": true,
+        "items": [
+          {
+            "text": "The round one form"
+          },
+          {
+            "text": "A tabular numeral in the key position"
+          }
+        ]
+      }
+    ]
+  },
+  "template": "cols"
+}

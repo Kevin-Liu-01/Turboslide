@@ -15,6 +15,8 @@ import type { DeckDocument, Slide, SlotName } from '@turboslide/schema/deck';
 import { slideBlocks, slotsForLayout } from '@turboslide/schema/deck';
 import type { BlockSlot, Mutation } from '@turboslide/schema/mutations';
 import type { Position } from '@turboslide/schema/position';
+import { plainLength, styleRange } from '@turboslide/schema/text';
+import type { RunMarks, Text as Markup } from '@turboslide/schema/text';
 import { CONTENT, CONTENT_ORIGIN } from '@turboslide/theme/tokens';
 
 /** The prefix of the system clipboard text (SPEC 2.2). */
@@ -321,18 +323,33 @@ export function altFor(fileName: string): string {
 // ---------------------------------------------------------------------------------------------
 // Paint format (SPEC 3.1 row 6)
 
-/** The look Paint format carries: the block fields Google's Paint format copies, where a block has them. */
-export const PAINT_FIELDS = ['typography', 'color', 'fill', 'stroke', 'strokeWidth'] as const;
+/**
+ * The look Paint format carries (SPEC 3.1 row 6; gslides-parity SPEC-2 6.1 row 32, 0.37): the
+ * block fields Google's paint roller copies where a block has them (fill, line, text formatting),
+ * plus the marks of the caret's run while a range is selected.
+ */
+export const PAINT_FIELDS = [
+  'typography',
+  'color',
+  'fill',
+  'stroke',
+  'strokeWidth',
+  'dash',
+  'valign',
+  'marker',
+  'preset',
+] as const;
 export type PaintField = (typeof PAINT_FIELDS)[number];
-export type PaintFormat = Partial<Record<PaintField, unknown>>;
+export type PaintFormat = Partial<Record<PaintField, unknown>> & { marks?: RunMarks };
 
-/** The fields the block carries, as the format to paint; empty when it carries none. */
-export function paintFormatOf(block: Block): PaintFormat {
+/** The fields the block carries, as the format to paint, plus the run marks given; empty when it carries none. */
+export function paintFormatOf(block: Block, marks?: RunMarks): PaintFormat {
   const source = block as unknown as Record<string, unknown>;
   const out: PaintFormat = {};
   for (const field of PAINT_FIELDS) {
     if (source[field] !== undefined) out[field] = clone(source[field]);
   }
+  if (marks !== undefined && Object.keys(marks).length > 0) out.marks = { ...marks };
   return out;
 }
 
@@ -343,10 +360,20 @@ export function blockTakesField(type: BlockType, field: string): boolean {
   return shape !== undefined && field in shape;
 }
 
+/** The pointer of the one Text a block carries whole, for the marks a paint applies over all of it. */
+function wholeTextPath(block: Block): string | null {
+  if (block.type === 'heading' || block.type === 'paragraph' || block.type === 'text')
+    return '/text';
+  if ((block.type === 'box' || block.type === 'shape') && typeof block.text === 'string')
+    return '/text';
+  return null;
+}
+
 /**
  * One `block.set` per field of the format the target block takes (SPEC 3.1 row 6: "applies
  * them to the next clicked block in one block.set per field"); a field the target holds at the
- * same value writes nothing. Empty when nothing applies.
+ * same value writes nothing; the run marks, when carried, apply over the target's whole text as
+ * one `text.replace` (SPEC-2 0.37). Empty when nothing applies.
  */
 export function paintMutations(slide: Slide, target: Block, format: PaintFormat): Mutation[] {
   const current = target as unknown as Record<string, unknown>;
@@ -362,6 +389,33 @@ export function paintMutations(slide: Slide, target: Block, format: PaintFormat)
       path: `/${field}`,
       value: clone(value),
     });
+  }
+  const path = format.marks === undefined ? null : wholeTextPath(target);
+  if (path !== null && format.marks !== undefined) {
+    const text = (current[path.slice(1)] as Markup | undefined) ?? '';
+    const length = plainLength(text);
+    if (length > 0) {
+      const marks = format.marks;
+      const next = styleRange(text, [0, length], {
+        i: marks.i === true,
+        u: marks.u === true,
+        s: marks.s === true,
+        sup: marks.sup === true,
+        sub: marks.sub === true,
+        color: marks.color ?? null,
+        highlight: marks.hl ?? null,
+      });
+      if (next !== text) {
+        out.push({
+          op: 'text.replace',
+          slideId: slide.id,
+          blockId: target.id,
+          path,
+          range: [0, length],
+          text: next,
+        });
+      }
+    }
   }
   return out;
 }

@@ -20,6 +20,16 @@ import { STUB_PREFIX, stubClause } from './strings.ts';
  * name predicates over a `MenuContext`, so the model stays serializable data for the audit
  * script and `evaluate()` is the one place they run.
  *
+ * Round two (SPEC-2 section 4) flips the rows the round one Later stubs and the omitted items
+ * held back: the text marks, capitalization, justified text, indents, spacing, the bullet and
+ * numbering presets, merged cells, the image tools, the border pickers, dashes and line ends,
+ * every shape category, charts, the diagram panel, word art, the line kinds, special characters,
+ * the hover grid of Insert > Table, slide backgrounds, rotation, flip, groups, Select none and
+ * Help Turboslide improve; the canvas (SPEC-2 section 1) makes every top level block of every
+ * slide kind an object, so the Arrange rows are enabled on every slide, and brings View > Show
+ * ruler, Guides, Snap to and Zoom in (SPEC-2 0.77). What stays Later is section 12 of SPEC-2,
+ * each row with its clause.
+ *
  * Nothing in a label, tooltip or stub clause names an internal thing (SPEC 12); the default view
  * words test greps this file. Relative imports carry the `.ts` extension so the parity audit
  * script can load the model under Node; the icon import is a type and is erased.
@@ -31,7 +41,10 @@ export type Platform = 'mac' | 'win';
 /** Mac chord first; alternates joined by ' or '; an empty string is a platform with no chord. */
 export type Shortcut = { mac: string; win: string };
 
-/** The fourteen actions SPEC 7.5 adds; B1 lands them in the actions table and the union collapses. */
+/**
+ * The fourteen actions SPEC 7.5 added in round one, kept as a list for the tests and the audit;
+ * every id is in the actions table (`ActionId`) since round one's merge 1.
+ */
 export const GS1_ACTION_IDS = [
   'slide.new',
   'slide.duplicate',
@@ -47,10 +60,55 @@ export const GS1_ACTION_IDS = [
   'deck.remove',
   'export.text',
   'view.zoom',
-] as const;
+] as const satisfies readonly ActionId[];
 
-export type Gs1ActionId = (typeof GS1_ACTION_IDS)[number];
-export type MenuActionId = ActionId | Gs1ActionId;
+/**
+ * The thirty six actions SPEC-2 section 3 adds, in its order (`slide.toCanvas` and `deck.guides`
+ * joined with the canvas, SPEC-2 0.93), kept as a list for the tests and the audit; B1 landed
+ * them in the actions table on day one and merge 1 of round two collapsed `MenuActionId` into
+ * `ActionId` (SPEC-2 0.49), so a row can only name an action that exists.
+ */
+export const GS2_ACTION_IDS = [
+  'block.group',
+  'block.ungroup',
+  'block.regroup',
+  'block.rotate',
+  'block.flip',
+  'block.crop',
+  'block.mask',
+  'block.resetImage',
+  'block.adjust',
+  'block.setAlt',
+  'block.shadow',
+  'block.autofit',
+  'slide.setBackground',
+  'deck.setBackground',
+  'text.style',
+  'text.list',
+  'text.spacing',
+  'text.columns',
+  'text.indent',
+  'text.case',
+  'chart.setData',
+  'chart.setKind',
+  'table.merge',
+  'table.unmerge',
+  'table.insertRows',
+  'table.insertColumns',
+  'table.deleteRows',
+  'table.deleteColumns',
+  'table.distribute',
+  'table.cellStyle',
+  'shape.set',
+  'line.set',
+  'diagram.insert',
+  'text.insert',
+  'slide.toCanvas',
+  'deck.guides',
+] as const satisfies readonly ActionId[];
+
+/** The action a menu row runs: an id of the actions table, since merge 1 of round two (SPEC-2 0.49). */
+export type MenuActionId = ActionId;
 
 /** The per browser and per document toggles the View, Tools and Snap to items flip. */
 export type MenuSetting =
@@ -70,7 +128,10 @@ export type MenuSetting =
   | 'showIds'
   | 'sectionsTree'
   | 'book'
-  | 'zoom';
+  | 'zoom'
+  /* round two (SPEC-2 0.77): the rulers and the deck's guides, per browser like the snap settings */
+  | 'showRuler'
+  | 'showGuides';
 
 /** Client side handlers with no action of their own (SPEC 2.13: undo, redo, the clipboard, zoom). */
 export type MenuClientHandler =
@@ -91,7 +152,25 @@ export type MenuClientHandler =
   | 'presenterView'
   | 'presentFromBeginning'
   | 'toolFinder'
-  | 'runAction';
+  | 'runAction'
+  /* round two (SPEC-2 4.1): crop mode, the word art bar, the two pickers anchored to a menu row, Select none */
+  | 'cropMode'
+  | 'wordArt'
+  | 'borderColorPicker'
+  | 'borderWeightPicker'
+  | 'selectNone';
+
+/**
+ * The plates a dynamic submenu draws instead of a list of rows: the layout grid, a shape
+ * category's glyph grid, the bullet and numbering preset grids, the Insert > Table hover grid,
+ * the line end and dash lists (SPEC-2 4.1). The shell renders each; a row whose plate the shell
+ * cannot draw yet falls back to its children, or runs its `action` as a command.
+ */
+export type MenuDynamic =
+  'layouts' | 'shapes' | 'bulletPresets' | 'numberPresets' | 'tableGrid' | 'lineEnds' | 'dashes';
+
+/** Google's four shape categories (SPEC-2 2.3); a `shapes` submenu without one shows all four. */
+export type ShapeCategory = 'shapes' | 'arrows' | 'callouts' | 'equation';
 
 export type MenuEffect =
   | { kind: 'action'; id: MenuActionId; input?: Readonly<Record<string, unknown>> }
@@ -99,7 +178,14 @@ export type MenuEffect =
   | { kind: 'panel'; title: string }
   | { kind: 'route'; path: string; newTab?: true }
   | { kind: 'toggle'; setting: MenuSetting; value?: string | boolean }
-  | { kind: 'submenu'; dynamic?: 'layouts'; action?: MenuActionId }
+  | {
+      kind: 'submenu';
+      dynamic?: MenuDynamic;
+      /** the shape category a `shapes` plate shows */
+      category?: ShapeCategory;
+      /** the action a pick in the plate runs; the row itself runs it as a command when no plate is drawn */
+      action?: MenuActionId;
+    }
   | { kind: 'client'; handler: MenuClientHandler };
 
 /** The named predicates over a MenuContext; `evaluate` runs them. */
@@ -116,9 +202,6 @@ export type MenuPredicate =
   | 'pictureLayout'
   | 'slideSkipped'
   | 'blockSelected'
-  | 'freeformBlockSelected'
-  | 'twoOrMoreFreeform'
-  | 'threeOrMoreFreeform'
   | 'canBringForward'
   | 'canBringToFront'
   | 'canSendBackward'
@@ -135,7 +218,30 @@ export type MenuPredicate =
   /* the toolbar tails (toolbar-tails.ts): a box (the one text family block with a fill), a block that holds a picture, and a control that never takes input */
   | 'boxSelected'
   | 'pictureBlockSelected'
-  | 'never';
+  | 'never'
+  /* round two (SPEC-2 4.1, section 1): the objects of the canvas (every top level block of every
+     slide kind; the first pick converts a grammar slide), groups, cell ranges, edited pictures,
+     runs, list levels, border fields, the deck's guides and the ruler */
+  | 'objectSelected'
+  | 'twoOrMore'
+  | 'threeOrMore'
+  | 'rotatable'
+  | 'canGroup'
+  | 'groupSelected'
+  | 'canRegroup'
+  | 'cellRangeSelected'
+  | 'mergedCellSelected'
+  | 'imageEdited'
+  | 'chartSelected'
+  | 'runSelected'
+  | 'listLevelUp'
+  | 'listLevelDown'
+  | 'hasBorderField'
+  | 'spaceBeforeSet'
+  | 'spaceAfterSet'
+  | 'hasGuides'
+  | 'rulerShown'
+  | 'coversSheet';
 
 export type MenuCheck = { setting: MenuSetting; value?: string | boolean };
 
@@ -162,8 +268,12 @@ export type MenuItem = {
   doc?: string;
   /** a check item's state; a toggle effect implies its own setting */
   checked?: MenuCheck;
+  /** a toggle drawn as a plain row: the label flips instead of a check mark (Show ruler reads Hide ruler) */
+  plain?: true;
   /** the label while the predicate holds (Skip slide reads Unskip slide) */
   altLabel?: { when: MenuPredicate; label: string };
+  /** the effect while the predicate holds (Change background opens the Replace image submenu on a picture layout); `resolveEffect` reads it */
+  altEffect?: { when: MenuPredicate; effect: MenuEffect };
   /** the underlined letter; `assignAccessKeys` in keys.ts fills it */
   accessKey?: string;
   /** a 1 px rule is drawn above this item */
@@ -269,19 +379,34 @@ const toggle = (setting: MenuSetting, value?: string | boolean): MenuEffect =>
 const client = (handler: MenuClientHandler): MenuEffect => ({ kind: 'client', handler });
 
 // ---------------------------------------------------------------------------------------------
-// Shared clauses (SPEC 12: one clause, no internal noun)
+// Shared clauses (SPEC 12, SPEC-2 12: one clause, no internal noun, no process word)
 
-const COMMENTS_LATER = 'Comments arrive in the next round';
-const GT_ONE_STYLE = 'The GT theme sets Inter in one style';
+const COMMENTS_LATER = 'Leave a note in the speaker notes instead';
 const STILL_SLIDES = 'The GT theme presents still slides';
-const NO_ROTATION = 'Rotation is not part of the GT theme';
-const GRAMMAR_LINES_UP =
-  'Blocks on this layout line up automatically. Choose the Blank layout to place them by hand';
-const NO_BACKGROUND =
-  'This layout has no background. Use Section header, Caption or Closing for a full picture';
+const NUMBERING_STARTS = 'Numbering starts at 1';
+const NO_MEDIA = 'Link to a recording instead';
+const START_FROM_GT = 'Start from the GT brand deck on the home page';
+const DOWNLOAD_FORMATS = 'Only PowerPoint, PDF, text, pictures and the web page download';
 const GOOGLE_SERVICE = 'A Google service';
+/* SPEC-2 12: Edit guides stays Later; a guide is moved by dragging and removed from its right-click menu */
+const GUIDES_BY_HAND = 'Drag a guide to move it and right-click it to delete it';
 
-/** The Replace image sources (SPEC 2.4, 2.5, 2.6): one list drawn in three places. */
+/* the disabled reasons of the object rows (SPEC-2 4.1, section 1): every top level block of every
+   slide kind is an object, so no row is disabled because of the slide's layout */
+const SELECT_OBJECT = 'Select an object on the slide first';
+const SELECT_OBJECTS = 'Select two or more objects on the slide first';
+const SELECT_THREE_OBJECTS = 'Select three or more objects on the slide first';
+const SELECT_BORDERED = 'Select a box, shape, picture, line, table cell or word art first';
+
+/* the sheet is 1600 by 900: a new guide lands at its centre (SPEC-2 6.1 row 30) */
+const SHEET_CENTER_X = 800;
+const SHEET_CENTER_Y = 450;
+
+/**
+ * The Replace image sources (SPEC 2.4, 2.5): the Insert > Image sources as the Format > Image >
+ * Replace image submenu. Change background no longer lists them (SPEC-2 0.74): its dialog inserts
+ * the picture object, which then has its own Replace image.
+ */
 function replaceImageItems(prefix: string): MenuItem[] {
   return [
     now(`${prefix}.upload`, 'Upload from computer', action('asset.add'), { icon: 'photo' }),
@@ -294,6 +419,50 @@ function replaceImageItems(prefix: string): MenuItem[] {
     ),
   ];
 }
+
+/** Google's six dashes (SPEC-2 2.3.3), one row each; the label is the accessible name of the sample. */
+export const DASH_ROWS: ReadonlyArray<{ id: string; label: string }> = [
+  { id: 'solid', label: 'Solid' },
+  { id: 'dot', label: 'Dot' },
+  { id: 'dash', label: 'Dash' },
+  { id: 'dashDot', label: 'Dash dot' },
+  { id: 'longDash', label: 'Long dash' },
+  { id: 'longDashDot', label: 'Long dash dot' },
+];
+
+function dashItems(prefix: string, enabled: MenuPredicate): MenuItem[] {
+  return DASH_ROWS.map(({ id, label }) =>
+    now(`${prefix}.${id}`, label, action('block.set', { dash: id }), { enabled }),
+  );
+}
+
+/** Google's ten line decorations (SPEC-2 2.4.5), one row each under Line start and Line end. */
+export const LINE_END_ROWS: ReadonlyArray<{ id: string; label: string }> = [
+  { id: 'none', label: 'None' },
+  { id: 'fillArrow', label: 'Arrow' },
+  { id: 'stealth', label: 'Stealth arrow' },
+  { id: 'fillCircle', label: 'Circle' },
+  { id: 'fillSquare', label: 'Square' },
+  { id: 'fillDiamond', label: 'Diamond' },
+  { id: 'openArrow', label: 'Open arrow' },
+  { id: 'openCircle', label: 'Open circle' },
+  { id: 'openSquare', label: 'Open square' },
+  { id: 'openDiamond', label: 'Open diamond' },
+];
+
+function lineEndItems(prefix: string, end: 'start' | 'end'): MenuItem[] {
+  return LINE_END_ROWS.map(({ id, label }) =>
+    now(`${prefix}.${id}`, label, action('line.set', { [end]: id }), { enabled: 'lineSelected' }),
+  );
+}
+
+/** A shape category's glyph grid (SPEC-2 4.1): a dynamic submenu whose pick arms the draw tool. */
+const shapeGrid = (category: ShapeCategory): MenuEffect => ({
+  kind: 'submenu',
+  dynamic: 'shapes',
+  category,
+  action: 'block.insert',
+});
 
 // ---------------------------------------------------------------------------------------------
 // 2.0 The title row and 9.1 the Slideshow arrow
@@ -403,7 +572,7 @@ const FILE: Menu = {
       now('file.download.pptx', 'Microsoft PowerPoint (.pptx)', dialog('Download'), {
         doc: 'Perfect by default, or Editable text',
       }),
-      omit('file.download.odp', 'ODP Document (.odp)', 'No ODP writer and no sales demand in R07'),
+      later('file.download.odp', 'ODP Document (.odp)', DOWNLOAD_FORMATS),
       now('file.download.pdf', 'PDF Document (.pdf)', dialog('Download'), {
         doc: 'One slide per page',
       }),
@@ -420,10 +589,10 @@ const FILE: Menu = {
         'PNG image (.png, current slide)',
         action('render.slide', { format: 'png' }),
       ),
-      omit(
+      later(
         'file.download.svg',
         'Scalable Vector Graphics (.svg, current slide)',
-        'The sheet carries rasters; an SVG wrapping rasters misrepresents the file type',
+        DOWNLOAD_FORMATS,
       ),
       now('file.download.html', 'Web page (.html)', action('build.run'), {
         turboslide: true,
@@ -519,8 +688,10 @@ const EDIT: Menu = {
       key: shortcut('Cmd+A'),
       dividerBefore: true,
     }),
-    later('edit.selectNone', 'Select none', 'Press Esc to clear the selection', {
-      key: shortcut('Ctrl+Cmd+U then A', 'Ctrl+Alt+U then A'),
+    /* SPEC-2 0.61: Google's two key sequence stays unbound; the shortcuts dialog lists it greyed */
+    now('edit.selectNone', 'Select none', client('selectNone'), {
+      enabled: 'hasSelection',
+      doc: 'Clears the selection on the slide and in the filmstrip; Esc does the same',
     }),
     now('edit.findReplace', 'Find and replace', dialog('Find and replace'), {
       key: shortcut('Cmd+Shift+H', 'Ctrl+H'),
@@ -555,12 +726,21 @@ const VIEW: Menu = {
       dividerBefore: true,
       doc: 'Every slide as a tile; drag to reorder',
     }),
+    /* SPEC-2 0.81, 0.101: Zoom in and Zoom out step the ladder 25, 50, 75, 100, 125, 150, 200,
+       300, 400, 800, 1600 from the current zoom; the presets and the Zoom box set a value */
     sub('view.zoom', 'Zoom', [
-      now('view.zoom.in', 'Zoom in', client('zoomIn'), { key: shortcut('Cmd+Plus') }),
-      now('view.zoom.out', 'Zoom out', client('zoomOut'), { key: shortcut('Cmd+Minus') }),
+      now('view.zoom.in', 'Zoom in', client('zoomIn'), {
+        key: shortcut('Cmd+Plus'),
+        doc: 'The next step up, to 1600%',
+      }),
+      now('view.zoom.out', 'Zoom out', client('zoomOut'), {
+        key: shortcut('Cmd+Minus'),
+        doc: 'The next step down, to 25%',
+      }),
       now('view.zoom.fit', 'Fit', action('view.zoom', { zoom: 'fit' }), {
         checked: { setting: 'zoom', value: 'fit' },
         dividerBefore: true,
+        doc: 'The whole slide in the window',
       }),
       now('view.zoom.50', '50%', action('view.zoom', { zoom: 50 }), {
         checked: { setting: 'zoom', value: '50' },
@@ -573,25 +753,45 @@ const VIEW: Menu = {
         checked: { setting: 'zoom', value: '200' },
       }),
     ]),
-    later('view.showRuler', 'Show ruler', 'Rulers arrive with indents'),
+    /* SPEC-2 0.77, 6.1 rows 29 and 30: the rulers in inches along the top and left of the stage, and
+       the deck's guides; Google relabels Show ruler rather than checking it */
+    now('view.showRuler', 'Show ruler', toggle('showRuler'), {
+      plain: true,
+      altLabel: { when: 'rulerShown', label: 'Hide ruler' },
+      doc: 'Rulers in inches along the top and left of the slide; drag out of one to add a guide',
+    }),
     sub('view.guides', 'Guides', [
-      later('view.guides.show', 'Show guides', 'Alignment lines still show while you drag'),
-      later(
+      now('view.guides.show', 'Show guides', toggle('showGuides'), {
+        doc: 'The guides on every slide; they never show when presenting',
+      }),
+      now(
         'view.guides.addVertical',
         'Add vertical guide',
-        'Alignment lines still show while you drag',
+        action('deck.guides', { add: [{ axis: 'x', at: SHEET_CENTER_X }] }),
+        { doc: 'A guide at the centre of the slide; drag it into place' },
       ),
-      later(
+      now(
         'view.guides.addHorizontal',
         'Add horizontal guide',
-        'Alignment lines still show while you drag',
+        action('deck.guides', { add: [{ axis: 'y', at: SHEET_CENTER_Y }] }),
+        { doc: 'A guide at the centre of the slide; drag it into place' },
       ),
-      later('view.guides.edit', 'Edit guides', 'Alignment lines still show while you drag'),
-      later('view.guides.clear', 'Clear guides', 'Alignment lines still show while you drag'),
+      later('view.guides.edit', 'Edit guides', GUIDES_BY_HAND),
+      now('view.guides.clear', 'Clear guides', action('deck.guides', { clear: true }), {
+        enabled: 'hasGuides',
+        disabledReason: 'Add a guide first',
+        doc: 'Removes every guide from the presentation',
+      }),
+      /* 4.3: the right-click menu of a guide line; the shell names the guide under the pointer */
+      now('view.guides.delete', 'Delete guide', action('deck.guides'), {
+        enabled: 'hasGuides',
+        contextOnly: true,
+        doc: 'Removes this guide from every slide',
+      }),
     ]),
     sub('view.snapTo', 'Snap to', [
       now('view.snapTo.guides', 'Guides', toggle('snapGuides'), {
-        doc: 'Edges and centres of the blocks around the one you drag',
+        doc: 'Edges and centres of the other objects, the slide and the guides while you drag',
       }),
       now('view.snapTo.grid', 'Grid', toggle('snapGrid'), { doc: 'The 8 px grid' }),
     ]),
@@ -693,61 +893,89 @@ const INSERT: Menu = {
       icon: 'text',
       doc: 'Click to place a box, or drag to draw one',
     }),
-    omit(
-      'insert.audio',
-      'Audio',
-      'No media primitive; not in the ten tasks; the Perfect export cannot carry it',
-    ),
-    omit(
-      'insert.video',
-      'Video',
-      'No media primitive; not in the ten tasks; the Perfect export cannot carry it',
-    ),
+    later('insert.audio', 'Audio', NO_MEDIA, { icon: 'speaker-wave' }),
+    later('insert.video', 'Video', NO_MEDIA, { icon: 'video-camera' }),
+    /* SPEC-2 4.1: each category is a glyph grid drawn from the shape table; a pick arms the draw
+       tool. The rows under Shapes and Arrows are the legacy presets the draw tools already know;
+       the grid replaces them as the drawn plate once the shell renders it. */
     sub(
       'insert.shape',
       'Shape',
       [
-        sub('insert.shape.shapes', 'Shapes', [
-          now('insert.shape.shapes.rectangle', 'Rectangle', action('block.insert'), {
-            turboslide: true,
-          }),
-          now('insert.shape.shapes.rounded', 'Rounded rectangle', action('block.insert'), {
-            turboslide: true,
-          }),
-          now('insert.shape.shapes.ellipse', 'Ellipse', action('block.insert'), {
-            turboslide: true,
-          }),
-        ]),
-        sub('insert.shape.arrows', 'Arrows', [
-          now('insert.shape.arrows.arrow', 'Arrow', action('block.insert'), { turboslide: true }),
-        ]),
-        later('insert.shape.callouts', 'Callouts', 'Callouts need a pointer handle'),
-        omit('insert.shape.equation', 'Equation', 'Not in the theme’s grammar'),
+        sub(
+          'insert.shape.shapes',
+          'Shapes',
+          [
+            now('insert.shape.shapes.rectangle', 'Rectangle', action('block.insert'), {
+              turboslide: true,
+            }),
+            now('insert.shape.shapes.rounded', 'Rounded rectangle', action('block.insert'), {
+              turboslide: true,
+            }),
+            now('insert.shape.shapes.ellipse', 'Ellipse', action('block.insert'), {
+              turboslide: true,
+            }),
+          ],
+          { effect: shapeGrid('shapes') },
+        ),
+        sub(
+          'insert.shape.arrows',
+          'Arrows',
+          [
+            now('insert.shape.arrows.arrow', 'Arrow', action('block.insert'), {
+              turboslide: true,
+            }),
+          ],
+          { effect: shapeGrid('arrows') },
+        ),
+        now('insert.shape.callouts', 'Callouts', shapeGrid('callouts'), {
+          doc: 'A shape with a pointer you can drag',
+        }),
+        now('insert.shape.equation', 'Equation', shapeGrid('equation'), {
+          doc: 'Plus, minus, multiply, divide, equal and not equal',
+        }),
       ],
       { icon: 'box' },
     ),
-    now('insert.table', 'Table', action('block.insert'), {
-      icon: 'table',
-      doc: 'Pick the columns and rows, up to 20 by 20',
-    }),
+    now(
+      'insert.table',
+      'Table',
+      { kind: 'submenu', dynamic: 'tableGrid', action: 'block.insert' },
+      {
+        icon: 'table',
+        enabled: 'hasSlide',
+        doc: 'Point at the size you want, up to 20 columns by 20 rows',
+      },
+    ),
     sub(
       'insert.chart',
       'Chart',
       [
-        later('insert.chart.bar', 'Bar', 'Use a table for the numbers this quarter'),
-        later('insert.chart.column', 'Column', 'Use a table for the numbers this quarter'),
-        later('insert.chart.line', 'Line', 'Use a table for the numbers this quarter'),
-        later('insert.chart.pie', 'Pie', 'Use a table for the numbers this quarter'),
+        now('insert.chart.bar', 'Bar', action('block.insert', { chart: 'bar' }), {
+          enabled: 'hasSlide',
+        }),
+        now('insert.chart.column', 'Column', action('block.insert', { chart: 'column' }), {
+          enabled: 'hasSlide',
+        }),
+        now('insert.chart.line', 'Line', action('block.insert', { chart: 'line' }), {
+          enabled: 'hasSlide',
+        }),
+        now('insert.chart.pie', 'Pie', action('block.insert', { chart: 'pie' }), {
+          enabled: 'hasSlide',
+        }),
         omit('insert.chart.fromSheets', 'From Sheets', GOOGLE_SERVICE),
       ],
-      { stubReason: 'Use a table for the numbers this quarter' },
+      { icon: 'chart-bar', doc: 'A chart with sample numbers you edit in Format options' },
     ),
-    later('insert.diagram', 'Diagram', 'Diagram shapes arrive in a later round'),
-    omit(
-      'insert.wordArt',
-      'Word art',
-      'The Big number layout and the ladder’s 88 px size are the theme’s answer (R11 A11)',
-    ),
+    now('insert.diagram', 'Diagram', panel('Diagram'), {
+      icon: 'rectangle-group',
+      enabled: 'hasSlide',
+      doc: 'Grid, Hierarchy, Timeline, Process, Relationship or Cycle',
+    }),
+    now('insert.wordArt', 'Word art', client('wordArt'), {
+      enabled: 'hasSlide',
+      doc: 'Type your text and press Enter',
+    }),
     sub(
       'insert.line',
       'Line',
@@ -758,27 +986,34 @@ const INSERT: Menu = {
           turboslide: true,
           doc: 'A hairline across the slot',
         }),
-        omit(
-          'insert.line.elbowConnector',
-          'Elbow Connector',
-          'Not in the theme’s stroke grammar (SPEC 2.1)',
-        ),
-        omit(
-          'insert.line.curvedConnector',
-          'Curved Connector',
-          'Not in the theme’s stroke grammar (SPEC 2.1)',
-        ),
-        omit('insert.line.curve', 'Curve', 'Not in the theme’s stroke grammar (SPEC 2.1)'),
-        omit('insert.line.polyline', 'Polyline', 'Not in the theme’s stroke grammar (SPEC 2.1)'),
-        omit('insert.line.scribble', 'Scribble', 'Not in the theme’s stroke grammar (SPEC 2.1)'),
+        now('insert.line.elbowConnector', 'Elbow connector', action('block.insert'), {
+          google: 'Elbow Connector',
+          enabled: 'hasSlide',
+          doc: 'Turns a corner between two shapes and follows them when they move',
+        }),
+        now('insert.line.curvedConnector', 'Curved connector', action('block.insert'), {
+          google: 'Curved Connector',
+          enabled: 'hasSlide',
+          doc: 'Bends between two shapes and follows them when they move',
+        }),
+        now('insert.line.curve', 'Curve', action('block.insert'), {
+          enabled: 'hasSlide',
+          doc: 'Click each point; double click to finish',
+        }),
+        now('insert.line.polyline', 'Polyline', action('block.insert'), {
+          enabled: 'hasSlide',
+          doc: 'Click each corner; double click to finish',
+        }),
+        now('insert.line.scribble', 'Scribble', action('block.insert'), {
+          enabled: 'hasSlide',
+          doc: 'Draw freehand',
+        }),
       ],
       { icon: 'minus' },
     ),
-    omit(
-      'insert.specialCharacters',
-      'Special characters',
-      'The operating system’s character picker works in the editable run',
-    ),
+    now('insert.specialCharacters', 'Special characters', dialog('Insert special characters'), {
+      doc: 'Arrows, punctuation, currency, math, symbols and emoji, by name',
+    }),
     omit('insert.animation', 'Animation', 'Section 0.5'),
     now('insert.link', 'Link', client('link'), {
       key: shortcut('Cmd+K'),
@@ -799,12 +1034,8 @@ const INSERT: Menu = {
     }),
     now('insert.slideNumbers', 'Slide numbers', dialog('Slide numbers')),
     omit('insert.placeholder', 'Placeholder', 'Theme builder only'),
-    later('insert.templates', 'Templates', 'A sales starter deck arrives in the next round'),
-    omit(
-      'insert.buildingBlocks',
-      'Building blocks',
-      'Table, list and Big number cover the agendas, lists and statistics Google lists',
-    ),
+    later('insert.templates', 'Templates', START_FROM_GT),
+    later('insert.buildingBlocks', 'Building blocks', START_FROM_GT),
     omit('insert.speakerSpotlight', 'Speaker spotlight', 'Meet only'),
     now('insert.icon', 'Icon', action('block.insert'), {
       turboslide: true,
@@ -834,15 +1065,31 @@ const FORMAT: Menu = {
           key: shortcut('Cmd+B'),
           enabled: 'textBlockSelected',
         }),
-        later('format.text.italic', 'Italic', GT_ONE_STYLE, { key: shortcut('Cmd+I') }),
-        later('format.text.underline', 'Underline', GT_ONE_STYLE, { key: shortcut('Cmd+U') }),
-        now('format.text.strikethrough', 'Strikethrough', action('block.set'), {
-          key: shortcut('Cmd+Shift+X', 'Alt+Shift+5'),
-          enabled: 'listItemSelected',
-          disabledReason: 'Strikes through a list item',
+        now('format.text.italic', 'Italic', action('text.style', { mark: 'i' }), {
+          key: shortcut('Cmd+I'),
+          enabled: 'textBlockSelected',
+          icon: 'italic',
         }),
-        omit('format.text.superscript', 'Superscript', 'Not in the type model'),
-        omit('format.text.subscript', 'Subscript', 'Not in the type model'),
+        now('format.text.underline', 'Underline', action('text.style', { mark: 'u' }), {
+          key: shortcut('Cmd+U'),
+          enabled: 'textBlockSelected',
+          icon: 'underline',
+        }),
+        now('format.text.strikethrough', 'Strikethrough', action('text.style', { mark: 's' }), {
+          key: shortcut('Cmd+Shift+X', 'Alt+Shift+5'),
+          enabled: 'textBlockSelected',
+          icon: 'strikethrough',
+          doc: 'Strikes through the selected text, or a whole list item',
+        }),
+        now('format.text.superscript', 'Superscript', action('text.style', { mark: 'sup' }), {
+          key: shortcut('Cmd+.'),
+          enabled: 'textBlockSelected',
+        }),
+        now('format.text.subscript', 'Subscript', action('text.style', { mark: 'sub' }), {
+          key: shortcut('Cmd+,'),
+          enabled: 'textBlockSelected',
+          doc: 'Your browser may take this key; the Format menu has the item',
+        }),
         sub(
           'format.text.size',
           'Size',
@@ -858,7 +1105,31 @@ const FORMAT: Menu = {
           ],
           { dividerBefore: true },
         ),
-        omit('format.text.capitalization', 'Capitalization', 'The copy rules want sentence case'),
+        sub(
+          'format.text.capitalization',
+          'Capitalization',
+          [
+            now(
+              'format.text.capitalization.lower',
+              'lowercase',
+              action('text.case', { mode: 'lower' }),
+              { enabled: 'textBlockSelected' },
+            ),
+            now(
+              'format.text.capitalization.upper',
+              'UPPERCASE',
+              action('text.case', { mode: 'upper' }),
+              { enabled: 'textBlockSelected' },
+            ),
+            now(
+              'format.text.capitalization.title',
+              'Title Case',
+              action('text.case', { mode: 'title' }),
+              { enabled: 'textBlockSelected' },
+            ),
+          ],
+          { enabled: 'textBlockSelected', doc: 'Rewrites the selected text' },
+        ),
       ],
       { icon: 'text' },
     ),
@@ -875,73 +1146,118 @@ const FORMAT: Menu = {
         key: shortcut('Cmd+Shift+R'),
         enabled: 'textBlockSelected',
       }),
-      omit(
-        'format.alignIndent.justified',
-        'Justified',
-        'No justify; the grammar sets ragged right',
-      ),
-      later(
+      now('format.alignIndent.justified', 'Justified', action('block.set'), {
+        key: shortcut('Cmd+Shift+J'),
+        enabled: 'textBlockSelected',
+      }),
+      now(
         'format.alignIndent.increaseIndent',
         'Increase indent',
-        'Indents arrive with list levels',
-        { key: shortcut('Cmd+]'), dividerBefore: true },
+        action('text.indent', { by: 1 }),
+        {
+          key: shortcut('Cmd+]'),
+          enabled: 'textBlockSelected',
+          icon: 'bars-arrow-down',
+          dividerBefore: true,
+          doc: 'Moves the paragraph right, or a list item down a level',
+        },
       ),
-      later(
+      now(
         'format.alignIndent.decreaseIndent',
         'Decrease indent',
-        'Indents arrive with list levels',
-        { key: shortcut('Cmd+[') },
+        action('text.indent', { by: -1 }),
+        {
+          key: shortcut('Cmd+['),
+          enabled: 'textBlockSelected',
+          icon: 'bars-arrow-up',
+          doc: 'Moves the paragraph left, or a list item up a level',
+        },
       ),
-      omit('format.alignIndent.indentationOptions', 'Indentation options', 'No indent model'),
+      later(
+        'format.alignIndent.indentationOptions',
+        'Indentation options',
+        'Set the indent under Text fitting',
+      ),
     ]),
     sub('format.spacing', 'Line & paragraph spacing', [
       now('format.spacing.single', 'Single', action('block.set'), {
         enabled: 'textBlockSelected',
-        doc: 'The tightest line height of the theme',
       }),
       now('format.spacing.1_15', '1.15', action('block.set'), { enabled: 'textBlockSelected' }),
       now('format.spacing.1_5', '1.5', action('block.set'), { enabled: 'textBlockSelected' }),
       now('format.spacing.double', 'Double', action('block.set'), {
         enabled: 'textBlockSelected',
-        doc: 'The widest line height of the theme',
       }),
-      now('format.spacing.custom', 'Custom spacing', panel('Format options'), {
+      now(
+        'format.spacing.addBefore',
+        'Add space before paragraph',
+        action('text.spacing', { before: 8 }),
+        {
+          enabled: 'textBlockSelected',
+          altLabel: { when: 'spaceBeforeSet', label: 'Remove space before paragraph' },
+          dividerBefore: true,
+        },
+      ),
+      now(
+        'format.spacing.addAfter',
+        'Add space after paragraph',
+        action('text.spacing', { after: 8 }),
+        {
+          enabled: 'textBlockSelected',
+          altLabel: { when: 'spaceAfterSet', label: 'Remove space after paragraph' },
+        },
+      ),
+      now('format.spacing.custom', 'Custom spacing', dialog('Custom spacing'), {
         enabled: 'textBlockSelected',
         dividerBefore: true,
+        doc: 'Line spacing, and the space before and after each paragraph',
       }),
     ]),
     sub('format.bulletsNumbering', 'Bullets & numbering', [
-      now('format.bulletsNumbering.numbered', 'Numbered list', action('block.set'), {
-        key: shortcut('Cmd+Shift+7'),
-        enabled: 'textBlockSelected',
-        doc: 'A numbered ruled list',
-      }),
-      now('format.bulletsNumbering.bulleted', 'Bulleted list', action('block.set'), {
-        key: shortcut('Cmd+Shift+8'),
-        enabled: 'textBlockSelected',
-        doc: 'The GT theme draws list bullets as ruled rows',
-      }),
+      now(
+        'format.bulletsNumbering.numbered',
+        'Numbered list',
+        { kind: 'submenu', dynamic: 'numberPresets', action: 'text.list' },
+        {
+          key: shortcut('Cmd+Shift+7'),
+          enabled: 'textBlockSelected',
+          icon: 'numbered-list',
+          doc: 'Six numbering styles; the button and the key apply the first',
+        },
+      ),
+      now(
+        'format.bulletsNumbering.bulleted',
+        'Bulleted list',
+        { kind: 'submenu', dynamic: 'bulletPresets', action: 'text.list' },
+        {
+          key: shortcut('Cmd+Shift+8'),
+          enabled: 'textBlockSelected',
+          icon: 'list-bullet',
+          doc: 'Nine bullet styles; the button and the key apply the first',
+        },
+      ),
       sub(
         'format.bulletsNumbering.listOptions',
         'List options',
         [
-          omit(
+          later(
             'format.bulletsNumbering.listOptions.restart',
             'Restart numbering',
-            'One list per block',
+            NUMBERING_STARTS,
           ),
-          omit(
+          later(
             'format.bulletsNumbering.listOptions.prefixSuffix',
             'Edit prefix and suffix',
-            'Not in the list model',
+            NUMBERING_STARTS,
           ),
-          omit(
+          now(
             'format.bulletsNumbering.listOptions.moreBullets',
             'More bullets',
-            'Ruled rows, no glyphs',
+            dialog('Insert special characters'),
+            { enabled: 'listItemSelected' },
           ),
         ],
-        { omitReason: 'Ruled rows have no list options' },
+        { enabled: 'listItemSelected' },
       ),
     ]),
     sub(
@@ -977,10 +1293,15 @@ const FORMAT: Menu = {
         now('format.table.distributeColumns', 'Distribute columns', action('block.set'), {
           enabled: 'tableCellSelected',
         }),
-        later('format.table.mergeCells', 'Merge cells', 'Merged cells arrive in a later round', {
+        now('format.table.mergeCells', 'Merge cells', action('table.merge'), {
+          enabled: 'cellRangeSelected',
+          disabledReason: 'Select two or more cells first',
           dividerBefore: true,
         }),
-        later('format.table.unmergeCells', 'Unmerge cells', 'Merged cells arrive in a later round'),
+        now('format.table.unmergeCells', 'Unmerge cells', action('table.unmerge'), {
+          enabled: 'mergedCellSelected',
+          disabledReason: 'Select a merged cell first',
+        }),
       ],
       { icon: 'table', dividerBefore: true },
     ),
@@ -988,39 +1309,63 @@ const FORMAT: Menu = {
       'format.image',
       'Image',
       [
-        now('format.image.cropImage', 'Crop image', action('block.set'), {
+        now('format.image.cropImage', 'Crop image', client('cropMode'), {
           enabled: 'imageSelected',
-          doc: 'Crop to the top or the centre',
+          icon: 'viewfinder-circle',
+          doc: 'Drag the handles to crop; press Enter to finish',
         }),
-        omit('format.image.maskImage', 'Mask image', 'Not in the grammar'),
+        now(
+          'format.image.maskImage',
+          'Mask image',
+          { kind: 'submenu', dynamic: 'shapes', action: 'block.mask' },
+          { enabled: 'imageSelected', doc: 'Shows the picture inside a shape' },
+        ),
         sub(
           'format.image.replaceImage',
           'Replace image',
           replaceImageItems('format.image.replaceImage'),
           { enabled: 'imageSelected' },
         ),
-        later('format.image.resetImage', 'Reset image', 'Free cropping arrives first'),
+        now('format.image.resetImage', 'Reset image', action('block.resetImage'), {
+          enabled: 'imageEdited',
+          disabledReason: 'The picture is not cropped, masked or adjusted',
+          icon: 'arrow-uturn-left',
+        }),
         now('format.image.imageOptions', 'Image options', panel('Format options'), {
           enabled: 'imageSelected',
         }),
       ],
       { icon: 'photo' },
     ),
+    /* SPEC-2 0.27, 0.62: Border color and Border weight open the toolbar's pickers anchored to
+       the row and write the block's border, or a word art block's outline */
     sub('format.bordersLines', 'Borders & lines', [
-      now('format.bordersLines.borderColor', 'Border color', action('block.set'), {
-        enabled: 'blockSelected',
+      now('format.bordersLines.borderColor', 'Border color', client('borderColorPicker'), {
+        enabled: 'hasBorderField',
+        disabledReason: SELECT_BORDERED,
       }),
-      now('format.bordersLines.borderWeight', 'Border weight', action('block.set'), {
-        enabled: 'blockSelected',
+      now('format.bordersLines.borderWeight', 'Border weight', client('borderWeightPicker'), {
+        enabled: 'hasBorderField',
+        disabledReason: SELECT_BORDERED,
       }),
-      later('format.bordersLines.borderDash', 'Border dash', 'The GT theme draws solid lines'),
-      now('format.bordersLines.lineStart', 'Line start', action('block.set'), {
-        enabled: 'lineSelected',
-        dividerBefore: true,
-      }),
-      now('format.bordersLines.lineEnd', 'Line end', action('block.set'), {
-        enabled: 'lineSelected',
-      }),
+      sub(
+        'format.bordersLines.borderDash',
+        'Border dash',
+        dashItems('format.bordersLines.borderDash', 'blockSelected'),
+        { enabled: 'blockSelected' },
+      ),
+      sub(
+        'format.bordersLines.lineStart',
+        'Line start',
+        lineEndItems('format.bordersLines.lineStart', 'start'),
+        { enabled: 'lineSelected', dividerBefore: true },
+      ),
+      sub(
+        'format.bordersLines.lineEnd',
+        'Line end',
+        lineEndItems('format.bordersLines.lineEnd', 'end'),
+        { enabled: 'lineSelected' },
+      ),
     ]),
     now('format.formatOptions', 'Format options', panel('Format options'), {
       icon: 'adjustments',
@@ -1038,9 +1383,53 @@ const FORMAT: Menu = {
       contextOnly: true,
       doc: 'The description a screen reader reads',
     }),
-    later('format.textFitting', 'Text fitting', 'Text fitting arrives with autofit', {
+    now('format.textFitting', 'Text fitting', panel('Format options'), {
+      enabled: 'textBlockSelected',
       contextOnly: true,
+      doc: 'Do not autofit, Shrink text on overflow, or Resize shape to fit text',
     }),
+    now('format.dropShadow', 'Drop shadow', panel('Format options'), {
+      enabled: 'blockSelected',
+      contextOnly: true,
+      doc: 'Colour, transparency, angle, distance and blur',
+    }),
+    /* SPEC-2 4.3: the shape and chart right-click menus; Turboslide additions (section 10) */
+    now(
+      'format.changeShape',
+      'Change shape',
+      { kind: 'submenu', dynamic: 'shapes', action: 'shape.set' },
+      { enabled: 'shapeSelected', contextOnly: true, turboslide: true },
+    ),
+    now('format.editData', 'Edit data', panel('Format options'), {
+      enabled: 'chartSelected',
+      contextOnly: true,
+      turboslide: true,
+      doc: 'The categories and series of the chart',
+    }),
+    sub(
+      'format.chartType',
+      'Chart type',
+      [
+        now('format.chartType.bar', 'Bar', action('chart.setKind', { kind: 'bar' }), {
+          enabled: 'chartSelected',
+          turboslide: true,
+        }),
+        now('format.chartType.column', 'Column', action('chart.setKind', { kind: 'column' }), {
+          enabled: 'chartSelected',
+          turboslide: true,
+        }),
+        now('format.chartType.line', 'Line', action('chart.setKind', { kind: 'line' }), {
+          enabled: 'chartSelected',
+          turboslide: true,
+        }),
+        now('format.chartType.pie', 'Pie', action('chart.setKind', { kind: 'pie' }), {
+          enabled: 'chartSelected',
+          turboslide: true,
+          doc: 'Keeps the first series',
+        }),
+      ],
+      { enabled: 'chartSelected', contextOnly: true, turboslide: true },
+    ),
   ],
 };
 
@@ -1092,17 +1481,15 @@ const SLIDE: Menu = {
       ],
       { dividerBefore: true },
     ),
-    sub(
-      'slide.changeBackground',
-      'Change background',
-      replaceImageItems('slide.changeBackground'),
-      {
-        enabled: 'pictureLayout',
-        disabledReason: NO_BACKGROUND,
-        icon: 'photo',
-        dividerBefore: true,
-      },
-    ),
+    /* SPEC-2 0.74, 4.1: one Background dialog on every slide kind; Color writes the fill and
+       Choose image inserts a picture object at the bottom of the stack (the slide converts to the
+       canvas first), so the picture kinds' Replace image submenu of round one retires */
+    now('slide.changeBackground', 'Change background', dialog('Background'), {
+      enabled: 'hasSlide',
+      icon: 'photo',
+      dividerBefore: true,
+      doc: 'A colour or a picture behind the slide',
+    }),
     now(
       'slide.applyLayout',
       'Apply layout',
@@ -1114,9 +1501,13 @@ const SLIDE: Menu = {
       },
     ),
     later('slide.transition', 'Transition', STILL_SLIDES),
-    later('slide.editTheme', 'Edit theme', 'The GT theme is edited in the repository', {
-      dividerBefore: true,
-    }),
+    /* SPEC-2 0.75, 12: the frame, the wordmark and the counter stay theme level until Edit theme */
+    later(
+      'slide.editTheme',
+      'Edit theme',
+      'The footer mark, the slide counter and the rails belong to the GT theme',
+      { dividerBefore: true },
+    ),
     now('slide.changeTheme', 'Change theme', panel('Themes'), { icon: 'swatch' }),
   ],
 };
@@ -1154,39 +1545,47 @@ const ARRANGE: Menu = {
           enabled: 'canSendToBack',
         }),
       ],
-      { icon: 'queue-list', enabled: 'blockSelected' },
+      { icon: 'queue-list', enabled: 'objectSelected', disabledReason: SELECT_OBJECT },
     ),
+    /* SPEC-2 0.80, 4.1: Align is enabled on every slide kind with one object selected (it aligns
+       to the slide) or several (to the selection); the action picks the reference when `to` is
+       absent. The first pick on a grammar slide converts it to the canvas (1.6). */
     sub(
       'arrange.align',
       'Align',
       [
         now('arrange.align.left', 'Left', action('block.align', { edge: 'left' }), {
-          enabled: 'twoOrMoreFreeform',
-          disabledReason: GRAMMAR_LINES_UP,
+          enabled: 'objectSelected',
+          disabledReason: SELECT_OBJECT,
         }),
         now('arrange.align.center', 'Center', action('block.align', { edge: 'center' }), {
-          enabled: 'twoOrMoreFreeform',
-          disabledReason: GRAMMAR_LINES_UP,
+          enabled: 'objectSelected',
+          disabledReason: SELECT_OBJECT,
         }),
         now('arrange.align.right', 'Right', action('block.align', { edge: 'right' }), {
-          enabled: 'twoOrMoreFreeform',
-          disabledReason: GRAMMAR_LINES_UP,
+          enabled: 'objectSelected',
+          disabledReason: SELECT_OBJECT,
         }),
         now('arrange.align.top', 'Top', action('block.align', { edge: 'top' }), {
-          enabled: 'twoOrMoreFreeform',
-          disabledReason: GRAMMAR_LINES_UP,
+          enabled: 'objectSelected',
+          disabledReason: SELECT_OBJECT,
           dividerBefore: true,
         }),
         now('arrange.align.middle', 'Middle', action('block.align', { edge: 'middle' }), {
-          enabled: 'twoOrMoreFreeform',
-          disabledReason: GRAMMAR_LINES_UP,
+          enabled: 'objectSelected',
+          disabledReason: SELECT_OBJECT,
         }),
         now('arrange.align.bottom', 'Bottom', action('block.align', { edge: 'bottom' }), {
-          enabled: 'twoOrMoreFreeform',
-          disabledReason: GRAMMAR_LINES_UP,
+          enabled: 'objectSelected',
+          disabledReason: SELECT_OBJECT,
         }),
       ],
-      { icon: 'columns', enabled: 'twoOrMoreFreeform', disabledReason: GRAMMAR_LINES_UP },
+      {
+        icon: 'columns',
+        enabled: 'objectSelected',
+        disabledReason: SELECT_OBJECT,
+        doc: 'One object lines up with the slide; several line up with each other',
+      },
     ),
     sub(
       'arrange.distribute',
@@ -1196,17 +1595,18 @@ const ARRANGE: Menu = {
           'arrange.distribute.horizontally',
           'Horizontally',
           action('block.distribute', { axis: 'x' }),
-          { enabled: 'threeOrMoreFreeform', disabledReason: GRAMMAR_LINES_UP },
+          { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
         ),
         now(
           'arrange.distribute.vertically',
           'Vertically',
           action('block.distribute', { axis: 'y' }),
-          { enabled: 'threeOrMoreFreeform', disabledReason: GRAMMAR_LINES_UP },
+          { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
         ),
       ],
-      { enabled: 'threeOrMoreFreeform', disabledReason: GRAMMAR_LINES_UP },
+      { enabled: 'threeOrMore', disabledReason: SELECT_THREE_OBJECTS },
     ),
+    /* SPEC-2 0.80: Center on page is block.align against the sheet, on every slide kind */
     sub(
       'arrange.centerOnPage',
       'Center on page',
@@ -1214,41 +1614,73 @@ const ARRANGE: Menu = {
         now(
           'arrange.centerOnPage.horizontally',
           'Horizontally',
-          action('block.align', { edge: 'center', to: 'page' }),
-          { enabled: 'freeformBlockSelected', disabledReason: GRAMMAR_LINES_UP },
+          action('block.align', { edge: 'center', to: 'sheet' }),
+          { enabled: 'objectSelected', disabledReason: SELECT_OBJECT },
         ),
         now(
           'arrange.centerOnPage.vertically',
           'Vertically',
-          action('block.align', { edge: 'middle', to: 'page' }),
-          { enabled: 'freeformBlockSelected', disabledReason: GRAMMAR_LINES_UP },
+          action('block.align', { edge: 'middle', to: 'sheet' }),
+          { enabled: 'objectSelected', disabledReason: SELECT_OBJECT },
         ),
       ],
-      { enabled: 'freeformBlockSelected', disabledReason: GRAMMAR_LINES_UP },
+      { enabled: 'objectSelected', disabledReason: SELECT_OBJECT },
     ),
+    /* SPEC-2 0.2, 0.3, 4.1: rotation, flip and groups on every object of every slide kind */
     sub(
       'arrange.rotate',
       'Rotate',
       [
-        later('arrange.rotate.clockwise', 'Rotate clockwise 90°', NO_ROTATION),
-        later('arrange.rotate.counterClockwise', 'Rotate counter-clockwise 90°', NO_ROTATION),
-        later('arrange.rotate.flipHorizontally', 'Flip horizontally', NO_ROTATION),
-        later('arrange.rotate.flipVertically', 'Flip vertically', NO_ROTATION),
+        now(
+          'arrange.rotate.clockwise',
+          'Rotate clockwise 90°',
+          action('block.rotate', { by: 90 }),
+          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+        ),
+        now(
+          'arrange.rotate.counterClockwise',
+          'Rotate counter-clockwise 90°',
+          action('block.rotate', { by: -90 }),
+          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+        ),
+        now(
+          'arrange.rotate.flipHorizontally',
+          'Flip horizontally',
+          action('block.flip', { axis: 'h' }),
+          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+        ),
+        now(
+          'arrange.rotate.flipVertically',
+          'Flip vertically',
+          action('block.flip', { axis: 'v' }),
+          { enabled: 'rotatable', disabledReason: SELECT_OBJECT },
+        ),
       ],
-      { stubReason: NO_ROTATION, dividerBefore: true },
+      {
+        icon: 'arrow-path',
+        enabled: 'rotatable',
+        disabledReason: SELECT_OBJECT,
+        dividerBefore: true,
+        doc: 'Option and the Left or Right arrow turn the selection by 15 degrees; with Shift, by 1',
+      },
     ),
-    later('arrange.group', 'Group', 'Select several blocks and move them together', {
+    now('arrange.group', 'Group', action('block.group'), {
       key: shortcut('Cmd+Option+G'),
+      icon: 'rectangle-group',
+      enabled: 'canGroup',
+      disabledReason: SELECT_OBJECTS,
       dividerBefore: true,
+      doc: 'Moves, resizes, rotates and formats the objects together',
     }),
-    later('arrange.ungroup', 'Ungroup', 'Select several blocks and move them together', {
+    now('arrange.ungroup', 'Ungroup', action('block.ungroup'), {
       key: shortcut('Cmd+Option+Shift+G'),
+      enabled: 'groupSelected',
+      disabledReason: 'Select a group first',
     }),
-    omit(
-      'arrange.regroup',
-      'Regroup',
-      'R01 could not verify the item on a public page; groups are Later',
-    ),
+    now('arrange.regroup', 'Regroup', action('block.regroup'), {
+      enabled: 'canRegroup',
+      disabledReason: 'Available after Ungroup, while the objects are still on the slide',
+    }),
   ],
 };
 
@@ -1283,7 +1715,11 @@ const TOOLS: Menu = {
     omit('tools.dictionary', 'Dictionary', GOOGLE_SERVICE),
     omit('tools.qaHistory', 'Q&A history', GOOGLE_SERVICE),
     omit('tools.dictateNotes', 'Dictate speaker notes', GOOGLE_SERVICE),
-    later('tools.preferences', 'Preferences', 'Preferences arrive with autofit'),
+    later(
+      'tools.preferences',
+      'Preferences',
+      'Text fitting is set per text box in Format options; the ruler reads inches',
+    ),
     omit(
       'tools.accessibilitySettings',
       'Accessibility settings',
@@ -1405,9 +1841,13 @@ const HELP: Menu = {
     }),
     omit('help.training', 'Training', 'No training site'),
     omit('help.updates', 'Updates', 'No release notes page'),
-    later('help.improve', 'Help Turboslide improve', 'A place for feedback is not chosen yet', {
-      google: 'Help Slides improve',
-    }),
+    /* SPEC-2 0.28: the repository's issue page, in a new tab */
+    now(
+      'help.improve',
+      'Help Turboslide improve',
+      route('https://github.com/Kevin-Liu-01/Turboslide/issues/new', true),
+      { google: 'Help Slides improve', doc: 'Report a problem or ask for something, in a new tab' },
+    ),
     omit('help.privacyPolicy', 'Privacy Policy', 'No policy page'),
     omit('help.termsOfService', 'Terms of Service', 'No terms page'),
     now('help.keyboardShortcuts', 'Keyboard shortcuts', dialog('Keyboard shortcuts'), {
@@ -1461,6 +1901,8 @@ export type ToolbarControl = {
   disabledReason?: string;
   dividerBefore?: true;
   doc?: string;
+  /** a control Google's toolbar does not have (SPEC-2 section 10) */
+  turboslide?: true;
 };
 
 /** Positions 1 to 7 (SPEC 3.1); never collapse. */
@@ -1524,7 +1966,7 @@ export const TOOLBAR_HEAD: ReadonlyArray<ToolbarControl> = [
     text: true,
     status: 'now',
     item: 'view.zoom',
-    doc: 'Fit, 50%, 100%, 200%, or type a value from 25 to 400',
+    doc: 'Fit, 50%, 100%, 200%, or type a value from 25 to 1600',
   },
 ];
 
@@ -1584,9 +2026,9 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     text: true,
     status: 'now',
     item: 'slide.changeBackground',
-    enabled: 'pictureLayout',
-    disabledReason: NO_BACKGROUND,
+    enabled: 'hasSlide',
     dividerBefore: true,
+    doc: 'A colour or a picture behind the slide',
   },
   {
     control: 'toolbar.layout',
@@ -1625,17 +2067,54 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
 // 4.2 and 4.3 The right-click menus
 
 export type ContextTarget =
-  'filmstripCard' | 'emptyCanvas' | 'textBlock' | 'image' | 'tableCell' | 'textSelection';
+  | 'filmstripCard'
+  | 'emptyCanvas'
+  | 'textBlock'
+  | 'image'
+  | 'tableCell'
+  | 'textSelection'
+  /* round two (SPEC-2 4.3): a shape, a line, a group, a chart, a range of table cells and a guide line */
+  | 'shape'
+  | 'line'
+  | 'group'
+  | 'chart'
+  | 'cellRange'
+  | 'guide';
 
-/** A menu item by id, a divider, or an item shown only while a predicate holds. */
+/**
+ * A menu item by id, a divider, or an item (or a divider, `id: DIVIDER`) shown only while a
+ * predicate holds.
+ */
 export type ContextEntry = string | { id: string; when: MenuPredicate };
 
 export const DIVIDER = '-';
 
+/** The clipboard rows every object menu starts with (SPEC 4.3). */
+const OBJECT_CLIPBOARD: ReadonlyArray<ContextEntry> = [
+  'edit.cut',
+  'edit.copy',
+  'edit.paste',
+  'edit.delete',
+  'edit.duplicate',
+];
+
+/** The Arrange rows of an object menu (SPEC 4.3; SPEC-2 4.3 adds Rotate, Group and Ungroup). */
+const OBJECT_ARRANGE: ReadonlyArray<ContextEntry> = [
+  'arrange.order',
+  'arrange.rotate',
+  'arrange.centerOnPage',
+  'arrange.align',
+  'arrange.distribute',
+  'arrange.group',
+  'arrange.ungroup',
+];
+
 /**
- * The right-click menus, in the orders of SPEC 4.2 (the card) and 4.3 (the canvas). Every id is a
- * menu bar item (R07 rule 2), so labels, keys, effects and predicates come from the one table;
- * the label of `edit.delete` reads Delete, as Google's card menu does.
+ * The right-click menus, in the orders of SPEC 4.2 (the card), 4.3 (the canvas) and SPEC-2 4.3
+ * (the shape, line, group, chart, cell range and guide targets). Every id is a menu bar item (R07
+ * rule 2), so labels, keys, effects and predicates come from the one table; the label of
+ * `edit.delete` reads Delete, as Google's card menu does. Every object menu opens on every slide
+ * kind with its rows enabled (SPEC-2 1.1): the first row a person picks converts the slide.
  */
 export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<ContextEntry>>> = {
   filmstripCard: [
@@ -1657,6 +2136,8 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     DIVIDER,
     'insert.comment',
   ],
+  /* opens from the empty sheet and from the workspace around it (SPEC-2 0.100); Guides ▸ is
+     Google's row 7 after Comment (R08 A5, SPEC-2 0.91) */
   emptyCanvas: [
     'edit.paste',
     DIVIDER,
@@ -1671,13 +2152,94 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'slide.transition',
     DIVIDER,
     'insert.comment',
+    DIVIDER,
+    'view.guides',
   ],
   textBlock: [
-    'edit.cut',
-    'edit.copy',
-    'edit.paste',
-    'edit.delete',
-    'edit.duplicate',
+    ...OBJECT_CLIPBOARD,
+    DIVIDER,
+    ...OBJECT_ARRANGE,
+    DIVIDER,
+    'insert.link',
+    'format.textFitting',
+    'format.dropShadow',
+    'format.formatOptions',
+    'format.altText',
+    DIVIDER,
+    'insert.comment',
+  ],
+  image: [
+    ...OBJECT_CLIPBOARD,
+    DIVIDER,
+    'arrange.order',
+    'arrange.rotate',
+    'arrange.group',
+    'arrange.centerOnPage',
+    'arrange.align',
+    DIVIDER,
+    'format.image.replaceImage',
+    'format.image.cropImage',
+    'format.image.maskImage',
+    'format.image.resetImage',
+    'format.image.imageOptions',
+    'format.formatOptions',
+    'format.altText',
+    DIVIDER,
+    'insert.comment',
+    /* SPEC-2 0.100: a picture object covering the sheet at the bottom of the stack leaves no
+       empty sheet to right-click, so Change background and Guides stay one click away */
+    { id: DIVIDER, when: 'coversSheet' },
+    { id: 'slide.changeBackground', when: 'coversSheet' },
+    { id: 'view.guides', when: 'coversSheet' },
+  ],
+  shape: [
+    ...OBJECT_CLIPBOARD,
+    DIVIDER,
+    ...OBJECT_ARRANGE,
+    DIVIDER,
+    'insert.link',
+    'format.textFitting',
+    'format.dropShadow',
+    'format.formatOptions',
+    'format.changeShape',
+    'format.altText',
+    DIVIDER,
+    'insert.comment',
+  ],
+  line: [
+    ...OBJECT_CLIPBOARD,
+    DIVIDER,
+    ...OBJECT_ARRANGE,
+    DIVIDER,
+    'insert.link',
+    'format.dropShadow',
+    'format.formatOptions',
+    'format.bordersLines.lineStart',
+    'format.bordersLines.lineEnd',
+    'format.altText',
+    DIVIDER,
+    'insert.comment',
+  ],
+  group: [
+    'arrange.ungroup',
+    { id: 'arrange.regroup', when: 'canRegroup' },
+    DIVIDER,
+    ...OBJECT_CLIPBOARD,
+    DIVIDER,
+    'arrange.order',
+    'arrange.rotate',
+    'arrange.centerOnPage',
+    'arrange.align',
+    'arrange.distribute',
+    DIVIDER,
+    'format.dropShadow',
+    'format.formatOptions',
+    'format.altText',
+    DIVIDER,
+    'insert.comment',
+  ],
+  chart: [
+    ...OBJECT_CLIPBOARD,
     DIVIDER,
     'arrange.order',
     'arrange.rotate',
@@ -1686,28 +2248,8 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'arrange.distribute',
     'arrange.group',
     DIVIDER,
-    'insert.link',
-    'format.textFitting',
-    'format.formatOptions',
-    { id: 'format.altText', when: 'shapeSelected' },
-    DIVIDER,
-    'insert.comment',
-  ],
-  image: [
-    'edit.cut',
-    'edit.copy',
-    'edit.paste',
-    'edit.delete',
-    'edit.duplicate',
-    DIVIDER,
-    'arrange.order',
-    'arrange.centerOnPage',
-    'arrange.align',
-    DIVIDER,
-    'format.image.replaceImage',
-    'format.image.cropImage',
-    'format.image.resetImage',
-    'format.image.imageOptions',
+    'format.editData',
+    'format.chartType',
     'format.formatOptions',
     'format.altText',
     DIVIDER,
@@ -1725,11 +2267,31 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.table.distributeRows',
     'format.table.distributeColumns',
     'format.table.mergeCells',
+    'format.table.unmergeCells',
     DIVIDER,
     'edit.cut',
     'edit.copy',
     'edit.paste',
     'insert.link',
+    'format.formatOptions',
+  ],
+  cellRange: [
+    'format.table.mergeCells',
+    'format.table.unmergeCells',
+    'format.table.distributeRows',
+    'format.table.distributeColumns',
+    DIVIDER,
+    'format.table.insertRowAbove',
+    'format.table.insertRowBelow',
+    'format.table.insertColumnLeft',
+    'format.table.insertColumnRight',
+    'format.table.deleteRow',
+    'format.table.deleteColumn',
+    'format.table.deleteTable',
+    DIVIDER,
+    'edit.cut',
+    'edit.copy',
+    'edit.paste',
     'format.formatOptions',
   ],
   textSelection: [
@@ -1738,16 +2300,25 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'edit.paste',
     'edit.pasteWithoutFormatting',
     DIVIDER,
+    'format.text.italic',
+    'format.text.underline',
+    'format.text.strikethrough',
+    'format.text.superscript',
+    'format.text.subscript',
+    'format.text.capitalization',
+    DIVIDER,
     'insert.link',
     DIVIDER,
     'format.formatOptions',
   ],
+  /* a right-click on a guide line (R08 A20, SPEC-2 0.91) */
+  guide: ['view.guides.delete', 'view.guides.edit'],
 };
 
 // ---------------------------------------------------------------------------------------------
 // Context and predicates
 
-export type BlockFamily = 'text' | 'shape' | 'image' | 'line' | 'table' | 'other';
+export type BlockFamily = 'text' | 'shape' | 'image' | 'line' | 'table' | 'chart' | 'other';
 
 export type MenuContext = {
   platform: Platform;
@@ -1758,7 +2329,7 @@ export type MenuContext = {
     index: number;
     count: number;
     skipped: boolean;
-    /** the freeform layout; grammar layouts line blocks up by themselves */
+    /** the slide is on the freeform layout already (a canvas, SPEC-2 1.1); no row reads it since every slide converts on its first canvas write */
     freeform: boolean;
     /** Section header, Caption or Closing: the layouts with a full picture */
     pictureLayout: boolean;
@@ -1780,10 +2351,43 @@ export type MenuContext = {
     /** the selected run or block carries a link */
     linked: boolean;
     order: { forward: boolean; backward: boolean; front: boolean; back: boolean };
+    /* round two (SPEC-2 4.1, section 1), every field optional so a context built before merge 1 still reads */
+    /**
+     * The selected blocks are objects of the canvas: top level blocks of any slide kind, a title
+     * or statement slide's field and a plate's block included (SPEC-2 1.1). On when absent, because
+     * everything a person selects on the sheet is one; the route says no for a block nested inside
+     * another. The Arrange, Rotate and Group rows read this and the first pick converts the slide.
+     */
+    object?: boolean;
+    /** every selected block carries a position box already (the slide is a canvas); informational, the rows read `object` */
+    rotatable?: boolean;
+    /** the selected blocks share this group tag */
+    group?: string;
+    /** the editor remembers an ungrouped set whose blocks are still on the slide */
+    regroup?: boolean;
+    /** the selected picture object covers the sheet at the bottom of the stack (SPEC-2 0.100) */
+    coversSheet?: boolean;
+    /** a range of table cells is selected, from (r0, c0) to (r1, c1) */
+    cells?: { r0: number; c0: number; r1: number; c1: number };
+    /** the selected cell is the anchor of merged cells */
+    merged?: boolean;
+    /** the caret selects a range of text, as offsets into the block's text */
+    range?: [number, number];
+    /** the selected picture is cropped, masked or adjusted */
+    imageEdited?: boolean;
+    /** the selected text block carries an outline (word art) */
+    outlined?: boolean;
+    /** the selected list item's level, 1 to 9 */
+    listLevel?: number;
+    /** the selected block's paragraphs carry space before, or after */
+    spaceBefore?: boolean;
+    spaceAfter?: boolean;
   };
   clipboard: 'empty' | 'slides' | 'blocks' | 'text' | 'image';
   history: { undo: boolean; redo: boolean };
   sections: number;
+  /** how many guides the presentation holds (Deck.guides, SPEC-2 2.10); none when absent */
+  guides?: number;
   settings: Readonly<Partial<Record<MenuSetting, boolean | string>>>;
 };
 
@@ -1804,6 +2408,8 @@ export const DEFAULT_MENU_CONTEXT: MenuContext = {
   clipboard: 'empty',
   history: { undo: false, redo: false },
   sections: 1,
+  guides: 0,
+  /* the rulers and the guides start hidden, as Google's do (SPEC-2 6.1 rows 29 and 30) */
   settings: {
     snapGuides: true,
     speakerNotes: true,
@@ -1817,7 +2423,8 @@ export const DEFAULT_MENU_CONTEXT: MenuContext = {
 /** Runs a named predicate. */
 export function evaluate(predicate: MenuPredicate | undefined, ctx: MenuContext): boolean {
   const { slide, selection } = ctx;
-  const freeform = slide?.freeform === true;
+  /* SPEC-2 1.1: every top level block of every slide kind is an object; the route says no only for a nested block */
+  const objects = selection.object !== false;
   switch (predicate) {
     case undefined:
     case 'always':
@@ -1844,12 +2451,6 @@ export function evaluate(predicate: MenuPredicate | undefined, ctx: MenuContext)
       return slide?.skipped === true;
     case 'blockSelected':
       return selection.blocks >= 1;
-    case 'freeformBlockSelected':
-      return freeform && selection.blocks >= 1;
-    case 'twoOrMoreFreeform':
-      return freeform && selection.blocks >= 2;
-    case 'threeOrMoreFreeform':
-      return freeform && selection.blocks >= 3;
     case 'canBringForward':
       return selection.blocks >= 1 && selection.order.forward;
     case 'canBringToFront':
@@ -1882,6 +2483,54 @@ export function evaluate(predicate: MenuPredicate | undefined, ctx: MenuContext)
       return selection.blocks === 1 && selection.picture === true;
     case 'never':
       return false;
+    /* round two (SPEC-2 4.1, 0.80, 0.83): the object rows read `object`, never the layout, so a
+       grammar slide's block enables them and the first pick converts the slide (1.6) */
+    case 'objectSelected':
+    case 'rotatable':
+      return selection.blocks >= 1 && objects;
+    case 'twoOrMore':
+    case 'canGroup':
+      return selection.blocks >= 2 && objects;
+    case 'threeOrMore':
+      return selection.blocks >= 3 && objects;
+    case 'groupSelected':
+      return selection.blocks >= 1 && selection.group !== undefined;
+    case 'canRegroup':
+      return selection.regroup === true;
+    case 'cellRangeSelected':
+      return selection.tableCell && selection.cells !== undefined;
+    case 'mergedCellSelected':
+      return selection.tableCell && selection.merged === true;
+    case 'imageEdited':
+      return selection.block === 'image' && selection.imageEdited === true;
+    case 'coversSheet':
+      return selection.block === 'image' && selection.coversSheet === true;
+    case 'hasGuides':
+      return (ctx.guides ?? 0) > 0;
+    case 'rulerShown':
+      return ctx.settings.showRuler === true;
+    case 'chartSelected':
+      return selection.block === 'chart';
+    case 'runSelected':
+      return ctx.focus === 'text' && selection.range !== undefined;
+    case 'listLevelUp':
+      return selection.listItem && (selection.listLevel ?? 1) < 9;
+    case 'listLevelDown':
+      return selection.listItem && (selection.listLevel ?? 1) > 1;
+    case 'hasBorderField':
+      return (
+        selection.blocks >= 1 &&
+        (selection.box === true ||
+          selection.block === 'shape' ||
+          selection.block === 'image' ||
+          selection.block === 'line' ||
+          selection.tableCell ||
+          selection.outlined === true)
+      );
+    case 'spaceBeforeSet':
+      return selection.spaceBefore === true;
+    case 'spaceAfterSet':
+      return selection.spaceAfter === true;
   }
 }
 
@@ -1890,8 +2539,20 @@ export function isEnabled(item: MenuItem, ctx: MenuContext): boolean {
   return item.status === 'now' && evaluate(item.enabled, ctx);
 }
 
-/** The check state of a check or radio item; undefined for a plain item. */
+/**
+ * The effect an item runs in a context: its `altEffect` while that predicate holds (Change
+ * background opens the Replace image submenu on a picture layout and the Background dialog
+ * elsewhere), else its effect. Every surface that runs or draws an item reads the effect here.
+ */
+export function resolveEffect(item: MenuItem, ctx: MenuContext): MenuEffect | undefined {
+  if (item.altEffect !== undefined && evaluate(item.altEffect.when, ctx))
+    return item.altEffect.effect;
+  return item.effect;
+}
+
+/** The check state of a check or radio item; undefined for a plain item (a `plain` toggle relabels instead). */
 export function isChecked(item: MenuItem, ctx: MenuContext): boolean | undefined {
+  if (item.plain === true) return undefined;
   const check: MenuCheck | undefined =
     item.checked ??
     (item.effect?.kind === 'toggle'
@@ -2021,9 +2682,17 @@ export function contextMenuItems(
       out.push(itemById(entry));
       continue;
     }
-    if (evaluate(entry.when, ctx)) out.push(itemById(entry.id));
+    if (!evaluate(entry.when, ctx)) continue;
+    out.push(entry.id === DIVIDER ? DIVIDER : itemById(entry.id));
   }
   return out;
+}
+
+/** The item ids a right-click menu can draw, conditional entries included and dividers left out. */
+export function contextMenuIds(target: ContextTarget): string[] {
+  return CONTEXT_MENUS[target]
+    .map((entry) => (typeof entry === 'string' ? entry : entry.id))
+    .filter((id) => id !== DIVIDER);
 }
 
 /** The action ids the model names, through `action` effects and dynamic submenus. */

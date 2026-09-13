@@ -3,15 +3,20 @@
 // the header row's display face (weight 500 is a family name, fonts-map.ts), the column fill, the
 // rules as cell borders (the hairline above the first row, the row rule under every row, the ink
 // rule under a header row, no side borders) from the block's weight and the computed colors, the
-// export font map's face and size on every run, and the cell padding as the margin, the top one
-// lifted by the renderer's first-baseline constant (baseline.ts) the way a text box is. The runs
+// export font map's face and size on every run, the exact line pitch as `lineSpacing` on every
+// cell, and the cell padding as the margin, the top one lifted by the renderer's first-baseline
+// constant (baseline.ts) the way a text box is. The runs
 // are the measured lines of each cell (text.ts textRuns: the browser's breaks, paragraph breaks,
 // links), so no renderer rewraps. SPEC 8.2's "never a PPTX table" is scoped to `rows` and `plain`
 // (SPEC 7.9 item 2); the ruled rows construction stays as the fallback the builder takes when the
-// verify loop finds a cell outside the 3 px budget.
+// verify loop finds a cell outside the 3 px budget. Round two (gslides-parity SPEC-2 2.7): a
+// merged cell travels as `rowspan` and `colspan` on its anchor with the covered cells left out of
+// the row arrays, a cell's own fill and border per cell (`type: 'none'` at weight 0, `dash` for
+// the six dashes), the table border's dash on every rule, and the table's rotation, shadow and
+// alt text on the frame.
 import type PptxGenJS from 'pptxgenjs';
 
-import type { SceneTable, SceneTableCell, SceneText } from '../scene/types.ts';
+import type { SceneDash, SceneTable, SceneTableCell, SceneText } from '../scene/types.ts';
 import { PX_PER_IN, pxToIn, pxToPt } from '../units.ts';
 import { firstBaselineShiftPx } from './baseline.ts';
 import { fillProps, lineColor } from './lines.ts';
@@ -23,30 +28,63 @@ export type TableEmitOptions = TextEmitOptions & {
   paperHex: string;
 };
 
-/** A cell border: the measured rule as a solid line in its composite color, or none. */
-export function cellBorder(
-  rule: { color: string; width: number } | undefined,
-  paperHex: string,
-): PptxGenJS.BorderProps {
-  if (!rule || rule.width <= 0) return { type: 'none' };
-  return { type: 'solid', color: lineColor(rule.color, paperHex).color, pt: pxToPt(rule.width) };
+/**
+ * A cell's options with the line pitch: pptxgenjs 4.0.1 declares `TableCellProps` without
+ * `lineSpacing` while its text body writer reads the field from a cell the way it does from a
+ * text box (gen-xml `genXmlTextBody`, `<a:lnSpc><a:spcPts>`), so the writer takes it typed here.
+ */
+export type TableCellOptions = PptxGenJS.TableCellProps & { lineSpacing?: number };
+
+/**
+ * How much less a table cell's top margin gives up than a text box does for the first baseline
+ * shift (baseline.ts), in sheet px. With the text box model alone LibreOffice sets a cell's first
+ * line about a pixel higher than the browser: measured in the render worker image on the
+ * fixture's two tables (32 cells at 16 px on a 23.2 px pitch, `lineSpacing` written), every cell
+ * read dy -1 or -2 against the 1 px budget; a pixel kept lands them on 0 and -1 (b2.md, fix
+ * round). Not applied with `--baseline-target none`.
+ */
+export const CELL_FIRST_BASELINE_PX = 1;
+
+/** pptxgenjs `BorderProps.type` takes solid, dash or none: the six dashes map to dash but solid. */
+function borderType(dash: SceneDash | undefined): 'solid' | 'dash' {
+  return dash === undefined || dash === 'solid' ? 'solid' : 'dash';
 }
 
-/** The four borders of a cell: top on the first row (the hairline above), bottom on every row. */
+/** A cell border: the measured rule as a line in its composite color and dash, or none. */
+export function cellBorder(
+  rule: { color: string; width: number; dash?: SceneDash } | undefined,
+  paperHex: string,
+  dash?: SceneDash,
+): PptxGenJS.BorderProps {
+  if (!rule || rule.width <= 0) return { type: 'none' };
+  return {
+    type: borderType(rule.dash ?? dash),
+    color: lineColor(rule.color, paperHex).color,
+    pt: pxToPt(rule.width),
+  };
+}
+
+/**
+ * The four borders of a cell: top on the first row (the hairline above), bottom on every row; a
+ * cell's own border (SPEC-2 2.7.2) replaces the row's rule under it, `none` at weight 0.
+ */
 export function cellBorders(
   table: SceneTable,
   rowIndex: number,
   paperHex: string,
+  cell?: SceneTableCell,
 ): [PptxGenJS.BorderProps, PptxGenJS.BorderProps, PptxGenJS.BorderProps, PptxGenJS.BorderProps] {
   const row = table.rows[rowIndex];
   const under = row?.header ? (table.headerRule ?? table.rule) : table.rule;
   const none: PptxGenJS.BorderProps = { type: 'none' };
-  return [
-    rowIndex === 0 ? cellBorder(table.rule, paperHex) : none,
-    none,
-    cellBorder(under, paperHex),
-    none,
-  ];
+  const dash = table.border?.dash;
+  const own =
+    cell?.border === 'none'
+      ? none
+      : cell?.border !== undefined
+        ? cellBorder(cell.border, paperHex, dash)
+        : cellBorder(under, paperHex, dash);
+  return [rowIndex === 0 ? cellBorder(table.rule, paperHex, dash) : none, none, own, none];
 }
 
 /**
@@ -62,13 +100,14 @@ export function cellMargin(
   let shift = 0;
   if (text && text.lines.length > 0) {
     const lineHeight = Math.max(...text.lines.map((l) => l.box[3]));
-    shift = firstBaselineShiftPx(
-      text.style.size,
-      lineHeight,
-      options.baseline ?? 'libreoffice',
-      undefined,
-      text.style.mono,
-    );
+    shift =
+      firstBaselineShiftPx(
+        text.style.size,
+        lineHeight,
+        options.baseline ?? 'libreoffice',
+        undefined,
+        text.style.mono,
+      ) - (options.baseline === 'none' ? 0 : CELL_FIRST_BASELINE_PX);
   }
   return [pxToIn(Math.max(0, top - shift)), pxToIn(right), pxToIn(bottom), pxToIn(left)];
 }
@@ -84,14 +123,23 @@ export function tableCell(
   const style = text?.style;
   const family = style ? familyFor(style, options.fontSet) : undefined;
   if (family) options.families.add(family);
-  const cellOptions: PptxGenJS.TableCellProps = {
+  // the exact line pitch on the cell (the text box writes the same lnSpc): without it LibreOffice
+  // lays the cell's lines out at the face's natural height, which puts the first line about 6 px
+  // higher than the browser's line box and the first baseline shift of cellMargin compensates
+  // for (measured in the render worker image on the fixture's two tables, every cell dy -6)
+  const lineHeight =
+    text && text.lines.length > 0 ? Math.max(...text.lines.map((l) => l.box[3])) : undefined;
+  const cellOptions: TableCellOptions = {
     align: cell.align,
     valign: table.valign,
     margin: cellMargin(cell, text, options),
-    border: cellBorders(table, rowIndex, options.paperHex),
+    ...(lineHeight !== undefined ? { lineSpacing: pxToPt(lineHeight) } : {}),
+    border: cellBorders(table, rowIndex, options.paperHex, cell),
     ...(cell.fill !== undefined ? { fill: fillProps(cell.fill, options.paperHex) } : {}),
     ...(family ? { fontFace: family } : {}),
     fontSize: pxToPt(style?.size ?? table.size),
+    ...(cell.rowspan !== undefined && cell.rowspan > 1 ? { rowspan: cell.rowspan } : {}),
+    ...(cell.colspan !== undefined && cell.colspan > 1 ? { colspan: cell.colspan } : {}),
   };
   if (!text || text.lines.length === 0) return { text: '', options: cellOptions };
   // the run options are TextPropsOptions (charSpacing, transparency, hyperlink); pptxgenjs reads
@@ -112,14 +160,20 @@ export function addSceneTable(
   table: SceneTable,
   texts: readonly SceneText[],
   options: TableEmitOptions,
-): { rows: number; columns: number } {
+): { rows: number; columns: number; merged: number; rotated: boolean } {
   const byId = new Map(texts.map((text) => [text.id, text]));
+  let merged = 0;
   const rows: PptxGenJS.TableRow[] = table.rows.map((row, r) =>
-    row.cells.map((cell) => tableCell(table, r, cell, byId.get(cell.textId), options)),
+    row.cells.map((cell) => {
+      if ((cell.rowspan ?? 1) > 1 || (cell.colspan ?? 1) > 1) merged += 1;
+      return tableCell(table, r, cell, byId.get(cell.textId), options);
+    }),
   );
   const colW = table.columns.map((column) => pxToIn(column.w));
   const rowH = table.rows.map((row) => pxToIn(row.h));
   const [x, y] = table.box;
+  // pptxgenjs's TableProps carry no rotate, shadow or altText (4.0.1 declarations): a rotated
+  // table travels upright at its box and the residual says so (the builder reads `rotated`)
   slide.addTable(rows, {
     x: pxToIn(x),
     y: pxToIn(y),
@@ -129,9 +183,14 @@ export function addSceneTable(
     rowH,
     margin: 0,
     fontSize: pxToPt(table.size),
-    objectName: `${options.namePrefix}#${table.blockId}`,
+    objectName: `${options.namePrefix}#${table.blockId}${table.userGroup ? `@g:${table.userGroup}` : ''}`,
   });
-  return { rows: table.rows.length, columns: table.columns.length };
+  return {
+    rows: table.rows.length,
+    columns: table.columns.length,
+    merged,
+    rotated: table.rotate !== undefined && table.rotate !== 0,
+  };
 }
 
 /** The sheet px per inch, for a caller sizing against the measured grid. */

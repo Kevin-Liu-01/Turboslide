@@ -8,6 +8,7 @@ import type { DeckDocument, Finding, RuleId } from './contracts.ts';
 import { createContext } from './context.ts';
 import type { LintOptions } from './context.ts';
 import { checkAssets } from './static/asset.ts';
+import { checkCharts } from './static/chart.ts';
 import { checkColor } from './static/color.ts';
 import { checkCopy } from './static/copy.ts';
 import { checkDia } from './static/dia.ts';
@@ -49,6 +50,7 @@ export function lintStatic(input: DeckDocument, options: LintOptions = {}): Find
     ...checkIcons(ctx),
     ...checkRows(ctx),
     ...checkTables(ctx),
+    ...checkCharts(ctx),
     ...checkDia(ctx),
     ...checkAssets(ctx),
     ...checkPictures(ctx),

@@ -117,6 +117,7 @@
                                     ]
                                   }
                                 },
+                                "alt": "The mark at 128, 64, 32, 24 and 16 pixels on one baseline",
                                 "type": "dia",
                                 "fit": {
                                   "viewBox": [
@@ -126,8 +127,7 @@
                                     160
                                   ]
                                 },
-                                "svg": "<svg class=\"dia bench\" viewBox=\"0 0 639 160\" aria-label=\"The mark at 128, 64, 32, 24 and 16 pixels on one baseline\">\n              <line class=\"hair\" stroke-width=\"1\" x1=\"0\" y1=\"128.5\" x2=\"639\" y2=\"128.5\"></line>\n              <use href=\"#gt-mark\" x=\"0\" y=\"0\" width=\"201\" height=\"128\"></use>\n              <use href=\"#gt-mark\" x=\"233\" y=\"64\" width=\"101\" height=\"64\"></use>\n              <use href=\"#gt-mark\" x=\"366\" y=\"96\" width=\"50\" height=\"32\"></use>\n              <use href=\"#gt-mark\" x=\"448\" y=\"104\" width=\"38\" height=\"24\"></use>\n              <use href=\"#gt-mark\" x=\"518\" y=\"112\" width=\"25\" height=\"16\"></use>\n              <text x=\"100\" y=\"156\" text-anchor=\"middle\">128px</text>\n              <text x=\"283\" y=\"156\" text-anchor=\"middle\">64px</text>\n              <text x=\"391\" y=\"156\" text-anchor=\"middle\">32px</text>\n              <text x=\"467\" y=\"156\" text-anchor=\"middle\">24px</text>\n              <text x=\"530\" y=\"156\" text-anchor=\"middle\">16px</text>\n            </svg>",
-                                "alt": "The mark at 128, 64, 32, 24 and 16 pixels on one baseline"
+                                "svg": "<svg class=\"dia bench\" viewBox=\"0 0 639 160\" aria-label=\"The mark at 128, 64, 32, 24 and 16 pixels on one baseline\">\n              <line class=\"hair\" stroke-width=\"1\" x1=\"0\" y1=\"128.5\" x2=\"639\" y2=\"128.5\"></line>\n              <use href=\"#gt-mark\" x=\"0\" y=\"0\" width=\"201\" height=\"128\"></use>\n              <use href=\"#gt-mark\" x=\"233\" y=\"64\" width=\"101\" height=\"64\"></use>\n              <use href=\"#gt-mark\" x=\"366\" y=\"96\" width=\"50\" height=\"32\"></use>\n              <use href=\"#gt-mark\" x=\"448\" y=\"104\" width=\"38\" height=\"24\"></use>\n              <use href=\"#gt-mark\" x=\"518\" y=\"112\" width=\"25\" height=\"16\"></use>\n              <text x=\"100\" y=\"156\" text-anchor=\"middle\">128px</text>\n              <text x=\"283\" y=\"156\" text-anchor=\"middle\">64px</text>\n              <text x=\"391\" y=\"156\" text-anchor=\"middle\">32px</text>\n              <text x=\"467\" y=\"156\" text-anchor=\"middle\">24px</text>\n              <text x=\"530\" y=\"156\" text-anchor=\"middle\">16px</text>\n            </svg>"
                               }
                             ]
                           },

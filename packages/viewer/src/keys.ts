@@ -100,10 +100,11 @@ export function keyAction(e: KeyLike, ctx: KeyContext): KeyAction | null {
 // The editor's stage keys (gslides-parity SPEC 10.1, 10.2)
 
 /**
- * What the editor's stage reads before it resolves a key: whether a block is selected, whether
- * the slide is on the freeform layout (the arrows nudge there and are inert on a grammar slide),
- * whether a text run is being edited (InlineText owns every key then) and whether the event
- * target is a field or a chrome control (that control's keys win).
+ * What the editor's stage reads before it resolves a key: whether an object is selected, whether
+ * the slide is a canvas already (informational since gslides-parity SPEC-2 0.87: the arrows nudge
+ * on every slide kind and the first nudge converts), whether a text run is being edited
+ * (InlineText owns every key then) and whether the event target is a field or a chrome control
+ * (that control's keys win).
  */
 export type EditorKeyContext = {
   selected: boolean;
@@ -112,6 +113,10 @@ export type EditorKeyContext = {
   editable: boolean;
   /** Apple platforms read Cmd; the others Ctrl */
   apple: boolean;
+  /** two or more objects are selected: Cmd+Option+G groups them */
+  several?: boolean;
+  /** the selection is a group: Cmd+Option+Shift+G ungroups it */
+  grouped?: boolean;
 };
 
 export type EditorKeyLike = KeyLike & { shiftKey?: boolean };
@@ -133,21 +138,36 @@ export type EditorKeyAction =
   | { type: 'link' }
   | { type: 'bold' }
   | { type: 'paintCopy' }
-  | { type: 'paintPaste' };
-
-/** Arrow nudges on a freeform slide: one pixel, eight with Shift (SPEC 10.1). */
-export const NUDGE_PX = 1;
-export const NUDGE_SHIFT_PX = 8;
+  | { type: 'paintPaste' }
+  /* round two (gslides-parity SPEC-2 section 9) */
+  | { type: 'rotate'; by: number }
+  | { type: 'group' }
+  | { type: 'ungroup' }
+  | { type: 'mark'; mark: 'i' | 'u' | 's' | 'sup' | 'sub' }
+  | { type: 'indent'; by: 1 | -1 };
 
 /**
- * The stage's key table (SPEC 10.1 "Move and arrange objects", 10.2): Esc leaves the mode,
- * Enter starts editing, Delete and Backspace remove, Tab and Shift Tab walk the blocks, the
- * arrows nudge on a freeform slide and are inert on a grammar slide, Cmd D duplicates, Cmd A
- * selects every block, Cmd X, C and V are the clipboard (Shift V pastes plain), Cmd Up and Down
- * order (Shift for front and back), Cmd K is the link, Cmd B the weight, Cmd Option C and V the
- * paint format. No bare letter, digit, Space or Shift letter does anything (SPEC 0.28): the
- * table returns null for every one of them, in every state, and editor-keys.test.ts asserts it.
- * Inside a field, a chrome control or an editing session the stage yields (null).
+ * Arrow nudges on every slide kind: one pixel, ten with Shift (gslides-parity SPEC-2 0.87,
+ * Google's "larger increment" read as 10; the round one 8 px grid step retires).
+ */
+export const NUDGE_PX = 1;
+export const NUDGE_SHIFT_PX = 10;
+/** Option+Left and Option+Right rotate 15 degrees, one with Shift (R04 B7, SPEC-2 0.78). */
+export const ROTATE_KEY_DEG = 15;
+export const ROTATE_KEY_FINE_DEG = 1;
+
+/**
+ * The stage's key table (SPEC 10.1 "Move and arrange objects", 10.2; gslides-parity SPEC-2
+ * section 9): Esc leaves the mode, Enter starts editing, Delete and Backspace remove, Tab and
+ * Shift Tab walk the objects, the arrows nudge 1 px and 10 px with Shift on every slide kind, Cmd
+ * D duplicates, Cmd A selects every object, Cmd X, C and V are the clipboard (Shift V pastes
+ * plain), Cmd Up and Down order (Shift for front and back), Cmd K is the link, Cmd B the weight,
+ * Cmd I, U, Shift X, period and comma the marks over a selected object's text, Cmd ] and [ the
+ * indents, Option Left and Right rotate 15 degrees (1 with Shift; Cmd Option Left and Right as
+ * aliases), Cmd Option G and Cmd Option Shift G group and ungroup, Cmd Option C and V the paint
+ * format. No bare letter, digit, Space or Shift letter does anything (SPEC 0.28): the table
+ * returns null for every one of them, in every state, and editor-keys.test.ts asserts it. Inside
+ * a field, a chrome control or an editing session the stage yields (null).
  */
 export function editorKeyAction(e: EditorKeyLike, ctx: EditorKeyContext): EditorKeyAction | null {
   if (ctx.editable || ctx.editing) return null;
@@ -160,11 +180,34 @@ export function editorKeyAction(e: EditorKeyLike, ctx: EditorKeyContext): Editor
     const low = key.toLowerCase();
     if (low === 'c') return ctx.selected ? { type: 'paintCopy' } : null;
     if (low === 'v') return ctx.selected ? { type: 'paintPaste' } : null;
+    /* Group Cmd+Option+G, Ungroup Cmd+Option+Shift+G (R04 B7, SPEC-2 section 9) */
+    if (low === 'g' && ctx.selected) return shift ? { type: 'ungroup' } : { type: 'group' };
+    /* Cmd+Option+Left and Right: the 15 degree aliases when the browser lets them through (0.78) */
+    if (key === 'ArrowLeft' && ctx.selected) return { type: 'rotate', by: -ROTATE_KEY_DEG };
+    if (key === 'ArrowRight' && ctx.selected) return { type: 'rotate', by: ROTATE_KEY_DEG };
+    return null;
+  }
+  if (alt && !meta && !otherMod && ctx.selected) {
+    /* Google's rotate keys: Option+Left and Right 15 degrees, with Shift 1 degree (R04 B7, G1) */
+    const step = shift ? ROTATE_KEY_FINE_DEG : ROTATE_KEY_DEG;
+    if (key === 'ArrowLeft') return { type: 'rotate', by: -step };
+    if (key === 'ArrowRight') return { type: 'rotate', by: step };
     return null;
   }
   if (alt || otherMod) return null;
   if (meta) {
     const low = key.toLowerCase();
+    /* the marks with an object selected and no caret apply to the whole text (SPEC-2 section 9) */
+    if (ctx.selected) {
+      if (low === 'i' && !shift) return { type: 'mark', mark: 'i' };
+      if (low === 'u' && !shift) return { type: 'mark', mark: 'u' };
+      if (low === 'x' && shift) return { type: 'mark', mark: 's' };
+      if (key === '.' && !shift) return { type: 'mark', mark: 'sup' };
+      if (key === ',' && !shift) return { type: 'mark', mark: 'sub' };
+      /* Increase and Decrease indent, Chrome's Forward and Back on macOS (0.55) */
+      if (key === ']') return { type: 'indent', by: 1 };
+      if (key === '[') return { type: 'indent', by: -1 };
+    }
     switch (low) {
       case 'd':
         return ctx.selected && !shift ? { type: 'duplicate' } : null;
@@ -202,7 +245,7 @@ export function editorKeyAction(e: EditorKeyLike, ctx: EditorKeyContext): Editor
     case 'ArrowDown':
     case 'ArrowLeft':
     case 'ArrowRight': {
-      if (!ctx.freeform) return { type: 'inert' };
+      /* every slide kind nudges (SPEC-2 0.87); the first nudge on a grammar slide converts it */
       const step = shift ? NUDGE_SHIFT_PX : NUDGE_PX;
       const dx = key === 'ArrowRight' ? step : key === 'ArrowLeft' ? -step : 0;
       const dy = key === 'ArrowDown' ? step : key === 'ArrowUp' ? -step : 0;

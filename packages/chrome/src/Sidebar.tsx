@@ -71,6 +71,22 @@ export type SidebarEdit = {
   clipboard?: ClipboardStore;
   /** the deck id the clipboard payloads carry */
   deckId?: string;
+  /**
+   * The filmstrip's handle (gslides-parity SPEC-2 8.6, 0.30, 0.61): Edit > Select all with the
+   * filmstrip focused selects every card, Edit > Select none clears the multi selection. Called
+   * with the handle on mount and null on unmount.
+   */
+  registerHandle?: (handle: FilmstripHandle | null) => void;
+};
+
+/** What the filmstrip exposes to the shell and the route (SPEC-2 8.6). */
+export type FilmstripHandle = {
+  /** selects every card */
+  selectAll: () => void;
+  /** clears the multi selection back to the current card */
+  selectNone: () => void;
+  /** the selected card ids in deck order */
+  selected: () => string[];
 };
 
 /** Where the reader's folds live: one key per shell holding a JSON map of section id to open or closed. */
@@ -608,9 +624,19 @@ export type SidebarProps = {
 export function Sidebar(props: SidebarProps) {
   const { edit } = props;
   const settings = useFilmstripSettings(edit);
+  const shellState = useContext(EditorShellContext);
   if (edit !== undefined && settings?.sectionsTree !== true) {
+    /* the shell reads the handle for Edit > Select all and Select none when the route passes none (SPEC-2 8.6) */
+    const registerHandle = edit.registerHandle ?? shellState?.registerFilmstrip;
     return (
-      <Filmstrip {...props} edit={{ ...edit, ...(settings === undefined ? {} : { settings }) }} />
+      <Filmstrip
+        {...props}
+        edit={{
+          ...edit,
+          ...(settings === undefined ? {} : { settings }),
+          ...(registerHandle === undefined ? {} : { registerHandle }),
+        }}
+      />
     );
   }
   return <TreeSidebar {...props} />;
@@ -1329,6 +1355,22 @@ function Filmstrip({
     // the selection follows the current card; setSelection reads refs
   }, [active]);
 
+  /* the handle the shell reads for Edit > Select all and Select none (SPEC-2 8.6, 0.61) */
+  const orderRef = useRef(order);
+  orderRef.current = order;
+  const registerRef = useRef(edit.registerHandle);
+  registerRef.current = edit.registerHandle;
+  useEffect(() => {
+    const handle: FilmstripHandle = {
+      selectAll: () => setSelection([...orderRef.current]),
+      selectNone: () => setSelection(active ? [active] : []),
+      selected: () => [...selectedRef.current],
+    };
+    registerRef.current?.(handle);
+    return () => registerRef.current?.(null);
+    // setSelection reads refs; the handle is stable for the mount
+  }, [active]);
+
   /* the parity facts per card: from the document when the page passes it, else slide.list */
   const [rows, setRows] = useState<ReadonlyMap<string, { skip?: boolean; template?: string }>>(
     new Map(),
@@ -1474,11 +1516,16 @@ function Filmstrip({
     await (edit.clipboard ?? clipboardStore).write(payload);
   };
 
-  const removeSlides = (ids: string[]) => {
+  /**
+   * Removes the cards; `quiet` for Cut (SPEC-2 0.30, R08 A24: Google's Cut shows no snackbar and
+   * Undo stays on Cmd+Z), the snackbar with Undo for Delete.
+   */
+  const removeSlides = (ids: string[], quiet = false) => {
     const ordered = order.filter((id) => ids.includes(id));
     if (ordered.length === 0) return;
     for (const id of ordered) void dispatch('slide.remove', { slideId: id }).catch(() => undefined);
     const count = ordered.length;
+    if (quiet) return;
     if (edit.snack && edit.undo) {
       const undoAll = edit.undo;
       edit.snack(count === 1 ? SNACKBARS.slideDeleted : SNACKBARS.slidesDeleted(count), {
@@ -1738,7 +1785,7 @@ function Filmstrip({
     const last = ids[ids.length - 1] ?? anchorId;
     switch (item.id) {
       case 'edit.cut':
-        void copySlides(ids).then(() => removeSlides(ids));
+        void copySlides(ids).then(() => removeSlides(ids, true));
         return;
       case 'edit.copy':
         void copySlides(ids);

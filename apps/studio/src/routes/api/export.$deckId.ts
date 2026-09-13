@@ -21,6 +21,14 @@ import {
   runSyncExport,
 } from '../../server/export-sync';
 import type { SyncExportInput } from '../../server/export-sync';
+import {
+  batchedJobFile,
+  cancelBatchedExport,
+  exportBatch,
+  isJobId,
+  mergeExport,
+  startBatchedExport,
+} from '../../server/export-batch';
 import { ensureDeckAssets, isHosted, workerClientOptions } from '../../server/root';
 
 // POST /api/export/:deckId enqueues an export job on the render worker and answers 202 with the job
@@ -59,6 +67,18 @@ import { ensureDeckAssets, isHosted, workerClientOptions } from '../../server/ro
 // materialized (server/root.ts ensureDecks) before any job runs, so a cold function whose first
 // request is an export finds the deck.
 //
+// The batched Perfect export (gslides-parity SPEC-2 8.1; server/export-batch.ts), the http form
+// of export.run's `batch` and `merge` so an agent can drive what the Download dialog drives:
+// `POST ?start=1` with the export.run body answers `{ jobId, revision, batches, batchSize, total }`
+// (the plan, the old jobs pruned); `POST ?batch=<i>&job=<id>` renders one batch into the job and
+// answers `{ index, slides, ms }` or `{ stale: 'revision' | 'asset' }`; `POST ?merge=<id>` builds
+// the file from the stored parts and answers the JSON variant's body plus `peakMb`; `POST
+// ?cancel=<id>` deletes the job. A body carrying `batch: { index, of, jobId }` or `merge: { jobId }`
+// (the action's fields) is the same as the query form. `GET ?job=<id>&file=<name>` serves a
+// batched job's file from the part store before it asks the worker's job folder. The cancel form
+// needs no bearer: the job id is unguessable and the page sends it from `pagehide` with
+// `keepalive`, where it cannot carry a header (SPEC-2 0.45).
+//
 // Authentication (SPEC 11): TURBOSLIDE_TOKEN, when set, is required as `Authorization: Bearer
 // <token>` on every request here; unset (a checkout), the route is open. The editor never fetches
 // this route: its export runs through the syncExport server function of server/download.ts (the
@@ -80,13 +100,14 @@ function worker(): WorkerClient {
   return client;
 }
 
-/** GET ?job=<id>&file=<name>: a produced file from this instance's job folder. */
-async function jobFile(jobId: string, name: string): Promise<Response> {
+/** GET ?job=<id>&file=<name>: a produced file from the batched job's store, else this instance's job folder. */
+async function jobFile(deckId: string, jobId: string, name: string): Promise<Response> {
   if (!/^[a-z0-9-]+$/.test(jobId)) return badRequest('job must be a job id');
   if (!/^[A-Za-z0-9._-]+$/.test(name) || name.startsWith('.'))
     return badRequest('file must be a name');
   try {
-    const data = await worker().readJobFile(jobId, `export/${name}`);
+    const batched = await batchedJobFile(deckId, jobId, name);
+    const data = batched?.data ?? (await worker().readJobFile(jobId, `export/${name}`));
     return new Response(data, {
       headers: {
         'cache-control': 'no-store',
@@ -135,6 +156,78 @@ function unauthorized(request: Request): Response | null {
 
 function badRequest(message: string): Response {
   return Response.json({ error: { message, status: 400 } }, { status: 400 });
+}
+
+/** A batch step's error as the route answers it: 404 for a missing deck or job, 400 for a bad input, 502 otherwise. */
+function batchError(error: unknown): Response {
+  const message = error instanceof Error ? error.message : String(error);
+  const status = error instanceof RangeError ? 404 : error instanceof TypeError ? 400 : 502;
+  return Response.json({ error: { message, status } }, { status });
+}
+
+type BatchField = { index: number; of: number; jobId: string } | undefined;
+type MergeField = { jobId: string } | undefined;
+
+/**
+ * The batch forms of a POST (the module comment): the query's `start`, `batch` and `job`,
+ * `merge` and `cancel`, or the body's `batch` and `merge` fields. Null when the request is a
+ * plain export.
+ */
+async function batchedPost(
+  deckId: string,
+  url: URL,
+  fields: Record<string, unknown>,
+): Promise<Response | null> {
+  const query = (name: string) => url.searchParams.get(name);
+  const bodyBatch = fields.batch as BatchField;
+  const bodyMerge = fields.merge as MergeField;
+  const cancel = query('cancel');
+  if (cancel !== null) {
+    if (!isJobId(cancel)) return badRequest('cancel must name a job id');
+    try {
+      return Response.json(await cancelBatchedExport(deckId, cancel));
+    } catch (error) {
+      return batchError(error);
+    }
+  }
+  const merge = query('merge') ?? bodyMerge?.jobId;
+  if (merge !== undefined) {
+    if (!isJobId(merge)) return badRequest('merge must name a job id');
+    try {
+      return Response.json(await mergeExport(deckId, merge), {
+        headers: { 'cache-control': 'no-store', 'x-turboslide-sync': 'batched' },
+      });
+    } catch (error) {
+      return batchError(error);
+    }
+  }
+  const batch = query('batch');
+  const job = query('job');
+  if (batch !== null || bodyBatch !== undefined) {
+    const index = batch !== null ? Number(batch) : bodyBatch?.index;
+    const jobId = job ?? bodyBatch?.jobId;
+    if (index === undefined || !Number.isInteger(index) || index < 0)
+      return badRequest('batch must be a non negative integer');
+    if (jobId === undefined || !isJobId(jobId)) return badRequest('job must name a job id');
+    try {
+      return Response.json(await exportBatch(deckId, jobId, index, bodyBatch?.of), {
+        headers: { 'cache-control': 'no-store', 'x-turboslide-sync': 'batched' },
+      });
+    } catch (error) {
+      return batchError(error);
+    }
+  }
+  if (query('start') === '1') {
+    const { batch: _b, merge: _m, ...input } = fields;
+    try {
+      return Response.json(await startBatchedExport(deckId, input), {
+        headers: { 'cache-control': 'no-store', 'x-turboslide-sync': 'batched' },
+      });
+    } catch (error) {
+      return batchError(error);
+    }
+  }
+  return null;
 }
 
 type ExportInput = SyncExportInput & { out?: string };
@@ -211,7 +304,9 @@ export const Route = createFileRoute('/api/export/$deckId')({
   server: {
     handlers: {
       POST: async ({ params, request }) => {
-        const denied = unauthorized(request);
+        // the page's pagehide cancel carries no header (SPEC-2 0.45); the job id is the capability
+        const cancelling = new URL(request.url).searchParams.get('cancel') !== null;
+        const denied = cancelling ? null : unauthorized(request);
         if (denied) return denied;
         if (!SLUG_PATTERN.test(params.deckId)) return badRequest('deckId must be a slug');
         const length = Number(request.headers.get('content-length') ?? 0);
@@ -239,6 +334,9 @@ export const Route = createFileRoute('/api/export/$deckId')({
         const url = new URL(request.url);
         // `sync` is the transport's flag, not an export.run field; it leaves before validation
         const { sync: syncFlag, ...fields } = body as Record<string, unknown>;
+        // the batched export's forms (SPEC-2 8.1) answer before the single call path
+        const batched = await batchedPost(params.deckId, url, fields);
+        if (batched !== null) return batched;
         const requested = url.searchParams.get('sync') === '1' || syncFlag === true;
         // hosted, a queued job would outlive the request that could run it (the docblock)
         const sync: SyncMode | null = requested ? 'requested' : isHosted() ? 'hosted' : null;
@@ -273,7 +371,7 @@ export const Route = createFileRoute('/api/export/$deckId')({
         const url = new URL(request.url);
         const jobId = url.searchParams.get('job');
         const file = url.searchParams.get('file');
-        if (jobId && file) return jobFile(jobId, file);
+        if (jobId && file) return jobFile(params.deckId, jobId, file);
         try {
           if (jobId) {
             const job = await worker().job(jobId);

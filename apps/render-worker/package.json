@@ -16,6 +16,7 @@
     "./jobs/sheet": "./src/jobs/sheet.ts",
     "./jobs/export": "./src/jobs/export.ts",
     "./jobs/verify": "./src/jobs/verify.ts",
+    "./jobs/measure": "./src/jobs/measure.ts",
     "./server": "./src/server.ts",
     "./client": "./src/client.ts",
     "./package.json": "./package.json"

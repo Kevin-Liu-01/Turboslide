@@ -252,3 +252,134 @@
   cursor: move;
   touch-action: none;
 }
+
+/* ---- the canvas (gslides-parity SPEC-2 section 6) ---- */
+
+/* the turning layer of a rotated or flipped object: the ring, the frame edges and the handles turn
+   with it, drawn from pos (SPEC-2 1.5); the layer itself takes no pointer, its children do */
+.ts-turn {
+  position: absolute;
+  pointer-events: none;
+}
+
+.ts-turn > .ts-select {
+  position: absolute;
+}
+
+/* the rotation ring: a 12px ring on paper with a hair rule, ink while dragged or hovered, joined
+   to the object's top centre by a 1px hair line drawn through ::after (SPEC-2 6.1 row 11) */
+.ts-handle[data-kind='free-rotate']::before {
+  inset: 0;
+  border: 1px solid var(--pt-hair);
+  border-radius: 50%;
+  background: var(--pt-paper);
+}
+
+.ts-handle[data-kind='free-rotate']::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 1px;
+  height: 18px;
+  margin-left: -0.5px;
+  background: var(--pt-hair);
+  pointer-events: none;
+}
+
+.ts-handle[data-kind='free-rotate'].is-active::before,
+.ts-handle[data-kind='free-rotate']:hover::before {
+  border-color: var(--pt-ink);
+}
+
+.ts-handle[data-kind='free-rotate'].is-active {
+  cursor: grabbing;
+}
+
+/* a line's end handles: the deck's square, ink while dragged */
+.ts-handle[data-kind='line-end']::before {
+  inset: 0;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+}
+
+.ts-handle[data-kind='line-end'].is-active::before,
+.ts-handle[data-kind='line-end']:hover::before {
+  border-color: var(--pt-ink);
+}
+
+/* crop mode (SPEC-2 6.1 row 19): the picture's full extent dimmed under a hair outline, the frame
+   in ink, the eight handles black squares as Google draws them */
+.ts-crop-full {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair);
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+.ts-crop-frame {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-ink);
+  pointer-events: none;
+}
+
+.ts-handle[data-kind='crop-edge']::before {
+  inset: 0;
+  border: 1px solid var(--pt-paper);
+  background: var(--pt-ink);
+}
+
+/* the readouts (SPEC-2 0.86): the size while a resize is down, the angle while a rotation is down */
+.ts-readout {
+  position: absolute;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  font: 500 13px/1 var(--pt-text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* a group's union ring: hair, named for the reader (role="group") */
+.ts-group.is-group {
+  pointer-events: none;
+}
+
+/* a connection site: a 6px ring in ink on paper (SPEC-2 6.2) */
+.ts-site {
+  position: absolute;
+  box-sizing: border-box;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border: 1px solid var(--pt-ink);
+  border-radius: 50%;
+  background: var(--pt-paper);
+  pointer-events: none;
+}
+
+/* the path a Curve or Polyline tool is placing: a hair polyline through the points, ink dots */
+.ts-draw-path {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.ts-draw-path polyline {
+  stroke: var(--pt-hair);
+  stroke-width: 1;
+}
+
+.ts-draw-path circle {
+  fill: var(--pt-ink);
+}

@@ -1,0 +1,51 @@
+/* Insert > Table (pickers/TableGrid.tsx): Google's hover grid as a plate inside the Insert menu
+   (gslides-parity SPEC-2 0.26, 6.2), 20 by 20 cells of 14 px. The cells inside the pointed size
+   fill with the plate colour and take the ink edge; the caption under the grid reads the size
+   ("4 x 3"). One --pt-hair frame around the grid; the cells draw --pt-hair-soft so the grid reads
+   as a grid without a rule under every row. The menu's dynamic plate (.ts-menu.is-dynamic) carries
+   the frame and the padding of the submenu. */
+.ts-tablegrid-plate {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.ts-tablegrid {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 4px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  cursor: pointer;
+}
+
+.ts-tablegrid:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-tablegrid-row {
+  display: flex;
+  gap: 1px;
+}
+
+.ts-tablegrid-cell {
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-hair-soft);
+  background: transparent;
+}
+
+.ts-tablegrid-cell.is-in {
+  border-color: var(--pt-ink);
+  background: var(--pt-plate);
+}
+
+.ts-tablegrid-size {
+  margin: 8px 0 0;
+  color: var(--pt-ink-2);
+  font: 13px/1 var(--pt-text);
+  font-variant-numeric: tabular-nums;
+}

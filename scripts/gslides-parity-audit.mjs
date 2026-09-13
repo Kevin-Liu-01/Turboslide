@@ -34,6 +34,19 @@
 //   7. The default view's text and tooltip names contain none of the words of SPEC 12 outside
 //      Tools > Advanced and the Agent access dialog, on /new, /edit and /decks.
 //   8. `scripts/tooltip-audit.mjs --strict` on the same pages.
+//   9. Round two (docs/gslides-parity/SPEC-2.md sections 4, 5, 6.1 and 9; MILESTONES-2 "Verifier"):
+//      every row section 4.1 flips to Now runs with its observer (the rotate, flip, group,
+//      ungroup, regroup, align, Center on page, mark, capitalization, indent, spacing, list,
+//      line end, dash, chart kind and guide writes are verified on the document after the write
+//      and undone); every dynamic submenu plate renders its tiles (the shape grids, the bullet
+//      and numbering presets, the table hover grid) and a pick writes (a shape pick draws, a
+//      preset pick writes `text.list`, a mask pick writes `block.mask`, a table pick inserts, a
+//      Change shape pick writes `shape.set`); the toolbar tails, the right-click menus and the
+//      Format options sections are read with a text block, a shape, a line, a picture, a table
+//      cell, a chart, a group, a covering picture object and a guide selected (SPEC-2 4.2, 4.3,
+//      5); the object chords of section 9 (rotate, nudge, duplicate, group, Tab, Cmd+A, Delete)
+//      and the text chords on a range (the marks, Justify, the indents) are dispatched as real
+//      keydowns; the words of section 10 are checked while every new dialog and picker is open.
 //
 // The read-only deck (`/edit/gt-brand`) gets steps 2, 4 (default tail), 5 (filmstrip) and 7 with
 // no write. The JSON report (one row per item with pass or fail and the evidence, totals per
@@ -50,6 +63,7 @@ import {
   CONTEXT_MENUS,
   DEFAULT_MENU_CONTEXT,
   DIVIDER,
+  GS2_ACTION_IDS,
   MENUS,
   TITLE_ROW_ITEMS,
   TOOLBAR_HEAD,
@@ -100,24 +114,25 @@ const USE_DECK = value('deck');
 const TRASH_USED_DECK = flag('trash');
 /** only these effect ids (debugging) */
 const ONLY_EFFECTS = value('effects') ? new Set(value('effects').split(',')) : null;
-/** only these phases: rows, effects, clipboard, twoSlides, shortcuts, retired, tails, textBlock, tooltip, readonly, home */
+/** only these phases: rows, effects, clipboard, twoSlides, shortcuts, retired, tails, textBlock, objects, tooltip, readonly, home */
 const PHASES = value('phases') ? new Set(value('phases').split(',')) : null;
 const phase = (name) => PHASES === null || PHASES.has(name);
 /**
  * The rows docs/gslides-parity/VERIFICATION.md section 9 records as deviations from Google: their
  * effect is not run and the row is reported as skipped with the finding, so the exit code speaks
  * for the rows the round claims and the record names the rest. Remove a row here when it lands.
+ * Round one's two rows (Border color and Border weight) landed in round two as the anchored
+ * pickers of SPEC-2 4.1 and left the map.
  */
-const RECORDED_DEVIATIONS = new Map([
-  [
-    'format.bordersLines.borderColor',
-    'finding 3: the row answers the sentence naming the toolbar control and opens no picker',
-  ],
-  [
-    'format.bordersLines.borderWeight',
-    'finding 3: the row answers the sentence naming the toolbar control and opens no picker',
-  ],
-]);
+const RECORDED_DEVIATIONS = new Map([]);
+/**
+ * SPEC-2 4.3's `cellRange` target is not selected by the stage this round (B4's recorded
+ * deviation, docs/gslides-parity/build-2/b4.md section 3 and AGENTS.md): the range rows run
+ * through the Table section and the actions. The audit tries the range drag and records the
+ * menu as this deviation when the stage answers the single cell menu.
+ */
+const CELL_RANGE_DEVIATION =
+  'b4.md section 3: the stage selects no cellRange target this round; Merge cells, Unmerge cells and the range rows run through the Table section of Format options and through table.merge';
 const IS_LOCAL = /^https?:\/\/(localhost|127\.0\.0\.1)(:|$)/.test(BASE);
 const VIEWPORT = { width: 1440, height: 900 };
 
@@ -129,6 +144,66 @@ const PICTURE_KINDS = new Set(['opener', 'mood', 'closing']);
 
 /** The text block types of the text tail (editor-shell.ts TEXT_TYPES). */
 const TEXT_TYPES = new Set(['heading', 'paragraph', 'text', 'box', 'plain', 'quote', 'lead']);
+
+/**
+ * SPEC-2 section 5: the Format options sections in the panel's order
+ * (packages/chrome/src/inspector/format-sections.ts FORMAT_SECTIONS), the sections each
+ * selection type must show, and the sections it must not (the table's "Shown for" column read
+ * by type; a paragraph has no fill and no shadow, so the text row asks for less than a text box).
+ */
+const FORMAT_SECTION_ORDER = [
+  'size',
+  'position',
+  'layout',
+  'textFitting',
+  'text',
+  'colour',
+  'picture',
+  'adjustments',
+  'shadow',
+  'table',
+  'chart',
+  'line',
+  'shape',
+  'list',
+  'altText',
+  'block',
+];
+const FORMAT_SECTIONS_FOR = {
+  text: ['size', 'position', 'textFitting', 'text', 'altText'],
+  shape: ['size', 'position', 'textFitting', 'text', 'colour', 'shadow', 'shape', 'altText'],
+  line: ['size', 'position', 'line', 'altText'],
+  image: ['size', 'position', 'picture', 'adjustments', 'shadow', 'altText'],
+  table: ['size', 'position', 'textFitting', 'text', 'table', 'altText'],
+  chart: ['size', 'position', 'chart', 'shadow', 'altText'],
+  group: ['size', 'position'],
+};
+const FORMAT_SECTIONS_NOT_FOR = {
+  text: ['picture', 'adjustments', 'table', 'chart', 'line', 'shape'],
+  shape: ['picture', 'adjustments', 'table', 'chart', 'line', 'list'],
+  line: ['textFitting', 'picture', 'adjustments', 'table', 'chart', 'shape', 'list'],
+  image: ['textFitting', 'text', 'table', 'chart', 'line', 'shape', 'list'],
+  table: ['picture', 'adjustments', 'chart', 'line', 'shape', 'list'],
+  chart: ['textFitting', 'text', 'picture', 'adjustments', 'table', 'line', 'shape', 'list'],
+  group: ['picture', 'adjustments', 'table', 'chart', 'line', 'shape', 'list'],
+};
+/** The mark a Format > Text row writes (SPEC-2 4.1, 7.2: the mark span `[text]{i u s sup sub}`). */
+const MARK_OF_ROW = {
+  'format.text.italic': 'i',
+  'format.text.underline': 'u',
+  'format.text.strikethrough': 's',
+  'format.text.superscript': 'sup',
+  'format.text.subscript': 'sub',
+};
+/** The bounds an edge aligns to on the sheet (SPEC-2 6.1 rows 21 and 23: one object aligns to the slide). */
+const SHEET_EDGE = { left: 0, center: 800, right: 1600, top: 0, middle: 450, bottom: 900 };
+const near = (a, b, tolerance = 1.5) => Math.abs(a - b) <= tolerance;
+const markRe = (mark) => new RegExp(`\\]\\{[^}]*\\b${mark}\\b[^}]*\\}`);
+/** The plain text of a marked up Text: the spans' text without their marks and links. */
+const plainOf = (text) =>
+  String(text ?? '')
+    .replace(/\[([^\]]*)\]\{[^}]*\}/g, '$1')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
 
 const log = (line) => process.stderr.write(`${line}\n`);
 
@@ -220,6 +295,8 @@ async function settled(page, timeout = 30_000) {
 }
 
 const state = (page) => page.evaluate(() => window.turboslide.studio.describe().state);
+/** the server's version log, one entry per write (SPEC-2 11.8 step 2) */
+const versions = (page) => invoke(page, 'version.list');
 const invoke = (page, action, input) =>
   page.evaluate(([id, value]) => window.turboslide.studio.invoke(id, value), [action, input]);
 
@@ -349,9 +426,24 @@ async function activate(page, id) {
     return;
   }
   const leaf = `${ROW_SELECTOR(level)}[data-menu-item="${id}"]`;
+  /* SPEC-2 4.1: the rows under Shapes and Arrows are the legacy presets; the shell draws the
+     category's glyph grid in their place and a tile arms the draw tool */
+  if (LEGACY_TILE_OF[id] !== undefined && (await page.$(leaf)) === null) {
+    const tile = `[data-control="${PARENT.get(id)}.pick.${LEGACY_TILE_OF[id]}"]`;
+    await page.waitForSelector(tile, { timeout: 5000 });
+    await page.click(tile, { timeout: 8000 });
+    return;
+  }
   await assertEnabledRow(page, leaf);
   await page.click(leaf, { timeout: 8000 });
 }
+/** The plate tile each legacy row of the model stands for (packages/schema/src/shapes.ts LEGACY_PRESETS). */
+const LEGACY_TILE_OF = {
+  'insert.shape.shapes.rectangle': 'rect',
+  'insert.shape.shapes.rounded': 'roundRect',
+  'insert.shape.shapes.ellipse': 'ellipse',
+  'insert.shape.arrows.arrow': 'rightArrow',
+};
 
 /** Hovers a row and reads the tooltip plate once it names that row (an earlier plate may still be up). */
 async function tooltipDocOf(page, rowSelector, name) {
@@ -560,15 +652,54 @@ async function walkMenus(page, ctx, tag) {
     for (const item of items) {
       if (item.status === 'omit' || item.contextOnly) continue;
       const row = listed.find((r) => r.id === item.id);
-      if (!row || !item.items || item.items.length === 0) continue;
-      if (row.disabled || row.haspopup !== 'menu') continue;
-      if (item.effect?.kind === 'submenu' && item.effect.dynamic) {
-        /* the Apply layout grid: a dynamic plate, not a list of rows */
-        await page.click(`${ROW_SELECTOR(level)}[data-menu-item="${item.id}"]`);
-        const plate = await page
-          .waitForSelector('.ts-menu.is-dynamic [data-control^="layout.apply."]', { timeout: 5000 })
+      if (!row || row.disabled) continue;
+      /* a dynamic row may carry no child rows at all (Insert > Table, the preset grids): the
+         plate is checked before the children test */
+      const dynamic = item.effect?.kind === 'submenu' && item.effect.dynamic;
+      if (!dynamic && (!item.items || item.items.length === 0)) continue;
+      if (!dynamic && row.haspopup !== 'menu') continue;
+      if (dynamic) {
+        /* a dynamic plate, not a list of rows: the Apply layout grid, or round two's shape
+           grids, preset grids and table hover grid (SPEC-2 4.1); the plate's tiles carry the
+           row's id as their data-control prefix. The pointer opens the plate after 120 ms and a
+           click on a row whose plate is open closes it again (measured: every plate read as
+           missing on the first run), so the click is only for a row the hover did not open */
+        const rowSel = `${ROW_SELECTOR(level)}[data-menu-item="${item.id}"]`;
+        const prefix = item.effect.dynamic === 'layouts' ? 'layout.apply.' : `${item.id}.`;
+        await page.hover(rowSel);
+        let plate = await page
+          .waitForSelector(`.ts-menu.is-dynamic [data-control^="${prefix}"]`, { timeout: 1500 })
           .catch(() => null);
-        seen.get(item.id).dynamic = plate !== null;
+        if (plate === null) {
+          await page.click(rowSel);
+          plate = await page
+            .waitForSelector(`.ts-menu.is-dynamic [data-control^="${prefix}"]`, { timeout: 4000 })
+            .catch(() => null);
+        }
+        const tiles =
+          plate === null
+            ? 0
+            : await page.$$eval(
+                `.ts-menu.is-dynamic [data-control^="${item.effect.dynamic === 'layouts' ? 'layout.apply.' : `${item.id}.pick.`}"]`,
+                (els) => els.length,
+              );
+        const untipped =
+          plate === null
+            ? []
+            : await page.$$eval(
+                `.ts-menu.is-dynamic [data-control^="${item.effect.dynamic === 'layouts' ? 'layout.apply.' : `${item.id}.pick.`}"]`,
+                (els) =>
+                  els
+                    .filter((el) => !el.closest('[data-tip]'))
+                    .map((el) => el.getAttribute('data-control'))
+                    .slice(0, 5),
+              );
+        seen.get(item.id).dynamic = {
+          plate: plate !== null,
+          kind: item.effect.dynamic,
+          tiles,
+          untipped,
+        };
         continue;
       }
       await openSubmenuRow(page, level, item.id).catch(() => null);
@@ -618,6 +749,21 @@ async function walkMenus(page, ctx, tag) {
       const prow = seen.get(pid);
       return p?.status === 'later' || (prow !== undefined && prow.disabled);
     });
+    /* round two: a child row of a dynamic plate is drawn as one of its tiles (the shape grids
+       replace the shape rows, SPEC-2 4.1), and a child of a context-only row is not in the bar */
+    const plateParent = parentIds.find((pid) => seen.get(pid)?.dynamic?.plate === true);
+    if (found === undefined && plateParent !== undefined) {
+      skip(section, {
+        ...base,
+        check: 'present',
+        evidence: `drawn as a tile of the ${seen.get(plateParent).dynamic.kind} plate of ${plateParent} (${seen.get(plateParent).dynamic.tiles} tiles)`,
+      });
+      continue;
+    }
+    if (found === undefined && parentIds.some((pid) => findItem(pid)?.contextOnly)) {
+      pass(section, { ...base, check: 'not in the bar (under a context only row)' });
+      continue;
+    }
     if (found === undefined) {
       if (parentBlocked)
         skip(section, {
@@ -665,9 +811,22 @@ async function walkMenus(page, ctx, tag) {
       const check = isChecked(item, ctx);
       if (check !== undefined && found.role === 'menuitem')
         problems.push('a check item drawn as a plain menuitem');
+      /* SPEC-2 4.1: an enabled dynamic row draws its plate with tiles that carry the tooltip primitive */
+      if (item.effect?.kind === 'submenu' && item.effect.dynamic && expected && !found.disabled) {
+        const plate = found.dynamic;
+        if (!plate || plate.plate !== true)
+          problems.push(`the ${item.effect.dynamic} plate did not render`);
+        else if (plate.tiles === 0) problems.push(`the ${item.effect.dynamic} plate has no tile`);
+        else if (plate.untipped.length > 0)
+          problems.push(`tiles without a tooltip: ${plate.untipped.join(', ')}`);
+      }
     }
     if (problems.length === 0)
-      pass(section, { ...base, check: 'row', evidence: `level ${found.level}` });
+      pass(section, {
+        ...base,
+        check: 'row',
+        evidence: `level ${found.level}${found.dynamic ? `; ${found.dynamic.kind} plate with ${found.dynamic.tiles} tiles` : ''}`,
+      });
     else fail(section, { ...base, check: 'row', evidence: problems });
   }
   return { seen, rendered };
@@ -700,7 +859,7 @@ async function checkToolbar(page, kind, tag) {
   const known = new Set([
     ...HEAD_IDS,
     ...DEFAULT_TAIL_IDS,
-    ...['text', 'shape', 'image', 'line', 'table', 'other'].flatMap((k) =>
+    ...['text', 'shape', 'image', 'line', 'table', 'chart', 'group', 'other'].flatMap((k) =>
       tailFor(k).map((c) => c.control),
     ),
   ]);
@@ -732,6 +891,11 @@ function expectedContext(target, ctx) {
     }
     const id = typeof entry === 'string' ? entry : evaluate(entry.when, ctx) ? entry.id : null;
     if (id === null) continue;
+    /* a conditional divider (the covering picture's appended rows, SPEC-2 0.100) */
+    if (id === DIVIDER) {
+      out.push('-');
+      continue;
+    }
     const item = findItem(id);
     if (item && item.status !== 'omit') out.push(id);
   }
@@ -813,6 +977,8 @@ async function observeDialog(page, item, title) {
         .filter((el) => !el.closest('[data-tip]') && !el.closest('[aria-hidden="true"]'))
         .map((el) => el.getAttribute('data-control') ?? el.tagName),
   );
+  /* SPEC-2 section 10: the words of the dialog while it is open */
+  await checkDefaultWords(page, `dialog ${found.control ?? found.title}`);
   await page.keyboard.press('Escape');
   const gone = await waitFor(async () => (await dialogs(page)).length === 0);
   const focusAfter = await page.evaluate(
@@ -873,6 +1039,12 @@ async function toggleState(page, setting) {
         return v?.hasAttribute('data-spellcheck') ?? false;
       case 'sourceDrawer':
         return document.querySelector('[data-control="source.drawer"]') !== null;
+      /* round two (SPEC-2 6.1 rows 29 and 30): the two rulers along the stage; the deck's guides
+         draw only while the deck holds one, so the row's check state speaks for Show guides */
+      case 'showRuler':
+        return document.querySelectorAll('.ts-ruler').length === 2;
+      case 'showGuides':
+        return null;
       default:
         return null;
     }
@@ -916,6 +1088,10 @@ async function observeToggle(page, item) {
   let ok;
   if (radio) ok = checkedAfter === 'true' && (before === null || after !== null);
   else if (setting === 'compact') ok = before === false && after === true;
+  else if (checkedBefore === null && checkedAfter === null && before !== null)
+    /* a row with no aria-checked alternates its label (Show ruler becomes Hide ruler, SPEC-2 4.1,
+       Google's own form): the DOM state it drives is the check */
+    ok = after !== before;
   else ok = checkedAfter !== checkedBefore && (before === null || after !== before);
   /* revert: a check item toggles back; a radio returns to the option that was checked */
   if (radio) {
@@ -1023,8 +1199,12 @@ async function observeRoute(page, context, item, deckId) {
     await opened.waitForLoadState('domcontentloaded').catch(() => null);
     const url = opened.url();
     await opened.close();
+    /* GitHub answers /issues/new with a login redirect whose return_to carries the URL */
+    const decoded = decodeURIComponent(url);
     const ok =
-      new URL(url).pathname + new URL(url).hash === path || url.includes(path.split('#')[0]);
+      new URL(url).pathname + new URL(url).hash === path ||
+      url.includes(path.split('#')[0]) ||
+      decoded.includes(path.split('#')[0]);
     return { ok, evidence: `new tab ${url}` };
   }
   const from = page.url();
@@ -1308,11 +1488,30 @@ async function runEffectInner(page, context, item, ctx, deckId) {
         };
       }
       const level = await openPath(page, item.id);
-      await page.click(`${ROW_SELECTOR(level)}[data-menu-item="${item.id}"]`);
-      const sub = await page
-        .waitForSelector(`[role="menu"][data-level="${level + 1}"]`, { timeout: 4000 })
+      /* the pointer opens a plate; a click on an open row closes it (see walkMenus) */
+      await page.hover(`${ROW_SELECTOR(level)}[data-menu-item="${item.id}"]`);
+      const opened = await page
+        .waitForSelector(
+          `[role="menu"][data-level="${level + 1}"], .ts-menu.is-dynamic [data-control^="${item.id}."]`,
+          { timeout: 1500 },
+        )
         .catch(() => null);
-      return { ok: sub !== null, evidence: sub ? 'submenu opened' : 'submenu did not open' };
+      if (opened === null) await page.click(`${ROW_SELECTOR(level)}[data-menu-item="${item.id}"]`);
+      const sub = await page
+        .waitForSelector(
+          `[role="menu"][data-level="${level + 1}"], .ts-menu.is-dynamic [data-control^="${item.id}."]`,
+          { timeout: 4000 },
+        )
+        .catch(() => null);
+      const plate = sub ? await page.$$('.ts-menu.is-dynamic [data-control]') : [];
+      return {
+        ok: sub !== null,
+        evidence: sub
+          ? plate.length > 0
+            ? `the ${effect.dynamic} plate opened with ${plate.length} controls`
+            : 'submenu opened'
+          : 'submenu did not open',
+      };
     }
     case 'client':
       return runClientEffect(page, context, item);
@@ -1448,13 +1647,406 @@ async function runClientEffect(page, context, item) {
     case 'delete':
     case 'duplicate':
       return { skip: true, evidence: 'run in the clipboard sequence' };
+    /* round two (SPEC-2 4.1) */
+    case 'cropMode': {
+      await activate(page, item.id);
+      const chip = await waitFor(() => page.$('.ts-overlay .ts-select-chip.is-crop'), {
+        timeout: 4000,
+      });
+      const text = chip ? await chip.textContent() : '';
+      const handles = await page.$$('.ts-overlay [data-control$=".crop.w"]');
+      await page.keyboard.press('Escape');
+      const gone = await waitFor(
+        async () => (await page.$('.ts-overlay .ts-select-chip.is-crop')) === null,
+      );
+      return {
+        ok: Boolean(chip) && handles.length === 1 && Boolean(gone),
+        evidence: chip
+          ? `crop mode: chip "${text?.trim()}", ${handles.length} west handle; Esc ${gone ? 'left it' : 'stayed'}`
+          : `no crop chip; snackbar "${await snackbarText(page)}"`,
+      };
+    }
+    case 'wordArt': {
+      const st = await state(page);
+      const count = async () => {
+        const slide = (await invoke(page, 'slide.get', { slideId: st.slideId })).slide;
+        return Object.values(slide.slots ?? {}).flat().length;
+      };
+      const before = await count();
+      const rev = await revisionOf(page);
+      await activate(page, item.id);
+      const bar = await waitFor(() => page.$('[data-control="wordArt.bar"]'), { timeout: 4000 });
+      if (!bar)
+        return { ok: false, evidence: `no word art bar; snackbar "${await snackbarText(page)}"` };
+      const placeholder = await page.$eval(
+        '[data-control="wordArt.text"]',
+        (el) => el.getAttribute('placeholder') ?? '',
+      );
+      await page.fill('[data-control="wordArt.text"]', 'Audit');
+      await page.keyboard.press('Enter');
+      const after = await waitRevision(page, rev, 10_000);
+      await settled(page).catch(() => null);
+      const now = await count();
+      const slide = (await invoke(page, 'slide.get', { slideId: st.slideId })).slide;
+      const art = Object.values(slide.slots ?? {})
+        .flat()
+        .find((b) => b.type === 'text' && b.outline !== undefined);
+      /* on a slide that is not a canvas the insert converts it first (SPEC-2 1.6): the kind's
+         fields become blocks too, so the count grows by at least one */
+      const ok = after !== null && now >= before + 1 && art !== undefined && art.pos !== undefined;
+      if (after !== null) await undo(page);
+      return {
+        ok,
+        evidence: `bar "${placeholder}"; revision ${rev} -> ${after}; blocks ${before} -> ${now}; ${art ? `text block with outline ${JSON.stringify(art.outline)} at ${JSON.stringify(art.pos)}` : 'no outlined text block'}`,
+      };
+    }
+    case 'borderColorPicker':
+    case 'borderWeightPicker': {
+      const kind = item.effect.handler === 'borderColorPicker' ? 'Color' : 'Weight';
+      const object = await selectedObject(page);
+      const rev = await revisionOf(page);
+      await activate(page, item.id);
+      const plate = await waitFor(() => page.$(`[data-control="${item.id}.plate"]`), {
+        timeout: 4000,
+      });
+      if (!plate)
+        return {
+          ok: false,
+          evidence: `no plate for ${kind}; snackbar "${await snackbarText(page)}"`,
+        };
+      /* a colour of the palette (never None) and a weight of 2 (never Google's Transparent 0) */
+      const option =
+        (await page.$(
+          kind === 'Color'
+            ? `[data-control="${item.id}.plate"] [data-control="${item.id}.ink"], [data-control="${item.id}.plate"] [data-control="${item.id}.titanium"]`
+            : `[data-control="${item.id}.plate"] [data-control="${item.id}.2"]`,
+        )) ??
+        (await page.$(
+          `[data-control="${item.id}.plate"] [data-control^="${item.id}."]:not([data-control$=".plate"]):not([data-control$=".hex"]):not([data-control$=".none"]):not([data-control$=".0"])`,
+        ));
+      const picked = option ? await option.getAttribute('data-control') : null;
+      if (option) await option.click();
+      const after = await waitRevision(page, rev, 8000);
+      await settled(page).catch(() => null);
+      const block = object ? await blockNow(page, object.slideId, object.blockId) : null;
+      const field =
+        kind === 'Color'
+          ? (block?.stroke ?? block?.outline?.color)
+          : (block?.width ?? block?.strokeWidth ?? block?.outline?.width);
+      const ok = after !== null && field !== undefined;
+      if (after !== null) await undo(page);
+      return {
+        ok,
+        evidence: `plate opened anchored to the row; picked ${picked}; revision ${rev} -> ${after}; ${kind === 'Color' ? 'stroke' : 'strokeWidth'} now ${JSON.stringify(field)}`,
+      };
+    }
+    case 'selectNone': {
+      const before = (await state(page)).blockId;
+      await activate(page, item.id);
+      const cleared = await waitFor(
+        async () => ((await state(page)).blockId === null ? true : null),
+        { timeout: 4000 },
+      );
+      const chips = await page.$$('.ts-overlay .ts-select-chip');
+      return {
+        ok: cleared === true && chips.length === 0,
+        evidence: `block ${before} -> ${(await state(page)).blockId}; ${chips.length} selection chips`,
+      };
+    }
     default:
       return { ok: false, evidence: `no observer for the client handler ${item.effect.handler}` };
   }
 }
 
+// ---------------------------------------------------------------------------------------------
+// Round two: the object writes (SPEC-2 section 3 through the rows of 4.1)
+
+/** The selected block and its slide, or null. */
+async function selectedObject(page) {
+  const st = await state(page);
+  if (!st.blockId) return null;
+  const slide = (await invoke(page, 'slide.get', { slideId: st.slideId })).slide;
+  const block =
+    Object.values(slide.slots ?? {})
+      .flat()
+      .find((b) => b.id === st.blockId) ?? null;
+  return { slideId: st.slideId, blockId: st.blockId, slide, block };
+}
+
+async function blockNow(page, slideId, blockId) {
+  const slide = (await invoke(page, 'slide.get', { slideId })).slide;
+  return (
+    Object.values(slide.slots ?? {})
+      .flat()
+      .find((b) => b.id === blockId) ?? null
+  );
+}
+
+async function objectsOf(page, slideId) {
+  const slide = (await invoke(page, 'slide.get', { slideId })).slide;
+  return Object.values(slide.slots ?? {}).flat();
+}
+
+/**
+ * One write from a menu row on the selected object, verified against the block after it and
+ * undone; `verify(before, after, slide)` returns { ok, evidence }. A grammar slide converts on
+ * the write (SPEC-2 1.6), which the evidence names.
+ */
+async function observeObjectWrite(page, item, verify) {
+  const before = await selectedObject(page);
+  if (!before?.block) return { ok: false, evidence: 'no block selected' };
+  const wasCanvas = before.slide.layout?.type === 'freeform';
+  const outcome = await observeWrite(page, item, {
+    verify: async () => {
+      const after = await blockNow(page, before.slideId, before.blockId);
+      const slide = (await invoke(page, 'slide.get', { slideId: before.slideId })).slide;
+      const result = await verify(before.block, after, slide);
+      const converted = !wasCanvas && slide.layout?.type === 'freeform';
+      return {
+        ...result,
+        evidence: `${result.evidence}${converted ? '; the slide converted to the canvas in the same write' : ''}`,
+      };
+    },
+  });
+  if (outcome.revision !== undefined) await undo(page);
+  return outcome;
+}
+
+/** The observer of a round two row's action (SPEC-2 4.1), by the action id and the row's input. */
+async function runRoundTwoAction(page, context, item, ctx, deckId) {
+  const id = item.effect.id;
+  const input = item.effect.input ?? {};
+  switch (id) {
+    case 'block.rotate': {
+      const by = input.by ?? 0;
+      return observeObjectWrite(page, item, (b, a) => {
+        const want = ((((b.pos?.rotate ?? 0) + by) % 360) + 360) % 360;
+        const got = a?.pos?.rotate ?? 0;
+        return {
+          ok: near(got, want, 0.01),
+          evidence: `rotate ${b.pos?.rotate ?? 0} -> ${got} (wanted ${want})`,
+        };
+      });
+    }
+    case 'block.flip': {
+      const axis = input.axis;
+      return observeObjectWrite(page, item, (b, a) => {
+        const was = (b.pos?.flip ?? '').includes(axis);
+        const is = (a?.pos?.flip ?? '').includes(axis);
+        return {
+          ok: was !== is,
+          evidence: `flip ${b.pos?.flip ?? 'none'} -> ${a?.pos?.flip ?? 'none'}`,
+        };
+      });
+    }
+    case 'block.align': {
+      const edge = input.edge;
+      return observeObjectWrite(page, item, (b, a) => {
+        const p = a?.pos;
+        if (!p) return { ok: false, evidence: 'no pos after the write' };
+        const at = {
+          left: p.x,
+          center: p.x + p.w / 2,
+          right: p.x + p.w,
+          top: p.y,
+          middle: p.y + p.h / 2,
+          bottom: p.y + p.h,
+        }[edge];
+        return {
+          ok: near(at, SHEET_EDGE[edge]),
+          evidence: `${edge} of one object to the slide: ${Math.round(at * 100) / 100} (wanted ${SHEET_EDGE[edge]}); pos ${JSON.stringify(p)}`,
+        };
+      });
+    }
+    case 'block.group':
+      return observeObjectWrite(page, item, (b, a, slide) => {
+        const tag = a?.pos?.group;
+        const members = Object.values(slide.slots ?? {})
+          .flat()
+          .filter((x) => x.pos?.group === tag).length;
+        return {
+          ok: tag !== undefined && members >= 2,
+          evidence: `group ${tag} with ${members} members`,
+        };
+      });
+    case 'block.ungroup':
+      return observeObjectWrite(page, item, (b, a, slide) => {
+        const tag = b.pos?.group;
+        const left = Object.values(slide.slots ?? {})
+          .flat()
+          .filter((x) => x.pos?.group === tag).length;
+        return {
+          ok: tag !== undefined && left === 0,
+          evidence: `group ${tag} -> ${left} members left`,
+        };
+      });
+    case 'block.regroup':
+      return observeObjectWrite(page, item, (b, a, slide) => {
+        const tag = a?.pos?.group;
+        const members = Object.values(slide.slots ?? {})
+          .flat()
+          .filter((x) => x.pos?.group === tag).length;
+        return {
+          ok: tag !== undefined && members >= 2,
+          evidence: `regrouped as ${tag} with ${members} members`,
+        };
+      });
+    case 'text.style': {
+      const mark = MARK_OF_ROW[item.id];
+      if (!mark) break;
+      return observeObjectWrite(page, item, (b, a) => {
+        const text =
+          typeof a?.text === 'string' ? a.text : JSON.stringify(a?.text ?? a?.items ?? '');
+        return {
+          ok: markRe(mark).test(text),
+          evidence: `text "${text.slice(0, 80)}" carries {${mark}}: ${markRe(mark).test(text)}`,
+        };
+      });
+    }
+    case 'text.case': {
+      const mode = item.id.split('.').pop();
+      return observeObjectWrite(page, item, (b, a) => {
+        const before = plainOf(b.text);
+        const after = plainOf(a?.text);
+        const want =
+          mode === 'upper'
+            ? before.toUpperCase()
+            : mode === 'lower'
+              ? before.toLowerCase()
+              : before.replace(/\b\p{L}/gu, (c) => c.toUpperCase());
+        const ok =
+          mode === 'title'
+            ? after !== before || before === want
+            : after === want || (before === want && after === before);
+        return {
+          ok: ok && after.length > 0,
+          evidence: `${mode}: "${before.slice(0, 40)}" -> "${after.slice(0, 40)}"`,
+        };
+      });
+    }
+    case 'text.indent': {
+      const direction = item.id.endsWith('increaseIndent') ? 1 : -1;
+      if (direction < 0) {
+        /* Decrease indent needs an indent: the increase row first, both undone after */
+        const rev0 = await revisionOf(page);
+        await activate(page, findItem('format.alignIndent.increaseIndent').id);
+        const moved = await waitRevision(page, rev0, 8000);
+        if (moved === null)
+          return { ok: false, evidence: 'Increase indent wrote nothing to set up Decrease indent' };
+        await settled(page).catch(() => null);
+        const outcome = await observeObjectWrite(page, item, (b, a) => {
+          const was = b.typography?.indent ?? b.indent ?? 0;
+          const is = a?.typography?.indent ?? a?.indent ?? 0;
+          return { ok: is < was, evidence: `indent ${was} -> ${is}` };
+        });
+        await undo(page);
+        return outcome;
+      }
+      return observeObjectWrite(page, item, (b, a) => {
+        const was = b.typography?.indent ?? b.indent ?? 0;
+        const is = a?.typography?.indent ?? a?.indent ?? 0;
+        return { ok: is > was, evidence: `indent ${was} -> ${is}` };
+      });
+    }
+    case 'text.spacing': {
+      const field = item.id.endsWith('addBefore') ? 'spaceBefore' : 'spaceAfter';
+      return observeObjectWrite(page, item, (b, a) => {
+        const was = b.typography?.[field] ?? 0;
+        const is = a?.typography?.[field] ?? 0;
+        return { ok: is !== was, evidence: `${field} ${was} -> ${is}` };
+      });
+    }
+    case 'text.columns':
+      return observeObjectWrite(page, item, (b, a) => ({
+        ok: (a?.typography?.columns ?? 1) !== (b.typography?.columns ?? 1),
+        evidence: `columns ${b.typography?.columns ?? 1} -> ${a?.typography?.columns ?? 1}`,
+      }));
+    case 'line.set': {
+      const end = input.start !== undefined ? 'start' : 'end';
+      const want = input[end];
+      return observeObjectWrite(page, item, (b, a) => {
+        const field = end === 'start' ? 'lineStart' : 'lineEnd';
+        return {
+          ok: (a?.[field] ?? 'none') === want,
+          evidence: `${field} ${b[field] ?? 'none'} -> ${a?.[field] ?? 'none'} (wanted ${want})`,
+        };
+      });
+    }
+    case 'chart.setKind':
+      return observeObjectWrite(page, item, (b, a) => ({
+        ok: a?.kind === input.kind,
+        evidence: `kind ${b.kind} -> ${a?.kind} (wanted ${input.kind})`,
+      }));
+    case 'block.set': {
+      if (input.dash !== undefined)
+        return observeObjectWrite(page, item, (b, a) => ({
+          ok:
+            (a?.dash ?? 'solid') === input.dash ||
+            (input.dash === 'solid' && a?.dash === undefined),
+          evidence: `dash ${b.dash ?? 'solid'} -> ${a?.dash ?? 'solid'} (wanted ${input.dash})`,
+        }));
+      if (item.id === 'format.alignIndent.justified')
+        return observeObjectWrite(page, item, (b, a) => ({
+          ok: a?.typography?.align === 'justify',
+          evidence: `align ${b.typography?.align ?? 'start'} -> ${a?.typography?.align}`,
+        }));
+      break;
+    }
+    case 'deck.guides': {
+      if (input.clear === true) {
+        /* Clear guides needs a guide: one added through the action first, both undone after */
+        const info0 = await invoke(page, 'deck.info');
+        await invoke(page, 'deck.guides', {
+          add: [{ axis: 'x', at: 400 }],
+          baseRevision: info0.revision,
+        });
+        await settled(page).catch(() => null);
+        const outcome = await observeWrite(page, item, {
+          verify: async () => {
+            const info = await invoke(page, 'deck.info');
+            const count = (info.guides?.x?.length ?? 0) + (info.guides?.y?.length ?? 0);
+            return {
+              ok: count === 0,
+              evidence: `guides after Clear: ${JSON.stringify(info.guides ?? null)}`,
+            };
+          },
+        });
+        if (outcome.revision !== undefined) await undo(page);
+        await undo(page);
+        return outcome;
+      }
+      const add = input.add?.[0];
+      const outcome = await observeWrite(page, item, {
+        verify: async () => {
+          const info = await invoke(page, 'deck.info');
+          const list = info.guides?.[add?.axis] ?? [];
+          const drawn = await page.$$(`.ts-overlay [data-control="guide.${add?.axis}.${add?.at}"]`);
+          return {
+            ok: add !== undefined && list.includes(add.at),
+            evidence: `guides ${JSON.stringify(info.guides ?? null)} (wanted ${add?.axis} ${add?.at}); ${drawn.length} guide line drawn (Show guides ${drawn.length ? 'on' : 'off or hidden'})`,
+          };
+        },
+      });
+      if (outcome.revision !== undefined) await undo(page);
+      return outcome;
+    }
+    default:
+      break;
+  }
+  /* every other round two write: the revision moves and the write is undone */
+  if (GS2_ACTION_IDS.includes(id)) {
+    const outcome = await observeWrite(page, item);
+    if (outcome.revision !== undefined) await undo(page);
+    return outcome;
+  }
+  return null;
+}
+
 async function runActionEffect(page, context, item, ctx, deckId) {
   const id = item.effect.id;
+  /* round two's rows first (SPEC-2 4.1): the observers verify the document after the write */
+  const roundTwo = await runRoundTwoAction(page, context, item, ctx, deckId);
+  if (roundTwo !== null) return roundTwo;
   switch (id) {
     case 'view.present':
       return observePresent(page, item);
@@ -1619,7 +2211,7 @@ async function runActionEffect(page, context, item, ctx, deckId) {
       const steps = [];
       /* a draw tool arms data-tool on the stage root (Editor.tsx) until the click or drag places */
       const tool = await page.evaluate(
-        () => document.querySelector('.ts-editor')?.getAttribute('data-tool') ?? null,
+        () => document.querySelector('[data-tool]')?.getAttribute('data-tool') ?? null,
       );
       if (tool) steps.push(`the stage armed the ${tool} tool`);
       if (after === null) {
@@ -1659,7 +2251,29 @@ async function runActionEffect(page, context, item, ctx, deckId) {
             }
             return null;
           });
-          if (spot) {
+          if (spot && /^insert\.line\.(curve|polyline)$/.test(item.id)) {
+            /* SPEC-2 6.2: Curve and Polyline take a click per point and end on Enter */
+            for (const [dx, dy] of [
+              [-200, -60],
+              [-100, -110],
+              [0, -40],
+            ]) {
+              await page.mouse.click(spot.x + dx, spot.y + dy);
+              await page.waitForTimeout(120);
+            }
+            await page.keyboard.press('Enter');
+            after = await waitRevision(page, rev, 4000);
+            steps.push('placed three points and pressed Enter');
+          } else if (spot && item.id === 'insert.line.scribble') {
+            /* SPEC-2 6.2: Scribble samples the pointer every 8 px along a drag */
+            await page.mouse.move(spot.x - 240, spot.y - 20);
+            await page.mouse.down();
+            for (let i = 1; i <= 20; i += 1)
+              await page.mouse.move(spot.x - 240 + i * 12, spot.y - 20 + Math.sin(i / 3) * 16);
+            await page.mouse.up();
+            after = await waitRevision(page, rev, 4000);
+            steps.push('dragged a scribble of 20 steps on the sheet');
+          } else if (spot) {
             await page.mouse.click(spot.x, spot.y);
             after = await waitRevision(page, rev, 4000);
             steps.push('clicked an empty spot on the sheet');
@@ -2050,9 +2664,18 @@ async function selectBlockByClick(page, blockId, { text }) {
   if (!el) return null;
   const box = await el.boundingBox();
   if (!box) return null;
-  await page.mouse.click(box.x + Math.min(12, box.width / 2), box.y + Math.min(12, box.height / 2));
+  /* an object is taken by its frame (2 px in from the corner); a text selection by a click 12 px
+     inside, which places the caret (SPEC-2 6.1 rows 1 and 18) */
+  const inset = text ? 12 : 2;
+  await page.mouse.click(
+    box.x + Math.min(inset, box.width / 2),
+    box.y + Math.min(inset, box.height / 2),
+  );
   await page.waitForTimeout(150);
-  if (text) {
+  /* a click inside a Text opens its caret (a shape with text included, SPEC-2 0.11): Esc steps
+     the caret to the object, so the keys and rows that follow act on the object */
+  const editing = (await page.$('.ts-stagewrap [contenteditable="true"]')) !== null;
+  if (text || editing) {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(150);
   }
@@ -2093,7 +2716,8 @@ async function tailStates(page, context, deckId, tag) {
   const slot = textBlock?.slot ?? Object.keys(slide.slots ?? {})[0] ?? 'main';
   /* the primitives */
   const inserts = [
-    { id: 'audit-shape', type: 'shape', shape: 'rectangle' },
+    /* a shape with text, so the Format > Text rows the shape tail enables have a Text to style (SPEC-2 0.11) */
+    { id: 'audit-shape', type: 'shape', shape: 'rectangle', text: 'Shape text' },
     { id: 'audit-line', type: 'shape', shape: 'line' },
     {
       id: 'audit-shot',
@@ -2174,6 +2798,1468 @@ async function tailStates(page, context, deckId, tag) {
     await page.waitForTimeout(100);
   }
   return { slideId, textBlock, inserted, textCtx };
+}
+
+// ---------------------------------------------------------------------------------------------
+// Round two: the object states (SPEC-2 4.2, 4.3, 5, 6.1, 9)
+
+/** The right-click menu on a block's element: a right-click at its top left corner. */
+async function openBlockMenu(page, blockId) {
+  /* the object is selected first (a right-click inside an unselected text block's run is the
+     browser's own menu, round one deviation 5; the round one audit selected before it opened) */
+  const selected = await selectBlockByClick(page, blockId, { text: true });
+  const el = await page.$(`.ts-stagewrap .pt-slide [data-block="${blockId}"]`);
+  if (!el) throw new Error(`no element for ${blockId}`);
+  const box = await el.boundingBox();
+  const inset = selected === blockId ? 12 : 6;
+  await page.mouse.click(box.x + inset, box.y + inset, { button: 'right' });
+}
+
+/** The chip's text over the selection, or ''. */
+async function chipText(page) {
+  return page.evaluate(
+    () => document.querySelector('.ts-overlay .ts-select-chip')?.textContent?.trim() ?? '',
+  );
+}
+
+/** The MenuContext of a selected object, built as the audit reads it (blockFamily by type). */
+async function objectContext(page, family, extra = {}) {
+  const st = await state(page);
+  const slide = (await invoke(page, 'slide.get', { slideId: st.slideId })).slide;
+  const objects = Object.values(slide.slots ?? {}).flat();
+  const block = objects.find((b) => b.id === st.blockId);
+  const freeform = slide.layout?.type === 'freeform';
+  const at = objects.findIndex((b) => b.id === st.blockId);
+  const z = block?.pos?.z;
+  const zs = objects.map((b) => b.pos?.z).filter((v) => v !== undefined);
+  const top = zs.length ? Math.max(...zs) : 0;
+  const bottom = zs.length ? Math.min(...zs) : 0;
+  const forward = freeform
+    ? objects.length > 1 && z !== undefined && z < top
+    : objects.length > 1 && at >= 0 && at < objects.length - 1;
+  const backward = freeform ? objects.length > 1 && z !== undefined && z > bottom : at > 0;
+  return contextOf(page, {
+    focus: 'canvas',
+    selection: {
+      blocks: extra.blocks ?? 1,
+      block: family,
+      box: block?.type === 'box',
+      picture: family === 'image',
+      textBlock: family === 'text' || family === 'shape' || family === 'table',
+      listItem: block?.type === 'plain',
+      tableCell: family === 'table',
+      linked: false,
+      order: { forward, front: forward, backward, back: backward },
+      object: true,
+      rotatable: true,
+      outlined: block?.type === 'text' && block.outline !== undefined,
+      imageEdited:
+        family === 'image' && Boolean(block?.trim || block?.mask || block?.adjust || block?.crop),
+      coversSheet: extra.coversSheet ?? false,
+      ...extra.selection,
+    },
+  });
+}
+
+/** Format options' sections with this selection, against SPEC-2 section 5 (the panel opened through the Format menu). */
+async function checkFormatSections(page, type, tag) {
+  const section = `formatOptions:${tag}`;
+  await closeOverlays(page);
+  try {
+    await activate(page, 'format.formatOptions');
+  } catch (error) {
+    fail(section, {
+      id: `sections.${type}`,
+      evidence: `Format options did not open: ${String(error).slice(0, 160)}`,
+    });
+    return;
+  }
+  const panel = await waitFor(() => page.$('.ts-rpanel [data-panel-title="Format options"]'));
+  if (!panel) {
+    fail(section, { id: `sections.${type}`, evidence: 'no Format options panel' });
+    return;
+  }
+  await page.waitForTimeout(250);
+  const shown = await page.$$eval('.ts-rpanel [data-section]', (els) =>
+    els.map((el) => ({
+      id: el.getAttribute('data-section'),
+      title: el.querySelector('h3, h2, .ts-panel-section-title, button')?.textContent?.trim() ?? '',
+    })),
+  );
+  const ids = shown.map((s) => s.id);
+  const missing = (FORMAT_SECTIONS_FOR[type] ?? []).filter((id) => !ids.includes(id));
+  const extra = (FORMAT_SECTIONS_NOT_FOR[type] ?? []).filter((id) => ids.includes(id));
+  const order = ids.map((id) => FORMAT_SECTION_ORDER.indexOf(id));
+  const ordered = order.every((n, i) => i === 0 || n >= order[i - 1]);
+  const untipped = await page.$$eval(
+    '.ts-rpanel [data-section] button, .ts-rpanel [data-section] input, .ts-rpanel [data-section] select, .ts-rpanel [data-section] [role="button"], .ts-rpanel [data-section] [role="radio"], .ts-rpanel [data-section] [role="checkbox"]',
+    (els) =>
+      els
+        .filter((el) => !el.closest('[data-tip]') && !el.closest('[aria-hidden="true"]'))
+        .map((el) => el.getAttribute('data-control') ?? el.tagName)
+        .slice(0, 8),
+  );
+  await checkDefaultWords(page, `Format options with a ${type} selected`);
+  const row = {
+    id: `sections.${type}`,
+    shown: ids,
+    evidence: `sections ${ids.join(', ')}${missing.length ? `; missing ${missing.join(', ')}` : ''}${extra.length ? `; not for a ${type}: ${extra.join(', ')}` : ''}${ordered ? '' : '; out of SPEC-2 section 5 order'}${untipped.length ? `; controls without a tooltip: ${untipped.join(', ')}` : ''}`,
+  };
+  /* the tooltip verdict on the generated controls is the tooltip audit's (scripts/tooltip-audit.mjs
+     --strict walks the inspector); here the list is evidence */
+  if (missing.length === 0 && extra.length === 0 && ordered) pass(section, row);
+  else fail(section, row);
+  const close = await page.$('.ts-rpanel [data-control$=".close"]');
+  if (close) await close.click();
+  else await page.keyboard.press('Escape');
+  await page.waitForTimeout(150);
+}
+
+/**
+ * A context-only row (SPEC-2 4.3: Text fitting, Drop shadow, Alt text, Change shape, Edit data,
+ * Chart type ▸) picked from the object's right-click menu, with its effect observed.
+ */
+async function runContextRow(page, blockId, id, tag, observe) {
+  const section = `effects:${tag}`;
+  const item = findItem(id);
+  if (!item) return;
+  await closeOverlays(page);
+  /* a right panel a previous row opened stays over the stage: close it first */
+  const openPanel = await page.$('.ts-rpanel [data-control$=".close"]');
+  if (openPanel) {
+    await openPanel.click().catch(() => null);
+    await page.waitForTimeout(150);
+  }
+  try {
+    await openBlockMenu(page, blockId);
+    await page.waitForSelector('#ts-menu-canvas', { timeout: 4000 });
+    const row = await page.$(`#ts-menu-canvas [data-menu-item="${id}"]`);
+    if (!row) {
+      fail(section, { id, menu: 'context', evidence: 'the row is not in the right-click menu' });
+      await closeOverlays(page);
+      return;
+    }
+    const outcome = await observe(row);
+    await closeOverlays(page).catch(() => null);
+    if (outcome.skip) skip(section, { id, menu: 'context', evidence: outcome.evidence });
+    else if (outcome.ok)
+      pass(section, { id, menu: 'context', label: item.label, evidence: outcome.evidence });
+    else fail(section, { id, menu: 'context', label: item.label, evidence: outcome.evidence });
+  } catch (error) {
+    fail(section, { id, menu: 'context', evidence: `threw: ${String(error).slice(0, 200)}` });
+    await closeOverlays(page).catch(() => null);
+  }
+}
+
+/** A context row that opens Format options at a section. */
+const panelAt = (page, sectionId) => async (row) => {
+  await row.click();
+  const panel = await waitFor(() => page.$('.ts-rpanel [data-panel-title="Format options"]'));
+  const open = panel
+    ? await page.$(`.ts-rpanel [data-section="${sectionId}"]:not(.is-closed)`)
+    : null;
+  const present = panel ? await page.$(`.ts-rpanel [data-section="${sectionId}"]`) : null;
+  return {
+    ok: Boolean(panel) && Boolean(present),
+    evidence: panel
+      ? `Format options opened; section ${sectionId} ${present ? (open ? 'open' : 'present, closed') : 'absent'}`
+      : `no panel; snackbar "${await snackbarText(page)}"`,
+  };
+};
+
+/** A dynamic plate pick from a menu row (bar or context): the tile by its data-control, the write verified and undone. */
+async function pickFromPlate(page, rowSelector, itemId, tileId, verify) {
+  const rev = await revisionOf(page);
+  await page.hover(rowSelector);
+  const tile = await page
+    .waitForSelector(`.ts-menu.is-dynamic [data-control="${itemId}.pick.${tileId}"]`, {
+      timeout: 4000,
+    })
+    .catch(() => null);
+  if (!tile) {
+    const any = await page.$$eval('.ts-menu.is-dynamic [data-control]', (els) =>
+      els.slice(0, 4).map((el) => el.getAttribute('data-control')),
+    );
+    return {
+      ok: false,
+      evidence: `no tile ${itemId}.pick.${tileId} (plate shows ${any.join(', ') || 'nothing'})`,
+    };
+  }
+  await tile.click();
+  const after = await waitRevision(page, rev, 8000);
+  const steps = [];
+  let landed = after;
+  if (landed === null) {
+    /* a shape pick arms the draw tool: a click on empty sheet places the default box */
+    const tool = await page.evaluate(
+      () => document.querySelector('[data-tool]')?.getAttribute('data-tool') ?? null,
+    );
+    if (tool) {
+      steps.push(`the stage armed the ${tool} tool`);
+      const spot = await page.evaluate(() => {
+        const sheet = document.querySelector('.ts-stagewrap .pt-slide');
+        if (!sheet) return null;
+        const r = sheet.getBoundingClientRect();
+        for (const [fx, fy] of [
+          [0.85, 0.85],
+          [0.9, 0.2],
+          [0.5, 0.92],
+        ]) {
+          const x = r.left + r.width * fx;
+          const y = r.top + r.height * fy;
+          const el = document.elementFromPoint(x, y);
+          if (el && !el.closest('[data-block], [data-run]')) return { x, y };
+        }
+        return null;
+      });
+      if (spot) {
+        await page.mouse.click(spot.x, spot.y);
+        landed = await waitRevision(page, rev, 6000);
+        steps.push('clicked an empty spot on the sheet');
+      }
+    }
+  }
+  if (landed === null)
+    return {
+      ok: false,
+      evidence: `picked ${tileId}; no write (revision ${rev}); ${steps.join('; ') || 'no tool armed'}; snackbar "${await snackbarText(page)}"`,
+    };
+  await settled(page).catch(() => null);
+  const result = await verify();
+  await page.keyboard.press('Escape');
+  await undo(page);
+  return {
+    ok: result.ok,
+    evidence: `picked ${tileId}; revision ${rev} -> ${landed}; ${result.evidence}${steps.length ? `; ${steps.join('; ')}` : ''}`,
+  };
+}
+
+/** The object shortcuts of SPEC-2 section 9 with a block selected and no caret. */
+async function checkObjectShortcuts(page, slideId, blockId, otherId, tag) {
+  const section = `shortcuts:${tag}`;
+  const select = async (id) => {
+    await closeOverlays(page);
+    const got = await selectBlockByClick(page, id, { text: false });
+    if (got !== id) {
+      const editable = await page.$('.ts-stagewrap [contenteditable="true"]');
+      if (editable) await page.keyboard.press('Escape');
+    }
+    return (await state(page)).blockId === id;
+  };
+  const pos = async () => (await blockNow(page, slideId, blockId))?.pos ?? null;
+  const count = async () => (await objectsOf(page, slideId)).length;
+  const press = async (chord) => {
+    const rev = await revisionOf(page);
+    await page.keyboard.press(chord);
+    const after = await waitRevision(page, rev, 8000);
+    await settled(page).catch(() => null);
+    return { rev, after };
+  };
+  const record = (id, key, ok, evidence) => (ok ? pass : fail)(section, { id, key, evidence });
+  const rows = [
+    {
+      id: 'key.rotate.right15',
+      key: 'Option+Right',
+      chord: 'Alt+ArrowRight',
+      check: (b, a) => near(((a?.rotate ?? 0) - (b?.rotate ?? 0) + 360) % 360, 15, 0.01),
+      what: (b, a) => `rotate ${b?.rotate ?? 0} -> ${a?.rotate ?? 0}`,
+    },
+    {
+      id: 'key.rotate.left1',
+      key: 'Option+Shift+Left',
+      chord: 'Alt+Shift+ArrowLeft',
+      check: (b, a) => near(((b?.rotate ?? 0) - (a?.rotate ?? 0) + 360) % 360, 1, 0.01),
+      what: (b, a) => `rotate ${b?.rotate ?? 0} -> ${a?.rotate ?? 0}`,
+    },
+    {
+      id: 'key.nudge.right1',
+      key: 'Right',
+      chord: 'ArrowRight',
+      check: (b, a) => near((a?.x ?? 0) - (b?.x ?? 0), 1, 0.01),
+      what: (b, a) => `x ${b?.x} -> ${a?.x}`,
+    },
+    {
+      id: 'key.nudge.down10',
+      key: 'Shift+Down',
+      chord: 'Shift+ArrowDown',
+      check: (b, a) => near((a?.y ?? 0) - (b?.y ?? 0), 10, 0.01),
+      what: (b, a) => `y ${b?.y} -> ${a?.y}`,
+    },
+  ];
+  for (const row of rows) {
+    if (!(await select(blockId))) {
+      fail(section, { id: row.id, key: row.key, evidence: `could not select ${blockId}` });
+      continue;
+    }
+    let before = await pos();
+    const { rev, after } = await press(row.chord);
+    const now = await pos();
+    /* on a slide nothing converted the key's write carries the conversion first (SPEC-2 1.6):
+       the box the object had is the conversion's */
+    let converted = '';
+    if (before === null || before === undefined) {
+      const list = await versions(page);
+      const write = list[list.length - 1]?.mutations ?? [];
+      const replaced = write[0]?.op === 'slide.replace' ? write[0].slide : null;
+      before = replaced?.slots?.main?.find((b) => b.id === blockId)?.pos ?? null;
+      converted = replaced ? '; the slide converted in the same write' : '';
+    }
+    const ok = after !== null && row.check(before, now);
+    record(
+      row.id,
+      row.key,
+      ok,
+      `revision ${rev} -> ${after}; ${row.what(before, now)}${converted}`,
+    );
+    if (after !== null) await undo(page);
+  }
+  /* the angle readout shows for 600 ms after a rotate key (6.1 row 12) */
+  if (await select(blockId)) {
+    const rev = await revisionOf(page);
+    await page.keyboard.press('Alt+ArrowRight');
+    const readout = await waitFor(
+      () =>
+        page.evaluate(() => document.querySelector('.ts-overlay .ts-readout')?.textContent ?? null),
+      { timeout: 1500 },
+    );
+    const after = await waitRevision(page, rev, 8000);
+    await settled(page).catch(() => null);
+    record(
+      'readout.angle',
+      'Option+Right',
+      /°$/.test(readout ?? ''),
+      `readout "${readout ?? 'none'}"`,
+    );
+    if (after !== null) await undo(page);
+  }
+  /* Cmd+D duplicates 16 px right and down on top of the stack (6.1 row 15) */
+  if (await select(blockId)) {
+    const before = await count();
+    let src = await pos();
+    const { rev, after } = await press('Meta+d');
+    const objects = await objectsOf(page, slideId);
+    if (!src) {
+      const list = await versions(page);
+      const write = list[list.length - 1]?.mutations ?? [];
+      src =
+        write[0]?.op === 'slide.replace'
+          ? write[0].slide?.slots?.main?.find((b) => b.id === blockId)?.pos
+          : null;
+    }
+    const copy = objects.find(
+      (b) =>
+        b.id !== blockId && b.pos && src && near(b.pos.x, src.x + 16) && near(b.pos.y, src.y + 16),
+    );
+    record(
+      'key.duplicate',
+      'Cmd+D',
+      after !== null && objects.length === before + 1 && Boolean(copy),
+      `revision ${rev} -> ${after}; objects ${before} -> ${objects.length}; copy ${copy ? `${copy.id} at ${JSON.stringify(copy.pos)}` : 'not 16 px right and down'}`,
+    );
+    if (after !== null) await undo(page);
+  }
+  /* Tab moves the selection to another object (6.1 row 4) */
+  if (await select(blockId)) {
+    await blurAll(page);
+    await page.keyboard.press('Tab');
+    const next = await waitFor(
+      async () => {
+        const id = (await state(page)).blockId;
+        return id && id !== blockId ? id : null;
+      },
+      { timeout: 3000 },
+    );
+    record(
+      'key.tab',
+      'Tab',
+      next !== null,
+      `selection ${blockId} -> ${next ?? (await state(page)).blockId}`,
+    );
+  }
+  /* Cmd+A on the canvas selects every object (6.1 row 5): the canvas owns focus after the click */
+  if (await select(blockId)) {
+    const focus = await page.evaluate(
+      () => document.activeElement?.closest('.ts-stagewrap, .ts-editor') !== null,
+    );
+    if (!focus) {
+      const el = await page.$(`.ts-stagewrap .pt-slide [data-block="${blockId}"]`);
+      const box = await el.boundingBox();
+      await page.mouse.click(box.x + 2, box.y + 2);
+      if (await page.$('.ts-stagewrap [contenteditable="true"]'))
+        await page.keyboard.press('Escape');
+    }
+    await page.keyboard.press('Meta+a');
+    const chip = await waitFor(
+      async () => {
+        const text = await chipText(page);
+        return /objects$/.test(text) ? text : null;
+      },
+      { timeout: 3000 },
+    );
+    record(
+      'key.selectAll',
+      'Cmd+A',
+      chip !== null,
+      `chip "${chip ?? (await chipText(page))}" over ${await count()} objects`,
+    );
+    await page.keyboard.press('Escape');
+  }
+  /* Cmd+Option+G groups two objects, Cmd+Option+Shift+G ungroups (6.1 row 14) */
+  if (otherId && (await select(blockId))) {
+    const other = await page.$(`.ts-stagewrap .pt-slide [data-block="${otherId}"]`);
+    const box = other ? await other.boundingBox() : null;
+    if (box) {
+      await page.keyboard.down('Shift');
+      await page.mouse.click(box.x + 6, box.y + 6);
+      await page.keyboard.up('Shift');
+      const chip = await waitFor(
+        async () => {
+          const text = await chipText(page);
+          return /2 objects/.test(text) ? text : null;
+        },
+        { timeout: 3000 },
+      );
+      if (chip) {
+        const { rev, after } = await press('Meta+Alt+g');
+        const grouped = await blockNow(page, slideId, blockId);
+        const tag = grouped?.pos?.group;
+        const members = (await objectsOf(page, slideId)).filter((b) => b.pos?.group === tag).length;
+        record(
+          'key.group',
+          'Cmd+Option+G',
+          after !== null && tag !== undefined && members === 2,
+          `chip "${chip}"; revision ${rev} -> ${after}; group ${tag} with ${members} members; chip now "${await chipText(page)}"`,
+        );
+        if (after !== null) {
+          const un = await press('Meta+Alt+Shift+g');
+          const left = (await objectsOf(page, slideId)).filter((b) => b.pos?.group === tag).length;
+          record(
+            'key.ungroup',
+            'Cmd+Option+Shift+G',
+            un.after !== null && left === 0,
+            `revision ${un.rev} -> ${un.after}; ${left} members left in ${tag}`,
+          );
+          if (un.after !== null) await undo(page);
+          await undo(page);
+        }
+      } else
+        record(
+          'key.group',
+          'Cmd+Option+G',
+          false,
+          `Shift+click did not add ${otherId}: chip "${await chipText(page)}"`,
+        );
+    }
+  }
+  /* Delete removes the object in one write (6.1 row 17); one object selected */
+  await page.keyboard.press('Escape');
+  if (await select(blockId)) {
+    const selectedChip = await chipText(page);
+    const before = await count();
+    const { rev, after } = await press('Delete');
+    const now = await count();
+    const snack = await snackbarText(page);
+    record(
+      'key.delete',
+      'Delete',
+      after !== null && now === before - 1,
+      `chip "${selectedChip}"; revision ${rev} -> ${after}; objects ${before} -> ${now}; snackbar "${snack}"`,
+    );
+    if (after !== null) await undo(page);
+  }
+  await closeOverlays(page);
+}
+
+/** The text chords of SPEC-2 section 9 on a range inside a run: each one write, verified and undone. */
+async function checkTextShortcuts(page, slideId, blockId, tag) {
+  const section = `shortcuts:${tag}`;
+  const caret = async () => {
+    await closeOverlays(page);
+    const run = await page.$(`.ts-stagewrap .pt-slide [data-run="${blockId}/text"]`);
+    if (!run) return false;
+    const box = await run.boundingBox();
+    await page.mouse.click(box.x + 8, box.y + box.height / 2);
+    const editable = await waitFor(
+      () => page.$(`.ts-stagewrap [data-run="${blockId}/text"][contenteditable="true"]`),
+      { timeout: 3000 },
+    );
+    if (!editable) return false;
+    await page.keyboard.press('Home');
+    for (let i = 0; i < 4; i += 1) await page.keyboard.press('Shift+ArrowRight');
+    return true;
+  };
+  const chords = [
+    { id: 'key.text.italic', key: 'Cmd+I', chord: 'Meta+i', verify: (t) => markRe('i').test(t) },
+    { id: 'key.text.underline', key: 'Cmd+U', chord: 'Meta+u', verify: (t) => markRe('u').test(t) },
+    {
+      id: 'key.text.strikethrough',
+      key: 'Cmd+Shift+X',
+      chord: 'Meta+Shift+x',
+      verify: (t) => markRe('s').test(t),
+    },
+    {
+      id: 'key.text.superscript',
+      key: 'Cmd+.',
+      chord: 'Meta+Period',
+      verify: (t) => markRe('sup').test(t),
+    },
+    {
+      id: 'key.text.subscript',
+      key: 'Cmd+,',
+      chord: 'Meta+Comma',
+      verify: (t) => markRe('sub').test(t),
+    },
+  ];
+  for (const row of chords) {
+    if (!(await caret())) {
+      fail(section, { id: row.id, key: row.key, evidence: `no caret in ${blockId}` });
+      continue;
+    }
+    const rev = await revisionOf(page);
+    await page.keyboard.press(row.chord);
+    /* the burst writes one text.replace after the 400 ms pause (SPEC-2 6.2; text-styles.spec.ts) */
+    const after = await waitRevision(page, rev, 10_000);
+    await settled(page).catch(() => null);
+    const block = await blockNow(page, slideId, blockId);
+    const text = typeof block?.text === 'string' ? block.text : JSON.stringify(block?.text ?? '');
+    const ok = after !== null && row.verify(text);
+    (ok ? pass : fail)(section, {
+      id: row.id,
+      key: row.key,
+      evidence: `revision ${rev} -> ${after}; ${block?.type ?? 'no'} block ${blockId} text "${text.slice(0, 80)}"`,
+    });
+    await page.keyboard.press('Escape');
+    await settled(page).catch(() => null);
+    if (after !== null) await undo(page);
+  }
+  /* Justify and the indents with the block selected and no caret */
+  const selectBlock = async () =>
+    (await selectBlockByClick(page, blockId, { text: true })) === blockId;
+  const blockChords = [
+    {
+      id: 'key.text.justify',
+      key: 'Cmd+Shift+J',
+      chord: 'Meta+Shift+j',
+      verify: (b) => b?.typography?.align === 'justify',
+      what: (b) => `align ${b?.typography?.align}`,
+    },
+    {
+      id: 'key.text.indentMore',
+      key: 'Cmd+]',
+      chord: 'Meta+BracketRight',
+      verify: (b) => (b?.typography?.indent ?? b?.indent ?? 0) > 0,
+      what: (b) => `indent ${b?.typography?.indent ?? b?.indent ?? 0}`,
+    },
+  ];
+  for (const row of blockChords) {
+    await closeOverlays(page);
+    if (!(await selectBlock())) {
+      fail(section, { id: row.id, key: row.key, evidence: `could not select ${blockId}` });
+      continue;
+    }
+    const rev = await revisionOf(page);
+    await page.keyboard.press(row.chord);
+    const after = await waitRevision(page, rev, 8000);
+    await settled(page).catch(() => null);
+    const block = await blockNow(page, slideId, blockId);
+    const ok = after !== null && row.verify(block);
+    (ok ? pass : fail)(section, {
+      id: row.id,
+      key: row.key,
+      evidence: `revision ${rev} -> ${after}; ${row.what(block)}; page still at ${new URL(page.url()).pathname}`,
+    });
+    if (after !== null) await undo(page);
+  }
+}
+
+/**
+ * The round two states on the tail slide: a shape, a line, a picture, a table cell, a chart, a
+ * group, a covering picture object and a guide. Each state walks the rows its predicates enable,
+ * runs the flipped rows' effects, reads the toolbar tail, the right-click menu and the Format
+ * options sections, and dispatches the chords of section 9.
+ */
+async function roundTwoStates(page, context, states, deckId, tag) {
+  const { slideId, textBlock, inserted } = states;
+  const byType = (type, shape) =>
+    inserted.find(
+      (b) =>
+        b.type === type && (shape === undefined || (shape === 'line') === (b.shape === 'line')),
+    );
+  const shape = byType('shape', 'closed');
+  const line = byType('shape', 'line');
+  const shot = byType('shot');
+  const table = byType('table');
+  const goto = async () => {
+    await closeOverlays(page);
+    await invoke(page, 'view.goto', { slideId }).catch(() => null);
+    await waitFor(async () => ((await state(page)).slideId === slideId ? true : null));
+  };
+  const select = async (id) => {
+    await goto();
+    const got = await selectBlockByClick(page, id, { text: false });
+    if (got !== id) {
+      const editable = await page.$('.ts-stagewrap [contenteditable="true"]');
+      if (editable) await page.keyboard.press('Escape');
+    }
+    return (await state(page)).blockId === id;
+  };
+  const effectsWith = async (family, ids, ctx, stateTag) => {
+    for (const id of ids) {
+      const item = findItem(id);
+      if (!item) continue;
+      const target =
+        family === 'text'
+          ? textBlock?.id
+          : family === 'shape'
+            ? shape?.id
+            : family === 'line'
+              ? line?.id
+              : family === 'image'
+                ? shot?.id
+                : family === 'table'
+                  ? table?.id
+                  : null;
+      if (!target || !(await select(target))) {
+        skip(`effects:${stateTag}`, { id, evidence: `could not select the ${family}` });
+        continue;
+      }
+      const ctxNow = await objectContext(page, family);
+      await runEffect(page, context, item, ctxNow, deckId, stateTag);
+    }
+  };
+
+  // 1. the text block: the round two Format rows (marks, capitalization, justified, indents, spacing, lists)
+  if (textBlock) {
+    /* the Title and body slide's placeholder is empty: the marks and the case need text, so one
+       block.set gives it a sentence first (measured: text.style on an empty Text is a no-op) */
+    await goto();
+    const rev0 = await revisionOf(page);
+    await invoke(page, 'block.set', {
+      slideId,
+      blockId: textBlock.id,
+      path: '/text',
+      value: 'The audit paragraph carries a sentence for the marks',
+      baseRevision: rev0,
+    }).catch(() => null);
+    await settled(page).catch(() => null);
+    await resetEditor(page, deckId);
+    await effectsWith(
+      'text',
+      [
+        'format.text.italic',
+        'format.text.underline',
+        'format.text.strikethrough',
+        'format.text.superscript',
+        'format.text.subscript',
+        'format.text.capitalization.lower',
+        'format.text.capitalization.upper',
+        'format.text.capitalization.title',
+        'format.alignIndent.justified',
+        'format.alignIndent.increaseIndent',
+        'format.alignIndent.decreaseIndent',
+        'format.spacing.addBefore',
+        'format.spacing.addAfter',
+        'format.bulletsNumbering.bulleted',
+        'format.bulletsNumbering.numbered',
+        'edit.selectNone',
+      ],
+      null,
+      'textBlock2',
+    );
+    /* the preset plates: a pick writes text.list (SPEC-2 11.1 step 20) */
+    for (const [rowId, family, preset] of [
+      ['format.bulletsNumbering.bulleted', 'bullet', 'disc-circle-square'],
+      ['format.bulletsNumbering.numbered', 'number', 'digit-alpha-roman'],
+    ]) {
+      if (!(await select(textBlock.id))) continue;
+      const level = await openPath(page, rowId);
+      const outcome = await pickFromPlate(
+        page,
+        `${ROW_SELECTOR(level)}[data-menu-item="${rowId}"]`,
+        rowId,
+        preset,
+        async () => {
+          const block = await blockNow(page, slideId, textBlock.id);
+          return {
+            ok: block?.type === 'plain' && block.marker === family && block.preset === preset,
+            evidence: `block now ${block?.type} marker ${block?.marker} preset ${block?.preset}`,
+          };
+        },
+      ).catch((e) => ({ ok: false, evidence: `threw: ${String(e).slice(0, 160)}` }));
+      await closeOverlays(page);
+      (outcome.ok ? pass : fail)(`pickers:${tag}`, {
+        id: `${rowId}.pick`,
+        evidence: outcome.evidence,
+      });
+    }
+    await checkTextShortcuts(page, slideId, textBlock.id, 'text');
+    if (await select(textBlock.id)) await checkFormatSections(page, 'text', tag);
+    /* the context-only rows of the text block's menu */
+    await runContextRow(
+      page,
+      textBlock.id,
+      'format.textFitting',
+      'textBlock2',
+      panelAt(page, 'textFitting'),
+    );
+    await runContextRow(
+      page,
+      textBlock.id,
+      'format.dropShadow',
+      'textBlock2',
+      panelAt(page, 'shadow'),
+    );
+    await runContextRow(
+      page,
+      textBlock.id,
+      'format.altText',
+      'textBlock2',
+      panelAt(page, 'altText'),
+    );
+  }
+
+  // 2. the shape: rows, effects, tail, menu, sections, chords
+  if (shape) {
+    if (await select(shape.id)) {
+      const ctxS = await objectContext(page, 'shape');
+      await walkMenus(page, ctxS, 'shape');
+      await checkContextMenu(page, 'shape', () => openBlockMenu(page, shape.id), ctxS, tag);
+      await checkFormatSections(page, 'shape', tag);
+    }
+    await effectsWith(
+      'shape',
+      [
+        'arrange.rotate.clockwise',
+        'arrange.rotate.counterClockwise',
+        'arrange.rotate.flipHorizontally',
+        'arrange.rotate.flipVertically',
+        'arrange.centerOnPage.horizontally',
+        'arrange.centerOnPage.vertically',
+        'arrange.align.left',
+        'arrange.align.center',
+        'arrange.align.right',
+        'arrange.align.top',
+        'arrange.align.middle',
+        'arrange.align.bottom',
+        'arrange.order.bringToFront',
+        'arrange.order.bringForward',
+        'arrange.order.sendBackward',
+        'arrange.order.sendToBack',
+        'format.bordersLines.borderColor',
+        'format.bordersLines.borderWeight',
+        'format.bordersLines.borderDash.dot',
+        'format.bordersLines.borderDash.longDash',
+        'format.text.italic',
+        'edit.selectNone',
+      ],
+      null,
+      'shape',
+    );
+    /* Change shape from the context menu: a pick writes shape.set */
+    await runContextRow(page, shape.id, 'format.changeShape', 'shape', async () => {
+      const outcome = await pickFromPlate(
+        page,
+        '#ts-menu-canvas [data-menu-item="format.changeShape"]',
+        'format.changeShape',
+        'hexagon',
+        async () => {
+          const block = await blockNow(page, slideId, shape.id);
+          return {
+            ok: block?.shape === 'hexagon',
+            evidence: `shape ${shape.shape} -> ${block?.shape}`,
+          };
+        },
+      );
+      return outcome;
+    });
+    await checkObjectShortcuts(page, slideId, shape.id, line?.id ?? textBlock?.id, 'objects');
+  }
+
+  // 3. the line: the ends and the dash, the menu, the sections
+  if (line) {
+    if (await select(line.id)) {
+      const ctxL = await objectContext(page, 'line');
+      await checkContextMenu(page, 'line', () => openBlockMenu(page, line.id), ctxL, tag);
+      await checkFormatSections(page, 'line', tag);
+    }
+    await effectsWith(
+      'line',
+      [
+        'format.bordersLines.lineStart.fillCircle',
+        'format.bordersLines.lineEnd.fillArrow',
+        'format.bordersLines.lineEnd.openDiamond',
+        'format.bordersLines.borderDash.dash',
+        'arrange.rotate.clockwise',
+      ],
+      null,
+      'line',
+    );
+  }
+
+  // 4. the picture: the image menu, the mask plate, crop mode, reset, the sections
+  if (shot) {
+    if (await select(shot.id)) {
+      const ctxI = await objectContext(page, 'image');
+      await walkMenus(page, ctxI, 'image');
+      await checkContextMenu(page, 'image', () => openBlockMenu(page, shot.id), ctxI, tag);
+      await checkFormatSections(page, 'image', tag);
+    }
+    await effectsWith(
+      'image',
+      ['format.image.cropImage', 'arrange.rotate.flipHorizontally'],
+      null,
+      'image',
+    );
+    if (await select(shot.id)) {
+      const level = await openPath(page, 'format.image.maskImage');
+      const outcome = await pickFromPlate(
+        page,
+        `${ROW_SELECTOR(level)}[data-menu-item="format.image.maskImage"]`,
+        'format.image.maskImage',
+        'ellipse',
+        async () => {
+          const block = await blockNow(page, slideId, shot.id);
+          return {
+            ok: block?.mask === 'ellipse',
+            evidence: `mask ${shot.mask ?? 'none'} -> ${block?.mask}`,
+          };
+        },
+      ).catch((e) => ({ ok: false, evidence: `threw: ${String(e).slice(0, 160)}` }));
+      await closeOverlays(page);
+      (outcome.ok ? pass : fail)(`pickers:${tag}`, {
+        id: 'format.image.maskImage.pick',
+        evidence: outcome.evidence,
+      });
+    }
+    /* Reset image needs an edited picture: a mask through the action first, both undone */
+    if (await select(shot.id)) {
+      const rev0 = await revisionOf(page);
+      await invoke(page, 'block.mask', {
+        slideId,
+        blockId: shot.id,
+        mask: 'ellipse',
+        baseRevision: rev0,
+      }).catch(() => null);
+      await settled(page).catch(() => null);
+      if ((await revisionOf(page)) > rev0 && (await select(shot.id))) {
+        const ctxE = await objectContext(page, 'image', { selection: { imageEdited: true } });
+        const item = findItem('format.image.resetImage');
+        const outcome = await observeObjectWrite(page, item, (b, a) => ({
+          ok: a?.mask === undefined,
+          evidence: `mask ${b.mask} -> ${a?.mask ?? 'none'}`,
+        })).catch((e) => ({ ok: false, evidence: `threw: ${String(e).slice(0, 160)}` }));
+        void ctxE;
+        (outcome.ok ? pass : fail)(`effects:image`, {
+          id: 'format.image.resetImage',
+          menu: 'format',
+          evidence: outcome.evidence,
+        });
+        await undo(page);
+      } else
+        skip('effects:image', {
+          id: 'format.image.resetImage',
+          evidence: 'block.mask did not write to set up Reset image',
+        });
+    }
+  }
+
+  // 5. the table cell: the cell menu, the sections, the range attempt
+  if (table) {
+    const cell = async (r, c) =>
+      page.$(`.ts-stagewrap .pt-slide [data-run="${table.id}/rows/${r}/cells/${c}"]`);
+    await goto();
+    const first = await cell(0, 0);
+    if (first) {
+      const box = await first.boundingBox();
+      await page.mouse.click(box.x + 8, box.y + box.height / 2);
+      await page.waitForTimeout(150);
+      /* the click opened the cell's caret; Esc keeps the table selected without it, so the
+         right-click on the cell's run reaches the stage (a right-click inside an editing run is
+         the browser's own menu, round one deviation 5) */
+      if (await page.$('.ts-stagewrap [contenteditable="true"]'))
+        await page.keyboard.press('Escape');
+      await page.waitForTimeout(150);
+      if ((await state(page)).blockId === table.id) {
+        const ctxT = await objectContext(page, 'table');
+        await checkContextMenu(
+          page,
+          'tableCell',
+          async () => {
+            const el = await cell(0, 0);
+            const b = await el.boundingBox();
+            await page.mouse.click(b.x + 8, b.y + b.height / 2, { button: 'right' });
+          },
+          ctxT,
+          tag,
+        );
+        await checkFormatSections(page, 'table', tag);
+        /* the range: a drag from (0, 0) to (1, 1); the stage selects no cellRange this round (B4) */
+        await closeOverlays(page);
+        const from = await cell(0, 0);
+        const to = await cell(1, 1);
+        if (from && to) {
+          const a = await from.boundingBox();
+          const b = await to.boundingBox();
+          await page.mouse.move(a.x + 8, a.y + a.height / 2);
+          await page.mouse.down();
+          await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2, { steps: 6 });
+          await page.mouse.up();
+          await page.waitForTimeout(200);
+          await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2, { button: 'right' });
+          const observed = await readContextMenu(page).catch(() => []);
+          const wanted = expectedContext('cellRange', ctxT);
+          const same =
+            JSON.stringify(observed.filter((e) => e !== '-')) ===
+            JSON.stringify(wanted.filter((e) => e !== '-'));
+          if (same) pass(`contextMenu:${tag}`, { id: 'cellRange', check: 'order', observed });
+          else
+            skip(`contextMenu:${tag}`, {
+              id: 'cellRange',
+              check: 'order',
+              observed,
+              evidence: `recorded deviation (${CELL_RANGE_DEVIATION})`,
+            });
+          await closeOverlays(page);
+        }
+      } else
+        fail(`contextMenu:${tag}`, {
+          id: 'tableCell',
+          evidence: `clicking the first cell selected ${(await state(page)).blockId}`,
+        });
+    }
+  }
+
+  // 6. a chart: inserted through the action, its tail, menu, sections and rows
+  {
+    await goto();
+    const rev = await revisionOf(page);
+    const chart = {
+      id: 'audit-chart',
+      type: 'chart',
+      kind: 'bar',
+      categories: ['A', 'B', 'C'],
+      series: [{ name: 'Series 1', values: [3, 5, 2] }],
+      pos: { x: 320, y: 180, w: 960, h: 540 },
+    };
+    const result = await invoke(page, 'block.insert', {
+      slideId,
+      slot: 'main',
+      block: chart,
+      baseRevision: rev,
+    }).catch((e) => ({ error: String(e) }));
+    if (result.error)
+      skip(`toolbar:${tag}`, {
+        id: 'toolbar.chart',
+        check: 'setup',
+        evidence: `block.insert chart: ${result.error.slice(0, 200)}`,
+      });
+    else {
+      await settled(page).catch(() => null);
+      if (await select(chart.id)) {
+        await checkToolbar(page, 'chart', tag);
+        const ctxC = await objectContext(page, 'chart');
+        await checkContextMenu(page, 'chart', () => openBlockMenu(page, chart.id), ctxC, tag);
+        await checkFormatSections(page, 'chart', tag);
+        await runContextRow(page, chart.id, 'format.editData', 'chart', panelAt(page, 'chart'));
+        await runContextRow(page, chart.id, 'format.chartType', 'chart', async (row) => {
+          await row.hover();
+          const child = await page
+            .waitForSelector('#ts-menu-canvas [data-menu-item="format.chartType.pie"]', {
+              timeout: 4000,
+            })
+            .catch(() => null);
+          if (!child) return { ok: false, evidence: 'Chart type ▸ opened no submenu' };
+          const before = await revisionOf(page);
+          await child.click();
+          const after = await waitRevision(page, before, 8000);
+          await settled(page).catch(() => null);
+          const block = await blockNow(page, slideId, chart.id);
+          const ok = after !== null && block?.kind === 'pie';
+          if (after !== null) await undo(page);
+          return { ok, evidence: `revision ${before} -> ${after}; kind bar -> ${block?.kind}` };
+        });
+        await checkDefaultWords(page, 'a chart selected');
+      } else
+        fail(`toolbar:${tag}`, {
+          id: 'toolbar.chart',
+          check: 'select',
+          evidence: `clicking ${chart.id} selected ${(await state(page)).blockId}`,
+        });
+      /* the chart leaves so the group and picture states see the tail slide as before */
+      await invoke(page, 'block.remove', {
+        slideId,
+        blockId: chart.id,
+        baseRevision: await revisionOf(page),
+      }).catch(() => null);
+      await settled(page).catch(() => null);
+    }
+  }
+
+  // 7. a group of the shape and the line: Group, the group tail, menu, sections, Ungroup, Regroup
+  if (shape && line && (await select(shape.id))) {
+    const other = await page.$(`.ts-stagewrap .pt-slide [data-block="${line.id}"]`);
+    const box = other ? await other.boundingBox() : null;
+    if (box) {
+      await page.keyboard.down('Shift');
+      await page.mouse.click(box.x + 6, box.y + 6);
+      await page.keyboard.up('Shift');
+      const two = await waitFor(
+        async () => (/2 objects/.test(await chipText(page)) ? true : null),
+        { timeout: 3000 },
+      );
+      if (two) {
+        const ctx2 = await objectContext(page, 'shape', { blocks: 2 });
+        await walkMenus(page, ctx2, 'twoObjects');
+        const item = findItem('arrange.group');
+        const before = await revisionOf(page);
+        await activate(page, item.id).catch(() => null);
+        const after = await waitRevision(page, before, 8000);
+        await settled(page).catch(() => null);
+        const tagOf = (await blockNow(page, slideId, shape.id))?.pos?.group;
+        const members = (await objectsOf(page, slideId)).filter(
+          (b) => b.pos?.group === tagOf,
+        ).length;
+        (after !== null && tagOf && members === 2 ? pass : fail)(`effects:${tag}`, {
+          id: 'arrange.group',
+          menu: 'arrange',
+          evidence: `revision ${before} -> ${after}; group ${tagOf} with ${members} members`,
+        });
+        if (after !== null) {
+          /* a click on a member selects the group */
+          await page.keyboard.press('Escape');
+          if (await select(shape.id)) {
+            const chip = await chipText(page);
+            (chip === 'Group' ? pass : fail)(`toolbar:${tag}`, {
+              id: 'group.chip',
+              evidence: `chip "${chip}"`,
+            });
+            await checkToolbar(page, 'group', tag);
+            const ctxG = await objectContext(page, 'shape', {
+              blocks: 2,
+              selection: { group: tagOf },
+            });
+            await checkContextMenu(page, 'group', () => openBlockMenu(page, shape.id), ctxG, tag);
+            await checkFormatSections(page, 'group', tag);
+            const ring = await page.$('.ts-overlay .ts-group[role="group"]');
+            (ring ? pass : fail)(`toolbar:${tag}`, {
+              id: 'group.ring',
+              evidence: ring ? 'the union ring carries role="group"' : 'no role="group" ring',
+            });
+            /* Ungroup from the Arrange menu, then Regroup */
+            const b1 = await revisionOf(page);
+            await activate(page, 'arrange.ungroup').catch(() => null);
+            const a1 = await waitRevision(page, b1, 8000);
+            await settled(page).catch(() => null);
+            const left = (await objectsOf(page, slideId)).filter(
+              (b) => b.pos?.group === tagOf,
+            ).length;
+            (a1 !== null && left === 0 ? pass : fail)(`effects:${tag}`, {
+              id: 'arrange.ungroup',
+              menu: 'arrange',
+              evidence: `revision ${b1} -> ${a1}; ${left} members left`,
+            });
+            if (a1 !== null && (await select(shape.id))) {
+              const b2 = await revisionOf(page);
+              await activate(page, 'arrange.regroup').catch(() => null);
+              const a2 = await waitRevision(page, b2, 8000);
+              await settled(page).catch(() => null);
+              const re = (await blockNow(page, slideId, shape.id))?.pos?.group;
+              (a2 !== null && re ? pass : fail)(`effects:${tag}`, {
+                id: 'arrange.regroup',
+                menu: 'arrange',
+                evidence: `revision ${b2} -> ${a2}; group ${re ?? 'none'}`,
+              });
+              if (a2 !== null) await undo(page);
+            }
+            if (a1 !== null) await undo(page);
+          }
+          await undo(page);
+        }
+      } else
+        fail(`effects:${tag}`, {
+          id: 'arrange.group',
+          menu: 'arrange',
+          evidence: `Shift+click did not add the line: chip "${await chipText(page)}"`,
+        });
+    }
+  }
+
+  // 8. a guide: Add vertical guide, the guide line, its menu, Delete guide
+  {
+    await goto();
+    await closeOverlays(page);
+    const info0 = await invoke(page, 'deck.info');
+    await invoke(page, 'deck.guides', {
+      add: [{ axis: 'x', at: 800 }],
+      baseRevision: info0.revision,
+    }).catch(() => null);
+    await settled(page).catch(() => null);
+    /* View > Guides > Show guides, when off */
+    const level = await openPath(page, 'view.guides.show');
+    const rowsNow = await readRows(page, level);
+    const showRow = rowsNow.find((r) => r.id === 'view.guides.show');
+    if (showRow && showRow.checked !== 'true')
+      await page.click(`${ROW_SELECTOR(level)}[data-menu-item="view.guides.show"]`);
+    await closeMenus(page);
+    const guide = await waitFor(() => page.$('.ts-overlay [data-control="guide.x.800"]'), {
+      timeout: 4000,
+    });
+    const ctxGd = { ...(await contextOf(page)), guides: 1 };
+    if (guide) {
+      pass(`rows:${tag}`, {
+        id: 'guide.drawn',
+        menu: 'view',
+        evidence: 'the vertical guide at 800 is drawn in the overlay',
+      });
+      await checkContextMenu(
+        page,
+        'guide',
+        async () => {
+          const g = await page.$('.ts-overlay [data-control="guide.x.800"]');
+          const b = await g.boundingBox();
+          await page.mouse.click(b.x + b.width / 2, b.y + Math.min(200, b.height / 2), {
+            button: 'right',
+          });
+        },
+        ctxGd,
+        tag,
+      );
+      /* Delete guide from the guide's menu writes deck.guides with remove */
+      await closeOverlays(page);
+      const g = await page.$('.ts-overlay [data-control="guide.x.800"]');
+      const b = await g.boundingBox();
+      await page.mouse.click(b.x + b.width / 2, b.y + Math.min(200, b.height / 2), {
+        button: 'right',
+      });
+      const del = await page
+        .waitForSelector('#ts-menu-canvas [data-menu-item="view.guides.delete"]', { timeout: 4000 })
+        .catch(() => null);
+      if (del) {
+        const before = await revisionOf(page);
+        await del.click();
+        const after = await waitRevision(page, before, 8000);
+        await settled(page).catch(() => null);
+        const info = await invoke(page, 'deck.info');
+        const gone = !(info.guides?.x ?? []).includes(800);
+        (after !== null && gone ? pass : fail)(`effects:${tag}`, {
+          id: 'view.guides.delete',
+          menu: 'view',
+          evidence: `revision ${before} -> ${after}; guides ${JSON.stringify(info.guides ?? null)}`,
+        });
+        if (after !== null) await undo(page);
+      } else
+        fail(`effects:${tag}`, {
+          id: 'view.guides.delete',
+          menu: 'view',
+          evidence: 'no Delete guide row in the guide menu',
+        });
+    } else
+      fail(`rows:${tag}`, {
+        id: 'guide.drawn',
+        menu: 'view',
+        evidence: 'no guide line drawn after Add vertical guide and Show guides',
+      });
+    await closeOverlays(page);
+    /* Show ruler: the two rulers with 14 and 8 numerals (SPEC-2 11.8 step 6) */
+    const lvl = await openPath(page, 'view.showRuler');
+    await page.click(`${ROW_SELECTOR(lvl)}[data-menu-item="view.showRuler"]`);
+    await closeMenus(page);
+    const rulers = await waitFor(
+      async () => ((await page.$$('.ts-overlay .ts-ruler, .ts-ruler')).length === 2 ? true : null),
+      { timeout: 4000 },
+    );
+    const numerals = await page.$$eval('.ts-ruler', (els) =>
+      els.map((el) => el.querySelectorAll('.ts-ruler-numeral').length),
+    );
+    (rulers && numerals.includes(14) && numerals.includes(8) ? pass : fail)(`rows:${tag}`, {
+      id: 'ruler.drawn',
+      menu: 'view',
+      evidence: `rulers ${rulers ? 2 : (await page.$$('.ts-ruler')).length}; numerals ${numerals.join(' and ')} (wanted 14 and 8)`,
+    });
+    const lvl2 = await openPath(page, 'view.showRuler');
+    const label = (await readRows(page, lvl2)).find((r) => r.id === 'view.showRuler')?.label;
+    (label === 'Hide ruler' ? pass : fail)(`rows:${tag}`, {
+      id: 'view.showRuler.altLabel',
+      menu: 'view',
+      evidence: `row reads "${label}" while the rulers show`,
+    });
+    await page.click(`${ROW_SELECTOR(lvl2)}[data-menu-item="view.showRuler"]`);
+    await closeMenus(page);
+    await checkDefaultWords(page, 'rulers and a guide shown');
+    /* the guide leaves: Clear guides through the action */
+    const info1 = await invoke(page, 'deck.info');
+    if ((info1.guides?.x?.length ?? 0) + (info1.guides?.y?.length ?? 0) > 0)
+      await invoke(page, 'deck.guides', { clear: true, baseRevision: info1.revision }).catch(
+        () => null,
+      );
+    await settled(page).catch(() => null);
+  }
+
+  // 9. a covering picture object at the bottom of the stack: the image menu appends Change background and Guides (SPEC-2 0.100)
+  if (shot) {
+    await goto();
+    const rev = await revisionOf(page);
+    const asset = shot.asset;
+    const picture = {
+      id: 'audit-picture',
+      type: 'picture',
+      asset,
+      pos: { x: 0, y: 0, w: 1600, h: 900 },
+    };
+    const result = await invoke(page, 'block.insert', {
+      slideId,
+      slot: 'main',
+      block: picture,
+      baseRevision: rev,
+    }).catch((e) => ({ error: String(e) }));
+    if (!result.error) {
+      await settled(page).catch(() => null);
+      await invoke(page, 'block.order', {
+        slideId,
+        blockId: picture.id,
+        move: 'back',
+        baseRevision: await revisionOf(page),
+      }).catch(() => null);
+      await settled(page).catch(() => null);
+      const pictureZ = (await blockNow(page, slideId, picture.id))?.pos?.z ?? 0;
+      const bottom = (await objectsOf(page, slideId)).every(
+        (b) => b.id === picture.id || (b.pos?.z ?? 0) > pictureZ,
+      );
+      /* the picture covers the sheet: a right-click on it away from the other objects */
+      await closeOverlays(page);
+      const el = await page.$(`.ts-stagewrap .pt-slide .free[data-free="${picture.id}"]`);
+      if (el) {
+        const box = await el.boundingBox();
+        await page.mouse.click(box.x + 30, box.y + box.height - 30);
+        await page.waitForTimeout(150);
+        const selected = (await state(page)).blockId === picture.id;
+        const ctxP = await objectContext(page, 'image', { coversSheet: true });
+        await checkContextMenu(
+          page,
+          'image',
+          async () => {
+            await page.mouse.click(box.x + 30, box.y + box.height - 30, { button: 'right' });
+          },
+          ctxP,
+          'coversSheet',
+        );
+        (selected ? pass : fail)(`rows:${tag}`, {
+          id: 'picture.coversSheet',
+          menu: 'context',
+          evidence: `picture object at z bottom ${bottom}; selected by a click ${selected}`,
+        });
+      }
+      await invoke(page, 'block.remove', {
+        slideId,
+        blockId: picture.id,
+        baseRevision: await revisionOf(page),
+      }).catch(() => null);
+      await settled(page).catch(() => null);
+    } else
+      skip(`contextMenu:coversSheet`, {
+        id: 'image',
+        evidence: `block.insert picture: ${result.error.slice(0, 200)}`,
+      });
+  }
+
+  // 10. the table hover grid and a shape grid pick from the Insert menu, the special characters pick, the Diagram panel's insert
+  {
+    await goto();
+    await closeOverlays(page);
+    const count = async () => (await objectsOf(page, slideId)).length;
+    const before = await count();
+    const level = await openPath(page, 'insert.table');
+    const outcome = await pickFromPlate(
+      page,
+      `${ROW_SELECTOR(level)}[data-menu-item="insert.table"]`,
+      'insert.table',
+      '4x3',
+      async () => {
+        const objects = await objectsOf(page, slideId);
+        const table = objects.find((b) => b.type === 'table' && b.id !== 'audit-table');
+        return {
+          ok:
+            objects.length === before + 1 &&
+            table?.columns?.length === 4 &&
+            table?.rows?.length === 3 &&
+            table.pos !== undefined,
+          evidence: `objects ${before} -> ${objects.length}; table ${table ? `${table.columns?.length} by ${table.rows?.length} at ${JSON.stringify(table.pos)}` : 'none'}`,
+        };
+      },
+    ).catch((e) => ({ ok: false, evidence: `threw: ${String(e).slice(0, 160)}` }));
+    await closeOverlays(page);
+    (outcome.ok ? pass : fail)(`pickers:${tag}`, {
+      id: 'insert.table.pick',
+      evidence: outcome.evidence,
+    });
+    for (const [rowId, tile] of [
+      ['insert.shape.shapes', 'hexagon'],
+      ['insert.shape.arrows', 'rightArrow'],
+      ['insert.shape.callouts', 'wedgeRectCallout'],
+      ['insert.shape.equation', 'mathPlus'],
+    ]) {
+      await goto();
+      await closeOverlays(page);
+      const n = await count();
+      const lvl = await openPath(page, rowId);
+      const picked = await pickFromPlate(
+        page,
+        `${ROW_SELECTOR(lvl)}[data-menu-item="${rowId}"]`,
+        rowId,
+        tile,
+        async () => {
+          const objects = await objectsOf(page, slideId);
+          const drawn = objects.find((b) => b.type === 'shape' && b.shape === tile);
+          return {
+            ok: objects.length === n + 1 && drawn !== undefined && drawn.pos !== undefined,
+            evidence: `objects ${n} -> ${objects.length}; ${drawn ? `${tile} at ${JSON.stringify(drawn.pos)}` : `no ${tile}`}`,
+          };
+        },
+      ).catch((e) => ({ ok: false, evidence: `threw: ${String(e).slice(0, 160)}` }));
+      await closeOverlays(page);
+      (picked.ok ? pass : fail)(`pickers:${tag}`, {
+        id: `${rowId}.pick`,
+        evidence: picked.evidence,
+      });
+    }
+    /* the special characters dialog: a pick with no caret creates a text box (SPEC-2 6.2) */
+    await goto();
+    await closeOverlays(page);
+    {
+      const n = await count();
+      const rev = await revisionOf(page);
+      await activate(page, 'insert.specialCharacters').catch(() => null);
+      const tileEl = await page
+        .waitForSelector('[data-control^="dialog.specialCharacters.pick."]', { timeout: 5000 })
+        .catch(() => null);
+      if (tileEl) {
+        const id = await tileEl.getAttribute('data-control');
+        await tileEl.click();
+        const after = await waitRevision(page, rev, 8000);
+        await settled(page).catch(() => null);
+        const objects = await objectsOf(page, slideId);
+        const still = await page.$(
+          '[role="dialog"] [data-control="dialog.specialCharacters.grid"]',
+        );
+        (after !== null && objects.length === n + 1 ? pass : fail)(`pickers:${tag}`, {
+          id: 'insert.specialCharacters.pick',
+          evidence: `picked ${id}; revision ${rev} -> ${after}; objects ${n} -> ${objects.length}; the dialog ${still ? 'stays open' : 'closed'}`,
+        });
+        await closeOverlays(page);
+        if (after !== null) await undo(page);
+      } else
+        fail(`pickers:${tag}`, {
+          id: 'insert.specialCharacters.pick',
+          evidence: 'the dialog shows no character tile',
+        });
+      await closeOverlays(page);
+    }
+    /* the Diagram panel: Insert writes a group of objects */
+    await goto();
+    await closeOverlays(page);
+    {
+      const n = await count();
+      const rev = await revisionOf(page);
+      await activate(page, 'insert.diagram').catch(() => null);
+      const panel = await waitFor(() => page.$('.ts-rpanel [data-panel-title="Diagram"]'), {
+        timeout: 5000,
+      });
+      if (panel) {
+        await checkDefaultWords(page, 'the Diagram panel');
+        const insert = await page.$(
+          '.ts-rpanel [data-control="diagram.insert"], .ts-rpanel button:has-text("Insert")',
+        );
+        if (insert) {
+          await insert.click();
+          const after = await waitRevision(page, rev, 10_000);
+          await settled(page).catch(() => null);
+          const objects = await objectsOf(page, slideId);
+          const tags = new Set(objects.filter((b) => b.pos?.group).map((b) => b.pos.group));
+          (after !== null && objects.length > n + 1 && tags.size >= 1 ? pass : fail)(
+            `pickers:${tag}`,
+            {
+              id: 'insert.diagram.insert',
+              evidence: `revision ${rev} -> ${after}; objects ${n} -> ${objects.length}; groups ${[...tags].join(', ') || 'none'}`,
+            },
+          );
+          if (after !== null) await undo(page);
+        } else
+          fail(`pickers:${tag}`, {
+            id: 'insert.diagram.insert',
+            evidence: 'no Insert button in the Diagram panel',
+          });
+        const close = await page.$('.ts-rpanel [data-control$=".close"]');
+        if (close) await close.click();
+      } else fail(`pickers:${tag}`, { id: 'insert.diagram.insert', evidence: 'no Diagram panel' });
+      await closeOverlays(page);
+    }
+    /* the Background dialog: Color writes the slide's fill; Choose from this presentation inserts the picture object at the bottom */
+    await goto();
+    await closeOverlays(page);
+    {
+      const rev = await revisionOf(page);
+      await activate(page, 'slide.changeBackground').catch(() => null);
+      const dialog = await waitFor(() => page.$('[data-control="dialog.background"]'), {
+        timeout: 5000,
+      });
+      if (dialog) {
+        const swatch = await page.$(
+          '[data-control^="dialog.background.color."]:not([data-control$=".none"]):not([data-control$=".hex"])',
+        );
+        const picked = swatch ? await swatch.getAttribute('data-control') : null;
+        if (swatch) await swatch.click();
+        const done = await page.$(
+          '[data-control="dialog.background"] [data-control$=".done"], [data-control="dialog.background"] button:has-text("Done")',
+        );
+        if (done) await done.click();
+        const after = await waitRevision(page, rev, 8000);
+        await settled(page).catch(() => null);
+        const slide = (await invoke(page, 'slide.get', { slideId })).slide;
+        (after !== null && slide.background !== undefined ? pass : fail)(`effects:${tag}`, {
+          id: 'slide.changeBackground.color',
+          menu: 'slide',
+          evidence: `picked ${picked}; Done ${done ? 'clicked' : 'not found'}; revision ${rev} -> ${after}; background ${JSON.stringify(slide.background ?? null)}`,
+        });
+        await closeOverlays(page);
+        if (after !== null) await undo(page);
+        /* Choose from this presentation */
+        const rev2 = await revisionOf(page);
+        const n = await count();
+        await activate(page, 'slide.changeBackground').catch(() => null);
+        await waitFor(() => page.$('[data-control="dialog.background"]'), { timeout: 5000 });
+        const choose = await page.$(
+          '[data-control^="dialog.background.choose."]:not([data-control$=".upload"]):not([data-control$=".byUrl"])',
+        );
+        const chosen = choose ? await choose.getAttribute('data-control') : null;
+        if (choose) await choose.click();
+        const done2 = await page.$(
+          '[data-control="dialog.background"] [data-control$=".done"], [data-control="dialog.background"] button:has-text("Done")',
+        );
+        if (done2) await done2.click();
+        const after2 = await waitRevision(page, rev2, 10_000);
+        await settled(page).catch(() => null);
+        const objects = await objectsOf(page, slideId);
+        const pic = objects.find((b) => b.type === 'picture');
+        const lowest = Math.min(...objects.map((b) => b.pos?.z ?? 0));
+        (after2 !== null && pic && pic.pos?.z === lowest && pic.pos.w === 1600 ? pass : fail)(
+          `effects:${tag}`,
+          {
+            id: 'slide.changeBackground.choose',
+            menu: 'slide',
+            evidence: `chose ${chosen}; revision ${rev2} -> ${after2}; objects ${n} -> ${objects.length}; picture ${pic ? JSON.stringify(pic.pos) : 'none'} (lowest z ${lowest})`,
+          },
+        );
+        await closeOverlays(page);
+        if (after2 !== null) await undo(page);
+      } else
+        fail(`effects:${tag}`, {
+          id: 'slide.changeBackground.color',
+          menu: 'slide',
+          evidence: 'no Background dialog',
+        });
+      await closeOverlays(page);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -2502,14 +4588,22 @@ try {
           list.some((b) => b.id === blockId),
         );
         const at = slot ? slot.findIndex((b) => b.id === blockId) : -1;
+        /* SPEC-2 6.1 row 13 supersedes the slot rule: one stack per canvas; on a slide nothing
+           converted the objects take document order as their z, so forward and front hold when
+           the block is not last in that order and backward and back when it is not first
+           (editor-shell.ts buildMenuContext) */
+        const everyBlock = Object.values(placed.slots ?? {}).flat();
+        const docAt = everyBlock.findIndex((b) => b.id === blockId);
+        void slot;
+        void at;
         const order =
-          placed.layout?.type === 'freeform' || !slot
+          placed.layout?.type === 'freeform' || docAt < 0
             ? { forward: false, backward: false, front: false, back: false }
             : {
-                forward: at > 0,
-                front: at > 0,
-                backward: at >= 0 && at < slot.length - 1,
-                back: at >= 0 && at < slot.length - 1,
+                forward: everyBlock.length > 1 && docAt < everyBlock.length - 1,
+                front: everyBlock.length > 1 && docAt < everyBlock.length - 1,
+                backward: docAt > 0,
+                back: docAt > 0,
               };
         const ctxB = await contextOf(page, {
           focus: 'canvas',
@@ -2586,6 +4680,18 @@ try {
           id: 'select',
           evidence: `could not select ${blockId} (${selected})`,
         });
+    }
+    /* round two: the object states (SPEC-2 4.2, 4.3, 5, 6.1, 9) on the same tail slide */
+    if (states && phase('objects')) {
+      await resetEditor(page, scratchDeck);
+      try {
+        await roundTwoStates(page, context, states, scratchDeck, 'objects');
+      } catch (error) {
+        fail('infrastructure', {
+          id: 'objects',
+          evidence: `the round two states threw: ${String(error?.stack ?? error).slice(0, 600)}`,
+        });
+      }
     }
   }
 
@@ -2745,8 +4851,8 @@ for (const [tag, menus] of Object.entries(totals)) {
 log(
   `audit: ${summary.pass} pass, ${summary.fail} fail, ${summary.skip} skipped in ${report.seconds} s; report ${OUT}`,
 );
-for (const row of rows.filter((r) => r.pass === false).slice(0, 60))
+for (const row of rows.filter((r) => r.pass === false).slice(0, 80))
   log(
-    `  FAIL ${row.section} ${row.id}: ${typeof row.evidence === 'string' ? row.evidence.slice(0, 200) : JSON.stringify(row.evidence).slice(0, 200)}`,
+    `  FAIL ${row.section} ${row.id}: ${typeof row.evidence === 'string' ? row.evidence.slice(0, 200) : JSON.stringify(row.evidence ?? { wanted: row.wanted, observed: row.observed }).slice(0, 200)}`,
   );
 process.exit(failures > 0 && !REPORT_ONLY ? 1 : 0);

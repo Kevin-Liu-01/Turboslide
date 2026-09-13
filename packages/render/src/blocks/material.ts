@@ -57,7 +57,7 @@ export function renderMaterial(block: BlockOf<'material'>, ctx: BlockContext): s
   );
 }
 
-/** The `data-recipe` value of a material-sourced picture (slide.ts writes it through attrs, which escapes). */
+/** The `data-recipe` value of a material-sourced picture (slide.ts and picture.ts write it through attrs, which escapes). */
 export function pictureRecipeAttr(
   source: {
     materialId: string;
@@ -65,13 +65,14 @@ export function pictureRecipeAttr(
     timeMs: number;
   },
   twoTone: boolean,
-  plate: 'lower-left' | 'lower-right' | 'upper-left',
+  plate?: 'lower-left' | 'lower-right' | 'upper-left',
 ): string {
+  // a Choose image picture has no plate and the shader composes for none (SPEC-2 0.105)
   return JSON.stringify({
     materialId: source.materialId,
     uniforms: source.uniforms,
     anchor: source.timeMs,
     twoTone,
-    plate,
+    ...(plate !== undefined ? { plate } : {}),
   });
 }

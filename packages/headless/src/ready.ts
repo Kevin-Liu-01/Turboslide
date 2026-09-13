@@ -1,13 +1,19 @@
 // The readiness signal that replaces the deck's fixed 220 ms settle (SPEC 5.3, the rasters row;
 // slides report section 2.2: the settle was two thirds of the per-slide cost): document.fonts
 // loaded for every face the slide uses, every visible image decoded, the dither canvases drawn,
-// material anchors present, then two animation frames. Also the dither draw itself, which the
-// deck's viewer runtime does in tail.html lines 104 to 114 and the headless page has to do
-// because no runtime ships with a rendered document.
+// material anchors present, then two animation frames. The steps themselves are
+// `awaitSheetReady` of @turboslide/render/measure-dom (gslides-parity SPEC-2 1.3, 0.97), the one
+// function the editor's canvas measurer and this page run before they measure, so both reach
+// the same readiness; `waitForReady` evaluates its source and keeps the ReadyInfo reporting
+// (the faces, the missing Inter combinations, the broken images, how the frames ended) around
+// it. The dither draw at the PDF's full cell size stays here (drawDitherCanvases), which the
+// shared function leaves alone once a canvas carries `data-drawn`.
 //
 // Every function handed to page.evaluate is self-contained: Playwright serializes its source, so
 // nothing from module scope may be referenced inside.
 import type { Page } from 'playwright-core';
+
+import { awaitSheetReady } from '@turboslide/render/measure-dom';
 
 export type ReadyInfo = {
   readyMs: number;
@@ -31,10 +37,10 @@ export async function waitForReady(page: Page, options: ReadyOptions = {}): Prom
   const selector = options.rootSelector ?? DEFAULT_ROOT;
   const timeout = options.timeoutMs ?? 10_000;
   return page.evaluate(
-    async ({ rootSelector, timeoutMs }) => {
+    `(async (rootSelector, timeoutMs, ready) => {
       const t0 = performance.now();
       // the selector list is tried in order; a comma list would match body first in document order
-      let root: Element = document.body;
+      let root = document.body;
       for (const sel of rootSelector.split(',')) {
         const el = document.querySelector(sel.trim());
         if (el) {
@@ -42,35 +48,37 @@ export async function waitForReady(page: Page, options: ReadyOptions = {}): Prom
           break;
         }
       }
-      const withTimeout = <T>(p: Promise<T>, fallback: T): Promise<T> =>
-        Promise.race([p, new Promise<T>((r) => setTimeout(() => r(fallback), timeoutMs))]);
-      await withTimeout(
-        document.fonts.ready.then(() => undefined),
-        undefined,
-      );
+      const withTimeout = (p, fallback) =>
+        Promise.race([p, new Promise((r) => setTimeout(() => r(fallback), timeoutMs))]);
+      // the shared steps: fonts, every face the root uses, the images, the dither canvases, two
+      // frames; bounded here as well so a page whose compositor produces no frames (measured in
+      // the hosted chrome-headless-shell: every render hung to the job's 300 s timeout) answers
+      const frames = await withTimeout(ready(root, timeoutMs).then(() => 'raf'), 'timeout');
       // Every (weight, size, family) combination the slide's text uses: document.fonts.ready
-      // resolves before a lazily used face loads (pptx report section 4.4 note 4).
-      const combos = new Set<string>();
+      // resolves before a lazily used face loads (pptx report section 4.4 note 4); after the
+      // shared load the answer names the Inter combinations no face served.
+      const combos = new Set();
       const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-      let node: Node | null;
+      let node;
       while ((node = walker.nextNode())) {
-        if (!(node.textContent ?? '').trim()) continue;
+        if (!(node.textContent || '').trim()) continue;
         const el = node.parentElement;
         if (!el) continue;
         const cs = getComputedStyle(el);
         if (cs.display === 'none' || cs.visibility === 'hidden') continue;
-        const family = (cs.fontFamily.split(',')[0] ?? '').trim().replace(/^['"]|['"]$/g, '');
+        const family = (cs.fontFamily.split(',')[0] || '').trim().replace(/^['"]|['"]$/g, '');
         if (!family) continue;
-        combos.add(`${cs.fontWeight} ${cs.fontSize} ${family}`);
+        const style = cs.fontStyle === 'italic' || cs.fontStyle.indexOf('oblique') === 0 ? 'italic ' : '';
+        combos.add(style + cs.fontWeight + ' ' + cs.fontSize + ' ' + family);
       }
-      const missing: string[] = [];
+      const missing = [];
       await Promise.all(
         [...combos].map(async (spec) => {
-          const family = spec.split(' ').slice(2).join(' ');
+          const family = spec.replace(/^italic /, '').split(' ').slice(2).join(' ');
           try {
             const faces = await withTimeout(document.fonts.load(spec), []);
             if (faces.length === 0 && /^inter$/i.test(family)) missing.push(spec);
-          } catch {
+          } catch (e) {
             if (/^inter$/i.test(family)) missing.push(spec);
           }
         }),
@@ -79,40 +87,22 @@ export async function waitForReady(page: Page, options: ReadyOptions = {}): Prom
         const r = img.getBoundingClientRect();
         return r.width > 0 && r.height > 0;
       });
-      await Promise.all(
-        images.map((img) =>
-          withTimeout(
-            img.decode().catch(() => undefined),
-            undefined,
-          ),
-        ),
-      );
       const brokenImages = images
         .filter((img) => img.complete && img.naturalWidth === 0)
-        .map((img) => img.getAttribute('src') ?? img.currentSrc);
-      // two frames so layout and paint settle; bounded, because a page whose compositor produces
-      // no frames (measured in the hosted chrome-headless-shell: every render hung here to the
-      // job's 300 s timeout) never fires requestAnimationFrame
-      const frames = await withTimeout(
-        new Promise<'raf'>((r) =>
-          requestAnimationFrame(() => requestAnimationFrame(() => r('raf'))),
-        ),
-        'timeout' as const,
-      );
+        .map((img) => img.getAttribute('src') || img.currentSrc);
       const faces = [...document.fonts]
         .filter((face) => face.status === 'loaded')
-        .map((face) => `${face.family.replace(/^['"]|['"]$/g, '')} ${face.weight} ${face.style}`);
-      for (const spec of missing) faces.push(`fallback:${spec}`);
+        .map((face) => face.family.replace(/^['"]|['"]$/g, '') + ' ' + face.weight + ' ' + face.style);
+      for (const spec of missing) faces.push('fallback:' + spec);
       return {
         readyMs: Math.round(performance.now() - t0),
-        fonts: { status: missing.length ? ('partial' as const) : ('loaded' as const), faces },
+        fonts: { status: missing.length ? 'partial' : 'loaded', faces },
         brokenImages,
         imageCount: images.length,
         frames,
       };
-    },
-    { rootSelector: selector, timeoutMs: timeout },
-  );
+    })(${JSON.stringify(selector)}, ${timeout}, ${awaitSheetReady.toString()})`,
+  ) as Promise<ReadyInfo>;
 }
 
 export type DitherDrawOptions = {

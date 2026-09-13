@@ -1,0 +1,1146 @@
+{
+  "deckId": "gslides",
+  "revision": 1,
+  "format": "pptx",
+  "mode": "flatten",
+  "theme": "light",
+  "fontSet": "exact",
+  "fontSetVersion": "4.001+gt.2",
+  "files": [
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/gslides-light.pptx",
+      "bytes": 1714538,
+      "sha256": "d61d2ac9faf70a27a1756a91062233a53166bd78dd5d0e615e660a968586bfe3"
+    },
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/gslides-dark.pptx",
+      "bytes": 1718469,
+      "sha256": "230476900a4a574b92f37b0dae0b9657ae81428ade94b916c8ededa10658a803"
+    },
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/gslides-both.zip",
+      "bytes": 3433251,
+      "sha256": "bbd8bd2f2e527396ee5a02f35873f20e9177e6ba1750059451929e6574962b86"
+    }
+  ],
+  "fonts": {
+    "embedded": [],
+    "requiredOnViewer": [
+      "GT Inter Display",
+      "GT Inter Text 26",
+      "GT Inter Text 14",
+      "GT Inter Text 22",
+      "GT Inter Text 20 Medium",
+      "GT Inter Text 20",
+      "GT Inter Text 24 Medium",
+      "GT Inter Text 15",
+      "GT Inter Text 22 Medium"
+    ],
+    "substitutedIn": [
+      "every viewer"
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "title",
+      "theme": "light",
+      "native": [
+        "heading",
+        "lead"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/01-title@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 37293,
+        "colors": 642,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "breaks",
+      "theme": "light",
+      "native": [
+        "h",
+        "p1",
+        "p2"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/02-breaks@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 46515,
+        "colors": 409,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "table",
+      "theme": "light",
+      "native": [
+        "h",
+        "table"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/03-table@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31829,
+        "colors": 414,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "numbered",
+      "theme": "light",
+      "native": [
+        "h",
+        "p1",
+        "list"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/04-numbered@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 35302,
+        "colors": 408,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "links",
+      "theme": "light",
+      "native": [
+        "h",
+        "box",
+        "shape",
+        "t1"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/05-links@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31365,
+        "colors": 411,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "prompt",
+      "theme": "light",
+      "native": [
+        "h"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/06-prompt@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 12147,
+        "colors": 181,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "styles",
+      "theme": "light",
+      "native": [
+        "h",
+        "p1",
+        "justified"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/07-styles@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 53199,
+        "colors": 870,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "canvas-title",
+      "theme": "light",
+      "native": [
+        "heading",
+        "lead",
+        "grow",
+        "shrink",
+        "padded"
+      ],
+      "raster": [
+        "mark",
+        "icon"
+      ],
+      "sheet": "work/sheets/light/08-canvas-title@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 90780,
+        "colors": 656,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "canvas-opener",
+      "theme": "light",
+      "native": [
+        "plate",
+        "big",
+        "p",
+        "credit"
+      ],
+      "raster": [
+        "picture"
+      ],
+      "sheet": "work/sheets/light/09-canvas-opener@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 359350,
+        "colors": 558,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "rotated",
+      "theme": "light",
+      "native": [
+        "h",
+        "tilted",
+        "arrow"
+      ],
+      "raster": [
+        "photo"
+      ],
+      "sheet": "work/sheets/light/10-rotated@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 101551,
+        "colors": 419,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "grouped",
+      "theme": "light",
+      "native": [
+        "h",
+        "s1",
+        "s2",
+        "s3",
+        "label"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/11-grouped@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 30639,
+        "colors": 392,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "shapes",
+      "theme": "light",
+      "native": [
+        "h",
+        "hex",
+        "right",
+        "callout",
+        "plus",
+        "snip",
+        "dashed"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/12-shapes@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 36517,
+        "colors": 401,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "lines",
+      "theme": "light",
+      "native": [
+        "h",
+        "decorated",
+        "a",
+        "b",
+        "elbow",
+        "curved",
+        "poly",
+        "closed",
+        "scribble"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/13-lines@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 30044,
+        "colors": 407,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "word-art",
+      "theme": "light",
+      "native": [
+        "h",
+        "art"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/14-word-art@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 35057,
+        "colors": 397,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "shadow",
+      "theme": "light",
+      "native": [
+        "h",
+        "box",
+        "shape"
+      ],
+      "raster": [
+        "photo"
+      ],
+      "sheet": "work/sheets/light/15-shadow@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 81083,
+        "colors": 408,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "background-color",
+      "theme": "light",
+      "native": [
+        "h",
+        "p1"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/16-background-color@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 33737,
+        "colors": 402,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "background-picture",
+      "theme": "light",
+      "native": [
+        "heading",
+        "lead"
+      ],
+      "raster": [
+        "mark",
+        "photo"
+      ],
+      "sheet": "work/sheets/light/17-background-picture@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 145500,
+        "colors": 945,
+        "mismatch": 0,
+        "fraction": 0
+      },
+      "pictures": [
+        {
+          "box": [
+            0,
+            0,
+            1600,
+            900
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "image-tools",
+      "theme": "light",
+      "native": [
+        "h"
+      ],
+      "raster": [
+        "trimmed",
+        "masked",
+        "adjusted"
+      ],
+      "sheet": "work/sheets/light/18-image-tools@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 87316,
+        "colors": 420,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "table-merge",
+      "theme": "light",
+      "native": [
+        "h",
+        "table"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/19-table-merge@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31168,
+        "colors": 412,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "chart-bar",
+      "theme": "light",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/20-chart-bar@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 40545,
+        "colors": 660,
+        "mismatch": 0,
+        "fraction": 0
+      },
+      "pictures": [
+        {
+          "box": [
+            137,
+            229,
+            720,
+            480
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "chart-line",
+      "theme": "light",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/21-chart-line@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 40553,
+        "colors": 664,
+        "mismatch": 0,
+        "fraction": 0
+      },
+      "pictures": [
+        {
+          "box": [
+            137,
+            217.39,
+            1326,
+            460
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "chart-pie",
+      "theme": "light",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/22-chart-pie@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 34198,
+        "colors": 644,
+        "mismatch": 0,
+        "fraction": 0
+      },
+      "pictures": [
+        {
+          "box": [
+            137,
+            217.39,
+            1326,
+            460
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "diagram",
+      "theme": "light",
+      "native": [
+        "h",
+        "step-1",
+        "label-1",
+        "link-1",
+        "step-2",
+        "label-2",
+        "link-2",
+        "step-3",
+        "label-3",
+        "link-3",
+        "step-4",
+        "label-4"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/23-diagram@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 25829,
+        "colors": 410,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "bullets",
+      "theme": "light",
+      "native": [
+        "h",
+        "bullets",
+        "numbers",
+        "ruled"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/24-bullets@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 59144,
+        "colors": 404,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "spacing",
+      "theme": "light",
+      "native": [
+        "h",
+        "spaced",
+        "indented"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/25-spacing@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 53884,
+        "colors": 405,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "autofit",
+      "theme": "light",
+      "native": [
+        "h",
+        "p1"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/light/26-autofit@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 52847,
+        "colors": 414,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "title",
+      "theme": "dark",
+      "native": [
+        "heading",
+        "lead"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/01-title@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 37173,
+        "colors": 807,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "breaks",
+      "theme": "dark",
+      "native": [
+        "h",
+        "p1",
+        "p2"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/02-breaks@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 46539,
+        "colors": 428,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "table",
+      "theme": "dark",
+      "native": [
+        "h",
+        "table"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/03-table@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31865,
+        "colors": 435,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "numbered",
+      "theme": "dark",
+      "native": [
+        "h",
+        "p1",
+        "list"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/04-numbered@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 35302,
+        "colors": 428,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "links",
+      "theme": "dark",
+      "native": [
+        "h",
+        "box",
+        "shape",
+        "t1"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/05-links@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31385,
+        "colors": 442,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "prompt",
+      "theme": "dark",
+      "native": [
+        "h"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/06-prompt@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 12289,
+        "colors": 195,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "styles",
+      "theme": "dark",
+      "native": [
+        "h",
+        "p1",
+        "justified"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/07-styles@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 53373,
+        "colors": 838,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "canvas-title",
+      "theme": "dark",
+      "native": [
+        "heading",
+        "lead",
+        "grow",
+        "shrink",
+        "padded"
+      ],
+      "raster": [
+        "mark",
+        "icon"
+      ],
+      "sheet": "work/sheets/dark/08-canvas-title@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 90814,
+        "colors": 829,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "canvas-opener",
+      "theme": "dark",
+      "native": [
+        "plate",
+        "big",
+        "p",
+        "credit"
+      ],
+      "raster": [
+        "picture"
+      ],
+      "sheet": "work/sheets/dark/09-canvas-opener@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 360162,
+        "colors": 873,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "rotated",
+      "theme": "dark",
+      "native": [
+        "h",
+        "tilted",
+        "arrow"
+      ],
+      "raster": [
+        "photo"
+      ],
+      "sheet": "work/sheets/dark/10-rotated@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 102464,
+        "colors": 656,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "grouped",
+      "theme": "dark",
+      "native": [
+        "h",
+        "s1",
+        "s2",
+        "s3",
+        "label"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/11-grouped@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 30628,
+        "colors": 413,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "shapes",
+      "theme": "dark",
+      "native": [
+        "h",
+        "hex",
+        "right",
+        "callout",
+        "plus",
+        "snip",
+        "dashed"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/12-shapes@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 36302,
+        "colors": 494,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "lines",
+      "theme": "dark",
+      "native": [
+        "h",
+        "decorated",
+        "a",
+        "b",
+        "elbow",
+        "curved",
+        "poly",
+        "closed",
+        "scribble"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/13-lines@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 30114,
+        "colors": 431,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "word-art",
+      "theme": "dark",
+      "native": [
+        "h",
+        "art"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/14-word-art@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 35238,
+        "colors": 585,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "shadow",
+      "theme": "dark",
+      "native": [
+        "h",
+        "box",
+        "shape"
+      ],
+      "raster": [
+        "photo"
+      ],
+      "sheet": "work/sheets/dark/15-shadow@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 83340,
+        "colors": 667,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "background-color",
+      "theme": "dark",
+      "native": [
+        "h",
+        "p1"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/16-background-color@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 33728,
+        "colors": 425,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "background-picture",
+      "theme": "dark",
+      "native": [
+        "heading",
+        "lead"
+      ],
+      "raster": [
+        "mark",
+        "photo"
+      ],
+      "sheet": "work/sheets/dark/17-background-picture@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 146654,
+        "colors": 1224,
+        "mismatch": 0,
+        "fraction": 0
+      },
+      "pictures": [
+        {
+          "box": [
+            0,
+            0,
+            1600,
+            900
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "image-tools",
+      "theme": "dark",
+      "native": [
+        "h"
+      ],
+      "raster": [
+        "trimmed",
+        "masked",
+        "adjusted"
+      ],
+      "sheet": "work/sheets/dark/18-image-tools@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 86586,
+        "colors": 623,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "table-merge",
+      "theme": "dark",
+      "native": [
+        "h",
+        "table"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/19-table-merge@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 31326,
+        "colors": 504,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "chart-bar",
+      "theme": "dark",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/20-chart-bar@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 40177,
+        "colors": 672,
+        "mismatch": 0,
+        "fraction": 0
+      },
+      "pictures": [
+        {
+          "box": [
+            137,
+            229,
+            720,
+            480
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "chart-line",
+      "theme": "dark",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/21-chart-line@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 40272,
+        "colors": 689,
+        "mismatch": 0,
+        "fraction": 0
+      },
+      "pictures": [
+        {
+          "box": [
+            137,
+            217.39,
+            1326,
+            460
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "chart-pie",
+      "theme": "dark",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/22-chart-pie@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 34055,
+        "colors": 655,
+        "mismatch": 0,
+        "fraction": 0
+      },
+      "pictures": [
+        {
+          "box": [
+            137,
+            217.39,
+            1326,
+            460
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "diagram",
+      "theme": "dark",
+      "native": [
+        "h",
+        "step-1",
+        "label-1",
+        "link-1",
+        "step-2",
+        "label-2",
+        "link-2",
+        "step-3",
+        "label-3",
+        "link-3",
+        "step-4",
+        "label-4"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/23-diagram@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 25731,
+        "colors": 506,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "bullets",
+      "theme": "dark",
+      "native": [
+        "h",
+        "bullets",
+        "numbers",
+        "ruled"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/24-bullets@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 59115,
+        "colors": 425,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "spacing",
+      "theme": "dark",
+      "native": [
+        "h",
+        "spaced",
+        "indented"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/25-spacing@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 53714,
+        "colors": 428,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    },
+    {
+      "slideId": "autofit",
+      "theme": "dark",
+      "native": [
+        "h",
+        "p1"
+      ],
+      "raster": [],
+      "sheet": "work/sheets/dark/26-autofit@2x.png",
+      "page": {
+        "format": "png-palette",
+        "bytes": 52974,
+        "colors": 433,
+        "mismatch": 0,
+        "fraction": 0
+      }
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": true,
+  "passed": true,
+  "residual": [
+    "merged report over light and dark; theme names the first, per-theme reports are beside this file",
+    "renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "flatten (perfect): the slide is a 2x raster of the sheet under the page raster policy; text is an invisible native layer; the slide title is the slide name and a hidden title placeholder",
+    "rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x",
+    "package: 151 parts, 182 relationships, valid against the content types and relationships",
+    "skipped: 1 slide(s) left out (skipped); pass includeSkipped to carry them",
+    "links: a slide link on an invisible run of the flatten layer is written as a slide jump; whether PowerPoint honours it under the cover picture is unverified (gslides-parity SPEC 7.2.8)",
+    "rotation: 4 object(s) carry a rotation or a flip on their own xfrm; a rotated group is written per member (gslides-parity SPEC-2 2.1)",
+    "package: 25 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)",
+    "package: 81 kern=\"0\" attribute(s) and 0 empty ext list(s) removed; 0 custGeom",
+    "pages: 26 png-palette; 1.54 MiB of page rasters; worst decoded mismatch 0.000 percent at threshold 0.1 (perfect budget 0.1)",
+    "links: 8 hyperlink(s) written (a URL as is, a slide link as a jump to its number in this file; SPEC 7.2.7, 7.2.8)",
+    "notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)",
+    "fonts not embedded: GT Inter Display, GT Inter Text 26, GT Inter Text 14, GT Inter Text 22, GT Inter Text 20 Medium, GT Inter Text 20, GT Inter Text 24 Medium, GT Inter Text 15, GT Inter Text 22 Medium; the text layer is invisible, so no viewer draws them (docs/pptx.md)",
+    "pages: 26 png-palette; 1.55 MiB of page rasters; worst decoded mismatch 0.000 percent at threshold 0.1 (perfect budget 0.1)",
+    "both: gslides-both.zip holds the light and dark files"
+  ]
+}

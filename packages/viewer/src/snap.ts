@@ -170,7 +170,22 @@ export const FREE_SNAP_PX: number = SNAP_DISTANCE;
 export const FREE_MIN_SIZE = 16;
 
 export type SnapAxis = 'x' | 'y';
-export type SnapKind = 'grid' | 'rail' | 'content' | 'seam' | 'plate' | 'edge' | 'center';
+/**
+ * Where a snap line comes from: the grid, a GT line (rail, content box, seam, plate edge), another
+ * object's edge or centre, the sheet's edge or centre, a deck guide (SPEC-2 2.10) or an equal
+ * spacing match (SPEC-2 6.1 row 7).
+ */
+export type SnapKind =
+  | 'grid'
+  | 'rail'
+  | 'content'
+  | 'seam'
+  | 'plate'
+  | 'edge'
+  | 'center'
+  | 'sheet'
+  | 'guide'
+  | 'spacing';
 
 /**
  * One snap line: a vertical (`axis: 'x'`) or horizontal (`axis: 'y'`) line at `at`, spanning
@@ -224,6 +239,110 @@ export function sheetSnapLines(): SnapLine[] {
     });
   }
   return lines;
+}
+
+/** The sheet's own edges and centre (SPEC-2 6.1 row 7: "the sheet's edges and centre"). */
+export function sheetEdgeLines(): SnapLine[] {
+  const { width, height } = SHEET;
+  return [
+    { axis: 'x', at: 0, kind: 'sheet', from: 0, to: height },
+    { axis: 'x', at: width / 2, kind: 'sheet', from: 0, to: height },
+    { axis: 'x', at: width, kind: 'sheet', from: 0, to: height },
+    { axis: 'y', at: 0, kind: 'sheet', from: 0, to: width },
+    { axis: 'y', at: height / 2, kind: 'sheet', from: 0, to: width },
+    { axis: 'y', at: height, kind: 'sheet', from: 0, to: width },
+  ];
+}
+
+/** The deck's guides as snap lines spanning the sheet (SPEC-2 2.10, 6.1 row 31). */
+export function deckGuideLines(
+  guides: { x: ReadonlyArray<number>; y: ReadonlyArray<number> } | undefined,
+): SnapLine[] {
+  if (!guides) return [];
+  return [
+    ...guides.x.map((at): SnapLine => ({
+      axis: 'x',
+      at,
+      kind: 'guide',
+      from: 0,
+      to: SHEET.height,
+    })),
+    ...guides.y.map((at): SnapLine => ({ axis: 'y', at, kind: 'guide', from: 0, to: SHEET.width })),
+  ];
+}
+
+/**
+ * Shift constrains a move to one axis: the axis of the larger delta keeps its value and the other
+ * is zero (SPEC-2 6.1 row 7).
+ */
+export function axisLock(dx: number, dy: number): { dx: number; dy: number } {
+  return Math.abs(dx) >= Math.abs(dy) ? { dx, dy: 0 } : { dx: 0, dy };
+}
+
+type SpacingSnap = { delta: number; guides: SnapLine[] };
+
+/**
+ * The equal spacing snap on one axis (SPEC-2 6.1 row 7; Google's spacing guides, R05 C7): for
+ * every pair of resting boxes that overlap the moving box on the other axis and sit apart by a
+ * gap, the moving box snaps to the place where its gap to the nearer box equals that gap (beyond
+ * the pair on either side, or midway between two boxes). The guides drawn are the ticks that
+ * bound the two equal gaps, spanning the moving box on the other axis.
+ */
+function spacingAxis(
+  moving: readonly [number, number, number, number],
+  others: ReadonlyArray<readonly [number, number, number, number]>,
+  axis: SnapAxis,
+): SpacingSnap | null {
+  const main = axis === 'x' ? 0 : 1;
+  const cross = axis === 'x' ? 1 : 0;
+  const size = axis === 'x' ? 2 : 3;
+  const crossSize = axis === 'x' ? 3 : 2;
+  const overlapsCross = (box: readonly [number, number, number, number]): boolean =>
+    box[cross] < moving[cross] + moving[crossSize] && box[cross] + box[crossSize] > moving[cross];
+  const rows = others.filter(overlapsCross).sort((a, b) => a[main] - b[main]);
+  let best: (SpacingSnap & { distance: number }) | null = null;
+  const tick = (at: number): SnapLine => ({
+    axis,
+    at,
+    kind: 'spacing',
+    from: moving[cross],
+    to: moving[cross] + moving[crossSize],
+  });
+  const consider = (candidateStart: number, ticks: number[]) => {
+    const delta = candidateStart - moving[main];
+    if (Math.abs(delta) > FREE_SNAP_PX) return;
+    if (best !== null && Math.abs(delta) >= best.distance) return;
+    const unique = ticks.filter((at, index) => ticks.indexOf(at) === index);
+    best = { delta, distance: Math.abs(delta), guides: unique.map(tick) };
+  };
+  const length = moving[size];
+  for (let i = 0; i < rows.length - 1; i += 1) {
+    const a = rows[i];
+    const b = rows[i + 1];
+    if (a === undefined || b === undefined) continue;
+    const aEnd = a[main] + a[size];
+    const bEnd = b[main] + b[size];
+    const gap = b[main] - aEnd;
+    if (gap <= 0) continue;
+    // after b with the same gap
+    consider(bEnd + gap, [aEnd, b[main], bEnd, bEnd + gap]);
+    // before a with the same gap
+    consider(a[main] - gap - length, [a[main] - gap, a[main], aEnd, b[main]]);
+  }
+  // midway between two boxes, at equal distance from both
+  for (let i = 0; i < rows.length; i += 1) {
+    for (let j = i + 1; j < rows.length; j += 1) {
+      const a = rows[i];
+      const b = rows[j];
+      if (a === undefined || b === undefined) continue;
+      const aEnd = a[main] + a[size];
+      const room = b[main] - aEnd - length;
+      if (room <= 0) continue;
+      const gap = room / 2;
+      consider(aEnd + gap, [aEnd, aEnd + gap, aEnd + gap + length, b[main]]);
+    }
+  }
+  return best;
 }
 
 /** The six snap lines of a box: its left, center and right, its top, middle and bottom. */
@@ -287,21 +406,38 @@ export function snapMove(
   dx: number,
   dy: number,
   lines: SnapLine[],
-  options: { grid?: boolean } = {},
+  options: {
+    grid?: boolean;
+    /** the resting boxes the equal spacing guides read (SPEC-2 6.1 row 7); none skips them */
+    spacing?: ReadonlyArray<readonly [number, number, number, number]>;
+  } = {},
 ): SnapResult {
   const grid = options.grid ?? true;
   const [x0, y0, w, h] = box;
   const x = x0 + dx;
   const y = y0 + dy;
-  const sx = snapAxis([x, x + w / 2, x + w], lines, 'x', grid);
-  const sy = snapAxis([y, y + h / 2, y + h], lines, 'y', grid);
+  let sx: AxisSnap = snapAxis([x, x + w / 2, x + w], lines, 'x', grid);
+  let sy: AxisSnap = snapAxis([y, y + h / 2, y + h], lines, 'y', grid);
+  const guides: SnapLine[] = [];
+  const moved: [number, number, number, number] = [x, y, w, h];
+  if (options.spacing !== undefined && options.spacing.length > 1) {
+    const spx = spacingAxis(moved, options.spacing, 'x');
+    if (spx !== null && (sx.line === null || Math.abs(spx.delta) < Math.abs(sx.delta))) {
+      sx = { delta: spx.delta, line: null };
+      guides.push(...spx.guides);
+    }
+    const spy = spacingAxis(moved, options.spacing, 'y');
+    if (spy !== null && (sy.line === null || Math.abs(spy.delta) < Math.abs(sy.delta))) {
+      sy = { delta: spy.delta, line: null };
+      guides.push(...spy.guides);
+    }
+  }
   const snapped: [number, number, number, number] = [
     Math.round(x + sx.delta),
     Math.round(y + sy.delta),
     Math.round(w),
     Math.round(h),
   ];
-  const guides: SnapLine[] = [];
   if (sx.line) guides.push(guideFor(sx.line, snapped));
   if (sy.line) guides.push(guideFor(sy.line, snapped));
   return { box: snapped, guides };
@@ -333,8 +469,10 @@ export function snapResize(
   let right = x + w;
   let top = y;
   let bottom = y + h;
-  const movesX = hasDir(dir, 'e') || hasDir(dir, 'w');
-  const movesY = hasDir(dir, 'n') || hasDir(dir, 's');
+  /* an edge snaps only when the pointer moved along its axis: a corner dragged sideways keeps
+     its top and bottom where they are instead of taking a nearby line (a phantom resize) */
+  const movesX = (hasDir(dir, 'e') || hasDir(dir, 'w')) && dx !== 0;
+  const movesY = (hasDir(dir, 'n') || hasDir(dir, 's')) && dy !== 0;
   if (hasDir(dir, 'w')) left += dx;
   if (hasDir(dir, 'e')) right += dx;
   if (hasDir(dir, 'n')) top += dy;
@@ -347,7 +485,7 @@ export function snapResize(
     ? movesX
     : movesX && movesY
       ? Math.abs(dx) / Math.max(1, w) >= Math.abs(dy) / Math.max(1, h)
-      : movesX;
+      : movesX || ((hasDir(dir, 'e') || hasDir(dir, 'w')) && !movesY);
   const leadY = !aspect ? movesY : !leadX;
   if (leadX) {
     if (hasDir(dir, 'w')) {

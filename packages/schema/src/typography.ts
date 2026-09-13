@@ -1,10 +1,12 @@
 // Typography (Kevin, 2026-09-11: "font and typography controls"): the optional overrides a
-// heading, a paragraph, a text block or a box carries over the grammar's defaults. Every value is
-// a step of the sheet's own scales (head:57-68, 96-172): the type ladder for size, weights 300 to
-// 700 with the 500 cap enforced by the type/weight-cap lint rather than the schema, three
-// alignments, the tracking steps the deck uses in em, and the line heights the ladder sets. A
-// field that is absent leaves the grammar's default in place, so a deck written before this
-// round renders unchanged. Imports only zod and annotate (blocks.ts imports this).
+// heading, a paragraph, a text block, a box or a shape carries over the grammar's defaults. Every
+// value is a step of the sheet's own scales (head:57-68, 96-172): the type ladder for size, weights
+// 300 to 700 with the 500 cap enforced by the type/weight-cap lint rather than the schema, the
+// four alignments, the tracking steps the deck uses in em, and the line heights the ladder sets
+// plus Google's four spacing values. The parity round two (gslides-parity SPEC-2 2.2) adds the
+// paragraph spacing in px, the column count and the left indent. A field that is absent leaves the
+// grammar's default in place, so a deck written before this round renders unchanged. Imports only
+// zod and annotate (blocks.ts imports this).
 import { z } from 'zod';
 import { annotate } from './annotate.ts';
 
@@ -22,14 +24,37 @@ export type TypeWeight = (typeof TYPE_WEIGHTS)[number];
 /** Display weight is capped at 500 (DECK-GRAMMAR.md:20). */
 export const WEIGHT_CAP = 500;
 
-export const TYPE_ALIGNS = ['left', 'center', 'right'] as const;
+/** Google's four alignments; justify is SPEC-2 2.2.7. */
+export const TYPE_ALIGNS = ['left', 'center', 'right', 'justify'] as const;
 export type TypeAlign = (typeof TYPE_ALIGNS)[number];
 
 /** Letter spacing steps in em: the display faces at -0.025, rows at -0.01, the credit at 0.01. */
 export const TYPE_TRACKING = [-0.025, -0.02, -0.015, -0.01, 0, 0.01, 0.02] as const;
 
-/** Line height steps: h1 1.02, big 1.06, title 1.08, h2 1.1, say 1.2, plain 1.4, lead 1.45, p 1.5, panel 1.7. */
-export const TYPE_LEADING = [1.02, 1.06, 1.08, 1.1, 1.2, 1.25, 1.3, 1.4, 1.45, 1.5, 1.7] as const;
+/**
+ * Line height steps: h1 1.02, big 1.06, title 1.08, h2 1.1, say 1.2, plain 1.4, lead 1.45, p 1.5,
+ * panel 1.7, plus Google's Single, 1.15, 1.5 and Double (SPEC-2 2.2.8). type/ladder is a size
+ * rule, so a value off this list is not a finding.
+ */
+export const TYPE_LEADING = [
+  1, 1.02, 1.06, 1.08, 1.1, 1.15, 1.2, 1.25, 1.3, 1.4, 1.45, 1.5, 1.7, 2,
+] as const;
+
+/** Google's line spacing menu (SPEC-2 0.20): Single, 1.15, 1.5, Double. */
+export const LINE_SPACING_PRESETS = [1, 1.15, 1.5, 2] as const;
+
+/** The column counts a text container takes (SPEC-2 2.2.10). */
+export const TYPE_COLUMNS = [1, 2, 3] as const;
+export type TypeColumns = (typeof TYPE_COLUMNS)[number];
+
+/** The gap between text columns in px (SPEC-2 2.2.10). */
+export const COLUMN_GAP_PX = 40;
+
+/** One Increase indent step in px: Google's half inch on this sheet, on the 8 px grid (SPEC-2 0.22). */
+export const INDENT_STEP_PX = 64;
+
+/** The Add space before or after paragraph step in px (SPEC-2 4.1 format.spacing.addBefore). */
+export const PARAGRAPH_SPACE_STEP_PX = 8;
 
 export type Typography = {
   /** Font size in px; a value off the ladder is a type/ladder finding. */
@@ -40,6 +65,14 @@ export type Typography = {
   tracking?: number;
   /** Line height as a factor. */
   leading?: number;
+  /** Space before every paragraph but the first, in px (SPEC-2 2.2.9). */
+  spaceBefore?: number;
+  /** Space after every paragraph but the last, in px (SPEC-2 2.2.9). */
+  spaceAfter?: number;
+  /** Text columns inside the block (SPEC-2 2.2.10). */
+  columns?: TypeColumns;
+  /** The paragraphs' left indent in px (SPEC-2 2.2.11). */
+  indent?: number;
 };
 
 export const typographyObjectSchema = z.strictObject({
@@ -71,11 +104,39 @@ export const typographyObjectSchema = z.strictObject({
     help: 'Letter spacing in em; the display faces sit at -0.025 (head:58).',
   }),
   leading: annotate(z.number().positive().optional(), {
-    label: 'Leading',
+    label: 'Line spacing',
     control: 'number',
     snap: TYPE_LEADING,
     group: 'Text',
-    help: 'Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65).',
+    help: 'Line height as a factor; body copy runs 1.5, headings 1.02 to 1.1 (head:59-65); Single, 1.15, 1.5 and Double are Google’s values (gslides-parity SPEC-2 2.2.8).',
+  }),
+  spaceBefore: annotate(z.number().nonnegative().optional(), {
+    label: 'Space before',
+    control: 'number',
+    snap: [0, 8, 16, 24],
+    group: 'Text',
+    help: 'Space above every paragraph but the first, in px (gslides-parity SPEC-2 2.2.9).',
+  }),
+  spaceAfter: annotate(z.number().nonnegative().optional(), {
+    label: 'Space after',
+    control: 'number',
+    snap: [0, 8, 16, 24],
+    group: 'Text',
+    help: 'Space below every paragraph but the last, in px (gslides-parity SPEC-2 2.2.9).',
+  }),
+  columns: annotate(z.literal(TYPE_COLUMNS).optional(), {
+    label: 'Columns',
+    control: 'select',
+    snap: TYPE_COLUMNS,
+    group: 'Text',
+    help: 'Text columns inside the block with a 40 px gap; one when absent (gslides-parity SPEC-2 2.2.10).',
+  }),
+  indent: annotate(z.number().nonnegative().optional(), {
+    label: 'Indent',
+    control: 'number',
+    snap: [0, 64, 128, 192],
+    group: 'Text',
+    help: 'The paragraphs’ left indent in px; Increase indent steps it by 64 (gslides-parity SPEC-2 2.2.11).',
   }),
 }) satisfies z.ZodType<Typography>;
 
@@ -84,7 +145,7 @@ export const typographySchema = annotate(typographyObjectSchema.optional(), {
   label: 'Typography',
   control: 'typography',
   group: 'Text',
-  help: 'Size from the ladder, weight, alignment, tracking and leading; an absent field keeps the grammar default.',
+  help: 'Size from the ladder, weight, alignment, tracking, line and paragraph spacing, columns and indent; an absent field keeps the grammar default.',
 });
 
 export function isLadderSize(size: number): boolean {
@@ -98,6 +159,16 @@ export function nearestLadderSize(size: number): number {
   return best;
 }
 
+/**
+ * The next ladder step below a size, or undefined at the floor: what Shrink text on overflow
+ * writes on each pass (gslides-parity SPEC-2 0.23). A size off the ladder steps to the first step
+ * under it.
+ */
+export function ladderStepDown(size: number): number | undefined {
+  for (const step of TYPE_LADDER) if (step < size) return step;
+  return undefined;
+}
+
 /** The inline CSS declarations of a typography record, in a stable order; empty when nothing is set. */
 export function typographyDeclarations(typography: Typography | undefined): string[] {
   if (typography === undefined) return [];
@@ -107,5 +178,9 @@ export function typographyDeclarations(typography: Typography | undefined): stri
   if (typography.align !== undefined) out.push(`text-align:${typography.align}`);
   if (typography.tracking !== undefined) out.push(`letter-spacing:${typography.tracking}em`);
   if (typography.leading !== undefined) out.push(`line-height:${typography.leading}`);
+  if (typography.columns !== undefined && typography.columns > 1)
+    out.push(`column-count:${typography.columns}`, `column-gap:${COLUMN_GAP_PX}px`);
+  if (typography.indent !== undefined && typography.indent > 0)
+    out.push(`padding-left:${typography.indent}px`);
   return out;
 }

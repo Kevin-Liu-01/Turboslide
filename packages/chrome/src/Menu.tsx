@@ -14,6 +14,7 @@ import {
   DIVIDER,
   isChecked,
   isEnabled,
+  resolveEffect,
   resolveLabel,
   tooltipDoc,
   visibleItems,
@@ -68,8 +69,12 @@ export type MenuProps = {
   autoFocus?: boolean;
   /** draw context-only rows too (the right-click menus pass their own lists) */
   includeContextOnly?: boolean;
-  /** the content of a dynamic submenu (Apply layout draws the layout grid) */
-  renderDynamic?: (item: MenuItem) => ReactNode;
+  /**
+   * The content of a dynamic submenu (Apply layout draws the layout grid, Insert > Table the
+   * hover grid); null when the caller has no plate for the row, which then draws its children as
+   * rows or runs as a command. `viaKeyboard` says the plate should take focus.
+   */
+  renderDynamic?: (item: MenuItem, options?: { viaKeyboard?: boolean }) => ReactNode;
   id?: string;
   className?: string;
 };
@@ -153,10 +158,37 @@ function rectOf(anchor: MenuAnchor): Rect {
   return { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom };
 }
 
-/** True for a row that opens a submenu: children to draw, or a dynamic submenu with a renderer. */
-function hasSubmenu(item: MenuItem, renderDynamic: MenuProps['renderDynamic']): boolean {
-  if (item.effect?.kind === 'submenu' && item.effect.dynamic !== undefined)
-    return renderDynamic !== undefined;
+/**
+ * The plate of a dynamic submenu, or null: the row's resolved effect names a dynamic and the
+ * caller draws it. A caller without a plate for the row (the shape grids before the shape table
+ * lands, a context menu) returns null and the row falls back to its children or its command.
+ */
+function dynamicNode(
+  item: MenuItem,
+  context: MenuContext,
+  renderDynamic: MenuProps['renderDynamic'],
+  viaKeyboard: boolean,
+): ReactNode {
+  const effect = resolveEffect(item, context);
+  if (effect?.kind !== 'submenu' || effect.dynamic === undefined || renderDynamic === undefined)
+    return null;
+  return renderDynamic(item, { viaKeyboard }) ?? null;
+}
+
+/**
+ * True for a row that opens a submenu: a dynamic plate the caller draws, or children to list. A
+ * row whose resolved effect is not a submenu is a command even when it carries children (Change
+ * background opens the Background dialog on a content slide and the Replace image submenu on a
+ * picture layout, SPEC-2 4.1).
+ */
+function hasSubmenu(
+  item: MenuItem,
+  context: MenuContext,
+  renderDynamic: MenuProps['renderDynamic'],
+): boolean {
+  const effect = resolveEffect(item, context);
+  if (effect !== undefined && effect.kind !== 'submenu') return false;
+  if (dynamicNode(item, context, renderDynamic, false) !== null) return true;
   return item.items !== undefined && visibleItems(item.items).length > 0;
 }
 
@@ -299,7 +331,7 @@ function MenuList({
   const activate = useCallback(
     (item: MenuItem, viaKeyboard: boolean) => {
       if (!isEnabled(item, context)) return;
-      if (hasSubmenu(item, renderDynamic)) {
+      if (hasSubmenu(item, context, renderDynamic)) {
         if (openId === item.id && !viaKeyboard) closeSubmenu(true);
         else openSubmenu(item, viaKeyboard);
         return;
@@ -334,7 +366,7 @@ function MenuList({
         event.preventDefault();
         if (
           focused !== undefined &&
-          hasSubmenu(focused, renderDynamic) &&
+          hasSubmenu(focused, context, renderDynamic) &&
           isEnabled(focused, context)
         ) {
           openSubmenu(focused, true);
@@ -395,7 +427,7 @@ function MenuList({
     if (event.pointerType === 'touch') return;
     window.clearTimeout(hoverTimer.current);
     if (isEnabled(item, context)) setFocusId(item.id);
-    if (hasSubmenu(item, renderDynamic) && isEnabled(item, context)) {
+    if (hasSubmenu(item, context, renderDynamic) && isEnabled(item, context)) {
       if (openId !== item.id) {
         hoverTimer.current = window.setTimeout(() => openSubmenu(item, false), SUBMENU_HOVER_MS);
       }
@@ -431,7 +463,7 @@ function MenuList({
       {visible.map((item, index) => {
         const rowEnabled = isEnabled(item, context);
         const checked = isChecked(item, context);
-        const submenu = hasSubmenu(item, renderDynamic);
+        const submenu = hasSubmenu(item, context, renderDynamic);
         const text = resolveLabel(item, context);
         const key =
           item.key === undefined
@@ -509,43 +541,55 @@ function MenuList({
                 </span>
               ) : null}
             </div>
-            {isOpen && openItem?.id === item.id && openRow !== null ? (
-              openItem.items !== undefined && visibleItems(openItem.items).length > 0 ? (
-                <MenuList
-                  items={openItem.items}
-                  context={context}
-                  label={text}
-                  anchor={{ kind: 'element', element: openRow }}
-                  placement="right"
-                  level={level + 1}
-                  autoFocus={openViaKeyboard.current}
-                  includeContextOnly={includeContextOnly}
-                  renderDynamic={renderDynamic}
-                  onSelect={onSelect}
-                  onCloseLevel={(reason) => {
-                    if (reason === 'escape') closeSubmenu(true);
-                    else onCloseLevel(reason);
-                  }}
-                  onNavigate={onNavigate}
-                  id={`${id}-${item.id}`}
-                />
-              ) : (
-                <DynamicPlate
-                  label={text}
-                  anchor={openRow}
-                  level={level}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Escape' || event.key === 'ArrowLeft') {
-                      event.preventDefault();
-                      event.stopPropagation();
-                      closeSubmenu(true);
-                    }
-                  }}
-                >
-                  {renderDynamic?.(openItem)}
-                </DynamicPlate>
-              )
-            ) : null}
+            {isOpen && openItem?.id === item.id && openRow !== null
+              ? ((() => {
+                  /* a dynamic plate the caller draws comes first; the row's children otherwise */
+                  const plate = dynamicNode(
+                    openItem,
+                    context,
+                    renderDynamic,
+                    openViaKeyboard.current,
+                  );
+                  if (plate !== null)
+                    return (
+                      <DynamicPlate
+                        label={text}
+                        anchor={openRow}
+                        level={level}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Escape' || event.key === 'ArrowLeft') {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            closeSubmenu(true);
+                          }
+                        }}
+                      >
+                        {plate}
+                      </DynamicPlate>
+                    );
+                  return null;
+                })() ??
+                (openItem.items !== undefined && visibleItems(openItem.items).length > 0 ? (
+                  <MenuList
+                    items={openItem.items}
+                    context={context}
+                    label={text}
+                    anchor={{ kind: 'element', element: openRow }}
+                    placement="right"
+                    level={level + 1}
+                    autoFocus={openViaKeyboard.current}
+                    includeContextOnly={includeContextOnly}
+                    renderDynamic={renderDynamic}
+                    onSelect={onSelect}
+                    onCloseLevel={(reason) => {
+                      if (reason === 'escape') closeSubmenu(true);
+                      else onCloseLevel(reason);
+                    }}
+                    onNavigate={onNavigate}
+                    id={`${id}-${item.id}`}
+                  />
+                ) : null))
+              : null}
           </div>
         );
       })}

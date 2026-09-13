@@ -1,6 +1,6 @@
 // Figures and screenshots (head:88-94; report 03 sections 4.3, 5.5, 5.6): shot, pair, tiles,
 // details, board, logoPlates.
-import { classes, el, escapeText, style, voidEl } from '../html.ts';
+import { classes, el, escapeText, px, style, voidEl } from '../html.ts';
 import { renderText } from '../text.ts';
 import type { BlockOf } from '@turboslide/schema/blocks';
 import {
@@ -16,6 +16,14 @@ import {
 } from './context.ts';
 import type { BlockContext } from './context.ts';
 import { emptyPictureHtml, renderTextOrPrompt } from './prompt.ts';
+import {
+  adjustDeclarations,
+  frameDeclarations,
+  maskDeclaration,
+  trimAttr,
+  trimDeclarations,
+} from './picture.ts';
+import { boxShadowDeclaration } from './primitives.ts';
 
 /**
  * A figure caption: the Text, the prompt "Add a caption" for an empty one with prompts on, or no
@@ -46,20 +54,71 @@ function figcaption(
  * figure layout draws the dashed plate with prompts on and nothing otherwise (SPEC 5.2).
  */
 export function renderShot(block: BlockOf<'shot'>, ctx: BlockContext): string {
+  // the picture tools of gslides-parity SPEC-2 2.5: a trimmed or masked picture sits in a
+  // `.shot-crop` frame at the picture's aspect (the frame clips, the image is scaled inside it);
+  // the frame border of 2.5.5 replaces the hairline, the adjustments are the image's opacity and
+  // filter, the shadow the frame's. A shot without them renders byte for byte as before.
+  const tooled =
+    block.trim !== undefined ||
+    block.mask !== undefined ||
+    block.adjust !== undefined ||
+    block.frame !== undefined ||
+    block.shadow !== undefined;
+  const image = isEmptyPicture(block.asset) ? undefined : imageFor(ctx, block.asset, block.id);
   const imgStyle = style(
     block.aspect && `aspect-ratio:${block.aspect}`,
     block.aspect && 'object-fit:cover',
     block.aspect && `object-position:${block.crop ?? 'center'}`,
     block.border === false && 'border:0',
+    block.frame !== undefined && block.trim === undefined && block.mask === undefined
+      ? frameDeclarations(block.frame).join(';')
+      : false,
+    ...adjustDeclarations(block.adjust),
+    (block.trim !== undefined || block.mask !== undefined) &&
+      `position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;border:0`,
+    ...(block.trim !== undefined ? trimDeclarations(block.trim) : []),
   );
-  const img = isEmptyPicture(block.asset)
-    ? emptyPictureHtml(ctx, 'shot')
-    : voidEl('img', {
-        class: classes('shot', block.fit === 'fit' && 'fit'),
-        ...imgAttrs(imageFor(ctx, block.asset, block.id)),
-        style: imgStyle,
-        ...raster(ctx, block.id, 'shot', false),
-      });
+  let img: string;
+  if (image === undefined) img = emptyPictureHtml(ctx, 'shot');
+  else {
+    img = voidEl('img', {
+      class: classes('shot', block.fit === 'fit' && 'fit'),
+      ...imgAttrs(image),
+      style: imgStyle,
+      ...raster(ctx, block.id, 'shot', false),
+    });
+    if (tooled && (block.trim !== undefined || block.mask !== undefined)) {
+      // the frame keeps the picture's aspect after the trim: the kept fractions of the asset's
+      // size, else the block's aspect, else 16:9
+      const size = image.size;
+      const keptW = 1 - (block.trim?.left ?? 0) - (block.trim?.right ?? 0);
+      const keptH = 1 - (block.trim?.top ?? 0) - (block.trim?.bottom ?? 0);
+      const ratio =
+        block.aspect !== undefined
+          ? block.aspect
+          : size !== undefined
+            ? `${px(size[0] * keptW)} / ${px(size[1] * keptH)}`
+            : `${px(16 * keptW)} / ${px(9 * keptH)}`;
+      const w = block.width ?? ctx.slotWidth ?? 1326;
+      const h = (w * (size?.[1] ?? 9) * keptH) / ((size?.[0] ?? 16) * keptW);
+      img = el(
+        'div',
+        {
+          class: 'shot-crop',
+          style: style(
+            `aspect-ratio:${ratio}`,
+            ...frameDeclarations(block.frame),
+            block.frame === undefined && block.border !== false && 'border:1px solid var(--hair)',
+            maskDeclaration(block.mask, w, h),
+            boxShadowDeclaration(block.shadow),
+          ),
+          'data-trim': trimAttr(block.trim),
+          'data-mask': block.mask,
+        },
+        img,
+      );
+    }
+  }
   const caption = figcaption(block.caption, ctx, block, '/caption', 'caption');
   return el(
     'figure',
@@ -68,8 +127,14 @@ export function renderShot(block: BlockOf<'shot'>, ctx: BlockContext): string {
         'shot-fig',
         block.captionSize === 15 && 'cap-15',
         block.fit === 'fit' && 'fit',
+        tooled && 'tooled',
       ),
-      style: block.width !== undefined ? `width:${block.width}px;max-width:100%` : undefined,
+      style: style(
+        block.width !== undefined && `width:${block.width}px;max-width:100%`,
+        block.shadow !== undefined && block.trim === undefined && block.mask === undefined
+          ? boxShadowDeclaration(block.shadow)
+          : false,
+      ),
     }),
     img + caption,
   );

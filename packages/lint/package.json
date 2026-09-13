@@ -13,6 +13,7 @@
     "./text": "./src/text.ts",
     "./lint-static": "./src/lint-static.ts",
     "./run": "./src/run.ts",
+    "./run-client": "./src/run-client.ts",
     "./chrome": "./src/chrome.ts",
     "./static/copy": "./src/static/copy.ts",
     "./static/type": "./src/static/type.ts",

@@ -31,10 +31,19 @@ export function versionOf(bytes: Uint8Array): string {
   return `"${createHash('md5').update(bytes).digest('hex')}"`;
 }
 
-export function memoryBlobClient(base = 'https://fake.blob.local'): FakeBlobClient {
-  const blobs = new Map<string, { bytes: Uint8Array; version: string }>();
+export type FakeBlobOptions = {
+  /** the upload clock every put records as `uploadedAt`; the wall clock by default */
+  now?: () => string;
+};
+
+export function memoryBlobClient(
+  base = 'https://fake.blob.local',
+  options: FakeBlobOptions = {},
+): FakeBlobClient {
+  const blobs = new Map<string, { bytes: Uint8Array; version: string; uploadedAt: string }>();
   const calls: FakeBlobCall[] = [];
   const failures = new Map<string, Error>();
+  const now = options.now ?? (() => new Date().toISOString());
   let heldList: BlobEntry[] | null = null;
   let heldBodies: Map<string, { bytes: Uint8Array; version: string }> | null = null;
   const listing = (): BlobEntry[] =>
@@ -51,6 +60,7 @@ export function memoryBlobClient(base = 'https://fake.blob.local'): FakeBlobClie
           url: `${base}/${pathname}`,
           size: stored.bytes.byteLength,
           version: stored.version,
+          uploadedAt: stored.uploadedAt,
         };
   };
   return {
@@ -101,7 +111,7 @@ export function memoryBlobClient(base = 'https://fake.blob.local'): FakeBlobClie
       }
       return [...out].sort();
     },
-    async put(pathname, bytes, options: BlobPutOptions) {
+    async put(pathname, bytes, putOptions: BlobPutOptions) {
       calls.push({ op: 'put', pathname });
       const failure = failures.get(pathname);
       if (failure !== undefined) {
@@ -109,12 +119,12 @@ export function memoryBlobClient(base = 'https://fake.blob.local'): FakeBlobClie
         throw failure;
       }
       const existing = blobs.get(pathname);
-      if (existing !== undefined && !options.overwrite) throw new BlobExistsError(pathname);
-      if (options.ifMatch !== undefined && existing?.version !== options.ifMatch) {
+      if (existing !== undefined && !putOptions.overwrite) throw new BlobExistsError(pathname);
+      if (putOptions.ifMatch !== undefined && existing?.version !== putOptions.ifMatch) {
         throw new BlobPreconditionError(pathname);
       }
       const copy = new Uint8Array(bytes);
-      blobs.set(pathname, { bytes: copy, version: versionOf(copy) });
+      blobs.set(pathname, { bytes: copy, version: versionOf(copy), uploadedAt: now() });
       const entry = entryOf(pathname);
       if (entry === null) throw new Error('unreachable');
       return entry;

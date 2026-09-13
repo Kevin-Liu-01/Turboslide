@@ -44,7 +44,8 @@ describe('blockControls for a rows block', () => {
     );
     /* `link` is the whole-box link every block carries since the Google Slides parity round
        (gslides-parity SPEC 7.2.7, blockLinkField in schema/text.ts) */
-    expect(annotated).toEqual(['link', 'key', 'tight', 'links', 'minRowHeight']);
+    /* `alt` is the per block description of SPEC-2 0.51 (BlockBase.alt) */
+    expect(annotated).toEqual(['link', 'alt', 'key', 'tight', 'links', 'minRowHeight']);
     for (const key of annotated) expect(byPath.has(`/${key}`)).toBe(true);
     expect(byPath.has('/id')).toBe(false);
     expect(byPath.has('/type')).toBe(false);

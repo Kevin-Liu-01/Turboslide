@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "rotated",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Rotated and flipped objects",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 900,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "tilted",
+        "type": "text",
+        "text": "A text box rotated 37 degrees",
+        "padding": 16,
+        "pos": {
+          "x": 200,
+          "y": 320,
+          "w": 480,
+          "h": 64,
+          "z": 1,
+          "rotate": 37
+        }
+      },
+      {
+        "id": "arrow",
+        "type": "shape",
+        "shape": "rightArrow",
+        "fill": "ink",
+        "stroke": "ink",
+        "pos": {
+          "x": 760,
+          "y": 300,
+          "w": 320,
+          "h": 120,
+          "z": 2,
+          "flip": "h"
+        }
+      },
+      {
+        "id": "photo",
+        "type": "picture",
+        "asset": "fixture-photo",
+        "frame": {
+          "weight": 1
+        },
+        "pos": {
+          "x": 1000,
+          "y": 480,
+          "w": 400,
+          "h": 225,
+          "z": 3,
+          "rotate": 15
+        }
+      }
+    ]
+  },
+  "template": "blank"
+}

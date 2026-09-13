@@ -183,8 +183,28 @@ function base(id: SlideId) {
   return { schemaVersion: 1 as const, id };
 }
 
+/**
+ * A content layout's placeholders carry `autofit: 'shrink'` (gslides-parity SPEC-2 0.41; Google's
+ * theme placeholders default to Shrink text on overflow, R09 A5): the heading, paragraph, text and
+ * box blocks a `make` creates. The picture kinds' plate blocks and the fixed kinds' fields keep
+ * the grammar's sizes until the slide converts to the canvas (SPEC-2 1.2).
+ */
+function withShrink(blocks: Block[]): Block[] {
+  return blocks.map((block) =>
+    block.type === 'heading' ||
+    block.type === 'paragraph' ||
+    block.type === 'text' ||
+    block.type === 'box'
+      ? ({ ...block, autofit: 'shrink' } as Block)
+      : block,
+  );
+}
+
 function content(id: SlideId, layout: Layout, slots: ContentSlide['slots']): ContentSlide {
-  return { ...base(id), kind: 'content', layout, slots };
+  const fitted: ContentSlide['slots'] = {};
+  for (const [slot, blocks] of Object.entries(slots) as [SlotName, Block[]][])
+    fitted[slot] = withShrink(blocks);
+  return { ...base(id), kind: 'content', layout, slots: fitted };
 }
 
 const COLS_5_7: Layout = { type: 'cols', ratio: '5/7', gap: 72, align: 'center' };

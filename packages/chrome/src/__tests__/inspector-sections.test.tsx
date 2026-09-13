@@ -176,7 +176,8 @@ describe('Inspector sections', () => {
     expect(screen.getByLabelText<HTMLInputElement>('t: Weight').value).toBe('600');
     expect(screen.getByLabelText('t: Align options')).toBeTruthy();
     expect(screen.getByLabelText('t: Tracking (em)')).toBeTruthy();
-    expect(screen.getByLabelText('t: Leading')).toBeTruthy();
+    /* Google's word since SPEC-2 0.20 (the typography label of B1's schema) */
+    expect(screen.getByLabelText('t: Line spacing')).toBeTruthy();
     expect(document.querySelector('[data-rule="type/weight-cap"]')).not.toBeNull();
     /* stepping the weight writes the whole typography object in one block.set */
     fireEvent.click(screen.getByLabelText('t: Weight up'));

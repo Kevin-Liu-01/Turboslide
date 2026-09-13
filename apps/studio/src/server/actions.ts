@@ -16,7 +16,9 @@ import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import type { SheetJobResult } from '@turboslide/render-worker/jobs/sheet';
 import { cacheDir, defaultPaths } from '@turboslide/render-worker/paths';
+import type { CanvasBoxes } from '@turboslide/schema/canvas';
 import type { DeckDocument } from '@turboslide/schema/deck';
+import { makeDiagram } from '@turboslide/schema/diagrams';
 import { ConflictError } from '@turboslide/schema/errors';
 import type { ExportReport } from '@turboslide/schema/export';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
@@ -42,6 +44,7 @@ import {
 } from '@turboslide/theme/tokens';
 
 import { lintLists } from './lint';
+import { measureSlidesThroughWorker } from './measure';
 import {
   deckDir,
   ensureDeckAssets,
@@ -406,7 +409,7 @@ function registerHostedDeckActions(dispatcher: Dispatcher, decks: HostedDecks): 
     return mapStale(() => decks.restore(id, baseRevision));
   });
   dispatcher.register('deck.remove', (input) => {
-    const { id, confirm, baseRevision } = input as DeckIdInput & { confirm: true };
+    const { id, confirm, baseRevision } = input as DeckIdInput & { confirm?: boolean };
     if (confirm !== true) throw new TypeError('deck.remove needs confirm: true');
     return mapStale(() => decks.remove(id, baseRevision));
   });
@@ -447,7 +450,7 @@ function registerSlideImport(
     const document = (await sourceStore.read()).document;
     await decks.ensureAssets(sourceDeckId);
     const sourceDir = join(decks.decksDir, sourceDeckId);
-    const client = decks.kind === 'blob' ? await exportBlobClient() : null;
+    const blobClient = decks.kind === 'blob' ? await exportBlobClient() : null;
     return slideImport(deps, context, request, {
       document,
       copyAsset: async (relative) => {
@@ -458,11 +461,15 @@ function registerSlideImport(
         if (!existsSync(from)) throw new RangeError(`${sourceDeckId} has no file ${relative}`);
         mkdirSync(dirname(to), { recursive: true });
         cpSync(from, to);
-        if (client !== null) {
-          await client.put(`${deckPrefix(deckId)}${relative}`, new Uint8Array(readFileSync(to)), {
-            overwrite: true,
-            contentType: blobContentType(relative),
-          });
+        if (blobClient !== null) {
+          await blobClient.put(
+            `${deckPrefix(deckId)}${relative}`,
+            new Uint8Array(readFileSync(to)),
+            {
+              overwrite: true,
+              contentType: blobContentType(relative),
+            },
+          );
         }
       },
     });
@@ -507,6 +514,10 @@ export async function deckDispatcher(
     load,
     lint: lintLists(),
     renderRecords,
+    // deck.info's counts.snapshots on the Blob backend (SPEC-2 8.2; B6's BlobStore.snapshots)
+    ...('snapshots' in deckStore && typeof deckStore.snapshots === 'function'
+      ? { snapshots: () => (deckStore as { snapshots: () => Promise<number> }).snapshots() }
+      : {}),
     deckDirFor: (path) => {
       const id = basename(path);
       if (
@@ -520,18 +531,32 @@ export async function deckDispatcher(
       return storeFor(id).dir;
     },
   });
-  registerStoreActions(dispatcher, {
-    store: deckStore,
-    lint: lintLists(),
-    // fix.run's rendered layer reads the worker's cache for the current revision (sync, like the CLI's render.json read)
-    renderRecords: () => renderRecords(loadDeckDir(store.dir).document),
-  });
-  // deck.create makes a sibling under decks/; deck.rename writes this deck's title
+  // the store actions' dependencies: fix.run's rendered layer reads the worker's cache for the
+  // current revision (sync, like the CLI's render.json read); the canvas and fit measurers of
+  // round two (gslides-parity SPEC-2 1.3, 0.64, 0.104) run through the render worker facade of
+  // server/render.ts, one measurement per action call, so slide.toCanvas and every canvas write
+  // on a slide that is not a canvas yet convert on this transport as they do on the CLI, and
+  // headless Chromium stays out of this process
   const storeDeps: StoreActionDeps = {
     store: deckStore,
     lint: lintLists(),
     renderRecords: () => renderRecords(loadDeckDir(store.dir).document),
+    measureCanvas: async (_deck, slides) => {
+      const measured = await measureSlidesThroughWorker(
+        deckId,
+        slides.map((slide) => slide.id),
+      );
+      const boxes: Record<string, CanvasBoxes> = {};
+      for (const [id, entry] of Object.entries(measured)) boxes[id] = entry.canvas;
+      return boxes;
+    },
+    measureFit: async (_deck, slide) =>
+      (await measureSlidesThroughWorker(deckId, [slide.id]))[slide.id]?.fit ?? {},
+    // the diagram templates (SPEC-2 2.8.3): B5's @turboslide/schema/diagrams, bound at merge 2
+    diagrams: makeDiagram,
   };
+  registerStoreActions(dispatcher, storeDeps);
+  // deck.create makes a sibling under decks/; deck.rename writes this deck's title
   registerDeckActions(dispatcher, { ...storeDeps, decksDir: join(repoRoot(), 'decks') });
   // the collection actions over the hosted backend (they replace the folder handlers
   // registerDeckActions put on the same ids) and slide.import, which no CLI registration offers

@@ -6,6 +6,8 @@
 import { isAbsolute, join, resolve } from 'node:path';
 
 import { formatFinding } from '@turboslide/lint/run';
+import type { Slide } from '@turboslide/schema/deck';
+import { makeDiagram } from '@turboslide/schema/diagrams';
 import { ConflictError } from '@turboslide/schema/errors';
 import { parseBlockAddress } from '@turboslide/schema/ids';
 import { parseJson } from '@turboslide/schema/json';
@@ -14,7 +16,8 @@ import type { FileStore } from '@turboslide/store/file-store';
 
 import { flagBoolean, flagString } from './args.ts';
 import type { CommandContext } from './context.ts';
-import { derivedDir, findDeckDir, readJson, readRenderRecords } from './deck-files.ts';
+import { derivedDir, findDeckDir, loadDeck, readJson, readRenderRecords } from './deck-files.ts';
+import { headlessCanvasMeasurer, headlessFitMeasurer } from './deps/canvas.ts';
 import { lintLists } from './deps/theme.ts';
 import { GateError, UsageError } from './exit.ts';
 import type { SlideResult, StoreActionDeps, WriteContext } from './store-actions.ts';
@@ -26,11 +29,18 @@ export function openStore(ctx: CommandContext): FileStore {
 }
 
 export function storeDeps(ctx: CommandContext, store: FileStore): StoreActionDeps {
+  // the canvas and fit measurers run headless Chromium over the deck directory, one page per
+  // action call (gslides-parity SPEC-2 1.3, 0.104); the slides are read from disk at call time
+  const slidesOf = (): Record<string, Slide> => loadDeck(store.dir).slides;
   return {
     store,
     lint: lintLists(),
     renderRecords: () =>
       readRenderRecords(join(derivedDir(store.dir, ctx.cwd), 'render', 'render.json')),
+    measureCanvas: headlessCanvasMeasurer(store.dir, slidesOf),
+    measureFit: headlessFitMeasurer(store.dir, slidesOf),
+    // the diagram templates (SPEC-2 2.8.3): B5's @turboslide/schema/diagrams, bound at merge 2
+    diagrams: makeDiagram,
   };
 }
 

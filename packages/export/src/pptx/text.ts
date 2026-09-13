@@ -9,20 +9,33 @@
 // `.no` rows struck, and 0.02 in of width
 // slack so no renderer wraps early (pptx report section 4.1). In flatten mode every run carries
 // transparency 100 (`<a:alpha val="0"/>`), the searchable layer over the raster.
+//
+// The Google Slides parity round two (gslides-parity SPEC-2 2.1, 2.2, 7.2): the run marks as
+// `italic`, `underline: { style: 'sng' }`, `strike`, `superscript`, `subscript`, `highlight` and
+// the run's own colour; a Google list item's glyph or numeral as `bullet` with `indentLevel`
+// (2.2.12); `paraSpaceBefore` and `paraSpaceAfter` on the paragraphs they apply to (2.2.9);
+// `align: 'justify'`; `valign` and a four number `margin` on a positioned text box (2.2.18,
+// 2.2.19); word art's `outline` (2.2.16); the object's `rotate`, `flipH`, `flipV`, `shadow` and
+// `altText` (2.1, 2.3.4, 2.5.6); and a shape's text as one `addText` with `shape` (2.2.17).
 import type PptxGenJS from 'pptxgenjs';
 
-import type { SceneRun, SceneStyle, SceneText } from '../scene/types.ts';
+import type { SceneRect, SceneRun, SceneStyle, SceneText } from '../scene/types.ts';
 import { PAGE_IN, PX_PER_IN, parseCssColor, pxToIn, pxToPt } from '../units.ts';
 import { firstBaselineShiftPx } from './baseline.ts';
 import type { BaselineTarget } from './baseline.ts';
 import { faceAdvanceExcess } from './face-advance.ts';
 import type { FontSet } from './fonts-map.ts';
 import { MONO_FAMILY, pickFamily, weightSubstitution } from './fonts-map.ts';
+import { fillProps, rectLine, rectShape } from './lines.ts';
 import { isSlideLink } from './links.ts';
 import type { LinkResolver } from './links.ts';
+import { objectName, objectProps, outlineBox } from './shapes.ts';
 
 /** Width slack on every text box, in inches (pptx report section 4.1). */
 export const WIDTH_SLACK_IN = 0.02;
+
+/** The bullet's indent in points: the renderer's 36 px key position (render lists.ts NUMERAL_INDENT). */
+export const BULLET_INDENT_PX = 36;
 
 export type TextEmitOptions = {
   fontSet: FontSet;
@@ -43,12 +56,46 @@ export type TextEmitOptions = {
    * link to its number in the file. Without it a URL link is written and a slide link dropped.
    */
   links?: LinkResolver;
+  /** The paper hex a shape's translucent fill composites on (a shape with text, SPEC-2 2.2.17). */
+  paperHex?: string;
 };
 
 /** The family for a style: the mono stack for the code panel, else the set's pick. */
 export function familyFor(style: SceneStyle, set: FontSet): string {
   if (style.mono) return MONO_FAMILY;
   return pickFamily(style.size, style.weight, set).family;
+}
+
+/** The Unicode code point of a bullet glyph as pptxgenjs `characterCode` wants it: four hex digits. */
+export function bulletCharacterCode(glyph: string): string {
+  const code = glyph.codePointAt(0) ?? 0x2022;
+  return code.toString(16).toUpperCase().padStart(4, '0');
+}
+
+/**
+ * The pptxgenjs `bullet` of a list item (SPEC-2 2.2.12, 2.2.13): the glyph's code point, or the
+ * numbering scheme with the item's start number; the indent is the renderer's key position.
+ */
+export function bulletOptions(
+  bullet: NonNullable<SceneText['bullet']>,
+): NonNullable<PptxGenJS.TextPropsOptions['bullet']> {
+  const indent = pxToPt(BULLET_INDENT_PX);
+  if (bullet.kind === 'number') {
+    const numberType = (bullet.numberType ?? 'arabicPeriod') as NonNullable<
+      Exclude<PptxGenJS.TextPropsOptions['bullet'], boolean | undefined>
+    >['numberType'];
+    // pptxgenjs 4.0.1 declares `numberType` and its writer reads `bullet.style`
+    // (gen-xml `<a:buAutoNum type="${bullet.style || 'arabicPeriod'}"`); both travel so the file
+    // carries the scheme whichever the version reads
+    return {
+      type: 'number',
+      numberType,
+      numberStartAt: bullet.startAt ?? 1,
+      indent,
+      ...({ style: numberType } as Record<string, unknown>),
+    };
+  }
+  return { characterCode: bulletCharacterCode(bullet.glyph || '•'), indent };
 }
 
 function runOptions(
@@ -91,6 +138,13 @@ function runOptions(
   if (options.invisible || run.gt) out.transparency = 100;
   else if (color.alpha < 1) out.transparency = Math.round((1 - color.alpha) * 100);
   if (run.style.strike) out.strike = 'sngStrike';
+  // the run marks of gslides-parity SPEC-2 7.2: the italic face keeps the family name (7.1)
+  if (run.style.italic) out.italic = true;
+  if (run.style.underline) out.underline = { style: 'sng' };
+  if (run.style.baseline === 'super') out.superscript = true;
+  else if (run.style.baseline === 'sub') out.subscript = true;
+  if (run.style.highlight !== undefined && !options.invisible)
+    out.highlight = parseCssColor(run.style.highlight).hex;
   if (run.style.link) {
     // A slide link travels in both modes as a slide jump (gslides-parity SPEC 7.2.8; whether
     // PowerPoint honours it on the invisible run of a flatten file is unverified, the report
@@ -128,8 +182,8 @@ export function guardLinkSpaces(runs: readonly SceneRun[]): SceneRun[] {
     let text = run.text;
     const prev = runs[i - 1];
     const next = runs[i + 1];
-    if (prev?.style.link && text.startsWith(' ')) text = `\u00a0${text.slice(1)}`;
-    if (next?.style.link && text.endsWith(' ')) text = `${text.slice(0, -1)}\u00a0`;
+    if (prev?.style.link && text.startsWith(' ')) text = ` ${text.slice(1)}`;
+    if (next?.style.link && text.endsWith(' ')) text = `${text.slice(0, -1)} `;
     return text === run.text ? run : { ...run, text };
   });
 }
@@ -143,7 +197,7 @@ export function gapFiller(run: SceneRun, options: TextEmitOptions): PptxGenJS.Te
   const family = familyFor(run.style, options.fontSet);
   options.families.add(family);
   return {
-    text: '\u00a0',
+    text: ' ',
     options: {
       fontFace: family,
       fontSize: pxToPt(run.style.size),
@@ -158,10 +212,14 @@ export function gapFiller(run: SceneRun, options: TextEmitOptions): PptxGenJS.Te
  * The pptxgenjs run list of a measured text: lines joined by soft breaks, runs by style, and a
  * paragraph break (`breakLine` on the last run of the paragraph, gslides-parity SPEC 7.2.9) where
  * the browser's line starts a new `.para` span, so the file holds one `<a:p>` per paragraph with
- * the same alignment and pitch.
+ * the same alignment and pitch. The paragraph spacing of SPEC-2 2.2.9 goes on the paragraphs it
+ * applies to (before on every paragraph but the first, after on every one but the last), the
+ * bullet of a list item (2.2.12) on its first run.
  */
 export function textRuns(text: SceneText, options: TextEmitOptions): PptxGenJS.TextProps[] {
   const out: PptxGenJS.TextProps[] = [];
+  const paragraphs = new Set(text.lines.map((line) => line.paragraph ?? 0)).size;
+  let paragraphIndex = 0;
   text.lines.forEach((line, li) => {
     const previous = li > 0 ? text.lines[li - 1] : undefined;
     const newParagraph =
@@ -172,10 +230,26 @@ export function textRuns(text: SceneText, options: TextEmitOptions): PptxGenJS.T
     if (newParagraph) {
       const last = out[out.length - 1];
       if (last) last.options = { ...last.options, breakLine: true };
+      paragraphIndex += 1;
     }
     guardLinkSpaces(line.runs).forEach((run, ri) => {
       const runProps = runOptions(run, options, li === 0 && ri === 0, ri === 0);
       if (newParagraph && ri === 0) delete runProps.softBreakBefore;
+      const startsParagraph = ri === 0 && (li === 0 || newParagraph);
+      if (startsParagraph) {
+        if (text.paraSpace?.before !== undefined && paragraphIndex > 0)
+          runProps.paraSpaceBefore = pxToPt(text.paraSpace.before);
+        if (text.paraSpace?.after !== undefined && paragraphIndex < paragraphs - 1)
+          runProps.paraSpaceAfter = pxToPt(text.paraSpace.after);
+        if (text.bullet !== undefined) {
+          runProps.bullet = bulletOptions(text.bullet);
+          if (text.bullet.level > 1) runProps.indentLevel = Math.min(8, text.bullet.level - 1);
+          if (text.bullet.substituted === true)
+            options.residual?.add(
+              `numbering: ${options.namePrefix}#${text.blockId} uses the ${text.bullet.preset ?? 'digit-nested'} preset, whose "${text.bullet.glyph}" form has no OOXML numbering scheme; the file numbers it as arabicPeriod (gslides-parity SPEC-2 2.2.13)`,
+            );
+        }
+      }
       out.push({ text: run.text, options: runProps });
       const filler = gapFiller(run, options);
       if (filler) out.push(filler);
@@ -184,10 +258,24 @@ export function textRuns(text: SceneText, options: TextEmitOptions): PptxGenJS.T
   return out;
 }
 
+/** A four sided padding in px as the pptxgenjs `margin` in points: top, right, bottom, left. */
+export function marginPt(
+  padding: [number, number, number, number],
+): [number, number, number, number] {
+  // pptxgenjs 4.0.1 reads a margin array as left, right, bottom, top (gen-xml: margin[0] is lIns,
+  // [1] rIns, [2] bIns, [3] tIns), not the CSS order the padding arrives in
+  const [top, right, bottom, left] = padding;
+  return [pxToPt(left), pxToPt(right), pxToPt(bottom), pxToPt(top)];
+}
+
 /**
  * The box options of a measured text: the lines' union widened to the element and the slack, and
  * the box moved up by the target renderer's first-baseline offset (baseline.ts); the mono stack
- * has its own measured anchor.
+ * has its own measured anchor. A positioned text box with a vertical alignment or a padding
+ * (SPEC-2 2.2.18, 2.2.19) is written at the element's own box, moved up by the same offset, with
+ * `valign` and a four number `margin` instead, so the file lays the text out inside the same box
+ * the sheet did; word art's
+ * outline, the rotation, flip, shadow and alt text travel on the box (2.2.16, 2.1, 2.3.4, 2.5.6).
  */
 export function textBoxOptions(
   text: SceneText,
@@ -205,21 +293,52 @@ export function textBoxOptions(
     undefined,
     text.style.mono,
   );
-  const opts: PptxGenJS.TextPropsOptions = {
-    x: pxToIn(x),
-    y: pxToIn(Math.max(0, y - shift)),
-    w: wIn,
-    h: Math.max(pxToIn(h), lineHeight / PX_PER_IN),
-    margin: 0,
-    valign: 'top',
+  const fitted = text.valign !== undefined || text.padding !== undefined;
+  // the first baseline shift moves the box for every vertical alignment: the target renderer
+  // sets each line's glyphs lower in its pitch than the browser by the same amount whether the
+  // lines sit at the top, the middle or the bottom of the box (measured in the render worker
+  // image on the fixture's diagram labels, valign middle: dy 4 unshifted; b2.md, fix round)
+  const opts: PptxGenJS.TextPropsOptions = fitted
+    ? {
+        x: pxToIn(text.box[0]),
+        y: pxToIn(Math.max(0, text.box[1] - shift)),
+        w: Math.min(pxToIn(text.box[2]) + WIDTH_SLACK_IN, PAGE_IN.width - pxToIn(text.box[0])),
+        h: Math.max(pxToIn(text.box[3]), lineHeight / PX_PER_IN),
+        margin: marginPt(text.padding ?? [0, 0, 0, 0]),
+        valign: text.valign ?? 'top',
+      }
+    : {
+        x: pxToIn(x),
+        y: pxToIn(Math.max(0, y - shift)),
+        w: wIn,
+        h: Math.max(pxToIn(h), lineHeight / PX_PER_IN),
+        margin: 0,
+        valign: 'top',
+      };
+  Object.assign(opts, {
     align: text.style.align,
     lineSpacing: pxToPt(lineHeight),
     paraSpaceBefore: 0,
     paraSpaceAfter: 0,
     wrap: true,
     isTextBox: true,
-    objectName: `${options.namePrefix}#${text.id}${text.group ? `@${text.group}` : ''}`,
-  };
+    objectName: objectName(options.namePrefix, text.id, text.userGroup, text.group),
+    ...objectProps(text),
+  });
+  // a bulleted text box keeps the glyph in its margin: the box starts at the key position, and
+  // for a nested item at the level's indent before it, since the file writes the level as
+  // `indentLevel` and pptxgenjs sets the paragraph's marL to the indent times the level plus one
+  // (measured in the render worker image on the fixture's bullets: a level 2 item landed 36 px
+  // right of the sheet's, a level 3 item 72 px, dw 43 and 73 on the two blocks; b2.md, fix round)
+  if (text.bullet !== undefined && !fitted) {
+    const levels = Math.min(8, Math.max(0, (text.bullet.level ?? 1) - 1));
+    const hanging = BULLET_INDENT_PX * (1 + levels);
+    const left = Math.max(0, pxToIn(x - hanging));
+    opts.x = left;
+    opts.w = Math.min(wIn + pxToIn(hanging), PAGE_IN.width - left);
+  }
+  if (text.outline !== undefined && !options.invisible)
+    opts.outline = { color: text.outline.colorHex, size: pxToPt(text.outline.width) };
   // the owning block's link on the text box itself (gslides-parity SPEC 7.2.7)
   if (text.link !== undefined && !options.invisible) {
     const link = linkFor(text.link, options);
@@ -236,5 +355,64 @@ export function addSceneText(
 ): boolean {
   if (text.lines.length === 0) return false;
   slide.addText(textRuns(text, options), textBoxOptions(text, options));
+  return true;
+}
+
+/**
+ * A shape with text (SPEC-2 2.2.17) as one `addText` with `shape`: the shape's geometry, fill and
+ * line at the shape's box, the text laid out inside a margin that is the text layer's inset from
+ * the shape's edges (the preset's text rectangle plus the block's padding), the vertical alignment
+ * of the block, and the object's transform, shadow and alt text. Returns false when the text is
+ * empty, in which case the caller writes the shape alone.
+ */
+export function addShapeText(
+  slide: PptxGenJS.Slide,
+  rect: SceneRect,
+  text: SceneText,
+  options: TextEmitOptions,
+  name: string,
+): boolean {
+  if (text.lines.length === 0) return false;
+  // the shape's geometry drawn in by half its outline (shapes.ts outlineBox); the text layer's
+  // inset is measured from that box so the text keeps the sheet's position
+  const [x, y, w, h] = outlineBox(rect);
+  const [tx, ty, tw, th] = text.box;
+  const lineHeight = Math.max(...text.lines.map((l) => l.box[3]));
+  // the first baseline shift of textBoxOptions, as a margin the box cannot move: the top inset
+  // gives it up and the bottom inset takes it, so a centred or bottom aligned text moves up by
+  // the same amount a top aligned one does
+  const shift = firstBaselineShiftPx(
+    text.style.size,
+    lineHeight,
+    options.baseline ?? 'libreoffice',
+    undefined,
+    text.style.mono,
+  );
+  const inset: [number, number, number, number] = [
+    Math.max(0, Math.max(0, ty - y) + (text.padding?.[0] ?? 0) - shift),
+    Math.max(0, x + w - (tx + tw)) + (text.padding?.[1] ?? 0),
+    Math.max(0, Math.max(0, y + h - (ty + th)) + (text.padding?.[2] ?? 0) + shift),
+    Math.max(0, tx - x) + (text.padding?.[3] ?? 0),
+  ];
+  const { shape, rectRadius } = rectShape(rect);
+  slide.addText(textRuns(text, options), {
+    x: pxToIn(x),
+    y: pxToIn(y),
+    w: pxToIn(w),
+    h: pxToIn(h),
+    shape,
+    ...(rectRadius !== undefined ? { rectRadius } : {}),
+    fill: fillProps(rect.fill, options.paperHex),
+    line: rectLine(rect, options.paperHex),
+    margin: marginPt(inset),
+    valign: text.valign ?? rect.valign ?? 'top',
+    align: text.style.align,
+    lineSpacing: pxToPt(lineHeight),
+    paraSpaceBefore: 0,
+    paraSpaceAfter: 0,
+    wrap: true,
+    objectName: objectName(options.namePrefix, name, rect.userGroup, rect.group),
+    ...objectProps(rect),
+  });
   return true;
 }

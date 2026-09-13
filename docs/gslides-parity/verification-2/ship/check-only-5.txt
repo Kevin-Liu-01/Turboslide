@@ -1,0 +1,240 @@
+check  5/25: pnpm test
+$ vitest run
+
+ RUN  v4.1.11 /Users/kevinliu/repos/Turboslide
+
+ ❯ |@turboslide/cli| src/commands/freeform.test.ts (7 tests | 2 failed) 12340ms
+     × block align moves the named blocks to one snapped edge and writes a version 5007ms
+     × slide set-layout moves a grammar slide to freeform and back with the blocks refiled 5048ms
+ ❯ |@turboslide/cli| src/commands/gslides.test.ts (13 tests | 1 failed) 12627ms
+     × block duplicate copies a block after its original, offset on a freeform slide (block.duplicate) 5011ms
+ ❯ |@turboslide/cli| src/commands/canvas.test.ts (5 tests | 4 failed) 22730ms
+     × converts one slide of every kind at the recorded pos, six ids on one browser page 5014ms
+     × block set /pos on a grammar slide converts and moves in one revision 5010ms
+     × slide set-layout --type freeform is the same measured conversion 5076ms
+     × the fresh Title slide converts at the prompts’ boxes with no height under one line box 5005ms
+ ❯ |@turboslide/cli| src/commands/walk.test.ts (10 tests | 1 failed) 23415ms
+     × chart and table 7982ms
+ ❯ |@turboslide/cli| src/commands/mcp.test.ts (2 tests | 1 failed) 28070ms
+     × the dispatcher has deck.set and slide.import and the tool list names every parity tool 15321ms
+ ❯ |@turboslide/schema| src/apply-layout.test.ts (9 tests | 1 failed) 5938ms
+     × produces a valid slide for every source layout to every target layout of the 21 5888ms
+ ❯ |@turboslide/mcp| src/tools.test.ts (12 tests | 2 failed) 25818ms
+     × returns no tool when nothing is implemented and every tool when everything is 11681ms
+     × serialises every tool under 4 MB in total and every outputSchema under 32 KB 10849ms
+ ❯ |@turboslide/effects| src/parity.test.ts (26 tests | 5 failed) 74278ms
+     × mood-earth: every backend lights the cells pipeline.ts lights 20338ms
+     × mood-lighthouse: every backend lights the cells pipeline.ts lights 6280ms
+     × opener-prototemplate: every backend lights the cells pipeline.ts lights 6973ms
+     × the pixelmatch port counts and paints what the npm package does 5462ms
+     × DSSIM agrees with the TypeScript definition 11280ms
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 17 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |@turboslide/mcp| src/tools.test.ts > deriveTools > returns no tool when nothing is implemented and every tool when everything is
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/tools.test.ts:38:3
+     36|   });
+     37|
+     38|   it('returns no tool when nothing is implemented and every tool when …
+       |   ^
+     39|     expect(deriveTools(() => false)).toEqual([]);
+     40|     const all = deriveTools(() => true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/17]⎯
+
+ FAIL  |@turboslide/mcp| src/tools.test.ts > the served tool list stays under the stdio read buffer > serialises every tool under 4 MB in total and every outputSchema under 32 KB
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/tools.test.ts:176:3
+    174|   });
+    175|
+    176|   it('serialises every tool under 4 MB in total and every outputSchema…
+       |   ^
+    177|     const tools = deriveTools(() => true);
+    178|     expect(tools.length).toBeGreaterThan(80);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/17]⎯
+
+ FAIL  |@turboslide/cli| src/commands/canvas.test.ts > turboslide slide to-canvas > converts one slide of every kind at the recorded pos, six ids on one browser page
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/commands/canvas.test.ts:105:3
+    103|   });
+    104|
+    105|   test('converts one slide of every kind at the recorded pos, six ids …
+       |   ^
+    106|     const launches = headlessStats.launches;
+    107|     const before = manifest().revision;
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/17]⎯
+
+ FAIL  |@turboslide/cli| src/commands/canvas.test.ts > turboslide slide to-canvas > block set /pos on a grammar slide converts and moves in one revision
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/commands/canvas.test.ts:149:3
+    147|   });
+    148|
+    149|   test('block set /pos on a grammar slide converts and moves in one re…
+       |   ^
+    150|     const before = manifest().revision;
+    151|     const grammar = slideFile('audience');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/17]⎯
+
+ FAIL  |@turboslide/cli| src/commands/canvas.test.ts > turboslide slide to-canvas > slide set-layout --type freeform is the same measured conversion
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/commands/canvas.test.ts:180:3
+    178|   });
+    179|
+    180|   test('slide set-layout --type freeform is the same measured conversi…
+       |   ^
+    181|     const other = join(root, 'decks', 'gt-copy');
+    182|     copyDeck(other);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/17]⎯
+
+ FAIL  |@turboslide/cli| src/commands/canvas.test.ts > turboslide slide to-canvas > the fresh Title slide converts at the prompts’ boxes with no height under one line box
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/commands/canvas.test.ts:198:3
+    196|   });
+    197|
+    198|   test('the fresh Title slide converts at the prompts’ boxes with no h…
+       |   ^
+    199|     const made = await run(['slide', 'new', '--layout', 'title', '--id…
+    200|     expect(made.code, made.stderr).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/17]⎯
+
+ FAIL  |@turboslide/cli| src/commands/freeform.test.ts > turboslide freeform commands > block align moves the named blocks to one snapped edge and writes a version
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/commands/freeform.test.ts:92:3
+     90|   });
+     91|
+     92|   test('block align moves the named blocks to one snapped edge and wri…
+       |   ^
+     93|     const r = await run([
+     94|       'block',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/17]⎯
+
+ FAIL  |@turboslide/cli| src/commands/freeform.test.ts > turboslide freeform commands > slide set-layout moves a grammar slide to freeform and back with the blocks refiled
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/commands/freeform.test.ts:242:3
+    240|   });
+    241|
+    242|   test('slide set-layout moves a grammar slide to freeform and back wi…
+       |   ^
+    243|     const free = await run(['slide', 'set-layout', 'content-rule', '--…
+    244|     expect(free.code, free.stderr).toBe(0);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/17]⎯
+
+ FAIL  |@turboslide/cli| src/commands/gslides.test.ts > the Google Slides parity actions on a local decks folder > block duplicate copies a block after its original, offset on a freeform slide (block.duplicate)
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/commands/gslides.test.ts:388:3
+    386|   });
+    387|
+    388|   test('block duplicate copies a block after its original, offset on a…
+       |   ^
+    389|     const result = await run([
+    390|       'block',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/17]⎯
+
+ FAIL  |@turboslide/cli| src/commands/mcp.test.ts > turboslide mcp serves the parity actions over the deck folder > the dispatcher has deck.set and slide.import and the tool list names every parity tool
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/commands/mcp.test.ts:121:3
+    119|   });
+    120|
+    121|   test('the dispatcher has deck.set and slide.import and the tool list…
+       |   ^
+    122|     const dispatcher = createDeckDispatcher(handlerEnv());
+    123|     expect(dispatcher.has('deck.set')).toBe(true);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/17]⎯
+
+ FAIL  |@turboslide/cli| src/commands/walk.test.ts > the agent parity walk over the fixture deck > chart and table
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/commands/walk.test.ts:259:3
+    257|   });
+    258|
+    259|   test('chart and table', async () => {
+       |   ^
+    260|     const data = JSON.stringify({
+    261|       categories: ['A', 'B', 'C'],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/17]⎯
+
+ FAIL  |@turboslide/schema| src/apply-layout.test.ts > applyLayout > produces a valid slide for every source layout to every target layout of the 21
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/apply-layout.test.ts:96:3
+     94|
+     95| describe('applyLayout', () => {
+     96|   it('produces a valid slide for every source layout to every target l…
+       |   ^
+     97|     for (const source of LAYOUT_IDS) {
+     98|       const sourceSlide = filled(source);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/17]⎯
+
+ FAIL  |@turboslide/effects| src/parity.test.ts > cell identity on the deck two-tone assets > mood-earth: every backend lights the cells pipeline.ts lights
+ FAIL  |@turboslide/effects| src/parity.test.ts > cell identity on the deck two-tone assets > mood-lighthouse: every backend lights the cells pipeline.ts lights
+ FAIL  |@turboslide/effects| src/parity.test.ts > cell identity on the deck two-tone assets > opener-prototemplate: every backend lights the cells pipeline.ts lights
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/parity.test.ts:153:5
+    151|
+    152|   for (const { id, asset, treatment } of twoToneAssets) {
+    153|     test(`${id}: every backend lights the cells pipeline.ts lights`, a…
+       |     ^
+    154|       const { image, from } = await inputFor(id, asset);
+    155|       const reference = ts.twoToneScreen(image, treatment);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/17]⎯
+
+ FAIL  |@turboslide/effects| src/parity.test.ts > diffs > the pixelmatch port counts and paints what the npm package does
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/parity.test.ts:416:3
+    414|   }
+    415|
+    416|   test('the pixelmatch port counts and paints what the npm package doe…
+       |   ^
+    417|     const src = await decodeImage(join(FIXTURES, 'pillow', 'src.png'));
+    418|     const dark = await decodeImage(join(DECK_DIR, 'assets', 'opener-br…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/17]⎯
+
+ FAIL  |@turboslide/effects| src/parity.test.ts > diffs > DSSIM agrees with the TypeScript definition
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/parity.test.ts:480:3
+    478|   });
+    479|
+    480|   test('DSSIM agrees with the TypeScript definition', async () => {
+       |   ^
+    481|     const dark = await decodeImage(join(DECK_DIR, 'assets', 'mood-wave…
+    482|     const light = await decodeImage(join(DECK_DIR, 'assets', 'mood-wav…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/17]⎯
+
+
+ Test Files  8 failed | 173 passed (181)
+      Tests  17 failed | 1970 passed | 3 skipped (1990)
+   Start at  10:03:11
+   Duration  160.59s (transform 413.52s, setup 0ms, import 766.84s, tests 883.60s, environment 243.46s)
+
+[ELIFECYCLE] Test failed. See above for more details.
+check  5/25: FAIL exit 1 after 161.4 s
+check: stopped after a failure (161.4 s)
+check exit 1

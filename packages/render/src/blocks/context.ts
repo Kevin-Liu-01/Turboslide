@@ -2,6 +2,7 @@
 // roots addressable (SPEC 5.2: data-block, data-type, data-run, data-raster).
 import { classes, escapeAttr, style } from '../html.ts';
 import type { AssetId, BlockId, SlideId } from '@turboslide/schema/ids';
+import type { Asset } from '@turboslide/schema/assets';
 import type { Block, Icon } from '@turboslide/schema/blocks';
 import { EMPTY_ASSET_REF } from '@turboslide/schema/blocks';
 import type { LayoutId, SlideKind } from '@turboslide/schema/deck';
@@ -29,6 +30,14 @@ export type BlockContext = {
   image: (assetId: AssetId) => ResolvedImage | undefined;
   /** Resolves an asset file path (`assets/x-light.jpg`) to a URL, for escape markup. */
   assetUrl: (path: string) => string;
+  /**
+   * The asset record itself, for a block whose rendering reads the source (a picture object over
+   * a material asset carries the recipe, gslides-parity SPEC-2 2.6.4); undefined when the
+   * context has no deck.
+   */
+  asset?: (assetId: AssetId) => Asset | undefined;
+  /** Emit the chips of a picture kind or a covering picture object (RenderOptions.chrome). */
+  chrome?: boolean;
   /** The width in sheet pixels available to the block, when the layout knows it. */
   slotWidth?: number;
   /** The height of the block's box on a freeform slide (docs/freeform.md); unknown in a flow layout. */

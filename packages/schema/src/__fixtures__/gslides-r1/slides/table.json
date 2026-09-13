@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "id": "table",
+  "kind": "content",
+  "layout": {
+    "type": "split",
+    "gap": 56,
+    "head": {
+      "cols": "4/8"
+    },
+    "body": {
+      "align": "center"
+    }
+  },
+  "slots": {
+    "headLeft": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Pricing table"
+      }
+    ],
+    "body": [
+      {
+        "id": "table",
+        "type": "table",
+        "columns": [
+          {
+            "align": "left"
+          },
+          {
+            "align": "right"
+          },
+          {
+            "align": "right"
+          },
+          {
+            "align": "right"
+          }
+        ],
+        "rows": [
+          {
+            "cells": [
+              "Plan",
+              "Seats",
+              "Locales",
+              "Price"
+            ],
+            "header": true
+          },
+          {
+            "cells": [
+              "Starter",
+              "5",
+              "2",
+              "$0"
+            ]
+          },
+          {
+            "cells": [
+              "Team",
+              "25",
+              "10",
+              "$99"
+            ]
+          },
+          {
+            "cells": [
+              "Enterprise",
+              "Unlimited",
+              "Every locale",
+              "Contact sales"
+            ]
+          }
+        ],
+        "border": {
+          "weight": 1
+        }
+      }
+    ]
+  },
+  "template": "table"
+}

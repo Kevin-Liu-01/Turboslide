@@ -25,7 +25,66 @@ export type SceneStyle = {
   link?: string;
   /** The computed font-feature-settings ('cv11', 'ss01' on display text). */
   features: string;
-  align: 'left' | 'center' | 'right';
+  align: 'left' | 'center' | 'right' | 'justify';
+  /** The marks of gslides-parity SPEC-2 7.2, read from the run's elements (`<i>`, `<u>`, `<sup>`, `<sub>`, `<mark>`). */
+  italic?: boolean;
+  underline?: boolean;
+  baseline?: 'super' | 'sub';
+  /** The computed background of the `<mark>` the run sits in, rgb() or rgba(). */
+  highlight?: string;
+};
+
+/** The rotation and mirror of a positioned object (gslides-parity SPEC-2 2.1.1, 2.1.2). */
+export type SceneTransform = {
+  /** Degrees clockwise about the box centre, 0 to 360 exclusive. */
+  rotate?: number;
+  flip?: 'h' | 'v' | 'hv';
+};
+
+/** A drop shadow (SPEC-2 2.3.4), the colour resolved to a hex for the theme. */
+export type SceneShadow = {
+  colorHex: string;
+  opacity: number;
+  angle: number;
+  /** Sheet px. */
+  distance: number;
+  blur: number;
+};
+
+/** The dash of a stroke or border (SPEC-2 2.3.3), the document's name. */
+export type SceneDash = 'solid' | 'dot' | 'dash' | 'dashDot' | 'longDash' | 'longDashDot';
+
+/**
+ * The object facts every positioned scene entry may carry (SPEC-2 1.5, 2.1): the transform, the
+ * user group tag (written as the `@g:<tag>` object name suffix, the outer grpSp), the shadow, the
+ * dash and the alt text.
+ */
+export type SceneObject = SceneTransform & {
+  /** The `pos.group` tag of the block, the outer group of ooxml/groups.ts. */
+  userGroup?: string;
+  shadow?: SceneShadow;
+  dash?: SceneDash;
+  alt?: string;
+};
+
+/**
+ * A bullet or numeral of a Google list item (SPEC-2 2.2.12, 2.2.13): the glyph as drawn, the
+ * level 1 to 9, the preset's numeral form for the level and the item's one based count at it.
+ */
+export type SceneBullet = {
+  kind: 'bullet' | 'number';
+  glyph: string;
+  level: number;
+  /** The pptxgenjs numberType of the preset's form at the level, for a numbered item. */
+  numberType?: string;
+  /** The count the item starts at, for a numbered item. */
+  startAt?: number;
+  /** True when the preset's form has no OOXML scheme and travels substituted (the `zerodigit` form). */
+  substituted?: boolean;
+  /** The list's preset as the renderer wrote it (`data-preset`), read in the page. */
+  preset?: string;
+  /** The item's one based position among the items at its level, read in the page. */
+  index?: number;
 };
 
 export type SceneRun = {
@@ -61,7 +120,7 @@ export type SceneLine = {
   paragraph?: number;
 };
 
-export type SceneText = {
+export type SceneText = SceneObject & {
   /** `<blockId>/<pointer>` from data-run, or 'counter'. */
   id: string;
   blockId: string;
@@ -77,6 +136,23 @@ export type SceneText = {
   group?: string;
   /** The owning block's link (gslides-parity SPEC 7.2.7), as the href the renderer wrote. */
   link?: string;
+  /** The vertical alignment of a positioned text box or shape text (SPEC-2 2.2.18); top when absent. */
+  valign?: 'top' | 'middle' | 'bottom';
+  /** The padding of a positioned text box in sheet px: top, right, bottom, left (SPEC-2 2.2.19). */
+  padding?: [number, number, number, number];
+  /** Paragraph spacing in sheet px (SPEC-2 2.2.9). */
+  paraSpace?: { before?: number; after?: number };
+  /** Text columns inside the box (SPEC-2 2.2.10), written by the post-process as `numCol`. */
+  columns?: number;
+  /** Word art's outline (SPEC-2 2.2.16), the colour as a hex. */
+  outline?: { colorHex: string; width: number };
+  /** The list glyph or numeral the item carries (SPEC-2 2.2.12). */
+  bullet?: SceneBullet;
+  /**
+   * The shape this text sits in (SPEC-2 2.2.17): the block id of a shape with text, whose
+   * SceneRect the builder merges with this text into one `addText` with `shape`.
+   */
+  inShape?: string;
 };
 
 export type SceneRule = {
@@ -95,7 +171,7 @@ export type SceneRule = {
 /** The native geometry a rect travels as: a rectangle, a rounded rectangle or an ellipse (prstGeom). */
 export type SceneShapeKind = 'rect' | 'roundRect' | 'ellipse';
 
-export type SceneRect = {
+export type SceneRect = SceneObject & {
   box: Box;
   /** The computed fill; `rgba(0, 0, 0, 0)` for a shape with no fill, which the builder writes as no fill. */
   fill: string;
@@ -109,6 +185,13 @@ export type SceneRect = {
   shape?: SceneShapeKind;
   /** The corner radius of a rounded rectangle in sheet px. */
   radius?: number;
+  /** A preset of shapes.ts by its ECMA `prstGeom` name (SPEC-2 2.3.1), when the shape is not one of the three above. */
+  preset?: string;
+  /** The preset's adjust values as fractions of 100000, in the definitions file's guide order (SPEC-2 2.3.2). */
+  adjust?: number[];
+  /** The vertical alignment and padding of a text carrying box or shape (SPEC-2 2.2.18, 2.2.19). */
+  valign?: 'top' | 'middle' | 'bottom';
+  padding?: [number, number, number, number];
 };
 
 /**
@@ -116,7 +199,7 @@ export type SceneRect = {
  * the builder writes a native line with a triangle head at the headed ends. (`SceneLine` above is
  * a line of text; this is a drawn segment.)
  */
-export type SceneSegment = {
+export type SceneSegment = SceneObject & {
   blockId: string;
   from: [number, number];
   to: [number, number];
@@ -125,6 +208,20 @@ export type SceneSegment = {
   /** Stroke width in sheet px. */
   width: number;
   heads: 'none' | 'start' | 'end' | 'both';
+  /** The line kind (SPEC-2 2.4): a straight line or arrow when absent. */
+  kind?: 'line' | 'arrow' | 'elbow' | 'curved' | 'curve' | 'polyline' | 'scribble';
+  /** The points of an elbow (four), a curve, polyline or scribble, in sheet px. */
+  points?: [number, number][];
+  /** Where a connector bends, 0 to 1 along the box (SPEC-2 2.4.1). */
+  bend?: number;
+  /** The decorations of SPEC-2 2.4.5 at the ends; `none` when absent. */
+  startEnd?: string;
+  endEnd?: string;
+  /** A closed path (SPEC-2 2.4.3) and the fill it takes. */
+  closed?: boolean;
+  fill?: string;
+  /** The shapes the ends are attached to (SPEC-2 2.4.7): the target's object name and site. */
+  connect?: { start?: { name: string; site: number }; end?: { name: string; site: number } };
 };
 
 export type ScenePicture = {
@@ -139,7 +236,7 @@ export type ScenePicture = {
   alt: string;
 };
 
-export type SceneRaster = {
+export type SceneRaster = SceneObject & {
   /** Unique within the slide. */
   id: string;
   blockId: string;
@@ -180,10 +277,15 @@ export type SceneTableCell = {
   /** The data-run id of the cell's text carrier (`<blockId>/rows/<r>/cells/<c>`). */
   textId: string;
   align: 'left' | 'center' | 'right';
-  /** The cell's computed background when the column sets a fill. */
+  /** The cell's computed background when the column or the cell sets a fill. */
   fill?: string;
   /** The cell padding in sheet px: top, right, bottom, left. */
   margin: [number, number, number, number];
+  /** A merged cell's extent (SPEC-2 2.7.1); 1 when absent. The covered cells are not listed. */
+  rowspan?: number;
+  colspan?: number;
+  /** The cell's own rule under it (SPEC-2 2.7.2): none at weight 0, else the colour, width and dash. */
+  border?: { color: string; width: number; dash?: SceneDash } | 'none';
 };
 
 export type SceneTableRow = {
@@ -199,7 +301,7 @@ export type SceneTableRow = {
  * vertical alignment and the font size. The cells' texts are the scene's `texts` entries named
  * by `textId`, grouped per row like a ruled row so the fallback construction needs nothing more.
  */
-export type SceneTable = {
+export type SceneTable = SceneObject & {
   blockId: string;
   box: Box;
   columns: { x: number; w: number }[];
@@ -211,6 +313,45 @@ export type SceneTable = {
   valign: 'top' | 'middle' | 'bottom';
   /** The computed font size in sheet px. */
   size: number;
+  /** The table border's dash (SPEC-2 2.7.3); solid when absent. */
+  border?: { dash?: SceneDash; weight: number };
+  /** True when the table holds merged cells (the grid form of the renderer). */
+  merged?: boolean;
+};
+
+/**
+ * A chart block (gslides-parity SPEC-2 2.8.1): the data from the document and the series colours
+ * as the theme resolved them in the page, for `addChart` in Editable text; the svg is a raster in
+ * Perfect. The chart's box is a picture region in the verify loop.
+ */
+export type SceneChart = SceneObject & {
+  blockId: string;
+  box: Box;
+  kind: 'bar' | 'column' | 'line' | 'pie';
+  categories: string[];
+  series: { name: string; values: number[]; colorHex: string }[];
+  /** A pie's slice colours per category as the theme resolved them, hex (SPEC-2 2.8.1). */
+  sliceColorsHex?: string[];
+  title?: string;
+  legend: 'none' | 'right' | 'bottom' | 'top' | 'left';
+  numberFormat: 'plain' | 'thousands' | 'percent' | 'currency';
+  labels: boolean;
+  /** The computed label and title colours. */
+  labelColor: string;
+  titleColor: string;
+};
+
+/**
+ * The slide background of SPEC-2 2.6 (1.5): a colour (the slide's own or the deck default), or
+ * the picture object that covers the sheet at the bottom of the stack, whose raster the builder
+ * writes as `slide.background = { data }`, the form the picture kinds export.
+ */
+export type SceneBackground = {
+  /** The computed colour of the `.slide-bg` layer, rgb() or rgba(). */
+  color?: string;
+  /** The raster id of the covering picture object. */
+  pictureRasterId?: string;
+  pictureBlockId?: string;
 };
 
 export type Scene = {
@@ -241,6 +382,10 @@ export type Scene = {
   lines?: SceneSegment[];
   /** Table blocks as grids (gslides-parity SPEC 7.3); absent on a scene measured before them. */
   tables?: SceneTable[];
+  /** Chart blocks (gslides-parity SPEC-2 2.8.1); absent on a scene measured before them. */
+  charts?: SceneChart[];
+  /** The slide background of SPEC-2 2.6, when the slide has one. */
+  background?: SceneBackground;
   rasters: SceneRaster[];
   blocks: SceneBlock[];
   notes?: string;

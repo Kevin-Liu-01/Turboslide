@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { actionsInOrder } from '@turboslide/schema/actions';
+import type { BlockType } from '@turboslide/schema/blocks';
+import { CATALOG } from '@turboslide/schema/catalog';
 import { workedDocument } from '@turboslide/schema/fixtures';
 import type { Version } from '@turboslide/schema/mutations';
 
@@ -118,8 +120,18 @@ describe('buildPaletteEntries', () => {
       expect(input.after).toBe('list');
       expect(input.baseRevision).toBe(412);
     }
-    /* a plate-only block is not offered on a content slide */
-    expect(insert.some((entry) => entry.id === 'insert:block:credit')).toBe(false);
+    /* every block offered on a content slide is one the catalog allows there; since the canvas
+       (SPEC-2 section 1) no block is plate only, so the credit line is offered too */
+    const offered = insert
+      .filter((entry) => entry.id.startsWith('insert:block:'))
+      /* the palette names the shot block Image (insertLabel) */
+      .map(
+        (entry) =>
+          (entry.id.split(':')[2] === 'image' ? 'shot' : entry.id.split(':')[2]) as BlockType,
+      );
+    expect(offered.length).toBeGreaterThan(0);
+    for (const type of offered) expect(CATALOG[type].allowedIn, type).toContain('content');
+    expect(offered).toContain('credit');
   });
 
   it('lists every labeled action outside the view and studio groups', () => {

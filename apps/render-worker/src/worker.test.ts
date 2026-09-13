@@ -100,6 +100,7 @@ function fakeRunners(paths: WorkerPaths): Partial<Runners> {
       return result;
     },
     export: async (input: unknown) => ({ echoed: input }),
+    measure: async (input: unknown) => ({ echoed: input }),
   };
 }
 
@@ -189,6 +190,21 @@ describe('export job (gslides-parity SPEC 7.2.1, 7.3, 7.6)', () => {
     expect(verifySkippedNote('native', none, 'pptx')).toContain(
       'native text placement is unverified',
     );
+  });
+
+  it('builds the read only slide measure command for a measure job (gslides-parity SPEC-2 1.3)', async () => {
+    const { measureJobArgs, measureJobInput } = await import('./jobs/measure.ts');
+    const input = measureJobInput.parse({ deckId: 'demo', slideIds: ['title', 'opener-brand'] });
+    expect(measureJobArgs(input, '/decks/demo')).toEqual([
+      'slide',
+      'measure',
+      'title',
+      'opener-brand',
+      '--deck',
+      '/decks/demo',
+      '--json',
+    ]);
+    expect(() => measureJobInput.parse({ deckId: 'demo', slideIds: [] })).toThrow();
   });
 
   it('keeps JPEG renders in their own cache folder with the .jpg extension', () => {

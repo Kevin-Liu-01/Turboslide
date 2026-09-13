@@ -1,0 +1,47 @@
+{
+  "deck": "gt-brand",
+  "slideId": "mood-earth",
+  "template": "mood",
+  "source": "turboslide slide to-canvas (Chromium, headless, 1x, 1/64 px)",
+  "objects": {
+    "picture": {
+      "x": 0,
+      "y": 0,
+      "w": 1600,
+      "h": 900,
+      "z": 0
+    },
+    "plate": {
+      "x": 903,
+      "y": 536.734375,
+      "w": 560,
+      "h": 234.265625,
+      "z": 1,
+      "group": "plate"
+    },
+    "h": {
+      "x": 929,
+      "y": 558.734375,
+      "w": 508,
+      "h": 47.515625,
+      "z": 2,
+      "group": "plate"
+    },
+    "p1": {
+      "x": 929,
+      "y": 618.25,
+      "w": 508,
+      "h": 99,
+      "z": 3,
+      "group": "plate"
+    },
+    "credit": {
+      "x": 929,
+      "y": 729.25,
+      "w": 508,
+      "h": 21.75,
+      "z": 4,
+      "group": "plate"
+    }
+  }
+}

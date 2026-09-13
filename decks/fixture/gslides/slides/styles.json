@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "id": "styles",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Text styles"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "measure": 56,
+        "text": "A run in [italic]{i}, one [underlined]{u}, one [struck through]{s}, E = mc[2]{sup}, H[2]{sub}O, a [coloured]{c:green} run and a [highlighted]{h:amber} run."
+      },
+      {
+        "id": "justified",
+        "type": "text",
+        "typography": {
+          "align": "justify"
+        },
+        "text": "A justified text box sets every line but the last to the full measure. The word spaces stretch so both edges of the block are straight, which is what Google Slides does for the fourth alignment button."
+      }
+    ]
+  },
+  "template": "one-column"
+}

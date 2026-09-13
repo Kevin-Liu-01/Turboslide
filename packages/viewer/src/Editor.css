@@ -82,3 +82,31 @@
 .ts-editor:focus {
   outline: none;
 }
+
+/* ---- the canvas (gslides-parity SPEC-2 section 6) ---- */
+
+/* the editor lifts the sheet's clip while editing (SPEC-2 1.4, 0.96), so the part of an object
+   dragged past the slide's edge shows on the workspace as Google shows it; thumbnails, present
+   mode, the print document and the rasters keep the theme's overflow: hidden */
+.ts-editor:not(.is-present) .pt-sheet-stage > .sheet {
+  overflow: visible;
+}
+
+/* Space held: the stage pans with the grab cursor (SPEC-2 6.1 row 28) */
+.ts-editor[data-pan] .pt-sheet-stage,
+.ts-editor[data-pan] .pt-slide [data-block],
+.ts-editor[data-pan] .pt-slide [data-run] {
+  cursor: grab;
+}
+
+/* crop mode: the picture's frame is the pan surface (SPEC-2 6.1 row 19) */
+.ts-editor[data-crop] .pt-slide [data-block] {
+  cursor: move;
+}
+
+/* every object of every slide kind drags by its body; the text of a title or statement slide keeps the caret inside */
+.ts-editor .pt-slide .opener-img,
+.ts-editor .pt-slide .mood-img,
+.ts-editor .pt-slide [data-slot='plate'] {
+  cursor: default;
+}

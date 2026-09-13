@@ -4,11 +4,14 @@ import type { Box } from '@turboslide/schema/render';
 import { COLUMN_GAP, COLUMNS, CONTENT_ORIGIN, RAIL, SHEET } from '@turboslide/theme/tokens';
 
 import {
+  axisLock,
   boxSnapLines,
+  deckGuideLines,
   FREE_GRID,
   FREE_MIN_SIZE,
   FREE_SNAP_PX,
   resizeCursor,
+  sheetEdgeLines,
   sheetSnapLines,
   snapMove,
   snapResize,
@@ -144,5 +147,62 @@ describe('resizeCursor', () => {
     expect(resizeCursor('e')).toBe('ew-resize');
     expect(resizeCursor('ne')).toBe('nesw-resize');
     expect(resizeCursor('se')).toBe('nwse-resize');
+  });
+});
+
+// Round two (gslides-parity SPEC-2 6.1 rows 7 and 31): the sheet's edges and centre, the deck's
+// guides, the equal spacing guides, the Shift axis lock and a drag with every snap off.
+describe('the canvas snaps', () => {
+  it('lists the sheet edges and centre and the deck guides as lines spanning the sheet', () => {
+    const edges = sheetEdgeLines();
+    expect(edges.map((l) => [l.axis, l.at])).toEqual([
+      ['x', 0],
+      ['x', 800],
+      ['x', 1600],
+      ['y', 0],
+      ['y', 450],
+      ['y', 900],
+    ]);
+    const guides = deckGuideLines({ x: [400], y: [300] });
+    expect(guides).toEqual([
+      { axis: 'x', at: 400, kind: 'guide', from: 0, to: 900 },
+      { axis: 'y', at: 300, kind: 'guide', from: 0, to: 1600 },
+    ]);
+    expect(deckGuideLines(undefined)).toEqual([]);
+  });
+
+  it('snaps a moved box to a deck guide and reports it', () => {
+    const lines = deckGuideLines({ x: [400], y: [] });
+    const result = snapMove([100, 100, 200, 50], 296, 0, lines, { grid: false });
+    expect(result.box[0]).toBe(400);
+    expect(result.guides[0]).toMatchObject({ axis: 'x', at: 400, kind: 'guide' });
+  });
+
+  it('constrains a move to the axis of the larger delta under Shift', () => {
+    expect(axisLock(30, 10)).toEqual({ dx: 30, dy: 0 });
+    expect(axisLock(-4, 12)).toEqual({ dx: 0, dy: 12 });
+  });
+
+  it('snaps to an equal gap beside two resting boxes and draws the spacing ticks', () => {
+    /* a at 100..200 and b at 300..400 sit 100 apart; a moving box of 100 lands at 500 when its
+       gap to b equals theirs */
+    const others: [number, number, number, number][] = [
+      [100, 100, 100, 50],
+      [300, 100, 100, 50],
+    ];
+    const result = snapMove([0, 100, 100, 50], 496, 0, [], { grid: false, spacing: others });
+    expect(result.box[0]).toBe(500);
+    expect(result.guides.every((g) => g.kind === 'spacing')).toBe(true);
+    expect(result.guides.map((g) => g.at).sort((a, b) => a - b)).toEqual([200, 300, 400, 500]);
+    /* midway between the two: 200..300 has no room for 100, but a gap of 50 each side fits a 0 box only */
+    const far = snapMove([0, 100, 100, 50], 700, 0, [], { grid: false, spacing: others });
+    expect(far.box[0]).toBe(700);
+    expect(far.guides).toEqual([]);
+  });
+
+  it('rounds to whole pixels with every snap off', () => {
+    const result = snapMove([100, 100, 200, 50], 33.4, 0.6, [], { grid: false });
+    expect(result.box).toEqual([133, 101, 200, 50]);
+    expect(result.guides).toEqual([]);
   });
 });

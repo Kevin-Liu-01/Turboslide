@@ -23,6 +23,7 @@
     "@turboslide/chrome": "workspace:*",
     "@turboslide/cli": "workspace:*",
     "@turboslide/effects": "workspace:*",
+    "@turboslide/export": "workspace:*",
     "@turboslide/fonts": "workspace:*",
     "@turboslide/lint": "workspace:*",
     "@turboslide/materials": "workspace:*",

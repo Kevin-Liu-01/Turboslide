@@ -150,6 +150,15 @@ a 10.7 GB log in eleven minutes) and from the parallel-builder setup.
   No other port, no second server on one checkout.
 - Only the studio builder, the integrator and the verifier start it, and they stop it when done.
   Everyone else works without a server.
+- The written exception for the Google Slides parity round two (`docs/gslides-parity/SPEC-2.md`
+  0.43, `docs/gslides-parity/MILESTONES-2.md`): a builder whose row names a port runs their own
+  server as `TURBOSLIDE_STORE=tmp node_modules/.bin/vite dev --port <port>` from `apps/studio`,
+  always with the tmp store so no spec writes `decks/`, stops it before returning, and never
+  touches 4321, 3005 or another builder's port. Playwright runs against that server with
+  `PLAYWRIGHT_BASE_URL=http://localhost:<port>` (`playwright.config.ts` reads it as `baseURL` and
+  defines no `webServer` when it is set). Playwright runs never overlap on the shared machine:
+  take `.turboslide/e2e.lock` with `mkdir .turboslide/e2e.lock` before `playwright test`, `rmdir`
+  it after, and wait while it exists. `scripts/check.mjs` keeps 4321.
 - `server.forwardConsole` stays `false` and `devtools()` stays in every Vite config
   (`apps/studio/vite.config.ts` says why). Never redirect the dev server's output to an unbounded
   file; `scripts/check.mjs` and `playwright.config.ts` cap or discard it.
@@ -202,11 +211,20 @@ environment); `docs/HOSTED-STATUS.md` records the round.
 ## Acceptance
 
 `pnpm check` runs `scripts/check.mjs`: the M1 acceptance chain from the milestone plan followed by
-the M2 format gate (`pnpm format:check`, step 19), in order, stopping at the first failure.
-`node scripts/check.mjs --list` prints the steps; `--only 4,5` and `--from 6` run parts of it. The
-runner skips the two steps that read the Prototemplate checkout when
-`/Users/kevinliu/repos/Prototemplate/deck` (or `TURBOSLIDE_PROTOTEMPLATE_DECK`) is missing, which
-is the case in CI, and starts and stops the dev server for the two steps that need it.
+the M2 format gate (`pnpm format:check`, step 19), the two steps of the Google Slides parity round
+(20 and 21) and the three of round two (22 to 24, gslides-parity SPEC-2 11.1: the fixture deck
+exported in both modes with the flatten report perfect, `turboslide fonts build --check`, and the
+conversion fidelity gate `scripts/canvas-fidelity.mjs` over the GT deck and the two templates at
+0.5 percent), in order, stopping at the first failure; step 25 is the container verification of
+SPEC-2 11.3, run when a Docker daemon answers and skipped otherwise. `node scripts/check.mjs
+--list` prints the steps; `--only 4,5` and `--from 6` run parts of it. The runner skips the two
+steps that read the Prototemplate checkout when `/Users/kevinliu/repos/Prototemplate/deck` (or
+`TURBOSLIDE_PROTOTEMPLATE_DECK`) is missing, which is the case in CI, skips step 23 without the
+fonts venv (`.turboslide/venv`) and step 25 without Docker, and starts and stops the dev server for
+the steps that need it with `TURBOSLIDE_EXPORT_BATCH=3`, the batch size `export-batch.spec.ts`
+drives. Step 21's spec list carries the round two specs (`canvas.spec.ts`, `objects.spec.ts`,
+`text-styles.spec.ts`, `tables.spec.ts`, `charts.spec.ts`, `hygiene.spec.ts`,
+`export-batch.spec.ts`). `docs/gslides-parity/BUILD-STATUS-2.md` records the merge 2 run.
 
 The M4 lines beyond `pnpm check` are the skills and coverage vitest files
 (`packages/agent/src/__tests__/{skills,coverage}.test.ts`), `apps/studio/e2e/agent-http.spec.ts`
@@ -326,7 +344,38 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
   (`docs/deck-transfer.md`).
 - `apps/studio` depends on `@turboslide/cli` (its `./store-actions` export, so the HTTP and MCP
   writes run the CLI's store actions) and on `@turboslide/mcp`; the render worker already depended
-  on the CLI the same way.
+  on the CLI the same way. Since round two the window transport runs the same store actions too:
+  every `on(...)` handler of the editor route is the store action over the editor's store, so one
+  implementation serves the four transports (SPEC 7.1).
+- The canvas model of round two (gslides-parity SPEC-2 section 1): every slide is a canvas. A
+  canvas write (`block.set /pos`, `block.move` with `z`, a positioned `block.insert`, the arrange,
+  rotate, flip, group, crop and duplicate actions, `slide.toCanvas`, `slide.setLayout` to
+  freeform, `diagram.insert`) on a slide that is not on the freeform layout converts it first,
+  losslessly, through `toCanvas` of `@turboslide/schema/canvas` over the boxes one DOM function
+  measures: `measureCanvasBoxes` of `@turboslide/render/measure-dom` on a 1x sheet with the prompts
+  drawn, after `awaitSheetReady`, relative to the `.ts-stage` element, at 1/64 px. The editor
+  evaluates it on a hidden sheet in the current theme (`@turboslide/viewer/canvas-measure`,
+  bound as the store actions' `measureCanvas` and `measureFit` on the window transport); the CLI
+  and the MCP server evaluate it on a headless page (`apps/cli/src/deps/canvas.ts`); the hosted
+  studio's `/api/actions` runs the read only `turboslide slide measure <ids> --deck <dir> --json`
+  through the render worker (its CLI child process, or the worker's `measure` job over
+  `TURBOSLIDE_WORKER_URL`; `apps/studio/src/server/measure.ts`). The `pos` every transport writes
+  are identical in Chromium (SPEC-2 0.104); the five GT slides with a code panel measure one pixel
+  differently between the themes (b2.md decision 2), so a conversion made in dark and viewed in
+  light, or the reverse, differs by that pixel there. `scripts/canvas-fidelity.mjs` (check step 24)
+  converts every slide of the GT deck and the templates and compares the two renders per theme,
+  measuring in the theme it compares.
+- A route module of `apps/studio` may import a `src/server/*.ts` module only when everything the
+  module exports is a server function wrapper or a pure helper with no worker, headless or `node:`
+  import: TanStack Start's client transform strips a server function's handler and the imports
+  only the handler used, but a plain exported function keeps its imports alive in the browser
+  graph. Merge 1 of round two put `measureSlidesThroughWorker` (which reaches
+  `@turboslide/render-worker/cli` and `node:child_process`) in `server/render.ts`, a module the
+  edit route imports for `renderSlideImages`, and no editor page booted on any dev server or on the
+  preview until merge 2 moved it to `server/measure.ts`, imported by `server/actions.ts` alone.
+  `scripts/check-client-bundle.mjs` (step 6) fails on `node:fs`, `node:path`, `node:zlib` and
+  `node:child_process` in a client chunk, but only the dev server shows the module graph a build
+  tree shakes, so a boot probe of `/new` on a dev server is part of every merge.
 
 ## Deviations from the spec, recorded
 
@@ -432,6 +481,78 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
     compact bar has four; no new action for the blank slide, the laser pointer or full screen
     (parity SPEC 7.5 lists none), which stay readable through `describe().state` and drivable by
     the keys and the menu.
+- The builders' deviations of round two (gslides-parity SPEC-2; `docs/gslides-parity/build-2/
+<key>.md`, listed in `docs/gslides-parity/BUILD-STATUS-2.md`), recorded for Kevin:
+  - SPEC-2 2.9 (the amendments to the two specifications and to `docs/freeform.md`), edited in by
+    the integrator at merge 2: every slide becomes a freeform slide on its first canvas
+    manipulation and the grammar layouts are the templates (gslides-parity SPEC 7.1 rule 3, SPEC
+    4.3 of this spec); a `shape` holds a Text (gslides-parity SPEC 3.3); an inserted text box
+    converts the slide and lands as an object (gslides-parity SPEC 2.4); the text markup has five
+    rules, the mark span the fifth (this spec 4.2); the ruled list stays the default and
+    `plain.marker` draws glyphs and numerals on request (2.1); a coloured run is a severity 1 lint,
+    not a refusal (2.1); rotation is in and `pos` carries `rotate`, `flip` and `group`
+    (`docs/freeform.md` 2); resize handles on every object of a canvas (6.4); Apply layout's table
+    gains the picture object and the plate box and a canvas re-flows by the same table
+    (gslides-parity SPEC 5.5); the conversion record is the schema field `SlideBase.grammar`, so
+    no `ext` key is written (gslides-parity SPEC 7.1 rule 2, this spec 4.1); `layout/freeform`
+    carries the sales sentence and `freeform/off-sheet` has two severities (`docs/freeform.md` 1
+    and 6).
+  - B1: a connector end off its site is a severity 2 validator note, not a refusal; `padding` and
+    `valign` without `pos` are refused on shape and text only; a rectangle target offers eight
+    connection sites; `block insert --pos` lands the object last in `main` with z one above the
+    highest; `slide.setLayout` to freeform on a canvas slide writes nothing; `alt` on `BlockBase`
+    puts the key second in every block the schema serializes, so the committed GT deck was
+    re-imported once in the fix round (22 slide files with `dia` and `dither` blocks, `alt` moved
+    before `type`, no value changed, revision 25) and check step 7 is byte identical again from
+    that tree (VERIFICATION-2 finding 3; the integrator's call).
+  - B2: the measured box is written at 1/64 px, never the pixel (b2.md decision 1, request R2,
+    applied at merge 2 in `packages/schema/src/canvas.ts`); the picture object travels as
+    `slide.background` only when it covers the sheet, so the fixture's `canvas-opener` (its
+    picture moved 40 px right) travels as a `p:pic` and `background-picture` exercises the
+    background form (R4); a curve travels as the polyline through its points; a rotated table is
+    written unrotated (pptxgenjs has no `rotate` on a table); the PDF's `word-art` page sits at
+    0.103 percent against the 0.1 target and under the 0.5 fail line; the dark theme of five GT
+    code panel slides measures one pixel differently from light (R3, recorded above), so
+    `scripts/canvas-fidelity.mjs` measures, converts and compares once per theme (the fix round;
+    171 slides, 342 pairs, worst 0.262 percent, 95 s) while the CLI's conversion measures in light.
+  - B3: a grammar slide's fields are objects to the shell through `pseudoBlockOf` before the first
+    write converts the slide; Order on a grammar slide plans `block.order`; inserts never land in
+    a slot; the Background dialog's Choose without the stage handle is two writes; "Line kind"
+    reads "Line type" (kind is a forbidden default view word); seventeen round one lint rules'
+    proposals carry forbidden words and are pinned as a ceiling in `default-view-words.test.ts`.
+  - B4: Cmd Up and Cmd Down on a real block of a grammar slide reorder within its slot (SPEC-2 6.1
+    row 13 asks for one stack); the handle and the keys write `block.set /pos` (and `/trim`) in one
+    `slide.update` where SPEC-2 6.1 names `block.rotate`, `block.flip`, `block.group` and
+    `block.crop` (the documents written are identical; the agent spellings stay the CLI's and the
+    menu rows'); autofit after a resize is one ladder step per commit; the point tools end on
+    Enter or the first point (a double click lands as two clicks); a `cellRange` target is not
+    selected by the stage this round; the clip lift is scoped to `.ts-editor`; the hidden measure
+    root resets the inherited text defaults so it measures as the CLI's present document does.
+  - B5: a hierarchy of n levels has 2n minus 1 nodes; the timeline's labels are ink in every
+    style; the three diagram styles are the theme's tones (Outline, Plate, Ink); the Format
+    options slot props carry `slide.id` (the route adapts B3's `slideId`).
+  - B6: the four batched export server functions live in `download.ts` and the logic in
+    `export-batch.ts`; `POST /api/export/:deckId?start=1` is the http form of the plan; the cancel
+    form needs no bearer (the job id is the capability); `documentAtRevision` decides staleness;
+    the snapshot key contention rule (two writers from one revision inside one clock millisecond
+    push equal manifests with different bodies and contest one key: the store verifies the existing
+    snapshot's etag against its own body and answers a conflict before its manifest push, SPEC-2
+    0.40 and 8.2); the merge duplicates the per theme report lines; the batch spec exports one
+    theme; `ten-tasks.spec.ts`'s Cut assertion of the Slide deleted snackbar is retired (SPEC-2
+    0.30).
+  - Integrator (merge 2): the fixture's `diagram` slide is rebuilt through `diagram.insert`
+    (process, four steps, plate style, at the default box; the hand written labels "1. Connect"
+    became the template's "Step 1"); the committed `canvas-walk` recordings are re-derived at
+    1/64 px while the fixture's `canvas-title`, `canvas-opener` and `background-picture` keep the
+    integer `pos` the CLI wrote before R2 (valid positions; the headless test compares at the
+    pixel); the stage's Cmd+D runs `block.duplicate` on every slide kind (one implementation,
+    the copy after its source as round one's spec pins), the stage's own paste path serving only a
+    kind's object that is not a block; the Edit menu's Cut and Delete remove several cards in one
+    write (one Undo); a lease on a slide removed while the lease was in flight is quiet; the TanStack
+    devtools do not mount for an automated browser (their Inter face shadowed the theme's on the
+    dev stage, b4.md request 6; this devtools version has no shadow root option); `selectSoon`
+    re-selects once when the filmstrip has rendered the card (a select is a hash navigation, and
+    one per frame remounted the shell); the `deck.info` contract gains `counts.snapshots`.
   - Fix round (integrator): after a write, an undo or an external change removes the current
     slide, the editor selects the slide now at the removed slide's index, clamped to the end
     (`replacementSlide` in `apps/studio/src/routes/edit.$deckId.tsx`). The research (R02, R07)

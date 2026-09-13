@@ -2,6 +2,7 @@
 import { flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
 import { findDeckDir, loadDeck, slideRows } from '../deck-files.ts';
+import { canvasCounts } from '../store-actions.ts';
 
 export async function info(ctx: CommandContext): Promise<number> {
   const dir = findDeckDir(ctx.cwd, flagString(ctx.args, 'deck'), ctx.env);
@@ -9,6 +10,8 @@ export async function info(ctx: CommandContext): Promise<number> {
   const rows = slideRows(loaded);
   const kinds: Record<string, number> = {};
   for (const row of rows) kinds[row.kind] = (kinds[row.kind] ?? 0) + 1;
+  // the canvas counts (gslides-parity SPEC-2 0.93): slides arranged by hand, charts, guides
+  const canvas = canvasCounts({ deck: loaded.deck, slides: loaded.slides });
   const result = {
     id: loaded.deck.id,
     title: loaded.deck.title,
@@ -20,7 +23,10 @@ export async function info(ctx: CommandContext): Promise<number> {
       sections: loaded.deck.sections.length,
       assets: Object.keys(loaded.deck.assets).length,
       kinds,
+      ...canvas,
     },
+    ...(loaded.deck.defaults !== undefined ? { defaults: loaded.deck.defaults } : {}),
+    ...(loaded.deck.guides !== undefined ? { guides: loaded.deck.guides } : {}),
     sections: loaded.deck.sections.map((section) => ({
       id: section.id,
       name: section.name,

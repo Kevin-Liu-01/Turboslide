@@ -186,6 +186,29 @@ describe('align, distribute and order', () => {
     ).toBe(1463 - 160);
   });
 
+  it('keeps the sheet and the content box exact under snap, and never snaps off the sheet', () => {
+    // one block aligns to the sheet by default; the sheet's bottom is 900, not the grid's 904
+    // (VERIFICATION-2 finding 7), and every other sheet edge and centre is exact as well
+    const shape = { x: 1160, y: 620, w: 300, h: 120 };
+    expect(alignPositions([shape], 'bottom', undefined, true)[0]?.y).toBe(900 - 120);
+    expect(alignPositions([shape], 'right', undefined, true)[0]?.x).toBe(1600 - 300);
+    expect(alignPositions([shape], 'middle', undefined, true)[0]?.y).toBe(450 - 60);
+    expect(alignPositions([shape], 'center', undefined, true)[0]?.x).toBe(800 - 150);
+    expect(alignPositions([shape], 'left', undefined, true)[0]?.x).toBe(0);
+    expect(alignPositions([shape], 'top', undefined, true)[0]?.y).toBe(0);
+    // the same with `to` set to the sheet for several blocks, and to the content box
+    expect(alignPositions([a, b], 'bottom', 'sheet', true).map((p) => p.y)).toEqual([850, 800]);
+    expect(alignPositions([shape], 'bottom', 'content', true)[0]?.y).toBe(771 - 120);
+    // a selection whose shared edge would snap past the sheet keeps the exact edge: a block sitting
+    // on the sheet's bottom puts the union's bottom at 900, which the grid would round to 904
+    const tall = { x: 100, y: 100, w: 100, h: 800 };
+    expect(alignPositions([tall, b], 'bottom', 'selection', true).map((p) => p.y)).toEqual([
+      100, 800,
+    ]);
+    // while a selection's edge inside the sheet still snaps: the union's bottom at 300 rounds to 304
+    expect(alignPositions([a, b], 'bottom', 'selection', true).map((p) => p.y)).toEqual([254, 204]);
+  });
+
   it('distributes with equal gaps or a fixed gap and keeps the input order', () => {
     // the span is 100 to 680, the blocks take 230 of it, so the two gaps are 175 each
     const even = distributePositions([c, a, b], 'horizontal');

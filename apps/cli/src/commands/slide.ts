@@ -26,8 +26,10 @@ import {
   slideNew,
   slideRemove,
   slideReplace,
+  slideSetBackground,
   slideSetLayout,
   slideSkip,
+  slideToCanvas,
   slideUpdate,
 } from '../store-actions.ts';
 import type { SlideImportInput, SlideImportSource, StoreActionDeps } from '../store-actions.ts';
@@ -42,10 +44,11 @@ import {
   storeDeps,
   writeContext,
 } from '../write.ts';
+import { measureSlidesHeadless } from '../deps/canvas.ts';
 import { decksDirFor } from './deck.ts';
 import { slideGet } from './slides.ts';
 
-const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-layout|new|duplicate|skip|apply-layout|import> ...
+const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-layout|new|duplicate|skip|apply-layout|import|to-canvas|measure|background> ...
   slide get <id>
   slide put <id> [--file slide.json] < slide.json
   slide patch <id> --set <pointer>=<value> [--unset <pointer>] | --mutations [--file mutations.json]
@@ -62,6 +65,12 @@ const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-lay
   slide apply-layout <id,id,...> <layout>      move the content into the layout's placeholders (slide.applyLayout)
   slide import <sourceDeckId> <id,id,...> [--after <slideId>] [--section <sectionId>] [--decks <dir>]
                                                copy slides and their assets from another deck under decks/ (slide.import)
+  slide to-canvas <id,id,...>                  arrange the slides by hand: every object takes the box it is drawn at
+                                               (slide.toCanvas; one headless page for the call)
+  slide measure <id,id,...> --json             print the boxes and text fit the conversion reads, writing nothing
+                                               (what the hosted studio and the render worker run)
+  slide background <id,id,...> --color <color> | --off
+                                               the slides' background colour, or the theme default again (slide.setBackground)
 The layouts: ${LAYOUT_IDS.join(', ')}.
 Every write takes --base-revision <n> (default: the current revision), --author <name>, --note <text>, --force and --json.`;
 
@@ -93,9 +102,89 @@ export async function slide(ctx: CommandContext): Promise<number> {
       return slideApplyLayoutCommand(inner);
     case 'import':
       return slideImportCommand(inner);
+    case 'to-canvas':
+      return slideToCanvasCommand(inner);
+    case 'measure':
+      return slideMeasureCommand(inner);
+    case 'background':
+      return slideBackgroundCommand(inner);
     default:
       throw new UsageError(`unknown subcommand "slide ${sub ?? ''}"\n${USAGE}`);
   }
+}
+
+/**
+ * `slide measure <id,id,...> --json` (integrator request I1, docs/gslides-parity/build-2/
+ * integrator.md; added by the integrator at merge 2 in B1's file, the smallest edit): the read
+ * only command the hosted studio's http transport and the render worker's `measure` job run to
+ * convert a slide that is not a canvas yet (SPEC-2 1.3, 0.104). It prints what
+ * `measureSlidesHeadless` returns, `{ [slideId]: { canvas: CanvasBoxes, fit: { [blockId]: { box,
+ * contentHeight?, fontSize? } } } }`, on one headless page for every id, and writes nothing.
+ */
+async function slideMeasureCommand(ctx: CommandContext): Promise<number> {
+  const slideIds = requireSlideIds(ctx, 0);
+  const store = openStore(ctx);
+  const { document } = loadDeckDir(store.dir);
+  const slides = slideIds.map((id) => {
+    const slide = document.slides[id];
+    if (slide === undefined) throw new UsageError(`No slide "${id}" in ${store.dir}`);
+    return slide;
+  });
+  const measured = await measureSlidesHeadless(store.dir, document.deck, document.slides, slides);
+  ctx.out.result(measured);
+  for (const [id, entry] of Object.entries(measured)) {
+    const boxes = Object.entries(entry.canvas.blocks);
+    ctx.out.human(
+      `${id}: ${boxes.length} block box(es)${entry.canvas.picture ? ', picture' : ''}${entry.canvas.plate ? ', plate' : ''}${entry.canvas.mark ? ', mark' : ''}${entry.canvas.prompted.length > 0 ? `, prompted ${entry.canvas.prompted.join(', ')}` : ''}`,
+    );
+    for (const [blockId, box] of boxes)
+      ctx.out.human(`  ${blockId.padEnd(12)} ${box[0]},${box[1]} ${box[2]}x${box[3]}`);
+  }
+  return 0;
+}
+
+async function slideToCanvasCommand(ctx: CommandContext): Promise<number> {
+  const slideIds = requireSlideIds(ctx, 0);
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    slideToCanvas(storeDeps(ctx, store), writeContext(ctx), {
+      slideIds,
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  for (const row of result.slides) {
+    ctx.out.human(
+      `${row.slideId}: ${row.converted ? 'arranged by hand' : 'already arranged by hand'}${row.template !== undefined ? ` (${row.template})` : ''}, ${row.objects.length} object(s)`,
+    );
+    for (const object of row.objects)
+      ctx.out.human(
+        `  ${object.id.padEnd(12)} ${object.type.padEnd(10)} ${object.pos.x},${object.pos.y} ${object.pos.w}x${object.pos.h} z ${object.pos.z ?? 0}`,
+      );
+  }
+  ctx.out.human(`revision ${result.revision}, ${result.findings.length} finding(s)`);
+  return 0;
+}
+
+async function slideBackgroundCommand(ctx: CommandContext): Promise<number> {
+  const slideIds = requireSlideIds(ctx, 0);
+  const color = flagString(ctx.args, 'color');
+  const off = flagBoolean(ctx.args, 'off');
+  if ((color === undefined) === !off)
+    throw new UsageError(`slide background wants --color <color> or --off\n${USAGE}`);
+  const store = openStore(ctx);
+  const result = await runAction(ctx, async () =>
+    slideSetBackground(storeDeps(ctx, store), writeContext(ctx), {
+      slideIds,
+      background: color === undefined ? null : { color: color as never },
+      baseRevision: await baseRevision(ctx, store),
+    }),
+  );
+  ctx.out.result(result);
+  ctx.out.human(
+    `${off ? 'reset the background of' : `set the background ${color} on`} ${slideIds.join(', ')}: revision ${result.revision}`,
+  );
+  return 0;
 }
 
 /** A layout id from a flag or a positional, checked against the list. */

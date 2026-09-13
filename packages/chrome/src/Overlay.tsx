@@ -4,43 +4,43 @@ import type { EditorOverlayView, LintBox } from '@turboslide/viewer/Editor';
 import type { Box, Handle } from '@turboslide/viewer/Gestures';
 import { GuideLines } from '@turboslide/viewer/Guides';
 import { MarqueeRect } from '@turboslide/viewer/Marquee';
+import { objectTransform, ROTATE_HANDLE_GAP_PX, ROTATE_HANDLE_PX } from '@turboslide/viewer/rotate';
 
+import { DeckGuides } from './DeckGuides';
 import { cn } from './lib/cn';
+import { CANVAS } from './menus/strings';
+import { Rulers } from './Rulers';
 import { tipProps } from './Tooltip';
 
 import './Overlay.css';
 
 /**
- * The overlay over the stage in edit mode (SPEC 6.4), drawn from the boxes the viewer's Editor
- * measured, in the chrome's tokens: a --pt-hair outline under the pointer, the --pt-ink selection
- * ring with a 13px chip naming `type · id` outside it, the lint boxes of the slide while the lint
- * layer is on (severity 3 in ink, 1 and 2 in titanium, the rule id in the chip), the insertion
- * line and the outlined target slot of a block drag, and the handles of the direct manipulation
- * table (the seam, the plate edge and grip, the key edge, the shot edge and crop area, the pair
- * figures, the scales markers). The chip is the block's drag handle: dragging it reorders the
- * block within its slot or into another one, and on a freeform slide moves it anywhere. Handles
+ * The overlay over the stage in edit mode (SPEC 6.4; gslides-parity SPEC-2 section 6), drawn from
+ * the boxes the viewer's Editor measured, in the chrome's tokens: a --pt-hair outline under the
+ * pointer, the --pt-ink selection ring with a 13px chip naming the object in Google's words
+ * outside it, the lint boxes of the slide while the lint layer is on (severity 3 in ink, 1 and 2
+ * in titanium, the rule id in the chip), the insertion line and the outlined target slot of a
+ * grammar reorder, and the handles of the direct manipulation table (the seam, the plate edge and
+ * grip, the key edge, the shot edge and crop area, the pair figures, the scales markers). Handles
  * are buttons, so the arrow keys nudge them (SPEC 6.4 keyboard nudges) and the window API can name
  * them by label or `data-control`. The labels and markers of a declared diagram are handles that
- * take the pointer only while Alt is held (`data-alt-only`, the overlay root's `data-alt`; SPEC 6.4
- * Alt-drag, M5), and a dragged label shows its 12 px clearance ring, ink as a state when a stroke
- * intrudes.
+ * take the pointer only while Alt is held (`data-alt-only`, the overlay root's `data-alt`).
  *
- * The freeform stage (Kevin's direction of 2026-09-11): the rings of every block of a
- * multi-selection and the hair box around the group, the eight resize squares of a positioned
- * block, the snap guides in titanium while a drag snaps, and the marquee. The Google Slides parity
- * round (gslides-parity SPEC 1.1, 4.3, 10.2) makes the block's frame the drag surface: four edge
- * strips around a positioned block start its move gesture, as Google's border does, since a click
- * inside the text now places the caret; the chip names the block in Google's words (Text box,
- * Image, Table) and prints the id only while Show slide and block ids is on (SPEC 13.7); the
- * arrange bar of the editor depth round is gone, its actions live in the Arrange menu and the
- * right-click menu (SPEC 4.3). Every control carries the chrome's tooltip (Tooltip.tsx tipProps)
- * naming it, what it does and its key; a native title is never used, so the audit and the reader
- * see one plate. Cmd Up and Cmd Down on a focused move chip (Ctrl on Windows) change the order
- * through the view's onHandleOrder, Google's Bring forward and Send backward, Shift for the ends
- * (SPEC 10.1); Alt with an arrow is retired (SPEC 10.2). Line law (SPEC 2.2 junction table): every rule here is 1px, the ring and an
- * active handle draw ink as a state (.is-selected, .is-active), a resting handle draws --pt-hair,
- * guides draw --pt-titanium, and the sheet's blocks draw nothing. New in Turboslide; no
- * Prototemplate source.
+ * The canvas (Kevin's directive of 2026-09-12, SPEC-2 6.1): every object of every slide kind
+ * carries the ring with eight 11 px squares, the rotation ring 24 px above the top centre joined
+ * by a 1 px line (a `slider` the arrows step by a degree, Shift by fifteen), and the frame edges
+ * that start its move; a rotated or flipped object's ring and handles turn with it, drawn from
+ * `pos` (SPEC-2 1.5); a line kind shows its two end handles instead; a multi selection draws a
+ * ring per member and the hair union box with the chip "3 objects", a group the union ring with
+ * `role="group"` and the chip "Group"; the readouts (the size while a resize is down, the angle
+ * while a rotation is down, the inch position while a guide drags); crop mode's dimmed picture
+ * and black handles with its chip sentence; the connection sites of the shape under a line end;
+ * the deck's guides (DeckGuides.tsx) and the rulers (Rulers.tsx). Every control carries the
+ * chrome's tooltip (Tooltip.tsx tipProps); a native title is never used. Cmd Up and Cmd Down on a
+ * focused move chip change the order through the view's onHandleOrder, Shift for the ends (SPEC
+ * 10.1). Line law (SPEC 2.2): every rule here is 1px, the ring and an active handle draw ink as a
+ * state, a resting handle draws --pt-hair, guides draw --pt-titanium, and the sheet's blocks draw
+ * nothing.
  */
 export type OverlayProps = { view: EditorOverlayView };
 
@@ -54,7 +54,7 @@ const CHIP_H = 18;
 const CHIP_GAP = 2;
 /** The clearance a diagram label keeps from a stroke, in sheet pixels (DECK-GRAMMAR.md:45). */
 const CLEARANCE_PX = 12;
-/** The frame edge strips of a positioned block: this many CSS pixels wide, centred on the ring (gslides-parity SPEC 10.2). */
+/** The frame edge strips of an object: this many CSS pixels wide, centred on the ring (gslides-parity SPEC 10.2). */
 export const FRAME_EDGE_PX = 8;
 
 /** The chip sits above the ring's top left corner, or under its bottom left when the ring meets the sheet's top. */
@@ -66,7 +66,17 @@ function chipStyle(box: Box, k: number): CSSProperties {
   };
 }
 
-/** The four edge strips of a block's frame, each centred on the ring's edge (gslides-parity SPEC 10.2: the frame is the drag surface). */
+/** The readout chip sits above the ring's top right, clear of the chip and the rotation ring. */
+function readoutStyle(box: Box, k: number): CSSProperties {
+  const above = box[1] * k - CHIP_H - CHIP_GAP - ROTATE_HANDLE_GAP_PX;
+  return {
+    left: (box[0] + box[2]) * k,
+    top: above >= 0 ? above : (box[1] + box[3]) * k + CHIP_GAP,
+    transform: 'translateX(-100%)',
+  };
+}
+
+/** The four edge strips of an object's frame, each centred on the ring's edge (gslides-parity SPEC 10.2: the frame is the drag surface). */
 export function frameEdgeStyles(box: Box, k: number): Record<'n' | 's' | 'w' | 'e', CSSProperties> {
   const half = FRAME_EDGE_PX / 2;
   const left = box[0] * k;
@@ -114,6 +124,18 @@ function handleStyle(handle: Handle, k: number): CSSProperties {
       top: (handle.box[1] + handle.box[3] / 2) * k,
       width: 11,
       height: 11,
+      transform: 'translate(-50%, -50%)',
+      cursor: handle.cursor,
+    };
+  }
+  if (handle.shape === 'ring') {
+    /* the ring sits ROTATE_HANDLE_GAP_PX CSS pixels above the top centre of the box it turns (the
+       hit box's bottom edge is the object's top) */
+    return {
+      left: (handle.box[0] + handle.box[2] / 2) * k,
+      top: (handle.box[1] + handle.box[3]) * k - ROTATE_HANDLE_GAP_PX,
+      width: ROTATE_HANDLE_PX,
+      height: ROTATE_HANDLE_PX,
       transform: 'translate(-50%, -50%)',
       cursor: handle.cursor,
     };
@@ -168,9 +190,15 @@ export function handleDoc(handle: Handle): string {
     case 'block-move':
       return `Drag the chip or the block to reorder it within its slot or into another slot. ${modKey()}Up and ${modKey()}Down move it one step, and with Shift to the first or the last place in its slot.`;
     case 'free-move':
-      return `Drag the frame or the chip anywhere: snaps to the 8 px grid, the rails, the content box and other blocks. Arrows nudge 1 px, Shift 8 px. ${modKey()}Up and ${modKey()}Down change the order.`;
+      return `Drag the frame or the chip anywhere: snaps to other objects, the slide's edges and centre and the guides; Shift keeps one axis, ${modKey()}drag skips the snaps, Option drag drops a copy. Arrows nudge 1 px, Shift 10 px. ${modKey()}Up and ${modKey()}Down change the order.`;
     case 'free-resize':
-      return `Drag the ${RESIZE_NAMES[handle.dir ?? ''] ?? 'edge'} to resize; Shift keeps the aspect. Arrows step 1 px, Shift 8 px.`;
+      return `Drag the ${RESIZE_NAMES[handle.dir ?? ''] ?? 'edge'} to resize; Shift keeps the aspect ratio, Option resizes from the centre. Arrows step 1 px, Shift 10 px.`;
+    case 'free-rotate':
+      return 'Drag to rotate about the centre; Shift snaps to 15 degrees. Left and Right turn 1 degree, Shift 15.';
+    case 'line-end':
+      return 'Drag the end of the line; it snaps to a connection site of the shape under it and follows that shape from then on. Shift keeps 45 degree steps.';
+    case 'crop-edge':
+      return `Drag the ${RESIZE_NAMES[handle.dir ?? ''] ?? 'edge'} of the crop. Press Enter to finish.`;
   }
 }
 
@@ -184,12 +212,12 @@ function handleTip(handle: Handle) {
   return tipProps({ name: handle.label, doc: handleDoc(handle) });
 }
 
-/** True for a move chip (a block within its slot, or a positioned block): the order keys apply. */
+/** True for a move chip (a block within its slot, or an object): the order keys apply. */
 function isMoveHandle(handle: Handle): boolean {
   return handle.kind === 'free-move' || handle.kind === 'block-move';
 }
 
-/** The arrow pair a key belongs to, for a two-axis handle (a diagram label or marker, a positioned block). */
+/** The arrow pair a key belongs to, for a two-axis handle (a diagram label or marker, an object). */
 function nudgeAxis(e: ReactKeyboardEvent<HTMLElement>): 'x' | 'y' | null {
   switch (e.key) {
     case 'ArrowLeft':
@@ -204,9 +232,10 @@ function nudgeAxis(e: ReactKeyboardEvent<HTMLElement>): 'x' | 'y' | null {
 }
 
 function nudgeDelta(e: ReactKeyboardEvent<HTMLElement>, handle: Handle): number | null {
-  // Shift steps ten on the grammar handles and eight sheet pixels on a positioned block
-  const free = handle.kind === 'free-move' || handle.kind === 'free-resize';
-  const big = e.shiftKey ? (free ? 8 : 10) : 1;
+  // Shift steps ten on the grammar handles and on an object (SPEC-2 0.87), fifteen degrees on the rotation ring
+  const free =
+    handle.kind === 'free-move' || handle.kind === 'free-resize' || handle.kind === 'crop-edge';
+  const big = e.shiftKey ? (handle.kind === 'free-rotate' ? 15 : 10) : 1;
   switch (e.key) {
     case 'ArrowRight':
     case 'ArrowUp':
@@ -217,7 +246,11 @@ function nudgeDelta(e: ReactKeyboardEvent<HTMLElement>, handle: Handle): number 
     case 'Enter':
     case ' ':
       // a grip or an area has two states: the key flips it
-      return !free && (handle.shape === 'square' || handle.shape === 'area') ? 1 : null;
+      return !free &&
+        handle.kind !== 'free-rotate' &&
+        (handle.shape === 'square' || handle.shape === 'area')
+        ? 1
+        : null;
     default:
       return null;
   }
@@ -246,11 +279,22 @@ type HandleButtonProps = {
   style: CSSProperties;
   onDown: (handle: Handle, event: PointerEvent) => void;
   onKey: (e: ReactKeyboardEvent<HTMLButtonElement>, handle: Handle) => void;
+  /** the rotation ring is a slider: the angle in degrees */
+  angle?: number;
   children?: ReactNode;
 };
 
-function HandleButton({ handle, className, style, onDown, onKey, children }: HandleButtonProps) {
+function HandleButton({
+  handle,
+  className,
+  style,
+  onDown,
+  onKey,
+  angle,
+  children,
+}: HandleButtonProps) {
   const tip = handleTip(handle);
+  const slider = handle.kind === 'free-rotate';
   return (
     <button
       type="button"
@@ -258,10 +302,20 @@ function HandleButton({ handle, className, style, onDown, onKey, children }: Han
       data-kind={handle.kind}
       data-shape={handle.shape}
       data-dir={handle.dir}
+      data-index={handle.index}
       data-alt-only={handle.alt ? '' : undefined}
       style={style}
       aria-label={handle.label}
       data-control={handle.control}
+      {...(slider
+        ? {
+            role: 'slider',
+            'aria-valuemin': 0,
+            'aria-valuemax': 359,
+            'aria-valuenow': Math.round(angle ?? 0),
+            'aria-valuetext': CANVAS.rotation(Math.round(angle ?? 0)),
+          }
+        : {})}
       {...tip}
       onPointerDown={(e) => {
         if (e.button === 0) onDown(handle, e.nativeEvent);
@@ -308,34 +362,119 @@ export function Overlay({ view }: OverlayProps) {
     if (delta === null) return;
     e.preventDefault();
     e.stopPropagation();
-    // a two-axis handle (SPEC 6.4 dia labels and markers, M5; a positioned block this round)
-    // takes Left and Right on x, Up and Down on y; every other handle keeps its one axis
+    // a two-axis handle (SPEC 6.4 dia labels and markers, M5; an object) takes Left and Right on
+    // x, Up and Down on y; every other handle keeps its one axis
     const axis = handle.axis === 'xy' ? nudgeAxis(e) : null;
     if (axis) view.onHandleNudge(handle, delta, axis);
     else view.onHandleNudge(handle, delta);
   };
   const chipText =
-    view.count > 1 && view.chip !== null ? `${view.count} blocks · ${view.chip}` : view.chip;
+    view.groupTag !== null && view.count > 1
+      ? CANVAS.group
+      : view.count > 1
+        ? CANVAS.objects(view.count)
+        : view.chip;
   const ringBox = view.groupBox ?? view.selectionBox;
-  /* the frame of a positioned block is its drag surface (gslides-parity SPEC 10.2, R09 A1): four
-     edge strips start the same free-move gesture as the chip */
+  /* a rotated or flipped object's ring and handles turn with it, drawn from pos (SPEC-2 1.5);
+     the chip, the readouts and the union box stay upright over the bounding box */
+  const transform =
+    view.count === 1 && view.selectionPos !== null ? objectTransform(view.selectionPos) : undefined;
+  const rotated = transform !== undefined;
+  const turnStyle: CSSProperties | undefined =
+    rotated && ringBox
+      ? { ...place(ringBox, k), transform, transformOrigin: 'center center' }
+      : undefined;
+  /* the frame of an object is its drag surface (gslides-parity SPEC 10.2, R09 A1): four edge
+     strips start the same free-move gesture as the chip */
   const frameEdges =
-    chipHandle && chipHandle.kind === 'free-move' && ringBox && !view.editing
-      ? frameEdgeStyles(ringBox, k)
+    chipHandle && chipHandle.kind === 'free-move' && ringBox && !view.editing && !view.crop
+      ? frameEdgeStyles(rotated ? [0, 0, ringBox[2], ringBox[3]] : ringBox, k)
       : null;
+  const angle = view.selectionPos?.rotate ?? 0;
+  /* the handles of a turned object are placed relative to its own box inside the turning layer */
+  const localHandle = (handle: Handle): Handle =>
+    rotated && ringBox
+      ? {
+          ...handle,
+          box: [
+            handle.box[0] - ringBox[0],
+            handle.box[1] - ringBox[1],
+            handle.box[2],
+            handle.box[3],
+          ],
+        }
+      : handle;
+  const turning = drawn.filter(
+    (handle) =>
+      handle.kind === 'free-resize' || handle.kind === 'free-rotate' || handle.kind === 'line-end',
+  );
+  const flat = drawn.filter((handle) => !turning.includes(handle));
+  const handleButton = (handle: Handle, local: boolean) => (
+    <HandleButton
+      key={handle.id}
+      handle={handle}
+      className={cn(
+        'ts-handle',
+        handle.blockId !== undefined && 'is-selected',
+        view.activeHandle === handle.id && 'is-active',
+      )}
+      style={handleStyle(local ? localHandle(handle) : handle, k)}
+      onDown={view.onHandleDown}
+      onKey={onHandleKey}
+      angle={angle}
+    />
+  );
+  const readout =
+    view.rotation !== null
+      ? CANVAS.rotation(Math.round(view.rotation))
+      : view.sizeReadout !== null
+        ? CANVAS.size(Math.round(view.sizeReadout.w), Math.round(view.sizeReadout.h))
+        : null;
   return (
     <>
+      {view.rulers ? (
+        <Rulers
+          k={k}
+          pointer={view.rulers.pointer}
+          selection={view.rulers.selection}
+          onRulerDown={view.onRulerDown}
+        />
+      ) : null}
+      {view.deckGuides ? (
+        <DeckGuides
+          guides={view.deckGuides}
+          k={k}
+          dragging={view.draggingGuide}
+          onGuideDown={view.onGuideDown}
+          onGuideContextMenu={view.onGuideContextMenu}
+        />
+      ) : view.draggingGuide ? (
+        <DeckGuides
+          guides={{ x: [], y: [] }}
+          k={k}
+          dragging={view.draggingGuide}
+          onGuideDown={view.onGuideDown}
+          onGuideContextMenu={view.onGuideContextMenu}
+        />
+      ) : null}
       {view.hover ? (
         <div className="ts-hover" style={place(view.hover, k)} aria-hidden="true" />
       ) : null}
       {view.lint.map((lint) => (
         <LintMark key={lint.id} lint={lint} k={k} />
       ))}
-      {/* the outlined target slot of a block drag (this round), hair, under the drop line */}
+      {/* the outlined target slot of a grammar reorder, hair, under the drop line */}
       {view.dropSlot ? (
         <div className="ts-drop-slot" style={place(view.dropSlot, k)} aria-hidden="true" />
       ) : null}
-      {/* the other blocks of a multi-selection: each its own ink ring */}
+      {/* crop mode (SPEC-2 6.1 row 19): the picture at its full extent, dimmed outside the frame */}
+      {view.crop ? (
+        <>
+          <div className="ts-crop-full" style={place(view.crop.full, k)} aria-hidden="true" />
+          <div className="ts-crop-frame" style={place(view.crop.frame, k)} aria-hidden="true" />
+        </>
+      ) : null}
+      {/* the other objects of a multi-selection: each its own ink ring */}
       {view.extraBoxes.map((box, i) => (
         <div
           key={`extra:${i}`}
@@ -344,18 +483,51 @@ export function Overlay({ view }: OverlayProps) {
           aria-hidden="true"
         />
       ))}
-      {view.selectionBox ? (
-        <div
-          className={cn('ts-select', 'is-selected', view.editing && 'is-editing')}
-          style={place(view.selectionBox, k)}
-          aria-hidden="true"
-        />
+      {view.selectionBox && !view.crop ? (
+        rotated && ringBox && view.count === 1 ? (
+          <div className="ts-turn" style={turnStyle} data-rotated="" aria-hidden="true">
+            <div
+              className={cn('ts-select', 'is-selected', view.editing && 'is-editing')}
+              style={{ left: 0, top: 0, width: ringBox[2] * k, height: ringBox[3] * k }}
+            />
+            {frameEdges && chipHandle
+              ? (Object.keys(frameEdges) as Array<keyof typeof frameEdges>).map((side) => (
+                  <div
+                    key={`frame:${side}`}
+                    className="ts-frame-edge"
+                    data-side={side}
+                    style={frameEdges[side]}
+                    onPointerDown={(e) => {
+                      if (e.button === 0) view.onHandleDown(chipHandle, e.nativeEvent);
+                    }}
+                  />
+                ))
+              : null}
+            {view.editing ? null : turning.map((handle) => handleButton(handle, true))}
+          </div>
+        ) : (
+          <div
+            className={cn('ts-select', 'is-selected', view.editing && 'is-editing')}
+            style={place(view.selectionBox, k)}
+            aria-hidden="true"
+          />
+        )
       ) : null}
-      {/* the hair box around the group, so the whole selection reads as one */}
+      {/* the box around a multi-selection: hair, so the whole selection reads as one; a group's ring is a named group */}
       {view.groupBox ? (
-        <div className="ts-group" style={place(view.groupBox, k)} aria-hidden="true" />
+        view.groupTag !== null ? (
+          <div
+            className="ts-group is-group"
+            role="group"
+            aria-label={`${CANVAS.group}: ${view.groupMembers.join(', ')}`}
+            data-group={view.groupTag}
+            style={place(view.groupBox, k)}
+          />
+        ) : (
+          <div className="ts-group" style={place(view.groupBox, k)} aria-hidden="true" />
+        )
       ) : null}
-      {ringBox && view.chip !== null ? (
+      {ringBox && chipText !== null && !view.crop ? (
         chipHandle && !view.editing ? (
           <HandleButton
             handle={chipHandle}
@@ -372,7 +544,17 @@ export function Overlay({ view }: OverlayProps) {
           </span>
         )
       ) : null}
-      {frameEdges && chipHandle
+      {view.crop && ringBox ? (
+        <span className="ts-select-chip is-static is-crop" style={chipStyle(view.crop.frame, k)}>
+          {CANVAS.crop}
+        </span>
+      ) : null}
+      {readout !== null && ringBox ? (
+        <span className="ts-readout" role="status" style={readoutStyle(ringBox, k)}>
+          {readout}
+        </span>
+      ) : null}
+      {frameEdges && chipHandle && !rotated
         ? (Object.keys(frameEdges) as Array<keyof typeof frameEdges>).map((side) => (
             <div
               key={`frame:${side}`}
@@ -410,23 +592,32 @@ export function Overlay({ view }: OverlayProps) {
           aria-hidden="true"
         />
       ) : null}
-      {/* the snap guides of a freeform drag (this round), titanium */}
+      {/* the snap guides of a canvas drag, titanium */}
       {view.guides.length > 0 ? <GuideLines guides={view.guides} k={k} /> : null}
       {view.marquee ? <MarqueeRect box={view.marquee} k={k} /> : null}
-      {drawn.map((handle) => (
-        <HandleButton
-          key={handle.id}
-          handle={handle}
-          className={cn(
-            'ts-handle',
-            handle.blockId !== undefined && 'is-selected',
-            view.activeHandle === handle.id && 'is-active',
-          )}
-          style={handleStyle(handle, k)}
-          onDown={view.onHandleDown}
-          onKey={onHandleKey}
+      {/* the connection sites of the shape under a dragged line end or an armed line tool (SPEC-2 6.2) */}
+      {view.sites.map((site, i) => (
+        <span
+          key={`site:${i}`}
+          className="ts-site"
+          style={{ left: site.x * k, top: site.y * k }}
+          aria-hidden="true"
         />
       ))}
+      {/* the points a Curve or Polyline tool placed so far, joined by a hair path */}
+      {view.drawPoints.length > 0 ? (
+        <svg className="ts-draw-path" aria-hidden="true">
+          <polyline
+            points={view.drawPoints.map((p) => `${p.x * k},${p.y * k}`).join(' ')}
+            fill="none"
+          />
+          {view.drawPoints.map((p, i) => (
+            <circle key={`pt:${i}`} cx={p.x * k} cy={p.y * k} r={3} />
+          ))}
+        </svg>
+      ) : null}
+      {flat.map((handle) => handleButton(handle, false))}
+      {!rotated || view.count !== 1 ? turning.map((handle) => handleButton(handle, false)) : null}
     </>
   );
 }

@@ -18,7 +18,7 @@ The order of delivery follows the thesis. The CLI ships first because it is the 
 
 Seven properties define agent native here (report 05 section 2): discoverable, declarative and diffable, parity by named actions, deterministic and visible, lintable, verified by artifact, shared history. Each section below says which property it serves.
 
-What Turboslide is not: it is not a free-form canvas. There are no free coordinates, no z-order, no rotation and no resize handles on text. Anything the grammar cannot express goes into an `html` escape block that the linter flags and the exporter rasterizes; the count of such blocks in a deck is the honest scope of the grammar (report 05 section 9 item 1).
+What Turboslide is not: it is not a free-form canvas by default. The grammar layouts carry no free coordinates, no z-order and no rotation; since the Google Slides parity round two (docs/gslides-parity/SPEC-2.md section 1, Kevin's directive of 2026-09-12) every slide becomes a canvas on its first manipulation, where every object carries `pos` with rotation and flip and takes resize handles, and the grammar layouts are the templates it re-flows by. Anything the grammar cannot express goes into an `html` escape block that the linter flags and the exporter rasterizes; the count of such blocks in a deck is the honest scope of the grammar (report 05 section 9 item 1).
 
 ## 2. The look
 
@@ -29,7 +29,7 @@ The slides are the GT brand deck, unchanged. The theme is `gt-ink-paper`, the on
 - The sheet is 1600 by 900. Two vertical rails at 56 px from the left and right edges, two horizontal rules at 56 px from the top and bottom, an 11 by 11 registration cross at each junction, all drawn by the engine and never by a slide. The slide box is inset 57 px with 72 by 80 padding, so the content box is 1326 by 642 at (137, 129). The wordmark sits bottom left and the counter bottom right, inside the bottom margin (report 03 section 1).
 - Nine tokens with a pure dark remap: `--paper` `#ffffff` / `#070707`, `--ink` `#070707` / `#f2f2f0`, `--ink-2` `#3a3d44` / `#b9bcc3`, `--titanium` `#8a8f98` unchanged, `--hair` at 18 percent ink (22 percent in dark), `--hair-soft` 9 percent (10), `--plate` 3.5 percent (5), `--cross` 38 percent (34), `--edge` 62 percent (55), `--thumb` 32 percent (head:11-32, 178-179). Fixed colors that do not remap: the four semantic icon hues `#12a37a` ok, `#f0a020` warn, `#e5484d` no, `#2f5ce0` info; the `#101010` code panel; the swatch plates; the fixed-white logo plate on slide 14 (report 03 section 2).
 - Inter is the only face, embedded as one InterVariable 4.001 woff2 with `opsz` 14 to 32 and `wght` 100 to 900 (pptx report section 4.10). Display weight is capped at 500 and text under 15 px on the sheet is a defect. The ladder: h1 88 px at 1.02, h2 44 px at 1.1, `.big` 72 px at 1.06, all at weight 500 with -0.025em tracking, `text-wrap: balance` and features `cv11` and `ss01`; p 22 px at 1.5; `.lead` 26 px; `.cap` 15 px titanium; `.rows` 20 px; `.plain` 24 px; diagram text 20 px in `--ink-2`, `.lab` 26 px, `.sm` 18 px; `.panel` 17 px monospace at 1.7 (report 03 section 3).
-- Ruled rows and lists instead of bullets: `.rows` with a key column (240 default, `.narrow` 180, set per slide to 90, 120, 150, 190, 200, 220, 250 or 300), values at most two lines; `.plain` at 24 px with `.no` strike; semantic color only on Heroicons 20 solid icons in key cells (20 px) and at list row starts (24 px), never inside a sentence (report 03 sections 4.2, 4.4). Unchanged in the Google Slides parity round: the Bulleted list control produces the ruled list, and `plain.numbered` draws a tabular numeral in the icon position (gslides-parity SPEC 7.9 item 3, decision 15.1).
+- Ruled rows and lists instead of bullets, the default (a `plain` list draws glyph bullets and numerals on request through `marker` and `preset`, gslides-parity SPEC-2 2.3): `.rows` with a key column (240 default, `.narrow` 180, set per slide to 90, 120, 150, 190, 200, 220, 250 or 300), values at most two lines; `.plain` at 24 px with `.no` strike; semantic color only on Heroicons 20 solid icons in key cells (20 px) and at list row starts (24 px), never inside a sentence (report 03 sections 4.2, 4.4; a coloured run is the `color/semantic-icons-only` lint at severity 1, not a refusal, gslides-parity SPEC-2 2.9 item 6). Unchanged in the Google Slides parity round: the Bulleted list control produces the ruled list, and `plain.numbered` draws a tabular numeral in the icon position (gslides-parity SPEC 7.9 item 3, decision 15.1).
 - Inline SVG diagrams with 1 px or 1.5 px strokes in `ink`, `mid` or `hair`, fills only ink, paper or plate, 11 px square markers, no arrowheads, labels 12 px clear of lines, coordinates on the half pixel (report 03 sections 4.7, 5.11).
 - Plates over full-bleed pictures: the section opener's plate lower left with `max-width` 740, the mood plate lower right at 560 with a 44 px title, the closing plate upper left at 720 with the mark; the picture at `inset: -57px` under the rails; two paper chips under the wordmark and counter on the stage only (report 03 section 5.1).
 - Two-tone Bayer dither at 2 px cells on openers and mood slides, produced by the `OPENERS.md` pipeline (crop, cover to 800 by 450, tone, 8 by 8 Bayer at thresholds `(m + 0.5) / 64`, 2x nearest, inverted light twin); one live dither ramp canvas on slide 26 (report 03 sections 8.3, 8.8).
@@ -311,12 +311,14 @@ Text is a string in a four-rule inline markup. Resolution: design A used `string
 ```ts
 // packages/schema/src/text.ts
 export type Text = string;
-// Four rules, nothing else:
+// Five rules, nothing else (the fifth is the mark span of gslides-parity SPEC-2 7.2):
 //   *text*            the display run: weight 500, the deck's <b>
 //   [text](https://…) a link; inside rows.links an external glyph follows it
 //   GT                a standalone GT word becomes the mark at render, with the exclusion list from gt-mark-in-text.js
 //                     (code, URLs, package names, attributes, panel text); the document keeps the letters
 //   \*  \[  \GT       escapes
+//   [text]{i u s sup sub c:<color> h:<color>}  the mark span: italic, underline, strikethrough, super or subscript, a text
+//                     and a highlight colour on a run (gslides-parity SPEC-2 2.2, 7.2)
 // No line breaks inside a string except a paragraph break in paragraph, text, box and table cell Texts (multilineTextSchema,
 // gslides-parity SPEC 7.4) and \n in panel.code, where it is honored. A non-breaking space (U+00A0) is the nowrap device.
 export type Run = { t: string; b?: true; gt?: true; link?: string }; // parseText(text): Run[]; serializeRuns(runs): Text
@@ -895,7 +897,7 @@ Addressing. A block is `slideId#blockId` (`content-rule#list`); a run inside a t
 
 ### 4.4 What the validator and reducer do
 
-`validateDeck(input: unknown): { deck: Deck; issues: Issue[] }` parses with Zod, applies migrations by `schemaVersion`, normalizes (layout defaults filled, slot names checked against the layout, block ids unique per slide, asset references resolved, section slide ids unique across the deck, an `opener` slide's `sectionId` equals its section and it is first, `scales` markers derived, `Text` parsed and re-serialized so escapes are canonical), keeps `ext` on the three levels, rejects unknown fields elsewhere with `unknown_field`, and returns issues with JSON pointers. `applyWrite(deck, slides, write)` is a pure reducer that rejects a stale `baseRevision` with the current document, applies the mutation list atomically, bumps `revision`, appends to the log and returns the normalized result plus the inverse mutations. `diffDecks(a, b): Mutation[]` produces a mutation list from two documents so `turboslide diff`, the version list and the judge loop speak one language.
+`validateDeck(input: unknown): { deck: Deck; issues: Issue[] }` parses with Zod, applies migrations by `schemaVersion`, normalizes (layout defaults filled, slot names checked against the layout, block ids unique per slide, asset references resolved, section slide ids unique across the deck, an `opener` slide's `sectionId` equals its section and it is first, `scales` markers derived, `Text` parsed and re-serialized so escapes are canonical), keeps `ext` on the three levels (a converted slide's origin is `grammar`, a schema field, never an `ext` key: gslides-parity SPEC-2 0.99), rejects unknown fields elsewhere with `unknown_field`, and returns issues with JSON pointers. `applyWrite(deck, slides, write)` is a pure reducer that rejects a stale `baseRevision` with the current document, applies the mutation list atomically, bumps `revision`, appends to the log and returns the normalized result plus the inverse mutations. `diffDecks(a, b): Mutation[]` produces a mutation list from two documents so `turboslide diff`, the version list and the judge loop speak one language.
 
 ## 5. Renderer
 
@@ -1063,7 +1065,7 @@ Direct manipulation exists only where the grammar has a property to move:
 | Alt-drag a label or marker in a declared `dia` (M5)                      | `block.set /data/…`                 | half-pixel grid, 12 px clearance shown live                                                                                        |
 | Double-click text                                                        | `text.replace`, coalesced at 400 ms | `contenteditable` on the run element; the run toolbar has weight 500 and link; a typed standalone `GT` renders as the mark at once |
 
-There are no free x and y, no resize handles on text, no z-order, no rotation. The `html` block shows a titanium hatch and its severity 2 lint.
+On a grammar slide there are no free x and y, no z-order and no rotation; a slide becomes a canvas on its first manipulation and then every object has resize handles, a rotation handle and a paint order (gslides-parity SPEC-2 sections 1 and 6; the amendment of SPEC-2 2.9 item 8). The `html` block shows a titanium hatch and its severity 2 lint.
 
 ### 6.5 The inspector
 

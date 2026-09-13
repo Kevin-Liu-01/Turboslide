@@ -1,16 +1,20 @@
 import type { Block, BlockType } from '@turboslide/schema/blocks';
+import { isLineKind } from '@turboslide/schema/shapes';
 
 import type { IconName } from '../icons';
 import type { ControlSpec } from './generate';
 import { isItemControl } from './sections';
 
 /**
- * Format options (gslides-parity SPEC 3.9): the Inspector's generated controls regrouped under
- * Google's section names. One table names the sections in Google's order with an icon and a
- * sentence; the two routers send a slide control and a block control to a section, or to none
- * (the fields that leave the panel: the slide's id, tags, section and title override go to
- * Tools > Advanced > Show slide and block ids, the notes to the pane under the canvas, a block's
- * link to Insert > Link). Pure: no React, no DOM, so `format-sections.test.ts` runs in Node.
+ * Format options (gslides-parity SPEC 3.9; SPEC-2 section 5): the Inspector's generated controls
+ * regrouped under Google's section names, in Google's order (R05 B7, F3): Size & rotation,
+ * Position, Text fitting, Text, Colour, Picture, Adjustments, Drop shadow, Table, Chart data,
+ * Line, Shape, List, Alt text, then the block's own Options. One table names the sections with an
+ * icon and a sentence; the two routers send a slide control and a block control to a section, or
+ * to none (the fields that leave the panel: the slide's id, tags, section and title override go
+ * to Tools > Advanced > Show slide and block ids, the notes to the pane under the canvas, a
+ * block's link to Insert > Link; the round two fields the panel draws itself as sections). Pure:
+ * no React, no DOM, so `format-sections.test.ts` runs in Node.
  */
 export type FormatSectionId =
   | 'size'
@@ -20,7 +24,12 @@ export type FormatSectionId =
   | 'text'
   | 'colour'
   | 'picture'
+  | 'adjustments'
+  | 'shadow'
   | 'table'
+  | 'chart'
+  | 'line'
+  | 'shape'
   | 'list'
   | 'altText'
   /** a grammar block's own fields, under the block's label (no Google section exists) */
@@ -33,39 +42,51 @@ export type FormatSectionMeta = {
   doc: string;
 };
 
-/** The sections in the order the panel shows them (SPEC 3.9, 12 "Panels"). */
+/** The sections in the order the panel shows them (SPEC 3.9, 12 "Panels"; SPEC-2 section 5). */
 export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
   {
     id: 'size',
     title: 'Size & rotation',
     icon: 'arrows-pointing-in',
-    doc: 'Width and height on the slide',
+    doc: 'Width, height, rotation and flip on the slide',
   },
   {
     id: 'position',
     title: 'Position',
     icon: 'move',
-    doc: 'The distance from the top left of the slide',
+    doc: 'The distance from the top left or the centre of the slide',
   },
   { id: 'layout', title: 'Layout', icon: 'columns', doc: 'How this slide arranges its blocks' },
   {
     id: 'textFitting',
     title: 'Text fitting',
     icon: 'arrows-pointing-in',
-    doc: 'Not available in Turboslide yet. Text fitting arrives with autofit',
+    doc: 'Autofit, indentation, padding and vertical alignment',
   },
   {
     id: 'text',
     title: 'Text',
     icon: 'text',
-    doc: 'Size, weight, alignment, letter spacing and line height',
+    doc: 'Size, weight, alignment, spacing, columns and the selected text’s marks',
   },
   { id: 'colour', title: 'Colour', icon: 'swatch', doc: 'Fill, border and text colour' },
   {
     id: 'picture',
     title: 'Picture',
     icon: 'photo',
-    doc: 'The picture, its crop, frame and caption',
+    doc: 'The picture, its crop, mask, frame and caption',
+  },
+  {
+    id: 'adjustments',
+    title: 'Adjustments',
+    icon: 'adjustments',
+    doc: 'Transparency, brightness and contrast',
+  },
+  {
+    id: 'shadow',
+    title: 'Drop shadow',
+    icon: 'square-2-stack',
+    doc: 'Colour, transparency, angle, distance and blur',
   },
   {
     id: 'table',
@@ -73,6 +94,19 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     icon: 'table',
     doc: 'Header row, columns, fill, border and vertical alignment',
   },
+  {
+    id: 'chart',
+    title: 'Chart data',
+    icon: 'chart-bar',
+    doc: 'The categories and series of the chart',
+  },
+  {
+    id: 'line',
+    title: 'Line',
+    icon: 'minus',
+    doc: 'The line type, its ends, weight, dash and bend',
+  },
+  { id: 'shape', title: 'Shape', icon: 'cube', doc: 'The shape and its adjustable sides' },
   { id: 'list', title: 'List', icon: 'list-bullet', doc: 'The items and how the list draws them' },
   {
     id: 'altText',
@@ -90,7 +124,14 @@ export const FORMAT_SECTION_BY_ID: Readonly<Record<FormatSectionId, FormatSectio
   >;
 
 const TEXT_TYPES: ReadonlySet<BlockType> = new Set(['heading', 'paragraph', 'text', 'box']);
-const PICTURE_TYPES: ReadonlySet<BlockType> = new Set(['shot', 'pair', 'tiles', 'details', 'icon']);
+const PICTURE_TYPES: ReadonlySet<BlockType> = new Set([
+  'shot',
+  'pair',
+  'tiles',
+  'details',
+  'icon',
+  'picture',
+]);
 const LIST_TYPES: ReadonlySet<BlockType> = new Set([
   'rows',
   'plain',
@@ -108,11 +149,45 @@ const LIST_TYPES: ReadonlySet<BlockType> = new Set([
 const GEOMETRY =
   /^(radius|padding|height|length|orientation|arrowheads|width|weight|corner radius|shape)$/i;
 const PICTURE_FIELDS =
-  /^(caption|caption size|crop|crop anchor|border|fit|aspect|width|asset|assets|picture|name|size)$/i;
+  /^(caption|caption size|crop|crop anchor|border|fit|aspect|width|asset|assets|picture|name|size|position)$/i;
+/** The round two fields the panel draws as its own sections, never as generated rows (SPEC-2 section 5). */
+const OWN_SECTION_PATHS: ReadonlySet<string> = new Set([
+  '/pos',
+  '/trim',
+  '/mask',
+  '/adjust',
+  '/frame',
+  '/shadow',
+  '/autofit',
+  '/valign',
+  '/padding',
+  '/alt',
+  '/outline',
+  '/dash',
+  '/bend',
+  '/points',
+  '/closed',
+  '/lineStart',
+  '/lineEnd',
+  '/connect',
+  '/adjust',
+  '/marker',
+  '/preset',
+  '/kind',
+  '/categories',
+  '/series',
+  '/legend',
+  '/numberFormat',
+  '/labels',
+  '/title',
+  '/spans',
+  '/cells',
+]);
 
 /** Where a slide's own control goes: the layout fields to Layout, the picture to Picture, the rest leave the panel. */
 export function formatSectionOfSlideControl(spec: ControlSpec): FormatSectionId | null {
   if (spec.path === '/picture/asset' || spec.group === 'Asset') return 'picture';
+  if (spec.path === '/background') return null;
   if (spec.group === 'Slide' || spec.group === 'Text' || spec.group === 'Advanced') return null;
   if (spec.path.startsWith('/layout') || spec.path.startsWith('/plate') || spec.group === 'Layout')
     return 'layout';
@@ -120,9 +195,11 @@ export function formatSectionOfSlideControl(spec: ControlSpec): FormatSectionId 
 }
 
 /**
- * Where a block's control goes (SPEC 3.9). The position composite is drawn by the panel itself
- * as Size & rotation and Position, so it routes to `size`; the link leaves (Insert > Link); the
- * ext field leaves.
+ * Where a block's control goes (SPEC 3.9; SPEC-2 section 5). The position composite is drawn by
+ * the panel itself as Size & rotation and Position, so it routes to `size`; the round two fields
+ * (`trim`, `mask`, `adjust`, `frame`, `shadow`, `autofit`, `valign`, `padding`, `alt`, the line
+ * and chart fields) are drawn by their own sections and route there, so no generated row repeats
+ * them; the link leaves (Insert > Link); the ext field leaves.
  */
 export function formatSectionOfBlockControl(
   spec: ControlSpec,
@@ -130,17 +207,49 @@ export function formatSectionOfBlockControl(
 ): FormatSectionId | null {
   if (spec.path === '/link' || spec.path === '/ext') return null;
   if (spec.kind === 'position') return 'size';
+  if (spec.path === '/alt') return 'altText';
+  if (spec.path === '/shadow') return 'shadow';
+  if (spec.path === '/autofit' || spec.path === '/valign' || spec.path === '/padding')
+    return block.type === 'box' && spec.path === '/padding' && block.pos === undefined
+      ? 'size'
+      : 'textFitting';
+  if (spec.path === '/outline') return 'colour';
+  if (block.type === 'chart') return 'chart';
+  if (block.type === 'shape') {
+    if (isLineKind(block.shape)) {
+      if (spec.kind === 'typography' || spec.path === '/text') return null;
+      return 'line';
+    }
+    if (spec.path === '/shape' || spec.path === '/adjust') return 'shape';
+    if (
+      spec.path === '/dash' ||
+      spec.path === '/lineStart' ||
+      spec.path === '/lineEnd' ||
+      spec.path === '/bend' ||
+      spec.path === '/points' ||
+      spec.path === '/closed' ||
+      spec.path === '/connect'
+    )
+      return 'shape';
+  }
   const label = spec.inspector.label;
-  if (block.type === 'table') return spec.kind === 'typography' ? 'text' : 'table';
+  if (block.type === 'table') {
+    if (spec.kind === 'typography') return 'text';
+    return 'table';
+  }
   if (block.type === 'material') return 'block';
   if (LIST_TYPES.has(block.type)) {
     if (spec.kind === 'typography') return 'text';
     if (spec.kind === 'color' && !isItemControl(spec)) return 'colour';
+    if (block.type === 'plain' && (spec.path === '/marker' || spec.path === '/preset'))
+      return 'list';
     return 'list';
   }
   if (spec.kind === 'color') return 'colour';
   if (spec.kind === 'typography') return 'text';
   if (PICTURE_TYPES.has(block.type)) {
+    if (spec.path === '/trim' || spec.path === '/mask' || spec.path === '/frame') return 'picture';
+    if (spec.path === '/adjust') return 'adjustments';
     if (spec.kind === 'asset' || isItemControl(spec) || PICTURE_FIELDS.test(label) || spec.text)
       return 'picture';
     return 'block';
@@ -148,22 +257,65 @@ export function formatSectionOfBlockControl(
   if (TEXT_TYPES.has(block.type)) {
     if (spec.text || spec.group === 'Text' || /^(level|role|tone|measure|margin)/i.test(label))
       return 'text';
+    if (spec.path === '/dash') return 'colour';
     if (GEOMETRY.test(label)) return 'size';
     return 'block';
   }
   if (block.type === 'shape' || block.type === 'rule') {
+    if (spec.path === '/dash') return 'colour';
     if (GEOMETRY.test(label)) return 'size';
     return 'block';
   }
   return 'block';
 }
 
-/** True for a block whose picture carries alt text the Alt text section edits. */
-export function hasAltText(block: Block): boolean {
-  return PICTURE_TYPES.has(block.type);
+/** True for a path the panel draws inside one of its own sections (no generated row repeats it). */
+export function isOwnSectionPath(path: string): boolean {
+  return OWN_SECTION_PATHS.has(path);
 }
 
-/** True for a block Text fitting would apply to (SPEC 3.9: text and box), drawn as the Later row. */
+/** True for a block that shows an asset whose description the Alt text section edits as `asset.alt` (SPEC-2 0.51). */
+export function hasAltText(block: Block): boolean {
+  return PICTURE_TYPES.has(block.type) && block.type !== 'icon';
+}
+
+/** True for a block Text fitting applies to (SPEC-2 0.41, 2.1.5): heading, paragraph, text, box and shape. */
 export function hasTextFitting(block: Block): boolean {
-  return block.type === 'text' || block.type === 'box';
+  return (
+    block.type === 'text' ||
+    block.type === 'box' ||
+    block.type === 'heading' ||
+    block.type === 'paragraph' ||
+    (block.type === 'shape' && !isLineKind(block.shape))
+  );
+}
+
+/** True for a block Drop shadow applies to (SPEC-2 2.3.4). */
+export function hasShadow(block: Block): boolean {
+  return (
+    block.type === 'box' ||
+    block.type === 'shape' ||
+    block.type === 'text' ||
+    block.type === 'shot' ||
+    block.type === 'picture' ||
+    block.type === 'icon' ||
+    block.type === 'table' ||
+    block.type === 'chart'
+  );
+}
+
+/** True for a block Adjustments applies to (SPEC-2 2.5.3): shot, picture; icon takes transparency only. */
+export function hasAdjustments(block: Block): boolean {
+  return block.type === 'shot' || block.type === 'picture' || block.type === 'icon';
+}
+
+/** True for a block the Picture section serves (SPEC-2 section 5). */
+export function hasPicture(block: Block): boolean {
+  return (
+    block.type === 'shot' ||
+    block.type === 'picture' ||
+    block.type === 'pair' ||
+    block.type === 'tiles' ||
+    block.type === 'details'
+  );
 }

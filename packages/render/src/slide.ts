@@ -6,12 +6,16 @@ import { pictureRecipeAttr } from './blocks/material.ts';
 import { measureStyle } from './blocks/text-blocks.ts';
 import { colsTemplate, colsWidths, COLS_GAP, CONTENT, slotBoxes } from './geometry.ts';
 import { attrs, classes, el, escapeAttr, px, style } from './html.ts';
+import { colorCss } from '@turboslide/schema/color';
 import { renderTextOrPrompt } from './blocks/prompt.ts';
 import type { AssetId, SlideId } from '@turboslide/schema/ids';
 import type { Block } from '@turboslide/schema/blocks';
 import type { ContentSlide, Deck, Layout, Plate, Slide, SlotName } from '@turboslide/schema/deck';
 import { insideContent, sortByZ } from '@turboslide/schema/freeform';
+import type { Position } from '@turboslide/schema/position';
+import { normalizeRotation } from '@turboslide/schema/position';
 import type { Box, Theme } from '@turboslide/schema/render';
+import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 import { importResidual } from '@turboslide/schema/ext';
 
 export type RenderOptions = {
@@ -97,6 +101,8 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     image: imageResolver(deck, options),
     assetUrl: (path) =>
       options.assetSrc ? options.assetSrc('', options.theme, path) : `${options.assetBase}${path}`,
+    asset: (id) => deck.assets[id],
+    ...(options.chrome ? { chrome: true } : {}),
     ...(options.live === true ? { live: true } : {}),
     ...(options.prompts === true ? { prompts: true } : {}),
     slide: {
@@ -120,6 +126,15 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     'data-counter': options.counter,
   };
   const active = options.active !== false ? 'is-on' : undefined;
+  const pictureKind = slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing';
+  const background = slide.background ?? (pictureKind ? undefined : deck.defaults?.background);
+  // the background colour layer (SPEC-2 2.6.1, 2.6.2): a `.slide-bg` under `.in` at the sheet
+  // box, drawn only when set so every other slide's markup is unchanged; the deck default is not
+  // drawn on an unconverted picture kind, whose photograph is the ground (0.108)
+  const bg =
+    background !== undefined
+      ? `<div class="slide-bg" style="background:${escapeAttr(colorCss(background.color))}"></div>`
+      : '';
   let html: string;
   let slots: Record<string, Box> = {};
   switch (slide.kind) {
@@ -166,7 +181,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
       html = el(
         'section',
         { class: classes('slide', kindClass, scopeClass, active), ...common },
-        scopedCss + img + el('div', { class: 'in' }, plate) + chips,
+        scopedCss + img + bg + el('div', { class: 'in' }, plate) + chips,
       );
       slots = { plate: plateBox(slide.plate) };
       break;
@@ -199,6 +214,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
         'section',
         { class: classes('slide', scopeClass, active), ...common },
         scopedCss +
+          bg +
           el(
             'div',
             { class: 'in' },
@@ -225,6 +241,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
         'section',
         { class: classes('slide', scopeClass, active), ...common },
         scopedCss +
+          bg +
           el('div', { class: 'in' }, el('div', { class: 'center', 'data-slot': 'main' }, big)),
       );
       slots = slotBoxesAsRecord({ type: 'center' });
@@ -234,7 +251,7 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
       html = el(
         'section',
         { class: classes('slide', scopeClass, active), ...common },
-        scopedCss + el('div', { class: 'in' }, renderLayout(slide, ctx)),
+        scopedCss + bg + el('div', { class: 'in' }, renderLayout(slide, ctx)),
       );
       slots = slotBoxesAsRecord(slide.layout);
       break;
@@ -383,7 +400,8 @@ function renderFreeform(blocks: Block[], ctx: BlockContext): string {
   const inside: string[] = [];
   const outside: string[] = [];
   const [contentX, contentY] = CONTENT;
-  sortByZ(blocks).forEach((block, order) => {
+  const ordered = sortByZ(blocks);
+  ordered.forEach((block, order) => {
     const pos = block.pos ?? { x: contentX, y: contentY, w: 1326, h: 642 };
     const inContent = insideContent(pos);
     const inline = style(
@@ -392,11 +410,25 @@ function renderFreeform(blocks: Block[], ctx: BlockContext): string {
       `width:${px(pos.w)}px`,
       `height:${px(pos.h)}px`,
       `z-index:${order + 1}`,
+      freeTransform(pos),
     );
+    // the two paper chips of a picture kind (OPENERS.md:47) inside the wrapper of a picture
+    // object that covers the sheet at the bottom of the stack, after the image, so they cover
+    // the photograph and nothing else (SPEC-2 1.4, 0.75, 0.98)
+    const chips =
+      ctx.chrome === true && order === 0 && block.type === 'picture' && coversSheet(pos)
+        ? '<div class="ts-chips" aria-hidden="true"></div>'
+        : '';
     const html = el(
       'div',
-      { class: 'free', 'data-free': block.id, style: inline },
-      renderBlock(block, { ...ctx, slotWidth: pos.w, slotHeight: pos.h }),
+      {
+        class: 'free',
+        'data-free': block.id,
+        style: inline,
+        ...freeDataAttrs(pos),
+        'aria-label': block.alt,
+      },
+      renderBlock(block, { ...ctx, slotWidth: pos.w, slotHeight: pos.h }) + chips,
     );
     (inContent ? inside : outside).push(html);
   });
@@ -411,6 +443,37 @@ function renderFreeform(blocks: Block[], ctx: BlockContext): string {
         )
       : '';
   return el('div', { class: 'freeform', 'data-slot': 'main' }, inside.join('')) + sheetLayer;
+}
+
+/**
+ * The rotation and flip of an object (SPEC-2 2.1.1, 2.1.2): `rotate(<deg>)` then the mirror,
+ * about the box centre; nothing for an object with neither, so a round one freeform slide keeps
+ * its markup. The class `.ts-measure` on the sheet root drops the transform for the exporter's
+ * measurement pass (1.5).
+ */
+export function freeTransform(pos: Position): string | false {
+  const angle = normalizeRotation(pos.rotate ?? 0);
+  const parts: string[] = [];
+  if (angle !== 0) parts.push(`rotate(${px(angle)}deg)`);
+  if (pos.flip === 'h') parts.push('scale(-1, 1)');
+  else if (pos.flip === 'v') parts.push('scale(1, -1)');
+  else if (pos.flip === 'hv') parts.push('scale(-1, -1)');
+  return parts.length > 0 && `transform:${parts.join(' ')}`;
+}
+
+/** The data attributes of a positioned object the overlay and the exporter read (SPEC-2 1.4). */
+export function freeDataAttrs(pos: Position): Record<string, string | undefined> {
+  const angle = normalizeRotation(pos.rotate ?? 0);
+  return {
+    'data-rotate': angle !== 0 ? px(angle) : undefined,
+    'data-flip': pos.flip,
+    'data-group': pos.group,
+  };
+}
+
+/** True when a box covers the whole sheet (the picture object of a converted picture kind, SPEC-2 1.4). */
+export function coversSheet(pos: Position): boolean {
+  return pos.x <= 0 && pos.y <= 0 && pos.x + pos.w >= SHEET_WIDTH && pos.y + pos.h >= SHEET_HEIGHT;
 }
 
 /**

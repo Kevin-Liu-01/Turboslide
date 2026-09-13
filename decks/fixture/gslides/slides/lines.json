@@ -1,0 +1,235 @@
+{
+  "schemaVersion": 1,
+  "id": "lines",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Lines and connectors",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 900,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "decorated",
+        "type": "shape",
+        "shape": "line",
+        "stroke": "ink",
+        "width": 2,
+        "lineStart": "fillCircle",
+        "lineEnd": "stealth",
+        "orientation": "horizontal",
+        "pos": {
+          "x": 137,
+          "y": 236,
+          "w": 600,
+          "h": 8,
+          "z": 1
+        }
+      },
+      {
+        "id": "a",
+        "type": "shape",
+        "shape": "rect",
+        "stroke": "ink",
+        "text": "A",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 137,
+          "y": 300,
+          "w": 240,
+          "h": 120,
+          "z": 2
+        }
+      },
+      {
+        "id": "b",
+        "type": "shape",
+        "shape": "rect",
+        "stroke": "ink",
+        "text": "B",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 700,
+          "y": 500,
+          "w": 240,
+          "h": 120,
+          "z": 3
+        }
+      },
+      {
+        "id": "elbow",
+        "type": "shape",
+        "shape": "elbow",
+        "stroke": "ink",
+        "lineEnd": "fillArrow",
+        "orientation": "diagonal-down",
+        "connect": {
+          "start": {
+            "block": "a",
+            "site": 3
+          },
+          "end": {
+            "block": "b",
+            "site": 1
+          }
+        },
+        "pos": {
+          "x": 377,
+          "y": 360,
+          "w": 323,
+          "h": 200,
+          "z": 4
+        }
+      },
+      {
+        "id": "curved",
+        "type": "shape",
+        "shape": "curved",
+        "stroke": "ink",
+        "lineEnd": "openArrow",
+        "orientation": "diagonal-up",
+        "pos": {
+          "x": 1000,
+          "y": 300,
+          "w": 320,
+          "h": 200,
+          "z": 5
+        }
+      },
+      {
+        "id": "poly",
+        "type": "shape",
+        "shape": "polyline",
+        "stroke": "ink",
+        "width": 1.5,
+        "points": [
+          [
+            0,
+            0
+          ],
+          [
+            0.3,
+            1
+          ],
+          [
+            0.6,
+            0.2
+          ],
+          [
+            1,
+            1
+          ]
+        ],
+        "pos": {
+          "x": 1000,
+          "y": 560,
+          "w": 320,
+          "h": 120,
+          "z": 6
+        }
+      },
+      {
+        "id": "closed",
+        "type": "shape",
+        "shape": "curve",
+        "stroke": "ink",
+        "fill": "plate",
+        "closed": true,
+        "points": [
+          [
+            0.1,
+            0.9
+          ],
+          [
+            0.2,
+            0.1
+          ],
+          [
+            0.7,
+            0
+          ],
+          [
+            1,
+            0.6
+          ],
+          [
+            0.6,
+            1
+          ]
+        ],
+        "pos": {
+          "x": 137,
+          "y": 560,
+          "w": 300,
+          "h": 200,
+          "z": 7
+        }
+      },
+      {
+        "id": "scribble",
+        "type": "shape",
+        "shape": "scribble",
+        "stroke": "ink",
+        "points": [
+          [
+            0,
+            0.5
+          ],
+          [
+            0.1,
+            0.2
+          ],
+          [
+            0.2,
+            0.8
+          ],
+          [
+            0.35,
+            0.1
+          ],
+          [
+            0.5,
+            0.9
+          ],
+          [
+            0.65,
+            0.3
+          ],
+          [
+            0.8,
+            0.7
+          ],
+          [
+            1,
+            0.4
+          ]
+        ],
+        "pos": {
+          "x": 477,
+          "y": 580,
+          "w": 440,
+          "h": 160,
+          "z": 8
+        }
+      }
+    ]
+  },
+  "template": "blank"
+}

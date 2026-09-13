@@ -6,7 +6,9 @@ import { flagBoolean, flagString, parseArgs } from './args.ts';
 import { asset } from './commands/asset.ts';
 import { block } from './commands/block.ts';
 import { build } from './commands/build.ts';
+import { chart } from './commands/chart.ts';
 import { deck } from './commands/deck.ts';
+import { diagram } from './commands/diagram.ts';
 import { diff } from './commands/diff.ts';
 import { exportCommand } from './commands/export.ts';
 import { fix } from './commands/fix.ts';
@@ -16,14 +18,17 @@ import { importCommand } from './commands/import.ts';
 import { info } from './commands/info.ts';
 import { judge } from './commands/judge.ts';
 import { lease } from './commands/lease.ts';
+import { line } from './commands/line.ts';
 import { lint } from './commands/lint.ts';
 import { material } from './commands/material.ts';
 import { mcp } from './commands/mcp.ts';
 import { render } from './commands/render.ts';
 import { sections } from './commands/sections.ts';
+import { shape } from './commands/shape.ts';
 import { sheet } from './commands/sheet.ts';
 import { slide } from './commands/slide.ts';
 import { slides } from './commands/slides.ts';
+import { table } from './commands/table.ts';
 import { text } from './commands/text.ts';
 import { validate } from './commands/validate.ts';
 import { version } from './commands/version.ts';
@@ -74,8 +79,24 @@ Commands
                                     move a slide's content into another layout's placeholders (slide.applyLayout)
   slide import <sourceDeckId> <id,...> [--after <id>] [--section <s>]
                                     copy slides and their assets from another deck under decks/ (slide.import)
+  slide to-canvas <id,...>          arrange the slides by hand: every object takes the box it is drawn at (slide.toCanvas)
+  slide background <id,...> --color <color> | --off
+                                    the slides' background colour (slide.setBackground)
+  deck guides --add-vertical <x> | --add-horizontal <y> | --remove-vertical <x> | --remove-horizontal <y> | --set <json> | --clear
+                                    the guide lines the editor shows on every slide (deck.guides)
+  deck background --color <color> | --off
+                                    the theme background colour (deck.setBackground)
   text replace <find> <replace> [--match-case] [--slides <id,...>]
                                     find and replace across the deck's text and notes in one write (text.replaceAll)
+  text style <slide>#<block> <pointer> --range a:b [--italic] [--underline] [--strike] [--superscript] [--subscript] [--color <c>] [--highlight <c>]
+  text case <slide>#<block> <pointer> --range a:b lower|upper|title
+  text insert <slide>#<block> <pointer> --at <n> <text>
+  text list <slide>#<block> [--marker rule|bullet|number] [--preset <preset>] [--items <i,...>] [--level <1-9>|--in|--out]
+  text spacing <slide>#<block> [--line <factor>] [--before <px>] [--after <px>]
+  text columns <slide>#<block> 1|2|3
+  text indent <slide>#<block> --in|--out|--to <px> [--items <i,...>]
+                                    the text styles, lists, spacing, columns and indents of round two (text.style, text.case,
+                                    text.insert, text.list, text.spacing, text.columns, text.indent)
   block set <slide>#<block> <pointer> <value> [--delete]
   block insert <slide> --slot <slot> [--after <block>] < block.json
   block remove <slide>#<block>
@@ -85,7 +106,29 @@ Commands
   block align <slide> --blocks <id,...> --edge left|center|right|top|middle|bottom [--to selection|content|sheet] [--no-snap]
   block distribute <slide> --blocks <id,...> --axis horizontal|vertical [--gap <px>] [--snap]
   block order <slide>#<block> --move front|back|forward|backward | --z <n>
-                                    the position boxes of a freeform slide (block.align, block.distribute, block.order)
+                                    the position boxes of a canvas slide (block.align, block.distribute, block.order)
+  block group <slide> --blocks <id,...> [--as <tag>] | block ungroup <slide> --group <tag> | block regroup <slide> --blocks <id,...> --as <tag>
+  block rotate <slide>#<block> --to <deg>|--by <deg> [--about each|selection]
+  block flip <slide>#<block> --axis h|v [--about each|selection]
+  block crop <slide>#<block> --left <f> --right <f> --top <f> --bottom <f>
+  block mask <slide>#<block> <preset>|--off | block reset-image <slide>#<block>
+  block adjust <slide>#<block> [--transparency <t>] [--brightness <b>] [--contrast <c>]
+  block alt <slide>#<block> <text> | block shadow <slide>#<block> --on [...]|--off
+  block autofit <slide>#<block> none|shrink|grow [--apply]
+                                    the canvas objects of round two (block.group, block.ungroup, block.regroup, block.rotate,
+                                    block.flip, block.crop, block.mask, block.resetImage, block.adjust, block.setAlt,
+                                    block.shadow, block.autofit); a slide not arranged by hand yet converts first
+  table merge|unmerge|insert-rows|insert-columns|delete-rows|delete-columns|distribute|cell-style <slide>#<block> ...
+                                    Google's table menus (table.merge, table.unmerge, table.insertRows, table.insertColumns,
+                                    table.deleteRows, table.deleteColumns, table.distribute, table.cellStyle)
+  chart set-data <slide>#<block> < data.json | chart set-kind <slide>#<block> bar|column|line|pie
+                                    the chart's data and type (chart.setData, chart.setKind)
+  shape set <slide>#<block> [--kind <preset>] [--adjust <n,...>] [--fill <c>] [--stroke <c>] [--width <w>] [--dash <d>] [--radius <r>]
+  line set <slide>#<block> [--kind <kind>] [--start <end>] [--end <end>] [--weight <w>] [--dash <d>] [--bend <b>] [--points "x,y ..."]
+           [--connect-start <block>:<site>] [--connect-end <block>:<site>] [--detach start|end|both]
+                                    the shape and line fields (shape.set, line.set)
+  diagram insert <slide> --kind grid|hierarchy|timeline|process|relationship|cycle --count <n> [--style outline|plate|ink] [--pos x,y,w,h]
+                                    a diagram template as one group of objects (diagram.insert)
   sections set < sections.json      replace the section list, the only place order lives
   asset add <file|url> --role <r> --alt <t> [--artist --license --share-alike --source-url] [--two-tone --black --gamma --plate <side>]
                                     a picture as an asset with its license fields; --two-tone runs the deck's screen and keeps the source
@@ -162,6 +205,11 @@ const COMMANDS: Record<string, Command> = {
   slide,
   block,
   text,
+  table,
+  chart,
+  shape,
+  line,
+  diagram,
   sections,
   asset,
   material,

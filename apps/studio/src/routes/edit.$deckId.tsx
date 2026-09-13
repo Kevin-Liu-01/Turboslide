@@ -15,23 +15,113 @@ import {
   windowActionIds,
 } from '@turboslide/agent/window/registry';
 import {
+  blockAdjust,
+  blockAlign,
+  blockAutofit,
+  blockCrop,
+  blockDistribute,
   blockDuplicate,
+  blockFlip,
+  blockGroup,
+  blockInsert,
+  blockMask,
+  blockMove,
+  blockOrder,
+  blockRegroup,
+  blockRemove,
+  blockResetImage,
+  blockRotate,
+  blockSet,
+  blockSetAlt,
+  blockShadow,
+  blockUngroup,
+  canvasCounts,
+  chartSetData,
+  chartSetKind,
+  deckGuides,
+  deckSetBackground,
   deckText,
+  diagramInsert,
+  lineSet,
+  shapeSet,
   slideApplyLayout,
   slideDuplicate,
   slideNew,
+  slideSetBackground,
+  slideSetLayout,
   slideSkip,
+  slideToCanvas,
+  slideUpdate,
+  tableCellStyle,
+  tableDeleteColumns,
+  tableDeleteRows,
+  tableDistribute,
+  tableInsertColumns,
+  tableInsertRows,
+  tableMerge,
+  tableUnmerge,
+  textCase,
+  textColumns,
+  textIndent,
+  textInsert,
+  textList,
   textReplaceAll,
+  textSpacing,
+  textStyle,
 } from '@turboslide/cli/store-actions';
 import type {
+  BlockAdjustInput,
+  BlockAlignInput,
+  BlockAutofitInput,
+  BlockCropInput,
+  BlockDistributeInput,
   BlockDuplicateInput,
+  BlockFlipInput,
+  BlockGroupInput,
+  BlockInsertInput,
+  BlockMaskInput,
+  BlockMoveInput,
+  BlockOrderInput,
+  BlockRegroupInput,
+  BlockRemoveInput,
+  BlockResetImageInput,
+  BlockRotateInput,
+  BlockSetAltInput,
+  BlockSetInput,
+  BlockShadowInput,
+  BlockUngroupInput,
+  ChartSetDataInput,
+  ChartSetKindInput,
+  DeckGuidesInput,
+  DeckSetBackgroundInput,
+  DiagramInsertInput,
   ExportTextInput,
+  LineSetInput,
+  ShapeSetInput,
   SlideApplyLayoutInput,
   SlideDuplicateInput,
   SlideNewInput,
+  SlideSetBackgroundInput,
+  SlideSetLayoutInput,
   SlideSkipInput,
+  SlideToCanvasInput,
+  SlideUpdateInput,
   StoreActionDeps,
+  TableCellStyleInput,
+  TableDeleteInput,
+  TableDistributeInput,
+  TableInsertColumnsInput,
+  TableInsertRowsInput,
+  TableMergeInput,
+  TableUnmergeInput,
+  TextCaseInput,
+  TextColumnsInput,
+  TextIndentInput,
+  TextInsertInput,
+  TextListInput,
   TextReplaceAllInput,
+  TextSpacingInput,
+  TextStyleInput,
 } from '@turboslide/cli/store-actions';
 import type {
   ExportCapabilities,
@@ -59,6 +149,8 @@ import { tipProps } from '@turboslide/chrome/Tooltip';
 import { ExportReportCard } from '@turboslide/chrome/ExportReportCard';
 import type { ArtifactRun, ExportDownload } from '@turboslide/chrome/ExportReportCard';
 import type { DitherWorkerLike } from '@turboslide/chrome/inspector/dither';
+import { chartFormatSlot } from '@turboslide/chrome/inspector/chart';
+import { tableFormatSlot } from '@turboslide/chrome/inspector/table';
 import { Overlay } from '@turboslide/chrome/Overlay';
 import { buildPaletteEntries } from '@turboslide/chrome/palette-data';
 import type { PaletteEntry } from '@turboslide/chrome/palette-data';
@@ -70,37 +162,33 @@ import type { SourceOwnerApi } from '@turboslide/chrome/SourceDrawer';
 import type { SaveState } from '@turboslide/chrome/StatusChip';
 import { TwinStage } from '@turboslide/chrome/TwinStage';
 import { ViewerShell } from '@turboslide/chrome/ViewerShell';
+import { planPlayList } from '@turboslide/export/batch/plan';
 import { lintStatic } from '@turboslide/lint/lint-static';
 import { renderSlide } from '@turboslide/render/slide';
 import type { ActionId, DeckTemplateId } from '@turboslide/schema/actions';
-import { deckAppearance, isTrashed, unskippedSlideOrder } from '@turboslide/schema/deck';
+import { SHAPE_KINDS } from '@turboslide/schema/blocks';
+import type { CanvasBoxes } from '@turboslide/schema/canvas';
+import { makeDiagram } from '@turboslide/schema/diagrams';
+import {
+  canvasObjects,
+  deckAppearance,
+  isCanvasSlide,
+  isTrashed,
+  slideBlocks,
+  slideTitle,
+  unskippedSlideOrder,
+} from '@turboslide/schema/deck';
 import type { LayoutId } from '@turboslide/schema/layouts';
 import { derivedLayout } from '@turboslide/schema/layouts';
 import type { Asset } from '@turboslide/schema/assets';
-import type { Block } from '@turboslide/schema/blocks';
 import { blockAssetRefs } from '@turboslide/schema/catalog';
-import { slideBlocks, slideTitle } from '@turboslide/schema/deck';
-import type { ContentSlide, DeckDocument, Layout, Section, Slide } from '@turboslide/schema/deck';
+import type { DeckDocument, Section, Slide } from '@turboslide/schema/deck';
 import { ConflictError } from '@turboslide/schema/errors';
 import type { Finding } from '@turboslide/schema/findings';
-import {
-  alignPositions,
-  convertLayout,
-  distributePositions,
-  reorderZ,
-  snapToGrid,
-} from '@turboslide/schema/freeform';
-import type {
-  AlignEdge,
-  AlignTarget,
-  DistributeAxis,
-  OrderMove,
-} from '@turboslide/schema/freeform';
 import { ICON_NAMES } from '@turboslide/schema/icons';
 import { canonicalJson } from '@turboslide/schema/json';
 import { parseAuthor } from '@turboslide/schema/mutations';
 import type { Author, Lease, Mutation, Version, Write } from '@turboslide/schema/mutations';
-import type { Position } from '@turboslide/schema/position';
 import { applyMutations, applyWrite } from '@turboslide/schema/reduce';
 import { validateSlide } from '@turboslide/schema/validate';
 import type { Issue } from '@turboslide/schema/validate';
@@ -110,15 +198,16 @@ import { PRODUCT_TOKENS, PROPER_NOUNS } from '@turboslide/theme/copy';
 import { SHEET } from '@turboslide/theme/tokens';
 import { BookView } from '@turboslide/viewer/BookView';
 import { clipboardStore, pastedSlideInserts } from '@turboslide/viewer/clipboard';
+import { measureForCanvas, measureForFit } from '@turboslide/viewer/canvas-measure';
 import { Editor as StageEditor } from '@turboslide/viewer/Editor';
-import type { EditorContextMenu, EditorHandle, EditorNotice } from '@turboslide/viewer/Editor';
-import {
-  GRAMMAR_EXT_KEY,
-  readStageBoxes,
-  toFreeform,
-  toGrammar,
-} from '@turboslide/viewer/Freeform';
+import type {
+  EditorContextMenu,
+  EditorHandle,
+  EditorMenuSelection,
+  EditorNotice,
+} from '@turboslide/viewer/Editor';
 import type { EditorTool } from '@turboslide/viewer/Gestures';
+import type { CaretInfo } from '@turboslide/viewer/InlineText';
 import { GRID_DEFAULT_TILE, GridView } from '@turboslide/viewer/GridView';
 import type { GridTileSize } from '@turboslide/viewer/GridView';
 import { isPictureKind, pad2, trimTitle } from '@turboslide/viewer/model';
@@ -146,8 +235,10 @@ import { bundleDownloadTicket, bundleUploadTicket, connectFacts } from '../serve
 import { createNewDeck, listDecks, readSourceDeckSlides, restoreStoredDeck } from '../server/decks';
 import {
   EXPORT_POLL_MS,
+  batchedProgressLabel,
   exportCapabilities,
   pollExport,
+  runBatchedExport,
   runBuild,
   signDownload,
   startExport,
@@ -394,6 +485,8 @@ export type EditorSnapshot = {
   view: EditorView;
   /** the stage scale view.zoom set, or 'fit' (gslides-parity SPEC 7.2.16); the Sheet draws it (B4) */
   zoom: number | 'fit';
+  /** the sheet point view.zoom keeps under the stage centre, the sheet centre when null (gslides-parity SPEC-2 0.81) */
+  zoomCenter: { x: number; y: number } | null;
   selection: Selection | null;
   /** the last write or action error, for the toast and the status chip */
   error: string | null;
@@ -436,8 +529,8 @@ export type EditorController = {
   allFindings: () => Finding[];
   /** the Edit | View seg's state, for view.* results */
   setEditing: (enabled: boolean) => void;
-  /** export.run posts the sync route instead of queueing a job (a hosted studio) */
-  setExportSync: (enabled: boolean) => void;
+  /** export.run posts the sync route instead of queueing a job (a hosted studio); the play list longer than `batchSize` runs in batches (SPEC-2 8.1) */
+  setExportSync: (enabled: boolean, batchSize?: number) => void;
   /** what the shell shows, from ShellBridge */
   setView: (view: EditorView) => void;
   /** the shell's toast */
@@ -498,28 +591,6 @@ function replacementSlide(
   const at = before.indexOf(active);
   if (at < 0) return after[0] ?? '';
   return after[Math.min(at, after.length - 1)] ?? '';
-}
-
-/** Every mutation of slide.update must address the named slide (store-actions checkSlideMutations). */
-function checkSlideMutations(slideId: string, mutations: ReadonlyArray<Mutation>): void {
-  mutations.forEach((mutation, index) => {
-    const target =
-      mutation.op === 'slide.insert'
-        ? mutation.slide.id
-        : 'slideId' in mutation
-          ? mutation.slideId
-          : undefined;
-    if (target === undefined) {
-      throw new TypeError(
-        `slide.update: mutation ${index} (${mutation.op}) is a deck-level mutation; use its own action`,
-      );
-    }
-    if (target !== slideId) {
-      throw new TypeError(
-        `slide.update: mutation ${index} addresses slide "${target}", not "${slideId}"`,
-      );
-    }
-  });
 }
 
 /** True for a mutation that changes no slide file on its own (order, assets, manifest, restore). */
@@ -635,6 +706,7 @@ function createEditorController(init: {
     activeSlide: initialOrder[0] ?? '',
     view: { mode: 'slide', present: false },
     zoom: 'fit',
+    zoomCenter: null,
     selection: null,
     error: null,
     versionPrompt: false,
@@ -693,14 +765,26 @@ function createEditorController(init: {
     return html;
   };
 
-  /* the shell knows a new item after its next render: a select that found nothing runs once
-     more after a frame (measured: the new slide stayed unselected one run in five) */
+  /* the shell knows a new item after its next render: a select that found nothing runs once more
+     when the filmstrip has rendered the id's card, checked on every animation frame for up to 2 s
+     (gslides-parity SPEC-2 8.5, 0.35; measured in round one: the new slide stayed unselected one
+     run in five on a loaded machine, and one extra frame was not always enough). The select runs
+     at most twice: a select is a hash navigation, and repeating it every frame cleared the
+     snackbar the removal had just shown */
   const selectSoon = (slideId: string): void => {
     shell?.select(slideId);
-    if (typeof requestAnimationFrame === 'function')
-      requestAnimationFrame(() => {
-        if (latest().activeSlide !== slideId) shell?.select(slideId);
-      });
+    if (typeof requestAnimationFrame !== 'function' || typeof document === 'undefined') return;
+    const until = Date.now() + 2_000;
+    const tick = (): void => {
+      if (shell?.active === slideId) return;
+      const card = document.querySelector(`.ts-filmstrip .ts-card[data-id="${slideId}"]`);
+      if (card !== null) {
+        shell?.select(slideId);
+        return;
+      }
+      if (Date.now() < until) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
   };
 
   /**
@@ -1078,6 +1162,8 @@ function createEditorController(init: {
         }
         await leaseSlide({ deckId, slideId, author, minutes: LEASE_MINUTES });
       } catch (error) {
+        /* a slide removed while its lease was in flight (Cut, Delete) is no one's error to read */
+        if (latest().document.slides[slideId] === undefined) return;
         say(`Lease: ${errorMessage(error)}`);
       }
     })();
@@ -1106,10 +1192,10 @@ function createEditorController(init: {
       .filter((record) => record.revision > local.serverRevision && record.mutations.length > 0)
       .sort((a, b) => a.revision - b.revision);
     const last = records[records.length - 1];
-    const author = last?.author ?? result.head?.author;
+    const recordAuthor = last?.author ?? result.head?.author;
     const external: External = {
       revision: result.revision,
-      ...(author !== undefined ? { author } : {}),
+      ...(recordAuthor !== undefined ? { author: recordAuthor } : {}),
       ...(last?.note ? { note: last.note } : {}),
     };
     let document = local.document;
@@ -1220,8 +1306,10 @@ function createEditorController(init: {
 
   /* the Edit | View seg's state, read by view.* results */
   const editingRef = { current: true };
-  /* export.run goes through the sync route on a hosted studio (server/download.ts capabilities.sync) */
+  /* export.run goes through the sync route on a hosted studio (server/download.ts capabilities.sync);
+     a play list longer than the capability's batch size runs the batched protocol (SPEC-2 8.1) */
   let exportSync = false;
+  let exportBatchSize = 0;
 
   // The dispatcher: the same ACTIONS table and validation the CLI and MCP run (SPEC 7.1).
   const dispatcher: Dispatcher = createDispatcher();
@@ -1267,6 +1355,80 @@ function createEditorController(init: {
     };
   };
 
+  /*
+   * The document actions of the Google Slides parity round (gslides-parity SPEC 7.5: slide.new,
+   * slide.duplicate, slide.skip, slide.applyLayout, block.duplicate, text.replaceAll, export.text)
+   * run the store actions of @turboslide/cli/store-actions, the one implementation the CLI and the
+   * hosted dispatcher run (SPEC 7.1), over a DeckStore whose read is the local document and whose
+   * write is this editor's commit: the reducer applies the write now, the history takes the entry
+   * for undo, and the server confirms it in order. Only read, revision and write are reachable
+   * from those actions; the version, lease and watch methods belong to the server (server/write.ts)
+   * and throw if a later action reaches for them here.
+   */
+  const editorStore = (label: string): DeckStore => {
+    const unavailable = (method: string) => (): never => {
+      throw new TypeError(
+        `${method} is not available on the editor's store; commit is its write path`,
+      );
+    };
+    return {
+      id: deckId,
+      read: async () => ({ document: snapshot.document, issues: [], ok: true }),
+      revision: async () => snapshot.document.deck.revision,
+      write: async (write) => {
+        checkBase(write.baseRevision);
+        const committed = await commit(write.mutations, label);
+        return {
+          ok: true,
+          document: snapshot.document,
+          revision: committed.revision,
+          entry: committed.entry,
+          changed: [...touchedSlides(write.mutations)],
+          issues: [],
+          warnings: [],
+        };
+      },
+      saveVersion: unavailable('saveVersion'),
+      listVersions: unavailable('listVersions'),
+      records: unavailable('records'),
+      documentAt: unavailable('documentAt'),
+      documentAtRevision: unavailable('documentAtRevision'),
+      lease: unavailable('lease'),
+      release: unavailable('release'),
+      leases: unavailable('leases'),
+      watch: unavailable('watch'),
+    };
+  };
+  /*
+   * The dependencies of the store actions on the window transport. `measureCanvas` and
+   * `measureFit` (gslides-parity SPEC-2 1.3, 0.64, 0.104) are the editor's own measurers over a
+   * hidden 1600 by 900 sheet in the current theme, `measureForCanvas` and `measureForFit` of
+   * @turboslide/viewer/canvas-measure over B2's `measureCanvasBoxes` (the one function the CLI,
+   * the MCP server and the hosted studio evaluate headless), so an agent's `block.set /pos` or
+   * `slide.toCanvas` from the window API converts a slide through the same render as a drag and
+   * writes the same `pos` the CLI writes in Chromium. `diagrams` is B5's `makeDiagram` of
+   * @turboslide/schema/diagrams (SPEC-2 2.8.3). The measurers read the slides of the current
+   * snapshot (the store's read is the local document).
+   */
+  const measureOptions = () => ({ assetBase: ASSET_BASE(deckId) });
+  const storeDeps = (label: string): StoreActionDeps => ({
+    store: editorStore(label),
+    lint: lintLists(),
+    measureCanvas: async (_deck, slides) => {
+      const out: Record<string, CanvasBoxes> = {};
+      for (const slide of slides)
+        out[slide.id] = await measureForCanvas(
+          snapshot.document,
+          slide,
+          readTheme(),
+          measureOptions(),
+        );
+      return out;
+    },
+    measureFit: (_deck, slide) =>
+      measureForFit(snapshot.document, slide, readTheme(), measureOptions()),
+    diagrams: makeDiagram,
+  });
   on<{ name: string; baseRevision: number }>('deck.rename', async (input) => {
     checkBase(input.baseRevision);
     const name = input.name.trim();
@@ -1310,16 +1472,42 @@ function createEditorController(init: {
     init.onDeckCreated?.(created.deckId);
     return created;
   });
+  /* a server side write comes back over the watch channel; a caller that reads the revision it
+     answered can address the result at once (slide.import, and asset.add before a block.insert
+     that names the asset: the store action validates the block against the local document, so
+     the asset has to be there first) */
+  const awaitRevision = async (revision: number, ms: number): Promise<boolean> => {
+    const until = Date.now() + ms;
+    while (latest().document.deck.revision < revision) {
+      if (Date.now() > until) return false;
+      await sleep(40);
+    }
+    return true;
+  };
   /* asset.add, asset.dither, material.capture and material.list run on the server (sharp, the
-     capture browser, the catalog); the write they end in comes back over the watch channel */
+     capture browser, the catalog); the write they end in comes back over the watch channel, and
+     the handler waits for that revision before it answers */
   const serverSide = (id: ServerSideWindowAction, options: { announce?: boolean } = {}): void => {
     on<unknown>(id, async (input) => {
+      const before = latest().document.deck.revision;
       const output = await runDeckAction({ deckId, action: id, input, author });
+      const outputs = Array.isArray(output) ? output : [output];
+      const ids = outputs
+        .map((entry) => (entry as { id?: string } | null)?.id)
+        .filter((entry): entry is string => typeof entry === 'string');
       if (options.announce === true) {
-        const outputs = Array.isArray(output) ? output : [output];
-        const ids = outputs
-          .map((entry) => (entry as { id?: string } | null)?.id)
-          .filter((entry): entry is string => typeof entry === 'string');
+        /* the asset actions write this deck: the answer waits until that write has come back
+           over the watch channel (the revision moved, or the asset is in the manifest), so a
+           block.insert that names the asset next validates against a document that holds it
+           (round one's ten-tasks task 4; the store action validates locally, SPEC 7.1) */
+        const revision = (output as { revision?: unknown } | null)?.revision;
+        const landed = (): boolean =>
+          latest().document.deck.revision > before ||
+          (typeof revision === 'number' && latest().document.deck.revision >= revision) ||
+          (ids.length > 0 &&
+            ids.every((asset) => latest().document.deck.assets[asset] !== undefined));
+        const until = Date.now() + 15_000;
+        while (!landed() && Date.now() < until) await sleep(40);
         if (ids.length > 0) say(`${id}: ${ids.join(', ')}`);
       }
       return output;
@@ -1341,6 +1529,36 @@ function createEditorController(init: {
     publish({ artifact: { progress: { label: `Exporting ${label}` }, run: null } });
     try {
       if (exportSync) {
+        // a play list longer than the function's batch size runs the batched protocol of SPEC-2
+        // 8.1 (plan, batches, merge; server/download.ts runBatchedExport), PPTX only: the PDF
+        // stays one call
+        const { ids } = planPlayList(snapshot.document, {
+          ...(input.includeSkipped === true ? { includeSkipped: true } : {}),
+          ...(input.slideIds !== undefined ? { slideIds: input.slideIds } : {}),
+        });
+        if (input.format !== 'pdf' && exportBatchSize > 0 && ids.length > exportBatchSize) {
+          const merged = await runBatchedExport(deckId, input, (progress) =>
+            publish({
+              artifact: { progress: { label: batchedProgressLabel(progress) }, run: null },
+            }),
+          );
+          const run: ArtifactRun = {
+            kind: 'export',
+            input: menuInputOf(input),
+            report: merged.report,
+            downloads: merged.files.map(({ name, bytes, url }) => ({
+              name,
+              bytes,
+              ...(url !== null ? { url } : {}),
+            })),
+            jobId: merged.summary.job,
+            ms: merged.summary.ms,
+          };
+          publish({ artifact: { progress: null, run } });
+          const first = run.downloads[0];
+          if (first?.url !== undefined) triggerDownload(downloadUrlOf(first.url));
+          return run.report;
+        }
         const run = await runSyncExport(deckId, input);
         publish({ artifact: { progress: null, run } });
         const first = run.downloads[0];
@@ -1432,9 +1650,12 @@ function createEditorController(init: {
           0,
         ),
         skipped: slideOrder(document).filter((id) => document.slides[id]?.skip === true).length,
+        // the canvas counts (gslides-parity SPEC-2 0.93): slides arranged by hand, charts, guides
+        ...canvasCounts(document),
       },
       // the parity round's manifest facts (gslides-parity SPEC 7.2.3 to 7.2.5), only when written
       ...(document.deck.defaults !== undefined ? { defaults: document.deck.defaults } : {}),
+      ...(document.deck.guides !== undefined ? { guides: document.deck.guides } : {}),
       ...(document.deck.trashedAt !== undefined ? { trashedAt: document.deck.trashedAt } : {}),
     };
   });
@@ -1448,6 +1669,8 @@ function createEditorController(init: {
       lint: { s3: number; s2: number };
       skip?: boolean;
       template?: Slide['template'];
+      canvas?: boolean;
+      objects?: number;
     }[] = [];
     const findings = allFindings();
     for (const section of outlineOf(snapshot.document)) {
@@ -1468,6 +1691,10 @@ function createEditorController(init: {
           // the parity round's facts (gslides-parity SPEC 7.2.1, 7.2.2), only when set
           ...(record?.skip === true ? { skip: true } : {}),
           ...(record?.template !== undefined ? { template: record.template } : {}),
+          // a canvas slide and its object count (gslides-parity SPEC-2 0.93)
+          ...(record !== undefined && isCanvasSlide(record)
+            ? { canvas: true, objects: canvasObjects(record).length }
+            : {}),
         });
       }
     }
@@ -1546,15 +1773,13 @@ function createEditorController(init: {
       return { sections: snapshot.document.deck.sections, revision: committed.revision };
     },
   );
-  on<{ slideId: string; baseRevision: number; mutations: Mutation[] }>(
-    'slide.update',
-    async (input) => {
-      checkBase(input.baseRevision);
-      requireSlide(input.slideId);
-      checkSlideMutations(input.slideId, input.mutations);
-      const committed = await commit(input.mutations, 'slide.update');
-      return slideResult(committed, input.slideId);
-    },
+  /* slide.update, block.set, block.insert, block.remove and block.move run the store actions of
+     @turboslide/cli/store-actions (the one implementation of every transport, SPEC 7.1): a
+     `/pos` write, a positioned insert and a `z` move convert a slide that is not a canvas yet in
+     the same write (gslides-parity SPEC-2 1.6), a move carries its connectors (2.4.7) and a
+     removal detaches them; on a freeform slide they write what the round one handlers wrote */
+  on<SlideUpdateInput>('slide.update', (input) =>
+    slideUpdate(storeDeps('slide.update'), context, input),
   );
   on<{ slideId: string; baseRevision: number; slide: Slide }>('slide.replace', async (input) => {
     checkBase(input.baseRevision);
@@ -1565,212 +1790,33 @@ function createEditorController(init: {
     );
     return slideResult(committed, input.slideId);
   });
-  on<{ slideId: string; blockId: string; path: string; value?: unknown; baseRevision: number }>(
-    'block.set',
-    async (input) => {
-      checkBase(input.baseRevision);
-      requireSlide(input.slideId);
-      const committed = await commit(
-        [
-          {
-            op: 'block.set',
-            slideId: input.slideId,
-            blockId: input.blockId,
-            path: input.path,
-            ...(input.value !== undefined ? { value: input.value } : {}),
-          },
-        ],
-        'block.set',
-      );
-      return slideResult(committed, input.slideId);
-    },
+  on<BlockSetInput>('block.set', (input) => blockSet(storeDeps('block.set'), context, input));
+  on<BlockInsertInput>('block.insert', (input) =>
+    blockInsert(storeDeps('block.insert'), context, input),
   );
-  on<{
-    slideId: string;
-    slot: Extract<Mutation, { op: 'block.insert' }>['slot'];
-    after?: string;
-    block: Block;
-    baseRevision: number;
-  }>('block.insert', async (input) => {
-    checkBase(input.baseRevision);
-    requireSlide(input.slideId);
-    const committed = await commit(
-      [
-        {
-          op: 'block.insert',
-          slideId: input.slideId,
-          slot: input.slot,
-          ...(input.after !== undefined ? { after: input.after } : {}),
-          block: input.block,
-        },
-      ],
-      'block.insert',
-    );
-    return slideResult(committed, input.slideId);
-  });
-  on<{ slideId: string; blockId: string; baseRevision: number }>('block.remove', async (input) => {
-    checkBase(input.baseRevision);
-    requireSlide(input.slideId);
-    const committed = await commit(
-      [{ op: 'block.remove', slideId: input.slideId, blockId: input.blockId }],
-      'block.remove',
-    );
-    return slideResult(committed, input.slideId);
-  });
-  on<{
-    slideId: string;
-    blockId: string;
-    slot: Extract<Mutation, { op: 'block.move' }>['slot'];
-    after?: string;
-    baseRevision: number;
-  }>('block.move', async (input) => {
-    checkBase(input.baseRevision);
-    requireSlide(input.slideId);
-    const committed = await commit(
-      [
-        {
-          op: 'block.move',
-          slideId: input.slideId,
-          blockId: input.blockId,
-          slot: input.slot,
-          ...(input.after !== undefined ? { after: input.after } : {}),
-        },
-      ],
-      'block.move',
-    );
-    return slideResult(committed, input.slideId);
-  });
-  // Freeform (docs/freeform.md). The arithmetic is the schema's, the same the CLI's store-actions
-  // use, so an arrange from the inspector, the stage or an agent writes the same block.set /pos
-  // mutations; each action is one commit, so one history entry and one version record.
-  type Positioned = { id: string; pos: Position };
-  const freeformRows = (slideId: string): Positioned[] => {
-    const slide = requireSlide(slideId);
-    if (slide.kind !== 'content' || slide.layout.type !== 'freeform') {
-      throw new TypeError(
-        `Slide "${slideId}" is not on the freeform layout; slide.setLayout moves it there (docs/freeform.md)`,
-      );
-    }
-    return (slide.slots.main ?? []).flatMap((block) =>
-      block.pos === undefined ? [] : [{ id: block.id, pos: block.pos }],
-    );
-  };
-  const pickRows = (rows: Positioned[], ids: readonly string[], slideId: string): Positioned[] =>
-    ids.map((id) => {
-      const row = rows.find((candidate) => candidate.id === id);
-      if (row === undefined)
-        throw new RangeError(`No positioned block "${id}" on slide "${slideId}"`);
-      return row;
-    });
-  const positionMutations = (
-    slideId: string,
-    rows: readonly Positioned[],
-    next: readonly Position[],
-  ): Mutation[] =>
-    rows.flatMap((row, index) => {
-      const pos = next[index];
-      if (pos === undefined || canonicalJson(pos) === canonicalJson(row.pos)) return [];
-      return [{ op: 'block.set' as const, slideId, blockId: row.id, path: '/pos', value: pos }];
-    });
-  const commitPositions = async (slideId: string, mutations: Mutation[], label: string) => {
-    if (mutations.length === 0) {
-      return {
-        slide: requireSlide(slideId),
-        revision: snapshot.document.deck.revision,
-        findings: findingsFor(slideId),
-      };
-    }
-    const committed = await commit(mutations, label);
-    return slideResult(committed, slideId);
-  };
-  on<{
-    slideId: string;
-    blockIds: string[];
-    edge: AlignEdge;
-    to?: AlignTarget;
-    snap?: boolean;
-    baseRevision: number;
-  }>('block.align', (input) => {
-    checkBase(input.baseRevision);
-    const rows = pickRows(freeformRows(input.slideId), input.blockIds, input.slideId);
-    const next = alignPositions(
-      rows.map((row) => row.pos),
-      input.edge,
-      input.to,
-      input.snap !== false,
-    );
-    return commitPositions(
-      input.slideId,
-      positionMutations(input.slideId, rows, next),
-      'block.align',
-    );
-  });
-  on<{
-    slideId: string;
-    blockIds: string[];
-    axis: DistributeAxis;
-    gap?: number;
-    snap?: boolean;
-    baseRevision: number;
-  }>('block.distribute', (input) => {
-    checkBase(input.baseRevision);
-    const rows = pickRows(freeformRows(input.slideId), input.blockIds, input.slideId);
-    let next = distributePositions(
-      rows.map((row) => row.pos),
-      input.axis,
-      input.gap,
-    );
-    if (input.snap === true) {
-      next = next.map((pos) =>
-        input.axis === 'horizontal'
-          ? { ...pos, x: snapToGrid(pos.x) }
-          : { ...pos, y: snapToGrid(pos.y) },
-      );
-    }
-    return commitPositions(
-      input.slideId,
-      positionMutations(input.slideId, rows, next),
-      'block.distribute',
-    );
-  });
-  on<{ slideId: string; blockId: string; move?: OrderMove; z?: number; baseRevision: number }>(
-    'block.order',
-    (input) => {
-      checkBase(input.baseRevision);
-      const rows = freeformRows(input.slideId);
-      const stack = reorderZ(rows, input.blockId, input.move ?? { z: input.z ?? 0 });
-      const mutations: Mutation[] = rows.flatMap((row) => {
-        const z = stack[row.id];
-        if (z === undefined || z === row.pos.z) return [];
-        return [
-          {
-            op: 'block.set' as const,
-            slideId: input.slideId,
-            blockId: row.id,
-            path: '/pos/z',
-            value: z,
-          },
-        ];
-      });
-      return commitPositions(input.slideId, mutations, 'block.order');
-    },
+  on<BlockRemoveInput>('block.remove', (input) =>
+    blockRemove(storeDeps('block.remove'), context, input),
   );
-  on<{ slideId: string; layout: Layout; baseRevision: number }>(
-    'slide.setLayout',
-    async (input) => {
-      checkBase(input.baseRevision);
-      const slide = requireSlide(input.slideId);
-      if (slide.kind !== 'content')
-        throw new TypeError(
-          `Slide "${slide.id}" is a ${slide.kind} slide and has no layout to set`,
-        );
-      const next = convertedLayout(slide, input.layout);
-      const committed = await commit(
-        [{ op: 'slide.replace', slideId: input.slideId, slide: next }],
-        'slide.setLayout',
-      );
-      return slideResult(committed, input.slideId);
-    },
+  on<BlockMoveInput>('block.move', (input) => blockMove(storeDeps('block.move'), context, input));
+  /* The arrange actions (docs/freeform.md; gslides-parity SPEC-2 1.6, 0.80): the store actions'
+     arithmetic is the schema's, so an arrange from the stage, a menu row or an agent writes the
+     same block.set /pos mutations, one commit each; a slide that is not a canvas yet converts in
+     the same write once the editor's measurer is bound (storeDeps above), and block.align with one
+     block reads the sheet as its reference */
+  on<BlockAlignInput>('block.align', (input) =>
+    blockAlign(storeDeps('block.align'), context, input),
+  );
+  on<BlockDistributeInput>('block.distribute', (input) =>
+    blockDistribute(storeDeps('block.distribute'), context, input),
+  );
+  on<BlockOrderInput>('block.order', (input) =>
+    blockOrder(storeDeps('block.order'), context, input),
+  );
+  /* slide.setLayout: the store action, so a switch to freeform is the measured conversion on
+     this transport too (gslides-parity SPEC-2 1.6, 0.73) and back to the recorded grammar layout
+     type is lossless through fromCanvas (docs/freeform.md section 4) */
+  on<SlideSetLayoutInput>('slide.setLayout', (input) =>
+    slideSetLayout(storeDeps('slide.setLayout'), context, input),
   );
   on<{ sections: Section[]; baseRevision: number }>('section.set', async (input) => {
     checkBase(input.baseRevision);
@@ -1879,62 +1925,21 @@ function createEditorController(init: {
     shell?.setPresent(input.on);
     return viewState();
   });
-  on<{ zoom: number | 'fit' }>('view.zoom', (input) => {
-    // the schema caps the factor at 4; the floor is Google's 25 percent (gslides-parity SPEC 3.1)
-    if (input.zoom !== 'fit' && input.zoom < 0.25)
-      throw new TypeError(`view.zoom: zoom must be at least 0.25 or 'fit'; got ${input.zoom}`);
-    publish({ zoom: input.zoom });
+  on<{ zoom: number | 'fit'; center?: { x: number; y: number } }>('view.zoom', (input) => {
+    // the schema clamps the factor to 0.25 to 16, Google's 25 to 1600 percent (gslides-parity
+    // SPEC-2 0.101); `center` is the sheet point the stage keeps under its centre (0.81), kept on
+    // the snapshot for the stage's zoom (B4), which reports the scroll in the view state
+    if (input.zoom !== 'fit' && (input.zoom < 0.25 || input.zoom > 16))
+      throw new TypeError(
+        `view.zoom: zoom must be between 0.25 and 16 or 'fit'; got ${input.zoom}`,
+      );
+    publish({
+      zoom: input.zoom,
+      zoomCenter: input.center ?? null,
+    });
     return viewState();
   });
 
-  /*
-   * The document actions of the Google Slides parity round (gslides-parity SPEC 7.5: slide.new,
-   * slide.duplicate, slide.skip, slide.applyLayout, block.duplicate, text.replaceAll, export.text)
-   * run the store actions of @turboslide/cli/store-actions, the one implementation the CLI and the
-   * hosted dispatcher run (SPEC 7.1), over a DeckStore whose read is the local document and whose
-   * write is this editor's commit: the reducer applies the write now, the history takes the entry
-   * for undo, and the server confirms it in order. Only read, revision and write are reachable
-   * from those actions; the version, lease and watch methods belong to the server (server/write.ts)
-   * and throw if a later action reaches for them here.
-   */
-  const editorStore = (label: string): DeckStore => {
-    const unavailable = (method: string) => (): never => {
-      throw new TypeError(
-        `${method} is not available on the editor's store; commit is its write path`,
-      );
-    };
-    return {
-      id: deckId,
-      read: async () => ({ document: snapshot.document, issues: [], ok: true }),
-      revision: async () => snapshot.document.deck.revision,
-      write: async (write) => {
-        checkBase(write.baseRevision);
-        const committed = await commit(write.mutations, label);
-        return {
-          ok: true,
-          document: snapshot.document,
-          revision: committed.revision,
-          entry: committed.entry,
-          changed: [...touchedSlides(write.mutations)],
-          issues: [],
-          warnings: [],
-        };
-      },
-      saveVersion: unavailable('saveVersion'),
-      listVersions: unavailable('listVersions'),
-      records: unavailable('records'),
-      documentAt: unavailable('documentAt'),
-      documentAtRevision: unavailable('documentAtRevision'),
-      lease: unavailable('lease'),
-      release: unavailable('release'),
-      leases: unavailable('leases'),
-      watch: unavailable('watch'),
-    };
-  };
-  const storeDeps = (label: string): StoreActionDeps => ({
-    store: editorStore(label),
-    lint: lintLists(),
-  });
   on<SlideNewInput>('slide.new', async (input) => {
     const result = await slideNew(storeDeps('slide.new'), context, input);
     // Google selects the new slide (R01 Slide > New slide); a grid stays a grid
@@ -1958,17 +1963,110 @@ function createEditorController(init: {
     textReplaceAll(storeDeps('text.replaceAll'), context, input),
   );
   on<ExportTextInput>('export.text', (input) => deckText(snapshot.document, input));
+  /*
+   * The thirty six actions of the Google Slides parity round two (gslides-parity SPEC-2 section 3)
+   * on the window transport, each the store action the CLI, MCP and HTTP transports run, over the
+   * editor's store so the reducer applies the write now, the history takes one entry and the
+   * server confirms it in order. slide.toCanvas and the canvas writes measure through
+   * storeDeps.measureCanvas (bound at merge 2, see above); block.autofit with `apply` through
+   * storeDeps.measureFit; diagram.insert through storeDeps.diagrams. None of them runs on the
+   * server (server/agent-actions.ts SERVER_SIDE_WINDOW_ACTIONS): the editor measures itself (1.3).
+   */
+  on<SlideToCanvasInput>('slide.toCanvas', (input) =>
+    slideToCanvas(storeDeps('slide.toCanvas'), context, input),
+  );
+  on<DeckGuidesInput>('deck.guides', (input) =>
+    deckGuides(storeDeps('deck.guides'), context, input),
+  );
+  on<SlideSetBackgroundInput>('slide.setBackground', (input) =>
+    slideSetBackground(storeDeps('slide.setBackground'), context, input),
+  );
+  on<DeckSetBackgroundInput>('deck.setBackground', (input) =>
+    deckSetBackground(storeDeps('deck.setBackground'), context, input),
+  );
+  on<BlockGroupInput>('block.group', (input) =>
+    blockGroup(storeDeps('block.group'), context, input),
+  );
+  on<BlockUngroupInput>('block.ungroup', (input) =>
+    blockUngroup(storeDeps('block.ungroup'), context, input),
+  );
+  on<BlockRegroupInput>('block.regroup', (input) =>
+    blockRegroup(storeDeps('block.regroup'), context, input),
+  );
+  on<BlockRotateInput>('block.rotate', (input) =>
+    blockRotate(storeDeps('block.rotate'), context, input),
+  );
+  on<BlockFlipInput>('block.flip', (input) => blockFlip(storeDeps('block.flip'), context, input));
+  on<BlockCropInput>('block.crop', (input) => blockCrop(storeDeps('block.crop'), context, input));
+  on<BlockMaskInput>('block.mask', (input) => blockMask(storeDeps('block.mask'), context, input));
+  on<BlockResetImageInput>('block.resetImage', (input) =>
+    blockResetImage(storeDeps('block.resetImage'), context, input),
+  );
+  on<BlockAdjustInput>('block.adjust', (input) =>
+    blockAdjust(storeDeps('block.adjust'), context, input),
+  );
+  on<BlockSetAltInput>('block.setAlt', (input) =>
+    blockSetAlt(storeDeps('block.setAlt'), context, input),
+  );
+  on<BlockShadowInput>('block.shadow', (input) =>
+    blockShadow(storeDeps('block.shadow'), context, input),
+  );
+  on<BlockAutofitInput>('block.autofit', (input) =>
+    blockAutofit(storeDeps('block.autofit'), context, input),
+  );
+  on<TextStyleInput>('text.style', (input) => textStyle(storeDeps('text.style'), context, input));
+  on<TextListInput>('text.list', (input) => textList(storeDeps('text.list'), context, input));
+  on<TextSpacingInput>('text.spacing', (input) =>
+    textSpacing(storeDeps('text.spacing'), context, input),
+  );
+  on<TextColumnsInput>('text.columns', (input) =>
+    textColumns(storeDeps('text.columns'), context, input),
+  );
+  on<TextIndentInput>('text.indent', (input) =>
+    textIndent(storeDeps('text.indent'), context, input),
+  );
+  on<TextCaseInput>('text.case', (input) => textCase(storeDeps('text.case'), context, input));
+  on<TextInsertInput>('text.insert', (input) =>
+    textInsert(storeDeps('text.insert'), context, input),
+  );
+  on<ChartSetDataInput>('chart.setData', (input) =>
+    chartSetData(storeDeps('chart.setData'), context, input),
+  );
+  on<ChartSetKindInput>('chart.setKind', (input) =>
+    chartSetKind(storeDeps('chart.setKind'), context, input),
+  );
+  on<TableMergeInput>('table.merge', (input) =>
+    tableMerge(storeDeps('table.merge'), context, input),
+  );
+  on<TableUnmergeInput>('table.unmerge', (input) =>
+    tableUnmerge(storeDeps('table.unmerge'), context, input),
+  );
+  on<TableInsertRowsInput>('table.insertRows', (input) =>
+    tableInsertRows(storeDeps('table.insertRows'), context, input),
+  );
+  on<TableInsertColumnsInput>('table.insertColumns', (input) =>
+    tableInsertColumns(storeDeps('table.insertColumns'), context, input),
+  );
+  on<TableDeleteInput>('table.deleteRows', (input) =>
+    tableDeleteRows(storeDeps('table.deleteRows'), context, input),
+  );
+  on<TableDeleteInput>('table.deleteColumns', (input) =>
+    tableDeleteColumns(storeDeps('table.deleteColumns'), context, input),
+  );
+  on<TableDistributeInput>('table.distribute', (input) =>
+    tableDistribute(storeDeps('table.distribute'), context, input),
+  );
+  on<TableCellStyleInput>('table.cellStyle', (input) =>
+    tableCellStyle(storeDeps('table.cellStyle'), context, input),
+  );
+  on<ShapeSetInput>('shape.set', (input) => shapeSet(storeDeps('shape.set'), context, input));
+  on<LineSetInput>('line.set', (input) => lineSet(storeDeps('line.set'), context, input));
+  on<DiagramInsertInput>('diagram.insert', (input) =>
+    diagramInsert(storeDeps('diagram.insert'), context, input),
+  );
   /* slide.import reads another deck, so it runs on the server (server/actions.ts) and its write
      comes back over the watch channel; the handler waits for that revision so a caller can address
      the imported slides at once, then selects the first of them */
-  const awaitRevision = async (revision: number, ms: number): Promise<boolean> => {
-    const until = Date.now() + ms;
-    while (latest().document.deck.revision < revision) {
-      if (Date.now() > until) return false;
-      await sleep(40);
-    }
-    return true;
-  };
   on<{
     sourceDeckId: string;
     slideIds: string[];
@@ -2089,8 +2187,9 @@ function createEditorController(init: {
     setEditing(enabled) {
       editingRef.current = enabled;
     },
-    setExportSync(enabled) {
+    setExportSync(enabled, batchSize) {
       exportSync = enabled;
+      exportBatchSize = batchSize ?? 0;
     },
     setView(view) {
       if (view.mode === snapshot.view.mode && view.present === snapshot.view.present) return;
@@ -2265,28 +2364,6 @@ function toSections(
   }));
 }
 
-/**
- * The slide slide.setLayout writes for a picked layout. To freeform the stage's measured boxes
- * place every block where it is drawn (toFreeform, which records the source under ext.grammar);
- * back to the recorded grammar layout type toGrammar is lossless; every other case is the
- * schema's convertLayout, the same arithmetic the CLI's store action uses (docs/freeform.md).
- */
-function convertedLayout(slide: ContentSlide, layout: Layout): ContentSlide {
-  const boxes = typeof document === 'undefined' ? null : readStageBoxes();
-  if (layout.type === 'freeform' && slide.layout.type !== 'freeform' && boxes) {
-    const converted = toFreeform(slide, boxes);
-    if (converted) return converted.slide;
-  }
-  if (slide.layout.type === 'freeform' && layout.type !== 'freeform') {
-    const record = slide.ext?.[GRAMMAR_EXT_KEY] as { layout?: Layout } | undefined;
-    if (record?.layout?.type === layout.type) {
-      const back = toGrammar(slide);
-      if (back && back.lossless) return back.slide;
-    }
-  }
-  return convertLayout(slide, layout);
-}
-
 /** The route's selection as the stage Editor's: a block, or the run being edited inside it. */
 function toStageSelection(selection: Selection | null, slideId: string): StageSelection {
   if (!selection || selection.slideId !== slideId) return null;
@@ -2303,19 +2380,39 @@ function fromStageSelection(selection: StageSelection, slideId: string): Selecti
 }
 
 /**
- * The route's selection in the shell's words (gslides-parity SPEC 3.2 to 3.8): the block, whether
- * the caret is in one of its runs, the table cell or the list item the run pointer names.
+ * The route's selection in the shell's words (gslides-parity SPEC 3.2 to 3.8; SPEC-2 seams): the
+ * block, whether the caret is in one of its runs, the table cell or the list item the run pointer
+ * names, and the canvas facts the stage reads about the selection (`menuSelection()`, B4): the
+ * selected ids, the shared group, the caret's marks and range, whether every block carries a pos,
+ * whether the slide is a canvas, a covering picture, an edited picture, a nested block.
  */
-function toShellSelection(selection: Selection | null): EditorSelection | null {
+function toShellSelection(
+  selection: Selection | null,
+  facts: EditorMenuSelection | null,
+): EditorSelection | null {
   if (selection === null) return null;
   const pointer = selection.pointer;
   const cell = pointer === undefined ? null : cellPointer(pointer);
   const item = pointer === undefined ? null : listItemPointer(pointer);
-  return {
+  const base: EditorSelection = {
     blockId: selection.blockId,
     text: pointer !== undefined,
     ...(cell === null ? {} : { cell: { row: cell.row, column: cell.col } }),
     ...(item === null ? {} : { listItem: true }),
+  };
+  if (facts === null || facts.blocks === 0) return base;
+  return {
+    ...base,
+    ...(facts.blockIds.length > 1 ? { blockIds: facts.blockIds } : {}),
+    ...(facts.group !== undefined ? { group: facts.group } : {}),
+    ...(facts.marks !== undefined ? { marks: facts.marks } : {}),
+    ...(facts.range !== undefined ? { range: facts.range } : {}),
+    ...(facts.listLevel !== undefined ? { listLevel: facts.listLevel } : {}),
+    imageEdited: facts.imageEdited,
+    positioned: facts.positioned,
+    coversSheet: facts.coversSheet,
+    canvas: facts.canvas,
+    nested: !facts.object,
   };
 }
 
@@ -2337,17 +2434,25 @@ function deletedWord(type: string): string {
   }
 }
 
-/** The toolbar's draw tool (the shell's words) as the stage's (Gestures.tsx EditorTool). */
+/**
+ * The toolbar's draw tool (the shell's words) as the stage's (Gestures.tsx EditorTool; SPEC-2
+ * 6.2): the two types share every kind, so the tool passes through; a shape id the schema does
+ * not know falls back to Select rather than arming a tool the stage cannot draw.
+ */
 function toEditorTool(tool: DrawTool): EditorTool {
   switch (tool.kind) {
     case 'text':
       return { kind: 'text' };
-    case 'rule':
-      return { kind: 'line', line: 'rule' };
     case 'shape':
-      return tool.shape === 'line' || tool.shape === 'arrow'
-        ? { kind: 'line', line: tool.shape }
-        : { kind: 'shape', shape: tool.shape };
+      return SHAPE_KINDS.includes(tool.shape) ? { kind: 'shape', shape: tool.shape } : 'select';
+    case 'line':
+      return { kind: 'line', line: tool.line };
+    case 'table':
+      return { kind: 'table', columns: tool.columns, rows: tool.rows };
+    case 'chart':
+      return { kind: 'chart', chart: tool.chart };
+    case 'wordArt':
+      return { kind: 'wordArt', text: tool.text };
   }
 }
 
@@ -2449,6 +2554,13 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const [editorHandle, setEditorHandle] = useState<EditorHandle | null>(null);
   /* the toolbar's draw tool; Select between inserts */
   const [tool, setTool] = useState<EditorTool>('select');
+  /* the caret's marks and range inside a run (the toolbar's pressed state and Format options' Text
+     colour), reported by the stage; a state so the shell re-reads the selection facts on change */
+  const [caret, setCaret] = useState<CaretInfo | null>(null);
+  /* the stage's selection beyond the anchor (B4's onMultiSelectionChange): a Shift click, a
+     marquee or Select all changes it while the route's selection keeps the anchor, so it is a
+     change signal of its own for the facts the menus read */
+  const [multiSelection, setMultiSelection] = useState<readonly string[]>([]);
   /* the filmstrip's and the grid's multi-selection */
   const [selectedSlideIds, setSelectedSlideIds] = useState<string[]>([]);
   /* the region that last took focus */
@@ -2475,7 +2587,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     if (payload.draft !== true) recordDeckOpened(payload.deckId);
     exportCapabilities()
       .then((caps) => {
-        controller.setExportSync(caps.sync);
+        controller.setExportSync(caps.sync, caps.batchSize);
         setCapabilities(caps);
       })
       .catch((error: unknown) => controller.say(`Export: ${errorMessage(error)}`));
@@ -2699,40 +2811,40 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       slides: JSON.parse(JSON.stringify(slides)) as Slide[],
     });
   };
-  /* one slide.remove per slide with the revision each write will find (the reducer applies
-     locally before the next call), and the snackbar with one Undo per removed slide */
-  const removeSlides = (ids: readonly string[]): void => {
+  /* the selected cards leave in one write of one slide.remove per slide (one revision, one
+     history entry, so Edit > Undo brings them all back; gslides-parity SPEC-2 8.6), through the
+     editor's commit; Delete says so with Undo, Cut says nothing, as Google's Cut does not (SPEC-2
+     0.30) */
+  const removeSlides = (ids: readonly string[], options: { quiet?: boolean } = {}): void => {
     const ordered = slideOrder(snap.document).filter((id) => ids.includes(id));
     if (ordered.length === 0) return;
-    let base = revision;
-    for (const id of ordered) {
-      void shellDispatch('slide.remove', { slideId: id, baseRevision: base }).catch(
-        (error: unknown) => shellSay(errorMessage(error)),
-      );
-      base += 1;
-    }
+    void controller
+      .commit(
+        ordered.map((id) => ({ op: 'slide.remove' as const, slideId: id })),
+        'slide.remove',
+      )
+      .catch((error: unknown) => shellSay(errorMessage(error)));
+    if (options.quiet === true) return;
     const count = ordered.length;
     shellSay(count === 1 ? SNACKBARS.slideDeleted : SNACKBARS.slidesDeleted(count), {
       label: SNACKBARS.undo,
-      run: () => {
-        for (let i = 0; i < count; i += 1) void controller.undo();
-      },
+      run: () => void controller.undo(),
     });
   };
   /* slides after the last selected card (slide.import when they come from another deck, so the
      assets travel); anything else is the canvas's paste onto the current slide */
   const pasteSlidesOrCanvas = async (plain: boolean): Promise<void> => {
-    const payload = await clipboardStore.read();
-    if (payload === null) return;
-    if (payload.kind !== 'slides') {
+    const clip = await clipboardStore.read();
+    if (clip === null) return;
+    if (clip.kind !== 'slides') {
       await editorHandle?.paste({ plain });
       return;
     }
     const after = liveSlideIds[liveSlideIds.length - 1] ?? snap.activeSlide;
-    if (payload.deckId !== deckId && payload.deckId !== '') {
+    if (clip.deckId !== deckId && clip.deckId !== '') {
       await shellDispatch('slide.import', {
-        sourceDeckId: payload.deckId,
-        slideIds: payload.slides.map((row) => row.id),
+        sourceDeckId: clip.deckId,
+        slideIds: clip.slides.map((row) => row.id),
         ...(after !== '' ? { after } : {}),
         baseRevision: revision,
       });
@@ -2741,7 +2853,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     let base = revision;
     for (const input of pastedSlideInserts(
       snap.document.deck,
-      payload,
+      clip,
       after === '' ? undefined : after,
     )) {
       void shellDispatch('slide.insert', { ...input, baseRevision: base }).catch((error: unknown) =>
@@ -2754,7 +2866,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     kind: clipboardKind,
     ...(slideClipboard
       ? {
-          cut: () => void copySlides().then(() => removeSlides(liveSlideIds)),
+          cut: () => void copySlides().then(() => removeSlides(liveSlideIds, { quiet: true })),
           copy: () => void copySlides(),
           paste: () =>
             void pasteSlidesOrCanvas(false).catch((e: unknown) => shellSay(errorMessage(e))),
@@ -2793,6 +2905,14 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         controller.say('Open a slide in Editing mode to add a picture');
         return;
       }
+      if (target.kind === 'background') {
+        /* Change background > Choose image (SPEC-2 2.6.4): the picture object at the bottom of
+           the stack, the slide converted first; the handle's asset.add then insertObject */
+        handle
+          .insertPicture(file, { background: true })
+          .catch((error: unknown) => controller.say(errorMessage(error)));
+        return;
+      }
       const where =
         target.kind === 'block'
           ? { blockId: target.blockId, replace: true }
@@ -2805,12 +2925,62 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     });
   };
 
+  /* the stage's facts about the selection (B4's menuSelection): the route's selection, the
+     stage's multi selection, the caret the stage reports and the document are the states that
+     change them; the stage reads them through its refs, so they are listed as change signals */
+  const selectionFacts = useMemo<EditorMenuSelection | null>(
+    () => (editorHandle !== null && selection !== null ? editorHandle.menuSelection() : null),
+    [editorHandle, selection, multiSelection, caret, snap.document],
+  );
+  /* the selected objects' boxes in sheet px, for Size & rotation and Position on a slide nothing
+     converted yet (SPEC-2 section 5 row 1; the stage measures them, the first edit converts) */
+  const measuredBoxes =
+    editorHandle !== null && selection !== null
+      ? Object.fromEntries(
+          editorHandle
+            .positions()
+            .map(({ id, pos }) => [id, { x: pos.x, y: pos.y, w: pos.w, h: pos.h }]),
+        )
+      : undefined;
+  /* the stage's handle in the shell's words (SPEC-2 seams): the same object, plus the Background
+     dialog's Choose landing the picture object at the bottom of the stack */
+  const shellEditor: EditorShellInput['editor'] =
+    editorHandle === null
+      ? undefined
+      : {
+          ...editorHandle,
+          insertBackgroundPicture: (asset) =>
+            editorHandle.insertObject({ id: 'picture', type: 'picture', asset }, { bottom: true }),
+        };
+  /* B5's Chart data and Table sections inside Format options (SPEC-2 section 5) */
+  const formatSlots: NonNullable<EditorShellInput['formatSlots']> = {
+    chart: (props) =>
+      chartFormatSlot({
+        block: props.block,
+        slide: { id: props.slideId },
+        revision: props.revision,
+        dispatch: props.dispatch,
+        busy: props.busy,
+        onNotice: shellSay,
+      }),
+    table: (props) =>
+      tableFormatSlot({
+        block: props.block,
+        slide: { id: props.slideId },
+        revision: props.revision,
+        dispatch: props.dispatch,
+        selection: props.selection,
+        busy: props.busy,
+        onNotice: shellSay,
+      }),
+  };
+
   const editorInput: EditorShellInput = {
     deckId,
     document: snap.document,
     slideId: snap.activeSlide,
     selectedSlideIds: selectedSlideIds.length > 0 ? selectedSlideIds : [snap.activeSlide],
-    selection: toShellSelection(selection),
+    selection: toShellSelection(selection, selectionFacts),
     focus,
     revision,
     dispatch: shellDispatch,
@@ -2951,6 +3121,13 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       if (!handle.armPaint()) controller.say('Select a block with a look to copy first');
     },
     onDrawTool: (drawTool) => setTool(toEditorTool(drawTool)),
+    /* the canvas (SPEC-2 sections 1 and 6): the stage's handle, the deck's guides, the zoom the
+       stage reports and the measured boxes of a grammar slide's objects */
+    editor: shellEditor,
+    ...(snap.document.deck.guides !== undefined ? { guides: snap.document.deck.guides } : {}),
+    ...(typeof snap.zoom === 'number' ? { view: { zoom: snap.zoom } } : {}),
+    ...(measuredBoxes !== undefined ? { measuredBoxes } : {}),
+    formatSlots,
     present: {
       start: (fromBeginning) =>
         startSlideshow(presentHost, { from: fromBeginning ? 'beginning' : 'current' }),
@@ -3024,6 +3201,8 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
           tool={tool}
           onToolDone={() => setTool('select')}
           onHandle={setEditorHandle}
+          onCaret={setCaret}
+          onMultiSelection={setMultiSelection}
           selectedSlideIds={selectedSlideIds}
           onSelectedSlideIds={setSelectedSlideIds}
         />
@@ -3131,6 +3310,10 @@ type EditorStageProps = {
   tool: EditorTool;
   onToolDone: () => void;
   onHandle: (handle: EditorHandle | null) => void;
+  /** the caret's marks and range inside a run, for the toolbar's pressed state */
+  onCaret: (info: CaretInfo | null) => void;
+  /** the stage's selected objects beyond the anchor, for the facts the menus read */
+  onMultiSelection: (ids: readonly string[]) => void;
   selectedSlideIds: readonly string[];
   onSelectedSlideIds: (ids: string[]) => void;
 };
@@ -3149,6 +3332,8 @@ function EditorStage({
   tool,
   onToolDone,
   onHandle,
+  onCaret,
+  onMultiSelection,
   selectedSlideIds,
   onSelectedSlideIds,
 }: EditorStageProps) {
@@ -3241,16 +3426,44 @@ function EditorStage({
           dispatch={controller.invoke}
           selection={toStageSelection(snap.selection, slide.id)}
           onSelectionChange={(next) => controller.select(fromStageSelection(next, slide.id))}
+          onMultiSelectionChange={onMultiSelection}
           findings={findings}
           lintLayer={lintLayer}
           overlay={(view) => <Overlay view={view} />}
           onError={(error) => controller.say(errorMessage(error))}
           onRemoved={(block) => editorShell.say(`${deletedWord(block.type)} deleted`, undoAction)}
           zoom={snap.zoom}
+          zoomCenter={snap.zoomCenter}
+          onZoom={(zoom, center) => {
+            void controller
+              .invoke('view.zoom', { zoom, ...(center === undefined ? {} : { center }) })
+              .catch((error: unknown) => controller.say(errorMessage(error)));
+          }}
+          /* the canvas (SPEC-2 6.1 rows 29 to 31): the deck's guides, the View toggles, the snaps */
+          {...(snap.document.deck.guides !== undefined
+            ? { guides: snap.document.deck.guides }
+            : {})}
+          onGuides={(input) => {
+            void controller
+              .invoke('deck.guides', {
+                ...input,
+                baseRevision: controller.getSnapshot().document.deck.revision,
+              })
+              .catch((error: unknown) => controller.say(errorMessage(error)));
+          }}
+          showRuler={editorShell.settings.showRuler === true}
+          showGuides={editorShell.settings.showGuides === true}
+          snapGuides={editorShell.settings.snapGuides !== false}
+          snapGrid={editorShell.settings.snapGrid === true}
+          onCaret={onCaret}
           tool={tool}
           onToolDone={onToolDone}
           showIds={editorShell.settings.showIds === true}
-          onContextMenu={setCanvasMenu}
+          onContextMenu={(menu) => {
+            /* Delete guide reads the guide under the pointer from the shell (B3's plan fills `remove`) */
+            editorShell.setGuideUnderPointer(menu.target === 'guide' ? (menu.guide ?? null) : null);
+            setCanvasMenu(menu);
+          }}
           onNotice={notice}
           onUndo={() => void controller.undo()}
           onRedo={() => void controller.redo()}
@@ -3366,6 +3579,7 @@ function EditorStage({
           {...(record === undefined ? {} : { layout: derivedLayout(record) })}
           onLayout={(layout) => editorShell.pickLayout(layout, 'apply')}
           renderLayouts={renderLayouts}
+          renderDynamic={editorShell.renderDynamicSubmenu}
           id="ts-menu-canvas"
         />
       ) : null}
@@ -3384,6 +3598,7 @@ function EditorStage({
           {...(record === undefined ? {} : { layout: derivedLayout(record) })}
           onLayout={(layout) => editorShell.pickLayout(layout, 'apply')}
           renderLayouts={renderLayouts}
+          renderDynamic={editorShell.renderDynamicSubmenu}
           id="ts-menu-grid"
         />
       ) : null}

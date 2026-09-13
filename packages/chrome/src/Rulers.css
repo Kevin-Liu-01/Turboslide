@@ -1,0 +1,112 @@
+/* The rulers of View > Show ruler (Rulers.tsx; gslides-parity SPEC-2 6.1 row 29), drawn inside the
+   overlay layer just outside the sheet's box in CSS pixels. Line law (SPEC 2.2): ticks are 1px
+   --pt-hair, the numerals 11px titanium, the pointer's hairline 1px ink as a state, the selection's
+   extent the hair token at low alpha. The rulers take the pointer (a drag out creates a guide) and
+   nothing about them animates. */
+.ts-ruler {
+  position: absolute;
+  box-sizing: border-box;
+  background: var(--pt-paper);
+  pointer-events: auto;
+  overflow: hidden;
+  user-select: none;
+  touch-action: none;
+}
+
+.ts-ruler.is-x {
+  left: 0;
+  top: -20px;
+  width: 100%;
+  height: 20px;
+  border-bottom: 1px solid var(--pt-hair);
+  cursor: s-resize;
+}
+
+.ts-ruler.is-y {
+  left: -20px;
+  top: 0;
+  width: 20px;
+  height: 100%;
+  border-right: 1px solid var(--pt-hair);
+  cursor: e-resize;
+}
+
+.ts-ruler:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-ruler-corner {
+  position: absolute;
+  left: -20px;
+  top: -20px;
+  background: var(--pt-paper);
+  border-right: 1px solid var(--pt-hair);
+  border-bottom: 1px solid var(--pt-hair);
+  pointer-events: none;
+}
+
+.ts-ruler-tick {
+  position: absolute;
+  background: var(--pt-hair);
+  pointer-events: none;
+}
+
+.ts-ruler.is-x .ts-ruler-tick {
+  width: 1px;
+}
+
+.ts-ruler.is-y .ts-ruler-tick {
+  height: 1px;
+}
+
+.ts-ruler-numeral {
+  position: absolute;
+  color: var(--pt-titanium);
+  font: 11px/1 var(--pt-text);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.ts-ruler.is-x .ts-ruler-numeral {
+  top: 2px;
+}
+
+.ts-ruler.is-y .ts-ruler-numeral {
+  left: 3px;
+}
+
+.ts-ruler-extent {
+  position: absolute;
+  background: var(--pt-hair);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.ts-ruler.is-x .ts-ruler-extent {
+  top: 0;
+  bottom: 0;
+}
+
+.ts-ruler.is-y .ts-ruler-extent {
+  left: 0;
+  right: 0;
+}
+
+.ts-ruler-hair {
+  position: absolute;
+  background: var(--pt-ink);
+  pointer-events: none;
+}
+
+.ts-ruler.is-x .ts-ruler-hair {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+.ts-ruler.is-y .ts-ruler-hair {
+  left: 0;
+  right: 0;
+  height: 1px;
+}

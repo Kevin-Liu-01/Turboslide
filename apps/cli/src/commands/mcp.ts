@@ -29,11 +29,12 @@ import type { DeckSource } from '@turboslide/mcp/resources';
 import { createMcpServer } from '@turboslide/mcp/server';
 import { redirectConsoleToStderr, serveStdio } from '@turboslide/mcp/stdio';
 import type { DeckDocument, Slide } from '@turboslide/schema/deck';
-import { slideBlocks } from '@turboslide/schema/deck';
+import { canvasObjects, isCanvasSlide, slideBlocks } from '@turboslide/schema/deck';
 import type { Finding } from '@turboslide/schema/findings';
 import type { RenderRecord } from '@turboslide/schema/render';
 import type { RuleId } from '@turboslide/schema/rules';
 import { validateDeck } from '@turboslide/schema/validate';
+import { makeDiagram } from '@turboslide/schema/diagrams';
 import { openFileStore } from '@turboslide/store/file-store';
 import type { FileStore } from '@turboslide/store/file-store';
 import {
@@ -64,7 +65,8 @@ import type { LoadedDeck } from '../deck-files.ts';
 import { lintLists } from '../deps/theme.ts';
 import { EXIT } from '../exit.ts';
 import type { Output } from '../output.ts';
-import { registerStoreActions } from '../store-actions.ts';
+import { canvasCounts, registerStoreActions } from '../store-actions.ts';
+import { headlessCanvasMeasurer, headlessFitMeasurer } from '../deps/canvas.ts';
 import { build } from './build.ts';
 import { decksDirOfDeck, registerDeckActions } from './deck.ts';
 import { exportCommand } from './export.ts';
@@ -174,6 +176,12 @@ function assetIdsOf(slide: Slide): Set<string> {
   return ids;
 }
 
+/** The canvas facts of a slide.list row (gslides-parity SPEC-2 0.93): a canvas slide and its object count. */
+function canvasRow(slide: Slide | undefined): { canvas?: boolean; objects?: number } {
+  if (slide === undefined || !isCanvasSlide(slide)) return {};
+  return { canvas: true, objects: canvasObjects(slide).length };
+}
+
 function renderDir(env: HandlerEnv): string {
   return join(env.derived, 'render');
 }
@@ -203,6 +211,7 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
   dispatcher.register('deck.info', () => {
     const loaded = loadDeck(env.dir);
     const rows = slideRows(loaded);
+    const canvas = canvasCounts(documentOf(loaded));
     return {
       id: loaded.deck.id,
       title: loaded.deck.title,
@@ -215,8 +224,11 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
         assets: Object.keys(loaded.deck.assets).length,
         htmlBlocks: htmlBlockCount(loaded),
         skipped: rows.filter((row) => loaded.slides[row.id]?.skip === true).length,
+        // the canvas counts (gslides-parity SPEC-2 0.93)
+        ...canvas,
       },
       ...(loaded.deck.defaults !== undefined ? { defaults: loaded.deck.defaults } : {}),
+      ...(loaded.deck.guides !== undefined ? { guides: loaded.deck.guides } : {}),
       ...(loaded.deck.trashedAt !== undefined ? { trashedAt: loaded.deck.trashedAt } : {}),
     };
   });
@@ -239,6 +251,7 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
         ...(loaded.slides[row.id]?.template !== undefined
           ? { template: loaded.slides[row.id]?.template }
           : {}),
+        ...canvasRow(loaded.slides[row.id]),
       }));
   });
 
@@ -565,7 +578,18 @@ function fileDeckSource(env: HandlerEnv, deckId: string): DeckSource {
 export function createDeckDispatcher(env: HandlerEnv): Dispatcher {
   const dispatcher = createDispatcher();
   registerReadActions(dispatcher, env);
-  const deps = { store: env.store, lint: lintLists(), renderRecords: () => renderRecords(env) };
+  // the canvas measurers over this deck directory, one headless page per action call
+  // (gslides-parity SPEC-2 1.3, 0.104)
+  const slidesOf = (): Record<string, Slide> => loadDeck(env.dir).slides;
+  const deps = {
+    store: env.store,
+    lint: lintLists(),
+    renderRecords: () => renderRecords(env),
+    measureCanvas: headlessCanvasMeasurer(env.dir, slidesOf),
+    measureFit: headlessFitMeasurer(env.dir, slidesOf),
+    // the diagram templates (SPEC-2 2.8.3): B5's @turboslide/schema/diagrams, bound at merge 2
+    diagrams: makeDiagram,
+  };
   registerStoreActions(dispatcher, deps);
   /* deck.create and deck.copy make a sibling of this deck under the same decks/ folder; deck.rename
      and deck.set write this deck; deck.list, deck.trash and deck.restore read and stamp the folder */

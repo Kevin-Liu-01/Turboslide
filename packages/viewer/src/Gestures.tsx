@@ -1,24 +1,56 @@
-// The gesture engine of the stage in edit mode (SPEC 6.4): the handles the overlay draws for a
-// slide and its selected block, the pointer math from client pixels to sheet pixels, the mapping
-// from a drag (start point, current point) to exactly one mutation, the keyboard nudges, and the
-// mapping from a mutation to the action-table call the editor dispatches (SPEC 7.1: a click and an
-// agent call are one action). Everything here is pure and runs in Node; gestures.test.ts pins the
-// mapping (a drag of the key edge from 200 to 232 yields block.set /key 240). The Editor owns the
-// pointer listeners and the live preview, the chrome's Overlay owns the pixels.
+// The gesture engine of the stage in edit mode (SPEC 6.4; gslides-parity SPEC-2 section 6): the
+// handles the overlay draws for a slide and its selected objects, the pointer math from client
+// pixels to sheet pixels, the mapping from a drag (start point, current point, the modifier keys)
+// to the mutations it stands for, the keyboard nudges, the draw tools and the mapping from a
+// mutation to the action-table call the editor dispatches (SPEC 7.1: a click and an agent call
+// are one action). Every object of every slide kind gets the canvas handles (the frame and chip
+// that move it, the eight squares that resize it, the ring that rotates it, the two end handles of
+// a line); the grammar's own property handles (the key edge, the shot edge, the seam, the plate
+// grip) stay beside them. Everything here is pure and runs in Node; gestures.test.ts and
+// canvas.test.ts pin the mapping. The Editor owns the pointer listeners, the conversion of a
+// slide that is not a canvas yet and the live preview; the chrome's Overlay owns the pixels.
 import type { ActionId } from '@turboslide/schema/actions';
-import type { Block, BlockType } from '@turboslide/schema/blocks';
+import type { Block, BlockType, ShapeBlock, ShapeKind } from '@turboslide/schema/blocks';
+import { ROWS_KEY_SNAP } from '@turboslide/schema/blocks';
+import { emptyChart } from '@turboslide/schema/blocks/chart';
+import type { ChartKind } from '@turboslide/schema/blocks/chart';
+import { emptyTable } from '@turboslide/schema/blocks/table';
+import {
+  canAttach,
+  connectorEnds,
+  connectorFieldsBetween,
+  isConnector,
+  nearestSite,
+  targetSites,
+} from '@turboslide/schema/connect';
 import type { Slide } from '@turboslide/schema/deck';
+import { PLATE_WIDTHS, slotsForLayout } from '@turboslide/schema/deck';
+import { boundingBox, unionBox } from '@turboslide/schema/freeform';
 import type { BlockSlot, Mutation } from '@turboslide/schema/mutations';
 import { jsonEqual } from '@turboslide/schema/pointer';
+import type { Position } from '@turboslide/schema/position';
+import { normalizeRotation } from '@turboslide/schema/position';
 import type { Box } from '@turboslide/schema/render';
+import { isLineKind, isPathKind } from '@turboslide/schema/shapes';
+import type { LineKind } from '@turboslide/schema/shapes';
 import { COLUMN_GAP, CONTENT, CONTENT_ORIGIN, SHEET } from '@turboslide/theme/tokens';
 
 import { labelClearance, snapHalf, unitsPerPixel } from '@turboslide/render/dia/snap';
 import type { DiaBox } from '@turboslide/render/dia/snap';
 
+import {
+  freeformBlocks,
+  isFreeformSlide,
+  placedOf,
+  posBox,
+  posFor,
+  scaleGroupMutations,
+} from './Freeform';
+import { rotateMutations, rotationFromDrag, unrotateDelta } from './rotate';
 import type { Selection } from './Selection';
 import { blockById, selectedBlockId } from './Selection';
 import {
+  axisLock,
   CROP_FLIP_PX,
   plateSideFor,
   PLATE_SIDES_BY_KIND,
@@ -36,10 +68,6 @@ import {
   stepRatio,
 } from './snap';
 import type { ResizeDir, SnapLine } from './snap';
-import { isFreeformSlide, posBox, posFor } from './Freeform';
-import type { Position } from '@turboslide/schema/position';
-import { ROWS_KEY_SNAP } from '@turboslide/schema/blocks';
-import { PLATE_WIDTHS, slotsForLayout } from '@turboslide/schema/deck';
 
 /** The sheet box type the overlay reads, so the chrome package needs no dependency on the schema. */
 export type { Box } from '@turboslide/schema/render';
@@ -59,16 +87,23 @@ export type HandleKind =
   | 'block-move'
   | 'dia-label'
   | 'dia-marker'
-  /** a positioned block of a freeform slide: its chip drags it anywhere (this round) */
+  /** an object of the canvas: its chip and frame drag it anywhere (SPEC-2 6.1 row 7) */
   | 'free-move'
-  /** one of the eight resize squares of a positioned block */
-  | 'free-resize';
+  /** one of the eight resize squares of an object (row 9) */
+  | 'free-resize'
+  /** the rotation ring above the selection (row 11) */
+  | 'free-rotate'
+  /** the start (index 0) or end (index 1) handle of a line kind (row 20, 6.2) */
+  | 'line-end'
+  /** one of the eight black squares of crop mode (row 19) */
+  | 'crop-edge';
 
 /**
  * How the overlay draws a handle: `v` a vertical rule through the hit box, `square` an 11 px
- * square, `area` an invisible region with a cursor, `chip` the selection chip itself.
+ * square, `area` an invisible region with a cursor, `chip` the selection chip itself, `ring` the
+ * 12 px rotation ring joined to the selection by a 1 px line.
  */
-export type HandleShape = 'v' | 'square' | 'area' | 'chip';
+export type HandleShape = 'v' | 'square' | 'area' | 'chip' | 'ring';
 
 export type Handle = {
   id: string;
@@ -77,18 +112,25 @@ export type Handle = {
   box: Box;
   /** the block the handle edits; absent for the slide-level handles (seam, plate) */
   blockId?: string;
-  /** the item the handle edits: a scales row, a pair figure */
+  /** the item the handle edits: a scales row, a pair figure, a line end (0 start, 1 end) */
   index?: number;
-  /** the edge or corner a free-resize handle moves */
+  /** the edge or corner a free-resize or crop-edge handle moves */
   dir?: ResizeDir;
   cursor:
-    'col-resize' | 'ew-resize' | 'ns-resize' | 'nesw-resize' | 'nwse-resize' | 'grab' | 'move';
+    | 'col-resize'
+    | 'ew-resize'
+    | 'ns-resize'
+    | 'nesw-resize'
+    | 'nwse-resize'
+    | 'grab'
+    | 'move'
+    | 'crosshair';
   /** the accessible name, `<block id>: <property>` (SPEC 6.5) */
   label: string;
   /** the locale-independent id for the window API, under `handle.` so it never collides with an inspector control */
   control: string;
   shape: HandleShape;
-  /** the arrow keys that nudge it; `xy` moves on both axes (a diagram label or marker) */
+  /** the arrow keys that nudge it; `xy` moves on both axes (a diagram label or marker, an object) */
   axis: 'x' | 'y' | 'xy';
   /** the drag direction that increases the value; -1 for an edge anchored on the right */
   sign: 1 | -1;
@@ -104,6 +146,8 @@ export type MeasuredBoxes = {
   runs: Record<string, Box>;
   /** per block, the parts a handle needs (PART_SELECTORS), in document order */
   parts: Record<string, Box[]>;
+  /** the ids whose element holds a prompt (an empty placeholder keeps the prompt's box, SPEC-2 0.97) */
+  prompted?: string[];
 };
 
 export const EMPTY_BOXES: MeasuredBoxes = { blocks: {}, slots: {}, runs: {}, parts: {} };
@@ -121,6 +165,10 @@ export const PART_SELECTORS: Partial<Record<BlockType, string>> = {
 export const HANDLE_HIT = 8;
 /** The side of a square handle, the deck's marker size (DECK-GRAMMAR.md:44). */
 export const HANDLE_SQUARE = 11;
+/** The rotation ring's hit box in sheet pixels; the overlay draws it 24 CSS px above the ring. */
+export const ROTATE_HANDLE_BOX = 24;
+/** A line's end handle snaps to a connection site within this many sheet pixels (SPEC-2 6.2). */
+export const SITE_SNAP_PX = 12;
 
 type PictureKind = 'opener' | 'mood' | 'closing';
 type PictureSlide = Extract<Slide, { kind: PictureKind }>;
@@ -183,13 +231,159 @@ function square(cx: number, cy: number): Box {
   return [cx - HANDLE_SQUARE / 2, cy - HANDLE_SQUARE / 2, HANDLE_SQUARE, HANDLE_SQUARE];
 }
 
+/** True for a shape block of a line kind: it drags by its two ends instead of eight squares (SPEC-2 6.2). */
+export function isLineBlock(block: Block | undefined): block is ShapeBlock {
+  return block !== undefined && block.type === 'shape' && isLineKind(block.shape);
+}
+
+/** What `handlesFor` reads beyond the anchor: every selected id (a group or a multi selection) and crop mode. */
+export type HandleOptions = {
+  /** every selected object, the anchor first; `[anchor]` when absent */
+  ids?: readonly string[];
+  /** crop mode on the anchor: the eight crop handles over the frame replace the object's handles */
+  crop?: { frame: Box };
+};
+
+/** The eight resize squares around a box, for an object or a selection's union. */
+function resizeHandles(
+  blockId: string,
+  box: Box,
+  kind: 'free-resize' | 'crop-edge',
+  prefix: string,
+): Handle[] {
+  return RESIZE_DIRS.map((dir) => {
+    const cx = dir.includes('w')
+      ? box[0]
+      : dir.includes('e')
+        ? box[0] + box[2]
+        : box[0] + box[2] / 2;
+    const cy = dir.includes('n')
+      ? box[1]
+      : dir.includes('s')
+        ? box[1] + box[3]
+        : box[1] + box[3] / 2;
+    return {
+      id: `${kind}:${blockId}:${dir}`,
+      kind,
+      box: square(cx, cy),
+      blockId,
+      dir,
+      cursor: resizeCursor(dir),
+      label: `${blockId}: ${prefix} ${dir}`,
+      control: `handle.${blockId}.${kind === 'crop-edge' ? 'crop' : 'resize'}.${dir}`,
+      shape: 'square',
+      axis: 'xy',
+      sign: 1,
+    };
+  });
+}
+
 /**
- * The handles of a slide (SPEC 6.4 table): the column seam of `cols` and the plate edge and grip of
- * a full-picture slide always; for the selected block its chip (drag to reorder), and per type the
- * rows key edge, the shot edge and crop area, the pair figures, the scales markers. Diagram
- * editing is M5 and gets no handle. Blocks without a measured box get none.
+ * The canvas handles of the selection (SPEC-2 6.1 rows 1, 9, 11, 19, 20): the chip and frame that
+ * move it, the eight squares that resize it (the union for several objects, a group's members
+ * scaling together), the rotation ring above it, or a line's two end handles; in crop mode the
+ * eight black crop handles over the frame.
  */
-export function handlesFor(slide: Slide, boxes: MeasuredBoxes, selection: Selection): Handle[] {
+function canvasHandles(
+  slide: Slide,
+  boxes: MeasuredBoxes,
+  anchor: string,
+  ids: readonly string[],
+  options: HandleOptions,
+): Handle[] {
+  const handles: Handle[] = [];
+  if (options.crop) {
+    handles.push(...resizeHandles(anchor, options.crop.frame, 'crop-edge', 'Crop'));
+    return handles;
+  }
+  const rows = placedOf(slide, ids, boxes);
+  const union: Box | null =
+    rows.length > 0
+      ? unionBox(rows.map((row) => row.pos))
+      : ids.reduce<Box | null>((acc, id) => {
+          const box = boxes.blocks[id];
+          if (!box) return acc;
+          if (!acc) return [...box];
+          const x = Math.min(acc[0], box[0]);
+          const y = Math.min(acc[1], box[1]);
+          return [
+            x,
+            y,
+            Math.max(acc[0] + acc[2], box[0] + box[2]) - x,
+            Math.max(acc[1] + acc[3], box[1] + box[3]) - y,
+          ];
+        }, null);
+  const own = boxes.blocks[anchor];
+  const box = union ?? own;
+  if (!box) return handles;
+  handles.push({
+    id: `free-move:${anchor}`,
+    kind: 'free-move',
+    box,
+    blockId: anchor,
+    cursor: 'move',
+    label: `${anchor}: Move`,
+    control: `handle.${anchor}.move`,
+    shape: 'chip',
+    axis: 'xy',
+    sign: 1,
+  });
+  const block = blockById(slide, anchor);
+  if (ids.length === 1 && isLineBlock(block) && block.pos !== undefined) {
+    const ends = connectorEnds(block);
+    (['start', 'end'] as const).forEach((which, index) => {
+      const point = ends[which];
+      handles.push({
+        id: `line-end:${anchor}:${index}`,
+        kind: 'line-end',
+        box: square(point.x, point.y),
+        blockId: anchor,
+        index,
+        cursor: 'crosshair',
+        label: `${anchor}: ${which === 'start' ? 'Line start' : 'Line end'}`,
+        control: `handle.${anchor}.${which}`,
+        shape: 'square',
+        axis: 'xy',
+        sign: 1,
+      });
+    });
+    return handles;
+  }
+  handles.push(...resizeHandles(anchor, box, 'free-resize', 'Resize'));
+  handles.push({
+    id: `free-rotate:${anchor}`,
+    kind: 'free-rotate',
+    /* the hit box sits on the object's top edge; the overlay draws the ring 24 CSS px above it */
+    box: [
+      box[0] + box[2] / 2 - ROTATE_HANDLE_BOX / 2,
+      box[1] - ROTATE_HANDLE_BOX,
+      ROTATE_HANDLE_BOX,
+      ROTATE_HANDLE_BOX,
+    ],
+    blockId: anchor,
+    cursor: 'grab',
+    label: `${anchor}: Rotate`,
+    control: `handle.${anchor}.rotate`,
+    shape: 'ring',
+    axis: 'x',
+    sign: 1,
+  });
+  return handles;
+}
+
+/**
+ * The handles of a slide (SPEC 6.4 table; SPEC-2 section 6): the column seam of `cols` and the
+ * plate edge and grip of a picture kind always; for the selection the canvas handles of every
+ * object (`canvasHandles`), and per type the rows key edge, the shot edge and crop area, the pair
+ * figures, the scales markers and the Alt-drag diagram labels. Objects without a measured box get
+ * none.
+ */
+export function handlesFor(
+  slide: Slide,
+  boxes: MeasuredBoxes,
+  selection: Selection,
+  options: HandleOptions = {},
+): Handle[] {
   const handles: Handle[] = [];
   if (slide.kind === 'content' && slide.layout.type === 'cols') {
     const left = boxes.slots.left;
@@ -241,64 +435,14 @@ export function handlesFor(slide: Slide, boxes: MeasuredBoxes, selection: Select
   }
   const blockId = selectedBlockId(selection);
   if (blockId === null) return handles;
-  const block = blockById(slide, blockId);
+  const ids = options.ids && options.ids.length > 0 ? options.ids : [blockId];
   const box = boxes.blocks[blockId];
-  if (!block || !box) return handles;
+  if (!box) return handles;
+  handles.push(...canvasHandles(slide, boxes, blockId, ids, options));
+  if (options.crop || ids.length > 1) return handles;
+  const block = blockById(slide, blockId);
+  if (!block) return handles;
   const parts = boxes.parts[blockId] ?? [];
-  if (isFreeformSlide(slide)) {
-    /* a positioned block (this round): the chip drags it anywhere and eight squares resize it;
-       the per-type property handles below still apply to it */
-    handles.push({
-      id: `free-move:${blockId}`,
-      kind: 'free-move',
-      box,
-      blockId,
-      cursor: 'move',
-      label: `${blockId}: Move`,
-      control: `handle.${blockId}.move`,
-      shape: 'chip',
-      axis: 'xy',
-      sign: 1,
-    });
-    for (const dir of RESIZE_DIRS) {
-      const cx = dir.includes('w')
-        ? box[0]
-        : dir.includes('e')
-          ? box[0] + box[2]
-          : box[0] + box[2] / 2;
-      const cy = dir.includes('n')
-        ? box[1]
-        : dir.includes('s')
-          ? box[1] + box[3]
-          : box[1] + box[3] / 2;
-      handles.push({
-        id: `free-resize:${blockId}:${dir}`,
-        kind: 'free-resize',
-        box: square(cx, cy),
-        blockId,
-        dir,
-        cursor: resizeCursor(dir),
-        label: `${blockId}: Resize ${dir}`,
-        control: `handle.${blockId}.resize.${dir}`,
-        shape: 'square',
-        axis: 'xy',
-        sign: 1,
-      });
-    }
-  } else {
-    handles.push({
-      id: `block-move:${blockId}`,
-      kind: 'block-move',
-      box,
-      blockId,
-      cursor: 'grab',
-      label: `${blockId}: Move`,
-      control: `handle.${blockId}.move`,
-      shape: 'chip',
-      axis: 'y',
-      sign: 1,
-    });
-  }
   switch (block.type) {
     case 'rows':
       handles.push({
@@ -315,20 +459,22 @@ export function handlesFor(slide: Slide, boxes: MeasuredBoxes, selection: Select
       });
       break;
     case 'shot': {
-      handles.push({
-        id: `shot-width:${blockId}`,
-        kind: 'shot-width',
-        box: edge(box[0] + box[2], box[1], box[3]),
-        blockId,
-        cursor: 'ew-resize',
-        label: `${blockId}: Width`,
-        control: `handle.${blockId}.width`,
-        shape: 'v',
-        axis: 'x',
-        sign: 1,
-      });
+      if (!isFreeformSlide(slide)) {
+        handles.push({
+          id: `shot-width:${blockId}`,
+          kind: 'shot-width',
+          box: edge(box[0] + box[2], box[1], box[3]),
+          blockId,
+          cursor: 'ew-resize',
+          label: `${blockId}: Width`,
+          control: `handle.${blockId}.width`,
+          shape: 'v',
+          axis: 'x',
+          sign: 1,
+        });
+      }
       const image = parts[0];
-      if (block.aspect !== undefined && image) {
+      if (block.aspect !== undefined && image && block.trim === undefined) {
         handles.push({
           id: `shot-crop:${blockId}`,
           kind: 'shot-crop',
@@ -433,6 +579,32 @@ export function handlesFor(slide: Slide, boxes: MeasuredBoxes, selection: Select
 }
 
 /**
+ * The round one reorder handle of a block within its slot on a grammar slide: what Cmd Up and Cmd
+ * Down move through `nudgeMutation` (`block.move`, one place; SPEC 4.3). No longer drawn: the
+ * chip and the frame move the object anywhere and convert the slide (SPEC-2 1.6).
+ */
+export function blockMoveHandle(
+  slide: Slide,
+  boxes: MeasuredBoxes,
+  blockId: string,
+): Handle | null {
+  const box = boxes.blocks[blockId];
+  if (!box || !locateBlock(slide, blockId)) return null;
+  return {
+    id: `block-move:${blockId}`,
+    kind: 'block-move',
+    box,
+    blockId,
+    cursor: 'grab',
+    label: `${blockId}: Move`,
+    control: `handle.${blockId}.move`,
+    shape: 'chip',
+    axis: 'y',
+    sign: 1,
+  };
+}
+
+/**
  * Diagram units per sheet pixel of a rendered dia block: one with `fit: 'slot'`, the viewBox
  * width over the measured width otherwise (render/dia/snap.ts).
  */
@@ -515,17 +687,30 @@ export function labelClearanceBox(
 // Drags
 
 /**
- * What a freeform gesture reads beyond the slide and the boxes: the blocks that move together (the
- * anchor first) and the snap lines of everything they can land on (the sheet's lines plus the
- * edges and centers of the blocks that stay put).
+ * What a canvas gesture reads beyond the slide and the boxes: the objects that move together (the
+ * anchor first), the snap lines of everything they can land on (the sheet's edges and centre, the
+ * GT lines, the deck's guides, the edges and centres of the resting objects), whether the 8 px grid
+ * catches what no line does (View > Snap to > Grid), and the resting objects' boxes for the equal
+ * spacing guides.
  */
-export type FreeContext = { ids: string[]; lines: SnapLine[] };
+export type FreeContext = {
+  ids: string[];
+  lines: SnapLine[];
+  /** the 8 px grid under Snap to > Grid; off, a drag with no line near rounds to whole pixels */
+  grid?: boolean;
+  /** the resting objects' bounding boxes, for the equal spacing guides */
+  spacing?: Box[];
+};
 
 /** What a gesture reads: the slide as it was when the drag began and the boxes measured then. */
 export type GestureContext = { slide: Slide; boxes: MeasuredBoxes; free?: FreeContext };
 
-/** The modifier keys a freeform gesture reads on every move: Shift locks the aspect of a resize. */
-export type GestureMods = { shift: boolean };
+/**
+ * The modifier keys a canvas gesture reads on every move (SPEC-2 0.79): Shift constrains a move
+ * to an axis, keeps the aspect of a resize and snaps a rotation to 15 degrees; Option resizes
+ * about the centre; Cmd suppresses every snap.
+ */
+export type GestureMods = { shift: boolean; alt?: boolean; meta?: boolean };
 
 function blockSet(slide: Slide, blockId: string, path: string, value?: unknown): Mutation {
   return value === undefined
@@ -653,10 +838,10 @@ export function dropIndexFor(
 }
 
 /**
- * The one mutation a drag stands for at its current point, or null when the value has not moved
- * off its start (SPEC 6.4: each gesture ends in exactly one mutation). Called on every pointer
- * move for the live preview and once more on release for the commit; both read the slide as it
- * was when the drag began, so a preview never compounds.
+ * The one mutation a grammar drag stands for at its current point, or null when the value has not
+ * moved off its start (SPEC 6.4: each gesture ends in exactly one mutation). Called on every
+ * pointer move for the live preview and once more on release for the commit; both read the slide
+ * as it was when the drag began, so a preview never compounds.
  */
 export function gestureMutation(
   handle: Handle,
@@ -752,21 +937,112 @@ export function gestureMutation(
   }
 }
 
-/** What a freeform gesture stands for at its current point: the `pos` writes and the guides drawn. */
-export type FreeGesture = { mutations: Mutation[]; guides: SnapLine[] };
+/**
+ * What a canvas gesture stands for at its current point: the `pos` writes, the guides drawn, the
+ * connection sites shown while a line's end is down, and the readout (the size or the angle).
+ */
+export type FreeGesture = {
+  mutations: Mutation[];
+  guides: SnapLine[];
+  /** the connection sites of the shape under a dragged line end (6 px rings) */
+  sites?: Point[];
+  /** the size chip while a resize is down, in sheet pixels (SPEC-2 0.86) */
+  size?: { w: number; h: number };
+  /** the angle chip while a rotation is down */
+  angle?: number;
+};
 
 function posMutation(slide: Slide, blockId: string, pos: Position): Mutation {
   return { op: 'block.set', slideId: slide.id, blockId, path: '/pos', value: pos };
 }
 
+/** The nearest connection site of an attachable object under a point, within SITE_SNAP_PX. */
+export function siteUnder(
+  slide: Slide,
+  point: Point,
+  exclude: ReadonlyArray<string> = [],
+): { blockId: string; site: number; point: Point } | null {
+  let best: { blockId: string; site: number; point: Point; distance: number } | null = null;
+  for (const block of freeformBlocks(slide)) {
+    if (exclude.includes(block.id) || !canAttach(block) || isConnector(block)) continue;
+    const near = nearestSite(block, point);
+    if (near === undefined || near.distance > SITE_SNAP_PX) continue;
+    if (best === null || near.distance < best.distance)
+      best = { blockId: block.id, site: near.site, point: near.point, distance: near.distance };
+  }
+  return best;
+}
+
+/** The connection sites of the attachable object whose box holds the point, for the rings the overlay draws. */
+export function sitesUnder(
+  slide: Slide,
+  point: Point,
+  exclude: ReadonlyArray<string> = [],
+): Point[] {
+  for (const block of freeformBlocks(slide)) {
+    if (exclude.includes(block.id) || !canAttach(block) || isConnector(block) || !block.pos)
+      continue;
+    const b = boundingBox(block.pos);
+    const margin = SITE_SNAP_PX;
+    if (
+      point.x >= b.x - margin &&
+      point.x <= b.x + b.w + margin &&
+      point.y >= b.y - margin &&
+      point.y <= b.y + b.h + margin
+    ) {
+      return targetSites(block);
+    }
+  }
+  return [];
+}
+
 /**
- * The freeform gestures (this round): a `free-move` drag moves the anchor block and every other
- * selected block by the same snapped offset, the anchor's box snapping to the sheet's lines and
- * the resting blocks' edges and centers, else to the 8 px grid; a `free-resize` drag moves one or
- * two edges of the anchor with the same snaps, Shift locking the aspect. Every block that moves
- * gets one `block.set /pos`; the Editor commits the list as one write. Null when nothing changed,
- * so a click on a chip writes nothing. The guides are what the overlay draws while the pointer is
- * down. Pure; freeform.test.ts pins it.
+ * The mutations that put a line's end at a point (SPEC-2 6.2, 0.103): the end snaps to a
+ * connection site of the shape under it and records `connect` for that end, or drops the
+ * attachment when it lands away; `pos`, `orientation` and the swapped decorations travel in the
+ * same write through the schema's connectorFieldsBetween.
+ */
+export function lineEndMutations(
+  slide: Slide,
+  block: ShapeBlock,
+  which: 'start' | 'end',
+  to: Point,
+  options: { snap?: boolean } = {},
+): { mutations: Mutation[]; sites: Point[] } {
+  if (block.pos === undefined) return { mutations: [], sites: [] };
+  const ends = connectorEnds(block);
+  const snap = options.snap ?? true;
+  const site = snap ? siteUnder(slide, to, [block.id]) : null;
+  const point = site ? site.point : { x: Math.round(to.x * 2) / 2, y: Math.round(to.y * 2) / 2 };
+  const connect: NonNullable<ShapeBlock['connect']> = { ...(block.connect ?? {}) };
+  if (site) connect[which] = { block: site.blockId, site: site.site };
+  else delete connect[which];
+  const normalized = Object.keys(connect).length === 0 ? undefined : connect;
+  const fields = connectorFieldsBetween(
+    block,
+    which === 'start' ? point : ends.start,
+    which === 'end' ? point : ends.end,
+    normalized,
+  );
+  const mutations: Mutation[] = [];
+  for (const [path, value] of Object.entries(fields)) {
+    const current = (block as unknown as Record<string, unknown>)[path];
+    if (JSON.stringify(current) === JSON.stringify(value)) continue;
+    mutations.push(blockSet(slide, block.id, `/${path}`, value));
+  }
+  return { mutations, sites: snap ? sitesUnder(slide, to, [block.id]) : [] };
+}
+
+/**
+ * The canvas gestures (SPEC-2 6.1 rows 7, 9, 11, 20): a `free-move` drag moves every selected
+ * object by the same snapped offset (Shift locks the axis, Cmd suppresses the snaps); a
+ * `free-resize` drag moves one or two edges of the object with the same snaps (Shift keeps the
+ * aspect, Option resizes about the centre; a rotated object resizes along its own axes; a
+ * selection of several scales every member about the union); a `free-rotate` drag turns the
+ * object about its centre (Shift snaps to 15 degrees; several rotate about the union centre); a
+ * `line-end` drag moves one end of a line onto a connection site or away from one. Every object
+ * that changes gets one `block.set /pos`; the Editor commits the list as one write. Null when
+ * nothing changed, so a click on a chip writes nothing. Pure; canvas.test.ts pins it.
  */
 export function freeGesture(
   handle: Handle,
@@ -777,43 +1053,116 @@ export function freeGesture(
 ): FreeGesture | null {
   const { slide, boxes } = ctx;
   const blockId = handle.blockId;
-  if (blockId === undefined || !isFreeformSlide(slide)) return null;
+  if (blockId === undefined) return null;
   const anchor = posFor(slide, blockId, boxes);
   if (!anchor) return null;
-  const lines = ctx.free?.lines ?? [];
-  const dx = now.x - start.x;
-  const dy = now.y - start.y;
+  const suppress = mods.meta === true;
+  const lines = suppress ? [] : (ctx.free?.lines ?? []);
+  const grid = suppress ? false : (ctx.free?.grid ?? true);
+  const spacing = suppress ? undefined : ctx.free?.spacing;
+  const ids = ctx.free?.ids.includes(blockId) ? ctx.free.ids : [blockId];
+  let dx = now.x - start.x;
+  let dy = now.y - start.y;
+  /* a press with no travel is a click, never a write: a snap line within reach would otherwise
+     move the object on a plain click of its chip or a handle */
+  if (dx === 0 && dy === 0) return null;
   if (handle.kind === 'free-move') {
-    const ids = ctx.free?.ids.includes(blockId) ? ctx.free.ids : [blockId];
-    const snapped = snapMove(posBox(anchor), dx, dy, lines);
-    const sdx = snapped.box[0] - anchor.x;
-    const sdy = snapped.box[1] - anchor.y;
+    if (mods.shift) ({ dx, dy } = axisLock(dx, dy));
+    const rows = placedOf(slide, ids, boxes);
+    if (rows.length === 0) return null;
+    /* the selection snaps by the union of its rotated bounding boxes (SPEC-2 0.107) */
+    const union = unionBox(rows.map((row) => row.pos));
+    const snapped = snapMove(union, dx, dy, lines, {
+      grid,
+      ...(spacing !== undefined ? { spacing } : {}),
+    });
+    const sdx = snapped.box[0] - union[0];
+    const sdy = snapped.box[1] - union[1];
     if (sdx === 0 && sdy === 0) return null;
-    const mutations: Mutation[] = [];
-    for (const id of ids) {
-      const pos = posFor(slide, id, boxes);
-      if (!pos) continue;
-      mutations.push(posMutation(slide, id, { ...pos, x: pos.x + sdx, y: pos.y + sdy }));
-    }
-    return mutations.length > 0 ? { mutations, guides: snapped.guides } : null;
+    const mutations: Mutation[] = rows.map(({ id, pos }) =>
+      posMutation(slide, id, { ...pos, x: pos.x + sdx, y: pos.y + sdy }),
+    );
+    return { mutations, guides: snapped.guides };
   }
   if (handle.kind === 'free-resize' && handle.dir !== undefined) {
-    const snapped = snapResize(posBox(anchor), handle.dir, dx, dy, lines, { aspect: mods.shift });
-    const [x, y, w, h] = snapped.box;
+    if (ids.length > 1) {
+      const rows = placedOf(slide, ids, boxes);
+      const union = unionBox(rows.map((row) => row.pos));
+      const snapped = snapResize(union, handle.dir, dx, dy, lines, { aspect: mods.shift, grid });
+      const to = mods.alt === true ? aboutCentre(union, snapped.box) : snapped.box;
+      const mutations = scaleGroupMutations(slide, ids, boxes, to);
+      if (mutations.length === 0) return null;
+      return { mutations, guides: snapped.guides, size: { w: to[2], h: to[3] } };
+    }
+    const angle = normalizeRotation(anchor.rotate ?? 0);
+    if (angle !== 0) ({ dx, dy } = unrotateDelta(dx, dy, angle));
+    const snapped = snapResize(posBox(anchor), handle.dir, dx, dy, angle === 0 ? lines : [], {
+      aspect: mods.shift,
+      grid: angle === 0 ? grid : false,
+    });
+    const box = mods.alt === true ? aboutCentre(posBox(anchor), snapped.box) : snapped.box;
+    const [x, y, w, h] = box;
     if (x === anchor.x && y === anchor.y && w === anchor.w && h === anchor.h) return null;
     return {
       mutations: [posMutation(slide, blockId, { ...anchor, x, y, w, h })],
-      guides: snapped.guides,
+      guides: angle === 0 ? snapped.guides : [],
+      size: { w, h },
     };
   }
+  if (handle.kind === 'free-rotate') {
+    const rows = placedOf(slide, ids, boxes);
+    if (rows.length === 0) return null;
+    const union = unionBox(rows.map((row) => row.pos));
+    const centre = { x: union[0] + union[2] / 2, y: union[1] + union[3] / 2 };
+    const startAngle = rows.length === 1 ? normalizeRotation(anchor.rotate ?? 0) : 0;
+    const to = rotationFromDrag(startAngle, centre, start, now, { shift: mods.shift });
+    const mutations =
+      rows.length === 1
+        ? rotateMutations(slide, rows, { to }, 'each')
+        : rotateMutations(slide, rows, { by: to }, 'selection');
+    if (mutations.length === 0) return null;
+    const angle = rows.length === 1 ? to : normalizeRotation(to);
+    return { mutations, guides: [], angle };
+  }
+  if (handle.kind === 'line-end' && handle.index !== undefined) {
+    const block = blockById(slide, blockId);
+    if (!isLineBlock(block) || block.pos === undefined) return null;
+    const ends = connectorEnds(block);
+    const which = handle.index === 0 ? 'start' : 'end';
+    const from = ends[which];
+    if (mods.shift) ({ dx, dy } = angleLock(dx, dy));
+    const to = { x: from.x + dx, y: from.y + dy };
+    const result = lineEndMutations(slide, block, which, to, { snap: !suppress });
+    if (result.mutations.length === 0) return { mutations: [], guides: [], sites: result.sites };
+    return { mutations: result.mutations, guides: [], sites: result.sites };
+  }
   return null;
+}
+
+/** A resized box mirrored about the original centre (Option: the opposite edges move too). */
+function aboutCentre(from: Box, to: Box): Box {
+  const cx = from[0] + from[2] / 2;
+  const cy = from[1] + from[3] / 2;
+  const w = Math.max(1, from[2] + 2 * (to[2] - from[2]));
+  const h = Math.max(1, from[3] + 2 * (to[3] - from[3]));
+  return [Math.round(cx - w / 2), Math.round(cy - h / 2), Math.round(w), Math.round(h)];
+}
+
+/** Shift constrains a line's end to 45 degree steps (SPEC-2 6.2). */
+export function angleLock(dx: number, dy: number): { dx: number; dy: number } {
+  const length = Math.hypot(dx, dy);
+  if (length === 0) return { dx, dy };
+  const angle = Math.atan2(dy, dx);
+  const step = Math.PI / 4;
+  const snapped = Math.round(angle / step) * step;
+  return { dx: Math.cos(snapped) * length, dy: Math.sin(snapped) * length };
 }
 
 /**
  * One keyboard step on a focused handle (SPEC 6.4 keyboard nudges): the key edge and the plate
  * edge step through their sets, the seam through the named ratios and 10 px, a marker by one (ten
  * with Shift through `delta`), a shot edge by 10 px, a block by one position, a plate side and a
- * crop anchor flip, a pair figure swaps with its neighbour.
+ * crop anchor flip, a pair figure swaps with its neighbour, an object moves or grows by one pixel.
  */
 export function nudgeMutation(
   handle: Handle,
@@ -844,15 +1193,15 @@ export function nudgeMutation(
   }
   const blockId = handle.blockId;
   const block = blockId === undefined ? undefined : blockById(slide, blockId);
-  if (!block || blockId === undefined) return null;
+  if (blockId === undefined) return null;
   switch (handle.kind) {
     case 'key-edge': {
-      if (block.type !== 'rows') return null;
+      if (block?.type !== 'rows') return null;
       const next = stepInSet(ROWS_KEY_SNAP, block.key, delta);
       return next === block.key ? null : blockSet(slide, blockId, '/key', next);
     }
     case 'shot-width': {
-      if (block.type !== 'shot') return null;
+      if (block?.type !== 'shot') return null;
       const slotBox = slotBoxOf(slide, blockId, boxes);
       const from = block.width ?? boxes.blocks[blockId]?.[2] ?? slotBox[2];
       const next = snapShotWidth(from + delta * 10, slotBox[2], slotBox[3]);
@@ -861,12 +1210,12 @@ export function nudgeMutation(
       return next === block.width ? null : blockSet(slide, blockId, '/width', next);
     }
     case 'shot-crop': {
-      if (block.type !== 'shot') return null;
+      if (block?.type !== 'shot') return null;
       const next = (block.crop ?? 'center') === 'center' ? 'top' : 'center';
       return blockSet(slide, blockId, '/crop', next);
     }
     case 'pair-swap': {
-      if (block.type !== 'pair' || handle.index === undefined) return null;
+      if (block?.type !== 'pair' || handle.index === undefined) return null;
       const other = handle.index + (delta > 0 ? 1 : -1);
       if (other < 0 || other >= block.figures.length) return null;
       const figures = block.figures.map((figure) => ({ ...figure }));
@@ -878,7 +1227,7 @@ export function nudgeMutation(
       return blockSet(slide, blockId, '/figures', figures);
     }
     case 'scale-marker': {
-      if (block.type !== 'scales' || handle.index === undefined) return null;
+      if (block?.type !== 'scales' || handle.index === undefined) return null;
       const item = block.items[handle.index];
       if (!item) return null;
       const next = Math.max(0, Math.min(100, item.value + delta));
@@ -889,13 +1238,13 @@ export function nudgeMutation(
     case 'dia-label':
     case 'dia-marker': {
       // one unit per step on the half-pixel grid (ten with Shift through `delta`); Up is negative y
-      if (block.type !== 'dia') return null;
+      if (block?.type !== 'dia') return null;
       const dx = axis === 'x' ? delta : 0;
       const dy = axis === 'y' ? -delta : 0;
       return diaMoveMutation(slide, block, handle, dx, dy);
     }
     case 'free-move': {
-      // one sheet pixel per step (eight with Shift through `delta`); Up is negative y
+      // one sheet pixel per step (ten with Shift through `delta`); Up is negative y
       const pos = posFor(slide, blockId, boxes);
       if (!pos) return null;
       const dx = axis === 'x' ? delta : 0;
@@ -912,6 +1261,13 @@ export function nudgeMutation(
       const [x, y, w, h] = grown.box;
       if (x === pos.x && y === pos.y && w === pos.w && h === pos.h) return null;
       return posMutation(slide, blockId, { ...pos, x, y, w, h });
+    }
+    case 'free-rotate': {
+      // one degree per step (fifteen with Shift through `delta`); Right and Up turn clockwise
+      const pos = posFor(slide, blockId, boxes);
+      if (!pos) return null;
+      const [mutation] = rotateMutations(slide, [{ id: blockId, pos }], { by: delta });
+      return mutation ?? null;
     }
     case 'block-move': {
       const located = locateBlock(slide, blockId);
@@ -984,6 +1340,7 @@ export function actionForMutation(mutation: Mutation, baseRevision: number): Act
         },
       };
     case 'slide.set':
+    case 'slide.replace':
     case 'text.replace':
       return {
         id: 'slide.update',
@@ -995,10 +1352,10 @@ export function actionForMutation(mutation: Mutation, baseRevision: number): Act
 }
 
 /**
- * One action call for a list of stage mutations (this round: a group move, an align, a nudge of
- * several blocks, a Delete of a multi-selection): a single mutation is its own action as above;
- * several travel as one `slide.update`, so the write is one revision and one undo step. Every
- * mutation must name the same slide.
+ * One action call for a list of stage mutations (a group move, an align, a nudge of several
+ * objects, a Delete of a multi-selection, a conversion followed by the gesture's writes): a
+ * single mutation is its own action as above; several travel as one `slide.update`, so the write
+ * is one revision and one undo step. Every mutation must name the same slide.
  */
 export function actionForMutations(
   mutations: ReadonlyArray<Mutation>,
@@ -1019,39 +1376,95 @@ export function actionForMutations(
 }
 
 // ---------------------------------------------------------------------------------------------
-// The draw tools (gslides-parity SPEC 3.1 rows 9 to 12; R09 A1: a click places the default box,
-// a drag draws one, and a new text box opens in the caret state)
+// The draw tools (gslides-parity SPEC-2 6.1 row 33, 6.2; R05 A1, A5, A10: a click places the
+// default box, a drag draws one, Shift constrains, Option draws from the centre, the point tools
+// take a click per point, Scribble samples the pointer, and a new text box opens in the caret state)
 
-/** The toolbar's Select, Text box, Shape and Line tools; the stage draws with everything but Select. */
+/** The toolbar's tools; the stage draws with everything but Select (the chrome's DrawTool, one kind per row). */
 export type EditorTool =
   | 'select'
   | { kind: 'text' }
-  | { kind: 'shape'; shape: 'rectangle' | 'rounded' | 'ellipse' }
-  | { kind: 'line'; line: 'line' | 'arrow' | 'rule' };
+  | { kind: 'shape'; shape: ShapeKind }
+  | { kind: 'line'; line: LineKind | 'rule' }
+  | { kind: 'table'; columns: number; rows: number }
+  | { kind: 'chart'; chart: ChartKind }
+  | { kind: 'wordArt'; text: string };
 
-/** The default box a tool places on a click, in sheet pixels (palette-data.ts DEFAULT_SIZE). */
-export const TOOL_DEFAULT_SIZE: Readonly<Record<'text' | 'shape' | 'line', [number, number]>> = {
+/** The default box a tool places on a click, in sheet pixels (SPEC-2 6.2; palette-data.ts DEFAULT_SIZE). */
+export const TOOL_DEFAULT_SIZE: Readonly<
+  Record<'text' | 'shape' | 'line' | 'table' | 'chart' | 'wordArt', [number, number]>
+> = {
   text: [480, 64],
   shape: [240, 160],
   line: [320, 8],
+  table: [960, 320],
+  chart: [960, 540],
+  wordArt: [800, 120],
 };
 
 /** A drag shorter than this on both axes counts as a click and places the default box. */
 export const DRAW_MIN_PX = 8;
+/** Scribble samples the pointer every 8 px and keeps at most this many points (SPEC-2 2.4.4, 6.2). */
+export const SCRIBBLE_SAMPLE_PX = 8;
+export const SCRIBBLE_MAX_POINTS = 64;
+/** The word art insert: 88 px display weight 500 with a 1.5 px ink outline (SPEC-2 6.2). */
+export const WORD_ART_SIZE = 88;
+
+/** True for a tool whose drag draws a line (a point tool included). */
+export function isLineTool(tool: EditorTool): tool is { kind: 'line'; line: LineKind | 'rule' } {
+  return tool !== 'select' && tool.kind === 'line';
+}
+
+/** True for Curve and Polyline: a click per point, ended by a double click, Enter or a click on the first point. */
+export function isPointTool(tool: EditorTool): boolean {
+  return isLineTool(tool) && (tool.line === 'curve' || tool.line === 'polyline');
+}
+
+/** True for Scribble: the pointer is sampled while it is down. */
+export function isScribbleTool(tool: EditorTool): boolean {
+  return isLineTool(tool) && tool.line === 'scribble';
+}
 
 /** The block type a tool inserts. */
 export function toolBlockType(tool: Exclude<EditorTool, 'select'>): BlockType {
-  if (tool.kind === 'text') return 'text';
-  if (tool.kind === 'shape') return 'shape';
-  return tool.line === 'rule' ? 'rule' : 'shape';
+  switch (tool.kind) {
+    case 'text':
+    case 'wordArt':
+      return 'text';
+    case 'shape':
+      return 'shape';
+    case 'table':
+      return 'table';
+    case 'chart':
+      return 'chart';
+    case 'line':
+      return tool.line === 'rule' ? 'rule' : 'shape';
+  }
 }
 
-/** The block a tool inserts under `id`: an empty text box, a shape, a line or arrow shape, or a rule. */
+/** The block a tool inserts under `id`: an empty text box, a shape preset, a line kind, a rule, a table, a chart or a word art text. */
 export function toolBlock(tool: Exclude<EditorTool, 'select'>, id: string): Block {
-  if (tool.kind === 'text') return { id, type: 'text', text: '' };
-  if (tool.kind === 'shape') return { id, type: 'shape', shape: tool.shape };
-  if (tool.line === 'rule') return { id, type: 'rule', orientation: 'horizontal' };
-  return { id, type: 'shape', shape: tool.line };
+  switch (tool.kind) {
+    case 'text':
+      return { id, type: 'text', text: '', autofit: 'grow' };
+    case 'wordArt':
+      return {
+        id,
+        type: 'text',
+        text: tool.text,
+        typography: { size: WORD_ART_SIZE, weight: 500, align: 'center' },
+        outline: { color: 'ink', width: 1.5 },
+      } as Block;
+    case 'shape':
+      return { id, type: 'shape', shape: tool.shape };
+    case 'table':
+      return emptyTable(id, tool.columns, tool.rows);
+    case 'chart':
+      return emptyChart(id, tool.chart);
+    case 'line':
+      if (tool.line === 'rule') return { id, type: 'rule', orientation: 'horizontal' };
+      return { id, type: 'shape', shape: tool.line };
+  }
 }
 
 /** The box a draw drag stands for, or the default box at the press when the drag was a click. */
@@ -1059,37 +1472,106 @@ export function drawnBox(
   tool: Exclude<EditorTool, 'select'>,
   start: Point,
   now: Point,
+  mods: { shift?: boolean; alt?: boolean } = {},
 ): { box: Box; dragged: boolean } {
-  const dx = now.x - start.x;
-  const dy = now.y - start.y;
+  let dx = now.x - start.x;
+  let dy = now.y - start.y;
   const dragged = Math.abs(dx) >= DRAW_MIN_PX || Math.abs(dy) >= DRAW_MIN_PX;
   if (!dragged) {
     const [w, h] = TOOL_DEFAULT_SIZE[tool.kind];
     return { box: [start.x, start.y, w, h], dragged: false };
   }
+  if (mods.shift === true) {
+    if (isLineTool(tool)) ({ dx, dy } = angleLock(dx, dy));
+    else {
+      const side = Math.max(Math.abs(dx), Math.abs(dy));
+      dx = Math.sign(dx || 1) * side;
+      dy = Math.sign(dy || 1) * side;
+    }
+  }
+  if (mods.alt === true) {
+    return {
+      box: [start.x - Math.abs(dx), start.y - Math.abs(dy), Math.abs(dx) * 2, Math.abs(dy) * 2],
+      dragged: true,
+    };
+  }
   return {
-    box: [Math.min(start.x, now.x), Math.min(start.y, now.y), Math.abs(dx), Math.abs(dy)],
+    box: [
+      Math.min(start.x, start.x + dx),
+      Math.min(start.y, start.y + dy),
+      Math.abs(dx),
+      Math.abs(dy),
+    ],
     dragged: true,
   };
 }
 
 /** The 8 px grid position of a drawn box, with a 1 px floor on both sides. */
-export function drawnPosition(box: Box, z: number): Position {
-  const grid = 8;
-  const round = (v: number) => Math.round(v / grid) * grid;
+export function drawnPosition(box: Box, z: number, grid = true): Position {
+  const step = grid ? 8 : 1;
+  const round = (v: number) => Math.round(v / step) * step;
   return {
     x: round(box[0]),
     y: round(box[1]),
-    w: Math.max(grid, round(box[2])),
-    h: Math.max(grid, round(box[3])),
+    w: Math.max(step, round(box[2])),
+    h: Math.max(step, round(box[3])),
     z,
   };
 }
 
+/** The orientation of a drawn line from its start and end (a diagonal keeps the direction of the drag). */
+export function drawnLineOrientation(
+  start: Point,
+  end: Point,
+): 'horizontal' | 'vertical' | 'diagonal-down' | 'diagonal-up' {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  if (Math.abs(dy) < DRAW_MIN_PX) return 'horizontal';
+  if (Math.abs(dx) < DRAW_MIN_PX) return 'vertical';
+  return dx * dy > 0 ? 'diagonal-down' : 'diagonal-up';
+}
+
 /**
- * The one `block.insert` a draw tool ends in: on a freeform slide the block takes the drawn box
- * as `pos` on top of the stack; on a grammar slide the box is the layout's and the block lands in
- * the slot after the selected block (the slot the caller names). Null when the slide has no slot.
+ * The pointer samples of a scribble or the clicks of a point tool as a path block's box and
+ * `points` (fractions of the box, SPEC-2 2.4.3): the box spans the points with a 1 px floor, the
+ * points are rounded to three places, and a scribble is thinned to at most SCRIBBLE_MAX_POINTS.
+ */
+export function pathFromPoints(
+  points: ReadonlyArray<Point>,
+): { box: Box; points: [number, number][] } | null {
+  if (points.length < 2) return null;
+  const xs = points.map((p) => p.x);
+  const ys = points.map((p) => p.y);
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  const w = Math.max(1, Math.max(...xs) - x);
+  const h = Math.max(1, Math.max(...ys) - y);
+  const fractions = points.map((p): [number, number] => [
+    Math.round(((p.x - x) / w) * 1000) / 1000,
+    Math.round(((p.y - y) / h) * 1000) / 1000,
+  ]);
+  return { box: [Math.round(x), Math.round(y), Math.round(w), Math.round(h)], points: fractions };
+}
+
+/** Every nth sample so a scribble keeps at most `max` points, the first and last always kept. */
+export function simplifyPoints(points: ReadonlyArray<Point>, max = SCRIBBLE_MAX_POINTS): Point[] {
+  if (points.length <= max) return [...points];
+  const out: Point[] = [];
+  const step = (points.length - 1) / (max - 1);
+  for (let i = 0; i < max; i += 1) {
+    const at = Math.round(i * step);
+    const point = points[Math.min(points.length - 1, at)];
+    if (point) out.push(point);
+  }
+  return out;
+}
+
+/**
+ * The one `block.insert` a draw tool ends in: on a canvas the block takes the drawn box as `pos`
+ * on top of the stack (a line takes the drag's orientation, a path tool its points); on a grammar
+ * slide the box is the layout's and the block lands in the slot after the selected block (the slot
+ * the caller names). The Editor converts a slide that is not a canvas first (SPEC-2 1.6), so the
+ * grammar branch serves an insert that asked for a slot. Null when the slide has no slot.
  */
 export function toolInsertMutation(
   slide: Slide,
@@ -1098,8 +1580,19 @@ export function toolInsertMutation(
   box: Box,
   slot: BlockSlot | null,
   after?: string,
+  options: {
+    grid?: boolean;
+    points?: [number, number][];
+    orientation?: ShapeBlock['orientation'];
+  } = {},
 ): Mutation | null {
-  const block = toolBlock(tool, id);
+  let block = toolBlock(tool, id);
+  if (block.type === 'shape' && isLineKind(block.shape)) {
+    if (isPathKind(block.shape) && options.points !== undefined)
+      block = { ...block, points: options.points } as Block;
+    else if (options.orientation !== undefined)
+      block = { ...block, orientation: options.orientation } as Block;
+  }
   if (isFreeformSlide(slide)) {
     const stack = slide.slots.main ?? [];
     const maxZ = Math.max(0, ...stack.map((b) => b.pos?.z ?? 0));
@@ -1109,7 +1602,7 @@ export function toolInsertMutation(
       slideId: slide.id,
       slot: 'main',
       ...(last !== undefined ? { after: last } : {}),
-      block: { ...block, pos: drawnPosition(box, maxZ + 1) },
+      block: { ...block, pos: drawnPosition(box, maxZ + 1, options.grid ?? true) },
     };
   }
   if (slot === null) return null;
@@ -1120,4 +1613,14 @@ export function toolInsertMutation(
     ...(after !== undefined ? { after } : {}),
     block,
   };
+}
+
+/** The default box of a block inserted without a click: centred on the sheet at the tool's default size (SPEC-2 6.2). */
+export function centredBox(size: readonly [number, number]): Box {
+  return [
+    Math.round((SHEET.width - size[0]) / 2),
+    Math.round((SHEET.height - size[1]) / 2),
+    size[0],
+    size[1],
+  ];
 }

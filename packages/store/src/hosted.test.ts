@@ -22,7 +22,14 @@ import { openHostedDecks } from './hosted.ts';
 import type { HostedDecks } from './hosted.ts';
 import { directorySeed, materializeSeed } from './seed.ts';
 import { NOT_PERSISTENT_NOTICE, selectStore } from './select.ts';
-import type { DeckStore, StoreEvent } from './store.ts';
+import {
+  etagMd5,
+  prunableSnapshots,
+  retainedSnapshots,
+  snapshotKey,
+  snapshotPath,
+} from './snapshots.ts';
+import type { DeckStore, StoreEvent, VersionRecord } from './store.ts';
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
 
@@ -224,7 +231,9 @@ describe('hosted stores', () => {
   async function blobPair(hooks?: {
     beforeCommit?: () => Promise<void>;
   }): Promise<{ fake: FakeBlobClient; a: BlobStore; b: BlobStore }> {
-    const fake = memoryBlobClient();
+    // the fake stamps uploads with the test clock; the pair prunes with no grace so a test sees
+    // the retention rule act (the store's default leaves an unreferenced snapshot alone for 5 min)
+    const fake = memoryBlobClient(undefined, { now });
     await pushDeckDir(fake, 'gt-brand', join(seedRoot, 'gt-brand'), { overwrite: false });
     const a = openBlobStore({
       client: fake,
@@ -233,6 +242,7 @@ describe('hosted stores', () => {
       now,
       syncTtlMs: 0,
       pollMs: 20,
+      snapshotGraceMs: 0,
     });
     const b = openBlobStore({
       client: fake,
@@ -241,6 +251,7 @@ describe('hosted stores', () => {
       now,
       syncTtlMs: 0,
       pollMs: 20,
+      snapshotGraceMs: 0,
       ...(hooks === undefined ? {} : { hooks }),
     });
     return { fake, a, b };
@@ -415,6 +426,261 @@ describe('hosted stores', () => {
       );
       expect(existsSync(join(a.dir, 'assets', 'mood-earth-light.png'))).toBe(true);
       expect(await a.pullAssets()).toBe(0);
+    });
+
+    /* gslides-parity SPEC-2 8.2, 0.40: immutable per revision documents */
+
+    it('stores the snapshot keyed by the body md5 before deck.json flips, and the record names it', async () => {
+      const { fake, a, b } = await blobPair();
+      fake.calls.length = 0;
+      const outcome = await a.write({
+        baseRevision: 412,
+        author: agentA,
+        mutations: [setSize(22)],
+      });
+      expect(outcome.ok).toBe(true);
+      if (!outcome.ok) return;
+      // the key is the md5 of the deck.json bytes the write pushed, which is the etag the store answers
+      const head = await fake.head('decks/gt-brand/deck.json');
+      const key = etagMd5(head!.version)!;
+      expect(key).toMatch(/^[0-9a-f]{32}$/);
+      expect(snapshotKey(fake.blobs.get('decks/gt-brand/deck.json')!.bytes)).toBe(key);
+      expect(outcome.entry.snapshot).toBe(key);
+      expect(fake.blobs.has(`decks/gt-brand/${snapshotPath(key)}`)).toBe(true);
+      // the write order: the snapshot, then the manifest, then the slides and the record
+      const puts = fake.calls.filter((c) => c.op === 'put').map((c) => c.pathname);
+      expect(puts.indexOf(`decks/gt-brand/${snapshotPath(key)}`)).toBeLessThan(
+        puts.indexOf('decks/gt-brand/deck.json'),
+      );
+      expect(puts.indexOf('decks/gt-brand/deck.json')).toBeLessThan(
+        puts.indexOf('decks/gt-brand/versions/1.json'),
+      );
+      // the stored record carries the key, so the peer reads it back
+      const records = await b.records();
+      expect(records.map((r) => r.snapshot)).toEqual([key]);
+      // the snapshot is the whole document
+      const body = JSON.parse(
+        new TextDecoder().decode(fake.blobs.get(`decks/gt-brand/${snapshotPath(key)}`)!.bytes),
+      ) as { deck: { revision: number }; slides: Record<string, unknown> };
+      expect(body.deck.revision).toBe(413);
+      expect(Object.keys(body.slides)).toHaveLength(WORKED_SLIDES.length);
+      expect(await a.snapshots()).toBe(1);
+    });
+
+    it('pulls the current document from its snapshot with no slide body read, even when the CDN serves stale bodies', async () => {
+      const { fake, a, b } = await blobPair();
+      await b.sync();
+      // a commits r413; from now on get() answers the r412 bodies for every overwritten path while
+      // head() is current; the snapshot is a fresh pathname, so its body is never stale
+      fake.holdGet();
+      const first = await a.write({ baseRevision: 412, author: agentA, mutations: [setSize(20)] });
+      expect(first.ok).toBe(true);
+      fake.calls.length = 0;
+      const seen = await b.read();
+      expect(seen.document.deck.revision).toBe(413);
+      const list = seen.document.slides['content-rule'];
+      expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 20 });
+      const gets = fake.calls.filter((c) => c.op === 'get').map((c) => c.pathname);
+      expect(gets.some((p) => p.startsWith('decks/gt-brand/slides/'))).toBe(false);
+      expect(gets.some((p) => p === 'decks/gt-brand/deck.json')).toBe(false);
+      expect(gets.filter((p) => p.startsWith('decks/gt-brand/snapshots/'))).toHaveLength(1);
+      fake.releaseGet();
+    });
+
+    it('two racing writers store two snapshots; the winner’s is served and the loser’s is orphaned and pruned', async () => {
+      const hooks = {
+        beforeCommit: async () => {
+          // the other instance commits a millisecond later, as two function instances do; the
+          // manifests differ in updatedAt, so the two bodies get two keys
+          clock = '2026-09-11T10:00:00.001Z';
+          const won = await pair.a.write({
+            baseRevision: 412,
+            author: agentA,
+            mutations: [setSize(20)],
+          });
+          expect(won.ok).toBe(true);
+        },
+      };
+      const pair = await blobPair(hooks);
+      const lost = await pair.b.write({
+        baseRevision: 412,
+        author: agentB,
+        mutations: [setSize(22)],
+      });
+      expect(lost.ok).toBe(false);
+      // two different bodies, two different keys: the loser stored its snapshot and then failed
+      // the conditional manifest push, so its snapshot is named by no record and no etag
+      const stored = blobsOf(pair.fake, 'decks/gt-brand/snapshots/');
+      expect(stored).toHaveLength(2);
+      const head = await pair.fake.head('decks/gt-brand/deck.json');
+      const winner = etagMd5(head!.version)!;
+      expect(stored).toContain(`decks/gt-brand/${snapshotPath(winner)}`);
+      const records = await pair.b.records();
+      expect(records.map((r) => r.snapshot)).toEqual([winner]);
+      // pull() and documentAtRevision(413) serve the winner's document
+      const fresh = openBlobStore({
+        client: pair.fake,
+        deckId: 'gt-brand',
+        dir: join(root, 'mirror-c', 'gt-brand'),
+        now,
+        syncTtlMs: 0,
+      });
+      const current = (await fresh.read()).document;
+      const list = current.slides['content-rule'];
+      expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 20 });
+      const at = await fresh.documentAtRevision(413);
+      const atList = at.slides['content-rule'];
+      expect(atList?.kind === 'content' && atList.slots.right?.[0]).toMatchObject({ size: 20 });
+      // the prune removes the orphan and keeps the winner's
+      clock = '2026-09-11T10:30:00.000Z';
+      expect(await pair.a.pruneSnapshots()).toBe(1);
+      expect(blobsOf(pair.fake, 'decks/gt-brand/snapshots/')).toEqual([
+        `decks/gt-brand/${snapshotPath(winner)}`,
+      ]);
+    });
+
+    it('two writers from one revision inside one clock millisecond contest one key; the second answers a conflict and the served document is the first’s', async () => {
+      // the key is the md5 of the manifest bytes: the same base, the same updatedAt and other
+      // slides give equal manifests and different bodies, so the name is contested and the
+      // writer whose body the name holds is the one whose manifest may flip
+      let raced = false;
+      const hooks = {
+        beforeCommit: async () => {
+          // the race is staged once; b's retry at the end of the test commits undisturbed
+          if (raced) return;
+          raced = true;
+          const won = await pair.a.write({
+            baseRevision: 412,
+            author: agentA,
+            mutations: [setSize(20)],
+          });
+          expect(won.ok ? 'ok' : won.message).toBe('ok');
+        },
+      };
+      const pair = await blobPair(hooks);
+      const lost = await pair.b.write({
+        baseRevision: 412,
+        author: agentB,
+        mutations: [setSize(22)],
+      });
+      expect(lost.ok).toBe(false);
+      if (lost.ok || lost.code !== 'conflict') return;
+      expect(lost.message).toMatch(/its snapshot took the name this write computed/);
+      expect(lost.currentRevision).toBe(413);
+      expect(blobsOf(pair.fake, 'decks/gt-brand/snapshots/')).toHaveLength(1);
+      // the one snapshot is a's body, and every reader gets a's document
+      const list = (await pair.b.read()).document.slides['content-rule'];
+      expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 20 });
+      expect(blobsOf(pair.fake, 'decks/gt-brand/versions/')).toEqual([
+        'decks/gt-brand/versions/1.json',
+      ]);
+      // a retry from the current document lands
+      clock = '2026-09-11T10:00:00.002Z';
+      const retry = await pair.b.write({
+        baseRevision: 413,
+        author: agentB,
+        mutations: [setSize(22)],
+      });
+      expect(retry.ok).toBe(true);
+      expect(await pair.a.revision()).toBe(414);
+    });
+
+    it('retention keeps the newest records’ snapshots and every named version’s', async () => {
+      const { fake, a } = await blobPair();
+      let base = 412;
+      const keys: string[] = [];
+      for (const [i, size] of [20, 22, 24].entries()) {
+        clock = `2026-09-11T10:0${i + 1}:00.000Z`;
+        const outcome = await a.write({
+          baseRevision: base,
+          author: agentA,
+          mutations: [setSize(size)],
+        });
+        expect(outcome.ok).toBe(true);
+        if (!outcome.ok) return;
+        keys.push(outcome.entry.snapshot!);
+        base = outcome.revision;
+      }
+      // a named version at r415 pins the third snapshot; the record's snapshot is the current one
+      await a.saveVersion(kevin, 'pinned');
+      const records = await a.records();
+      // the retention set over a window of one record: the newest write and the named version's
+      const retained = retainedSnapshots(records, 1);
+      expect([...retained].sort()).toEqual([keys[2]].sort());
+      const entries = await fake.list('decks/gt-brand/snapshots/');
+      const doomed = prunableSnapshots(entries, 'decks/gt-brand/', retained, {
+        now: Date.parse('2026-09-11T11:00:00.000Z'),
+        graceMs: 0,
+      });
+      expect(doomed.sort()).toEqual(
+        keys
+          .slice(0, 2)
+          .map((k) => `decks/gt-brand/${snapshotPath(k)}`)
+          .sort(),
+      );
+      // a snapshot younger than the grace is left alone whatever the records say: at 10:06:30
+      // the 10:01 upload has aged past five minutes and the 10:02 one has not
+      expect(
+        prunableSnapshots(entries, 'decks/gt-brand/', retained, {
+          now: Date.parse('2026-09-11T10:06:30.000Z'),
+          graceMs: 5 * 60_000,
+        }),
+      ).toEqual(keys.slice(0, 1).map((k) => `decks/gt-brand/${snapshotPath(k)}`));
+      // the store's own prune keeps the last 50 records' snapshots: nothing goes here
+      expect(await a.pruneSnapshots()).toBe(0);
+      expect(await a.snapshots()).toBe(3);
+    });
+
+    it('documentAtRevision reads the record’s snapshot, and replays a record that carries none', async () => {
+      // a record written before the round: a FileStore write on the seed folder, pushed as is
+      const seedDeck = join(seedRoot, 'gt-brand');
+      const legacy = openFileStore({ dir: seedDeck, now });
+      const early = await legacy.write({
+        baseRevision: 412,
+        author: kevin,
+        mutations: [setSize(22)],
+      });
+      expect(early.ok).toBe(true);
+      const { fake, a, b } = await blobPair();
+      const records = await a.records();
+      expect(records).toHaveLength(1);
+      expect(records[0]?.snapshot).toBeUndefined();
+      // through the replay: the document before the legacy write
+      const before = await a.documentAtRevision(412);
+      const beforeList = before.slides['content-rule'];
+      expect(beforeList?.kind === 'content' && beforeList.slots.right?.[0]).not.toMatchObject({
+        size: 22,
+      });
+      // a round two write: its record names a snapshot and documentAtRevision reads it
+      const outcome = await a.write({
+        baseRevision: 413,
+        author: agentA,
+        mutations: [setSize(24)],
+      });
+      expect(outcome.ok).toBe(true);
+      if (!outcome.ok) return;
+      fake.calls.length = 0;
+      await b.sync(true);
+      const at = await b.documentAtRevision(414);
+      const atList = at.slides['content-rule'];
+      expect(atList?.kind === 'content' && atList.slots.right?.[0]).toMatchObject({ size: 24 });
+      const gets = fake.calls.filter((c) => c.op === 'get').map((c) => c.pathname);
+      expect(gets).toContain(`decks/gt-brand/${snapshotPath(outcome.entry.snapshot!)}`);
+      // the legacy record still replays on the peer
+      const legacyAt = await b.documentAtRevision(413);
+      const legacyList = legacyAt.slides['content-rule'];
+      expect(legacyList?.kind === 'content' && legacyList.slots.right?.[0]).toMatchObject({
+        size: 22,
+      });
+      // and a record whose snapshot is gone falls back to the replay
+      fake.blobs.delete(`decks/gt-brand/${snapshotPath(outcome.entry.snapshot!)}`);
+      const replayed = await b.documentAtRevision(414);
+      const replayedList = replayed.slides['content-rule'];
+      expect(replayedList?.kind === 'content' && replayedList.slots.right?.[0]).toMatchObject({
+        size: 24,
+      });
+      const typed: VersionRecord[] = await b.records();
+      expect(typed.map((r) => r.n)).toEqual([1, 2]);
     });
   });
 

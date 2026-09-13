@@ -520,50 +520,6 @@
   font: 13px/1.4 var(--pt-text);
 }
 
-/* Insert > Table (dialogs/InsertTable.tsx): Google's grid picker, 20 by 20 cells of 18 px on the
-   8 px rhythm; the cells inside the pointed size fill with the plate and take the ink edge, the
-   caption under the grid reads the size. One --pt-hair frame around the grid; the cells draw
-   --pt-hair-soft so the grid reads as a grid without a rule under every row. */
-.ts-tablegrid {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 6px;
-  border: 1px solid var(--pt-hair);
-  background: var(--pt-paper);
-  cursor: pointer;
-}
-
-.ts-tablegrid:focus-visible {
-  outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
-}
-
-.ts-tablegrid-row {
-  display: flex;
-  gap: 2px;
-}
-
-.ts-tablegrid-cell {
-  width: 18px;
-  height: 18px;
-  box-sizing: border-box;
-  border: 1px solid var(--pt-hair-soft);
-  background: transparent;
-}
-
-.ts-tablegrid-cell.is-in {
-  border-color: var(--pt-ink);
-  background: var(--pt-plate);
-}
-
-.ts-tablegrid-size {
-  margin: 8px 0 0;
-  color: var(--pt-ink-2);
-  font: 13px/1 var(--pt-text);
-  font-variant-numeric: tabular-nums;
-}
-
 /* Insert > Icon (dialogs/InsertIcon.tsx): the symbol picker fills the dialog's body; the dialog
    draws the frame, so the card's own edge and fade leave */
 .ts-dialog .ts-iconpicker.is-embedded {

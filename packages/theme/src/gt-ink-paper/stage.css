@@ -62,6 +62,9 @@
   inset: 57px;
   padding: 72px 80px;
   display: none;
+  /* the slide is a stacking context (gslides-parity SPEC-2 0.98): a canvas object's z-index stays
+     inside it, so the frame, the wordmark and the counter paint over every object */
+  isolation: isolate;
 }
 .ts-sheet .slide.is-on {
   display: block;

@@ -1,7 +1,7 @@
 // A small deck for the linter's tests: the three worked slides of SPEC 4.3 as they should be,
 // plus one slide and one asset per family of planted defects. Each planted defect names the rule
 // it should trip in a comment, so the test reads as the rule table.
-import type { Asset, Deck, DeckDocument, Slide } from '../contracts.ts';
+import type { Asset, Deck, DeckDocument, RenderRecord, Slide } from '../contracts.ts';
 
 const assets: Record<string, Asset> = {
   'liquid-metal-diamond': {
@@ -344,7 +344,8 @@ const badRaw: unknown[] = [
   // The slide is on the freeform layout (docs/freeform.md), so it also plants: layout/freeform;
   // type/ladder (23 px) and type/weight-cap (700) on the text block's typography; freeform/overlap
   // (the text box over the heading); color/off-palette (a hex fill on the box); freeform/off-sheet
-  // (an arrow past the right edge). Every value here is schema-valid.
+  // at severity 2 (an arrow crossing the right edge) and at severity 3 (a rule wholly outside the
+  // sheet, gslides-parity SPEC-2 0.96). Every value here is schema-valid.
   {
     schemaVersion: 1,
     id: 'fixed-points',
@@ -379,6 +380,116 @@ const badRaw: unknown[] = [
           shape: 'arrow',
           pos: { x: 1500, y: 800, w: 200, h: 8, z: 3 },
         },
+        {
+          id: 's2',
+          type: 'rule',
+          orientation: 'horizontal',
+          pos: { x: 1700, y: 400, w: 200, h: 8, z: 4 },
+        },
+      ],
+    },
+  },
+  // The canvas (gslides-parity SPEC-2 section 1): a Title slide arranged by hand, with its record
+  // in `grammar`, plants layout/freeform and nothing else; a text over the picture object and a
+  // text over a textless box are the design, so freeform/overlap skips them (0.76); a rotated text
+  // is judged by its bounding box (0.107); a shape's text takes the copy rules (copy/no-exclamation,
+  // 2.2.17); a run coloured with a semantic hue is color/semantic-icons-only at severity 1 and a hex
+  // run is color/off-palette (0.6); a chart with 12 categories in a 720 px box is chart/size (0.60).
+  {
+    schemaVersion: 1,
+    id: 'canvas-title',
+    kind: 'content',
+    layout: { type: 'freeform' },
+    template: 'title',
+    grammar: {
+      kind: 'title',
+      slots: { main: ['mark', 'heading', 'lead'] },
+      boxes: {
+        mark: { x: 137, y: 322, w: 132, h: 84, z: 0 },
+        heading: { x: 137, y: 450, w: 1326, h: 90, z: 1 },
+        lead: { x: 137, y: 566, w: 1326, h: 76, z: 2 },
+      },
+      fields: { mark: { w: 132, h: 84 }, autofit: ['heading', 'lead'] },
+    },
+    slots: {
+      main: [
+        { id: 'mark', type: 'mark', w: 132, h: 84, pos: { x: 137, y: 322, w: 132, h: 84, z: 0 } },
+        {
+          id: 'heading',
+          type: 'heading',
+          level: 'h1',
+          text: 'Arranged by hand',
+          autofit: 'shrink',
+          pos: { x: 137, y: 450, w: 1326, h: 90, z: 1 },
+        },
+        {
+          id: 'lead',
+          type: 'paragraph',
+          role: 'lead',
+          tone: 'muted',
+          measure: 56,
+          text: 'The heading and the lead keep their boxes.',
+          autofit: 'shrink',
+          pos: { x: 137, y: 566, w: 1326, h: 76, z: 2 },
+        },
+      ],
+    },
+  },
+  {
+    schemaVersion: 1,
+    id: 'canvas-objects',
+    kind: 'content',
+    layout: { type: 'freeform' },
+    slots: {
+      main: [
+        // the picture object under a caption: the design, not an overlap
+        {
+          id: 'picture',
+          type: 'picture',
+          asset: 'liquid-metal-diamond',
+          pos: { x: 0, y: 0, w: 1600, h: 900, z: 0 },
+        },
+        // a textless box under a heading: the design, not an overlap
+        {
+          id: 'plate',
+          type: 'box',
+          fill: 'paper',
+          strokeWidth: 0,
+          pos: { x: 137, y: 500, w: 740, h: 240, z: 1, group: 'plate' },
+        },
+        {
+          id: 'big',
+          type: 'heading',
+          level: 'big',
+          text: 'Over the picture',
+          pos: { x: 163, y: 522, w: 688, h: 77, z: 2, group: 'plate' },
+        },
+        // a shape with text: the copy rules read it (copy/no-exclamation)
+        {
+          id: 'callout',
+          type: 'shape',
+          shape: 'wedgeRectCallout',
+          fill: 'plate',
+          text: 'Ship it now!',
+          pos: { x: 1000, y: 129, w: 400, h: 160, z: 3 },
+        },
+        // a rotated text box beside the heading: its bounding box reaches the callout's box, so
+        // freeform/overlap names the pair by the rotated bounds (0.107)
+        {
+          id: 'tilted',
+          type: 'text',
+          text: 'Tilted [fast]{c:green} and [loud]{c:#ff0000}',
+          pos: { x: 900, y: 300, w: 200, h: 40, z: 4, rotate: 90 },
+        },
+        // chart/size: 12 categories in a 720 px box
+        {
+          id: 'chart',
+          type: 'chart',
+          kind: 'column',
+          categories: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'],
+          series: [{ name: 'Series 1', values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] }],
+          pos: { x: 137, y: 129, w: 720, h: 300, z: 5 },
+        },
       ],
     },
   },
@@ -404,7 +515,11 @@ export const deck: Deck = {
         'mood-rosetta',
       ],
     },
-    { id: 'status', name: 'Status and plan', slideIds: ['opener-status', 'fixed-points'] },
+    {
+      id: 'status',
+      name: 'Status and plan',
+      slideIds: ['opener-status', 'fixed-points', 'canvas-title', 'canvas-objects'],
+    },
   ],
   assets,
   revision: 1,
@@ -419,3 +534,30 @@ export const document: DeckDocument = {
 
 /** The slides without planted defects, for the clean-deck assertion. */
 export const GOOD_SLIDE_IDS = good.map((s) => s.id);
+
+/**
+ * One render record per rendered rule the fixture plants (gslides-parity SPEC-2 2.1.5): the
+ * `fixed-points` text box `t1` needs 80 px of text in a 40 px box under no autofit, so
+ * text/overflow fires with the fix that writes the box height; the coverage test applies it.
+ */
+export const renderedRecords: RenderRecord[] = [
+  {
+    deckId: deck.id,
+    slideId: 'fixed-points',
+    revision: 1,
+    theme: 'light',
+    scale: 1,
+    image: 'fixed-points-light.png',
+    renderer: 'Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max',
+    pageErrors: [],
+    consoleErrors: [],
+    overflow: [],
+    blocks: {
+      t1: { type: 'text', box: [137, 150, 400, 40], lines: 3, fontSize: 23, contentHeight: 80 },
+    },
+    fonts: { status: 'loaded', faces: [] },
+    anchors: [],
+    rasters: [],
+    timing: { readyMs: 10, screenshotMs: 40 },
+  },
+];

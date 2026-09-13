@@ -51,6 +51,7 @@ function entryOf(blob: WithMeta): BlobEntry {
     url: blob.url,
     size: typeof blob.size === 'number' ? blob.size : 0,
     version: blob.etag !== undefined && blob.etag !== '' ? strongEtag(blob.etag) : uploaded,
+    ...(uploaded === '' ? {} : { uploadedAt: uploaded }),
   };
 }
 
@@ -131,7 +132,7 @@ export function vercelBlobClient(env: Env = process.env): BlobClient {
           mode: 'folded',
           ...(cursor === undefined ? {} : { cursor }),
         });
-        for (const folder of page.folders ?? []) out.add(folder);
+        for (const folder of page.folders) out.add(folder);
         cursor = page.hasMore ? page.cursor : undefined;
       } while (cursor !== undefined);
       return [...out].sort();

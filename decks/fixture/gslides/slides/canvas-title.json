@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-title",
+  "template": "title",
+  "grammar": {
+    "kind": "title",
+    "slots": {
+      "main": [
+        "mark",
+        "heading",
+        "lead"
+      ]
+    },
+    "boxes": {
+      "mark": {
+        "x": 137,
+        "y": 288,
+        "w": 132,
+        "h": 84,
+        "z": 0
+      },
+      "heading": {
+        "x": 137,
+        "y": 420,
+        "w": 901,
+        "h": 90,
+        "z": 1
+      },
+      "lead": {
+        "x": 137,
+        "y": 536,
+        "w": 901,
+        "h": 75,
+        "z": 2
+      }
+    },
+    "fields": {
+      "mark": {
+        "w": 132,
+        "h": 84
+      },
+      "template": "title",
+      "autofit": [
+        "heading",
+        "lead"
+      ]
+    }
+  },
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "mark",
+        "pos": {
+          "x": 137,
+          "y": 288,
+          "w": 132,
+          "h": 84,
+          "z": 0
+        },
+        "type": "mark",
+        "w": 132,
+        "h": 84
+      },
+      {
+        "id": "heading",
+        "pos": {
+          "x": 137,
+          "y": 420,
+          "w": 901,
+          "h": 90,
+          "z": 1
+        },
+        "type": "heading",
+        "level": "h1",
+        "text": "A title slide as a canvas",
+        "autofit": "shrink"
+      },
+      {
+        "id": "lead",
+        "pos": {
+          "x": 137,
+          "y": 536,
+          "w": 901,
+          "h": 75,
+          "z": 2
+        },
+        "type": "paragraph",
+        "text": "The mark, the heading and this lead are objects; a text box grows, another shrinks, a shape holds padded text and an icon sits beside it.",
+        "role": "lead",
+        "tone": "muted",
+        "measure": 56,
+        "autofit": "shrink"
+      },
+      {
+        "id": "grow",
+        "pos": {
+          "x": 137,
+          "y": 640,
+          "w": 520,
+          "h": 60,
+          "z": 3
+        },
+        "type": "text",
+        "text": "A text box that resizes to fit its text",
+        "padding": 16,
+        "autofit": "grow"
+      },
+      {
+        "id": "shrink",
+        "pos": {
+          "x": 700,
+          "y": 640,
+          "w": 420,
+          "h": 80,
+          "z": 4
+        },
+        "type": "text",
+        "text": "A text box with shrink text on overflow: the copy is long enough at 26 px that the fit steps the size down the ladder to 24 or 22 before it fits the box it was given.",
+        "typography": {
+          "size": 26
+        },
+        "padding": 16,
+        "autofit": "shrink"
+      },
+      {
+        "id": "padded",
+        "pos": {
+          "x": 1160,
+          "y": 620,
+          "w": 300,
+          "h": 120,
+          "z": 5
+        },
+        "alt": "A rounded rectangle holding a short label",
+        "type": "shape",
+        "shape": "roundRect",
+        "stroke": "ink",
+        "text": "Padded, middle aligned",
+        "typography": {
+          "align": "center"
+        },
+        "padding": {
+          "top": 8,
+          "right": 24,
+          "bottom": 8,
+          "left": 24
+        },
+        "valign": "middle"
+      },
+      {
+        "id": "icon",
+        "pos": {
+          "x": 1400,
+          "y": 289,
+          "w": 48,
+          "h": 48,
+          "z": 6
+        },
+        "type": "icon",
+        "name": "check-circle",
+        "size": 48
+      }
+    ]
+  }
+}

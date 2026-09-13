@@ -1,26 +1,28 @@
-// The stage in edit mode (SPEC 6.4; gslides-parity SPEC 4.3, 7.2.14, 7.2.15, 10.2): the theme's
-// .ts-sheet root, the fitted sheet with the frame at the fit or at the View > Zoom factor, the
-// slide rendered through renderSlide as innerHTML (SPEC 5.3: React owns chrome, overlays and view
-// state only) with the prompts of empty placeholders, the measured block boxes, hover and
-// selection, the gestures with a live preview from a draft document, inline text editing, the
-// draw tools, the clipboard and paint format, drop to insert or replace a picture, the right-click
-// classification the chrome's context menu draws, and the overlay layer the chrome fills.
-// Nothing here reaches the document except through an action-table call (SPEC 7.1): a drag ends
-// in one mutation that `dispatch` receives as the same `block.set`, `block.move` or `slide.update`
-// call the CLI and the MCP server make, with the document's revision as baseRevision. The owner of
-// the client store (undo, autosave, conflicts; SPEC 6.7) provides `dispatch`.
+// The stage in edit mode (SPEC 6.4; gslides-parity SPEC 4.3, 7.2.14, 7.2.15, 10.2; SPEC-2
+// sections 1 and 6): the theme's .ts-sheet root, the fitted sheet with the frame at the fit or at
+// the View > Zoom factor, the slide rendered through renderSlide as innerHTML (SPEC 5.3: React
+// owns chrome, overlays and view state only) with the prompts of empty placeholders, the measured
+// object boxes, hover and selection, the gestures with a live preview from a draft document,
+// inline text editing, the draw tools, the clipboard and paint format, drop to insert or replace a
+// picture, the right-click classification the chrome's context menu draws, and the overlay layer
+// the chrome fills. Nothing here reaches the document except through an action-table call (SPEC
+// 7.1): a drag ends in one call that `dispatch` receives as the same `block.set`, `block.move` or
+// `slide.update` call the CLI and the MCP server make, with the document's revision as
+// baseRevision. The owner of the client store (undo, autosave, conflicts; SPEC 6.7) provides
+// `dispatch`.
 //
-// Google's text model (gslides-parity SPEC 10.2, R09 A1): a single click inside text places the
-// caret where it landed and the block's frame is the drag surface; double click selects a word
-// and triple click a paragraph, the browser's own behaviour on the editable run; Esc commits and
-// selects the block; Enter breaks a paragraph in the four multiline pointers, appends an item in
-// a list and commits elsewhere; Tab and Shift Tab walk the cells of a table, the last cell adding
-// a row; typing is one `text.replace` per 400 ms pause, so one Cmd Z removes one burst; the
-// arrows nudge on a freeform slide and are inert on a grammar slide; no bare letter does anything
-// (keys.ts editorKeyAction). The freeform layout (Freeform.tsx) drags its blocks anywhere with
-// snapping and guides, resizes them from eight handles, selects several with Shift click or a
-// marquee and moves them as a group. Every gesture still ends in one write: several `pos`
-// mutations travel as one `slide.update` (actionForMutations).
+// Every slide is a canvas (Kevin's directive of 2026-09-12, SPEC-2 1.1): every top level block of
+// every slide kind, a title's mark, heading and lead, a statement's big line, a picture kind's
+// photograph, plate and plate blocks are objects a person drags, resizes, rotates, reorders,
+// groups, duplicates, deletes and edits in place. The first canvas gesture on a slide that is not
+// on the freeform layout converts it losslessly and travels the conversion in the same write
+// (SPEC-2 1.6): the gesture previews over a provisional conversion from the stage's boxes, and the
+// release measures the slide on a hidden 1x sheet (canvas-measure.ts, the one measurer the CLI
+// shares) and commits one `slide.update` of `[slide.replace, ...the gesture's writes]`, one
+// revision and one undo step. Typing, table commands, typography, colour, Apply layout and Delete
+// of a block stay grammar writes and never convert. Selection, hover, Tab and a right-click never
+// write. The overlay draws a rotated object's ring from `pos` (SPEC-2 1.5), the readouts, the
+// deck's guides and the rulers; zoom and pan are view state through `onZoom`.
 import type {
   DragEvent as ReactDragEvent,
   PointerEvent as ReactPointerEvent,
@@ -32,11 +34,15 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { renderSlide } from '@turboslide/render/slide';
 import type { ActionId } from '@turboslide/schema/actions';
 import type { Asset } from '@turboslide/schema/assets';
-import type { Block, BlockType } from '@turboslide/schema/blocks';
+import type { Block, BlockType, ShotTrim } from '@turboslide/schema/blocks';
 import type { TableBlock, TableCommand } from '@turboslide/schema/blocks/table';
 import { applyTableCommand } from '@turboslide/schema/blocks/table';
+import type { GuidesInput } from '@turboslide/schema/canvas';
+import { GUIDE_CENTRE } from '@turboslide/schema/canvas';
 import { isMultilinePath } from '@turboslide/schema/catalog';
-import type { DeckDocument, Slide } from '@turboslide/schema/deck';
+import type { Color } from '@turboslide/schema/color';
+import { detachConnectors, followConnectors } from '@turboslide/schema/connect';
+import type { DeckDocument, DeckGuides, Slide } from '@turboslide/schema/deck';
 import type { Finding } from '@turboslide/schema/findings';
 import type {
   AlignEdge,
@@ -47,12 +53,18 @@ import type {
 import { sortByZ } from '@turboslide/schema/freeform';
 import type { Mutation } from '@turboslide/schema/mutations';
 import { jsonEqual } from '@turboslide/schema/pointer';
+import type { Position } from '@turboslide/schema/position';
 import { applyMutations } from '@turboslide/schema/reduce';
 import type { Box } from '@turboslide/schema/render';
+import { isClosedShapeKind } from '@turboslide/schema/shapes';
 import type { Text as Markup } from '@turboslide/schema/text';
-import { canonicalText, parseText } from '@turboslide/schema/text';
+import { canonicalText, parseText, plainLength } from '@turboslide/schema/text';
+import type { RunMarks } from '@turboslide/schema/text';
+import { TYPE_LADDER } from '@turboslide/schema/typography';
 import { CONTENT_ORIGIN } from '@turboslide/theme/tokens';
 
+import { measureForCanvas, measureForFit } from './canvas-measure';
+import type { FitMeasure } from './canvas-measure';
 import {
   altFor,
   assetIdFor,
@@ -62,7 +74,6 @@ import {
   fileToDataUrl,
   freeId,
   imageFilesOf,
-  insertSlotFor,
   paintFormatOf,
   paintMutations,
   pastedBlockInserts,
@@ -71,29 +82,57 @@ import {
   takenBlockIds,
 } from './clipboard';
 import type { ClipboardPayload, ClipboardStore, PaintFormat } from './clipboard';
+import { cropByHandle, fullExtent, isNoTrim, NO_TRIM, normalizeTrim, panCrop } from './crop';
 import { Frame } from './Frame';
 import {
   alignMutations,
+  boundingBoxOf,
   distributeMutations,
+  expandGroups,
   freeformBlocks,
   freeNudgeMutations,
+  freshGroupTag,
   groupBox as groupBoxOf,
+  groupMembers,
+  groupMutations,
   isFreeformSlide,
+  isObjectId,
   measureBoxes,
+  objectIds,
+  placedOf,
+  posFor,
+  selectionUnion,
+  sharedGroup,
+  toFreeform,
+  ungroupMutations,
   zOrderMutations,
 } from './Freeform';
+import type { FreeformSlide } from './Freeform';
 import {
   actionForMutations,
   blockMoveFor,
+  blockMoveHandle,
+  centredBox,
   drawnBox,
+  drawnLineOrientation,
   EMPTY_BOXES,
   freeGesture,
   gestureMutation,
   handlesFor,
+  isLineBlock,
+  isLineTool,
+  isPointTool,
+  isScribbleTool,
   labelClearanceBox,
   locateBlock,
   nudgeMutation,
+  pathFromPoints,
+  SCRIBBLE_SAMPLE_PX,
   sheetPoint,
+  simplifyPoints,
+  siteUnder,
+  sitesUnder,
+  TOOL_DEFAULT_SIZE,
   toolBlockType,
   toolInsertMutation,
 } from './Gestures';
@@ -101,6 +140,7 @@ import type {
   EditorTool,
   FreeContext,
   GestureContext,
+  GestureMods,
   Handle,
   MeasuredBoxes,
   Point,
@@ -115,11 +155,20 @@ import {
   tableRowAppendMutation,
   textBurstMutation,
 } from './InlineText';
-import type { CaretPlacement, InlineTextEndReason } from './InlineText';
+import type {
+  CaretInfo,
+  CaretPlacement,
+  InlineTextEndReason,
+  InlineTextHandle,
+} from './InlineText';
 import { editorKeyAction, isBareCharacterKey } from './keys';
+import { toggleMark } from './marks';
+import type { ToggleMark } from './marks';
 import { isMarquee, marqueeBox, marqueeHits } from './Marquee';
 import { MaterialMount } from './MaterialMount';
 import { isPictureKind } from './model';
+import { flipMutations, ROTATE_READOUT_MS, rotateMutations } from './rotate';
+import { inchesLabel, rulerToSheet } from './rulers-model';
 import {
   allBlockIds,
   blockById,
@@ -134,7 +183,8 @@ import {
   isEditableTarget,
   isTextBlockType,
   listItemPointer,
-  resolveBlock,
+  objectContextTarget,
+  resolveObject,
   resolveRun,
   runElement,
   selectedBlockId,
@@ -145,9 +195,10 @@ import {
 import type { BlockFamily, Selection } from './Selection';
 import { fitSheetAt, Sheet, SHEET_PAD } from './Sheet';
 import type { SheetZoom } from './Sheet';
-import { boxSnapLines, sheetSnapLines } from './snap';
+import { boxSnapLines, deckGuideLines, sheetEdgeLines, sheetSnapLines } from './snap';
 import { applyThemeToTree } from './theme';
 import type { Theme } from './theme';
+import { centerKeepingPoint, clampZoom, scrollForCenter, stepZoom, zoomFromWheel } from './zoom';
 
 import './Editor.css';
 
@@ -171,8 +222,8 @@ export type LintBox = {
 };
 
 /**
- * The arrange actions of a freeform selection, the stage's side of block.align,
- * block.distribute and block.order with the schema's vocabulary; the context menu calls them.
+ * The arrange actions of a selection, the stage's side of block.align, block.distribute and
+ * block.order with the schema's vocabulary; the context menu calls them.
  */
 export type ArrangeActions = {
   /** the selected block count */
@@ -185,6 +236,24 @@ export type ArrangeActions = {
   zOrder: (move: OrderMove) => void;
 };
 
+/** The rulers' state the overlay draws (SPEC-2 6.1 row 29): on, the scale and the selection's extent. */
+export type RulersView = {
+  on: boolean;
+  /** the pointer over the stage in sheet pixels, for the hairline; null off the stage */
+  pointer: Point | null;
+  /** the selection's bounding box in sheet pixels, shaded on both rulers */
+  selection: Box | null;
+};
+
+/**
+ * A guide being dragged: its axis, its live position in sheet pixels, the inch readout (SPEC-2
+ * 0.86) and, for a stored guide, the position it started from (a drag out of a ruler has none).
+ */
+export type DraggingGuide = { axis: 'x' | 'y'; at: number; label: string; from?: number };
+
+/** Crop mode's state for the overlay (SPEC-2 6.1 row 19): the frame, the full picture behind it and the trim. */
+export type CropView = { blockId: string; frame: Box; full: Box; trim: ShotTrim };
+
 /** What the Editor hands the overlay layer on every render (SPEC 6.4); the chrome's Overlay draws it. */
 export type EditorOverlayView = {
   slideId: string;
@@ -196,6 +265,8 @@ export type EditorOverlayView = {
   selection: Selection;
   /** the selected block's or run's box */
   selectionBox: Box | null;
+  /** the selected object's position, so the ring and the handles rotate and flip with it (SPEC-2 1.5) */
+  selectionPos: Position | null;
   /** the block's plain name for the chip (gslides-parity SPEC 13.7); with the id after a middle dot only when ids are shown */
   chip: string | null;
   handles: Handle[];
@@ -212,22 +283,42 @@ export type EditorOverlayView = {
   alt: boolean;
   /** the 12 px clearance ring of the dragged diagram label, ink when a stroke intrudes (SPEC 6.4) */
   clearance: { box: Box; ok: boolean } | null;
-  /** the slide is a freeform slide: blocks carry `pos` */
+  /** the slide is a canvas: blocks carry `pos` */
   freeform: boolean;
   /** the boxes of the other selected blocks of a multi-selection; the anchor is selectionBox */
   extraBoxes: Box[];
   /** the union box while more than one block is selected */
   groupBox: Box | null;
+  /** the group tag the selection shares (the ring carries role="group", the chip reads "Group") */
+  groupTag: string | null;
+  /** the member names of a group, for the ring's accessible name */
+  groupMembers: string[];
   /** the selected block count */
   count: number;
   /** the marquee being dragged, or the box a draw tool is drawing */
   marquee: Box | null;
   /** the snap guides of the gesture under way */
   guides: Guide[];
-  /** the arrange actions of a freeform selection, null when none applies */
+  /** the arrange actions of a selection, null when none applies */
   arrange: ArrangeActions | null;
   /** paint format is armed: the next click paints */
   paint: boolean;
+  /** the live angle while a rotation is down or for 600 ms after a rotate key (SPEC-2 0.86) */
+  rotation: number | null;
+  /** the live size while a resize is down, in sheet pixels */
+  sizeReadout: { w: number; h: number } | null;
+  /** the rulers (SPEC-2 6.1 row 29); null while View > Show ruler is off */
+  rulers: RulersView | null;
+  /** the deck's guides while View > Guides > Show guides is on */
+  deckGuides: DeckGuides | null;
+  /** a guide being dragged, with its inch readout */
+  draggingGuide: DraggingGuide | null;
+  /** crop mode (SPEC-2 6.1 row 19) */
+  crop: CropView | null;
+  /** the connection sites of the shape under a dragged line end or an armed line tool (6 px rings) */
+  sites: Point[];
+  /** the points placed so far by a Curve or Polyline tool, in sheet pixels */
+  drawPoints: Point[];
   onHandleDown: (handle: Handle, event: PointerEvent) => void;
   /** `axis` names the arrow pair for a two-axis handle; the default is the handle's own axis */
   onHandleNudge: (handle: Handle, delta: number, axis?: 'x' | 'y') => void;
@@ -236,10 +327,26 @@ export type EditorOverlayView = {
    * block, or one step within its slot on a grammar slide; `forward` is Up.
    */
   onHandleOrder: (handle: Handle, move: OrderMove) => void;
+  /** a press on a deck guide starts its drag (SPEC-2 6.1 row 30) */
+  onGuideDown: (axis: 'x' | 'y', at: number, event: PointerEvent) => void;
+  /** a right-click on a deck guide opens its menu */
+  onGuideContextMenu: (axis: 'x' | 'y', at: number, event: MouseEvent) => void;
+  /** a press on a ruler starts a drag out that creates a guide at the drop (row 29) */
+  onRulerDown: (axis: 'x' | 'y', event: PointerEvent) => void;
 };
 
-/** The right-click targets of gslides-parity SPEC 4.3 the stage tells apart; the chrome's ContextMenu draws them. */
-export type EditorContextTarget = 'emptyCanvas' | 'textBlock' | 'image' | 'tableCell';
+/** The right-click targets of gslides-parity SPEC 4.3 and SPEC-2 4.3 the stage tells apart; the chrome's ContextMenu draws them. */
+export type EditorContextTarget =
+  | 'emptyCanvas'
+  | 'textBlock'
+  | 'image'
+  | 'tableCell'
+  | 'shape'
+  | 'line'
+  | 'group'
+  | 'chart'
+  | 'cellRange'
+  | 'guide';
 
 /** A right-click on the stage, or Shift F10 with a block selected. */
 export type EditorContextMenu = {
@@ -252,11 +359,14 @@ export type EditorContextMenu = {
   blockId?: string;
   /** the cell of a table target */
   cell?: { row: number; col: number; pointer: string };
+  /** the guide of a guide target */
+  guide?: { axis: 'x' | 'y'; at: number };
 };
 
 /** What the menu model's predicates read about the selection (menus/model.ts MenuContext.selection). */
 export type EditorMenuSelection = {
   blocks: number;
+  blockIds: string[];
   block?: BlockFamily;
   textBlock: boolean;
   listItem: boolean;
@@ -265,6 +375,26 @@ export type EditorMenuSelection = {
   order: { forward: boolean; backward: boolean; front: boolean; back: boolean };
   editing: boolean;
   freeform: boolean;
+  /* round two (SPEC-2 4.1, section 1) */
+  /** the selected blocks are objects of the canvas (top level blocks of any kind) */
+  object: boolean;
+  /** every selected block carries a pos (the slide is a canvas) */
+  positioned: boolean;
+  /** the slide is on the freeform layout */
+  canvas: boolean;
+  /** the selection shares a group tag */
+  group?: string;
+  /** the editor remembers an ungrouped set whose blocks are still on the slide */
+  regroup: boolean;
+  /** the selected picture object covers the sheet at the bottom of the stack (SPEC-2 0.100) */
+  coversSheet: boolean;
+  /** the marks of the caret's run and the plain range, while a run is being edited */
+  marks?: RunMarks & { b?: true };
+  range?: [number, number];
+  /** the selected picture carries a crop, mask or adjustment */
+  imageEdited: boolean;
+  /** the selected list item's level */
+  listLevel?: number;
 };
 
 /** A line for the snackbar (gslides-parity SPEC 12); `undo` asks for the Undo action. */
@@ -282,14 +412,14 @@ export type EditorHandle = {
   duplicate: () => Promise<void>;
   selectAll: () => void;
   deselect: () => void;
-  /** front and back on a freeform slide; forward and backward everywhere */
+  /** front and back on a canvas; forward and backward everywhere */
   order: (move: OrderMove) => void;
   align: (edge: AlignEdge, to?: AlignTarget) => void;
   distribute: (axis: DistributeAxis) => void;
   /** the link popover on the selected block's first run (Cmd K) */
   link: () => void;
   /** one of the nine table commands on the selected table, at the cell being edited */
-  table: (kind: TableCommand['kind']) => void;
+  table: (kind: StageTableCommand['kind']) => void;
   /** arms Paint format from the selection: true when the selection carried a look */
   armPaint: (keep?: boolean) => boolean;
   disarmPaint: () => void;
@@ -298,12 +428,73 @@ export type EditorHandle = {
   commitText: () => void;
   focus: () => void;
   menuSelection: () => EditorMenuSelection;
-  /** one step insert of a picture (SPEC 7.2.14): asset.add, then block.insert, or the replace of an image block or a picture slide */
+  /**
+   * one step insert of a picture (SPEC 7.2.14): asset.add, then block.insert, or the replace of an
+   * image block or a picture slide; `background` lands the picture object at the bottom of the
+   * stack (Change background > Choose image, SPEC-2 2.6.4; the integrator's seam at merge 2)
+   */
   insertPicture: (
     file: File,
-    where?: { blockId?: string; point?: Point; replace?: boolean },
+    where?: { blockId?: string; point?: Point; replace?: boolean; background?: boolean },
   ) => Promise<void>;
+  /* round two: the canvas (SPEC-2 sections 1 and 6) */
+  /** converts the slide to the canvas with no other write (slide.toCanvas) */
+  toCanvas: () => Promise<void>;
+  zoomTo: (zoom: SheetZoom, center?: Point) => void;
+  zoomStep: (direction: 1 | -1) => void;
+  rotate: (by: number) => void;
+  flip: (axis: 'h' | 'v') => void;
+  group: () => void;
+  ungroup: () => void;
+  regroup: () => void;
+  cropMode: () => void;
+  exitCrop: () => void;
+  mask: (shape: string | null) => void;
+  centerOnPage: (axis: 'x' | 'y') => void;
+  addGuide: (axis: 'x' | 'y', at?: number) => void;
+  clearGuides: () => void;
+  /** inserts text at the caret, or into a new text box when nothing is being edited */
+  insertText: (text: string) => void;
+  /** the word art bar's insert */
+  wordArt: (text: string) => void;
+  /** Edit > Select none */
+  selectNone: () => void;
+  /** measures and writes the fit of block.autofit on the window transport (SPEC-2 0.64) */
+  applyAutofit: (blockId: string) => Promise<void>;
+  /** an Insert row's block as an object at the sheet centre (or the box), converting the slide first (SPEC-2 0.8) */
+  insertObject: (block: Block, options?: { box?: Box; bottom?: boolean }) => void;
+  /** a mark toggled on the caret's range or the selected objects' whole text (the toolbar's buttons) */
+  toggleMark: (mark: ToggleMark) => void;
+  /** a text or highlight colour on the caret's range */
+  setTextColor: (which: 'color' | 'highlight', color: Color | null) => void;
+  /** the list item's level or the block's indent, one step (Cmd ] and [) */
+  indent: (by: 1 | -1) => void;
+  /** the objects' positions, for the Format options fields (Size & rotation, Position) */
+  positions: () => { id: string; pos: Position }[];
+  /** writes a position field on the selected objects (the Format options fields), converting first */
+  setPosition: (blockId: string, pos: Position) => void;
 };
+
+/**
+ * The nine round one table commands the stage runs by kind alone (SPEC 7.3); the round two
+ * commands carry fields and arrive as a plan through the shell's `tableCommand(plan)` (SPEC-2 2.7,
+ * B5's table-tools.ts), never through this handle.
+ */
+type StageTableCommand = Extract<
+  TableCommand,
+  {
+    kind:
+      | 'insertRowAbove'
+      | 'insertRowBelow'
+      | 'insertColumnLeft'
+      | 'insertColumnRight'
+      | 'deleteRow'
+      | 'deleteColumn'
+      | 'deleteTable'
+      | 'distributeRows'
+      | 'distributeColumns';
+  }
+>;
 
 export type EditorProps = {
   document: DeckDocument;
@@ -322,6 +513,13 @@ export type EditorProps = {
   /** the selection, when the page owns it (the inspector reads it); internal otherwise */
   selection?: Selection;
   onSelectionChange?: (selection: Selection) => void;
+  /**
+   * the ids of the selected objects beyond the anchor (a Shift or Cmd click, a marquee, Select
+   * all), whenever they change: the page's selection names the anchor alone, so this is the
+   * page's signal to read `menuSelection()` again (SPEC-2 4.1: Group, Ungroup, Regroup, Align
+   * and Distribute read the whole selection)
+   */
+  onMultiSelectionChange?: (ids: readonly string[]) => void;
   /** the slide's findings; drawn while `lintLayer` is on */
   findings?: readonly Finding[];
   lintLayer?: boolean;
@@ -333,6 +531,10 @@ export type EditorProps = {
   onRemoved?: (block: { type: BlockType; id: string }) => void;
   /** View > Zoom (gslides-parity SPEC 7.2.16); the fit when absent */
   zoom?: SheetZoom;
+  /** the sheet point view.zoom keeps under the stage centre (SPEC-2 0.81); the stage scrolls there when it changes */
+  zoomCenter?: Point | null;
+  /** the zoom a wheel, a pinch, Cmd+plus or the handle asked for; the route writes view.zoom */
+  onZoom?: (zoom: SheetZoom, center?: Point) => void;
   /** the toolbar's draw tool; Select when absent. The stage calls onToolDone after one insert */
   tool?: EditorTool;
   onToolDone?: () => void;
@@ -351,6 +553,20 @@ export type EditorProps = {
   clipboard?: ClipboardStore;
   /** the deck id the clipboard payloads carry, so a paste from another deck imports its assets */
   deckId?: string;
+  /* round two (SPEC-2 6.1 rows 29 to 31) */
+  /** the deck's guides, drawn in the overlay while `showGuides` is on and snapped to under `snapGuides` */
+  guides?: DeckGuides;
+  /** a guide added, moved or removed from the rulers and the overlay: the route writes deck.guides */
+  onGuides?: (input: GuidesInput) => void;
+  showRuler?: boolean;
+  showGuides?: boolean;
+  /** View > Snap to > Guides (on unless set) and Grid (off unless set) */
+  snapGuides?: boolean;
+  snapGrid?: boolean;
+  /** a slide converted to the canvas by a gesture (a notice hook; the write travels with the gesture) */
+  onCanvasConvert?: (slideId: string) => void;
+  /** the caret's marks and range changed inside a run (the toolbar's pressed state) */
+  onCaret?: (info: CaretInfo | null) => void;
 };
 
 type Editing = {
@@ -367,24 +583,40 @@ type ActiveGesture = {
   handle: Handle;
   start: Point;
   ctx: GestureContext;
+  /** the slide is not a canvas: the context holds a provisional conversion and the release measures */
+  convert: Mutation | null;
+  /** Option was held at the press: the drag drops copies where the pointer releases (SPEC-2 0.79) */
+  duplicate: boolean;
   /** the last previewed mutations, so an unchanged move re-renders nothing */
   last: Mutation[] | null;
+  /** the last modifiers seen, for the release */
+  mods: GestureMods;
 };
 
 /** A press on a block's body that may become a drag; CSS pixels. */
-type Press = { blockId: string; clientX: number; clientY: number };
+type Press = { blockId: string; clientX: number; clientY: number; alt: boolean };
 
 /** A run to edit once the slide re-rendered with it (a new list item, the next cell, a drawn text box). */
 type PendingEdit = { blockId: string; pointer: string; caret: CaretPlacement; link?: boolean };
+
+/** Crop mode's live state (SPEC-2 6.1 row 19): the frame and the trim as the handles move them. */
+type CropState = {
+  blockId: string;
+  frame: Box;
+  trim: ShotTrim;
+  original: { frame: Box; trim: ShotTrim };
+};
 
 /** A body drag starts once the pointer has moved this many CSS pixels from the press. */
 const DRAG_START_PX = 4;
 /** How long the stage waits for a server write (an asset) to reach the document before it gives up. */
 const ASSET_WAIT_MS = 20_000;
-/** The default box of a dropped picture on a freeform slide (palette-data.ts DEFAULT_SIZE shot). */
+/** The default box of a dropped picture (palette-data.ts DEFAULT_SIZE shot). */
 const DROP_PICTURE_SIZE: [number, number] = [480, 272];
 /** Pictures up to 25 MB (gslides-parity SPEC 11.3; the sentence of menus/strings.ts ERRORS.pictureSize). */
 const PICTURE_SIZE_NOTICE = 'Pictures up to 25 MB';
+/** The indent step of Cmd+] and Cmd+[ in px (SPEC-2 2.2.11). */
+const INDENT_STEP_PX = 64;
 
 function backdropFor(document: DeckDocument, slide: Slide | undefined, theme: Theme, base: string) {
   if (!slide || !isPictureKind(slide.kind) || !('picture' in slide)) return undefined;
@@ -394,9 +626,16 @@ function backdropFor(document: DeckDocument, slide: Slide | undefined, theme: Th
   return base + (theme === 'dark' ? asset.twins.dark : asset.twins.light);
 }
 
-/** The chip handle of a block, the one a body drag stands for: block-move or free-move. */
-function chipHandleFor(slide: Slide, boxes: MeasuredBoxes, blockId: string): Handle | undefined {
-  return handlesFor(slide, boxes, { kind: 'block', blockId }).find((h) => h.shape === 'chip');
+/** The chip handle of a block, the one a body drag stands for: free-move. */
+function chipHandleFor(
+  slide: Slide,
+  boxes: MeasuredBoxes,
+  blockId: string,
+  ids: readonly string[],
+): Handle | undefined {
+  return handlesFor(slide, boxes, { kind: 'block', blockId }, { ids }).find(
+    (h) => h.shape === 'chip',
+  );
 }
 
 /** The controls of the chrome a keydown may start from: their own keys, never the stage's. */
@@ -461,6 +700,39 @@ function markupHasLink(text: Markup | undefined): boolean {
   return text !== undefined && parseText(text).some((run) => run.link !== undefined);
 }
 
+/** The boxes of a canvas slide from its positions, for a gesture over a converted slide. */
+function boxesFromPositions(slide: Slide, measured: MeasuredBoxes): MeasuredBoxes {
+  const blocks: Record<string, Box> = {};
+  for (const block of freeformBlocks(slide)) {
+    if (block.pos) blocks[block.id] = [block.pos.x, block.pos.y, block.pos.w, block.pos.h];
+  }
+  return { ...measured, blocks };
+}
+
+/** The next smaller ladder size, or undefined at the bottom (the store action's ladderStepDown). */
+function ladderStepDown(size: number): number | undefined {
+  const sorted = [...TYPE_LADDER].sort((a, b) => b - a);
+  return sorted.find((step) => step < size);
+}
+
+/** True for a picture that shows an asset a crop applies to: the picture object or a shot. */
+function isCroppable(
+  block: Block | undefined,
+): block is Extract<Block, { type: 'picture' | 'shot' }> {
+  return block !== undefined && (block.type === 'picture' || block.type === 'shot');
+}
+
+/** True when the object covers the sheet at the bottom of the stack (the background photograph, SPEC-2 0.100). */
+function coversSheet(slide: Slide, blockId: string): boolean {
+  const blocks = freeformBlocks(slide);
+  const block = blocks.find((each) => each.id === blockId);
+  if (!block || block.type !== 'picture' || !block.pos) return false;
+  const stack = sortByZ(blocks);
+  if (stack[0]?.id !== blockId) return false;
+  const b = boundingBoxOf(block.pos);
+  return b[0] <= 0 && b[1] <= 0 && b[0] + b[2] >= 1600 && b[1] + b[3] >= 900;
+}
+
 export function Editor({
   document: doc,
   slideId,
@@ -474,12 +746,15 @@ export function Editor({
   dispatch,
   selection: controlled,
   onSelectionChange,
+  onMultiSelectionChange,
   findings,
   lintLayer = false,
   overlay,
   onError,
   onRemoved,
   zoom = 'fit',
+  zoomCenter = null,
+  onZoom,
   tool = 'select',
   onToolDone,
   showIds = false,
@@ -490,6 +765,14 @@ export function Editor({
   handle: onHandle,
   clipboard = clipboardStore,
   deckId,
+  guides: deckGuides,
+  onGuides,
+  showRuler = false,
+  showGuides = false,
+  snapGuides = true,
+  snapGrid = false,
+  onCanvasConvert,
+  onCaret,
 }: EditorProps) {
   const slide = doc.slides[slideId];
   const [draft, setDraft] = useState<DeckDocument | null>(null);
@@ -528,9 +811,23 @@ export function Editor({
   const [editing, setEditing] = useState<Editing | null>(null);
   const [alt, setAlt] = useState(false);
   const [paint, setPaint] = useState<{ format: PaintFormat; keep: boolean } | null>(null);
+  /* round two */
+  const [crop, setCrop] = useState<CropState | null>(null);
+  /* a member selected alone inside its group after a double click (SPEC-2 6.1 row 14) */
+  const [groupEntered, setGroupEntered] = useState<string | null>(null);
+  const [readout, setReadout] = useState<
+    { kind: 'angle'; value: number } | { kind: 'size'; w: number; h: number } | null
+  >(null);
+  const [space, setSpace] = useState(false);
+  const [draggingGuide, setDraggingGuide] = useState<DraggingGuide | null>(null);
+  const [pointer, setPointer] = useState<Point | null>(null);
+  const [sites, setSites] = useState<Point[]>([]);
+  const [drawPoints, setDrawPoints] = useState<Point[]>([]);
+  const [scroll, setScroll] = useState({ left: 0, top: 0 });
 
   const root = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLDivElement>(null);
+  const scroller = useRef<HTMLDivElement>(null);
   const gesture = useRef<ActiveGesture | null>(null);
   const press = useRef<Press | null>(null);
   /* the listeners bound once read the latest values through these refs */
@@ -558,6 +855,30 @@ export function Editor({
   toolRef.current = tool;
   const htmlRef = useRef(html);
   htmlRef.current = html;
+  const cropRef = useRef(crop);
+  cropRef.current = crop;
+  const groupEnteredRef = useRef(groupEntered);
+  groupEnteredRef.current = groupEntered;
+  const themeRef = useRef(theme);
+  themeRef.current = theme;
+  const assetBaseRef = useRef(assetBase);
+  assetBaseRef.current = assetBase;
+  const settingsRef = useRef({ snapGuides, snapGrid, showGuides, showRuler });
+  settingsRef.current = { snapGuides, snapGrid, showGuides, showRuler };
+  const deckGuidesRef = useRef(deckGuides);
+  deckGuidesRef.current = deckGuides;
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
+  const spaceRef = useRef(space);
+  spaceRef.current = space;
+  /* the set Ungroup left, for Regroup (SPEC-2 6.1 row 14) */
+  const ungrouped = useRef<{ slideId: string; ids: string[]; tag: string } | null>(null);
+  /* the caret's marks and range while a run is being edited */
+  const caretRef = useRef<CaretInfo | null>(null);
+  const inlineRef = useRef<InlineTextHandle | null>(null);
+  /* the points a Curve or Polyline tool placed so far */
+  const drawPointsRef = useRef<Point[]>([]);
+  const readoutTimer = useRef(0);
   /* the markup shown while a run is edited: frozen at the session's start so a burst's re-render
      never replaces the editable element under the caret */
   const frozenHtml = useRef<string | null>(null);
@@ -565,12 +886,16 @@ export function Editor({
   const committedText = useRef<Markup>('');
   const pendingEdit = useRef<PendingEdit | null>(null);
   const pendingSelect = useRef<string[] | null>(null);
+  /* crop mode to enter once the slide re-rendered with the picture object (a double click on a kind's photograph converts first) */
+  const pendingCrop = useRef<string | null>(null);
   const dispatchRef = useRef(dispatch);
   dispatchRef.current = dispatch;
   const onErrorRef = useRef(onError);
   onErrorRef.current = onError;
   const onSelectionRef = useRef(onSelectionChange);
   onSelectionRef.current = onSelectionChange;
+  const onMultiRef = useRef(onMultiSelectionChange);
+  onMultiRef.current = onMultiSelectionChange;
   const onRemovedRef = useRef(onRemoved);
   onRemovedRef.current = onRemoved;
   const onToolDoneRef = useRef(onToolDone);
@@ -583,6 +908,14 @@ export function Editor({
   onUndoRef.current = onUndo;
   const onRedoRef = useRef(onRedo);
   onRedoRef.current = onRedo;
+  const onZoomRef = useRef(onZoom);
+  onZoomRef.current = onZoom;
+  const onGuidesRef = useRef(onGuides);
+  onGuidesRef.current = onGuides;
+  const onConvertRef = useRef(onCanvasConvert);
+  onConvertRef.current = onCanvasConvert;
+  const onCaretRef = useRef(onCaret);
+  onCaretRef.current = onCaret;
   const clipboardRef = useRef(clipboard);
   clipboardRef.current = clipboard;
   const deckIdRef = useRef(deckId ?? doc.deck.id);
@@ -599,6 +932,22 @@ export function Editor({
     selectionRef.current = next;
     setInnerSelection(next);
     onSelectionRef.current?.(next);
+  };
+
+  /** A selection of objects widened to whole groups unless a member was entered (SPEC-2 6.1 row 14). */
+  const selectObjects = (ids: readonly string[]) => {
+    const slideNow = slideRef.current;
+    if (!slideNow || ids.length === 0) {
+      select(null);
+      return;
+    }
+    const entered = groupEnteredRef.current;
+    const widened =
+      entered !== null && ids.length === 1 && ids[0] === entered
+        ? [...ids]
+        : expandGroups(slideNow, ids);
+    const picked = selectionOf(widened);
+    select(picked.selection, picked.extra);
   };
 
   /* an anchor the page changed from outside the group (the inspector, Tab) ends the
@@ -623,6 +972,17 @@ export function Editor({
       setExtra(pruned);
     }
   }, [anchorId]);
+
+  /* a selection that leaves the entered group's member ends the entered state */
+  useEffect(() => {
+    if (groupEntered !== null && anchorId !== groupEntered) setGroupEntered(null);
+  }, [anchorId, groupEntered]);
+
+  /* the rest of the multi-selection changed while the anchor stayed (a Shift click, a marquee,
+     Select all, a deselect): the page's signal to read menuSelection() again */
+  useEffect(() => {
+    onMultiRef.current?.(extra);
+  }, [extra]);
 
   const measure = () => {
     const el = body.current;
@@ -675,15 +1035,199 @@ export function Editor({
     );
   };
 
+  /** The slide as the document will hold it after the mutations this tick issued (the reducer applied them; this ref lags one render). */
+  const slideAfter = (mutations: ReadonlyArray<Mutation>): Slide | undefined => {
+    if (mutations.length === 0) return slideRef.current;
+    try {
+      return applyMutations(docRef.current, [...mutations]).document.slides[slideIdRef.current];
+    } catch {
+      return slideRef.current;
+    }
+  };
+
+  // -------------------------------------------------------------------------------------------
+  // The conversion (SPEC-2 1.2, 1.3, 1.6)
+
+  /** The provisional conversion from the stage's boxes: what a gesture previews before the hidden sheet measured. */
+  const provisionalCanvas = (
+    slideNow: Slide,
+    boxesNow: MeasuredBoxes,
+  ): { slide: FreeformSlide; replace: Mutation } | null => {
+    if (isFreeformSlide(slideNow)) return null;
+    const converted = toFreeform(slideNow, boxesNow);
+    if (!converted) return null;
+    return {
+      slide: converted.slide,
+      replace: { op: 'slide.replace', slideId: slideNow.id, slide: converted.slide },
+    };
+  };
+
   /**
-   * One order step for a block: the paint order on a freeform slide (block.order), one place
-   * within its slot on a grammar slide (block.move). Cmd Up and Cmd Down, Shift for the ends
-   * (gslides-parity SPEC 10.1). On a grammar slide the direction follows the arrow on the key:
-   * `forward` (Cmd Up) moves the block one place up its slot, `backward` (Cmd Down) one place
-   * down, `front` and `back` to the first and the last place, the convention of the editor
-   * depth round (editor.spec.ts pins Down moving the first block to the second place). The parity
-   * round's first cut inverted the sign, so Down on the first block computed an index of -1 and
-   * wrote nothing (VERIFICATION.md finding 18).
+   * The measured conversion (SPEC-2 1.3): the slide rendered once more into a hidden 1x sheet and
+   * measured by the one function the CLI shares, so the pos the editor writes equal the CLI's. The
+   * stage's boxes stand in when the hidden sheet cannot render (a test without layout).
+   */
+  const measuredCanvas = async (
+    slideNow: Slide,
+  ): Promise<{ slide: FreeformSlide; replace: Mutation } | null> => {
+    if (isFreeformSlide(slideNow)) return null;
+    let converted: ReturnType<typeof toFreeform> = null;
+    try {
+      const measured = await measureForCanvas(docRef.current, slideNow, themeRef.current, {
+        assetBase: assetBaseRef.current,
+      });
+      converted = toFreeform(slideNow, measured);
+    } catch (error) {
+      onErrorRef.current?.(error);
+    }
+    if (!converted) converted = toFreeform(slideNow, boxesRef.current);
+    if (!converted) return null;
+    return {
+      slide: converted.slide,
+      replace: { op: 'slide.replace', slideId: slideNow.id, slide: converted.slide },
+    };
+  };
+
+  /**
+   * The autofit writes after a gesture (SPEC-2 6.2 Autofit, 0.64): the slide as the write leaves
+   * it is rendered into the hidden sheet and measured; a `grow` block whose text needs more than
+   * its box takes the text height as `pos.h`, a `shrink` block steps its size down the ladder by
+   * one, the same one step `block.autofit --apply` writes. Only the blocks the mutations touched.
+   */
+  const withAutofit = async (
+    slideNow: Slide,
+    mutations: Mutation[],
+    touched: ReadonlyArray<string>,
+  ): Promise<Mutation[]> => {
+    const after = (() => {
+      try {
+        return applyMutations(docRef.current, mutations).document.slides[slideNow.id];
+      } catch {
+        return undefined;
+      }
+    })();
+    if (!after) return mutations;
+    const fitted = freeformBlocks(after).filter(
+      (block) =>
+        touched.includes(block.id) &&
+        block.pos !== undefined &&
+        'autofit' in block &&
+        (block.autofit === 'grow' || block.autofit === 'shrink'),
+    );
+    if (fitted.length === 0) return mutations;
+    let measured: FitMeasure;
+    try {
+      const withSlide: DeckDocument = {
+        ...docRef.current,
+        slides: { ...docRef.current.slides, [after.id]: after },
+      };
+      measured = await measureForFit(withSlide, after, themeRef.current, {
+        assetBase: assetBaseRef.current,
+      });
+    } catch {
+      return mutations;
+    }
+    const out = [...mutations];
+    for (const block of fitted) {
+      const fit = measured[block.id];
+      const pos = block.pos;
+      if (!fit || fit.contentHeight === undefined || !pos || fit.contentHeight <= pos.h + 1)
+        continue;
+      if ('autofit' in block && block.autofit === 'grow') {
+        out.push({
+          op: 'block.set',
+          slideId: after.id,
+          blockId: block.id,
+          path: '/pos/h',
+          value: Math.ceil(fit.contentHeight),
+        });
+        continue;
+      }
+      const typography =
+        'typography' in block && block.typography !== undefined ? { ...block.typography } : {};
+      const size =
+        fit.fontSize ?? (typeof typography.size === 'number' ? typography.size : undefined);
+      const step = size !== undefined ? ladderStepDown(size) : undefined;
+      if (step === undefined) continue;
+      out.push({
+        op: 'block.set',
+        slideId: after.id,
+        blockId: block.id,
+        path: '/typography',
+        value: { ...typography, size: step },
+      });
+    }
+    return out;
+  };
+
+  /**
+   * One canvas write (SPEC-2 1.6): `build` reads the canvas slide and its boxes and returns the
+   * gesture's mutations; on a slide that is not a canvas yet the measured conversion's
+   * `slide.replace` travels first in the same `slide.update`, so the write is one revision and one
+   * undo step. The attached connectors follow the objects the write moved (2.4.7) and autofit runs
+   * over the objects it touched. The optional `then` runs after the write with the slide as written.
+   */
+  const commitCanvas = async (
+    build: (canvas: Slide, boxesNow: MeasuredBoxes) => Mutation[],
+    options: { autofit?: boolean; select?: (canvas: Slide) => string[] | null } = {},
+  ): Promise<void> => {
+    const slideNow = slideRef.current;
+    if (!slideNow) return;
+    let canvas: Slide = slideNow;
+    let prefix: Mutation[] = [];
+    if (!isFreeformSlide(slideNow)) {
+      const converted = await measuredCanvas(slideNow);
+      if (!converted) return;
+      canvas = converted.slide;
+      prefix = [converted.replace];
+    }
+    const boxesNow = isFreeformSlide(slideNow)
+      ? boxesRef.current
+      : boxesFromPositions(canvas, boxesRef.current);
+    const own = build(canvas, boxesNow);
+    if (own.length === 0 && prefix.length === 0) {
+      setDraft(null);
+      return;
+    }
+    const touched = own.flatMap((m) =>
+      m.op === 'block.set' && m.path.startsWith('/pos') ? [m.blockId] : [],
+    );
+    const followed = followAfter(canvas, [...prefix, ...own], touched);
+    let mutations = [...prefix, ...own, ...followed];
+    if (options.autofit !== false && touched.length > 0)
+      mutations = await withAutofit(slideNow, mutations, touched);
+    const wanted = options.select?.(canvas) ?? null;
+    if (wanted) pendingSelect.current = wanted;
+    commit(mutations);
+    if (prefix.length > 0) onConvertRef.current?.(slideNow.id);
+  };
+
+  /** The connector follow mutations over the slide as the mutations leave it (SPEC-2 2.4.7). */
+  const followAfter = (
+    canvas: Slide,
+    mutations: ReadonlyArray<Mutation>,
+    moved: ReadonlyArray<string>,
+  ): Mutation[] => {
+    if (moved.length === 0) return [];
+    try {
+      const after = applyMutations(docRef.current, [...mutations]).document.slides[canvas.id];
+      return after ? followConnectors(after, moved) : [];
+    } catch {
+      return [];
+    }
+  };
+
+  /** The positions of the selected objects on the canvas the gesture reads (a grammar slide's from the stage's boxes). */
+  const selectedPositions = (
+    canvas: Slide,
+    boxesNow: MeasuredBoxes,
+    ids: readonly string[],
+  ): { id: string; pos: Position }[] => placedOf(canvas, ids, boxesNow);
+
+  /**
+   * One order step for a block: the paint order on a canvas (block.order), one place within its
+   * slot on a grammar slide (block.move, the round one reorder, which SPEC-2 1.6 keeps as a grammar
+   * write; editor.spec.ts pins Cmd Down on the chip moving the block one place down its slot).
    */
   const orderBlock = (blockId: string, move: OrderMove) => {
     const slideNow = slideRef.current;
@@ -710,7 +1254,7 @@ export function Editor({
       ]);
       return;
     }
-    const chip = chipHandleFor(slideNow, boxesRef.current, blockId);
+    const chip = blockMoveHandle(slideNow, boxesRef.current, blockId);
     const mutation = chip
       ? nudgeMutation(
           chip,
@@ -727,16 +1271,29 @@ export function Editor({
     setDraft(null);
   }, [doc]);
 
-  /* Alt held: the diagram handles take the pointer (SPEC 6.4 Alt-drag); released, or the window
-     loses focus, they yield to selection again */
+  /* Alt held: the diagram handles take the pointer (SPEC 6.4 Alt-drag); Space held: the stage
+     pans (SPEC-2 6.1 row 28); released, or the window loses focus, they yield to selection again */
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'Alt') setAlt(true);
+      if (
+        e.key === ' ' &&
+        !editingRef.current &&
+        !isEditableTarget(e.target) &&
+        !isChromeControlTarget(e.target, root.current) &&
+        selectionRef.current === null
+      ) {
+        setSpace(true);
+      }
     };
     const up = (e: KeyboardEvent) => {
       if (e.key === 'Alt') setAlt(false);
+      if (e.key === ' ') setSpace(false);
     };
-    const off = () => setAlt(false);
+    const off = () => {
+      setAlt(false);
+      setSpace(false);
+    };
     window.addEventListener('keydown', down);
     window.addEventListener('keyup', up);
     window.addEventListener('blur', off);
@@ -748,7 +1305,7 @@ export function Editor({
   }, []);
 
   // -------------------------------------------------------------------------------------------
-  // Text editing (gslides-parity SPEC 7.2.15, 7.4, 10.2)
+  // Text editing (gslides-parity SPEC 7.2.15, 7.4, 10.2; SPEC-2 6.2)
 
   const startEdit = (
     run: { blockId: string; pointer: string; element: HTMLElement },
@@ -789,21 +1346,13 @@ export function Editor({
     if (current) writeText(current, text);
   };
 
-  /** The slide as the document will hold it after the mutations this tick issued (the reducer applied them; this ref lags one render). */
-  const slideAfter = (mutations: Mutation[]): Slide | undefined => {
-    if (mutations.length === 0) return slideRef.current;
-    try {
-      return applyMutations(docRef.current, mutations).document.slides[slideIdRef.current];
-    } catch {
-      return slideRef.current;
-    }
-  };
-
   const endEdit = (text: Markup, reason: InlineTextEndReason) => {
     const current = editingRef.current;
     if (!current) return;
     setEditing(null);
     frozenHtml.current = null;
+    caretRef.current = null;
+    onCaretRef.current?.(null);
     const written = writeText(current, text);
     const slideNow = slideAfter(written ? [written] : []);
     const backToBlock = () => select({ kind: 'block', blockId: current.blockId });
@@ -852,15 +1401,17 @@ export function Editor({
         commit([appended.mutation]);
         return;
       }
-      case 'list-backspace': {
-        /* Backspace on an empty item removes it and moves the caret to the item before (SPEC 7.4) */
+      case 'list-backspace':
+      case 'list-leave': {
+        /* Backspace on an empty item removes it and moves the caret to the item before (SPEC 7.4);
+           Enter on an empty item leaves the list the same way and selects the block (SPEC-2 6.2) */
         const block = blockById(slideNow, current.blockId);
         const removed = block ? listRemoveMutation(slideNow, block, current.pointer) : null;
         if (!block || !removed) {
           backToBlock();
           return;
         }
-        if (removed.pointer === null) pendingSelect.current = [block.id];
+        if (removed.pointer === null || reason === 'list-leave') pendingSelect.current = [block.id];
         else pendingEdit.current = { blockId: block.id, pointer: removed.pointer, caret: 'end' };
         commit([removed.mutation]);
         return;
@@ -888,6 +1439,68 @@ export function Editor({
     return block !== undefined && listRemoveMutation(slideNow, block, current.pointer) !== null;
   };
 
+  /** Tab at the start of a list item, Cmd ] and Cmd [ in it: the item's level steps 1 to 9 (SPEC-2 6.2 Lists). */
+  const onListLevel = (by: 1 | -1): boolean => {
+    const current = editingRef.current;
+    const slideNow = slideRef.current;
+    if (!current || !slideNow) return false;
+    const block = blockById(slideNow, current.blockId);
+    if (!block || block.type !== 'plain') return false;
+    const item = listItemPointer(current.pointer);
+    if (item === null) return false;
+    const items = [...block.items];
+    const target = items[item.index];
+    if (!target) return false;
+    const level = Math.min(9, Math.max(1, (target.level ?? 1) + by));
+    if (level === (target.level ?? 1)) return true;
+    const next = { ...target } as typeof target & { level?: number };
+    if (level === 1) delete next.level;
+    else next.level = level;
+    items[item.index] = next;
+    commit([
+      { op: 'block.set', slideId: slideNow.id, blockId: block.id, path: '/items', value: items },
+    ]);
+    return true;
+  };
+
+  /** Cmd ] and Cmd [ on a text block: the paragraph's left indent steps 64 px (SPEC-2 2.2.11). */
+  const indentBlocks = (ids: readonly string[], by: 1 | -1): boolean => {
+    const slideNow = slideRef.current;
+    if (!slideNow) return false;
+    const mutations: Mutation[] = [];
+    for (const id of ids) {
+      const block = blockById(slideNow, id);
+      if (!block || !isTextBlockType(block.type) || block.type === 'table') continue;
+      const typography = (block as { typography?: Record<string, unknown> }).typography ?? {};
+      const current = typeof typography['indent'] === 'number' ? typography['indent'] : 0;
+      const next = Math.max(0, current + by * INDENT_STEP_PX);
+      if (next === current) continue;
+      const value = { ...typography };
+      if (next === 0) delete value['indent'];
+      else value['indent'] = next;
+      mutations.push({
+        op: 'block.set',
+        slideId: slideNow.id,
+        blockId: id,
+        path: '/typography',
+        ...(Object.keys(value).length > 0 ? { value } : {}),
+      });
+    }
+    if (mutations.length === 0) return false;
+    commit(mutations);
+    return true;
+  };
+
+  const onIndent = (by: 1 | -1): boolean => {
+    const current = editingRef.current;
+    return current ? indentBlocks([current.blockId], by) : false;
+  };
+
+  const onCaretInfo = (info: CaretInfo) => {
+    caretRef.current = info;
+    onCaretRef.current?.(info);
+  };
+
   const stageRect = () => body.current?.parentElement?.getBoundingClientRect();
 
   /* the fresh markup: the theme's twins and dither canvases, then the boxes; fonts and images
@@ -913,10 +1526,18 @@ export function Editor({
       }
     }
     const wanted = pendingSelect.current;
-    if (wanted && wanted.every((id) => el.querySelector(`[data-block="${id}"]`))) {
+    if (
+      wanted &&
+      wanted.every((id) => el.querySelector(`[data-block="${id}"], .free[data-free="${id}"]`))
+    ) {
       pendingSelect.current = null;
       const picked = selectionOf(wanted);
       select(picked.selection, picked.extra);
+    }
+    const cropNext = pendingCrop.current;
+    if (cropNext && slideRef.current && blockById(slideRef.current, cropNext)) {
+      pendingCrop.current = null;
+      window.setTimeout(() => enterCrop(cropNext), 0);
     }
     const onLoad = () => measure();
     el.addEventListener('load', onLoad, true);
@@ -933,40 +1554,128 @@ export function Editor({
     // the boxes follow the markup and the theme; measure, select and startEdit are closures over refs
   }, [shownHtml, theme]);
 
-  /* a selection that names a block the slide no longer has is dropped */
+  /* a selection that names an object the slide no longer has is dropped */
   useEffect(() => {
     const current = selectionRef.current;
-    if (current && slide && blockOrder(body.current ?? document).length > 0) {
-      if (!body.current?.querySelector(`[data-block="${current.blockId}"]`)) select(null);
-    }
-  }, [html]);
+    const slideNow = slideRef.current;
+    if (!current || !slideNow || !body.current) return;
+    if (blockOrder(body.current).length === 0 && Object.keys(boxes.blocks).length === 0) return;
+    if (!isObjectId(slideNow, boxes, current.blockId)) select(null);
+  }, [html, boxes]);
+
+  /* crop mode ends when the slide or the picture changes under it */
+  useEffect(() => {
+    if (crop && (!slide || !blockById(slide, crop.blockId))) setCrop(null);
+  }, [slide, crop]);
+
+  /* the zoom centre: the stage scrolls the named sheet point under its centre (SPEC-2 0.81) */
+  const pad = present ? SHEET_PAD.present : narrow ? SHEET_PAD.narrow : SHEET_PAD.wide;
+  const fitted = fitSheetAt({ aw: stageSize.width, ah: stageSize.height, pad, zoom });
+  /* the same placement Sheet makes: under the toolbar on a narrow viewport */
+  const fit = narrow && !present && zoom === 'fit' ? { ...fitted, top: pad } : fitted;
+  const k = fit.scale;
+  useLayoutEffect(() => {
+    const el = scroller.current;
+    if (!el || zoom === 'fit') return;
+    const center = zoomCenter ?? { x: 800, y: 450 };
+    const target = scrollForCenter(center, fit, stageSize);
+    el.scrollLeft = target.left;
+    el.scrollTop = target.top;
+    setScroll({ left: el.scrollLeft, top: el.scrollTop });
+    // the scroll follows the zoom, its centre and the stage box
+  }, [zoom, zoomCenter, stageSize.width, stageSize.height]);
 
   // -------------------------------------------------------------------------------------------
-  // Gestures
+  // Gestures (SPEC-2 6.1 rows 7, 9, 11, 20)
 
-  /** The snap lines a freeform gesture on `ids` can land on: the sheet's and the resting blocks'. */
-  const freeContextFor = (slideNow: Slide, ids: string[], boxesNow: MeasuredBoxes): FreeContext => {
-    const lines = sheetSnapLines();
-    for (const block of freeformBlocks(slideNow)) {
-      if (ids.includes(block.id)) continue;
-      const box = boxesNow.blocks[block.id];
-      if (box) lines.push(...boxSnapLines(box));
+  /**
+   * The snap context of a canvas gesture on `ids` (SPEC-2 6.1 rows 7 and 31): under Snap to >
+   * Guides the sheet's edges and centre, the GT lines, the deck's guides and the resting objects'
+   * bounding box edges and centres; under Snap to > Grid the 8 px grid; nothing under both off.
+   */
+  const freeContextFor = (canvas: Slide, ids: string[], boxesNow: MeasuredBoxes): FreeContext => {
+    const settings = settingsRef.current;
+    const lines: Guide[] = [];
+    const spacing: Box[] = [];
+    if (settings.snapGuides) {
+      lines.push(
+        ...sheetEdgeLines(),
+        ...sheetSnapLines(),
+        ...deckGuideLines(deckGuidesRef.current),
+      );
+      for (const block of freeformBlocks(canvas)) {
+        if (ids.includes(block.id)) continue;
+        const box = block.pos ? boundingBoxOf(block.pos) : boxesNow.blocks[block.id];
+        if (box) {
+          lines.push(...boxSnapLines(box));
+          spacing.push(box);
+        }
+      }
     }
-    return { ids, lines };
+    return { ids, lines, grid: settings.snapGrid, spacing };
+  };
+
+  /** The copies an Option+drag drops (SPEC-2 0.79): every selected object inserted at its dragged pos on top of the stack. */
+  const duplicateMutations = (g: ActiveGesture, moved: Mutation[]): Mutation[] => {
+    const canvas = g.ctx.slide;
+    const taken = takenBlockIds(canvas);
+    const stack = freeformBlocks(canvas);
+    let z = Math.max(0, ...stack.map((b) => b.pos?.z ?? 0));
+    let after = stack[stack.length - 1]?.id;
+    const tags = new Map<string, string>();
+    const out: Mutation[] = [];
+    for (const mutation of moved) {
+      if (mutation.op !== 'block.set' || mutation.path !== '/pos') continue;
+      const source = blockById(canvas, mutation.blockId);
+      if (!source) continue;
+      const id = freeId(`${source.id}-2`, taken);
+      taken.add(id);
+      z += 1;
+      const pos = { ...(mutation.value as Position), z };
+      if (pos.group !== undefined) {
+        let tag = tags.get(pos.group);
+        if (tag === undefined) {
+          tag = freshGroupTag({ ...canvas, slots: { main: [...stack] } } as Slide, pos.group);
+          tags.set(pos.group, tag);
+        }
+        pos.group = tag;
+      }
+      const copy = { ...(JSON.parse(JSON.stringify(source)) as Block), id, pos } as Block;
+      out.push({
+        op: 'block.insert',
+        slideId: canvas.id,
+        slot: 'main',
+        ...(after !== undefined ? { after } : {}),
+        block: copy,
+      });
+      after = id;
+    }
+    return out;
   };
 
   /** The mutations a gesture stands for at a point, and what the overlay shows meanwhile. */
   const gestureAt = (
     g: ActiveGesture,
     now: Point,
-    shift: boolean,
-  ): { mutations: Mutation[]; guides: Guide[] } => {
-    if (g.handle.kind === 'free-move' || g.handle.kind === 'free-resize') {
-      const result = freeGesture(g.handle, g.ctx, g.start, now, { shift });
-      return { mutations: result?.mutations ?? [], guides: result?.guides ?? [] };
+    mods: GestureMods,
+  ): { mutations: Mutation[]; guides: Guide[]; sites: Point[] } => {
+    const kind = g.handle.kind;
+    if (
+      kind === 'free-move' ||
+      kind === 'free-resize' ||
+      kind === 'free-rotate' ||
+      kind === 'line-end'
+    ) {
+      const result = freeGesture(g.handle, g.ctx, g.start, now, mods);
+      if (result?.angle !== undefined) setReadout({ kind: 'angle', value: result.angle });
+      else if (result?.size !== undefined)
+        setReadout({ kind: 'size', w: result.size.w, h: result.size.h });
+      let mutations = result?.mutations ?? [];
+      if (g.duplicate && kind === 'free-move') mutations = duplicateMutations(g, mutations);
+      return { mutations, guides: result?.guides ?? [], sites: result?.sites ?? [] };
     }
     const mutation = gestureMutation(g.handle, g.ctx, g.start, now);
-    return { mutations: mutation === null ? [] : [mutation], guides: [] };
+    return { mutations: mutation === null ? [] : [mutation], guides: [], sites: [] };
   };
 
   const endGestureState = () => {
@@ -975,74 +1684,155 @@ export function Editor({
     setDrop(null);
     setDropSlot(null);
     setGuides([]);
+    setSites([]);
+    setReadout(null);
   };
+
+  const modsOf = (ev: {
+    shiftKey: boolean;
+    altKey: boolean;
+    metaKey: boolean;
+    ctrlKey: boolean;
+  }): GestureMods => ({
+    shift: ev.shiftKey,
+    alt: ev.altKey,
+    meta: ev.metaKey || ev.ctrlKey,
+  });
 
   /**
    * A gesture from a handle or a body press: the preview follows the pointer through the draft
-   * document, the release commits the same mutations once (SPEC 6.4). A free-move gesture on a
-   * block of the multi-selection moves the whole group.
+   * document, the release commits the same mutations once (SPEC 6.4). A canvas gesture on a
+   * member of the selection moves the whole selection; on a slide that is not a canvas the
+   * gesture previews over the provisional conversion and the release measures and converts (1.6).
    */
-  const beginGesture = (handle: Handle, clientX: number, clientY: number) => {
+  const beginGesture = (
+    handle: Handle,
+    clientX: number,
+    clientY: number,
+    options: { duplicate?: boolean } = {},
+  ) => {
     const slideNow = slideRef.current;
     const rect = stageRect();
     if (!slideNow || !rect || editingRef.current || gesture.current) return;
     const start = sheetPoint(rect, clientX, clientY);
     const boxesNow = boxesRef.current;
-    const ctx: GestureContext = { slide: slideNow, boxes: boxesNow };
-    if (handle.blockId !== undefined && isFreeformSlide(slideNow)) {
+    const canvasKind =
+      handle.kind === 'free-move' ||
+      handle.kind === 'free-resize' ||
+      handle.kind === 'free-rotate' ||
+      handle.kind === 'line-end';
+    let ctx: GestureContext = { slide: slideNow, boxes: boxesNow };
+    let convert: Mutation | null = null;
+    if (canvasKind && !isFreeformSlide(slideNow)) {
+      const provisional = provisionalCanvas(slideNow, boxesNow);
+      if (!provisional) return;
+      convert = provisional.replace;
+      ctx = { slide: provisional.slide, boxes: boxesFromPositions(provisional.slide, boxesNow) };
+    }
+    if (handle.blockId !== undefined && canvasKind) {
       const selected = selectedIds(selectionRef.current, extraRef.current);
       const ids = selected.includes(handle.blockId) ? selected : [handle.blockId];
-      ctx.free = freeContextFor(slideNow, ids, boxesNow);
+      ctx.free = freeContextFor(ctx.slide, ids, ctx.boxes);
     }
-    gesture.current = { handle, start, ctx, last: null };
+    gesture.current = {
+      handle,
+      start,
+      ctx,
+      convert,
+      duplicate: options.duplicate === true,
+      last: null,
+      mods: { shift: false },
+    };
     setActiveHandle(handle.id);
     setHover(null);
     if (handle.blockId !== undefined) {
       const selected = selectedIds(selectionRef.current, extraRef.current);
-      if (!selected.includes(handle.blockId)) select({ kind: 'block', blockId: handle.blockId });
+      if (!selected.includes(handle.blockId)) selectObjects([handle.blockId]);
     }
     if (handle.kind === 'block-move' && handle.blockId !== undefined) {
       const first = blockMoveFor(slideNow, handle.blockId, start, ctx.boxes);
       setDrop(first.indicator);
       setDropSlot(first.slotBox);
     }
+    const preview = (mutations: Mutation[]) => {
+      const g = gesture.current;
+      if (!g) return;
+      const all = g.convert ? [g.convert, ...mutations] : mutations;
+      if (all.length === 0) {
+        setDraft(null);
+        return;
+      }
+      try {
+        setDraft(applyMutations(docRef.current, all).document);
+      } catch {
+        // a preview the reducer refuses: the last good preview stays up
+      }
+    };
     const move = (ev: PointerEvent) => {
       const g = gesture.current;
       const r = stageRect();
       if (!g || !r) return;
       const now = sheetPoint(r, ev.clientX, ev.clientY);
+      const mods = modsOf(ev);
+      g.mods = mods;
       if (g.handle.kind === 'block-move' && g.handle.blockId !== undefined) {
         const at = blockMoveFor(g.ctx.slide, g.handle.blockId, now, g.ctx.boxes);
         setDrop(at.indicator);
         setDropSlot(at.slotBox);
       }
-      const { mutations, guides: nextGuides } = gestureAt(g, now, ev.shiftKey);
-      if (g.handle.kind === 'free-move' || g.handle.kind === 'free-resize') setGuides(nextGuides);
+      const { mutations, guides: nextGuides, sites: nextSites } = gestureAt(g, now, mods);
+      setGuides(nextGuides);
+      setSites(nextSites);
       if (jsonEqual(mutations, g.last)) return;
       g.last = mutations;
-      if (mutations.length === 0) {
-        setDraft(null);
-        return;
-      }
-      try {
-        setDraft(applyMutations(docRef.current, mutations).document);
-      } catch {
-        // a preview the reducer refuses: the last good preview stays up
-      }
+      preview(mutations);
     };
     const up = (ev: PointerEvent) => {
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', cancel);
       const g = gesture.current;
-      endGestureState();
       const r = stageRect();
+      const mods = g ? { ...g.mods, ...modsOf(ev) } : modsOf(ev);
+      endGestureState();
       if (!g || !r) {
         setDraft(null);
         return;
       }
       const now = sheetPoint(r, ev.clientX, ev.clientY);
-      commit(gestureAt(g, now, ev.shiftKey).mutations);
+      if (!g.convert) {
+        const { mutations } = gestureAt(g, now, mods);
+        void finishCanvasGesture(g, mutations);
+        return;
+      }
+      /* the release on a slide that is not a canvas: measure, convert exactly, re-run the gesture
+         over the measured canvas and commit the conversion with the writes as one slide.update */
+      void (async () => {
+        const measured = await measuredCanvas(slideNow);
+        if (!measured) {
+          setDraft(null);
+          return;
+        }
+        const exact: ActiveGesture = {
+          ...g,
+          convert: measured.replace,
+          ctx: {
+            slide: measured.slide,
+            boxes: boxesFromPositions(measured.slide, boxesNow),
+            ...(g.ctx.free
+              ? {
+                  free: freeContextFor(
+                    measured.slide,
+                    g.ctx.free.ids,
+                    boxesFromPositions(measured.slide, boxesNow),
+                  ),
+                }
+              : {}),
+          },
+        };
+        const { mutations } = gestureAt(exact, now, mods);
+        await finishCanvasGesture(exact, mutations);
+      })();
     };
     const cancel = () => {
       window.removeEventListener('pointermove', move);
@@ -1054,6 +1844,139 @@ export function Editor({
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', cancel);
+  };
+
+  /** The commit of a gesture: the conversion first, the writes, the connectors that follow and the autofit (SPEC-2 1.6). */
+  const finishCanvasGesture = async (g: ActiveGesture, own: Mutation[]): Promise<void> => {
+    const canvas = g.ctx.slide;
+    const prefix = g.convert ? [g.convert] : [];
+    if (own.length === 0) {
+      /* a click on a chip writes nothing, and a slide nothing moved on stays unconverted */
+      setDraft(null);
+      return;
+    }
+    const kind = g.handle.kind;
+    const isCanvasWrite =
+      kind === 'free-move' ||
+      kind === 'free-resize' ||
+      kind === 'free-rotate' ||
+      kind === 'line-end';
+    if (!isCanvasWrite) {
+      commit(own);
+      return;
+    }
+    const touched = own.flatMap((m) =>
+      m.op === 'block.set' && m.path.startsWith('/pos') ? [m.blockId] : [],
+    );
+    const followed = followAfter(canvas, [...prefix, ...own], touched);
+    let mutations = [...prefix, ...own, ...followed];
+    if (kind === 'free-resize' && touched.length > 0)
+      mutations = await withAutofit(slideRef.current ?? canvas, mutations, touched);
+    if (g.duplicate) {
+      const copies = own.flatMap((m) => (m.op === 'block.insert' ? [m.block.id] : []));
+      if (copies.length > 0) pendingSelect.current = copies;
+    }
+    commit(mutations);
+    if (prefix.length > 0) onConvertRef.current?.(canvas.id);
+  };
+
+  // -------------------------------------------------------------------------------------------
+  // Crop mode (SPEC-2 6.1 row 19, 6.2)
+
+  const enterCrop = (blockId: string) => {
+    const slideNow = slideRef.current;
+    if (!slideNow) return;
+    const block = blockById(slideNow, blockId);
+    if (!isCroppable(block)) return;
+    const box = boxesRef.current.blocks[blockId];
+    if (!box) return;
+    const frame: Box = block.pos
+      ? [block.pos.x, block.pos.y, block.pos.w, block.pos.h]
+      : [Math.round(box[0]), Math.round(box[1]), Math.round(box[2]), Math.round(box[3])];
+    const trim = block.trim ?? NO_TRIM;
+    if (editingRef.current) editingRef.current.element.blur();
+    select({ kind: 'block', blockId });
+    setCrop({ blockId, frame, trim, original: { frame, trim } });
+  };
+
+  /** Enter, Esc or a click outside: one write of the trim and the frame, converting the slide first (SPEC-2 1.6 "Crop image"). */
+  const exitCrop = (commitCrop = true) => {
+    const state = cropRef.current;
+    if (!state) return;
+    setCrop(null);
+    if (!commitCrop) return;
+    const trim = normalizeTrim(state.trim);
+    const unchanged =
+      jsonEqual(trim, normalizeTrim(state.original.trim)) &&
+      jsonEqual(state.frame, state.original.frame);
+    if (unchanged) return;
+    void commitCanvas(
+      (canvas) => {
+        const block = blockById(canvas, state.blockId);
+        if (!block || !isCroppable(block) || !block.pos) return [];
+        const mutations: Mutation[] = [];
+        if (isNoTrim(trim)) {
+          if (block.trim !== undefined)
+            mutations.push({
+              op: 'block.set',
+              slideId: canvas.id,
+              blockId: block.id,
+              path: '/trim',
+            });
+        } else if (!jsonEqual(block.trim, trim)) {
+          mutations.push({
+            op: 'block.set',
+            slideId: canvas.id,
+            blockId: block.id,
+            path: '/trim',
+            value: trim,
+          });
+        }
+        const [x, y, w, h] = state.frame;
+        if (block.pos.x !== x || block.pos.y !== y || block.pos.w !== w || block.pos.h !== h) {
+          mutations.push({
+            op: 'block.set',
+            slideId: canvas.id,
+            blockId: block.id,
+            path: '/pos',
+            value: { ...block.pos, x, y, w, h },
+          });
+        }
+        return mutations;
+      },
+      { autofit: false },
+    );
+  };
+
+  /** A crop handle or a pan inside the frame: the live trim, committed on exit. */
+  const beginCropDrag = (dir: Handle['dir'] | 'pan', clientX: number, clientY: number) => {
+    const state = cropRef.current;
+    const rect = stageRect();
+    if (!state || !rect) return;
+    const start = sheetPoint(rect, clientX, clientY);
+    const origin = { frame: state.frame, trim: state.trim };
+    const move = (ev: PointerEvent) => {
+      const r = stageRect();
+      const current = cropRef.current;
+      if (!r || !current) return;
+      const now = sheetPoint(r, ev.clientX, ev.clientY);
+      const dx = now.x - start.x;
+      const dy = now.y - start.y;
+      if (dir === 'pan' || dir === undefined) {
+        setCrop({ ...current, trim: panCrop(origin.frame, origin.trim, dx, dy) });
+        return;
+      }
+      const next = cropByHandle(origin.frame, origin.trim, dir, dx, dy);
+      setCrop({ ...current, frame: next.frame, trim: next.trim });
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
   };
 
   // -------------------------------------------------------------------------------------------
@@ -1069,24 +1992,45 @@ export function Editor({
     });
   };
 
+  /**
+   * Delete and Backspace (SPEC-2 6.1 row 17): every selected object in one write. A block of a
+   * grammar slide is removed in place (no conversion, 1.6); a kind's object that is not a block
+   * (the title's heading, the photograph) converts first so it can leave. The connectors attached
+   * to a removed object detach in the same write (2.4.7).
+   */
   const removeSelected = (): boolean => {
     const slideNow = slideRef.current;
     if (!slideNow) return false;
-    // real blocks only: the text of a title or statement slide is a field, not a block
-    const blocks = selectedBlocks();
-    const anchor = blocks[0];
-    if (!anchor) return false;
-    commit(
-      blocks.map((block): Mutation => ({
+    const ids = selectedIds(selectionRef.current, extraRef.current).filter((id) =>
+      isObjectId(slideNow, boxesRef.current, id),
+    );
+    if (ids.length === 0) return false;
+    const needsConversion = ids.some((id) => blockById(slideNow, id) === undefined);
+    const anchor = ids[0];
+    const anchorType = anchor === undefined ? undefined : blockTypeOf(slideNow, anchor);
+    select(null);
+    if (!needsConversion) {
+      const mutations: Mutation[] = ids.map((id) => ({
         op: 'block.remove',
         slideId: slideNow.id,
-        blockId: block.id,
-      })),
-    );
-    select(null);
+        blockId: id,
+      }));
+      commit([...detachConnectors(slideNow, ids), ...mutations]);
+    } else {
+      void commitCanvas(
+        (canvas) => [
+          ...detachConnectors(canvas, ids),
+          ...ids.flatMap((id): Mutation[] =>
+            blockById(canvas, id) ? [{ op: 'block.remove', slideId: canvas.id, blockId: id }] : [],
+          ),
+        ],
+        { autofit: false },
+      );
+    }
     /* the write is the one block.remove (or one slide.update of several) above; the chrome's
        snackbar names the block and the undo key so the removal is never silent (SPEC 6.9) */
-    onRemovedRef.current?.({ type: anchor.type, id: anchor.id });
+    if (anchor !== undefined)
+      onRemovedRef.current?.({ type: (anchorType ?? 'text') as BlockType, id: anchor });
     return true;
   };
 
@@ -1109,40 +2053,44 @@ export function Editor({
     if (cut) removeSelected();
   };
 
-  /** A block with the same look as the paste, inserted from a text payload. */
+  /** A block with the same look as the paste, inserted from a text payload as an object (SPEC-2 0.8). */
   const insertTextBlock = (text: string, point?: Point) => {
-    const slideNow = slideRef.current;
-    if (!slideNow) return;
-    const id = freeId('text', takenBlockIds(slideNow));
     const markup = canonicalText(text.replace(/\r\n?/g, '\n').trim());
-    const selected = selectedBlockId(selectionRef.current) ?? undefined;
-    const [ox, oy] = CONTENT_ORIGIN;
-    const at = point ?? { x: ox, y: oy };
-    const mutation = toolInsertMutation(
-      slideNow,
-      { kind: 'text' },
-      id,
-      [at.x, at.y, 480, 64],
-      insertSlotFor(slideNow, selected),
-      selected,
-    );
-    if (!mutation || mutation.op !== 'block.insert') return;
-    const block = { ...mutation.block, text: markup } as Block;
-    pendingSelect.current = [id];
-    commit([{ ...mutation, block }]);
+    const [w, h] = TOOL_DEFAULT_SIZE.text;
+    const box: Box = point ? [point.x, point.y, w, h] : centredBox([w, h]);
+    insertObject({ id: 'text', type: 'text', text: markup, autofit: 'grow' } as Block, { box });
   };
 
+  /**
+   * A paste of blocks (SPEC-2 0.84): the copies keep their `pos` on another slide and land 16 px
+   * right and down on the slide they were copied from; a paste of positioned blocks on a slide
+   * that is not a canvas converts it first, so the objects arrive where they were.
+   */
   const pasteBlocks = (payload: Extract<ClipboardPayload, { kind: 'blocks' }>) => {
     const slideNow = slideRef.current;
     if (!slideNow) return;
-    const selected = selectedBlockId(selectionRef.current) ?? undefined;
-    const planned = pastedBlockInserts(slideNow, payload, {
-      sameSlide: payload.deckId === deckIdRef.current && payload.slideId === slideNow.id,
-      ...(selected !== undefined ? { selectedBlockId: selected } : {}),
-    });
-    if (planned.mutations.length === 0) return;
-    pendingSelect.current = planned.ids;
-    commit(planned.mutations);
+    const positioned = payload.blocks.some((block) => block.pos !== undefined);
+    if (!isFreeformSlide(slideNow) && !positioned) {
+      const selected = selectedBlockId(selectionRef.current) ?? undefined;
+      const planned = pastedBlockInserts(slideNow, payload, {
+        sameSlide: payload.deckId === deckIdRef.current && payload.slideId === slideNow.id,
+        ...(selected !== undefined ? { selectedBlockId: selected } : {}),
+      });
+      if (planned.mutations.length === 0) return;
+      pendingSelect.current = planned.ids;
+      commit(planned.mutations);
+      return;
+    }
+    void commitCanvas(
+      (canvas) => {
+        const planned = pastedBlockInserts(canvas, payload, {
+          sameSlide: payload.deckId === deckIdRef.current && payload.slideId === canvas.id,
+        });
+        pendingSelect.current = planned.ids;
+        return planned.mutations;
+      },
+      { autofit: false },
+    );
   };
 
   const pasteSlides = async (payload: Extract<ClipboardPayload, { kind: 'slides' }>) => {
@@ -1190,26 +2138,64 @@ export function Editor({
     await pasteSlides(payload);
   };
 
+  /**
+   * Cmd+D (SPEC-2 6.1 row 15): the copies 16 px right and down on top of the stack. On a canvas
+   * the write is block.duplicate, as the CLI's; on a slide that is not a canvas yet the measured
+   * conversion travels with the inserts of the copies in one slide.update (1.6).
+   */
   const duplicateSelection = async (): Promise<void> => {
     const slideNow = slideRef.current;
-    const blocks = selectedBlocks();
-    if (!slideNow || blocks.length === 0) return;
-    /* the copies take `<id>-2` and up, as store-actions blockDuplicate names them; the selection
-       moves to them once the slide re-renders with them */
-    const taken = takenBlockIds(slideNow);
-    const ids = blocks.map((block) => {
-      const id = freeId(`${block.id}-2`, taken);
-      taken.add(id);
-      return id;
-    });
-    pendingSelect.current = ids;
-    await call('block.duplicate', { slideId: slideNow.id, blockIds: blocks.map((b) => b.id) });
+    if (!slideNow) return;
+    const ids = selectedIds(selectionRef.current, extraRef.current).filter((id) =>
+      isObjectId(slideNow, boxesRef.current, id),
+    );
+    if (ids.length === 0) return;
+    if (isFreeformSlide(slideNow) || ids.every((id) => blockById(slideNow, id) !== undefined)) {
+      /* the copies take `<id>-2` and up, as store-actions blockDuplicate names them; the selection
+         moves to them once the slide re-renders with them. On a slide that is not a canvas yet the
+         store action converts it through the route's measurer and lands each copy after its source
+         (integrator merge 2: one implementation for Cmd+D and the CLI, SPEC 7.1; the copy sits
+         after its source in the list as round one's text-editing spec pins), so the stage's own
+         paste path below serves only a kind's object that is not a block (the photograph, the
+         plate, the mark), which block.duplicate cannot name before the conversion */
+      const taken = takenBlockIds(slideNow);
+      const copies = ids.map((id) => {
+        const next = freeId(`${id}-2`, taken);
+        taken.add(next);
+        return next;
+      });
+      pendingSelect.current = copies;
+      await call('block.duplicate', { slideId: slideNow.id, blockIds: ids });
+      return;
+    }
+    await commitCanvas(
+      (canvas) => {
+        const payload: Extract<ClipboardPayload, { kind: 'blocks' }> = {
+          kind: 'blocks',
+          deckId: deckIdRef.current,
+          slideId: canvas.id,
+          blocks: ids.flatMap((id) => {
+            const block = blockById(canvas, id);
+            return block ? [JSON.parse(JSON.stringify(block)) as Block] : [];
+          }),
+        };
+        const planned = pastedBlockInserts(canvas, payload, { sameSlide: true });
+        pendingSelect.current = planned.ids;
+        return planned.mutations;
+      },
+      { autofit: false },
+    );
   };
 
+  /** Cmd+A with the canvas owning focus: every object of the slide (SPEC-2 6.1 row 5). */
   const selectAll = () => {
     const slideNow = slideRef.current;
-    if (!slideNow) return;
-    const picked = selectionOf(allBlockIds(slideNow));
+    if (!slideNow || !body.current) return;
+    const ids = objectIds(slideNow, boxesRef.current, blockOrder(body.current)).filter((id) =>
+      isFreeformSlide(slideNow) ? true : isObjectId(slideNow, boxesRef.current, id),
+    );
+    const all = ids.length > 0 ? ids : allBlockIds(slideNow);
+    const picked = selectionOf(all);
     select(picked.selection, picked.extra);
   };
 
@@ -1217,7 +2203,7 @@ export function Editor({
     const blocks = selectedBlocks();
     const source = blocks[0];
     if (!source) return false;
-    const format = paintFormatOf(source);
+    const format = paintFormatOf(source, caretRef.current?.marks);
     if (Object.keys(format).length === 0) return false;
     setPaint({ format, keep });
     return true;
@@ -1227,7 +2213,7 @@ export function Editor({
     if (paintRef.current) setPaint(null);
   };
 
-  /** Paint format on a block: one block.set per field the target takes (SPEC 3.1 row 6). */
+  /** Paint format on an object: one block.set per field the target takes, plus the marks over its text (SPEC 3.1 row 6, SPEC-2 0.37). */
   const applyPaint = (blockId: string): boolean => {
     const armed = paintRef.current;
     const slideNow = slideRef.current;
@@ -1266,6 +2252,44 @@ export function Editor({
     commit(mutations);
   };
 
+  /**
+   * A mark on the caret's range while a run is being edited, else over the whole text of every
+   * selected text object as one text.replace per object (SPEC-2 6.2 "Text marks").
+   */
+  const toggleMarkOnSelection = (mark: ToggleMark) => {
+    if (inlineRef.current) {
+      inlineRef.current.toggleMark(mark);
+      return;
+    }
+    const slideNow = slideRef.current;
+    if (!slideNow) return;
+    const mutations = selectedBlocks().flatMap((block): Mutation[] => {
+      const path =
+        block.type === 'heading' || block.type === 'paragraph' || block.type === 'text'
+          ? '/text'
+          : (block.type === 'box' || block.type === 'shape') && typeof block.text === 'string'
+            ? '/text'
+            : null;
+      if (path === null) return [];
+      const text = (block as { text?: Markup }).text ?? '';
+      const length = plainLength(text);
+      if (length === 0) return [];
+      const next = canonicalText(toggleMark(text, [0, length], mark));
+      if (next === text) return [];
+      return [
+        {
+          op: 'text.replace',
+          slideId: slideNow.id,
+          blockId: block.id,
+          path,
+          range: [0, text.length],
+          text: next,
+        },
+      ];
+    });
+    commit(mutations);
+  };
+
   const openLink = () => {
     const el = body.current;
     const current = editingRef.current;
@@ -1282,7 +2306,7 @@ export function Editor({
   };
 
   /** One of the nine table commands (SPEC 7.3) on the selected table, at the cell being edited. */
-  const tableCommand = (kind: TableCommand['kind']) => {
+  const tableCommand = (kind: StageTableCommand['kind']) => {
     const slideNow = slideRef.current;
     if (!slideNow) return;
     const current = editingRef.current;
@@ -1331,14 +2355,69 @@ export function Editor({
   };
 
   /**
+   * An Insert row's block as an object (SPEC-2 0.8, 6.2): centred on the sheet at its default
+   * size (or the box given; the Background dialog's picture takes the whole sheet at the bottom of
+   * the stack), on top of the stack, converting the slide first. A new text box opens in the caret
+   * state.
+   */
+  const insertObject = (block: Block, options: { box?: Box; bottom?: boolean } = {}) => {
+    void commitCanvas(
+      (canvas) => {
+        const taken = takenBlockIds(canvas);
+        const id = freeId(block.id, taken);
+        const stack = freeformBlocks(canvas);
+        const size = TOOL_DEFAULT_SIZE[block.type as keyof typeof TOOL_DEFAULT_SIZE] ?? [320, 160];
+        const box =
+          options.box ?? (block.type === 'picture' ? [0, 0, 1600, 900] : centredBox(size));
+        const bottom = options.bottom === true || block.type === 'picture';
+        const z = bottom ? -1 : Math.max(0, ...stack.map((b) => b.pos?.z ?? 0)) + 1;
+        const pos: Position = {
+          x: Math.round(box[0]),
+          y: Math.round(box[1]),
+          w: Math.max(1, Math.round(box[2])),
+          h: Math.max(1, Math.round(box[3])),
+          z: Math.max(0, z),
+        };
+        const mutations: Mutation[] = [];
+        if (bottom) {
+          /* the picture takes z 0 and everything else moves up one, so it is the bottom of the stack */
+          for (const each of stack) {
+            mutations.push({
+              op: 'block.set',
+              slideId: canvas.id,
+              blockId: each.id,
+              path: '/pos/z',
+              value: (each.pos?.z ?? 0) + 1,
+            });
+          }
+        }
+        const last = stack[stack.length - 1]?.id;
+        mutations.push({
+          op: 'block.insert',
+          slideId: canvas.id,
+          slot: 'main',
+          ...(last !== undefined ? { after: last } : {}),
+          block: { ...block, id, pos } as Block,
+        });
+        if (block.type === 'text' && (block as { text?: string }).text === '')
+          pendingEdit.current = { blockId: id, pointer: 'text', caret: 'end' };
+        else pendingSelect.current = [id];
+        return mutations;
+      },
+      { autofit: false },
+    );
+  };
+
+  /**
    * One step insert of a picture (gslides-parity SPEC 7.2.14): asset.add with the alt from the
    * file name and the capture role, then the block or slide write once the asset has reached the
    * document over the watch channel: a drop on an image block replaces its picture, a drop on the
-   * background of a picture slide replaces the slide's, anything else inserts a picture block.
+   * background of a picture slide replaces the slide's, anything else inserts a picture block as
+   * an object at the drop (SPEC-2 0.8).
    */
   const insertPicture = async (
     file: File,
-    where: { blockId?: string; point?: Point; replace?: boolean } = {},
+    where: { blockId?: string; point?: Point; replace?: boolean; background?: boolean } = {},
   ): Promise<void> => {
     if (!file.type.startsWith('image/')) return;
     if (file.size > PICTURE_MAX_BYTES) {
@@ -1369,8 +2448,13 @@ export function Editor({
     }
     const slideNow = slideRef.current;
     if (!slideNow) return;
+    if (where.background === true) {
+      /* the picture object covering the sheet at the bottom of the stack (SPEC-2 2.6.4) */
+      insertObject({ id: 'picture', type: 'picture', asset: asset.id } as Block, { bottom: true });
+      return;
+    }
     const target = where.blockId !== undefined ? blockById(slideNow, where.blockId) : undefined;
-    if (target && target.type === 'shot') {
+    if (target && (target.type === 'shot' || target.type === 'picture')) {
       commit([
         {
           op: 'block.set',
@@ -1387,46 +2471,229 @@ export function Editor({
       commit([{ op: 'slide.set', slideId: slideNow.id, path: '/picture/asset', value: asset.id }]);
       return;
     }
-    const blockId = freeId('shot', takenBlockIds(slideNow));
-    const block: Block = { id: blockId, type: 'shot', asset: asset.id };
-    const selected = selectedBlockId(selectionRef.current) ?? undefined;
-    if (isFreeformSlide(slideNow)) {
-      const [ox, oy] = CONTENT_ORIGIN;
-      const [w, h] = DROP_PICTURE_SIZE;
-      const at = where.point ?? { x: ox, y: oy };
-      const maxZ = Math.max(0, ...freeformBlocks(slideNow).map((b) => b.pos?.z ?? 0));
-      pendingSelect.current = [blockId];
-      commit([
-        {
-          op: 'block.insert',
-          slideId: slideNow.id,
-          slot: 'main',
-          block: {
-            ...block,
-            pos: {
-              x: Math.round(at.x / 8) * 8,
-              y: Math.round(at.y / 8) * 8,
-              w,
-              h,
-              z: maxZ + 1,
-            },
-          },
-        },
-      ]);
+    const [ox, oy] = CONTENT_ORIGIN;
+    const [w, h] = DROP_PICTURE_SIZE;
+    const at = where.point ?? { x: ox, y: oy };
+    insertObject({ id: 'shot', type: 'shot', asset: asset.id } as Block, {
+      box: [Math.round(at.x / 8) * 8, Math.round(at.y / 8) * 8, w, h],
+    });
+  };
+
+  // -------------------------------------------------------------------------------------------
+  // The canvas commands the keys, the menu rows and the handle share (SPEC-2 6.1)
+
+  const selectedObjectIds = (): string[] => {
+    const slideNow = slideRef.current;
+    if (!slideNow) return [];
+    return selectedIds(selectionRef.current, extraRef.current).filter((id) =>
+      isObjectId(slideNow, boxesRef.current, id),
+    );
+  };
+
+  const showAngle = (value: number) => {
+    setReadout({ kind: 'angle', value });
+    window.clearTimeout(readoutTimer.current);
+    readoutTimer.current = window.setTimeout(() => setReadout(null), ROTATE_READOUT_MS);
+  };
+
+  /** Option+Left and Right, the Rotate rows: one rotation over the selection (about the union for several, SPEC-2 6.2). */
+  const rotateSelection = (by: number) => {
+    const ids = selectedObjectIds();
+    if (ids.length === 0 || editingRef.current) return;
+    void commitCanvas((canvas, boxesNow) => {
+      const rows = selectedPositions(canvas, boxesNow, ids);
+      const mutations = rotateMutations(
+        canvas,
+        rows,
+        { by },
+        rows.length > 1 ? 'selection' : 'each',
+      );
+      const first = mutations[0];
+      if (first && first.op === 'block.set' && first.value !== undefined)
+        showAngle(((first.value as Position).rotate ?? 0) as number);
+      return mutations;
+    });
+  };
+
+  const flipSelection = (axis: 'h' | 'v') => {
+    const ids = selectedObjectIds();
+    if (ids.length === 0 || editingRef.current) return;
+    void commitCanvas((canvas, boxesNow) =>
+      flipMutations(
+        canvas,
+        selectedPositions(canvas, boxesNow, ids),
+        axis,
+        ids.length > 1 ? 'selection' : 'each',
+      ),
+    );
+  };
+
+  const groupSelection = () => {
+    const ids = selectedObjectIds();
+    if (ids.length < 2) return;
+    void commitCanvas(
+      (canvas) => {
+        const tag = freshGroupTag(canvas);
+        pendingSelect.current = ids;
+        return groupMutations(canvas, ids, tag);
+      },
+      { autofit: false },
+    );
+  };
+
+  const ungroupSelection = () => {
+    const slideNow = slideRef.current;
+    const ids = selectedObjectIds();
+    if (!slideNow || ids.length === 0) return;
+    const tag = sharedGroup(slideNow, ids);
+    if (tag === null) return;
+    const members = groupMembers(slideNow, tag);
+    ungrouped.current = { slideId: slideNow.id, ids: members, tag };
+    setGroupEntered(null);
+    commit(ungroupMutations(slideNow, members));
+  };
+
+  const regroupSelection = () => {
+    const slideNow = slideRef.current;
+    const remembered = ungrouped.current;
+    if (!slideNow || !remembered || remembered.slideId !== slideNow.id) return;
+    const present = remembered.ids.filter((id) => blockById(slideNow, id) !== undefined);
+    if (present.length < 2) return;
+    const tag = freshGroupTag(slideNow, remembered.tag);
+    ungrouped.current = null;
+    pendingSelect.current = present;
+    commit(groupMutations(slideNow, present, tag));
+  };
+
+  const canRegroup = (): boolean => {
+    const slideNow = slideRef.current;
+    const remembered = ungrouped.current;
+    if (!slideNow || !remembered || remembered.slideId !== slideNow.id) return false;
+    return remembered.ids.filter((id) => blockById(slideNow, id) !== undefined).length >= 2;
+  };
+
+  /** The arrows: 1 px, 10 px with Shift, on every slide kind; the first nudge converts (SPEC-2 0.87). */
+  const nudgeSelection = (dx: number, dy: number) => {
+    const ids = selectedObjectIds();
+    if (ids.length === 0) return;
+    void commitCanvas((canvas, boxesNow) => freeNudgeMutations(canvas, ids, boxesNow, dx, dy));
+  };
+
+  const alignSelection = (edge: AlignEdge, to?: AlignTarget) => {
+    const ids = selectedObjectIds();
+    if (ids.length === 0) return;
+    void commitCanvas((canvas, boxesNow) => alignMutations(canvas, ids, boxesNow, edge, to));
+  };
+
+  const distributeSelection = (axis: DistributeAxis) => {
+    const ids = selectedObjectIds();
+    if (ids.length < 3) return;
+    void commitCanvas((canvas, boxesNow) => distributeMutations(canvas, ids, boxesNow, axis));
+  };
+
+  /** Arrange > Order on a canvas or a slide about to become one (block.order); a grammar slot reorder otherwise (orderBlock). */
+  const orderSelection = (move: OrderMove) => {
+    const slideNow = slideRef.current;
+    const anchor = selectedBlockId(selectionRef.current);
+    if (!slideNow || anchor === null) return;
+    if (isFreeformSlide(slideNow) || blockById(slideNow, anchor) !== undefined) {
+      orderBlock(anchor, move);
       return;
     }
-    const slot = insertSlotFor(slideNow, selected);
-    if (slot === null) return;
-    pendingSelect.current = [blockId];
+    /* a kind's object that is not a block (the photograph, the plate, the mark): convert, then order */
+    void commitCanvas((canvas) => zOrderMutations(canvas, anchor, move), { autofit: false });
+  };
+
+  /** The Format options fields: one pos written on an object, converting first (SPEC-2 6.1 row 24). */
+  const setPosition = (blockId: string, pos: Position) => {
+    void commitCanvas((canvas) => {
+      const block = blockById(canvas, blockId);
+      if (!block || !block.pos || jsonEqual(block.pos, pos)) return [];
+      return [{ op: 'block.set', slideId: canvas.id, blockId, path: '/pos', value: pos }];
+    });
+  };
+
+  const maskSelection = (shape: string | null) => {
+    const slideNow = slideRef.current;
+    const anchor = selectedBlockId(selectionRef.current);
+    if (!slideNow || anchor === null) return;
+    const block = blockById(slideNow, anchor);
+    if (!isCroppable(block)) return;
+    if (shape !== null && !isClosedShapeKind(shape)) return;
     commit([
-      {
-        op: 'block.insert',
-        slideId: slideNow.id,
-        slot,
-        ...(selected !== undefined ? { after: selected } : {}),
-        block,
-      },
+      shape === null
+        ? { op: 'block.set', slideId: slideNow.id, blockId: anchor, path: '/mask' }
+        : { op: 'block.set', slideId: slideNow.id, blockId: anchor, path: '/mask', value: shape },
     ]);
+  };
+
+  /** slide.toCanvas from the handle: the conversion alone, one write (SPEC-2 1.6). */
+  const toCanvas = async (): Promise<void> => {
+    const slideNow = slideRef.current;
+    if (!slideNow || isFreeformSlide(slideNow)) return;
+    const converted = await measuredCanvas(slideNow);
+    if (!converted) return;
+    commit([converted.replace]);
+    onConvertRef.current?.(slideNow.id);
+  };
+
+  /** block.autofit on the window transport: the fit measured now and written (SPEC-2 0.64). */
+  const applyAutofit = async (blockId: string): Promise<void> => {
+    const slideNow = slideRef.current;
+    if (!slideNow) return;
+    const block = blockById(slideNow, blockId);
+    if (!block || !('autofit' in block) || block.autofit === undefined || block.autofit === 'none')
+      return;
+    const mutations = await withAutofit(slideNow, [], [blockId]);
+    if (mutations.length > 0) commit(mutations);
+  };
+
+  const zoomTo = (next: SheetZoom, center?: Point) => {
+    onZoomRef.current?.(next === 'fit' ? 'fit' : clampZoom(next), center);
+  };
+
+  const zoomStepBy = (direction: 1 | -1) => {
+    zoomTo(stepZoom(k, direction));
+  };
+
+  const addGuide = (axis: 'x' | 'y', at?: number) => {
+    onGuidesRef.current?.({ add: [{ axis, at: at ?? GUIDE_CENTRE[axis] }] });
+  };
+
+  const clearGuides = () => {
+    onGuidesRef.current?.({ clear: true });
+  };
+
+  /** The word art bar's Enter: a text object at 88 px display weight 500 with an ink outline, centred (SPEC-2 6.2). */
+  const insertWordArt = (text: string) => {
+    const trimmed = text.trim();
+    if (trimmed === '') return;
+    const [w, h] = TOOL_DEFAULT_SIZE.wordArt;
+    insertObject(
+      {
+        id: 'text',
+        type: 'text',
+        text: canonicalText(trimmed),
+        typography: { size: 88, weight: 500, align: 'center' },
+        outline: { color: 'ink', width: 1.5 },
+      } as Block,
+      { box: centredBox([w, h]) },
+    );
+  };
+
+  /** The special characters picker's insert: at the caret, or into a new text box (SPEC-2 6.2). */
+  const insertText = (text: string) => {
+    if (inlineRef.current) {
+      inlineRef.current.insertText(text);
+      return;
+    }
+    const [w, h] = TOOL_DEFAULT_SIZE.text;
+    insertObject(
+      { id: 'text', type: 'text', text: canonicalText(text), autofit: 'grow' } as Block,
+      {
+        box: centredBox([w, h]),
+      },
+    );
   };
 
   /** What the menu model reads about the selection (menus/model.ts MenuContext.selection). */
@@ -1441,9 +2708,9 @@ export function Editor({
     const pointer = editingNow?.pointer ?? (current?.kind === 'run' ? current.pointer : undefined);
     const free = isFreeformSlide(slideNow);
     let order = { forward: false, backward: false, front: false, back: false };
-    if (slideNow && block && free) {
+    if (slideNow && free && anchor !== undefined) {
       const stack = sortByZ(freeformBlocks(slideNow)).map((b) => b.id);
-      const at = stack.indexOf(block.id);
+      const at = stack.indexOf(anchor);
       order = {
         forward: at >= 0 && at < stack.length - 1,
         backward: at > 0,
@@ -1460,6 +2727,9 @@ export function Editor({
           back: located.index > 0,
         };
       }
+    } else if (slideNow && anchor !== undefined) {
+      /* a kind's object that is not a block: the stack it joins on conversion has room both ways */
+      order = { forward: true, backward: true, front: true, back: true };
     }
     const linked =
       (block !== undefined && block.link !== undefined) ||
@@ -1467,22 +2737,45 @@ export function Editor({
         anchor !== undefined &&
         pointer !== undefined &&
         markupHasLink(readRunText(slideNow, anchor, pointer)));
+    const group = slideNow ? sharedGroup(slideNow, ids) : null;
+    const item = pointer !== undefined ? listItemPointer(pointer) : null;
+    const listLevel =
+      block?.type === 'plain' && item !== null ? (block.items[item.index]?.level ?? 1) : undefined;
+    const imageEdited =
+      isCroppable(block) &&
+      (block.trim !== undefined || block.mask !== undefined || block.adjust !== undefined);
     return {
       blocks: ids.length,
+      blockIds: ids,
       ...(anchor !== undefined ? { block: blockFamily(type) } : {}),
       textBlock:
         isTextBlockType(type) ||
-        (slideNow?.kind === 'title' && anchor !== undefined) ||
+        (slideNow?.kind === 'title' && anchor !== undefined && anchor !== 'mark') ||
         (slideNow?.kind === 'statement' && anchor !== undefined),
       listItem:
         pointer !== undefined &&
-        listItemPointer(pointer) !== null &&
+        item !== null &&
         (block?.type === 'plain' || block?.type === 'rows' || block?.type === 'refs'),
       tableCell: block?.type === 'table' && pointer !== undefined && cellPointer(pointer) !== null,
       linked,
       order,
       editing: editingNow !== null,
       freeform: free,
+      object:
+        slideNow !== undefined &&
+        ids.length > 0 &&
+        ids.every((id) => isObjectId(slideNow, boxesRef.current, id)),
+      positioned:
+        slideNow !== undefined &&
+        ids.length > 0 &&
+        ids.every((id) => blockById(slideNow, id)?.pos !== undefined),
+      canvas: free,
+      ...(group !== null ? { group } : {}),
+      regroup: canRegroup(),
+      coversSheet: slideNow !== undefined && anchor !== undefined && coversSheet(slideNow, anchor),
+      ...(caretRef.current ? { marks: caretRef.current.marks, range: caretRef.current.range } : {}),
+      imageEdited,
+      ...(listLevel !== undefined ? { listLevel } : {}),
     };
   };
 
@@ -1504,26 +2797,9 @@ export function Editor({
       duplicate: duplicateSelection,
       selectAll,
       deselect: () => select(null),
-      order: (move) => {
-        const anchor = selectedBlockId(selectionRef.current);
-        if (anchor !== null) orderBlock(anchor, move);
-      },
-      align: (edge, to) => {
-        const slideNow = slideRef.current;
-        const ids = selectedIds(selectionRef.current, extraRef.current);
-        if (!slideNow || ids.length === 0) return;
-        if (to !== undefined) {
-          void call('block.align', { slideId: slideNow.id, blockIds: ids, edge, to });
-          return;
-        }
-        commit(alignMutations(slideNow, ids, boxesRef.current, edge));
-      },
-      distribute: (axis) => {
-        const slideNow = slideRef.current;
-        const ids = selectedIds(selectionRef.current, extraRef.current);
-        if (!slideNow || ids.length < 3) return;
-        commit(distributeMutations(slideNow, ids, boxesRef.current, axis));
-      },
+      order: orderSelection,
+      align: alignSelection,
+      distribute: distributeSelection,
       link: openLink,
       table: tableCommand,
       armPaint,
@@ -1535,6 +2811,44 @@ export function Editor({
       focus: () => root.current?.focus({ preventScroll: true }),
       menuSelection,
       insertPicture,
+      toCanvas,
+      zoomTo,
+      zoomStep: zoomStepBy,
+      rotate: rotateSelection,
+      flip: flipSelection,
+      group: groupSelection,
+      ungroup: ungroupSelection,
+      regroup: regroupSelection,
+      cropMode: () => {
+        const anchor = selectedBlockId(selectionRef.current);
+        if (anchor !== null) enterCrop(anchor);
+      },
+      exitCrop: () => exitCrop(true),
+      mask: maskSelection,
+      centerOnPage: (axis) => alignSelection(axis === 'x' ? 'center' : 'middle', 'sheet'),
+      addGuide,
+      clearGuides,
+      insertText,
+      wordArt: insertWordArt,
+      selectNone: () => {
+        if (editingRef.current) editingRef.current.element.blur();
+        select(null);
+      },
+      applyAutofit,
+      insertObject,
+      toggleMark: toggleMarkOnSelection,
+      setTextColor: (which, color) => inlineRef.current?.setColor(which, color),
+      indent: (by) => {
+        if (onListLevel(by)) return;
+        if (onIndent(by)) return;
+        indentBlocks(selectedObjectIds(), by);
+      },
+      positions: () => {
+        const slideNow = slideRef.current;
+        if (!slideNow) return [];
+        return placedOf(slideNow, selectedObjectIds(), boxesRef.current);
+      },
+      setPosition,
     };
   }
   useEffect(() => {
@@ -1543,7 +2857,7 @@ export function Editor({
   }, []);
 
   // -------------------------------------------------------------------------------------------
-  // Keys (gslides-parity SPEC 10.1, 10.2; keys.ts editorKeyAction)
+  // Keys (gslides-parity SPEC 10.1, 10.2; SPEC-2 section 9; keys.ts editorKeyAction)
 
   const openContextMenuFromKeyboard = () => {
     const el = body.current;
@@ -1554,22 +2868,26 @@ export function Editor({
     const box = anchor !== null ? boxesRef.current.blocks[anchor] : undefined;
     const rect = stageRect();
     if (!rect) return;
-    const k = rect.width / 1600 || 1;
-    const x = rect.left + (box ? (box[0] + box[2] / 2) * k : rect.width / 2);
-    const y = rect.top + (box ? (box[1] + box[3] / 2) * k : rect.height / 2);
+    const kk = rect.width / 1600 || 1;
+    const x = rect.left + (box ? (box[0] + box[2] / 2) * kk : rect.width / 2);
+    const y = rect.top + (box ? (box[1] + box[3] / 2) * kk : rect.height / 2);
     const element =
       (anchor !== null ? el.querySelector<HTMLElement>(`[data-block="${anchor}"]`) : null) ?? el;
-    const block = anchor !== null ? blockById(slideNow, anchor) : undefined;
-    const family = blockFamily(
-      block?.type ?? (anchor !== null ? blockTypeOf(slideNow, anchor) : undefined),
-    );
     cb({
-      target: anchor === null ? 'emptyCanvas' : family === 'image' ? 'image' : 'textBlock',
+      target: anchor === null ? 'emptyCanvas' : contextTargetFor(slideNow, anchor),
       x,
       y,
       element,
       ...(anchor !== null ? { blockId: anchor } : {}),
     });
+  };
+
+  /** The right-click target of an object (SPEC-2 4.3): a group when the selection shares a tag, else by type. */
+  const contextTargetFor = (slideNow: Slide, id: string): EditorContextTarget => {
+    const ids = selectedIds(selectionRef.current, extraRef.current);
+    if (ids.includes(id) && ids.length > 1 && sharedGroup(slideNow, ids) !== null) return 'group';
+    const target = objectContextTarget(slideNow, id);
+    return target === 'table' ? 'textBlock' : target;
   };
 
   /* the edit-mode keys (SPEC 6.9; gslides-parity SPEC 10.1, 10.2), in the capture phase so the
@@ -1583,7 +2901,13 @@ export function Editor({
   useOnceLayoutEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (editingRef.current || isEditableTarget(e.target)) return;
-      if (e.target instanceof Element && e.target.closest('.ts-overlay')) return;
+      /* a focused overlay handle nudges, orders and flips itself with the plain and Cmd arrows,
+         Enter and Space (Overlay.tsx); every other chord (Delete, Esc, Option arrows, Cmd letters)
+         is the stage's, so a rotate key after a drag from the chip still turns the object */
+      if (e.target instanceof Element && e.target.closest('.ts-overlay')) {
+        const arrow = e.key.startsWith('Arrow');
+        if ((arrow && !e.altKey) || e.key === 'Enter' || e.key === ' ') return;
+      }
       const el = body.current;
       const slideNow = slideRef.current;
       if (!el || !slideNow) return;
@@ -1592,6 +2916,29 @@ export function Editor({
         e.preventDefault();
         e.stopImmediatePropagation();
       };
+      /* crop mode owns Enter and Esc (SPEC-2 6.1 row 19) */
+      if (cropRef.current) {
+        if (e.key === 'Enter' || e.key === 'Escape') {
+          exitCrop(true);
+          stop();
+          return;
+        }
+      }
+      /* the point tools end on Enter and cancel on Esc (SPEC-2 6.2) */
+      if (toolRef.current !== 'select' && drawPointsRef.current.length > 0) {
+        if (e.key === 'Enter') {
+          finishPointTool(false);
+          stop();
+          return;
+        }
+        if (e.key === 'Escape') {
+          drawPointsRef.current = [];
+          setDrawPoints([]);
+          onToolDoneRef.current?.();
+          stop();
+          return;
+        }
+      }
       /* a key on a chrome control (an inspector button, a swatch, a menu row, a filmstrip card)
          is that control's: only Tab below still reads it, to decide whether the page or the
          browser owns the order */
@@ -1600,12 +2947,17 @@ export function Editor({
         typeof navigator !== 'undefined' && /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
       if (e.key === 'Tab' && !e.metaKey && !e.ctrlKey && !e.altKey) {
         /* with nothing selected, Tab from the page (the body, or the stage itself) selects the
-           first block and Shift Tab the last (cycleSelection from -1); from a field or a chrome
-           button the browser's focus order runs instead */
+           first object and Shift Tab the last (cycleSelection from -1); from a field or a chrome
+           button the browser's focus order runs instead; the order is paint order on a canvas and
+           document order otherwise (SPEC-2 0.83) */
         const inside = e.target instanceof Node && root.current?.contains(e.target);
         const fromPage = e.target === document.body;
         if (current === null && !inside && !fromPage) return;
-        select(cycleSelection(blockOrder(el), current, e.shiftKey ? -1 : 1));
+        const order = objectIds(slideNow, boxesRef.current, blockOrder(el));
+        const next = cycleSelection(order, current, e.shiftKey ? -1 : 1);
+        setGroupEntered(null);
+        if (next) selectObjects([next.blockId]);
+        else select(null);
         stop();
         return;
       }
@@ -1626,12 +2978,15 @@ export function Editor({
         return;
       }
       const free = isFreeformSlide(slideNow);
+      const ids = selectedIds(current, extraRef.current);
       const action = editorKeyAction(e, {
         selected: current !== null,
         freeform: free,
         editing: false,
         editable: false,
         apple,
+        several: ids.length > 1,
+        grouped: sharedGroup(slideNow, ids) !== null,
       });
       if (action === null) {
         /* no bare letter does anything on the stage (SPEC 0.28); with a block selected the letter
@@ -1639,11 +2994,32 @@ export function Editor({
         if (current !== null && isBareCharacterKey(e)) stop();
         return;
       }
-      const ids = selectedIds(current, extraRef.current);
       switch (action.type) {
         case 'escape':
           if (paintRef.current) {
             setPaint(null);
+            stop();
+            return;
+          }
+          if (toolRef.current !== 'select') {
+            onToolDoneRef.current?.();
+            stop();
+            return;
+          }
+          if (groupEnteredRef.current !== null) {
+            /* Esc from a member returns to the group (SPEC-2 6.1 row 14) */
+            const member = groupEnteredRef.current;
+            setGroupEntered(null);
+            groupEnteredRef.current = null;
+            selectObjects([member]);
+            stop();
+            return;
+          }
+          if (pendingEdit.current !== null) {
+            /* Esc before a drawn text box's session opened (its write is still landing): the
+               session is off and the box stays selected, as it would after Esc inside it */
+            pendingSelect.current = [pendingEdit.current.blockId];
+            pendingEdit.current = null;
             stop();
             return;
           }
@@ -1654,7 +3030,7 @@ export function Editor({
           stop();
           return;
         case 'nudge':
-          commit(freeNudgeMutations(slideNow, ids, boxesRef.current, action.dx, action.dy));
+          nudgeSelection(action.dx, action.dy);
           stop();
           return;
         case 'enter': {
@@ -1671,11 +3047,7 @@ export function Editor({
           return;
         case 'order':
           if (current !== null) {
-            if (!free && (action.move === 'front' || action.move === 'back')) {
-              orderBlock(current.blockId, action.move);
-            } else {
-              orderBlock(current.blockId, action.move);
-            }
+            orderSelection(action.move);
             stop();
           }
           return;
@@ -1726,6 +3098,27 @@ export function Editor({
           stop();
           return;
         }
+        case 'rotate':
+          rotateSelection(action.by);
+          stop();
+          return;
+        case 'group':
+          groupSelection();
+          stop();
+          return;
+        case 'ungroup':
+          ungroupSelection();
+          stop();
+          return;
+        case 'mark':
+          /* Cmd Shift X on a selected list item keeps the round one `no` flag through the menu row */
+          toggleMarkOnSelection(action.mark);
+          stop();
+          return;
+        case 'indent':
+          indentBlocks(ids, action.by);
+          stop();
+          return;
         case 'tab':
           return;
         default:
@@ -1784,15 +3177,67 @@ export function Editor({
     };
   }, []);
 
+  /* Cmd+scroll and a trackpad pinch zoom about the pointer (SPEC-2 6.1 row 27): the default is
+     prevented over the stage so the page never zooms there */
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      const rect = el.getBoundingClientRect();
+      const sheet = stageRect();
+      const current = zoomRef.current === 'fit' ? k : zoomRef.current;
+      const next = zoomFromWheel(current, e.deltaY);
+      if (Math.abs(next - current) < 1e-4) return;
+      const pointerAt = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      const under = sheet ? sheetPoint(sheet, e.clientX, e.clientY) : { x: 800, y: 450 };
+      onZoomRef.current?.(
+        next,
+        centerKeepingPoint(under, pointerAt, { width: rect.width, height: rect.height }, next),
+      );
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [k]);
+
   const onHandleDown = (handle: Handle, e: PointerEvent) => {
     if (e.button !== 0) return;
     e.preventDefault();
-    beginGesture(handle, e.clientX, e.clientY);
+    if (handle.kind === 'crop-edge') {
+      beginCropDrag(handle.dir, e.clientX, e.clientY);
+      return;
+    }
+    beginGesture(handle, e.clientX, e.clientY, {
+      duplicate: e.altKey && handle.kind === 'free-move',
+    });
   };
 
   const onHandleNudge = (handle: Handle, delta: number, axis?: 'x' | 'y') => {
     const slideNow = slideRef.current;
     if (!slideNow || gesture.current) return;
+    if (handle.kind === 'free-move' && handle.blockId !== undefined) {
+      const dx = (axis ?? 'x') === 'x' ? delta : 0;
+      const dy = axis === 'y' ? -delta : 0;
+      nudgeSelection(dx, dy);
+      return;
+    }
+    if (handle.kind === 'free-rotate') {
+      rotateSelection(delta);
+      return;
+    }
+    if (handle.kind === 'free-resize' && handle.blockId !== undefined) {
+      void commitCanvas((canvas, boxesNow) => {
+        const mutation = nudgeMutation(
+          handle,
+          { slide: canvas, boxes: boxesNow },
+          delta,
+          axis ?? (handle.axis === 'y' ? 'y' : 'x'),
+        );
+        return mutation ? [mutation] : [];
+      });
+      return;
+    }
     const mutation = nudgeMutation(
       handle,
       { slide: slideNow, boxes: boxesRef.current },
@@ -1807,11 +3252,85 @@ export function Editor({
     orderBlock(handle.blockId, move);
   };
 
+  /** A press on a deck guide drags it; the release writes deck.guides move (SPEC-2 6.1 row 30). */
+  const onGuideDown = (axis: 'x' | 'y', at: number, e: PointerEvent) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    const rect = stageRect();
+    if (!rect) return;
+    let last = at;
+    setDraggingGuide({ axis, at, label: inchesLabel(at), from: at });
+    const move = (ev: PointerEvent) => {
+      const r = stageRect();
+      if (!r) return;
+      const point = sheetPoint(r, ev.clientX, ev.clientY);
+      last = Math.round(axis === 'x' ? point.x : point.y);
+      last = Math.max(0, Math.min(axis === 'x' ? 1600 : 900, last));
+      setDraggingGuide({ axis, at: last, label: inchesLabel(last), from: at });
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      setDraggingGuide(null);
+      if (last !== at) onGuidesRef.current?.({ move: [{ axis, from: at, to: last }] });
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  };
+
+  const onGuideContextMenu = (axis: 'x' | 'y', at: number, e: MouseEvent) => {
+    const cb = onContextMenuRef.current;
+    if (!cb || !root.current) return;
+    e.preventDefault();
+    cb({ target: 'guide', x: e.clientX, y: e.clientY, element: root.current, guide: { axis, at } });
+  };
+
+  /** A press on a ruler drags a new guide out of it; the release inside the sheet writes deck.guides add (row 29). */
+  const onRulerDown = (axis: 'x' | 'y', e: PointerEvent) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    let last: number | null = null;
+    const move = (ev: PointerEvent) => {
+      const r = stageRect();
+      if (!r) return;
+      const kk = r.width / 1600 || 1;
+      const edge = axis === 'x' ? r.left : r.top;
+      const client = axis === 'x' ? ev.clientX : ev.clientY;
+      const at = rulerToSheet(axis, client, edge, kk);
+      const inside = axis === 'x' ? ev.clientY >= r.top - 1 : ev.clientX >= r.left - 1;
+      last = inside ? at : null;
+      setDraggingGuide(inside ? { axis, at, label: inchesLabel(at) } : null);
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+      setDraggingGuide(null);
+      if (last !== null) onGuidesRef.current?.({ add: [{ axis, at: last }] });
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  };
+
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
     const el = body.current;
-    if (!el || gesture.current) return;
-    const id = resolveBlock(e.target, el);
+    const slideNow = slideRef.current;
+    if (!el || !slideNow) return;
+    if (settingsRef.current.showRuler) {
+      const rect = stageRect();
+      if (rect) setPointer(sheetPoint(rect, e.clientX, e.clientY));
+    }
+    if (gesture.current) return;
+    const id = resolveObject(e.target, el, slideNow);
     setHover((prev) => (prev === id ? prev : id));
+    const drawTool = toolRef.current;
+    if (drawTool !== 'select' && isLineTool(drawTool) && isFreeformSlide(slideNow)) {
+      const rect = stageRect();
+      if (rect) setSites(sitesUnder(slideNow, sheetPoint(rect, e.clientX, e.clientY)));
+    }
   };
 
   /** A press on a block's body arms a drag: past DRAG_START_PX it becomes the chip's gesture. */
@@ -1826,8 +3345,9 @@ export function Editor({
       window.removeEventListener('pointerup', up);
       const slideNow = slideRef.current;
       if (!slideNow) return;
-      const chip = chipHandleFor(slideNow, boxesRef.current, p.blockId);
-      if (chip) beginGesture(chip, p.clientX, p.clientY);
+      const ids = selectedIds(selectionRef.current, extraRef.current);
+      const chip = chipHandleFor(slideNow, boxesRef.current, p.blockId, ids);
+      if (chip) beginGesture(chip, p.clientX, p.clientY, { duplicate: p.alt });
     };
     const up = () => {
       press.current = null;
@@ -1838,7 +3358,7 @@ export function Editor({
     window.addEventListener('pointerup', up);
   };
 
-  /** A press on the empty sheet of a freeform slide drags a marquee; a plain click clears. */
+  /** A press on the empty sheet or the workspace drags a marquee over the objects' bounding boxes; a plain click clears (SPEC-2 6.1 row 3, 0.100). */
   const armMarquee = (clientX: number, clientY: number) => {
     const rect = stageRect();
     if (!rect) return;
@@ -1847,13 +3367,34 @@ export function Editor({
     const move = (ev: PointerEvent) => {
       const r = stageRect();
       const slideNow = slideRef.current;
-      if (!r || !slideNow) return;
+      const el = body.current;
+      if (!r || !slideNow || !el) return;
       const box = marqueeBox(start, sheetPoint(r, ev.clientX, ev.clientY));
       if (!live && !isMarquee(box)) return;
       live = true;
       setMarquee(box);
-      const order = freeformBlocks(slideNow).map((block) => block.id);
-      const hits = selectionOf(marqueeHits(box, boxesRef.current.blocks, order));
+      const order = objectIds(slideNow, boxesRef.current, blockOrder(el));
+      const bounding: Record<string, Box> = {};
+      for (const id of order) {
+        const block = blockById(slideNow, id);
+        const box2 = block?.pos ? boundingBoxOf(block.pos) : boxesRef.current.blocks[id];
+        if (!box2) continue;
+        /* the picture covering the sheet at the bottom of the stack (the background photograph)
+           is crossed by every marquee inside the sheet; it joins only when the marquee holds it
+           whole, so a marquee over the plate selects the plate (SPEC-2 0.100) */
+        if (
+          coversSheet(slideNow, id) &&
+          !(
+            box[0] <= box2[0] &&
+            box[1] <= box2[1] &&
+            box[0] + box[2] >= box2[0] + box2[2] &&
+            box[1] + box[3] >= box2[1] + box2[3]
+          )
+        )
+          continue;
+        bounding[id] = box2;
+      }
+      const hits = selectionOf(expandGroups(slideNow, marqueeHits(box, bounding, order)));
       select(hits.selection, hits.extra);
     };
     const up = () => {
@@ -1868,20 +3409,167 @@ export function Editor({
     window.addEventListener('pointercancel', up);
   };
 
+  /** Space+drag pans the zoomed stage (SPEC-2 6.1 row 28). */
+  const armPan = (clientX: number, clientY: number) => {
+    const el = scroller.current;
+    if (!el) return;
+    const startLeft = el.scrollLeft;
+    const startTop = el.scrollTop;
+    const move = (ev: PointerEvent) => {
+      el.scrollLeft = startLeft - (ev.clientX - clientX);
+      el.scrollTop = startTop - (ev.clientY - clientY);
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+  };
+
+  /** The one insert of a draw tool, converting the slide first (SPEC-2 6.1 row 33). */
+  const insertDrawn = (
+    drawTool: Exclude<EditorTool, 'select'>,
+    box: Box,
+    options: {
+      points?: [number, number][];
+      orientation?: 'horizontal' | 'vertical' | 'diagonal-down' | 'diagonal-up';
+      start?: Point;
+      end?: Point;
+    } = {},
+  ) => {
+    void commitCanvas(
+      (canvas) => {
+        const type = toolBlockType(drawTool);
+        const id = freeId(type, takenBlockIds(canvas));
+        const mutation = toolInsertMutation(canvas, drawTool, id, box, 'main', undefined, {
+          grid: settingsRef.current.snapGrid,
+          ...(options.points ? { points: options.points } : {}),
+          ...(options.orientation ? { orientation: options.orientation } : {}),
+        });
+        if (!mutation || mutation.op !== 'block.insert') return [];
+        const mutations: Mutation[] = [mutation];
+        /* a connector's ends snap to the sites under the drag's start and end (SPEC-2 6.2, 2.4.7) */
+        if (
+          mutation.block.type === 'shape' &&
+          isLineBlock(mutation.block) &&
+          options.start &&
+          options.end &&
+          (mutation.block.shape === 'line' ||
+            mutation.block.shape === 'arrow' ||
+            mutation.block.shape === 'elbow' ||
+            mutation.block.shape === 'curved')
+        ) {
+          const startSite = siteUnder(canvas, options.start);
+          const endSite = siteUnder(canvas, options.end);
+          if (startSite || endSite) {
+            const connect: NonNullable<Extract<Block, { type: 'shape' }>['connect']> = {};
+            if (startSite) connect.start = { block: startSite.blockId, site: startSite.site };
+            if (endSite) connect.end = { block: endSite.blockId, site: endSite.site };
+            const attached = { ...mutation.block, connect } as Block;
+            mutations[0] = { ...mutation, block: attached };
+          }
+        }
+        if (drawTool.kind === 'text')
+          pendingEdit.current = { blockId: id, pointer: 'text', caret: 'end' };
+        else pendingSelect.current = [id];
+        return mutations;
+      },
+      { autofit: false },
+    );
+    onToolDoneRef.current?.();
+  };
+
+  /** Curve and Polyline: the placed points as one path block (SPEC-2 6.2); `closed` when the last click met the first point. */
+  const finishPointTool = (closed: boolean) => {
+    const drawTool = toolRef.current;
+    const points = drawPointsRef.current;
+    drawPointsRef.current = [];
+    setDrawPoints([]);
+    if (drawTool === 'select' || !isPointTool(drawTool)) return;
+    const path = pathFromPoints(points);
+    if (!path) {
+      onToolDoneRef.current?.();
+      return;
+    }
+    void commitCanvas(
+      (canvas) => {
+        const id = freeId('shape', takenBlockIds(canvas));
+        const mutation = toolInsertMutation(canvas, drawTool, id, path.box, 'main', undefined, {
+          grid: false,
+          points: path.points,
+        });
+        if (!mutation || mutation.op !== 'block.insert') return [];
+        const block = closed ? ({ ...mutation.block, closed: true } as Block) : mutation.block;
+        pendingSelect.current = [id];
+        return [{ ...mutation, block }];
+      },
+      { autofit: false },
+    );
+    onToolDoneRef.current?.();
+  };
+
   /**
-   * A press with a draw tool (gslides-parity SPEC 3.1 rows 9 to 12): the pointer draws a box in
-   * the marquee's ink; the release inserts the tool's block there, or the default box at the
-   * press when the pointer did not travel. A text box opens in the caret state (R09 A1); the
-   * tool then returns to Select through onToolDone.
+   * A press with a draw tool (SPEC-2 6.1 row 33, 6.2): the pointer draws a box in the marquee's
+   * ink; the release inserts the tool's block there, or the default box at the press when the
+   * pointer did not travel; Shift constrains, Option draws from the centre; Curve and Polyline
+   * take a click per point; Scribble samples the pointer. A text box opens in the caret state
+   * (R09 A1); the tool then returns to Select through onToolDone.
    */
-  const armDraw = (clientX: number, clientY: number, drawTool: Exclude<EditorTool, 'select'>) => {
+  const armDraw = (
+    clientX: number,
+    clientY: number,
+    drawTool: Exclude<EditorTool, 'select'>,
+    mods: { shift: boolean; alt: boolean },
+  ) => {
     const rect = stageRect();
     if (!rect) return;
     const start = sheetPoint(rect, clientX, clientY);
+    if (isPointTool(drawTool)) {
+      const points = drawPointsRef.current;
+      const first = points[0];
+      if (first && points.length >= 2 && Math.hypot(first.x - start.x, first.y - start.y) < 8) {
+        finishPointTool(true);
+        return;
+      }
+      drawPointsRef.current = [...points, start];
+      setDrawPoints(drawPointsRef.current);
+      return;
+    }
+    if (isScribbleTool(drawTool)) {
+      const samples: Point[] = [start];
+      const move = (ev: PointerEvent) => {
+        const r = stageRect();
+        if (!r) return;
+        const now = sheetPoint(r, ev.clientX, ev.clientY);
+        const last = samples[samples.length - 1];
+        if (!last || Math.hypot(now.x - last.x, now.y - last.y) >= SCRIBBLE_SAMPLE_PX) {
+          samples.push(now);
+          setDrawPoints([...samples]);
+        }
+      };
+      const finish = () => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', finish);
+        window.removeEventListener('pointercancel', finish);
+        setDrawPoints([]);
+        const path = pathFromPoints(simplifyPoints(samples));
+        if (path) insertDrawn(drawTool, path.box, { points: path.points });
+        else onToolDoneRef.current?.();
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', finish);
+      window.addEventListener('pointercancel', finish);
+      return;
+    }
+    let current = mods;
     const move = (ev: PointerEvent) => {
       const r = stageRect();
       if (!r) return;
-      const drawn = drawnBox(drawTool, start, sheetPoint(r, ev.clientX, ev.clientY));
+      current = { shift: ev.shiftKey, alt: ev.altKey };
+      const drawn = drawnBox(drawTool, start, sheetPoint(r, ev.clientX, ev.clientY), current);
       setMarquee(drawn.dragged ? drawn.box : null);
     };
     const finishDraw = (ev: PointerEvent) => {
@@ -1889,28 +3577,20 @@ export function Editor({
       window.removeEventListener('pointerup', finishDraw);
       window.removeEventListener('pointercancel', cancel);
       setMarquee(null);
+      setSites([]);
       const r = stageRect();
-      const slideNow = slideRef.current;
-      if (!r || !slideNow) return;
-      const drawn = drawnBox(drawTool, start, sheetPoint(r, ev.clientX, ev.clientY));
-      const type = toolBlockType(drawTool);
-      const id = freeId(type, takenBlockIds(slideNow));
-      const selected = selectedBlockId(selectionRef.current) ?? undefined;
-      const mutation = toolInsertMutation(
-        slideNow,
-        drawTool,
-        id,
-        drawn.box,
-        insertSlotFor(slideNow, selected),
-        selected,
-      );
-      if (mutation) {
-        if (drawTool.kind === 'text')
-          pendingEdit.current = { blockId: id, pointer: 'text', caret: 'end' };
-        else pendingSelect.current = [id];
-        commit([mutation]);
-      }
-      onToolDoneRef.current?.();
+      if (!r) return;
+      const end = sheetPoint(r, ev.clientX, ev.clientY);
+      const drawn = drawnBox(drawTool, start, end, current);
+      const orientation =
+        isLineTool(drawTool) && drawTool.line !== 'rule' && drawn.dragged
+          ? drawnLineOrientation(start, end)
+          : undefined;
+      insertDrawn(drawTool, drawn.box, {
+        ...(orientation ? { orientation } : {}),
+        start,
+        end: drawn.dragged ? end : { x: start.x + drawn.box[2], y: start.y + drawn.box[3] / 2 },
+      });
     };
     const cancel = () => {
       window.removeEventListener('pointermove', move);
@@ -1923,6 +3603,30 @@ export function Editor({
     window.addEventListener('pointercancel', cancel);
   };
 
+  /** A press on the stage root outside the sheet: the workspace (SPEC-2 0.100) starts a marquee, a click deselects. */
+  const onWorkspacePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return;
+    if (e.target instanceof Element && e.target.closest('.sheet')) return;
+    if (e.target instanceof Element && e.target.closest('.ts-overlay')) return;
+    if (editingRef.current) return;
+    if (spaceRef.current) {
+      armPan(e.clientX, e.clientY);
+      return;
+    }
+    if (cropRef.current) {
+      exitCrop(true);
+      return;
+    }
+    const drawTool = toolRef.current;
+    if (drawTool !== 'select') {
+      e.preventDefault();
+      armDraw(e.clientX, e.clientY, drawTool, { shift: e.shiftKey, alt: e.altKey });
+      return;
+    }
+    setGroupEntered(null);
+    armMarquee(e.clientX, e.clientY);
+  };
+
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
     const el = body.current;
     const slideNow = slideRef.current;
@@ -1930,13 +3634,32 @@ export function Editor({
     const current = editingRef.current;
     /* a click inside the editable run is the caret's; one outside ends the edit through its blur */
     if (current) return;
+    if (spaceRef.current) {
+      e.preventDefault();
+      armPan(e.clientX, e.clientY);
+      return;
+    }
+    const cropNow = cropRef.current;
+    if (cropNow) {
+      /* inside the frame a drag pans the picture; outside commits (SPEC-2 6.1 row 19) */
+      const rect = stageRect();
+      const point = rect ? sheetPoint(rect, e.clientX, e.clientY) : null;
+      const [fx, fy, fw, fh] = cropNow.frame;
+      if (point && point.x >= fx && point.x <= fx + fw && point.y >= fy && point.y <= fy + fh) {
+        e.preventDefault();
+        beginCropDrag('pan', e.clientX, e.clientY);
+        return;
+      }
+      exitCrop(true);
+      return;
+    }
     const drawTool = toolRef.current;
     if (drawTool !== 'select') {
       e.preventDefault();
-      armDraw(e.clientX, e.clientY, drawTool);
+      armDraw(e.clientX, e.clientY, drawTool, { shift: e.shiftKey, alt: e.altKey });
       return;
     }
-    const id = resolveBlock(e.target, el);
+    const id = resolveObject(e.target, el, slideNow);
     /* paint format armed: the click paints the block and nothing else (SPEC 3.1 row 6) */
     if (paintRef.current && id !== null) {
       e.preventDefault();
@@ -1944,16 +3667,22 @@ export function Editor({
       select({ kind: 'block', blockId: id });
       return;
     }
-    const free = isFreeformSlide(slideNow);
     if (id === null) {
-      if (free) armMarquee(e.clientX, e.clientY);
-      else select(null);
+      setGroupEntered(null);
+      armMarquee(e.clientX, e.clientY);
       return;
     }
     const selected = selectedIds(selectionRef.current, extraRef.current);
-    if (e.shiftKey || (free && (e.metaKey || e.ctrlKey))) {
-      const toggled = toggleSelected(selectionRef.current, extraRef.current, id);
-      select(toggled.selection, toggled.extra);
+    if (e.shiftKey || e.metaKey || e.ctrlKey) {
+      /* Shift and Cmd click toggle membership (SPEC-2 6.1 row 2); a group toggles whole */
+      const members = expandGroups(slideNow, [id]);
+      let next = { selection: selectionRef.current, extra: extraRef.current as string[] };
+      const adding = !selected.includes(id);
+      for (const member of members) {
+        if (adding === !selectedIds(next.selection, next.extra).includes(member))
+          next = toggleSelected(next.selection, next.extra, member);
+      }
+      select(next.selection, next.extra);
       return;
     }
     /* a single click inside text places the caret there (gslides-parity SPEC 10.2, R09 A1);
@@ -1967,13 +3696,43 @@ export function Editor({
       }
     }
     if (!selected.includes(id)) {
-      // a click on a block of the group keeps the group, so the drag that follows moves it whole
-      select({ kind: 'block', blockId: id });
+      /* a click on a member of a group selects the group, so the drag that follows moves it whole */
+      if (groupEnteredRef.current !== id) setGroupEntered(null);
+      selectObjects([id]);
     }
-    /* real blocks drag by their body: to reorder on a grammar slide, anywhere on a freeform one;
-       the text of a title or statement slide is a field and has no chip */
-    if (blockById(slideNow, id)) {
-      armPress({ blockId: id, clientX: e.clientX, clientY: e.clientY });
+    /* every object drags by its body: a picture, a shape, a material anywhere; the text of a
+       title or statement slide by its frame through the overlay (its interior is the caret's) */
+    if (isObjectId(slideNow, boxesRef.current, id)) {
+      armPress({ blockId: id, clientX: e.clientX, clientY: e.clientY, alt: e.altKey });
+    }
+  };
+
+  /** A double click: a member of a group alone (SPEC-2 6.1 row 14), crop mode on a picture (row 19). */
+  const onDoubleClick = (e: ReactMouseEvent<HTMLDivElement>) => {
+    const el = body.current;
+    const slideNow = slideRef.current;
+    if (!el || !slideNow || editingRef.current) return;
+    const id = resolveObject(e.target, el, slideNow);
+    if (id === null) return;
+    const block = blockById(slideNow, id);
+    if (isCroppable(block) && (isFreeformSlide(slideNow) || block.type === 'shot')) {
+      e.preventDefault();
+      enterCrop(id);
+      return;
+    }
+    if (id === 'picture' && !isFreeformSlide(slideNow)) {
+      /* the photograph of a picture kind: convert, then crop mode on the picture object */
+      e.preventDefault();
+      pendingCrop.current = 'picture';
+      void toCanvas();
+      return;
+    }
+    const tag = block?.pos?.group;
+    if (tag !== undefined && groupEnteredRef.current !== id) {
+      e.preventDefault();
+      setGroupEntered(id);
+      groupEnteredRef.current = id;
+      select({ kind: 'block', blockId: id }, []);
     }
   };
 
@@ -1982,7 +3741,7 @@ export function Editor({
     if (e.target instanceof Element && e.target.closest('a')) e.preventDefault();
   };
 
-  /** A right-click: the target of gslides-parity SPEC 4.3 for the chrome's menu; inside an editing session the browser's own menu carries the spelling suggestions. */
+  /** A right-click: the target of gslides-parity SPEC 4.3 and SPEC-2 4.3 for the chrome's menu; inside an editing session the browser's own menu carries the spelling suggestions. */
   const onContextMenuEvent = (e: ReactMouseEvent<HTMLDivElement>) => {
     const cb = onContextMenuRef.current;
     const el = body.current;
@@ -1991,7 +3750,8 @@ export function Editor({
     const current = editingRef.current;
     if (current && e.target instanceof Node && current.element.contains(e.target)) return;
     e.preventDefault();
-    const id = resolveBlock(e.target, el);
+    const inSheet = e.target instanceof Element && e.target.closest('.sheet') !== null;
+    const id = inSheet ? resolveObject(e.target, el, slideNow) : null;
     const run = resolveRun(e.target, el);
     const element =
       (e.target instanceof Element ? e.target.closest<HTMLElement>('[data-block]') : null) ?? el;
@@ -2000,9 +3760,8 @@ export function Editor({
       return;
     }
     const block = blockById(slideNow, id);
-    const family = blockFamily(block?.type ?? blockTypeOf(slideNow, id));
     if (!selectedIds(selectionRef.current, extraRef.current).includes(id)) {
-      select({ kind: 'block', blockId: id });
+      selectObjects([id]);
     }
     const cell = block?.type === 'table' && run ? cellPointer(run.pointer) : null;
     if (cell && run) {
@@ -2018,7 +3777,7 @@ export function Editor({
       return;
     }
     cb({
-      target: family === 'image' ? 'image' : 'textBlock',
+      target: contextTargetFor(slideNow, id),
       x: e.clientX,
       y: e.clientY,
       element,
@@ -2035,28 +3794,28 @@ export function Editor({
   const onDrop = (e: ReactDragEvent<HTMLDivElement>) => {
     const files = imageFilesOf(e.dataTransfer);
     const el = body.current;
-    if (files.length === 0 || !el) return;
+    const slideNow = slideRef.current;
+    if (files.length === 0 || !el || !slideNow) return;
     e.preventDefault();
     const rect = stageRect();
     const point = rect ? sheetPoint(rect, e.clientX, e.clientY) : undefined;
-    const id = resolveBlock(e.target, el);
+    const id = resolveObject(e.target, el, slideNow);
     const [first] = files;
     if (!first) return;
     void insertPicture(first, {
-      ...(id !== null ? { blockId: id } : {}),
+      ...(id !== null && blockById(slideNow, id) ? { blockId: id } : {}),
       ...(point ? { point } : {}),
-      replace: id === null,
+      replace: id === 'picture' && !isFreeformSlide(slideNow),
     });
   };
 
-  const pad = present ? SHEET_PAD.present : narrow ? SHEET_PAD.narrow : SHEET_PAD.wide;
-  const fitted = fitSheetAt({ aw: stageSize.width, ah: stageSize.height, pad, zoom });
-  /* the same placement Sheet makes: under the toolbar on a narrow viewport */
-  const fit = narrow && !present && zoom === 'fit' ? { ...fitted, top: pad } : fitted;
-  const k = fit.scale;
-
   const selectedId = selectedBlockId(selection);
   const ids = selectedIds(selection, extra);
+  const anchorBlock = slide && selectedId !== null ? blockById(slide, selectedId) : undefined;
+  const anchorPos: Position | null =
+    anchorBlock?.pos ??
+    (slide && selectedId !== null ? posFor(slide, selectedId, boxes) : null) ??
+    null;
   const selectionBox =
     selection === null
       ? null
@@ -2069,10 +3828,18 @@ export function Editor({
     const box = boxes.blocks[id];
     return box ? [box] : [];
   });
-  const group = ids.length > 1 ? groupBoxOf(ids, boxes) : null;
+  const group =
+    ids.length > 1 && slide ? (selectionUnion(slide, ids, boxes) ?? groupBoxOf(ids, boxes)) : null;
+  const groupTag = slide ? sharedGroup(slide, ids) : null;
   const hoverBox =
     hover !== null && !ids.includes(hover) && !activeHandle ? (boxes.blocks[hover] ?? null) : null;
-  const handles = shownSlide && !editing ? handlesFor(shownSlide, boxes, selection) : [];
+  const handles =
+    shownSlide && !editing
+      ? handlesFor(shownSlide, boxes, selection, {
+          ids,
+          ...(crop ? { crop: { frame: crop.frame } } : {}),
+        })
+      : [];
   const lint: LintBox[] =
     lintLayer && findings
       ? findings.flatMap((finding): LintBox[] => {
@@ -2100,27 +3867,25 @@ export function Editor({
       ? labelClearanceBox(shownSlide, active, boxes)
       : null;
 
-  /* the arrange actions of a freeform selection: each is one write */
+  /* the arrange actions of a selection: each is one write, on every slide kind (SPEC-2 6.1 rows 13, 21, 22) */
   const arrange: ArrangeActions | null =
-    freeform && selectedId !== null && !editing
+    selectedId !== null && !editing
       ? {
           count: ids.length,
           canDistribute: ids.length >= 3,
-          align: (edge) => {
-            const slideNow = slideRef.current;
-            if (slideNow) commit(alignMutations(slideNow, ids, boxesRef.current, edge));
-          },
-          distribute: (axis) => {
-            const slideNow = slideRef.current;
-            if (slideNow) commit(distributeMutations(slideNow, ids, boxesRef.current, axis));
-          },
-          zOrder: (move) => orderBlock(selectedId, move),
+          align: (edge) => alignSelection(edge),
+          distribute: (axis) => distributeSelection(axis),
+          zOrder: (move) => orderSelection(move),
         }
       : null;
 
   const chip =
     selectedId !== null && shownSlide
-      ? `${blockDisplayName(shownSlide, selectedId)}${showIds ? ` · ${selectedId}` : ''}`
+      ? groupTag !== null && ids.length > 1
+        ? 'Group'
+        : ids.length > 1
+          ? `${ids.length} objects`
+          : `${blockDisplayName(shownSlide, selectedId)}${showIds ? ` · ${selectedId}` : ''}`
       : null;
 
   const view: EditorOverlayView = {
@@ -2130,6 +3895,7 @@ export function Editor({
     hover: hoverBox,
     selection,
     selectionBox,
+    selectionPos: ids.length === 1 ? anchorPos : null,
     chip,
     handles,
     activeHandle,
@@ -2142,14 +3908,44 @@ export function Editor({
     freeform,
     extraBoxes,
     groupBox: group,
+    groupTag: ids.length > 1 ? groupTag : null,
+    groupMembers:
+      groupTag !== null && shownSlide ? ids.map((id) => blockDisplayName(shownSlide, id)) : [],
     count: ids.length,
     marquee,
     guides,
     arrange,
     paint: paint !== null,
+    rotation: readout?.kind === 'angle' ? readout.value : null,
+    sizeReadout: readout?.kind === 'size' ? { w: readout.w, h: readout.h } : null,
+    rulers: showRuler
+      ? {
+          on: true,
+          pointer,
+          selection:
+            slide && ids.length > 0
+              ? (selectionUnion(slide, ids, boxes) ?? groupBoxOf(ids, boxes))
+              : null,
+        }
+      : null,
+    deckGuides: showGuides ? (deckGuides ?? { x: [], y: [] }) : null,
+    draggingGuide,
+    crop: crop
+      ? {
+          blockId: crop.blockId,
+          frame: crop.frame,
+          full: fullExtent(crop.frame, crop.trim),
+          trim: crop.trim,
+        }
+      : null,
+    sites,
+    drawPoints,
     onHandleDown,
     onHandleNudge,
     onHandleOrder,
+    onGuideDown,
+    onGuideContextMenu,
+    onRulerDown,
   };
 
   const backdrop = backdropFor(shown, shownSlide, theme, assetBase);
@@ -2162,6 +3958,8 @@ export function Editor({
     'ts-stagewrap ts-sheet ts-editor',
     isPicture && 'is-picture',
     freeform && 'is-freeform',
+    space && 'is-pan',
+    crop && 'is-crop',
   ]
     .filter(Boolean)
     .join(' ');
@@ -2178,9 +3976,14 @@ export function Editor({
         data-marquee={marquee ? '' : undefined}
         data-tool={toolName}
         data-paint={paint ? '' : undefined}
+        data-pan={space ? '' : undefined}
+        data-crop={crop ? '' : undefined}
         tabIndex={-1}
         onDragOver={onDragOver}
         onDrop={onDrop}
+        onPointerDown={onWorkspacePointerDown}
+        onContextMenu={onContextMenuEvent}
+        onPointerLeave={() => setPointer(null)}
       >
         <div className="backdrop" aria-hidden="true">
           {backdrop ? <img src={backdrop} alt="" /> : null}
@@ -2192,6 +3995,8 @@ export function Editor({
           narrow={narrow}
           dir="next"
           edges={false}
+          scrollerRef={scroller}
+          onScroll={setScroll}
         >
           <Frame index={index} total={total} />
           <div
@@ -2202,21 +4007,27 @@ export function Editor({
             onPointerMove={onPointerMove}
             onPointerLeave={() => setHover(null)}
             onPointerDown={onPointerDown}
+            onDoubleClick={onDoubleClick}
             onClick={onClick}
-            onContextMenu={onContextMenuEvent}
             dangerouslySetInnerHTML={{ __html: shownHtml }}
           />
-          {/* the live shader over every material frame of the slide (SPEC 5.3, 5.4; M5) */}
+          {/* the live shader over every material frame of the slide (SPEC 5.3, 5.4; M5): it re-mounts on every commit that moves or resizes an object (SPEC-2 0.94) */}
           <MaterialMount body={body} html={shownHtml} onError={onError} />
         </Sheet>
       </div>
-      {/* the overlay layer (SPEC 2.2 junction table): chrome, over the sheet's box, in CSS pixels */}
+      {/* the overlay layer (SPEC 2.2 junction table): chrome, over the sheet's box, in CSS pixels; it follows the stage's scroll while zoomed */}
       <div
         className="ts-overlay ts-chrome"
         data-active-handle={activeHandle ?? undefined}
         data-alt={alt ? '' : undefined}
         data-freeform={freeform ? '' : undefined}
-        style={{ left: fit.left + 1, top: fit.top + 1, width: fit.width, height: fit.height }}
+        data-crop={crop ? '' : undefined}
+        style={{
+          left: fit.left + 1 - (zoom === 'fit' ? 0 : scroll.left),
+          top: fit.top + 1 - (zoom === 'fit' ? 0 : scroll.top),
+          width: fit.width,
+          height: fit.height,
+        }}
         hidden={stageSize.width <= 0}
       >
         {overlay ? overlay(view) : null}
@@ -2233,9 +4044,16 @@ export function Editor({
             onEnd={endEdit}
             onListEnter={onListEnter}
             onListBackspace={onListBackspace}
+            onListLevel={onListLevel}
+            onListLeave={onListBackspace}
+            onIndent={onIndent}
+            onCaret={onCaretInfo}
             onInput={measure}
             onUndo={() => onUndoRef.current?.()}
             onRedo={() => onRedoRef.current?.()}
+            handle={(inline) => {
+              inlineRef.current = inline;
+            }}
           />
         ) : null}
       </div>

@@ -326,6 +326,18 @@ function themeReport(built: BuildResult, input: ThemeReportInput): ExportReport 
     if (scene.picture && !scene.pictureExcluded) {
       out.pictures = [{ box: scene.picture.box, regenerated: scene.pictureRegenerated === true }];
     }
+    // the chart boxes (gslides-parity SPEC-2 2.8.1) and a picture object written as the slide
+    // background (2.6.4) are picture regions the verify loop reports and never gates: the viewer
+    // lays a chart out itself and resamples a picture with its own filter
+    const regions = [
+      ...(scene.charts ?? []).map((chart) => ({ box: chart.box, regenerated: false })),
+      ...(scene.background?.pictureRasterId !== undefined
+        ? scene.rasters
+            .filter((r) => r.id === scene.background?.pictureRasterId)
+            .map((r) => ({ box: r.box, regenerated: false }))
+        : []),
+    ];
+    if (regions.length > 0) out.pictures = [...(out.pictures ?? []), ...regions];
     return out;
   });
   return buildReport({

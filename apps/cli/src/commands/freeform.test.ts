@@ -2,7 +2,9 @@
 // set-layout (slide.setLayout) both ways, block align (block.align), block distribute
 // (block.distribute), block order (block.order) and the z target of block move (block.move), each
 // through runCli with --json, so the CLI, the store actions and the schema arithmetic are
-// exercised together and every write lands in the version log like any other.
+// exercised together and every write lands in the version log like any other. Since the Google
+// Slides parity round two a canvas write on a grammar slide converts it first through the headless
+// measurer (SPEC-2 1.6), so the tests that touch a grammar slide open a browser.
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -109,17 +111,27 @@ describe('turboslide freeform commands', () => {
     expect(missing.stderr).toContain('No positioned block "nope"');
     const badEdge = await run(['block', 'align', 'free', '--blocks', 'p1', '--edge', 'diagonal']);
     expect(badEdge.code).toBe(2);
+    // a canvas write on a grammar slide converts it first and travels the conversion in the same
+    // write (gslides-parity SPEC-2 1.6, 0.73): one revision, the slide on the freeform layout, and
+    // one block aligns to the sheet's edge (block.align defaults `to` to sheet for one block, 0.80)
+    const before = (await run(['info', '--json'])).json as { revision: number };
     const grammar = await run([
       'block',
       'align',
-      'content-rule',
+      'the-production-site',
       '--blocks',
       'h',
       '--edge',
       'left',
+      '--json',
     ]);
-    expect(grammar.code).toBe(2);
-    expect(grammar.stderr).toContain('not on the freeform layout');
+    expect(grammar.code, grammar.stderr).toBe(0);
+    const converted = (grammar.json as SlideResult).slide;
+    expect((grammar.json as SlideResult).revision).toBe(before.revision + 1);
+    expect(converted.kind === 'content' && converted.layout).toEqual({ type: 'freeform' });
+    expect(converted.grammar?.kind).toBe('content');
+    expect(posOf(converted, 'h').x).toBe(0);
+    expect(mainBlocks(converted).every((b) => b.pos !== undefined)).toBe(true);
   });
 
   test('block align with nothing to move writes no version but still checks the base', async () => {
@@ -229,14 +241,43 @@ describe('turboslide freeform commands', () => {
 
   test('slide set-layout moves a grammar slide to freeform and back with the blocks refiled', async () => {
     const free = await run(['slide', 'set-layout', 'content-rule', '--type', 'freeform', '--json']);
-    expect(free.code).toBe(0);
+    expect(free.code, free.stderr).toBe(0);
     const slide = (free.json as SlideResult).slide;
     expect(slide.kind === 'content' && slide.layout).toEqual({ type: 'freeform' });
     expect(mainBlocks(slide).map((b) => b.id)).toEqual(['h', 'p1', 'list']);
-    expect(posOf(slide, 'list')).toEqual({ x: 836, y: 129, w: 627, h: 642, z: 2 });
+    // the measured conversion (gslides-parity SPEC-2 1.6): every block takes the box the sheet
+    // draws it at, so the columns' x and width are the layout's and the heights are the text's
+    expect(posOf(slide, 'h')).toMatchObject({ x: 137, w: 627, z: 0 });
+    expect(posOf(slide, 'p1')).toMatchObject({ x: 137, w: 627, z: 1 });
+    expect(posOf(slide, 'list')).toMatchObject({ x: 836, w: 627, z: 2 });
+    for (const block of mainBlocks(slide)) {
+      expect(block.pos?.h, block.id).toBeGreaterThan(0);
+      // the measured value at the measurer's 1/64 px, never the pixel (SPEC-2 1.3; b2.md R2)
+      expect(Number.isInteger((block.pos?.y ?? 0) * 64), block.id).toBe(true);
+    }
+    expect(slide.grammar).toMatchObject({
+      kind: 'content',
+      layout: { type: 'cols', ratio: '1/1' },
+    });
     expect((free.json as SlideResult).findings.some((f) => f.rule === 'layout/freeform')).toBe(
       true,
     );
+    // set-layout freeform on a canvas slide writes nothing and keeps the object order
+    const again = await run([
+      'slide',
+      'set-layout',
+      'content-rule',
+      '--type',
+      'freeform',
+      '--json',
+    ]);
+    expect(again.code).toBe(0);
+    expect((again.json as SlideResult).revision).toBe((free.json as SlideResult).revision);
+    expect(mainBlocks((again.json as SlideResult).slide).map((b) => b.id)).toEqual([
+      'h',
+      'p1',
+      'list',
+    ]);
     const back = await run([
       'slide',
       'set-layout',
@@ -276,5 +317,52 @@ describe('turboslide freeform commands', () => {
     expect((await run(['slide', 'set-layout', 'content-rule', '--type', 'nope'])).code).toBe(2);
     expect((await run(['slide', 'set-layout', 'thesis', '--type', 'freeform'])).code).toBe(2);
     expect((await run(['slide', 'set-layout', 'content-rule'])).code).toBe(2);
+  });
+
+  test('block align with one block lands on the sheet edge itself, never the grid past it', async () => {
+    // VERIFICATION-2 finding 7: the sheet's bottom is 900, the grid would say 904; every sheet edge
+    // and centre is exact for one block (SPEC-2 6.1 rows 21 and 23) and the write leaves the block
+    // on the sheet, so no freeform/off-sheet finding is raised
+    const before = (await run(['info', '--json'])).json as { revision: number };
+    const bottom = await run([
+      'block',
+      'align',
+      'free',
+      '--blocks',
+      'ic',
+      '--edge',
+      'bottom',
+      '--json',
+    ]);
+    expect(bottom.code, bottom.stderr).toBe(0);
+    const afterBottom = bottom.json as SlideResult;
+    expect(afterBottom.revision).toBe(before.revision + 1);
+    expect(posOf(afterBottom.slide, 'ic')).toMatchObject({ y: 900 - 32, h: 32 });
+    expect(afterBottom.findings.map((f) => f.rule)).not.toContain('freeform/off-sheet');
+    const right = await run([
+      'block',
+      'align',
+      'free',
+      '--blocks',
+      'ic',
+      '--edge',
+      'right',
+      '--json',
+    ]);
+    expect(right.code, right.stderr).toBe(0);
+    expect(posOf((right.json as SlideResult).slide, 'ic')).toMatchObject({ x: 1600 - 32, w: 32 });
+    const middle = await run([
+      'block',
+      'align',
+      'free',
+      '--blocks',
+      'ic',
+      '--edge',
+      'middle',
+      '--json',
+    ]);
+    expect(middle.code, middle.stderr).toBe(0);
+    expect(posOf((middle.json as SlideResult).slide, 'ic')).toMatchObject({ y: 450 - 16 });
+    expect(posOf(slideFile('free'), 'ic')).toMatchObject({ x: 1568, y: 434, w: 32, h: 32 });
   });
 });

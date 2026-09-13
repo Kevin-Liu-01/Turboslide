@@ -3,7 +3,14 @@ import { createContext, useContext } from 'react';
 
 import type { LayoutId } from '@turboslide/schema/layouts';
 
-import type { DialogId, EditorShellInput, PanelId, ShellSettings } from './editor-shell';
+import type {
+  DialogId,
+  EditorShellInput,
+  PanelId,
+  PictureTarget,
+  ShellSettings,
+} from './editor-shell';
+import type { FormatSectionId } from './inspector/format-sections';
 import type { MenuContext, MenuId, MenuItem, MenuSetting, Platform } from './menus/model';
 import type { TailControl } from './menus/toolbar-tails';
 import type { SnackbarAction } from './Snackbar';
@@ -26,7 +33,7 @@ export type LayoutGridRequest = {
 export type DialogRequest = {
   id: DialogId;
   /** the picture target of Image by URL and Pictures in this presentation */
-  target?: import('./editor-shell').PictureTarget;
+  target?: PictureTarget;
 };
 
 export type EditorShellState = {
@@ -40,8 +47,22 @@ export type EditorShellState = {
   /** runs a toolbar control: its item, else its op */
   runControl: (control: TailControl, anchor: HTMLElement | null) => void;
   panel: PanelId | null;
-  openPanel: (id: PanelId) => void;
+  /** opens a panel; Format options opens at a section when one is named (Text fitting, Drop shadow, Alt text, Edit data) */
+  openPanel: (id: PanelId, options?: { section?: FormatSectionId }) => void;
+  /** the section Format options was opened at, until the panel closes */
+  panelSection: FormatSectionId | null;
   closePanel: () => void;
+  /** the word art bar over the canvas (Insert > Word art) */
+  wordArtOpen: boolean;
+  setWordArtOpen: (open: boolean) => void;
+  /** the filmstrip registers its handle here (Edit > Select all and Select none with the filmstrip focused, SPEC-2 8.6) */
+  registerFilmstrip: (handle: import('./Sidebar').FilmstripHandle | null) => void;
+  /**
+   * The guide under the pointer while its right-click menu is open (SPEC-2 4.3 `guide`): the
+   * stage sets it before it opens the menu and clears it after, so Delete guide knows which guide
+   * to remove.
+   */
+  setGuideUnderPointer: (guide: { axis: 'x' | 'y'; at: number } | null) => void;
   /** the Show side panel chevron: reopens the last panel */
   reopenPanel: () => void;
   dialog: DialogRequest | null;
@@ -52,8 +73,17 @@ export type EditorShellState = {
   closeLayoutGrid: () => void;
   /** New slide with the layout, or Apply layout to the selection */
   pickLayout: (layout: LayoutId, purpose: LayoutGridPurpose) => void;
-  /** the Apply layout submenu of the Slide menu and the right-click menus: the layout grid */
-  renderLayoutSubmenu: (item: MenuItem) => ReactNode;
+  /**
+   * The plate of a dynamic submenu (menus/model.ts `MenuDynamic`): the layout grid for Apply
+   * layout, the hover grid for Insert > Table, the shape, preset, line end and dash grids; null
+   * for a plate the shell does not draw, so the menu falls back to the row's children or runs its
+   * action. `viaKeyboard` says the submenu was opened from the keyboard and the plate should take
+   * focus; `onPicked` runs after a pick, so a right-click menu drawing the plate closes with it.
+   */
+  renderDynamicSubmenu: (
+    item: MenuItem,
+    options?: { viaKeyboard?: boolean; onPicked?: () => void },
+  ) => ReactNode;
   /** the open bar menu, for the access keys (Ctrl+Option+F opens File) */
   menuOpen: MenuId | null;
   setMenuOpen: (id: MenuId | null) => void;

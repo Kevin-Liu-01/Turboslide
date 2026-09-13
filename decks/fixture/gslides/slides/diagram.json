@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "id": "diagram",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "A process diagram",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 900,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "step-1",
+        "pos": {
+          "x": 320,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 1,
+          "group": "process"
+        },
+        "type": "shape",
+        "shape": "roundRect",
+        "fill": "plate",
+        "stroke": "plate",
+        "width": 1.5
+      },
+      {
+        "id": "label-1",
+        "pos": {
+          "x": 320,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 2,
+          "group": "process"
+        },
+        "type": "text",
+        "text": "Step 1",
+        "typography": {
+          "weight": 500,
+          "align": "center"
+        },
+        "valign": "middle",
+        "padding": 16
+      },
+      {
+        "id": "link-1",
+        "pos": {
+          "x": 516.8,
+          "y": 446,
+          "w": 57.6,
+          "h": 8,
+          "z": 3,
+          "group": "process"
+        },
+        "type": "shape",
+        "shape": "line",
+        "stroke": "ink",
+        "width": 1.5,
+        "orientation": "horizontal",
+        "lineEnd": "fillArrow",
+        "connect": {
+          "start": {
+            "block": "step-1",
+            "site": 3
+          },
+          "end": {
+            "block": "step-2",
+            "site": 1
+          }
+        }
+      },
+      {
+        "id": "step-2",
+        "pos": {
+          "x": 574.4,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 4,
+          "group": "process"
+        },
+        "type": "shape",
+        "shape": "roundRect",
+        "fill": "plate",
+        "stroke": "plate",
+        "width": 1.5
+      },
+      {
+        "id": "label-2",
+        "pos": {
+          "x": 574.4,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 5,
+          "group": "process"
+        },
+        "type": "text",
+        "text": "Step 2",
+        "typography": {
+          "weight": 500,
+          "align": "center"
+        },
+        "valign": "middle",
+        "padding": 16
+      },
+      {
+        "id": "link-2",
+        "pos": {
+          "x": 771.2,
+          "y": 446,
+          "w": 57.6,
+          "h": 8,
+          "z": 6,
+          "group": "process"
+        },
+        "type": "shape",
+        "shape": "line",
+        "stroke": "ink",
+        "width": 1.5,
+        "orientation": "horizontal",
+        "lineEnd": "fillArrow",
+        "connect": {
+          "start": {
+            "block": "step-2",
+            "site": 3
+          },
+          "end": {
+            "block": "step-3",
+            "site": 1
+          }
+        }
+      },
+      {
+        "id": "step-3",
+        "pos": {
+          "x": 828.8,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 7,
+          "group": "process"
+        },
+        "type": "shape",
+        "shape": "roundRect",
+        "fill": "plate",
+        "stroke": "plate",
+        "width": 1.5
+      },
+      {
+        "id": "label-3",
+        "pos": {
+          "x": 828.8,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 8,
+          "group": "process"
+        },
+        "type": "text",
+        "text": "Step 3",
+        "typography": {
+          "weight": 500,
+          "align": "center"
+        },
+        "valign": "middle",
+        "padding": 16
+      },
+      {
+        "id": "link-3",
+        "pos": {
+          "x": 1025.6,
+          "y": 446,
+          "w": 57.6,
+          "h": 8,
+          "z": 9,
+          "group": "process"
+        },
+        "type": "shape",
+        "shape": "line",
+        "stroke": "ink",
+        "width": 1.5,
+        "orientation": "horizontal",
+        "lineEnd": "fillArrow",
+        "connect": {
+          "start": {
+            "block": "step-3",
+            "site": 3
+          },
+          "end": {
+            "block": "step-4",
+            "site": 1
+          }
+        }
+      },
+      {
+        "id": "step-4",
+        "pos": {
+          "x": 1083.2,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 10,
+          "group": "process"
+        },
+        "type": "shape",
+        "shape": "roundRect",
+        "fill": "plate",
+        "stroke": "plate",
+        "width": 1.5
+      },
+      {
+        "id": "label-4",
+        "pos": {
+          "x": 1083.2,
+          "y": 370,
+          "w": 196.8,
+          "h": 160,
+          "z": 11,
+          "group": "process"
+        },
+        "type": "text",
+        "text": "Step 4",
+        "typography": {
+          "weight": 500,
+          "align": "center"
+        },
+        "valign": "middle",
+        "padding": 16
+      }
+    ]
+  },
+  "template": "blank"
+}

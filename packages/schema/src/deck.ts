@@ -9,8 +9,12 @@ import type { Asset } from './assets.ts';
 import { assetSchema } from './assets.ts';
 import type { Block } from './blocks.ts';
 import { blockSchema, extSchema } from './blocks.ts';
+import type { Color } from './color.ts';
+import { colorSchema } from './color.ts';
 import type { AssetId, SectionId, SlideId } from './ids.ts';
 import { slugSchema } from './ids.ts';
+import type { Position } from './position.ts';
+import { positionObjectSchema } from './position.ts';
 import type { Text } from './text.ts';
 import { plainText, textSchema } from './text.ts';
 
@@ -79,7 +83,16 @@ export type Deck = {
     appearance?: Appearance;
     /** the frame's slide counter; on when absent (gslides-parity SPEC 7.2.4) */
     counter?: CounterMode;
+    /** the background every slide without its own takes; what Add to theme writes (gslides-parity SPEC-2 2.6.2) */
+    background?: SlideBackground;
   };
+  /**
+   * The deck's guides (gslides-parity SPEC-2 2.10): vertical lines at the x values and horizontal
+   * lines at the y values, in sheet pixels, the same on every slide; the editor overlay draws them
+   * and the snap reads them; never in a thumbnail, the presentation or a download. Sorted, no
+   * duplicates, inside the sheet.
+   */
+  guides?: DeckGuides;
   /** increments on every committed write */
   revision: number;
   createdAt: string;
@@ -108,7 +121,54 @@ export type SlideBase = {
   skip?: true;
   /** The layout the slide was made from (gslides-parity SPEC 7.2.2); absent on every stored slide until New slide or Apply layout runs. */
   template?: LayoutId;
+  /**
+   * The slide's own background colour (gslides-parity SPEC-2 2.6.1, 0.74): a fill under the
+   * layout on every slide kind. Absent, the deck default applies. A background picture is not a
+   * field: it is a `picture` object at the bottom of the canvas stack (SPEC-2 2.6.4).
+   */
+  background?: SlideBackground;
+  /**
+   * The conversion record of a canvas slide (gslides-parity SPEC-2 1.2, 0.99): the kind, the
+   * layout, the slot membership, the boxes and the kind's fields the slide had before its first
+   * canvas manipulation converted it to the freeform layout, so `fromCanvas` restores the kind
+   * while nothing moved and Apply layout re-flows. A first class field, never an `ext` key, so the
+   * validator's `ext` issue does not fire on a converted slide.
+   */
+  grammar?: GrammarRecord;
   ext?: Record<string, unknown>;
+};
+
+/** A slide or deck background: a palette colour (SPEC-2 2.6.1, 0.74). */
+export type SlideBackground = { color: Color };
+
+/** The deck's guide lines in sheet pixels (SPEC-2 2.10). */
+export type DeckGuides = { x: number[]; y: number[] };
+
+/**
+ * What a slide was before it became a canvas (SPEC-2 1.2): the round one `GrammarRecord` of the
+ * viewer's Freeform module, moved here and extended with the kind and the kind's fields.
+ * `layout` and `slots` describe a content source; `fields` carries a fixed kind's `mark`,
+ * `measure`, `picture`, `plate` side and width, and `sectionId`; `boxes` is the `pos` every object
+ * received at the conversion, by id, so the switch back is lossless while nothing moved.
+ */
+export type GrammarRecord = {
+  kind: SlideKind;
+  layout?: Layout;
+  /** slot name (or `plate`) to block ids, in slot order */
+  slots?: Partial<Record<SlotName | 'plate', string[]>>;
+  /** the box each object got at the conversion, by id */
+  boxes: Record<string, Position>;
+  fields?: {
+    mark?: { w: number; h: number };
+    measure?: number;
+    picture?: Picture;
+    plate?: { side: PlateSide; maxWidth: 740 | 560 | 720 };
+    sectionId?: SectionId;
+    /** the `template` the source carried, when it carried one, so the restore is byte for byte */
+    template?: LayoutId;
+    /** the ids the conversion wrote `autofit: 'shrink'` on, so the restore removes it again */
+    autofit?: string[];
+  };
 };
 
 export type SlotName = 'main' | 'head' | 'headLeft' | 'headRight' | 'body' | 'left' | 'right';
@@ -205,6 +265,18 @@ const markSizeSchema = z.strictObject({
   w: annotate(z.number().positive(), { label: 'Mark width', control: 'number', group: 'Layout' }),
   h: annotate(z.number().positive(), { label: 'Mark height', control: 'number', group: 'Layout' }),
 });
+
+export const slideBackgroundSchema = z.strictObject({
+  color: colorSchema,
+}) satisfies z.ZodType<SlideBackground>;
+
+/** The sheet the guides lie inside (render.ts SHEET_WIDTH and SHEET_HEIGHT, repeated by value). */
+const GUIDE_MAX = { x: 1600, y: 900 } as const;
+
+export const deckGuidesSchema = z.strictObject({
+  x: z.array(z.number().min(0).max(GUIDE_MAX.x)),
+  y: z.array(z.number().min(0).max(GUIDE_MAX.y)),
+}) satisfies z.ZodType<DeckGuides>;
 
 export const sectionSchema = z.strictObject({
   id: slugSchema,
@@ -323,6 +395,29 @@ export const plateSchema = z.strictObject({
   blocks: z.array(blockSchema),
 }) satisfies z.ZodType<Plate>;
 
+export const grammarRecordSchema = z.strictObject({
+  kind: z.enum(['content', 'opener', 'mood', 'closing', 'title', 'statement']),
+  layout: z.lazy(() => layoutSchema).optional(),
+  slots: z.partialRecord(z.enum([...SLOT_NAMES, 'plate']), z.array(z.string())).optional(),
+  boxes: z.record(z.string(), positionObjectSchema),
+  fields: z
+    .strictObject({
+      mark: z.strictObject({ w: z.number().positive(), h: z.number().positive() }).optional(),
+      measure: z.number().positive().optional(),
+      picture: z.lazy(() => pictureSchema).optional(),
+      plate: z
+        .strictObject({
+          side: z.enum(['lower-left', 'lower-right', 'upper-left']),
+          maxWidth: z.literal([740, 560, 720]),
+        })
+        .optional(),
+      sectionId: slugSchema.optional(),
+      template: z.enum(LAYOUT_IDS).optional(),
+      autofit: z.array(z.string()).optional(),
+    })
+    .optional(),
+}) satisfies z.ZodType<GrammarRecord>;
+
 const slideBase = {
   schemaVersion: z.literal(SCHEMA_VERSION),
   id: annotate(slugSchema, { label: 'Id', control: 'readonly', group: 'Slide' }),
@@ -350,6 +445,18 @@ const slideBase = {
     snap: LAYOUT_IDS,
     group: 'Slide',
     help: 'The layout the slide was made from; New slide and Apply layout write it (gslides-parity SPEC 7.2.2).',
+  }),
+  background: annotate(slideBackgroundSchema.optional(), {
+    label: 'Background',
+    control: 'json',
+    group: 'Slide',
+    help: 'The colour behind the slide; the theme default when absent (gslides-parity SPEC-2 2.6.1). A background picture is a picture object at the bottom of the stack.',
+  }),
+  grammar: annotate(grammarRecordSchema.optional(), {
+    label: 'Arranged from',
+    control: 'readonly',
+    group: 'Slide',
+    help: 'The layout and fields the slide had before it was arranged by hand; Apply layout re-flows from it (gslides-parity SPEC-2 1.2).',
   }),
   ext: extSchema,
 };
@@ -458,8 +565,20 @@ export const deckSchema = z.strictObject({
         group: 'Slide',
         help: 'on draws the counter on every slide, off on none, skip-title on every slide but the title slide (gslides-parity SPEC 7.2.4). On when absent.',
       }),
+      background: annotate(slideBackgroundSchema.optional(), {
+        label: 'Background',
+        control: 'json',
+        group: 'Slide',
+        help: 'The background colour every slide without its own takes; Add to theme writes it (gslides-parity SPEC-2 2.6.2).',
+      }),
     })
     .optional(),
+  guides: annotate(deckGuidesSchema.optional(), {
+    label: 'Guides',
+    control: 'json',
+    group: 'Slide',
+    help: 'Vertical (x) and horizontal (y) guide lines in sheet px, the same on every slide; drawn in the editor only (gslides-parity SPEC-2 2.10).',
+  }),
   revision: z.number().int().nonnegative(),
   createdAt: isoDateSchema,
   updatedAt: isoDateSchema,
@@ -541,17 +660,40 @@ export function sectionOfSlide(deck: Deck, slideId: SlideId): Section | undefine
   return deck.sections.find((section) => section.slideIds.includes(slideId));
 }
 
-/** The blocks of a slide with the slot each lives in; 'plate' for the full-picture kinds. */
-export function slideBlocks(slide: Slide): { slot: SlotName | 'plate'; block: Block }[] {
+/** Where a top-level block lives: a content slot, or the plate of a picture kind. */
+export type BlockPlace = SlotName | 'plate';
+
+/**
+ * The blocks of a slide with the slot each lives in: 'plate' for the full-picture kinds, in
+ * document order. A canvas slide (gslides-parity SPEC-2 1.1) is a content slide on the freeform
+ * layout, so its objects are the blocks of its `main` slot; there is no second list.
+ */
+export function slideBlocks(slide: Slide): { slot: BlockPlace; block: Block }[] {
+  const out: { slot: BlockPlace; block: Block }[] = [];
   if (slide.kind === 'content') {
-    return Object.entries(slide.slots).flatMap(([slot, blocks]) =>
-      blocks.map((block) => ({ slot: slot as SlotName, block })),
-    );
+    for (const [slot, blocks] of Object.entries(slide.slots))
+      for (const block of blocks) out.push({ slot: slot as SlotName, block });
+  } else if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') {
+    for (const block of slide.plate.blocks) out.push({ slot: 'plate', block });
   }
-  if (slide.kind === 'opener' || slide.kind === 'mood' || slide.kind === 'closing') {
-    return slide.plate.blocks.map((block) => ({ slot: 'plate' as const, block }));
-  }
-  return [];
+  return out;
+}
+
+/** True for a canvas slide (SPEC-2 1.1): a content slide on the freeform layout. */
+export function isCanvasSlide(
+  slide: Slide,
+): slide is ContentSlide & { layout: { type: 'freeform' } } {
+  return slide.kind === 'content' && slide.layout.type === 'freeform';
+}
+
+/** The objects of a canvas slide (its top level blocks with `pos`), or none for any other slide. */
+export function canvasObjects(slide: Slide): Block[] {
+  return isCanvasSlide(slide) ? (slide.slots.main ?? []) : [];
+}
+
+/** The background a slide shows (SPEC-2 2.6): its own, else the deck default, else none. */
+export function slideBackground(deck: Deck, slide: Slide): SlideBackground | undefined {
+  return slide.background ?? deck.defaults?.background;
 }
 
 /** The longest title the sidebar and the sheet labels show before an ellipsis (tail:90-94). */

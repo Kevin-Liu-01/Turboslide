@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "id": "shapes",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Shape presets",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 900,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "hex",
+        "type": "shape",
+        "shape": "hexagon",
+        "stroke": "ink",
+        "text": "Hexagon",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 137,
+          "y": 260,
+          "w": 300,
+          "h": 220,
+          "z": 1
+        }
+      },
+      {
+        "id": "right",
+        "type": "shape",
+        "shape": "rightArrow",
+        "fill": "plate",
+        "stroke": "ink",
+        "text": "Right arrow",
+        "typography": {
+          "align": "center"
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 477,
+          "y": 300,
+          "w": 300,
+          "h": 140,
+          "z": 2
+        }
+      },
+      {
+        "id": "callout",
+        "type": "shape",
+        "shape": "wedgeRectCallout",
+        "stroke": "ink",
+        "adjust": [
+          -30000,
+          70000
+        ],
+        "text": "A callout with its wedge moved",
+        "padding": 16,
+        "valign": "middle",
+        "pos": {
+          "x": 817,
+          "y": 260,
+          "w": 340,
+          "h": 180,
+          "z": 3
+        }
+      },
+      {
+        "id": "plus",
+        "type": "shape",
+        "shape": "mathPlus",
+        "fill": "ink",
+        "stroke": "ink",
+        "pos": {
+          "x": 1197,
+          "y": 260,
+          "w": 220,
+          "h": 220,
+          "z": 4
+        }
+      },
+      {
+        "id": "snip",
+        "type": "shape",
+        "shape": "snip1Rect",
+        "stroke": "ink",
+        "text": "Snipped corner",
+        "padding": 16,
+        "pos": {
+          "x": 137,
+          "y": 540,
+          "w": 420,
+          "h": 180,
+          "z": 5
+        }
+      },
+      {
+        "id": "dashed",
+        "type": "shape",
+        "shape": "ellipse",
+        "stroke": "ink",
+        "dash": "dash",
+        "width": 2,
+        "pos": {
+          "x": 617,
+          "y": 540,
+          "w": 420,
+          "h": 180,
+          "z": 6
+        }
+      }
+    ]
+  },
+  "template": "blank"
+}

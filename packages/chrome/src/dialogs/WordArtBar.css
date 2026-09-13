@@ -1,0 +1,35 @@
+/* The word art bar (dialogs/WordArtBar.tsx; gslides-parity SPEC-2 0.14, 6.2): Google's entry
+   bar across the top of the canvas. One --pt-hair rule under it, paper ground, the field in the
+   display face at 20 px so the typed line reads as the object it becomes. Radius 0. */
+.ts-wordart {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 48px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+}
+
+.ts-wordart-field {
+  flex: 1;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 500 20px/1.2 var(--pt-display);
+}
+
+.ts-wordart-field:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}

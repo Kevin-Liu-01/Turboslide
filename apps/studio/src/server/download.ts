@@ -2,12 +2,19 @@ import { existsSync, mkdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { createServerFn } from '@tanstack/react-start';
+import { DOWNLOAD_PROGRESS } from '@turboslide/chrome/menus/strings';
+import { batchSize, leftWords, secondsLeft } from '@turboslide/export/batch/plan';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import { ACTIONS } from '@turboslide/schema/actions';
 import type { ExportReport } from '@turboslide/schema/export';
 import { exportReportSchema } from '@turboslide/schema/export';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
+import type {
+  ExportBatchResult,
+  MergeExportResult,
+  StartBatchedExportResult,
+} from './export-batch';
 import type { jsonBody } from './export-sync';
 import { deckDir, ensureDeckAssets, isHosted, workerClientOptions } from './root';
 import { buildsDir, downloadUrl, signDownloadToken } from './tokens';
@@ -67,12 +74,17 @@ export type ExportCapabilities = {
   worker: 'local' | 'http';
   /** the editor exports through POST /api/export/:deckId?sync=1 (a hosted studio) */
   sync: boolean;
+  /**
+   * The slides one synchronous call renders at most (gslides-parity SPEC-2 8.1): a longer play
+   * list exports in batches through `runBatchedExport`; 60, or TURBOSLIDE_EXPORT_BATCH.
+   */
+  batchSize: number;
 };
 
 const exportCapabilitiesFn = createServerFn({ method: 'GET' }).handler(
   async (): Promise<ExportCapabilities> => {
     const mode = (await worker()).mode;
-    return { downloads: mode === 'local', worker: mode, sync: isHosted() };
+    return { downloads: mode === 'local', worker: mode, sync: isHosted(), batchSize: batchSize() };
   },
 );
 
@@ -105,7 +117,7 @@ export type StartExportInput = { deckId: string; input: ExportRunInput };
 export type StartExportResult = { jobId: string; status: string };
 
 /** The deck id as a slug and the input through export.run's schema, with `out` removed. */
-function validateExportRun(raw: StartExportInput): StartExportInput {
+export function validateExportRun(raw: StartExportInput): StartExportInput {
   if (typeof raw.deckId !== 'string' || !SLUG_PATTERN.test(raw.deckId))
     throw new TypeError('deckId must be a slug');
   const parsed = ACTIONS['export.run'].input.safeParse(raw.input);
@@ -154,6 +166,224 @@ const syncExportFn = createServerFn({ method: 'POST' })
  */
 export async function syncExport(input: StartExportInput): Promise<SyncExportAnswer> {
   return syncExportFn({ data: input });
+}
+
+// ---------------------------------------------------------------------------------------------
+// The batched Perfect export (gslides-parity SPEC-2 8.1): four server functions over
+// server/export-batch.ts, loaded inside the handlers for the reason worker() gives, and the
+// client function the Download dialog calls.
+
+const startBatchedExportFn = createServerFn({ method: 'POST' })
+  .validator(validateExportRun)
+  .handler(async ({ data }): Promise<StartBatchedExportResult> => {
+    await requireDeck(data.deckId);
+    const { startBatchedExport: start } = await import('./export-batch');
+    return start(data.deckId, data.input);
+  });
+
+/** Step one: the plan (the revision, the batches, the pinned asset hashes) under a job id. */
+export async function startBatchedExport(
+  input: StartExportInput,
+): Promise<StartBatchedExportResult> {
+  return startBatchedExportFn({ data: input });
+}
+
+export type ExportBatchInput = { deckId: string; jobId: string; index: number };
+
+function validateJobInput<T extends { deckId: string; jobId: string }>(raw: T): T {
+  if (typeof raw.deckId !== 'string' || !SLUG_PATTERN.test(raw.deckId))
+    throw new TypeError('deckId must be a slug');
+  if (typeof raw.jobId !== 'string' || !/^[a-z0-9-]{1,80}$/.test(raw.jobId))
+    throw new TypeError('jobId must be a job id');
+  return raw;
+}
+
+const exportBatchFn = createServerFn({ method: 'POST' })
+  .validator((raw: ExportBatchInput): ExportBatchInput => {
+    validateJobInput(raw);
+    if (!Number.isInteger(raw.index) || raw.index < 0)
+      throw new TypeError('index must be a non negative integer');
+    return raw;
+  })
+  .handler(async ({ data }): Promise<ExportBatchResult> => {
+    await requireDeck(data.deckId);
+    const { exportBatch: run } = await import('./export-batch');
+    return run(data.deckId, data.jobId, data.index);
+  });
+
+/** Step two: one batch of the plan into the part store; `stale` when the job must restart. */
+export async function exportBatch(input: ExportBatchInput): Promise<ExportBatchResult> {
+  return exportBatchFn({ data: input });
+}
+
+export type ExportJobInput = { deckId: string; jobId: string };
+
+const mergeExportFn = createServerFn({ method: 'POST' })
+  .validator(validateJobInput<ExportJobInput>)
+  .handler(async ({ data }): Promise<MergeExportResult> => {
+    await requireDeck(data.deckId);
+    const { mergeExport: run } = await import('./export-batch');
+    return run(data.deckId, data.jobId);
+  });
+
+/** Step three: the file from the stored parts, with the merge's peak memory. */
+export async function mergeExport(input: ExportJobInput): Promise<MergeExportResult> {
+  return mergeExportFn({ data: input });
+}
+
+const cancelBatchedExportFn = createServerFn({ method: 'POST' })
+  .validator(validateJobInput<ExportJobInput>)
+  .handler(async ({ data }): Promise<{ jobId: string; removed: number }> => {
+    const { cancelBatchedExport: run } = await import('./export-batch');
+    return run(data.deckId, data.jobId);
+  });
+
+/** Cancel: the job's plan, parts and files go. */
+export async function cancelBatchedExport(
+  input: ExportJobInput,
+): Promise<{ jobId: string; removed: number }> {
+  return cancelBatchedExportFn({ data: input });
+}
+
+/** What the Download dialog shows while a batched export runs (SPEC-2 8.1 item 4). */
+export type BatchedExportProgress =
+  | { phase: 'preparing'; slide: number; total: number; secondsLeft: number | null }
+  | { phase: 'merging' }
+  | { phase: 'ready' };
+
+/** The sentence of a progress step, in the Download dialog's words. */
+export function batchedProgressLabel(progress: BatchedExportProgress): string {
+  switch (progress.phase) {
+    case 'preparing':
+      return DOWNLOAD_PROGRESS.preparing(
+        progress.slide,
+        progress.total,
+        progress.secondsLeft === null ? 'a few minutes' : leftWords(progress.secondsLeft),
+      );
+    case 'merging':
+      return DOWNLOAD_PROGRESS.merging;
+    case 'ready':
+      return DOWNLOAD_PROGRESS.ready;
+  }
+}
+
+export type RunBatchedExportOptions = {
+  /** stops the run; the job is cancelled on the server */
+  signal?: AbortSignal;
+  /** how many times a failed batch is tried again; default 1 (SPEC-2 8.1 item 4) */
+  retries?: number;
+  /** how many times a stale job is started again before the run fails; default 2 */
+  restarts?: number;
+};
+
+export class BatchedExportCancelled extends Error {
+  constructor() {
+    super('The export was cancelled');
+    this.name = 'BatchedExportCancelled';
+  }
+}
+
+/** The best effort cancel a closing page can still send (SPEC-2 0.45): the http route with keepalive. */
+function cancelOnPagehide(deckId: string, jobId: string): () => void {
+  if (typeof window === 'undefined') return () => {};
+  const onHide = () => {
+    void fetch(`/api/export/${encodeURIComponent(deckId)}?cancel=${encodeURIComponent(jobId)}`, {
+      method: 'POST',
+      keepalive: true,
+    }).catch(() => undefined);
+  };
+  window.addEventListener('pagehide', onHide);
+  return () => window.removeEventListener('pagehide', onHide);
+}
+
+/**
+ * The client side of the batched export (SPEC-2 8.1 item 4): the plan, then the batches one at a
+ * time (the render worker's one browser rule), each retried once before the run fails, the job
+ * started again when a batch answers `stale` (the deck moved or a picture was replaced during
+ * the download), then the merge. `onProgress` gets the slide reached with the estimate recomputed
+ * after every batch, then the merge and the ready steps. Cancel through `options.signal` deletes
+ * the job; `pagehide` sends the same cancel through the route with `keepalive`, and the 24 h prune
+ * covers what that misses.
+ */
+export async function runBatchedExport(
+  deckId: string,
+  input: ExportRunInput,
+  onProgress: (progress: BatchedExportProgress) => void,
+  options: RunBatchedExportOptions = {},
+): Promise<MergeExportResult> {
+  const retries = options.retries ?? 1;
+  const restarts = options.restarts ?? 2;
+  const throwIfCancelled = () => {
+    if (options.signal?.aborted) throw new BatchedExportCancelled();
+  };
+  for (let restart = 0; ; restart += 1) {
+    throwIfCancelled();
+    const started = await startBatchedExport({ deckId, input });
+    const stopPagehide = cancelOnPagehide(deckId, started.jobId);
+    let stale: 'revision' | 'asset' | null = null;
+    try {
+      const timings: { slides: number; ms: number }[] = [];
+      let done = 0;
+      onProgress({
+        phase: 'preparing',
+        slide: Math.min(1, started.total),
+        total: started.total,
+        secondsLeft: null,
+      });
+      for (let index = 0; index < started.batches.length; index += 1) {
+        throwIfCancelled();
+        let result: ExportBatchResult | undefined;
+        let failure: unknown;
+        for (let attempt = 0; attempt <= retries; attempt += 1) {
+          try {
+            result = await exportBatch({ deckId, jobId: started.jobId, index });
+            break;
+          } catch (error) {
+            failure = error;
+            throwIfCancelled();
+          }
+        }
+        if (result === undefined)
+          throw failure instanceof Error ? failure : new Error(String(failure));
+        if ('stale' in result) {
+          stale = result.stale;
+          break;
+        }
+        timings.push({ slides: result.slides, ms: result.ms });
+        done += result.slides;
+        onProgress({
+          phase: 'preparing',
+          slide: Math.min(done, started.total),
+          total: started.total,
+          secondsLeft: secondsLeft(done, started.total, timings),
+        });
+      }
+      if (stale === null) {
+        throwIfCancelled();
+        onProgress({ phase: 'merging' });
+        const merged = await mergeExport({ deckId, jobId: started.jobId });
+        onProgress({ phase: 'ready' });
+        return merged;
+      }
+    } catch (error) {
+      if (error instanceof BatchedExportCancelled || options.signal?.aborted) {
+        await cancelBatchedExport({ deckId, jobId: started.jobId }).catch(() => undefined);
+        throw new BatchedExportCancelled();
+      }
+      throw error;
+    } finally {
+      stopPagehide();
+    }
+    // a stale job: the deck moved under the download; start again from the current revision
+    await cancelBatchedExport({ deckId, jobId: started.jobId }).catch(() => undefined);
+    if (restart >= restarts) {
+      throw new Error(
+        stale === 'asset'
+          ? 'A picture of the deck changed while it was exporting; try the download again'
+          : 'The deck changed while it was exporting; try the download again',
+      );
+    }
+  }
 }
 
 export type ExportDownloadLink = { name: string; bytes: number; url: string };

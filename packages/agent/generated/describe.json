@@ -16,6 +16,8 @@
         "deck.trash",
         "deck.restore",
         "deck.remove",
+        "deck.setBackground",
+        "deck.guides",
         "slide.list",
         "slide.get",
         "slide.insert",
@@ -29,6 +31,8 @@
         "slide.skip",
         "slide.applyLayout",
         "slide.import",
+        "slide.toCanvas",
+        "slide.setBackground",
         "text.replaceAll",
         "block.set",
         "block.insert",
@@ -38,6 +42,38 @@
         "block.distribute",
         "block.order",
         "block.duplicate",
+        "block.group",
+        "block.ungroup",
+        "block.regroup",
+        "block.rotate",
+        "block.flip",
+        "block.crop",
+        "block.mask",
+        "block.resetImage",
+        "block.adjust",
+        "block.setAlt",
+        "block.shadow",
+        "block.autofit",
+        "text.style",
+        "text.list",
+        "text.spacing",
+        "text.columns",
+        "text.indent",
+        "text.case",
+        "text.insert",
+        "chart.setData",
+        "chart.setKind",
+        "table.merge",
+        "table.unmerge",
+        "table.insertRows",
+        "table.insertColumns",
+        "table.deleteRows",
+        "table.deleteColumns",
+        "table.distribute",
+        "table.cellStyle",
+        "shape.set",
+        "line.set",
+        "diagram.insert",
         "section.set",
         "slide.lease",
         "asset.add",
@@ -111,6 +147,8 @@
     "deck.trash",
     "deck.restore",
     "deck.remove",
+    "deck.setBackground",
+    "deck.guides",
     "slide.list",
     "slide.get",
     "slide.insert",
@@ -124,6 +162,8 @@
     "slide.skip",
     "slide.applyLayout",
     "slide.import",
+    "slide.toCanvas",
+    "slide.setBackground",
     "text.replaceAll",
     "block.set",
     "block.insert",
@@ -133,6 +173,38 @@
     "block.distribute",
     "block.order",
     "block.duplicate",
+    "block.group",
+    "block.ungroup",
+    "block.regroup",
+    "block.rotate",
+    "block.flip",
+    "block.crop",
+    "block.mask",
+    "block.resetImage",
+    "block.adjust",
+    "block.setAlt",
+    "block.shadow",
+    "block.autofit",
+    "text.style",
+    "text.list",
+    "text.spacing",
+    "text.columns",
+    "text.indent",
+    "text.case",
+    "text.insert",
+    "chart.setData",
+    "chart.setKind",
+    "table.merge",
+    "table.unmerge",
+    "table.insertRows",
+    "table.insertColumns",
+    "table.deleteRows",
+    "table.deleteColumns",
+    "table.distribute",
+    "table.cellStyle",
+    "shape.set",
+    "line.set",
+    "diagram.insert",
     "section.set",
     "slide.lease",
     "asset.add",
@@ -166,7 +238,7 @@
   "details": {
     "deck.info": {
       "label": "Deck info",
-      "doc": "Title, theme, sections with slide ids and titles, counts and the current revision.",
+      "doc": "Title, theme, sections with slide ids and titles, counts (the canvas slides, charts and guides included) and the current revision.",
       "mutates": false,
       "milestone": "M1",
       "group": "deck"
@@ -227,6 +299,20 @@
       "milestone": "GS1",
       "group": "deck"
     },
+    "deck.setBackground": {
+      "label": "Set theme background",
+      "doc": "Writes the background colour every slide without its own takes, what Add to theme writes; null removes it.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "deck"
+    },
+    "deck.guides": {
+      "label": "Set guides",
+      "doc": "Adds, removes, moves, sets or clears the deck’s guide lines, sheet pixels the same on every slide; the result is sorted and inside the sheet, and an empty result removes the field.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "deck"
+    },
     "slide.list": {
       "label": "List slides",
       "doc": "Every slide in deck order with its number, section, title, kind and lint counts.",
@@ -278,7 +364,7 @@
     },
     "slide.setLayout": {
       "label": "Set layout",
-      "doc": "Moves a content slide to another layout and refiles its blocks: to freeform every block gets a position box from its slot, from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).",
+      "doc": "Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured, gslides-parity SPEC-2 1.6); from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).",
       "mutates": true,
       "milestone": "M6",
       "group": "slide"
@@ -318,6 +404,20 @@
       "milestone": "GS1",
       "group": "slide"
     },
+    "slide.toCanvas": {
+      "label": "Arrange by hand",
+      "doc": "Converts slides to the canvas, the freeform layout, every object taking the position box it is drawn at (measured on a rendered sheet); a slide already on the freeform layout is left as it is; one write, one browser page for the call.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "slide"
+    },
+    "slide.setBackground": {
+      "label": "Change background",
+      "doc": "Writes the background colour of slides in one write; null removes it and the theme default applies. A background picture is a picture object at the bottom of the stack.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "slide"
+    },
     "text.replaceAll": {
       "label": "Find and replace",
       "doc": "Replaces every occurrence of a string in the visible text of the deck (every Text of every block, the title slide fields, the table cells and the speaker notes) in one write, case insensitive unless asked; the output counts the replacements.",
@@ -334,7 +434,7 @@
     },
     "block.insert": {
       "label": "Insert block",
-      "doc": "Inserts a block into a slot after the named block, or first.",
+      "doc": "Inserts a block into a slot after the named block, or first; a block carrying pos on a slide that is not a canvas yet converts the slide first and lands as an object (gslides-parity SPEC-2 1.6).",
       "mutates": true,
       "milestone": "M2",
       "group": "block"
@@ -355,7 +455,7 @@
     },
     "block.align": {
       "label": "Align blocks",
-      "doc": "Aligns the position boxes of freeform blocks on one edge, against the selection, the content box or the sheet, and snaps the result unless snap is false.",
+      "doc": "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge snaps to the guides and the grid unless snap is false, while the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (gslides-parity SPEC-2 0.80, 1.6).",
       "mutates": true,
       "milestone": "M6",
       "group": "block"
@@ -376,10 +476,234 @@
     },
     "block.duplicate": {
       "label": "Duplicate block",
-      "doc": "Copies the named blocks of a slide with fresh ids, each after its original; on a freeform slide the copy sits 16 px right and down and on top of the stack.",
+      "doc": "Copies the named blocks of a slide with fresh ids, each after its original; a positioned copy sits 16 px right and down and on top of the stack, a copied group takes a fresh tag and copied connectors keep their attachments to copied targets (gslides-parity SPEC-2 section 3).",
       "mutates": true,
       "milestone": "GS1",
       "group": "block"
+    },
+    "block.group": {
+      "label": "Group",
+      "doc": "Writes one group tag on two or more objects of a slide in one write; the tag is generated when none is given; a slide that is not a canvas yet converts first.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "block.ungroup": {
+      "label": "Ungroup",
+      "doc": "Removes the group tag from the named objects, or from every member of a named group, in one write.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "block.regroup": {
+      "label": "Regroup",
+      "doc": "Writes a tag back on the named objects, the set the editor remembers from the last ungroup.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "block.rotate": {
+      "label": "Rotate",
+      "doc": "Rotates objects to an angle or by an angle, degrees clockwise normalized to 0 up to 360, about each box or about the selection (a group rotation moves the members around the union centre); attached connectors follow; a slide that is not a canvas yet converts first.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "block.flip": {
+      "label": "Flip",
+      "doc": "Toggles one flip axis on objects; about the selection every member also mirrors about the union centre and its angle becomes 360 minus itself (a group flip); attached connectors follow.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "block.crop": {
+      "label": "Crop image",
+      "doc": "Writes the crop of a picture as fractions of it trimmed from each side; a slide that is not a canvas yet converts first when the picture is positioned.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "block.mask": {
+      "label": "Mask image",
+      "doc": "Clips a picture to a closed shape preset, or removes the mask with null.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "block.resetImage": {
+      "label": "Reset image",
+      "doc": "Removes the crop, the mask, the adjustments and the round one crop anchor and aspect of a picture in one write.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "block.adjust": {
+      "label": "Adjustments",
+      "doc": "Writes a picture’s transparency (0 to 1), brightness and contrast (-1 to 1); null clears one.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "block.setAlt": {
+      "label": "Alt text",
+      "doc": "Writes the description of an object: on the block for a shape, chart, line or text box, on the asset for a block that shows a picture, so two pictures of one asset share one description; the output names where it went.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "block.shadow": {
+      "label": "Drop shadow",
+      "doc": "Writes or removes the drop shadow of objects: colour, opacity, angle, distance and blur, the absent ones at Google’s defaults.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "block.autofit": {
+      "label": "Text fitting",
+      "doc": "Writes the fitting mode of a text carrying block: Do not autofit, Shrink text on overflow or Resize shape to fit text (grow, positioned blocks only); with apply the fit is measured and written in the same write, and the output names the fields written.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "text.style": {
+      "label": "Text style",
+      "doc": "Marks a range of a Text italic, underlined, struck, superscript or subscript, or gives it a text or highlight colour (true sets, false clears, null clears a colour), as one text.replace of the whole Text; the output returns the new markup.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "text.list": {
+      "label": "List options",
+      "doc": "Writes the marker, the preset and the items’ levels of a list block (a paragraph or text box converts to a list first); levels run 1 to 9.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "text.spacing": {
+      "label": "Line and paragraph spacing",
+      "doc": "Writes the line spacing (a factor) and the space before and after paragraphs (px) of text blocks; null clears one.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "text.columns": {
+      "label": "Columns",
+      "doc": "Writes the column count of text blocks, 1 to 3.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "text.indent": {
+      "label": "Indent",
+      "doc": "Steps the left indent of text blocks by 64 px in or out, or writes it; on a list block with items the items’ levels step instead.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "text.case": {
+      "label": "Capitalization",
+      "doc": "Rewrites the characters of a range in lowercase, UPPERCASE or Title Case, marks and links kept, as one text.replace.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "text.insert": {
+      "label": "Insert text",
+      "doc": "Inserts a string at a plain text offset of a Text, the special characters picker’s write, as one text.replace at [at, at].",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "chart.setData": {
+      "label": "Edit chart data",
+      "doc": "Writes a chart’s categories and series in one write; every series carries one value per category.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "chart.setKind": {
+      "label": "Chart type",
+      "doc": "Writes a chart’s kind; a pie keeps the first series and the output names the dropped ones.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "table.merge": {
+      "label": "Merge cells",
+      "doc": "Merges the cells from one corner to another into the anchor; the covered cells’ texts join the anchor’s with a line break.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "table.unmerge": {
+      "label": "Unmerge cells",
+      "doc": "Removes the merge that covers a cell.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "table.insertRows": {
+      "label": "Insert rows",
+      "doc": "Inserts rows above or below a row, merges and cell styles shifted, in one write.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "table.insertColumns": {
+      "label": "Insert columns",
+      "doc": "Inserts columns left or right of a column, every row gaining empty cells, merges and cell styles shifted, in one write.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "table.deleteRows": {
+      "label": "Delete rows",
+      "doc": "Deletes the rows from one index to another; deleting every row removes the table.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "table.deleteColumns": {
+      "label": "Delete columns",
+      "doc": "Deletes the columns from one index to another; deleting every column removes the table.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "table.distribute": {
+      "label": "Distribute rows or columns",
+      "doc": "Gives every row an equal height or every column an equal width from a total; without a total the widths or heights clear so the content sizes them.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "table.cellStyle": {
+      "label": "Cell fill and border",
+      "doc": "Writes the fill and the border of cells in one write; null clears one; a border weight of 0 is Google’s Transparent border.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "shape.set": {
+      "label": "Shape",
+      "doc": "Writes the shape fields of shape blocks in one write: the preset, its adjust values, fill, border colour, weight, dash and corner radius; null clears one.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "line.set": {
+      "label": "Line",
+      "doc": "Writes the line fields of line blocks in one write: the kind, the start and end decorations, weight, dash, bend and points; a connect end attaches to a shape’s connection site and moves the end onto it, null detaches.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "block"
+    },
+    "diagram.insert": {
+      "label": "Insert diagram",
+      "doc": "Inserts a diagram template as one group of shape, text and line objects, centred on the sheet unless a box is given; a slide that is not a canvas yet converts first; the output names the ids.",
+      "mutates": true,
+      "milestone": "GS2",
+      "group": "slide"
     },
     "section.set": {
       "label": "Set sections",
@@ -509,7 +833,7 @@
     },
     "view.zoom": {
       "label": "Zoom",
-      "doc": "Sets the stage scale in the editor, a factor of the sheet size or fit; a view action with no document field.",
+      "doc": "Sets the stage scale in the editor, a factor of the sheet size from 0.25 to 16 or fit, keeping a named sheet point under the stage centre; the output reports the effective zoom and the scroll; a view action with no document field.",
       "mutates": false,
       "milestone": "GS1",
       "group": "view"

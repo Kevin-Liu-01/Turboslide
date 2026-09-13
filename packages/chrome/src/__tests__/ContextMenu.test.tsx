@@ -144,12 +144,12 @@ describe('ContextMenu', () => {
     expect(transition?.getAttribute('aria-disabled')).toBe('true');
     const comment = document.querySelector('[data-menu-item="insert.comment"]');
     expect(comment?.getAttribute('aria-disabled')).toBe('true');
-    /* Change background is disabled off a picture layout */
+    /* Change background opens the one Background dialog on every slide kind (SPEC-2 0.74) */
     expect(
       document
         .querySelector('[data-menu-item="slide.changeBackground"]')
         ?.getAttribute('aria-disabled'),
-    ).toBe('true');
+    ).toBeNull();
     /* the first row has focus */
     expect(document.activeElement).toBe(document.querySelector('[data-menu-item="edit.cut"]'));
   });
@@ -200,5 +200,63 @@ describe('ContextMenu', () => {
     expect(document.activeElement).toBe(radios[1]);
     fireEvent.click(radios.find((row) => row.dataset['layout'] === 'table')!);
     expect(onLayout).toHaveBeenCalledWith('table');
+  });
+
+  /* SPEC-2 4.3: Change shape ▸ on a shape draws the chrome's plate (the shell's
+     renderDynamicSubmenu through `renderDynamic`), and a pick inside it closes the menu the way
+     a layout pick does (VERIFICATION-2 finding 6: the row opened nothing) */
+  it('draws the chrome plate of Change shape on a shape and closes on a pick', () => {
+    const shapeContext: MenuContext = {
+      ...DEFAULT_MENU_CONTEXT,
+      focus: 'canvas',
+      selection: {
+        ...DEFAULT_MENU_CONTEXT.selection,
+        blocks: 1,
+        block: 'shape',
+        order: { forward: true, backward: true, front: true, back: true },
+      },
+    };
+    const onClose = vi.fn();
+    const renderDynamic = vi.fn(
+      (item: MenuItem, options: { viaKeyboard?: boolean; onPicked: () => void }) =>
+        item.id === 'format.changeShape' ? (
+          <button type="button" data-testid="pick-ellipse" onClick={() => options.onPicked()}>
+            Ellipse
+          </button>
+        ) : null,
+    );
+    render(
+      <ContextMenu
+        target="shape"
+        context={shapeContext}
+        anchor={{ x: 100, y: 100 }}
+        returnFocusTo={document.getElementById('card')}
+        onSelect={() => undefined}
+        onClose={onClose}
+        renderDynamic={renderDynamic}
+      />,
+    );
+    const row = document.querySelector<HTMLElement>('[data-menu-item="format.changeShape"]');
+    if (!row) throw new Error('no Change shape row');
+    expect(row.getAttribute('aria-disabled')).not.toBe('true');
+    expect(row.getAttribute('aria-haspopup')).toBe('menu');
+    fireEvent.pointerEnter(row);
+    fireEvent.keyDown(row, { key: 'ArrowRight' });
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    const tile = screen.getByTestId('pick-ellipse');
+    expect(renderDynamic).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'format.changeShape' }),
+      expect.objectContaining({ viaKeyboard: true }),
+    );
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.click(tile);
+    expect(onClose).toHaveBeenCalledWith('select');
+    /* a row the chrome draws no plate for keeps its own behaviour: Apply layout is not in a
+       shape's menu, and Alt text is a plain command row */
+    expect(
+      document.querySelector('[data-menu-item="format.altText"]')?.getAttribute('aria-haspopup'),
+    ).toBeNull();
   });
 });

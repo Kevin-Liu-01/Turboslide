@@ -7,10 +7,17 @@ The CLI and studio distributions carry this file.
 ## Inter (SIL Open Font License 1.1)
 
 What: `packages/fonts/assets/InterVariable.woff2`, InterVariable 4.001 with opsz 14 to 32 and
-wght 100 to 900, decoded from the GT deck's `fonts/deck-fonts.css`, and, from M2, static
-instances cut from it for PPTX embedding (SPEC 8.4). Source: https://rsms.me/inter/ and
-https://github.com/rsms/inter. The Reserved Font Name question for renamed instances is SPEC open
-question 5; until it is answered, no renamed instance ships.
+wght 100 to 900, decoded from the GT deck's `fonts/deck-fonts.css`; from M2, static instances cut
+from it for PPTX embedding (SPEC 8.4); and, from the Google Slides parity round two (SPEC-2 7.1),
+`packages/fonts/assets/InterVariable-Italic.woff2`, the italic companion from the same release
+(the rsms/inter release asset `Inter-4.001.zip`, path `web/InterVariable-Italic.woff2`,
+https://github.com/rsms/inter/releases/tag/v4.001; sha256
+`0470791f15efd2987bdb50b24027c3f584a2cf9b7b63fbf86012c5f2e9abcc05`, 380904 bytes; its own name table reads
+"Version 4.000;git-a52131595"), with an italic twin of every static instance cut from it. Source:
+https://rsms.me/inter/ and https://github.com/rsms/inter. Inter 4.001 declares no Reserved Font
+Name (name IDs 0, 7, 13 and 14 of both files, read by `reserved_font_name` in
+`scripts/build-fonts.py` on every build), so the renamed instances ship under the OFL; the check
+is recorded in `packages/fonts/export/fonts.json` `license`.
 
     Copyright (c) 2016 The Inter Project Authors (https://github.com/rsms/inter)
 
@@ -104,6 +111,30 @@ question 5; until it is answered, no renamed instance ships.
     DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
     FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
     OTHER DEALINGS IN THE FONT SOFTWARE.
+
+## ECMA-376 preset shape definitions (Ecma International)
+
+What: `packages/schema/src/shapes/presetShapeDefinitions.xml`, the `presetShapeDefinitions.xml`
+file ECMA-376 Part 1 (Office Open XML File Formats, DrawingML) publishes beside its text as the
+normative definition of the preset shape geometries (`ST_ShapeType`), committed as published
+(sha256 `eaff19f4405b3be6822428c96ef46cc685499217366fd58e5e63a5a24739f02f`) and read by
+`packages/schema/src/shapes/build-definitions.mjs` into `definitions.ts`, which the geometry
+interpreter `packages/schema/src/shapes/geometry.ts` evaluates so the sheet, the Perfect export
+and PowerPoint draw one shape (gslides-parity SPEC-2 0.10, 0.57). The file is not modified.
+Ecma International grants permission to copy and distribute the standard and its accompanying
+files under the Ecma International Code of Conduct in Patent Matters and the standard's copyright
+notice, which reads:
+
+    COPYRIGHT PROTECTED DOCUMENT
+    © Ecma International 2016
+    All rights reserved. Unless otherwise specified, no part of this publication may be reproduced
+    or utilized in any form or by any means, electronic or mechanical, including photocopying and
+    microfilm, without permission in writing from the publisher. Ecma International grants
+    permission to reproduce this document in whole or in part for the purpose of implementing
+    the standard.
+
+The same file is redistributed by LibreOffice (`oox/source/drawingml/customshapes/`) and by the
+Apache POI and python-pptx projects for the same purpose.
 
 ## Heroicons (MIT)
 

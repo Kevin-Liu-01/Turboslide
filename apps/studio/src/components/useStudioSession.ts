@@ -46,7 +46,11 @@ function sleep(ms: number): Promise<void> {
 export function useStudioSession({ deckId, author, enabled = true }: StudioSessionOptions): void {
   useEffect(() => {
     if (!enabled || typeof window === 'undefined') return;
+    /* read through a call: the cleanup below flips it while `run` awaits, which the type checker's
+       narrowing inside `run` does not see (it would read a plain `let` as always true after the
+       first check) */
     let alive = true;
+    const isAlive = (): boolean => alive;
     let sessionId: string | undefined;
 
     const attach = async (studio: StudioAutomation): Promise<void> => {
@@ -65,15 +69,15 @@ export function useStudioSession({ deckId, author, enabled = true }: StudioSessi
 
     const onReady = (): void => {
       const studio = activeStudio();
-      if (studio && alive) void attach(studio).catch(() => undefined);
+      if (studio && isAlive()) void attach(studio).catch(() => undefined);
     };
 
     const run = async (): Promise<void> => {
       const studio = await whenStudioReady(30_000).catch(() => undefined);
-      if (!studio || !alive) return;
+      if (!studio || !isAlive()) return;
       await attach(studio);
       window.addEventListener(READY_EVENT, onReady);
-      while (alive && sessionId !== undefined) {
+      while (isAlive() && sessionId !== undefined) {
         let commands;
         try {
           commands = await pollStudioSession({ id: sessionId, timeoutMs: POLL_MS });
@@ -81,7 +85,7 @@ export function useStudioSession({ deckId, author, enabled = true }: StudioSessi
           await sleep(RETRY_MS);
           continue;
         }
-        if (!alive) break;
+        if (!isAlive()) break;
         for (const command of commands) {
           const now = activeStudio();
           try {

@@ -16,3 +16,10 @@ packages/lint/fixtures/index.json
 
 # The parity audit and the verifier write their evidence here; a regenerated report must not fail check step 19
 docs/gslides-parity/verification/**/*.json
+docs/gslides-parity/verification-2/**/*.json
+
+# Round two of the Google Slides parity: the round one fixture deck frozen byte for byte at a65b313
+# (packages/schema/src/migrations.test.ts reads it; decks/ is ignored above for the same reason), and
+# the fonts manifest scripts/build-fonts.py writes, compared by `turboslide fonts build --check`
+packages/schema/src/__fixtures__/gslides-r1
+packages/fonts/export/fonts.json

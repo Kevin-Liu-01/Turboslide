@@ -1,0 +1,145 @@
+/* The Table section of Format options (inspector/table.tsx; gslides-parity SPEC-2 section 5):
+   ruled 32 px rows grouped under small headings (Table border, Row heights, Cell, Rows and
+   columns), swatch rows for the fills and border colours with a None square first, the row
+   heights as a numbered list, and the command buttons as the shell's ToolButtons. Rows draw
+   --pt-hair-soft under themselves (SPEC 2.2 line law); a group draws nothing of its own. */
+.ts-table-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 0 4px;
+}
+
+.ts-table-group {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+}
+
+.ts-table-heading {
+  padding: 6px 4px 2px;
+  color: var(--pt-ink-2);
+  font: 11px/1.2 var(--pt-text);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ts-table-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  list-style: none;
+}
+
+.ts-table-row.is-wide {
+  flex-wrap: wrap;
+  padding-bottom: 6px;
+}
+
+.ts-table-row.is-check {
+  justify-content: flex-start;
+}
+
+.ts-table-label {
+  flex: 0 0 auto;
+  color: var(--pt-ink-2);
+  font: 13px/1.2 var(--pt-text);
+}
+
+.ts-table-note {
+  margin: 0;
+  padding: 4px;
+  color: var(--pt-ink-2);
+  font: 12px/1.4 var(--pt-text);
+}
+
+.ts-table-heights {
+  margin: 0;
+  padding: 0;
+}
+
+.ts-table-height,
+.ts-table-count {
+  width: 72px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 4px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.2 var(--pt-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.ts-table-height:focus-visible,
+.ts-table-count:focus-visible,
+.ts-table-section select:focus-visible,
+.ts-table-section input[type='checkbox']:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+.ts-table-height::placeholder {
+  color: var(--pt-titanium);
+}
+
+.ts-table-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  width: 100%;
+}
+
+.ts-table-swatch {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--pt-hair);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.ts-table-swatch.is-none {
+  background:
+    linear-gradient(
+      to top right,
+      transparent calc(50% - 1px),
+      var(--pt-edge) calc(50% - 0.5px),
+      var(--pt-edge) calc(50% + 0.5px),
+      transparent calc(50% + 1px)
+    ),
+    var(--pt-paper);
+}
+
+.ts-table-swatch.is-current {
+  box-shadow:
+    0 0 0 2px var(--pt-paper),
+    0 0 0 3px var(--pt-ink);
+}
+
+.ts-table-swatch:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.ts-table-swatch:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 4px 4px;
+}
+
+.ts-table-actions.is-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}

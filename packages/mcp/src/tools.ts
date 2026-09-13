@@ -32,6 +32,14 @@ export const DESTRUCTIVE_ACTIONS: ReadonlySet<ActionId> = new Set<ActionId>([
   'deck.trash',
   'slide.applyLayout',
   'text.replaceAll',
+  // the parity round two: a picture loses its tools, rows and columns leave, cells merge, text is
+  // rewritten, a chart loses series
+  'block.resetImage',
+  'table.deleteRows',
+  'table.deleteColumns',
+  'table.merge',
+  'text.case',
+  'chart.setKind',
 ]);
 
 export type ToolEntry = {
@@ -114,6 +122,89 @@ function wrappedOutputSchema(outputSchema: JsonSchema, shape: ToolEntry['shape']
   };
 }
 
+/**
+ * The size above which a property of a served outputSchema is reduced to its type (VERIFICATION-2
+ * finding 16). The outputs that carry the document (`slide`, `slides`, `findings` with their
+ * fixes, `mutations`) inline the recursive Block union, 256 KB per tool, and 81 tools made
+ * tools/list 27 MB while the SDK's stdio client reads one message into a 10 MB buffer
+ * (`STDIO_DEFAULT_MAX_BUFFER_SIZE`), so no stock client could open the local server. The full
+ * schemas stay in `outputSchemaFor` and in the committed contracts (packages/agent/generated/
+ * mcp-tools.json, openapi.json); the served list is about 1.5 MB.
+ */
+export const OUTPUT_PROPERTY_BUDGET = 16 * 1024;
+
+function byteSize(value: unknown): number {
+  return new TextEncoder().encode(JSON.stringify(value)).length;
+}
+
+function collectRefs(value: unknown, refs: Set<string>): void {
+  if (Array.isArray(value)) {
+    for (const item of value) collectRefs(item, refs);
+    return;
+  }
+  if (!isRecord(value)) return;
+  for (const [key, entry] of Object.entries(value)) {
+    if (key === '$ref' && typeof entry === 'string') refs.add(entry);
+    else collectRefs(entry, refs);
+  }
+}
+
+/** The JSON type of a schema: its `type`, or the one type every variant of a `oneOf` or `anyOf` shares (the Slide is a union of its kinds). */
+function jsonTypeOf(schema: JsonSchema): string | undefined {
+  if (typeof schema.type === 'string') return schema.type;
+  const variants = Array.isArray(schema.oneOf)
+    ? schema.oneOf
+    : Array.isArray(schema.anyOf)
+      ? schema.anyOf
+      : undefined;
+  if (variants === undefined || variants.length === 0) return undefined;
+  const types = new Set(
+    variants.map((variant) => (isRecord(variant) ? jsonTypeOf(variant) : undefined)),
+  );
+  const [only] = [...types];
+  return types.size === 1 ? only : undefined;
+}
+
+/** A property reduced to its type and a sentence naming where the full schema is; `items: {}` keeps any array valid. */
+function compactProperty(name: string, schema: JsonSchema): JsonSchema {
+  const type = jsonTypeOf(schema);
+  const description = `${name}: the full schema is this property of the tool's outputSchema in the committed contracts (mcp-tools.json, openapi.json); tools/list serves the type alone so the list stays under the stdio read buffer.`;
+  if (type === 'array') return { type, items: {}, description };
+  return { ...(type === undefined ? {} : { type }), description };
+}
+
+/**
+ * The outputSchema served on tools/list: every property over OUTPUT_PROPERTY_BUDGET reduced to
+ * its type (the document carrying fields), then the definitions nothing references any more
+ * dropped. Smaller properties and the wrapper keep their full schema, so structuredContent still
+ * validates and the small outputs (deck.info, the version rows) stay typed. A schema with nothing
+ * over the budget is returned as is.
+ */
+export function compactOutputSchema(schema: JsonSchema): JsonSchema {
+  const properties = isRecord(schema.properties) ? schema.properties : undefined;
+  if (properties === undefined) return schema;
+  let changed = false;
+  const compacted: Record<string, unknown> = {};
+  for (const [name, property] of Object.entries(properties)) {
+    if (isRecord(property) && byteSize(property) > OUTPUT_PROPERTY_BUDGET) {
+      compacted[name] = compactProperty(name, property);
+      changed = true;
+    } else compacted[name] = property;
+  }
+  if (!changed) return schema;
+  const { definitions, ...rest } = schema;
+  const next: JsonSchema = { ...rest, properties: compacted };
+  if (isRecord(definitions)) {
+    const refs = new Set<string>();
+    collectRefs(next, refs);
+    const kept = Object.fromEntries(
+      Object.entries(definitions).filter(([name]) => refs.has(`#/definitions/${name}`)),
+    );
+    if (Object.keys(kept).length > 0) next.definitions = kept;
+  }
+  return next;
+}
+
 function describe(spec: ActionSpec, shape: ToolEntry['shape'], returnsImages: boolean): string {
   const parts = [spec.doc];
   if (spec.mutates)
@@ -136,7 +227,8 @@ export function outputSchemaFor(spec: ActionSpec): JsonSchema {
 export function toolEntry(spec: ActionSpec): ToolEntry {
   if (spec.mcp === undefined) throw new RangeError(`${spec.id} has no MCP tool name`);
   const inputSchema = toJsonSchema(spec.input, 'input');
-  const shape = outputShape(toJsonSchema(spec.output, 'output'));
+  const outputSchema = toJsonSchema(spec.output, 'output');
+  const shape = outputShape(outputSchema);
   const returnsImages = IMAGE_ACTIONS.has(spec.id);
   return {
     name: spec.mcp,
@@ -150,7 +242,7 @@ export function toolEntry(spec: ActionSpec): ToolEntry {
       title: spec.label,
       description: describe(spec, shape, returnsImages),
       inputSchema: asObjectSchema(inputSchema),
-      outputSchema: asObjectSchema(outputSchemaFor(spec)),
+      outputSchema: asObjectSchema(compactOutputSchema(wrappedOutputSchema(outputSchema, shape))),
       annotations: {
         title: spec.label,
         readOnlyHint: !spec.mutates,

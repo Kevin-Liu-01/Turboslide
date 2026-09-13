@@ -17,7 +17,9 @@ export type GeometryCheck = {
   slideParts: number;
   shapes: number;
   outOfBounds: ShapeBounds[];
-  /** geometryInBounds of the ExportReport: page size right and no shape outside it. */
+  /** Shapes that cross a page edge (gslides-parity SPEC-2 0.96): shown, clipped, reported. */
+  crossing: ShapeBounds[];
+  /** geometryInBounds of the ExportReport: page size right and no shape wholly off the page. */
   inBounds: boolean;
   custGeomCount: number;
   normAutofitCount: number;
@@ -51,12 +53,14 @@ export async function checkGeometry(pptx: string | Uint8Array): Promise<Geometry
   const all = listParts(zip);
   const pageSizeOk = pageSize.cx === PAGE_EMU.width && pageSize.cy === PAGE_EMU.height;
   const outOfBounds = shapes.filter((s) => !s.inBounds);
+  const crossing = shapes.filter((s) => s.crossing === true);
   return {
     pageSize,
     pageSizeOk,
     slideParts: parts.length,
     shapes: shapes.length,
     outOfBounds,
+    crossing,
     inBounds: pageSizeOk && outOfBounds.length === 0,
     custGeomCount,
     normAutofitCount,
@@ -78,6 +82,11 @@ export function geometryResidual(check: GeometryCheck): string[] {
   for (const shape of check.outOfBounds) {
     out.push(
       `${shape.part}: shape ${shape.id} "${shape.name}" leaves the page at ${shape.off[0]},${shape.off[1]} ${shape.ext[0]}x${shape.ext[1]} EMU`,
+    );
+  }
+  for (const shape of check.crossing) {
+    out.push(
+      `${shape.part}: shape ${shape.id} "${shape.name}" crosses the page edge at ${shape.off[0]},${shape.off[1]} ${shape.ext[0]}x${shape.ext[1]} EMU; the show clips it (gslides-parity SPEC-2 0.96)`,
     );
   }
   if (check.normAutofitCount > 0)

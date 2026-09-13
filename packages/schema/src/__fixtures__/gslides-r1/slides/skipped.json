@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "skipped",
+  "kind": "statement",
+  "big": "This slide is skipped",
+  "measure": 22,
+  "skip": true,
+  "template": "statement",
+  "notes": "A skipped slide with notes: absent from the exports unless includeSkipped."
+}

@@ -16,6 +16,8 @@ import {
   toolError,
   toolErrorBody,
   toolResult,
+  OUTPUT_PROPERTY_BUDGET,
+  compactOutputSchema,
 } from './tools.ts';
 import type { JsonSchema } from './tools.ts';
 
@@ -134,6 +136,50 @@ describe('deriveTools', () => {
     expect(render.tool.description).toContain('image content');
 
     expect(outputShape({ type: 'string' })).toBe('value');
+  });
+});
+
+describe('the served tool list stays under the stdio read buffer', () => {
+  const byteSize = (value: unknown): number =>
+    new TextEncoder().encode(JSON.stringify(value)).length;
+
+  it('serves the document carrying outputs as their type and keeps the small outputs whole', () => {
+    const full = outputSchemaFor(ACTIONS['slide.setLayout']);
+    const fullProperties = full.properties as Record<string, JsonSchema>;
+    expect(byteSize(fullProperties.slide)).toBeGreaterThan(OUTPUT_PROPERTY_BUDGET);
+    const served = toolEntry(ACTIONS['slide.setLayout']).tool.outputSchema as JsonSchema;
+    const servedProperties = served.properties as Record<string, JsonSchema>;
+    expect(served.type).toBe('object');
+    expect(Object.keys(servedProperties)).toEqual(Object.keys(fullProperties));
+    expect(servedProperties.slide).toMatchObject({ type: 'object' });
+    expect(servedProperties.slide?.description).toContain('mcp-tools.json');
+    expect(servedProperties.slide?.properties).toBeUndefined();
+    expect(servedProperties.revision).toEqual(fullProperties.revision);
+    expect(served.required).toEqual(full.required);
+    // the Block union nothing references any more leaves the definitions
+    expect(served.definitions).toBeUndefined();
+    expect(full.definitions).toBeDefined();
+    // a list output keeps its array type so structuredContent still validates
+    const lint = toolEntry(ACTIONS['lint.run']).tool.outputSchema as JsonSchema;
+    expect((lint.properties as Record<string, JsonSchema>).items).toMatchObject({
+      type: 'array',
+      items: {},
+    });
+    // an output with nothing over the budget is the full schema, the same object
+    const info = outputSchemaFor(ACTIONS['deck.info']);
+    expect(compactOutputSchema(info)).toBe(info);
+    expect(byteSize(toolEntry(ACTIONS['export.run']).tool.outputSchema)).toBe(
+      byteSize(outputSchemaFor(ACTIONS['export.run'])),
+    );
+  });
+
+  it('serialises every tool under 4 MB in total and every outputSchema under 32 KB', () => {
+    const tools = deriveTools(() => true);
+    expect(tools.length).toBeGreaterThan(80);
+    const total = tools.reduce((sum, entry) => sum + byteSize(entry.tool), 0);
+    expect(total).toBeLessThan(4 * 1024 * 1024);
+    for (const entry of tools)
+      expect(byteSize(entry.tool.outputSchema), entry.name).toBeLessThan(32 * 1024);
   });
 });
 

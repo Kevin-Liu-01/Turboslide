@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "shadow",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Drop shadows",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 900,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "box",
+        "type": "box",
+        "fill": "paper",
+        "stroke": "hair",
+        "text": "A box with the default shadow",
+        "shadow": {},
+        "pos": {
+          "x": 137,
+          "y": 300,
+          "w": 400,
+          "h": 200,
+          "z": 1
+        }
+      },
+      {
+        "id": "shape",
+        "type": "shape",
+        "shape": "ellipse",
+        "fill": "plate",
+        "stroke": "ink",
+        "shadow": {
+          "distance": 12,
+          "blur": 20,
+          "angle": 90
+        },
+        "pos": {
+          "x": 600,
+          "y": 300,
+          "w": 400,
+          "h": 200,
+          "z": 2
+        }
+      },
+      {
+        "id": "photo",
+        "type": "picture",
+        "asset": "fixture-photo",
+        "frame": {
+          "weight": 1
+        },
+        "shadow": {
+          "opacity": 0.5
+        },
+        "pos": {
+          "x": 1063,
+          "y": 300,
+          "w": 400,
+          "h": 225,
+          "z": 3
+        }
+      }
+    ]
+  },
+  "template": "blank"
+}

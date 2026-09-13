@@ -13,15 +13,20 @@ import {
   assetTwinsSchema,
   ASSET_ROLES,
 } from './assets.ts';
-import { blockSchema } from './blocks.ts';
+import { AUTOFITS, SHAPE_KINDS, blockSchema, shadowSchema } from './blocks.ts';
+import { CHART_KINDS, chartSeriesSchema } from './blocks/chart.ts';
 import { materialCatalogEntrySchema, materialUniformsSchema } from './blocks/material.ts';
+import { cellBorderSchema } from './blocks/table.ts';
+import { colorSchema } from './color.ts';
 import {
   APPEARANCES,
   COUNTER_MODES,
+  deckGuidesSchema,
   LAYOUT_IDS,
   layoutSchema,
   PLATE_SIDES,
   sectionSchema,
+  slideBackgroundSchema,
   slideSchema,
   SLIDE_KINDS,
   SLOT_NAMES,
@@ -31,15 +36,25 @@ import { findingSchema } from './findings.ts';
 import { ALIGN_EDGES, ALIGN_TARGETS, DISTRIBUTE_AXES, ORDER_MOVES } from './freeform.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
 import { leaseSchema, mutationSchema, versionSchema } from './mutations.ts';
+import { positionObjectSchema } from './position.ts';
 import { renderRecordSchema } from './render.ts';
 import { RULE_IDS } from './rules.ts';
+import { DASHES, LINE_ENDS, LINE_KINDS, isClosedShapeKind } from './shapes.ts';
+import {
+  BULLET_PRESETS,
+  CASE_MODES,
+  LIST_LEVEL_MAX,
+  LIST_MARKERS,
+  NUMBER_PRESETS,
+} from './text.ts';
+import { TYPE_COLUMNS } from './typography.ts';
 
 export type Transport = 'cli' | 'mcp' | 'http' | 'window';
 export const TRANSPORTS = ['cli', 'mcp', 'http', 'window'] as const;
 export const ALL_TRANSPORTS: ReadonlyArray<Transport> = TRANSPORTS;
 
-/** M1 to M6 are the first six milestones; GS1 is the Google Slides parity round (docs/gslides-parity). */
-export type Milestone = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1';
+/** M1 to M6 are the first six milestones; GS1 and GS2 are the Google Slides parity rounds (docs/gslides-parity). */
+export type Milestone = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1' | 'GS2';
 
 /** The palette groups (SPEC 6.1) and the docs sections. */
 export type ActionGroup =
@@ -59,6 +74,8 @@ export type ActionCli = {
   usage: string;
   /** The input key read from stdin when the usage ends in `< file.json`. */
   stdin?: string;
+  /** Input keys the command line does not spell: options of the hosted transports only (SPEC-2 8.1 `batch`, `merge`). */
+  omit?: string[];
 };
 
 export type ActionSpec = {
@@ -93,6 +110,8 @@ export const ACTION_IDS = [
   'deck.trash',
   'deck.restore',
   'deck.remove',
+  'deck.setBackground',
+  'deck.guides',
   'slide.list',
   'slide.get',
   'slide.insert',
@@ -106,6 +125,8 @@ export const ACTION_IDS = [
   'slide.skip',
   'slide.applyLayout',
   'slide.import',
+  'slide.toCanvas',
+  'slide.setBackground',
   'text.replaceAll',
   'block.set',
   'block.insert',
@@ -115,6 +136,38 @@ export const ACTION_IDS = [
   'block.distribute',
   'block.order',
   'block.duplicate',
+  'block.group',
+  'block.ungroup',
+  'block.regroup',
+  'block.rotate',
+  'block.flip',
+  'block.crop',
+  'block.mask',
+  'block.resetImage',
+  'block.adjust',
+  'block.setAlt',
+  'block.shadow',
+  'block.autofit',
+  'text.style',
+  'text.list',
+  'text.spacing',
+  'text.columns',
+  'text.indent',
+  'text.case',
+  'text.insert',
+  'chart.setData',
+  'chart.setKind',
+  'table.merge',
+  'table.unmerge',
+  'table.insertRows',
+  'table.insertColumns',
+  'table.deleteRows',
+  'table.deleteColumns',
+  'table.distribute',
+  'table.cellStyle',
+  'shape.set',
+  'line.set',
+  'diagram.insert',
   'section.set',
   'slide.lease',
   'asset.add',
@@ -204,6 +257,10 @@ const slideListRow = z.strictObject({
   skip: z.boolean().optional(),
   /** the layout the slide was made from, when written (gslides-parity SPEC 7.2.2) */
   template: layoutId.optional(),
+  /** true for a canvas slide, a content slide on the freeform layout (gslides-parity SPEC-2 0.93) */
+  canvas: z.boolean().optional(),
+  /** the top level block count of a canvas slide */
+  objects: z.number().int().nonnegative().optional(),
 });
 
 export const viewStateSchema = z.strictObject({
@@ -215,6 +272,63 @@ export const viewStateSchema = z.strictObject({
   edit: z.boolean().optional(),
   /** the stage scale, or 'fit' (gslides-parity SPEC 7.2.16) */
   zoom: z.union([z.number().positive(), z.literal('fit')]).optional(),
+  /** the stage's scroll offset in stage px after a zoom (gslides-parity SPEC-2 0.81) */
+  scroll: z.strictObject({ x: z.number(), y: z.number() }).optional(),
+});
+
+/** The list levels 1 to 9 (gslides-parity SPEC-2 0.58). */
+const listLevel = z.number().int().min(1).max(LIST_LEVEL_MAX);
+
+/** A plain text range in a Text, `[start, end]` counted in characters with one per paragraph break. */
+const textRange = z
+  .tuple([z.number().int().nonnegative(), z.number().int().nonnegative()])
+  .describe(
+    'The range in the plain text of the Text, [start, end], one character per paragraph break',
+  );
+
+const textPath = z.string().describe('JSON pointer of the Text inside the block, such as /text');
+
+/** A grid cell as [row, column], zero based. */
+const gridCell = z.tuple([z.number().int().nonnegative(), z.number().int().nonnegative()]);
+
+/** A shape id: one of the five legacy ids, the 135 presets or the line kinds (blocks.ts SHAPE_KINDS). */
+const shapeKind = z
+  .string()
+  .refine(
+    (value) => (SHAPE_KINDS as ReadonlyArray<string>).includes(value),
+    'a shape id from the shape picker',
+  );
+
+const closedShape = z
+  .string()
+  .refine((value) => isClosedShapeKind(value), 'a closed shape preset from the shape picker');
+
+const connectEnd = z.strictObject({
+  block: blockIdSchema,
+  site: z.number().int().nonnegative().describe("The index of the target's connection site"),
+});
+
+/** The diagram templates of gslides-parity SPEC-2 2.8.3 (diagrams.ts DIAGRAM_TEMPLATES, B5). */
+export const DIAGRAM_KINDS = [
+  'grid',
+  'hierarchy',
+  'timeline',
+  'process',
+  'relationship',
+  'cycle',
+] as const;
+export type DiagramKind = (typeof DIAGRAM_KINDS)[number];
+export const DIAGRAM_STYLES = ['outline', 'plate', 'ink'] as const;
+export type DiagramStyle = (typeof DIAGRAM_STYLES)[number];
+
+/** The picture of a guide list write (gslides-parity SPEC-2 2.10). */
+const guideAxis = z.enum(['x', 'y']).describe('x for a vertical guide, y for a horizontal one');
+
+/** The objects of one converted slide, as slide.toCanvas reports them. */
+const canvasObjectRow = z.strictObject({
+  id: blockIdSchema,
+  type: z.string(),
+  pos: positionObjectSchema,
 });
 
 /** One deck of the deck list (gslides-parity SPEC 7.5 deck.list): the manifest facts, newest first. */
@@ -348,7 +462,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'deck.info': action({
     id: 'deck.info',
     label: 'Deck info',
-    doc: 'Title, theme, sections with slide ids and titles, counts and the current revision.',
+    doc: 'Title, theme, sections with slide ids and titles, counts (the canvas slides, charts and guides included) and the current revision.',
     group: 'deck',
     mutates: false,
     transports: A,
@@ -367,15 +481,26 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         htmlBlocks: z.number().int(),
         /** skipped slides, left out of the slideshow and the downloads unless asked */
         skipped: z.number().int().optional(),
+        /** slides on the freeform layout, arranged by hand (gslides-parity SPEC-2 0.93) */
+        canvas: z.number().int().optional(),
+        /** chart blocks across the deck */
+        charts: z.number().int().optional(),
+        /** the deck's guide lines, both axes together (SPEC-2 2.10) */
+        guides: z.number().int().optional(),
+        /** the store's immutable per revision documents, on the Blob backend alone (SPEC-2 8.2) */
+        snapshots: z.number().int().optional(),
       }),
-      /** the deck's appearance and counter defaults (gslides-parity SPEC 7.2.3, 7.2.4) */
+      /** the deck's appearance, counter and background defaults (gslides-parity SPEC 7.2.3, 7.2.4, SPEC-2 2.6.2) */
       defaults: z
         .strictObject({
           notes: z.string().optional(),
           appearance: z.enum(APPEARANCES).optional(),
           counter: z.enum(COUNTER_MODES).optional(),
+          background: slideBackgroundSchema.optional(),
         })
         .optional(),
+      /** the deck's guides, when any (SPEC-2 2.10) */
+      guides: deckGuidesSchema.optional(),
       trashedAt: z.string().optional(),
     }),
     cli: { usage: 'turboslide info' },
@@ -820,7 +945,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'slide.setLayout': action({
     id: 'slide.setLayout',
     label: 'Set layout',
-    doc: 'Moves a content slide to another layout and refiles its blocks: to freeform every block gets a position box from its slot, from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).',
+    doc: 'Moves a content slide to another layout and refiles its blocks: to freeform the slide converts to the canvas, every block getting the position box it is drawn at (measured, gslides-parity SPEC-2 1.6); from freeform the boxes are dropped and the blocks fall into the target slots by geometry (docs/freeform.md).',
     group: 'slide',
     mutates: true,
     transports: A,
@@ -1006,7 +1131,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'block.insert': action({
     id: 'block.insert',
     label: 'Insert block',
-    doc: 'Inserts a block into a slot after the named block, or first.',
+    doc: 'Inserts a block into a slot after the named block, or first; a block carrying pos on a slide that is not a canvas yet converts the slide first and lands as an object (gslides-parity SPEC-2 1.6).',
     group: 'block',
     mutates: true,
     transports: A,
@@ -1075,7 +1200,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'block.align': action({
     id: 'block.align',
     label: 'Align blocks',
-    doc: 'Aligns the position boxes of freeform blocks on one edge, against the selection, the content box or the sheet, and snaps the result unless snap is false.',
+    doc: "Aligns objects on one edge, against the selection for several, the slide for one, or the content box; against the selection the shared edge snaps to the guides and the grid unless snap is false, while the slide's and the content box's edges stay exact; a slide that is not a canvas yet converts first (gslides-parity SPEC-2 0.80, 1.6).",
     group: 'block',
     mutates: true,
     transports: A,
@@ -1093,12 +1218,14 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .enum(ALIGN_TARGETS)
         .optional()
         .describe(
-          "The reference box; 'selection' for several blocks and 'content' for one unless set",
+          "The reference box; 'selection' for several blocks and 'sheet' (the slide) for one unless set",
         ),
       snap: z
         .boolean()
         .optional()
-        .describe('Snap the moved edges to the guides and the grid; on unless false'),
+        .describe(
+          "Snap the selection's shared edge to the guides and the grid; on unless false, and never applied to the slide's or the content box's edges",
+        ),
       baseRevision,
     }),
     output: slideResultSchema,
@@ -1166,7 +1293,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'block.duplicate': action({
     id: 'block.duplicate',
     label: 'Duplicate block',
-    doc: 'Copies the named blocks of a slide with fresh ids, each after its original; on a freeform slide the copy sits 16 px right and down and on top of the stack.',
+    doc: 'Copies the named blocks of a slide with fresh ids, each after its original; a positioned copy sits 16 px right and down and on top of the stack, a copied group takes a fresh tag and copied connectors keep their attachments to copied targets (gslides-parity SPEC-2 section 3).',
     group: 'block',
     mutates: true,
     transports: A,
@@ -1692,15 +1819,23 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
   'view.zoom': action({
     id: 'view.zoom',
     label: 'Zoom',
-    doc: 'Sets the stage scale in the editor, a factor of the sheet size or fit; a view action with no document field.',
+    doc: 'Sets the stage scale in the editor, a factor of the sheet size from 0.25 to 16 or fit, keeping a named sheet point under the stage centre; the output reports the effective zoom and the scroll; a view action with no document field.',
     group: 'view',
     mutates: false,
     transports: ['window', 'mcp'],
     milestone: 'GS1',
     input: z.strictObject({
       zoom: z
-        .union([z.number().positive().max(4), z.literal('fit')])
-        .describe("A factor between 0.25 and 4, or 'fit' for the stage's own fit"),
+        .union([z.number().min(0.25).max(16), z.literal('fit')])
+        .describe(
+          "A factor between 0.25 and 16 (Google's 25 to 1600 percent), or 'fit' for the stage's own fit",
+        ),
+      center: z
+        .strictObject({ x: z.number(), y: z.number() })
+        .optional()
+        .describe(
+          'The sheet point kept under the stage centre; the sheet centre unless set (gslides-parity SPEC-2 0.81)',
+        ),
     }),
     output: viewStateSchema,
     mcp: 'deck_set_zoom',
@@ -1779,9 +1914,25 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .optional()
         .describe('Carry the speaker notes; left out by default (gslides-parity decision 15.2)'),
       out: z.string().optional().describe('Output directory; defaults to .turboslide/export'),
+      batch: z
+        .strictObject({
+          index: z.number().int().nonnegative(),
+          of: z.number().int().positive(),
+          jobId: z.string().min(1),
+        })
+        .optional()
+        .describe(
+          'Hosted only (window and http): render one batch of slides of a batched export into the job (gslides-parity SPEC-2 8.1)',
+        ),
+      merge: z
+        .strictObject({ jobId: z.string().min(1) })
+        .optional()
+        .describe('Hosted only: build the file from the stored batches of the job (SPEC-2 8.1)'),
     }),
     output: exportReportSchema,
     cli: {
+      omit: ['batch', 'merge'],
+
       usage:
         'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --verify --out <out>',
     },
@@ -2028,6 +2179,923 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     }),
     output: z.null(),
     example: { label: 'list: Size', value: '22' },
+  }),
+
+  // ---- the Google Slides parity round two (docs/gslides-parity/SPEC-2.md section 3) ----
+  'deck.setBackground': action({
+    id: 'deck.setBackground',
+    label: 'Set theme background',
+    doc: 'Writes the background colour every slide without its own takes, what Add to theme writes; null removes it.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      background: slideBackgroundSchema
+        .nullable()
+        .describe('The colour, a palette token or a hex; null removes the default'),
+      baseRevision,
+    }),
+    output: z.strictObject({ background: slideBackgroundSchema.nullable(), revision }),
+    cli: { usage: 'turboslide deck background --color <color>' },
+    mcp: 'deck_set_background',
+    example: { background: { color: 'plate' }, baseRevision: 412 },
+  }),
+  'deck.guides': action({
+    id: 'deck.guides',
+    label: 'Set guides',
+    doc: 'Adds, removes, moves, sets or clears the deck’s guide lines, sheet pixels the same on every slide; the result is sorted and inside the sheet, and an empty result removes the field.',
+    group: 'deck',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z
+      .strictObject({
+        add: z.array(z.strictObject({ axis: guideAxis, at: z.number() })).optional(),
+        remove: z.array(z.strictObject({ axis: guideAxis, at: z.number() })).optional(),
+        move: z
+          .array(z.strictObject({ axis: guideAxis, from: z.number(), to: z.number() }))
+          .optional(),
+        set: deckGuidesSchema.optional().describe('Replace both lists'),
+        clear: z.literal(true).optional().describe('Remove every guide'),
+        baseRevision,
+      })
+      .refine(
+        (value) =>
+          [value.add, value.remove, value.move, value.set, value.clear].some(
+            (part) => part !== undefined,
+          ),
+        { message: 'deck.guides takes add, remove, move, set or clear', path: ['add'] },
+      ),
+    output: z.strictObject({ guides: deckGuidesSchema.nullable(), revision }),
+    cli: {
+      usage:
+        'turboslide deck guides --add-vertical <x> --add-horizontal <y> --remove-vertical <x> --remove-horizontal <y> --set <json> --clear',
+    },
+    mcp: 'deck_set_guides',
+    example: { add: [{ axis: 'x', at: 800 }], baseRevision: 412 },
+  }),
+  'slide.toCanvas': action({
+    id: 'slide.toCanvas',
+    label: 'Arrange by hand',
+    doc: 'Converts slides to the canvas, the freeform layout, every object taking the position box it is drawn at (measured on a rendered sheet); a slide already on the freeform layout is left as it is; one write, one browser page for the call.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({ slideIds: slideIdList, baseRevision }),
+    output: z.strictObject({
+      slides: z.array(
+        z.strictObject({
+          slideId: slugSchema,
+          converted: z.boolean(),
+          template: layoutId.optional(),
+          objects: z.array(canvasObjectRow),
+        }),
+      ),
+      revision,
+      findings: z.array(findingSchema),
+    }),
+    cli: { usage: 'turboslide slide to-canvas <slideIds>' },
+    mcp: 'deck_slide_to_canvas',
+    example: { slideIds: ['title'], baseRevision: 412 },
+  }),
+  'slide.setBackground': action({
+    id: 'slide.setBackground',
+    label: 'Change background',
+    doc: 'Writes the background colour of slides in one write; null removes it and the theme default applies. A background picture is a picture object at the bottom of the stack.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideIds: slideIdList,
+      background: slideBackgroundSchema.nullable(),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      slides: z.array(slideSchema),
+      revision,
+      findings: z.array(findingSchema),
+    }),
+    cli: { usage: 'turboslide slide background <slideIds> --color <color>' },
+    mcp: 'deck_set_slide_background',
+    example: { slideIds: ['content-rule'], background: { color: 'plate' }, baseRevision: 412 },
+  }),
+  'block.group': action({
+    id: 'block.group',
+    label: 'Group',
+    doc: 'Writes one group tag on two or more objects of a slide in one write; the tag is generated when none is given; a slide that is not a canvas yet converts first.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z.array(blockIdSchema).min(2),
+      group: slugSchema.optional().describe('The tag; a fresh one when absent'),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ group: slugSchema }),
+    cli: { usage: 'turboslide block group <slideId> --blocks <blockIds> --as <group>' },
+    mcp: 'deck_group_blocks',
+    example: { slideId: 'content-rule', blockIds: ['h', 'p1'], baseRevision: 412 },
+  }),
+  'block.ungroup': action({
+    id: 'block.ungroup',
+    label: 'Ungroup',
+    doc: 'Removes the group tag from the named objects, or from every member of a named group, in one write.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z
+      .strictObject({
+        slideId: slugSchema,
+        blockIds: z.array(blockIdSchema).min(1).optional(),
+        group: slugSchema.optional(),
+        baseRevision,
+      })
+      .refine((value) => value.blockIds !== undefined || value.group !== undefined, {
+        message: 'block.ungroup takes blockIds or group',
+        path: ['group'],
+      }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide block ungroup <slideId> --group <group> --blocks <blockIds>' },
+    mcp: 'deck_ungroup_blocks',
+    example: { slideId: 'content-rule', group: 'g1', baseRevision: 412 },
+  }),
+  'block.regroup': action({
+    id: 'block.regroup',
+    label: 'Regroup',
+    doc: 'Writes a tag back on the named objects, the set the editor remembers from the last ungroup.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z.array(blockIdSchema).min(2),
+      group: slugSchema,
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ group: slugSchema }),
+    cli: { usage: 'turboslide block regroup <slideId> --blocks <blockIds> --as <group>' },
+    mcp: 'deck_regroup_blocks',
+    example: { slideId: 'content-rule', blockIds: ['h', 'p1'], group: 'g1', baseRevision: 412 },
+  }),
+  'block.rotate': action({
+    id: 'block.rotate',
+    label: 'Rotate',
+    doc: 'Rotates objects to an angle or by an angle, degrees clockwise normalized to 0 up to 360, about each box or about the selection (a group rotation moves the members around the union centre); attached connectors follow; a slide that is not a canvas yet converts first.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z
+      .strictObject({
+        slideId: slugSchema,
+        blockIds: z.array(blockIdSchema).min(1),
+        to: z.number().optional().describe('The angle in degrees'),
+        by: z.number().optional().describe('Degrees added to the current angle'),
+        about: z.enum(['each', 'selection']).optional().describe("'each' unless set"),
+        baseRevision,
+      })
+      .refine((value) => (value.to === undefined) !== (value.by === undefined), {
+        message: 'block.rotate takes to or by, not both and not neither',
+        path: ['to'],
+      }),
+    output: slideResultSchema,
+    cli: {
+      usage: 'turboslide block rotate <slideId>#<blockId> --to <to> --by <by> --about <about>',
+    },
+    mcp: 'deck_rotate_block',
+    example: { slideId: 'content-rule', blockIds: ['h'], by: 90, baseRevision: 412 },
+  }),
+  'block.flip': action({
+    id: 'block.flip',
+    label: 'Flip',
+    doc: 'Toggles one flip axis on objects; about the selection every member also mirrors about the union centre and its angle becomes 360 minus itself (a group flip); attached connectors follow.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z.array(blockIdSchema).min(1),
+      axis: z.enum(['h', 'v']).describe('h flips horizontally, v vertically'),
+      about: z.enum(['each', 'selection']).optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide block flip <slideId>#<blockId> --axis <axis> --about <about>' },
+    mcp: 'deck_flip_block',
+    example: { slideId: 'content-rule', blockIds: ['h'], axis: 'h', baseRevision: 412 },
+  }),
+  'block.crop': action({
+    id: 'block.crop',
+    label: 'Crop image',
+    doc: 'Writes the crop of a picture as fractions of it trimmed from each side; a slide that is not a canvas yet converts first when the picture is positioned.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      trim: z.strictObject({
+        left: z.number().min(0).lt(1),
+        right: z.number().min(0).lt(1),
+        top: z.number().min(0).lt(1),
+        bottom: z.number().min(0).lt(1),
+      }),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide block crop <slideId>#<blockId> --left <left> --right <right> --top <top> --bottom <bottom>',
+    },
+    mcp: 'deck_crop_image',
+    example: {
+      slideId: 'the-production-site',
+      blockId: 'shot',
+      trim: { left: 0.1, right: 0, top: 0, bottom: 0.2 },
+      baseRevision: 412,
+    },
+  }),
+  'block.mask': action({
+    id: 'block.mask',
+    label: 'Mask image',
+    doc: 'Clips a picture to a closed shape preset, or removes the mask with null.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      mask: closedShape.nullable(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide block mask <slideId>#<blockId> <mask>' },
+    mcp: 'deck_mask_image',
+    example: {
+      slideId: 'the-production-site',
+      blockId: 'shot',
+      mask: 'ellipse',
+      baseRevision: 412,
+    },
+  }),
+  'block.resetImage': action({
+    id: 'block.resetImage',
+    label: 'Reset image',
+    doc: 'Removes the crop, the mask, the adjustments and the round one crop anchor and aspect of a picture in one write.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({ slideId: slugSchema, blockId: blockIdSchema, baseRevision }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide block reset-image <slideId>#<blockId>' },
+    mcp: 'deck_reset_image',
+    example: { slideId: 'the-production-site', blockId: 'shot', baseRevision: 412 },
+  }),
+  'block.adjust': action({
+    id: 'block.adjust',
+    label: 'Adjustments',
+    doc: 'Writes a picture’s transparency (0 to 1), brightness and contrast (-1 to 1); null clears one.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      transparency: z.number().min(0).max(1).nullable().optional(),
+      brightness: z.number().min(-1).max(1).nullable().optional(),
+      contrast: z.number().min(-1).max(1).nullable().optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide block adjust <slideId>#<blockId> --transparency <transparency> --brightness <brightness> --contrast <contrast>',
+    },
+    mcp: 'deck_adjust_image',
+    example: {
+      slideId: 'the-production-site',
+      blockId: 'shot',
+      brightness: 0.1,
+      baseRevision: 412,
+    },
+  }),
+  'block.setAlt': action({
+    id: 'block.setAlt',
+    label: 'Alt text',
+    doc: 'Writes the description of an object: on the block for a shape, chart, line or text box, on the asset for a block that shows a picture, so two pictures of one asset share one description; the output names where it went.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      alt: z.string(),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({
+      target: z.enum(['block', 'asset']),
+      assetId: slugSchema.optional(),
+    }),
+    cli: { usage: 'turboslide block alt <slideId>#<blockId> <alt>' },
+    mcp: 'deck_set_alt_text',
+    example: { slideId: 'content-rule', blockId: 'h', alt: 'The content rule', baseRevision: 412 },
+  }),
+  'block.shadow': action({
+    id: 'block.shadow',
+    label: 'Drop shadow',
+    doc: 'Writes or removes the drop shadow of objects: colour, opacity, angle, distance and blur, the absent ones at Google’s defaults.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z.array(blockIdSchema).min(1),
+      shadow: shadowSchema.nullable(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide block shadow <slideId>#<blockId> --on --color <color> --opacity <opacity> --angle <angle> --distance <distance> --blur <blur>',
+    },
+    mcp: 'deck_set_shadow',
+    example: {
+      slideId: 'content-rule',
+      blockIds: ['h'],
+      shadow: { distance: 8 },
+      baseRevision: 412,
+    },
+  }),
+  'block.autofit': action({
+    id: 'block.autofit',
+    label: 'Text fitting',
+    doc: 'Writes the fitting mode of a text carrying block: Do not autofit, Shrink text on overflow or Resize shape to fit text (grow, positioned blocks only); with apply the fit is measured and written in the same write, and the output names the fields written.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      autofit: z.enum(AUTOFITS),
+      apply: z
+        .literal(true)
+        .optional()
+        .describe(
+          'Measure the block and write the fit now: the box height for grow, the size step for shrink',
+        ),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ written: z.array(z.string()) }),
+    cli: { usage: 'turboslide block autofit <slideId>#<blockId> <autofit> --apply' },
+    mcp: 'deck_set_autofit',
+    example: { slideId: 'content-rule', blockId: 'p1', autofit: 'shrink', baseRevision: 412 },
+  }),
+  'text.style': action({
+    id: 'text.style',
+    label: 'Text style',
+    doc: 'Marks a range of a Text italic, underlined, struck, superscript or subscript, or gives it a text or highlight colour (true sets, false clears, null clears a colour), as one text.replace of the whole Text; the output returns the new markup.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      path: textPath,
+      range: textRange,
+      marks: z.strictObject({
+        i: z.boolean().optional(),
+        u: z.boolean().optional(),
+        s: z.boolean().optional(),
+        sup: z.boolean().optional(),
+        sub: z.boolean().optional(),
+        color: colorSchema.nullable().optional(),
+        highlight: colorSchema.nullable().optional(),
+      }),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ text: z.string() }),
+    cli: {
+      usage:
+        'turboslide text style <slideId>#<blockId> <path> --range <range> --italic --underline --strike --superscript --subscript --color <color> --highlight <highlight>',
+    },
+    mcp: 'deck_style_text',
+    example: {
+      slideId: 'content-rule',
+      blockId: 'p1',
+      path: '/text',
+      range: [0, 5],
+      marks: { i: true },
+      baseRevision: 412,
+    },
+  }),
+  'text.list': action({
+    id: 'text.list',
+    label: 'List options',
+    doc: 'Writes the marker, the preset and the items’ levels of a list block (a paragraph or text box converts to a list first); levels run 1 to 9.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      marker: z.enum(LIST_MARKERS).optional(),
+      preset: z.enum([...BULLET_PRESETS, ...NUMBER_PRESETS]).optional(),
+      items: z
+        .array(z.number().int().nonnegative())
+        .optional()
+        .describe('The items a level write applies to; every item unless set'),
+      level: listLevel.optional(),
+      levelBy: z.literal([1, -1]).optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide text list <slideId>#<blockId> --marker <marker> --preset <preset> --items <items> --level <level>',
+    },
+    mcp: 'deck_set_list',
+    example: {
+      slideId: 'content-rule',
+      blockId: 'list',
+      marker: 'bullet',
+      preset: 'disc-circle-square',
+      baseRevision: 412,
+    },
+  }),
+  'text.spacing': action({
+    id: 'text.spacing',
+    label: 'Line and paragraph spacing',
+    doc: 'Writes the line spacing (a factor) and the space before and after paragraphs (px) of text blocks; null clears one.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z.array(blockIdSchema).min(1),
+      line: z.number().positive().nullable().optional(),
+      before: z.number().nonnegative().nullable().optional(),
+      after: z.number().nonnegative().nullable().optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide text spacing <slideId>#<blockId> --line <line> --before <before> --after <after>',
+    },
+    mcp: 'deck_set_spacing',
+    example: { slideId: 'content-rule', blockIds: ['p1'], line: 1.5, baseRevision: 412 },
+  }),
+  'text.columns': action({
+    id: 'text.columns',
+    label: 'Columns',
+    doc: 'Writes the column count of text blocks, 1 to 3.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z.array(blockIdSchema).min(1),
+      columns: z.literal(TYPE_COLUMNS),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide text columns <slideId>#<blockId> <columns>' },
+    mcp: 'deck_set_columns',
+    example: { slideId: 'content-rule', blockIds: ['p1'], columns: 2, baseRevision: 412 },
+  }),
+  'text.indent': action({
+    id: 'text.indent',
+    label: 'Indent',
+    doc: 'Steps the left indent of text blocks by 64 px in or out, or writes it; on a list block with items the items’ levels step instead.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z
+      .strictObject({
+        slideId: slugSchema,
+        blockIds: z.array(blockIdSchema).min(1),
+        by: z.literal([1, -1]).optional().describe('One step in (1) or out (-1)'),
+        to: z.number().nonnegative().optional().describe('The indent in px'),
+        items: z
+          .array(z.number().int().nonnegative())
+          .optional()
+          .describe('List items whose level steps'),
+        baseRevision,
+      })
+      .refine((value) => (value.by === undefined) !== (value.to === undefined), {
+        message: 'text.indent takes by or to, not both and not neither',
+        path: ['by'],
+      }),
+    output: slideResultSchema,
+    cli: {
+      usage: 'turboslide text indent <slideId>#<blockId> --in --out --to <to> --items <items>',
+    },
+    mcp: 'deck_indent_text',
+    example: { slideId: 'content-rule', blockIds: ['p1'], by: 1, baseRevision: 412 },
+  }),
+  'text.case': action({
+    id: 'text.case',
+    label: 'Capitalization',
+    doc: 'Rewrites the characters of a range in lowercase, UPPERCASE or Title Case, marks and links kept, as one text.replace.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      path: textPath,
+      range: textRange,
+      mode: z.enum(CASE_MODES),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ text: z.string() }),
+    cli: { usage: 'turboslide text case <slideId>#<blockId> <path> --range <range> <mode>' },
+    mcp: 'deck_set_case',
+    example: {
+      slideId: 'content-rule',
+      blockId: 'h',
+      path: '/text',
+      range: [0, 16],
+      mode: 'title',
+      baseRevision: 412,
+    },
+  }),
+  'text.insert': action({
+    id: 'text.insert',
+    label: 'Insert text',
+    doc: 'Inserts a string at a plain text offset of a Text, the special characters picker’s write, as one text.replace at [at, at].',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      path: textPath,
+      at: z.number().int().nonnegative(),
+      text: z.string().min(1),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ text: z.string() }),
+    cli: { usage: 'turboslide text insert <slideId>#<blockId> <path> --at <at> <text>' },
+    mcp: 'deck_insert_text',
+    example: {
+      slideId: 'content-rule',
+      blockId: 'p1',
+      path: '/text',
+      at: 4,
+      text: '→',
+      baseRevision: 412,
+    },
+  }),
+  'chart.setData': action({
+    id: 'chart.setData',
+    label: 'Edit chart data',
+    doc: 'Writes a chart’s categories and series in one write; every series carries one value per category.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      categories: z.array(z.string()).min(1),
+      series: z.array(chartSeriesSchema).min(1),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide chart set-data <slideId>#<blockId> < data.json', stdin: 'data' },
+    mcp: 'deck_set_chart_data',
+    example: {
+      slideId: 'content-rule',
+      blockId: 'chart',
+      categories: ['Q1', 'Q2'],
+      series: [{ name: 'Series 1', values: [30, 45] }],
+      baseRevision: 412,
+    },
+  }),
+  'chart.setKind': action({
+    id: 'chart.setKind',
+    label: 'Chart type',
+    doc: 'Writes a chart’s kind; a pie keeps the first series and the output names the dropped ones.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      kind: z.enum(CHART_KINDS),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ dropped: z.array(z.string()) }),
+    cli: { usage: 'turboslide chart set-kind <slideId>#<blockId> <kind>' },
+    mcp: 'deck_set_chart_kind',
+    example: { slideId: 'content-rule', blockId: 'chart', kind: 'pie', baseRevision: 412 },
+  }),
+  'table.merge': action({
+    id: 'table.merge',
+    label: 'Merge cells',
+    doc: 'Merges the cells from one corner to another into the anchor; the covered cells’ texts join the anchor’s with a line break.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      from: gridCell,
+      to: gridCell,
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide table merge <slideId>#<blockId> --from <from> --to <to>' },
+    mcp: 'deck_merge_cells',
+    example: { slideId: 'table', blockId: 'table', from: [0, 0], to: [1, 1], baseRevision: 412 },
+  }),
+  'table.unmerge': action({
+    id: 'table.unmerge',
+    label: 'Unmerge cells',
+    doc: 'Removes the merge that covers a cell.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      at: gridCell,
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide table unmerge <slideId>#<blockId> --at <at>' },
+    mcp: 'deck_unmerge_cells',
+    example: { slideId: 'table', blockId: 'table', at: [0, 0], baseRevision: 412 },
+  }),
+  'table.insertRows': action({
+    id: 'table.insertRows',
+    label: 'Insert rows',
+    doc: 'Inserts rows above or below a row, merges and cell styles shifted, in one write.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      at: z.number().int().nonnegative(),
+      count: z.number().int().positive().optional(),
+      where: z.enum(['above', 'below']),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide table insert-rows <slideId>#<blockId> --at <at> --count <count> --above --below',
+    },
+    mcp: 'deck_insert_rows',
+    example: {
+      slideId: 'table',
+      blockId: 'table',
+      at: 1,
+      count: 2,
+      where: 'below',
+      baseRevision: 412,
+    },
+  }),
+  'table.insertColumns': action({
+    id: 'table.insertColumns',
+    label: 'Insert columns',
+    doc: 'Inserts columns left or right of a column, every row gaining empty cells, merges and cell styles shifted, in one write.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      at: z.number().int().nonnegative(),
+      count: z.number().int().positive().optional(),
+      where: z.enum(['left', 'right']),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide table insert-columns <slideId>#<blockId> --at <at> --count <count> --left --right',
+    },
+    mcp: 'deck_insert_columns',
+    example: { slideId: 'table', blockId: 'table', at: 0, where: 'left', baseRevision: 412 },
+  }),
+  'table.deleteRows': action({
+    id: 'table.deleteRows',
+    label: 'Delete rows',
+    doc: 'Deletes the rows from one index to another; deleting every row removes the table.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      from: z.number().int().nonnegative(),
+      to: z.number().int().nonnegative().optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide table delete-rows <slideId>#<blockId> --from <from> --to <to>' },
+    mcp: 'deck_delete_rows',
+    example: { slideId: 'table', blockId: 'table', from: 1, to: 2, baseRevision: 412 },
+  }),
+  'table.deleteColumns': action({
+    id: 'table.deleteColumns',
+    label: 'Delete columns',
+    doc: 'Deletes the columns from one index to another; deleting every column removes the table.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      from: z.number().int().nonnegative(),
+      to: z.number().int().nonnegative().optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide table delete-columns <slideId>#<blockId> --from <from> --to <to>' },
+    mcp: 'deck_delete_columns',
+    example: { slideId: 'table', blockId: 'table', from: 0, baseRevision: 412 },
+  }),
+  'table.distribute': action({
+    id: 'table.distribute',
+    label: 'Distribute rows or columns',
+    doc: 'Gives every row an equal height or every column an equal width from a total; without a total the widths or heights clear so the content sizes them.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      axis: z.enum(['rows', 'columns']),
+      total: z.number().positive().optional().describe('The measured or declared total in px'),
+      range: gridCell
+        .optional()
+        .describe('The first and last index to distribute; every one unless set'),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: { usage: 'turboslide table distribute <slideId>#<blockId> <axis> --total <total>' },
+    mcp: 'deck_distribute_table',
+    example: { slideId: 'table', blockId: 'table', axis: 'rows', baseRevision: 412 },
+  }),
+  'table.cellStyle': action({
+    id: 'table.cellStyle',
+    label: 'Cell fill and border',
+    doc: 'Writes the fill and the border of cells in one write; null clears one; a border weight of 0 is Google’s Transparent border.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      cells: z.array(gridCell).min(1),
+      fill: colorSchema.nullable().optional(),
+      border: cellBorderSchema.nullable().optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide table cell-style <slideId>#<blockId> --at <cells> --fill <fill> --border-color <color> --border-weight <weight> --border-dash <dash>',
+    },
+    mcp: 'deck_style_cells',
+    example: {
+      slideId: 'table',
+      blockId: 'table',
+      cells: [[1, 2]],
+      fill: 'plate',
+      baseRevision: 412,
+    },
+  }),
+  'shape.set': action({
+    id: 'shape.set',
+    label: 'Shape',
+    doc: 'Writes the shape fields of shape blocks in one write: the preset, its adjust values, fill, border colour, weight, dash and corner radius; null clears one.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z.array(blockIdSchema).min(1),
+      kind: shapeKind.optional(),
+      adjust: z.array(z.number()).nullable().optional(),
+      fill: colorSchema.nullable().optional(),
+      stroke: colorSchema.nullable().optional(),
+      width: z.literal([1, 1.5, 2, 3, 4]).nullable().optional(),
+      dash: z.enum(DASHES).nullable().optional(),
+      radius: z.number().nonnegative().nullable().optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide shape set <slideId>#<blockId> --kind <kind> --adjust <adjust> --fill <fill> --stroke <stroke> --width <width> --dash <dash> --radius <radius>',
+    },
+    mcp: 'deck_set_shape',
+    example: {
+      slideId: 'free',
+      blockIds: ['arrow'],
+      kind: 'hexagon',
+      fill: 'plate',
+      baseRevision: 412,
+    },
+  }),
+  'line.set': action({
+    id: 'line.set',
+    label: 'Line',
+    doc: 'Writes the line fields of line blocks in one write: the kind, the start and end decorations, weight, dash, bend and points; a connect end attaches to a shape’s connection site and moves the end onto it, null detaches.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockIds: z.array(blockIdSchema).min(1),
+      kind: z.enum(LINE_KINDS).optional(),
+      start: z.enum(LINE_ENDS).optional(),
+      end: z.enum(LINE_ENDS).optional(),
+      weight: z.literal([1, 1.5, 2, 3, 4]).optional(),
+      dash: z.enum(DASHES).nullable().optional(),
+      bend: z.number().min(0).max(1).nullable().optional(),
+      points: z
+        .array(z.tuple([z.number().min(0).max(1), z.number().min(0).max(1)]))
+        .min(2)
+        .optional(),
+      connect: z
+        .strictObject({
+          start: connectEnd.nullable().optional(),
+          end: connectEnd.nullable().optional(),
+        })
+        .optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema,
+    cli: {
+      usage:
+        'turboslide line set <slideId>#<blockId> --kind <kind> --start <start> --end <end> --weight <weight> --dash <dash> --bend <bend> --points <points> --connect-start <connectStart> --connect-end <connectEnd> --detach <detach>',
+    },
+    mcp: 'deck_set_line',
+    example: { slideId: 'free', blockIds: ['arrow'], end: 'fillArrow', baseRevision: 412 },
+  }),
+  'diagram.insert': action({
+    id: 'diagram.insert',
+    label: 'Insert diagram',
+    doc: 'Inserts a diagram template as one group of shape, text and line objects, centred on the sheet unless a box is given; a slide that is not a canvas yet converts first; the output names the ids.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS2',
+    input: z.strictObject({
+      slideId: slugSchema,
+      kind: z.enum(DIAGRAM_KINDS),
+      count: z.number().int().min(2).max(6),
+      style: z.enum(DIAGRAM_STYLES).optional(),
+      pos: positionObjectSchema.optional(),
+      after: blockIdSchema.optional(),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({ blockIds: z.array(blockIdSchema), group: slugSchema }),
+    cli: {
+      usage:
+        'turboslide diagram insert <slideId> --kind <kind> --count <count> --style <style> --pos <pos>',
+    },
+    mcp: 'deck_insert_diagram',
+    example: { slideId: 'content-rule', kind: 'process', count: 4, baseRevision: 412 },
   }),
   'artifact.download': action({
     id: 'artifact.download',

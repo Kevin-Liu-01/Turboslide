@@ -405,6 +405,28 @@ export const catalog: Block[] = [
   },
   { id: 'ico', type: 'icon', name: 'bolt', size: 48, color: 'amber' },
   { id: 'ico2', type: 'icon', name: 'gt-mark', size: 32 },
+  // the round two blocks (gslides-parity SPEC-2 2.6.4, 2.8.1), in a flow layout here
+  {
+    id: 'photo',
+    type: 'picture',
+    asset: 'opener-brand',
+    frame: { weight: 1 },
+    trim: { left: 0.1, right: 0.1, top: 0, bottom: 0 },
+  },
+  {
+    id: 'chart',
+    type: 'chart',
+    kind: 'column',
+    title: 'Words per month',
+    legend: 'bottom',
+    labels: true,
+    height: 360,
+    categories: ['Jan', 'Feb', 'Mar'],
+    series: [
+      { name: 'Docs', values: [1200, 1350, 1480] },
+      { name: 'App', values: [800, 860, 900], color: 'blue' },
+    ],
+  },
   {
     id: 'html',
     type: 'html',

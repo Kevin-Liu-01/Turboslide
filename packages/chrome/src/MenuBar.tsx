@@ -180,7 +180,7 @@ export function MenuBar({ className }: MenuBarProps) {
           onSelect={(item) => onSelect(item, openTitle)}
           onClose={onClose}
           onNavigate={(direction) => step(openMenu.id, direction, true)}
-          renderDynamic={shell.renderLayoutSubmenu}
+          renderDynamic={shell.renderDynamicSubmenu}
           id={`ts-menu-${openMenu.id}`}
         />
       ) : null}

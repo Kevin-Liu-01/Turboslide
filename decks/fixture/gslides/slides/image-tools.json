@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "id": "image-tools",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Image tools",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 900,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "trimmed",
+        "type": "picture",
+        "asset": "fixture-photo",
+        "frame": {
+          "weight": 1
+        },
+        "trim": {
+          "left": 0.1,
+          "right": 0.1,
+          "top": 0.05,
+          "bottom": 0.05
+        },
+        "pos": {
+          "x": 137,
+          "y": 260,
+          "w": 400,
+          "h": 225,
+          "z": 1
+        }
+      },
+      {
+        "id": "masked",
+        "type": "picture",
+        "asset": "fixture-photo",
+        "mask": "ellipse",
+        "pos": {
+          "x": 600,
+          "y": 260,
+          "w": 400,
+          "h": 225,
+          "z": 2
+        }
+      },
+      {
+        "id": "adjusted",
+        "type": "picture",
+        "asset": "fixture-photo",
+        "frame": {
+          "weight": 1
+        },
+        "adjust": {
+          "transparency": 0.2,
+          "brightness": 0.2,
+          "contrast": 0.1
+        },
+        "pos": {
+          "x": 1063,
+          "y": 260,
+          "w": 400,
+          "h": 225,
+          "z": 3
+        }
+      }
+    ]
+  },
+  "template": "blank"
+}

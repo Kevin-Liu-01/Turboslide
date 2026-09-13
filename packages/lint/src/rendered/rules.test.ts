@@ -376,6 +376,88 @@ describe('dia/label-clearance on a raw svg', () => {
   });
 });
 
+describe('text/overflow (gslides-parity SPEC-2 2.1.5)', () => {
+  const canvas = createContext({
+    deck: { ...document.deck, sections: [{ id: 'one', name: 'One', slideIds: ['free'] }] },
+    slides: {
+      free: {
+        schemaVersion: 1,
+        id: 'free',
+        kind: 'content',
+        layout: { type: 'freeform' },
+        slots: {
+          main: [
+            {
+              id: 'none',
+              type: 'text',
+              text: 'Too long.',
+              pos: { x: 100, y: 100, w: 300, h: 40, z: 0 },
+            },
+            {
+              id: 'shrink',
+              type: 'text',
+              text: 'Too long.',
+              autofit: 'shrink',
+              typography: { size: 26 },
+              pos: { x: 100, y: 200, w: 300, h: 40, z: 1 },
+            },
+            {
+              id: 'floor',
+              type: 'text',
+              text: 'Too long.',
+              autofit: 'shrink',
+              typography: { size: 15 },
+              pos: { x: 100, y: 300, w: 300, h: 20, z: 2 },
+            },
+            {
+              id: 'grow',
+              type: 'text',
+              text: 'Too long.',
+              autofit: 'grow',
+              pos: { x: 100, y: 400, w: 300, h: 40, z: 3 },
+            },
+            {
+              id: 'fits',
+              type: 'text',
+              text: 'Fits.',
+              pos: { x: 100, y: 500, w: 300, h: 40, z: 4 },
+            },
+          ],
+        },
+      },
+    },
+  });
+  test('names text that leaves its box: the fix writes the box height under none, the ladder step under shrink, the height when the ladder ended, and grow is left to the editor', () => {
+    const r = record('free', 'light', {
+      blocks: {
+        none: { type: 'text', box: [100, 100, 300, 40], fontSize: 22, contentHeight: 66 },
+        shrink: { type: 'text', box: [100, 200, 300, 40], fontSize: 26, contentHeight: 78 },
+        floor: { type: 'text', box: [100, 300, 300, 20], fontSize: 15, contentHeight: 44 },
+        grow: { type: 'text', box: [100, 400, 300, 40], fontSize: 22, contentHeight: 66 },
+        fits: { type: 'text', box: [100, 500, 300, 40], fontSize: 22, contentHeight: 33 },
+      },
+    });
+    const found = byRule(lintRecord(canvas, r, { bitmap: null }), 'text/overflow');
+    expect(found.map((f) => f.blockId)).toEqual(['none', 'shrink', 'floor']);
+    expect(found[0]?.fix).toEqual([
+      { op: 'block.set', slideId: 'free', blockId: 'none', path: '/pos/h', value: 66 },
+    ]);
+    expect(found[1]?.fix).toEqual([
+      { op: 'block.set', slideId: 'free', blockId: 'shrink', path: '/typography/size', value: 24 },
+    ]);
+    expect(found[2]?.fix).toEqual([
+      { op: 'block.set', slideId: 'free', blockId: 'floor', path: '/pos/h', value: 44 },
+    ]);
+    for (const f of found) {
+      expect(f.severity).toBe(2);
+      expect(f.theme).toBe('light');
+      expect(f.evidence.measured?.contentHeight).toBeGreaterThan(
+        f.evidence.measured?.boxHeight ?? 0,
+      );
+    }
+  });
+});
+
 describe('every rendered finding', () => {
   test('carries the table severity and kind, a theme, a block where one exists, and a stable id', () => {
     const bitmap = sheet('light');

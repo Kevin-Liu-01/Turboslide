@@ -168,6 +168,74 @@ export const BLOCK_CSS = `
 /* icon: one glyph at its stated size; .ic keeps the sprite fill */
 .ts-sheet svg.icon-block { display: block; vertical-align: baseline; }
 
+/* ---- the canvas (gslides-parity SPEC-2 section 1, 1.4): every object in its .free wrapper ---- */
+/* an object's box is its wrapper: the block's own flow margins (a paragraph's margin-top, an
+   imported residual margin) do not move it inside the box, whatever the inline style says */
+.ts-sheet .free > *, .ts-sheet .free > .link > * { margin: 0 !important; }
+/* a rotated or flipped object turns about its centre; .ts-measure on the sheet root drops the
+   transform for the exporter's measurement pass (1.5) */
+.ts-sheet .free[data-rotate], .ts-sheet .free[data-flip] { transform-origin: center; }
+.ts-sheet.ts-measure .free[data-rotate], .ts-sheet.ts-measure .free[data-flip], .ts-measure .free[data-rotate], .ts-measure .free[data-flip] { transform: none !important; }
+/* the picture object (2.6.4): a frame at the object's box, the image covering it with the twins */
+.ts-sheet .picture { position: relative; display: block; box-sizing: border-box; overflow: hidden; }
+.ts-sheet .free > .picture, .ts-sheet .free > .link > .picture { width: 100%; height: 100%; }
+.ts-sheet .picture > img.picture-img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.ts-sheet .picture > .ts-material-live { position: absolute; inset: 0; }
+/* the two paper chips inside a covering picture object's wrapper paint over the photograph and
+   nothing else (0.75, 0.98); the slot form's inset -57px is relative to .slide */
+.ts-sheet .free > .ts-chips { inset: 0; z-index: 1; }
+/* a material object and a picture object over a material take the object's box, not 16:9 (0.105) */
+.ts-sheet .free > .material-fig, .ts-sheet .free > .material { width: 100%; height: 100%; aspect-ratio: auto; }
+.ts-sheet .free > .material-fig { grid-template-rows: 1fr auto; }
+.ts-sheet .free > .material-fig > .material { aspect-ratio: auto; height: 100%; min-height: 0; }
+/* the plate scoped declarations of the picture kinds repeated on a converted plate's children
+   (block-css.ts .opener-plate and .mood-plate above), so a plate child renders the same as an
+   object: the members keep the plate group tag the conversion wrote (schema/canvas.ts CANVAS_GROUP);
+   the credit's 15 px titanium and the mood title's 44 px are the block's own look on any canvas */
+.ts-sheet .free[data-group="plate"] > .big { color: var(--ink); }
+.ts-sheet .free[data-group="plate"] > p { max-width: 56ch; color: var(--ink); }
+.ts-sheet .free > .credit { font-size: 15px; line-height: 1.45; letter-spacing: 0.01em; color: var(--titanium); }
+.ts-sheet .free > .big.title { font-size: 44px; line-height: 1.08; }
+.ts-sheet .free > svg[data-type="mark"] { display: block; fill: currentColor; }
+/* the slide background colour layer (2.6.1): under .in at the sheet box */
+.ts-sheet .slide-bg { position: absolute; inset: -57px; pointer-events: none; }
+/* a positioned text box with an alignment or a padding fills its box (2.2.18, 2.2.19) */
+.ts-sheet .free > p.text, .ts-sheet .free > .link > p.text { box-sizing: border-box; }
+/* a shape with text: the svg and the .shape-text layer at the preset's text rectangle (2.2.17) */
+.ts-sheet .shape-block { position: relative; display: block; }
+.ts-sheet .free > .shape-block, .ts-sheet .free > .link > .shape-block { width: 100%; height: 100%; }
+.ts-sheet .shape-block > svg.shape { display: block; width: 100%; height: 100%; }
+.ts-sheet .shape-text { position: absolute; box-sizing: border-box; font-size: 22px; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; }
+.ts-sheet .shape-text .para { margin: 0; }
+/* word art (2.2.16): the outline behind the fill */
+.ts-sheet p.text.word-art { paint-order: stroke fill; }
+/* the picture tools on a shot (2.5): the clipping frame at the picture's aspect */
+.ts-sheet .shot-crop { position: relative; display: block; width: 100%; overflow: hidden; box-sizing: border-box; background: var(--plate); }
+.ts-sheet .shot-crop > img.shot { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; border: 0; }
+/* the chart block (2.8.1): the diagram grammar's sizes */
+.ts-sheet svg.chart { display: block; overflow: visible; }
+.ts-sheet .free > svg.chart, .ts-sheet .free > .link > svg.chart { width: 100%; height: 100%; }
+.ts-sheet svg.chart text { font-family: var(--text); font-size: 18px; fill: var(--ink-2); }
+.ts-sheet svg.chart .title { font-family: var(--display); font-size: 20px; font-weight: 500; letter-spacing: -0.01em; fill: var(--ink); }
+.ts-sheet svg.chart .legend text { font-size: 15px; }
+.ts-sheet svg.chart .value { font-size: 15px; fill: var(--ink); }
+.ts-sheet svg.chart .ink { stroke: var(--ink); }
+.ts-sheet svg.chart .hair { stroke: var(--hair-soft); }
+/* Google's bulleted and numbered list (2.2.12): the glyph or numeral in the 36 px key position,
+   the item indented 36 px per level below the first */
+.ts-sheet .plain.marked > .item { display: grid; grid-template-columns: 36px minmax(0, 1fr); padding: 12px 0; border-bottom: 1px solid var(--hair-soft); }
+.ts-sheet .plain.marked > .item:last-child { border-bottom-color: var(--hair); }
+.ts-sheet .plain.marked > .item > span { display: block; padding: 0; border-bottom: 0; }
+.ts-sheet .plain.marked > .item > .num { font-variant-numeric: tabular-nums; }
+.ts-sheet .plain.marked > .item > .glyph { font-size: 0.8em; line-height: 1.75; }
+/* the table's grid form (2.7.1, 2.7.2): merged cells and per cell rules */
+.ts-sheet .table.grid { display: grid; grid-template-columns: var(--table-cols); }
+.ts-sheet .table.grid > .tr { display: contents; }
+/* a cell fills its track so its rule sits on the row's bottom edge and its fill covers the row, as
+   in Google's table and the a:tbl the export writes; the vertical alignment moves to the content */
+.ts-sheet .table.grid .td { align-self: stretch; align-content: var(--table-valign, start); }
+.ts-sheet .table.grid > .tr.header .td { font-family: var(--display); font-weight: 500; letter-spacing: -0.01em; }
+
 /* ---- the render surface: one visible slide, the sheet filling the viewport in present mode ---- */
 .ts-render-surface { margin: 0; background: var(--paper); overflow: hidden; }
 .ts-render-surface .ts-sheet.ts-present { position: absolute; left: -1px; top: -1px; border-color: transparent; box-shadow: none; }

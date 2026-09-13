@@ -1,5 +1,6 @@
 // The block dispatcher: one renderer per catalog entry (SPEC 4.2, 5.2).
 import type { Block } from '@turboslide/schema/blocks';
+import { renderChart } from './chart.ts';
 import { renderComposite } from './composite.ts';
 import type { BlockContext } from './context.ts';
 import { renderDia } from './dia.ts';
@@ -16,6 +17,7 @@ import { renderPlain, renderRefs, renderRows, renderSay } from './lists.ts';
 import { renderMaterial } from './material.ts';
 import { renderDither, renderMark, renderMarkSizes, renderMatrix } from './misc.ts';
 import { renderPanel } from './panel.ts';
+import { renderPicture } from './picture.ts';
 import { renderBox, renderIcon, renderRule, renderShape, renderTextBlock } from './primitives.ts';
 import { linkWrap } from './prompt.ts';
 import { renderScales } from './scales.ts';
@@ -96,6 +98,10 @@ function renderBlockBody(block: Block, ctx: BlockContext): string {
       return renderTable(block, ctx);
     case 'html':
       return renderHtmlEscape(block, ctx);
+    case 'chart':
+      return renderChart(block, ctx);
+    case 'picture':
+      return renderPicture(block, ctx);
   }
 }
 

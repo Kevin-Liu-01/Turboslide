@@ -96,6 +96,18 @@ export const TEXT_BLOCK_TYPES: ReadonlySet<string> = new Set([
 /** Blocks that are mostly hairlines: declared diagrams, scales, and the rule and shape primitives. */
 export const LINE_BLOCK_TYPES: ReadonlySet<string> = new Set(['dia', 'scales', 'rule', 'shape']);
 
+/**
+ * How far a table cell's compared region is drawn in from the cell's top and bottom edges, in
+ * sheet px. The cell budget is a text budget: the row rules sit on the cell's bottom edge in the
+ * sheet (the browser draws the cell's border-bottom) and on the row's bottom edge in the file (the
+ * `a:lnB` of an `a:tbl` row), so an ink coloured header rule or a dashed rule's phase would enter
+ * one region and not the other; measured in the render worker image on the fixture's merged
+ * table, the header cells read dw -271 to -311 that way. The text sits at least 8 px inside a
+ * cell (the 12 px padding less the first baseline shift), so 3 px keeps every glyph and drops the
+ * rules of both renderers.
+ */
+export const CELL_RULE_INSET_PX = 3;
+
 export function blockKind(type: string): BlockKind {
   if (TEXT_BLOCK_TYPES.has(type)) return 'text';
   if (LINE_BLOCK_TYPES.has(type)) return 'line';

@@ -122,7 +122,10 @@ describe('editorKeyAction', () => {
     });
   });
 
-  it('the arrows nudge on a freeform slide, 1 px and 8 px with Shift, and are inert on a grammar slide', () => {
+  it('the arrows nudge on every slide kind, 1 px and 10 px with Shift (gslides-parity SPEC-2 0.87)', () => {
+    /* round one nudged 8 px with Shift (the grid) and was inert on a grammar slide; SPEC-2 0.87
+       reads Google's "larger increment" as 10 px and the first nudge on a grammar slide converts */
+    expect(NUDGE_SHIFT_PX).toBe(10);
     expect(editorKeyAction({ key: 'ArrowRight' }, free)).toEqual({
       type: 'nudge',
       dx: NUDGE_PX,
@@ -133,8 +136,69 @@ describe('editorKeyAction', () => {
       dx: 0,
       dy: -NUDGE_SHIFT_PX,
     });
-    expect(editorKeyAction({ key: 'ArrowDown' }, selected)).toEqual({ type: 'inert' });
+    expect(editorKeyAction({ key: 'ArrowDown' }, selected)).toEqual({
+      type: 'nudge',
+      dx: 0,
+      dy: NUDGE_PX,
+    });
     expect(editorKeyAction({ key: 'ArrowLeft' }, nothing)).toBeNull();
+  });
+
+  it('rotates with Option Left and Right, 15 degrees and 1 with Shift, and honours the Cmd Option aliases (SPEC-2 0.78)', () => {
+    expect(editorKeyAction({ key: 'ArrowLeft', altKey: true }, selected)).toEqual({
+      type: 'rotate',
+      by: -15,
+    });
+    expect(editorKeyAction({ key: 'ArrowRight', altKey: true, shiftKey: true }, selected)).toEqual({
+      type: 'rotate',
+      by: 1,
+    });
+    expect(editorKeyAction({ key: 'ArrowRight', altKey: true, metaKey: true }, selected)).toEqual({
+      type: 'rotate',
+      by: 15,
+    });
+    expect(editorKeyAction({ key: 'ArrowLeft', altKey: true }, nothing)).toBeNull();
+    /* Option Up stays nothing: the arrow pair rotates, the vertical pair is free */
+    expect(editorKeyAction({ key: 'ArrowUp', altKey: true }, selected)).toBeNull();
+  });
+
+  it('groups with Cmd Option G and ungroups with Shift; the marks and the indents apply to a selected object', () => {
+    expect(editorKeyAction({ key: 'g', metaKey: true, altKey: true }, selected)).toEqual({
+      type: 'group',
+    });
+    expect(
+      editorKeyAction({ key: 'G', metaKey: true, altKey: true, shiftKey: true }, selected),
+    ).toEqual({ type: 'ungroup' });
+    expect(editorKeyAction({ key: 'i', metaKey: true }, selected)).toEqual({
+      type: 'mark',
+      mark: 'i',
+    });
+    expect(editorKeyAction({ key: 'u', metaKey: true }, selected)).toEqual({
+      type: 'mark',
+      mark: 'u',
+    });
+    expect(editorKeyAction({ key: 'X', metaKey: true, shiftKey: true }, selected)).toEqual({
+      type: 'mark',
+      mark: 's',
+    });
+    expect(editorKeyAction({ key: '.', metaKey: true }, selected)).toEqual({
+      type: 'mark',
+      mark: 'sup',
+    });
+    expect(editorKeyAction({ key: ',', metaKey: true }, selected)).toEqual({
+      type: 'mark',
+      mark: 'sub',
+    });
+    expect(editorKeyAction({ key: ']', metaKey: true }, selected)).toEqual({
+      type: 'indent',
+      by: 1,
+    });
+    expect(editorKeyAction({ key: '[', metaKey: true }, selected)).toEqual({
+      type: 'indent',
+      by: -1,
+    });
+    expect(editorKeyAction({ key: 'i', metaKey: true }, nothing)).toBeNull();
+    expect(editorKeyAction({ key: ']', metaKey: true }, nothing)).toBeNull();
   });
 
   it('Cmd D duplicates, Cmd A selects all, Cmd X, C, V are the clipboard and Shift V pastes plain', () => {
@@ -184,8 +248,13 @@ describe('editorKeyAction', () => {
     const win: EditorKeyContext = { ...selected, apple: false };
     expect(editorKeyAction({ key: 'd', ctrlKey: true }, win)).toEqual({ type: 'duplicate' });
     expect(editorKeyAction({ key: 'd', metaKey: true }, win)).toBeNull();
-    /* the retired Turboslide chords of SPEC 10.2 are nothing on the stage */
-    expect(editorKeyAction({ key: ']', metaKey: true }, free)).toBeNull();
+    /* the retired Turboslide chords of SPEC 10.2 are nothing on the stage; Cmd ] is the indent
+       since SPEC-2 0.55 and Option Up stays nothing */
+    expect(editorKeyAction({ key: ']', metaKey: true }, free)).toEqual({ type: 'indent', by: 1 });
+    expect(editorKeyAction({ key: ']', ctrlKey: true }, { ...free, apple: false })).toEqual({
+      type: 'indent',
+      by: 1,
+    });
     expect(editorKeyAction({ key: 'ArrowUp', altKey: true }, free)).toBeNull();
   });
 });

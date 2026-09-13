@@ -15,7 +15,7 @@
 import type { ActionId, ActionSpec } from '@turboslide/schema/actions';
 import { actionsInOrder } from '@turboslide/schema/actions';
 import type { Block, BlockType, ShapeKind } from '@turboslide/schema/blocks';
-import { PRIMITIVE_BLOCK_TYPES, SHAPE_KINDS } from '@turboslide/schema/blocks';
+import { PRIMITIVE_BLOCK_TYPES } from '@turboslide/schema/blocks';
 import { CATALOG } from '@turboslide/schema/catalog';
 import type { Deck, Slide, SlideKind, SlotName } from '@turboslide/schema/deck';
 import { slideBlocks, slideTitle, slotsForLayout } from '@turboslide/schema/deck';
@@ -170,6 +170,15 @@ const SHAPE_DOC: Readonly<Record<ShapeKind, string>> = {
   line: 'A line across its box, horizontal when the box is wider than tall.',
   arrow: 'A line with a filled 8 px head at its end.',
 };
+
+/**
+ * The shape variants the palette and the Insert menu strip offer: the five legacy kinds with a
+ * word and a glyph here. The shape table of SPEC-2 2.3 (`SHAPE_KINDS` now lists every preset)
+ * is drawn by the shape picker of the menu model's Insert > Shape categories, not by this strip.
+ */
+export const LEGACY_SHAPE_VARIANTS: ReadonlyArray<ShapeKind> = Object.keys(
+  SHAPE_WORD,
+) as ShapeKind[];
 
 /** The box a new block takes on a freeform slide, by type; in sheet px on the 8 px grid. */
 const DEFAULT_SIZE: Readonly<Record<string, [number, number]>> = {
@@ -429,7 +438,7 @@ function blockEntries(ctx: PaletteContext): PaletteEntry[] {
     const entry = CATALOG[type];
     if (!entry.allowedIn.includes(where)) continue;
     if (type === 'shape') {
-      for (const variant of SHAPE_KINDS) {
+      for (const variant of LEGACY_SHAPE_VARIANTS) {
         out.push({
           id: `insert:block:shape:${variant}`,
           group: 'insert',

@@ -62,7 +62,19 @@ const STATIC_EXPECTED: RuleId[] = [
   // the Google Slides parity round (docs/gslides-parity/SPEC.md 5.4, 7.3)
   'copy/empty-placeholder',
   'table/size',
+  // the parity round two (docs/gslides-parity/SPEC-2.md 0.60), planted on canvas-objects
+  'chart/size',
 ];
+
+/** The rules whose findings may carry a documented downward severity override (context.ts FindingDetails). */
+const OVERRIDDEN: ReadonlySet<RuleId> = new Set<RuleId>([
+  // reports at 1 on a mood slide, whose plate is opaque, and when no metrics are recorded
+  'picture/plate-clear',
+  // 2 for an object crossing the sheet's edge, 3 for one wholly outside (gslides-parity SPEC-2 0.96)
+  'freeform/off-sheet',
+  // 1 on a text run, 3 on escape markup (gslides-parity SPEC-2 0.6)
+  'color/semantic-icons-only',
+]);
 
 /** The committed GT deck, read the way the store reads it, for the count that must not rise. */
 function readGtDeck(): { deck: Deck; slides: Record<string, Slide> } | null {
@@ -109,7 +121,7 @@ describe('lintStatic', () => {
       // the table severity, or a documented downward override (context.ts FindingDetails: picture/plate-clear
       // reports at 1 on a mood slide, whose plate is opaque, and when no metrics are recorded)
       expect(f.severity).toBeLessThanOrEqual(RULES[f.rule].severity);
-      if (f.rule !== 'picture/plate-clear') expect(f.severity).toBe(RULES[f.rule].severity);
+      if (!OVERRIDDEN.has(f.rule)) expect(f.severity).toBe(RULES[f.rule].severity);
       expect(f.kind).toBe(RULES[f.rule].kind);
       expect(f.id).toBe(
         [f.rule, f.slideId, f.blockId ?? '', f.path ?? '', f.theme ?? ''].join('|'),
@@ -160,9 +172,25 @@ describe('lintStatic', () => {
       severity: 1,
       path: '/layout',
     });
-    const off = onSlide.find((f) => f.rule === 'freeform/off-sheet');
-    expect(off).toMatchObject({ severity: 3, blockId: 's1', path: '/slots/main/3/pos' });
-    expect(off?.evidence.box).toEqual([1500, 800, 200, 8]);
+    // the arrow crosses the right edge: severity 2 with the crossing sentence; the rule wholly
+    // outside the sheet keeps the table's 3 (gslides-parity SPEC-2 0.96)
+    const off = onSlide.filter((f) => f.rule === 'freeform/off-sheet');
+    expect(off.map((f) => [f.blockId, f.severity])).toEqual([
+      ['s2', 3],
+      ['s1', 2],
+    ]);
+    const crossing = off.find((f) => f.blockId === 's1');
+    expect(crossing).toMatchObject({ path: '/slots/main/3/pos' });
+    expect(crossing?.evidence.box).toEqual([1500, 800, 200, 8]);
+    expect(crossing?.proposal).toBe(
+      "Part of this object is past the slide's edge and will not show",
+    );
+    expect(off.find((f) => f.blockId === 's2')?.proposal).toBe(
+      'This object is outside the slide and will not show. Move it onto the slide or delete it',
+    );
+    expect(onSlide.find((f) => f.rule === 'layout/freeform')?.proposal).toBe(
+      'This slide is arranged by hand; Apply layout re-flows it',
+    );
     const overlap = onSlide.find((f) => f.rule === 'freeform/overlap');
     expect(overlap).toMatchObject({ severity: 1, blockId: 't1' });
     expect(overlap?.evidence.text).toBe('h and t1');
@@ -193,8 +221,85 @@ describe('lintStatic', () => {
     ]);
     // the grammar slides raise none of the freeform rules
     expect(
-      findings.filter((f) => f.slideId !== 'fixed-points' && f.rule.startsWith('freeform/')),
+      findings.filter(
+        (f) =>
+          f.slideId !== 'fixed-points' &&
+          f.slideId !== 'canvas-objects' &&
+          f.rule.startsWith('freeform/'),
+      ),
     ).toEqual([]);
+  });
+
+  test('a slide arranged by hand carries layout/freeform and no rule about the conversion (gslides-parity SPEC-2 0.76)', () => {
+    const onCanvas = findings.filter((f) => f.slideId === 'canvas-title');
+    // the mark object is a raster in native mode, which export/non-native (1) lists for every deck
+    // that holds a mark block; no freeform, copy or colour rule fires because the slide converted
+    expect(onCanvas.map((f) => f.rule)).toEqual(['export/non-native', 'layout/freeform']);
+    expect(onCanvas.find((f) => f.rule === 'layout/freeform')?.proposal).toBe(
+      'This slide is arranged by hand; Apply layout re-flows it',
+    );
+  });
+
+  test('the canvas objects: overlap skips the picture object and a textless box, reads the rotated bounding box, and the shape text takes the copy rules', () => {
+    const onSlide = findings.filter((f) => f.slideId === 'canvas-objects');
+    const overlaps = onSlide.filter((f) => f.rule === 'freeform/overlap');
+    // the heading over the plate box and the picture is the design; the tilted text's 40 by 200
+    // bounding box (rotated 90 degrees about its centre) reaches the callout's box
+    expect(overlaps.map((f) => f.evidence.text)).toEqual(['callout and tilted']);
+    expect(overlaps[0]?.proposal).toMatch(
+      /^Slide \d+ has 2 objects placed over its text\. Move one of them or apply a layout$/,
+    );
+    expect(onSlide.filter((f) => f.rule === 'freeform/off-sheet')).toEqual([]);
+    expect(onSlide.find((f) => f.rule === 'copy/no-exclamation')).toMatchObject({
+      blockId: 'callout',
+      path: '/slots/main/3/text',
+    });
+    const semantic = onSlide.find((f) => f.rule === 'color/semantic-icons-only');
+    expect(semantic).toMatchObject({ severity: 1, blockId: 'tilted' });
+    expect(semantic?.evidence.text).toContain('green');
+    const palette = onSlide.find((f) => f.rule === 'color/off-palette' && f.blockId === 'tilted');
+    expect(palette).toMatchObject({ severity: 2 });
+    expect(palette?.evidence.text).toContain('#ff0000');
+    const chart = onSlide.find((f) => f.rule === 'chart/size');
+    expect(chart).toMatchObject({
+      severity: 2,
+      blockId: 'chart',
+      path: '/slots/main/5/categories',
+    });
+    expect(chart?.evidence.measured).toEqual({ categories: 12, width: 720 });
+    // a wide chart or a pie under nine slices is clean
+    const wide = lintStatic({
+      deck: { ...document.deck, sections: [{ id: 'one', name: 'One', slideIds: ['c'] }] },
+      slides: {
+        c: {
+          schemaVersion: 1,
+          id: 'c',
+          kind: 'content',
+          layout: { type: 'freeform' },
+          slots: {
+            main: [
+              {
+                id: 'wide',
+                type: 'chart',
+                kind: 'bar',
+                categories: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'],
+                series: [{ name: 'S', values: [1, 2, 3, 4, 5, 6, 7, 8, 9] }],
+                pos: { x: 137, y: 129, w: 1000, h: 300, z: 0 },
+              },
+              {
+                id: 'pie',
+                type: 'chart',
+                kind: 'pie',
+                categories: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'],
+                series: [{ name: 'S', values: [1, 2, 3, 4, 5, 6, 7, 8] }],
+                pos: { x: 137, y: 500, w: 400, h: 300, z: 1 },
+              },
+            ],
+          },
+        },
+      },
+    });
+    expect(wide.filter((f) => f.rule === 'chart/size')).toEqual([]);
   });
 
   test('copy/empty-placeholder names the empty title and the empty cell at severity 1, and the empty Texts trip no other rule', () => {

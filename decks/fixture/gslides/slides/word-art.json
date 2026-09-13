@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "word-art",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Word art",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 900,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "art",
+        "type": "text",
+        "text": "Outlined at 88",
+        "typography": {
+          "size": 88,
+          "weight": 500,
+          "align": "center"
+        },
+        "color": "paper",
+        "outline": {
+          "color": "ink",
+          "width": 2
+        },
+        "valign": "middle",
+        "pos": {
+          "x": 137,
+          "y": 330,
+          "w": 1326,
+          "h": 240,
+          "z": 1
+        }
+      }
+    ]
+  },
+  "template": "blank"
+}

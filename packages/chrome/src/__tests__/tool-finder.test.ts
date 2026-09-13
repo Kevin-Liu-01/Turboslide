@@ -27,10 +27,18 @@ describe('finderRows', () => {
     const pdf = rows.find((row) => row.item.id === 'file.download.pdf');
     expect(pdf?.path).toBe(['File', 'Download'].join(PATH_SEPARATOR));
     expect(pdf?.title).toBe('PDF Document (.pdf)');
+    /* Italic is Now since SPEC-2 0.1 (disabled with nothing selected); Edit guides stays Later */
     const italic = rows.find((row) => row.item.id === 'format.text.italic');
-    expect(italic?.later).toBe(true);
+    expect(italic?.later).toBe(false);
     expect(italic?.enabled).toBe(false);
-    expect(italic?.doc?.startsWith('Not available in Turboslide yet')).toBe(true);
+    const editGuides = rows.find((row) => row.item.id === 'view.guides.edit');
+    expect(editGuides?.later).toBe(true);
+    expect(editGuides?.enabled).toBe(false);
+    expect(editGuides?.doc?.startsWith('Not available in Turboslide yet')).toBe(true);
+    expect(editGuides?.path).toBe(['View', 'Guides'].join(PATH_SEPARATOR));
+    /* Insert > Table is listed (its plate is dynamic), the plain containers are not */
+    expect(rows.some((row) => row.item.id === 'insert.table')).toBe(true);
+    expect(rows.some((row) => row.item.id === 'view.guides')).toBe(false);
     const undo = rows.find((row) => row.item.id === 'edit.undo');
     expect(undo?.key).toBe('Cmd Z');
     expect(undo?.enabled).toBe(false);

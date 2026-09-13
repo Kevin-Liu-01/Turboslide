@@ -21,7 +21,10 @@ test.use({ baseURL: BASE, permissions: ['clipboard-read', 'clipboard-write'] });
 
 const ROOT = join(import.meta.dirname, '..', '..', '..');
 const DECK = 'e2e-text';
-const DECK_DIR = join(ROOT, 'decks', DECK);
+/* the folder the server reads decks from: a builder's tmp store names its overlay's decks folder
+   in TURBOSLIDE_E2E_DECKS_DIR (gslides-parity SPEC-2 0.43); the checkout's decks/ otherwise */
+const DECKS = process.env['TURBOSLIDE_E2E_DECKS_DIR'] ?? join(ROOT, 'decks');
+const DECK_DIR = join(DECKS, DECK);
 
 type Version = {
   n: number;
@@ -190,6 +193,10 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     await expect.poll(() => runText(page, 'content-rule', 'h', 'text')).toBe('The copy test now');
     await page.keyboard.press('ControlOrMeta+z');
     await expect.poll(() => runText(page, 'content-rule', 'h', 'text')).toBe('The copy test');
+    /* the two undo writes reach the server before the next test opens the deck again; without
+       this the next test's reload could read the heading with both bursts still in it (measured
+       once on the merged tree of round two, integrator merge 2) */
+    await settled(page);
   });
 
   test('Enter breaks a paragraph in a multiline pointer and commits in a heading; Shift Enter is the same break', async ({
@@ -211,16 +218,26 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     await page.keyboard.type('Three.', { delay: 20 });
     await page.keyboard.press('Escape');
     await expect.poll(() => runText(page, 'content-rule', 'p', 'text')).toBe('One.\nTwo.\nThree.');
-    /* a heading takes no break: Enter commits and selects the block */
+    /* a heading takes no break: Enter commits and selects the block. The commit is awaited on its
+       own conditions (gslides-parity SPEC-2 8.5, 0.35; VERIFICATION finding 16): the paragraph's
+       burst has landed before the heading is touched, then the editable element is gone and the
+       revision has moved before the run text is read, each with a 30 s budget, so the assertion
+       never reads the heading between its burst and its commit on a loaded machine. */
+    await settled(page);
     const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
     const hbox = await heading.boundingBox();
+    const beforeHeading = await revision(page);
     await page.mouse.click(hbox!.x + 8, hbox!.y + hbox!.height / 2);
-    await expect(heading).toHaveAttribute('contenteditable', 'true');
+    await expect(heading).toHaveAttribute('contenteditable', 'true', { timeout: 30_000 });
     await page.keyboard.press('End');
     await page.keyboard.type(' A', { delay: 20 });
     await page.keyboard.press('Enter');
-    await expect(heading).not.toHaveAttribute('contenteditable', 'true');
-    await expect.poll(() => runText(page, 'content-rule', 'h', 'text')).toBe('The copy test A');
+    await expect(heading).not.toHaveAttribute('contenteditable', 'true', { timeout: 30_000 });
+    await expect.poll(() => revision(page), { timeout: 30_000 }).toBeGreaterThan(beforeHeading);
+    await settled(page);
+    await expect
+      .poll(() => runText(page, 'content-rule', 'h', 'text'), { timeout: 30_000 })
+      .toBe('The copy test A');
   });
 
   test('Enter at the end of a list item appends an item and Backspace on the empty item removes it', async ({
@@ -349,7 +366,7 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     await expect.poll(() => ids(), { timeout: 15_000 }).toEqual(['h', 'h-2', 'p', 'list']);
   });
 
-  test('no bare letter changes the view with a block selected, and the arrows are inert on a grammar slide', async ({
+  test('no bare letter changes the view with a block selected, and the arrows nudge the block by a pixel on a grammar slide (SPEC-2 0.87)', async ({
     page,
   }) => {
     test.setTimeout(60_000);
@@ -358,6 +375,9 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     /* select the block through its overlay chip path: Tab from the page selects the first block */
     await page.locator('body').press('Tab');
     await expect(page.locator('.ts-overlay .ts-select.is-selected')).toBeVisible();
+    /* the heading's words as this test finds them (an earlier test of this file commits ' A' into them) */
+    const words = await runText(page, 'content-rule', 'h', 'text');
+    const startRevision = await revision(page);
     const before = await page.evaluate(() => ({
       theme: document.documentElement.getAttribute('data-theme'),
       sb: document.querySelector('.pt-viewer')?.getAttribute('data-sb'),
@@ -383,9 +403,26 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
       active: document.querySelector('.pt-viewer')?.getAttribute('data-active'),
     }));
     expect(after).toEqual(before);
-    /* the selection is unchanged: the arrows did not cycle the blocks */
+    /* the selection is unchanged: the arrows did not cycle the blocks, and no letter reached the text */
     await expect(page.locator('.ts-overlay .ts-select.is-selected')).toBeVisible();
     expect(await heading.count()).toBe(1);
-    expect(await runText(page, 'content-rule', 'h', 'text')).toBe('The copy test');
+    expect(await runText(page, 'content-rule', 'h', 'text')).toBe(words);
+    /* round two (gslides-parity SPEC-2 0.87, 1.6): the two arrows nudged the selected block 1 px
+       down and 1 px right, the first press converting the slide to the canvas in the same write;
+       round one held the arrows inert on a grammar slide */
+    await expect.poll(() => revision(page), { timeout: 30_000 }).toBeGreaterThan(startRevision);
+    await settled(page);
+    const slide = (await page.evaluate(() =>
+      window.turboslide!.studio.invoke('slide.get', { slideId: 'content-rule' }),
+    )) as {
+      slide: {
+        layout?: { type: string };
+        slots?: { main?: { id: string; pos?: { x: number; y: number } }[] };
+      };
+    };
+    expect(slide.slide.layout).toEqual({ type: 'freeform' });
+    const h = slide.slide.slots?.main?.find((b) => b.id === 'h');
+    expect(h?.pos).toBeDefined();
+    expect(h!.pos!.x).toBe(138);
   });
 });

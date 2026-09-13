@@ -8,7 +8,9 @@ SPEC 1 and SPEC 6.4 state that slots and ids are the only coordinates: "There ar
 
 - The grammar layouts (`cols`, `split`, `center`, `left-mid`, `stack`) stay. Blocks in them still have no coordinates; the editor gains drag to move and reorder blocks within a slot and across slots, which is the existing `block.move` mutation (the studio builder's part).
 - A new layout, `freeform`, carries positioned blocks. Every top-level block of a freeform slide has `pos: { x, y, w, h, z? }`, its box on the 1600 by 900 sheet in sheet pixels. The validator requires `pos` there and refuses it everywhere else (`packages/schema/src/validate.ts`, issue code `position`, severity 3), so the grammar layouts keep their guarantee.
-- A freeform slide is flagged by the linter as `layout/freeform` at severity 1, so a deck that wants to stay pure grammar sees where it left it.
+- A freeform slide is flagged by the linter as `layout/freeform` at severity 1 with the sentence "This slide is arranged by hand; Apply layout re-flows it" (gslides-parity SPEC-2 1.4), so a deck that wants to stay pure grammar sees where it left it.
+
+Round two of the Google Slides parity (gslides-parity SPEC-2 section 1, Kevin's directive of 2026-09-12: "we must, must must be able to drag and move around ANYTHING") makes the canvas the one form of an arranged slide: every slide of every kind (title, statement, content, opener, mood, closing) becomes a freeform content slide on its first canvas manipulation or insert, block by block and losslessly, with the layout's own text, the photograph (the `picture` object at the bottom of the stack), the plate (a `box` with its children in the `plate` group), the mark and every block as objects; `slide.template` keeps the layout identity so Apply layout re-flows, and `slide.grammar` records the origin so `fromCanvas` restores the kind byte for byte while nothing moved. The theme elements the renderer draws on every slide (the footer mark, the counter, the rails, the chips, the paper ground) stay theme level this round, as Google's master elements are, until Slide > Edit theme.
 
 The rendered `sheet/overflow` rule and the line law are unchanged. `docs/grammar.md` is regenerated from the catalog and names the layout and the five primitive blocks.
 
@@ -17,10 +19,19 @@ The rendered `sheet/overflow` rule and the line law are unchanged. `docs/grammar
 `packages/schema/src/position.ts`
 
 ```ts
-export type Position = { x: number; y: number; w: number; h: number; z?: number };
+export type Position = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  z?: number;
+  rotate?: number;
+  flip?: 'h' | 'v' | 'hv';
+  group?: string;
+};
 ```
 
-`pos` sits on `BlockBase`, so every block type can be positioned, the material block included. `z` is optional; absent counts as 0 and document order breaks ties (`sortByZ`). The inspector annotation is one control of kind `position`.
+`pos` sits on `BlockBase`, so every block type can be positioned, the material block included. `z` is optional; absent counts as 0 and document order breaks ties (`sortByZ`). Round two adds `rotate` (degrees clockwise about the box centre), `flip` and `group` (gslides-parity SPEC-2 2.1): rotation is in, and every geometry that reads a box (snapping, align, distribute, the marquee, `freeform/off-sheet`, the connection sites) reads the rotated bounding box (SPEC-2 0.107). A measured box is written at the measurer's 1/64 px, never rounded to the pixel (SPEC-2 1.3; `canvas.ts` `boxPos`). The inspector annotation is one control of kind `position`; Format options draws it as Size & rotation and Position.
 
 `packages/schema/src/deck.ts` adds `{ type: 'freeform' }` to `Layout`; its one slot is `main`, and `normalizeLayout` returns it unchanged.
 
@@ -74,7 +85,7 @@ All four are on the cli, mcp, http and window transports and end in ordinary `bl
 
 `convertLayout(slide, layout)` behind `slide.setLayout`:
 
-- To freeform: every block keeps its slot's column and the blocks of one slot share the slot's height in document order, snapped, with `z` in reading order. A `cols` 1/1 slide with two blocks on the left and one on the right becomes boxes at (137, 129) and (137, 450) on the left and one box the full column on the right. The slide reads as it did; the designer drags from there.
+- To freeform: the measured conversion of gslides-parity SPEC-2 1.2 on every transport (`toCanvas` of `packages/schema/src/canvas.ts` over the boxes one DOM function measures, `measureCanvasBoxes` of `@turboslide/render/measure-dom`, on a 1x sheet with the prompts drawn): every block takes the box it is drawn at, a picture kind's photograph becomes the `picture` object at 0, 0, 1600, 900 under everything, its plate a `box` with its children in the `plate` group, a title's mark a `mark` block, a statement's big line a text block, and `slide.grammar` records the origin. The editor measures a hidden sheet in the current theme (`@turboslide/viewer/canvas-measure`), the CLI and the MCP server a headless page (`turboslide slide to-canvas`, `slide measure`), the hosted studio the render worker (`slide measure` as its child process or its `measure` job); the `pos` they write are identical in Chromium (SPEC-2 0.104). The conversion travels in the gesture's or the action's write as one `slide.replace` first, so one undo restores the kind (SPEC-2 1.6). The slide reads as it did; the designer drags from there.
 - From freeform to a grammar layout: the boxes are dropped and the blocks fall into the target slots by geometry. The two columns of `cols` take a block by its center against the content middle; the head of a `split` takes the headings and the rest is the body (with two head columns, headings go left and a paragraph in the top third goes right); one slot takes everything. Blocks read top to bottom, left to right within one grid step.
 - Between grammar layouts the slots map by index (left to head, right to body); a slot the target lacks folds into the last one.
 
@@ -90,14 +101,14 @@ A plain `slide.set /layout` from freeform to a grammar layout is refused by the 
 
 `packages/lint/src/static/freeform.ts`, `color.ts`, `type.ts`:
 
-| Rule                 | Layer  | Severity | Check                                                                                    | Fix                   |
-| -------------------- | ------ | -------- | ---------------------------------------------------------------------------------------- | --------------------- |
-| `layout/freeform`    | static | 1        | the slide is on the freeform layout                                                      | no                    |
-| `freeform/off-sheet` | static | 3        | a positioned block leaves the 1600 by 900 sheet (the static `sheet/overflow`)            | no                    |
-| `freeform/overlap`   | static | 1        | two text-carrying blocks whose boxes intersect; names both blocks and the intersection   | no                    |
-| `color/off-palette`  | static | 2        | a custom hex on a primitive's `fill`, `stroke` or `color`; names the block and the color | no                    |
-| `type/ladder`        | static | 2        | a `typography.size` off the ladder                                                       | yes, the nearest step |
-| `type/weight-cap`    | both   | 3        | extended: a `typography.weight` over 500 on a heading, paragraph, text or box            | yes, 500              |
+| Rule                 | Layer  | Severity | Check                                                                                                                                                                                                     | Fix                   |
+| -------------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| `layout/freeform`    | static | 1        | the slide is on the freeform layout                                                                                                                                                                       | no                    |
+| `freeform/off-sheet` | static | 3 or 2   | a positioned block lies wholly outside the 1600 by 900 sheet (3, the gate), or its rotated bounding box crosses an edge (2, under the gate: part of the object will not show; gslides-parity SPEC-2 0.96) | no                    |
+| `freeform/overlap`   | static | 1        | two text-carrying blocks whose boxes intersect; names both blocks and the intersection                                                                                                                    | no                    |
+| `color/off-palette`  | static | 2        | a custom hex on a primitive's `fill`, `stroke` or `color`; names the block and the color                                                                                                                  | no                    |
+| `type/ladder`        | static | 2        | a `typography.size` off the ladder                                                                                                                                                                        | yes, the nearest step |
+| `type/weight-cap`    | both   | 3        | extended: a `typography.weight` over 500 on a heading, paragraph, text or box                                                                                                                             | yes, 500              |
 
 The fixture deck (`packages/lint/src/fixtures/deck.ts`) plants every one on the `fixed-points` slide, so `packages/lint/fixtures/index.json` lists them and the coverage test runs the fixes. The rendered `sheet/rail-touch` reads `text` and `box` as text types.
 
@@ -112,7 +123,7 @@ Native mode (`packages/export/src/scene/measure.ts`, `pptx/lines.ts`, `pptx/buil
 - The drag surfaces: `block.move` within and across slots on grammar slides, drag and resize of `pos` on freeform slides through `block.set /pos` (snapping through `snapPosition` and the guides of `freeform.ts`), and the align, distribute and order commands as toolbar buttons with tooltips.
 - The inspector controls for the three new annotation kinds: `color` (the palette swatches plus a custom hex field), `typography` (size, weight, align, tracking, leading) and `position` (x, y, w, h, z). Until they exist the generated inspector falls back to a text field for these objects (`packages/chrome/src/inspector/generate.ts` `kindFor`).
 - The palette group Primitives, and the freeform layout in the layout picker.
-- Handlers for `block.align`, `block.distribute`, `block.order` and `slide.setLayout` on the window transport, in the editor's `on(...)` table (`apps/studio/src/routes/edit.$deckId.tsx`, integrated 2026-09-11): the three arrange actions run the schema's `alignPositions`, `distributePositions` and `reorderZ` and commit the `block.set /pos` mutations as one write, exactly what the CLI's store actions write. `slide.setLayout` to freeform reads the stage's measured boxes (`@turboslide/viewer/Freeform` `readStageBoxes` and `toFreeform`, which records the source layout under `ext.grammar`) so every block lands where it is drawn; back to the recorded grammar layout type it is `toGrammar` and lossless; every other switch is the schema's `convertLayout`, the CLI's arithmetic. `readStageBoxes` queries the stage wrapper (`.ts-stagewrap.ts-editor .pt-slide`), not the route's `.ts-editor` root, because in thumbnail density the sidebar's live clones are `.pt-slide` elements under that root too (found and fixed during integration).
+- Handlers for every canvas action on the window transport, in the editor's `on(...)` table (`apps/studio/src/routes/edit.$deckId.tsx`): since the Google Slides parity round two each one is the store action of `@turboslide/cli/store-actions` over the editor's store (one commit, one history entry), the one implementation the CLI, the MCP server and the hosted `/api/actions` run, with the editor's own measurer bound as `measureCanvas` and `measureFit` (`@turboslide/viewer/canvas-measure` `measureForCanvas` and `measureForFit` over B2's `measureCanvasBoxes`) and B5's `makeDiagram` as `diagrams`. `slide.setLayout` to freeform is the measured conversion through the store action; back to a grammar layout is the schema's `convertLayout`.
 
 ## 9. Tests
 

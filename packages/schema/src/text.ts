@@ -1,31 +1,58 @@
-// The four-rule inline text markup (SPEC 4.2 "Text"). A Text is a string so that `git diff` reads
-// at the word level and an agent can type it; parseText turns it into runs for the renderer and
-// serializeRuns turns runs back into the canonical string. Resolution recorded in SPEC 4.2: the
-// agent-nativeness judge chose the string over a `string | Run[]` union.
+// The five-rule inline text markup (SPEC 4.2 "Text"; gslides-parity SPEC-2 7.2 adds the fifth). A
+// Text is a string so that `git diff` reads at the word level and an agent can type it; parseText
+// turns it into runs for the renderer and serializeRuns turns runs back into the canonical string.
+// Resolution recorded in SPEC 4.2: the agent-nativeness judge chose the string over a
+// `string | Run[]` union.
 //
 //   *text*             the display run: weight 500, the deck's <b> (DECK-GRAMMAR.md:20)
 //   [text](https://…)  a link; inside rows.links an external glyph follows it (head:121)
+//   [text]{marks}      the mark span (SPEC-2 0.5): marks is a space separated list of
+//                      i u s sup sub c:<color> h:<color>, written in that canonical order;
+//                      italic, underline, strikethrough, superscript, subscript, text colour
+//                      and highlight. [text](url){marks} is a linked span; the order of the
+//                      (url) and {marks} parts is free on input. Unknown marks leave the
+//                      brackets literal.
 //   GT                 a standalone GT word becomes the mark at render (head:70-74); the document
 //                      keeps the letters. The renderer skips panels, links and decks with gtWord
 //                      off; the parser never flags GT inside a link.
-//   \*  \[  \GT        escapes
+//   \*  \[  \GT        escapes; a literal "]{" after an escaped "[" stays literal
 //
-// No line breaks inside a string except a paragraph break in the four multiline pointers
-// (paragraph.text, text.text, box.text and a table cell; gslides-parity SPEC 7.4) and \n in
-// panel.code. A non-breaking space (U+00A0) is the nowrap device.
+// No line breaks inside a string except a paragraph break in the multiline pointers
+// (paragraph.text, text.text, box.text, shape.text and a table cell; gslides-parity SPEC 7.4) and
+// \n in panel.code. A non-breaking space (U+00A0) is the nowrap device.
 //
 // A link whose target is `#s/<slideId>`, `#next`, `#previous`, `#first` or `#last` is a slide
 // link (gslides-parity SPEC 7.2.8): the viewer and the standalone runtime resolve it, the
 // validator checks that the slide exists, and the export writes it as a slide hyperlink.
 import { z } from 'zod';
 import { annotate } from './annotate.ts';
+import type { Color } from './color.ts';
+import { colorSchema } from './color.ts';
 import type { SlideId } from './ids.ts';
 import { slugSchema } from './ids.ts';
 
 export type Text = string;
 
+/**
+ * The marks a run carries beyond the display run and the link (SPEC-2 7.2): `sup` and `sub` are
+ * exclusive, `color` is the text colour and `hl` the highlight, each a palette token or a hex.
+ */
+export type RunMarks = {
+  i?: true;
+  u?: true;
+  s?: true;
+  sup?: true;
+  sub?: true;
+  color?: Color;
+  hl?: Color;
+};
+
 /** parseText(text): Run[]; serializeRuns(runs): Text. A gt run always has t === 'GT'. */
-export type Run = { t: string; b?: true; gt?: true; link?: string };
+export type Run = RunMarks & { t: string; b?: true; gt?: true; link?: string };
+
+/** The boolean marks in canonical order (SPEC-2 7.2). */
+export const MARK_FLAGS = ['i', 'u', 's', 'sup', 'sub'] as const;
+export type MarkFlag = (typeof MARK_FLAGS)[number];
 
 /** No line breaks in a Text; panel.code is a plain string and is not a Text (SPEC 4.2). */
 export const textSchema = z
@@ -34,8 +61,8 @@ export const textSchema = z
 
 /**
  * A Text that may hold paragraph breaks: `\n` separates paragraphs, `\r` is refused. The catalog
- * names the four pointers that take it (gslides-parity SPEC 7.4); every other Text keeps the one
- * line rule of textSchema.
+ * names the pointers that take it (gslides-parity SPEC 7.4); every other Text keeps the one line
+ * rule of textSchema.
  */
 export const multilineTextSchema = z
   .string()
@@ -126,6 +153,9 @@ export function slideLinksOf(text: Text): SlideLinkTarget[] {
   return out;
 }
 
+// ---------------------------------------------------------------------------------------------
+// The parser
+
 /**
  * Characters that keep GT from being a standalone word: the letters of gt-next, a URL path or file
  * name, a package. Punctuation after the word (`GT:` on slide 53, `(GT)`) leaves it standalone, so
@@ -156,14 +186,91 @@ function findUnescaped(text: string, needle: string, from: number): number {
   return i;
 }
 
-type Flags = { b?: true; link?: string };
+type Flags = RunMarks & { b?: true; link?: string };
 
 function makeRun(t: string, flags: Flags, gt: boolean): Run {
   const run: Run = { t };
   if (flags.b) run.b = true;
+  for (const flag of MARK_FLAGS) if (flags[flag]) run[flag] = true;
+  if (flags.color !== undefined) run.color = flags.color;
+  if (flags.hl !== undefined) run.hl = flags.hl;
   if (flags.link !== undefined) run.link = flags.link;
   if (gt) run.gt = true;
   return run;
+}
+
+/**
+ * Reads a `{marks}` list into marks, or null when a token is not a mark (the brackets then stay
+ * literal). `sup` beside `sub` keeps the first and drops the second (SPEC-2 7.2); markConflicts
+ * reports it.
+ */
+export function parseMarks(list: string): RunMarks | null {
+  const marks: RunMarks = {};
+  const tokens = list.trim().split(/\s+/).filter(Boolean);
+  if (tokens.length === 0) return null;
+  for (const token of tokens) {
+    if ((MARK_FLAGS as ReadonlyArray<string>).includes(token)) {
+      const flag = token as MarkFlag;
+      if ((flag === 'sup' && marks.sub) || (flag === 'sub' && marks.sup)) continue;
+      marks[flag] = true;
+      continue;
+    }
+    const colon = token.indexOf(':');
+    if (colon !== 1) return null;
+    const kind = token.charAt(0);
+    const value = token.slice(2);
+    if (!colorSchema.safeParse(value).success) return null;
+    if (kind === 'c') marks.color = value as Color;
+    else if (kind === 'h') marks.hl = value as Color;
+    else return null;
+  }
+  return marks;
+}
+
+/** The marks of a run or flag set in canonical order, as the `{…}` list without the braces. */
+export function serializeMarks(marks: RunMarks): string {
+  const out: string[] = [];
+  for (const flag of MARK_FLAGS) if (marks[flag]) out.push(flag);
+  if (marks.color !== undefined) out.push(`c:${marks.color}`);
+  if (marks.hl !== undefined) out.push(`h:${marks.hl}`);
+  return out.join(' ');
+}
+
+/** The `(url)` and `{marks}` parts after a closing bracket, in either order; null when neither parses. */
+function spanTail(
+  text: string,
+  from: number,
+): { link?: string; marks?: RunMarks; end: number } | null {
+  let i = from;
+  let link: string | undefined;
+  let marks: RunMarks | undefined;
+  for (let part = 0; part < 2; part += 1) {
+    const c = text.charAt(i);
+    if (c === '(' && link === undefined) {
+      const end = text.indexOf(')', i + 1);
+      const url = end > i + 1 ? text.slice(i + 1, end) : '';
+      if (url === '' || /\s/.test(url)) return null;
+      link = url;
+      i = end + 1;
+      continue;
+    }
+    if (c === '{' && marks === undefined) {
+      const end = text.indexOf('}', i + 1);
+      if (end < 0) return null;
+      const parsed = parseMarks(text.slice(i + 1, end));
+      if (parsed === null) return null;
+      marks = parsed;
+      i = end + 1;
+      continue;
+    }
+    break;
+  }
+  if (link === undefined && marks === undefined) return null;
+  return {
+    ...(link !== undefined ? { link } : {}),
+    ...(marks !== undefined ? { marks } : {}),
+    end: i,
+  };
 }
 
 function parseInto(text: string, flags: Flags, out: Run[]): void {
@@ -200,15 +307,19 @@ function parseInto(text: string, flags: Flags, out: Run[]): void {
         continue;
       }
     }
-    if (c === '[' && flags.link === undefined) {
+    if (c === '[') {
       const close = findUnescaped(text, ']', i + 1);
-      if (close > i + 1 && text.charAt(close + 1) === '(') {
-        const end = text.indexOf(')', close + 2);
-        const url = end > close + 2 ? text.slice(close + 2, end) : '';
-        if (url !== '' && !/\s/.test(url)) {
+      if (close > i + 1) {
+        const tail = spanTail(text, close + 1);
+        if (tail !== null && (tail.link === undefined || flags.link === undefined)) {
+          const inner: Flags = { ...flags, ...(tail.marks ?? {}) };
+          if (tail.link !== undefined) inner.link = tail.link;
+          // sup and sub stay exclusive when a span nests inside another (SPEC-2 7.2)
+          if (tail.marks?.sup && flags.sub) delete inner.sup;
+          if (tail.marks?.sub && flags.sup) delete inner.sub;
           flush();
-          parseInto(text.slice(i + 1, close), { ...flags, link: url }, out);
-          i = end + 1;
+          parseInto(text.slice(i + 1, close), inner, out);
+          i = tail.end;
           continue;
         }
       }
@@ -225,8 +336,23 @@ function parseInto(text: string, flags: Flags, out: Run[]): void {
   flush();
 }
 
+/** The marks of a run, without its text, display and link flags. */
+export function runMarks(run: Run): RunMarks {
+  const marks: RunMarks = {};
+  for (const flag of MARK_FLAGS) if (run[flag]) marks[flag] = true;
+  if (run.color !== undefined) marks.color = run.color;
+  if (run.hl !== undefined) marks.hl = run.hl;
+  return marks;
+}
+
 function sameFlags(a: Run, b: Run): boolean {
-  return a.b === b.b && a.link === b.link && a.gt === undefined && b.gt === undefined;
+  return (
+    a.b === b.b &&
+    a.link === b.link &&
+    a.gt === undefined &&
+    b.gt === undefined &&
+    serializeMarks(a) === serializeMarks(b)
+  );
 }
 
 /** Merges adjacent runs with identical flags; gt runs stay separate. */
@@ -246,6 +372,21 @@ export function parseText(text: Text): Run[] {
   const runs: Run[] = [];
   parseInto(text, {}, runs);
   return mergeRuns(runs);
+}
+
+/**
+ * The `{…}` lists of a Text that name both sup and sub (SPEC-2 7.2): the parser keeps the first
+ * and drops the second, and the validator notes it at severity 1. The pointer is the offset of
+ * the list in the markup string.
+ */
+export function markConflicts(text: Text): { at: number; list: string }[] {
+  const out: { at: number; list: string }[] = [];
+  for (const match of text.matchAll(/\{([^}]*)\}/g)) {
+    const tokens = (match[1] ?? '').trim().split(/\s+/);
+    if (tokens.includes('sup') && tokens.includes('sub'))
+      out.push({ at: match.index, list: match[1] ?? '' });
+  }
+  return out;
 }
 
 /** Escapes `*`, `[` and any standalone GT so the text parses back to the same plain run. */
@@ -271,12 +412,19 @@ function escapeRunText(t: string, inLink: boolean): string {
 }
 
 function serializeOne(run: Run): string {
-  if (run.gt) return 'GT';
-  if (run.link !== undefined) return `[${escapeRunText(run.t, true)}](${run.link})`;
-  return escapeRunText(run.t, false);
+  const marks = serializeMarks(run);
+  const inner = run.gt ? 'GT' : escapeRunText(run.t, run.link !== undefined);
+  if (run.link === undefined && marks === '') return inner;
+  let out = `[${inner}]`;
+  if (run.link !== undefined) out += `(${run.link})`;
+  if (marks !== '') out += `{${marks}}`;
+  return out;
 }
 
-/** The canonical string for a run list: bold runs grouped in one `*…*`, escapes applied. */
+/**
+ * The canonical string for a run list: bold runs grouped in one `*…*` (the display run stays
+ * outside a mark span, SPEC-2 7.2), every marked or linked run as one bracket, escapes applied.
+ */
 export function serializeRuns(runs: ReadonlyArray<Run>): Text {
   const merged = mergeRuns(runs);
   let out = '';
@@ -318,4 +466,406 @@ export function plainText(text: Text): string {
   return parseText(text)
     .map((run) => run.t)
     .join('');
+}
+
+// ---------------------------------------------------------------------------------------------
+// Ranges in the plain text (SPEC-2 section 3: text.style, text.case, text.insert)
+
+/**
+ * A run of one paragraph with its plain text offsets in the whole Text, where the `\n` between
+ * two paragraphs counts as one character (SPEC-2 3, text.style: "in the plain text of the Text").
+ */
+export type PlacedRun = { paragraph: number; run: Run; start: number; end: number };
+
+/** Every run of every paragraph with its plain offsets. */
+export function placeRuns(text: Text): PlacedRun[] {
+  const out: PlacedRun[] = [];
+  let offset = 0;
+  parseParagraphs(text).forEach((runs, paragraph) => {
+    if (paragraph > 0) offset += 1;
+    for (const run of runs) {
+      out.push({ paragraph, run, start: offset, end: offset + run.t.length });
+      offset += run.t.length;
+    }
+  });
+  return out;
+}
+
+/** The length of the plain text with one character per paragraph break. */
+export function plainLength(text: Text): number {
+  return splitParagraphs(text).reduce(
+    (sum, paragraph, index) => sum + plainText(paragraph).length + (index > 0 ? 1 : 0),
+    0,
+  );
+}
+
+function checkRange(text: Text, range: readonly [number, number]): [number, number] {
+  const length = plainLength(text);
+  const [start, end] = range;
+  if (!Number.isInteger(start) || !Number.isInteger(end) || start < 0 || end < start)
+    throw new RangeError(
+      `A text range is [start, end] with 0 <= start <= end, got ${start}:${end}`,
+    );
+  if (end > length)
+    throw new RangeError(`The range ${start}:${end} is outside a text of ${length} characters`);
+  return [start, end];
+}
+
+/**
+ * The runs of every paragraph with the runs that cross `start` or `end` split there, so a range
+ * edit touches whole runs. A gt run is never split (it is the two letters GT); a range that cuts
+ * through one takes the whole run.
+ */
+function splitAt(
+  text: Text,
+  range: readonly [number, number],
+): { paragraphs: Run[][]; inside: (placed: PlacedRun) => boolean } {
+  const [start, end] = checkRange(text, range);
+  const paragraphs: Run[][] = splitParagraphs(text).map(() => []);
+  let offset = 0;
+  parseParagraphs(text).forEach((runs, paragraph) => {
+    if (paragraph > 0) offset += 1;
+    const list = paragraphs[paragraph] ?? [];
+    for (const run of runs) {
+      const from = offset;
+      const to = offset + run.t.length;
+      offset = to;
+      if (run.gt) {
+        list.push(run);
+        continue;
+      }
+      const cuts = [start, end].filter((cut) => cut > from && cut < to).sort((a, b) => a - b);
+      let at = from;
+      for (const cut of [...cuts, to]) {
+        if (cut === at) continue;
+        list.push({ ...run, t: run.t.slice(at - from, cut - from) });
+        at = cut;
+      }
+    }
+    paragraphs[paragraph] = list;
+  });
+  return {
+    paragraphs,
+    inside: (placed) => placed.start >= start && placed.end <= end && placed.end > placed.start,
+  };
+}
+
+function placeParagraphs(paragraphs: ReadonlyArray<Run[]>): PlacedRun[] {
+  const out: PlacedRun[] = [];
+  let offset = 0;
+  paragraphs.forEach((runs, paragraph) => {
+    if (paragraph > 0) offset += 1;
+    for (const run of runs) {
+      out.push({ paragraph, run, start: offset, end: offset + run.t.length });
+      offset += run.t.length;
+    }
+  });
+  return out;
+}
+
+/** What text.style writes: true sets a mark, false clears it, null clears a colour (SPEC-2 3). */
+export type MarkEdit = {
+  i?: boolean;
+  u?: boolean;
+  s?: boolean;
+  sup?: boolean;
+  sub?: boolean;
+  color?: Color | null;
+  highlight?: Color | null;
+};
+
+/** The runs over a plain text range with the marks applied; the rest of the Text is unchanged. */
+export function styleRange(text: Text, range: readonly [number, number], edit: MarkEdit): Text {
+  const { paragraphs, inside } = splitAt(text, range);
+  for (const placed of placeParagraphs(paragraphs)) {
+    if (!inside(placed)) continue;
+    const run = placed.run;
+    for (const flag of MARK_FLAGS) {
+      const value = edit[flag];
+      if (value === true) run[flag] = true;
+      else if (value === false) delete run[flag];
+    }
+    // sup and sub stay exclusive: setting one clears the other
+    if (edit.sup === true) delete run.sub;
+    if (edit.sub === true) delete run.sup;
+    if (edit.color === null) delete run.color;
+    else if (edit.color !== undefined) run.color = edit.color;
+    if (edit.highlight === null) delete run.hl;
+    else if (edit.highlight !== undefined) run.hl = edit.highlight;
+  }
+  return paragraphs.map((runs) => serializeRuns(runs)).join('\n');
+}
+
+/** The marks every run of the range carries (the toolbar's pressed state); empty when the range is empty. */
+export function marksOfRange(text: Text, range: readonly [number, number]): RunMarks {
+  const { paragraphs, inside } = splitAt(text, range);
+  const runs = placeParagraphs(paragraphs).filter(inside);
+  const first = runs[0];
+  if (first === undefined) return {};
+  const marks = runMarks(first.run);
+  for (const placed of runs.slice(1)) {
+    const other = runMarks(placed.run);
+    for (const flag of MARK_FLAGS) if (!other[flag]) delete marks[flag];
+    if (other.color !== marks.color) delete marks.color;
+    if (other.hl !== marks.hl) delete marks.hl;
+  }
+  return marks;
+}
+
+export const CASE_MODES = ['lower', 'upper', 'title'] as const;
+export type CaseMode = (typeof CASE_MODES)[number];
+
+/** Title Case as Google writes it: the first letter of every word up, the rest down. */
+export function titleCase(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(
+      /(^|[^\p{L}\p{N}'’])(\p{L})/gu,
+      (_m, before: string, letter: string) => `${before}${letter.toUpperCase()}`,
+    );
+}
+
+/** The characters of the range rewritten in a case, marks and links kept (SPEC-2 0.19, 2.2.14). */
+export function caseRange(text: Text, range: readonly [number, number], mode: CaseMode): Text {
+  const { paragraphs, inside } = splitAt(text, range);
+  for (const placed of placeParagraphs(paragraphs)) {
+    if (!inside(placed) || placed.run.gt) continue;
+    const t = placed.run.t;
+    placed.run.t =
+      mode === 'lower' ? t.toLowerCase() : mode === 'upper' ? t.toUpperCase() : titleCase(t);
+  }
+  return paragraphs.map((runs) => serializeRuns(runs)).join('\n');
+}
+
+/**
+ * A string inserted at a plain text offset as a plain run (the special characters picker,
+ * SPEC-2 2.2.15); it takes the marks of the run it lands inside, as a caret does. A `\n` in the
+ * string starts a new paragraph.
+ */
+export function insertAt(text: Text, at: number, insert: string): Text {
+  const { paragraphs } = splitAt(text, [at, at]);
+  const placed = placeParagraphs(paragraphs);
+  // the run that ends at the offset (typing continues it), else the one that starts there
+  const before = placed.find((row) => row.end === at && !row.run.gt);
+  const after = placed.find((row) => row.start === at);
+  const host = before ?? after;
+  const paragraphOf = (offset: number): number => {
+    let cursor = 0;
+    for (let i = 0; i < paragraphs.length; i += 1) {
+      const length = (paragraphs[i] ?? []).reduce((sum, run) => sum + run.t.length, 0);
+      if (offset <= cursor + length) return i;
+      cursor += length + 1;
+    }
+    return paragraphs.length - 1;
+  };
+  const template: Run = host === undefined ? { t: '' } : { ...host.run, t: '' };
+  delete template.gt;
+  const pieces = insert.split('\n');
+  const paragraph = paragraphOf(at);
+  const list = paragraphs[paragraph] ?? [];
+  const index =
+    before !== undefined && before.paragraph === paragraph
+      ? list.indexOf(before.run) + 1
+      : after !== undefined && after.paragraph === paragraph
+        ? list.indexOf(after.run)
+        : list.length;
+  const firstPiece = pieces[0] ?? '';
+  const head = list.slice(0, index);
+  const tail = list.slice(index);
+  if (pieces.length === 1) {
+    list.splice(0, list.length, ...head, { ...template, t: firstPiece }, ...tail);
+    paragraphs[paragraph] = list;
+  } else {
+    const newParagraphs: Run[][] = [];
+    newParagraphs.push([...head, { ...template, t: firstPiece }]);
+    for (const middle of pieces.slice(1, -1)) newParagraphs.push([{ ...template, t: middle }]);
+    newParagraphs.push([{ ...template, t: pieces[pieces.length - 1] ?? '' }, ...tail]);
+    paragraphs.splice(paragraph, 1, ...newParagraphs);
+  }
+  return paragraphs.map((runs) => serializeRuns(runs)).join('\n');
+}
+
+// ---------------------------------------------------------------------------------------------
+// List glyphs and numerals (SPEC-2 2.2.12, 2.2.13; R05 E3)
+
+/** Google's bullet glyph presets, each three code points that cycle from level 4 (SPEC-2 0.58). */
+export const BULLET_PRESETS = [
+  'disc-circle-square',
+  'diamondx-arrow3d-square',
+  'checkbox',
+  'arrow-diamond-disc',
+  'star-circle-square',
+  'arrow3d-circle-square',
+  'lefttriangle-diamond-disc',
+  'diamondx-hollowdiamond-square',
+  'diamond-circle-square',
+] as const;
+export type BulletPreset = (typeof BULLET_PRESETS)[number];
+
+/** Google's numbering presets, each three numeral forms that cycle from level 4. */
+export const NUMBER_PRESETS = [
+  'digit-alpha-roman',
+  'digit-alpha-roman-parens',
+  'digit-nested',
+  'upperalpha-alpha-roman',
+  'upperroman-upperalpha-digit',
+  'zerodigit-alpha-roman',
+] as const;
+export type NumberPreset = (typeof NUMBER_PRESETS)[number];
+
+export const LIST_MARKERS = ['rule', 'bullet', 'number'] as const;
+export type ListMarker = (typeof LIST_MARKERS)[number];
+
+/** List levels run 1 to 9 (SPEC-2 0.58). */
+export const LIST_LEVEL_MAX = 9;
+
+/** The glyph code points Google's presets use (R05 E3, the BulletGlyphPreset table). */
+export const BULLET_GLYPHS = {
+  arrow: '➔',
+  arrow3d: '➢',
+  checkbox: '❏',
+  circle: '○',
+  diamond: '◆',
+  diamondx: '❖',
+  hollowdiamond: '◇',
+  disc: '●',
+  square: '■',
+  star: '★',
+  lefttriangle: '◄',
+} as const;
+export type BulletGlyphName = keyof typeof BULLET_GLYPHS;
+
+/** The three glyphs of a bullet preset, in level order; checkbox repeats its one glyph. */
+export const BULLET_PRESET_GLYPHS: Readonly<
+  Record<BulletPreset, readonly [BulletGlyphName, BulletGlyphName, BulletGlyphName]>
+> = {
+  'disc-circle-square': ['disc', 'circle', 'square'],
+  'diamondx-arrow3d-square': ['diamondx', 'arrow3d', 'square'],
+  checkbox: ['checkbox', 'checkbox', 'checkbox'],
+  'arrow-diamond-disc': ['arrow', 'diamond', 'disc'],
+  'star-circle-square': ['star', 'circle', 'square'],
+  'arrow3d-circle-square': ['arrow3d', 'circle', 'square'],
+  'lefttriangle-diamond-disc': ['lefttriangle', 'diamond', 'disc'],
+  'diamondx-hollowdiamond-square': ['diamondx', 'hollowdiamond', 'square'],
+  'diamond-circle-square': ['diamond', 'circle', 'square'],
+};
+
+export type NumeralForm = 'digit' | 'zerodigit' | 'alpha' | 'upperalpha' | 'roman' | 'upperroman';
+
+/** The three numeral forms of a numbering preset with their suffix, in level order. */
+export const NUMBER_PRESET_FORMS: Readonly<
+  Record<
+    NumberPreset,
+    { forms: readonly [NumeralForm, NumeralForm, NumeralForm]; suffix: '.' | ')'; nested?: true }
+  >
+> = {
+  'digit-alpha-roman': { forms: ['digit', 'alpha', 'roman'], suffix: '.' },
+  'digit-alpha-roman-parens': { forms: ['digit', 'alpha', 'roman'], suffix: ')' },
+  'digit-nested': { forms: ['digit', 'digit', 'digit'], suffix: '.', nested: true },
+  'upperalpha-alpha-roman': { forms: ['upperalpha', 'alpha', 'roman'], suffix: '.' },
+  'upperroman-upperalpha-digit': { forms: ['upperroman', 'upperalpha', 'digit'], suffix: '.' },
+  'zerodigit-alpha-roman': { forms: ['zerodigit', 'alpha', 'roman'], suffix: '.' },
+};
+
+/** The level a preset's third form covers, wrapping: level 4 draws level 1's form (SPEC-2 0.58). */
+export function presetSlot(level: number): 0 | 1 | 2 {
+  const clamped = Math.min(LIST_LEVEL_MAX, Math.max(1, Math.round(level)));
+  return ((clamped - 1) % 3) as 0 | 1 | 2;
+}
+
+/** The bullet glyph of a preset at a level. */
+export function bulletGlyph(preset: BulletPreset, level = 1): string {
+  return BULLET_GLYPHS[BULLET_PRESET_GLYPHS[preset][presetSlot(level)]];
+}
+
+function toRoman(n: number): string {
+  const table: [number, string][] = [
+    [1000, 'm'],
+    [900, 'cm'],
+    [500, 'd'],
+    [400, 'cd'],
+    [100, 'c'],
+    [90, 'xc'],
+    [50, 'l'],
+    [40, 'xl'],
+    [10, 'x'],
+    [9, 'ix'],
+    [5, 'v'],
+    [4, 'iv'],
+    [1, 'i'],
+  ];
+  let out = '';
+  let rest = Math.max(1, Math.round(n));
+  for (const [value, glyph] of table)
+    while (rest >= value) {
+      out += glyph;
+      rest -= value;
+    }
+  return out;
+}
+
+function toAlpha(n: number): string {
+  let out = '';
+  let rest = Math.max(1, Math.round(n));
+  while (rest > 0) {
+    rest -= 1;
+    out = String.fromCharCode(97 + (rest % 26)) + out;
+    rest = Math.floor(rest / 26);
+  }
+  return out;
+}
+
+/** One numeral in a form: 3 is "3", "03", "c", "C", "iii" or "III". */
+export function numeral(form: NumeralForm, n: number): string {
+  switch (form) {
+    case 'digit':
+      return String(n);
+    case 'zerodigit':
+      return n < 10 ? `0${n}` : String(n);
+    case 'alpha':
+      return toAlpha(n);
+    case 'upperalpha':
+      return toAlpha(n).toUpperCase();
+    case 'roman':
+      return toRoman(n);
+    case 'upperroman':
+      return toRoman(n).toUpperCase();
+  }
+}
+
+/**
+ * The numeral a numbered item shows (SPEC-2 2.2.12): the preset's form for the level with its
+ * suffix; the nested preset writes the counters of every level ("1.2.1."). `counters` are the
+ * one based positions at levels 1 to `level`.
+ */
+export function listNumeral(
+  preset: NumberPreset,
+  level: number,
+  counters: readonly number[],
+): string {
+  const spec = NUMBER_PRESET_FORMS[preset];
+  const clamped = Math.min(LIST_LEVEL_MAX, Math.max(1, Math.round(level)));
+  const n = counters[clamped - 1] ?? 1;
+  if (spec.nested) return `${counters.slice(0, clamped).join('.')}.`;
+  return `${numeral(spec.forms[presetSlot(clamped)], n)}${spec.suffix}`;
+}
+
+/**
+ * The numerals of a whole numbered list, one per item, from the items' levels: a level restarts
+ * its count after a shallower item, as Google numbers nested lists.
+ */
+export function listNumerals(preset: NumberPreset, levels: ReadonlyArray<number>): string[] {
+  const counters: number[] = [];
+  return levels.map((raw) => {
+    const level = Math.min(LIST_LEVEL_MAX, Math.max(1, Math.round(raw)));
+    counters.length = Math.min(counters.length, level);
+    while (counters.length < level) counters.push(0);
+    counters[level - 1] = (counters[level - 1] ?? 0) + 1;
+    return listNumeral(preset, level, counters);
+  });
+}
+
+/** The plain text glyph export.text writes per level: •, ◦, ▪ cycling (SPEC-2 3). */
+export function textBullet(level = 1): string {
+  return ['•', '◦', '▪'][presetSlot(level)] ?? '•';
 }

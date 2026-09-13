@@ -1,5 +1,26 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
+
+/** The OS/2 fsSelection field of a TrueType file. */
+function os2Selection(buffer: Buffer): number {
+  const offset = tableOffset(buffer, 'OS/2');
+  return offset < 0 ? 0 : buffer.readUInt16BE(offset + 62);
+}
+
+/** The head macStyle field of a TrueType file. */
+function headMacStyle(buffer: Buffer): number {
+  const offset = tableOffset(buffer, 'head');
+  return offset < 0 ? 0 : buffer.readUInt16BE(offset + 44);
+}
+
+function tableOffset(buffer: Buffer, wanted: string): number {
+  const numTables = buffer.readUInt16BE(4);
+  for (let i = 0; i < numTables; i += 1) {
+    const at = 12 + i * 16;
+    if (buffer.toString('latin1', at, at + 4) === wanted) return buffer.readUInt32BE(at + 8);
+  }
+  return -1;
+}
 import {
   DISPLAY_MIN_PX,
   exportFace,
@@ -17,8 +38,11 @@ describe('the export font set', () => {
 
   it('is the committed build of scripts/build-fonts.py, byte for byte', () => {
     expect(fonts.generatedBy).toBe('scripts/build-fonts.py');
+    // both sources declare no Reserved Font Name (gslides-parity SPEC-2 0.66)
     expect(fonts.license.reservedFontName).toBeNull();
+    expect(fonts.license.italicReservedFontName).toBeNull();
     expect(fonts.source.fsType).toBe(0);
+    expect(fonts.source.italic.fsType).toBe(0);
     for (const face of fonts.faces) {
       const bytes = exportFaceBytes(face);
       expect(bytes.byteLength, face.file).toBe(face.bytes);
@@ -35,9 +59,48 @@ describe('the export font set', () => {
     }
   });
 
+  it('carries 34 faces, an italic twin per upright face with the italic name table facts (gslides-parity SPEC-2 7.1)', () => {
+    expect(fonts.faces).toHaveLength(34);
+    const italics = fonts.faces.filter((f) => f.italic);
+    const uprights = fonts.faces.filter((f) => !f.italic);
+    expect(italics).toHaveLength(17);
+    expect(uprights).toHaveLength(17);
+    expect(fonts.version).toBe('4.001+gt.2');
+    for (const upright of uprights) {
+      const twin = italics.find(
+        (f) =>
+          f.family === upright.family && f.opsz === upright.opsz && f.weight === upright.weight,
+      );
+      expect(twin, upright.family).toBeDefined();
+      expect(twin?.style).toBe('Italic');
+      expect(twin?.postScriptName).toBe(
+        `${upright.postScriptName.replace(/-Regular$/, '')}-Italic`,
+      );
+      expect(twin?.file).toBe(`${twin?.postScriptName}.ttf`);
+      expect(twin?.frozen).toEqual(upright.frozen);
+      expect(twin?.sets).toEqual(upright.sets);
+      const bytes = exportFaceBytes(twin!);
+      const names = ttfNames(bytes);
+      expect(names.get(4), twin?.file).toBe(`${upright.family} Italic`);
+      expect(names.get(16) ?? upright.family).toBe(upright.family);
+      expect(names.get(17) ?? 'Italic').toBe('Italic');
+      // OS/2.fsSelection italic bit and head.macStyle italic bit
+      expect(os2Selection(bytes) & 1, twin?.file).toBe(1);
+      expect(headMacStyle(bytes) & 2, twin?.file).toBe(2);
+    }
+    // the italic source is recorded with its provenance
+    expect(fonts.source.italic.file).toBe('packages/fonts/assets/InterVariable-Italic.woff2');
+    expect(fonts.source.italic.sha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(fonts.source.italic.release).toContain('rsms/inter/releases/tag/v4.001');
+    expect(fonts.source.italic.path).toBe('web/InterVariable-Italic.woff2');
+    expect(fonts.source.italic.italicAngle).toBeLessThan(0);
+  });
+
   it('has the SPEC 8.4 families: one display face and both weights at every text size', () => {
     const exact = exportFaces('exact');
-    expect(exact.filter((f) => f.display)).toHaveLength(1);
+    // one display face, and since round two its italic twin beside it
+    expect(exact.filter((f) => f.display && !f.italic)).toHaveLength(1);
+    expect(exact.filter((f) => f.display && f.italic)).toHaveLength(1);
     expect(exact.find((f) => f.display)?.family).toBe('GT Inter Display');
     expect(exact.find((f) => f.display)?.frozen).toEqual(['cv11', 'ss01']);
     for (const size of fonts.textSizes) {
@@ -55,9 +118,11 @@ describe('the export font set', () => {
       fonts.faces.filter((f) => f.family.startsWith('GT Inter')).length,
     ).toBeGreaterThanOrEqual(12);
     const standard = exportFaces('standard');
-    expect(standard.map((f) => f.family).sort()).toEqual(
+    // the three families, each with an upright and an italic face since round two
+    expect([...new Set(standard.map((f) => f.family))].sort()).toEqual(
       ['GT Inter Display', 'Inter', 'Inter Medium'].sort(),
     );
+    expect(standard).toHaveLength(6);
   });
 
   it('maps a run to its family', () => {
@@ -73,6 +138,17 @@ describe('the export font set', () => {
     expect(exportFamily(20, 500, { set: 'standard' })).toBe('Inter Medium');
     expect(exportFamily(44, 500, { set: 'standard' })).toBe('GT Inter Display');
     expect(exportFace(26, 500).opsz).toBe(26);
+    // the italic twin keeps the family name and carries the Italic style (gslides-parity SPEC-2 7.1)
+    expect(exportFace(22, 400, { italic: true })).toMatchObject({
+      family: 'GT Inter Text 22',
+      style: 'Italic',
+      postScriptName: 'GTInterText22-Italic',
+    });
+    expect(exportFace(88, 500, { italic: true }).postScriptName).toBe('GTInterDisplay-Italic');
+    expect(exportFace(20, 500, { set: 'standard', italic: true }).postScriptName).toBe(
+      'InterMedium-Italic',
+    );
+    expect(exportFace(22, 400).style).toBe('Regular');
     expect(DISPLAY_MIN_PX).toBe(44);
     expect(nearestTextSize(16, [26, 24, 22, 20, 18, 15, 14])).toBe(15);
     expect(nearestTextSize(25, [26, 24, 22, 20, 18, 15, 14])).toBe(24);

@@ -20,6 +20,7 @@ import type { Page } from 'playwright-core';
 import type {
   Scene,
   SceneBlock,
+  SceneChart,
   SceneRaster,
   SceneRect,
   SceneRule,
@@ -28,6 +29,15 @@ import type {
   SceneTableCell,
   SceneText,
 } from './types.ts';
+
+/**
+ * What the page reads of a chart block (gslides-parity SPEC-2 2.8.1): its box, the transform and
+ * the colours the theme resolved; the data comes from the document (scene/enrich.ts).
+ */
+export type MeasuredChart = Pick<
+  SceneChart,
+  'blockId' | 'box' | 'kind' | 'labelColor' | 'titleColor' | 'rotate' | 'flip' | 'userGroup' | 'alt'
+> & { seriesColors: string[] };
 
 /** What one tagged raster element is, as tagRasterElements returns it (boxes are measured later). */
 export type RasterTag = {
@@ -94,6 +104,10 @@ export async function tagRasterElements(
         if (el.closest('[data-ts-rid]') !== null) return;
         const kind = el.getAttribute('data-raster') ?? 'icon';
         const owner = ownerOf(el);
+        // a native chart travels through addChart (gslides-parity SPEC-2 2.8.1) and a native shape
+        // as a preset geometry (2.3.1): their svgs are not rasters of their own
+        const ownerType = owner?.getAttribute('data-type');
+        if (ownerType === 'chart' || (ownerType === 'shape' && kind === 'dia')) return;
         const blockId =
           owner?.getAttribute('data-block') ??
           (el.getAttribute('data-rid') ?? 'raster').split(':')[0] ??
@@ -149,8 +163,10 @@ export const DEFAULT_SHEET_SELECTOR = '.ts-sheet, .sheet, body';
 export const DEFAULT_SLIDE_SELECTOR = '.slide.is-on, [data-slide], .slide';
 
 /** What the page returns; the Node side adds the ids, the notes and the asset id. */
-type PageScene = Omit<Scene, 'slideId' | 'n' | 'total' | 'theme' | 'kind' | 'notes'> & {
+type PageScene = Omit<Scene, 'slideId' | 'n' | 'total' | 'theme' | 'kind' | 'notes' | 'charts'> & {
   pictureSrc?: string;
+  /** The chart boxes and colours; scene/enrich.ts adds the data from the document. */
+  chartsDom?: MeasuredChart[];
 };
 
 export async function measureScene(page: Page, options: MeasureSceneOptions): Promise<Scene> {
@@ -177,7 +193,17 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         strike: boolean;
         link?: string;
         features: string;
-        align: 'left' | 'center' | 'right';
+        align: 'left' | 'center' | 'right' | 'justify';
+        italic?: boolean;
+        underline?: boolean;
+        baseline?: 'super' | 'sub';
+        highlight?: string;
+      };
+      type Transform = {
+        rotate?: number;
+        flip?: 'h' | 'v' | 'hv';
+        userGroup?: string;
+        alt?: string;
       };
       type Run = {
         text: string;
@@ -190,7 +216,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         /** The `.para` span the run sits in (gslides-parity SPEC 7.4); 0 without one. */
         paragraph: number;
       };
-      type Line = { top: number; bottom: number; runs: Run[]; paragraph: number };
+      type Line = { top: number; bottom: number; runs: Run[]; paragraph: number; band: number };
 
       const firstOf = (list: string): Element | null => {
         for (const sel of list.split(',')) {
@@ -271,6 +297,24 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         return nativeTypes.includes(owner.getAttribute('data-type') ?? '');
       };
 
+      // the positioned object's wrapper (gslides-parity SPEC-2 1.4, 2.1): the rotation, the flip,
+      // the group tag and the alt text travel on the scene entries of the block
+      const objectOf = (el: Element | null): Transform => {
+        const owner = el ? ownerOf(el) : null;
+        const wrapper = owner?.parentElement?.closest('.free[data-free]') ?? null;
+        if (!wrapper || wrapper.getAttribute('data-free') !== owner?.getAttribute('data-block'))
+          return {};
+        const out: Transform = {};
+        const rotate = parseFloat(wrapper.getAttribute('data-rotate') ?? '');
+        if (Number.isFinite(rotate) && rotate !== 0) out.rotate = rotate;
+        const flip = wrapper.getAttribute('data-flip');
+        if (flip === 'h' || flip === 'v' || flip === 'hv') out.flip = flip;
+        const group = wrapper.getAttribute('data-group');
+        if (group) out.userGroup = group;
+        const alt = wrapper.getAttribute('aria-label');
+        if (alt) out.alt = alt;
+        return out;
+      };
       const firstFamily = (ff: string): string =>
         (ff.split(',')[0] ?? '').trim().replace(/^['"]|['"]$/g, '');
       const hasStrike = (el: Element, stop: Element): boolean => {
@@ -282,10 +326,23 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         }
         return false;
       };
+      // the mark span's elements between the run and its carrier (gslides-parity SPEC-2 7.2)
+      const within = (el: Element, carrier: Element, selector: string): Element | null => {
+        const found = el.closest(selector);
+        return found && carrier.contains(found) && found !== carrier ? found : null;
+      };
       const styleOf = (el: Element, carrier: Element): Style => {
         const c = getComputedStyle(el);
         const size = parseFloat(c.fontSize);
-        const lineHeight = c.lineHeight === 'normal' ? size * 1.21 : parseFloat(c.lineHeight);
+        // a super or subscript run keeps its line at the carrier's height (line-height 0 on the
+        // element, render sheet.css), so the line box is measured from the carrier's line height
+        const supOrSub = within(el, carrier, 'sup, sub');
+        const lineHost = supOrSub ? (supOrSub.parentElement ?? el) : el;
+        const hostStyle = lineHost === el ? c : getComputedStyle(lineHost);
+        const lineHeight =
+          hostStyle.lineHeight === 'normal'
+            ? parseFloat(hostStyle.fontSize) * 1.21
+            : parseFloat(hostStyle.lineHeight);
         const letterSpacing = c.letterSpacing === 'normal' ? 0 : parseFloat(c.letterSpacing);
         const anchor = el.closest('a');
         const align = c.textAlign;
@@ -300,10 +357,25 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           strike: hasStrike(el, carrier),
           features: c.fontFeatureSettings,
           align:
-            align === 'center' ? 'center' : align === 'right' || align === 'end' ? 'right' : 'left',
+            align === 'center'
+              ? 'center'
+              : align === 'right' || align === 'end'
+                ? 'right'
+                : align === 'justify'
+                  ? 'justify'
+                  : 'left',
         };
         const href = anchor?.getAttribute('href');
         if (href) style.link = href;
+        if (c.fontStyle === 'italic' || c.fontStyle.startsWith('oblique')) style.italic = true;
+        if (within(el, carrier, 'u') !== null) style.underline = true;
+        if (supOrSub !== null)
+          style.baseline = supOrSub.tagName.toLowerCase() === 'sup' ? 'super' : 'sub';
+        const mark = within(el, carrier, 'mark');
+        if (mark !== null) {
+          const bg = getComputedStyle(mark).backgroundColor;
+          if (bg && bg !== 'rgba(0, 0, 0, 0)') style.highlight = bg;
+        }
         return style;
       };
       const sameStyle = (a: Style, b: Style): boolean =>
@@ -314,7 +386,11 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
         a.color === b.color &&
         a.strike === b.strike &&
         a.link === b.link &&
-        a.mono === b.mono;
+        a.mono === b.mono &&
+        a.italic === b.italic &&
+        a.underline === b.underline &&
+        a.baseline === b.baseline &&
+        a.highlight === b.highlight;
 
       // One carrier to lines of runs.
       const measureCarrier = (el: Element): { lines: Line[]; style: Style } => {
@@ -341,6 +417,19 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           const at = paras.indexOf(para);
           return at < 0 ? 0 : at;
         };
+        // A multi column carrier (SPEC-2 2.2.10, `column-count`) sets lines of two columns at one
+        // height: a run's column band, from its left edge over the carrier's width, keeps them
+        // apart, and the lines sort by paragraph, then band, then top, the reading order the file
+        // needs (one `<a:p>` per paragraph, the viewer flowing its own columns). Sorted by top
+        // alone the fixture's two column paragraph read "1.5.leaves 12 px after." in LibreOffice
+        // (b2.md, fix round).
+        const columnCount = Math.max(1, Number.parseInt(getComputedStyle(el).columnCount, 10) || 1);
+        const carrierRect = el.getBoundingClientRect();
+        const bandOf = (rect: DOMRect): number => {
+          if (columnCount < 2 || carrierRect.width <= 0) return 0;
+          const at = Math.floor(((rect.left - carrierRect.left) / carrierRect.width) * columnCount);
+          return Math.min(columnCount - 1, Math.max(0, at));
+        };
         const pushRun = (
           rect: DOMRect,
           text: string,
@@ -350,9 +439,10 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           gtLetters?: number,
         ): void => {
           const cy = rect.top + rect.height / 2;
-          let line = lines.find((l) => cy >= l.top - 1 && cy <= l.bottom + 1);
+          const band = bandOf(rect);
+          let line = lines.find((l) => l.band === band && cy >= l.top - 1 && cy <= l.bottom + 1);
           if (!line) {
-            line = { top: rect.top, bottom: rect.bottom, runs: [], paragraph };
+            line = { top: rect.top, bottom: rect.bottom, runs: [], paragraph, band };
             lines.push(line);
           }
           if (!gt) {
@@ -435,7 +525,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           }
           flush();
         }
-        lines.sort((a, b) => a.top - b.top);
+        lines.sort((a, b) => a.paragraph - b.paragraph || a.band - b.band || a.top - b.top);
         // An inline element that is not text (the external glyph after a link in a link table,
         // head:121) leaves a horizontal gap between two runs; the run before it records the gap
         // and the width of a no-break space in its font, so the exporter can fill the gap with an
@@ -520,22 +610,31 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           style,
           lines: sceneLines,
           native,
+          ...objectOf(el),
         };
         if (group !== undefined) text.group = group;
         const link = linkOfBlock.get(blockId);
         if (link !== undefined) text.link = link;
+        // the text layer of a shape with text (SPEC-2 2.2.17): merged with the shape by the builder
+        if (el.classList.contains('shape-text')) text.inShape = blockId;
         return text;
       };
 
       // Text carriers in document order: every data-run Text, and the numeral of a numbered
       // list item (data-num, gslides-parity SPEC 7.2.6), which travels as its own run.
       const texts: SceneText[] = [];
+      // the counts per level of a numbered list, reset by a shallower item (schema listNumerals)
+      const listCounters = new Map<Element, number[]>();
       slide.querySelectorAll<HTMLElement>('[data-run], [data-num]').forEach((el) => {
         const numeral = el.getAttribute('data-num');
         const id = numeral !== null ? `${numeral}/num` : (el.getAttribute('data-run') ?? '');
         const owner = ownerOf(el);
         const blockId = owner?.getAttribute('data-block') ?? id.split('/')[0] ?? '';
         const native = isNativeOwner(el);
+        // a Google list (gslides-parity SPEC-2 2.2.12): the glyph or numeral travels as the
+        // paragraph's bullet, not as a text of its own
+        const marked = owner !== null && owner.classList.contains('marked');
+        if (marked && numeral !== null) return;
         let group: string | undefined;
         const row = el.parentElement;
         if (owner && row && row.parentElement === owner && owner.classList.contains('rows')) {
@@ -565,7 +664,28 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           group = `${blockId}/row/${i}`;
         }
         const text = toText(el, id, blockId, native, group);
-        if (text) texts.push(text);
+        if (text) {
+          if (marked && owner && row && row.classList.contains('item')) {
+            const glyphEl = row.querySelector(':scope > .num');
+            const level = Math.max(1, parseInt(row.getAttribute('data-level') ?? '1', 10) || 1);
+            const kind = owner.getAttribute('data-marker') === 'number' ? 'number' : 'bullet';
+            const counters = listCounters.get(owner) ?? [];
+            counters.length = Math.min(counters.length, level);
+            while (counters.length < level) counters.push(0);
+            counters[level - 1] = (counters[level - 1] ?? 0) + 1;
+            listCounters.set(owner, counters);
+            text.bullet = {
+              kind,
+              glyph: (glyphEl?.textContent ?? '').trim(),
+              level,
+              index: counters[level - 1] ?? 1,
+              ...(owner.getAttribute('data-preset')
+                ? { preset: owner.getAttribute('data-preset') ?? '' }
+                : {}),
+            };
+          }
+          texts.push(text);
+        }
       });
 
       // Rules, rects and lines of the native blocks: computed borders, backgrounds and strokes.
@@ -644,19 +764,31 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
               : value === 'end' || value === 'flex-end'
                 ? 'bottom'
                 : 'top';
+          // the grid form (SPEC-2 2.7.1, 2.7.2): the rows are display contents, the cells carry
+          // the rules and a merged cell spans; the row box is the union of its cells
+          const gridForm = el.classList.contains('grid');
+          const dashOf = (style: string): 'dash' | 'dot' | undefined =>
+            style === 'dashed' ? 'dash' : style === 'dotted' ? 'dot' : undefined;
           let rule: SceneTable['rule'] | undefined;
           let headerRule: SceneTable['headerRule'];
+          let merged = false;
+          let rowDash: string | undefined;
           const rows = rowEls.map((row) => {
-            const r = row.getBoundingClientRect();
-            const c = getComputedStyle(row);
             const header = row.classList.contains('header');
-            const width = parseFloat(c.borderBottomWidth);
-            const line = { color: c.borderBottomColor, width: round(width) };
-            if (header) headerRule ??= line;
-            else rule ??= line;
-            const cells: SceneTableCell[] = [
-              ...row.querySelectorAll<HTMLElement>(':scope > .td'),
-            ].map((cell) => {
+            const cellEls = [...row.querySelectorAll<HTMLElement>(':scope > .td')];
+            let r = row.getBoundingClientRect();
+            if (r.height < 1 && cellEls.length > 0) {
+              r = cellEls.map((cell) => cell.getBoundingClientRect()).reduce((a, b) => union(a, b));
+            }
+            const c = getComputedStyle(row);
+            if (!gridForm) {
+              const width = parseFloat(c.borderBottomWidth);
+              const line = { color: c.borderBottomColor, width: round(width) };
+              if (header) headerRule ??= line;
+              else rule ??= line;
+              rowDash ??= c.borderBottomStyle;
+            }
+            const cells: SceneTableCell[] = cellEls.map((cell) => {
               const cs = getComputedStyle(cell);
               const fill = parseFloat(cs.backgroundColor.split(',')[3] ?? '1');
               const out: SceneTableCell = {
@@ -672,13 +804,56 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
               };
               if (cs.backgroundColor !== 'rgba(0, 0, 0, 0)' && fill !== 0)
                 out.fill = cs.backgroundColor;
+              const span = cell.getAttribute('data-span');
+              if (span) {
+                const [rs, cs2] = span.split('x').map(Number);
+                if ((rs ?? 1) > 1) out.rowspan = rs;
+                if ((cs2 ?? 1) > 1) out.colspan = cs2;
+                merged = true;
+              }
+              if (gridForm) {
+                const bw = parseFloat(cs.borderBottomWidth);
+                if (!(bw > 0) || cs.borderBottomStyle === 'none') out.border = 'none';
+                else {
+                  const dash = dashOf(cs.borderBottomStyle);
+                  out.border = {
+                    color: cs.borderBottomColor,
+                    width: round(bw),
+                    ...(dash ? { dash } : {}),
+                  };
+                  const line = { color: cs.borderBottomColor, width: round(bw) };
+                  if (header) headerRule ??= line;
+                  else rule ??= line;
+                  rowDash ??= cs.borderBottomStyle;
+                }
+              }
               return out;
             });
             return { y: round(r.top - oy), h: round(r.height), header, cells };
           });
-          const firstRow = rows[0];
-          const columns = firstRow
-            ? firstRow.cells.map((cell) => ({ x: cell.box[0], w: cell.box[2] }))
+          if (gridForm) {
+            // In the grid form the rows are display contents, so a row's box is the union of its
+            // cells: a merged cell spanning down makes it the span's height, and a track taller
+            // than its cells (an explicit row height) is missed. The row height addTable takes is
+            // the track pitch: the next row's top less this one's, the table's bottom edge for the
+            // last row. Measured on the fixture's merged table: cells of 54 px in 56 px tracks
+            // wrote 54 px rows, and LibreOffice's rows drifted 2 px per row (b2.md, fix round).
+            const tableBox = toBox(el.getBoundingClientRect());
+            const bottom = tableBox[1] + tableBox[3];
+            rows.forEach((row, i) => {
+              const next = rows[i + 1];
+              const pitch = round((next ? next.y : bottom) - row.y);
+              if (pitch > 0) row.h = pitch;
+            });
+          }
+          // the columns from the row with the most cells (a merged row lists fewer)
+          const widest = rows.reduce<SceneTable['rows'][number] | undefined>(
+            (best, row) =>
+              best === undefined || row.cells.length > best.cells.length ? row : best,
+            undefined,
+          );
+          const columns = widest
+            ? widest.cells.map((cell) => ({ x: cell.box[0], w: cell.box[2] }))
             : [];
           const fallbackRule = {
             color: rootStyleOf.borderTopColor,
@@ -690,10 +865,22 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
             columns,
             rows,
             rule: rule ?? headerRule ?? fallbackRule,
-            valign: valignOf(rowEls[0] ? getComputedStyle(rowEls[0]).alignItems : 'start'),
+            valign: valignOf(
+              rowEls[0]
+                ? gridForm
+                  ? getComputedStyle(el).getPropertyValue('--table-valign').trim() || 'start'
+                  : getComputedStyle(rowEls[0]).alignItems
+                : 'start',
+            ),
             size: round(parseFloat(rootStyleOf.fontSize)),
+            ...objectOf(el),
           };
           if (headerRule) table.headerRule = headerRule;
+          if (merged) table.merged = true;
+          const tableDash = dashOf(rowDash ?? rootStyleOf.borderTopStyle);
+          const ruleWidth = round(parseFloat(rootStyleOf.borderTopWidth) || 0);
+          if (tableDash || ruleWidth === 0)
+            table.border = { weight: ruleWidth, ...(tableDash ? { dash: tableDash } : {}) };
           tables.push(table);
         } else if (type === 'plain' || type === 'refs') {
           // a top hairline (plain) and a soft rule under every item; refs has no top border, and
@@ -723,6 +910,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
             blockId,
             role: 'box',
             shape: 'rect',
+            ...objectOf(el),
           };
           const bw = parseFloat(c.borderTopWidth);
           if (bw > 0) rect.line = { color: c.borderTopColor, width: round(bw) };
@@ -744,52 +932,106 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
             role: 'rule',
           });
         } else if (type === 'shape') {
-          // the shape block: the svg's own box, the inner element's computed fill and stroke (a
-          // token resolves to rgb here), the ends and heads from the data attributes the renderer
-          // wrote in viewBox units, scaled to the box
-          const kind = el.getAttribute('data-shape') ?? 'rectangle';
-          const svgRect = el.getBoundingClientRect();
-          const viewBox = (el.getAttribute('viewBox') ?? '0 0 1 1').split(/\s+/).map(Number);
+          // the shape block: the svg's own box (the svg itself, or the svg inside a `.shape-block`
+          // root when the shape holds text, gslides-parity SPEC-2 2.2.17), the inner element's
+          // computed fill and stroke (a token resolves to rgb here), the ends, heads, points and
+          // decorations from the data attributes the renderer wrote in viewBox units, scaled to the box
+          const svg = el.matches('svg') ? el : el.querySelector(':scope > svg.shape');
+          if (!svg) continue;
+          const kind = svg.getAttribute('data-shape') ?? 'rectangle';
+          const svgRect = svg.getBoundingClientRect();
+          const viewBox = (svg.getAttribute('viewBox') ?? '0 0 1 1').split(/\s+/).map(Number);
           const sx = svgRect.width / (viewBox[2] || 1);
           const sy = svgRect.height / (viewBox[3] || 1);
-          if (kind === 'line' || kind === 'arrow') {
-            const lineEl = el.querySelector('line');
-            if (lineEl) {
-              const c = getComputedStyle(lineEl);
-              const point = (name: string): [number, number] => {
-                const parts = (el.getAttribute(name) ?? '0,0').split(',').map(Number);
-                return [
-                  round(svgRect.left - ox + (parts[0] ?? 0) * sx),
-                  round(svgRect.top - oy + (parts[1] ?? 0) * sy),
-                ];
-              };
-              const headsAttr = el.getAttribute('data-heads');
+          const point = (value: string): [number, number] => {
+            const parts = value.split(',').map(Number);
+            return [
+              round(svgRect.left - ox + (parts[0] ?? 0) * sx),
+              round(svgRect.top - oy + (parts[1] ?? 0) * sy),
+            ];
+          };
+          const transform = objectOf(el);
+          const lineKinds = ['line', 'arrow', 'elbow', 'curved', 'curve', 'polyline', 'scribble'];
+          if (lineKinds.includes(kind)) {
+            const strokeEl = svg.querySelector('line, path');
+            if (strokeEl) {
+              const c = getComputedStyle(strokeEl);
+              const headsAttr = svg.getAttribute('data-heads');
               const heads: SceneSegment['heads'] =
                 headsAttr === 'start' || headsAttr === 'end' || headsAttr === 'both'
                   ? headsAttr
                   : 'none';
-              lines.push({
+              const pointsAttr = svg.getAttribute('data-points');
+              const points = pointsAttr ? pointsAttr.split(' ').map(point) : undefined;
+              const from = svg.getAttribute('data-from');
+              const to = svg.getAttribute('data-to');
+              const first = points?.[0];
+              const last = points?.[points.length - 1];
+              const segment: SceneSegment = {
                 blockId,
-                from: point('data-from'),
-                to: point('data-to'),
+                from: from
+                  ? point(from)
+                  : (first ?? [round(svgRect.left - ox), round(svgRect.top - oy)]),
+                to: to
+                  ? point(to)
+                  : (last ?? [round(svgRect.right - ox), round(svgRect.bottom - oy)]),
                 color: c.stroke,
                 width: round(parseFloat(c.strokeWidth) || 1),
                 heads,
-              });
+                ...transform,
+              };
+              if (
+                kind !== 'line' &&
+                kind !== 'arrow' &&
+                kind !== 'elbow' &&
+                kind !== 'curved' &&
+                kind !== 'curve' &&
+                kind !== 'polyline' &&
+                kind !== 'scribble'
+              ) {
+                // unreachable by the list above; keeps the union narrow for the compiler
+              } else segment.kind = kind;
+              if (points) segment.points = points;
+              const bend = parseFloat(svg.getAttribute('data-bend') ?? '');
+              if (Number.isFinite(bend)) segment.bend = bend;
+              const startEnd = svg.getAttribute('data-start');
+              const endEnd = svg.getAttribute('data-end');
+              if (startEnd) segment.startEnd = startEnd;
+              if (endEnd) segment.endEnd = endEnd;
+              if (svg.getAttribute('data-closed') === '1') {
+                segment.closed = true;
+                if (c.fill && c.fill !== 'none') segment.fill = c.fill;
+              }
+              const dashed = c.strokeDasharray && c.strokeDasharray !== 'none';
+              if (dashed) segment.dash = 'dash';
+              lines.push(segment);
             }
           } else {
-            const shapeEl = el.querySelector('rect, ellipse');
+            const shapeEl = svg.querySelector('rect, ellipse, path');
             if (shapeEl) {
               const c = getComputedStyle(shapeEl);
+              const legacy: Record<string, SceneRect['shape']> = {
+                rectangle: 'rect',
+                rect: 'rect',
+                rounded: 'roundRect',
+                roundRect: 'roundRect',
+                ellipse: 'ellipse',
+              };
               const rect: SceneRect = {
                 box: toBox(svgRect),
                 fill: c.fill === 'none' || c.fill === '' ? 'rgba(0, 0, 0, 0)' : c.fill,
                 blockId,
                 role: 'shape',
-                shape: kind === 'ellipse' ? 'ellipse' : kind === 'rounded' ? 'roundRect' : 'rect',
+                shape: legacy[kind] ?? 'rect',
+                ...transform,
               };
-              if (kind === 'rounded')
-                rect.radius = round(parseFloat(shapeEl.getAttribute('rx') ?? '0') * sx);
+              if (!(kind in legacy)) rect.preset = kind;
+              const adjust = svg.getAttribute('data-adjust');
+              if (adjust) rect.adjust = adjust.split(',').map(Number);
+              if (kind === 'rounded' || kind === 'roundRect') {
+                const rx = parseFloat(shapeEl.getAttribute('rx') ?? '');
+                if (Number.isFinite(rx) && rx > 0) rect.radius = round(rx * sx);
+              }
               const sw = parseFloat(c.strokeWidth);
               if (c.stroke !== 'none' && c.stroke !== '' && sw > 0)
                 rect.line = { color: c.stroke, width: round(sw) };
@@ -797,6 +1039,42 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
             }
           }
         }
+      }
+      // the chart blocks (gslides-parity SPEC-2 2.8.1): the box and the colours the theme resolved;
+      // the data comes from the document (scene/enrich.ts)
+      const chartsDom: MeasuredChart[] = [];
+      for (const el of blockEls) {
+        if (el.getAttribute('data-type') !== 'chart') continue;
+        const blockId = el.getAttribute('data-block') ?? '';
+        const svg = el.matches('svg') ? el : el.querySelector('svg.chart');
+        if (!svg) continue;
+        const kindAttr = svg.getAttribute('data-chart');
+        const kind: MeasuredChart['kind'] =
+          kindAttr === 'bar' || kindAttr === 'column' || kindAttr === 'line' || kindAttr === 'pie'
+            ? kindAttr
+            : 'column';
+        const seriesColors: string[] = [];
+        svg.querySelectorAll('.series').forEach((series) => {
+          const mark = series.matches('path') ? series : series.querySelector('rect, path');
+          if (!mark) return;
+          const c = getComputedStyle(mark);
+          seriesColors.push(series.matches('path') ? c.stroke : c.fill);
+        });
+        if (kind === 'pie')
+          svg.querySelectorAll('.slices > *').forEach((slice) => {
+            seriesColors.push(getComputedStyle(slice).fill);
+          });
+        const label = svg.querySelector('.categories text, .legend text, text');
+        const title = svg.querySelector('.title');
+        chartsDom.push({
+          blockId,
+          box: toBox(svg.getBoundingClientRect()),
+          kind,
+          seriesColors,
+          labelColor: label ? getComputedStyle(label).fill : ink,
+          titleColor: title ? getComputedStyle(title).fill : ink,
+          ...objectOf(el),
+        });
       }
 
       // Plates and chips of a full-picture slide.
@@ -903,10 +1181,17 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
           box,
           alpha: t.alpha,
           scale: 2,
+          ...objectOf(el),
         };
         if (clip) raster.clip = true;
         rasters.push(raster);
       }
+
+      // the slide background colour layer (gslides-parity SPEC-2 2.6.1, 2.6.2)
+      const bgEl = slide.querySelector<HTMLElement>(':scope > .slide-bg');
+      const background: Scene['background'] = bgEl
+        ? { color: getComputedStyle(bgEl).backgroundColor }
+        : undefined;
 
       const fonts = [...document.fonts]
         .filter((face) => face.status === 'loaded')
@@ -933,6 +1218,8 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
       if (pictureSrc !== undefined) out.pictureSrc = pictureSrc;
       if (wordmark) out.wordmark = wordmark;
       if (counter) out.counter = counter;
+      if (chartsDom.length > 0) out.chartsDom = chartsDom;
+      if (background) out.background = background;
       return out;
     },
     {
@@ -943,7 +1230,7 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
       tags,
     },
   )) as PageScene;
-  const { pictureSrc, ...rest } = measured;
+  const { pictureSrc, chartsDom, ...rest } = measured;
   void pictureSrc;
   const scene: Scene = {
     slideId: options.slideId,
@@ -955,5 +1242,15 @@ export async function measureScene(page: Page, options: MeasureSceneOptions): Pr
   };
   if (scene.picture && options.pictureAssetId) scene.picture.assetId = options.pictureAssetId;
   if (options.notes) scene.notes = options.notes;
+  // the chart boxes and colours travel to scene/enrich.ts, which adds the data from the document
+  if (chartsDom && chartsDom.length > 0)
+    scene.charts = chartsDom.map((chart) => ({
+      ...chart,
+      categories: [],
+      series: chart.seriesColors.map((colorHex) => ({ name: '', values: [], colorHex })),
+      legend: 'none',
+      numberFormat: 'plain',
+      labels: false,
+    }));
   return scene;
 }

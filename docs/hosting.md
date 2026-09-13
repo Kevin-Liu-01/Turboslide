@@ -128,8 +128,11 @@ temp tree (`apps/studio/src/server/root.test.ts`); the Docker worker's own folde
 One Vercel Blob store, public access, holds each deck under `decks/<id>/` in the layout of SPEC
 4.1: `deck.json`, `slides/<slideId>.json`, `versions/<n>.json`, `leases.json`, the sidecars
 (`import-ids.json`, `import-report.json`, `known-findings.json`) and `assets/<file>`, the twins,
-whose public URLs the browser can read directly. Templates are not uploaded; they ship in the
-bundle.
+whose public URLs the browser can read directly. Since the Google Slides parity round two the
+prefix also holds `snapshots/<md5>.json`, one immutable copy of the whole document per committed
+write (the subsection "Immutable per revision documents" below). Templates are not uploaded; they
+ship in the bundle. Produced exports live beside the decks under `exports/<deckId>/<jobId>/` (the
+files of a synchronous export; the plan, the parts and the files of a batched one, section 7).
 
 ### Reads
 
@@ -147,12 +150,21 @@ unchanged deck costs one `head` per read and no download.
 A write pulls first, then applies through `FileStore.write` on the mirror (the same `applyWrite`,
 lease check and version record as on disk), then pushes in this order:
 
-1. `deck.json` with `ifMatch` set to the etag this instance synced. This is the commit point. A
+1. `snapshots/<md5>.json`, the whole document as canonical JSON under the md5 of the `deck.json`
+   bytes about to be pushed, with overwrite refused (the subsection below; gslides-parity SPEC-2
+   8.2). An existing snapshot whose etag is the md5 of this body is the same document and is left
+   alone; one holding another body means another instance is committing the same revision from
+   the same base inside the same clock millisecond, and the write stops here with a `conflict`
+   outcome naming that (`SnapshotContestedError`), so no committed etag ever names a body its
+   writer did not store.
+2. `deck.json` with `ifMatch` set to the etag this instance synced. This is the commit point. A
    precondition failure means another instance committed first: the mirror is re-pulled and the
    outcome is `conflict` with the current document attached, the same shape as a stale
-   `baseRevision`.
-2. The slides the write changed (`put`, overwrite) and the slides it removed (`del`).
-3. `versions/<n>.json`.
+   `baseRevision`; the snapshot of step 1 is then named by no record and no etag, and the prune
+   removes it.
+3. The slides the write changed (`put`, overwrite) and the slides it removed (`del`).
+4. `versions/<n>.json`, carrying `snapshot: <md5>`.
+5. The retention prune, after the answer and without blocking it.
 
 A named version (`saveVersion`) uploads its record with overwrite refused; a collision with another
 instance's record of the same number is a `ConflictError`. Leases are pulled fresh before every
@@ -164,6 +176,38 @@ If a push fails between steps (the network, the store), the mirror's record is d
 sync pulls the store's truth; the caller sees the error and retries from the current revision.
 Between step 1 and step 2 a reader on another instance can see the new manifest with the old slide
 bytes for a moment; its next sync corrects that.
+
+### Immutable per revision documents
+
+The Google Slides parity round two (gslides-parity SPEC-2 8.2, 0.32, 0.40; `packages/store/src/
+snapshots.ts` and `blob-store.ts`): `deck.json` and the slide bodies are overwritten in place and
+the CDN serves an overwritten body stale for a while, so round one proved a mirror's copy by
+hashing bodies to etags or by replaying the version records. Every committed write now also stores
+the whole `DeckDocument` under `snapshots/<md5>.json`, where the md5 is the hash of the `deck.json`
+bytes it pushes, which is the etag Vercel Blob answers for them. So:
+
+- `pull()` asks `head('deck.json')` for the etag and reads `snapshots/<etag's md5>.json`; when
+  it exists and its `deck` hashes to that etag, it is the current document, proven by its name,
+  and the mirror is written from it with no revision read and no slide body fetched. A deck
+  written before the round, or a store whose `deck.json` push failed after its snapshot, has none
+  and takes the round one replay.
+- `documentAtRevision(r)` reads record r, then `snapshots/<record.snapshot>.json`, and falls
+  back to the replay from the inverses for a record without the key or whose snapshot is gone. The
+  batched export renders every batch from the plan's revision through it, and a named version's
+  record carries the key of the document it names (stored then when the deck's last write
+  predates the round).
+- Two writers that race from one revision push different manifests (their `updatedAt` differs by
+  at least a millisecond) and so store different keys; the loser's snapshot is orphaned. Equal
+  manifests with different bodies (the same clock millisecond) contest one name, and the store
+  refuses the second writer before its manifest push (the Writes list above); `hosted.test.ts`
+  stages both races with the fake's frozen clock.
+- Retention: after a commit the store deletes, in one `del`, every snapshot no record among the
+  newest 50 and no named version names, older than five minutes (a commit in flight on another
+  instance has stored its snapshot and not yet its manifest); the current manifest's snapshot
+  stays whatever the records say. `BlobStore.snapshots()` counts them for `deck.info`;
+  `BlobStore.pruneSnapshots()` runs the prune on demand. No migration runs: a deck with no
+  snapshots reads as in round one and its next write creates the first.
+- The file and tmp stores gain nothing; their bodies are local.
 
 ### The seed, once
 
@@ -403,6 +447,55 @@ true` with a worst decoded mismatch of 0.003 percent; verify is `not-requested` 
   `/api/export` 401 for GET and POST without the header and 200 with it (`hosted` for the plain
   POST, `requested` with `?sync=1`); every refusal is
   `{ error: { name, status: 401, message, code: "unauthorized" } }`.
+
+### The batched Perfect export
+
+Round two (gslides-parity SPEC-2 8.1, 0.31, 0.44, 0.45; `packages/export/src/batch/`,
+`apps/studio/src/server/export-batch.ts`, `download.ts`, the export route): a Download of a deck
+whose play list is longer than the batch size runs as per slide batches, each one synchronous
+function call, and a final merge. The size is `floor(240 s / (2.6 s per slide × 1.5))`, 61
+written as 60 (the constants and the measurement they come from are in `batch/plan.ts`;
+`TURBOSLIDE_EXPORT_BATCH` overrides them, the end to end spec uses 3), so the GT deck is two
+batches of 60 and 25. A whole GT deck still fits one 800 s call (190 to 222 s measured in round
+one); batching exists for robustness: a Chromium crash or a cold instance fails one batch, which
+the dialog retries once, not the file.
+
+The protocol, as server functions under the CSRF middleware (`download.ts`) and as the http form on
+`POST /api/export/:deckId` (`?start=1`, `?batch=<i>&job=<id>`, `?merge=<id>`, `?cancel=<id>`, or
+the action's `batch: { index, of, jobId }` and `merge: { jobId }` body fields), the same bearer
+rule as the route except the cancel, which the page sends from `pagehide` with `keepalive` and no
+header (the job id is the capability):
+
+1. `startBatchedExport` validates the input through `export.run`'s schema (PPTX only: the PDF is
+   one print of the whole document and stays a single call), reads the deck at its current
+   revision, computes the play list and the batches, pins the sha256 of every twin the play list
+   references, prunes every job under `exports/<deckId>/` older than 24 h and stores
+   `exports/<deckId>/<jobId>/plan.json`; answers `{ jobId, revision, batches, batchSize, total }`.
+   The job id is `b<start time in base 36>-<8 hex>`, so the prune reads the age off a folder name
+   when the store reports no upload time.
+2. `exportBatch` renders one batch from the document at the plan's revision
+   (`documentAtRevision`, the snapshot path above) with the whole play list's numbering, so the
+   counters read right, and stores each scene as JSON plus the 2x sheet shot, the rasters, the
+   regenerated or twin picture and the wordmark under `parts/`, with `overwrite: true`, so a rerun
+   rewrites the same paths and a repeat answers the same result. It answers `{ stale: 'revision' }`
+   when the revision can no longer be read and `{ stale: 'asset' }` when a twin the batch references
+   no longer hashes as the plan recorded (a picture replaced during the download); the dialog then
+   cancels the job and starts again from the current revision. One browser at a time per process.
+3. `mergeExport` streams the parts to the function's disk one file at a time, runs `buildPptx` per
+   theme over the scenes in play order from the paths on disk (no browser), stores the files and
+   the reports under the job, and answers the `jsonBody` shape of the synchronous export plus
+   `peakMb`, the largest resident memory sampled every second during the merge, so VERIFICATION-2
+   records the merge against the 3009 MB function.
+4. `cancelBatchedExport` deletes the job's prefix.
+
+The dialog (`runBatchedExport` in `download.ts`) runs the batches in sequence and shows
+"Preparing slide 60 of 85, about 1 minute left" with the estimate recomputed from the measured
+batch times after every batch, rounded to the half minute, then "Merging your file", then "Your
+file is ready" (`DOWNLOAD_PROGRESS`); `exportCapabilities().batchSize` tells the editor when to
+take this path. On the file and tmp backends the part store is a folder of the instance's derived
+files (`.turboslide/exports/`, `@turboslide/store/blob-disk`) and the files' URLs are the route's
+`?job=<id>&file=<name>` form, which streams them from that instance; on the blob backend the files
+are stored copies with public URLs, as the synchronous export's are.
 
 `vercel logs <url> --json` shows the function's lines per request: the store selection, the seed
 and package materialization, every worker job line (`turboslide hosting: worker [...]`), the

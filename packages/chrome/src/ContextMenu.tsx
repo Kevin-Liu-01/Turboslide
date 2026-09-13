@@ -23,10 +23,14 @@ import './ContextMenu.css';
  * centre of the selection from Shift F10), the first row takes focus, Esc and Tab return focus to
  * the element that was right-clicked, and a row's activation reaches the caller through
  * `onSelect` with the model's item; the caller runs its effect (an action, a dialog, a panel).
- * Apply layout is the model's one dynamic submenu: `renderLayouts` draws the layout grid when the
- * chrome has one, and the default here is the plain list of the 21 layouts with the current one
- * checked, Google's eleven first and the GT layouts after the rule (SPEC 5.2), each row a
- * `menuitemradio` the arrows walk. New in Turboslide (no Prototemplate source).
+ * Apply layout is the model's first dynamic submenu: `renderLayouts` draws the layout grid when
+ * the chrome has one, and the default here is the plain list of the 21 layouts with the current
+ * one checked, Google's eleven first and the GT layouts after the rule (SPEC 5.2), each row a
+ * `menuitemradio` the arrows walk. The other dynamic submenus of round two (Change shape ▸ and
+ * Mask image ▸ with a shape grid, the bullet and numbering preset grids, the line ends and
+ * dashes; SPEC-2 4.3) come from `renderDynamic`, the shell's `renderDynamicSubmenu`, and a pick
+ * inside such a plate closes this menu the way a layout pick does. New in Turboslide (no
+ * Prototemplate source).
  */
 export type ContextMenuProps = {
   target: ContextTarget;
@@ -46,6 +50,15 @@ export type ContextMenuProps = {
   onLayout?: (layout: LayoutId) => void;
   /** the chrome's layout grid for the Apply layout submenu; the plain list when absent */
   renderLayouts?: (pick: (layout: LayoutId) => void, current: LayoutId | undefined) => ReactNode;
+  /**
+   * the chrome's plate for every other dynamic submenu (the shell's `renderDynamicSubmenu`):
+   * `onPicked` is what the plate calls after a pick so this menu closes; null for a row the
+   * chrome draws no plate for, which then lists its children or runs its command
+   */
+  renderDynamic?: (
+    item: MenuItem,
+    options: { viaKeyboard?: boolean; onPicked: () => void },
+  ) => ReactNode;
   id?: string;
 };
 
@@ -82,9 +95,21 @@ export function contextMenuLabel(target: ContextTarget): string {
     case 'image':
       return 'Image menu';
     case 'tableCell':
+    case 'cellRange':
       return 'Table menu';
     case 'textSelection':
       return 'Text menu';
+    /* round two (SPEC-2 4.3) */
+    case 'shape':
+      return 'Shape menu';
+    case 'line':
+      return 'Line menu';
+    case 'group':
+      return 'Group menu';
+    case 'chart':
+      return 'Chart menu';
+    case 'guide':
+      return 'Guide menu';
   }
 }
 
@@ -192,6 +217,7 @@ export function ContextMenu({
   layout,
   onLayout,
   renderLayouts,
+  renderDynamic,
   id,
 }: ContextMenuProps) {
   const items = useMemo(() => contextItems(target, context), [target, context]);
@@ -212,14 +238,16 @@ export function ContextMenu({
       onSelect={onSelect}
       onClose={onClose}
       className={`ts-context-menu is-${target}`}
-      renderDynamic={(item) =>
+      renderDynamic={(item, options) =>
         item.effect?.kind === 'submenu' && item.effect.dynamic === 'layouts' ? (
           renderLayouts ? (
             renderLayouts(pick, layout)
           ) : (
             <LayoutList current={layout} onPick={pick} />
           )
-        ) : null
+        ) : (
+          (renderDynamic?.(item, { ...options, onPicked: () => onClose('select') }) ?? null)
+        )
       }
     />
   );

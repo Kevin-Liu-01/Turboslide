@@ -10,15 +10,32 @@ import type { Page } from '@playwright/test';
 // inert while presenting; Presenter view at /present/:id with the unskipped slides, the notes and
 // their text size, the timer, the disabled Audience tools tab; and the two windows in sync over
 // BroadcastChannel in both directions, including view.goto through the window API of either
-// window. The spec works on a scratch copy of decks/fixture/gslides (seven slides, one skipped,
+// window. The spec works on a scratch copy of decks/fixture/gslides (27 slides, one skipped,
 // notes on two, no assets) under decks/e2e-present and removes it afterwards.
 
 const ROOT = join(import.meta.dirname, '..', '..', '..');
 const DECK = 'e2e-present';
 const DECK_DIR = join(ROOT, 'decks', DECK);
 
-/** The fixture's slides in order; `skipped` carries `skip: true` and leaves every show. */
-const PLAY = ['title', 'breaks', 'table', 'numbered', 'links', 'prompt'];
+/**
+ * The fixture's slides in order minus the ones that carry `skip: true` (`skipped`), read from the
+ * fixture so every count here follows its total (gslides-parity SPEC-2 0.42, 11.2).
+ */
+const PLAY = playOf(join(ROOT, 'decks', 'fixture', 'gslides'));
+
+function playOf(dir: string): string[] {
+  const manifest = JSON.parse(readFileSync(join(dir, 'deck.json'), 'utf8')) as {
+    sections: { slideIds: string[] }[];
+  };
+  return manifest.sections
+    .flatMap((section) => section.slideIds)
+    .filter((id) => {
+      const slide = JSON.parse(readFileSync(join(dir, 'slides', `${id}.json`), 'utf8')) as {
+        skip?: boolean;
+      };
+      return slide.skip !== true;
+    });
+}
 
 function seedDeck(): void {
   rmSync(DECK_DIR, { recursive: true, force: true });

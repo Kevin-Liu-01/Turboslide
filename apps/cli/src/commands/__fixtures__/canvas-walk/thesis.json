@@ -1,0 +1,15 @@
+{
+  "deck": "gt-brand",
+  "slideId": "thesis",
+  "template": "statement",
+  "source": "turboslide slide to-canvas (Chromium, headless, 1x, 1/64 px)",
+  "objects": {
+    "big": {
+      "x": 311.15625,
+      "y": 411.84375,
+      "w": 977.6875,
+      "h": 76.3125,
+      "z": 0
+    }
+  }
+}

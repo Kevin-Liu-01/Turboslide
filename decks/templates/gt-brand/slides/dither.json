@@ -41,11 +41,11 @@
             "blocks": [
               {
                 "id": "dither",
+                "alt": "A ramp from solid ink to sparse dots, rendered with the Bayer screen",
                 "type": "dither",
                 "height": 220,
                 "ramp": "linear-x",
-                "border": true,
-                "alt": "A ramp from solid ink to sparse dots, rendered with the Bayer screen"
+                "border": true
               }
             ]
           },

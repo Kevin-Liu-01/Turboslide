@@ -11,7 +11,13 @@ import { basename, join } from 'node:path';
 import { lintDeck, lintStatic, countsBySlide } from '@turboslide/lint/run';
 import type { LintLayers } from '@turboslide/lint/run';
 import type { Deck, DeckDocument, Slide } from '@turboslide/schema/deck';
-import { slideBlocks, slideOrder, slideTitle } from '@turboslide/schema/deck';
+import {
+  canvasObjects,
+  isCanvasSlide,
+  slideBlocks,
+  slideOrder,
+  slideTitle,
+} from '@turboslide/schema/deck';
 import type { Finding } from '@turboslide/schema/findings';
 import type { RenderRecord } from '@turboslide/schema/render';
 import type { RuleId } from '@turboslide/schema/rules';
@@ -39,6 +45,11 @@ export type ReaderDeps = {
    * not serve. Absent, validate.run validates the loaded document only and refuses a path.
    */
   deckDirFor?: (path: string) => string;
+  /**
+   * The store's immutable per revision documents on the Blob backend (gslides-parity SPEC-2 8.2,
+   * BlobStore.snapshots()); deck.info reports `counts.snapshots` when a transport passes it.
+   */
+  snapshots?: () => Promise<number> | number;
 };
 
 export type OutlineSection = {
@@ -221,14 +232,36 @@ export type DeckInfo = {
     htmlBlocks: number;
     /** slides with skip set, left out of the slideshow and the downloads unless asked */
     skipped: number;
+    /** slides on the freeform layout, arranged by hand (gslides-parity SPEC-2 0.93) */
+    canvas: number;
+    /** chart blocks across the deck (gslides-parity SPEC-2 0.93) */
+    charts: number;
+    /** the deck's guide lines, both axes together (gslides-parity SPEC-2 2.10) */
+    guides: number;
+    /** the store's per revision snapshots on the Blob backend (gslides-parity SPEC-2 8.2); absent elsewhere */
+    snapshots?: number;
   };
   /** the deck's defaults as written (gslides-parity SPEC 7.2.3, 7.2.4); absent when none is set */
   defaults?: Deck['defaults'];
+  /** the deck's guides as written (gslides-parity SPEC-2 2.10); absent when none is set */
+  guides?: Deck['guides'];
   /** the trash stamp (gslides-parity SPEC 7.2.5); absent unless the deck is in the trash */
   trashedAt?: string;
 };
 
-export function deckInfo(document: DeckDocument): DeckInfo {
+/** The canvas counts of deck.info (gslides-parity SPEC-2 0.93): the CLI's canvasCounts over the same document. */
+function canvasCounts(document: DeckDocument): { canvas: number; charts: number; guides: number } {
+  let canvas = 0;
+  let charts = 0;
+  for (const slide of Object.values(document.slides)) {
+    if (isCanvasSlide(slide)) canvas += 1;
+    for (const { block } of slideBlocks(slide)) if (block.type === 'chart') charts += 1;
+  }
+  const guides = (document.deck.guides?.x.length ?? 0) + (document.deck.guides?.y.length ?? 0);
+  return { canvas, charts, guides };
+}
+
+export function deckInfo(document: DeckDocument, extra: { snapshots?: number } = {}): DeckInfo {
   const order = slideOrder(document.deck).filter((id) => document.slides[id] !== undefined);
   return {
     id: document.deck.id,
@@ -242,8 +275,11 @@ export function deckInfo(document: DeckDocument): DeckInfo {
       assets: Object.keys(document.deck.assets).length,
       htmlBlocks: htmlBlockCount(document),
       skipped: order.filter((id) => document.slides[id]?.skip === true).length,
+      ...canvasCounts(document),
+      ...(extra.snapshots !== undefined ? { snapshots: extra.snapshots } : {}),
     },
     ...(document.deck.defaults !== undefined ? { defaults: document.deck.defaults } : {}),
+    ...(document.deck.guides !== undefined ? { guides: document.deck.guides } : {}),
     ...(document.deck.trashedAt !== undefined ? { trashedAt: document.deck.trashedAt } : {}),
   };
 }
@@ -253,7 +289,12 @@ export function registerReadActions(dispatcher: Dispatcher, deps: ReaderDeps): v
   const records = async (document: DeckDocument): Promise<RenderRecord[]> =>
     deps.renderRecords === undefined ? [] : await deps.renderRecords(document);
 
-  dispatcher.register('deck.info', async () => deckInfo(await deps.load()));
+  dispatcher.register('deck.info', async () =>
+    deckInfo(
+      await deps.load(),
+      deps.snapshots === undefined ? {} : { snapshots: await deps.snapshots() },
+    ),
+  );
 
   dispatcher.register('slide.list', async (input) => {
     const { sectionId } = input as { sectionId?: string };
@@ -270,6 +311,10 @@ export function registerReadActions(dispatcher: Dispatcher, deps: ReaderDeps): v
       skip?: boolean;
       /** the layout the slide was made from, when written (gslides-parity SPEC 7.2.2) */
       template?: Slide['template'];
+      /** true for a canvas slide, a content slide on the freeform layout (gslides-parity SPEC-2 0.93) */
+      canvas?: boolean;
+      /** the top level block count of a canvas slide */
+      objects?: number;
     }[] = [];
     for (const section of outlineOf(document)) {
       if (sectionId !== undefined && section.id !== sectionId) continue;
@@ -284,6 +329,10 @@ export function registerReadActions(dispatcher: Dispatcher, deps: ReaderDeps): v
           lint: { s3: counts[slide.id]?.s3 ?? 0, s2: counts[slide.id]?.s2 ?? 0 },
           ...(record?.skip === true ? { skip: true } : {}),
           ...(record?.template !== undefined ? { template: record.template } : {}),
+          // a canvas slide and its object count (gslides-parity SPEC-2 0.93)
+          ...(record !== undefined && isCanvasSlide(record)
+            ? { canvas: true, objects: canvasObjects(record).length }
+            : {}),
         });
       }
     }

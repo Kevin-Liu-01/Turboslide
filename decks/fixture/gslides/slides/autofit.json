@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "autofit",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "A heading long enough that shrink text on overflow steps its size down the ladder before it wraps a third time",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "measure": 56,
+        "text": "The heading above carries autofit shrink without a position box: the fit runs in the flow layout."
+      }
+    ]
+  },
+  "template": "one-column"
+}

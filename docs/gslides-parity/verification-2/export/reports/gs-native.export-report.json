@@ -1,0 +1,736 @@
+{
+  "deckId": "gslides",
+  "revision": 1,
+  "format": "pptx",
+  "mode": "native",
+  "theme": "light",
+  "fontSet": "exact",
+  "fontSetVersion": "4.001+gt.2",
+  "files": [
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/gs-native/gslides-light.pptx",
+      "bytes": 1245425,
+      "sha256": "5787ad7760c1f4609f2ddc3a2d223eeb7adbffafef46d7e22d34b862695d891a"
+    },
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/gs-native/gslides-dark.pptx",
+      "bytes": 1258156,
+      "sha256": "455adf86815ecd77017f32ebb8bd3b77706c363e794fb354c8577ff0d440c109"
+    },
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/gs-native/gslides-both.zip",
+      "bytes": 2503825,
+      "sha256": "4816d4069abf20ea85cecc869814a39692f1206c830324433b35f7c08dd89210"
+    }
+  ],
+  "fonts": {
+    "embedded": [],
+    "requiredOnViewer": [
+      "GT Inter Display",
+      "GT Inter Text 26",
+      "GT Inter Text 14",
+      "GT Inter Text 22",
+      "GT Inter Text 20 Medium",
+      "GT Inter Text 20",
+      "GT Inter Text 24 Medium",
+      "GT Inter Text 15",
+      "GT Inter Text 18",
+      "GT Inter Text 22 Medium"
+    ],
+    "substitutedIn": [
+      "every viewer"
+    ]
+  },
+  "slides": [
+    {
+      "slideId": "title",
+      "theme": "light",
+      "native": [
+        "heading",
+        "lead"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "breaks",
+      "theme": "light",
+      "native": [
+        "h",
+        "p1",
+        "p2"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "table",
+      "theme": "light",
+      "native": [
+        "h",
+        "table"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "numbered",
+      "theme": "light",
+      "native": [
+        "h",
+        "p1",
+        "list"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "links",
+      "theme": "light",
+      "native": [
+        "h",
+        "box",
+        "shape",
+        "t1"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "prompt",
+      "theme": "light",
+      "native": [
+        "h"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "styles",
+      "theme": "light",
+      "native": [
+        "h",
+        "p1",
+        "justified"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "canvas-title",
+      "theme": "light",
+      "native": [
+        "heading",
+        "lead",
+        "grow",
+        "shrink",
+        "padded"
+      ],
+      "raster": [
+        "mark",
+        "icon"
+      ]
+    },
+    {
+      "slideId": "canvas-opener",
+      "theme": "light",
+      "native": [
+        "plate",
+        "big",
+        "p",
+        "credit"
+      ],
+      "raster": [
+        "picture"
+      ]
+    },
+    {
+      "slideId": "rotated",
+      "theme": "light",
+      "native": [
+        "h",
+        "tilted",
+        "arrow"
+      ],
+      "raster": [
+        "photo"
+      ]
+    },
+    {
+      "slideId": "grouped",
+      "theme": "light",
+      "native": [
+        "h",
+        "s1",
+        "s2",
+        "s3",
+        "label"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "shapes",
+      "theme": "light",
+      "native": [
+        "h",
+        "hex",
+        "right",
+        "callout",
+        "plus",
+        "snip",
+        "dashed"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "lines",
+      "theme": "light",
+      "native": [
+        "h",
+        "decorated",
+        "a",
+        "b",
+        "elbow",
+        "curved",
+        "poly",
+        "closed",
+        "scribble"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "word-art",
+      "theme": "light",
+      "native": [
+        "h",
+        "art"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "shadow",
+      "theme": "light",
+      "native": [
+        "h",
+        "box",
+        "shape"
+      ],
+      "raster": [
+        "photo"
+      ]
+    },
+    {
+      "slideId": "background-color",
+      "theme": "light",
+      "native": [
+        "h",
+        "p1"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "background-picture",
+      "theme": "light",
+      "native": [
+        "heading",
+        "lead"
+      ],
+      "raster": [
+        "mark",
+        "photo"
+      ],
+      "pictures": [
+        {
+          "box": [
+            0,
+            0,
+            1600,
+            900
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "image-tools",
+      "theme": "light",
+      "native": [
+        "h"
+      ],
+      "raster": [
+        "trimmed",
+        "masked",
+        "adjusted"
+      ]
+    },
+    {
+      "slideId": "table-merge",
+      "theme": "light",
+      "native": [
+        "h",
+        "table"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "chart-bar",
+      "theme": "light",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [
+            137,
+            229,
+            720,
+            480
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "chart-line",
+      "theme": "light",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [
+            137,
+            217.39,
+            1326,
+            460
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "chart-pie",
+      "theme": "light",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [
+            137,
+            217.39,
+            1326,
+            460
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "diagram",
+      "theme": "light",
+      "native": [
+        "h",
+        "step-1",
+        "label-1",
+        "link-1",
+        "step-2",
+        "label-2",
+        "link-2",
+        "step-3",
+        "label-3",
+        "link-3",
+        "step-4",
+        "label-4"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "bullets",
+      "theme": "light",
+      "native": [
+        "h",
+        "bullets",
+        "numbers",
+        "ruled"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "spacing",
+      "theme": "light",
+      "native": [
+        "h",
+        "spaced",
+        "indented"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "autofit",
+      "theme": "light",
+      "native": [
+        "h",
+        "p1"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "title",
+      "theme": "dark",
+      "native": [
+        "heading",
+        "lead"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "breaks",
+      "theme": "dark",
+      "native": [
+        "h",
+        "p1",
+        "p2"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "table",
+      "theme": "dark",
+      "native": [
+        "h",
+        "table"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "numbered",
+      "theme": "dark",
+      "native": [
+        "h",
+        "p1",
+        "list"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "links",
+      "theme": "dark",
+      "native": [
+        "h",
+        "box",
+        "shape",
+        "t1"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "prompt",
+      "theme": "dark",
+      "native": [
+        "h"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "styles",
+      "theme": "dark",
+      "native": [
+        "h",
+        "p1",
+        "justified"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "canvas-title",
+      "theme": "dark",
+      "native": [
+        "heading",
+        "lead",
+        "grow",
+        "shrink",
+        "padded"
+      ],
+      "raster": [
+        "mark",
+        "icon"
+      ]
+    },
+    {
+      "slideId": "canvas-opener",
+      "theme": "dark",
+      "native": [
+        "plate",
+        "big",
+        "p",
+        "credit"
+      ],
+      "raster": [
+        "picture"
+      ]
+    },
+    {
+      "slideId": "rotated",
+      "theme": "dark",
+      "native": [
+        "h",
+        "tilted",
+        "arrow"
+      ],
+      "raster": [
+        "photo"
+      ]
+    },
+    {
+      "slideId": "grouped",
+      "theme": "dark",
+      "native": [
+        "h",
+        "s1",
+        "s2",
+        "s3",
+        "label"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "shapes",
+      "theme": "dark",
+      "native": [
+        "h",
+        "hex",
+        "right",
+        "callout",
+        "plus",
+        "snip",
+        "dashed"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "lines",
+      "theme": "dark",
+      "native": [
+        "h",
+        "decorated",
+        "a",
+        "b",
+        "elbow",
+        "curved",
+        "poly",
+        "closed",
+        "scribble"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "word-art",
+      "theme": "dark",
+      "native": [
+        "h",
+        "art"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "shadow",
+      "theme": "dark",
+      "native": [
+        "h",
+        "box",
+        "shape"
+      ],
+      "raster": [
+        "photo"
+      ]
+    },
+    {
+      "slideId": "background-color",
+      "theme": "dark",
+      "native": [
+        "h",
+        "p1"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "background-picture",
+      "theme": "dark",
+      "native": [
+        "heading",
+        "lead"
+      ],
+      "raster": [
+        "mark",
+        "photo"
+      ],
+      "pictures": [
+        {
+          "box": [
+            0,
+            0,
+            1600,
+            900
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "image-tools",
+      "theme": "dark",
+      "native": [
+        "h"
+      ],
+      "raster": [
+        "trimmed",
+        "masked",
+        "adjusted"
+      ]
+    },
+    {
+      "slideId": "table-merge",
+      "theme": "dark",
+      "native": [
+        "h",
+        "table"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "chart-bar",
+      "theme": "dark",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [
+            137,
+            229,
+            720,
+            480
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "chart-line",
+      "theme": "dark",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [
+            137,
+            217.39,
+            1326,
+            460
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "chart-pie",
+      "theme": "dark",
+      "native": [
+        "h",
+        "chart"
+      ],
+      "raster": [],
+      "pictures": [
+        {
+          "box": [
+            137,
+            217.39,
+            1326,
+            460
+          ],
+          "regenerated": false
+        }
+      ]
+    },
+    {
+      "slideId": "diagram",
+      "theme": "dark",
+      "native": [
+        "h",
+        "step-1",
+        "label-1",
+        "link-1",
+        "step-2",
+        "label-2",
+        "link-2",
+        "step-3",
+        "label-3",
+        "link-3",
+        "step-4",
+        "label-4"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "bullets",
+      "theme": "dark",
+      "native": [
+        "h",
+        "bullets",
+        "numbers",
+        "ruled"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "spacing",
+      "theme": "dark",
+      "native": [
+        "h",
+        "spaced",
+        "indented"
+      ],
+      "raster": []
+    },
+    {
+      "slideId": "autofit",
+      "theme": "dark",
+      "native": [
+        "h",
+        "p1"
+      ],
+      "raster": []
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": false,
+  "passed": true,
+  "residual": [
+    "merged report over light and dark; theme names the first, per-theme reports are beside this file",
+    "renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "native (editable text): text boxes at the browser boxes, layout within 3 px; the glyph antialiasing is the viewer's",
+    "rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x",
+    "package: 146 parts, 173 relationships, valid against the content types and relationships",
+    "skipped: 1 slide(s) left out (skipped); pass includeSkipped to carry them",
+    "table: table#table written as a:tbl (4 by 4); the per cell 3 px budget is measured by the verify loop, which falls back to ruled rows when a cell misses it",
+    "paths: ts:lines#closed is a curve through its points; the file holds the polyline through them (gslides-parity SPEC-2 2.4.3)",
+    "background-picture: the picture object photo covers the sheet at the bottom of the stack and travels as the slide background, the form a picture kind exports (gslides-parity SPEC-2 2.6.4)",
+    "table: table-merge#table written as a:tbl (4 by 4, 1 merged cell(s)); the per cell 3 px budget is measured by the verify loop, which falls back to ruled rows when a cell misses it",
+    "chart: chart-bar#chart written as a bar chart part (addChart); its box is a picture region in the verify loop, reported and never gated (gslides-parity SPEC-2 2.8.1)",
+    "chart: chart-line#chart written as a line chart part (addChart); its box is a picture region in the verify loop, reported and never gated (gslides-parity SPEC-2 2.8.1)",
+    "chart: chart-pie#chart written as a pie chart part (addChart); its box is a picture region in the verify loop, reported and never gated (gslides-parity SPEC-2 2.8.1)",
+    "connectors: 4 connector(s) written as p:cxnSp with stCxn and endCxn on their targets, so PowerPoint moves them with the shapes (gslides-parity SPEC-2 2.4.7)",
+    "rotation: 6 object(s) carry a rotation or a flip on their own xfrm; a rotated group is written per member (gslides-parity SPEC-2 2.1)",
+    "package: 25 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)",
+    "package: 81 kern=\"0\" attribute(s) and 0 empty ext list(s) removed; 3 custGeom",
+    "links: 9 hyperlink(s) written (a URL as is, a slide link as a jump to its number in this file; SPEC 7.2.7, 7.2.8)",
+    "notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)",
+    "fonts not embedded: GT Inter Display, GT Inter Text 26, GT Inter Text 14, GT Inter Text 22, GT Inter Text 20 Medium, GT Inter Text 20, GT Inter Text 24 Medium, GT Inter Text 15, GT Inter Text 18, GT Inter Text 22 Medium; a viewer without them installed substitutes (SPEC 8.4); --embed-fonts embeds them",
+    "both: gslides-both.zip holds the light and dark files"
+  ]
+}

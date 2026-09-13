@@ -5,13 +5,31 @@
 // round's primitives (docs/freeform.md) travel the same way: a box or a closed shape is a
 // `rect`, `roundRect` (with `rectRadius`) or `ellipse` preset geometry with its fill and outline,
 // a shape with no fill writes `fill: { type: 'none' }`, and a line or arrow is a native line from
-// its measured ends with `triangle` arrowheads at the headed ends.
+// its measured ends with `triangle` arrowheads at the headed ends. The Google Slides parity round
+// two (gslides-parity SPEC-2 2.1, 2.3, 2.4) adds the presets of shapes.ts as their ECMA
+// `prstGeom` name (their adjust values in the post-process), the rotation, flip, shadow, dash and
+// alt text of every shape, the ten line decorations, the elbow and curved connectors as
+// `bentConnector3` and `curvedConnector3`, and the path kinds as custom geometry (a curve as the
+// sheet's cubic segments). An outlined shape is written at its box drawn in by half the stroke
+// (shapes.ts `outlineBox`), because the viewer centres an outline on the geometry.
 import type PptxGenJS from 'pptxgenjs';
 
 import type { Box } from '@turboslide/schema/render';
 
 import type { SceneRect, SceneRule, SceneSegment } from '../scene/types.ts';
 import { compositeHex, parseCssColor, pxToIn, pxToPt, transparencyOf } from '../units.ts';
+import {
+  LEGACY_PRESET,
+  arrowHead,
+  connectorPreset,
+  customGeometryPoints,
+  dashType,
+  objectName,
+  objectProps,
+  outlineBox,
+  prst,
+  segmentBox,
+} from './shapes.ts';
 
 export type LineEmitOptions = {
   /** The paper hex the translucent tokens composite on; undefined keeps alpha (over a picture). */
@@ -19,6 +37,8 @@ export type LineEmitOptions = {
   namePrefix: string;
   /** A block link on the shape (gslides-parity SPEC 7.2.7), resolved by the builder. */
   hyperlink?: PptxGenJS.HyperlinkProps;
+  /** Residual lines the shapes add (a substituted line head, a curve as a polyline), for the report. */
+  residual?: Set<string>;
 };
 
 /** The line color options: composite on paper, or the raw color with its alpha as transparency. */
@@ -98,32 +118,58 @@ export function fillProps(
   return props;
 }
 
-/** A filled rectangle, rounded rectangle or ellipse with no outline unless the rect carries one. */
+/** The outline props of a rect: its measured line with the dash of SPEC-2 2.3.3, or none. */
+export function rectLine(rect: SceneRect, paperHex: string | undefined): PptxGenJS.ShapeLineProps {
+  if (!rect.line) return { type: 'none' };
+  const color = lineColor(rect.line.color, paperHex);
+  const line: PptxGenJS.ShapeLineProps = { color: color.color, width: pxToPt(rect.line.width) };
+  if (color.transparency !== undefined) line.transparency = color.transparency;
+  const dash = dashType(rect.dash);
+  if (dash) line.dashType = dash;
+  return line;
+}
+
+/**
+ * The geometry a rect travels as: a preset of shapes.ts by its ECMA name (SPEC-2 2.3.1), else the
+ * round one rect, roundRect or ellipse, with the corner radius of a rounded rectangle as
+ * `rectRadius`.
+ */
+export function rectShape(rect: SceneRect): { shape: PptxGenJS.SHAPE_NAME; rectRadius?: number } {
+  if (rect.preset !== undefined) return { shape: prst(LEGACY_PRESET[rect.preset] ?? rect.preset) };
+  const shape: PptxGenJS.SHAPE_NAME =
+    rect.shape === 'ellipse' ? 'ellipse' : rect.shape === 'roundRect' ? 'roundRect' : 'rect';
+  return {
+    shape,
+    ...(shape === 'roundRect' ? { rectRadius: pxToIn(rect.radius ?? 0) } : {}),
+  };
+}
+
+/**
+ * A filled rectangle, rounded rectangle, ellipse or preset with no outline unless the rect carries
+ * one, its rotation, flip, shadow, dash and alt text (SPEC-2 2.1, 2.3). The name carries the user
+ * group as `@g:<tag>` and a row group after it.
+ */
 export function addSceneRect(
   slide: PptxGenJS.Slide,
   rect: SceneRect,
   options: LineEmitOptions,
   name: string,
 ): void {
-  const [x, y, w, h] = rect.box;
-  let line: PptxGenJS.ShapeLineProps = { type: 'none' };
-  if (rect.line) {
-    const color = lineColor(rect.line.color, options.paperHex);
-    line = { color: color.color, width: pxToPt(rect.line.width) };
-    if (color.transparency !== undefined) line.transparency = color.transparency;
-  }
-  const shape: PptxGenJS.SHAPE_NAME =
-    rect.shape === 'ellipse' ? 'ellipse' : rect.shape === 'roundRect' ? 'roundRect' : 'rect';
+  // an outlined shape or box is written drawn in by half its stroke (outlineBox): the viewer
+  // centres the outline on the geometry, the sheet keeps it inside the box
+  const [x, y, w, h] = outlineBox(rect);
+  const { shape, rectRadius } = rectShape(rect);
   slide.addShape(shape, {
     x: pxToIn(x),
     y: pxToIn(y),
     w: pxToIn(w),
     h: pxToIn(h),
     fill: fillProps(rect.fill, options.paperHex),
-    line,
-    ...(shape === 'roundRect' ? { rectRadius: pxToIn(rect.radius ?? 0) } : {}),
+    line: rectLine(rect, options.paperHex),
+    ...(rectRadius !== undefined ? { rectRadius } : {}),
     ...(options.hyperlink ? { hyperlink: options.hyperlink } : {}),
-    objectName: `${options.namePrefix}#${name}${rect.group ? `@${rect.group}` : ''}`,
+    ...objectProps(rect),
+    objectName: objectName(options.namePrefix, name, rect.userGroup, rect.group),
   });
 }
 
@@ -153,11 +199,44 @@ export function addLinkRect(
   });
 }
 
+/** The line props of a segment: colour, width, dash and the two heads (the round one triangles or the decorations). */
+function segmentLine(line: SceneSegment, options: LineEmitOptions): PptxGenJS.ShapeLineProps {
+  const color = lineColor(line.color, options.paperHex);
+  const props: PptxGenJS.ShapeLineProps = { color: color.color, width: pxToPt(line.width) };
+  if (color.transparency !== undefined) props.transparency = color.transparency;
+  const dash = dashType(line.dash);
+  if (dash) props.dashType = dash;
+  if (line.startEnd !== undefined || line.endEnd !== undefined) {
+    // the decorations of SPEC-2 2.4.5; a substituted head is one residual line
+    for (const [side, kind] of [
+      ['begin', line.startEnd],
+      ['end', line.endEnd],
+    ] as const) {
+      const { head, exact } = arrowHead(kind);
+      if (head === 'none') continue;
+      if (side === 'begin') props.beginArrowType = head;
+      else props.endArrowType = head;
+      if (!exact)
+        options.residual?.add(
+          `line heads: ${kind} on ${options.namePrefix}#${line.blockId} travels as ${head}; PowerPoint draws no ${kind} head (gslides-parity SPEC-2 2.4.5)`,
+        );
+    }
+    return props;
+  }
+  if (line.heads === 'start' || line.heads === 'both') props.beginArrowType = 'triangle';
+  if (line.heads === 'end' || line.heads === 'both') props.endArrowType = 'triangle';
+  return props;
+}
+
 /**
  * A line or arrow between two measured points. A pptxgenjs line runs from the top left to the
  * bottom right of its box, so a line whose end lies left of or above its start flips: `flipH`
  * when x2 < x1, `flipV` when y2 < y1, which keeps the shape's begin at `from` and its end at `to`
- * so the arrowheads land where the sheet drew them.
+ * so the arrowheads land where the sheet drew them. An elbow or curved connector (SPEC-2 2.4.1,
+ * 2.4.2) is the ECMA connector preset over the same box, its bend an adjust value the post-process
+ * writes; a polyline or scribble (2.4.4) is a custom geometry through its points and a curve
+ * (2.4.3) one through the Catmull-Rom cubics the sheet draws (`catmullRomSegments`), so the file
+ * holds the curve itself.
  */
 export function addSceneLine(
   slide: PptxGenJS.Slide,
@@ -167,20 +246,52 @@ export function addSceneLine(
 ): void {
   const [x1, y1] = line.from;
   const [x2, y2] = line.to;
-  const color = lineColor(line.color, options.paperHex);
-  const props: PptxGenJS.ShapeLineProps = { color: color.color, width: pxToPt(line.width) };
-  if (color.transparency !== undefined) props.transparency = color.transparency;
-  if (line.heads === 'start' || line.heads === 'both') props.beginArrowType = 'triangle';
-  if (line.heads === 'end' || line.heads === 'both') props.endArrowType = 'triangle';
-  slide.addShape('line', {
+  const props = segmentLine(line, options);
+  const common = {
+    line: props,
+    ...(options.hyperlink ? { hyperlink: options.hyperlink } : {}),
+    objectName: objectName(options.namePrefix, name, line.userGroup),
+    ...objectProps(line),
+  };
+  if (line.kind === 'curve' || line.kind === 'polyline' || line.kind === 'scribble') {
+    const box = segmentBox(line);
+    if (line.kind === 'curve' && (line.points?.length ?? 0) > 2)
+      options.residual?.add(
+        `paths: ${options.namePrefix}#${line.blockId} is a curve through its points; the file holds the sheet's Catmull-Rom cubics as a:cubicBezTo segments (gslides-parity SPEC-2 2.4.3)`,
+      );
+    slide.addShape(prst('custGeom'), {
+      x: pxToIn(box.x),
+      y: pxToIn(box.y),
+      w: pxToIn(box.w),
+      h: pxToIn(box.h),
+      points: customGeometryPoints(line, box),
+      fill: line.closed && line.fill ? fillProps(line.fill, options.paperHex) : { type: 'none' },
+      ...common,
+    });
+    return;
+  }
+  const flipH = x2 < x1;
+  const flipV = y2 < y1;
+  const geometry = {
     x: pxToIn(Math.min(x1, x2)),
     y: pxToIn(Math.min(y1, y2)),
     w: pxToIn(Math.abs(x2 - x1)),
     h: pxToIn(Math.abs(y2 - y1)),
-    ...(x2 < x1 ? { flipH: true } : {}),
-    ...(y2 < y1 ? { flipV: true } : {}),
-    line: props,
-    ...(options.hyperlink ? { hyperlink: options.hyperlink } : {}),
-    objectName: `${options.namePrefix}#${name}`,
+  };
+  if (line.kind === 'elbow' || line.kind === 'curved') {
+    slide.addShape(prst(connectorPreset(line.kind)), {
+      ...geometry,
+      ...(flipH ? { flipH: true } : {}),
+      ...(flipV ? { flipV: true } : {}),
+      fill: { type: 'none' },
+      ...common,
+    });
+    return;
+  }
+  slide.addShape('line', {
+    ...geometry,
+    ...(flipH ? { flipH: true } : {}),
+    ...(flipV ? { flipV: true } : {}),
+    ...common,
   });
 }

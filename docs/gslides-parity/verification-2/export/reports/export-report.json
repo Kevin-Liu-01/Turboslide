@@ -1,0 +1,438 @@
+{
+  "deckId": "gslides",
+  "revision": 1,
+  "format": "pdf",
+  "mode": "flatten",
+  "theme": "light",
+  "fontSet": "exact",
+  "fontSetVersion": "inter-variable",
+  "files": [
+    {
+      "path": "/Users/kevinliu/repos/Turboslide/.turboslide/gs-pdf/gslides-light.pdf",
+      "bytes": 847969,
+      "sha256": "28577d15c29143e39041fc64bc94491854b88094aa4eaf8adcb5d0dd5510aa20"
+    }
+  ],
+  "fonts": {
+    "embedded": [
+      "Inter"
+    ],
+    "requiredOnViewer": [],
+    "substitutedIn": []
+  },
+  "slides": [
+    {
+      "slideId": "title",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 951,
+        "fraction": 0.00016510416666666667,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/01-title@2x.png",
+        "got": "pages/page-01.png",
+        "diff": "01-title.diff.png"
+      }
+    },
+    {
+      "slideId": "breaks",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 2030,
+        "fraction": 0.00035243055555555554,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/02-breaks@2x.png",
+        "got": "pages/page-02.png",
+        "diff": "02-breaks.diff.png"
+      }
+    },
+    {
+      "slideId": "table",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 1034,
+        "fraction": 0.0001795138888888889,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/03-table@2x.png",
+        "got": "pages/page-03.png",
+        "diff": "03-table.diff.png"
+      }
+    },
+    {
+      "slideId": "numbered",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 1272,
+        "fraction": 0.00022083333333333333,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/04-numbered@2x.png",
+        "got": "pages/page-04.png",
+        "diff": "04-numbered.diff.png"
+      }
+    },
+    {
+      "slideId": "links",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 905,
+        "fraction": 0.00015711805555555555,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/05-links@2x.png",
+        "got": "pages/page-05.png",
+        "diff": "05-links.diff.png"
+      }
+    },
+    {
+      "slideId": "prompt",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 183,
+        "fraction": 0.00003177083333333333,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/06-prompt@2x.png",
+        "got": "pages/page-06.png",
+        "diff": "06-prompt.diff.png"
+      }
+    },
+    {
+      "slideId": "styles",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 2501,
+        "fraction": 0.00043420138888888886,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/07-styles@2x.png",
+        "got": "pages/page-07.png",
+        "diff": "07-styles.diff.png"
+      }
+    },
+    {
+      "slideId": "canvas-title",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 2590,
+        "fraction": 0.00044965277777777777,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/08-canvas-title@2x.png",
+        "got": "pages/page-08.png",
+        "diff": "08-canvas-title.diff.png"
+      }
+    },
+    {
+      "slideId": "canvas-opener",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 86134,
+        "pictureFraction": 0.014953819444444445,
+        "blocks": [],
+        "ref": "reference/09-canvas-opener@2x.png",
+        "got": "pages/page-09.png",
+        "diff": "09-canvas-opener.diff.png"
+      }
+    },
+    {
+      "slideId": "rotated",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 589,
+        "fraction": 0.00011338409758193493,
+        "scale": 2,
+        "pictureMismatch": 11471,
+        "pictureFraction": 0.020293029147236356,
+        "blocks": [],
+        "ref": "reference/10-rotated@2x.png",
+        "got": "pages/page-10.png",
+        "diff": "10-rotated.diff.png"
+      }
+    },
+    {
+      "slideId": "grouped",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 841,
+        "fraction": 0.00014600694444444446,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/11-grouped@2x.png",
+        "got": "pages/page-11.png",
+        "diff": "11-grouped.diff.png"
+      }
+    },
+    {
+      "slideId": "shapes",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 1011,
+        "fraction": 0.00017552083333333333,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/12-shapes@2x.png",
+        "got": "pages/page-12.png",
+        "diff": "12-shapes.diff.png"
+      }
+    },
+    {
+      "slideId": "lines",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 490,
+        "fraction": 0.00008506944444444444,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/13-lines@2x.png",
+        "got": "pages/page-13.png",
+        "diff": "13-lines.diff.png"
+      }
+    },
+    {
+      "slideId": "word-art",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 5915,
+        "fraction": 0.0010269097222222222,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/14-word-art@2x.png",
+        "got": "pages/page-14.png",
+        "diff": "14-word-art.diff.png"
+      }
+    },
+    {
+      "slideId": "shadow",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 2212,
+        "fraction": 0.0004093460437870727,
+        "scale": 2,
+        "pictureMismatch": 12292,
+        "pictureFraction": 0.03450298799468926,
+        "blocks": [],
+        "ref": "reference/15-shadow@2x.png",
+        "got": "pages/page-15.png",
+        "diff": "15-shadow.diff.png"
+      }
+    },
+    {
+      "slideId": "background-color",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 1326,
+        "fraction": 0.00023020833333333332,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/16-background-color@2x.png",
+        "got": "pages/page-16.png",
+        "diff": "16-background-color.diff.png"
+      }
+    },
+    {
+      "slideId": "background-picture",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 0,
+        "fraction": 0,
+        "scale": 2,
+        "pictureMismatch": 91665,
+        "pictureFraction": 0.0159140625,
+        "blocks": [],
+        "ref": "reference/17-background-picture@2x.png",
+        "got": "pages/page-17.png",
+        "diff": "17-background-picture.diff.png"
+      }
+    },
+    {
+      "slideId": "image-tools",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 326,
+        "fraction": 0.00007168808733104372,
+        "scale": 2,
+        "pictureMismatch": 16894,
+        "pictureFraction": 0.01393294307237312,
+        "blocks": [],
+        "ref": "reference/18-image-tools@2x.png",
+        "got": "pages/page-18.png",
+        "diff": "18-image-tools.diff.png"
+      }
+    },
+    {
+      "slideId": "table-merge",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 1062,
+        "fraction": 0.000184375,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/19-table-merge@2x.png",
+        "got": "pages/page-19.png",
+        "diff": "19-table-merge.diff.png"
+      }
+    },
+    {
+      "slideId": "chart-bar",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 1334,
+        "fraction": 0.00023159722222222223,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/20-chart-bar@2x.png",
+        "got": "pages/page-20.png",
+        "diff": "20-chart-bar.diff.png"
+      }
+    },
+    {
+      "slideId": "chart-line",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 1949,
+        "fraction": 0.00033836805555555557,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/21-chart-line@2x.png",
+        "got": "pages/page-21.png",
+        "diff": "21-chart-line.diff.png"
+      }
+    },
+    {
+      "slideId": "chart-pie",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 1359,
+        "fraction": 0.0002359375,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/22-chart-pie@2x.png",
+        "got": "pages/page-22.png",
+        "diff": "22-chart-pie.diff.png"
+      }
+    },
+    {
+      "slideId": "diagram",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 671,
+        "fraction": 0.00011649305555555556,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/23-diagram@2x.png",
+        "got": "pages/page-23.png",
+        "diff": "23-diagram.diff.png"
+      }
+    },
+    {
+      "slideId": "bullets",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 2502,
+        "fraction": 0.000434375,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/24-bullets@2x.png",
+        "got": "pages/page-24.png",
+        "diff": "24-bullets.diff.png"
+      }
+    },
+    {
+      "slideId": "spacing",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 2454,
+        "fraction": 0.0004260416666666667,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/25-spacing@2x.png",
+        "got": "pages/page-25.png",
+        "diff": "25-spacing.diff.png"
+      }
+    },
+    {
+      "slideId": "autofit",
+      "theme": "light",
+      "native": [],
+      "raster": [],
+      "verify": {
+        "mismatch": 1946,
+        "fraction": 0.00033784722222222224,
+        "scale": 2,
+        "blocks": [],
+        "ref": "reference/26-autofit@2x.png",
+        "got": "pages/page-26.png",
+        "diff": "26-autofit.diff.png"
+      }
+    }
+  ],
+  "geometryInBounds": true,
+  "perfect": false,
+  "passed": true,
+  "residual": [
+    "renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+    "pdf: 26 page(s) at 960 by 540 pt (13.333 by 7.5 in), 847969 bytes, light; the text is vector and searchable; notes never travel",
+    "pdf gate: the file holds 26 page(s) for 26 slide(s)",
+    "pdf: the first page measures 960 by 540 pt",
+    "skipped: 1 slide(s) left out (skipped); pass includeSkipped to carry them",
+    "pdf gate: pdftoppm at 3200 by 1800 against the 2x web render, pixelmatch threshold 0.1, the picture regions (img, canvas, raster elements) compared separately; target 0.1 percent per page, fail over 0.5; 26 page(s) measured, 1 over the target, 0 over the fail line",
+    "pdf gate: worst page 14 (word-art) at 0.103 percent outside its pictures, ships with this note",
+    "pdf pictures: 5 page(s) carry pictures; inside their boxes the worst is page 15 (shadow) at 3.450 percent (informational: the file holds the picture bytes and a viewer resamples them with its own filter)"
+  ]
+}

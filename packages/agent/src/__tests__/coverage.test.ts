@@ -7,8 +7,8 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import { document as lintFixture } from '@turboslide/lint/fixtures/deck';
-import { lintStatic } from '@turboslide/lint/run';
+import { document as lintFixture, renderedRecords } from '@turboslide/lint/fixtures/deck';
+import { lintDeck } from '@turboslide/lint/run';
 import { ACTION_IDS, ACTIONS, actionsInOrder, actionsOn } from '@turboslide/schema/actions';
 import type { ActionId } from '@turboslide/schema/actions';
 import { applyMutations } from '@turboslide/schema/reduce';
@@ -97,7 +97,7 @@ describe('every action', () => {
 
   it('is named in at least one test or spec file once its milestone has landed', () => {
     const files = testFiles();
-    const landed: ReadonlySet<string> = new Set(['M1', 'M2', 'M3', 'M4', 'GS1']);
+    const landed: ReadonlySet<string> = new Set(['M1', 'M2', 'M3', 'M4', 'GS1', 'GS2']);
     const named = (spec: (typeof rows)[number][1]): string[] => [
       `'${spec.id}'`,
       `"${spec.id}"`,
@@ -186,7 +186,8 @@ describe('every rule with a fix', () => {
   const fixable = rulesInOrder()
     .filter((rule) => rule.fix)
     .map((rule) => rule.id);
-  const findings = lintStatic(lintFixture);
+  // both layers: a rendered rule's fixture is the record the lint fixture deck carries for it
+  const findings = lintDeck(lintFixture, renderedRecords);
 
   it.each(fixable)(
     '%s produces a finding with fix mutations on the fixture deck, and the fix applies',
@@ -198,7 +199,7 @@ describe('every rule with a fix', () => {
       const first = withFix[0]!;
       const applied = applyMutations(lintFixture, first.fix ?? []);
       expect(applied.document.deck.id).toBe(lintFixture.deck.id);
-      const after = lintStatic(applied.document).filter(
+      const after = lintDeck(applied.document, renderedRecords).filter(
         (finding) =>
           finding.rule === rule &&
           finding.slideId === first.slideId &&

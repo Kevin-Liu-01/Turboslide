@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "id": "grouped",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "A group of four objects",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 900,
+          "h": 56,
+          "z": 0
+        }
+      },
+      {
+        "id": "s1",
+        "type": "shape",
+        "shape": "rect",
+        "stroke": "ink",
+        "pos": {
+          "x": 240,
+          "y": 300,
+          "w": 240,
+          "h": 160,
+          "z": 1,
+          "group": "four"
+        }
+      },
+      {
+        "id": "s2",
+        "type": "shape",
+        "shape": "ellipse",
+        "stroke": "ink",
+        "pos": {
+          "x": 520,
+          "y": 300,
+          "w": 240,
+          "h": 160,
+          "z": 2,
+          "group": "four"
+        }
+      },
+      {
+        "id": "s3",
+        "type": "shape",
+        "shape": "triangle",
+        "stroke": "ink",
+        "pos": {
+          "x": 800,
+          "y": 300,
+          "w": 240,
+          "h": 160,
+          "z": 3,
+          "group": "four"
+        }
+      },
+      {
+        "id": "label",
+        "type": "text",
+        "text": "One group tag on three shapes and this text box",
+        "padding": 16,
+        "pos": {
+          "x": 240,
+          "y": 500,
+          "w": 800,
+          "h": 48,
+          "z": 4,
+          "group": "four"
+        }
+      }
+    ]
+  },
+  "template": "blank"
+}

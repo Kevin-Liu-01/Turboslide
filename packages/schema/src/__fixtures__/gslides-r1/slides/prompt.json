@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "prompt",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": ""
+      }
+    ]
+  },
+  "template": "title-only"
+}

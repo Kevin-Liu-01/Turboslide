@@ -13,7 +13,10 @@ export type ShapeBounds = {
   name: string;
   off: [number, number];
   ext: [number, number];
+  /** The shape shows on the page: inside it, or crossing its edge (gslides-parity SPEC-2 0.96). */
   inBounds: boolean;
+  /** The shape crosses a page edge: part of it is past the edge, which the show clips (0.96). */
+  crossing?: boolean;
 };
 
 /** A shape is in bounds when its box lies inside the page with a one-pixel (7,620 EMU) tolerance. */
@@ -26,19 +29,40 @@ export function inPage(off: [number, number], ext: [number, number], tolerance =
   );
 }
 
+/**
+ * A shape shows when some of it lies on the page (gslides-parity SPEC-2 0.96): an object a person
+ * dragged past the sheet's edge is written at its box and the show clips it, so it is not out of
+ * bounds; a shape wholly off the page is.
+ */
+export function showsOnPage(
+  off: [number, number],
+  ext: [number, number],
+  tolerance = 7620,
+): boolean {
+  return (
+    off[0] + ext[0] > -tolerance &&
+    off[1] + ext[1] > -tolerance &&
+    off[0] < PAGE_EMU.width + tolerance &&
+    off[1] < PAGE_EMU.height + tolerance
+  );
+}
+
 /** Every shape of every slide part. Group children are read through their own xfrm. */
 export async function readGeometry(zip: Package): Promise<ShapeBounds[]> {
   const out: ShapeBounds[] = [];
   for (const part of slideParts(zip)) {
     const xml = await readPart(zip, part);
     for (const shape of listShapes(xml)) {
+      const inside = inPage(shape.off, shape.ext);
+      const shows = showsOnPage(shape.off, shape.ext);
       out.push({
         part,
         id: shape.id,
         name: shape.name,
         off: shape.off,
         ext: shape.ext,
-        inBounds: inPage(shape.off, shape.ext),
+        inBounds: shows,
+        ...(shows && !inside ? { crossing: true } : {}),
       });
     }
   }

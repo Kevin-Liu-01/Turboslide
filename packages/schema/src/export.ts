@@ -64,6 +64,9 @@ export const NATIVE_BLOCK_TYPES = [
   // the table block is a PPTX table in Editable text, with the ruled rows construction as the
   // fallback named in `residual` when a cell misses the 3 px budget (gslides-parity SPEC 7.3)
   'table',
+  // the chart block is a native chart part through addChart in Editable text (gslides-parity
+  // SPEC-2 0.24); its box is a picture region in the verify loop
+  'chart',
 ] as const;
 
 export type NativeBlockType = (typeof NATIVE_BLOCK_TYPES)[number];
@@ -406,6 +409,16 @@ export type ExportCheck = {
   kernZero: number;
   shapes: number;
   outOfBounds: number;
+  /** The parity round two counts (gslides-parity SPEC-2 11.3), written by exports of this round. */
+  italicRuns?: number;
+  rotated?: number;
+  groups?: number;
+  charts?: number;
+  connectors?: number;
+  numCol?: number;
+  avLst?: number;
+  tables?: number;
+  mergedCells?: number;
   relationships: { checked: number; invalid: string[] };
   contentTypes: { undeclared: string[]; missingOverrides: string[] };
   pythonPptx: { ran: boolean; python?: string; slides?: number; shapes?: number; error?: string };
@@ -439,6 +452,15 @@ export const exportCheckSchema = z.strictObject({
   kernZero: z.number().int().nonnegative(),
   shapes: z.number().int().nonnegative(),
   outOfBounds: z.number().int().nonnegative(),
+  italicRuns: z.number().int().nonnegative().optional(),
+  rotated: z.number().int().nonnegative().optional(),
+  groups: z.number().int().nonnegative().optional(),
+  charts: z.number().int().nonnegative().optional(),
+  connectors: z.number().int().nonnegative().optional(),
+  numCol: z.number().int().nonnegative().optional(),
+  avLst: z.number().int().nonnegative().optional(),
+  tables: z.number().int().nonnegative().optional(),
+  mergedCells: z.number().int().nonnegative().optional(),
   relationships: z.strictObject({
     checked: z.number().int().nonnegative(),
     invalid: z.array(z.string()),

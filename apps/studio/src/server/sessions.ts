@@ -49,7 +49,7 @@ function requireActions(value: unknown): string[] {
   if (!Array.isArray(value) || !value.every((item) => typeof item === 'string')) {
     throw new TypeError('actions must be a list of action ids');
   }
-  return value as string[];
+  return value;
 }
 
 function optionalState(value: unknown): Record<string, unknown> | undefined {

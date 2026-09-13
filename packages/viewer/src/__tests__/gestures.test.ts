@@ -7,6 +7,7 @@ import {
   actionForMutation,
   actionForMutations,
   blockMoveFor,
+  blockMoveHandle,
   drawnBox,
   dropIndexFor,
   dropSlotFor,
@@ -66,17 +67,31 @@ describe('handlesFor', () => {
   it('offers the column seam always and the key edge of a selected rows block at its key', () => {
     const none = handlesFor(slide, boxes, null);
     expect(none.map((h) => h.kind)).toEqual(['col-seam']);
+    /* every object of every slide kind carries the canvas handles (gslides-parity SPEC-2 1.1,
+       6.1): the chip, the eight squares and the rotation ring, then the grammar's own property
+       handles; the round one block-move chip is gone (the chip moves the object and converts) */
     const selected = handlesFor(slide, boxes, { kind: 'block', blockId: 'list' });
-    expect(selected.map((h) => h.kind)).toEqual(['col-seam', 'block-move', 'key-edge']);
+    expect(selected.map((h) => h.kind)).toEqual([
+      'col-seam',
+      'free-move',
+      ...Array<string>(8).fill('free-resize'),
+      'free-rotate',
+      'key-edge',
+    ]);
     const edge = handle('key-edge', selected);
     expect(edge.box[0] + edge.box[2] / 2).toBe(731.5 + 200);
     expect(edge.label).toBe('list: Key column edge');
     expect(edge.control).toBe('handle.list.key');
   });
 
-  it('gives a heading no property handle beyond its chip', () => {
+  it('gives a heading no property handle beyond the canvas handles', () => {
     const forHeading = handlesFor(slide, boxes, { kind: 'block', blockId: 'h' });
-    expect(forHeading.map((h) => h.kind)).toEqual(['col-seam', 'block-move']);
+    expect(forHeading.map((h) => h.kind)).toEqual([
+      'col-seam',
+      'free-move',
+      ...Array<string>(8).fill('free-resize'),
+      'free-rotate',
+    ]);
   });
 });
 
@@ -357,8 +372,9 @@ describe('nudgeMutation', () => {
     });
   });
 
-  it('moves a block one position from the keyboard', () => {
-    const chip = handle('block-move', handlesFor(slide, boxes, { kind: 'block', blockId: 'h' }));
+  it('moves a block one position from the keyboard (the round one slot reorder, blockMoveHandle)', () => {
+    const chip = blockMoveHandle(slide, boxes, 'h');
+    if (!chip) throw new Error('no block-move handle');
     expect(nudgeMutation(chip, ctx, 1)).toEqual({
       op: 'block.move',
       slideId: 'positioning',
@@ -367,7 +383,8 @@ describe('nudgeMutation', () => {
       after: 'p1',
     });
     expect(nudgeMutation(chip, ctx, -1)).toBeNull();
-    const second = handle('block-move', handlesFor(slide, boxes, { kind: 'block', blockId: 'p1' }));
+    const second = blockMoveHandle(slide, boxes, 'p1');
+    if (!second) throw new Error('no block-move handle');
     expect(nudgeMutation(second, ctx, -1)).toEqual({
       op: 'block.move',
       slideId: 'positioning',
@@ -490,7 +507,9 @@ describe('declared diagram labels and markers (SPEC 6.4 Alt-drag, M5)', () => {
     const list = handlesFor(dia, diaBoxes, { kind: 'block', blockId: 'dia1' });
     expect(list.map((h) => h.kind)).toEqual([
       'col-seam',
-      'block-move',
+      'free-move',
+      ...Array<string>(8).fill('free-resize'),
+      'free-rotate',
       'dia-marker',
       'dia-marker',
       'dia-label',
@@ -687,7 +706,14 @@ describe('draw tools', () => {
       slideId: 'free',
       slot: 'main',
       after: 'a',
-      block: { id: 'text', type: 'text', text: '', pos: { x: 304, y: 296, w: 480, h: 64, z: 3 } },
+      /* a new text box inserts with autofit grow (gslides-parity SPEC-2 6.2 Autofit) */
+      block: {
+        id: 'text',
+        type: 'text',
+        text: '',
+        autofit: 'grow',
+        pos: { x: 304, y: 296, w: 480, h: 64, z: 3 },
+      },
     });
     const onGrammar = toolInsertMutation(
       slide,

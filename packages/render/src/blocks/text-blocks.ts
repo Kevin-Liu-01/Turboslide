@@ -1,12 +1,29 @@
 // heading, paragraph and credit (SPEC 4.2; head:57-68 for the ladder, s01:8-10 for the plate).
 // A heading or paragraph may carry `typography` (typography.ts): its declarations are written
 // inline after the margins, so an absent record leaves the grammar's step untouched.
-import { el, style } from '../html.ts';
+import { el, px, style } from '../html.ts';
 import type { BlockOf } from '@turboslide/schema/blocks';
+import type { Typography } from '@turboslide/schema/typography';
 import { typographyDeclarations } from '@turboslide/schema/typography';
 import { rootAttrs, runAttr } from './context.ts';
 import type { BlockContext } from './context.ts';
 import { renderMultiline, renderTextOrPrompt } from './prompt.ts';
+
+/**
+ * The paragraph spacing of gslides-parity SPEC-2 2.2.9 as the two custom properties the `.para`
+ * rules of block-css.ts read (`--para-before` above every paragraph but the first, `--para-after`
+ * under every paragraph but the last); nothing when the typography sets neither, so a block
+ * written before this round renders byte for byte.
+ */
+export function paraSpacingDeclarations(typography: Typography | undefined): string[] {
+  if (typography === undefined) return [];
+  const out: string[] = [];
+  if (typography.spaceBefore !== undefined && typography.spaceBefore > 0)
+    out.push(`--para-before:${px(typography.spaceBefore)}px`);
+  if (typography.spaceAfter !== undefined && typography.spaceAfter > 0)
+    out.push(`--para-after:${px(typography.spaceAfter)}px`);
+  return out;
+}
 
 export function renderHeading(block: BlockOf<'heading'>, ctx: BlockContext): string {
   const text = renderTextOrPrompt(block.text, ctx, block, '/text');
@@ -59,6 +76,7 @@ export function renderParagraph(block: BlockOf<'paragraph'>, ctx: BlockContext):
     measure.style,
     block.marginTop !== undefined && `margin-top:${block.marginTop}px`,
     ...typographyDeclarations(block.typography),
+    ...paraSpacingDeclarations(block.typography),
   );
   return el(
     'p',

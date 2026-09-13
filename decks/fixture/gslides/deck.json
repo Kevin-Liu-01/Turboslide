@@ -14,14 +14,67 @@
         "numbered",
         "links",
         "skipped",
-        "prompt"
+        "prompt",
+        "styles",
+        "canvas-title"
+      ]
+    },
+    {
+      "id": "canvas",
+      "name": "Canvas",
+      "slideIds": [
+        "canvas-opener",
+        "rotated",
+        "grouped",
+        "shapes",
+        "lines",
+        "word-art",
+        "shadow",
+        "background-color",
+        "background-picture",
+        "image-tools",
+        "table-merge",
+        "chart-bar",
+        "chart-line",
+        "chart-pie",
+        "diagram",
+        "bullets",
+        "spacing",
+        "autofit"
       ]
     }
   ],
-  "assets": {},
+  "assets": {
+    "fixture-photo": {
+      "id": "fixture-photo",
+      "role": "other",
+      "alt": "Fixture geometry: a disc, a triangle, a horizon rule and a hatched band, drawn in one bit",
+      "twins": {
+        "light": "assets/fixture-photo-light.jpg",
+        "dark": "assets/fixture-photo-dark.jpg"
+      },
+      "size": [
+        1600,
+        900
+      ],
+      "scale": 1,
+      "source": {
+        "kind": "file"
+      },
+      "inline": "two-color"
+    }
+  },
   "defaults": {
     "appearance": "light",
     "counter": "on"
+  },
+  "guides": {
+    "x": [
+      800
+    ],
+    "y": [
+      450
+    ]
   },
   "revision": 1,
   "createdAt": "2026-09-12T00:00:00.000Z",

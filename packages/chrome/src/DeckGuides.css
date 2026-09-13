@@ -1,0 +1,63 @@
+/* The deck's guide lines (DeckGuides.tsx; gslides-parity SPEC-2 6.1 row 30), drawn inside the
+   overlay layer in CSS pixels. Line law (SPEC 2.2): a guide is a 1px dashed --pt-titanium rule
+   drawn through ::before down the middle of a 7px hit strip that takes the pointer, so the line
+   stays one pixel at every stage scale and a person can still grab it. The readout is a filled
+   label in ink on paper. Nothing animates. */
+.ts-deck-guide {
+  position: absolute;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.ts-deck-guide[data-axis='x'] {
+  width: 7px;
+  cursor: ew-resize;
+}
+
+.ts-deck-guide[data-axis='y'] {
+  height: 7px;
+  cursor: ns-resize;
+}
+
+.ts-deck-guide::before {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.ts-deck-guide[data-axis='x']::before {
+  left: 3px;
+  top: 0;
+  bottom: 0;
+  border-left: 1px dashed var(--pt-titanium);
+}
+
+.ts-deck-guide[data-axis='y']::before {
+  top: 3px;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--pt-titanium);
+}
+
+.ts-deck-guide.is-new {
+  pointer-events: none;
+}
+
+.ts-deck-guide:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-guide-readout {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  height: 18px;
+  padding: 0 6px;
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  font: 500 13px/1 var(--pt-text);
+  white-space: nowrap;
+  pointer-events: none;
+}

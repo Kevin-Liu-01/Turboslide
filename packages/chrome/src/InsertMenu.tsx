@@ -2,7 +2,6 @@ import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import type { ShapeKind } from '@turboslide/schema/blocks';
-import { SHAPE_KINDS } from '@turboslide/schema/blocks';
 import type { IconName as SpriteIconName } from '@turboslide/schema/icons';
 import { setAt } from '@turboslide/schema/pointer';
 
@@ -11,6 +10,7 @@ import { IconPicker } from './IconPicker';
 import { Icon } from './icons';
 import { cn } from './lib/cn';
 import type { PaletteEntry, PaletteRun } from './palette-data';
+import { LEGACY_SHAPE_VARIANTS } from './palette-data';
 import { ToolButton } from './ToolButton';
 import { tipProps } from './Tooltip';
 
@@ -283,7 +283,7 @@ export function InsertMenu({ entries, dispatch, onNotice, className }: InsertMen
                   </span>
                   <span className="ts-insert-t">Shape</span>
                   <span className="ts-insert-variants">
-                    {SHAPE_KINDS.map((kind) => {
+                    {LEGACY_SHAPE_VARIANTS.map((kind) => {
                       const entry = shapes.find((candidate) => candidate.variant === kind);
                       if (entry === undefined) return null;
                       return (

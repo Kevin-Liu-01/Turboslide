@@ -1,5 +1,5 @@
 {
-  "$comment": "Google Slides' menu items as R01 transcribed them on 2026-09-11 (docs/gslides-parity/research/01-menu-bar.md), one entry per Google item with its label as the report prints it and its path of parent labels. The title row and the Slideshow arrow come from R01 'Menu bar placement and behaviour' plus SPEC 2.0, which names the controls R01 describes without a label (Document status, Record, Ask Gemini); each such entry says so in `source`. Items R01 marks unverified carry `unverified: true`. menu-model.test.ts asserts every entry is in the model with a status.",
+  "$comment": "Google Slides' menu items as R01 transcribed them on 2026-09-11 (docs/gslides-parity/research/01-menu-bar.md), one entry per Google item with its label as the report prints it and its path of parent labels. The title row and the Slideshow arrow come from R01 'Menu bar placement and behaviour' plus SPEC 2.0, which names the controls R01 describes without a label (Document status, Record, Ask Gemini); each such entry says so in `source`. Round two (SPEC-2 section 4) adds the submenu rows R05 attests and R01 only names as a submenu: the Capitalization options (R05 B1), the paragraph spacing toggles (R05 B3, S52), the six dashes and the ten line decorations (R05 A10; the labels are the enum values in sentence case, Google prints no tooltip names); each such entry names its report in `source`. Items R01 marks unverified carry `unverified: true`. menu-model.test.ts asserts every entry is in the model with a status.",
   "menus": [
     {
       "menu": "Title row",
@@ -179,6 +179,21 @@
         { "label": "Increase font size", "path": ["Text", "Size"] },
         { "label": "Decrease font size", "path": ["Text", "Size"] },
         { "label": "Capitalization", "path": ["Text"] },
+        {
+          "label": "lowercase",
+          "path": ["Text", "Capitalization"],
+          "source": "R05 B1, R01 Format"
+        },
+        {
+          "label": "UPPERCASE",
+          "path": ["Text", "Capitalization"],
+          "source": "R05 B1, R01 Format"
+        },
+        {
+          "label": "Title Case",
+          "path": ["Text", "Capitalization"],
+          "source": "R05 B1, R01 Format"
+        },
         { "label": "Align & indent", "path": [] },
         { "label": "Left", "path": ["Align & indent"] },
         { "label": "Center", "path": ["Align & indent"] },
@@ -193,6 +208,16 @@
         { "label": "1.5", "path": ["Line & paragraph spacing"] },
         { "label": "Double", "path": ["Line & paragraph spacing"] },
         { "label": "Custom spacing", "path": ["Line & paragraph spacing"] },
+        {
+          "label": "Add space before paragraph",
+          "path": ["Line & paragraph spacing"],
+          "source": "R05 B3 (S52)"
+        },
+        {
+          "label": "Add space after paragraph",
+          "path": ["Line & paragraph spacing"],
+          "source": "R05 B3 (S52)"
+        },
         { "label": "Bullets & numbering", "path": [] },
         { "label": "Numbered list", "path": ["Bullets & numbering"] },
         { "label": "Bulleted list", "path": ["Bullets & numbering"] },
@@ -222,8 +247,90 @@
         { "label": "Border color", "path": ["Borders & lines"] },
         { "label": "Border weight", "path": ["Borders & lines"] },
         { "label": "Border dash", "path": ["Borders & lines"] },
+        { "label": "Solid", "path": ["Borders & lines", "Border dash"], "source": "R05 A10 (S24)" },
+        { "label": "Dot", "path": ["Borders & lines", "Border dash"], "source": "R05 A10 (S24)" },
+        { "label": "Dash", "path": ["Borders & lines", "Border dash"], "source": "R05 A10 (S24)" },
+        {
+          "label": "Dash dot",
+          "path": ["Borders & lines", "Border dash"],
+          "source": "R05 A10 (S24)"
+        },
+        {
+          "label": "Long dash",
+          "path": ["Borders & lines", "Border dash"],
+          "source": "R05 A10 (S24)"
+        },
+        {
+          "label": "Long dash dot",
+          "path": ["Borders & lines", "Border dash"],
+          "source": "R05 A10 (S24)"
+        },
         { "label": "Line start", "path": ["Borders & lines"], "unverified": true },
+        { "label": "None", "path": ["Borders & lines", "Line start"], "source": "R05 A10 (S23)" },
+        { "label": "Arrow", "path": ["Borders & lines", "Line start"], "source": "R05 A10 (S23)" },
+        {
+          "label": "Stealth arrow",
+          "path": ["Borders & lines", "Line start"],
+          "source": "R05 A10 (S23)"
+        },
+        { "label": "Circle", "path": ["Borders & lines", "Line start"], "source": "R05 A10 (S23)" },
+        { "label": "Square", "path": ["Borders & lines", "Line start"], "source": "R05 A10 (S23)" },
+        {
+          "label": "Diamond",
+          "path": ["Borders & lines", "Line start"],
+          "source": "R05 A10 (S23)"
+        },
+        {
+          "label": "Open arrow",
+          "path": ["Borders & lines", "Line start"],
+          "source": "R05 A10 (S23)"
+        },
+        {
+          "label": "Open circle",
+          "path": ["Borders & lines", "Line start"],
+          "source": "R05 A10 (S23)"
+        },
+        {
+          "label": "Open square",
+          "path": ["Borders & lines", "Line start"],
+          "source": "R05 A10 (S23)"
+        },
+        {
+          "label": "Open diamond",
+          "path": ["Borders & lines", "Line start"],
+          "source": "R05 A10 (S23)"
+        },
         { "label": "Line end", "path": ["Borders & lines"], "unverified": true },
+        { "label": "None", "path": ["Borders & lines", "Line end"], "source": "R05 A10 (S23)" },
+        { "label": "Arrow", "path": ["Borders & lines", "Line end"], "source": "R05 A10 (S23)" },
+        {
+          "label": "Stealth arrow",
+          "path": ["Borders & lines", "Line end"],
+          "source": "R05 A10 (S23)"
+        },
+        { "label": "Circle", "path": ["Borders & lines", "Line end"], "source": "R05 A10 (S23)" },
+        { "label": "Square", "path": ["Borders & lines", "Line end"], "source": "R05 A10 (S23)" },
+        { "label": "Diamond", "path": ["Borders & lines", "Line end"], "source": "R05 A10 (S23)" },
+        {
+          "label": "Open arrow",
+          "path": ["Borders & lines", "Line end"],
+          "source": "R05 A10 (S23)"
+        },
+        {
+          "label": "Open circle",
+          "path": ["Borders & lines", "Line end"],
+          "source": "R05 A10 (S23)"
+        },
+        {
+          "label": "Open square",
+          "path": ["Borders & lines", "Line end"],
+          "source": "R05 A10 (S23)"
+        },
+        {
+          "label": "Open diamond",
+          "path": ["Borders & lines", "Line end"],
+          "source": "R05 A10 (S23)"
+        },
         { "label": "Format options", "path": [] },
         { "label": "Clear formatting", "path": [] }
       ]

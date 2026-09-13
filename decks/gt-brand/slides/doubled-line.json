@@ -39,6 +39,7 @@
     "right": [
       {
         "id": "dia1",
+        "alt": "One path stroked 6px in ink and then 3px in paper, shown as a curve with a junction and as two enlarged bars",
         "type": "dia",
         "fit": {
           "viewBox": [
@@ -48,8 +49,7 @@
             480
           ]
         },
-        "svg": "<svg class=\"dia\" viewBox=\"0 40 800 480\" aria-label=\"One path stroked 6px in ink and then 3px in paper, shown as a curve with a junction and as two enlarged bars\">\n          <path d=\"M40 300 C 240 300, 300 80, 480 80 S 700 260, 760 150\" fill=\"none\" class=\"ink\" stroke-width=\"6\" vector-effect=\"non-scaling-stroke\"></path>\n          <path d=\"M480 80 C 560 80, 640 240, 760 300\" fill=\"none\" class=\"ink\" stroke-width=\"6\" vector-effect=\"non-scaling-stroke\"></path>\n          <path d=\"M40 300 C 240 300, 300 80, 480 80 S 700 260, 760 150\" fill=\"none\" class=\"paper\" stroke-width=\"3\" vector-effect=\"non-scaling-stroke\"></path>\n          <path d=\"M480 80 C 560 80, 640 240, 760 300\" fill=\"none\" class=\"paper\" stroke-width=\"3\" vector-effect=\"non-scaling-stroke\"></path>\n          <text x=\"40\" y=\"392\">Stroke 1: 6px in ink</text>\n          <rect x=\"40\" y=\"410\" width=\"296\" height=\"80\" fill=\"var(--ink)\"></rect>\n          <text x=\"376\" y=\"392\">Stroke 2: 3px in paper on top</text>\n          <rect x=\"376\" y=\"410\" width=\"296\" height=\"80\" fill=\"var(--ink)\"></rect>\n          <rect x=\"376\" y=\"430\" width=\"296\" height=\"40\" fill=\"var(--paper)\"></rect>\n          <text x=\"688\" y=\"420\" dominant-baseline=\"middle\">1.5px line</text>\n          <text x=\"688\" y=\"450\" dominant-baseline=\"middle\">3px gap</text>\n          <text x=\"688\" y=\"480\" dominant-baseline=\"middle\">1.5px line</text>\n        </svg>",
-        "alt": "One path stroked 6px in ink and then 3px in paper, shown as a curve with a junction and as two enlarged bars"
+        "svg": "<svg class=\"dia\" viewBox=\"0 40 800 480\" aria-label=\"One path stroked 6px in ink and then 3px in paper, shown as a curve with a junction and as two enlarged bars\">\n          <path d=\"M40 300 C 240 300, 300 80, 480 80 S 700 260, 760 150\" fill=\"none\" class=\"ink\" stroke-width=\"6\" vector-effect=\"non-scaling-stroke\"></path>\n          <path d=\"M480 80 C 560 80, 640 240, 760 300\" fill=\"none\" class=\"ink\" stroke-width=\"6\" vector-effect=\"non-scaling-stroke\"></path>\n          <path d=\"M40 300 C 240 300, 300 80, 480 80 S 700 260, 760 150\" fill=\"none\" class=\"paper\" stroke-width=\"3\" vector-effect=\"non-scaling-stroke\"></path>\n          <path d=\"M480 80 C 560 80, 640 240, 760 300\" fill=\"none\" class=\"paper\" stroke-width=\"3\" vector-effect=\"non-scaling-stroke\"></path>\n          <text x=\"40\" y=\"392\">Stroke 1: 6px in ink</text>\n          <rect x=\"40\" y=\"410\" width=\"296\" height=\"80\" fill=\"var(--ink)\"></rect>\n          <text x=\"376\" y=\"392\">Stroke 2: 3px in paper on top</text>\n          <rect x=\"376\" y=\"410\" width=\"296\" height=\"80\" fill=\"var(--ink)\"></rect>\n          <rect x=\"376\" y=\"430\" width=\"296\" height=\"40\" fill=\"var(--paper)\"></rect>\n          <text x=\"688\" y=\"420\" dominant-baseline=\"middle\">1.5px line</text>\n          <text x=\"688\" y=\"450\" dominant-baseline=\"middle\">3px gap</text>\n          <text x=\"688\" y=\"480\" dominant-baseline=\"middle\">1.5px line</text>\n        </svg>"
       }
     ]
   }

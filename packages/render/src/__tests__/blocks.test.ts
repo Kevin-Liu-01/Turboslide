@@ -80,6 +80,8 @@ describe('block catalog', () => {
       'rule',
       'text',
       'icon',
+      'picture',
+      'chart',
       'html',
     ];
     for (const type of expected) expect(types.has(type), type).toBe(true);

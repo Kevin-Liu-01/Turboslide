@@ -1,0 +1,192 @@
+/* The pickers of round two (gslides-parity SPEC-2 4.1, 6.2, section 10): the shape grids, the
+   bullet and numbering preset grids, the line decoration grid, the dash list, the colour plate and
+   the weight list. One grammar: a plate in paper with a --pt-hair frame, tiles 40 px square drawn
+   in the ink with a --pt-hair-soft edge, the pointed or focused tile in --pt-plate with an ink
+   edge, the picked one with an ink ring. Radius 0; colours are tokens only. The menu's dynamic
+   plate (.ts-menu.is-dynamic) carries the padding when a picker sits inside a submenu. */
+.ts-picker {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--pt-ink);
+  font: 13px/1.3 var(--pt-text);
+}
+
+.ts-picker-title {
+  margin: 0;
+  padding: 0 2px;
+  color: var(--pt-titanium);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.ts-picker-grid {
+  display: grid;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  outline: none;
+}
+
+.ts-picker-grid:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-picker-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--pt-hair-soft);
+  background: transparent;
+  color: var(--pt-ink);
+  cursor: pointer;
+}
+
+.ts-picker-tile.is-wide {
+  width: 96px;
+}
+
+.ts-picker-tile.is-active {
+  border-color: var(--pt-ink);
+  background: var(--pt-plate);
+}
+
+.ts-picker-tile.is-picked {
+  box-shadow: inset 0 0 0 1px var(--pt-ink);
+}
+
+.ts-picker-tile svg {
+  display: block;
+  overflow: visible;
+}
+
+.ts-picker-glyphs {
+  display: inline-flex;
+  gap: 6px;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-picker-glyphs span:nth-child(2) {
+  color: var(--pt-ink-2);
+}
+
+.ts-picker-glyphs span:nth-child(3) {
+  color: var(--pt-titanium);
+}
+
+/* the dash list: one row per dash with a 64 px sample */
+.ts-picker-list {
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  outline: none;
+}
+
+.ts-picker-list:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 28px;
+  padding: 0 8px;
+  color: var(--pt-ink);
+  cursor: pointer;
+}
+
+.ts-picker-row.is-active {
+  background: var(--pt-plate);
+}
+
+.ts-picker-row.is-picked .ts-picker-check {
+  visibility: visible;
+}
+
+.ts-picker-check {
+  width: 12px;
+  visibility: hidden;
+}
+
+/* the colour plate and the weight list anchored to a menu row or a toolbar button (SPEC-2 0.27) */
+.ts-plate-anchored {
+  position: fixed;
+  z-index: 60;
+  padding: 8px;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+}
+
+.ts-color-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 28px);
+  gap: 6px;
+}
+
+.ts-color-swatch {
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--pt-hair);
+  cursor: pointer;
+}
+
+.ts-color-swatch.is-none {
+  background:
+    linear-gradient(
+      to top right,
+      transparent calc(50% - 1px),
+      var(--pt-ink) 50%,
+      transparent calc(50% + 1px)
+    ),
+    var(--pt-paper);
+}
+
+.ts-color-swatch.is-on {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-color-swatch:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-color-hex {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--pt-titanium);
+  font-size: 12px;
+}
+
+.ts-color-hex input {
+  box-sizing: border-box;
+  width: 96px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px/1 var(--pt-mono);
+}
+
+.ts-color-hex input:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}

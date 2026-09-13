@@ -26,6 +26,7 @@
     "right": [
       {
         "id": "dia1",
+        "alt": "Machine translation as perceived and GT placed on a quality and speed field",
         "type": "dia",
         "fit": {
           "viewBox": [
@@ -35,8 +36,7 @@
             400
           ]
         },
-        "svg": "<svg class=\"dia\" viewBox=\"0 0 620 400\" aria-label=\"Machine translation as perceived and GT placed on a quality and speed field\">\n          <rect x=\"150\" y=\"40\" width=\"460\" height=\"300\" fill=\"none\" class=\"hair\" stroke-width=\"1\"></rect>\n          <text x=\"130\" y=\"52\" text-anchor=\"end\">Native level</text>\n          <text x=\"130\" y=\"340\" text-anchor=\"end\">Low quality</text>\n          <text x=\"150\" y=\"372\">Slow</text>\n          <text x=\"610\" y=\"372\" text-anchor=\"end\">Fast</text>\n          <path d=\"M550 85.5 V294.5\" class=\"mid\" stroke-width=\"1\" fill=\"none\"></path>\n          <rect x=\"544.5\" y=\"74.5\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n          <use href=\"#gt-mark\" x=\"499.94\" y=\"69.96\" width=\"30.26\" height=\"19.24\" fill=\"var(--ink)\"></use>\n          <rect x=\"544.5\" y=\"294.5\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n          <text x=\"530\" y=\"307\" text-anchor=\"end\">Machine translation as perceived</text>\n        </svg>",
-        "alt": "Machine translation as perceived and GT placed on a quality and speed field"
+        "svg": "<svg class=\"dia\" viewBox=\"0 0 620 400\" aria-label=\"Machine translation as perceived and GT placed on a quality and speed field\">\n          <rect x=\"150\" y=\"40\" width=\"460\" height=\"300\" fill=\"none\" class=\"hair\" stroke-width=\"1\"></rect>\n          <text x=\"130\" y=\"52\" text-anchor=\"end\">Native level</text>\n          <text x=\"130\" y=\"340\" text-anchor=\"end\">Low quality</text>\n          <text x=\"150\" y=\"372\">Slow</text>\n          <text x=\"610\" y=\"372\" text-anchor=\"end\">Fast</text>\n          <path d=\"M550 85.5 V294.5\" class=\"mid\" stroke-width=\"1\" fill=\"none\"></path>\n          <rect x=\"544.5\" y=\"74.5\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n          <use href=\"#gt-mark\" x=\"499.94\" y=\"69.96\" width=\"30.26\" height=\"19.24\" fill=\"var(--ink)\"></use>\n          <rect x=\"544.5\" y=\"294.5\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n          <text x=\"530\" y=\"307\" text-anchor=\"end\">Machine translation as perceived</text>\n        </svg>"
       }
     ]
   }

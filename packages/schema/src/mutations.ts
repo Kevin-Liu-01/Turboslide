@@ -91,7 +91,8 @@ export type Version = {
 export type Lease = { slideId: SlideId; holder: Author; until: string };
 
 const pointer = z.string().regex(/^(\/.*)?$/, 'a JSON pointer');
-const blockSlotSchema = z.enum([...SLOT_NAMES, 'plate']);
+export const BLOCK_SLOTS = [...SLOT_NAMES, 'plate'] as const;
+export const blockSlotSchema = z.enum(BLOCK_SLOTS);
 
 export const mutationSchema = z.discriminatedUnion('op', [
   z.strictObject({

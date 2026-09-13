@@ -1,0 +1,253 @@
+/* The shared controls of the round two Format options sections (inspector/fields.tsx;
+   gslides-parity SPEC-2 section 5). Two-up and four-up number fields, a slider with its field,
+   toggle rows of 28 px squares, radio lists, swatch rows, panel buttons. One --pt-hair frame per
+   field, ink as the pressed state, titanium for the labels and notes. Radius 0; tokens only. */
+.ts-fo-field-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ts-fo-field-box input {
+  min-width: 0;
+}
+
+.ts-fo-field-unit {
+  color: var(--pt-titanium);
+  font-size: 11px;
+}
+
+.ts-fo-fields.is-four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.ts-fo-fields.is-two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.ts-fo-slider {
+  display: grid;
+  grid-template-columns: 1fr 72px;
+  align-items: end;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.ts-fo-slider > .ts-fo-field-label {
+  grid-column: 1 / -1;
+}
+
+.ts-fo-slider input[type='range'] {
+  width: 100%;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--pt-ink);
+}
+
+.ts-fo-slider .ts-fo-field > .ts-fo-field-label {
+  display: none;
+}
+
+.ts-fo-toggles {
+  display: inline-flex;
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.ts-fo-toggle {
+  height: 28px;
+  min-width: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+}
+
+.ts-fo-toggle.pt-icon {
+  width: 28px;
+  padding: 0;
+}
+
+.ts-fo-toggle.is-on {
+  border-color: var(--pt-ink);
+  background: var(--pt-plate);
+}
+
+.ts-fo-toggle.is-disabled {
+  color: var(--pt-titanium);
+  border-color: var(--pt-hair-soft);
+  cursor: default;
+}
+
+.ts-fo-radios {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.ts-fo-radio {
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  column-gap: 8px;
+  align-items: center;
+  color: var(--pt-ink);
+}
+
+.ts-fo-radio.is-disabled {
+  color: var(--pt-titanium);
+}
+
+.ts-fo-radio input {
+  margin: 0;
+  accent-color: var(--pt-ink);
+}
+
+.ts-fo-radio .ts-fo-note {
+  grid-column: 2;
+  margin: 0;
+}
+
+.ts-fo-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+  color: var(--pt-ink);
+}
+
+.ts-fo-check input {
+  margin: 0;
+  accent-color: var(--pt-ink);
+}
+
+.ts-fo-colors {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0;
+}
+
+.ts-fo-swatches {
+  display: grid;
+  grid-template-columns: repeat(7, 24px);
+  gap: 4px;
+}
+
+.ts-fo-swatch {
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--pt-hair);
+  cursor: pointer;
+}
+
+.ts-fo-swatch.is-none {
+  background:
+    linear-gradient(
+      to top right,
+      transparent calc(50% - 1px),
+      var(--pt-ink) 50%,
+      transparent calc(50% + 1px)
+    ),
+    var(--pt-paper);
+}
+
+.ts-fo-swatch.is-on {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-fo-hex {
+  box-sizing: border-box;
+  width: 120px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px/1 var(--pt-mono);
+}
+
+.ts-fo-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0;
+}
+
+.ts-fo-note {
+  margin: 2px 0 0;
+  color: var(--pt-titanium);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.ts-fo-button {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+}
+
+.ts-fo-button.is-on {
+  border-color: var(--pt-ink);
+  background: var(--pt-plate);
+}
+
+.ts-fo-button.is-disabled {
+  color: var(--pt-titanium);
+  border-color: var(--pt-hair-soft);
+  cursor: default;
+}
+
+.ts-fo-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0;
+}
+
+.ts-fo-dial {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-fo-dial input[type='range'] {
+  width: 96px;
+  accent-color: var(--pt-ink);
+}
+
+.ts-fo-field.is-disabled select,
+.ts-fo-field select {
+  box-sizing: border-box;
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.4 var(--pt-text);
+}
+
+.ts-fo-levels {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-fo-level {
+  display: grid;
+  grid-template-columns: 1fr 72px;
+  align-items: center;
+  gap: 8px;
+  color: var(--pt-ink);
+  font-size: 12px;
+}

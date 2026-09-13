@@ -1,0 +1,638 @@
+{
+  "at": "2026-09-13T16:41:39.670Z",
+  "steps": [
+    {
+      "transport": "cli",
+      "name": "slide to-canvas title",
+      "command": "turboslide slide to-canvas title --json",
+      "ok": true,
+      "ms": 9188,
+      "evidence": "exit 0 in 9188 ms; revision 1 -> 2; converted true; template title; grammar title; pos within 1 px of the committed canvas-title true, exact false (the fixture keeps the integer pos the CLI wrote before R2); heading {\"x\":137,\"y\":420.4375,\"w\":901.453125,\"h\":89.75,\"z\":1}"
+    },
+    {
+      "transport": "cli",
+      "name": "slide measure styles (a read)",
+      "command": "turboslide slide measure styles --json",
+      "ok": true,
+      "ms": 9318,
+      "evidence": "exit 0 in 9318 ms; revision 2 -> 2; boxes for h, p1, justified; fit for 3 blocks; revision unchanged true"
+    },
+    {
+      "transport": "cli",
+      "name": "block insert --pos",
+      "command": "turboslide block insert title --slot main --pos 200,200,480,64 --file /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide-verifier-agent-9hkWVd/text.json --json",
+      "ok": true,
+      "ms": 4442,
+      "evidence": "exit 0 in 4442 ms; revision 2 -> 3; note at {\"x\":200,\"y\":200,\"w\":480,\"h\":64,\"z\":3} (z one above the highest)"
+    },
+    {
+      "transport": "cli",
+      "name": "block set /pos on a grammar slide",
+      "command": "turboslide block set styles#h /pos {\"x\":137,\"y\":129,\"w\":600,\"h\":80} --json",
+      "ok": true,
+      "ms": 9886,
+      "evidence": "exit 0 in 9886 ms; revision 3 -> 4; styles converted in one revision (4); h at {\"x\":137,\"y\":129,\"w\":600,\"h\":80}; every object positioned"
+    },
+    {
+      "transport": "cli",
+      "name": "block rotate --by 90",
+      "command": "turboslide block rotate rotated#tilted --by 90 --json",
+      "ok": true,
+      "ms": 4912,
+      "evidence": "exit 0 in 4912 ms; revision 4 -> 5; tilted rotate 37 -> 127"
+    },
+    {
+      "transport": "cli",
+      "name": "block flip --axis h",
+      "command": "turboslide block flip rotated#arrow --axis h --json",
+      "ok": true,
+      "ms": 3406,
+      "evidence": "exit 0 in 3406 ms; revision 5 -> 6; arrow flip h -> none"
+    },
+    {
+      "transport": "cli",
+      "name": "block group",
+      "command": "turboslide block group shapes --blocks hex,right --as pair --json",
+      "ok": true,
+      "ms": 3636,
+      "evidence": "exit 0 in 3636 ms; revision 6 -> 7; hex and right carry group pair"
+    },
+    {
+      "transport": "cli",
+      "name": "block ungroup",
+      "command": "turboslide block ungroup shapes --group pair --json",
+      "ok": true,
+      "ms": 3557,
+      "evidence": "exit 0 in 3557 ms; revision 7 -> 8; groups left: 0"
+    },
+    {
+      "transport": "cli",
+      "name": "block regroup",
+      "command": "turboslide block regroup shapes --blocks hex,right --as pair --json",
+      "ok": true,
+      "ms": 3665,
+      "evidence": "exit 0 in 3665 ms; revision 8 -> 9; hex group pair"
+    },
+    {
+      "transport": "cli",
+      "name": "block order --move back",
+      "command": "turboslide block order rotated#photo --move back --json",
+      "ok": true,
+      "ms": 3695,
+      "evidence": "exit 0 in 3695 ms; revision 9 -> 10; photo z 0 (lowest 0)"
+    },
+    {
+      "transport": "cli",
+      "name": "deck guides --add-vertical 400",
+      "command": "turboslide deck guides --add-vertical 400 --json",
+      "ok": true,
+      "ms": 3640,
+      "evidence": "exit 0 in 3640 ms; revision 10 -> 11; guides {\"x\":[400,800],\"y\":[450]}"
+    },
+    {
+      "transport": "cli",
+      "name": "deck guides --clear",
+      "command": "turboslide deck guides --clear --json",
+      "ok": true,
+      "ms": 3640,
+      "evidence": "exit 0 in 3640 ms; revision 11 -> 12; guides null"
+    },
+    {
+      "transport": "cli",
+      "name": "text style --italic --color red",
+      "command": "turboslide text style styles#p1 /text --range 0:4 --italic --color red --json",
+      "ok": true,
+      "ms": 3538,
+      "evidence": "exit 0 in 3538 ms; revision 12 -> 13; text \"[A ru]{i c:red}n in [italic]{i}, one [underlined]{u}, one [s\""
+    },
+    {
+      "transport": "cli",
+      "name": "text list --marker bullet --level 4",
+      "command": "turboslide text list bullets#bullets --marker bullet --items 0 --level 4 --json",
+      "ok": true,
+      "ms": 3582,
+      "evidence": "exit 0 in 3582 ms; revision 13 -> 14; marker bullet; item 0 level 4"
+    },
+    {
+      "transport": "cli",
+      "name": "text spacing --line 1.5",
+      "command": "turboslide text spacing styles#p1 --line 1.5 --json",
+      "ok": true,
+      "ms": 4051,
+      "evidence": "exit 0 in 4051 ms; revision 14 -> 15; typography {\"leading\":1.5}"
+    },
+    {
+      "transport": "cli",
+      "name": "text columns 2",
+      "command": "turboslide text columns styles#p1 2 --json",
+      "ok": true,
+      "ms": 3490,
+      "evidence": "exit 0 in 3490 ms; revision 15 -> 16; columns 2"
+    },
+    {
+      "transport": "cli",
+      "name": "text indent --in",
+      "command": "turboslide text indent styles#p1 --in --json",
+      "ok": true,
+      "ms": 3180,
+      "evidence": "exit 0 in 3180 ms; revision 16 -> 17; indent 64"
+    },
+    {
+      "transport": "cli",
+      "name": "text case upper",
+      "command": "turboslide text case styles#p1 /text --range 0:5 upper --json",
+      "ok": true,
+      "ms": 3559,
+      "evidence": "exit 0 in 3559 ms; revision 17 -> 18; text \"[A RU]{i c:red}N in [italic]{i}, one [un\""
+    },
+    {
+      "transport": "cli",
+      "name": "text insert --at 2 \"→\"",
+      "command": "turboslide text insert styles#p1 /text --at 2 → --json",
+      "ok": true,
+      "ms": 3785,
+      "evidence": "exit 0 in 3785 ms; revision 18 -> 19; text \"[A →RU]{i c:red}N in [italic]{i}, one [u\""
+    },
+    {
+      "transport": "cli",
+      "name": "chart set-data",
+      "command": "turboslide chart set-data chart-bar#chart --file /var/folders/yl/sxf0v4tn14n2pkwqmf_21l540000gn/T/turboslide-verifier-agent-9hkWVd/data.json --json",
+      "ok": true,
+      "ms": 3730,
+      "evidence": "exit 0 in 3730 ms; revision 19 -> 20; categories [\"North\",\"South\"]; series 1"
+    },
+    {
+      "transport": "cli",
+      "name": "chart set-kind pie",
+      "command": "turboslide chart set-kind chart-bar#chart pie --json",
+      "ok": true,
+      "ms": 4083,
+      "evidence": "exit 0 in 4083 ms; revision 20 -> 21; kind pie"
+    },
+    {
+      "transport": "cli",
+      "name": "table merge",
+      "command": "turboslide table merge table#table --from 1,1 --to 2,2 --json",
+      "ok": true,
+      "ms": 3358,
+      "evidence": "exit 0 in 3358 ms; revision 21 -> 22; spans [{\"row\":1,\"column\":1,\"rows\":2,\"columns\":2}]"
+    },
+    {
+      "transport": "cli",
+      "name": "table unmerge",
+      "command": "turboslide table unmerge table#table --at 1,1 --json",
+      "ok": true,
+      "ms": 3373,
+      "evidence": "exit 0 in 3373 ms; revision 22 -> 23; spans []"
+    },
+    {
+      "transport": "cli",
+      "name": "table insert-rows --below --count 2",
+      "command": "turboslide table insert-rows table#table --at 1 --count 2 --below --json",
+      "ok": true,
+      "ms": 3511,
+      "evidence": "exit 0 in 3511 ms; revision 23 -> 24; rows 6"
+    },
+    {
+      "transport": "cli",
+      "name": "table delete-columns",
+      "command": "turboslide table delete-columns table#table --from 3 --to 3 --json",
+      "ok": true,
+      "ms": 3775,
+      "evidence": "exit 0 in 3775 ms; revision 24 -> 25; columns 3"
+    },
+    {
+      "transport": "cli",
+      "name": "table distribute rows --total 320",
+      "command": "turboslide table distribute table#table rows --total 320 --json",
+      "ok": true,
+      "ms": 3511,
+      "evidence": "exit 0 in 3511 ms; revision 25 -> 26; row heights [53,53,53,53,53,53]"
+    },
+    {
+      "transport": "cli",
+      "name": "table cell-style --border-weight 0",
+      "command": "turboslide table cell-style table#table --at 0,0 --border-weight 0 --json",
+      "ok": true,
+      "ms": 3489,
+      "evidence": "exit 0 in 3489 ms; revision 26 -> 27; cells [{\"row\":0,\"column\":0,\"border\":{\"weight\":0}}]"
+    },
+    {
+      "transport": "cli",
+      "name": "shape set --kind hexagon --dash dot",
+      "command": "turboslide shape set shapes#hex --kind hexagon --dash dot --json",
+      "ok": true,
+      "ms": 3403,
+      "evidence": "exit 0 in 3403 ms; revision 27 -> 28; shape hexagon dash dot"
+    },
+    {
+      "transport": "cli",
+      "name": "line set --end fillArrow",
+      "command": "turboslide line set lines#decorated --end fillArrow --json",
+      "ok": true,
+      "ms": 3186,
+      "evidence": "exit 0 in 3186 ms; revision 28 -> 29; lineEnd fillArrow"
+    },
+    {
+      "transport": "cli",
+      "name": "line set --connect-end b:2",
+      "command": "turboslide line set lines#decorated --connect-end b:2 --json",
+      "ok": true,
+      "ms": 3559,
+      "evidence": "exit 0 in 3559 ms; revision 29 -> 30; connect {\"end\":{\"block\":\"b\",\"site\":2}}; pos {\"x\":137,\"y\":236,\"w\":600,\"h\":8,\"z\":1} -> {\"x\":137,\"y\":240,\"w\":683,\"h\":380,\"z\":1}"
+    },
+    {
+      "transport": "cli",
+      "name": "block set b /pos moves the attached connector",
+      "command": "turboslide block set lines#b /pos {\"x\":760,\"y\":540,\"w\":240,\"h\":120,\"z\":3} --json",
+      "ok": true,
+      "ms": 3026,
+      "evidence": "exit 0 in 3026 ms; revision 30 -> 31; decorated {\"x\":137,\"y\":240,\"w\":683,\"h\":380,\"z\":1} -> {\"x\":137,\"y\":240,\"w\":743,\"h\":420,\"z\":1}; the fixture's elbow (attached to a and b) {\"x\":377,\"y\":360,\"w\":383,\"h\":240,\"z\":4}"
+    },
+    {
+      "transport": "cli",
+      "name": "block crop",
+      "command": "turboslide block crop image-tools#trimmed --left 0.1 --right 0 --top 0 --bottom 0 --json",
+      "ok": true,
+      "ms": 2936,
+      "evidence": "exit 0 in 2936 ms; revision 31 -> 32; trim {\"left\":0.1,\"right\":0,\"top\":0,\"bottom\":0}"
+    },
+    {
+      "transport": "cli",
+      "name": "block mask ellipse",
+      "command": "turboslide block mask image-tools#adjusted ellipse --json",
+      "ok": true,
+      "ms": 3114,
+      "evidence": "exit 0 in 3114 ms; revision 32 -> 33; mask ellipse"
+    },
+    {
+      "transport": "cli",
+      "name": "block adjust --brightness 0.2",
+      "command": "turboslide block adjust image-tools#masked --brightness 0.2 --json",
+      "ok": true,
+      "ms": 3070,
+      "evidence": "exit 0 in 3070 ms; revision 33 -> 34; adjust {\"brightness\":0.2}"
+    },
+    {
+      "transport": "cli",
+      "name": "block reset-image",
+      "command": "turboslide block reset-image image-tools#trimmed --json",
+      "ok": true,
+      "ms": 3073,
+      "evidence": "exit 0 in 3073 ms; revision 34 -> 35; trim null mask none"
+    },
+    {
+      "transport": "cli",
+      "name": "block alt",
+      "command": "turboslide block alt shapes#hex A hexagon --json",
+      "ok": true,
+      "ms": 3104,
+      "evidence": "exit 0 in 3104 ms; revision 35 -> 36; alt \"A hexagon\""
+    },
+    {
+      "transport": "cli",
+      "name": "block shadow --on",
+      "command": "turboslide block shadow shapes#hex --on --json",
+      "ok": true,
+      "ms": 2974,
+      "evidence": "exit 0 in 2974 ms; revision 36 -> 37; shadow {}"
+    },
+    {
+      "transport": "cli",
+      "name": "block autofit shrink --apply",
+      "command": "turboslide block autofit canvas-title#shrink shrink --apply --json",
+      "ok": true,
+      "ms": 6921,
+      "evidence": "exit 0 in 6921 ms; revision 37 -> 38; autofit shrink; size 26 -> 24 (the ladder stepped down in the same revision)"
+    },
+    {
+      "transport": "cli",
+      "name": "block set /valign middle",
+      "command": "turboslide block set canvas-title#padded /valign middle --json",
+      "ok": true,
+      "ms": 3785,
+      "evidence": "exit 0 in 3785 ms; revision 38 -> 39; valign middle"
+    },
+    {
+      "transport": "cli",
+      "name": "block set /padding",
+      "command": "turboslide block set canvas-title#padded /padding {\"top\":8,\"right\":16,\"bottom\":8,\"left\":16} --json",
+      "ok": true,
+      "ms": 3021,
+      "evidence": "exit 0 in 3021 ms; revision 39 -> 40; padding {\"top\":8,\"right\":16,\"bottom\":8,\"left\":16}"
+    },
+    {
+      "transport": "cli",
+      "name": "slide background --color plate",
+      "command": "turboslide slide background styles --color plate --json",
+      "ok": true,
+      "ms": 3146,
+      "evidence": "exit 0 in 3146 ms; revision 40 -> 41; background {\"color\":\"plate\"}"
+    },
+    {
+      "transport": "cli",
+      "name": "deck background --color plate",
+      "command": "turboslide deck background --color plate --json",
+      "ok": true,
+      "ms": 3068,
+      "evidence": "exit 0 in 3068 ms; revision 41 -> 42; defaults.background {\"color\":\"plate\"}"
+    },
+    {
+      "transport": "cli",
+      "name": "diagram insert on a grammar slide",
+      "command": "turboslide diagram insert autofit --kind process --count 4 --json",
+      "ok": true,
+      "ms": 7752,
+      "evidence": "exit 0 in 7752 ms; revision 42 -> 43; autofit converted (freeform); 13 objects; groups process"
+    },
+    {
+      "transport": "cli",
+      "name": "slide set-layout --type freeform",
+      "command": "turboslide slide set-layout background-color --type freeform --json",
+      "ok": true,
+      "ms": 7131,
+      "evidence": "exit 0 in 7131 ms; revision 43 -> 44; layout freeform; grammar {\"type\":\"stack\",\"gap\":22}; 2 objects positioned"
+    },
+    {
+      "transport": "cli",
+      "name": "deck info --json carries canvas, charts and guides",
+      "command": "turboslide info --json",
+      "ok": true,
+      "ms": 2661,
+      "evidence": "exit 0 in 2661 ms; revision 44 -> 44; counts {\"slides\":27,\"sections\":2,\"assets\":1,\"kinds\":{\"content\":26,\"statement\":1},\"canvas\":17,\"charts\":3,\"guides\":0}; guides null"
+    },
+    {
+      "transport": "cli",
+      "name": "slide list --json marks canvas slides with object counts",
+      "command": "turboslide slides --json",
+      "ok": true,
+      "ms": 3047,
+      "evidence": "exit 0 in 3047 ms; revision 44 -> 44; 17 canvas slides of 27; e.g. {\"id\":\"title\",\"n\":1,\"section\":\"Fixture\",\"sectionId\":\"fixture\",\"title\":\"Export fixture\",\"kind\":\"conte"
+    },
+    {
+      "transport": "cli",
+      "name": "lint all --json after the walk",
+      "command": "turboslide lint all --json",
+      "ok": true,
+      "ms": 3255,
+      "evidence": "exit 0 in 3255 ms; revision 44 -> 44; 44 findings, 0 at severity 3"
+    },
+    {
+      "transport": "mcp",
+      "name": "tools/list fits the stock client buffer (10 MB)",
+      "ok": false,
+      "evidence": "McpError: MCP error -32001: Request timed out; transport errors: "
+    },
+    {
+      "transport": "mcp",
+      "name": "tools/list over a 64 MB buffer (the walk continues on it)",
+      "ok": true,
+      "evidence": "81 tools; the JSON of the list is 25.9 MB"
+    },
+    {
+      "transport": "mcp",
+      "name": "the 36 round two tools are served",
+      "ok": true,
+      "evidence": "81 tools; missing none"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_slide_to_canvas",
+      "ok": true,
+      "evidence": "1424 ms; isError false; revision 1 -> 2; title converted; heading {\"x\":137,\"y\":420.4375,\"w\":901.453125,\"h\":89.75,\"z\":1}"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_guides",
+      "ok": true,
+      "evidence": "12 ms; isError false; revision 2 -> 3; guides {\"x\":[400,800],\"y\":[450]}"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_rotate_block",
+      "ok": true,
+      "evidence": "62 ms; isError false; revision 3 -> 4; rotate 52"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_flip_block",
+      "ok": true,
+      "evidence": "67 ms; isError false; revision 4 -> 5; flip hv"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_group_blocks",
+      "ok": true,
+      "evidence": "63 ms; isError false; revision 5 -> 6; group pair"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_ungroup_blocks",
+      "ok": true,
+      "evidence": "66 ms; isError false; revision 6 -> 7; group none"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_regroup_blocks",
+      "ok": true,
+      "evidence": "70 ms; isError false; revision 7 -> 8; group pair"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_style_text",
+      "ok": true,
+      "evidence": "72 ms; isError false; revision 8 -> 9; text \"[A ru]{u}n in [italic]{i}, one [underlined]{u}, on\""
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_case",
+      "ok": true,
+      "evidence": "65 ms; isError false; revision 9 -> 10; text \"[A RU]{u}N in [italic]{i}, one\""
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_insert_text",
+      "ok": true,
+      "evidence": "62 ms; isError false; revision 10 -> 11; text \"[A→ RU]{u}N in [italic]{i}, on\""
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_list",
+      "ok": true,
+      "evidence": "68 ms; isError false; revision 11 -> 12; marker number preset digit-alpha-roman"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_spacing",
+      "ok": true,
+      "evidence": "61 ms; isError false; revision 12 -> 13; typography {\"spaceBefore\":8}"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_columns",
+      "ok": true,
+      "evidence": "62 ms; isError false; revision 13 -> 14; columns 2"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_indent_text",
+      "ok": true,
+      "evidence": "66 ms; isError false; revision 14 -> 15; indent 64"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_chart_data",
+      "ok": true,
+      "evidence": "68 ms; isError false; revision 15 -> 16; categories [\"A\",\"B\"]"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_chart_kind",
+      "ok": true,
+      "evidence": "65 ms; isError false; revision 16 -> 17; kind line"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_merge_cells",
+      "ok": true,
+      "evidence": "71 ms; isError false; revision 17 -> 18; spans [{\"row\":1,\"column\":1,\"rows\":2,\"columns\":2}]"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_unmerge_cells",
+      "ok": true,
+      "evidence": "63 ms; isError false; revision 18 -> 19; spans 0"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_insert_rows",
+      "ok": true,
+      "evidence": "57 ms; isError false; revision 19 -> 20; rows 5"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_insert_columns",
+      "ok": true,
+      "evidence": "57 ms; isError false; revision 20 -> 21; columns 5"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_delete_rows",
+      "ok": true,
+      "evidence": "57 ms; isError false; revision 21 -> 22; rows 4"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_delete_columns",
+      "ok": true,
+      "evidence": "58 ms; isError false; revision 22 -> 23; columns 4"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_distribute_table",
+      "ok": true,
+      "evidence": "58 ms; isError false; revision 23 -> 24; row heights [80,80,80,80]"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_style_cells",
+      "ok": true,
+      "evidence": "58 ms; isError false; revision 24 -> 25; cells [{\"row\":0,\"column\":0,\"fill\":\"plate\"}]"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_shape",
+      "ok": true,
+      "evidence": "60 ms; isError false; revision 25 -> 26; dash dash"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_line",
+      "ok": true,
+      "evidence": "61 ms; isError false; revision 26 -> 27; lineEnd openDiamond"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_crop_image",
+      "ok": true,
+      "evidence": "58 ms; isError false; revision 27 -> 28; trim {\"left\":0.2,\"right\":0,\"top\":0,\"bottom\":0}"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_mask_image",
+      "ok": true,
+      "evidence": "58 ms; isError false; revision 28 -> 29; mask hexagon"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_adjust_image",
+      "ok": true,
+      "evidence": "58 ms; isError false; revision 29 -> 30; adjust {\"contrast\":0.3}"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_reset_image",
+      "ok": true,
+      "evidence": "59 ms; isError false; revision 30 -> 31; trim null"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_alt_text",
+      "ok": true,
+      "evidence": "86 ms; isError false; revision 31 -> 32; alt \"An arrow\""
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_shadow",
+      "ok": true,
+      "evidence": "67 ms; isError false; revision 32 -> 33; shadow {\"opacity\":0.3,\"angle\":45}"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_autofit",
+      "ok": true,
+      "evidence": "922 ms; isError false; revision 33 -> 34; autofit shrink; size 26 -> 24"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_slide_background",
+      "ok": true,
+      "evidence": "57 ms; isError false; revision 34 -> 35; background {\"color\":\"plate\"}"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_set_background",
+      "ok": true,
+      "evidence": "9 ms; isError false; revision 35 -> 36; defaults.background {\"color\":\"ink\"}"
+    },
+    {
+      "transport": "mcp",
+      "name": "deck_insert_diagram",
+      "ok": true,
+      "evidence": "960 ms; isError false; revision 36 -> 37; autofit converted; 11 objects"
+    },
+    {
+      "transport": "mcp",
+      "name": "the MCP copy validates after every tool",
+      "ok": true,
+      "evidence": "validate exit 0; revision 37"
+    }
+  ],
+  "summary": {
+    "cli": {
+      "pass": 47,
+      "fail": 0
+    },
+    "mcp": {
+      "pass": 39,
+      "fail": 1
+    }
+  },
+  "canvasWriteMs": {
+    "slide to-canvas title": 9188,
+    "block insert --pos": 4442,
+    "block set /pos on a grammar slide": 9886,
+    "diagram insert on a grammar slide": 7752,
+    "slide set-layout --type freeform": 7131
+  }
+}

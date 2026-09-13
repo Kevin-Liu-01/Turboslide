@@ -29,7 +29,19 @@ import type { Author, Lease, Version, Write } from '@turboslide/schema/mutations
 import { applyWrite } from '@turboslide/schema/reduce';
 
 import { STATE_DIR, loadDeckDir, openFileStore, slidePath, writeManifest } from './file-store.ts';
-import { documentAtVersion, readVersions } from './versions.ts';
+import {
+  SNAPSHOTS_DIR,
+  SNAPSHOT_GRACE_MS,
+  etagMd5,
+  parseSnapshot,
+  prunableSnapshots,
+  retainedSnapshots,
+  snapshotBody,
+  snapshotKey,
+  snapshotKeyOf,
+  snapshotPath,
+} from './snapshots.ts';
+import { documentAtVersion, readVersions, recordAtRevision, writeVersion } from './versions.ts';
 import type { FileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
 import { assetPathWithin, checkRevision, factsFor } from './hosted.ts';
@@ -61,7 +73,14 @@ import { readRevision } from './watch.ts';
 // The client the store talks to
 
 /** One stored blob as the client reports it. `version` is the etag (uploadedAt when absent). */
-export type BlobEntry = { pathname: string; url: string; size: number; version: string };
+export type BlobEntry = {
+  pathname: string;
+  url: string;
+  size: number;
+  version: string;
+  /** ISO time of the upload, when the client reports one (the snapshot prune and the export job prune read it). */
+  uploadedAt?: string;
+};
 
 export type BlobPutOptions = {
   /** replace an existing blob; false makes an existing pathname a BlobExistsError */
@@ -126,11 +145,12 @@ export function deckPrefix(deckId: string): string {
 
 export const LEASES_FILE = 'leases.json';
 
-/** The files the mirror manages: every document of the deck, not the twins and not the leases. */
+/** The files the mirror manages: every document of the deck, not the twins, the leases or the snapshots. */
 export function isMirroredDocument(relative: string): boolean {
   return (
     relative !== LEASES_FILE &&
     !relative.startsWith('assets/') &&
+    !relative.startsWith(`${SNAPSHOTS_DIR}/`) &&
     !relative.startsWith(`${STATE_DIR}/`) &&
     isSafeKey(relative)
   );
@@ -206,6 +226,22 @@ export class StaleMirrorError extends Error {
   }
 }
 
+/**
+ * Another instance stored a different document under the snapshot name this write computed (the
+ * same base revision, the same clock millisecond, other slides); the write stops before its
+ * manifest push and the caller retries from the current document (SPEC-2 8.2).
+ */
+export class SnapshotContestedError extends Error {
+  readonly key: string;
+  constructor(deckId: string, key: string) {
+    super(
+      `Another instance is committing the same revision of ${deckId} at this moment (snapshot ${key} holds its document); retry the write from the current document`,
+    );
+    this.name = 'SnapshotContestedError';
+    this.key = key;
+  }
+}
+
 /** The highest version record number the mirror holds (or the manifest being built names), 0 without any. */
 function lastRecord(dir: string, manifest?: Manifest): number {
   let last = 0;
@@ -250,6 +286,8 @@ export type BlobStoreOptions = {
   syncTtlMs?: number;
   /** test hooks: runs between the local write and the push, to stage a race */
   hooks?: { beforeCommit?: () => Promise<void> };
+  /** how long an unreferenced snapshot is left alone before the prune removes it; default 5 minutes */
+  snapshotGraceMs?: number;
 };
 
 export type BlobStore = DeckStore & {
@@ -258,6 +296,10 @@ export type BlobStore = DeckStore & {
   sync: (force?: boolean) => Promise<SyncState>;
   /** pulls the deck's twins that are missing locally; returns how many were written */
   pullAssets: () => Promise<number>;
+  /** how many immutable documents the store holds under snapshots/ (deck.info's `snapshots`, SPEC-2 8.2) */
+  snapshots: () => Promise<number>;
+  /** removes every snapshot no retained record names; returns how many went (write() runs this after a commit) */
+  pruneSnapshots: () => Promise<number>;
 };
 
 export function openBlobStore(options: BlobStoreOptions): BlobStore {
@@ -265,6 +307,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
   const prefix = deckPrefix(deckId);
   const pollMs = options.pollMs ?? 3000;
   const syncTtlMs = options.syncTtlMs ?? 750;
+  const snapshotGraceMs = options.snapshotGraceMs ?? SNAPSHOT_GRACE_MS;
   const serial = serialQueue();
   const file: FileStore = openFileStore({
     dir,
@@ -345,6 +388,41 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       writeManifestFile(dir, next);
       return;
     }
+    /** the mirror's documents from a proven document, and the manifest rows they get */
+    const writeDocuments = (document: DeckDocument): void => {
+      const current = existsSync(pathOf('deck.json')) ? loadDeckDir(dir).document : null;
+      mkdirSync(join(dir, 'slides'), { recursive: true });
+      for (const [id, slide] of Object.entries(document.slides)) {
+        const bytes = new TextEncoder().encode(canonicalJson(slide));
+        if (
+          current === null ||
+          canonicalJson(current.slides[id]) !== canonicalJson(slide) ||
+          !existsSync(slidePath(dir, id))
+        )
+          writeAtomic(slidePath(dir, id), bytes);
+        next.files[`slides/${id}.json`] = quotedMd5(bytes);
+      }
+      for (const id of Object.keys(current?.slides ?? {})) {
+        if (document.slides[id] === undefined) rmSync(slidePath(dir, id), { force: true });
+      }
+      writeManifest(dir, document.deck);
+      next.files['deck.json'] = deckHead.version;
+    };
+    // 1b. the snapshot path (gslides-parity SPEC-2 8.2): the etag is the md5 of the current
+    // deck.json bytes and the writer stored the whole document under that key before it pushed
+    // the manifest, so the snapshot is the current document, proven by its name; no revision is
+    // read and no slide body is fetched. A deck written before the round, or a store whose
+    // deck.json push failed after its snapshot, has none and takes the replay below.
+    const currentKey = etagMd5(deckHead.version);
+    const snapshot = currentKey === null ? null : await readSnapshot(currentKey);
+    if (snapshot !== null && quotedMd5(canonicalJson(snapshot.deck)) === deckHead.version) {
+      writeDocuments(snapshot);
+      for (const relative of localDocuments(dir)) {
+        if (next.files[relative] === undefined) rmSync(pathOf(relative), { force: true });
+      }
+      writeManifestFile(dir, next);
+      return;
+    }
     // 2. the base: the mirror's previous state, or the bodies the store serves for an empty mirror
     let base = before;
     const unproven = new Set<string>();
@@ -406,22 +484,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       }
     }
     if (proven) {
-      const current = loadDeckDir(dir).document;
-      mkdirSync(join(dir, 'slides'), { recursive: true });
-      for (const [id, slide] of Object.entries(document.slides)) {
-        const bytes = new TextEncoder().encode(canonicalJson(slide));
-        if (
-          canonicalJson(current.slides[id]) !== canonicalJson(slide) ||
-          !existsSync(slidePath(dir, id))
-        )
-          writeAtomic(slidePath(dir, id), bytes);
-        next.files[`slides/${id}.json`] = quotedMd5(bytes);
-      }
-      for (const id of Object.keys(current.slides)) {
-        if (document.slides[id] === undefined) rmSync(slidePath(dir, id), { force: true });
-      }
-      writeManifest(dir, document.deck);
-      next.files['deck.json'] = deckHead.version;
+      writeDocuments(document);
     } else {
       // unprovable for now: reads keep the mirror's copy, write() refuses until a later pull proves one
       for (const relative of localDocuments(dir)) {
@@ -481,6 +544,60 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       contentType: blobContentType(relative),
       ...(ifMatch === undefined ? {} : { ifMatch }),
     });
+
+  /** The stored snapshot under a key as a document, or null when the store has none or it does not parse. */
+  const readSnapshot = async (key: string): Promise<DeckDocument | null> => {
+    const fetched = await client.get(`${prefix}${snapshotPath(key)}`);
+    if (fetched === null) return null;
+    try {
+      return parseSnapshot(fetched.bytes, `${prefix}${snapshotPath(key)}`);
+    } catch {
+      return null;
+    }
+  };
+
+  /**
+   * Stores the whole document under its key with overwrite refused (SPEC-2 8.2). A snapshot that
+   * exists already is left alone when its bytes are ours (a retry, or an identical write on
+   * another instance: equal bytes are one document). The key is the md5 of the manifest bytes
+   * alone, so two writers that start from one revision inside one clock millisecond push equal
+   * manifests with different slide bodies and want the same name (measured in hosted.test.ts with
+   * a frozen clock); the one whose body the name holds proceeds, the other stops before its
+   * manifest push with SnapshotContestedError, which write() answers as a conflict, so no
+   * committed etag ever names a body its writer did not store.
+   */
+  const putSnapshot = async (key: string, body: Uint8Array): Promise<void> => {
+    const relative = snapshotPath(key);
+    try {
+      await client.put(`${prefix}${relative}`, body, {
+        overwrite: false,
+        contentType: blobContentType(relative),
+      });
+    } catch (error) {
+      if (!(error instanceof BlobExistsError)) throw error;
+      const existing = await client.head(`${prefix}${relative}`);
+      if (existing !== null && existing.version === quotedMd5(body)) return;
+      throw new SnapshotContestedError(deckId, key);
+    }
+  };
+
+  /**
+   * Removes every snapshot no retained record names (the newest 50 records and every named
+   * version keep theirs) and that is older than the grace, so a commit in flight on another
+   * instance keeps the snapshot it stored a moment ago. The current manifest's snapshot stays
+   * whatever the records say. One `del` call.
+   */
+  const pruneSnapshots = async (current: string | null): Promise<number> => {
+    const retained = retainedSnapshots(readVersions(dir));
+    const entries = await client.list(`${prefix}${SNAPSHOTS_DIR}/`);
+    const doomed = prunableSnapshots(entries, prefix, retained, {
+      now: Date.now(),
+      graceMs: snapshotGraceMs,
+      current,
+    });
+    if (doomed.length > 0) await client.del(doomed);
+    return doomed.length;
+  };
 
   /** Forgets the mirror's versions so the next sync pulls everything the store has. */
   const invalidate = (): void => {
@@ -542,8 +659,16 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         if (synced !== head.version) throw new StaleMirrorError(deckId);
         const outcome = await file.write(write, writeOptions);
         if (!outcome.ok) return outcome;
+        // the snapshot key (SPEC-2 8.2, 0.40): the md5 of the deck.json bytes about to be pushed,
+        // which is the etag the store will answer for them; the record of this commit names it
+        const key = snapshotKey(new Uint8Array(readFileSync(pathOf('deck.json'))));
+        const entry: VersionRecord = { ...outcome.entry, snapshot: key };
+        writeVersion(dir, entry);
         try {
           if (options.hooks?.beforeCommit) await options.hooks.beforeCommit();
+          // the whole document under its immutable name, before the manifest flips; a loser of the
+          // race below leaves a snapshot no record and no etag names, which the prune removes
+          await putSnapshot(key, snapshotBody(outcome.document));
           // the commit point: the manifest goes first, conditional on the version this instance read
           const committed = await putDocument('deck.json', synced);
           manifest.files['deck.json'] = committed.version;
@@ -551,22 +676,38 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           for (const slideId of outcome.changed) {
             const relative = `slides/${slideId}.json`;
             if (existsSync(pathOf(relative))) {
-              const entry = await putDocument(relative);
-              manifest.files[relative] = entry.version;
+              const pushed = await putDocument(relative);
+              manifest.files[relative] = pushed.version;
             } else {
               await client.del([`${prefix}${relative}`]);
               delete manifest.files[relative];
             }
           }
-          const record = `versions/${outcome.entry.n}.json`;
-          const entry = await putDocument(record);
-          manifest.files[record] = entry.version;
+          const record = `versions/${entry.n}.json`;
+          const stored = await putDocument(record);
+          manifest.files[record] = stored.version;
           writeManifestFile(dir, manifest);
           syncedAt = Date.now();
           lastState = { present: true, pulled: false, revision: outcome.revision };
-          return outcome;
+          // retention runs after the commit and never blocks the answer (SPEC-2 8.2)
+          void pruneSnapshots(key).catch(() => undefined);
+          return { ...outcome, entry };
         } catch (error) {
           if (error instanceof BlobPreconditionError) return conflictFromStore();
+          if (error instanceof SnapshotContestedError) {
+            // the other writer may have committed already (the round one sentence holds) or may
+            // still be between its snapshot and its manifest push (the contention alone)
+            const conflict = await conflictFromStore();
+            return conflict.ok || conflict.code !== 'conflict'
+              ? conflict
+              : {
+                  ...conflict,
+                  message:
+                    conflict.currentRevision > write.baseRevision
+                      ? `${conflict.message} (its snapshot took the name this write computed)`
+                      : error.message,
+                };
+          }
           // the mirror is ahead of the store: forget it so the next sync pulls the truth
           discard();
           throw error;
@@ -581,7 +722,15 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         if (readManifest(dir).files['deck.json'] !== head.version) await pull();
         const version = await file.saveVersion(author, note);
         const relative = `versions/${version.n}.json`;
+        // a named version pins the document it names (SPEC-2 8.2 retention): its record carries
+        // the current manifest's snapshot key, and the snapshot is stored now when the deck's
+        // last write predates the round
+        const key = snapshotKey(new Uint8Array(readFileSync(pathOf('deck.json'))));
+        const record = readVersions(dir).find((row) => row.n === version.n);
+        if (record !== undefined) writeVersion(dir, { ...record, snapshot: key });
         try {
+          if ((await client.head(`${prefix}${snapshotPath(key)}`)) === null)
+            await putSnapshot(key, snapshotBody(loadDeckDir(dir).document));
           const entry = await client.put(
             `${prefix}${relative}`,
             new Uint8Array(readFileSync(pathOf(relative))),
@@ -625,6 +774,15 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
 
     async documentAtRevision(revision: number): Promise<DeckDocument> {
       await requirePresent();
+      const { document } = loadDeckDir(dir);
+      if (revision === document.deck.revision) return document;
+      // the record's snapshot first (SPEC-2 8.2), the round one replay from the inverses when the
+      // record carries no key or its snapshot is gone
+      const record = recordAtRevision(readVersions(dir), revision);
+      if (record?.snapshot !== undefined) {
+        const snapshot = await readSnapshot(record.snapshot);
+        if (snapshot !== null) return snapshot;
+      }
       return file.documentAtRevision(revision);
     },
 
@@ -670,6 +828,19 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       }, pollMs);
       timer.unref();
       return () => clearInterval(timer);
+    },
+
+    async snapshots(): Promise<number> {
+      const entries = await client.list(`${prefix}${SNAPSHOTS_DIR}/`);
+      return entries.filter((entry) => snapshotKeyOf(entry.pathname.slice(prefix.length)) !== null)
+        .length;
+    },
+
+    pruneSnapshots(): Promise<number> {
+      return serial(async () => {
+        const head = await client.head(`${prefix}deck.json`);
+        return pruneSnapshots(head === null ? null : etagMd5(head.version));
+      });
     },
 
     async pullAssets(): Promise<number> {

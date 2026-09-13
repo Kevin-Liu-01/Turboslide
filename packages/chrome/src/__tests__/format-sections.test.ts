@@ -30,11 +30,20 @@ function block(type: Block['type']): Block {
 }
 
 describe('the sections', () => {
-  it('carry the nine names of SPEC 12 in order, plus the block fallback', () => {
+  it('carry the names of SPEC 12 and SPEC-2 section 5 in Google’s order, plus the block fallback', () => {
     const names = FORMAT_SECTIONS.map((section) => section.title);
     for (const name of PANELS.formatOptions.sections) expect(names).toContain(name);
     expect(names.indexOf('Size & rotation')).toBeLessThan(names.indexOf('Position'));
     expect(names.indexOf('Text')).toBeLessThan(names.indexOf('Colour'));
+    /* SPEC-2 section 5: the round two sections in Google's order (R05 B7, F3) */
+    for (const name of ['Adjustments', 'Drop shadow', 'Chart data', 'Line', 'Shape', 'Alt text'])
+      expect(names).toContain(name);
+    expect(names.indexOf('Picture')).toBeLessThan(names.indexOf('Adjustments'));
+    expect(names.indexOf('Adjustments')).toBeLessThan(names.indexOf('Drop shadow'));
+    expect(names.indexOf('Table')).toBeLessThan(names.indexOf('Chart data'));
+    expect(names.indexOf('Chart data')).toBeLessThan(names.indexOf('Line'));
+    expect(names.indexOf('Line')).toBeLessThan(names.indexOf('Shape'));
+    expect(names.indexOf('List')).toBeLessThan(names.indexOf('Alt text'));
     for (const section of FORMAT_SECTIONS) {
       expect(forbiddenWordsIn(section.title), section.id).toEqual([]);
       expect(forbiddenWordsIn(section.doc), section.id).toEqual([]);
@@ -84,12 +93,18 @@ describe('a block control routes to', () => {
       rows: [{ cells: ['x'] }],
     } as Block;
     for (const spec of blockControls(table).controls) {
-      if (spec.path !== '/link' && spec.path !== '/ext')
+      if (spec.path === '/alt') expect(formatSectionOfBlockControl(spec, table)).toBe('altText');
+      else if (spec.path === '/valign')
+        expect(formatSectionOfBlockControl(spec, table)).toBe('textFitting');
+      else if (spec.path !== '/link' && spec.path !== '/ext' && spec.path !== '/shadow')
         expect(formatSectionOfBlockControl(spec, table), spec.path).toBe('table');
     }
     expect(hasAltText(shot)).toBe(true);
     expect(hasAltText(table)).toBe(false);
     expect(hasTextFitting({ id: 'x', type: 'text', text: '' } as Block)).toBe(true);
+    expect(hasTextFitting({ id: 'h', type: 'heading', level: 'h2', text: '' } as Block)).toBe(true);
+    expect(hasTextFitting({ id: 's', type: 'shape', shape: 'rect' } as Block)).toBe(true);
+    expect(hasTextFitting({ id: 'l', type: 'shape', shape: 'line' } as Block)).toBe(false);
     expect(hasTextFitting(shot)).toBe(false);
   });
 });

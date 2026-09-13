@@ -72,6 +72,13 @@
       "packages/lint/src/lint.test.ts"
     ]
   },
+  "text/overflow": {
+    "layer": "rendered",
+    "slides": [],
+    "tests": [
+      "packages/lint/src/rendered/rules.test.ts"
+    ]
+  },
   "color/tokens-only": {
     "layer": "static",
     "slides": [
@@ -84,7 +91,8 @@
   "color/semantic-icons-only": {
     "layer": "static",
     "slides": [
-      "bad-escape"
+      "bad-escape",
+      "canvas-objects"
     ],
     "tests": [
       "packages/lint/src/lint.test.ts"
@@ -93,6 +101,7 @@
   "color/off-palette": {
     "layer": "static",
     "slides": [
+      "canvas-objects",
       "fixed-points"
     ],
     "tests": [
@@ -304,7 +313,8 @@
   "copy/no-exclamation": {
     "layer": "static",
     "slides": [
-      "bad-copy"
+      "bad-copy",
+      "canvas-objects"
     ],
     "tests": [
       "packages/lint/src/lint.test.ts"
@@ -364,6 +374,15 @@
       "packages/lint/src/lint.test.ts"
     ]
   },
+  "chart/size": {
+    "layer": "static",
+    "slides": [
+      "canvas-objects"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts"
+    ]
+  },
   "contrast/both-themes": {
     "layer": "rendered",
     "slides": [],
@@ -395,6 +414,8 @@
   "layout/freeform": {
     "layer": "static",
     "slides": [
+      "canvas-objects",
+      "canvas-title",
       "fixed-points"
     ],
     "tests": [
@@ -404,6 +425,7 @@
   "freeform/overlap": {
     "layer": "static",
     "slides": [
+      "canvas-objects",
       "fixed-points"
     ],
     "tests": [
@@ -442,6 +464,8 @@
     "slides": [
       "bad-copy",
       "bad-escape",
+      "canvas-objects",
+      "canvas-title",
       "content-rule",
       "the-production-site"
     ],

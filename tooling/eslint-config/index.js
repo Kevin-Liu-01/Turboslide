@@ -7,6 +7,13 @@ import { tanstackConfig } from '@tanstack/eslint-config';
 // The TanStack config is type aware (parserOptions.project: true), so every linted .ts, .tsx and
 // .js file must belong to a tsconfig project. Root config files and the tooling packages are not
 // in any project and are ignored below; scripts/*.mjs are outside the TanStack file glob.
+//
+// gslides-parity SPEC-2 8.4: `pnpm lint` runs eslint once per workspace package through
+// scripts/lint-packages.mjs, each process from that package's folder, because one run over the
+// tree loads every project's types at once and left a 4 GB heap (VERIFICATION finding 6). The
+// parser therefore uses `projectService`, which resolves the nearest tsconfig per file from the
+// working directory the process started in, in place of `project: true`; the two agree on which
+// tsconfig a file belongs to, and the service loads one project per package run.
 
 const repoRules = {
   '@typescript-eslint/no-explicit-any': 'error',
@@ -42,7 +49,18 @@ const frameworkDefaultExports = [
 export const turboslideConfig = [
   ...tanstackConfig.map((config) =>
     config.name === 'tanstack/javascript'
-      ? { ...config, rules: { ...config.rules, ...repoRules } }
+      ? {
+          ...config,
+          languageOptions: {
+            ...config.languageOptions,
+            parserOptions: {
+              ...config.languageOptions?.parserOptions,
+              project: undefined,
+              projectService: true,
+            },
+          },
+          rules: { ...config.rules, ...repoRules },
+        }
       : config,
   ),
   {
@@ -56,6 +74,8 @@ export const turboslideConfig = [
       '**/node_modules/**',
       '**/dist/**',
       '**/.output/**',
+      // a local `vercel deploy` or `vercel build` leaves the built output here (git-ignored)
+      '**/.vercel/**',
       '**/.tanstack/**',
       '**/.nitro/**',
       '.turbo/**',
@@ -68,6 +88,9 @@ export const turboslideConfig = [
       'vitest.config.ts',
       'playwright.config.ts',
       'tooling/**',
+      // outside every tsconfig project (SPEC-2 8.4): the documents and the e2e drive scripts
+      'docs/**',
+      '**/e2e/*.mjs',
     ],
   },
 ];

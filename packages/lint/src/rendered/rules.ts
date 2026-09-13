@@ -17,6 +17,7 @@ import { checkLabelClearance } from './clearance.ts';
 import { checkContrast } from './contrast.ts';
 import { checkColumnsAligned, checkEmptyHalf, checkPairGaps } from './layout.ts';
 import { checkLinesLaw } from './lines.ts';
+import { checkTextOverflow } from './overflow.ts';
 import { indexBlocks } from './shared.ts';
 import { checkStretched } from './stretched.ts';
 import { checkThumbLegible } from './thumb.ts';
@@ -219,6 +220,7 @@ export function lintRecord(
   out.push(...checkStretched(ctx, record, slide, refs));
   out.push(...checkThumbLegible(ctx, record, slide, refs));
   out.push(...checkLabelClearance(ctx, record, slide, refs));
+  out.push(...checkTextOverflow(ctx, record, slide, refs));
 
   // and the rules that read the screenshot; null means there is none, so nothing is read from disk
   const renderDir = inputs.renderDir ?? renderDirOf(ctx.options);

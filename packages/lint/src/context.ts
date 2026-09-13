@@ -326,6 +326,13 @@ export function blockTexts(block: Block): TextRef[] {
     case 'box':
       push('/text', block.text, 'body');
       break;
+    // the text inside a shape (gslides-parity SPEC-2 2.2.17): the copy and type rules run over it
+    case 'shape':
+      push('/text', block.text, 'body');
+      break;
+    case 'chart':
+      push('/title', block.title, 'label');
+      break;
     case 'table':
       block.rows.forEach((row, r) =>
         row.cells.forEach((cell, c) => push(`/rows/${r}/cells/${c}`, cell, 'cell')),
@@ -337,10 +344,13 @@ export function blockTexts(block: Block): TextRef[] {
   return out;
 }
 
-/** The Texts that take paragraph breaks, so the copy rules run per paragraph (gslides-parity SPEC 7.4). */
+/** The Texts that take paragraph breaks, so the copy rules run per paragraph (gslides-parity SPEC 7.4, SPEC-2 2.2.17). */
 export function isMultilineRef(block: Block, ref: TextRef): boolean {
   return (
-    ((block.type === 'paragraph' || block.type === 'text' || block.type === 'box') &&
+    ((block.type === 'paragraph' ||
+      block.type === 'text' ||
+      block.type === 'box' ||
+      block.type === 'shape') &&
       ref.path === '/text') ||
     block.type === 'table'
   );
@@ -368,6 +378,9 @@ export function emptyTexts(block: Block): { path: string; what: string }[] {
       break;
     case 'box':
       push('/text', block.text, 'box');
+      break;
+    case 'shape':
+      push('/text', block.text, 'shape');
       break;
     case 'plain':
       block.items.forEach((item, i) => push(`/items/${i}/text`, item.text, 'list item'));

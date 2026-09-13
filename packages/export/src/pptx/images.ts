@@ -1,14 +1,17 @@
 // Pictures and rasters (SPEC 8.2): the full-picture background as a `p:bg` blip when its aspect is
 // the sheet's, else a cover-cropped picture at the sheet box; every raster as an RGBA PNG at 2x
 // placed at its measured box (alpha survives the package byte for byte, pptx report section 4.6);
-// `altText` carries the block id. pptxgenjs takes `data` as `image/png;base64,...` without the
-// `data:` prefix.
+// `altText` carries the block id, or the block's own alt text when it has one (gslides-parity
+// SPEC-2 2.5.6). A raster of a rotated or flipped object was shot at its unrotated box (SPEC-2 1.5)
+// and carries pptxgenjs `rotate`, `flipH` and `flipV`; a shadow travels on the image. pptxgenjs
+// takes `data` as `image/png;base64,...` without the `data:` prefix.
 import { readFileSync } from 'node:fs';
 
 import type PptxGenJS from 'pptxgenjs';
 
 import type { Scene, SceneRaster } from '../scene/types.ts';
 import { pxToIn } from '../units.ts';
+import { objectName, objectProps } from './shapes.ts';
 
 export function dataUri(bytes: Uint8Array, mime: string): string {
   return `${mime};base64,${Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength).toString('base64')}`;
@@ -59,7 +62,22 @@ export function addPicture(
   return 'cover';
 }
 
-/** One raster PNG at its measured box, with the block's link when it carries one (SPEC 7.2.7). */
+/**
+ * The picture object that covers the sheet at the bottom of the stack as the slide background
+ * (gslides-parity SPEC-2 2.6.4, 1.5): its 2x raster as `slide.background = { data }`, the form the
+ * picture kinds export, so a converted and an unconverted Section header produce the same file.
+ * Returns false when the raster has no file.
+ */
+export function addPictureBackground(slide: PptxGenJS.Slide, raster: SceneRaster): boolean {
+  if (!raster.file) return false;
+  slide.background = { data: dataUri(readFileSync(raster.file), 'image/png') };
+  return true;
+}
+
+/**
+ * One raster PNG at its measured box, with the block's link when it carries one (SPEC 7.2.7), the
+ * object's rotation, flip and shadow (SPEC-2 2.1, 2.3.4) and its alt text (2.5.6).
+ */
 export function addRaster(
   slide: PptxGenJS.Slide,
   raster: SceneRaster,
@@ -72,15 +90,17 @@ export function addRaster(
   const png = bytes ?? readFileSync(file as string);
   const [x, y, w, h] = raster.box;
   if (w <= 0 || h <= 0) return false;
+  const props = objectProps(raster);
   slide.addImage({
     data: dataUri(png, 'image/png'),
     x: pxToIn(x),
     y: pxToIn(y),
     w: pxToIn(w),
     h: pxToIn(h),
-    altText: `${raster.blockId} (${raster.kind})`,
+    ...props,
+    altText: props.altText ?? `${raster.blockId} (${raster.kind})`,
     ...(hyperlink ? { hyperlink } : {}),
-    objectName: `${namePrefix}#${raster.id}`,
+    objectName: objectName(namePrefix, raster.id, raster.userGroup),
   });
   return true;
 }

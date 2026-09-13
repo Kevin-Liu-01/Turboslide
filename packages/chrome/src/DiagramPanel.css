@@ -1,0 +1,79 @@
+/* The Diagram panel (DiagramPanel.tsx; gslides-parity SPEC-2 section 5): the type tiles, the
+   count stepper named for the type, the style tiles, the live preview and the Insert row, in the
+   320 px right panel. Lines: the count row and the preview draw --pt-hair-soft under themselves;
+   the preview frame is the tile's --pt-hair. */
+.ts-diagram-panel .ts-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+.ts-diagram-count {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 36px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-diagram-count-label {
+  color: var(--pt-ink-2);
+  font: 13px/1.2 var(--pt-text);
+}
+
+.ts-diagram-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ts-diagram-count-field {
+  width: 48px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 4px;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.2 var(--pt-text);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.ts-diagram-count-field::-webkit-outer-spin-button,
+.ts-diagram-count-field::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+.ts-diagram-count-field:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+.ts-diagram-live {
+  padding: 4px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-diagram-preview.is-live {
+  width: 100%;
+}
+
+.ts-diagram-insert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px;
+}
+
+.ts-diagram-box {
+  color: var(--pt-titanium);
+  font: 12px/1.2 var(--pt-text);
+  font-variant-numeric: tabular-nums;
+}

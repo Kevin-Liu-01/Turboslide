@@ -2,6 +2,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools';
 import { HeadContent, Link, Scripts, createRootRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 
 import tokensCss from '@turboslide/chrome/tokens.css?url';
 import interCss from '@turboslide/fonts/inter.css?url';
@@ -10,6 +11,7 @@ import sheetCss from '@turboslide/theme/gt-ink-paper/sheet.css?url';
 import stageCss from '@turboslide/theme/gt-ink-paper/stage.css?url';
 import { THEME_BOOT_SCRIPT } from '@turboslide/viewer/theme';
 
+import { useMountEffect } from '../components/useMountEffect';
 import appCss from '../styles.css?url';
 
 // The document shell (SPEC 3.4): the theme boot script (gt-theme then
@@ -64,6 +66,30 @@ function NotFound() {
   );
 }
 
+/**
+ * The devtools, mounted after hydration and never for an automated browser (gslides-parity
+ * build-2/b4.md request 6): their stylesheet declares its own `@font-face { font-family: Inter }`
+ * from node_modules, and a face declared last in the document wins for the same descriptors, so
+ * every Inter run on a dev stage, the hidden canvas measure root included, rendered in the
+ * devtools' Inter (the statement's 72 px line measured 971 px wide against the CLI's 978). This
+ * devtools version has no shadow root option, so the e2e runs and the canvas walk, which compare
+ * the editor's measurement with the CLI's, run without the devtools (`navigator.webdriver`); a
+ * person's dev browser keeps them, and the recorded difference stands for that browser alone.
+ */
+function DevtoolsMount() {
+  const [show, setShow] = useState(false);
+  useMountEffect(() => {
+    if (typeof navigator !== 'undefined' && navigator.webdriver) return;
+    setShow(true);
+  });
+  return show ? (
+    <TanStackDevtools
+      config={{ position: 'bottom-right' }}
+      plugins={[{ name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> }]}
+    />
+  ) : null;
+}
+
 function RootDocument({ children }: { children: ReactNode }) {
   return (
     // the boot script stamps data-theme before hydration, so the attribute is expected to differ from the server's markup
@@ -78,12 +104,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         {children}
         {/* Dev only (SPEC 3.3 item 5): the component is Solid based and must never reach a
             production bundle. The devtools() Vite plugin strips it from builds as well. */}
-        {import.meta.env.DEV ? (
-          <TanStackDevtools
-            config={{ position: 'bottom-right' }}
-            plugins={[{ name: 'TanStack Router', render: <TanStackRouterDevtoolsPanel /> }]}
-          />
-        ) : null}
+        {import.meta.env.DEV ? <DevtoolsMount /> : null}
         <Scripts />
       </body>
     </html>

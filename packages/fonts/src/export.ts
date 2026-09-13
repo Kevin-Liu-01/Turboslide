@@ -1,10 +1,12 @@
-// The export font set (SPEC 8.4; MILESTONES M2 item 5): the static instances scripts/build-fonts.py
-// cuts from InterVariable into export/, described by export/fonts.json. The PPTX builder asks
-// exportFace(sizePx, weight) for the family name a text run travels under (DrawingML has no weight
-// 500, so the medium cut is its own family, pptx report section 1 item 2), the OOXML post-process
-// embeds exportFaces(set) as .fntdata parts, and the render worker's Docker image installs the same
-// files so LibreOffice renders with them. fontSetVersion() is what ExportReport.fontSetVersion
-// records. License: SIL OFL 1.1 with no Reserved Font Name declared (fonts.json `license`).
+// The export font set (SPEC 8.4; MILESTONES M2 item 5; gslides-parity SPEC-2 7.1): the static
+// instances scripts/build-fonts.py cuts from InterVariable and InterVariable-Italic into export/,
+// described by export/fonts.json. The PPTX builder asks exportFace(sizePx, weight, { italic }) for
+// the family name a text run travels under (DrawingML has no weight 500, so the medium cut is its
+// own family, pptx report section 1 item 2; an italic run keeps the family and the file carries
+// the Italic style), the OOXML post-process embeds exportFaces(set) as .fntdata parts, and the
+// render worker's Docker image installs the same files so LibreOffice renders with them.
+// fontSetVersion() is what ExportReport.fontSetVersion records. License: SIL OFL 1.1 with no
+// Reserved Font Name declared by either source (fonts.json `license`).
 import { existsSync, readFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -17,6 +19,8 @@ export type ExportFace = {
   /** The family name a run names in the PPTX and the installed face answers to. */
   family: string;
   style: string;
+  /** true for an italic twin (gslides-parity SPEC-2 7.1); the family name is the upright's */
+  italic: boolean;
   postScriptName: string;
   opsz: number;
   weight: number;
@@ -31,20 +35,31 @@ export type ExportFace = {
   sha256: string;
 };
 
+export type ExportFontSource = {
+  file: string;
+  family: string | null;
+  version: string;
+  sha256: string;
+  bytes: number;
+  fsType: number;
+  axes: Record<string, [number, number, number]>;
+};
+
 export type ExportFonts = {
   version: string;
   generatedBy: string;
   prefix: string;
-  source: {
-    file: string;
-    family: string | null;
-    version: string;
-    sha256: string;
-    bytes: number;
-    fsType: number;
-    axes: Record<string, [number, number, number]>;
+  source: ExportFontSource & {
+    /** the italic source of the same release (SPEC-2 7.1, 0.66) */
+    italic: ExportFontSource & { italicAngle: number; release: string; path: string };
   };
-  license: { id: string; reservedFontName: string | null; checked: string[]; note: string };
+  license: {
+    id: string;
+    reservedFontName: string | null;
+    italicReservedFontName: string | null;
+    checked: string[];
+    note: string;
+  };
   textSizes: number[];
   weights: number[];
   displaySizes: number[];
@@ -97,7 +112,7 @@ export function exportFaceBytes(face: ExportFace): Buffer {
   return readFileSync(exportFacePath(face));
 }
 
-/** The faces of a set, in fonts.json order. */
+/** The faces of a set, in fonts.json order, the italic twins included. */
 export function exportFaces(set: ExportFontSet = 'exact'): ExportFace[] {
   return loadExportFonts().faces.filter((face) => face.sets.includes(set));
 }
@@ -128,12 +143,15 @@ export type ExportFaceQuery = {
   set?: ExportFontSet;
   /** Force the display instance (a heading block) regardless of size. */
   display?: boolean;
+  /** The italic twin of the face (gslides-parity SPEC-2 7.1): the same family, style Italic. */
+  italic?: boolean;
 };
 
 /**
  * The face a text run at `sizePx` and `weight` exports with. In the exact set a display run is
  * `GT Inter Display` and text runs map to the nearest ladder size and weight; in the standard set
- * headings keep the display face and every text run is `Inter` or `Inter Medium` (SPEC 8.4).
+ * headings keep the display face and every text run is `Inter` or `Inter Medium` (SPEC 8.4). An
+ * italic run takes the italic twin of the same family (SPEC-2 7.1).
  */
 export function exportFace(
   sizePx: number,
@@ -142,7 +160,10 @@ export function exportFace(
 ): ExportFace {
   const fonts = loadExportFonts();
   const set = query.set ?? 'exact';
-  const faces = fonts.faces.filter((face) => face.sets.includes(set));
+  const italic = query.italic === true;
+  const faces = fonts.faces.filter(
+    (face) => face.sets.includes(set) && (face.italic ?? face.style === 'Italic') === italic,
+  );
   const display = query.display ?? sizePx >= DISPLAY_MIN_PX;
   if (display) {
     const face = faces.find((f) => f.display);
@@ -158,7 +179,7 @@ export function exportFace(
   const face = faces.find((f) => !f.display && f.opsz === size && f.weight === w);
   if (!face) {
     throw new RangeError(
-      `@turboslide/fonts: no ${set} face for ${sizePx} px weight ${weight} (opsz ${size}, wght ${w})`,
+      `@turboslide/fonts: no ${set} ${italic ? 'italic ' : ''}face for ${sizePx} px weight ${weight} (opsz ${size}, wght ${w})`,
     );
   }
   return face;

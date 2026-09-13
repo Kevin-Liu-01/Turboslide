@@ -185,6 +185,22 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
     await menu(page).locator('[data-menu-item="slide.skipSlide"]').click();
     await expect.poll(() => skipped(page), { timeout: 20_000 }).toEqual([]);
     await expect(card(page, 'content-rule')).not.toHaveClass(/is-skipped/);
+    /* Change background is one row on every slide kind (SPEC-2 0.74, 11.6): it opens the Background
+       dialog with Color, Image and Add to theme on a content slide and on the Title slide alike */
+    for (const id of ['content-rule', 'title']) {
+      await card(page, id).click({ button: 'right' });
+      const row = menu(page).locator('[data-menu-item="slide.changeBackground"]');
+      await expect(row).not.toHaveAttribute('aria-disabled', 'true');
+      await expect(row.locator('.ts-menu-label')).toHaveText('Change background');
+      await row.click();
+      const dialog = page.getByRole('dialog', { name: 'Background' });
+      await expect(dialog).toBeVisible();
+      await expect(dialog.locator('[data-control="dialog.background.color.plate"]')).toBeVisible();
+      await expect(dialog.locator('[data-control="dialog.background.addToTheme"]')).toBeVisible();
+      await expect(dialog.locator('[data-control="dialog.background.done"]')).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(dialog).toHaveCount(0);
+    }
   });
 
   test('drag reorders as one slide.move, Delete shows the snackbar and Undo brings the slide back', async ({

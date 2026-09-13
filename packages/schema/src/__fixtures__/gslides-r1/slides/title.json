@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "title",
+  "kind": "title",
+  "mark": {
+    "w": 132,
+    "h": 84
+  },
+  "heading": "Export fixture",
+  "lead": "One of every object the Google Slides parity round added, for both export modes.",
+  "notes": "The title slide carries speaker notes; the downloads leave them out unless asked.",
+  "template": "title"
+}

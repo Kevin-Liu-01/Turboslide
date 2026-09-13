@@ -40,7 +40,9 @@ export function checkAssets(ctx: LintContext): Finding[] {
       if (block.type === 'shot') {
         const asset = ctx.asset(block.asset);
         if (!usedBy.has(block.asset)) usedBy.set(block.asset, slide.id);
-        if (asset && 'neutral' in asset.twins && block.border === false) {
+        // a frame (gslides-parity SPEC-2 2.5.5) is a border too
+        const framed = block.frame !== undefined;
+        if (asset && 'neutral' in asset.twins && block.border === false && !framed) {
           out.push(
             ctx.finding('asset/twin-or-border', slide.id, {
               blockId: block.id,
@@ -55,6 +57,38 @@ export function checkAssets(ctx: LintContext): Finding[] {
                   blockId: block.id,
                   path: '/border',
                   value: true,
+                },
+              ],
+            }),
+          );
+        }
+      }
+      // the picture object (SPEC-2 2.6.4): a neutral twin that does not cover the sheet keeps a frame
+      if (block.type === 'picture') {
+        const asset = ctx.asset(block.asset);
+        if (block.asset !== '' && !usedBy.has(block.asset)) usedBy.set(block.asset, slide.id);
+        const covers =
+          block.pos !== undefined &&
+          block.pos.x <= 0 &&
+          block.pos.y <= 0 &&
+          block.pos.x + block.pos.w >= 1600 &&
+          block.pos.y + block.pos.h >= 900;
+        const framed = block.frame !== undefined;
+        if (asset && 'neutral' in asset.twins && !framed && !covers) {
+          out.push(
+            ctx.finding('asset/twin-or-border', slide.id, {
+              blockId: block.id,
+              path: `${ref.path}/frame`,
+              text: asset.id,
+              proposal:
+                'A picture without a dark twin keeps a 1 px frame so it reads as a plate on the dark ground (DECK-GRAMMAR.md:56).',
+              fix: [
+                {
+                  op: 'block.set',
+                  slideId: slide.id,
+                  blockId: block.id,
+                  path: '/frame',
+                  value: { weight: 1 },
                 },
               ],
             }),

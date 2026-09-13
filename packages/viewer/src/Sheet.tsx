@@ -1,4 +1,4 @@
-import type { MouseEvent, ReactNode, TouchEvent } from 'react';
+import type { MouseEvent, ReactNode, RefObject, TouchEvent, UIEvent } from 'react';
 import { useRef } from 'react';
 
 import { SHEET_H, SHEET_W } from './model';
@@ -92,6 +92,10 @@ export type SheetProps = {
   edges?: boolean;
   /** hidden while another mode is up */
   hidden?: boolean;
+  /** the scrolling stage box, for the editor's zoom and pan (gslides-parity SPEC-2 6.1 rows 27, 28) */
+  scrollerRef?: RefObject<HTMLDivElement | null>;
+  /** the stage scrolled while zoomed: the overlay follows */
+  onScroll?: (scroll: { left: number; top: number }) => void;
   children?: ReactNode;
 };
 
@@ -114,6 +118,8 @@ export function Sheet({
   onStep,
   edges = true,
   hidden = false,
+  scrollerRef,
+  onScroll,
   children,
 }: SheetProps) {
   const sheet = useRef<HTMLDivElement>(null);
@@ -155,6 +161,7 @@ export function Sheet({
 
   return (
     <div
+      ref={scrollerRef}
       className="pt-sheet-stage"
       data-dir={dir}
       data-zoom={zoomed ? String(fit.scale) : undefined}
@@ -162,6 +169,12 @@ export function Sheet({
       onClick={onClick}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
+      onScroll={
+        onScroll
+          ? (e: UIEvent<HTMLDivElement>) =>
+              onScroll({ left: e.currentTarget.scrollLeft, top: e.currentTarget.scrollTop })
+          : undefined
+      }
     >
       <div
         ref={sheet}

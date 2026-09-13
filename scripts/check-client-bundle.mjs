@@ -10,6 +10,11 @@
 //   2. Section 5.5: no Solid or devtools chunk appears in the server output (dropping the
 //      devtools() Vite plugin left neodrag and solid-js chunks in the server bundle and every
 //      request returned 500). File names and contents are both checked.
+//   3. gslides-parity SPEC-2 8.3 (VERIFICATION finding 12): no client chunk names `node:fs`,
+//      `node:path` or `node:zlib`. The linter's rendered layer reached the page through
+//      `@turboslide/lint/run`; the pages import `@turboslide/lint/run-client` now and the
+//      studio's lint server function loads the rendered layer inside its handler, so a builtin
+//      in the client output means a server module joined the browser graph again.
 //
 // The default server output is <dist>/server. A Nitro deploy build (apps/studio/.output/server)
 // is checked too when it exists, or pass it with --server. Source maps are skipped: a client map
@@ -18,6 +23,17 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
 const MARKER = 'TURBOSLIDE_SERVER_ONLY_MARKER';
+/**
+ * The builtins a page must never name (SPEC-2 8.3), matched as module specifiers in quotes. The
+ * three of the specification, plus node:child_process: the render worker's cli.ts imports it,
+ * and a server module that reaches that file from the editor's client graph stops the editor from
+ * booting in dev (measured 2026-09-12: the page error "Cannot access node:child_process.spawn in
+ * client code" from apps/studio/src/server/render.ts importing @turboslide/render-worker/cli).
+ */
+const NODE_BUILTINS = ['node:fs', 'node:path', 'node:zlib', 'node:child_process'];
+const NODE_BUILTIN_PATTERNS = NODE_BUILTINS.map(
+  (name) => new RegExp(`["'\`]${name.replace(':', '\\:')}(?:/[^"'\`]*)?["'\`]`),
+);
 const SOLID_PATTERNS = [
   /solid-js/,
   /@solid-primitives/,
@@ -93,6 +109,23 @@ if (presentServers.length > 0 && serverHits === 0) {
     `server-only marker "${MARKER}" not found in any server file: the check is not live (keep a route calling a server function that returns it, see apps/studio/src/server/health.ts)`,
   );
 }
+
+// 3. Node builtins in the client output (SPEC-2 8.3).
+const clientScripts = clientFiles.filter((f) => /\.(?:js|mjs|cjs)$/.test(f));
+let builtinHits = 0;
+for (const file of clientScripts) {
+  const text = readFileSync(file, 'utf8');
+  for (const [i, pattern] of NODE_BUILTIN_PATTERNS.entries()) {
+    if (!pattern.test(text)) continue;
+    builtinHits += 1;
+    failures.push(
+      `client chunk ${relative(dist, file)} names ${NODE_BUILTINS[i]}: a server module reached the browser graph (SPEC-2 8.3; the linter's rendered layer stays behind @turboslide/lint/run)`,
+    );
+  }
+}
+notes.push(
+  `node builtins (${NODE_BUILTINS.join(', ')}) in client scripts: ${builtinHits} of ${clientScripts.length} files`,
+);
 
 // 2. Solid and devtools chunks in the server output.
 for (const dir of presentServers) {

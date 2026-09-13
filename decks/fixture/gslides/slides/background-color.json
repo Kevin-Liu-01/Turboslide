@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "background-color",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "A plate background"
+      },
+      {
+        "id": "p1",
+        "type": "paragraph",
+        "measure": 56,
+        "text": "This slide carries background.color plate; the Editable text export writes the colour as the slide background."
+      }
+    ]
+  },
+  "background": {
+    "color": "plate"
+  },
+  "template": "one-column"
+}

@@ -116,6 +116,7 @@
                     "blocks": [
                       {
                         "id": "dia1",
+                        "alt": "A three-step flow: a line with three square markers labeled Source, Translate, and Deploy, with the words strings and translations between them",
                         "type": "dia",
                         "fit": {
                           "viewBox": [
@@ -125,8 +126,7 @@
                             210
                           ]
                         },
-                        "svg": "<svg class=\"dia\" viewBox=\"0 0 300 210\" aria-label=\"A three-step flow: a line with three square markers labeled Source, Translate, and Deploy, with the words strings and translations between them\">\n              <line class=\"ink\" x1=\"5.5\" y1=\"70.5\" x2=\"294.5\" y2=\"70.5\"></line>\n              <rect x=\"0\" y=\"65\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n              <rect x=\"144.5\" y=\"65\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n              <rect x=\"289\" y=\"65\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n              <text x=\"75\" y=\"52\" text-anchor=\"middle\">Strings</text>\n              <text x=\"222\" y=\"52\" text-anchor=\"middle\">Translations</text>\n              <text x=\"0\" y=\"114\">Source</text>\n              <text x=\"150\" y=\"114\" text-anchor=\"middle\">Translate</text>\n              <text x=\"300\" y=\"114\" text-anchor=\"end\">Deploy</text>\n              <text x=\"0\" y=\"204\">A three-step flow</text>\n            </svg>",
-                        "alt": "A three-step flow: a line with three square markers labeled Source, Translate, and Deploy, with the words strings and translations between them"
+                        "svg": "<svg class=\"dia\" viewBox=\"0 0 300 210\" aria-label=\"A three-step flow: a line with three square markers labeled Source, Translate, and Deploy, with the words strings and translations between them\">\n              <line class=\"ink\" x1=\"5.5\" y1=\"70.5\" x2=\"294.5\" y2=\"70.5\"></line>\n              <rect x=\"0\" y=\"65\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n              <rect x=\"144.5\" y=\"65\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n              <rect x=\"289\" y=\"65\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n              <text x=\"75\" y=\"52\" text-anchor=\"middle\">Strings</text>\n              <text x=\"222\" y=\"52\" text-anchor=\"middle\">Translations</text>\n              <text x=\"0\" y=\"114\">Source</text>\n              <text x=\"150\" y=\"114\" text-anchor=\"middle\">Translate</text>\n              <text x=\"300\" y=\"114\" text-anchor=\"end\">Deploy</text>\n              <text x=\"0\" y=\"204\">A three-step flow</text>\n            </svg>"
                       }
                     ]
                   },
@@ -134,6 +134,7 @@
                     "blocks": [
                       {
                         "id": "dia2",
+                        "alt": "A scale from Reserved to Playful with a center tick and an 11px square marker at 22 percent",
                         "type": "dia",
                         "fit": {
                           "viewBox": [
@@ -143,8 +144,7 @@
                             210
                           ]
                         },
-                        "svg": "<svg class=\"dia\" viewBox=\"0 0 300 210\" aria-label=\"A scale from Reserved to Playful with a center tick and an 11px square marker at 22 percent\">\n              <line class=\"hair\" x1=\"0\" y1=\"70.5\" x2=\"300\" y2=\"70.5\"></line>\n              <line class=\"mid\" x1=\"150.5\" y1=\"66.5\" x2=\"150.5\" y2=\"75.5\"></line>\n              <rect x=\"60.5\" y=\"65\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n              <text class=\"lab\" style=\"font-size:20px\" x=\"0\" y=\"114\">Reserved</text>\n              <text x=\"300\" y=\"114\" text-anchor=\"end\">Playful</text>\n              <text x=\"0\" y=\"204\">A scale with a marker</text>\n            </svg>",
-                        "alt": "A scale from Reserved to Playful with a center tick and an 11px square marker at 22 percent"
+                        "svg": "<svg class=\"dia\" viewBox=\"0 0 300 210\" aria-label=\"A scale from Reserved to Playful with a center tick and an 11px square marker at 22 percent\">\n              <line class=\"hair\" x1=\"0\" y1=\"70.5\" x2=\"300\" y2=\"70.5\"></line>\n              <line class=\"mid\" x1=\"150.5\" y1=\"66.5\" x2=\"150.5\" y2=\"75.5\"></line>\n              <rect x=\"60.5\" y=\"65\" width=\"11\" height=\"11\" fill=\"var(--ink)\"></rect>\n              <text class=\"lab\" style=\"font-size:20px\" x=\"0\" y=\"114\">Reserved</text>\n              <text x=\"300\" y=\"114\" text-anchor=\"end\">Playful</text>\n              <text x=\"0\" y=\"204\">A scale with a marker</text>\n            </svg>"
                       }
                     ]
                   },
@@ -152,6 +152,7 @@
                     "blocks": [
                       {
                         "id": "dia3",
+                        "alt": "A stacked layer model: customer apps above the open-source libraries above the platform, the two GT layers on a plate",
                         "type": "dia",
                         "fit": {
                           "viewBox": [
@@ -161,8 +162,7 @@
                             210
                           ]
                         },
-                        "svg": "<svg class=\"dia\" viewBox=\"0 0 300 210\" aria-label=\"A stacked layer model: customer apps above the open-source libraries above the platform, the two GT layers on a plate\">\n              <rect x=\"0.5\" y=\"62.5\" width=\"299\" height=\"108\" fill=\"var(--plate)\"></rect>\n              <rect x=\"0.5\" y=\"8.5\" width=\"299\" height=\"162\" fill=\"none\" class=\"hair\" stroke-width=\"1\"></rect>\n              <path d=\"M0.5 62.5 H299.5 M0.5 116.5 H299.5\" class=\"hair\" stroke-width=\"1\" fill=\"none\"></path>\n              <text x=\"16\" y=\"42\">Customer apps</text>\n              <text x=\"16\" y=\"96\">Open-source libraries</text>\n              <text x=\"16\" y=\"150\">Platform</text>\n              <text x=\"0\" y=\"204\">A stacked layer model</text>\n            </svg>",
-                        "alt": "A stacked layer model: customer apps above the open-source libraries above the platform, the two GT layers on a plate"
+                        "svg": "<svg class=\"dia\" viewBox=\"0 0 300 210\" aria-label=\"A stacked layer model: customer apps above the open-source libraries above the platform, the two GT layers on a plate\">\n              <rect x=\"0.5\" y=\"62.5\" width=\"299\" height=\"108\" fill=\"var(--plate)\"></rect>\n              <rect x=\"0.5\" y=\"8.5\" width=\"299\" height=\"162\" fill=\"none\" class=\"hair\" stroke-width=\"1\"></rect>\n              <path d=\"M0.5 62.5 H299.5 M0.5 116.5 H299.5\" class=\"hair\" stroke-width=\"1\" fill=\"none\"></path>\n              <text x=\"16\" y=\"42\">Customer apps</text>\n              <text x=\"16\" y=\"96\">Open-source libraries</text>\n              <text x=\"16\" y=\"150\">Platform</text>\n              <text x=\"0\" y=\"204\">A stacked layer model</text>\n            </svg>"
                       }
                     ]
                   },
@@ -170,6 +170,7 @@
                     "blocks": [
                       {
                         "id": "dia4",
+                        "alt": "An isometric plate with three shaded faces and the mark seated in the top face",
                         "type": "dia",
                         "fit": {
                           "viewBox": [
@@ -179,8 +180,7 @@
                             210
                           ]
                         },
-                        "svg": "<svg class=\"dia\" viewBox=\"0 0 300 210\" aria-label=\"An isometric plate with three shaded faces and the mark seated in the top face\">\n              <polygon points=\"150,8 270,77.28 150,146.56 30,77.28\" fill=\"var(--ink)\" fill-opacity=\"0.04\"></polygon>\n              <polygon points=\"270,77.28 150,146.56 150,170.56 270,101.28\" fill=\"var(--ink)\" fill-opacity=\"0.15\"></polygon>\n              <polygon points=\"30,77.28 150,146.56 150,170.56 30,101.28\" fill=\"var(--ink)\" fill-opacity=\"0.09\"></polygon>\n              <polygon points=\"150,8 270,77.28 270,101.28 150,170.56 30,101.28 30,77.28\" fill=\"none\" class=\"mid\" stroke-width=\"1\"></polygon>\n              <path d=\"M30 77.28 L150 146.56 L270 77.28 M150 146.56 L150 170.56\" fill=\"none\" class=\"mid\" stroke-width=\"1\"></path>\n              <g transform=\"translate(150 74) scale(1 0.5) rotate(45)\"><svg width=\"84\" height=\"54\" x=\"-42\" y=\"-27\" fill=\"var(--ink)\" fill-opacity=\"0.55\"><use href=\"#gt-mark\"></use></svg></g>\n              <text x=\"0\" y=\"204\">An isometric plate</text>\n            </svg>",
-                        "alt": "An isometric plate with three shaded faces and the mark seated in the top face"
+                        "svg": "<svg class=\"dia\" viewBox=\"0 0 300 210\" aria-label=\"An isometric plate with three shaded faces and the mark seated in the top face\">\n              <polygon points=\"150,8 270,77.28 150,146.56 30,77.28\" fill=\"var(--ink)\" fill-opacity=\"0.04\"></polygon>\n              <polygon points=\"270,77.28 150,146.56 150,170.56 270,101.28\" fill=\"var(--ink)\" fill-opacity=\"0.15\"></polygon>\n              <polygon points=\"30,77.28 150,146.56 150,170.56 30,101.28\" fill=\"var(--ink)\" fill-opacity=\"0.09\"></polygon>\n              <polygon points=\"150,8 270,77.28 270,101.28 150,170.56 30,101.28 30,77.28\" fill=\"none\" class=\"mid\" stroke-width=\"1\"></polygon>\n              <path d=\"M30 77.28 L150 146.56 L270 77.28 M150 146.56 L150 170.56\" fill=\"none\" class=\"mid\" stroke-width=\"1\"></path>\n              <g transform=\"translate(150 74) scale(1 0.5) rotate(45)\"><svg width=\"84\" height=\"54\" x=\"-42\" y=\"-27\" fill=\"var(--ink)\" fill-opacity=\"0.55\"><use href=\"#gt-mark\"></use></svg></g>\n              <text x=\"0\" y=\"204\">An isometric plate</text>\n            </svg>"
                       }
                     ]
                   }

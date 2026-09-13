@@ -87,3 +87,11 @@
   color: var(--pt-ink);
   font-weight: 500;
 }
+
+/* SPEC-2 section 5: the multi selection line ("3 objects", "Group") under the notice */
+.ts-fo-count {
+  margin: 0;
+  padding: 8px 16px;
+  color: var(--pt-titanium);
+  font-size: 12px;
+}

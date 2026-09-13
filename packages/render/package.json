@@ -12,6 +12,7 @@
     "./print": "./src/print.ts",
     "./stage": "./src/stage.ts",
     "./geometry": "./src/geometry.ts",
+    "./measure-dom": "./src/measure-dom.ts",
     "./text": "./src/text.ts",
     "./html": "./src/html.ts",
     "./block-css": "./src/block-css.ts",

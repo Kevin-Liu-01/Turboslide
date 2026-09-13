@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 // `pnpm check`: the M1 acceptance chain from MILESTONES.md, run in order from the repo root, plus
-// the M2 format gate (step 19) and the two steps of the Google Slides parity round (steps 20 and
-// 21, docs/gslides-parity/SPEC.md 14.1). Every step is the literal command from the milestone plan,
+// the M2 format gate (step 19), the two steps of the Google Slides parity round (steps 20 and
+// 21, docs/gslides-parity/SPEC.md 14.1) and the three of round two (steps 22 to 24,
+// docs/gslides-parity/SPEC-2.md 11.1: the export fixture in both modes, the fonts build check,
+// the conversion fidelity gate), with the container verification of SPEC-2 11.3 as an optional
+// step 25 that runs when Docker is present. Every step is the literal command from the milestone plan,
 // with one guard: step 3 first proves the generated files are tracked, because
 // `git diff --exit-code` passes trivially on untracked paths. The runner adds only what the plan
 // assumes about its environment: it creates .turboslide/, it skips the steps that read Kevin's
@@ -14,7 +17,8 @@
 //   node scripts/check.mjs --list         print the numbered steps
 //   node scripts/check.mjs --from 6       start at step 6
 //   node scripts/check.mjs --only 4,5     run only those steps
-//   node scripts/check.mjs --strict       fail instead of skipping when the Prototemplate deck is missing
+//   node scripts/check.mjs --strict       fail instead of skipping when the Prototemplate deck, the
+//                                         fonts venv or Docker is missing
 //   node scripts/check.mjs --keep-server  leave a dev server the runner started running
 import { spawn, spawnSync } from 'node:child_process';
 import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
@@ -48,6 +52,17 @@ const EDITOR_STATES = 'editorGrid,editorMenu,editorPanel';
 // Step 20 (gslides-parity SPEC 14.1): the Google parity audit once the verifier has written it;
 // until then the menu model tests stand in, so the step is never a silent pass.
 const PARITY_AUDIT = 'scripts/gslides-parity-audit.mjs';
+// Step 23 (gslides-parity SPEC-2 11.1): the fonts build check needs the Python venv with fontTools
+// that scripts/build-fonts.py documents; without it the step is skipped, never a silent pass.
+const FONTS_VENV = '.turboslide/venv';
+// Step 25 (SPEC-2 11.3, optional): the container verification in the render worker image runs
+// when a Docker daemon answers; the verifier records its numbers in VERIFICATION-2.md.
+const CONTAINER_IMAGE = 'turboslide-render-worker';
+// The export batch size the dev server the runner starts advertises (SPEC-2 8.1): small, so
+// apps/studio/e2e/export-batch.spec.ts drives the plan, the batches and the merge over the 27
+// slide fixture deck in a few minutes; the Download dialog of a deck longer than three slides
+// takes the batched path on that server too, which is the path the spec proves.
+const EXPORT_BATCH = '3';
 
 // MILESTONES.md, M1 acceptance, in order. `needs` marks the environment a step depends on.
 const steps = [
@@ -107,15 +122,31 @@ const steps = [
   // of SPEC 11.2 first
   existsSync(PARITY_AUDIT)
     ? {
-        cmd: `node ${PARITY_AUDIT} --base ${STUDIO_URL} --out docs/gslides-parity/verification/parity-audit.json`,
+        cmd: `node ${PARITY_AUDIT} --base ${STUDIO_URL} --out docs/gslides-parity/verification-2/parity-audit.json`,
         needs: 'server',
       }
     : {
         cmd: 'pnpm exec vitest run --dir packages/chrome menus/__tests__',
       },
   {
-    cmd: 'pnpm exec playwright test apps/studio/e2e/ten-tasks.spec.ts apps/studio/e2e/text-editing.spec.ts apps/studio/e2e/filmstrip.spec.ts apps/studio/e2e/home.spec.ts apps/studio/e2e/present.spec.ts apps/studio/e2e/landing.spec.ts apps/studio/e2e/gslides-actions.spec.ts apps/studio/e2e/deck-transfer.spec.ts',
+    // round two (SPEC-2 11.1 step 21): the canvas walk of 11.8, the objects, the text styles, the
+    // tables, the charts, the hygiene rows and the batched export join the list
+    cmd: 'pnpm exec playwright test apps/studio/e2e/ten-tasks.spec.ts apps/studio/e2e/text-editing.spec.ts apps/studio/e2e/filmstrip.spec.ts apps/studio/e2e/home.spec.ts apps/studio/e2e/present.spec.ts apps/studio/e2e/landing.spec.ts apps/studio/e2e/gslides-actions.spec.ts apps/studio/e2e/deck-transfer.spec.ts apps/studio/e2e/canvas.spec.ts apps/studio/e2e/objects.spec.ts apps/studio/e2e/text-styles.spec.ts apps/studio/e2e/tables.spec.ts apps/studio/e2e/charts.spec.ts apps/studio/e2e/hygiene.spec.ts apps/studio/e2e/export-batch.spec.ts',
     needs: 'server',
+  },
+  // gslides-parity SPEC-2 11.1, steps 22 to 24: the fixture deck exported in both modes with the
+  // flatten report perfect, the fonts build check, the conversion fidelity gate (0.95)
+  {
+    cmd: `pnpm exec turboslide export decks/fixture/gslides --mode native --out .turboslide/gs-native && pnpm exec turboslide export check .turboslide/gs-native && pnpm exec turboslide export decks/fixture/gslides --mode flatten --out .turboslide/gs-flatten && pnpm exec turboslide export check .turboslide/gs-flatten && node -e "const fs=require('fs'); const dir='.turboslide/gs-flatten'; const reports=fs.readdirSync(dir).filter(f=>f.endsWith('.json')&&!f.endsWith('.check.json')); if(reports.length===0) process.exit(1); for (const f of reports) { const r=JSON.parse(fs.readFileSync(dir+'/'+f)); const perfect = r.perfect ?? (r.themes ?? r.reports ?? []).every(t=>t.perfect); if(perfect!==true){ console.error(f+': flatten report is not perfect'); process.exit(1) } }"`,
+  },
+  { cmd: 'pnpm exec turboslide fonts build --check', needs: 'python' },
+  {
+    cmd: 'node scripts/canvas-fidelity.mjs --deck decks/gt-brand --deck decks/templates/gt-brand --deck decks/templates/blank --max-mismatch 0.005',
+  },
+  // SPEC-2 11.3, optional: the container verification in the rebuilt render worker image
+  {
+    cmd: `docker build -f docker/render-worker.Dockerfile -t ${CONTAINER_IMAGE} . && docker run --rm -v "$PWD/.turboslide/container:/work" ${CONTAINER_IMAGE} turboslide export decks/fixture/gslides --mode native --verify --out /work/gs-native`,
+    needs: 'docker',
   },
 ];
 
@@ -138,6 +169,11 @@ const only = value('only') ? new Set(value('only').split(',').map(Number)) : nul
 const strict = flag('strict');
 const keepServer = flag('keep-server');
 const hasPrototemplate = existsSync(PROTOTEMPLATE_DECK);
+const hasFontsVenv = existsSync(FONTS_VENV);
+const hasDocker = (() => {
+  const probe = spawnSync('docker', ['info'], { stdio: 'ignore' });
+  return probe.status === 0;
+})();
 
 process.chdir(ROOT);
 mkdirSync('.turboslide', { recursive: true });
@@ -271,6 +307,7 @@ async function ensureServer() {
       cwd: ROOT,
       detached: true,
       stdio: keepServer ? ['ignore', 'ignore', 'ignore'] : ['ignore', 'pipe', 'pipe'],
+      env: { ...process.env, TURBOSLIDE_EXPORT_BATCH: EXPORT_BATCH },
     },
   );
   child.stdout?.on('data', (chunk) => serverLog.write(chunk));
@@ -340,17 +377,21 @@ const startedAt = Date.now();
 let exitCode = 0;
 for (const step of selected) {
   const label = `check ${String(step.n).padStart(2)}/${steps.length}`;
-  if (step.needs === 'prototemplate' && !hasPrototemplate) {
+  const missing =
+    step.needs === 'prototemplate' && !hasPrototemplate
+      ? `Prototemplate deck missing at ${PROTOTEMPLATE_DECK}; set TURBOSLIDE_PROTOTEMPLATE_DECK`
+      : step.needs === 'python' && !hasFontsVenv
+        ? `fonts venv missing at ${FONTS_VENV}; see scripts/build-fonts.py`
+        : step.needs === 'docker' && !hasDocker
+          ? 'no Docker daemon answers; the verifier runs the container verification (SPEC-2 11.3)'
+          : null;
+  if (missing !== null) {
     if (strict) {
-      console.error(
-        `${label}: FAIL Prototemplate deck missing at ${PROTOTEMPLATE_DECK} (--strict)`,
-      );
+      console.error(`${label}: FAIL ${missing} (--strict)`);
       exitCode = 1;
       break;
     }
-    console.log(
-      `${label}: skip (Prototemplate deck missing at ${PROTOTEMPLATE_DECK}; set TURBOSLIDE_PROTOTEMPLATE_DECK)\n    ${step.cmd}`,
-    );
+    console.log(`${label}: skip (${missing})\n    ${step.cmd}`);
     continue;
   }
   if (step.needs === 'server') {
@@ -368,7 +409,8 @@ for (const step of selected) {
     shell: '/bin/sh',
     stdio: 'inherit',
     cwd: ROOT,
-    env: process.env,
+    // the batch size the runner's dev server advertises, for export-batch.spec.ts (step 21)
+    env: { ...process.env, TURBOSLIDE_EXPORT_BATCH: EXPORT_BATCH },
   });
   const seconds = ((Date.now() - t) / 1000).toFixed(1);
   if (result.status !== 0) {

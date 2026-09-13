@@ -1,6 +1,7 @@
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 import { useRef, useState } from 'react';
 
+import { ZOOM_LADDER, clampZoomPercent, effectiveZoomPercent, zoomStepFrom } from './editor-shell';
 import { useEditorShell } from './editor-shell-context';
 import { Icon } from './icons';
 import { cn } from './lib/cn';
@@ -114,17 +115,42 @@ export function ToolbarDivider() {
   return <span className="ts-tb-sep" aria-hidden="true" />;
 }
 
-/** The Zoom box (SPEC 3.1 row 7): reads Fit or the percentage; a click lists the levels, a typed value from 25 to 400 applies. */
-function ZoomBox({ control }: { control: TailControl }) {
+/**
+ * The Zoom box (SPEC 3.1 row 7; SPEC-2 0.81, 0.101, 6.1 row 27): reads Fit or the percentage,
+ * the effective percent while Fit or a pinch zooms when the stage reports one; a click lists
+ * the levels (Zoom in, Zoom out, Fit, 50%, 100%, 200%); a typed value from 25 to 1600 applies
+ * through the editor's handle when the route wired it, else through `view.zoom`; the arrows step
+ * the ladder from the effective zoom.
+ */
+export function ZoomBox({ control }: { control: TailControl }) {
   const shell = useEditorShell();
   const [open, setOpen] = useState(false);
   const [typing, setTyping] = useState<string | null>(null);
   const box = useRef<HTMLDivElement>(null);
   const zoom = shell.settings.zoom;
-  const shown = zoom === 'fit' || zoom === undefined ? 'Fit' : `${zoom}%`;
+  const effective = effectiveZoomPercent(zoom, shell.input.view?.zoom);
+  const shown =
+    zoom === 'fit' || zoom === undefined
+      ? shell.input.view?.zoom === undefined
+        ? 'Fit'
+        : `${effective}%`
+      : `${zoom}%`;
   const item = itemById('view.zoom');
   const children: ReadonlyArray<MenuItem> = item.items ?? [];
   const tip = controlTip(control, shell.platform, true);
+
+  const applyPercent = (percent: number) => {
+    const clamped = clampZoomPercent(percent);
+    if (shell.input.editor?.zoomTo) {
+      shell.input.editor.zoomTo(clamped / 100);
+      shell.setSetting('zoom', String(clamped));
+      return;
+    }
+    void shell.input
+      .dispatch('view.zoom', { zoom: clamped / 100 })
+      .then(() => shell.setSetting('zoom', String(clamped)))
+      .catch((error: unknown) => shell.say(error instanceof Error ? error.message : String(error)));
+  };
 
   const commit = () => {
     const value = typing;
@@ -137,11 +163,7 @@ function ZoomBox({ control }: { control: TailControl }) {
     }
     const n = Number(trimmed);
     if (!Number.isFinite(n)) return;
-    const clamped = Math.max(25, Math.min(400, Math.round(n)));
-    void shell.input
-      .dispatch('view.zoom', { zoom: clamped / 100 })
-      .then(() => shell.setSetting('zoom', String(clamped)))
-      .catch((error: unknown) => shell.say(error instanceof Error ? error.message : String(error)));
+    applyPercent(n);
   };
 
   const onKey = (event: ReactKeyboardEvent<HTMLInputElement>) => {
@@ -154,15 +176,24 @@ function ZoomBox({ control }: { control: TailControl }) {
       event.stopPropagation();
       setTyping(null);
       event.currentTarget.blur();
-    } else if (event.key === 'ArrowDown') {
+    } else if (event.key === 'ArrowDown' && typing === null) {
       event.preventDefault();
       setOpen(true);
+    } else if (event.key === 'ArrowUp' && typing !== null) {
+      event.preventDefault();
+      applyPercent(zoomStepFrom(Number(typing.replace(/%$/, '')) || effective, 1));
+      setTyping(null);
     }
   };
 
   const fieldTip = tipProps(tip);
   return (
-    <div ref={box} className="ts-tb-zoom" data-control={control.control}>
+    <div
+      ref={box}
+      className="ts-tb-zoom"
+      data-control={control.control}
+      data-zoom={String(effective)}
+    >
       <input
         className="ts-tb-zoom-field"
         type="text"
@@ -197,7 +228,10 @@ function ZoomBox({ control }: { control: TailControl }) {
         aria-expanded={open}
         data-control="view.zoom.arrow"
         onClick={() => setOpen((on) => !on)}
-        {...tipProps({ name: 'Zoom levels', doc: 'Fit, 50%, 100% or 200%' })}
+        {...tipProps({
+          name: 'Zoom levels',
+          doc: `Fit, 50%, 100%, 200%, or type ${ZOOM_LADDER[0]} to ${ZOOM_LADDER[ZOOM_LADDER.length - 1]}`,
+        })}
       >
         <Icon name="chevron-down" />
       </button>

@@ -86,9 +86,24 @@ function viewOf(over: Partial<EditorOverlayView> = {}): EditorOverlayView {
       zOrder: vi.fn(),
     },
     paint: false,
+    /* round two (gslides-parity SPEC-2 section 6) */
+    selectionPos: null,
+    groupTag: null,
+    groupMembers: [],
+    rotation: null,
+    sizeReadout: null,
+    rulers: null,
+    deckGuides: null,
+    draggingGuide: null,
+    crop: null,
+    sites: [],
+    drawPoints: [],
     onHandleDown: vi.fn(),
     onHandleNudge: vi.fn(),
     onHandleOrder: vi.fn(),
+    onGuideDown: vi.fn(),
+    onGuideContextMenu: vi.fn(),
+    onRulerDown: vi.fn(),
     ...over,
   };
 }
@@ -111,7 +126,8 @@ describe('Overlay on a freeform slide', () => {
     const chipTip = tipShown(chip);
     expect(chipTip.name).toBe('a: Move');
     expect(chipTip.doc).toMatch(/Drag the frame or the chip anywhere/);
-    expect(chipTip.doc).toMatch(/Arrows nudge 1 px, Shift 8 px/);
+    /* Shift nudges 10 px since gslides-parity SPEC-2 0.87 */
+    expect(chipTip.doc).toMatch(/Arrows nudge 1 px, Shift 10 px/);
     /* the chip names the block in Google's words, never its id (SPEC 13.7) */
     expect(chip.textContent).toBe('Text');
     const squares = container.querySelectorAll<HTMLButtonElement>(
@@ -164,7 +180,7 @@ describe('Overlay on a freeform slide', () => {
     expect(view.onHandleNudge).toHaveBeenCalledWith(expect.anything(), 1, 'y');
   });
 
-  it('nudges a positioned block by eight with Shift and by one otherwise, on both axes', () => {
+  it('nudges an object by ten with Shift and by one otherwise, on both axes (SPEC-2 0.87)', () => {
     const view = viewOf();
     const { container } = render(<Overlay view={view} />);
     const chip = container.querySelector<HTMLButtonElement>('.ts-select-chip');
@@ -173,9 +189,111 @@ describe('Overlay on a freeform slide', () => {
     fireEvent.keyDown(chip, { key: 'ArrowUp' });
     const calls = (view.onHandleNudge as ReturnType<typeof vi.fn>).mock.calls;
     expect(calls.map((call) => [call[1], call[2]])).toEqual([
-      [8, 'x'],
+      [10, 'x'],
       [1, 'y'],
     ]);
+  });
+
+  it('draws the rotation ring as a slider above the top centre, stepping a degree and fifteen with Shift (SPEC-2 6.1 row 11)', () => {
+    const view = viewOf();
+    const { container } = render(<Overlay view={view} />);
+    const ring = container.querySelector<HTMLButtonElement>('[data-control="handle.a.rotate"]');
+    if (!ring) throw new Error('no rotation ring');
+    expect(ring.getAttribute('role')).toBe('slider');
+    expect(ring.getAttribute('aria-valuenow')).toBe('0');
+    expect(ring.dataset['shape']).toBe('ring');
+    /* the box a is 200..500 by 200..300 at k 0.5: the ring sits 24 px above the top centre */
+    expect(ring.style.left).toBe('175px');
+    expect(ring.style.top).toBe(`${100 - 24}px`);
+    fireEvent.keyDown(ring, { key: 'ArrowRight' });
+    fireEvent.keyDown(ring, { key: 'ArrowLeft', shiftKey: true });
+    const calls = (view.onHandleNudge as ReturnType<typeof vi.fn>).mock.calls;
+    expect(calls.map((call) => call[1])).toEqual([1, -15]);
+    expect(tipShown(ring).doc).toMatch(/Shift snaps to 15 degrees/);
+  });
+
+  it('turns the ring and the handles with a rotated object and shows the angle and size readouts', () => {
+    const turned = viewOf({
+      selectionPos: { x: 200, y: 200, w: 300, h: 100, z: 0, rotate: 37 },
+      rotation: 37,
+    });
+    const { container } = render(<Overlay view={turned} />);
+    const layer = container.querySelector<HTMLElement>('.ts-turn');
+    if (!layer) throw new Error('no turning layer');
+    expect(layer.style.transform).toBe('rotate(37deg)');
+    expect(layer.querySelectorAll('.ts-handle[data-kind="free-resize"]')).toHaveLength(8);
+    expect(container.querySelector('.ts-readout')?.textContent).toBe('37°');
+    cleanup();
+    const sized = render(<Overlay view={viewOf({ sizeReadout: { w: 480, h: 64 } })} />);
+    expect(sized.container.querySelector('.ts-readout')?.textContent).toBe('480 × 64');
+  });
+
+  it('names a group with role="group" and the chip "Group", and a multi selection "3 objects"', () => {
+    const grouped = viewOf({
+      extraBoxes: [boxes.blocks['b'] ?? [0, 0, 0, 0]],
+      groupBox: [200, 200, 600, 100],
+      groupTag: 'pair',
+      groupMembers: ['Text', 'Text'],
+      count: 2,
+    });
+    const { container } = render(<Overlay view={grouped} />);
+    const ring = container.querySelector('.ts-group[role="group"]');
+    expect(ring?.getAttribute('aria-label')).toBe('Group: Text, Text');
+    expect(container.querySelector('.ts-select-chip')?.textContent).toBe('Group');
+    cleanup();
+    const three = render(
+      <Overlay view={viewOf({ groupBox: [200, 200, 600, 100], count: 3, extraBoxes: [] })} />,
+    );
+    expect(three.container.querySelector('.ts-select-chip')?.textContent).toBe('3 objects');
+  });
+
+  it('draws crop mode: the dimmed picture, the frame, the black handles and the chip sentence', () => {
+    const cropping = viewOf({
+      crop: {
+        blockId: 'a',
+        frame: [200, 200, 300, 100],
+        full: [100, 200, 500, 100],
+        trim: { left: 0.2, right: 0.2, top: 0, bottom: 0 },
+      },
+      handles: handlesFor(
+        slide,
+        boxes,
+        { kind: 'block', blockId: 'a' },
+        { crop: { frame: [200, 200, 300, 100] } },
+      ),
+    });
+    const { container } = render(<Overlay view={cropping} />);
+    expect(container.querySelector<HTMLElement>('.ts-crop-full')?.style.width).toBe('250px');
+    expect(container.querySelector('.ts-crop-frame')).not.toBeNull();
+    expect(container.querySelectorAll('.ts-handle[data-kind="crop-edge"]')).toHaveLength(8);
+    expect(container.querySelector('.ts-select-chip.is-crop')?.textContent).toBe(
+      'Drag the handles to crop. Press Enter to finish',
+    );
+    /* no rotation ring and no frame edges in crop mode */
+    expect(container.querySelector('[data-kind="free-rotate"]')).toBeNull();
+    expect(container.querySelector('.ts-frame-edge')).toBeNull();
+  });
+
+  it('draws the connection sites, the deck guides and the rulers when the view carries them', () => {
+    const view = viewOf({
+      sites: [{ x: 600, y: 200 }],
+      deckGuides: { x: [800], y: [450] },
+      rulers: { on: true, pointer: { x: 400, y: 300 }, selection: [200, 200, 300, 100] },
+    });
+    const { container } = render(<Overlay view={view} />);
+    expect(container.querySelectorAll('.ts-site')).toHaveLength(1);
+    expect(container.querySelectorAll('.ts-deck-guide')).toHaveLength(2);
+    expect(container.querySelectorAll('.ts-ruler')).toHaveLength(2);
+    const guide = container.querySelector<HTMLElement>('[data-control="guide.x.800"]');
+    if (!guide) throw new Error('no guide');
+    fireEvent.pointerDown(guide, { button: 0 });
+    expect(view.onGuideDown).toHaveBeenCalledWith('x', 800, expect.anything());
+    fireEvent.contextMenu(guide);
+    expect(view.onGuideContextMenu).toHaveBeenCalledWith('x', 800, expect.anything());
+    const ruler = container.querySelector<HTMLElement>('[data-control="ruler.x"]');
+    if (!ruler) throw new Error('no ruler');
+    fireEvent.pointerDown(ruler, { button: 0 });
+    expect(view.onRulerDown).toHaveBeenCalledWith('x', expect.anything());
   });
 
   it('draws four frame edges around a positioned block that start its move gesture, and no arrange bar', () => {
@@ -243,7 +361,8 @@ describe('Overlay on a freeform slide', () => {
     const { container } = render(<Overlay view={view} />);
     expect(container.querySelectorAll('.ts-select.is-selected')).toHaveLength(2);
     expect(container.querySelector('.ts-group')).not.toBeNull();
-    expect(container.querySelector('.ts-select-chip')?.textContent).toBe('2 blocks · Text');
+    /* the multi selection chip counts objects in Google's words (SPEC-2 6.1 row 2) */
+    expect(container.querySelector('.ts-select-chip')?.textContent).toBe('2 objects');
   });
 
   it('draws the guides, the marquee and the target slot of a drag, and hides the bar meanwhile', () => {

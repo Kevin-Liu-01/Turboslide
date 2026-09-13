@@ -16,7 +16,9 @@ import type { Locator, Page } from '@playwright/test';
 // are written to .turboslide/ten-tasks.json for the verifier (SPEC 14.6).
 
 const ROOT = join(import.meta.dirname, '..', '..', '..');
-const DECKS = join(ROOT, 'decks');
+/* the folder the server reads decks from: a builder's tmp store names its overlay's decks folder
+   in TURBOSLIDE_E2E_DECKS_DIR (gslides-parity SPEC-2 0.43); the checkout's decks/ otherwise */
+const DECKS = process.env['TURBOSLIDE_E2E_DECKS_DIR'] ?? join(ROOT, 'decks');
 const DECK = 'e2e-tasks';
 const DECK_DIR = join(DECKS, DECK);
 const COUNTS_FILE = join(ROOT, '.turboslide', 'ten-tasks.json');
@@ -111,11 +113,11 @@ function record(task: keyof typeof BUDGET, c: Counter): void {
 function seedDeck(): void {
   rmSync(DECK_DIR, { recursive: true, force: true });
   mkdirSync(DECK_DIR, { recursive: true });
-  cpSync(join(DECKS, 'fixture', 'gslides', 'slides'), join(DECK_DIR, 'slides'), {
+  cpSync(join(ROOT, 'decks', 'fixture', 'gslides', 'slides'), join(DECK_DIR, 'slides'), {
     recursive: true,
   });
   const manifest = JSON.parse(
-    readFileSync(join(DECKS, 'fixture', 'gslides', 'deck.json'), 'utf8'),
+    readFileSync(join(ROOT, 'decks', 'fixture', 'gslides', 'deck.json'), 'utf8'),
   ) as { id: string; title: string };
   manifest.id = DECK;
   manifest.title = 'GT pitch';
@@ -354,38 +356,70 @@ test('task 4: swap a logo with one drop', async ({ page }) => {
   record(4, k.c);
 });
 
+/**
+ * The settle budget of the keyboard steps (gslides-parity SPEC-2 8.5, 0.35; VERIFICATION finding
+ * 16): every step waits for its own condition, the new id in `slide.list` and its card in the
+ * filmstrip and the title row reading All changes saved, with 30 s to reach it, so the task does
+ * not depend on an idle machine. The counters are unchanged: a wait is not a press.
+ */
+const SETTLE_MS = 30_000;
+
+/** The title row's save state reads All changes saved: every write has landed (SPEC 2.0). */
+async function allChangesSaved(page: Page): Promise<void> {
+  await settled(page);
+  await expect(page.locator('[data-control="deck.saveState"]')).toContainText(/All changes saved/, {
+    timeout: SETTLE_MS,
+  });
+}
+
 test('task 5: add, duplicate, delete and reorder slides in one press each', async ({ page }) => {
+  test.setTimeout(180_000);
   const k = counter(page);
   await openEditor(page, 'breaks');
-  await settled(page);
+  await allChangesSaved(page);
   const before = (await rows(page)).map((row) => row.id);
   const anchor = card(page, 'breaks');
   await anchor.focus();
   await k.press('Control+m', anchor);
-  await expect.poll(async () => (await rows(page)).length).toBe(before.length + 1);
+  /* the new id in slide.list, its card in the filmstrip, and the write landed, before Cmd+D */
+  await expect
+    .poll(async () => (await rows(page)).length, { timeout: SETTLE_MS })
+    .toBe(before.length + 1);
   const afterNew = (await rows(page)).map((row) => row.id);
   const added = afterNew.find((id) => !before.includes(id));
   expect(added).toBeTruthy();
-  /* the new slide is current; Cmd+D duplicates it */
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', added!);
-  await settled(page);
+  await expect(card(page, added!)).toBeVisible({ timeout: SETTLE_MS });
+  await allChangesSaved(page);
+  /* the new slide is current (the route's selectSoon keeps the intent until the filmstrip renders it) */
+  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', added!, {
+    timeout: SETTLE_MS,
+  });
   await card(page, added!).focus();
   await k.press('ControlOrMeta+d', card(page, added!));
-  await expect.poll(async () => (await rows(page)).length).toBe(before.length + 2);
+  await expect
+    .poll(async () => (await rows(page)).length, { timeout: SETTLE_MS })
+    .toBe(before.length + 2);
   const afterDup = (await rows(page)).map((row) => row.id);
   const copy = afterDup.find((id) => !afterNew.includes(id));
   expect(copy).toBeTruthy();
+  await expect(card(page, copy!)).toBeVisible({ timeout: SETTLE_MS });
+  await allChangesSaved(page);
   /* Delete removes the copy */
-  await settled(page);
   await card(page, copy!).focus();
   await k.press('Delete', card(page, copy!));
-  await expect.poll(async () => (await rows(page)).length).toBe(before.length + 1);
-  await expect(page.locator('[data-control="snackbar"]')).toContainText('Slide deleted');
+  await expect
+    .poll(async () => (await rows(page)).length, { timeout: SETTLE_MS })
+    .toBe(before.length + 1);
+  await expect(page.locator('[data-control="snackbar"]')).toContainText('Slide deleted', {
+    timeout: SETTLE_MS,
+  });
+  await allChangesSaved(page);
   /* a drag moves the new slide above the second card */
-  await settled(page);
   await k.drag(card(page, added!), card(page, 'breaks'), 4);
   await expect
-    .poll(async () => (await rows(page)).map((row) => row.id).indexOf(added!), { timeout: 20_000 })
+    .poll(async () => (await rows(page)).map((row) => row.id).indexOf(added!), {
+      timeout: SETTLE_MS,
+    })
     .toBe(1);
   record(5, k.c);
 });
@@ -637,7 +671,7 @@ test('Edit > Copy, Paste and Cut from the menu bar act on the selected slide car
   expect(copy).toMatch(/^links/);
   expect(withCopy.indexOf(copy)).toBe(before.indexOf('links') + 1);
   await settled(page);
-  /* Cut on the copy removes it with the snackbar, leaves it on the clipboard, and the slide that
+  /* Cut on the copy removes it without a snackbar, leaves it on the clipboard, and the slide that
      took its place is current */
   await card(page, copy).click();
   await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', copy);
@@ -646,7 +680,8 @@ test('Edit > Copy, Paste and Cut from the menu bar act on the selected slide car
   await expect
     .poll(async () => (await rows(page)).map((row) => row.id), { timeout: 20_000 })
     .toEqual(before);
-  await expect(page.locator('[data-control="snackbar"]')).toContainText('Slide deleted');
+  /* Cut shows no snackbar (gslides-parity SPEC-2 0.30, R08 A24: Google's Cut is silent and Undo
+     stays on Cmd+Z); hygiene.spec.ts asserts the absence, Delete keeps the Slide deleted line */
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
     .toContain(`"id":"${copy}"`);

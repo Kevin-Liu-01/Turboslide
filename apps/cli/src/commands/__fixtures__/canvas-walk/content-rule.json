@@ -1,0 +1,29 @@
+{
+  "deck": "gt-brand",
+  "slideId": "content-rule",
+  "template": "plain",
+  "source": "turboslide slide to-canvas (Chromium, headless, 1x, 1/64 px)",
+  "objects": {
+    "h": {
+      "x": 137,
+      "y": 323.296875,
+      "w": 627,
+      "h": 48.390625,
+      "z": 0
+    },
+    "p1": {
+      "x": 137,
+      "y": 411.6875,
+      "w": 627,
+      "h": 165,
+      "z": 1
+    },
+    "list": {
+      "x": 836,
+      "y": 273.71875,
+      "w": 627,
+      "h": 352.5625,
+      "z": 2
+    }
+  }
+}

@@ -1,15 +1,7 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
 import { createServerFn } from '@tanstack/react-start';
-import { lintDeck } from '@turboslide/lint/run';
-import type { LintLayers } from '@turboslide/lint/run';
-import { defaultPaths, cacheDir } from '@turboslide/render-worker/paths';
 import type { Finding } from '@turboslide/schema/findings';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { ICON_NAMES } from '@turboslide/schema/icons';
-import { THEME_NAMES } from '@turboslide/schema/render';
-import type { RenderRecord } from '@turboslide/schema/render';
 import { isRuleId } from '@turboslide/schema/rules';
 import type { RuleId } from '@turboslide/schema/rules';
 import { PRODUCT_TOKENS, PROPER_NOUNS } from '@turboslide/theme/copy';
@@ -28,7 +20,15 @@ import { openDeckStore } from './root';
  * before it reads: a plain FileStore over this instance's overlay answered the document this
  * instance last pulled, so the window API's lint.run on a deployment counted another instance's
  * writes late (the editor depth round, docs/EDITOR-DEPTH-STATUS.md section 5).
+ *
+ * The editor route imports this module for `lintLists` and the function stub, so nothing at its
+ * top level may reach a node builtin (gslides-parity SPEC-2 8.3): the rendered layer, the worker
+ * cache reader and `@turboslide/lint/run` live in `lint-rendered.ts`, which the handler alone
+ * loads. The page's own static lint imports `@turboslide/lint/lint-static` and the shared helpers
+ * come from `@turboslide/lint/run-client`.
  */
+
+export type LintLayers = 'static' | 'rendered' | 'both';
 
 export type LintSlidesInput = {
   deckId: string;
@@ -44,30 +44,6 @@ export function lintLists(): {
   iconNames: readonly string[];
 } {
   return { properNouns: PROPER_NOUNS, tokens: PRODUCT_TOKENS, iconNames: ICON_NAMES };
-}
-
-/** The worker's cached records for these slides at this revision, both themes, 1x. */
-function cachedRecords(
-  deckId: string,
-  revision: number,
-  slideIds: readonly string[],
-): RenderRecord[] {
-  const paths = defaultPaths();
-  const out: RenderRecord[] = [];
-  for (const theme of THEME_NAMES) {
-    const dir = cacheDir(paths, deckId, revision, theme, 1);
-    if (!existsSync(dir)) continue;
-    for (const slideId of slideIds) {
-      const file = join(dir, `${slideId}.json`);
-      if (!existsSync(file)) continue;
-      try {
-        out.push(JSON.parse(readFileSync(file, 'utf8')) as RenderRecord);
-      } catch {
-        // a half-written cache file: the rendered layer skips this slide
-      }
-    }
-  }
-  return out;
 }
 
 /** 'all' or a non-empty list of slugs, from untrusted input. */
@@ -114,14 +90,16 @@ const lintSlidesFn = createServerFn({ method: 'POST' })
     for (const id of ids) {
       if (document.slides[id] === undefined) throw new RangeError(`No slide "${id}"`);
     }
-    const layers = data.layers ?? 'both';
-    const records =
-      layers === 'static' ? [] : cachedRecords(data.deckId, document.deck.revision, ids);
-    const findings = lintDeck(document, records, {
-      layers,
-      ...(data.slideIds === 'all' ? {} : { slideIds: ids }),
-      ...(data.rule !== undefined ? { rules: [data.rule] } : {}),
-      ...lintLists(),
+    // the rendered layer and its node readers load here alone (the module comment)
+    const { lintRenderedDeck } = await import('./lint-rendered');
+    const findings = lintRenderedDeck({
+      deckId: data.deckId,
+      document,
+      ids,
+      all: data.slideIds === 'all',
+      layers: data.layers ?? 'both',
+      ...(data.rule !== undefined ? { rule: data.rule } : {}),
+      lists: lintLists(),
     });
     return JSON.stringify(findings);
   });

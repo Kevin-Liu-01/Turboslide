@@ -26,6 +26,7 @@ import type { Block, TableBlock } from './blocks.ts';
 import { EMPTY_ASSET_REF } from './blocks.ts';
 import type { ContentSlide, Deck, Layout, LayoutId, Slide, SlotName } from './deck.ts';
 import { slotsForLayout } from './deck.ts';
+import { CANVAS_GROUP } from './canvas.ts';
 import { convertLayout, readingOrder } from './freeform.ts';
 import type { AssetId, BlockId, SlideId } from './ids.ts';
 import { layoutEntry } from './layouts.ts';
@@ -75,10 +76,30 @@ function isList(block: Block): boolean {
 function isPictureBlock(block: Block): boolean {
   return (
     block.type === 'shot' ||
+    block.type === 'picture' ||
     block.type === 'pair' ||
     block.type === 'tiles' ||
     block.type === 'details'
   );
+}
+
+/**
+ * The plate box of a converted picture kind (gslides-parity SPEC-2 1.2, SPEC 5.5 "The plate box:
+ * dropped"): a paper box with no text in the `plate` group; the target layout draws its own plate.
+ */
+function isPlateBox(block: Block): boolean {
+  return (
+    block.type === 'box' &&
+    (block.text === undefined || block.text === '') &&
+    block.pos?.group === CANVAS_GROUP
+  );
+}
+
+/** A canvas slide without its plate boxes (the refile into a grammar layout drops `pos`, and with it the group). */
+function withoutPlateBoxes(slide: ContentSlide): ContentSlide {
+  const main = slide.slots.main;
+  if (main === undefined || !main.some(isPlateBox)) return slide;
+  return { ...slide, slots: { ...slide.slots, main: main.filter((block) => !isPlateBox(block)) } };
 }
 
 /** The pictures a figure block carries, in order, with their captions. */
@@ -94,6 +115,10 @@ function picturesOf(block: Block): Picture[] {
               from: block.id,
             },
           ];
+    // the picture object of a canvas slide is the picture placeholder, or the background picture
+    // of a picture layout (SPEC-2 1.2, the row SPEC 5.5 gains)
+    case 'picture':
+      return block.asset === EMPTY_ASSET_REF ? [] : [{ asset: block.asset, from: block.id }];
     case 'pair':
       return block.figures.flatMap((figure) =>
         figure.assets
@@ -152,6 +177,7 @@ export function extractContent(slide: Slide): Extracted {
     out.pictures.push({ asset: slide.picture.asset, from: 'picture' });
   }
   for (const block of orderedBlocks(slide)) {
+    if (isPlateBox(block)) continue;
     if (block.type === 'heading' && out.title === undefined) {
       out.title = block.text;
       out.titleFrom = block.id;
@@ -252,6 +278,7 @@ function keptFields(slide: Slide, layout: LayoutId) {
     ...(slide.notes !== undefined ? { notes: slide.notes } : {}),
     ...(slide.tags !== undefined ? { tags: slide.tags } : {}),
     ...(slide.skip !== undefined ? { skip: slide.skip } : {}),
+    ...(slide.background !== undefined ? { background: slide.background } : {}),
     ...(slide.ext !== undefined ? { ext: slide.ext } : {}),
     template: layout,
   };
@@ -282,10 +309,11 @@ export function applyLayout(input: ApplyLayoutInput): ApplyLayoutResult {
     );
   }
 
-  // a freeform source refiles by geometry into the target's slots first (SPEC 5.5)
+  // a freeform source refiles by geometry into the target's slots first (SPEC 5.5); the plate box
+  // of a converted picture kind leaves before the refile strips the group it is known by
   const refiled =
     source.kind === 'content' && source.layout.type === 'freeform' && made.kind === 'content'
-      ? convertLayout(source, made.layout)
+      ? convertLayout(withoutPlateBoxes(source), made.layout)
       : source;
   const extracted = extractContent(refiled);
 

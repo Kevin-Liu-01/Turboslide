@@ -102,12 +102,36 @@ export async function checkPptx(file: string, options: CheckOptions = {}): Promi
 
   const slideNames: string[] = [];
   let titledSlides = 0;
+  // the parity round two counts (gslides-parity SPEC-2 11.3): italic runs, rotated shapes, groups,
+  // attached connectors, text boxes with columns, adjust values on a preset (a rounded rectangle's
+  // own `adj` is the generator's), tables and merged cells; the chart parts are counted below
+  const counts = {
+    italicRuns: 0,
+    rotated: 0,
+    groups: 0,
+    connectors: 0,
+    numCol: 0,
+    avLst: 0,
+    tables: 0,
+    mergedCells: 0,
+  };
   for (const part of slideParts(zip)) {
     const xml = await readPart(zip, part);
     slideNames.push(readSlideName(xml) ?? '');
     if (hasTitlePlaceholder(xml)) titledSlides += 1;
+    counts.italicRuns += (xml.match(/<a:rPr\b[^>]*\si="1"/g) ?? []).length;
+    counts.rotated += (xml.match(/<a:xfrm\b[^>]*\srot="-?\d+"/g) ?? []).length;
+    counts.groups += (xml.match(/<p:grpSp>/g) ?? []).length;
+    counts.connectors += (xml.match(/<p:cxnSp>[\s\S]*?<a:(?:stCxn|endCxn)\b/g) ?? []).length;
+    counts.numCol += (xml.match(/<a:bodyPr\b[^>]*\snumCol="/g) ?? []).length;
+    counts.avLst += (
+      xml.match(/<a:prstGeom prst="(?!roundRect")[^"]*"><a:avLst><a:gd\b/g) ?? []
+    ).length;
+    counts.tables += (xml.match(/<a:tbl>/g) ?? []).length;
+    counts.mergedCells += (xml.match(/<a:tc\b[^>]*\s(?:rowSpan|gridSpan)="/g) ?? []).length;
   }
   const notes = parts.filter((p) => /^ppt\/notesSlides\/notesSlide\d+\.xml$/.test(p)).length;
+  const charts = parts.filter((p) => /^ppt\/charts\/chart\d+\.xml$/.test(p)).length;
 
   const formats: Record<string, number> = {};
   let mediaBytes = 0;
@@ -175,6 +199,8 @@ export async function checkPptx(file: string, options: CheckOptions = {}): Promi
     kernZero: geometry.kernZeroCount,
     shapes: geometry.shapes,
     outOfBounds: geometry.outOfBounds.length,
+    ...counts,
+    charts,
     relationships: { checked: validation.relationships, invalid: validation.invalidRelationships },
     contentTypes: {
       undeclared: validation.undeclaredParts,
@@ -201,6 +227,7 @@ export function describeCheck(check: ExportCheck): string[] {
     `fonts embedded: ${check.embeddedFonts.length === 0 ? 'none' : check.embeddedFonts.join(', ')}`,
     `titles: ${check.titledSlides} of ${check.slides} slide(s) carry a title placeholder; slide names ${check.slideNames.filter((n) => n !== '').length} set`,
     `checklist: ${check.custGeom} custGeom, ${check.normAutofit} normAutofit, ${check.kernZero} kern="0"`,
+    `round two: ${check.italicRuns ?? 0} italic run(s), ${check.rotated ?? 0} rotated, ${check.groups ?? 0} group(s), ${check.charts ?? 0} chart part(s), ${check.connectors ?? 0} attached connector(s), ${check.numCol ?? 0} numCol, ${check.avLst ?? 0} avLst, ${check.tables ?? 0} table(s) with ${check.mergedCells ?? 0} merged cell(s)`,
     `relationships: ${check.relationships.checked} checked, ${check.relationships.invalid.length} invalid; content types: ${check.contentTypes.undeclared.length} undeclared part(s), ${check.contentTypes.missingOverrides.length} override(s) for missing parts`,
     check.pythonPptx.ran
       ? `python-pptx: reopened, ${check.pythonPptx.slides} slide(s), ${check.pythonPptx.shapes} shape(s) (${check.pythonPptx.python ?? ''})`

@@ -1,25 +1,30 @@
-// The freeform layout on the stage (Kevin's direction of 2026-09-11, taken over SPEC 6.4's
-// no-coordinates rule; docs/freeform.md): a content slide whose layout is `{ type: 'freeform' }`
-// carries its blocks in the `main` slot, each with `pos` (schema/position.ts: x, y, w, h in sheet
-// pixels on the 1600 by 900 sheet, z for the stacking order; higher draws later, document order
-// breaks ties). The renderer places every block in a `.free[data-free]` wrapper at its box
-// (render/slide.ts renderFreeform), so the stage measures that wrapper as the block's box.
+// The canvas on the stage (gslides-parity SPEC-2 section 1; Kevin's directive of 2026-09-12:
+// "we must, must must be able to drag and move around ANYTHING, including backgrounds and shaders
+// but all text in the same exact way the google slides is like a canvas"): a content slide whose
+// layout is `{ type: 'freeform' }` carries its objects in the `main` slot, each with `pos`
+// (schema/position.ts: x, y, w, h in sheet pixels on the 1600 by 900 sheet, z for the stacking
+// order, rotate, flip and the group tag). The renderer places every object in a `.free[data-free]`
+// wrapper at its box (render/slide.ts renderFreeform), so the stage measures that wrapper as the
+// object's box. Every other slide kind is a canvas too: its top level blocks, a title's mark,
+// heading and lead, a statement's big line, a picture kind's photograph, plate and plate blocks
+// are objects the stage measures under the same ids the conversion gives them, and the first
+// canvas gesture converts the slide losslessly through `toCanvas` (@turboslide/schema/canvas)
+// over the boxes `canvas-measure.ts` reads from a hidden 1x sheet (SPEC-2 1.2, 1.3).
 //
 // This module is the stage's side of the feature over the schema's arithmetic
 // (@turboslide/schema/freeform: the guides, alignPositions, distributePositions, reorderZ,
-// sortByZ, convertLayout), so a drag, the inspector, the CLI's block.align, block.distribute and
-// block.order and the linter agree on where a box lands. Everything here returns mutations the
-// action table already has (`block.set /pos`, `block.set /pos/z`, `slide.replace`); the Editor
-// commits a list as one write. The conversion to freeform reads the rendered boxes so the slide
-// looks the same after the switch (convertLayout, which the CLI's slide.setLayout runs without a
-// browser, splits the slot boxes evenly instead); the switch back is lossless while every block
-// still sits where the switch put it, else the blocks refile by geometry and the caller says so.
-// Pure over boxes except the two DOM measures; freeform.test.ts pins it.
+// sortByZ, scalePositions; @turboslide/schema/canvas: toCanvas, fromCanvas), so a drag, the
+// inspector, the CLI's block.align, block.distribute and block.order and the linter agree on where
+// a box lands. Everything here returns mutations the action table already has (`block.set /pos`,
+// `block.set /pos/z`, `slide.replace`); the Editor commits a list as one write. Pure over boxes
+// except the two DOM measures; freeform.test.ts and canvas.test.ts pin it.
 import type { Block, BlockType } from '@turboslide/schema/blocks';
-import type { ContentSlide, Layout, Slide, SlotName } from '@turboslide/schema/deck';
-import { slotsForLayout } from '@turboslide/schema/deck';
+import type { CanvasBoxes } from '@turboslide/schema/canvas';
+import { fromCanvas, grammarRecordOf, toCanvas } from '@turboslide/schema/canvas';
+import type { ContentSlide, GrammarRecord, Layout, Slide, SlotName } from '@turboslide/schema/deck';
 import {
   alignPositions,
+  boundingBox,
   columnWidths,
   COLS_GAP,
   convertLayout,
@@ -27,35 +32,40 @@ import {
   positionBox,
   readingOrder,
   reorderZ,
+  scalePositions,
   sortByZ,
+  unionBox,
 } from '@turboslide/schema/freeform';
-import type { AlignEdge, DistributeAxis, OrderMove } from '@turboslide/schema/freeform';
+import type {
+  AlignEdge,
+  AlignTarget,
+  DistributeAxis,
+  OrderMove,
+} from '@turboslide/schema/freeform';
 import type { BlockSlot, Mutation } from '@turboslide/schema/mutations';
 import { jsonEqual } from '@turboslide/schema/pointer';
 import type { Position } from '@turboslide/schema/position';
 import type { Box } from '@turboslide/schema/render';
 import { CONTENT, CONTENT_ORIGIN, SHEET } from '@turboslide/theme/tokens';
 
+import { CANVAS_SELECTORS, canvasBoxesFromMeasured, virtualObjectIds } from './canvas-measure';
 import type { MeasuredBoxes } from './Gestures';
 import { PART_SELECTORS } from './Gestures';
 import { NAMED_RATIOS } from './snap';
 
-/** A content slide on the freeform layout. */
+/** A content slide on the freeform layout: a canvas (SPEC-2 1.1). */
 export type FreeformSlide = ContentSlide & { layout: { type: 'freeform' } };
 
 /** The one slot a freeform slide fills (deck.ts slotsForLayout). */
 export const FREEFORM_SLOT: SlotName = 'main';
-/** The `ext` key that keeps the grammar layout a slide had before the stage switched it to freeform. */
+/**
+ * The `ext` key the editor depth round kept the grammar record under; the record is the first
+ * class field `SlideBase.grammar` since SPEC-2 0.99 and `grammarRecordOf` reads the legacy key
+ * once. Kept for the route's layout switch until the integrator moves it to `grammarRecordOf`.
+ */
 export const GRAMMAR_EXT_KEY = 'grammar';
 
-/** What `toFreeform` records under `ext.grammar` so `toGrammar` can be lossless. */
-export type GrammarRecord = {
-  layout: Layout;
-  /** slot name to block ids, in slot order */
-  slots: Partial<Record<SlotName, string[]>>;
-  /** the box each block got at the switch, by id */
-  boxes: Record<string, Position>;
-};
+export type { GrammarRecord };
 
 export function isFreeformSlide(slide: Slide | undefined): slide is FreeformSlide {
   return slide !== undefined && slide.kind === 'content' && slide.layout.type === 'freeform';
@@ -93,13 +103,12 @@ export function paintOrder(slide: Slide): Block[] {
 }
 
 /**
- * The box a freeform gesture starts from: the block's `pos`, else its measured box (the validator
- * requires `pos` on every freeform block, so the fallback only covers a document in transit).
+ * The box a canvas gesture starts from: the object's `pos`, else its measured box (an object of
+ * a slide nothing converted yet, or a document in transit).
  */
 export function posFor(slide: Slide, blockId: string, boxes: MeasuredBoxes): Position | null {
   const block = freeformBlocks(slide).find((candidate) => candidate.id === blockId);
-  if (!block) return null;
-  const own = posOf(block);
+  const own = block ? posOf(block) : null;
   if (own) return own;
   const measured = boxes.blocks[blockId];
   return measured ? boxPos(measured) : null;
@@ -129,6 +138,122 @@ function posSet(slide: Slide, blockId: string, pos: Position): Mutation {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Objects (SPEC-2 1.1: every top level block of every slide kind, and the kinds' elements)
+
+/**
+ * The ids of a slide's objects in the order Tab and a marquee walk them (SPEC-2 0.83): paint
+ * order on a canvas; document order of the rendered slide on any other kind, where the kinds'
+ * elements without a block (the title's mark, a picture kind's photograph, plate and mark) join
+ * under the ids the conversion gives them, the photograph first as the bottom of the stack.
+ */
+export function objectIds(
+  slide: Slide,
+  boxes: MeasuredBoxes,
+  rendered: readonly string[],
+): string[] {
+  if (isFreeformSlide(slide)) return paintOrder(slide).map((block) => block.id);
+  const virtual = virtualObjectIds(slide);
+  const out: string[] = [];
+  if (virtual.has('picture') && boxes.blocks['picture']) out.push('picture');
+  if (virtual.has('plate') && boxes.blocks['plate']) out.push('plate');
+  if (slide.kind === 'title' && virtual.has('mark') && boxes.blocks['mark']) out.push('mark');
+  for (const id of rendered) if (!out.includes(id)) out.push(id);
+  if (
+    slide.kind === 'closing' &&
+    virtual.has('mark') &&
+    boxes.blocks['mark'] &&
+    !out.includes('mark')
+  )
+    out.splice(out.indexOf('plate') + 1, 0, 'mark');
+  return out;
+}
+
+/** True when the id names an object on the slide: a block, or one of the kind's virtual objects the stage measured. */
+export function isObjectId(slide: Slide, boxes: MeasuredBoxes, id: string): boolean {
+  if (freeformBlocks(slide).some((block) => block.id === id)) return true;
+  if (slide.kind === 'content') {
+    return Object.values(slide.slots).some((list) => list?.some((block) => block.id === id));
+  }
+  if (slide.kind === 'title')
+    return id === 'heading' || id === 'lead' || (id === 'mark' && id in boxes.blocks);
+  if (slide.kind === 'statement') return id === 'big';
+  if (slide.plate.blocks.some((block) => block.id === id)) return true;
+  return virtualObjectIds(slide).has(id as 'picture' | 'plate' | 'mark') && id in boxes.blocks;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Groups (SPEC-2 2.1.3, 6.1 row 14)
+
+/** The group tag an object carries, or null. */
+export function groupTagOf(slide: Slide, blockId: string): string | null {
+  const block = freeformBlocks(slide).find((candidate) => candidate.id === blockId);
+  return block?.pos?.group ?? null;
+}
+
+/** The members of a group in document order. */
+export function groupMembers(slide: Slide, tag: string): string[] {
+  return freeformBlocks(slide)
+    .filter((block) => block.pos?.group === tag)
+    .map((block) => block.id);
+}
+
+/**
+ * A selection widened to whole groups (SPEC-2 6.1 row 14: a click on a member selects the group):
+ * every member of every group one of `ids` belongs to joins, in the order met, the anchor first.
+ */
+export function expandGroups(slide: Slide, ids: readonly string[]): string[] {
+  const out: string[] = [];
+  for (const id of ids) {
+    if (!out.includes(id)) out.push(id);
+    const tag = groupTagOf(slide, id);
+    if (tag === null) continue;
+    for (const member of groupMembers(slide, tag)) if (!out.includes(member)) out.push(member);
+  }
+  return out;
+}
+
+/** The one group tag every one of `ids` shares, or null (a mixed or an ungrouped selection). */
+export function sharedGroup(slide: Slide, ids: readonly string[]): string | null {
+  if (ids.length === 0) return null;
+  const first = ids[0];
+  const tag = first === undefined ? null : groupTagOf(slide, first);
+  if (tag === null) return null;
+  return ids.every((id) => groupTagOf(slide, id) === tag) ? tag : null;
+}
+
+/** A group tag no object of the slide carries: `group`, then `group-2` (store-actions.ts blockGroup names them the same way). */
+export function freshGroupTag(slide: Slide, base = 'group'): string {
+  const taken = new Set(
+    freeformBlocks(slide).flatMap((block) => (block.pos?.group ? [block.pos.group] : [])),
+  );
+  let tag = base;
+  let n = 2;
+  while (taken.has(tag)) {
+    tag = `${base}-${n}`;
+    n += 1;
+  }
+  return tag;
+}
+
+/** The `block.set /pos/group` mutations of a group over the named objects (what block.group writes). */
+export function groupMutations(slide: Slide, ids: readonly string[], tag: string): Mutation[] {
+  return freeformBlocks(slide).flatMap((block): Mutation[] => {
+    if (!ids.includes(block.id) || block.pos === undefined || block.pos.group === tag) return [];
+    return [
+      { op: 'block.set', slideId: slide.id, blockId: block.id, path: '/pos/group', value: tag },
+    ];
+  });
+}
+
+/** The mutations that drop the group tag of the named objects (what block.ungroup writes). */
+export function ungroupMutations(slide: Slide, ids: readonly string[]): Mutation[] {
+  return freeformBlocks(slide).flatMap((block): Mutation[] => {
+    if (!ids.includes(block.id) || block.pos?.group === undefined) return [];
+    return [{ op: 'block.set', slideId: slide.id, blockId: block.id, path: '/pos/group' }];
+  });
+}
+
+// ---------------------------------------------------------------------------------------------
 // Measuring
 
 /** Boxes are compared after rounding to a hundredth of a pixel, so a re-measure with the same layout re-renders nothing. */
@@ -140,7 +265,10 @@ function roundBox(box: Box): Box {
  * Every box the gestures and the overlay read, in sheet pixels (SPEC 6.4: rect / k), from a
  * rendered slide body whose parent is the 1600 wide stage: the blocks, the slots, the runs and the
  * parts PART_SELECTORS name. A block the renderer wrapped in `.free[data-free]` (a positioned
- * block) is measured by that wrapper, which is its `pos`. Null before the stage has a size.
+ * block) is measured by that wrapper, which is its `pos`. The kinds' elements that are objects
+ * without a block (SPEC-2 1.1) are measured under the ids the conversion gives them (`picture`,
+ * `plate`, `mark`; canvas-measure.ts CANVAS_SELECTORS) unless a block of that id exists, and the
+ * ids whose element holds a prompt are listed in `prompted`. Null before the stage has a size.
  */
 export function measureBoxes(body: HTMLElement): MeasuredBoxes | null {
   const stage = body.parentElement;
@@ -152,14 +280,21 @@ export function measureBoxes(body: HTMLElement): MeasuredBoxes | null {
     const r = el.getBoundingClientRect();
     return roundBox([(r.left - rect.left) / k, (r.top - rect.top) / k, r.width / k, r.height / k]);
   };
-  const next: MeasuredBoxes = { blocks: {}, slots: {}, runs: {}, parts: {} };
+  const next: MeasuredBoxes = { blocks: {}, slots: {}, runs: {}, parts: {}, prompted: [] };
   body.querySelectorAll<HTMLElement>('[data-block]').forEach((el) => {
     const id = el.dataset['block'];
     if (!id || id in next.blocks) return;
     const wrapper = el.parentElement?.closest<HTMLElement>('.free[data-free]');
     next.blocks[id] = toBox(wrapper && wrapper.dataset['free'] === id ? wrapper : el);
+    if (el.querySelector(CANVAS_SELECTORS.prompt) !== null) next.prompted?.push(id);
     const selector = PART_SELECTORS[el.dataset['type'] as BlockType];
     if (selector) next.parts[id] = Array.from(el.querySelectorAll(selector), toBox);
+  });
+  /* a positioned block whose renderer draws nothing yet (the picture and chart blocks until B2
+     lands them) still has its wrapper, which is its pos: the object stays selectable */
+  body.querySelectorAll<HTMLElement>('.free[data-free]').forEach((el) => {
+    const id = el.dataset['free'];
+    if (id && !(id in next.blocks)) next.blocks[id] = toBox(el);
   });
   body.querySelectorAll<HTMLElement>('[data-slot]').forEach((el) => {
     const slot = el.dataset['slot'] as BlockSlot | undefined;
@@ -169,6 +304,19 @@ export function measureBoxes(body: HTMLElement): MeasuredBoxes | null {
     const run = el.dataset['run'];
     if (run && !(run in next.runs)) next.runs[run] = toBox(el);
   });
+  /* the kinds' objects without a block, under the conversion's ids (SPEC-2 1.2) */
+  const kind = body.querySelector('.slide')?.getAttribute('data-kind');
+  if (kind === 'opener' || kind === 'mood' || kind === 'closing') {
+    const picture = body.querySelector(CANVAS_SELECTORS.picture);
+    const plate = body.querySelector(CANVAS_SELECTORS.plate);
+    const mark = body.querySelector(CANVAS_SELECTORS.closingMark);
+    if (picture && !('picture' in next.blocks)) next.blocks['picture'] = toBox(picture);
+    if (plate && !('plate' in next.blocks)) next.blocks['plate'] = toBox(plate);
+    if (mark && !('mark' in next.blocks)) next.blocks['mark'] = toBox(mark);
+  } else if (kind === 'title') {
+    const mark = body.querySelector(CANVAS_SELECTORS.titleMark);
+    if (mark && !('mark' in next.blocks)) next.blocks['mark'] = toBox(mark);
+  }
   return next;
 }
 
@@ -186,77 +334,41 @@ export function readStageBoxes(root: ParentNode = document): MeasuredBoxes | nul
 }
 
 // ---------------------------------------------------------------------------------------------
-// Conversion
+// Conversion (SPEC-2 1.2)
 
-function stripPos(block: Block): Block {
-  if (block.pos === undefined) return block;
-  const { pos: _pos, ...rest } = block;
-  return rest;
+function isCanvasBoxes(boxes: MeasuredBoxes | CanvasBoxes): boxes is CanvasBoxes {
+  return !('slots' in boxes);
 }
 
 /**
- * A grammar content slide as a freeform slide: every block of every slot, in slot order, gets
- * its rendered box as `pos` and its paint index as `z`; the slot lists collapse into `main`; the
- * source layout, slot membership and boxes are kept under `ext.grammar` so the switch back is
- * lossless while nothing moved. A block without a measured box is stacked from the content
- * origin and named in `unplaced`. Null for a slide that is not a grammar content slide.
+ * A slide as a canvas (SPEC-2 1.2): every object of every kind gets its box as `pos` and its
+ * paint index as `z`; the kind becomes `content` on the freeform layout, `template` keeps the
+ * layout identity and `grammar` records what the slide was so the switch back is lossless while
+ * nothing moved. The boxes are the conversion's own (`measureForCanvas`, the hidden 1x sheet) or
+ * the stage's, mapped through `canvasBoxesFromMeasured` for the preview a gesture shows before the
+ * hidden sheet has measured. Null for a slide that is a canvas already.
  */
 export function toFreeform(
   slide: Slide,
-  boxes: MeasuredBoxes,
-): { slide: FreeformSlide; unplaced: string[] } | null {
-  if (slide.kind !== 'content' || isFreeformSlide(slide)) return null;
-  const named = slotsForLayout(slide.layout);
-  const order: SlotName[] = [
-    ...named,
-    ...(Object.keys(slide.slots) as SlotName[]).filter((slot) => !named.includes(slot)),
-  ];
-  const record: GrammarRecord = { layout: slide.layout, slots: {}, boxes: {} };
-  const blocks: Block[] = [];
-  const unplaced: string[] = [];
-  let fallbackY = CONTENT_ORIGIN[1];
-  for (const slot of order) {
-    const list = slide.slots[slot];
-    if (!list) continue;
-    record.slots[slot] = list.map((block) => block.id);
-    for (const block of list) {
-      const measured = boxes.blocks[block.id];
-      let pos: Position;
-      if (measured) {
-        pos = boxPos(measured, blocks.length);
-      } else {
-        unplaced.push(block.id);
-        pos = { x: CONTENT_ORIGIN[0], y: fallbackY, w: CONTENT[0], h: 64, z: blocks.length };
-        fallbackY += 80;
-      }
-      record.boxes[block.id] = pos;
-      blocks.push({ ...stripPos(block), pos });
-    }
-  }
-  const next: FreeformSlide = {
-    ...slide,
-    layout: { type: 'freeform' },
-    slots: { [FREEFORM_SLOT]: blocks },
-    ext: { ...slide.ext, [GRAMMAR_EXT_KEY]: record },
+  boxes: MeasuredBoxes | CanvasBoxes,
+): { slide: FreeformSlide; unplaced: string[]; record: GrammarRecord } | null {
+  const canvasBoxes = isCanvasBoxes(boxes) ? boxes : canvasBoxesFromMeasured(boxes, slide);
+  const converted = toCanvas(slide, canvasBoxes);
+  if (converted === null) return null;
+  return {
+    slide: converted.slide as FreeformSlide,
+    unplaced: converted.unplaced,
+    record: converted.record,
   };
-  return { slide: next, unplaced };
 }
 
-function grammarRecord(slide: Slide): GrammarRecord | null {
-  const value: unknown = slide.ext?.[GRAMMAR_EXT_KEY];
-  if (typeof value !== 'object' || value === null) return null;
-  const v = value as Record<string, unknown>;
-  const layout = v['layout'];
-  const slots = v['slots'];
-  const boxes = v['boxes'];
-  if (typeof layout !== 'object' || layout === null) return null;
-  if (typeof slots !== 'object' || slots === null) return null;
-  if (typeof boxes !== 'object' || boxes === null) return null;
-  return {
-    layout: layout as Layout,
-    slots,
-    boxes: boxes as GrammarRecord['boxes'],
-  };
+/** The `slide.replace` of a conversion, the first mutation of a canvas write on a slide that is not a canvas (SPEC-2 1.6). */
+export function conversionMutation(
+  slide: Slide,
+  boxes: MeasuredBoxes | CanvasBoxes,
+): Mutation | null {
+  const converted = toFreeform(slide, boxes);
+  return converted ? { op: 'slide.replace', slideId: slide.id, slide: converted.slide } : null;
 }
 
 function samePlace(a: Position, b: Position, tolerance: number): boolean {
@@ -277,13 +389,14 @@ export type GrammarFit =
  * back restores; the lint's `layout/freeform` evidence): the recorded grammar when every block is
  * where the switch put it, within 1 px; else one column at the content's left edge reads as a
  * `stack`, two columns on a named ratio's seam as `cols`; anything else is not lossless and the
- * blocks refile into a `stack` by geometry with the reason.
+ * blocks refile into a `stack` by geometry with the reason. A record of a fixed kind (a converted
+ * title, statement or picture kind) names no content layout: `fromCanvas` handles those.
  */
 export function grammarFit(slide: Slide): GrammarFit | null {
   if (!isFreeformSlide(slide)) return null;
   const blocks = freeformBlocks(slide);
-  const record = grammarRecord(slide);
-  if (record) {
+  const record = grammarRecordOf(slide);
+  if (record && record.layout !== undefined && record.slots !== undefined) {
     const ids = new Set(blocks.map((block) => block.id));
     const recorded = Object.values(record.slots).flat();
     const sameSet = recorded.length === ids.size && recorded.every((id) => ids.has(id));
@@ -292,7 +405,10 @@ export function grammarFit(slide: Slide): GrammarFit | null {
       const was = record.boxes[block.id];
       return pos !== null && was !== undefined && samePlace(pos, was, 1);
     });
-    if (sameSet && unmoved) return { lossless: true, layout: record.layout, slots: record.slots };
+    if (sameSet && unmoved) {
+      const { plate: _plate, ...slots } = record.slots;
+      return { lossless: true, layout: record.layout, slots };
+    }
   }
   const reading = readingOrder(slide).map(({ block }) => block);
   const placed = reading.map((block) => ({ block, pos: posOf(block) }));
@@ -334,18 +450,32 @@ export function grammarFit(slide: Slide): GrammarFit | null {
   };
 }
 
+function stripPos(block: Block): Block {
+  if (block.pos === undefined) return block;
+  const { pos: _pos, ...rest } = block;
+  return rest;
+}
+
 /**
- * A freeform slide back as a grammar slide: the fit's layout and slot lists, `pos` and the
- * grammar record dropped; when the positions fit no layout, the schema's convertLayout refiles
- * the blocks by geometry into a `stack` and `reason` says why the switch was not lossless.
+ * A canvas slide back as the slide it was (SPEC-2 1.2, `fromCanvas`): the recorded kind with its
+ * fields while nothing moved, else the content refiled by geometry with the reason. A freeform
+ * slide without a record (drawn from scratch) reads its grammar from its positions (`grammarFit`):
+ * one column is a stack, two columns on a named seam are cols, anything else refiles into a stack.
+ * Null for a slide that is not a canvas.
  */
 export function toGrammar(
   slide: Slide,
-): { slide: ContentSlide; lossless: boolean; reason?: string } | null {
+): { slide: Slide; lossless: boolean; reason?: string } | null {
   if (!isFreeformSlide(slide)) return null;
+  const restored = fromCanvas(slide);
+  if (restored !== null) {
+    return restored.lossless
+      ? { slide: restored.slide, lossless: true }
+      : { slide: restored.slide, lossless: false, reason: restored.reason };
+  }
   const fit = grammarFit(slide);
   if (!fit) return null;
-  const { ext: oldExt, ...rest } = slide;
+  const { ext: oldExt, grammar: _grammar, ...rest } = slide;
   const ext = { ...oldExt };
   delete ext[GRAMMAR_EXT_KEY];
   const withExt = (next: ContentSlide): ContentSlide => {
@@ -372,19 +502,15 @@ export function toGrammar(
 
 /**
  * The one write of a layout switch from the stage: a `slide.replace` with the converted slide, to
- * freeform from the rendered boxes or back to the grammar. Null when the slide is already in the
- * target form or cannot be converted (a picture, title or statement slide). The CLI's
- * slide.setLayout is the same write from convertLayout, without the measured boxes.
+ * the canvas from the boxes or back to the grammar. Null when the slide is already in the target
+ * form. The CLI's slide.setLayout is the same write from the measured conversion (SPEC-2 1.6).
  */
 export function layoutSwitchMutation(
   slide: Slide,
-  boxes: MeasuredBoxes,
+  boxes: MeasuredBoxes | CanvasBoxes,
   target: 'freeform' | 'grammar',
 ): Mutation | null {
-  if (target === 'freeform') {
-    const converted = toFreeform(slide, boxes);
-    return converted ? { op: 'slide.replace', slideId: slide.id, slide: converted.slide } : null;
-  }
+  if (target === 'freeform') return conversionMutation(slide, boxes);
   const converted = toGrammar(slide);
   return converted ? { op: 'slide.replace', slideId: slide.id, slide: converted.slide } : null;
 }
@@ -393,7 +519,7 @@ export function layoutSwitchMutation(
 // Arrange (the stage's side of block.align, block.distribute and block.order)
 
 /** The positions of the named blocks that have one, in the given order. */
-function placedOf(
+export function placedOf(
   slide: Slide,
   ids: readonly string[],
   boxes: MeasuredBoxes,
@@ -433,21 +559,24 @@ export function freeNudgeMutations(
 
 /**
  * Align the selected blocks on one edge or center (schema alignPositions, as block.align writes
- * it): against their group box, or the content box for a lone block, the shared line snapped once
- * to the guides and the grid. Only the blocks that move get a mutation.
+ * it): against their union for several blocks, the sheet for one (SPEC-2 0.80), or the box `to`
+ * names; the shared line snaps once to the guides and the grid, as the store action's block.align
+ * does by default; a rotated object aligns by its bounding box (0.107). Only the blocks that move
+ * get a mutation.
  */
 export function alignMutations(
   slide: Slide,
   ids: readonly string[],
   boxes: MeasuredBoxes,
   edge: AlignEdge,
+  to?: AlignTarget,
 ): Mutation[] {
   const rows = placedOf(slide, ids, boxes);
   if (rows.length === 0) return [];
   const next = alignPositions(
     rows.map((row) => row.pos),
     edge,
-    undefined,
+    to,
     true,
   );
   return positionMutations(slide, rows, next);
@@ -492,3 +621,54 @@ export function zOrderMutations(slide: Slide, blockId: string, move: OrderMove):
     return [{ op: 'block.set', slideId: slide.id, blockId: block.id, path: '/pos/z', value: z }];
   });
 }
+
+/**
+ * A group's resize (SPEC-2 0.102): every member's box scales by the union's x and y factors about
+ * the union's origin into `to`, typography and each member's rotation untouched; one `block.set
+ * /pos` per member whose box changed. The union reads the rotated bounding boxes (0.107).
+ */
+export function scaleGroupMutations(
+  slide: Slide,
+  ids: readonly string[],
+  boxes: MeasuredBoxes,
+  to: Box,
+): Mutation[] {
+  const rows = placedOf(slide, ids, boxes);
+  if (rows.length === 0) return [];
+  const next = scalePositions(
+    rows.map((row) => row.pos),
+    to,
+  ).map((pos) => ({
+    ...pos,
+    x: Math.round(pos.x * 2) / 2,
+    y: Math.round(pos.y * 2) / 2,
+    w: Math.max(1, Math.round(pos.w * 2) / 2),
+    h: Math.max(1, Math.round(pos.h * 2) / 2),
+  }));
+  return positionMutations(slide, rows, next);
+}
+
+/** The union of the rotated bounding boxes of the named blocks' positions (the overlay's union ring, 0.107). */
+export function selectionUnion(
+  slide: Slide,
+  ids: readonly string[],
+  boxes: MeasuredBoxes,
+): Box | null {
+  const rows = placedOf(slide, ids, boxes);
+  if (rows.length === 0) return groupBox(ids, boxes);
+  return unionBox(rows.map((row) => row.pos));
+}
+
+/** The axis aligned bounding box of an object's position as a box (0.107). */
+export function boundingBoxOf(pos: Position): Box {
+  const b = boundingBox(pos);
+  return [b.x, b.y, b.w, b.h];
+}
+
+/** The content box, for callers that place a default object inside it. */
+export const CONTENT_BOX_SHEET: Box = [
+  CONTENT_ORIGIN[0],
+  CONTENT_ORIGIN[1],
+  CONTENT[0],
+  CONTENT[1],
+];

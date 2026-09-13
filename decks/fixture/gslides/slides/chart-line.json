@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "chart-line",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "A line chart with values shown"
+      },
+      {
+        "id": "chart",
+        "type": "chart",
+        "kind": "line",
+        "labels": true,
+        "legend": "bottom",
+        "height": 460,
+        "categories": [
+          "2023",
+          "2024",
+          "2025",
+          "2026"
+        ],
+        "series": [
+          {
+            "name": "Locales",
+            "values": [
+              12,
+              24,
+              40,
+              58
+            ]
+          },
+          {
+            "name": "Projects",
+            "values": [
+              30,
+              55,
+              90,
+              140
+            ]
+          },
+          {
+            "name": "Teams",
+            "values": [
+              4,
+              9,
+              16,
+              25
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "template": "one-column"
+}

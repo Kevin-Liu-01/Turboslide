@@ -29,6 +29,12 @@ import { deckDir } from './root';
  * decks and write the collection through @turboslide/store/hosted, the backend the page cannot
  * reach. The document write slide.import ends in comes back over the watch channel like an
  * asset.add.
+ *
+ * No action of the Google Slides parity round two joins this list (gslides-parity SPEC-2 section
+ * 3; MILESTONES-2 "Integrator" item 2): block.setAlt writes the block or the asset record and
+ * uploads nothing, diagram.insert instantiates a template that needs no asset, and slide.toCanvas
+ * and the canvas writes measure in the editor's own hidden sheet on the window transport (SPEC-2
+ * 1.3), never on the server.
  */
 export const SERVER_SIDE_WINDOW_ACTIONS = [
   'asset.add',

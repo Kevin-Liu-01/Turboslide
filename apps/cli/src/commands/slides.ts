@@ -3,6 +3,7 @@
 import { join } from 'node:path';
 
 import { lintStatic, countsBySlide } from '@turboslide/lint/run';
+import { canvasObjects, isCanvasSlide } from '@turboslide/schema/deck';
 
 import { flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
@@ -25,6 +26,10 @@ export async function slides(ctx: CommandContext): Promise<number> {
       ...(loaded.slides[r.id]?.skip === true ? { skip: true } : {}),
       ...(loaded.slides[r.id]?.template !== undefined
         ? { template: loaded.slides[r.id]?.template }
+        : {}),
+      // a canvas slide and its object count (gslides-parity SPEC-2 0.93)
+      ...(loaded.slides[r.id] !== undefined && isCanvasSlide(loaded.slides[r.id] as never)
+        ? { canvas: true, objects: canvasObjects(loaded.slides[r.id] as never).length }
         : {}),
     }));
   ctx.out.result(rows);

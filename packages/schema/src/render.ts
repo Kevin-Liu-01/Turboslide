@@ -37,6 +37,12 @@ export type RenderRecord = {
       fontSize?: number;
       fontWeight?: number;
       color?: string;
+      /**
+       * The height the block's text needs in sheet px, measured from its line boxes plus the
+       * padding (gslides-parity SPEC-2 1.6): text/overflow compares it with the box and the fix
+       * writes it as pos.h under grow.
+       */
+      contentHeight?: number;
     }
   >;
   fonts: { status: 'loaded' | 'partial'; faces: string[] };
@@ -69,6 +75,7 @@ export const renderRecordSchema = z.strictObject({
       fontSize: z.number().optional(),
       fontWeight: z.number().optional(),
       color: z.string().optional(),
+      contentHeight: z.number().nonnegative().optional(),
     }),
   ),
   fonts: z.strictObject({ status: z.enum(['loaded', 'partial']), faces: z.array(z.string()) }),

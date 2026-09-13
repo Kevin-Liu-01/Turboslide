@@ -3,6 +3,7 @@
 //
 //   GET  /healthz                         versions, tools, queue stats
 //   POST /jobs                            { kind, ...input } -> 202 with the job record
+//                                         (kinds: render, sheet, export, verify, measure)
 //   GET  /jobs[?kind=]                    recent records
 //   GET  /jobs/:id[/wait?timeout=ms]      one record, optionally after it finishes
 //   GET  /jobs/:id/files/<path>           a file the job wrote (confined to the job directory)
@@ -23,6 +24,7 @@ import type { RenderRecord } from '@turboslide/schema/render';
 import { toolVersions } from '@turboslide/export/verify/libreoffice';
 
 import { exportJobInput, runExportJob } from './jobs/export.ts';
+import { measureJobInput, runMeasureJob } from './jobs/measure.ts';
 import { renderJobInput, runRenderJob } from './jobs/render.ts';
 import type { RenderJobResult } from './jobs/render.ts';
 import { runSheetJob, sheetJobInput } from './jobs/sheet.ts';
@@ -55,6 +57,8 @@ export function defaultRunners(paths: WorkerPaths): Runners {
     sheet: (input, ctx) => runSheetJob(sheetJobInput.parse(input), ctx, paths),
     export: (input, ctx) => runExportJob(exportJobInput.parse(input), ctx, paths),
     verify: (input, ctx) => runVerifyJob(verifyJobInput.parse(input), ctx, paths),
+    // the canvas measurement of the hosted studio (gslides-parity SPEC-2 1.3, 0.104)
+    measure: (input, ctx) => runMeasureJob(measureJobInput.parse(input), ctx, paths),
   };
 }
 

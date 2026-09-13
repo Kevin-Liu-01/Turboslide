@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "id": "spacing",
+  "kind": "content",
+  "layout": {
+    "type": "stack",
+    "gap": 22
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "type": "heading",
+        "level": "h2",
+        "text": "Spacing, columns and indent"
+      },
+      {
+        "id": "spaced",
+        "type": "paragraph",
+        "typography": {
+          "leading": 1.5,
+          "spaceBefore": 12,
+          "spaceAfter": 12,
+          "columns": 2
+        },
+        "text": "The first paragraph of a two column block at line spacing 1.5.\nThe second paragraph follows 12 px of space before it and leaves 12 px after.\nThe third paragraph fills the second column when the first is full."
+      },
+      {
+        "id": "indented",
+        "type": "paragraph",
+        "measure": 56,
+        "typography": {
+          "indent": 64
+        },
+        "text": "An indented paragraph, 64 px in from the left edge of the block."
+      }
+    ]
+  },
+  "template": "one-column"
+}

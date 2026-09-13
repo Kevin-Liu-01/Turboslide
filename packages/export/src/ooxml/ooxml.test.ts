@@ -18,6 +18,14 @@ import {
 import { readAttributes, inPage } from './geometry.ts';
 import { countGroups, groupShapes, listShapes } from './groups.ts';
 import { countKernZero, stripKern } from './kern.ts';
+import {
+  countAltTexts,
+  countConnectors,
+  toConnector,
+  writeAdjustValues,
+  writeAltText,
+  writeColumns,
+} from './shapes.ts';
 import { entryMethods, openPackage, readPart, writePackage } from './zip.ts';
 
 const RUN =
@@ -69,7 +77,7 @@ describe('grpSp grouping (SPEC 8.2)', () => {
 
   test('wraps the shapes of a row in one group with the union xfrm; a lone key stays', () => {
     const { xml, groups } = groupShapes(slide);
-    expect(groups).toEqual([{ key: 'list/row/0', ids: [3, 4, 5] }]);
+    expect(groups).toEqual([{ key: 'list/row/0', ids: [3, 4, 5], depth: 0 }]);
     expect(countGroups(xml)).toBe(1);
     expect(xml).toContain('<p:cNvPr id="7" name="list/row/0"/>');
     expect(xml).toContain(
@@ -85,6 +93,41 @@ describe('grpSp grouping (SPEC 8.2)', () => {
     expect(inPage([0, 0], [12_192_000, 6_858_000])).toBe(true);
     expect(inPage([12_000_000, 0], [200_000, 100])).toBe(false);
     expect(inPage([-7000, 0], [1000, 1000])).toBe(true);
+  });
+
+  test('nests a row group inside a user group and groups tables, charts and connectors (SPEC-2 2.1.3, 0.67)', () => {
+    const frame = (id: number, name: string): string =>
+      `<p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="${id}" name="${name}"/></p:nvGraphicFramePr><p:xfrm><a:off x="100" y="100"/><a:ext cx="500" cy="500"/></p:xfrm></p:graphicFrame>`;
+    const cxn = (id: number, name: string): string =>
+      `<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="${id}" name="${name}"/></p:nvCxnSpPr><p:spPr><a:xfrm><a:off x="700" y="100"/><a:ext cx="300" cy="10"/></a:xfrm></p:spPr></p:cxnSp>`;
+    const part =
+      '<p:spTree>' +
+      sp(2, 'ts:s#a@g:four', 0, 0, 100, 100) +
+      sp(3, 'ts:s#list/items/0/key@g:four@list/row/0', 0, 200, 100, 50) +
+      sp(4, 'ts:s#list/items/0/value@g:four@list/row/0', 100, 200, 100, 50) +
+      frame(5, 'ts:s#table@g:four') +
+      cxn(6, 'ts:s#link@g:four') +
+      sp(7, 'ts:s#alone@g:solo', 900, 900, 10, 10) +
+      '</p:spTree>';
+    const { xml, groups } = groupShapes(part);
+    // the outer group first, the nested row group inside it, the lone key ungrouped
+    expect(groups.map((g) => [g.key, g.depth])).toEqual([
+      ['g:four', 0],
+      ['list/row/0', 1],
+    ]);
+    expect(groups[0]?.ids).toEqual([2, 3, 4, 5, 6]);
+    expect(countGroups(xml)).toBe(2);
+    const outer = xml.indexOf('name="g:four"');
+    const inner = xml.indexOf('name="list/row/0"');
+    expect(outer).toBeGreaterThan(-1);
+    expect(inner).toBeGreaterThan(outer);
+    // the graphicFrame and the connector sit inside the outer group; the lone shape stays
+    expect(xml.indexOf('name="ts:s#table@g:four"')).toBeGreaterThan(outer);
+    expect(xml.indexOf('name="ts:s#link@g:four"')).toBeGreaterThan(outer);
+    expect(xml.lastIndexOf('name="ts:s#alone@g:solo"')).toBeGreaterThan(
+      xml.lastIndexOf('</p:grpSp>'),
+    );
+    expect(listShapes(xml).length).toBe(6);
   });
 });
 
@@ -189,5 +232,97 @@ describe('stored media (slides report section 3.3)', () => {
     expect(methods['ppt/slides/slide1.xml']).toBe('DEFLATE');
     const back = await openPackage(bytes);
     expect(await readPart(back, 'ppt/slides/slide1.xml')).toContain('x'.repeat(2000));
+  });
+});
+
+describe('the shape rewrites of gslides-parity SPEC-2 2.2.10, 2.3.2, 2.4.7', () => {
+  const geom = (prst: string, avLst = '<a:avLst/>'): string =>
+    `<a:prstGeom prst="${prst}">${avLst}</a:prstGeom>`;
+  const shape = (id: number, name: string, body: string, text = ''): string =>
+    `<p:sp><p:nvSpPr><p:cNvPr id="${id}" name="${name}"/><p:cNvSpPr/><p:nvPr/></p:nvSpPr><p:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="100" cy="100"/></a:xfrm>${body}</p:spPr>${text}</p:sp>`;
+  const textBody =
+    '<p:txBody><a:bodyPr wrap="square" lIns="0" rtlCol="0" anchor="t"><a:normAutofit/></a:bodyPr><a:p><a:r><a:t>x</a:t></a:r></a:p></p:txBody>';
+
+  test('writes the adjust values of a preset into its avLst', () => {
+    const part = `<p:spTree>${shape(2, 'ts:s#callout', geom('wedgeRectCallout'))}${shape(3, 'ts:s#other', geom('rect'))}</p:spTree>`;
+    const { xml, written } = writeAdjustValues(
+      part,
+      'ts:s#callout',
+      ['adj1', 'adj2'],
+      [-30000, 70000],
+    );
+    expect(written).toBe(true);
+    expect(xml).toContain(
+      '<a:prstGeom prst="wedgeRectCallout"><a:avLst><a:gd name="adj1" fmla="val -30000"/><a:gd name="adj2" fmla="val 70000"/></a:avLst></a:prstGeom>',
+    );
+    expect(xml).toContain('<a:prstGeom prst="rect"><a:avLst/></a:prstGeom>');
+    expect(writeAdjustValues(part, 'ts:s#missing', ['adj1'], [1]).written).toBe(false);
+    // a rounded rectangle's own adj is replaced, not doubled
+    const rounded = `<p:spTree>${shape(2, 'ts:s#r', geom('roundRect', '<a:avLst><a:gd name="adj" fmla="val 16667"/></a:avLst>'))}</p:spTree>`;
+    expect(writeAdjustValues(rounded, 'ts:s#r', ['adj'], [50000]).xml).toContain(
+      '<a:avLst><a:gd name="adj" fmla="val 50000"/></a:avLst>',
+    );
+  });
+
+  test('writes numCol and spcCol on the text box body', () => {
+    const part = `<p:spTree>${shape(2, 'ts:s#p1/text', geom('rect'), textBody)}</p:spTree>`;
+    const { xml, written } = writeColumns(part, 'ts:s#p1/text', 2, 304_800);
+    expect(written).toBe(true);
+    expect(xml).toContain(
+      '<a:bodyPr wrap="square" lIns="0" rtlCol="0" anchor="t" numCol="2" spcCol="304800">',
+    );
+    expect(writeColumns(part, 'ts:s#p1/text', 1, 304_800).written).toBe(false);
+  });
+
+  test('rewrites an attached line as a connector with stCxn and endCxn on its targets', () => {
+    const part =
+      '<p:spTree>' +
+      shape(2, 'ts:s#a', geom('rect'), textBody) +
+      shape(3, 'ts:s#b@g:four', geom('rect')) +
+      shape(4, 'ts:s#elbow', geom('bentConnector3'), textBody) +
+      '</p:spTree>';
+    const { xml, written } = toConnector(part, 'ts:s#elbow', {
+      start: { name: 'ts:s#a', site: 3 },
+      end: { name: 'ts:s#b', site: 1 },
+    });
+    expect(written).toBe(true);
+    expect(xml).toContain(
+      '<p:cxnSp><p:nvCxnSpPr><p:cNvPr id="4" name="ts:s#elbow"/><p:cNvCxnSpPr><a:stCxn id="2" idx="3"/><a:endCxn id="3" idx="1"/></p:cNvCxnSpPr><p:nvPr/></p:nvCxnSpPr>',
+    );
+    expect(xml).toContain('</p:cxnSp>');
+    // the connector carries no text body; the targets keep theirs
+    expect((xml.match(/<p:txBody>/g) ?? []).length).toBe(1);
+    expect(countConnectors(xml)).toBe(1);
+    expect(listShapes(xml).map((s) => s.id)).toEqual([2, 3, 4]);
+    // a target the part does not hold leaves the shape as it was
+    expect(toConnector(part, 'ts:s#elbow', { end: { name: 'ts:s#nope', site: 0 } }).written).toBe(
+      false,
+    );
+  });
+
+  test('writes a block alt text as descr on a shape or text box (2.5.6)', () => {
+    const part = `<p:spTree>${shape(2, 'ts:s#padded', geom('roundRect'), textBody)}${shape(3, 'ts:s#other', geom('rect'))}</p:spTree>`;
+    const { xml, written } = writeAltText(
+      part,
+      'ts:s#padded',
+      'A rounded rectangle holding a "label" & more',
+    );
+    expect(written).toBe(true);
+    expect(xml).toContain(
+      '<p:cNvPr id="2" name="ts:s#padded" descr="A rounded rectangle holding a &quot;label&quot; &amp; more"/>',
+    );
+    expect(xml).toContain('<p:cNvPr id="3" name="ts:s#other"/>');
+    expect(countAltTexts(xml)).toBe(1);
+    // an existing descr is replaced, an empty alt writes nothing, a missing shape changes nothing
+    expect(writeAltText(xml, 'ts:s#padded', 'Second').xml).toContain('descr="Second"/>');
+    expect(writeAltText(part, 'ts:s#padded', '').written).toBe(false);
+    expect(writeAltText(part, 'ts:s#missing', 'x').written).toBe(false);
+    // the connector rewrite keeps a descr written before it
+    const attached = toConnector(
+      `<p:spTree>${shape(2, 'ts:s#a', geom('rect'))}${writeAltText(shape(4, 'ts:s#elbow', geom('bentConnector3')), 'ts:s#elbow', 'An elbow').xml}</p:spTree>`,
+      'ts:s#elbow',
+      { start: { name: 'ts:s#a', site: 3 } },
+    );
+    expect(attached.xml).toContain('<p:cNvPr id="4" name="ts:s#elbow" descr="An elbow"/>');
   });
 });

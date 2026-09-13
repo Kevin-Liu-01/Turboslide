@@ -1,0 +1,22 @@
+{
+  "apps/cli": 10,
+  "apps/render-worker": 1,
+  "apps/studio": 8,
+  "packages/agent": 0,
+  "packages/chrome": 45,
+  "packages/effects": 0,
+  "packages/export": 9,
+  "packages/fonts": 0,
+  "packages/headless": 6,
+  "packages/import": 0,
+  "packages/lint": 7,
+  "packages/materials": 4,
+  "packages/mcp": 0,
+  "packages/native": 0,
+  "packages/render": 1,
+  "packages/schema": 5,
+  "packages/store": 3,
+  "packages/theme": 0,
+  "packages/viewer": 0,
+  "root": 0
+}

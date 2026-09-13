@@ -26,7 +26,13 @@ import { readGeometry } from '../ooxml/geometry.ts';
 import type { ShapeBounds } from '../ooxml/geometry.ts';
 import { openPackage } from '../ooxml/zip.ts';
 import { emuToPx } from '../units.ts';
-import { DEFAULT_BUDGETS, DIA_EDGE_TOLERANCE, blockKind, mergeBudgets } from './budgets.ts';
+import {
+  CELL_RULE_INSET_PX,
+  DEFAULT_BUDGETS,
+  DIA_EDGE_TOLERANCE,
+  blockKind,
+  mergeBudgets,
+} from './budgets.ts';
 import type { Budgets } from './budgets.ts';
 import { compareBlock, cropPng, diffImages, diffImagesOutside, readPng, writePng } from './diff.ts';
 import type { BlockDelta, BlockToCompare, MaskedImageDiff, Png } from './diff.ts';
@@ -158,17 +164,22 @@ export function blocksOfRecord(record: RenderRecord, scale: ReferenceScale = 1):
       .filter(
         ([id, block]) => (!id.includes('/') || block.type === 'cell') && block.type !== 'composite',
       )
-      .map(([blockId, block]) => ({
-        blockId,
-        type: block.type,
-        box: [
-          block.box[0] * scale,
-          block.box[1] * scale,
-          block.box[2] * scale,
-          block.box[3] * scale,
-        ],
-        ...(block.color === undefined ? {} : { color: block.color }),
-      }))
+      .map(([blockId, block]) => {
+        // a cell's region leaves the row rules out (CELL_RULE_INSET_PX): the cell budget measures
+        // the cell's text, and the sheet and the file draw the rule on different edges
+        const inset = block.type === 'cell' ? Math.min(CELL_RULE_INSET_PX, block.box[3] / 4) : 0;
+        return {
+          blockId,
+          type: block.type,
+          box: [
+            block.box[0] * scale,
+            (block.box[1] + inset) * scale,
+            block.box[2] * scale,
+            (block.box[3] - 2 * inset) * scale,
+          ],
+          ...(block.color === undefined ? {} : { color: block.color }),
+        };
+      })
   );
 }
 
@@ -420,12 +431,12 @@ export async function verifyPptx(
       // A regenerated two-tone picture (flatten, SPEC 8.2) is a crisp 2x dither where the browser
       // shows a bilinear upscale of the 1x twin, so its region is compared with the sheet shot the
       // page embeds and kept out of the render comparison; every other pixel is gated on the render.
-      const regions: Box[] =
-        report.mode === 'flatten'
-          ? (entry.pictures ?? [])
-              .filter((p) => p.regenerated)
-              .map((p) => [p.box[0] * scale, p.box[1] * scale, p.box[2] * scale, p.box[3] * scale])
-          : [];
+      // In native mode the chart boxes and a picture object written as the background
+      // (gslides-parity SPEC-2 2.8.1, 2.6.4) are excluded the same way: the viewer draws them
+      // itself, so their pixels are reported, never gated.
+      const regions: Box[] = (entry.pictures ?? [])
+        .filter((p) => (report.mode === 'flatten' ? p.regenerated : !p.regenerated))
+        .map((p) => [p.box[0] * scale, p.box[1] * scale, p.box[2] * scale, p.box[3] * scale]);
       let result: MaskedImageDiff;
       try {
         result = diffImagesOutside(ref, got, regions, budgets.threshold);
@@ -438,7 +449,15 @@ export async function verifyPptx(
       }
       const diffPath = join(fileOut, `${pad(n)}-${entry.slideId}.diff.png`);
       await writePng(diffPath, result.diff);
-      const blocks = compareBlocks(ref, got, record, {
+      // a chart block's ink is the viewer's own layout (SPEC-2 2.8.1): its region is reported
+      // above and its block is not compared
+      const comparable: RenderRecord = {
+        ...record,
+        blocks: Object.fromEntries(
+          Object.entries(record.blocks).filter(([, block]) => block.type !== 'chart'),
+        ),
+      };
+      const blocks = compareBlocks(ref, got, comparable, {
         scale,
         budgets,
         slideId: entry.slideId,

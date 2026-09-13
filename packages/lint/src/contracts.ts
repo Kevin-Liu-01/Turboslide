@@ -38,6 +38,8 @@ export type {
 } from '@turboslide/schema/blocks';
 export type { Color } from '@turboslide/schema/color';
 export { COLOR_TOKENS, isHexColor } from '@turboslide/schema/color';
+export type { Run } from '@turboslide/schema/text';
+export { parseParagraphs } from '@turboslide/schema/text';
 export type { Typography } from '@turboslide/schema/typography';
 export {
   TYPE_LADDER,
@@ -47,7 +49,14 @@ export {
 } from '@turboslide/schema/typography';
 export type { Position } from '@turboslide/schema/position';
 export { zOf } from '@turboslide/schema/position';
-export { boxesOverlap, offSheet, overlapArea, positionBox } from '@turboslide/schema/freeform';
+export {
+  boundingBox,
+  boxesOverlap,
+  offSheet,
+  offSheetKind,
+  overlapArea,
+  positionBox,
+} from '@turboslide/schema/freeform';
 export type { Asset, AssetSource, AssetTwins } from '@turboslide/schema/assets';
 export { isShareAlike } from '@turboslide/schema/assets';
 export type { Finding, KnownFinding, Severity, FindingSource } from '@turboslide/schema/findings';

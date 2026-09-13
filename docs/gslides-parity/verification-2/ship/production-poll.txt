@@ -1,0 +1,8 @@
+10:44:22 poll 1: / 307 -> /new
+  /new 200 18537 B; 11 stylesheet(s), 1 script(s), 12 fetched; markers ts-ruler 0, ts-deck-guide 0, handle. 23; x-vercel-id sfo1::iad1::7hcln-1789321462414-ca082243fcad
+  /edit/gt-brand 200 18623 B; 11 stylesheet(s), 1 script(s), 12 fetched; markers ts-ruler 0, ts-deck-guide 0, handle. 23; x-vercel-id sfo1::iad1::mx9gh-1789321463309-fb09f33340fb
+10:44:54 poll 2: / 307 -> /new
+  /new 200 24563 B; 11 stylesheet(s), 1 script(s), 12 fetched; markers ts-ruler 31, ts-deck-guide 10, handle. 23; x-vercel-id sfo1::iad1::hgj7h-1789321494695-2cf5ad619633
+  /edit/gt-brand 200 24649 B; 11 stylesheet(s), 1 script(s), 12 fetched; markers ts-ruler 31, ts-deck-guide 10, handle. 23; x-vercel-id sfo1::iad1::9zcqq-1789321496842-5b19d37a2edb
+10:44:54: the round two chrome answers on /new after 2 poll(s)
+poll exit 0

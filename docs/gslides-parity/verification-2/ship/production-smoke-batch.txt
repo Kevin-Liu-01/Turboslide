@@ -1,0 +1,18 @@
+10:45:30 PDT
+token for https://turboslide.vercel.app: 64 characters, saved 2026-09-11T23:13:03.969Z
+path                                       status  ms     result  detail
+/                                          307     283    pass    location /new; x-robots-tag noindex
+/new                                       200     138    pass    24563 chars; 3/3 shell marks; noindex
+/deck/gt-brand                             200     386    pass    381249 chars; 0 notes key(s)
+/edit/gt-brand                             200     91     pass    24649 chars; 3/3 shell marks
+/decks                                     200     524    pass    14 card(s)
+/decks/trash                               200     380    pass    27471 chars
+/print/gt-brand                            200     420    pass    85 page(s)
+/present/gt-brand                          200     89     pass    24941 chars
+/decks/gt-brand/assets/cover-fumadocs.png  200     14     pass    image/png 335538 B
+/api/agent                                 401     104    pass    bearer rule
+deck.info snapshots                        200     230    pass    0 snapshot(s), revision 31
+export batched                             200     237655  pass    plan r31: 85 slide(s) in 2 batch(es) of 60 (1913 ms); batch 0: 60 slide(s) in 79397 ms (80817 ms on the wire); batch 1: 25 slide(s) in 41679 ms (43807 ms on the wire); merge: 85 page(s) in 110978 ms (111118 ms on the wire), peak 668.4 MiB, perfect true, gt-brand-light.pptx 16276070 B stored
+12/12 passed against https://turboslide.vercel.app/
+export exit 0
+10:49:30 PDT

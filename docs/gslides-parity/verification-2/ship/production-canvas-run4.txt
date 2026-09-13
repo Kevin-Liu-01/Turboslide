@@ -1,0 +1,16 @@
+10:51:17 PDT
+token for https://turboslide.vercel.app: 64 characters, saved 2026-09-11T23:13:03.969Z
+ok   open /new: {"status":200,"readyMs":862,"title":"Untitled presentation, Turboslide","slideId":"title","kind":"title","address":"/new"}
+ok   drag the heading, the slide converts, the deck is created: {"deckId":"untitled-20260913-06du","layout":"freeform","kind":"content","template":"title","heading":{"x":197,"y":484,"w":593.4375,"h":90,"z":1},"objects":3}
+ok   draw a rectangle and rotate it: {"id":"shape","preset":"rect","pos":{"x":1000,"y":520,"w":240,"h":160,"z":3,"rotate":30},"how":"Option+Right twice"}
+ok   Insert > Chart > Bar: {"id":"chart","kind":"bar","pos":{"x":320,"y":180,"w":960,"h":540,"z":4}}
+ok   type italic text into the heading: {"text":"[Canvas round two]{i}","italic":true}
+ok   read the deck back (deck.info, slide.get, version.list): {"revision":6,"objects":[{"id":"mark","type":"mark","pos":{"x":137,"y":307.28125,"w":132,"h":84,"z":0}},{"id":"heading","type":"heading","pos":{"x":197,"y":484,"w":593.4375,"h":90,"z":1}},{"id":"lead","type":"paragraph","pos":{"x":137,"y":555.03125,"w":593.4375,"h":38,"z":2}},{"id":"shape","type":"shape","pos":{"x":1000,"y":520,"w":240,"h":160,"z":3,"rotate":30}},{"id":"chart","type":"chart","pos":{"x":320,"y":180,"w":960,"h":540,"z":4}}],"versions":{"count":6}}
+ok   deck.info over /api/actions reports snapshots for a deck written after the deploy: {"status":200,"ms":643,"revision":6,"snapshots":6}
+ok   screenshot: /Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-2/production-canvas.jpg
+FAIL File > Move to trash: {"error":"TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://turboslide.vercel.app/decks/trash\", waiting until \"domcontentloaded\"\n"}
+ok   Delete forever on /decks/trash (this run): {"deck":"untitled-20260913-06du","cardGone":true,"onHome":false,"inTrash":false}
+ok   Delete forever on /decks/trash (purge): {"deck":"untitled-20260913-og8j","cardGone":true,"onHome":false,"inTrash":false}
+10 of 11 steps passed in 55001 ms; deck untitled-20260913-06du
+walk exit 1
+10:52:13 PDT

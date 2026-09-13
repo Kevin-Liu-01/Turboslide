@@ -1,0 +1,13 @@
+10:45:30 PDT
+ok   open /new: {"status":200,"readyMs":1011,"title":"Untitled presentation, Turboslide","slideId":"title","kind":"title","address":"/new"}
+ok   drag the heading, the slide converts, the deck is created: {"deckId":"untitled-20260913-37o3","layout":"freeform","kind":"content","template":"title","heading":{"x":197,"y":484,"w":593.4375,"h":90,"z":1},"objects":3}
+FAIL draw a rectangle and rotate it: {"error":"TimeoutError: locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-menu-item=\"insert.shape.shapes.rectangle\"]')\n"}
+ok   Insert > Chart > Bar: {"id":"chart","kind":"bar","pos":{"x":320,"y":180,"w":960,"h":540,"z":3}}
+FAIL type italic text into the heading: {"text":"[Canvas round two]{i}","italic":false}
+ok   read the deck back (deck.info, slide.get, version.list): {"revision":3,"objects":[{"id":"mark","type":"mark","pos":{"x":137,"y":307.28125,"w":132,"h":84,"z":0}},{"id":"heading","type":"heading","pos":{"x":197,"y":484,"w":593.4375,"h":90,"z":1}},{"id":"lead","type":"paragraph","pos":{"x":137,"y":555.03125,"w":593.4375,"h":38,"z":2}},{"id":"chart","type":"chart","pos":{"x":320,"y":180,"w":960,"h":540,"z":3}}],"versions":{"count":3}}
+ok   screenshot: /Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-2/production-canvas.jpg
+ok   File > Move to trash: {"snackbar":"","trashedAt":"2026-09-13T17:46:09.182Z"}
+FAIL Delete forever on /decks/trash: {"error":"Error: the trash page lists no card for untitled-20260913-37o3"}
+6 of 9 steps passed in 43595 ms; deck untitled-20260913-37o3
+walk exit 1
+10:46:14 PDT

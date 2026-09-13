@@ -5,6 +5,7 @@
 //   node docs/gslides-parity/verification-2/ship/production-canvas.mjs
 //        [--base https://turboslide.vercel.app] [--out docs/gslides-parity/verification-2/ship]
 //        [--shot docs/gslides-parity/verification-2/production-canvas.jpg] [--keep]
+//        [--purge <deckId>]
 //
 // Opens /new in Chrome for Testing at 1440 by 900 (the headless launcher of packages/headless,
 // one page), and on the fresh draft: drags the Title slide's heading (the first write converts
@@ -12,8 +13,12 @@
 // rotates it with the keys, inserts a bar chart through Insert > Chart > Bar, types italic text
 // into the heading, reads the deck back through the window API (deck.info, slide.get with every
 // object's pos, version.list), screenshots the editor, then trashes the scratch deck through
-// File > Move to trash and deletes it forever through the trash page's own button. Every step is
-// recorded under --out as production-canvas.json with its timings; exit 1 when a step failed.
+// File > Move to trash and deletes it forever through the trash page's own button (`--purge` names
+// one more trashed deck to delete there, a scratch deck an earlier run left). With
+// TURBOSLIDE_TOKEN in the environment (run-with-token.mjs reads it from hosts.json in code) the
+// walk also reads `deck.info` over /api/actions for its deck, the row that carries
+// `counts.snapshots` on the Blob store (SPEC-2 8.2). Every step is recorded under --out as
+// production-canvas.json with its timings; exit 1 when a step failed.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -33,6 +38,8 @@ const SHOT = join(
   value('shot') ?? 'docs/gslides-parity/verification-2/production-canvas.jpg',
 );
 const KEEP = argv.includes('--keep');
+const PURGE = value('purge');
+const TOKEN = process.env.TURBOSLIDE_TOKEN;
 const AUTHOR = 'agent:ship-2';
 
 mkdirSync(OUT, { recursive: true });
@@ -204,9 +211,16 @@ try {
     await page.keyboard.press('Escape');
     const { k: k2, sheet } = await stageScale(page);
     await page.locator('[data-control="menubar.insert"]').click();
-    await page.locator('[data-menu-item="insert.shape"]').click();
-    await page.locator('[data-menu-item="insert.shape.shapes"]').click();
-    await page.locator('[data-menu-item="insert.shape.shapes.rectangle"]').click();
+    /* the submenus open on hover, as Google's do; a click on the parent row is the fallback */
+    const shapeRow = page.locator('[data-menu-item="insert.shape"]');
+    await shapeRow.hover();
+    const shapesRow = page.locator('[data-menu-item="insert.shape.shapes"]');
+    if (!(await shapesRow.isVisible().catch(() => false))) await shapeRow.click();
+    await shapesRow.hover();
+    /* Shapes ▸ is the shell's drawn plate (shapes.ts, SPEC-2 2.5): its tiles are
+       `<row>.pick.<preset>`; the rectangle preset is `rect` */
+    const tile = page.locator('.ts-menu.is-dynamic [data-control="insert.shape.shapes.pick.rect"]');
+    await tile.click({ timeout: 10_000 });
     await drag(page, { x: sheet.x + 1000 * k2, y: sheet.y + 520 * k2 }, 240 * k2, 160 * k2);
     await settled(page);
     let shape = (await objects(page, slideId)).find((b) => b.type === 'shape');
@@ -272,9 +286,11 @@ try {
     await page.keyboard.press('Escape');
     await settled(page);
     const heading = (await objects(page, slideId)).find((b) => b.id === 'heading');
-    const json = JSON.stringify(heading?.text ?? heading);
-    ok = json.includes('Canvas round two') && /"i":true/.test(json);
-    evidence = { text: heading?.text, italic: /"i":true/.test(json) };
+    /* the mark span rule (SPEC-2 7.2): an italic run reads `[text]{i}` in the Text */
+    const text = typeof heading?.text === 'string' ? heading.text : JSON.stringify(heading?.text);
+    const italic = /\]\{[^}]*i[^}]*\}/.test(text);
+    ok = text.includes('Canvas round two') && italic;
+    evidence = { text, italic };
   } catch (error) {
     evidence = { error: String(error) };
   }
@@ -305,6 +321,40 @@ try {
   }
   record('read the deck back (deck.info, slide.get, version.list)', ok, evidence);
 
+  // 6b. deck.info over the agent route with the bearer: counts.snapshots on the Blob store
+  if (TOKEN && deckId) {
+    ok = false;
+    try {
+      const t = Date.now();
+      const res = await fetch(`${BASE}/api/actions/deck.info?deck=${encodeURIComponent(deckId)}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${TOKEN}` },
+        body: '{}',
+      });
+      const json = await res.json().catch(() => null);
+      const counts = json?.counts ?? json?.output?.counts ?? null;
+      readback.http = {
+        status: res.status,
+        revision: json?.revision ?? json?.output?.revision,
+        counts,
+      };
+      ok = res.status === 200 && typeof counts?.snapshots === 'number' && counts.snapshots >= 1;
+      evidence = {
+        status: res.status,
+        ms: Date.now() - t,
+        revision: readback.http.revision,
+        snapshots: counts?.snapshots,
+      };
+    } catch (error) {
+      evidence = { error: String(error) };
+    }
+    record(
+      'deck.info over /api/actions reports snapshots for a deck written after the deploy',
+      ok,
+      evidence,
+    );
+  }
+
   // 7. the screenshot
   try {
     await page.keyboard.press('Escape');
@@ -315,55 +365,77 @@ try {
     record('screenshot', false, String(error));
   }
 
-  // 8. File > Move to trash
+  // 8. File > Move to trash: the route leaves for /decks once the deck is trashed, so the
+  //    confirmation is the trash page's own card in a second tab, not a read through the
+  //    editor's window API in the tab that is navigating
+  const openTrash = async () => {
+    const tab = await context.newPage();
+    await tab.goto(`${BASE}/decks/trash`, { waitUntil: 'domcontentloaded' });
+    await tab.waitForSelector('[data-control="trash.cards"], [data-control="trash.empty-state"]', {
+      timeout: 60_000,
+    });
+    return tab;
+  };
   ok = false;
   try {
     if (!deckId) throw new Error('no deck to trash');
     await page.locator('[data-control="menubar.file"]').click();
     await page.locator('[data-menu-item="file.moveToTrash"]').click();
-    const snackbar = await waitFor(() => page.$('[data-control="snackbar"]'), { timeout: 15_000 });
-    const text = snackbar ? await snackbar.textContent() : null;
-    const listed = await waitFor(
-      async () => {
-        const heads = await invoke(page, 'deck.list', { includeTrashed: true });
-        const head = heads.find((h) => h.id === deckId);
-        return head?.trashedAt ? head : null;
-      },
-      { timeout: 20_000 },
-    );
-    ok = Boolean(listed?.trashedAt);
-    evidence = { snackbar: text, trashedAt: listed?.trashedAt ?? null };
+    const t = Date.now();
+    await Promise.race([
+      page.waitForURL(/\/decks(\?|$)/, { timeout: 20_000 }),
+      page.waitForSelector('[data-control="snackbar"]', { timeout: 20_000 }),
+    ]).catch(() => null);
+    const address = await page.evaluate(() => window.location.pathname).catch(() => null);
+    const trash = await openTrash();
+    const card = trash.locator(`[data-control="trash.card.${deckId}"]`);
+    const listed = await waitFor(async () => ((await card.count()) > 0 ? true : null), {
+      timeout: 20_000,
+    });
+    const home = await fetch(`${BASE}/decks`).then((r) => r.text());
+    ok = listed === true && !home.includes(deckId);
+    evidence = {
+      ms: Date.now() - t,
+      addressAfter: address,
+      inTrash: listed === true,
+      onHome: home.includes(deckId),
+    };
+    await trash.close();
   } catch (error) {
     evidence = { error: String(error) };
   }
   record('File > Move to trash', ok, evidence);
 
   // 9. Delete forever through the trash page's button, so production keeps no scratch deck
-  if (!KEEP && deckId) {
+  const purge = [...(KEEP || !deckId ? [] : [deckId]), ...(PURGE ? [PURGE] : [])];
+  for (const id of purge) {
     ok = false;
     try {
-      await page.goto(`${BASE}/decks/trash`, { waitUntil: 'domcontentloaded' });
-      await page.waitForSelector(
-        '[data-control="trash.cards"], [data-control="trash.empty-state"]',
-        {
-          timeout: 60_000,
-        },
-      );
-      const card = page.locator(`[data-control="trash.cards"] [data-deck-id="${deckId}"]`);
-      const count = await card.count();
-      if (count === 0) throw new Error(`the trash page lists no card for ${deckId}`);
-      const remove = card.getByRole('button', { name: /Delete forever/ });
-      await remove.first().click();
-      await page.locator('[data-control="trash.confirm.ok"]').click();
+      const trash = await openTrash();
+      const card = trash.locator(`[data-control="trash.card.${id}"]`);
+      if ((await card.count()) === 0) throw new Error(`the trash page lists no card for ${id}`);
+      await trash.locator(`[data-control="trash.delete.${id}"]`).click();
+      await trash.locator('[data-control="trash.confirm.ok"]').click();
       await waitFor(async () => (await card.count()) === 0, { timeout: 30_000 });
       const gone = (await card.count()) === 0;
       const decks = await fetch(`${BASE}/decks`).then((r) => r.text());
-      ok = gone && !decks.includes(deckId);
-      evidence = { cardGone: gone, listedOnHome: decks.includes(deckId) };
+      const heads = await fetch(`${BASE}/decks/trash`).then((r) => r.text());
+      ok = gone && !decks.includes(id) && !heads.includes(id);
+      evidence = {
+        deck: id,
+        cardGone: gone,
+        onHome: decks.includes(id),
+        inTrash: heads.includes(id),
+      };
+      await trash.close();
     } catch (error) {
-      evidence = { error: String(error) };
+      evidence = { deck: id, error: String(error) };
     }
-    record('Delete forever on /decks/trash', ok, evidence);
+    record(
+      `Delete forever on /decks/trash (${id === deckId ? 'this run' : 'purge'})`,
+      ok,
+      evidence,
+    );
   }
 } finally {
   await launched.browser.close().catch(() => {});

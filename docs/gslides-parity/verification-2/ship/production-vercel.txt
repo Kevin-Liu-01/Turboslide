@@ -1,0 +1,35 @@
+10:45:17 PDT
+> Production deployments for kl01s-projects/turboslide [117ms]
+
+  Age     Project                       Deployment                                                 Status      Environment     Duration     Username         
+=== inspect ===
+<claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" />
+Vercel CLI 58.4.4 (Node.js 24.13.0)
+Fetching deployment "turboslide-1uhwap5ew-kl01s-projects.vercel.app" in kl01s-projects
+> Fetched deployment "turboslide-1uhwap5ew-kl01s-projects.vercel.app" in kl01s-projects [263ms]
+
+  General
+
+    id		dpl_23EcNRDJMM33QZ9pw6Gc9eoQXBVP
+    name	turboslide
+    target	production
+    status	● Ready
+    url		https://turboslide-1uhwap5ew-kl01s-projects.vercel.app
+    created	Sun Sep 13 2026 10:43:38 GMT-0700 (Pacific Daylight Time) [2m ago]
+
+
+  Aliases
+
+    ╶ https://turboslide.vercel.app
+    ╶ https://turboslide-kl01s-projects.vercel.app
+    ╶ https://turboslide-git-main-kl01s-projects.vercel.app
+    
+
+  Builds
+
+    ┌ .        [0ms]
+    ├── λ __server (105.69MB) [iad1]
+    ├── λ _serverFn/[...] (105.69MB) [iad1]
+    ├── λ api/export/[...] (105.69MB) [iad1]
+    └── λ api/render/[...] (105.69MB) [iad1]
+    

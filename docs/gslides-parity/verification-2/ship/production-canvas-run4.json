@@ -1,0 +1,303 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "at": "2026-09-13T17:52:13.556Z",
+  "ms": 55001,
+  "deckId": "untitled-20260913-06du",
+  "slideId": "title",
+  "steps": [
+    {
+      "step": "open /new",
+      "ok": true,
+      "evidence": {
+        "status": 200,
+        "readyMs": 862,
+        "title": "Untitled presentation, Turboslide",
+        "slideId": "title",
+        "kind": "title",
+        "address": "/new"
+      }
+    },
+    {
+      "step": "drag the heading, the slide converts, the deck is created",
+      "ok": true,
+      "evidence": {
+        "deckId": "untitled-20260913-06du",
+        "layout": "freeform",
+        "kind": "content",
+        "template": "title",
+        "heading": {
+          "x": 197,
+          "y": 484,
+          "w": 593.4375,
+          "h": 90,
+          "z": 1
+        },
+        "objects": 3
+      }
+    },
+    {
+      "step": "draw a rectangle and rotate it",
+      "ok": true,
+      "evidence": {
+        "id": "shape",
+        "preset": "rect",
+        "pos": {
+          "x": 1000,
+          "y": 520,
+          "w": 240,
+          "h": 160,
+          "z": 3,
+          "rotate": 30
+        },
+        "how": "Option+Right twice"
+      }
+    },
+    {
+      "step": "Insert > Chart > Bar",
+      "ok": true,
+      "evidence": {
+        "id": "chart",
+        "kind": "bar",
+        "pos": {
+          "x": 320,
+          "y": 180,
+          "w": 960,
+          "h": 540,
+          "z": 4
+        }
+      }
+    },
+    {
+      "step": "type italic text into the heading",
+      "ok": true,
+      "evidence": {
+        "text": "[Canvas round two]{i}",
+        "italic": true
+      }
+    },
+    {
+      "step": "read the deck back (deck.info, slide.get, version.list)",
+      "ok": true,
+      "evidence": {
+        "revision": 6,
+        "objects": [
+          {
+            "id": "mark",
+            "type": "mark",
+            "pos": {
+              "x": 137,
+              "y": 307.28125,
+              "w": 132,
+              "h": 84,
+              "z": 0
+            }
+          },
+          {
+            "id": "heading",
+            "type": "heading",
+            "pos": {
+              "x": 197,
+              "y": 484,
+              "w": 593.4375,
+              "h": 90,
+              "z": 1
+            }
+          },
+          {
+            "id": "lead",
+            "type": "paragraph",
+            "pos": {
+              "x": 137,
+              "y": 555.03125,
+              "w": 593.4375,
+              "h": 38,
+              "z": 2
+            }
+          },
+          {
+            "id": "shape",
+            "type": "shape",
+            "pos": {
+              "x": 1000,
+              "y": 520,
+              "w": 240,
+              "h": 160,
+              "z": 3,
+              "rotate": 30
+            }
+          },
+          {
+            "id": "chart",
+            "type": "chart",
+            "pos": {
+              "x": 320,
+              "y": 180,
+              "w": 960,
+              "h": 540,
+              "z": 4
+            }
+          }
+        ],
+        "versions": {
+          "count": 6
+        }
+      }
+    },
+    {
+      "step": "deck.info over /api/actions reports snapshots for a deck written after the deploy",
+      "ok": true,
+      "evidence": {
+        "status": 200,
+        "ms": 643,
+        "revision": 6,
+        "snapshots": 6
+      }
+    },
+    {
+      "step": "screenshot",
+      "ok": true,
+      "evidence": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-2/production-canvas.jpg"
+    },
+    {
+      "step": "File > Move to trash",
+      "ok": false,
+      "evidence": {
+        "error": "TimeoutError: page.goto: Timeout 30000ms exceeded.\nCall log:\n  - navigating to \"https://turboslide.vercel.app/decks/trash\", waiting until \"domcontentloaded\"\n"
+      }
+    },
+    {
+      "step": "Delete forever on /decks/trash (this run)",
+      "ok": true,
+      "evidence": {
+        "deck": "untitled-20260913-06du",
+        "cardGone": true,
+        "onHome": false,
+        "inTrash": false
+      }
+    },
+    {
+      "step": "Delete forever on /decks/trash (purge)",
+      "ok": true,
+      "evidence": {
+        "deck": "untitled-20260913-og8j",
+        "cardGone": true,
+        "onHome": false,
+        "inTrash": false
+      }
+    }
+  ],
+  "readback": {
+    "info": {
+      "id": "untitled-20260913-06du",
+      "revision": 6,
+      "counts": {
+        "slides": 1,
+        "sections": 1,
+        "assets": 4,
+        "htmlBlocks": 0,
+        "skipped": 0,
+        "canvas": 1,
+        "charts": 1,
+        "guides": 0
+      }
+    },
+    "slide": {
+      "id": "title",
+      "kind": "content",
+      "layout": {
+        "type": "freeform"
+      },
+      "template": "title",
+      "objects": [
+        {
+          "id": "mark",
+          "type": "mark",
+          "pos": {
+            "x": 137,
+            "y": 307.28125,
+            "w": 132,
+            "h": 84,
+            "z": 0
+          }
+        },
+        {
+          "id": "heading",
+          "type": "heading",
+          "pos": {
+            "x": 197,
+            "y": 484,
+            "w": 593.4375,
+            "h": 90,
+            "z": 1
+          }
+        },
+        {
+          "id": "lead",
+          "type": "paragraph",
+          "pos": {
+            "x": 137,
+            "y": 555.03125,
+            "w": 593.4375,
+            "h": 38,
+            "z": 2
+          }
+        },
+        {
+          "id": "shape",
+          "type": "shape",
+          "pos": {
+            "x": 1000,
+            "y": 520,
+            "w": 240,
+            "h": 160,
+            "z": 3,
+            "rotate": 30
+          }
+        },
+        {
+          "id": "chart",
+          "type": "chart",
+          "pos": {
+            "x": 320,
+            "y": 180,
+            "w": 960,
+            "h": 540,
+            "z": 4
+          }
+        }
+      ]
+    },
+    "versions": {
+      "count": 6
+    },
+    "state": {
+      "deckId": "untitled-20260913-06du",
+      "revision": 6,
+      "serverRevision": 6,
+      "pending": 0,
+      "slideId": "title",
+      "blockId": "heading",
+      "mode": "slide",
+      "theme": "dark",
+      "zoom": "fit",
+      "author": "agent:ship-2"
+    },
+    "http": {
+      "status": 200,
+      "revision": 6,
+      "counts": {
+        "slides": 1,
+        "sections": 1,
+        "assets": 4,
+        "htmlBlocks": 0,
+        "skipped": 0,
+        "canvas": 1,
+        "charts": 1,
+        "guides": 0,
+        "snapshots": 6
+      }
+    }
+  },
+  "pageErrors": [],
+  "screenshot": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-2/production-canvas.jpg"
+}

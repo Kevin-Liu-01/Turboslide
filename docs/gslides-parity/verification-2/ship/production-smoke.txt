@@ -1,0 +1,14 @@
+10:45:19 PDT
+path                                       status  ms     result  detail
+/                                          307     163    pass    location /new; x-robots-tag noindex
+/new                                       200     199    pass    24563 chars; 3/3 shell marks; noindex
+/deck/gt-brand                             200     1032   pass    381249 chars; 0 notes key(s)
+/edit/gt-brand                             200     146    pass    24649 chars; 3/3 shell marks
+/decks                                     200     5476   pass    14 card(s)
+/decks/trash                               200     3190   pass    27471 chars
+/print/gt-brand                            200     524    pass    85 page(s)
+/present/gt-brand                          200     100    pass    24941 chars
+/decks/gt-brand/assets/cover-fumadocs.png  200     115    pass    image/png 335538 B
+/api/agent                                 401     125    pass    bearer rule
+10/10 passed against https://turboslide.vercel.app/
+smoke exit 0

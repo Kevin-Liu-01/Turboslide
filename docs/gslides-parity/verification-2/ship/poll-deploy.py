@@ -5,10 +5,10 @@
 
 Every 30 s: GET base/ (the 307 to /new), base/new and base/edit/gt-brand (the SSR shells),
 collect the stylesheets and module scripts each shell links, fetch them, and count the bytes of
-the round two chrome's markers in them: `ts-ruler` (Rulers.css), `ts-deck-guide`
-(DeckGuides.css) and `data-control="handle.` (the canvas handles), none of which the round one
-deploy served. Stops when a marker count is above zero on /new, or after the minutes given
-(default 15). Prints one line per poll and a final summary; exit 0 when the new chrome answered.
+the round two chrome's class markers in them: `ts-ruler` (Rulers.css) and `ts-deck-guide`
+(DeckGuides.css), neither of which the round one deploy served (its assets count 0 for both;
+`handle.` is counted too but is not a stop rule, the round one bundle carries it 23 times).
+Stops when a class marker count is above zero on /new, or after the minutes given (default 15). Prints one line per poll and a final summary; exit 0 when the new chrome answered.
 """
 import re
 import sys
@@ -78,7 +78,7 @@ while True:
             f'{fetched} fetched; markers ' + ', '.join(f'{m} {n}' for m, n in counts.items())
             + (f'; x-vercel-id {deploy}' if deploy else '')
         )
-        if path == '/new' and any(counts.values()):
+        if path == '/new' and (counts['ts-ruler'] > 0 or counts['ts-deck-guide'] > 0):
             hit = True
     print('\n'.join(lines), flush=True)
     if hit:

@@ -819,3 +819,87 @@ bytes, 81 tools, the largest `deck_update_slide` 884 KB, the median 478 KB,
 | `container/step25-rerun.log`, `container/bisect-light.log`, `container/experiment-two-themes.log`, `container/experiment-image-vs-mounted.log`, `container/flatten-and-check.log`, `container/reports/*.json` | the container runs of this pass (section 7); `container/build.log` and `container/verify.log` are pass 1's    |
 | `export/pdf.log`, `export/pdf-pass1.log`, `export/reports/*.json`                                                                                                                                             | the PDF export of this pass and of pass 1, the export reports (section 7)                                     |
 | `preview/deploy.log`, `preview/hosted-smoke-batch.log`, `preview/*-pass1.log`                                                                                                                                 | the preview deployment and the smoke rows of this pass (section 8); pass 1's three logs kept as `*-pass1.log` |
+
+## 14. The ship step and production
+
+Written by the ship step on 2026-09-13 (PDT) after sections 1 to 13; `docs/gslides-parity/build-2/ship.md`
+is its record. Of section 10's findings the ship step closed 15 (the 22 template slide files
+re-snapshotted from the re-imported deck; the templates test 14 of 14, the migration test 10 of
+10), 16 with 13 (tools/list served at 1.46 MB for 88 tools where it was 27.2 MB: every
+outputSchema property over 16 KB is served as its type, the full schema kept in `outputSchemaFor`
+and the committed contracts; `apps/cli` `mcp.test.ts` passes its budgets in 3.0 s), 20 (check
+step 20 writes `verification-2/parity-audit.json`), 26 (`centredPosition` without the 8 px grid;
+Insert > Chart > Bar lands at 320, 180) and 27 (`present.spec.ts` reads its play list from the
+fixture, 26 of 27 slides). Findings 9, 10, 17, 18, 19, 21, 22, 23, 24, 25, 28, 29 and 30 stay
+open as section 10 records them, for the builders named there (`ship.md` section 6).
+
+The chain on the ship step's machine, under load averages of 15 to 31 from processes outside the
+round (`ship.md` section 3): steps 4, 6 to 19 and 22 to 24 pass (the GT deck within 0.5 percent
+of the shoot; the fixture's flatten export perfect at 0.000 percent; the fonts build current; the
+fidelity gate at 342 pairs, worst 0.262 percent); step 5 fails on 5 s vitest budgets under the
+root run's load (17 headless, schema and effects tests that pass alone); step 20 reads 2,127
+pass, 8 fail, 382 skipped in 815 s, the eight rows being findings 10, 17 and 18; step 21 reads 57
+passed, 4 failed, 5 did not run in 12.8 min, the four being finding 28's rows, with `charts.spec.ts`
+and `present.spec.ts` now green; step 25 fails in the image build for want of disk in the Docker
+VM (147 images, 97.5 GB), so section 7's container pass stands as the container record.
+
+Commit `13d0361` on `main` carries the round (520 paths by explicit list, `.github/` untracked),
+pushed at 10:43:34 PDT; this section and the ship evidence are the second commit.
+
+The production deployment: Vercel `dpl_23EcNRDJMM33QZ9pw6Gc9eoQXBVP`
+(`turboslide-1uhwap5ew-kl01s-projects.vercel.app`), created 10:43:38 PDT from the push, Ready,
+aliased to `https://turboslide.vercel.app`, first answering at 10:44:54, 80 s after the push
+(`verification-2/ship/production-poll.txt`): `/` 307 to `/new`; the SSR shells of `/new` and
+`/edit/gt-brand` grew from 18,537 and 18,623 bytes to 24,563 and 24,649, and their 11 stylesheets
+and 1 script count `ts-ruler` 31 and `ts-deck-guide` 10 bytes of the round two chrome's markers
+where the round one deploy's assets counted 0.
+
+`node scripts/hosted-smoke.mjs --base https://turboslide.vercel.app` at 10:45:19 PDT
+(`verification-2/ship/production-smoke.txt`), 10 of 10; with the bearer read in code and
+`--export-batch` at 10:45:30 (`production-smoke-batch.txt`), 12 of 12:
+
+| Path                                        | Status | ms      | Result | Detail                                                                                                                                                                                                             |
+| ------------------------------------------- | ------ | ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/`                                         | 307    | 163     | pass   | location /new; x-robots-tag noindex                                                                                                                                                                                |
+| `/new`                                      | 200    | 199     | pass   | 24,563 chars; 3 of 3 shell marks; noindex                                                                                                                                                                          |
+| `/deck/gt-brand`                            | 200    | 1,032   | pass   | 381,249 chars; 0 notes keys                                                                                                                                                                                        |
+| `/edit/gt-brand`                            | 200    | 146     | pass   | 24,649 chars; 3 of 3 shell marks                                                                                                                                                                                   |
+| `/decks`                                    | 200    | 5,476   | pass   | 14 cards                                                                                                                                                                                                           |
+| `/decks/trash`                              | 200    | 3,190   | pass   | 27,471 chars                                                                                                                                                                                                       |
+| `/print/gt-brand`                           | 200    | 524     | pass   | 85 pages                                                                                                                                                                                                           |
+| `/present/gt-brand`                         | 200    | 100     | pass   | 24,941 chars                                                                                                                                                                                                       |
+| `/decks/gt-brand/assets/cover-fumadocs.png` | 200    | 115     | pass   | image/png 335,538 B                                                                                                                                                                                                |
+| `/api/agent`                                | 401    | 125     | pass   | bearer rule                                                                                                                                                                                                        |
+| `deck.info` snapshots                       | 200    | 230     | pass   | 0 snapshots, revision 31 (no write to `gt-brand` since the deploy)                                                                                                                                                 |
+| export batched                              | 200    | 237,655 | pass   | plan r31: 85 slides in 2 batches of 60 (1.9 s); batch 0: 60 slides in 79.4 s; batch 1: 25 slides in 41.7 s; merge: 85 pages in 111.0 s, peak 668.4 MiB, `perfect: true`, `gt-brand-light.pptx` 16,276,070 B stored |
+
+The batched Perfect export of the 85 slide GT deck against production therefore takes 237.7 s
+(4.0 min) of wall time with a peak of 668.4 MiB against the 3009 MB function (the preview:
+239.5 s, 784.2 MiB), every batch under the 240 s budget.
+
+The canvas on production (`verification-2/ship/production-canvas.mjs`; the report
+`ship/production-canvas.json`; the screenshot `verification-2/production-canvas.jpg`): one Chrome
+for Testing load of `/new` at 1440 by 900 at 10:53:54 PDT, 11 of 11 steps in 16.0 s, 0 page
+errors (the five earlier runs, `ship/production-canvas-run1.txt` to `run5.txt`, corrected the
+script's own selectors; every product step passed in each run it reached). `/new` ready in
+626 ms; the Title slide's heading dragged 60 by 40 sheet pixels, which converted the slide to the
+freeform layout (`kind: content`, `template: title`) and created `untitled-20260913-9xqu` on the
+Blob store in the same write; a rectangle drawn at 1000, 520 by 240 by 160 and rotated to 30
+degrees by Option+Right twice; Insert > Chart > Bar at 320, 180 by 960 by 540; "Canvas round
+two" typed into the heading with Cmd+I over the line, read back through `slide.get` as
+`[Canvas round two]{i}`; `deck.info` revision 6, `version.list` 6 versions, and over
+`/api/actions` with the bearer `counts.snapshots` 6 on a deck written after the deploy
+(MILESTONES-2 ship item 4). The objects and their `pos` after the walk: `mark` 137, 307.28, 132
+by 84, z 0; `heading` 197, 484, 593.44 by 90, z 1; `lead` 137, 555.03, 593.44 by 38, z 2;
+`shape` 1000, 520, 240 by 160, rotate 30, z 3; `chart` 320, 180, 960 by 540, z 4. File > Move to
+trash listed the deck on `/decks/trash` and not on `/decks`, and the trash page's Delete forever
+removed it and the previous run's deck; every scratch deck of the six runs is gone. `deck.list`
+with the trash at 10:55 lists 15 decks and no trashed one; the fifteenth,
+`untitled-20260913-tii2` ("V1", revision 11), was written by another author after the deploy.
+
+Files under `docs/gslides-parity/verification-2/ship/`: `check-from-4.txt`, `check-only-5.txt`,
+`check-from-6.txt`, `check-from-21.txt`, `check-from-22.txt` (the chain); `poll-deploy.py`,
+`production-poll-run1.txt`, `production-poll.txt` (the deploy poll); `production-vercel.txt`;
+`production-smoke.txt`, `production-smoke-batch.txt`; `run-with-token.mjs`;
+`production-canvas.mjs`, `production-canvas.txt`, `production-canvas.json`,
+`production-canvas-run1.txt` to `run5.txt` with `run1.json` to `run5.json`.

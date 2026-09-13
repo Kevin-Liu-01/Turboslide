@@ -1,0 +1,270 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "at": "2026-09-13T17:49:15.397Z",
+  "ms": 28674,
+  "deckId": "untitled-20260913-duah",
+  "slideId": "title",
+  "steps": [
+    {
+      "step": "open /new",
+      "ok": true,
+      "evidence": {
+        "status": 200,
+        "readyMs": 614,
+        "title": "Untitled presentation, Turboslide",
+        "slideId": "title",
+        "kind": "title",
+        "address": "/new"
+      }
+    },
+    {
+      "step": "drag the heading, the slide converts, the deck is created",
+      "ok": true,
+      "evidence": {
+        "deckId": "untitled-20260913-duah",
+        "layout": "freeform",
+        "kind": "content",
+        "template": "title",
+        "heading": {
+          "x": 197,
+          "y": 484,
+          "w": 593.4375,
+          "h": 90,
+          "z": 1
+        },
+        "objects": 3
+      }
+    },
+    {
+      "step": "draw a rectangle and rotate it",
+      "ok": false,
+      "evidence": {
+        "error": "TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('[data-menu-item=\"insert.shape.shapes.rectangle\"]')\n"
+      }
+    },
+    {
+      "step": "Insert > Chart > Bar",
+      "ok": true,
+      "evidence": {
+        "id": "chart",
+        "kind": "bar",
+        "pos": {
+          "x": 320,
+          "y": 180,
+          "w": 960,
+          "h": 540,
+          "z": 3
+        }
+      }
+    },
+    {
+      "step": "type italic text into the heading",
+      "ok": true,
+      "evidence": {
+        "text": "[Canvas round two]{i}",
+        "italic": true
+      }
+    },
+    {
+      "step": "read the deck back (deck.info, slide.get, version.list)",
+      "ok": true,
+      "evidence": {
+        "revision": 3,
+        "objects": [
+          {
+            "id": "mark",
+            "type": "mark",
+            "pos": {
+              "x": 137,
+              "y": 307.28125,
+              "w": 132,
+              "h": 84,
+              "z": 0
+            }
+          },
+          {
+            "id": "heading",
+            "type": "heading",
+            "pos": {
+              "x": 197,
+              "y": 484,
+              "w": 593.4375,
+              "h": 90,
+              "z": 1
+            }
+          },
+          {
+            "id": "lead",
+            "type": "paragraph",
+            "pos": {
+              "x": 137,
+              "y": 555.03125,
+              "w": 593.4375,
+              "h": 38,
+              "z": 2
+            }
+          },
+          {
+            "id": "chart",
+            "type": "chart",
+            "pos": {
+              "x": 320,
+              "y": 180,
+              "w": 960,
+              "h": 540,
+              "z": 3
+            }
+          }
+        ],
+        "versions": {
+          "count": 3
+        }
+      }
+    },
+    {
+      "step": "deck.info over /api/actions reports snapshots for a deck written after the deploy",
+      "ok": true,
+      "evidence": {
+        "status": 200,
+        "ms": 273,
+        "revision": 3,
+        "snapshots": 3
+      }
+    },
+    {
+      "step": "screenshot",
+      "ok": true,
+      "evidence": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-2/production-canvas.jpg"
+    },
+    {
+      "step": "File > Move to trash",
+      "ok": true,
+      "evidence": {
+        "snackbar": "",
+        "trashedAt": "2026-09-13T17:49:02.303Z"
+      }
+    },
+    {
+      "step": "Delete forever on /decks/trash (this run)",
+      "ok": true,
+      "evidence": {
+        "deck": "untitled-20260913-duah",
+        "cardGone": true,
+        "onHome": false,
+        "inTrash": false
+      }
+    },
+    {
+      "step": "Delete forever on /decks/trash (purge)",
+      "ok": true,
+      "evidence": {
+        "deck": "untitled-20260913-37o3",
+        "cardGone": true,
+        "onHome": false,
+        "inTrash": false
+      }
+    }
+  ],
+  "readback": {
+    "info": {
+      "id": "untitled-20260913-duah",
+      "revision": 3,
+      "counts": {
+        "slides": 1,
+        "sections": 1,
+        "assets": 4,
+        "htmlBlocks": 0,
+        "skipped": 0,
+        "canvas": 1,
+        "charts": 1,
+        "guides": 0
+      }
+    },
+    "slide": {
+      "id": "title",
+      "kind": "content",
+      "layout": {
+        "type": "freeform"
+      },
+      "template": "title",
+      "objects": [
+        {
+          "id": "mark",
+          "type": "mark",
+          "pos": {
+            "x": 137,
+            "y": 307.28125,
+            "w": 132,
+            "h": 84,
+            "z": 0
+          }
+        },
+        {
+          "id": "heading",
+          "type": "heading",
+          "pos": {
+            "x": 197,
+            "y": 484,
+            "w": 593.4375,
+            "h": 90,
+            "z": 1
+          }
+        },
+        {
+          "id": "lead",
+          "type": "paragraph",
+          "pos": {
+            "x": 137,
+            "y": 555.03125,
+            "w": 593.4375,
+            "h": 38,
+            "z": 2
+          }
+        },
+        {
+          "id": "chart",
+          "type": "chart",
+          "pos": {
+            "x": 320,
+            "y": 180,
+            "w": 960,
+            "h": 540,
+            "z": 3
+          }
+        }
+      ]
+    },
+    "versions": {
+      "count": 3
+    },
+    "state": {
+      "deckId": "untitled-20260913-duah",
+      "revision": 3,
+      "serverRevision": 3,
+      "pending": 0,
+      "slideId": "title",
+      "blockId": "heading",
+      "mode": "slide",
+      "theme": "dark",
+      "zoom": "fit",
+      "author": "agent:ship-2"
+    },
+    "http": {
+      "status": 200,
+      "revision": 3,
+      "counts": {
+        "slides": 1,
+        "sections": 1,
+        "assets": 4,
+        "htmlBlocks": 0,
+        "skipped": 0,
+        "canvas": 1,
+        "charts": 1,
+        "guides": 0,
+        "snapshots": 3
+      }
+    }
+  },
+  "pageErrors": [],
+  "screenshot": "/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-2/production-canvas.jpg"
+}

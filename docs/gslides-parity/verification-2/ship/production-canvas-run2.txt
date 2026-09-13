@@ -1,0 +1,16 @@
+10:48:46 PDT
+token for https://turboslide.vercel.app: 64 characters, saved 2026-09-11T23:13:03.969Z
+ok   open /new: {"status":200,"readyMs":614,"title":"Untitled presentation, Turboslide","slideId":"title","kind":"title","address":"/new"}
+ok   drag the heading, the slide converts, the deck is created: {"deckId":"untitled-20260913-duah","layout":"freeform","kind":"content","template":"title","heading":{"x":197,"y":484,"w":593.4375,"h":90,"z":1},"objects":3}
+FAIL draw a rectangle and rotate it: {"error":"TimeoutError: locator.click: Timeout 10000ms exceeded.\nCall log:\n  - waiting for locator('[data-menu-item=\"insert.shape.shapes.rectangle\"]')\n"}
+ok   Insert > Chart > Bar: {"id":"chart","kind":"bar","pos":{"x":320,"y":180,"w":960,"h":540,"z":3}}
+ok   type italic text into the heading: {"text":"[Canvas round two]{i}","italic":true}
+ok   read the deck back (deck.info, slide.get, version.list): {"revision":3,"objects":[{"id":"mark","type":"mark","pos":{"x":137,"y":307.28125,"w":132,"h":84,"z":0}},{"id":"heading","type":"heading","pos":{"x":197,"y":484,"w":593.4375,"h":90,"z":1}},{"id":"lead","type":"paragraph","pos":{"x":137,"y":555.03125,"w":593.4375,"h":38,"z":2}},{"id":"chart","type":"chart","pos":{"x":320,"y":180,"w":960,"h":540,"z":3}}],"versions":{"count":3}}
+ok   deck.info over /api/actions reports snapshots for a deck written after the deploy: {"status":200,"ms":273,"revision":3,"snapshots":3}
+ok   screenshot: /Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-2/production-canvas.jpg
+ok   File > Move to trash: {"snackbar":"","trashedAt":"2026-09-13T17:49:02.303Z"}
+ok   Delete forever on /decks/trash (this run): {"deck":"untitled-20260913-duah","cardGone":true,"onHome":false,"inTrash":false}
+ok   Delete forever on /decks/trash (purge): {"deck":"untitled-20260913-37o3","cardGone":true,"onHome":false,"inTrash":false}
+10 of 11 steps passed in 28674 ms; deck untitled-20260913-duah
+walk exit 1
+10:49:15 PDT

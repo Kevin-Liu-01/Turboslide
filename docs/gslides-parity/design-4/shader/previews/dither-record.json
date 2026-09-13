@@ -1,0 +1,80 @@
+{
+  "date": "2026-09-13",
+  "assets": [
+    {
+      "name": "hero",
+      "frame": "lm-field-5500.png",
+      "params": {
+        "autocontrast": 0.5,
+        "white": 120,
+        "gamma": 1,
+        "polarity": "light-ground",
+        "cell": 2,
+        "channel": "gray",
+        "invert": false,
+        "blur": 0,
+        "minFilter": 0,
+        "black": 0,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "backend": "native",
+      "ms": 94,
+      "litFraction": 0.1762,
+      "plateClear": {
+        "plate": [
+          137,
+          500,
+          740,
+          271
+        ],
+        "nearestLitPx": 0,
+        "litUnder": 9846,
+        "litInBand": 2446
+      },
+      "warnings": [
+        "9846 lit cell(s) under the plate (picture/plate-clear)"
+      ],
+      "bytes": {
+        "dark": 11896,
+        "light": 11913
+      }
+    },
+    {
+      "name": "og-band",
+      "frame": "lm-field-rep2-7000.png",
+      "cells": "70 by 79 at 8 px",
+      "stages": "lanczos3 cover crop (sharp), toGray, autocontrast 0.5, tone white 90, ditherGray, inverted",
+      "litFraction": 0.1043
+    },
+    {
+      "name": "figure",
+      "frame": "gs-ink-metaballs-6000.png",
+      "params": {
+        "autocontrast": 0.5,
+        "black": 10,
+        "gamma": 1,
+        "polarity": "dark-ground",
+        "cell": 2,
+        "channel": "gray",
+        "invert": false,
+        "blur": 0,
+        "minFilter": 0,
+        "white": 255,
+        "bayer": 8,
+        "resampler": "lanczos3"
+      },
+      "backend": "native",
+      "ms": 77.7,
+      "litFraction": 0.0625,
+      "plateClear": null,
+      "warnings": [
+        "uniform screen: 6.2 percent of cells are lit; a two-tone picture needs an edge (OPENERS.md, round ten rule)"
+      ],
+      "bytes": {
+        "dark": 6447,
+        "light": 6464
+      }
+    }
+  ]
+}

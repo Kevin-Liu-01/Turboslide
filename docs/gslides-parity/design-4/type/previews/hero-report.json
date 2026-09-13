@@ -1,0 +1,57 @@
+{
+  "date": "2026-09-13",
+  "recipe": {
+    "material": "paper:mesh-gradient",
+    "colors": [
+      "#070707",
+      "#070707",
+      "#8a8f98",
+      "#f2f2f0"
+    ],
+    "distortion": 0.6,
+    "swirl": 0.15,
+    "frame": 6800,
+    "offsetX": 0.4,
+    "tone": {
+      "black": 80,
+      "white": 250,
+      "gamma": 1.5
+    }
+  },
+  "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Max, Unspecified Version)",
+  "frame": "1600 by 900",
+  "backend": "typescript",
+  "params": {
+    "kind": "two-tone",
+    "channel": "gray",
+    "blur": 1.2,
+    "autocontrast": 0.5,
+    "black": 80,
+    "white": 250,
+    "gamma": 1.5,
+    "polarity": "dark-ground",
+    "cell": 2,
+    "bayer": 8,
+    "resampler": "lanczos3"
+  },
+  "screenMs": 179.6,
+  "metrics": {
+    "litFraction": 0.1648,
+    "warnings": [
+      "8855 lit cell(s) under the plate (picture/plate-clear)"
+    ],
+    "plateClear": {
+      "plate": [
+        96,
+        96,
+        760,
+        300
+      ],
+      "nearestLitPx": 0,
+      "litUnder": 8855,
+      "litInBand": 1990
+    }
+  },
+  "darkBytes": 3715,
+  "lightBytes": 4315
+}

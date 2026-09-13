@@ -1,0 +1,148 @@
+{
+  "editorNoHover": {
+    "label": "no hover",
+    "tDcl": 255,
+    "tApi": 841,
+    "tCards": 902,
+    "cards": 85,
+    "firstThumb": 910,
+    "thumbStates": {
+      "static": 16,
+      "clone": 69,
+      "plate": 0
+    },
+    "domNodes": 2936,
+    "filmstripNodes": 2539,
+    "renders": 30,
+    "renderSample": [
+      {
+        "u": "/api/render/opener-brand?deck=gt-brand&theme=dark&w=320&r=979288e4",
+        "s": 200,
+        "cc": "public, max-age=31536000, immutable",
+        "x": "HIT",
+        "t": 1789326660459
+      },
+      {
+        "u": "/api/render/thesis?deck=gt-brand&theme=dark&w=320&r=18e1fdd5",
+        "s": 200,
+        "cc": "public, max-age=31536000, immutable",
+        "x": "HIT",
+        "t": 1789326660459
+      },
+      {
+        "u": "/api/render/title?deck=gt-brand&theme=dark&w=320&r=e6da83a6",
+        "s": 200,
+        "cc": "public, max-age=31536000, immutable",
+        "x": "HIT",
+        "t": 1789326660459
+      }
+    ],
+    "fns": [
+      "376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d",
+      "8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708",
+      "2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f",
+      "3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "f7409e4d29a9407a1b68faffe71a98022950fbb960c2b0c77fe567c68010e06c"
+    ],
+    "transition": {
+      "ms": 6223,
+      "hover": false,
+      "serverFnCallsDuring": 0,
+      "fnsAfterHover": []
+    }
+  },
+  "editorHover": {
+    "label": "hover preload",
+    "tDcl": 292,
+    "tApi": 915,
+    "tCards": 951,
+    "cards": 85,
+    "firstThumb": 1033,
+    "thumbStates": {
+      "static": 16,
+      "clone": 69,
+      "plate": 0
+    },
+    "domNodes": 2936,
+    "filmstripNodes": 2539,
+    "renders": 30,
+    "renderSample": [
+      {
+        "u": "/api/render/thesis?deck=gt-brand&theme=dark&w=320&r=18e1fdd5",
+        "s": 200,
+        "cc": "public, max-age=31536000, immutable",
+        "x": "HIT",
+        "t": 1789326675850
+      },
+      {
+        "u": "/api/render/opener-brand?deck=gt-brand&theme=dark&w=320&r=979288e4",
+        "s": 200,
+        "cc": "public, max-age=31536000, immutable",
+        "x": "HIT",
+        "t": 1789326675856
+      },
+      {
+        "u": "/api/render/title?deck=gt-brand&theme=dark&w=320&r=e6da83a6",
+        "s": 200,
+        "cc": "public, max-age=31536000, immutable",
+        "x": "HIT",
+        "t": 1789326675861
+      }
+    ],
+    "fns": [
+      "376e57a10847f57ca5b048a11bf99aedeb9578267b3e79f4751eca9488f94b8d",
+      "8f65781f136b1e8f43ea006e3e520a1eeaac1ca224d6ca7d9259f5ee46023708",
+      "3a277a5ce011222ea489e0c17331532988d227835ce75b06f9dc6f1e8133d9db",
+      "2d9a6ce6044f16aaf27a8a2a40e6e386d2180ebcd14024699f543e288875926f",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "f7409e4d29a9407a1b68faffe71a98022950fbb960c2b0c77fe567c68010e06c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "5f3e5dc3ba365a4443ff58752ea519cf00371c392141c92f9051a5cc5b9c022a",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c",
+      "bf5e8df0252e4b3589308a538d455995a3bd443677567cc93eaf3a661a05479c"
+    ],
+    "transition": {
+      "ms": 5961,
+      "hover": true,
+      "serverFnCallsDuring": 0,
+      "fnsAfterHover": []
+    }
+  },
+  "listToDeck": {
+    "links": [
+      "/edit/untitled-20260913-tii2",
+      "/edit/untitled-20260913-tii2",
+      "/edit/gt-brand-mu05h5vq",
+      "/edit/gt-brand-mu05h5vq",
+      "/edit/editor-depth-09120307",
+      "/edit/editor-depth-09120307"
+    ],
+    "deckOpen": {
+      "href": "/edit/gt-brand-mu05h5vq",
+      "ms": 858
+    }
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "recipe": {
+    "materialId": "paper:liquid-metal",
+    "uniforms": {
+      "u_colorBack": "#000000",
+      "u_colorTint": "#ffffff",
+      "u_softness": 0.05,
+      "u_shiftRed": 0,
+      "u_shiftBlue": 0,
+      "u_contour": 0.6,
+      "u_repetition": 3,
+      "u_distortion": 0.07,
+      "u_angle": 70,
+      "u_scale": 1,
+      "u_shape": "none"
+    },
+    "size": [
+      3200,
+      1800
+    ],
+    "backend": "angle-metal",
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Max, Unspecified Version)",
+    "treatment": {
+      "kind": "two-tone",
+      "autocontrast": 0.5,
+      "black": 160,
+      "white": 250,
+      "gamma": 1.5,
+      "polarity": "dark-ground",
+      "cell": 2,
+      "bayer": 8,
+      "resampler": "lanczos3"
+    },
+    "anchors": [
+      4000,
+      5500,
+      7000
+    ]
+  },
+  "frames": [
+    {
+      "anchor": 4000,
+      "litFraction": 0.3006,
+      "darkBytes": 14428,
+      "lightBytes": 14419
+    },
+    {
+      "anchor": 5500,
+      "litFraction": 0.3075,
+      "darkBytes": 14736,
+      "lightBytes": 14721
+    },
+    {
+      "anchor": 7000,
+      "litFraction": 0.2917,
+      "darkBytes": 14480,
+      "lightBytes": 14471
+    }
+  ],
+  "og": {
+    "cells": [
+      120,
+      63
+    ],
+    "cellPx": 10,
+    "litFraction": 0.2217,
+    "bytes": 1956
+  }
+}

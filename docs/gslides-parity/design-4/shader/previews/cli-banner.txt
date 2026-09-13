@@ -1,0 +1,4 @@
+ ██████████████   Turboslide 0.1.0
+ █     ██     █   decks/gt-brand · revision 31 · 85 slides
+ █     ██     █   effects backend: native (crates/turboslide-native 0.1.0)
+ █▄▄▄▄▄██▄▄▄▄▄█   https://turboslide.vercel.app

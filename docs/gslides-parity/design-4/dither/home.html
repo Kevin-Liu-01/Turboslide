@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turboslide</title>
+<meta name="description" content="An agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export.">
+<meta name="theme-color" content="#070707">
+<meta property="og:site_name" content="Turboslide">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Turboslide">
+<meta property="og:description" content="An agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export.">
+<meta property="og:image" content="previews/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Turboslide mark and name on a plate cut from a two tone dithered liquid metal frame">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<!--
+  /home mockup, design-4 proposal 1 (the dither is the identity). Static HTML with the real chrome
+  tokens (packages/chrome/src/tokens.css by relative path), the studio's Inter face by relative
+  path, the fifteen README screenshots under docs/readme by relative path, and the hero twins in
+  ./assets. Open it from a local server at the repository root, or in Chrome started with
+  --allow-file-access-from-files, so the font and the token file load from disk. The theme boot
+  below is the product's rule: gt-theme in localStorage, default dark, prefers-color-scheme never
+  consulted. Copy: research-4 report 05 section 6, with the numbers of reports 03 and 04.
+-->
+<script>
+(function(){try{var t=localStorage.getItem('gt-theme');document.documentElement.dataset.theme=(t==='light'||t==='dark')?t:'dark'}catch(e){document.documentElement.dataset.theme='dark'}
+var m=document.querySelector('meta[name=theme-color]');if(m)m.content=document.documentElement.dataset.theme==='dark'?'#070707':'#ffffff'})();
+</script>
+<link rel="stylesheet" href="../../../../packages/chrome/src/tokens.css">
+<style>
+/* The one face, the studio's file (packages/fonts/src/inter.css, same descriptor). */
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('../../../../packages/fonts/assets/InterVariable.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: italic; font-weight: 100 900; font-display: swap; src: url('../../../../packages/fonts/assets/InterVariable-Italic.woff2') format('woff2'); }
+
+/* The identity tokens this proposal adds (--ts-). Every --pt- token keeps its name and value;
+   these read them and never redefine them. */
+:root {
+  --ts-cell: 2px;               /* one dither cell at 1x; twins are 1600 by 900 with 2 px cells */
+  --ts-mark: 24px;              /* the title row mark (solid below 48 px, cellular from 48 px) */
+  --ts-h1: 56px;                /* the /home ladder, scaled from the sheet's LADDER, weight 500 */
+  --ts-h2: 32px;
+  --ts-h3: 20px;
+  --ts-lead: 20px;
+  --ts-body: 15px;
+  --ts-small: 13px;
+  --ts-hero-hold: 4000ms;       /* a hero frame holds this long; the change between frames is a cut */
+  --ts-dur-cut: 0ms;            /* a cut between two 1-bit frames never fades (a fade makes gray) */
+  --ts-plate: var(--pt-paper);  /* the plate is the ground showing through; it has no rule */
+  --ts-hero-1: url('assets/hero-1-light.png');
+  --ts-hero-2: url('assets/hero-2-light.png');
+  --ts-hero-3: url('assets/hero-3-light.png');
+}
+:root[data-theme='dark'] {
+  --ts-hero-1: url('assets/hero-1-dark.png');
+  --ts-hero-2: url('assets/hero-2-dark.png');
+  --ts-hero-3: url('assets/hero-3-dark.png');
+}
+@media (prefers-reduced-motion: reduce) { :root { --ts-hero-hold: 0ms; } }
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body { background: var(--pt-paper); color: var(--pt-ink); font: var(--ts-body)/1.55 var(--pt-text); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+h1, h2, h3 { font-family: var(--pt-display); font-feature-settings: 'cv11', 'ss01'; font-weight: 500; margin: 0; text-wrap: balance; }
+h1 { font-size: var(--ts-h1); line-height: 1.02; letter-spacing: -0.025em; }
+h2 { font-size: var(--ts-h2); line-height: 1.1; letter-spacing: -0.025em; }
+h3 { font-size: var(--ts-h3); line-height: 1.25; letter-spacing: -0.01em; }
+p { margin: 0; }
+.lead { font-size: var(--ts-lead); line-height: 1.45; color: var(--pt-ink); }
+.muted { color: var(--pt-ink-2); }
+.small { font-size: var(--ts-small); line-height: 1.5; }
+.num { font-variant-numeric: tabular-nums; }
+code, .mono { font-family: var(--pt-mono); font-size: 13px; }
+.rail { max-width: var(--pt-rail); margin: 0 auto; padding: 0 24px; min-width: 0; }
+section { border-bottom: 1px solid var(--pt-hair); }
+.band { padding: 72px 0; }
+.band-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px 72px; align-items: end; margin-bottom: 40px; }
+.band-head .lead { color: var(--pt-ink-2); }
+.only-light { display: block; } .only-dark { display: none; }
+:root[data-theme='dark'] .only-light { display: none; } :root[data-theme='dark'] .only-dark { display: block; }
+.dither { image-rendering: pixelated; }
+
+/* ---- the navigation: 56 px, one rule under it; the lockup is the 16 px solid mark and the word ---- */
+.nav { height: 56px; border-bottom: 1px solid var(--pt-hair); }
+.nav .rail { height: 100%; display: flex; align-items: center; gap: 24px; }
+.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--pt-ink); font-family: var(--pt-display); font-feature-settings: 'cv11', 'ss01'; font-weight: 500; font-size: 22px; letter-spacing: -0.01em; }
+.brand svg { display: block; width: 16px; height: 16px; fill: currentColor; }
+.nav-links { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.nav-links a.pt-ib { text-decoration: none; }
+
+/* ---- the hero: a 1600 by 900 two tone twin shown at its own cells, the plate lower left ---- */
+.hero { position: relative; height: 640px; overflow: hidden; background: var(--pt-paper); }
+.hero-frame { position: absolute; inset: 0; background-repeat: no-repeat; background-position: center 38%; background-size: 1600px 900px; image-rendering: pixelated; opacity: 0; transition: none; }
+.hero-frame.is-on { opacity: 1; }
+.hero-frame[data-frame='1'] { background-image: var(--ts-hero-1); }
+.hero-frame[data-frame='2'] { background-image: var(--ts-hero-2); }
+.hero-frame[data-frame='3'] { background-image: var(--ts-hero-3); }
+.hero .rail { position: relative; height: 100%; }
+.plate { position: absolute; left: 24px; bottom: 56px; max-width: 740px; background: var(--ts-plate); padding: 28px 32px 28px; }
+.plate h1 { margin-bottom: 14px; }
+.plate .lead { max-width: 640px; }
+.cta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.cta .pt-ib { height: 40px; padding: 0 16px; font-size: 14px; text-decoration: none; border-color: var(--pt-hair); }
+.cta .pt-ib:hover { border-color: var(--pt-ink); }
+.cta .pt-ib.is-solid, .cta .pt-ib.is-solid:hover { border-color: var(--pt-ink); }
+.facts { margin-top: 18px; color: var(--pt-ink-2); font-size: var(--ts-small); }
+.hero-credit { position: absolute; right: 24px; bottom: 16px; font-size: 12px; color: var(--pt-ink-2); background: var(--pt-paper); padding: 2px 6px; }
+
+/* ---- the numbers strip: six cells, rules drawn once ---- */
+.numbers { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; background: var(--pt-hair-soft); border-left: 1px solid var(--pt-hair-soft); border-right: 1px solid var(--pt-hair-soft); }
+.numbers > div { background: var(--pt-paper); padding: 28px 24px; }
+.numbers b { display: block; font-family: var(--pt-display); font-feature-settings: 'cv11', 'ss01', 'tnum'; font-weight: 500; font-size: 32px; letter-spacing: -0.025em; line-height: 1; margin-bottom: 10px; }
+.numbers span { color: var(--pt-ink-2); font-size: var(--ts-small); line-height: 1.5; display: block; }
+
+/* ---- the product shot and the editor band ---- */
+.shot { border: 1px solid var(--pt-edge); background: var(--pt-panel-ink); }
+.shot img { display: block; width: 100%; height: auto; }
+.two { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 56px 72px; align-items: start; }
+.claims { display: grid; gap: 24px; }
+.claims p { padding-top: 16px; border-top: 1px solid var(--pt-hair-soft); }
+.claims p:first-child { border-top: 0; padding-top: 0; }
+
+/* ---- the feature grid: one seam between cells, never two ---- */
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--pt-hair-soft); border: 1px solid var(--pt-hair); }
+.card { background: var(--pt-paper); padding: 0 0 24px; display: flex; flex-direction: column; }
+.card .fig { aspect-ratio: 16 / 10; overflow: hidden; border-bottom: 1px solid var(--pt-hair-soft); background: var(--pt-plate); display: flex; align-items: center; justify-content: center; }
+.card .fig img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.card .fig svg { width: 28px; height: 28px; fill: var(--pt-ink-2); }
+.card h3 { padding: 20px 24px 8px; }
+.card p { padding: 0 24px; color: var(--pt-ink-2); }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 24px; }
+.pair figure { margin: 0; }
+.pair figcaption { padding-top: 10px; color: var(--pt-ink-2); font-size: var(--ts-small); }
+
+/* ---- dithers and shaders ---- */
+.pipe { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; background: var(--pt-hair-soft); border: 1px solid var(--pt-hair); margin-top: 24px; }
+.pipe > div { background: var(--pt-paper); padding: 0 0 16px; }
+.pipe .win { height: 180px; overflow: hidden; border-bottom: 1px solid var(--pt-hair-soft); }
+.pipe .win img { display: block; width: 100%; height: 180px; object-fit: cover; }
+.pipe .win.twin { background: var(--ts-hero-3) no-repeat; background-size: 1600px 900px; background-position: -640px -300px; image-rendering: pixelated; }
+.pipe .win.mark { display: flex; align-items: center; justify-content: center; }
+.pipe .win.mark svg { width: 128px; height: 128px; fill: var(--pt-ink); }
+.pipe .cap { padding: 14px 16px 0; color: var(--pt-ink-2); font-size: var(--ts-small); }
+
+/* ---- why it is fast: rows ---- */
+.rows { border-top: 1px solid var(--pt-hair); }
+.row { display: grid; grid-template-columns: 240px minmax(0, 1fr) 320px; gap: 24px 48px; padding: 22px 0; border-bottom: 1px solid var(--pt-hair-soft); align-items: start; }
+.row h3 { font-size: 17px; }
+.row p { color: var(--pt-ink-2); }
+.row .n { font-family: var(--pt-display); font-feature-settings: 'cv11', 'ss01', 'tnum'; font-weight: 500; font-size: 17px; line-height: 1.35; letter-spacing: -0.01em; color: var(--pt-ink); }
+.row .f { display: block; margin-top: 8px; font-family: var(--pt-mono); font-size: 12px; color: var(--pt-ink-2); word-break: break-word; }
+.closing { padding-top: 28px; max-width: 900px; }
+
+/* ---- for agents: the contract in mono, hairline boxes, as an instrument ---- */
+.agent { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 20px 40px; padding: 20px 0; border-bottom: 1px solid var(--pt-hair-soft); align-items: start; }
+.agent b { font-weight: 500; font-size: 15px; }
+.agent p { color: var(--pt-ink-2); margin-bottom: 10px; }
+.cmd { display: block; overflow-wrap: anywhere; font-family: var(--pt-mono); font-size: 13px; line-height: 1.55; border: 1px solid var(--pt-hair); background: var(--pt-plate); padding: 10px 12px; white-space: pre-wrap; word-break: break-word; color: var(--pt-ink); }
+
+/* ---- compared with Google Slides ---- */
+table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+th, td { text-align: left; vertical-align: top; padding: 14px 20px 14px 0; border-bottom: 1px solid var(--pt-hair-soft); font-size: 15px; line-height: 1.5; }
+th { font-weight: 500; color: var(--pt-ink); border-bottom: 1px solid var(--pt-hair); }
+td:first-child { color: var(--pt-ink); font-weight: 500; width: 18%; }
+td:nth-child(2) { color: var(--pt-ink-2); width: 38%; }
+td:nth-child(3) { color: var(--pt-ink); }
+
+/* ---- footer ---- */
+footer { padding: 56px 0 64px; }
+.foot { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; }
+.foot h3 { font-size: 15px; margin-bottom: 12px; }
+.foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.foot a { color: var(--pt-ink-2); text-decoration: none; }
+.foot a:hover { color: var(--pt-ink); text-decoration: underline; text-underline-offset: 3px; }
+.foot-line { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--pt-hair-soft); display: flex; justify-content: space-between; gap: 24px; color: var(--pt-ink-2); font-size: var(--ts-small); flex-wrap: wrap; }
+.foot-line .brand { font-size: 15px; }
+
+@media (max-width: 1100px) {
+  .row { grid-template-columns: 200px minmax(0, 1fr); }
+  .row .n { grid-column: 2; }
+  .numbers { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  :root { --ts-h1: 40px; --ts-h2: 26px; --ts-lead: 17px; }
+  .band { padding: 48px 0; }
+  .band-head, .two, .pair, .foot { grid-template-columns: 1fr; }
+  .grid, .pipe { grid-template-columns: 1fr; }
+  .hero { height: 560px; }
+  .hero-frame { background-position: 40% 30%; }
+  .plate { left: 0; right: 0; bottom: 0; max-width: none; padding: 24px 24px 28px; }
+  .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .row { grid-template-columns: 1fr; }
+  .row .n { grid-column: 1; }
+  .agent { grid-template-columns: 1fr; }
+  .nav-links > a.pt-ib:not(.is-solid) { display: none; }
+  .hero-credit { display: none; }
+  .hero { height: 520px; }
+  .numbers b { font-size: 26px; }
+  td:nth-child(2), td:first-child { width: auto; }
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="rail">
+    <a class="brand" href="/home" aria-label="Turboslide home" title="Turboslide. The product page.">
+      <svg viewBox="0 0 16 16" aria-hidden="true" shape-rendering="crispEdges"><path fill-rule="evenodd" d="M0 0h16v16H0z M2 8h8v6H2z"/></svg>
+      <span>Turboslide</span>
+    </a>
+    <nav class="nav-links" aria-label="Site">
+      <a class="pt-ib" href="https://turboslide.vercel.app/decks" title="Your presentations. Every presentation on this Turboslide."><span class="pt-lb">Your presentations</span></a>
+      <a class="pt-ib" href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md" title="Documentation. The index of the documentation."><span class="pt-lb">Documentation</span></a>
+      <a class="pt-ib" href="#agents" title="For agents. The CLI, MCP, HTTP and window transports."><span class="pt-lb">For agents</span></a>
+      <a class="pt-ib" href="https://github.com/Kevin-Liu-01/Turboslide" title="GitHub. The repository."><span class="pt-lb">GitHub</span></a>
+      <button class="pt-ib" type="button" id="theme" title="Appearance. Switch between the light and the dark appearance."><span class="pt-lb" data-light="Dark" data-dark="Light">Light</span></button>
+      <a class="pt-ib is-solid" href="https://turboslide.vercel.app/new" title="New Presentation. Opens a fresh presentation; no account needed.">New Presentation</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" aria-labelledby="h1">
+  <div class="hero-frame is-on" data-frame="1" aria-hidden="true"></div>
+  <div class="hero-frame" data-frame="2" aria-hidden="true"></div>
+  <div class="hero-frame" data-frame="3" aria-hidden="true"></div>
+  <div class="rail">
+    <div class="plate">
+      <h1 id="h1">Turboslide</h1>
+      <p class="lead">A slides editor with Google Slides' menus, toolbar and shortcuts, a canvas on every slide, and a PowerPoint export that matches the screen pixel for pixel.</p>
+      <div class="cta">
+        <a class="pt-ib is-solid" href="https://turboslide.vercel.app/new" title="New Presentation. Opens a fresh presentation; the store creates it on the first edit.">New Presentation</a>
+        <a class="pt-ib" href="https://turboslide.vercel.app/deck/gt-brand" title="Open the GT Deck. The 85 slide brand deck in the viewer.">Open the GT Deck</a>
+        <a class="pt-ib" href="https://github.com/Kevin-Liu-01/Turboslide" title="GitHub. The repository, MIT licence.">GitHub</a>
+      </div>
+      <p class="facts">No account. Open source under the MIT licence. Hosted at turboslide.vercel.app.</p>
+    </div>
+    <span class="hero-credit">Material: liquid metal, Paper Shaders, three frames through the two tone screen</span>
+  </div>
+</section>
+
+<section aria-label="Numbers">
+  <div class="rail">
+    <div class="numbers">
+      <div><b class="num">105</b><span>actions, one table for the click, the CLI, MCP and the API</span></div>
+      <div><b class="num">21</b><span>layouts, Google's eleven first and the ten GT layouts after them</span></div>
+      <div><b class="num">135</b><span>shape presets drawn from the PowerPoint geometry</span></div>
+      <div><b class="num">0.003 %</b><span>worst page mismatch on the 170 page export of the GT deck</span></div>
+      <div><b class="num">17</b><span>shader materials with typed controls</span></div>
+      <div><b>MIT</b><span>licence, with the code on GitHub</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="h-editor">
+  <div class="rail">
+    <div class="shot">
+      <img class="only-dark" src="../../../readme/01-new-presentation.jpg" width="2880" height="1800" alt="The fresh Untitled presentation on the Title slide: the title row, the menu bar, the toolbar, the filmstrip and the speaker notes pane, in the dark appearance">
+      <img class="only-light" src="../../../readme/13-editor-light.jpg" width="2880" height="1800" alt="The editor on a content slide in the light appearance">
+    </div>
+    <div class="two" style="margin-top:56px">
+      <div>
+        <h2 id="h-editor">Google Slides' frame, on every slide a canvas</h2>
+        <div class="shot" style="margin-top:24px"><img src="../../../readme/06-canvas-rotation.jpg" width="2880" height="1800" alt="Rotation by the handle with the degree readout, beside a chart and a table"></div>
+      </div>
+      <div class="claims lead">
+        <p>The same menus, toolbar, filmstrip, speaker notes and right click menus, in Google's order, with Google's shortcuts. An item Turboslide does not have is in its place, disabled, with one sentence on what to do instead.</p>
+        <p>Every object drags, resizes, rotates, groups and reorders. The first drag on a slide converts it to a canvas without moving a pixel, and one undo puts the layout back.</p>
+        <p>One look: Inter, paper and ink, one pixel rules, a light and a dark appearance that the stage, the thumbnails, the slideshow and every download follow.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="h-features">
+  <div class="rail">
+    <div class="band-head">
+      <h2 id="h-features">What it does</h2>
+      <p class="lead">Twelve groups of features, in the order the README lists them. Every card is one thing the editor does today.</p>
+    </div>
+    <div class="grid">
+      <article class="card"><div class="fig"><img src="../../../readme/02-file-menu.jpg" alt="The File menu open with its Download submenu"></div><h3>The Google Slides shell</h3><p>Ten menus, a toolbar whose tail follows the selection, the filmstrip, the notes pane, the right panels and the bottom bar. Search the menus finds every item by name, and every control carries its name and its key.</p></article>
+      <article class="card"><div class="fig"><img src="../../../readme/07-canvas-snap-guides.jpg" alt="A group dragged into alignment with a snap guide"></div><h3>The canvas</h3><p>Drag, resize and rotate with live readouts. Snap guides, rulers, guides, zoom to 1600 percent, marquee selection, z order, groups, crop mode and connectors that follow the shape they are attached to.</p></article>
+      <article class="card"><div class="fig"><img src="../../../readme/04-layout-grid.jpg" alt="The layout grid with Google's eleven layouts and the ten GT layouts"></div><h3>Layouts and themes</h3><p>Twenty one layouts in one grid: Google's eleven and the ten GT layouts. Apply layout keeps the content and never refuses. A new presentation opens on a Title slide with four starter pictures already in it.</p></article>
+      <article class="card"><div class="fig"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M6 4.75A.75.75 0 0 1 6.75 4h10.5a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 4.75ZM6 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H6.75A.75.75 0 0 1 6 10Zm0 5.25a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H6.75a.75.75 0 0 1-.75-.75ZM1.99 4.75a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1v-.01ZM1.99 15.25a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1v-.01ZM1.99 10a1 1 0 0 1 1-1H3a1 1 0 0 1 1 1v.01a1 1 0 0 1-1 1h-.01a1 1 0 0 1-1-1V10Z" clip-rule="evenodd"/></svg></div><h3>Text</h3><p>Bold, italic, underline, strikethrough, super and subscript, colour and highlight on a range. Lists with nine bullet and six numbering presets, line spacing, columns, indents, alignment, autofit, find and replace across the deck, links to a URL or a slide.</p></article>
+      <article class="card"><div class="fig"><img src="../../../readme/08-format-options.jpg" alt="Format options on a rotated rectangle"></div><h3>Objects, pictures and materials</h3><p>135 shapes in Google's four categories, seven line kinds with ten end decorations, fills, borders, dashes and shadows. Pictures upload, crop, mask to any shape and adjust. Seventeen shader materials play live on the stage, and a photograph becomes a two tone dither in one step.</p></article>
+      <article class="card"><div class="fig"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M4.25 2A2.25 2.25 0 0 0 2 4.25v2.5A2.25 2.25 0 0 0 4.25 9h2.5A2.25 2.25 0 0 0 9 6.75v-2.5A2.25 2.25 0 0 0 6.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 2 13.25v2.5A2.25 2.25 0 0 0 4.25 18h2.5A2.25 2.25 0 0 0 9 15.75v-2.5A2.25 2.25 0 0 0 6.75 11h-2.5Zm9-9A2.25 2.25 0 0 0 11 4.25v2.5A2.25 2.25 0 0 0 13.25 9h2.5A2.25 2.25 0 0 0 18 6.75v-2.5A2.25 2.25 0 0 0 15.75 2h-2.5Zm0 9A2.25 2.25 0 0 0 11 13.25v2.5A2.25 2.25 0 0 0 13.25 18h2.5A2.25 2.25 0 0 0 18 15.75v-2.5A2.25 2.25 0 0 0 15.75 11h-2.5Z" clip-rule="evenodd"/></svg></div><h3>Tables</h3><p>A hover grid up to 20 by 20. Insert and delete rows and columns, merge and unmerge, distribute, header rows, cell fills and borders. Tab moves between cells. The editable export writes a real PowerPoint table.</p></article>
+      <article class="card"><div class="fig"><img src="../../../readme/03-insert-menu.jpg" alt="The Insert menu with the Chart submenu"></div><h3>Charts and diagrams</h3><p>Bar, column, line and pie charts with a data grid in the panel, up to 12 categories and 6 series. Six diagram templates in three styles insert as a group you edit like any other.</p></article>
+      <article class="card"><div class="fig"><img src="../../../readme/09-download-dialog.jpg" alt="The Download dialog with Perfect and Editable text"></div><h3>Exports</h3><p>Perfect PowerPoint by default: each page is the rendered slide over searchable text, checked against the screen before the file is written. Editable text PowerPoint, PDF, a single web page, plain text, JPEG and PNG beside it.</p></article>
+      <article class="card"><div class="fig"><img src="../../../readme/11-presenter-console.jpg" alt="Presenter view with the timer, the notes and the previews"></div><h3>Present</h3><p>Slideshow from the current slide, Presenter view in a second window with the timer, the notes and the next slide, Google's presenting keys, a laser pointer, and a present link you can send.</p></article>
+      <article class="card"><div class="fig"><img src="../../../readme/14-book-view.jpg" alt="The viewer's book view"></div><h3>The viewer and sharing</h3><p>A read only link with Slide, Grid and Book views, an embed for any site, and a Share dialog with the view, present and edit links. Skipped slides and speaker notes stay out of what you share unless you ask.</p></article>
+      <article class="card"><div class="fig"><img src="../../../readme/10-decks-home.jpg" alt="The home page at /decks with cards"></div><h3>Home and files</h3><p>Recent presentations as cards with thumbnails, Make a copy, Rename, Move to trash with Undo, Import slides from another presentation, Version history with named versions, and a bundle you can download and upload.</p></article>
+      <article class="card"><div class="fig"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd"/></svg></div><h3>Quality gates</h3><p>Fifty five grammar rules check overflow, contrast, type sizes and copy in both themes, with Fix for the mechanical ones. A 25 step acceptance chain and a 2,100 row parity audit run before anything ships.</p></article>
+    </div>
+    <div class="pair">
+      <figure><div class="shot"><img src="../../../readme/05-filmstrip-menu.jpg" width="2880" height="1800" alt="The filmstrip's right click menu"></div><figcaption>The filmstrip's right click menu, with Google's rows.</figcaption></figure>
+      <figure><div class="shot"><img src="../../../readme/15-grid-view.jpg" width="2400" height="1500" alt="The viewer's grid view"></div><figcaption>The viewer's grid view of the GT deck.</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="h-dither">
+  <div class="rail">
+    <div class="band-head">
+      <h2 id="h-dither">Dithers and shaders, from the deck to the interface</h2>
+      <p class="lead">The GT brand deck draws its photographs as two tone dithers: an eight by eight Bayer screen at two pixel cells, cut from a toned and cropped picture, with a light twin that is the exact inverse of the dark one.</p>
+    </div>
+    <div class="two">
+      <div class="shot"><img src="../../../readme/12-slideshow-dither.jpg" width="2400" height="1500" alt="The Blue Marble slide of the GT deck in the slideshow, a two tone dither with its plate"></div>
+      <div class="claims lead">
+        <p>The same pipeline runs on any photograph or on a frozen frame of a shader material, reports how clear the plate stays, and is written three times with one arithmetic: in TypeScript, in a Rust addon for Node and in a Rust module for the browser, with a test that proves the three light the same cells.</p>
+        <p>Seventeen Paper Shaders materials play live on the stage with typed controls and the GT palette presets, and every one is captured as frozen frames for the thumbnails and the exports.</p>
+        <p class="muted small">The Blue Marble slide of the GT deck in the slideshow, a two tone dither with its plate.</p>
+      </div>
+    </div>
+    <div class="pipe">
+      <div><div class="win"><img src="assets/hero-frame-continuous.jpg" alt="The liquid metal material, a continuous frame at 7.0 seconds"></div><p class="cap">1. The material, frozen at 7.0 seconds of its clock and captured at 3200 by 1800.</p></div>
+      <div><div class="win twin dither" role="img" aria-label="The same frame as a two tone dither, shown at one cell per two pixels"></div><p class="cap">2. The frame through the two tone screen: black point 160, white point 250, gamma 1.5, 29 percent of cells lit.</p></div>
+      <div><div class="win mark"><svg viewBox="0 0 64 64" aria-label="The Turboslide mark" role="img" shape-rendering="crispEdges"><rect x="0" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="6" y="0" width="1" height="1"/><rect x="8" y="0" width="1" height="1"/><rect x="10" y="0" width="1" height="1"/><rect x="12" y="0" width="1" height="1"/><rect x="14" y="0" width="1" height="1"/><rect x="16" y="0" width="1" height="1"/><rect x="18" y="0" width="1" height="1"/><rect x="20" y="0" width="1" height="1"/><rect x="22" y="0" width="1" height="1"/><rect x="24" y="0" width="1" height="1"/><rect x="26" y="0" width="1" height="1"/><rect x="28" y="0" width="1" height="1"/><rect x="30" y="0" width="1" height="1"/><rect x="32" y="0" width="1" height="1"/><rect x="34" y="0" width="1" height="1"/><rect x="36" y="0" width="1" height="1"/><rect x="38" y="0" width="1" height="1"/><rect x="40" y="0" width="1" height="1"/><rect x="42" y="0" width="1" height="1"/><rect x="44" y="0" width="1" height="1"/><rect x="46" y="0" width="1" height="1"/><rect x="48" y="0" width="1" height="1"/><rect x="50" y="0" width="1" height="1"/><rect x="52" y="0" width="1" height="1"/><rect x="54" y="0" width="1" height="1"/><rect x="56" y="0" width="1" height="1"/><rect x="58" y="0" width="1" height="1"/><rect x="60" y="0" width="1" height="1"/><rect x="62" y="0" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="7" y="1" width="1" height="1"/><rect x="9" y="1" width="1" height="1"/><rect x="11" y="1" width="1" height="1"/><rect x="13" y="1" width="1" height="1"/><rect x="15" y="1" width="1" height="1"/><rect x="17" y="1" width="1" height="1"/><rect x="19" y="1" width="1" height="1"/><rect x="21" y="1" width="1" height="1"/><rect x="23" y="1" width="1" height="1"/><rect x="25" y="1" width="1" height="1"/><rect x="27" y="1" width="1" height="1"/><rect x="29" y="1" width="1" height="1"/><rect x="31" y="1" width="1" height="1"/><rect x="33" y="1" width="1" height="1"/><rect x="35" y="1" width="1" height="1"/><rect x="37" y="1" width="1" height="1"/><rect x="39" y="1" width="1" height="1"/><rect x="41" y="1" width="1" height="1"/><rect x="43" y="1" width="1" height="1"/><rect x="45" y="1" width="1" height="1"/><rect x="49" y="1" width="1" height="1"/><rect x="51" y="1" width="1" height="1"/><rect x="53" y="1" width="1" height="1"/><rect x="57" y="1" width="1" height="1"/><rect x="61" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="10" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/><rect x="14" y="2" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="18" y="2" width="1" height="1"/><rect x="20" y="2" width="1" height="1"/><rect x="22" y="2" width="1" height="1"/><rect x="24" y="2" width="1" height="1"/><rect x="26" y="2" width="1" height="1"/><rect x="28" y="2" width="1" height="1"/><rect x="30" y="2" width="1" height="1"/><rect x="32" y="2" width="1" height="1"/><rect x="34" y="2" width="1" height="1"/><rect x="36" y="2" width="1" height="1"/><rect x="38" y="2" width="1" height="1"/><rect x="40" y="2" width="1" height="1"/><rect x="42" y="2" width="1" height="1"/><rect x="44" y="2" width="1" height="1"/><rect x="46" y="2" width="1" height="1"/><rect x="48" y="2" width="1" height="1"/><rect x="50" y="2" width="1" height="1"/><rect x="52" y="2" width="1" height="1"/><rect x="54" y="2" width="1" height="1"/><rect x="56" y="2" width="1" height="1"/><rect x="58" y="2" width="1" height="1"/><rect x="60" y="2" width="1" height="1"/><rect x="62" y="2" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="7" y="3" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="11" y="3" width="1" height="1"/><rect x="15" y="3" width="1" height="1"/><rect x="17" y="3" width="1" height="1"/><rect x="19" y="3" width="1" height="1"/><rect x="23" y="3" width="1" height="1"/><rect x="25" y="3" width="1" height="1"/><rect x="27" y="3" width="1" height="1"/><rect x="31" y="3" width="1" height="1"/><rect x="33" y="3" width="1" height="1"/><rect x="35" y="3" width="1" height="1"/><rect x="39" y="3" width="1" height="1"/><rect x="41" y="3" width="1" height="1"/><rect x="43" y="3" width="1" height="1"/><rect x="47" y="3" width="1" height="1"/><rect x="51" y="3" width="1" height="1"/><rect x="55" y="3" width="1" height="1"/><rect x="59" y="3" width="1" height="1"/><rect x="0" y="4" width="1" height="1"/><rect x="2" y="4" width="1" height="1"/><rect x="4" y="4" width="1" height="1"/><rect x="6" y="4" width="1" height="1"/><rect x="8" y="4" width="1" height="1"/><rect x="10" y="4" width="1" height="1"/><rect x="12" y="4" width="1" height="1"/><rect x="14" y="4" width="1" height="1"/><rect x="16" y="4" width="1" height="1"/><rect x="18" y="4" width="1" height="1"/><rect x="20" y="4" width="1" height="1"/><rect x="22" y="4" width="1" height="1"/><rect x="24" y="4" width="1" height="1"/><rect x="26" y="4" width="1" height="1"/><rect x="28" y="4" width="1" height="1"/><rect x="30" y="4" width="1" height="1"/><rect x="32" y="4" width="1" height="1"/><rect x="34" y="4" width="1" height="1"/><rect x="36" y="4" width="1" height="1"/><rect x="38" y="4" width="1" height="1"/><rect x="40" y="4" width="1" height="1"/><rect x="42" y="4" width="1" height="1"/><rect x="44" y="4" width="1" height="1"/><rect x="46" y="4" width="1" height="1"/><rect x="48" y="4" width="1" height="1"/><rect x="50" y="4" width="1" height="1"/><rect x="52" y="4" width="1" height="1"/><rect x="54" y="4" width="1" height="1"/><rect x="56" y="4" width="1" height="1"/><rect x="58" y="4" width="1" height="1"/><rect x="60" y="4" width="1" height="1"/><rect x="62" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="7" y="5" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/><rect x="15" y="5" width="1" height="1"/><rect x="17" y="5" width="1" height="1"/><rect x="19" y="5" width="1" height="1"/><rect x="21" y="5" width="1" height="1"/><rect x="23" y="5" width="1" height="1"/><rect x="25" y="5" width="1" height="1"/><rect x="27" y="5" width="1" height="1"/><rect x="29" y="5" width="1" height="1"/><rect x="31" y="5" width="1" height="1"/><rect x="33" y="5" width="1" height="1"/><rect x="35" y="5" width="1" height="1"/><rect x="37" y="5" width="1" height="1"/><rect x="39" y="5" width="1" height="1"/><rect x="41" y="5" width="1" height="1"/><rect x="43" y="5" width="1" height="1"/><rect x="45" y="5" width="1" height="1"/><rect x="47" y="5" width="1" height="1"/><rect x="49" y="5" width="1" height="1"/><rect x="51" y="5" width="1" height="1"/><rect x="53" y="5" width="1" height="1"/><rect x="55" y="5" width="1" height="1"/><rect x="57" y="5" width="1" height="1"/><rect x="61" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="2" y="6" width="1" height="1"/><rect x="4" y="6" width="1" height="1"/><rect x="6" y="6" width="1" height="1"/><rect x="8" y="6" width="1" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="12" y="6" width="1" height="1"/><rect x="14" y="6" width="1" height="1"/><rect x="16" y="6" width="1" height="1"/><rect x="18" y="6" width="1" height="1"/><rect x="20" y="6" width="1" height="1"/><rect x="22" y="6" width="1" height="1"/><rect x="24" y="6" width="1" height="1"/><rect x="26" y="6" width="1" height="1"/><rect x="28" y="6" width="1" height="1"/><rect x="30" y="6" width="1" height="1"/><rect x="32" y="6" width="1" height="1"/><rect x="34" y="6" width="1" height="1"/><rect x="36" y="6" width="1" height="1"/><rect x="38" y="6" width="1" height="1"/><rect x="40" y="6" width="1" height="1"/><rect x="42" y="6" width="1" height="1"/><rect x="44" y="6" width="1" height="1"/><rect x="46" y="6" width="1" height="1"/><rect x="48" y="6" width="1" height="1"/><rect x="50" y="6" width="1" height="1"/><rect x="52" y="6" width="1" height="1"/><rect x="54" y="6" width="1" height="1"/><rect x="56" y="6" width="1" height="1"/><rect x="58" y="6" width="1" height="1"/><rect x="60" y="6" width="1" height="1"/><rect x="62" y="6" width="1" height="1"/><rect x="1" y="7" width="1" height="1"/><rect x="3" y="7" width="1" height="1"/><rect x="5" y="7" width="1" height="1"/><rect x="7" y="7" width="1" height="1"/><rect x="9" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="13" y="7" width="1" height="1"/><rect x="15" y="7" width="1" height="1"/><rect x="17" y="7" width="1" height="1"/><rect x="19" y="7" width="1" height="1"/><rect x="21" y="7" width="1" height="1"/><rect x="23" y="7" width="1" height="1"/><rect x="25" y="7" width="1" height="1"/><rect x="27" y="7" width="1" height="1"/><rect x="29" y="7" width="1" height="1"/><rect x="31" y="7" width="1" height="1"/><rect x="33" y="7" width="1" height="1"/><rect x="35" y="7" width="1" height="1"/><rect x="37" y="7" width="1" height="1"/><rect x="39" y="7" width="1" height="1"/><rect x="41" y="7" width="1" height="1"/><rect x="43" y="7" width="1" height="1"/><rect x="45" y="7" width="1" height="1"/><rect x="47" y="7" width="1" height="1"/><rect x="49" y="7" width="1" height="1"/><rect x="51" y="7" width="1" height="1"/><rect x="53" y="7" width="1" height="1"/><rect x="55" y="7" width="1" height="1"/><rect x="59" y="7" width="1" height="1"/><rect x="63" y="7" width="1" height="1"/><rect x="0" y="8" width="3" height="1"/><rect x="4" y="8" width="3" height="1"/><rect x="8" y="8" width="3" height="1"/><rect x="12" y="8" width="3" height="1"/><rect x="16" y="8" width="3" height="1"/><rect x="20" y="8" width="3" height="1"/><rect x="24" y="8" width="3" height="1"/><rect x="28" y="8" width="3" height="1"/><rect x="32" y="8" width="3" height="1"/><rect x="36" y="8" width="3" height="1"/><rect x="40" y="8" width="3" height="1"/><rect x="44" y="8" width="3" height="1"/><rect x="48" y="8" width="3" height="1"/><rect x="52" y="8" width="1" height="1"/><rect x="54" y="8" width="1" height="1"/><rect x="56" y="8" width="1" height="1"/><rect x="58" y="8" width="1" height="1"/><rect x="60" y="8" width="1" height="1"/><rect x="62" y="8" width="1" height="1"/><rect x="1" y="9" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="5" y="9" width="1" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="9" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="13" y="9" width="1" height="1"/><rect x="15" y="9" width="1" height="1"/><rect x="17" y="9" width="1" height="1"/><rect x="19" y="9" width="1" height="1"/><rect x="21" y="9" width="1" height="1"/><rect x="23" y="9" width="1" height="1"/><rect x="25" y="9" width="1" height="1"/><rect x="27" y="9" width="1" height="1"/><rect x="29" y="9" width="1" height="1"/><rect x="31" y="9" width="1" height="1"/><rect x="33" y="9" width="1" height="1"/><rect x="35" y="9" width="1" height="1"/><rect x="37" y="9" width="1" height="1"/><rect x="39" y="9" width="1" height="1"/><rect x="41" y="9" width="1" height="1"/><rect x="43" y="9" width="1" height="1"/><rect x="45" y="9" width="1" height="1"/><rect x="47" y="9" width="1" height="1"/><rect x="49" y="9" width="1" height="1"/><rect x="51" y="9" width="1" height="1"/><rect x="53" y="9" width="1" height="1"/><rect x="55" y="9" width="1" height="1"/><rect x="57" y="9" width="1" height="1"/><rect x="59" y="9" width="1" height="1"/><rect x="61" y="9" width="1" height="1"/><rect x="0" y="10" width="1" height="1"/><rect x="2" y="10" width="3" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="8" y="10" width="1" height="1"/><rect x="10" y="10" width="3" height="1"/><rect x="14" y="10" width="1" height="1"/><rect x="16" y="10" width="1" height="1"/><rect x="18" y="10" width="3" height="1"/><rect x="22" y="10" width="1" height="1"/><rect x="24" y="10" width="1" height="1"/><rect x="26" y="10" width="3" height="1"/><rect x="30" y="10" width="1" height="1"/><rect x="32" y="10" width="1" height="1"/><rect x="34" y="10" width="3" height="1"/><rect x="38" y="10" width="1" height="1"/><rect x="40" y="10" width="1" height="1"/><rect x="42" y="10" width="3" height="1"/><rect x="46" y="10" width="1" height="1"/><rect x="48" y="10" width="1" height="1"/><rect x="50" y="10" width="1" height="1"/><rect x="52" y="10" width="1" height="1"/><rect x="54" y="10" width="1" height="1"/><rect x="56" y="10" width="1" height="1"/><rect x="58" y="10" width="1" height="1"/><rect x="60" y="10" width="1" height="1"/><rect x="62" y="10" width="1" height="1"/><rect x="1" y="11" width="1" height="1"/><rect x="3" y="11" width="1" height="1"/><rect x="5" y="11" width="1" height="1"/><rect x="7" y="11" width="1" height="1"/><rect x="9" y="11" width="1" height="1"/><rect x="11" y="11" width="1" height="1"/><rect x="13" y="11" width="1" height="1"/><rect x="15" y="11" width="1" height="1"/><rect x="17" y="11" width="1" height="1"/><rect x="19" y="11" width="1" height="1"/><rect x="21" y="11" width="1" height="1"/><rect x="23" y="11" width="1" height="1"/><rect x="25" y="11" width="1" height="1"/><rect x="27" y="11" width="1" height="1"/><rect x="29" y="11" width="1" height="1"/><rect x="31" y="11" width="1" height="1"/><rect x="33" y="11" width="1" height="1"/><rect x="35" y="11" width="1" height="1"/><rect x="37" y="11" width="1" height="1"/><rect x="39" y="11" width="1" height="1"/><rect x="41" y="11" width="1" height="1"/><rect x="43" y="11" width="1" height="1"/><rect x="45" y="11" width="1" height="1"/><rect x="47" y="11" width="1" height="1"/><rect x="49" y="11" width="1" height="1"/><rect x="51" y="11" width="1" height="1"/><rect x="53" y="11" width="1" height="1"/><rect x="55" y="11" width="1" height="1"/><rect x="57" y="11" width="1" height="1"/><rect x="59" y="11" width="1" height="1"/><rect x="63" y="11" width="1" height="1"/><rect x="0" y="12" width="3" height="1"/><rect x="4" y="12" width="3" height="1"/><rect x="8" y="12" width="3" height="1"/><rect x="12" y="12" width="3" height="1"/><rect x="16" y="12" width="3" height="1"/><rect x="20" y="12" width="3" height="1"/><rect x="24" y="12" width="3" height="1"/><rect x="28" y="12" width="3" height="1"/><rect x="32" y="12" width="3" height="1"/><rect x="36" y="12" width="3" height="1"/><rect x="40" y="12" width="3" height="1"/><rect x="44" y="12" width="3" height="1"/><rect x="48" y="12" width="3" height="1"/><rect x="52" y="12" width="3" height="1"/><rect x="56" y="12" width="1" height="1"/><rect x="58" y="12" width="1" height="1"/><rect x="60" y="12" width="1" height="1"/><rect x="62" y="12" width="1" height="1"/><rect x="1" y="13" width="1" height="1"/><rect x="3" y="13" width="1" height="1"/><rect x="5" y="13" width="1" height="1"/><rect x="7" y="13" width="1" height="1"/><rect x="9" y="13" width="1" height="1"/><rect x="11" y="13" width="1" height="1"/><rect x="13" y="13" width="1" height="1"/><rect x="15" y="13" width="1" height="1"/><rect x="17" y="13" width="1" height="1"/><rect x="19" y="13" width="1" height="1"/><rect x="21" y="13" width="1" height="1"/><rect x="23" y="13" width="1" height="1"/><rect x="25" y="13" width="1" height="1"/><rect x="27" y="13" width="1" height="1"/><rect x="29" y="13" width="1" height="1"/><rect x="31" y="13" width="1" height="1"/><rect x="33" y="13" width="1" height="1"/><rect x="35" y="13" width="1" height="1"/><rect x="37" y="13" width="1" height="1"/><rect x="39" y="13" width="1" height="1"/><rect x="41" y="13" width="1" height="1"/><rect x="43" y="13" width="1" height="1"/><rect x="45" y="13" width="1" height="1"/><rect x="47" y="13" width="1" height="1"/><rect x="49" y="13" width="1" height="1"/><rect x="51" y="13" width="1" height="1"/><rect x="53" y="13" width="1" height="1"/><rect x="55" y="13" width="1" height="1"/><rect x="57" y="13" width="1" height="1"/><rect x="59" y="13" width="1" height="1"/><rect x="61" y="13" width="1" height="1"/><rect x="63" y="13" width="1" height="1"/><rect x="0" y="14" width="1" height="1"/><rect x="2" y="14" width="3" height="1"/><rect x="6" y="14" width="3" height="1"/><rect x="10" y="14" width="3" height="1"/><rect x="14" y="14" width="3" height="1"/><rect x="18" y="14" width="3" height="1"/><rect x="22" y="14" width="3" height="1"/><rect x="26" y="14" width="3" height="1"/><rect x="30" y="14" width="3" height="1"/><rect x="34" y="14" width="3" height="1"/><rect x="38" y="14" width="3" height="1"/><rect x="42" y="14" width="3" height="1"/><rect x="46" y="14" width="3" height="1"/><rect x="50" y="14" width="1" height="1"/><rect x="52" y="14" width="1" height="1"/><rect x="54" y="14" width="1" height="1"/><rect x="56" y="14" width="1" height="1"/><rect x="58" y="14" width="1" height="1"/><rect x="60" y="14" width="1" height="1"/><rect x="62" y="14" width="1" height="1"/><rect x="1" y="15" width="1" height="1"/><rect x="3" y="15" width="1" height="1"/><rect x="5" y="15" width="1" height="1"/><rect x="7" y="15" width="1" height="1"/><rect x="9" y="15" width="1" height="1"/><rect x="11" y="15" width="1" height="1"/><rect x="13" y="15" width="1" height="1"/><rect x="15" y="15" width="1" height="1"/><rect x="17" y="15" width="1" height="1"/><rect x="19" y="15" width="1" height="1"/><rect x="21" y="15" width="1" height="1"/><rect x="23" y="15" width="1" height="1"/><rect x="25" y="15" width="1" height="1"/><rect x="27" y="15" width="1" height="1"/><rect x="29" y="15" width="1" height="1"/><rect x="31" y="15" width="1" height="1"/><rect x="33" y="15" width="1" height="1"/><rect x="35" y="15" width="1" height="1"/><rect x="37" y="15" width="1" height="1"/><rect x="39" y="15" width="1" height="1"/><rect x="41" y="15" width="1" height="1"/><rect x="43" y="15" width="1" height="1"/><rect x="45" y="15" width="1" height="1"/><rect x="47" y="15" width="1" height="1"/><rect x="49" y="15" width="1" height="1"/><rect x="51" y="15" width="1" height="1"/><rect x="53" y="15" width="1" height="1"/><rect x="55" y="15" width="1" height="1"/><rect x="57" y="15" width="1" height="1"/><rect x="59" y="15" width="1" height="1"/><rect x="61" y="15" width="1" height="1"/><rect x="63" y="15" width="1" height="1"/><rect x="0" y="16" width="55" height="1"/><rect x="56" y="16" width="3" height="1"/><rect x="60" y="16" width="1" height="1"/><rect x="62" y="16" width="1" height="1"/><rect x="1" y="17" width="1" height="1"/><rect x="3" y="17" width="1" height="1"/><rect x="5" y="17" width="1" height="1"/><rect x="7" y="17" width="1" height="1"/><rect x="9" y="17" width="1" height="1"/><rect x="11" y="17" width="1" height="1"/><rect x="13" y="17" width="1" height="1"/><rect x="15" y="17" width="1" height="1"/><rect x="17" y="17" width="1" height="1"/><rect x="19" y="17" width="1" height="1"/><rect x="21" y="17" width="1" height="1"/><rect x="23" y="17" width="1" height="1"/><rect x="25" y="17" width="1" height="1"/><rect x="27" y="17" width="1" height="1"/><rect x="29" y="17" width="1" height="1"/><rect x="31" y="17" width="1" height="1"/><rect x="33" y="17" width="1" height="1"/><rect x="35" y="17" width="1" height="1"/><rect x="37" y="17" width="1" height="1"/><rect x="39" y="17" width="1" height="1"/><rect x="41" y="17" width="1" height="1"/><rect x="43" y="17" width="1" height="1"/><rect x="45" y="17" width="1" height="1"/><rect x="47" y="17" width="1" height="1"/><rect x="49" y="17" width="1" height="1"/><rect x="51" y="17" width="1" height="1"/><rect x="53" y="17" width="1" height="1"/><rect x="55" y="17" width="1" height="1"/><rect x="57" y="17" width="1" height="1"/><rect x="59" y="17" width="1" height="1"/><rect x="61" y="17" width="1" height="1"/><rect x="63" y="17" width="1" height="1"/><rect x="0" y="18" width="49" height="1"/><rect x="50" y="18" width="3" height="1"/><rect x="54" y="18" width="3" height="1"/><rect x="58" y="18" width="1" height="1"/><rect x="60" y="18" width="1" height="1"/><rect x="62" y="18" width="1" height="1"/><rect x="1" y="19" width="1" height="1"/><rect x="3" y="19" width="1" height="1"/><rect x="5" y="19" width="1" height="1"/><rect x="7" y="19" width="1" height="1"/><rect x="9" y="19" width="1" height="1"/><rect x="11" y="19" width="1" height="1"/><rect x="13" y="19" width="1" height="1"/><rect x="15" y="19" width="1" height="1"/><rect x="17" y="19" width="1" height="1"/><rect x="19" y="19" width="1" height="1"/><rect x="21" y="19" width="1" height="1"/><rect x="23" y="19" width="1" height="1"/><rect x="25" y="19" width="1" height="1"/><rect x="27" y="19" width="1" height="1"/><rect x="29" y="19" width="1" height="1"/><rect x="31" y="19" width="1" height="1"/><rect x="33" y="19" width="1" height="1"/><rect x="35" y="19" width="1" height="1"/><rect x="37" y="19" width="1" height="1"/><rect x="39" y="19" width="1" height="1"/><rect x="41" y="19" width="1" height="1"/><rect x="43" y="19" width="1" height="1"/><rect x="45" y="19" width="1" height="1"/><rect x="47" y="19" width="1" height="1"/><rect x="49" y="19" width="1" height="1"/><rect x="51" y="19" width="1" height="1"/><rect x="53" y="19" width="1" height="1"/><rect x="55" y="19" width="1" height="1"/><rect x="57" y="19" width="1" height="1"/><rect x="59" y="19" width="1" height="1"/><rect x="61" y="19" width="1" height="1"/><rect x="63" y="19" width="1" height="1"/><rect x="0" y="20" width="55" height="1"/><rect x="56" y="20" width="3" height="1"/><rect x="60" y="20" width="3" height="1"/><rect x="1" y="21" width="1" height="1"/><rect x="3" y="21" width="3" height="1"/><rect x="7" y="21" width="1" height="1"/><rect x="9" y="21" width="1" height="1"/><rect x="11" y="21" width="3" height="1"/><rect x="15" y="21" width="1" height="1"/><rect x="17" y="21" width="1" height="1"/><rect x="19" y="21" width="3" height="1"/><rect x="23" y="21" width="1" height="1"/><rect x="25" y="21" width="1" height="1"/><rect x="27" y="21" width="3" height="1"/><rect x="31" y="21" width="1" height="1"/><rect x="33" y="21" width="1" height="1"/><rect x="35" y="21" width="3" height="1"/><rect x="39" y="21" width="1" height="1"/><rect x="41" y="21" width="1" height="1"/><rect x="43" y="21" width="3" height="1"/><rect x="47" y="21" width="1" height="1"/><rect x="49" y="21" width="1" height="1"/><rect x="51" y="21" width="1" height="1"/><rect x="53" y="21" width="1" height="1"/><rect x="55" y="21" width="1" height="1"/><rect x="57" y="21" width="1" height="1"/><rect x="59" y="21" width="1" height="1"/><rect x="61" y="21" width="1" height="1"/><rect x="63" y="21" width="1" height="1"/><rect x="0" y="22" width="53" height="1"/><rect x="54" y="22" width="3" height="1"/><rect x="58" y="22" width="1" height="1"/><rect x="60" y="22" width="1" height="1"/><rect x="62" y="22" width="1" height="1"/><rect x="1" y="23" width="1" height="1"/><rect x="3" y="23" width="1" height="1"/><rect x="5" y="23" width="3" height="1"/><rect x="9" y="23" width="1" height="1"/><rect x="11" y="23" width="1" height="1"/><rect x="13" y="23" width="3" height="1"/><rect x="17" y="23" width="1" height="1"/><rect x="19" y="23" width="1" height="1"/><rect x="21" y="23" width="3" height="1"/><rect x="25" y="23" width="1" height="1"/><rect x="27" y="23" width="1" height="1"/><rect x="29" y="23" width="3" height="1"/><rect x="33" y="23" width="1" height="1"/><rect x="35" y="23" width="1" height="1"/><rect x="37" y="23" width="3" height="1"/><rect x="41" y="23" width="1" height="1"/><rect x="43" y="23" width="1" height="1"/><rect x="45" y="23" width="1" height="1"/><rect x="47" y="23" width="1" height="1"/><rect x="49" y="23" width="1" height="1"/><rect x="51" y="23" width="1" height="1"/><rect x="53" y="23" width="1" height="1"/><rect x="55" y="23" width="1" height="1"/><rect x="57" y="23" width="1" height="1"/><rect x="59" y="23" width="1" height="1"/><rect x="61" y="23" width="1" height="1"/><rect x="63" y="23" width="1" height="1"/><rect x="0" y="24" width="59" height="1"/><rect x="60" y="24" width="3" height="1"/><rect x="0" y="25" width="2" height="1"/><rect x="3" y="25" width="3" height="1"/><rect x="7" y="25" width="3" height="1"/><rect x="11" y="25" width="3" height="1"/><rect x="15" y="25" width="3" height="1"/><rect x="19" y="25" width="3" height="1"/><rect x="23" y="25" width="3" height="1"/><rect x="27" y="25" width="3" height="1"/><rect x="31" y="25" width="3" height="1"/><rect x="35" y="25" width="3" height="1"/><rect x="39" y="25" width="3" height="1"/><rect x="43" y="25" width="3" height="1"/><rect x="47" y="25" width="3" height="1"/><rect x="51" y="25" width="1" height="1"/><rect x="53" y="25" width="1" height="1"/><rect x="55" y="25" width="1" height="1"/><rect x="57" y="25" width="1" height="1"/><rect x="59" y="25" width="1" height="1"/><rect x="61" y="25" width="1" height="1"/><rect x="63" y="25" width="1" height="1"/><rect x="0" y="26" width="57" height="1"/><rect x="58" y="26" width="3" height="1"/><rect x="62" y="26" width="1" height="1"/><rect x="1" y="27" width="3" height="1"/><rect x="5" y="27" width="3" height="1"/><rect x="9" y="27" width="3" height="1"/><rect x="13" y="27" width="3" height="1"/><rect x="17" y="27" width="3" height="1"/><rect x="21" y="27" width="3" height="1"/><rect x="25" y="27" width="3" height="1"/><rect x="29" y="27" width="3" height="1"/><rect x="33" y="27" width="3" height="1"/><rect x="37" y="27" width="3" height="1"/><rect x="41" y="27" width="3" height="1"/><rect x="45" y="27" width="3" height="1"/><rect x="49" y="27" width="1" height="1"/><rect x="51" y="27" width="1" height="1"/><rect x="53" y="27" width="1" height="1"/><rect x="55" y="27" width="1" height="1"/><rect x="57" y="27" width="1" height="1"/><rect x="59" y="27" width="1" height="1"/><rect x="61" y="27" width="1" height="1"/><rect x="63" y="27" width="1" height="1"/><rect x="0" y="28" width="59" height="1"/><rect x="60" y="28" width="3" height="1"/><rect x="0" y="29" width="2" height="1"/><rect x="3" y="29" width="43" height="1"/><rect x="47" y="29" width="3" height="1"/><rect x="51" y="29" width="1" height="1"/><rect x="53" y="29" width="1" height="1"/><rect x="55" y="29" width="1" height="1"/><rect x="57" y="29" width="1" height="1"/><rect x="59" y="29" width="1" height="1"/><rect x="61" y="29" width="1" height="1"/><rect x="63" y="29" width="1" height="1"/><rect x="0" y="30" width="57" height="1"/><rect x="58" y="30" width="3" height="1"/><rect x="62" y="30" width="1" height="1"/><rect x="1" y="31" width="3" height="1"/><rect x="5" y="31" width="3" height="1"/><rect x="9" y="31" width="7" height="1"/><rect x="17" y="31" width="7" height="1"/><rect x="25" y="31" width="7" height="1"/><rect x="33" y="31" width="7" height="1"/><rect x="41" y="31" width="3" height="1"/><rect x="45" y="31" width="3" height="1"/><rect x="49" y="31" width="1" height="1"/><rect x="51" y="31" width="1" height="1"/><rect x="53" y="31" width="1" height="1"/><rect x="55" y="31" width="1" height="1"/><rect x="57" y="31" width="1" height="1"/><rect x="59" y="31" width="1" height="1"/><rect x="61" y="31" width="1" height="1"/><rect x="63" y="31" width="1" height="1"/><rect x="0" y="32" width="8" height="1"/><rect x="40" y="32" width="23" height="1"/><rect x="0" y="33" width="8" height="1"/><rect x="40" y="33" width="6" height="1"/><rect x="47" y="33" width="3" height="1"/><rect x="51" y="33" width="1" height="1"/><rect x="53" y="33" width="1" height="1"/><rect x="55" y="33" width="1" height="1"/><rect x="57" y="33" width="1" height="1"/><rect x="59" y="33" width="1" height="1"/><rect x="61" y="33" width="1" height="1"/><rect x="63" y="33" width="1" height="1"/><rect x="0" y="34" width="8" height="1"/><rect x="40" y="34" width="17" height="1"/><rect x="58" y="34" width="3" height="1"/><rect x="62" y="34" width="1" height="1"/><rect x="1" y="35" width="3" height="1"/><rect x="5" y="35" width="3" height="1"/><rect x="40" y="35" width="4" height="1"/><rect x="45" y="35" width="3" height="1"/><rect x="49" y="35" width="1" height="1"/><rect x="51" y="35" width="1" height="1"/><rect x="53" y="35" width="1" height="1"/><rect x="55" y="35" width="1" height="1"/><rect x="57" y="35" width="1" height="1"/><rect x="59" y="35" width="1" height="1"/><rect x="61" y="35" width="1" height="1"/><rect x="63" y="35" width="1" height="1"/><rect x="0" y="36" width="8" height="1"/><rect x="40" y="36" width="19" height="1"/><rect x="60" y="36" width="3" height="1"/><rect x="0" y="37" width="2" height="1"/><rect x="3" y="37" width="5" height="1"/><rect x="40" y="37" width="6" height="1"/><rect x="47" y="37" width="3" height="1"/><rect x="51" y="37" width="1" height="1"/><rect x="53" y="37" width="1" height="1"/><rect x="55" y="37" width="1" height="1"/><rect x="57" y="37" width="1" height="1"/><rect x="59" y="37" width="1" height="1"/><rect x="61" y="37" width="1" height="1"/><rect x="63" y="37" width="1" height="1"/><rect x="0" y="38" width="8" height="1"/><rect x="40" y="38" width="17" height="1"/><rect x="58" y="38" width="3" height="1"/><rect x="62" y="38" width="1" height="1"/><rect x="1" y="39" width="3" height="1"/><rect x="5" y="39" width="3" height="1"/><rect x="41" y="39" width="3" height="1"/><rect x="45" y="39" width="3" height="1"/><rect x="49" y="39" width="1" height="1"/><rect x="51" y="39" width="1" height="1"/><rect x="53" y="39" width="1" height="1"/><rect x="55" y="39" width="1" height="1"/><rect x="57" y="39" width="1" height="1"/><rect x="59" y="39" width="1" height="1"/><rect x="61" y="39" width="1" height="1"/><rect x="63" y="39" width="1" height="1"/><rect x="0" y="40" width="8" height="1"/><rect x="40" y="40" width="23" height="1"/><rect x="0" y="41" width="8" height="1"/><rect x="40" y="41" width="6" height="1"/><rect x="47" y="41" width="3" height="1"/><rect x="51" y="41" width="1" height="1"/><rect x="53" y="41" width="1" height="1"/><rect x="55" y="41" width="1" height="1"/><rect x="57" y="41" width="1" height="1"/><rect x="59" y="41" width="1" height="1"/><rect x="61" y="41" width="1" height="1"/><rect x="63" y="41" width="1" height="1"/><rect x="0" y="42" width="8" height="1"/><rect x="40" y="42" width="17" height="1"/><rect x="58" y="42" width="3" height="1"/><rect x="62" y="42" width="1" height="1"/><rect x="1" y="43" width="3" height="1"/><rect x="5" y="43" width="3" height="1"/><rect x="40" y="43" width="4" height="1"/><rect x="45" y="43" width="3" height="1"/><rect x="49" y="43" width="1" height="1"/><rect x="51" y="43" width="1" height="1"/><rect x="53" y="43" width="1" height="1"/><rect x="55" y="43" width="1" height="1"/><rect x="57" y="43" width="1" height="1"/><rect x="59" y="43" width="1" height="1"/><rect x="61" y="43" width="1" height="1"/><rect x="63" y="43" width="1" height="1"/><rect x="0" y="44" width="8" height="1"/><rect x="40" y="44" width="19" height="1"/><rect x="60" y="44" width="3" height="1"/><rect x="0" y="45" width="2" height="1"/><rect x="3" y="45" width="5" height="1"/><rect x="40" y="45" width="6" height="1"/><rect x="47" y="45" width="3" height="1"/><rect x="51" y="45" width="1" height="1"/><rect x="53" y="45" width="1" height="1"/><rect x="55" y="45" width="1" height="1"/><rect x="57" y="45" width="1" height="1"/><rect x="59" y="45" width="1" height="1"/><rect x="61" y="45" width="1" height="1"/><rect x="63" y="45" width="1" height="1"/><rect x="0" y="46" width="8" height="1"/><rect x="40" y="46" width="17" height="1"/><rect x="58" y="46" width="3" height="1"/><rect x="62" y="46" width="1" height="1"/><rect x="1" y="47" width="3" height="1"/><rect x="5" y="47" width="3" height="1"/><rect x="41" y="47" width="3" height="1"/><rect x="45" y="47" width="3" height="1"/><rect x="49" y="47" width="1" height="1"/><rect x="51" y="47" width="1" height="1"/><rect x="53" y="47" width="1" height="1"/><rect x="55" y="47" width="1" height="1"/><rect x="57" y="47" width="1" height="1"/><rect x="59" y="47" width="1" height="1"/><rect x="61" y="47" width="1" height="1"/><rect x="63" y="47" width="1" height="1"/><rect x="0" y="48" width="8" height="1"/><rect x="40" y="48" width="23" height="1"/><rect x="0" y="49" width="8" height="1"/><rect x="40" y="49" width="6" height="1"/><rect x="47" y="49" width="3" height="1"/><rect x="51" y="49" width="1" height="1"/><rect x="53" y="49" width="1" height="1"/><rect x="55" y="49" width="1" height="1"/><rect x="57" y="49" width="1" height="1"/><rect x="59" y="49" width="1" height="1"/><rect x="61" y="49" width="1" height="1"/><rect x="63" y="49" width="1" height="1"/><rect x="0" y="50" width="8" height="1"/><rect x="40" y="50" width="17" height="1"/><rect x="58" y="50" width="3" height="1"/><rect x="62" y="50" width="1" height="1"/><rect x="1" y="51" width="3" height="1"/><rect x="5" y="51" width="3" height="1"/><rect x="40" y="51" width="4" height="1"/><rect x="45" y="51" width="3" height="1"/><rect x="49" y="51" width="1" height="1"/><rect x="51" y="51" width="1" height="1"/><rect x="53" y="51" width="1" height="1"/><rect x="55" y="51" width="1" height="1"/><rect x="57" y="51" width="1" height="1"/><rect x="59" y="51" width="1" height="1"/><rect x="61" y="51" width="1" height="1"/><rect x="63" y="51" width="1" height="1"/><rect x="0" y="52" width="8" height="1"/><rect x="40" y="52" width="19" height="1"/><rect x="60" y="52" width="3" height="1"/><rect x="0" y="53" width="2" height="1"/><rect x="3" y="53" width="5" height="1"/><rect x="40" y="53" width="6" height="1"/><rect x="47" y="53" width="3" height="1"/><rect x="51" y="53" width="1" height="1"/><rect x="53" y="53" width="1" height="1"/><rect x="55" y="53" width="1" height="1"/><rect x="57" y="53" width="1" height="1"/><rect x="59" y="53" width="1" height="1"/><rect x="61" y="53" width="1" height="1"/><rect x="63" y="53" width="1" height="1"/><rect x="0" y="54" width="8" height="1"/><rect x="40" y="54" width="17" height="1"/><rect x="58" y="54" width="3" height="1"/><rect x="62" y="54" width="1" height="1"/><rect x="1" y="55" width="3" height="1"/><rect x="5" y="55" width="3" height="1"/><rect x="41" y="55" width="3" height="1"/><rect x="45" y="55" width="3" height="1"/><rect x="49" y="55" width="1" height="1"/><rect x="51" y="55" width="1" height="1"/><rect x="53" y="55" width="1" height="1"/><rect x="55" y="55" width="1" height="1"/><rect x="57" y="55" width="1" height="1"/><rect x="59" y="55" width="1" height="1"/><rect x="61" y="55" width="1" height="1"/><rect x="63" y="55" width="1" height="1"/><rect x="0" y="56" width="63" height="1"/><rect x="0" y="57" width="46" height="1"/><rect x="47" y="57" width="3" height="1"/><rect x="51" y="57" width="1" height="1"/><rect x="53" y="57" width="1" height="1"/><rect x="55" y="57" width="1" height="1"/><rect x="57" y="57" width="1" height="1"/><rect x="59" y="57" width="1" height="1"/><rect x="61" y="57" width="1" height="1"/><rect x="63" y="57" width="1" height="1"/><rect x="0" y="58" width="57" height="1"/><rect x="58" y="58" width="3" height="1"/><rect x="62" y="58" width="1" height="1"/><rect x="1" y="59" width="3" height="1"/><rect x="5" y="59" width="3" height="1"/><rect x="9" y="59" width="3" height="1"/><rect x="13" y="59" width="3" height="1"/><rect x="17" y="59" width="3" height="1"/><rect x="21" y="59" width="3" height="1"/><rect x="25" y="59" width="3" height="1"/><rect x="29" y="59" width="3" height="1"/><rect x="33" y="59" width="3" height="1"/><rect x="37" y="59" width="3" height="1"/><rect x="41" y="59" width="3" height="1"/><rect x="45" y="59" width="3" height="1"/><rect x="49" y="59" width="1" height="1"/><rect x="51" y="59" width="1" height="1"/><rect x="53" y="59" width="1" height="1"/><rect x="55" y="59" width="1" height="1"/><rect x="57" y="59" width="1" height="1"/><rect x="59" y="59" width="1" height="1"/><rect x="61" y="59" width="1" height="1"/><rect x="63" y="59" width="1" height="1"/><rect x="0" y="60" width="59" height="1"/><rect x="60" y="60" width="3" height="1"/><rect x="0" y="61" width="2" height="1"/><rect x="3" y="61" width="3" height="1"/><rect x="7" y="61" width="3" height="1"/><rect x="11" y="61" width="3" height="1"/><rect x="15" y="61" width="3" height="1"/><rect x="19" y="61" width="3" height="1"/><rect x="23" y="61" width="3" height="1"/><rect x="27" y="61" width="3" height="1"/><rect x="31" y="61" width="3" height="1"/><rect x="35" y="61" width="3" height="1"/><rect x="39" y="61" width="3" height="1"/><rect x="43" y="61" width="3" height="1"/><rect x="47" y="61" width="3" height="1"/><rect x="51" y="61" width="1" height="1"/><rect x="53" y="61" width="1" height="1"/><rect x="55" y="61" width="1" height="1"/><rect x="57" y="61" width="1" height="1"/><rect x="59" y="61" width="1" height="1"/><rect x="61" y="61" width="1" height="1"/><rect x="63" y="61" width="1" height="1"/><rect x="0" y="62" width="57" height="1"/><rect x="58" y="62" width="1" height="1"/><rect x="60" y="62" width="1" height="1"/><rect x="62" y="62" width="1" height="1"/><rect x="1" y="63" width="1" height="1"/><rect x="3" y="63" width="1" height="1"/><rect x="5" y="63" width="3" height="1"/><rect x="9" y="63" width="1" height="1"/><rect x="11" y="63" width="1" height="1"/><rect x="13" y="63" width="3" height="1"/><rect x="17" y="63" width="1" height="1"/><rect x="19" y="63" width="1" height="1"/><rect x="21" y="63" width="3" height="1"/><rect x="25" y="63" width="1" height="1"/><rect x="27" y="63" width="1" height="1"/><rect x="29" y="63" width="3" height="1"/><rect x="33" y="63" width="1" height="1"/><rect x="35" y="63" width="1" height="1"/><rect x="37" y="63" width="3" height="1"/><rect x="41" y="63" width="1" height="1"/><rect x="43" y="63" width="1" height="1"/><rect x="45" y="63" width="1" height="1"/><rect x="47" y="63" width="1" height="1"/><rect x="49" y="63" width="1" height="1"/><rect x="51" y="63" width="1" height="1"/><rect x="53" y="63" width="1" height="1"/><rect x="55" y="63" width="1" height="1"/><rect x="57" y="63" width="1" height="1"/><rect x="59" y="63" width="1" height="1"/><rect x="61" y="63" width="1" height="1"/><rect x="63" y="63" width="1" height="1"/></svg></div><p class="cap">3. The mark is the same construction: a slide, a plate cut from the picture, the screen filling the rest.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="h-fast">
+  <div class="rail">
+    <div class="band-head">
+      <h2 id="h-fast">Why it is fast</h2>
+      <p class="lead">Most of the speed is structural: one renderer, contracts generated ahead of time, immutable documents and caches, and export work that runs where the browser already is. The numbers below are measured, and each one names the file that produces it.</p>
+    </div>
+    <div class="rows">
+      <div class="row"><h3>One renderer</h3><p>One function turns a slide into the same HTML and CSS for the editor, the viewer, the embed, the CLI's screenshots and the exporters. A render at one revision is the same pixels on every surface, so nothing is drawn twice and nothing has to be reconciled.</p><div><span class="n num">170 renders of the GT deck in 18.3 s in the acceptance chain; a slide is ready in 6 ms at the median</span><span class="f">packages/render/src/slide.ts</span></div></div>
+      <div class="row"><h3>Contracts generated once</h3><p>Every operation is one entry in one table. The CLI parsers, the MCP tools, the HTTP contract, the window API list and the skills are generated from it and committed, so describing the API costs nothing per request and a stale copy fails the build.</p><div><span class="n num">105 actions, 89 MCP tools, 87 HTTP paths, from one file</span><span class="f">packages/schema/src/actions.ts</span></div></div>
+      <div class="row"><h3>Rust where the arithmetic must not drift</h3><p>The dither and image comparison pipeline is a Rust crate compiled to a Node addon and to WebAssembly, with a TypeScript copy of the same arithmetic where neither is built. The crate exists so that a dither approved in the browser and one produced on a server light the same cells; where the addon is built it also cuts a screen in less than half the time. The hosted studio runs the TypeScript copy today.</p><div><span class="n num">20 ms for a 1600 by 900 screen through the addon, 23 ms through wasm, 52 ms in TypeScript</span><span class="f">crates/turboslide-native, docs/native.md</span></div></div>
+      <div class="row"><h3>The export is a screenshot</h3><p>Perfect PowerPoint rasterises each page in Chromium at twice the sheet size, stores it in the smallest encoding that decodes within budget, then decodes it again and compares it with the shot before the file is written. The page is the screen; there is no second layout engine to disagree with it.</p><div><span class="n num">worst decoded mismatch 0.003 percent over 170 pages; about 15.5 MiB per theme</span><span class="f">packages/export/src/pptx/page-raster.ts</span></div></div>
+      <div class="row"><h3>Export in batches</h3><p>On the hosted studio a long deck exports in batches of sixty slides, each one function call, with a progress sentence and a merge at the end. A failed batch is retried on its own; the file is never started over.</p><div><span class="n num">one slide in 7.5 s cold; the 85 slide GT deck in about three and a half minutes</span><span class="f">packages/export/src/batch/plan.ts</span></div></div>
+      <div class="row"><h3>Compute that lasts</h3><p>The export and render routes run on Vercel functions with an 800 second budget and 3,009 MB of memory, on fluid compute, so several requests to one deployment share one warm process and a render never waits for a cold start when the process is already up.</p><div><span class="n num">800 s and 3,009 MB on /api/export, /api/render and the server functions</span><span class="f">apps/studio/vite.deploy.config.ts</span></div></div>
+      <div class="row"><h3>Routes load before the click</h3><p>The router preloads a route's code and data as soon as the pointer reaches its link, so the move from the home page to a presentation, or from the editor to the viewer, starts before the click lands.</p><div><span class="n num">858 ms from a hover on a home page card to a rendered editor sheet, measured on production on 2026-09-13</span><span class="f">apps/studio/src/router.tsx</span></div></div>
+      <div class="row"><h3>Immutable documents and caches</h3><p>Every committed write stores the whole document under the hash of its bytes, so a reader proves it has the current document from one header and fetches no slide it already holds. Thumbnails named by revision are cached for a year, and the GT deck's pictures are static files on the CDN that answer before the function runs.</p><div><span class="n num">a cached thumbnail in 239 to 385 ms; a picture from the CDN in 112 to 299 ms; the list in 164 to 292 ms</span><span class="f">packages/store/src/snapshots.ts, apps/studio/src/server/thumbs.ts</span></div></div>
+    </div>
+    <p class="closing muted">What is still slow is measured too: the home page at /decks paints at 2.8 s at the median and 8.7 s at worst, because it lists every deck in the store on each visit; a thumbnail that is not cached takes seven to nine seconds on a cold instance; and one instance renders one slide at a time. Those numbers are this round's targets.</p>
+  </div>
+</section>
+
+<section class="band" id="agents" aria-labelledby="h-agents">
+  <div class="rail">
+    <div class="band-head">
+      <h2 id="h-agents">For agents</h2>
+      <p class="lead">Every capability of the editor is an action. The same 105 actions run on the CLI, over MCP, over HTTP and inside an open page, through one validator, and every write names the revision it read.</p>
+    </div>
+    <div class="rows">
+      <div class="agent"><b>CLI</b><div><p>Edits a decks folder with no browser page; --json gives machine output and --base-revision names the revision the write read.</p><code class="cmd">pnpm exec turboslide slide new --layout split --after title --deck decks/gt-brand --json</code></div></div>
+      <div class="agent"><b>MCP</b><div><p>One deck_&lt;action&gt; tool per action over stdio or streamable HTTP, with render tools that return PNGs and the deck_review prompt for the judge lenses.</p><code class="cmd">pnpm exec turboslide mcp --deck decks/gt-brand
+POST https://turboslide.vercel.app/mcp?deck=gt-brand   (with a bearer token)</code></div></div>
+      <div class="agent"><b>HTTP</b><div><p>One JSON object in, the normalized result and its findings out; a stale revision is 409 with the current document.</p><code class="cmd">curl -X POST 'https://turboslide.vercel.app/api/actions/deck.info?deck=gt-brand' \
+  -H 'authorization: Bearer $TURBOSLIDE_TOKEN' -H 'content-type: application/json' -d '{}'</code></div></div>
+      <div class="agent"><b>Window API</b><div><p>Inside an open editor, viewer or presenter page, the same actions run through the same dispatcher a click uses.</p><code class="cmd">window.turboslide.studio.invoke('view.goto', { slideId: 'thesis' })</code></div></div>
+      <div class="agent"><b>OpenAPI</b><div><p>The OpenAPI 3.1 document, the manifest and the llms guides are generated from the action table and committed.</p><code class="cmd">packages/agent/generated/openapi.json   (on GitHub today; GET /openapi.json once the round bundles it)</code></div></div>
+      <div class="agent"><b>Skills</b><div><p>Four skills with generated reference tables: discovery and the write protocol, writing slides in the grammar, driving the live page, verifying.</p><code class="cmd">skills/turboslide-api/SKILL.md   skills/turboslide-create/SKILL.md
+skills/turboslide-studio/SKILL.md   skills/turboslide-verify/SKILL.md</code></div></div>
+    </div>
+    <p class="closing muted">The hosted agent routes accept a bearer token set by the deployment's owner; a checkout serves them to localhost without one. A deck moves between a checkout and the hosted studio with <code>turboslide deck push gt-brand --to https://turboslide.vercel.app</code> and <code>deck pull</code>.</p>
+  </div>
+</section>
+
+<section class="band" aria-labelledby="h-compare">
+  <div class="rail">
+    <div class="band-head">
+      <h2 id="h-compare">Compared with Google Slides</h2>
+      <p class="lead">Turboslide follows Google Slides' structure and behaviours on purpose, so the differences are the point. Google Slides is a product of Google LLC; Turboslide is not affiliated with Google.</p>
+    </div>
+    <table>
+      <thead><tr><th></th><th>Google Slides</th><th>Turboslide</th></tr></thead>
+      <tbody>
+        <tr><td>Account</td><td>A Google account; the product page's calls to action are Sign in and Try Slides for work.</td><td>No account. Anyone with a link opens it; the store is shared.</td></tr>
+        <tr><td>Where the file lives</td><td>Google Drive.</td><td>A folder in a checkout, or a Vercel Blob store on the hosted studio, with one immutable copy per revision.</td></tr>
+        <tr><td>Editing together</td><td>Real time co editing with live pointers, comments, assignments and a comments panel.</td><td>One editor holds a ten minute lease on the slide it edits; another writer's change arrives within a second with a banner. No comments yet.</td></tr>
+        <tr><td>Export</td><td>PowerPoint, ODP, PDF, plain text, JPEG, PNG and SVG of the current slide.</td><td>PowerPoint in two modes, one pixel identical to the screen with a report; PDF, one file web page, plain text, JPEG, PNG and the Turboslide bundle. No ODP or SVG.</td></tr>
+        <tr><td>Import</td><td>PowerPoint and Canva files; Import slides from another presentation.</td><td>Import slides from a presentation on this studio; open a Turboslide bundle. No PowerPoint import yet.</td></tr>
+        <tr><td>Automation</td><td>A REST API with presentations.get and batchUpdate, Apps Script and add-ons; the developer site lists an MCP server.</td><td>105 actions on the CLI, MCP, HTTP and the window API, generated from one table with an OpenAPI document and four skills.</td></tr>
+        <tr><td>Layouts and themes</td><td>Many themes and templates; eleven predefined layouts per theme.</td><td>One theme, gt-ink-paper, with Google's eleven layouts and ten GT layouts.</td></tr>
+        <tr><td>Pictures</td><td>Stock and web images, Drive and Photos, GIFs and stickers, Gemini image generation.</td><td>Upload, URL or this presentation; crop, mask, adjust; two tone dithers and seventeen shader materials.</td></tr>
+        <tr><td>Transitions</td><td>Slide transitions and object animations.</td><td>None; the Transition item is present and disabled with a sentence.</td></tr>
+        <tr><td>Presenting</td><td>Slideshow, Presenter view, present from Meet, recording.</td><td>Slideshow, Presenter view in a second window, Google's keys, a present link.</td></tr>
+        <tr><td>Offline</td><td>With the Docs Offline extension in Chrome or Edge.</td><td>The slideshow keeps running after load; the editor needs the server.</td></tr>
+        <tr><td>Licence and hosting</td><td>Part of Google Workspace.</td><td>MIT; run it from a checkout or deploy it to Vercel.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <div class="rail">
+    <div class="foot">
+      <div><h3>Studio</h3><ul>
+        <li><a href="https://turboslide.vercel.app/new">New presentation</a></li>
+        <li><a href="https://turboslide.vercel.app/decks">Your presentations</a></li>
+        <li><a href="https://turboslide.vercel.app/deck/gt-brand">The GT deck</a></li>
+        <li><a href="https://turboslide.vercel.app/deck/gt-brand?present=1">Present the GT deck</a></li>
+        <li><a href="https://turboslide.vercel.app/decks/trash">Trash</a></li>
+      </ul></div>
+      <div><h3>Documentation</h3><ul>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md">The documentation index</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/spec/SPEC.md">The specification</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/gslides-parity/SPEC.md">Google Slides parity</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/grammar.md">The grammar</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/pptx.md">PowerPoint export</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/hosting.md">Hosting</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/native.md">The native module</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/AGENTS.md">Rules for the repository</a></li>
+      </ul></div>
+      <div><h3>Agents</h3><ul>
+        <li><a href="https://turboslide.vercel.app/api/agent">Manifest</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/openapi.json">OpenAPI</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/llms.txt">llms.txt</a></li>
+        <li><a href="https://turboslide.vercel.app/mcp">MCP</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-api/SKILL.md">turboslide-api</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-create/SKILL.md">turboslide-create</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-studio/SKILL.md">turboslide-studio</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-verify/SKILL.md">turboslide-verify</a></li>
+      </ul></div>
+      <div><h3>Licence</h3><ul>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/LICENSE">MIT licence, copyright 2026 Kevin Liu</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/THIRD_PARTY_NOTICES.md">Third party notices</a></li>
+        <li><a href="https://github.com/Kevin-Liu-01/Turboslide">GitHub</a></li>
+      </ul></div>
+    </div>
+    <div class="foot-line">
+      <a class="brand" href="/home" aria-label="Turboslide"><svg viewBox="0 0 16 16" aria-hidden="true" shape-rendering="crispEdges"><path fill-rule="evenodd" d="M0 0h16v16H0z M2 8h8v6H2z"/></svg><span>Turboslide</span></a>
+      <span>Turboslide is General Translation's slides editor. Google Slides is a product of Google LLC.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // Appearance: the product's rule (gt-theme in localStorage, default dark). The label names the
+  // appearance the button switches to.
+  var root = document.documentElement, btn = document.getElementById('theme'), lb = btn.querySelector('.pt-lb');
+  function paint() { var dark = root.dataset.theme === 'dark'; lb.textContent = dark ? lb.dataset.dark : lb.dataset.light; var m = document.querySelector('meta[name=theme-color]'); if (m) m.content = dark ? '#070707' : '#ffffff'; }
+  btn.addEventListener('click', function () { root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark'; try { localStorage.setItem('gt-theme', root.dataset.theme); } catch (e) {} paint(); });
+  paint();
+  // The hero: three captured, dithered frames of the material, cut in sequence every --ts-hero-hold.
+  // A cut, never a fade: two 1-bit images blended make gray. Still under reduced motion and when the tab is hidden.
+  var frames = document.querySelectorAll('.hero-frame'), i = 0, hold = parseFloat(getComputedStyle(root).getPropertyValue('--ts-hero-hold')) || 0;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (hold > 0 && !reduce.matches && frames.length > 1) {
+    setInterval(function () { if (document.hidden) return; frames[i].classList.remove('is-on'); i = (i + 1) % frames.length; frames[i].classList.add('is-on'); }, hold);
+  }
+})();
+</script>
+</body>
+</html>

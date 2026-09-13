@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Turboslide mark, the hint: the same T on a 16 unit cell grid (cap 12, width 10, stem 2,
+     arm 2, from Inter Display Medium's 0.786, 0.149 and 0.131 of cap), solid. For 16 and 32 px
+     (the tab icon, the title row, the app bar); at 64 px the host adds the 2 px cells of
+     hintRects (see build-marks.mjs). Fill is currentColor. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" role="img" aria-label="Turboslide">
+<path shape-rendering="crispEdges" d="M3 2h10v2h-4v10h-2v-10h-4z"/>
+</svg>

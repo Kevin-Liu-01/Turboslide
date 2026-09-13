@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+<style>.p{fill:#ffffff}.f{stroke:#656565}.i{fill:#070707}@media (prefers-color-scheme: dark){.p{fill:#070707}.f{stroke:#888887}.i{fill:#f2f2f0}}</style>
+<rect class="p" width="16" height="16"/>
+<rect class="f" x="0.5" y="0.5" width="15" height="15" fill="none" stroke-width="1" shape-rendering="crispEdges"/>
+<path class="i" shape-rendering="crispEdges" d="M3 2h10v2h-4v10h-2v-10h-4z"/>
+</svg>

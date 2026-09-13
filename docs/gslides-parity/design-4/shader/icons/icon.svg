@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges">
+  <style>
+    .plate { fill: #ffffff } .ink { fill: #070707 }
+    @media (prefers-color-scheme: dark) { .plate { fill: #070707 } .ink { fill: #f2f2f0 } }
+  </style>
+  <rect class="plate" width="16" height="16"/>
+  <g class="ink">
+    <rect x="1" y="4" width="14" height="2"/>
+    <rect x="1" y="6" width="1" height="6"/>
+    <rect x="14" y="6" width="1" height="6"/>
+    <rect x="1" y="11" width="14" height="1"/>
+    <rect x="7" y="6" width="2" height="5"/>
+  </g>
+</svg>

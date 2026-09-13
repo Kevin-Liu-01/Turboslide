@@ -1,0 +1,135 @@
+{
+  "16": {
+    "colours": 2,
+    "geometry": {
+      "S": 16,
+      "stroke": 1,
+      "bar": 2,
+      "cell": 0,
+      "pad": 1,
+      "W": 14,
+      "H": 8,
+      "interior": 5,
+      "inner": 5,
+      "x0": 1,
+      "y0": 4,
+      "stemX": 7
+    },
+    "cells": 0,
+    "cellGrid": "none"
+  },
+  "32": {
+    "colours": 2,
+    "geometry": {
+      "S": 32,
+      "stroke": 1,
+      "bar": 2,
+      "cell": 2,
+      "pad": 2,
+      "W": 28,
+      "H": 15,
+      "interior": 12,
+      "inner": 12,
+      "x0": 2,
+      "y0": 8,
+      "stemX": 15
+    },
+    "cells": 20,
+    "cellGrid": "6 by 6"
+  },
+  "48": {
+    "colours": 2,
+    "geometry": {
+      "S": 48,
+      "stroke": 2,
+      "bar": 4,
+      "cell": 2,
+      "pad": 4,
+      "W": 40,
+      "H": 22,
+      "interior": 16,
+      "inner": 16,
+      "x0": 4,
+      "y0": 13,
+      "stemX": 22
+    },
+    "cells": 31,
+    "cellGrid": "8 by 8"
+  },
+  "64": {
+    "colours": 2,
+    "geometry": {
+      "S": 64,
+      "stroke": 2,
+      "bar": 4,
+      "cell": 2,
+      "pad": 4,
+      "W": 56,
+      "H": 32,
+      "interior": 24,
+      "inner": 26,
+      "x0": 4,
+      "y0": 16,
+      "stemX": 30
+    },
+    "cells": 86,
+    "cellGrid": "12 by 13"
+  },
+  "180": {
+    "colours": 2,
+    "geometry": {
+      "S": 180,
+      "stroke": 6,
+      "bar": 12,
+      "cell": 4,
+      "pad": 14,
+      "W": 152,
+      "H": 86,
+      "interior": 64,
+      "inner": 68,
+      "x0": 14,
+      "y0": 47,
+      "stemX": 84
+    },
+    "cells": 141,
+    "cellGrid": "16 by 17"
+  },
+  "192": {
+    "colours": 2,
+    "geometry": {
+      "S": 192,
+      "stroke": 6,
+      "bar": 12,
+      "cell": 4,
+      "pad": 12,
+      "W": 168,
+      "H": 94,
+      "interior": 72,
+      "inner": 76,
+      "x0": 12,
+      "y0": 49,
+      "stemX": 90
+    },
+    "cells": 182,
+    "cellGrid": "18 by 19"
+  },
+  "512": {
+    "colours": 2,
+    "geometry": {
+      "S": 512,
+      "stroke": 16,
+      "bar": 32,
+      "cell": 8,
+      "pad": 32,
+      "W": 448,
+      "H": 256,
+      "interior": 192,
+      "inner": 208,
+      "x0": 32,
+      "y0": 128,
+      "stemX": 240
+    },
+    "cells": 317,
+    "cellGrid": "24 by 26"
+  }
+}

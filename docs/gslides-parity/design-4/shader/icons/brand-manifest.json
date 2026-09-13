@@ -1,0 +1,117 @@
+[
+  {
+    "path": "previews/mark-512-paper.png",
+    "bytes": 368,
+    "sha256": "e2004f17925ac40da38cd1adbd96aba73e90d856ec565071003dd171c7d8d5cf"
+  },
+  {
+    "path": "previews/mark-512-ink.png",
+    "bytes": 478,
+    "sha256": "a1c8ed7d22f0a604a29b4f8c4ed8933f21b6b11c1ddf7758f897077553efa29e"
+  },
+  {
+    "path": "previews/mark-180-paper.png",
+    "bytes": 194,
+    "sha256": "d53eb275569827ad7cbe4b84a28c5b15e2549f06cc07005533be66eb0647dfc4"
+  },
+  {
+    "path": "previews/mark-180-ink.png",
+    "bytes": 211,
+    "sha256": "55f6cb25ec854705a4e9d73ab60a9190b65aa5045dd26e62872c1d73ce102711"
+  },
+  {
+    "path": "previews/mark-64-paper.png",
+    "bytes": 155,
+    "sha256": "48892fd50cf53e73b5bd9bc31b99a38687e25cd44edf9ff2a46992ef392e0607"
+  },
+  {
+    "path": "previews/mark-64-ink.png",
+    "bytes": 161,
+    "sha256": "980cda0ecfadd19c7771dff885bad0e643b7dc8f8f7a9f85369f29013adbc956"
+  },
+  {
+    "path": "previews/mark-32-paper.png",
+    "bytes": 141,
+    "sha256": "e059710286c82b98a117689c21b646fdf813e943c435579b0e956b29675fdaf3"
+  },
+  {
+    "path": "previews/mark-32-ink.png",
+    "bytes": 148,
+    "sha256": "7aa70e44ff6e1bd203299b26135c4c6f03b3c889cb7229655d893c2204caa51a"
+  },
+  {
+    "path": "previews/mark-16-paper.png",
+    "bytes": 119,
+    "sha256": "8bffb4a5e4d1027df108717d121173a956e799597ad11d9b8ea29de534e76ffc"
+  },
+  {
+    "path": "previews/mark-16-ink.png",
+    "bytes": 123,
+    "sha256": "5d8a4a87189c434bfe926f02a48da2684cd247806e3912761310073252e39638"
+  },
+  {
+    "path": "icons/icon.svg",
+    "bytes": 563,
+    "sha256": "1501e54f490dc237698108150da97a6f34fa9c6241046990f272614bb19efcea"
+  },
+  {
+    "path": "icons/favicon-16.png",
+    "bytes": 124,
+    "sha256": "b9a88a11ca9db69b55c337d8f178a6a9461e748a0346cd2f392ddf8af6dd3521"
+  },
+  {
+    "path": "icons/favicon-32.png",
+    "bytes": 176,
+    "sha256": "8a5021628ca9f3d5139ce02b747638a1a6645c2cb487a830bfd86e7f123f23ab"
+  },
+  {
+    "path": "icons/favicon-48.png",
+    "bytes": 233,
+    "sha256": "b1a3ccfefe38b397f9057c407d07cd5e4728a97fec096dde8de73ee95d795c5c"
+  },
+  {
+    "path": "icons/apple-touch-icon.png",
+    "bytes": 882,
+    "sha256": "88d8b1c7b2992a46c7ef3d0b4468a8b48001041cf23910b3fa58ab3f12d76413"
+  },
+  {
+    "path": "icons/icon-192.png",
+    "bytes": 209,
+    "sha256": "f0ad8e3b4f6dd190b12dc4a4def7e05c1370a0cb561fffe8753614ea26024346"
+  },
+  {
+    "path": "icons/icon-512.png",
+    "bytes": 368,
+    "sha256": "e2004f17925ac40da38cd1adbd96aba73e90d856ec565071003dd171c7d8d5cf"
+  },
+  {
+    "path": "icons/icon-mask-192.png",
+    "bytes": 194,
+    "sha256": "ee257b2233b1c192ae1c4f441279a8342256c330c878f6bb31d16f366869ac88"
+  },
+  {
+    "path": "icons/icon-mask-512.png",
+    "bytes": 331,
+    "sha256": "b531d3abec110a1fde270478442727d2c8ec549ca8f5977c537f2a6a43011a32"
+  },
+  {
+    "path": "icons/icon-mono-512.png",
+    "bytes": 4734,
+    "sha256": "009ed7ff9ae8389381ef70c3a21241e51734c18779fda311867f0178cd5c5d40"
+  },
+  {
+    "path": "icons/icon-dark-192.png",
+    "bytes": 244,
+    "sha256": "a04572c8afd630fbdabcdf5a61244141df6e9111b165b3305cb9826364bc22ac"
+  },
+  {
+    "path": "icons/icon-dark-512.png",
+    "bytes": 478,
+    "sha256": "a1c8ed7d22f0a604a29b4f8c4ed8933f21b6b11c1ddf7758f897077553efa29e"
+  },
+  {
+    "path": "icons/manifest.webmanifest",
+    "bytes": 973,
+    "sha256": "2b6e236355d675829c000cdf1545bc142231903aaad86b4f51b0815d12946a7c"
+  }
+]

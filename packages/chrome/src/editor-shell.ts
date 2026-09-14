@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { AnchorHTMLAttributes, ComponentType, ReactNode } from 'react';
 
 import type { MarkSpec } from '@turboslide/identity/marks';
 import type { Asset } from '@turboslide/schema/assets';
@@ -56,7 +56,7 @@ import { tableCommandOfItem, tablePlan, tableWriteInput } from './table-tools';
 
 /**
  * The editor shell's contract with the studio route (gslides-parity SPEC 1, 2, 3, 6, 12): what
- * `apps/studio/src/routes/edit.$deckId.tsx` passes ViewerShell as its `editor` prop so the title
+ * `apps/studio/src/editor/EditorRoot.tsx` passes ViewerShell as its `editor` prop so the title
  * row, the menu bar, the toolbar and the panels can read the document and write through the one
  * dispatcher, and the pure helpers that turn a menu item into an action input, a selection into a
  * toolbar tail and the editor's facts into a `MenuContext`. Every field beyond the document, the
@@ -67,6 +67,22 @@ import { tableCommandOfItem, tablePlan, tableWriteInput } from './table-tools';
 
 /** The marks of the caret's run (SPEC-2 2.2.1 to 2.2.6): the schema's own type. */
 export type { RunMarks };
+
+/**
+ * The props of the link slot (gslides-parity SPEC-4 0.16, 1.10): the title row's mark and the
+ * app bar lockup render the component the studio passes here, the router's `Link` wrapped to
+ * these props with `preload: 'intent'`, so the chrome stays router free and a click is a same
+ * document transition instead of a document load. The anchor attributes pass through, because
+ * the slot carries `data-control`, the `aria-label` and the Tooltip primitive's handlers.
+ */
+export type LinkSlotProps = {
+  to: string;
+  preload?: 'intent';
+  className?: string;
+  children: ReactNode;
+} & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'className' | 'children'>;
+
+export type LinkComponent = ComponentType<LinkSlotProps>;
 
 /** What is selected on the canvas, in the shell's own words (the route maps its Selection to it). */
 export type EditorSelection = {
@@ -684,6 +700,12 @@ export type EditorShellInput = {
   uploadPicture?: (target: PictureTarget) => void;
   /** the origin the share links carry; window.location.origin when absent */
   origin?: string;
+  /**
+   * The router's `Link` for the title row's mark (gslides-parity SPEC-4 0.16, 1.10): the studio
+   * fills it from EditorRoot so the mark's click to /decks is a same document transition; a
+   * plain anchor when absent (a server render outside the router, a test)
+   */
+  linkComponent?: LinkComponent;
   /** TURBOSLIDE_TOKEN is set on the deployment (Agent access) */
   tokenRequired?: boolean;
   /** Insert > Link: the canvas link popover (B4); a dialog when absent */

@@ -1,0 +1,20 @@
+1x chrome light: strip #dee1e6, tile frame #656565, tile plate #070707
+1x chrome dark: strip #202124, tile frame #656565, tile plate #070707
+1x firefox light: strip #f0f0f4, tile frame #656565, tile plate #070707
+1x firefox dark: strip #1c1b22, tile frame #656565, tile plate #070707
+1x safari light: strip #e6e6e6, tile frame #656565, tile plate #070707
+1x safari dark: strip #2d2d2d, tile frame #656565, tile plate #070707
+wrote docs/gslides-parity/verification-4/brand/tab-strips-1x.png (420, 260)
+2x chrome light: strip #dee1e6, tile frame #656565, tile plate #070707
+2x chrome dark: strip #202124, tile frame #656565, tile plate #070707
+2x firefox light: strip #f0f0f4, tile frame #656565, tile plate #070707
+2x firefox dark: strip #1c1b22, tile frame #656565, tile plate #070707
+2x safari light: strip #e6e6e6, tile frame #656565, tile plate #070707
+2x safari dark: strip #2d2d2d, tile frame #656565, tile plate #070707
+wrote docs/gslides-parity/verification-4/brand/tab-strips-2x.png (840, 520)
+frame #656565 on chrome light #dee1e6: 4.45:1; plate #ffffff on it: 1.31:1
+frame #656565 on chrome dark #202124: 2.76:1; plate #ffffff on it: 16.10:1
+frame #656565 on firefox light #f0f0f4: 5.13:1; plate #ffffff on it: 1.14:1
+frame #656565 on firefox dark #1c1b22: 2.93:1; plate #ffffff on it: 17.08:1
+frame #656565 on safari light #e6e6e6: 4.67:1; plate #ffffff on it: 1.25:1
+frame #656565 on safari dark #2d2d2d: 2.36:1; plate #ffffff on it: 13.77:1

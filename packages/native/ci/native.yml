@@ -1,0 +1,141 @@
+# The native outputs of gslides-parity SPEC-4 0.38 (docs/native.md "Round four"): the wasm module
+# for the browser worker and the Linux x64 glibc addon for the Vercel function, built from
+# crates/turboslide-native on Linux with the toolchain pinned below, then compared with
+# packages/native/BUILD-RECORD.json. The Vercel builder has no Rust toolchain, so the outputs travel
+# in git; this job is how they are regenerated and how a change to them is checked.
+#
+# Where this file lives: B4 wrote it as packages/native/ci/native.yml (the round's rules keep every
+# builder out of .github/); the integrator places it at .github/workflows/native.yml.
+#
+# On push and pull request: build both outputs and fail when a committed file differs from the
+# fresh build (a committed binary changes only in a commit that also carries this job's rebuild
+# record). On workflow_dispatch: build and upload both as artifacts with a BUILD-RECORD.json whose
+# rows carry this run's id, so the person committing the outputs copies the files and the record.
+name: native
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'crates/turboslide-native/**'
+      - 'packages/native/**'
+      - '.github/workflows/native.yml'
+  pull_request:
+    paths:
+      - 'crates/turboslide-native/**'
+      - 'packages/native/**'
+      - '.github/workflows/native.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      # The toolchain the record names: rustc pinned, the wasm target, wasm-bindgen-cli at the exact
+      # version of the crate's wasm-bindgen dependency (=0.2.128; a mismatch fails the glue).
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: '1.98.1'
+          targets: wasm32-unknown-unknown, x86_64-unknown-linux-gnu
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin/wasm-bindgen
+            ~/.cargo/bin/cargo-zigbuild
+            crates/turboslide-native/target
+          key: native-${{ runner.os }}-1.98.1-${{ hashFiles('crates/turboslide-native/Cargo.lock') }}
+
+      - name: Install wasm-bindgen-cli 0.2.128 and cargo-zigbuild
+        run: |
+          command -v wasm-bindgen >/dev/null || cargo install wasm-bindgen-cli --version 0.2.128 --locked
+          command -v cargo-zigbuild >/dev/null || cargo install cargo-zigbuild --locked
+          pip3 install --user ziglang==0.13.0.post1
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # The wasm module through the package's own build script (the same command a checkout runs).
+      - name: Build the wasm module
+        run: node packages/native/scripts/build.mjs --wasm --strict
+
+      # The addon against the glibc floor of 2.28 (Vercel's Node 24 runtime names its glibc on no
+      # page the round read; 2.28 is Amazon Linux 2023's floor and below every current runtime's).
+      # cargo zigbuild links against the named glibc version; the cdylib is copied to the platform
+      # package the loader reads (packages/native/src/platform.ts addonFileName).
+      - name: Build the Linux x64 glibc addon
+        run: |
+          cargo zigbuild --release --features napi \
+            --manifest-path crates/turboslide-native/Cargo.toml \
+            --target x86_64-unknown-linux-gnu.2.28
+          cp crates/turboslide-native/target/x86_64-unknown-linux-gnu/release/libturboslide_native.so \
+            packages/native/npm/linux-x64-gnu/turboslide-native.linux-x64-gnu.node
+          ls -la packages/native/npm/linux-x64-gnu/
+
+      - name: Verify the addon loads and names its glibc floor
+        run: |
+          node -e "
+            const path = 'packages/native/npm/linux-x64-gnu/turboslide-native.linux-x64-gnu.node';
+            const m = require(require('node:path').resolve(path));
+            console.log('version', m.version());
+            console.log('glibc runtime', process.report.getReport().header.glibcVersionRuntime);
+          "
+          # every GLIBC_ symbol the addon imports is at or below the floor
+          objdump -T packages/native/npm/linux-x64-gnu/turboslide-native.linux-x64-gnu.node \
+            | grep -o 'GLIBC_[0-9.]*' | sort -uV | tail -1
+
+      - name: Parity across the three implementations
+        run: cd packages/effects && TURBOSLIDE_NATIVE_REQUIRED=1 ../../node_modules/.bin/vitest run src/parity.test.ts
+
+      # The record of this run: the sha256 per output with the run id and its URL, uploaded beside
+      # the outputs. On a push the committed record must already match the fresh build.
+      - name: Write the build record of this run
+        run: |
+          node -e "
+            const fs = require('node:fs');
+            const { createHash } = require('node:crypto');
+            const record = JSON.parse(fs.readFileSync('packages/native/BUILD-RECORD.json', 'utf8'));
+            const runId = process.env.GITHUB_RUN_ID;
+            const runUrl = process.env.GITHUB_SERVER_URL + '/' + process.env.GITHUB_REPOSITORY + '/actions/runs/' + runId;
+            for (const relative of Object.keys(record.outputs)) {
+              const path = 'packages/native/' + relative;
+              const bytes = fs.readFileSync(path);
+              record.outputs[relative] = { ...record.outputs[relative], bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex'), builtBy: 'ci', built: new Date().toISOString().slice(0, 10), runId, runUrl, machine: 'ubuntu-latest, rustc 1.98.1, wasm-bindgen 0.2.128, cargo zigbuild glibc 2.28' };
+              delete record.outputs[relative].note;
+            }
+            record.crateCommit = process.env.GITHUB_SHA;
+            fs.mkdirSync('native-outputs', { recursive: true });
+            fs.writeFileSync('native-outputs/BUILD-RECORD.json', JSON.stringify(record, null, 2) + '\n');
+            for (const relative of Object.keys(record.outputs)) {
+              fs.mkdirSync(require('node:path').dirname('native-outputs/' + relative), { recursive: true });
+              fs.copyFileSync('packages/native/' + relative, 'native-outputs/' + relative);
+            }
+          "
+
+      - name: Compare the committed outputs with this build
+        if: github.event_name != 'workflow_dispatch'
+        run: |
+          git status --short -- packages/native
+          # the committed wasm files and the record's hashes must equal the fresh build; a pending
+          # addon row (sha256 null) is allowed until the first dispatch run's outputs are committed
+          git diff --exit-code -- packages/native/wasm
+          node packages/native/scripts/check-record.mjs --no-build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: turboslide-native-${{ github.run_id }}
+          path: native-outputs/
+          if-no-files-found: error

@@ -236,11 +236,12 @@ describe('the editor shell in its default state', () => {
     expect(file.getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('runs File > Details from the menu and the dialog names the presentation', () => {
+  it('runs File > Details from the menu and the dialog names the presentation', async () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     fireEvent.click(container.querySelector('[data-control="menubar.file"]') as HTMLElement);
     fireEvent.click(document.querySelector('[data-menu-item="file.details"]') as HTMLElement);
-    const dialog = screen.getByRole('dialog', { name: 'Details' });
+    /* the dialogs load on first open (gslides-parity SPEC-4 0.44, lib/lazyDialog.ts) */
+    const dialog = await screen.findByRole('dialog', { name: 'Details' });
     expect(dialog.querySelector('[data-control="dialog.details.title"]')?.textContent).toBe(
       doc.deck.title,
     );
@@ -248,7 +249,7 @@ describe('the editor shell in its default state', () => {
     expect(screen.queryByRole('dialog', { name: 'Details' })).toBeNull();
   });
 
-  it('Ctrl+Shift+F is compact mode and Esc restores; Cmd+/ opens the shortcuts dialog', () => {
+  it('Ctrl+Shift+F is compact mode and Esc restores; Cmd+/ opens the shortcuts dialog', async () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     fireEvent.keyDown(document.body, { key: 'F', code: 'KeyF', ctrlKey: true, shiftKey: true });
     expect(
@@ -257,7 +258,7 @@ describe('the editor shell in its default state', () => {
     fireEvent.keyDown(document.body, { key: 'Escape' });
     expect(container.querySelector('[data-control="toolbar.showMenus"]')).toBeNull();
     fireEvent.keyDown(document.body, { key: '/', code: 'Slash', metaKey: true });
-    expect(screen.getByRole('dialog', { name: 'Keyboard shortcuts' })).toBeTruthy();
+    expect(await screen.findByRole('dialog', { name: 'Keyboard shortcuts' })).toBeTruthy();
   });
 
   it('binds no bare letter: S shows the one time sentence, changes nothing, and stays quiet after', () => {
@@ -413,7 +414,7 @@ describe('the Insert menu, compact mode and the title row', () => {
   it('Insert > Icon opens the symbol picker; a symbol writes an icon block of that name', async () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     clickMenuPath(container, 'insert', 'insert.icon');
-    const dialog = screen.getByRole('dialog', { name: 'Icon' });
+    const dialog = await screen.findByRole('dialog', { name: 'Icon' });
     /* the picker is embedded: one dialog, the host's close button, the symbols with pick ids */
     expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
     expect(dialog.querySelector('[data-control="dialog.insertIcon.filter"]')).not.toBeNull();
@@ -435,7 +436,7 @@ describe('the Insert menu, compact mode and the title row', () => {
   it('Insert > Material lists the catalog; a row writes a material block with that recipe', async () => {
     const { container } = render(<Harness input={input()} shell={shellState()} />);
     clickMenuPath(container, 'insert', 'insert.material');
-    const dialog = screen.getByRole('dialog', { name: 'Material' });
+    const dialog = await screen.findByRole('dialog', { name: 'Material' });
     const rows = dialog.querySelectorAll<HTMLElement>(
       '[data-control^="dialog.insertMaterial.pick."]',
     );

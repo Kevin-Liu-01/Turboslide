@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /og/
+Disallow: /new
+Disallow: /decks/trash
+Disallow: /print/
+Disallow: /edit/

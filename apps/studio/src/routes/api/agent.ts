@@ -3,6 +3,7 @@ import { createDispatcher } from '@turboslide/agent/dispatch';
 import { refuseSpoofedLocalhost } from '@turboslide/agent/http/dispatch';
 import { jsonResponse } from '@turboslide/agent/http/errors';
 import { runtimeManifest } from '@turboslide/agent/http/manifest';
+import { describeBackends } from '@turboslide/effects/select';
 
 import { DEFAULT_DECK, deckDispatcher } from '../../server/actions';
 import { agentAuth, requireAgentAuth } from '../../server/auth';
@@ -18,6 +19,39 @@ import { studioSessions } from '../../server/sessions';
 // unknown deck still answers, with the pending list saying every action waits for a deck.
 // The localhost rule holds only when every host the request names is local (gslides-parity
 // SPEC-3 8.8, TURBOSLIDE_TRUST_PROXY; server/headers.ts).
+//
+// Round four (gslides-parity SPEC-4 0.38, 3.9; build-4/b4.md R11, the integrator at merge 2): the
+// answer also carries `instance`, the facts of the process that answered: the effects backend the
+// function selected (`native` once the Linux addon is committed, `wasm` or `typescript` until
+// then), the runtime's glibc version from Node's process report (the addon is built against
+// glibc 2.28, and docs/native.md records what the platform runs) and the Node version.
+// scripts/hosted-smoke.mjs reads them with the bearer.
+
+type InstanceFacts = {
+  effectsBackend: 'native' | 'wasm' | 'typescript';
+  glibcVersionRuntime: string | null;
+  node: string;
+  platform: string;
+};
+
+function instanceFacts(): InstanceFacts {
+  let effectsBackend: InstanceFacts['effectsBackend'] = 'typescript';
+  try {
+    effectsBackend = describeBackends().selected;
+  } catch {
+    // a backend that fails to load leaves the TypeScript stages selected
+  }
+  let glibcVersionRuntime: string | null = null;
+  try {
+    // the report's type is `object`; the header's glibc field is Node's on Linux builds
+    const report = process.report?.getReport() as
+      { header?: { glibcVersionRuntime?: string } } | undefined;
+    glibcVersionRuntime = report?.header?.glibcVersionRuntime ?? null;
+  } catch {
+    // no process report on this runtime
+  }
+  return { effectsBackend, glibcVersionRuntime, node: process.version, platform: process.platform };
+}
 
 export const Route = createFileRoute('/api/agent')({
   server: {
@@ -47,7 +81,8 @@ export const Route = createFileRoute('/api/agent')({
           sessions: studioSessions().list(),
           defaultDeck: deckId,
         });
-        return jsonResponse(note === undefined ? manifest : { ...manifest, note });
+        const answer = { ...manifest, instance: instanceFacts() };
+        return jsonResponse(note === undefined ? answer : { ...answer, note });
       },
     },
   },

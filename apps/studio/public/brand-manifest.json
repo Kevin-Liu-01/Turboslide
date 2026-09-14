@@ -1,0 +1,160 @@
+{
+  "generator": "scripts/build-brand.ts",
+  "files": {
+    "apps/studio/public/apple-touch-icon.png": {
+      "bytes": 753,
+      "sha256": "7522912cd415a5f615ee7021422e64f9d8440bd9048892bc64d731ef759e40e1",
+      "kind": "built"
+    },
+    "apps/studio/public/brand/figure-dark.png": {
+      "bytes": 13873,
+      "sha256": "3227dea7cf9b4a1de6763c02c9f84d68a961090303f692d6e39871241779e553",
+      "kind": "captured"
+    },
+    "apps/studio/public/brand/figure-light.png": {
+      "bytes": 13892,
+      "sha256": "7e3efd4d8b0caf59758f47d03206f149480afabee532fda758bfca3701d4de80",
+      "kind": "captured"
+    },
+    "apps/studio/public/brand/hero-dark.png": {
+      "bytes": 13679,
+      "sha256": "6d5856e63203888299f75cd17ade83ce07eea5142613b9da738c69dee91c62d4",
+      "kind": "captured"
+    },
+    "apps/studio/public/brand/hero-light.png": {
+      "bytes": 13689,
+      "sha256": "b6f649ce71e6a92600a78bfcf17ce23177a6adce93d0402ed67b09b593b6e97e",
+      "kind": "captured"
+    },
+    "apps/studio/public/brand/notfound-dark.png": {
+      "bytes": 13866,
+      "sha256": "3edb0bedc65394426d89eeb13af3b5a00cff297c988912089af79d6b92361648",
+      "kind": "captured"
+    },
+    "apps/studio/public/brand/notfound-light.png": {
+      "bytes": 13862,
+      "sha256": "8dfd18fcbbfae8e2a8856cf3334049f221e38a1376375452c12b1501670b2905",
+      "kind": "captured"
+    },
+    "apps/studio/public/brand/og-screen-dark.png": {
+      "bytes": 1885,
+      "sha256": "3499674fc6a760a2c94b449356f2be6f5bfb75c0cc53af6ffcb8805111d263f7",
+      "kind": "captured"
+    },
+    "apps/studio/public/brand/og-screen-light.png": {
+      "bytes": 1887,
+      "sha256": "a0fd4a21e00967d914a760d79b00a1ca6caf896bc87915c00ee96bc9eac9c09e",
+      "kind": "captured"
+    },
+    "apps/studio/public/favicon.ico": {
+      "bytes": 15086,
+      "sha256": "b04bfab1f1ed901be0b63fc443993e7c2083f76ebd6e9ef1e4817b3d24fa449c",
+      "kind": "built"
+    },
+    "apps/studio/public/icon.svg": {
+      "bytes": 957,
+      "sha256": "8ffdbb017ee951a807beed52a442cf811a849c0d5b94f4e08829f7d6297b9ce5",
+      "kind": "built"
+    },
+    "apps/studio/public/icons/icon-192.png": {
+      "bytes": 257,
+      "sha256": "33fd3b15912e0adda6114e3a048d7dfe813a33fe7cbe689a004f8aaa8cd7a0b9",
+      "kind": "built"
+    },
+    "apps/studio/public/icons/icon-512.png": {
+      "bytes": 460,
+      "sha256": "bc568b55e83feb752fc8eceffde36b350596439d00065918ff08a7680765d9e0",
+      "kind": "built"
+    },
+    "apps/studio/public/icons/icon-dark-192.png": {
+      "bytes": 257,
+      "sha256": "7cf3a6deb87c51858feadd5ff199c43cfd330a5fafa2e9806f589e2a35d83f00",
+      "kind": "built"
+    },
+    "apps/studio/public/icons/icon-dark-512.png": {
+      "bytes": 460,
+      "sha256": "bedcdd05bf4bc5314b5a5555c0c6c3ec57ae597e5757d2d4283434b7c9ad16b1",
+      "kind": "built"
+    },
+    "apps/studio/public/icons/icon-mask-192.png": {
+      "bytes": 292,
+      "sha256": "de4368e8c7ead34a5334128264d3ac20ea5c2566c12250fd2b4dead6abd221f4",
+      "kind": "built"
+    },
+    "apps/studio/public/icons/icon-mask-512.png": {
+      "bytes": 422,
+      "sha256": "ef7861c6780f0b17dd7312b4db0c1cba353fbd676ed46f0fd0bf2d6ac12dad03",
+      "kind": "built"
+    },
+    "apps/studio/public/icons/icon-mono-512.png": {
+      "bytes": 3083,
+      "sha256": "15ac0d8be4850daffefe89231aac73e2699f5436b306864a601c2096c678b875",
+      "kind": "built"
+    },
+    "apps/studio/public/manifest.webmanifest": {
+      "bytes": 971,
+      "sha256": "e11add99257e1f3e372ff96b2766a90e58fff6955c6c19768a0be65883cbb848",
+      "kind": "built"
+    },
+    "apps/studio/public/og/turboslide.png": {
+      "bytes": 29818,
+      "sha256": "fbfd5cbba23d2b669bec9466ed10d6548609bdfaf16c264390ddf81fbfd1d402",
+      "kind": "rendered"
+    },
+    "apps/studio/public/robots.txt": {
+      "bytes": 99,
+      "sha256": "8489ce7043095c84c9a48bfa1fe7168421f3249b1b214d0fabd6f63b24983266",
+      "kind": "built"
+    },
+    "packages/theme/brand/facts.json": {
+      "bytes": 27144,
+      "sha256": "67f5a6919cb7da4e83b14fd3544bac1a2cae09ab1dca0ee48b1c37705219a097",
+      "kind": "facts"
+    },
+    "packages/theme/brand/hero.recipe.json": {
+      "bytes": 10180,
+      "sha256": "3e93fde8812a74b0dcc3d2584c355dc07a7fc522a21a94c3388da19df0295a9a",
+      "kind": "captured"
+    },
+    "packages/theme/brand/icon-tile.svg": {
+      "bytes": 957,
+      "sha256": "8ffdbb017ee951a807beed52a442cf811a849c0d5b94f4e08829f7d6297b9ce5",
+      "kind": "built"
+    },
+    "packages/theme/brand/lockup-stacked.svg": {
+      "bytes": 10463,
+      "sha256": "df29137f3f382db713d3a4828fa77005739ebcb6452c0c5d804e60c5a6e9e929",
+      "kind": "built"
+    },
+    "packages/theme/brand/mark-geometry.json": {
+      "bytes": 2422,
+      "sha256": "a126a8aa78d65482c567650eca03dc780dfcbd114c4357745d62082e89e3de92",
+      "kind": "built"
+    },
+    "packages/theme/brand/mark-small.svg": {
+      "bytes": 553,
+      "sha256": "c2cc3cd24b880a5b0379fb4c4c39f9c491325a59d8f8410d00ebf427beba8ba3",
+      "kind": "built"
+    },
+    "packages/theme/brand/mark.svg": {
+      "bytes": 38576,
+      "sha256": "1f5729be4a21abc7a68df2f07e30ad7d47dd38bbe6e126f93b41008e61e21c90",
+      "kind": "built"
+    },
+    "packages/theme/brand/og-template.html": {
+      "bytes": 8348,
+      "sha256": "cb6c10264cc57727fdeafbc7c085fd1f0e45b7f1d3669057f00bd4ba75930ddf",
+      "kind": "built"
+    },
+    "packages/theme/brand/wordmark-outlines.svg": {
+      "bytes": 5474,
+      "sha256": "82158d3e9d299740aab9657a509b23372655b3aff58fca45d57af44c90180faf",
+      "kind": "outlined"
+    },
+    "packages/theme/brand/wordmark.svg": {
+      "bytes": 887,
+      "sha256": "b5f5648a59a1bb8efce1024e9dd3df294dfe241cb63ef6b64a83bf51f83309bd",
+      "kind": "built"
+    }
+  }
+}

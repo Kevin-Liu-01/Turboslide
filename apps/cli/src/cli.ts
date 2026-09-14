@@ -4,6 +4,7 @@
 // set). runCli is pure over its streams so tests drive it.
 import { flagBoolean, flagString, parseArgs } from './args.ts';
 import { asset } from './commands/asset.ts';
+import { banner } from './commands/banner.ts';
 import { block } from './commands/block.ts';
 import { build } from './commands/build.ts';
 import { chart } from './commands/chart.ts';
@@ -237,6 +238,7 @@ Collaboration (every command takes --to <studio> to run on a hosted deck)
                                     an API key over the device flow, kept in ~/.config/turboslide/hosts.json
 
 Global flags
+  --version       the banner: the mark, the version, the hosted address, the action count and the effects backend
   --deck <dir>    the deck directory (default: TURBOSLIDE_DECK, the nearest deck.json, or decks/gt-brand)
   --json          machine output on stdout, human output on stderr
   --author <name> the author of writes (default $USER; agents pass agent:<runId>; TURBOSLIDE_AUTHOR)
@@ -319,10 +321,6 @@ export async function runCli(argv: readonly string[], options: RunOptions): Prom
     const args = parseArgs(argv);
     out = createOutput(flagBoolean(args, 'json'), options.streams);
     const [command, ...rest] = args.positionals;
-    if (!command || command === 'help' || flagBoolean(args, 'help')) {
-      options.streams.stdout(`${USAGE}\n`);
-      return EXIT.ok;
-    }
     const author = parseAuthor(
       flagString(args, 'author') ?? env.TURBOSLIDE_AUTHOR ?? env.USER ?? 'unknown',
     );
@@ -335,6 +333,13 @@ export async function runCli(argv: readonly string[], options: RunOptions): Prom
       rest,
       readStdin: options.stdin ?? readProcessStdin,
     };
+    // the banner (gslides-parity SPEC-4 0.17): `turboslide --version`, parsed before the command
+    // table; `turboslide version ...` stays the version log command
+    if (!command && flagBoolean(args, 'version')) return await banner(ctx);
+    if (!command || command === 'help' || flagBoolean(args, 'help')) {
+      options.streams.stdout(`${USAGE}\n`);
+      return EXIT.ok;
+    }
     const handler = COMMANDS[command];
     if (!handler) throw new UsageError(`unknown command "${command}"\n\n${USAGE}`);
     return await handler(ctx);

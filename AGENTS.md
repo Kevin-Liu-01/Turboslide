@@ -37,6 +37,9 @@ acceptance commands per milestone are in the milestone plan; the M1 acceptance i
   namespaces or parameter properties, and relative imports inside those packages carry the `.ts`
   extension.
 - Plain CSS: one `tokens.css` and one small CSS file per component, no Tailwind (SPEC 3.3 item 6).
+  Since round four `packages/chrome/src/brand.css` carries the eleven `--ts-` identity tokens
+  (gslides-parity SPEC-4 1.8) and `tokens.css` keeps every `--pt-` name and value (the one
+  addition is the `--pt-select` block, recorded under the round four seams below).
 - Every control, toolbar button, menu item, handle and chip carries the Tooltip primitive
   (`packages/chrome/src/Tooltip.tsx`, `data-tip`) with its name, one sentence on what it does and
   its key; a native `title` alone does not count. `node scripts/tooltip-audit.mjs --base <origin>`
@@ -88,7 +91,8 @@ From M4 the studio hosts that table for agents (MILESTONES M4 item 1):
   a ten minute lease on the slide it edits.
 - External writes reach an open editor over the store's watch channel within a second: the
   version records since the editor's revision are applied forward through the reducer and the
-  banner names the revision and the author (`edit.$deckId.tsx` `adoptExternal`).
+  banner names the revision and the author (`apps/studio/src/editor/controller.tsx`
+  `adoptExternal`; it sat in `routes/edit.$deckId.tsx` until round four's merge 1 split the editor).
 
 Adding an action: the parity chain below, then register its handler in the CLI
 (`apps/cli/src/commands/mcp.ts` or `store-actions.ts`), in the studio's dispatcher
@@ -190,6 +194,30 @@ a 10.7 GB log in eleven minutes) and from the parallel-builder setup.
   `vite preview` of a production build on 4344, so B5 may run `node_modules/.bin/vite build` inside
   `apps/studio` for that row alone. Nobody else builds; the integrator builds everything else.
 
+- The written exception for the Google Slides parity round four (`docs/gslides-parity/SPEC-4.md`,
+  `docs/gslides-parity/MILESTONES-4.md`): the round three form stands with one more variable.
+  Round three's identity runtime refuses every request without `TURBOSLIDE_SESSION_SECRET`
+  (`apps/studio/src/server/auth/secret.ts`; a tmp store has no state folder to mint it from and
+  the server answers 500 on every route), so a builder's server sets both secrets to obviously
+  fake values of 16 bytes or more, the way `playwright.config.ts` does for its own server. Nobody
+  builds this round either: `pnpm build`, `vite build` and the node-server and Vercel builds are
+  `scripts/check.mjs`'s and the integrator's. From `apps/studio`:
+
+  `TURBOSLIDE_STORE=tmp TURBOSLIDE_REALTIME=memory TURBOSLIDE_SESSION_SECRET=<fake> TURBOSLIDE_DOWNLOAD_SECRET=<fake> node_modules/.bin/vite dev --port <port> --strictPort`
+
+  | Port | Who                                               | Notes                                                                                                                                                                                                                                  |
+  | ---- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+  | 4321 | the integrator, the verifier, `scripts/check.mjs` | the file store; the `/new` boot probe at every merge; check step 31 builds and serves the node-server output here and fails when something already answers                                                                             |
+  | 4341 | B1 (brand assets, tokens, chrome mark)            | the tile and chrome checks, the selection screenshots                                                                                                                                                                                  |
+  | 4342 | B2 (the `/home` route)                            | `home-page.spec.ts`, `lint --chrome --url .../home`, `tooltip-audit.mjs --only /home`                                                                                                                                                  |
+  | 4343 | B3 (routes and transitions)                       | the `home`, `editor`, `present`, `landing` and `viewer` specs; `perf-budget.mjs --only routes,transitions --runs 1 --report` as a smoke                                                                                                |
+  | 4344 | B4 (editor actions and render)                    | the `filmstrip`, `viewer`, `window-api` and `undo` specs; the same number as round three's preview port, so B4's server is down before `pnpm check` reaches step 27, which treats anything answering on 4344 as the production preview |
+  | 4345 | unassigned (B5 runs no server)                    |                                                                                                                                                                                                                                        |
+  | 4346 | the verifier                                      | the parity audit, the perf budget's rows on a preview or production, `vite preview` of an existing `apps/studio/dist` for a local comparison                                                                                           |
+
+  The dev server measures nothing: every number of SPEC-4 section 4 comes from the node-server
+  build (check step 31) or a preview deployment, and a builder's run on a dev server is a smoke.
+
 ## Hosting
 
 The studio is deployed to Vercel from `apps/studio` (the project `turboslide` in Kevin's team,
@@ -276,6 +304,13 @@ environment with Kevin before the deploy (a blob store refuses to mint an export
   clean with it (check step 28 of SPEC-3 16.1).
 - The per checkout agent token lives at `.turboslide/token` (SPEC-3 7.7), gitignored with the rest
   of `.turboslide/`. Never print it, and never print `TURBOSLIDE_TOKEN`, a cookie value or a key.
+- Round four catalog entry (SPEC-4 0.31; day 0): `@vercel/functions` 3.9.7, attached to
+  `apps/studio` for `waitUntil` (SPEC-4 names no version; the newest release on 2026-09-14 was
+  pinned). Two workspace edges joined the graph: `@turboslide/theme` depends on
+  `@turboslide/effects` (`brand.ts` imports `bayer8`) and `@turboslide/chrome` on
+  `@turboslide/theme` (`TurboslideMark.tsx` imports the geometry module); both point down the one
+  way direction. A builder names a package and its version in
+  `docs/gslides-parity/build-4/<key>.md` and the integrator installs once.
 
 ## Ownership and git
 
@@ -291,6 +326,22 @@ environment with Kevin before the deploy (a blob store refuses to mint an export
   integrator makes it or reassigns it. `pnpm generate:contracts` is run by B1 and the integrator
   only; `pnpm install`, `pnpm build` and `vite build` are the integrator's (the one exception is
   the B5 row under the dev server rules). Nothing is committed until the ship step.
+- Round four: ownership is the "Owns" lists of `docs/gslides-parity/MILESTONES-4.md` with the day 0
+  amendments of `docs/gslides-parity/build-4/integrator.md` section 3; a request goes in
+  `docs/gslides-parity/build-4/<key>.md` and the integrator makes it. From merge 1
+  `apps/studio/src/editor/controller.tsx` is B4's, and `editor/EditorRoot.tsx`,
+  `editor/shell-bridge.tsx`, `routes/-edit-search.ts` and the route files are B3's. From merge 2
+  (b2.md R8, b3.md R10): B2 owns `apps/studio/src/routes/home.tsx` and `home.css`,
+  `apps/studio/src/components/home/**` (the nine bands, `HomeLink.tsx`, `HomeEditor.tsx`,
+  `Shot.tsx`, `SpriteIcon.tsx`, `copy.ts`, `facts.ts`, the generated `facts-data.ts`, `shots.ts`
+  and `shots.json`, the three tests), `apps/studio/e2e/home-page.spec.ts`,
+  `scripts/build-home-assets.ts` and `apps/studio/public/home/**` (generated, never edited by
+  hand; `facts-data.ts` is a checked copy of ten values of `packages/theme/brand/facts.json` with
+  its sha256, and `build-home-assets.ts --check` and `facts.test.ts` fail when the facts file moves
+  on); B3 owns `apps/studio/src/routes/-recent.ts`, `-recent.test.ts`, `-link-slot.tsx`,
+  `-access-page.tsx` and `apps/studio/src/components/PresenterPage.tsx` beside the route files.
+  Nothing is committed until the ship step; the untracked `packages/native/wasm/` files of a local
+  build are never committed before B4 replaces them with CI's outputs and `BUILD-RECORD.json`.
 
 ## Acceptance
 
@@ -381,6 +432,52 @@ uncommitted generated files and passes by regeneration, step 19 fails on the oth
 untracked documents alone, and the remaining steps are recorded step by step in
 `docs/gslides-parity/build-3/integrator.md` section 15.
 
+Round four's lines (`docs/gslides-parity/SPEC-4.md` 6.1 and 0.46; `docs/gslides-parity/BUILD-STATUS-4.md`):
+`pnpm check` is 31 steps. Step 29 is the generated files check: `node scripts/build-brand.ts
+--check` (the icon set, the twins and the card against `apps/studio/public/brand-manifest.json`
+by bytes, rebuilt and compared, plus the facts of SPEC-4 6.4; it launches Chrome for Testing once
+for the card compare when chromium-1217 is present and the fonts venv's python once for the
+outlines, and prints why it skips either), then `node scripts/build-home-assets.ts --check` (the
+`/home` screenshots and `facts-data.ts` against `facts.json`), `node
+packages/schema/scripts/build-definitions.mjs --check` (the shape table as one compact string and
+`ids.ts`; the generator moved from `src/shapes/` at merge 2) and `node
+packages/native/scripts/check-record.mjs` (the wasm module rebuilt when cargo, the wasm32 target
+and wasm-bindgen are present and compared with `packages/native/BUILD-RECORD.json`; the Linux
+addon by hash, a pending addon reported and not failed). Step 30 is `NITRO_PRESET=vercel pnpm
+--filter @turboslide/studio build:deploy && node scripts/check-vercel-output.mjs` (the header rules
+of SPEC-4 1.6 and the `/` redirect in `.vercel/output/config.json`, the static files of 0.13, every
+picture under `apps/studio/public/brand/` and `/home/`, the prerendered `/home`, every `*.func`
+directory against 250 MB); it runs on a machine linked to the Vercel project
+(`.vercel/project.json`) once `brand-manifest.json` exists, or with `TURBOSLIDE_CHECK_VERCEL=1`,
+and is skipped in CI. Step 31 is `node scripts/perf-budget.mjs --base http://localhost:4321
+--profile local --write --runs 3 --json .turboslide/perf-budget.json` against the node-server
+build the runner makes (`NITRO_PRESET=node-server pnpm --filter @turboslide/studio build:deploy`,
+then `node apps/studio/.output/server/index.mjs` with `PORT=4321`, `TURBOSLIDE_STORE=tmp` and the
+two fake secrets), never the dev server and never `vite preview`, with `--report` in CI until two
+runs agree, followed by `node scripts/check-client-bundle.mjs apps/studio/dist --base
+http://localhost:4321 --client apps/studio/.output/public` (the per route preload ceilings of
+SPEC-4 3.12 read from the served heads of `/decks`, `/deck/gt-brand` and `/edit/gt-brand`; the
+largest chunk ceiling of 600,000 bytes is asserted in step 6 too). The `TURBOSLIDE_CHECK_PERF`
+opt in of days 0 to 5 is gone since merge 2. Step 18's `lint --chrome` list carries `/home` and
+the Not found page (`/no-such-page`, a 404 the shell driver accepts when the document carries
+`main[data-control="notfound"]`), both with `--states ''`; step 26's list carries
+`home-page.spec.ts`. Every merge runs `node scripts/probes/new-write-probe.mjs --base
+http://localhost:4321` (17 rows: the draft on `/new`, six writes saved, the address moved to
+`/edit/<id>`, the room attached, the reopened page's first write, Move to trash and Delete
+forever) against a dev server the integrator starts with `playwright.config.ts`'s environment on
+the file store and stops afterwards. Beyond `pnpm check`: the per builder lines of SPEC-4 6.2, the
+verifier's VERIFICATION-4 rows, `node scripts/hosted-smoke.mjs` on the preview with the round's
+rows, and `NO_COLOR=1 node apps/cli/bin/turboslide.mjs --version` twice with identical output
+(from B1's day 3). `scripts/tooltip-audit.mjs` walks `/home` in its default list; one page alone
+is `--url <page>` (the `--only` of MILESTONES-4 B2's acceptance line is not a flag of the script).
+`scripts/hosted-smoke.mjs` carries the round's rows: `/home`, the icon set, the card, the eight
+twins and `/home` twice with `x-vercel-cache: HIT` on an https base, the thumbnail cache with and
+without `r`, and with `--token-env` the `/api/agent` `instance` facts (the effects backend, the
+runtime's glibc) and, with `--template-copy`, one deck created from the GT template and deleted
+forever again. On the merge 1 tree (2026-09-14, `BUILD-STATUS-4.md` "Merge 1") steps 1, 2, 4, 5,
+6 and 29 passed and the probe answered 17 of 17; the merge 2 run is recorded in
+`BUILD-STATUS-4.md` "Merge 2".
+
 Type checking: `pnpm exec tsr generate` must run before `tsc -b` because `routeTree.gen.ts` is
 generated and git-ignored (measured: three type errors otherwise). `tsc -b` writes declaration
 output to `<package>/dist/types` (project references need it); run `pnpm typecheck` once after a
@@ -429,7 +526,10 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
   `pnpm exec tsr generate --config apps/studio/tsr.config.json` works from the repo root: the
   `tsr` CLI has no `--config` flag (yargs ignores it) and reads `tsr.config.json` from the working
   directory, so the root copy points at `apps/studio/src/routes`. The app's own `tsr.config.json`
-  is read by the Vite plugin. Both produce the same `routeTree.gen.ts` (verified).
+  is read by the Vite plugin. Both produce the same route list; since round three the Start Vite
+  plugin appends a `declare module '@tanstack/react-start'` `Register` block (ten lines) that the
+  CLI does not write, so the two copies differ by that block alone and `tsc -b` passes with either
+  (round four, `build-4/b3.md` finding 5).
 - `pnpm generate:contracts` runs `packages/agent/src/generate/main.ts` with Node's type stripping;
   it must write every generated file deterministically so `git diff --exit-code` passes. From M4
   the outputs include `packages/agent/generated/llms.txt` and `llms-full.txt`; from M5
@@ -449,7 +549,8 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
 - `apps/studio` depends on `@turboslide/cli` (its `./store-actions` export, so the HTTP and MCP
   writes run the CLI's store actions) and on `@turboslide/mcp`; the render worker already depended
   on the CLI the same way. Since round two the window transport runs the same store actions too:
-  every `on(...)` handler of the editor route is the store action over the editor's store, so one
+  every `on(...)` handler of the editor's controller (`apps/studio/src/editor/controller.tsx`; the
+  edit route file until round four's merge 1) is the store action over the editor's store, so one
   implementation serves the four transports (SPEC 7.1).
 - The canvas model of round two (gslides-parity SPEC-2 section 1): every slide is a canvas. A
   canvas write (`block.set /pos`, `block.move` with `z`, a positioned `block.insert`, the arrange,
@@ -547,6 +648,112 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
     dispatches the same handlers. The CSRF filter passes a bearer on the three room routes and GET
     on `/device` and `/api/auth/magic-link/verify`; `playwright.config.ts` and `scripts/check.mjs`
     start their servers with `TURBOSLIDE_LOCAL_OPEN=1` and `TURBOSLIDE_AUTH_RATE_LIMIT=off`.
+
+- The round four seams (gslides-parity SPEC-4; MILESTONES-4 "The seams every builder types
+  against"; the orchestrator's rulings above SPEC-4 where they differ), as merge 1 installed them:
+  - The brand module: `@turboslide/theme/brand` (`packages/theme/src/brand.ts`, framework free,
+    `bayer8` from `@turboslide/effects/bayer`) is the one geometry source (SPEC-4 0.10):
+    `BRAND_TOKENS` and `BRAND_TOKENS_NARROW`, `WINDOW`, `FIELD_END`, `isBody`, `windowDistance`,
+    `field`, `markBits(N)`, `litCount`, `markPath(unit = 2)`, `cellRects`, `markGrid(sizePx)`,
+    `markSvg`, `markBlocks`, `CELL_THRESHOLD_PX = 64`, the tile data (`TILE_SIZES`, `solidWindow`,
+    `tileMarkPath`), the WCAG helpers and `SELECTION_COLORS`. `TurboslideMark.tsx`,
+    `scripts/build-brand.ts` and the CLI banner import it, and nothing else computes the mark's
+    bits or path, so the tab icon, the title row, the README, the card and the terminal draw one
+    form. `@turboslide/theme/brand/site` is `SITE` (`description`, `imageAlt`,
+    `origin(requestOrigin?)`, `themeColor`, `icons`, `twins`, `card`, `manifest`, `robots`) and
+    `/home` reads the twins and the brand paths from it. `@turboslide/chrome/brand.css` carries the
+    eleven `--ts-` identity tokens on `:root`, the 760 px block, the two `::view-transition-*`
+    rules of 0.40 and the lockup and Not found classes; `__root.tsx` loads it after `tokens.css`
+    for every route, so no route sheet declares a `--ts-` identity token (`grep -cE --
+'--ts-(cell|mark|h1|h2|h3|lead|body|small|figure|rail|plate)\b' apps/studio/src/styles.css`
+    is 0; round three's `--ts-` presence tokens stay).
+  - The chrome components (B1): `TurboslideMark({ size, tile? })` (the solid path under 64 px, the
+    cells of `markBits` from 64 px, `currentColor`, `crispEdges`; `role="img"`
+    `aria-label="Turboslide"` alone and `aria-hidden` inside a labelled link),
+    `AppBarBrand({ linkComponent?, homeTo = '/decks', aboutTo = '/home' })` (the mark as
+    `appbar.home`, the word as `appbar.about`), `EmptyFigure({ title, sentence, action?, figure,
+mark? })`, `TitleHomeLink` (`title.home`), and `Progress` with the deck's ramp masked on the
+    fill's leading sixteen cells (`shiftOf`, `rampEdgeMask`). The `linkComponent` seam (SPEC-4
+    0.16): `EditorShellInput.linkComponent?: LinkComponent` (`editor-shell.ts` `LinkSlotProps`:
+    `{ to, preload?: 'intent', className?, children }` plus the anchor attributes) is the router's
+    `Link` wrapped by the studio, so the chrome stays router free and a click on the title row's
+    mark is a same document transition; a plain anchor when absent. B3 fills it in `EditorRoot`
+    and mounts `AppBarBrand` on `/decks` (b1.md R5). `Thumb.capture?: 'never' | 'when-available'`
+    is typed at merge 1 so `Sidebar` compiles against the seam; the behaviour is B4's day 2.
+  - The selection colour (the orchestrator's ruling 1 over SPEC-4 0.3 and 0.9; Kevin's directive
+    that the canvas boxes turn blue): `--pt-select` (`#1a73e8` light, `#3d86f0` dark) and
+    `--pt-guide` (`#d6336c`, `#f0397a`) are the only additions to `packages/chrome/src/tokens.css`,
+    and the acceptance gate `git diff --exit-code packages/chrome/src/tokens.css` reads "differs
+    from `BASE` by that block only". The readers are the canvas selection ring, the eight handles
+    and the rotation handle, the marquee, the hover outline, the crop frame, the group box and
+    the selection chip (`Overlay.css`, `Marquee.css`) and the snap guides (`Guides.css`); the
+    chrome lint's `select` and `guides` scopes (`packages/lint/src/chrome.ts`,
+    `TURBOSLIDE_CHROME.select` and `.guides`, `SHELL_CHROME.tokens.select` and `.guide`) are the
+    allow list, and a border or an outline in either colour anywhere else is a finding. Each
+    value holds 3:1 against both the paper and the ink of its appearance (`brand.ts`
+    `SELECTION_COLORS`, pinned in `brand.test.ts`), so a ring reads on a white slide and on a
+    dark photograph. The remote collaborator outlines keep the six hues; the exports, the deck
+    content, the menus, `/home`, the card and the README stay paper and ink.
+  - The editor split (SPEC-4 0.44, PP 7 row 1; B3's day 1): `apps/studio/src/routes/edit.$deckId.tsx`
+    is the route alone (`Route` with the skeleton and `EditMissing`, `EditPage`; 89 lines),
+    `routes/-edit-search.ts` holds `validateEditSearch` (a dash prefixed file is not a route),
+    `apps/studio/src/editor/controller.tsx` holds `createEditorController` with the hotfix's write
+    path (`reportedRevision()`, `checkBase`, the room client wiring, `adoptExternal`, the `on(...)`
+    table) and `toViewerDeck`, `editor/EditorRoot.tsx` holds `EditorRoot`, the stage and the
+    banners with the two `recordDeckOpened` call sites, and `editor/shell-bridge.tsx` the shell
+    glue; `new.tsx` imports `EditorRoot` directly. The import direction is route to `EditorRoot`
+    to the controller and the shell bridge, never back into the page. Every unit moved verbatim
+    (82 of 82; b3.md 1.1), so the route's reference module no longer carries the editor.
+    `scripts/check.mjs` `INNER_HTML_ALLOW` names `editor/EditorRoot.tsx` for the sprite mount.
+  - `import()` (SPEC-4 0.44): this file carries no rule against dynamic import. In the browser
+    graph it is allowed in three places and nowhere else, all landed at merge 2 (B4's day 4;
+    b4.md R13): `packages/viewer/src/MaterialMount.tsx` (`@turboslide/materials/mount` on the
+    first `[data-recipe]` root), `packages/chrome/src/EditorShell.tsx` through `lib/lazyDialog.ts`
+    (the 26 dialogs, `DiagramPanel`, `EditHtmlPanel` and `ShortcutsDialog` on first open under
+    `Suspense`, preloaded when a menu first opens) and `packages/chrome/src/SourceDrawer.tsx`
+    (CodeMirror through `source/editor` on the first open). SPEC-4's fourth place, the one `marked`
+    importer in `packages/render`, does not exist: no `marked` is in the tree, so that diet row is
+    void. Everywhere else the client code under `apps/studio/src/{routes,editor,components}`,
+    `packages/chrome/src` and `packages/viewer/src` has none (the two `import('./x').Type` forms
+    in `editor-shell.ts` and `editor-shell-context.ts` are type positions). The router's
+    `lazyRouteComponent` importers are the Start plugin's, and the `import()` calls inside server
+    function handlers (`apps/studio/src/server/*.ts`, `start.ts`) and the Node only packages are
+    the server's, keeping those imports out of the client graph.
+  - The studio side of the seams as merge 2 installed them (B3's days 2 to 5, b3.md R10):
+    `apps/studio/src/routes/-link-slot.tsx` `RouterLinkSlot` is the router's `Link` as the
+    chrome's `LinkComponent` slot (`EditorRoot` fills `linkComponent` with it, `AppBarBrand` on
+    `/decks` and `/decks/trash` takes it); `decks.index.tsx` exports `useStreamedList(promise)`
+    (one mounted list that suspends on the first promise and takes later ones through an effect;
+    the loaders return the store listing unawaited so the shell and the Recent row render at
+    first byte); the Recent row is a cookie mirror `ts-recent` of the `localStorage` record scoped
+    to `Path=/decks` and pruned to twelve entries (`routes/-recent.ts`); `getDeck` and
+    `getDeckSlides` are GET server functions whose RPC answer carries `public, s-maxage=60,
+stale-while-revalidate=3600` only for the public shape of an open or published deck at the
+    named revision (`private, no-store` otherwise, never on the document); the You need access
+    page is `routes/-access-page.tsx` `AccessPage({ deckId })` over
+    `@turboslide/chrome/YouNeedAccess`, mounted as the `notFoundComponent` of the deck, edit,
+    present and print routes (the print route's line is the integrator's on b3.md R7); the
+    presenter is its own chunk (`components/PresenterPage.tsx`, imported inside `component`, so
+    `scripts/check.mjs` `INNER_HTML_ALLOW` names it and not the route file). The shell driver's
+    default `readySelector` and the chrome lint's roots carry `.ts-product` (the `/home` root,
+    b2.md R1) and `.ts-notfound`.
+  - `turboslide --version` (SPEC-4 0.17; B1's day 3): a flag parsed in `apps/cli/src/cli.ts`
+    before the command table and handled by `apps/cli/src/commands/banner.ts`; it prints
+    `markBlocks(8)` from the brand module beside the word, the version, the hosted address, the
+    action count and `effects backend: <describeBackends().selected>`, with no colour so
+    `NO_COLOR` changes nothing, and `turboslide info` prints the same header before the deck
+    facts. `apps/cli/src/commands/version.ts` stays the `version save|list|restore` command.
+  - The head (SPEC-4 1.6; B1's day 1): `__root.tsx` carries the description, `application-name`,
+    `apple-mobile-web-app-title`, the `og:*` and `twitter:*` set with the static card at
+    `SITE.origin()` (which reads `TURBOSLIDE_PUBLIC_ORIGIN`, else the production origin),
+    `/favicon.ico` with `sizes="32x32"` before `/icon.svg`, the touch icon, the manifest and one
+    `theme-color` that a boot script after `<HeadContent />` sets to the stamped theme's paper;
+    `NOINDEX_ROUTES` carries `/edit/$deckId`. `NotFound` is an `EmptyFigure` with the 64 px mark
+    and three tooltipped buttons (`notfound.new`, `notfound.decks`, `notfound.about`). The icon
+    set under `apps/studio/public/` (`icon.svg`, `favicon.ico` with three entries at 16, 32 and
+    48, `apple-touch-icon.png`, `manifest.webmanifest`, `robots.txt`, `icons/*.png`) is written by
+    `node scripts/build-brand.ts` and checked byte for byte against `brand-manifest.json` by
+    check step 29; edit the generator, never a generated file.
 
 ## Deviations from the spec, recorded
 
@@ -726,7 +933,8 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
     one per frame remounted the shell); the `deck.info` contract gains `counts.snapshots`.
   - Fix round (integrator): after a write, an undo or an external change removes the current
     slide, the editor selects the slide now at the removed slide's index, clamped to the end
-    (`replacementSlide` in `apps/studio/src/routes/edit.$deckId.tsx`). The research (R02, R07)
+    (`replacementSlide`, in `apps/studio/src/editor/controller.tsx` since round four's split). The
+    research (R02, R07)
     records that Google deletes without confirmation and does not record which slide it selects
     next; the rule follows Google's observed behaviour (the next slide, the previous one at the
     end) and is recorded here as an assumption until the audit checks it against Google. In the
@@ -772,6 +980,100 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
   the digit. The realtime spec's frozen `describe()` revision and the coalesced writes after a
   resync (b2.md, two defects), the intermittent `no thread` 404 on a reopen right after a
   resolve (one of six sequences on the merge 2 walk), and finding 28 stay for the fixer round.
+
+- Round four, merge 1 (`docs/gslides-parity/build-4/integrator.md`, `b1.md`, `b3.md`;
+  `BUILD-STATUS-4.md` "Merge 1"): `@vercel/functions` is pinned at 3.9.7 because SPEC-4 0.31 names
+  no version. The whole `packages/native/wasm/` folder is tracked (0.38 names the glue, the
+  `.wasm` and "the `.d.ts`", and there are two `.d.ts` files); the four files of an earlier local
+  build stay untracked until B4 commits CI's outputs with `BUILD-RECORD.json`. SPEC-4 6.4's "208
+  ink cells" is the area of the 16 unit path (`markBits(8)` lights 52 of 64 cells) and
+  `brand.test.ts` pins both readings. The 16 px tile carries a hinted 12 px mark (rails of 2 px, a
+  6 by 4 window) so the three ICO entries decode to three colours each with no anti aliased pixel;
+  `icon-dark-*.png` are the paper plate with the ink mark (SPEC-4 1.5 step 2; P2 named them the
+  other way); the progress track keeps the port's 2 px where 1.9 says 1 px. `SITE.origin()` in the
+  root `head()` has no request, so a preview without `TURBOSLIDE_PUBLIC_ORIGIN` carries
+  production's card address. The Not found page's About Turboslide button is a plain anchor until
+  B2's `home.tsx` exists. The two `recordDeckOpened` call sites moved with `EditorRoot` (B3's
+  file), so the day 0 amendment's "B4 passes the new arguments from `controller.tsx`" is void and
+  the day 3 change stays inside B3's files. `import './edit.$deckId.css'` stays in the route file
+  until B3's day 2 decides when the editor's CSS arrives. `landing.spec.ts` tests 3 and 4,
+  `editor.spec.ts` and `undo.spec.ts` read or seed the checkout's `decks/` on disk and cannot pass
+  against a tmp store server (b3.md finding 1); step 21 runs them on the runner's file store.
+  `realtime.spec.ts` test 4 is intermittent on this machine before and after the split (the frozen
+  `describe()` revision above). A direct `eslint` over the six split files reports four type aware
+  errors and four `no-shadow` warnings in code byte identical to `BASE`, while
+  `scripts/lint-packages.mjs --only studio` reports none of the errors there and 91 in
+  `apps/studio/e2e/*.spec.ts` above the baseline of 8; the file owners decide on day 2. The tmp
+  store dev server and the node-server build refuse every request without
+  `TURBOSLIDE_SESSION_SECRET`, so the round four server command above and check step 31's runner
+  set it. The verifier's day 0 requests on `scripts/perf-budget.mjs` (the local commit stamp of
+  4.6 row 1, the hosting banner over `toolbar.layout` on the tmp tier, the memory channel's two
+  second checkpoint cadence against 4.6's local ceilings, the twins row counting a 304, the idle
+  window missing a stream opened before it) are open for merge 2 (`build-4/verifier.md`).
+
+- Round four, merge 2 (`docs/gslides-parity/build-4/integrator.md` sections 15 to 20;
+  `BUILD-STATUS-4.md` "Merge 2"; the builders' `b1.md` to `b5.md`), 2026-09-14: the requests that
+  fell in nobody's file were applied by the integrator as the smallest edit with a note in the
+  file: `packages/headless/src/shell.ts` accepts a 404 whose document carries the Not found root
+  and its default `readySelector` names `.ts-product` and `.ts-notfound` (b1.md R8, b2.md R1);
+  `packages/lint/src/chrome.ts` roots gain the two classes; `packages/store/src/blob-vercel.ts`
+  passes `cacheControlMaxAge` to the SDK (b4.md R1); `packages/store/src/tmp-store.ts` takes
+  `HostedOptions.fetchAsset` and fetches the twins the seed does not carry after the overlay's
+  copy (b4.md R2), so `DROP_SEED_TWINS` ships as `true` in `vite.deploy.config.ts` with the
+  `blob` tier's fetch (B4) and the `tmp` tier's fetch (this) both in place; `apps/studio/src/routes/api/agent.ts`
+  answers an `instance` block (`effectsBackend`, `glibcVersionRuntime`, `node`, `platform`) for
+  the hosted smoke's backend row (b4.md R11); `packages/schema/src/shapes/build-definitions.mjs`
+  was removed for `packages/schema/scripts/build-definitions.mjs` and `THIRD_PARTY_NOTICES.md`
+  names the new path (b4.md R3); `packages/chrome/PORTED_FROM.json` gained rows for
+  `Filmstrip.tsx`, `Filmstrip.css` and `lib/lazyDialog.ts` (b4.md R12); `packages/chrome/package.json`
+  exports `./YouNeedAccess` and `./Filmstrip` (b3.md R6). Not applied and recorded: the Linux x64
+  glibc addon of SPEC-4 0.38 is not built (no `cargo-zigbuild` and no `zig` on this machine;
+  b4.md R7 has the commands and `packages/native/ci/native.yml` is the workflow), so the function
+  runs the TypeScript stages, `apps/studio/package.json` gains no `@turboslide/native-linux-x64-gnu`
+  (b3.md R13, b4.md R10) and `TURBOSLIDE_NATIVE_REQUIRED=1` is not set on step 5; the
+  `.github/` folder is untracked and outside the round's files, so `native.yml` stays under
+  `packages/native/ci/` until the ship step places it; the optional b4.md R4 (the validators
+  importing `ids.ts`), R5 (a `ViewerShell` render prop to keep `Filmstrip.tsx` out of the viewer
+  route) and R8 (`@turboslide/native` as a studio dependency) were not taken. The perf check's
+  metric changes (B4's R14 and the verifier's requests 1, 3 and 4) are recorded in
+  `scripts/perf-budget.mjs`'s header: DOM nodes after a garbage collection with the live element
+  count beside them, the local commit stamp from `pending` rising, "saved" as the acknowledgement
+  on the `local` profile because the memory channel checkpoints on a two second cadence (the
+  checkpoint recorded beside it; the `deployment` profile keeps the checkpoint), and a 304
+  revalidation not counted as a twin re-fetch. From B5 (b5.md R5): the README's images are `<img>`
+  tags because the B5 acceptance grep counts a markdown image's `!`, so a future README edit adds
+  an image as a tag too; `docs/freeform.md` line 130 was edited by B5 on the integrator's
+  forwarding of b3.md R5. MILESTONES-4 B2's acceptance line `tooltip-audit.mjs --only /home` reads
+  `--url <origin>/home` (the script has no `--only`). The task's numbering of the round's steps
+  (the perf budget as 29, the Vercel output as 30, the brand test as 31) differs from SPEC-4 6.1;
+  the check keeps SPEC-4's order (29 the generated files, 30 the Vercel output, 31 the perf budget).
+  Two repository files outside every builder's row changed with a note (`integrator.md` section
+  16): `.vercelignore` no longer drops `packages/native/wasm/` from a CLI preview's upload (the
+  first preview build of merge 2 failed on the dither worker's glue import; the module is a
+  committed build product since SPEC-4 0.38) and `.prettierignore` covers that folder (the
+  formatter had reflowed the wasm-bindgen glue, which `BUILD-RECORD.json` pins by sha256). The
+  vendor chunk group of SPEC-4 3.12 does not take effect inside the studio's Vite 8.2.2 build
+  (Rolldown 1.2.8 splits the same entry alone; in the Vite build a function `test`, `name` or
+  `manualChunks` is called zero times and the output is byte identical), so
+  `scripts/check-client-bundle.mjs` reports the largest chunk ceiling until a `vendor-*.js` chunk
+  exists (SPEC-4 0.27's gating rule) and the entry chunk stays at 914,233 bytes with the
+  attribution in `integrator.md` section 17 (React DOM, the schema package with its 281 KB shape
+  table reached through `render/dither-key.ts`, zod, the router); the `/home` and `/decks` js
+  decoded rows of 4.1 miss by construction until the fixer round. Step 19 was met by `prettier
+--write` over this round's committed research and design records and the round three
+  verification records (the round three precedent; whitespace and table alignment only), never
+  over the other workflow's `research-5/`, `design-5/` and `SPEC-5.md`, which were restored from
+  `HEAD` after the pass had touched them (the other workflow then committed them formatted as
+  `e2904d5`, and step 19 is green on the whole tree since); the verifier's untracked
+  `verification-4/` files were reformatted by the same pass and could not be restored (whitespace
+  only; recorded for the verifier). Step 27's audit writes `verification-3/layout-shift.json` and
+  `layout-shift.md` unformatted, so a chain that runs step 27 needs `prettier --write` on those
+  two before step 19 is run again (the committed copies are formatted). A Vercel preview stamps `x-robots-tag:
+noindex` on every answer, static and function alike, while production carries it on `/` alone,
+  so `hosted-smoke.mjs`'s `/home` row asserts the meta always and the header outside a preview.
+  The render route's answers carry the anonymous principal cookie (`set-cookie: __Host-ts_id`),
+  which keeps the CDN from caching thumbnails (`x-vercel-cache: MISS` on the second stamped
+  request); a finding for B4 and the verifier, not a merge edit.
 
 ## License
 

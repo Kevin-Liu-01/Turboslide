@@ -47,7 +47,9 @@ async function measure(browser, path, run) {
   const wall = Date.now() - t0;
   const timing = await page.evaluate(() => {
     const n = performance.getEntriesByType('navigation')[0];
-    const paints = Object.fromEntries(performance.getEntriesByType('paint').map((p) => [p.name, Math.round(p.startTime)]));
+    const paints = Object.fromEntries(
+      performance.getEntriesByType('paint').map((p) => [p.name, Math.round(p.startTime)]),
+    );
     const res = performance.getEntriesByType('resource');
     const byType = {};
     for (const r of res) {
@@ -87,10 +89,20 @@ async function measure(browser, path, run) {
     nodes: pick('Nodes'),
     layoutCount: pick('LayoutCount'),
   };
-  const html = { status: nav?.status(), headers: nav ? { cc: nav.headers()['cache-control'], xcache: nav.headers()['x-vercel-cache'], server: nav.headers()['server'] } : null };
-  const editorReady = path.startsWith('/edit') || path === '/new'
-    ? await page.evaluate(() => (typeof window.turboslide !== 'undefined')).catch(() => null)
-    : null;
+  const html = {
+    status: nav?.status(),
+    headers: nav
+      ? {
+          cc: nav.headers()['cache-control'],
+          xcache: nav.headers()['x-vercel-cache'],
+          server: nav.headers()['server'],
+        }
+      : null,
+  };
+  const editorReady =
+    path.startsWith('/edit') || path === '/new'
+      ? await page.evaluate(() => typeof window.turboslide !== 'undefined').catch(() => null)
+      : null;
   await context.close();
   return { path, run, wall, html, timing, cdpMetrics, editorReady, responses };
 }

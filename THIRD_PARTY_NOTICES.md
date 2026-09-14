@@ -118,7 +118,7 @@ What: `packages/schema/src/shapes/presetShapeDefinitions.xml`, the `presetShapeD
 file ECMA-376 Part 1 (Office Open XML File Formats, DrawingML) publishes beside its text as the
 normative definition of the preset shape geometries (`ST_ShapeType`), committed as published
 (sha256 `eaff19f4405b3be6822428c96ef46cc685499217366fd58e5e63a5a24739f02f`) and read by
-`packages/schema/src/shapes/build-definitions.mjs` into `definitions.ts`, which the geometry
+`packages/schema/scripts/build-definitions.mjs` into `definitions.ts`, which the geometry
 interpreter `packages/schema/src/shapes/geometry.ts` evaluates so the sheet, the Perfect export
 and PowerPoint draw one shape (gslides-parity SPEC-2 0.10, 0.57). The file is not modified.
 Ecma International grants permission to copy and distribute the standard and its accompanying

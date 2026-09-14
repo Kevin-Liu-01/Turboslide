@@ -1,0 +1,80 @@
+/* EmptyFigure (EmptyFigure.tsx; gslides-parity SPEC-4 1.9, 1.10): the empty states of /decks,
+   the trash and a search with no match, and the Not found page. A 320 by 180 crop of the figure
+   twin at 1:1 (the twin is 1600 by 900 at 2 px cells, shown at that size and cropped, never
+   scaled) in a 1 px --pt-edge frame, then the title, one sentence and at most one primary action.
+   The crop follows the appearance the boot script stamped: the light twin on light chrome, the
+   dark twin under :root[data-theme='dark'], the pair the build writes to apps/studio/public/brand
+   (the paths are packages/theme/brand/site.ts TWIN_PATHS; brand.test.ts asserts they agree).
+   Nothing here animates. Colours are tokens only; the frame is the edge role of the line law. */
+.ts-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  color: var(--pt-ink);
+}
+
+.ts-empty-fig {
+  position: relative;
+  box-sizing: border-box;
+  width: 320px;
+  height: 180px;
+  border: 1px solid var(--pt-edge);
+  background-color: var(--pt-paper);
+  background-repeat: no-repeat;
+  background-size: 1600px 900px;
+  /* the crop: the twin's centre, so the plate box of the capture stays out of the frame */
+  background-position: -640px -360px;
+  image-rendering: pixelated;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+}
+
+.ts-empty-fig[data-figure='figure'] {
+  background-image: url('/brand/figure-light.png');
+}
+
+.ts-empty-fig[data-figure='notfound'] {
+  background-image: url('/brand/notfound-light.png');
+}
+
+:root[data-theme='dark'] .ts-empty-fig[data-figure='figure'] {
+  background-image: url('/brand/figure-dark.png');
+}
+
+:root[data-theme='dark'] .ts-empty-fig[data-figure='notfound'] {
+  background-image: url('/brand/notfound-dark.png');
+}
+
+/* the mark over the crop (Not found): on a plate cut from the picture, the mark's own composition */
+.ts-empty-mark {
+  display: inline-flex;
+  padding: 16px;
+  background: var(--ts-plate, var(--pt-paper));
+  color: var(--pt-ink);
+}
+
+.ts-empty-title {
+  margin: 8px 0 0;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: var(--ts-h3, 20px);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--pt-ink);
+}
+
+.ts-empty-sentence {
+  margin: 0;
+  font-size: var(--ts-body, 15px);
+  line-height: 1.55;
+  color: var(--pt-ink-2);
+  max-width: 62ch;
+}
+
+.ts-empty-action {
+  margin-top: 8px;
+}

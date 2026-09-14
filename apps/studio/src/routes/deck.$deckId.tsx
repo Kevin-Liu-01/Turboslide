@@ -5,8 +5,10 @@ import type { ShellMode } from '@turboslide/chrome/shell-data';
 import type { Theme } from '@turboslide/viewer/theme';
 
 import { DeckViewer } from '../components/DeckViewer';
-import { getDeck } from '../server/decks';
+import { deckRevision, getDeck, getDeckSlides } from '../server/decks';
+import type { DeckPayload, DeckSlidesPayload } from '../server/decks';
 import { publishedPlayerGate } from '../server/published';
+import { AccessPage } from './-access-page';
 
 // The viewer (SPEC 3.4, 6.1): slide, grid, book and present modes; the theme;
 // the keys; #NN and #s/<slideId> hashes; the sidebar tree, the toolbar, the
@@ -19,7 +21,29 @@ import { publishedPlayerGate } from '../server/published';
 // passes the token to `getDeck` so the record decides the read, and the route's server GET gate
 // answers 410 with "This presentation is no longer published" once the deck is unpublished
 // (server/published.ts; hotfix B request R1).
+//
+// Round four (gslides-parity SPEC-4 3.11; PP 6, 5 "The Blob read path"): the document carries the
+// first slide's HTML and the other slides stream behind it. The loader reads the revision first
+// (`deckRevision`), asks `getDeck` for the payload with the first slide's markup alone
+// (`slides: 'first'`) and returns `getDeckSlides` unawaited as `rest`, which the router streams
+// after the shell and DeckViewer merges when it lands, so the sidebar's clones and the grid fill
+// in a moment after first paint while the document is one slide long (85 slides were 381 KB of
+// HTML and 6,470 nodes to hydrate). Both reads are GET server functions whose URL names the deck,
+// the theme and the revision, so a client's request is a CDN key: the answer carries
+// `public, s-maxage=60, stale-while-revalidate=3600` when the reader reached the deck as anyone
+// would and the shape is the public one (server/decks.ts setDeckCacheHeader), else
+// `private, no-store`. The revision is learned inside the loader rather than through
+// `loaderDeps`, which the router derives from the search alone. `notFoundComponent` is the You
+// need access page (VERIFICATION-3 finding 53; ruling 3): `getDeck` answers null for a missing
+// and a restricted deck alike and the server's status is 404.
 export type DeckSearch = { mode?: ShellMode; theme?: Theme; present?: 1; p?: string };
+
+/** What the two viewer routes' loaders return: the document's payload and the streamed rest. */
+export type DeckLoaderData = {
+  payload: DeckPayload;
+  /** the other slides' HTML, on its way; null for a caller `getDeckSlides` refuses */
+  rest: Promise<DeckSlidesPayload | null>;
+};
 
 /** The published token's grammar, the one `getDeck` validates (`publishToken`). */
 const PUBLISH_TOKEN_PATTERN = /^[A-Za-z0-9_-]{16,64}$/;
@@ -61,20 +85,36 @@ export function isNoLongerPublished(error: unknown): boolean {
   return /"error":"gone"/.test(error.message);
 }
 
+/**
+ * The loader of /deck and /embed (SPEC-4 3.11): the revision, the first slide's payload, the
+ * rest deferred. Shared by the two routes so they read the store the same way.
+ */
+export async function loadDeckView(
+  deckId: string,
+  deps: { theme?: Theme; p?: string },
+): Promise<DeckLoaderData> {
+  const head = await deckRevision({ data: { deckId } });
+  if (!head) throw notFound();
+  const input = {
+    deckId,
+    theme: deps.theme,
+    revision: head.revision,
+    ...(deps.p === undefined ? {} : { publishToken: deps.p }),
+  };
+  const payload = await getDeck({ data: { ...input, slides: 'first' } });
+  if (!payload) throw notFound();
+  // not awaited: the router streams the other slides behind the document (SPEC-4 3.11)
+  const rest =
+    payload.partial === true
+      ? getDeckSlides({ data: input })
+      : Promise.resolve<DeckSlidesPayload | null>(null);
+  return { payload, rest };
+}
+
 export const Route = createFileRoute('/deck/$deckId')({
   validateSearch: validateDeckSearch,
   loaderDeps: ({ search }) => ({ theme: search.theme, p: search.p }),
-  loader: async ({ params, deps }) => {
-    const payload = await getDeck({
-      data: {
-        deckId: params.deckId,
-        theme: deps.theme,
-        ...(deps.p === undefined ? {} : { publishToken: deps.p }),
-      },
-    });
-    if (!payload) throw notFound();
-    return payload;
-  },
+  loader: ({ params, deps }) => loadDeckView(params.deckId, deps),
   server: {
     // the 410 of a revoked publish token before the document renders (SPEC-3 6.4); every other
     // request goes on to the loader
@@ -87,7 +127,7 @@ export const Route = createFileRoute('/deck/$deckId')({
   headers: ({ match }) => deckResponseHeaders(match.search),
   head: ({ loaderData, match }) => ({
     meta: [
-      { title: loaderData ? `${loaderData.deck.title}, Turboslide` : 'Turboslide' },
+      { title: loaderData ? `${loaderData.payload.deck.title}, Turboslide` : 'Turboslide' },
       ...deckRobotsMeta(match.search),
     ],
   }),
@@ -97,7 +137,7 @@ export const Route = createFileRoute('/deck/$deckId')({
 });
 
 function DeckPage() {
-  const payload = Route.useLoaderData();
+  const { payload, rest } = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const onModeChange = (mode: ShellMode) => {
@@ -110,6 +150,7 @@ function DeckPage() {
   return (
     <DeckViewer
       payload={payload}
+      rest={rest}
       mode={search.mode}
       theme={search.theme}
       present={search.present === 1}
@@ -120,15 +161,7 @@ function DeckPage() {
 
 function DeckMissing() {
   const { deckId } = Route.useParams();
-  return (
-    <main className="ts-home">
-      <h1>No deck named {deckId}</h1>
-      <p>
-        This studio holds no deck at decks/{deckId}, and no decks/fixture to stand in for it. The
-        list at /decks has every deck it serves.
-      </p>
-    </main>
-  );
+  return <AccessPage deckId={deckId} />;
 }
 
 /** The loader's refusal on a client side navigation: the unpublished player, or the plain error. */

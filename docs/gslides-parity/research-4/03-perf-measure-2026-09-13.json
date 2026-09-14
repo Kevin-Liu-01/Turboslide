@@ -653,9 +653,7 @@
           "t": 4482,
           "d": 53,
           "b": 1,
-          "scripts": [
-            "index-Bw0tvTCg.js:module-script:43"
-          ]
+          "scripts": ["index-Bw0tvTCg.js:module-script:43"]
         }
       ],
       "cls": 0.0011,
@@ -1183,17 +1181,13 @@
           "t": 1044,
           "d": 54,
           "b": 0,
-          "scripts": [
-            "index-Bw0tvTCg.js:module-script:45"
-          ]
+          "scripts": ["index-Bw0tvTCg.js:module-script:45"]
         },
         {
           "t": 1135,
           "d": 118,
           "b": 66,
-          "scripts": [
-            "index-Bw0tvTCg.js:event-listener:114"
-          ]
+          "scripts": ["index-Bw0tvTCg.js:event-listener:114"]
         }
       ],
       "cls": 0.0024,
@@ -1811,9 +1805,7 @@
           "t": 682,
           "d": 187,
           "b": 136,
-          "scripts": [
-            "preload-helper-B5STkB3_.js:resolve-promise:173"
-          ]
+          "scripts": ["preload-helper-B5STkB3_.js:resolve-promise:173"]
         }
       ],
       "cls": 0.0005,
@@ -5927,9 +5919,7 @@
           "t": 495,
           "d": 112,
           "b": 60,
-          "scripts": [
-            "index-Bw0tvTCg.js:event-listener:108"
-          ]
+          "scripts": ["index-Bw0tvTCg.js:event-listener:108"]
         }
       ],
       "cls": 0.0024,
@@ -6707,17 +6697,13 @@
           "t": 244,
           "d": 86,
           "b": 36,
-          "scripts": [
-            "index-Bw0tvTCg.js:module-script:84"
-          ]
+          "scripts": ["index-Bw0tvTCg.js:module-script:84"]
         },
         {
           "t": 1394,
           "d": 407,
           "b": 355,
-          "scripts": [
-            "preload-helper-B5STkB3_.js:resolve-promise:380"
-          ]
+          "scripts": ["preload-helper-B5STkB3_.js:resolve-promise:380"]
         }
       ],
       "cls": 0.0005,

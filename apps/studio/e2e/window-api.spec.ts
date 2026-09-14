@@ -361,3 +361,38 @@ test('a guarded share action through the window API is refused without the page 
   );
   expect(outcome).toBe(REFUSAL);
 });
+
+test('an idle editor holds one stream and polls its session at the long poll cadence, never in a storm (SPEC-4 0.37, 4.4)', async ({
+  page,
+}) => {
+  test.setTimeout(150_000);
+  const streams: string[] = [];
+  const serverFns: { url: string; at: number }[] = [];
+  page.on('request', (request) => {
+    if (/\/api\/decks\/[^/?]+\/stream/.test(request.url())) streams.push(request.url());
+  });
+  page.on('response', (response) => {
+    if (response.url().includes('/_serverFn/'))
+      serverFns.push({ url: response.url(), at: performance.now() });
+  });
+  await openEditor(page);
+  /* the round three shell attaches its stream and its session during the settle */
+  await page.waitForTimeout(5_000);
+  const streamsBefore = streams.length;
+  const fnBefore = serverFns.length;
+  await page.waitForTimeout(60_000);
+  const streamsInWindow = streams.length - streamsBefore;
+  const fnInWindow = serverFns.slice(fnBefore);
+  console.log(
+    `idle 60 s: ${streamsInWindow} stream connections in the window (${streams.length} since load), ${fnInWindow.length} server function responses`,
+  );
+  /* one stream per tab (SPEC-3 3.3 closes it between 240 and 290 s, so the window sees at most one reconnect) */
+  expect(streams.length).toBeGreaterThanOrEqual(1);
+  expect(streamsInWindow).toBeLessThanOrEqual(1);
+  /* the idle ceiling of SPEC-4 4.4: four server function responses per minute. The session poll
+     survives round three (0.37); held for its 20 s on the instance that owns the session and
+     paused 2 s after an empty answer, it costs three a minute, never the storm R04 7.3 measured */
+  expect(fnInWindow.length).toBeLessThanOrEqual(4);
+  const gaps = fnInWindow.slice(1).map((row, i) => row.at - (fnInWindow[i]?.at ?? row.at));
+  for (const gap of gaps) expect(gap).toBeGreaterThan(1_500);
+});

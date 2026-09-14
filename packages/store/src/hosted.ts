@@ -100,6 +100,14 @@ export type HostedOptions = {
   overlayRoot: string;
   seed: SeedSource | null;
   blob: BlobClientFactory | null;
+  /**
+   * A twin the bundle and the store do not hold, by deck id and file name (`opener-brand-dark.jpg`),
+   * from wherever the deployment serves it statically (gslides-parity SPEC-4 0.35, 3.6: the seed's
+   * twins leave the function bundle and stay static files of the deployment); null when the
+   * source has none. The studio's root.ts fetches the seed deck's twins from the deployment's
+   * own origin; a checkout passes nothing, because its twins are on disk.
+   */
+  fetchAsset?: (deckId: string, relative: string) => Promise<Uint8Array | null>;
   /** the clock, for tests */
   now?: () => string;
   log?: (line: string) => void;

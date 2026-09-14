@@ -43,6 +43,10 @@ catalog:
   '@upstash/ratelimit': 2.0.8
   '@upstash/redis': 1.38.4
   '@vercel/blob': 2.8.0
+  # gslides-parity SPEC-4 0.31: waitUntil for the thumbnail refresh and the retention prune (the
+  # integrator, round four day 0); SPEC-4 names no version, so the newest release on the registry
+  # on 2026-09-14 is pinned (3.9.7, published 2026-09-09; build-4/integrator.md section 5)
+  '@vercel/functions': 3.9.7
   '@vitejs/plugin-react': 6.1.1
   better-auth: 1.7.4
   dompurify: 3.4.15

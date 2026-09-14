@@ -1,0 +1,212 @@
+/* The Turboslide identity sheet (gslides-parity SPEC-4 0.8, 0.9, 0.40, 1.8; round four B1).
+   Imported once by the studio's root route after tokens.css. It declares the eleven `--ts-`
+   tokens the /home page, Not found, the empty states and the title row mark read, mirrored as
+   data by packages/theme/src/brand.ts BRAND_TOKENS and pinned by brand.test.ts (the pattern of
+   tokens.ts and tokens.test.ts). No colour, no radius, no duration: every colour on an identity
+   surface resolves inside the `--pt-` set of tokens.css, which stays byte identical apart from
+   the `--pt-select` block of the orchestrator's ruling 1. The sheet also carries the two view
+   transition rules of 0.40 (in this file so tokens.css does not change), the `.ts-mark` and
+   `.ts-tile` classes TurboslideMark.tsx draws with, the app bar lockup of 1.2 (AppBarBrand.tsx)
+   and the Not found page's frame (__root.tsx NotFound). Round three's ten `--ts-` presence
+   tokens live in apps/studio/src/styles.css and are not identity tokens. */
+
+:root {
+  /* one dither cell at 1x: a twin is 1600 by 900 at 2 px cells, shown at that size with
+     image-rendering: pixelated and cropped, never scaled */
+  --ts-cell: 2px;
+  /* the title row mark */
+  --ts-mark: 24px;
+  /* the /home ladder (weight 500, tracking -0.025em on h1 and h2, -0.01em on h3) */
+  --ts-h1: 56px;
+  --ts-h2: 32px;
+  --ts-h3: 20px;
+  --ts-lead: 20px;
+  --ts-body: 15px;
+  /* the chrome size: facts, links, source lines, footer */
+  --ts-small: 13px;
+  /* the numbers strip, tabular-nums */
+  --ts-figure: 40px;
+  /* the content width of /home, the width .ts-home-page already uses */
+  --ts-rail: 1120px;
+  /* the plate is the ground showing through and draws no rule */
+  --ts-plate: var(--pt-paper);
+}
+
+/* the one media block of 0.9: the display sizes at and under 760 px */
+@media (max-width: 760px) {
+  :root {
+    --ts-h1: 40px;
+    --ts-h2: 26px;
+    --ts-lead: 18px;
+    --ts-figure: 32px;
+  }
+}
+
+/* View transitions (SPEC-4 0.40): the router starts a transition of type `route` on a path
+   change; the old root fades over the leaving duration and the new one over the entering
+   duration. tokens.css sets both to 0 ms under prefers-reduced-motion, so that reader gets the
+   cut. Slide changes keep SlideView.tsx's keyed fade. */
+::view-transition-old(root) {
+  animation-duration: var(--pt-dur-leave);
+}
+
+::view-transition-new(root) {
+  animation-duration: var(--pt-dur-enter);
+}
+
+/* The mark (TurboslideMark.tsx): currentColor, crisp edges, sized by the component's width and
+   height attributes; the title row's sheet reads --ts-mark over them (TitleRow.css). Never a
+   gradient, a second colour, a rounded corner or a rotation. */
+.ts-mark {
+  display: inline-block;
+  flex: 0 0 auto;
+  fill: currentColor;
+  shape-rendering: crispEdges;
+  vertical-align: middle;
+}
+
+/* The tile (SPEC-4 0.4): the mark in ink on an opaque paper plate with a 1 px frame in the
+   edge composite; in chrome the plate and the frame are the host's tokens (--pt-edge over
+   --pt-paper is the composite the rasters carry). */
+.ts-tile .ts-tile-plate {
+  fill: var(--pt-paper);
+}
+
+.ts-tile .ts-tile-frame {
+  fill: none;
+  stroke: var(--pt-edge);
+  stroke-width: 1;
+}
+
+.ts-tile .ts-tile-mark {
+  fill: var(--pt-ink);
+}
+
+/* The horizontal lockup at 22 px type (SPEC-4 1.2, 1.10; AppBarBrand.tsx): the 16 px solid
+   mark as one link to the files page and the word as a second link to the product page, a 10 px
+   gap, baselines shared. The word is live text in the display face, weight 500, -0.01em from 16
+   to 27 px (R01 6.2 item 5). Focus is the shell's 1 px ink ring, offset so it clears the glyphs. */
+.ts-brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.ts-brand-lockup-mark,
+.ts-brand-lockup-word {
+  display: inline-flex;
+  align-items: center;
+  color: var(--pt-ink);
+  text-decoration: none;
+  border: 0;
+  background: none;
+  padding: 0;
+  margin: 0;
+}
+
+.ts-brand-lockup-mark {
+  width: 16px;
+  height: 24px;
+  justify-content: center;
+}
+
+.ts-brand-lockup-mark .ts-mark {
+  width: 16px;
+  height: 16px;
+}
+
+.ts-brand-lockup-word {
+  height: 24px;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.ts-brand-lockup-word:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.ts-brand-lockup-mark:focus-visible,
+.ts-brand-lockup-word:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+/* The loading curtain (SPEC-4 0.15; the studio's EditorSkeleton and PresenterSkeleton): the
+   empty state's figure twin at integer cells where the sheet will be, aligned to the box's top
+   left corner so no cell is split, the light twin on light chrome and the dark twin under the
+   theme attribute. In the editor's skeleton a host laid over the stage box (the stage is
+   positioned, ViewerShell.css) carries a 16:9 child that fits it the way the sheet will, through
+   container query units, so the stage box itself is untouched; in the presenter's skeleton the
+   current slide's frame is the box. The skeleton's boxes are unchanged, so nothing moves when the
+   sheet replaces the picture; the selectors outrank the skeleton sheet's one class and two class
+   rules on the same boxes. The ramp texture of 0.15 is the Progress component's. */
+.ts-skeleton .ts-skeleton-stagewrap {
+  /* the shell's own sheet positions the stage box; the skeleton paints before that sheet loads */
+  position: relative;
+}
+
+.ts-skeleton .ts-curtain-host {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  container-type: size;
+}
+
+.ts-skeleton .ts-curtain-host > .ts-curtain {
+  width: min(100cqw, calc(100cqh * 16 / 9));
+  aspect-ratio: 16 / 9;
+}
+
+.ts-skeleton .ts-curtain,
+.ts-skeleton .ts-skeleton-frame.ts-curtain {
+  background-color: var(--pt-paper);
+  background-image: url('/brand/figure-light.png');
+  background-repeat: no-repeat;
+  background-size: 1600px 900px;
+  background-position: 0 0;
+  image-rendering: pixelated;
+}
+
+:root[data-theme='dark'] .ts-skeleton .ts-curtain,
+:root[data-theme='dark'] .ts-skeleton .ts-skeleton-frame.ts-curtain {
+  background-image: url('/brand/figure-dark.png');
+}
+
+/* The Not found page (SPEC-4 1.10; __root.tsx NotFound): the empty figure with the 64 px mark
+   over the notfound twin's crop, the heading, one paragraph, three .pt-ib buttons. Body text at
+   --ts-body, nothing under --ts-small. */
+.ts-notfound {
+  max-width: var(--ts-rail);
+  margin: 0 auto;
+  padding: 56px 24px 96px;
+  color: var(--pt-ink);
+  font: var(--ts-body) / 1.55 var(--pt-text);
+}
+
+.ts-notfound .ts-empty-title {
+  font-size: var(--ts-h2);
+}
+
+.ts-notfound-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ts-notfound-actions .pt-ib {
+  text-decoration: none;
+}
+
+.ts-notfound-actions .pt-ib:not(.is-solid) {
+  border-color: var(--pt-hair);
+}

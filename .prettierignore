@@ -23,3 +23,8 @@ docs/gslides-parity/verification-2/**/*.json
 # the fonts manifest scripts/build-fonts.py writes, compared by `turboslide fonts build --check`
 packages/schema/src/__fixtures__/gslides-r1
 packages/fonts/export/fonts.json
+
+# Round four (gslides-parity SPEC-4 0.38; the integrator at merge 2): the wasm module is wasm-bindgen's
+# output, committed as a build product whose bytes packages/native/BUILD-RECORD.json pins, so the
+# formatter never touches it (check step 29 compares the sha256, step 19 would otherwise reflow the glue)
+packages/native/wasm/

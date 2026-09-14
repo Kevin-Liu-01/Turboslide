@@ -5,6 +5,8 @@
  * body's 3fr and 2fr columns, the current slide's 16:9 frame and the side column with its two
  * small frames), so the console replaces it in place. Static, no state, no measurement; the head
  * groups are empty boxes of the head's own height and nothing here carries the console's marks.
+ * The current slide's frame carries `ts-curtain`, the figure twin of gslides-parity SPEC-4 0.15
+ * (brand.css), inside the same box.
  */
 export function PresenterSkeleton() {
   return (
@@ -24,7 +26,7 @@ export function PresenterSkeleton() {
           <div className="ts-presenter-row">
             <span />
             <div className="ts-presenter-current">
-              <div className="ts-presenter-frame is-current ts-skeleton-frame" />
+              <div className="ts-presenter-frame is-current ts-skeleton-frame ts-curtain" />
               <div className="ts-presenter-pick" />
             </div>
             <span />

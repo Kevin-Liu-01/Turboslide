@@ -119,7 +119,16 @@ export type EditorDeck = {
   issues: Issue[];
   ok: boolean;
   sprite: string;
+  /**
+   * The version log as the loader carries it (gslides-parity SPEC-4 0.34; PP 3.5 item 3): the
+   * newest EDITOR_VERSIONS_KEPT records without their `mutations`, oldest first as the log is.
+   * The Version history panel loads the whole log with its mutations through `listVersions`
+   * when it opens (the controller's call), and the editor's own writes refresh it the same way.
+   * A draft's log is empty.
+   */
   versions: Version[];
+  /** every record the store holds, counted before the trim; absent on a draft */
+  versionCount?: number;
   leases: Lease[];
   /** the store this studio runs on, for the banner over a store whose edits do not persist */
   hosting: HostingFacts;
@@ -141,6 +150,23 @@ export type EditorDeck = {
   /** the deployment's sign in facts (7.3); absent on a draft */
   auth?: EditorAuthFacts;
 };
+
+/** How many version records the editor's loader carries (SPEC-4 0.34). */
+export const EDITOR_VERSIONS_KEPT = 50;
+
+/**
+ * The version log trimmed for the loader (SPEC-4 0.34; PP 3.5 item 3): the newest
+ * EDITOR_VERSIONS_KEPT records in the log's own order, each without its `mutations` (a
+ * `slide.replace` carries the slide, so the GT deck's seven records weigh 184 KB and a deck
+ * edited for weeks would send megabytes on every open). The author, the note, the stamp, the
+ * number and the revision stay, which is what the title row's "last edit by" line and the
+ * Version history panel's rows read before the panel loads the full log. Pure.
+ */
+export function trimVersionLog(versions: ReadonlyArray<Version>): Version[] {
+  return versions
+    .slice(Math.max(0, versions.length - EDITOR_VERSIONS_KEPT))
+    .map((version) => ({ ...version, mutations: [] }));
+}
 
 /**
  * The payload shaped by role (SPEC-3 6.3): notes leave below editor, skipped slides leave below
@@ -261,10 +287,21 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
         mail: runtime.mailMode,
       },
     };
-    return JSON.stringify(shapeByRole(result, standing.capabilities));
+    const shaped = shapeByRole(result, standing.capabilities);
+    // the trim after the shaping: a role without history carries an empty log and no count
+    return JSON.stringify({
+      ...shaped,
+      versions: trimVersionLog(shaped.versions),
+      ...(shaped.versions.length > 0 || standing.capabilities.includes('history')
+        ? { versionCount: shaped.versions.length }
+        : {}),
+    });
   });
 
-/** The raw normalized document with the version log and the unexpired leases, for the editor's loader. */
+/**
+ * The raw normalized document with the trimmed version log (SPEC-4 0.34: the newest 50 records
+ * without their mutations, and `versionCount`) and the unexpired leases, for the editor's loader.
+ */
 export async function readEditorDeck(input: { deckId: string }): Promise<EditorDeck | null> {
   return JSON.parse(await readEditorDeckFn({ data: JSON.stringify(input) })) as EditorDeck | null;
 }

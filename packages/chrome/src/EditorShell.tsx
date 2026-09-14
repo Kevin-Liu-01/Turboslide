@@ -1,5 +1,5 @@
 import type { ReactNode, RefObject } from 'react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { emptyTable } from '@turboslide/schema/blocks/table';
 import type { LayoutId } from '@turboslide/schema/layouts';
@@ -12,35 +12,7 @@ import { ActivityPanel } from './activity/ActivityPanel';
 import { BottomBar } from './BottomBar';
 import { anchorAtSelection, canvasOrder, stepThread } from './comments/comments-model';
 import { CommentsPanel } from './comments/CommentsPanel';
-import { DiagramPanel } from './DiagramPanel';
-import { AgentAccessDialog } from './dialogs/AgentAccess';
-import { AvatarBuilderDialog } from './dialogs/AvatarBuilder';
-import { BackgroundDialog } from './dialogs/Background';
-import { CustomSpacingDialog } from './dialogs/CustomSpacing';
-import { DetailsDialog } from './dialogs/Details';
-import { DownloadDialog } from './dialogs/Download';
-import { FindReplaceDialog } from './dialogs/FindReplace';
-import { FromThisPresentationDialog } from './dialogs/FromThisPresentation';
-import { HelpDialog } from './dialogs/Help';
-import { ImageByUrlDialog } from './dialogs/ImageByUrl';
-import { ImportSlidesDialog } from './dialogs/ImportSlides';
-import { InsertIconDialog } from './dialogs/InsertIcon';
-import { InsertMaterialDialog } from './dialogs/InsertMaterial';
-import { LinkDialog } from './dialogs/Link';
-import { MakeCopyDialog } from './dialogs/MakeCopy';
-import { ForgetBrowserDialog } from './dialogs/ForgetBrowser';
 import { NamePromptDialog } from './dialogs/NamePrompt';
-import { NameVersionDialog } from './dialogs/NameVersion';
-import { NotificationSettingsDialog } from './dialogs/NotificationSettings';
-import { OpenDialog } from './dialogs/Open';
-import { ProfileDialog } from './dialogs/Profile';
-import { PublishDialog } from './dialogs/Publish';
-import { RequestAccessDialog } from './dialogs/RequestAccess';
-import { ShareDialog } from './dialogs/Share';
-import { SignInDialog } from './dialogs/SignIn';
-import { EditHtmlPanel } from './EditHtmlPanel';
-import { SlideNumbersDialog } from './dialogs/SlideNumbers';
-import { SpecialCharactersDialog } from './dialogs/SpecialCharacters';
 import { WordArtBar } from './dialogs/WordArtBar';
 import {
   APPEARANCE_STORAGE,
@@ -121,7 +93,6 @@ import { openRoster } from './presence/roster-hook';
 import { displayNameFor, viewerFactsOf } from './presence/presence-model';
 import { usePtShell } from './shell-context';
 import type { ShellState } from './shell-context';
-import { ShortcutsDialog } from './ShortcutsDialog';
 import type { FilmstripHandle } from './Sidebar';
 import { Snackbar } from './Snackbar';
 import type { SnackbarAction, SnackbarState } from './Snackbar';
@@ -133,6 +104,7 @@ import { ToolFinder } from './ToolFinder';
 import { useEditorKeys } from './useEditorKeys';
 import { VersionsPanel } from './VersionsPanel';
 import { previousOf } from './versions-model';
+import { lazyDialog, preloadDialogs } from './lib/lazyDialog';
 import { useMountEffect } from './lib/useMountEffect';
 import type { Version } from '@turboslide/schema/mutations';
 
@@ -173,6 +145,108 @@ const PICKER_DIALOG: Readonly<Record<InsertPicker, DialogId>> = {
   icon: 'insertIcon',
   material: 'insertMaterial',
 };
+
+/**
+ * The dialogs, the Diagram panel, the HTML panel and the shortcuts dialog load on first open
+ * (gslides-parity SPEC-4 0.44, 3.12; lib/lazyDialog.ts): one chunk per module, fetched when a menu
+ * first opens (`preloadDialogs` below) or when the dialog is asked for. The pickers stay static:
+ * the toolbar tail and the inspector import them too, so a split here alone would move no bytes.
+ */
+const AgentAccessDialog = lazyDialog(() =>
+  import('./dialogs/AgentAccess').then((m) => m.AgentAccessDialog),
+);
+const AvatarBuilderDialog = lazyDialog(() =>
+  import('./dialogs/AvatarBuilder').then((m) => m.AvatarBuilderDialog),
+);
+const BackgroundDialog = lazyDialog(() =>
+  import('./dialogs/Background').then((m) => m.BackgroundDialog),
+);
+const CustomSpacingDialog = lazyDialog(() =>
+  import('./dialogs/CustomSpacing').then((m) => m.CustomSpacingDialog),
+);
+const DetailsDialog = lazyDialog(() => import('./dialogs/Details').then((m) => m.DetailsDialog));
+const DownloadDialog = lazyDialog(() => import('./dialogs/Download').then((m) => m.DownloadDialog));
+const FindReplaceDialog = lazyDialog(() =>
+  import('./dialogs/FindReplace').then((m) => m.FindReplaceDialog),
+);
+const FromThisPresentationDialog = lazyDialog(() =>
+  import('./dialogs/FromThisPresentation').then((m) => m.FromThisPresentationDialog),
+);
+const HelpDialog = lazyDialog(() => import('./dialogs/Help').then((m) => m.HelpDialog));
+const ImageByUrlDialog = lazyDialog(() =>
+  import('./dialogs/ImageByUrl').then((m) => m.ImageByUrlDialog),
+);
+const ImportSlidesDialog = lazyDialog(() =>
+  import('./dialogs/ImportSlides').then((m) => m.ImportSlidesDialog),
+);
+const InsertIconDialog = lazyDialog(() =>
+  import('./dialogs/InsertIcon').then((m) => m.InsertIconDialog),
+);
+const InsertMaterialDialog = lazyDialog(() =>
+  import('./dialogs/InsertMaterial').then((m) => m.InsertMaterialDialog),
+);
+const LinkDialog = lazyDialog(() => import('./dialogs/Link').then((m) => m.LinkDialog));
+const MakeCopyDialog = lazyDialog(() => import('./dialogs/MakeCopy').then((m) => m.MakeCopyDialog));
+const ForgetBrowserDialog = lazyDialog(() =>
+  import('./dialogs/ForgetBrowser').then((m) => m.ForgetBrowserDialog),
+);
+const NameVersionDialog = lazyDialog(() =>
+  import('./dialogs/NameVersion').then((m) => m.NameVersionDialog),
+);
+const NotificationSettingsDialog = lazyDialog(() =>
+  import('./dialogs/NotificationSettings').then((m) => m.NotificationSettingsDialog),
+);
+const OpenDialog = lazyDialog(() => import('./dialogs/Open').then((m) => m.OpenDialog));
+const ProfileDialog = lazyDialog(() => import('./dialogs/Profile').then((m) => m.ProfileDialog));
+const PublishDialog = lazyDialog(() => import('./dialogs/Publish').then((m) => m.PublishDialog));
+const RequestAccessDialog = lazyDialog(() =>
+  import('./dialogs/RequestAccess').then((m) => m.RequestAccessDialog),
+);
+const ShareDialog = lazyDialog(() => import('./dialogs/Share').then((m) => m.ShareDialog));
+const SignInDialog = lazyDialog(() => import('./dialogs/SignIn').then((m) => m.SignInDialog));
+const SlideNumbersDialog = lazyDialog(() =>
+  import('./dialogs/SlideNumbers').then((m) => m.SlideNumbersDialog),
+);
+const SpecialCharactersDialog = lazyDialog(() =>
+  import('./dialogs/SpecialCharacters').then((m) => m.SpecialCharactersDialog),
+);
+const DiagramPanel = lazyDialog(() => import('./DiagramPanel').then((m) => m.DiagramPanel));
+const EditHtmlPanel = lazyDialog(() => import('./EditHtmlPanel').then((m) => m.EditHtmlPanel));
+const ShortcutsDialog = lazyDialog(() =>
+  import('./ShortcutsDialog').then((m) => m.ShortcutsDialog),
+);
+
+const LAZY_DIALOGS = [
+  AgentAccessDialog,
+  AvatarBuilderDialog,
+  BackgroundDialog,
+  CustomSpacingDialog,
+  DetailsDialog,
+  DownloadDialog,
+  FindReplaceDialog,
+  FromThisPresentationDialog,
+  HelpDialog,
+  ImageByUrlDialog,
+  ImportSlidesDialog,
+  InsertIconDialog,
+  InsertMaterialDialog,
+  LinkDialog,
+  MakeCopyDialog,
+  ForgetBrowserDialog,
+  NameVersionDialog,
+  NotificationSettingsDialog,
+  OpenDialog,
+  ProfileDialog,
+  PublishDialog,
+  RequestAccessDialog,
+  ShareDialog,
+  SignInDialog,
+  SlideNumbersDialog,
+  SpecialCharactersDialog,
+  DiagramPanel,
+  EditHtmlPanel,
+  ShortcutsDialog,
+] as const;
 
 /** A colour or weight plate anchored to a menu row (SPEC-2 0.27). */
 type AnchoredPicker = { kind: 'color' | 'weight'; anchor: HTMLElement };
@@ -228,6 +302,13 @@ export function EditorShell({
   const [dialog, setDialog] = useState<DialogRequest | null>(null);
   const [layoutGrid, setLayoutGrid] = useState<LayoutGridRequest | null>(null);
   const [menuOpen, setMenuOpen] = useState<MenuId | null>(null);
+  /* a menu opening is the intent to open a dialog: the lazy modules load now, once (SPEC-4 0.44) */
+  const dialogsPreloaded = useRef(false);
+  useEffect(() => {
+    if (menuOpen === null || dialogsPreloaded.current) return;
+    dialogsPreloaded.current = true;
+    preloadDialogs(LAZY_DIALOGS);
+  }, [menuOpen]);
   const [compact, setCompactState] = useState(false);
   const [toolFinderOpen, setToolFinderOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -1629,7 +1710,7 @@ export function EditorShell({
       case 'diagram':
         /* B5's Diagram panel (SPEC-2 section 5 "Diagram panel"), mounted by the integrator at merge 2 (b5.md request 3) */
         return (
-          <DiagramPanel
+          <DiagramPanel.Component
             slideId={input.slideId}
             revision={input.revision}
             dispatch={input.dispatch}
@@ -1701,7 +1782,7 @@ export function EditorShell({
         );
       case 'editHtml':
         return (
-          <EditHtmlPanel
+          <EditHtmlPanel.Component
             slideId={input.slideId}
             block={selectedBlock(slide, input.selection)}
             revision={input.revision}
@@ -1720,66 +1801,66 @@ export function EditorShell({
     if (dialog === null) return null;
     switch (dialog.id) {
       case 'open':
-        return <OpenDialog />;
+        return <OpenDialog.Component />;
       case 'importSlides':
-        return <ImportSlidesDialog />;
+        return <ImportSlidesDialog.Component />;
       case 'makeCopy':
-        return <MakeCopyDialog selected={makeCopySelected} />;
+        return <MakeCopyDialog.Component selected={makeCopySelected} />;
       case 'share':
-        return <ShareDialog />;
+        return <ShareDialog.Component />;
       case 'publish':
-        return <PublishDialog tab={publishTab} />;
+        return <PublishDialog.Component tab={publishTab} />;
       case 'download':
-        return <DownloadDialog format="pptx" />;
+        return <DownloadDialog.Component format="pptx" />;
       case 'downloadPdf':
-        return <DownloadDialog format="pdf" />;
+        return <DownloadDialog.Component format="pdf" />;
       case 'slideNumbers':
-        return <SlideNumbersDialog />;
+        return <SlideNumbersDialog.Component />;
       case 'details':
-        return <DetailsDialog />;
+        return <DetailsDialog.Component />;
       case 'findReplace':
-        return <FindReplaceDialog />;
+        return <FindReplaceDialog.Component />;
       case 'nameVersion':
-        return <NameVersionDialog />;
+        return <NameVersionDialog.Component />;
       case 'agentAccess':
-        return <AgentAccessDialog />;
+        return <AgentAccessDialog.Component />;
       case 'help':
-        return <HelpDialog />;
+        return <HelpDialog.Component />;
       case 'keyboardShortcuts':
-        return <ShortcutsDialog platform={platform} onClose={closeDialog} />;
+        return <ShortcutsDialog.Component platform={platform} onClose={closeDialog} />;
       case 'imageByUrl':
-        return <ImageByUrlDialog target={dialog.target} />;
+        return <ImageByUrlDialog.Component target={dialog.target} />;
       case 'fromThisPresentation':
-        return <FromThisPresentationDialog target={dialog.target} />;
+        return <FromThisPresentationDialog.Component target={dialog.target} />;
       case 'link':
-        return <LinkDialog />;
+        return <LinkDialog.Component />;
       case 'insertIcon':
-        return <InsertIconDialog />;
+        return <InsertIconDialog.Component />;
       case 'insertMaterial':
-        return <InsertMaterialDialog />;
+        return <InsertMaterialDialog.Component />;
       /* round two (SPEC-2 4.1) */
       case 'background':
-        return <BackgroundDialog />;
+        return <BackgroundDialog.Component />;
       case 'customSpacing':
-        return <CustomSpacingDialog />;
+        return <CustomSpacingDialog.Component />;
       case 'specialCharacters':
-        return <SpecialCharactersDialog />;
+        return <SpecialCharactersDialog.Component />;
       /* round three (SPEC-3 7.2 to 7.6, 5.5, 6.5) */
       case 'namePrompt':
         /* opened on purpose (Change name): a dialog with the scrim and the trap (finding 36) */
         return <NamePromptDialog modal />;
       case 'signIn':
-        return <SignInDialog />;
+        return <SignInDialog.Component />;
       case 'profile':
-        return <ProfileDialog />;
+        return <ProfileDialog.Component />;
       case 'avatarBuilder':
-        return <AvatarBuilderDialog />;
+        return <AvatarBuilderDialog.Component />;
       case 'notificationSettings':
-        return <NotificationSettingsDialog />;
+        return <NotificationSettingsDialog.Component />;
       case 'requestAccess':
-        return <RequestAccessDialog role={dialog.role ?? 'editor'} />;
+        return <RequestAccessDialog.Component role={dialog.role ?? 'editor'} />;
       case 'forgetBrowser':
-        return <ForgetBrowserDialog />;
+        return <ForgetBrowserDialog.Component />;
     }
   })();
 
@@ -1950,11 +2031,13 @@ export function EditorShell({
         ) : null}
         {input.drawer}
       </section>
-      <div className="ts-rpanel">{panelNode}</div>
+      <div className="ts-rpanel">
+        <Suspense fallback={null}>{panelNode}</Suspense>
+      </div>
       <BottomBar />
       {layoutPlate}
       {anchoredNode}
-      {dialogNode}
+      <Suspense fallback={null}>{dialogNode}</Suspense>
       {namePromptOpen && dialog === null ? <NamePromptDialog /> : null}
       <ToolFinder
         open={toolFinderOpen}

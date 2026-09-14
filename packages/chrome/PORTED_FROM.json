@@ -187,12 +187,49 @@
     "src/Progress.tsx": {
       "source": "src/components/viewer/Progress.tsx",
       "commit": "50b480184b8d0b5b86a8c74753085986d4a49f48",
-      "changes": ["the .pt-panel exclusion in the scroll listener removed with the index panel"]
+      "changes": [
+        "the .pt-panel exclusion in the scroll listener removed with the index panel",
+        "round four (gslides-parity SPEC-4 0.15, 1.9): the fill's leading sixteen cells are the deck's ramp (rampInk) applied as a mask on the fill's end, so the fill moves with translateX (shiftOf) instead of scaleX and its masked right end is the leading edge"
+      ]
     },
     "src/Progress.css": {
       "source": "src/components/viewer/Progress.css",
       "commit": "fa0cdfeeef3aad36b6d6643447e769f4cb9e9497",
-      "changes": []
+      "changes": [
+        "round four (gslides-parity SPEC-4 1.9): the track clips the fill (overflow hidden), the fill rests at translateX(-100%) instead of scaleX(0), and the mask layers are sized to the body and sixteen --ts-cell squares; the 2 px track and its --pt-hair-soft colour are the port's"
+      ]
+    },
+    "src/brand.css": {
+      "source": "new (gslides-parity round four, SPEC-4 0.8, 0.9, 0.40, 1.8): the eleven --ts- identity tokens mirrored by packages/theme/src/brand.ts, the view transition rules, the .ts-mark and .ts-tile classes, the app bar lockup and the Not found frame",
+      "commit": ""
+    },
+    "src/TurboslideMark.tsx": {
+      "source": "new (gslides-parity round four, SPEC-4 0.2, 0.5, 1.1, 1.10): the Turboslide mark drawn from @turboslide/theme/brand, the solid path below 64 px and the Bayer cells from 64 px; GtMark.tsx stays for the sheet's content",
+      "commit": ""
+    },
+    "src/AppBarBrand.tsx": {
+      "source": "new (gslides-parity round four, SPEC-4 0.16, 1.2, 1.10): the app bar lockup, the mark to /decks and the word to /home through the router's Link slot",
+      "commit": ""
+    },
+    "src/EmptyFigure.tsx": {
+      "source": "new (gslides-parity round four, SPEC-4 1.9, 1.10): the empty state and Not found figure, a 320 by 180 crop of a twin in a --pt-edge frame with a title, one sentence and one action",
+      "commit": ""
+    },
+    "src/EmptyFigure.css": {
+      "source": "new (gslides-parity round four, SPEC-4 1.9, 1.10)",
+      "commit": ""
+    },
+    "src/Filmstrip.tsx": {
+      "source": "moved from src/Sidebar.tsx (gslides-parity round four, SPEC-4 0.30, 0.41, 0.44; PP 7 row 7): the editor's filmstrip, Turboslide's own since M3, cut out of the sidebar by line range with FilmCard memoized, capture never on every card and the near window of @turboslide/viewer/GridView",
+      "commit": ""
+    },
+    "src/Filmstrip.css": {
+      "source": "moved from src/Sidebar.css (gslides-parity round four, SPEC-4 0.44): the filmstrip's rules, cut out of the sidebar's sheet by line range",
+      "commit": ""
+    },
+    "src/lib/lazyDialog.ts": {
+      "source": "new (gslides-parity round four, SPEC-4 0.44, 3.12; PP 7 row 5): the one lazyDialog() helper the EditorShell's dialogs, pickers and SourceDrawer load through on first open, preloaded when a menu first opens",
+      "commit": ""
     },
     "src/ThemeButton.tsx": {
       "source": "src/components/viewer/ThemeButton.tsx",

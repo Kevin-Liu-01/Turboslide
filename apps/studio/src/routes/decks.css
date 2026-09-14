@@ -40,7 +40,8 @@ html:has(.ts-home-page) {
   text-underline-offset: 3px;
 }
 
-/* ---- the app bar: the mark and the name at the left, the search field in the middle ---- */
+/* ---- the app bar: the lockup at the left (AppBarBrand, brand.css .ts-brand-lockup; gslides-parity
+   SPEC-4 1.10), the search field in the middle ---- */
 .ts-appbar {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -50,22 +51,51 @@ html:has(.ts-home-page) {
   border-bottom: 1px solid var(--pt-hair);
 }
 
-.ts-appbar-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--pt-ink);
-  text-decoration: none;
-  font-family: var(--pt-display);
-  font-feature-settings: 'cv11', 'ss01';
-  font-weight: 500;
-  font-size: 20px;
-  letter-spacing: -0.01em;
+/* ---- the list's stand in while the store listing streams (SPEC-4 0.29): the Recent row's cards
+   are real cards; the frames after them are the grid's own boxes, drawn empty at the card's size
+   so the cards arrive into the same height ---- */
+.ts-hm-card-frame {
+  border-color: var(--pt-hair-soft);
 }
 
-.ts-appbar-brand:focus-visible {
-  outline: 1px solid var(--pt-ink);
-  outline-offset: 2px;
+.ts-hm-card-frame .ts-hm-card-thumb {
+  background: var(--pt-plate);
+}
+
+.ts-hm-card-frame .ts-hm-card-body {
+  display: grid;
+  gap: 8px;
+  padding: 12px 12px 14px;
+}
+
+.ts-frame-line {
+  display: block;
+  height: 10px;
+  width: 60%;
+  background: var(--pt-plate);
+}
+
+.ts-frame-line.is-short {
+  width: 36%;
+}
+
+.ts-rows-pending .ts-row-frame td {
+  height: 40px;
+}
+
+.ts-hm-card-recent .ts-hm-card-body {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px 12px;
+}
+
+/* ---- the empty states (SPEC-4 1.10; EmptyFigure): the figure, the title, one sentence, one action ---- */
+.ts-home-empty-figure {
+  margin: 20px 0 0;
+}
+
+.ts-home-empty-figure .ts-empty-title {
+  font-size: 20px;
 }
 
 .ts-appbar-search {
@@ -676,4 +706,23 @@ html:has(.ts-home-page) {
   .ts-rows td:nth-child(2) {
     display: none;
   }
+}
+
+/* ---- the Recent row (SPEC-4 0.29): this browser's own decks, one row above the store's cards,
+   captioned so the two grids read as two things ---- */
+.ts-recent-row {
+  margin: 20px 0 0;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-recent-row-title {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--pt-ink-2);
+}
+
+.ts-recent-row .ts-cards {
+  margin-top: 12px;
 }

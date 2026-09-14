@@ -68,15 +68,8 @@ import type {
   WriteOutcome,
 } from './store.ts';
 import { AssetExistsError } from './store.ts';
-import {
-  copyDeck,
-  createDeck,
-  deckIdFor,
-  listDeckHeads,
-  restoreDeck,
-  trashDeck,
-} from './templates.ts';
-import type { TrashState } from './templates.ts';
+import { byNewest, copyDeck, createDeck, deckIdFor, restoreDeck, trashDeck } from './templates.ts';
+import type { DeckHead, TrashState } from './templates.ts';
 import { createOverlay } from './tmp-store.ts';
 import type { Overlay } from './tmp-store.ts';
 import { readRevision } from './watch.ts';
@@ -100,6 +93,12 @@ export type BlobPutOptions = {
   /** commit only when the stored version is this one (a BlobPreconditionError otherwise) */
   ifMatch?: string;
   contentType?: string;
+  /**
+   * the browser and CDN max age of the stored body in seconds (Vercel Blob `cacheControlMaxAge`);
+   * the thumbnail cache puts a year, because a stamp names its pixels (SPEC-4 0.31). Clients that
+   * cannot pass it through ignore it.
+   */
+  cacheControlMaxAge?: number;
 };
 
 export type BlobClient = {
@@ -167,8 +166,109 @@ export const ACCESS_FILE = 'access.json';
 export const COMMENTS_DIR = 'comments';
 
 /**
+ * The thumbnail cache of round four (gslides-parity SPEC-4 0.31, 3.2): the render route's
+ * captures live under `decks/<id>/.thumbs/<stamp>/<theme>@<width>/<slide>.png`, shared by every
+ * instance and never mirrored (the mirror holds documents; a capture is derived from them). The
+ * stamp is the name the URL carries as `r`: the slide's content stamp for the filmstrip and the
+ * viewer, the deck revision for the home cards. `pruneThumbs` keeps the newest THUMB_KEEP stamps
+ * per slide and theme.
+ */
+export const THUMBS_DIR = '.thumbs';
+/** How many stamps a slide keeps per theme (SPEC-4 0.31: K is 3). */
+export const THUMB_KEEP = 3;
+
+/** `decks/<id>/.thumbs/` */
+export function thumbsPrefix(deckId: string): string {
+  return `${deckPrefix(deckId)}${THUMBS_DIR}/`;
+}
+
+/** `decks/<id>/.thumbs/<stamp>/<theme>@<width>/<slide>.png` */
+export function thumbPathname(
+  deckId: string,
+  stamp: string,
+  theme: string,
+  width: number,
+  slideId: string,
+): string {
+  return `${thumbsPrefix(deckId)}${stamp}/${theme}@${width}/${slideId}.png`;
+}
+
+export type ThumbKey = {
+  deckId: string;
+  stamp: string;
+  theme: string;
+  width: number;
+  slideId: string;
+};
+
+/** The parts of a thumbnail pathname, or null when the pathname is not one. */
+export function parseThumbPathname(pathname: string): ThumbKey | null {
+  const match = /^decks\/([^/]+)\/\.thumbs\/([^/]+)\/([a-z]+)@(\d+)\/([^/]+)\.png$/.exec(pathname);
+  if (match === null) return null;
+  const [, deckId, stamp, theme, width, slideId] = match;
+  if (!deckId || !stamp || !theme || !width || !slideId) return null;
+  return { deckId, stamp, theme, width: Number(width), slideId };
+}
+
+/** The stored thumbnails of one slide and theme at one width, newest first by `uploadedAt`. */
+export function storedThumbs(
+  entries: ReadonlyArray<BlobEntry>,
+  deckId: string,
+  slideId: string,
+  theme: string,
+  width: number,
+): (BlobEntry & { key: ThumbKey })[] {
+  const out: (BlobEntry & { key: ThumbKey })[] = [];
+  for (const entry of entries) {
+    const key = parseThumbPathname(entry.pathname);
+    if (key === null) continue;
+    if (key.deckId !== deckId || key.slideId !== slideId) continue;
+    if (key.theme !== theme || key.width !== width) continue;
+    out.push({ ...entry, key });
+  }
+  return out.sort((a, b) => (b.uploadedAt ?? '').localeCompare(a.uploadedAt ?? ''));
+}
+
+/**
+ * Removes every stored thumbnail of a slide and theme beyond the newest `keep` stamps (every
+ * width of an evicted stamp goes); returns the pathnames removed. One `list` of the deck's
+ * `.thumbs/` prefix and at most one `del`; the render route runs it after its own put, behind the
+ * response (SPEC-4 0.31).
+ */
+export async function pruneThumbs(
+  client: BlobClient,
+  deckId: string,
+  slideId: string,
+  theme: string,
+  keep: number = THUMB_KEEP,
+): Promise<string[]> {
+  const entries = await client.list(thumbsPrefix(deckId));
+  const mine = entries
+    .map((entry) => ({ entry, key: parseThumbPathname(entry.pathname) }))
+    .filter(
+      (row): row is { entry: BlobEntry; key: ThumbKey } =>
+        row.key !== null && row.key.slideId === slideId && row.key.theme === theme,
+    );
+  /* the newest upload per stamp decides the stamp's age */
+  const newestOf = new Map<string, string>();
+  for (const { entry, key } of mine) {
+    const at = entry.uploadedAt ?? '';
+    if ((newestOf.get(key.stamp) ?? '') < at) newestOf.set(key.stamp, at);
+  }
+  const stamps = [...newestOf.entries()]
+    .sort((a, b) => b[1].localeCompare(a[1]))
+    .map(([stamp]) => stamp);
+  const doomedStamps = new Set(stamps.slice(Math.max(0, keep)));
+  const doomed = mine
+    .filter(({ key }) => doomedStamps.has(key.stamp))
+    .map(({ entry }) => entry.pathname);
+  if (doomed.length > 0) await client.del(doomed);
+  return doomed;
+}
+
+/**
  * The files the mirror manages: every document of the deck, not the twins, the leases, the
- * access record or the snapshots.
+ * access record, the snapshots or the thumbnail cache.
  */
 export function isMirroredDocument(relative: string): boolean {
   return (
@@ -176,6 +276,7 @@ export function isMirroredDocument(relative: string): boolean {
     relative !== ACCESS_FILE &&
     !relative.startsWith('assets/') &&
     !relative.startsWith(`${SNAPSHOTS_DIR}/`) &&
+    !relative.startsWith(`${THUMBS_DIR}/`) &&
     !relative.startsWith(`${STATE_DIR}/`) &&
     isSafeKey(relative)
   );
@@ -704,15 +805,16 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
 
     write(write: Write, writeOptions: WriteOptions = {}): Promise<WriteOutcome> {
       return serial(async () => {
-        // inside the queue already: sync directly, not through serial()
-        const head = await client.head(`${prefix}deck.json`);
+        // inside the queue already: sync directly, not through serial(). Round one of the four
+        // (gslides-parity SPEC-4 0.33): the manifest head and the leases read leave together;
+        // the leases file is its own document, so neither waits on the other
+        const [head] = await Promise.all([client.head(`${prefix}deck.json`), pullLeases()]);
         if (head === null) throw new RangeError(`No deck ${deckId} in the Blob store`);
         if (options.hooks?.afterHead) await options.hooks.afterHead();
         const before = readManifest(dir);
         if (before.files['deck.json'] !== head.version || !existsSync(pathOf('deck.json'))) {
           await pull();
         }
-        await pullLeases();
         const manifest = readManifest(dir);
         const synced = manifest.files['deck.json'];
         if (synced !== head.version) {
@@ -735,22 +837,40 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         writeVersion(dir, entry);
         try {
           if (options.hooks?.beforeCommit) await options.hooks.beforeCommit();
-          // the whole document under its immutable name, before the manifest flips; a loser of the
-          // race below leaves a snapshot no record and no etag names, which the prune removes
-          await putSnapshot(key, snapshotBody(outcome.document));
-          // the commit point: the manifest goes first, conditional on the version this instance read
+          // Round two (SPEC-4 0.33): the whole document under its immutable name and the changed
+          // slide bodies leave together, before the manifest flips. A loser of the race below
+          // leaves a snapshot no record and no etag names, which the prune removes, and slide
+          // bodies the live manifest still names by an older etag: a reader proves the document
+          // by the winner's snapshot (pull step 1b) and never reads those bodies, and the next
+          // write of the slide overwrites them. Deletions wait until after the commit (below),
+          // because a body removed before a commit that fails on ifMatch is one the live manifest
+          // still names, and a reader's next pull would get null for it.
+          const changedBodies = outcome.changed.filter((slideId) =>
+            existsSync(pathOf(`slides/${slideId}.json`)),
+          );
+          const removedBodies = outcome.changed.filter(
+            (slideId) => !existsSync(pathOf(`slides/${slideId}.json`)),
+          );
+          const [, ...pushedSlides] = await Promise.all([
+            putSnapshot(key, snapshotBody(outcome.document)),
+            ...changedBodies.map((slideId) => putDocument(`slides/${slideId}.json`)),
+          ]);
+          // Round three: the commit point, alone. The manifest goes up conditional on the version
+          // this instance read; a precondition failure is the conflict outcome below.
           const committed = await putDocument('deck.json', synced);
           manifest.files['deck.json'] = committed.version;
+          changedBodies.forEach((slideId, i) => {
+            const pushed = pushedSlides[i];
+            if (pushed !== undefined) manifest.files[`slides/${slideId}.json`] = pushed.version;
+          });
           writeManifestFile(dir, manifest);
-          for (const slideId of outcome.changed) {
-            const relative = `slides/${slideId}.json`;
-            if (existsSync(pathOf(relative))) {
-              const pushed = await putDocument(relative);
-              manifest.files[relative] = pushed.version;
-            } else {
-              await client.del([`${prefix}${relative}`]);
-              delete manifest.files[relative];
-            }
+          // the removed bodies leave after the commit, then round four: the version record, kept
+          // after the commit because records are put with overwrite and a loser's record must never
+          // overwrite the winner's, and kept synchronous because adoptExternal on another editor
+          // reads the records to apply the revision forward
+          if (removedBodies.length > 0) {
+            await client.del(removedBodies.map((slideId) => `${prefix}slides/${slideId}.json`));
+            for (const slideId of removedBodies) delete manifest.files[`slides/${slideId}.json`];
           }
           const record = `versions/${entry.n}.json`;
           const stored = await putDocument(record);
@@ -1027,6 +1147,44 @@ export async function pushDeckDir(
   );
 }
 
+/**
+ * A deck's list row from its manifest bytes (the shape `readDeckHead` in templates.ts reads from a
+ * folder, applied to the store's `deck.json` without a mirror; SPEC-4 0.29). Null when the bytes
+ * do not parse to a manifest.
+ */
+export function deckHeadOf(deckId: string, bytes: Uint8Array): DeckHead | null {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    return null;
+  }
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
+  const manifest = raw as Record<string, unknown>;
+  const sections = Array.isArray(manifest.sections) ? manifest.sections : [];
+  const head: DeckHead = {
+    id: deckId,
+    title: typeof manifest.title === 'string' ? manifest.title : deckId,
+    slides: sections.reduce(
+      (sum: number, section: unknown) =>
+        sum +
+        (typeof section === 'object' &&
+        section !== null &&
+        Array.isArray((section as { slideIds?: unknown }).slideIds)
+          ? ((section as { slideIds: unknown[] }).slideIds.length ?? 0)
+          : 0),
+      0,
+    ),
+    sections: sections.length,
+    revision: typeof manifest.revision === 'number' ? manifest.revision : 0,
+    updatedAt: typeof manifest.updatedAt === 'string' ? manifest.updatedAt : '',
+    createdAt: typeof manifest.createdAt === 'string' ? manifest.createdAt : '',
+  };
+  if (typeof manifest.trashedAt === 'string' && manifest.trashedAt !== '')
+    head.trashedAt = manifest.trashedAt;
+  return head;
+}
+
 /** The Blob backend: the overlay as a mirror, one BlobStore per deck, the seed uploaded once. */
 export function blobDecks(options: HostedOptions): HostedDecks {
   if (options.blob === null) {
@@ -1065,12 +1223,71 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     return store;
   };
 
-  /** The seed decks go up once: the first instance that finds no manifest uploads them. */
+  /** The twin files a deck's manifest names, relative to the deck folder (`assets/<file>`). */
+  const twinNames = (deckId: string): string[] => {
+    const dir = join(decksDir, deckId);
+    if (!existsSync(join(dir, 'deck.json'))) return [];
+    try {
+      const { document } = loadDeckDir(dir);
+      return Object.values(document.deck.assets).flatMap((asset) =>
+        Object.values(asset.twins).filter(
+          (relative): relative is string => typeof relative === 'string' && isSafeKey(relative),
+        ),
+      );
+    } catch {
+      return [];
+    }
+  };
+
+  /**
+   * The twins of a deck that neither the bundle nor the store handed this instance, fetched from
+   * the source `options.fetchAsset` names (the deployment's static files for the seed deck,
+   * SPEC-4 0.35) and, with `upload`, put to the store so the next instance and the assets route
+   * find them there. Returns how many were written.
+   */
+  const fetchMissingTwins = async (deckId: string, upload: boolean): Promise<number> => {
+    const fetchAsset = options.fetchAsset;
+    if (fetchAsset === undefined) return 0;
+    const dir = join(decksDir, deckId);
+    const missing = twinNames(deckId).filter(
+      (relative) => !existsSync(join(dir, ...relative.split('/'))),
+    );
+    if (missing.length === 0) return 0;
+    const c = upload ? await client() : null;
+    let written = 0;
+    const t = performance.now();
+    await eachLimit(missing, 8, async (relative) => {
+      const bytes = await fetchAsset(deckId, relative.replace(/^assets\//, ''));
+      if (bytes === null) return;
+      writeAtomic(join(dir, ...relative.split('/')), bytes);
+      written += 1;
+      if (c === null) return;
+      try {
+        await c.put(`${deckPrefix(deckId)}${relative}`, bytes, {
+          overwrite: false,
+          contentType: blobContentType(relative),
+        });
+      } catch (error) {
+        if (!(error instanceof BlobExistsError)) throw error;
+      }
+    });
+    if (written > 0)
+      log(
+        `blob: fetched ${written} of ${missing.length} missing twins of ${deckId} in ${Math.round(performance.now() - t)} ms`,
+      );
+    return written;
+  };
+
+  /**
+   * The seed decks go up once: the first instance that finds no manifest uploads them. The twins
+   * come from the bundle where it carries them and from the static source otherwise (SPEC-4 0.35).
+   */
   const seedOnce = async (): Promise<void> => {
     const c = await client();
     for (const deckId of await overlay.seedDecks()) {
       if ((await c.head(`${deckPrefix(deckId)}deck.json`)) !== null) continue;
       await overlay.ensureAssets(deckId);
+      await fetchMissingTwins(deckId, false);
       await pushDeckDir(c, deckId, join(decksDir, deckId), { overwrite: false, log });
     }
   };
@@ -1140,13 +1357,21 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     async list(listOptions) {
       await ready();
       const ids = await deckIds();
-      // the listing always asks the store: a trash stamp or a title written on another instance
-      // must show on the next home page load, not after the sync window (gslides-parity SPEC 6.2)
-      await eachLimit(ids, 4, async (deckId) => {
-        await (await storeFor(deckId)).sync(true);
+      // the listing reads every manifest through the SDK's origin read, in parallel, and writes
+      // no mirror (gslides-parity SPEC-4 0.29, 3.1; PP 3.1): a trash stamp or a title written on
+      // another instance shows on the next home page load (SPEC 6.2), and a deck store opens only
+      // when a deck is opened. The mirrors on this instance are left as they are; open() syncs.
+      const c = await client();
+      const heads: DeckHead[] = [];
+      await eachLimit(ids, 8, async (deckId) => {
+        const fetched = await c.get(`${deckPrefix(deckId)}deck.json`);
+        if (fetched === null) return;
+        const head = deckHeadOf(deckId, fetched.bytes);
+        if (head === null) return;
+        if (head.trashedAt !== undefined && listOptions?.includeTrashed !== true) return;
+        heads.push(head);
       });
-      const wanted = new Set(ids);
-      return listDeckHeads(decksDir, listOptions).filter((head) => wanted.has(head.id));
+      return heads.sort(byNewest);
     },
     async has(deckId) {
       await ready();
@@ -1166,7 +1391,17 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       if ((await c.head(`${deckPrefix(deckId)}deck.json`)) !== null) {
         throw new TypeError(`decks/${deckId} exists already; pick another name`);
       }
-      if (input.from !== 'blank') await overlay.ensureAllAssets();
+      if (input.from !== 'blank') {
+        // the GT template's assets folder is the seed deck's (`../../gt-brand/assets`), so every
+        // twin of every seed deck is on disk before createDeck copies the folder whole: from the
+        // bundle, from the store, else from the static source (SPEC-4 0.35, 3.6)
+        await overlay.ensureAllAssets();
+        for (const seedId of await overlay.seedDecks()) {
+          if ((await c.head(`${deckPrefix(seedId)}deck.json`)) !== null)
+            await (await storeFor(seedId)).pullAssets().catch(() => 0);
+          await fetchMissingTwins(seedId, true);
+        }
+      }
       const dir = join(decksDir, deckId);
       rmSync(dir, { recursive: true, force: true });
       const result = createDeck(
@@ -1257,9 +1492,11 @@ export function blobDecks(options: HostedOptions): HostedDecks {
     },
     async ensureAssets(deckId) {
       await ready();
-      // the seed's twins from the bundle, then whatever the store holds beyond them
+      // the seed's twins from the bundle, then whatever the store holds beyond them, then the
+      // static source for a seed deck whose twins left the bundle (SPEC-4 0.35)
       await overlay.ensureAssets(deckId);
       await (await storeFor(deckId)).pullAssets();
+      await fetchMissingTwins(deckId, true);
     },
     async assetFile(deckId, relative) {
       await ready();

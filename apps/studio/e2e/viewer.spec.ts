@@ -170,6 +170,45 @@ test('the embed posts gt-deck-slide on navigation and applies gt-theme', async (
     .toBe(`#${total > 1 ? 2 : 1}`);
 });
 
+test('the document carries the first slide alone and the deferred slides arrive; the twins are not fetched again on a second visit (SPEC-4 3.11, 4.5)', async ({
+  page,
+}) => {
+  /* the server's HTML: one rendered slide section, the other slides' markup streamed behind it
+     as the loader's deferred promise (routes/deck.$deckId.tsx loadDeckView) */
+  const html = await (await page.request.get(DECK)).text();
+  expect((html.match(/<section class="slide/g) ?? []).length).toBe(1);
+  /* on the page the deferred slides have arrived: a later slide's sheet renders its markup */
+  const total = await openDeck(page);
+  const shell = page.locator('.pt-viewer:not(.ts-skeleton)');
+  const target = Math.min(total, 3);
+  for (const digit of String(target)) await page.locator('body').press(digit);
+  await page.locator('body').press('Enter');
+  await expect(shell).toHaveAttribute('data-index', String(target - 1));
+  /* the keyed fade keeps the outgoing sheet for 180 ms (SlideView.tsx), so the assertion names
+     the active slide's own section */
+  const active = await shell.getAttribute('data-active');
+  expect(active).toBeTruthy();
+  const sheet = page.locator(
+    `.ts-stagewrap .ts-stage .pt-slide > .slide[data-slide="${active ?? ''}"]`,
+  );
+  await expect(sheet).toBeVisible({ timeout: 15_000 });
+  const laterHtml = await sheet.evaluate((el) => el.innerHTML.length);
+  expect(laterHtml).toBeGreaterThan(100);
+  /* the twins on a second visit in the same context (SPEC-4 4.5): the deck's assets come from the
+     browser's cache, none with bytes on the wire */
+  await page.goto(DECK);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
+  await page.waitForTimeout(500);
+  const twins = await page.evaluate(() =>
+    (performance.getEntriesByType('resource') as PerformanceResourceTiming[])
+      .filter((entry) => entry.name.includes('/decks/gt-brand/assets/'))
+      .map((entry) => ({ name: entry.name.split('/').pop(), transfer: entry.transferSize })),
+  );
+  console.log(`twins on the second visit: ${JSON.stringify(twins)}`);
+  expect(twins.length).toBeGreaterThan(0);
+  expect(twins.filter((twin) => twin.transfer > 0)).toEqual([]);
+});
+
 test('the agent surface answers', async ({ request }) => {
   const agent = await request.get('/api/agent');
   expect(agent.ok()).toBeTruthy();
@@ -183,4 +222,44 @@ test('the agent surface answers', async ({ request }) => {
   expect(llms.ok()).toBeTruthy();
   expect(llms.headers()['content-type']).toContain('text/plain');
   expect(await llms.text()).toContain('Turboslide');
+});
+
+test('the grid mounts clones for the tiles near the viewport alone, and the home cards keep their captures (SPEC-4 0.30, 0.41)', async ({
+  page,
+}) => {
+  test.setTimeout(150_000);
+  const renders: { url: string; status: number }[] = [];
+  page.on('response', (response) => {
+    if (response.url().includes('/api/render/'))
+      renders.push({ url: response.url(), status: response.status() });
+  });
+  const total = await openDeck(page);
+  await page.locator('body').press('g');
+  const shell = page.locator('.pt-viewer:not(.ts-skeleton)');
+  await expect(shell).toHaveAttribute('data-mode', 'grid');
+  const tiles = page.locator('.pt-grid .pt-thumb');
+  await expect(tiles).toHaveCount(total);
+  /* every tile stays in the DOM; a clone mounts on the tiles inside the window and on no other.
+     The viewer's grid carried no capture on the round three tree (the render route serves the
+     home cards; the editor's filmstrip asked for captures and asks for none since round four) */
+  await expect(page.locator('.pt-grid .pt-thumb[data-near] .is-clone').first()).toBeVisible();
+  const counts = await page.evaluate(() => ({
+    near: document.querySelectorAll('.pt-grid .pt-thumb[data-near]').length,
+    clonesFar: document.querySelectorAll('.pt-grid .pt-thumb:not([data-near]) .is-clone').length,
+    clonesNear: document.querySelectorAll('.pt-grid .pt-thumb[data-near] .is-clone').length,
+  }));
+  expect(counts.clonesFar).toBe(0);
+  expect(counts.near).toBeGreaterThan(0);
+  expect(counts.clonesNear).toBe(counts.near);
+  if (total > 40) expect(counts.near).toBeLessThan(total);
+  expect(renders).toEqual([]);
+  /* the capture path stays for the home cards: /decks asks the render route for the first slide
+     of a deck at its revision and gets a picture (a render on the first visit, a cache hit after) */
+  await page.goto('/decks');
+  await expect(page.locator('.pt-viewer, [data-hydrated]').first()).toBeAttached();
+  await expect
+    .poll(() => renders.some((row) => /[?&]w=320&r=\d+/.test(row.url) && row.status === 200), {
+      timeout: 90_000,
+    })
+    .toBe(true);
 });

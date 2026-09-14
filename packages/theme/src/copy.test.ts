@@ -10,7 +10,7 @@ import {
 } from './copy.ts';
 
 describe('copy lists', () => {
-  it('names the six proper nouns and the product tokens of DECK-GRAMMAR.md:22', () => {
+  it('names the six proper nouns of DECK-GRAMMAR.md:22, the product name of SPEC-4 1.2 and the product tokens', () => {
     expect(PROPER_NOUNS).toEqual([
       'General Translation',
       'Prototemplate',
@@ -18,6 +18,7 @@ describe('copy lists', () => {
       'Locadex',
       'Inter',
       'Heroicons',
+      'Turboslide',
     ]);
     for (const token of ['gt-next', 'gt', 'npx', 'CLI', 'API'])
       expect(PRODUCT_TOKENS).toContain(token);

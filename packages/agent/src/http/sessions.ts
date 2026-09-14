@@ -215,7 +215,15 @@ export function createSessionRegistry(options: SessionRegistryOptions = {}): Ses
     },
     poll(id, timeoutMs) {
       const entry = entries.get(id);
-      if (!entry) return Promise.resolve([]);
+      if (!entry) {
+        // an id this instance does not hold (another instance's page, or a swept session): the
+        // answer is empty after the poll's own timeout, never at once, so a page whose polls land
+        // on the wrong instance costs three calls a minute instead of a call every few
+        // milliseconds (gslides-parity SPEC-4 0.37; PP 3.8's interim; R04 7.3, 4.2)
+        return new Promise<SessionCommand[]>((resolve) => {
+          setTimeout(() => resolve([]), Math.max(0, timeoutMs));
+        });
+      }
       registry.heartbeat(id);
       if (entry.queue.length > 0) {
         const commands = entry.queue;

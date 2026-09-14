@@ -25,6 +25,16 @@ import {
 
 const POLL_MS = 20_000;
 const RETRY_MS = 2_000;
+/**
+ * The pause after an empty answer (gslides-parity SPEC-4 0.37, PP 3.8's interim): the registry is
+ * per instance, so a poll that lands on an instance that does not hold the session used to answer
+ * `[]` at once and the loop re-polled with no delay, which R04 7.3 measured at 11.7 `_serverFn`
+ * calls per second per idle tab and the verifier's day 0 run still saw bimodal (3 or 465 per
+ * minute). Two seconds after an empty answer bounds the storm to 30 calls per minute on the wrong
+ * instance and costs at most two seconds on a command that arrives during the pause; the server
+ * side half (sessions.ts holds an unknown id for its timeout) makes it 3 per minute.
+ */
+export const EMPTY_ANSWER_PAUSE_MS = 2_000;
 
 export type StudioSessionOptions = {
   deckId: string;
@@ -86,6 +96,10 @@ export function useStudioSession({ deckId, author, enabled = true }: StudioSessi
           continue;
         }
         if (!isAlive()) break;
+        if (commands.length === 0) {
+          await sleep(EMPTY_ANSWER_PAUSE_MS);
+          continue;
+        }
         for (const command of commands) {
           const now = activeStudio();
           try {

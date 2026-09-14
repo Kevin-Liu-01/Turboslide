@@ -1,10 +1,12 @@
 /* The snap guides (Guides.tsx), drawn inside the overlay layer in CSS pixels. Line law (SPEC 2.2):
-   1px, --pt-titanium, the color the chrome gives a transient measurement (the lint boxes of
-   severity 1 and 2 use it too), never ink and never the sheet's own tokens. A guide never takes
-   the pointer and nothing about it animates. */
+   1px, never the sheet's own tokens. The colour is --pt-guide since round four (gslides-parity
+   round four, the orchestrator's ruling 1; Kevin's directive d): a guide is a transient
+   measurement and takes a colour distinct from the selection's blue (Google's guides are red) that
+   holds 3:1 on paper and on ink, where the titanium of the earlier rounds blended into a
+   photograph. A guide never takes the pointer and nothing about it animates. */
 .ts-guide {
   position: absolute;
-  background: var(--pt-titanium);
+  background: var(--pt-guide);
   pointer-events: none;
 }
 

@@ -1,0 +1,97 @@
+import { describe, expect, it } from 'vitest';
+
+import type { Version } from '@turboslide/schema/mutations';
+
+import { EDITOR_VERSIONS_KEPT, shapeByRole, trimVersionLog } from './write';
+import type { EditorDeck } from './write';
+
+// The editor payload's version log (gslides-parity SPEC-4 0.34; PP 3.5 item 3): the loader
+// carries the newest EDITOR_VERSIONS_KEPT records without their mutations, and the trim runs
+// after the role shaping so a role without `history` keeps its empty log. Pure functions over
+// hand built records; no store, no server function.
+
+function version(n: number, mutationCount = 1): Version {
+  return {
+    n,
+    revision: n,
+    author: { kind: 'human', name: 'studio' },
+    note: `write ${n}`,
+    createdAt: new Date(Date.UTC(2026, 8, 14, 0, 0, n)).toISOString(),
+    mutations: Array.from({ length: mutationCount }, (_, i) => ({
+      op: 'deck.set',
+      path: '/title',
+      value: `title ${n}.${i}`,
+    })) as Version['mutations'],
+  };
+}
+
+describe('trimVersionLog', () => {
+  it('keeps the newest fifty records in the log order and drops every mutation', () => {
+    const log = Array.from({ length: 120 }, (_, i) => version(i + 1, 3));
+    const trimmed = trimVersionLog(log);
+    expect(trimmed).toHaveLength(EDITOR_VERSIONS_KEPT);
+    expect(trimmed[0]?.n).toBe(120 - EDITOR_VERSIONS_KEPT + 1);
+    expect(trimmed[trimmed.length - 1]?.n).toBe(120);
+    expect(trimmed.every((entry) => entry.mutations.length === 0)).toBe(true);
+    /* the fields the title row and the panel rows read stay */
+    const last = trimmed[trimmed.length - 1]!;
+    expect(last.author).toEqual({ kind: 'human', name: 'studio' });
+    expect(last.note).toBe('write 120');
+    expect(last.revision).toBe(120);
+    expect(last.createdAt).toBe(log[119]?.createdAt);
+    /* the source log is not touched */
+    expect(log[119]?.mutations).toHaveLength(3);
+  });
+
+  it('leaves a short log whole apart from the mutations, and an empty log empty', () => {
+    const log = [version(1), version(2)];
+    expect(trimVersionLog(log).map((entry) => entry.n)).toEqual([1, 2]);
+    expect(trimVersionLog([])).toEqual([]);
+  });
+});
+
+describe('shapeByRole then trimVersionLog', () => {
+  const payload: EditorDeck = {
+    deckId: 'q4',
+    document: {
+      deck: {
+        id: 'q4',
+        title: 'Q4',
+        revision: 3,
+        createdAt: '2026-09-14T00:00:00.000Z',
+        updatedAt: '2026-09-14T00:00:03.000Z',
+        sections: [{ id: 's', name: 'S', slideIds: ['a'] }],
+        assets: {},
+      },
+      slides: { a: { id: 'a', kind: 'title', heading: 'A' } },
+    } as unknown as EditorDeck['document'],
+    issues: [],
+    ok: true,
+    sprite: '',
+    versions: [version(1), version(2), version(3)],
+    leases: [],
+    hosting: {
+      store: 'file',
+      reason: 'test',
+      persistent: true,
+      blob: false,
+      seed: null,
+      notice: null,
+      decksDir: '/tmp',
+    },
+  };
+
+  it('an editor with history gets the trimmed log and the count', () => {
+    const shaped = shapeByRole(payload, ['read', 'write', 'history']);
+    const trimmed = trimVersionLog(shaped.versions);
+    expect(trimmed).toHaveLength(3);
+    expect(trimmed.every((entry) => entry.mutations.length === 0)).toBe(true);
+    expect(shaped.versions.length).toBe(3);
+  });
+
+  it('a role without history keeps an empty log', () => {
+    const shaped = shapeByRole(payload, ['read']);
+    expect(shaped.versions).toEqual([]);
+    expect(trimVersionLog(shaped.versions)).toEqual([]);
+  });
+});

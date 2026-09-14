@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start';
+import { getRequest, setResponseHeader } from '@tanstack/react-start/server';
 import type { DeckTemplateId } from '@turboslide/schema/actions';
 import { DECK_TEMPLATES } from '@turboslide/schema/actions';
 import { deckAppearance, isTrashed, slideTitle } from '@turboslide/schema/deck';
@@ -50,7 +51,7 @@ import {
 /** The fixture deck served for a missing id in a checkout. */
 const FALLBACK_DECK = 'fixture';
 
-/** The author the home page writes as (Rename); the editor's default author (edit.$deckId.tsx). */
+/** The author the home page writes as (Rename); the editor's default author (editor/EditorRoot.tsx). */
 const HOME_AUTHOR: Author = { kind: 'human', name: 'studio' };
 
 /**
@@ -71,6 +72,17 @@ export type DeckPayload = {
   issues: string[];
   /** the ids of the skipped slides (SPEC 7.2.1), listed so print can name what it left out */
   skipped: string[];
+  /**
+   * set when `slides: 'first'` left every slide after the first with an empty `html` (gslides-parity
+   * SPEC-4 3.11): the viewer routes fetch the rest through `getDeckSlides` behind the document
+   */
+  partial?: true;
+};
+
+/** The rest of a partial payload (SPEC-4 3.11): rendered HTML by slide id for the slides the document left out. */
+export type DeckSlidesPayload = {
+  revision: number;
+  html: Record<string, string>;
 };
 
 type Loaded = { servedId: string; document: DeckDocument; issues: string[] };
@@ -106,6 +118,8 @@ function sprite(): string {
 
 type ViewerBuildOptions = {
   theme: 'light' | 'dark';
+  /** render the HTML of the first slide alone, or of every slide but the first, or of all (SPEC-4 3.11) */
+  slides?: 'all' | 'first' | 'rest';
   /** carry the speaker notes; off for the public view and embed payloads (SPEC 6.6, R10 C3 item 1) */
   notes: boolean;
   /** carry the skipped slides; off for the public payloads and present mode (SPEC 7.2.1) */
@@ -157,21 +171,31 @@ function buildViewerDeck(
         if (!options.includeSkipped) continue;
       }
       n += 1;
-      const rendered = renderSlide(deck, slide, {
-        theme: options.theme,
-        chrome: true,
-        assetBase,
-        blockAttrs: true,
-        gtWord: true,
-        // every `html` block lands in the sandboxed frame (SPEC-3 8.4 item 2), or as its note
-        htmlFrame: htmlFrameFor({
-          theme: options.theme,
-          assetUrl: (path: string) => assetBase + path,
-          sheetCss: options.sheetCss,
-          policy: options.htmlPolicy,
-          publicStoreHost: process.env.TURBOSLIDE_PUBLIC_STORE_HOST ?? null,
-        }),
-      });
+      // the document carries the first slide's HTML alone when asked; the rest streams behind it
+      // (SPEC-4 3.11), and the request for the rest leaves the first slide out
+      const wanted =
+        options.slides === 'first'
+          ? out.length === 0
+          : options.slides === 'rest'
+            ? out.length > 0
+            : true;
+      const rendered = wanted
+        ? renderSlide(deck, slide, {
+            theme: options.theme,
+            chrome: true,
+            assetBase,
+            blockAttrs: true,
+            gtWord: true,
+            // every `html` block lands in the sandboxed frame (SPEC-3 8.4 item 2), or as its note
+            htmlFrame: htmlFrameFor({
+              theme: options.theme,
+              assetUrl: (path: string) => assetBase + path,
+              sheetCss: options.sheetCss,
+              policy: options.htmlPolicy,
+              publicStoreHost: process.env.TURBOSLIDE_PUBLIC_STORE_HOST ?? null,
+            }),
+          })
+        : { html: '' };
       const asset = 'picture' in slide ? deck.assets[slide.picture.asset] : undefined;
       const picture =
         isPictureKind(slide.kind) && asset
@@ -617,7 +641,62 @@ export type GetDeckInput = {
   includeTrashed?: boolean;
   /** `?p=` of the published player (gslides-parity SPEC-3 6.4): read in present mode and the embed only */
   publishToken?: string;
+  /**
+   * the HTML the payload carries (gslides-parity SPEC-4 3.11): every slide's (the default, print
+   * and the presenter), or the first slide's alone, the rest fetched by `getDeckSlides`
+   */
+  slides?: 'all' | 'first';
+  /**
+   * the revision the caller learned from `deckRevision` (SPEC-4 3.11; PP 5 "The Blob read path"):
+   * it names the document in the request's URL, so an answer the CDN keeps is never served for a
+   * newer revision; an answer whose document moved past it is not kept
+   */
+  revision?: number;
 };
+
+/** The header of an answer the CDN may keep for a minute and serve stale for an hour (SPEC-4 3.11). */
+export const DECK_CDN_CACHE_CONTROL = 'public, s-maxage=60, stale-while-revalidate=3600';
+
+/** Whether this handler answers a client's `/_serverFn/` request (a CDN entry) or the page's own render. */
+function answersRpc(): boolean {
+  try {
+    return new URL(getRequest().url).pathname.startsWith('/_serverFn/');
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * The cache header of a deck read (SPEC-4 3.11): kept by the CDN only when the request names the
+ * revision the document is at, the reader reached the deck as anyone would (the general access
+ * of the deck, `via: 'open'`, or the published player's token, which is in the URL) and the
+ * payload is the public shape (no notes, no skipped slides, the html blocks as notes), so no
+ * role's private shape is ever kept under a URL another reader may request. Everything else is
+ * `private, no-store`. Set on the server function's own answer alone, never on the document the
+ * loader renders in process.
+ */
+function setDeckCacheHeader(
+  input: { revision?: number },
+  shape: {
+    notes: boolean;
+    includeSkipped: boolean;
+    htmlPolicy: 'frame' | 'note';
+    via: string | null;
+  },
+  revision: number,
+): void {
+  if (!answersRpc()) return;
+  const isPublicShape = !shape.notes && !shape.includeSkipped && shape.htmlPolicy === 'note';
+  const cacheable =
+    input.revision === revision &&
+    isPublicShape &&
+    (shape.via === 'open' || shape.via === 'publish');
+  try {
+    setResponseHeader('Cache-Control', cacheable ? DECK_CDN_CACHE_CONTROL : 'private, no-store');
+  } catch {
+    // outside a request (a test): nothing to set
+  }
+}
 
 /** The payload shaped by role (SPEC-3 6.3): what the caller may read of notes and skipped slides. */
 async function shapeByRole(
@@ -628,6 +707,7 @@ async function shapeByRole(
   notes: boolean;
   includeSkipped: boolean;
   role: string;
+  via: string | null;
   htmlPolicy: 'frame' | 'note';
 }> {
   const { DeniedError, authorize, denialBody } = await import('./authorize');
@@ -637,7 +717,7 @@ async function shapeByRole(
   if (!read.ok) {
     // 410 travels to the page ("This presentation is no longer published"); 401 and 404 are one null
     if (read.status === 410) throw new DeniedError(410, denialBody(read, 'read'));
-    return { notes: false, includeSkipped: false, role: 'none', htmlPolicy: 'note' };
+    return { notes: false, includeSkipped: false, role: 'none', via: null, htmlPolicy: 'note' };
   }
   const notes =
     input.notes === true &&
@@ -652,8 +732,84 @@ async function shapeByRole(
   const shared = read.via === 'link' || read.via === 'publish';
   const htmlPolicy: 'frame' | 'note' =
     (await flagOn('htmlBlocks')) === false ? 'note' : shared ? 'note' : 'frame';
-  return { notes, includeSkipped, role: read.role, htmlPolicy };
+  return { notes, includeSkipped, role: read.role, via: read.via ?? null, htmlPolicy };
 }
+
+type ShapedLoad = {
+  loaded: Loaded;
+  shape: Awaited<ReturnType<typeof shapeByRole>>;
+  theme: 'light' | 'dark';
+  holdsHtml: boolean;
+};
+
+/**
+ * The authorize, the read and the theme every viewer payload starts from: null for a caller
+ * without a right, a missing deck or a deck in the trash the route did not ask for (one answer
+ * for a missing and a restricted deck, SPEC-3 6.2, 6.3).
+ */
+async function loadShaped(data: GetDeckInput): Promise<ShapedLoad | null> {
+  const { requestContext } = await import('./authorize');
+  const ctx = await requestContext();
+  if (data.publishToken !== undefined) ctx.publishToken = data.publishToken;
+  const shape = await shapeByRole(ctx, data.deckId, data);
+  if (shape.role === 'none') return null;
+  const loaded = await loadDeck(data.deckId);
+  if (!loaded) return null;
+  if (isTrashed(loaded.document.deck) && data.includeTrashed !== true) return null;
+  // the parser loads once per process, only when the deck holds an html block (SPEC-3 8.4)
+  const holdsHtml = Object.values(loaded.document.slides).some((slide) =>
+    JSON.stringify(slide).includes('"type":"html"'),
+  );
+  if (holdsHtml) {
+    const { loadPurifier } = await import('@turboslide/render/blocks/html-escape');
+    await loadPurifier().catch(() => undefined);
+  }
+  const theme = data.theme ?? deckAppearance(loaded.document.deck);
+  return { loaded, shape, theme, holdsHtml };
+}
+
+const deckInputValidator = (input: GetDeckInput): GetDeckInput => {
+  if (!/^[a-z0-9][a-z0-9-]*$/i.test(input.deckId)) throw new Error('deckId must be a slug');
+  if (input.publishToken !== undefined && !/^[A-Za-z0-9_-]{16,64}$/.test(input.publishToken))
+    throw new Error('publishToken must be a token');
+  if (input.revision !== undefined && (!Number.isInteger(input.revision) || input.revision < 0))
+    throw new Error('revision must be a non negative integer');
+  if (input.slides !== undefined && input.slides !== 'all' && input.slides !== 'first')
+    throw new Error("slides must be 'all' or 'first'");
+  return input;
+};
+
+/**
+ * The revision a deck is at (gslides-parity SPEC-4 3.11; PP 5 "The Blob read path"), read from
+ * the manifest after the store synced it (on Blob the open pulls a moved manifest); null for a
+ * missing deck. The viewer routes read it first so the `getDeck` and `getDeckSlides` requests
+ * carry the revision in their URL, which is the CDN key.
+ */
+export const deckRevision = createServerFn({ method: 'GET' })
+  .validator((input: { deckId: string }) => {
+    if (!/^[a-z0-9][a-z0-9-]*$/i.test(input.deckId)) throw new Error('deckId must be a slug');
+    return input;
+  })
+  .handler(async ({ data }): Promise<{ revision: number } | null> => {
+    if (answersRpc()) {
+      try {
+        setResponseHeader('Cache-Control', 'private, no-store');
+      } catch {
+        // outside a request: nothing to set
+      }
+    }
+    const candidates = [data.deckId];
+    if (!isHosted() && data.deckId !== FALLBACK_DECK) candidates.push(FALLBACK_DECK);
+    for (const servedId of candidates) {
+      try {
+        return { revision: await (await openDeckStore(servedId)).revision() };
+      } catch (error) {
+        if (error instanceof RangeError || error instanceof TypeError) continue;
+        throw error;
+      }
+    }
+    return null;
+  });
 
 /**
  * The rendered deck for the viewer routes, or null when neither the deck nor the fixture exists,
@@ -662,34 +818,17 @@ async function shapeByRole(
  * them (R10 C3 item 1, SPEC 6.6), so a view or embed link exposes what the rep meant to share.
  */
 export const getDeck = createServerFn({ method: 'GET' })
-  .validator((input: GetDeckInput) => {
-    if (!/^[a-z0-9][a-z0-9-]*$/i.test(input.deckId)) throw new Error('deckId must be a slug');
-    if (input.publishToken !== undefined && !/^[A-Za-z0-9_-]{16,64}$/.test(input.publishToken))
-      throw new Error('publishToken must be a token');
-    return input;
-  })
+  .validator(deckInputValidator)
   .handler(async ({ data }): Promise<DeckPayload | null> => {
     // authorize(read) first, the payload shaped by role (SPEC-3 6.2, 6.3): a caller without a
     // right gets null (the You need access page, one answer for a missing and a restricted deck)
-    const { requestContext } = await import('./authorize');
-    const ctx = await requestContext();
-    if (data.publishToken !== undefined) ctx.publishToken = data.publishToken;
-    const shape = await shapeByRole(ctx, data.deckId, data);
-    if (shape.role === 'none') return null;
-    const loaded = await loadDeck(data.deckId);
-    if (!loaded) return null;
-    if (isTrashed(loaded.document.deck) && data.includeTrashed !== true) return null;
-    // the parser loads once per process, only when the deck holds an html block (SPEC-3 8.4)
-    const holdsHtml = Object.values(loaded.document.slides).some((slide) =>
-      JSON.stringify(slide).includes('"type":"html"'),
-    );
-    if (holdsHtml) {
-      const { loadPurifier } = await import('@turboslide/render/blocks/html-escape');
-      await loadPurifier().catch(() => undefined);
-    }
-    const theme = data.theme ?? deckAppearance(loaded.document.deck);
+    const shaped = await loadShaped(data);
+    if (shaped === null) return null;
+    const { loaded, shape, theme, holdsHtml } = shaped;
+    setDeckCacheHeader(data, shape, loaded.document.deck.revision);
     const built = buildViewerDeck(data.deckId, loaded.servedId, loaded, {
       theme,
+      slides: data.slides ?? 'all',
       notes: shape.notes,
       includeSkipped: shape.includeSkipped,
       htmlPolicy: shape.htmlPolicy,
@@ -700,5 +839,33 @@ export const getDeck = createServerFn({ method: 'GET' })
       sprite: sprite(),
       issues: loaded.issues,
       skipped: built.skipped,
+      ...(data.slides === 'first' && built.deck.slides.length > 1 ? { partial: true } : {}),
     };
+  });
+
+/**
+ * The HTML of every slide but the first (gslides-parity SPEC-4 3.11): the viewer routes ask for
+ * it as a deferred promise the router streams behind the document, so /deck and /embed carry one
+ * slide's markup and the sidebar's clones and the grid fill in when this answers. The same
+ * authorize and the same shape as `getDeck`, so a reader gets the slides the payload would have
+ * carried and nothing more; null for the caller who gets null there.
+ */
+export const getDeckSlides = createServerFn({ method: 'GET' })
+  .validator(deckInputValidator)
+  .handler(async ({ data }): Promise<DeckSlidesPayload | null> => {
+    const shaped = await loadShaped(data);
+    if (shaped === null) return null;
+    const { loaded, shape, theme, holdsHtml } = shaped;
+    setDeckCacheHeader(data, shape, loaded.document.deck.revision);
+    const built = buildViewerDeck(data.deckId, loaded.servedId, loaded, {
+      theme,
+      slides: 'rest',
+      notes: shape.notes,
+      includeSkipped: shape.includeSkipped,
+      htmlPolicy: shape.htmlPolicy,
+      sheetCss: holdsHtml ? await sheetCss() : '',
+    });
+    const html: Record<string, string> = {};
+    for (const slide of built.deck.slides) if (slide.html !== '') html[slide.id] = slide.html;
+    return { revision: loaded.document.deck.revision, html };
   });

@@ -251,7 +251,15 @@ export async function driveShell<TConfig, TAudit extends object>(
     }, theme);
     const page = await context.newPage();
     const response = await page.goto(url, { waitUntil: 'load', timeout });
-    if (!response || response.status() >= 400) {
+    // a status of 400 or more is an infrastructure failure, with one exception (gslides-parity
+    // SPEC-4 6.1 step 18; build-4/b1.md R8): the studio's Not found page is a 404 whose document
+    // carries the Not found root (`main[data-control="notfound"]`, apps/studio __root.tsx), and it
+    // is audited as a page like any other
+    const notFoundPage =
+      response !== null &&
+      response.status() === 404 &&
+      (await page.$('main[data-control="notfound"]')) !== null;
+    if (!response || (response.status() >= 400 && !notFoundPage)) {
       out.infrastructure = `HTTP ${response ? response.status() : 'none'} for ${url}`;
       return out;
     }
@@ -271,8 +279,11 @@ export async function driveShell<TConfig, TAudit extends object>(
         deck = true;
       }
     } else {
+      // the roots a studio page mounts: the ported shell, the studio, the files pages, and since
+      // round four the /home product page (`.ts-product`, build-4/b2.md R1) and the Not found page
       await page.waitForSelector(
-        plan.readySelector ?? '.pt-viewer, .ts-studio, .viewer, .ts-home-page, .ts-trash-page',
+        plan.readySelector ??
+          '.pt-viewer, .ts-studio, .viewer, .ts-home-page, .ts-trash-page, .ts-product, .ts-notfound',
         { timeout },
       );
     }

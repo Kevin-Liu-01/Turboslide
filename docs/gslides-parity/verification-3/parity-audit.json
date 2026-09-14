@@ -1,9 +1,9 @@
 {
   "base": "http://localhost:4321",
-  "at": "2026-09-14T12:44:35.740Z",
-  "commit": "fb96cd4",
-  "seconds": 1106,
-  "scratchDeck": "untitled-20260914-9u9b",
+  "at": "2026-09-14T19:37:58.916Z",
+  "commit": "1d2a132",
+  "seconds": 1245,
+  "scratchDeck": "untitled-20260914-sa75",
   "namePromptAnswered": 1,
   "summary": {
     "pass": 2980,
@@ -1536,7 +1536,7 @@
     {
       "section": "firstOpen",
       "id": "the first write creates the deck and moves the address",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b; save words \"All changes saved\"; title \"Audit scratch\"",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75; save words \"All changes saved\"; title \"Audit scratch\"",
       "pass": true
     },
     {
@@ -5126,7 +5126,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260914-9u9b",
+      "where": "/edit/untitled-20260914-sa75",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -5220,7 +5220,7 @@
       "menu": "title",
       "effect": "route",
       "label": "Turboslide home",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b -> http://localhost:4321/decks",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75 -> http://localhost:4321/decks",
       "pass": true
     },
     {
@@ -5310,7 +5310,7 @@
       "menu": "title",
       "effect": "client",
       "label": "Presenter view",
-      "evidence": "second window http://localhost:4321/present/untitled-20260914-9u9b; this window presenting",
+      "evidence": "second window http://localhost:4321/present/untitled-20260914-sa75; this window presenting",
       "pass": true
     },
     {
@@ -5334,7 +5334,7 @@
       "menu": "title",
       "effect": "dialog",
       "label": "Share",
-      "evidence": "dialog dialog.share \"Share Audit scratch\"; focus inside; Esc closed it; focus after: BODY",
+      "evidence": "dialog dialog.share \"Share Audit scratch\"; focus inside; Esc closed it; focus after: share.open",
       "pass": true
     },
     {
@@ -5523,7 +5523,7 @@
       "menu": "file",
       "effect": "client",
       "label": "Copy link",
-      "evidence": "clipboard \"http://localhost:4321/deck/untitled-20260914-9u9b\" wanted \"http://localhost:4321/deck/untitled-20260914-9u9b\"; snackbar \"Link copied\"",
+      "evidence": "clipboard \"http://localhost:4321/deck/untitled-20260914-sa75\" wanted \"http://localhost:4321/deck/untitled-20260914-sa75\"; snackbar \"Link copied\"",
       "pass": true
     },
     {
@@ -5562,7 +5562,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Plain Text (.txt)",
-      "evidence": "download untitled-20260914-9u9b.txt",
+      "evidence": "download untitled-20260914-sa75.txt",
       "pass": true
     },
     {
@@ -5571,7 +5571,7 @@
       "menu": "file",
       "effect": "action",
       "label": "JPEG image (.jpg, current slide)",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-9u9b&theme=light&scale=2&revision=3",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-sa75&theme=light&scale=2&revision=3",
       "pass": true
     },
     {
@@ -5580,7 +5580,7 @@
       "menu": "file",
       "effect": "action",
       "label": "PNG image (.png, current slide)",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-9u9b&theme=light&scale=2&revision=3",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-sa75&theme=light&scale=2&revision=3",
       "pass": true
     },
     {
@@ -5598,7 +5598,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Turboslide bundle (.zip)",
-      "evidence": "download untitled-20260914-9u9b-r3.zip",
+      "evidence": "download untitled-20260914-sa75-r3.zip",
       "pass": true
     },
     {
@@ -5664,7 +5664,7 @@
       "menu": "file",
       "effect": "route",
       "label": "Print settings and preview",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b#s/title -> http://localhost:4321/print/untitled-20260914-9u9b",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75#s/title -> http://localhost:4321/print/untitled-20260914-sa75",
       "pass": true
     },
     {
@@ -5673,7 +5673,7 @@
       "menu": "file",
       "effect": "route",
       "label": "Print",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b#s/title -> http://localhost:4321/print/untitled-20260914-9u9b",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75#s/title -> http://localhost:4321/print/untitled-20260914-sa75",
       "pass": true
     },
     {
@@ -7347,7 +7347,7 @@
       "menu": "tools",
       "effect": "action",
       "label": "Render this slide",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-9u9b&theme=light&scale=1&revision=19",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-sa75&theme=light&scale=1&revision=19",
       "pass": true
     },
     {
@@ -7869,7 +7869,7 @@
       "id": "file.print",
       "key": "Cmd+P",
       "chord": "Cmd+P",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b#s/title -> http://localhost:4321/print/untitled-20260914-9u9b",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75#s/title -> http://localhost:4321/print/untitled-20260914-sa75",
       "pass": true
     },
     {
@@ -12347,14 +12347,14 @@
       "section": "shortcuts:text",
       "id": "key.text.justify",
       "key": "Cmd+Shift+J",
-      "evidence": "revision 145 -> 146; align justify; page still at /edit/untitled-20260914-9u9b",
+      "evidence": "revision 145 -> 146; align justify; page still at /edit/untitled-20260914-sa75",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.indentMore",
       "key": "Cmd+]",
-      "evidence": "revision 147 -> 148; indent 64; page still at /edit/untitled-20260914-9u9b",
+      "evidence": "revision 147 -> 148; indent 64; page still at /edit/untitled-20260914-sa75",
       "pass": true
     },
     {
@@ -24207,7 +24207,7 @@
     {
       "section": "dither:scratch",
       "id": "dialog.background.upload",
-      "evidence": "the covering picture picture (asset ref-rosetta) landed in 329 ms; revision 262 -> 263",
+      "evidence": "the covering picture picture (asset ref-rosetta) landed in 837 ms; revision 262 -> 263",
       "pass": true
     },
     {
@@ -24250,7 +24250,7 @@
     {
       "section": "roles:scratch",
       "id": "owner.record",
-      "evidence": "record revision 0, owner anon_d6d1f13…, general access restricted/viewer; the page's access facts {\"deckId\":\"untitled-20260914-9u9b\",\"revision\":0,\"owner\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"restricted\",\"role\":\"viewer\"},\"links\":[],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"owner\",\"via\":\"owner\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"readNotes\",\"write\",\"history\",\"export\",\"exportNotes\",\"rename\",\"copy\",\"trash\",\"restore\",\"publish\",\"follow\",\"share\",\"settings\",\"remove\",\"transfer\"],\"mode\":\"restricted\"}",
+      "evidence": "record revision 0, owner anon_93fc90f…, general access restricted/viewer; the page's access facts {\"deckId\":\"untitled-20260914-sa75\",\"revision\":0,\"owner\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"restricted\",\"role\":\"viewer\"},\"links\":[],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"owner\",\"via\":\"owner\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"readNotes\",\"write\",\"history\",\"export\",\"exportNotes\",\"rename\",\"copy\",\"trash\",\"restore\",\"publish\",\"follow\",\"share\",\"settings\",\"remove\",\"transfer\"],\"mode\":\"restricted\"}",
       "pass": true
     },
     {
@@ -24262,13 +24262,13 @@
     {
       "section": "roles:scratch",
       "id": "viewer.landing",
-      "evidence": "the viewer link landed on /deck/untitled-20260914-9u9b; address carries a token: false",
+      "evidence": "the viewer link landed on /deck/untitled-20260914-sa75; address carries a token: false",
       "pass": true
     },
     {
       "section": "roles:scratch",
       "id": "viewer.mode",
-      "evidence": "data-edit-mode viewing; access facts {\"deckId\":\"untitled-20260914-9u9b\",\"revision\":1,\"owner\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_aUq25NntOsZDLZNS\",\"role\":\"viewer\",\"createdAt\":\"2026-09-14T12:42:45.196Z\",\"createdBy\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"viewer\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"export\",\"copy\"],\"mode\":\"link\"}",
+      "evidence": "data-edit-mode viewing; access facts {\"deckId\":\"untitled-20260914-sa75\",\"revision\":1,\"owner\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_g-z7iU8nUHEQ-yKo\",\"role\":\"viewer\",\"createdAt\":\"2026-09-14T19:35:48.309Z\",\"createdBy\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"viewer\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"export\",\"copy\"],\"mode\":\"link\"}",
       "pass": true
     },
     {
@@ -27727,7 +27727,7 @@
     {
       "section": "roles:scratch",
       "id": "viewer.window.write",
-      "evidence": "deck.rename refused: Error: page.evaluate: RangeError: You can view this presentation. Request edit access to change it.\n    at invoke (http://localhost:4321/src/routes/edit.$deckId",
+      "evidence": "deck.rename refused: Error: page.evaluate: RangeError: You can view this presentation. Request edit access to change it.\n    at invoke (http://localhost:4321/src/editor/controller.t",
       "pass": true
     },
     {
@@ -27738,7 +27738,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260914-9u9b as a viewer",
+      "where": "/edit/untitled-20260914-sa75 as a viewer",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -27751,7 +27751,7 @@
     {
       "section": "roles:scratch",
       "id": "commenter.landing",
-      "evidence": "the commenter link landed on /edit/untitled-20260914-9u9b",
+      "evidence": "the commenter link landed on /edit/untitled-20260914-sa75",
       "pass": true
     },
     {
@@ -27763,7 +27763,7 @@
     {
       "section": "roles:scratch",
       "id": "commenter.role",
-      "evidence": "describe().state.access reads {\"deckId\":\"untitled-20260914-9u9b\",\"revision\":2,\"owner\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_aUq25NntOsZDLZNS\",\"role\":\"viewer\",\"createdAt\":\"2026-09-14T12:42:45.196Z\",\"createdBy\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0},{\"id\":\"lnk_f6UtgE-yh5pO1x9F\",\"role\":\"commenter\",\"createdAt\":\"2026-09-14T12:42:51.580Z\",\"createdBy\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"revokedAt\":null,\"expiresAt\":null,\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"commenter\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"export\",\"copy\"],\"mode\":\"link\"}; the rows below are read against the matrix of 6.2 for a commenter: read, presence, readSkipped, comment, readComments, export, copy",
+      "evidence": "describe().state.access reads {\"deckId\":\"untitled-20260914-sa75\",\"revision\":2,\"owner\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_g-z7iU8nUHEQ-yKo\",\"role\":\"viewer\",\"createdAt\":\"2026-09-14T19:35:48.309Z\",\"createdBy\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0},{\"id\":\"lnk_V7dRDmALu85Og6XW\",\"role\":\"commenter\",\"createdAt\":\"2026-09-14T19:36:01.642Z\",\"createdBy\":\"anon_93fc90fd-2ad7-4804-8bb2-06a8a37851ff\",\"revokedAt\":null,\"expiresAt\":null,\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"commenter\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"export\",\"copy\"],\"mode\":\"link\"}; the rows below are read against the matrix of 6.2 for a commenter: read, presence, readSkipped, comment, readComments, export, copy",
       "pass": true
     },
     {
@@ -31209,7 +31209,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260914-9u9b as a commenter",
+      "where": "/edit/untitled-20260914-sa75 as a commenter",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -31225,13 +31225,13 @@
       "menu": "title",
       "effect": "action",
       "label": "Forget this browser",
-      "evidence": "own chip \"Rhodium 648 (you)\" -> \"Foil 284 (you)\"; the page's principal anon_91fadbca-3c2f-48ab-8ffd-1486ec26e5d6 -> anon_d315a2dc-6c04-4f90-856b-e2e6c22f3bfd; confirm dialog \"Forget this browser\" confirmed",
+      "evidence": "own chip \"Agent (you)\" -> \"Carbon 340 (you)\"; the page's principal agent:localhost -> anon_d190ad7e-56f7-4210-af08-810a8228e093; confirm dialog \"Forget this browser\" confirmed",
       "pass": true
     },
     {
       "section": "tooltipAudit",
       "id": "tooltip-audit",
-      "evidence": "exit 0; {\"width\":1440,\"theme\":\"light\",\"pages\":[{\"url\":\"http://localhost:4321/new\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/edit/untitled-20260914-9u9b\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/decks\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]}],\"missing\":0,\"titleOnly\":0,\"broken\":0}",
+      "evidence": "exit 0; {\"width\":1440,\"theme\":\"light\",\"pages\":[{\"url\":\"http://localhost:4321/new\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/edit/untitled-20260914-sa75\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/decks\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]}],\"missing\":0,\"titleOnly\":0,\"broken\":0}",
       "pass": true
     },
     {
@@ -31240,7 +31240,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Move to trash",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b -> /decks \"\"",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-sa75 -> /decks \"\"",
       "pass": true
     },
     {
@@ -31248,7 +31248,7 @@
       "id": "trash.delete",
       "menu": "home",
       "label": "Delete forever",
-      "evidence": "the card of untitled-20260914-9u9b left the trash",
+      "evidence": "the card of untitled-20260914-sa75 left the trash",
       "pass": true
     },
     {

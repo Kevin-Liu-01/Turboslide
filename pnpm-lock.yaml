@@ -102,6 +102,9 @@ catalogs:
     '@vercel/blob':
       specifier: 2.8.0
       version: 2.8.0
+    '@vercel/functions':
+      specifier: 3.9.7
+      version: 3.9.7
     '@vitejs/plugin-react':
       specifier: 6.1.1
       version: 6.1.1
@@ -400,6 +403,9 @@ importers:
       '@upstash/redis':
         specifier: 'catalog:'
         version: 1.38.4
+      '@vercel/functions':
+        specifier: 'catalog:'
+        version: 3.9.7(ws@8.21.3)
       better-auth:
         specifier: 'catalog:'
         version: 1.7.4(@tanstack/react-start@1.168.50(crossws@0.4.12(srvx@1.0.4))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rolldown@1.2.8)(supports-color@7.2.0)(vite@8.2.2(@types/node@24.13.4)(jiti@2.7.0)))(pg@8.23.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(solid-js@1.9.15)(vitest@4.1.11(@types/node@24.13.4)(jsdom@30.0.1(@noble/hashes@2.4.0))(vite@8.2.2(@types/node@24.13.4)(jiti@2.7.0)))
@@ -538,6 +544,9 @@ importers:
       '@turboslide/schema':
         specifier: workspace:*
         version: link:../schema
+      '@turboslide/theme':
+        specifier: workspace:*
+        version: link:../theme
       '@turboslide/viewer':
         specifier: workspace:*
         version: link:../viewer
@@ -937,6 +946,9 @@ importers:
 
   packages/theme:
     dependencies:
+      '@turboslide/effects':
+        specifier: workspace:*
+        version: link:../effects
       '@turboslide/schema':
         specifier: workspace:*
         version: link:../schema
@@ -2451,6 +2463,18 @@ packages:
   '@vercel/cli-exec@1.0.1':
     resolution: {integrity: sha512-g9XerViJ/paZujufXYcu5XYI2vU2rtB4sgdpjUHde5RnOkdmpu0ngH46LCFGHoPXO/C+qDPSczIHIRN+8Q2YKQ==}
     engines: {node: '>= 18'}
+
+  '@vercel/functions@3.9.7':
+    resolution: {integrity: sha512-ICLzHbVZs10igkVMW/ovEMIXFa5ctpEjTa+VWRCOQbIqg9ALZcQcRjcfDuQZ/g2XtPS08EvHjzm538YJU9WsXA==}
+    engines: {node: '>= 20'}
+    peerDependencies:
+      '@aws-sdk/credential-provider-web-identity': '*'
+      ws: '>=8'
+    peerDependenciesMeta:
+      '@aws-sdk/credential-provider-web-identity':
+        optional: true
+      ws:
+        optional: true
 
   '@vercel/oidc@3.8.7':
     resolution: {integrity: sha512-fRu59npOu+1vsV570tiLKskfuRyOJ1MqceAkXbTIfWPnM+c9ve1tSK81oj4umKKirymlGUss3V60Lm5I38rKDw==}
@@ -6146,6 +6170,12 @@ snapshots:
   '@vercel/cli-exec@1.0.1':
     dependencies:
       execa: 5.1.1
+
+  '@vercel/functions@3.9.7(ws@8.21.3)':
+    dependencies:
+      '@vercel/oidc': 3.8.7
+    optionalDependencies:
+      ws: 8.21.3
 
   '@vercel/oidc@3.8.7':
     dependencies:

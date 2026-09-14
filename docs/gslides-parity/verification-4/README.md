@@ -1,0 +1,24 @@
+# verification-4/
+
+The verifier's artefacts of round four (`docs/gslides-parity/SPEC-4.md` sections 0.49 and 6.5; `MILESTONES-4.md` "Verifier").
+
+Present on 2026-09-13, copied from the session scratchpad before the date change by the round four synthesizer:
+
+| File                      | What it is                                                                                                                                                                                                    | sha256                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `perf-budget-prod.json`   | The first production run of `design-4/perf-budget.mjs`, 21:04:33 to 21:05:59 UTC, `--only routes,transitions,filmstrip,twins --profile deployment --runs 1`, 44 of 95 budgets met (`performance-plan.md` 9.5) | `c510519472f1d870fa5a7bdd1371e7532702b0af80a1c7e8ac104a19fcc0adca` |
+| `perf-budget-prod-2.json` | The second production run with the final script, 21:34:03 to 21:35:59 UTC, `--only routes,transitions,filmstrip,idle,twins --idle-seconds 30`, 58 of 121 budgets met                                          | `047fbf25fc714a3f843e2929d73a1bfa83f4fd6dbbab938c23d9300f2f4c6091` |
+| `perf-budget-prod.log`    | The first run's printed table                                                                                                                                                                                 |                                                                    |
+
+The verifier adds the baseline run on the round three ship deploy, the preview and production runs, the tab strip screenshots, the confusion sheet, the `/home` shots, the OG decode, the banner output, the mark rasters, the skeleton and filmstrip screenshots, the parity audit and chrome lint outputs and the hosted smoke tables, each named with its date and the deployment URL.
+
+Added on day 0, 2026-09-14, by the verifier (the round three ship commit `d5d7f07`, production deployment `dpl_C7gyjio633CawQxtdxDfYkGV9T55`):
+
+| File                                              | What it is                                                                                                                                                                                                                                                     |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BASELINE.md`                                     | The day 0 baseline: production and the local vite preview, every R04 measurement re-taken, the findings for the round and the budget rows already met                                                                                                          |
+| `baseline-2026-09-14.json`                        | The composite of every run below plus the harness's own measurements (routes with request counts, extras, the editor session, the material paint, the idle minute, the cleanup), production then local                                                         |
+| `perf-budget-baseline-2026-09-14.json`, `.log`    | `design-4/perf-budget.mjs --profile deployment --runs 3 --report` against production, 14:30:49 to 14:34:32 UTC, 58 of 121 budgets met                                                                                                                          |
+| `perf-budget-local-2026-09-14.json`, `.rerun.log` | The same script with `--profile local --runs 3 --report --write --only routes,filmstrip,idle,twins,write` against `vite preview` of `apps/studio/dist` on 4346 with `TURBOSLIDE_STORE=tmp`, 73 of 121 met; its scratch deck was trashed and deleted afterwards |
+| `perf-budget-local-2026-09-14.log`                | The first local run, which died at the Layout grid click under the tmp store's hosting banner (BASELINE.md finding 7); its transitions table is the source of the local transition numbers                                                                     |
+| `harness-day0/`                                   | The verifier's harness (`harness.mjs`, `assemble.mjs`, `diag-edit.mjs`, with the session's absolute paths as run) and the two logs of the `/edit/gt-brand` stalls (finding 6)                                                                                  |

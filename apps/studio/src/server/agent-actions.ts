@@ -18,7 +18,7 @@ import { deckDir } from './root';
  * Zod schema the HTTP and MCP transports use and runs the studio's deck dispatcher
  * (server/actions.ts, the composition /api/actions serves), so a click and an agent call take
  * one path. The write the action ends in reaches the open editor over the store's watch channel
- * as an external revision by the same author (edit.$deckId.tsx adoptExternal). The boundary is
+ * as an external revision by the same author (editor/controller.tsx adoptExternal). The boundary is
  * JSON text, as write.ts explains. createServerFn appears only under apps/studio/src/server.
  *
  * Round three (gslides-parity SPEC-3 6.2, 8.2, 8.3, 8.12): `authorize()` runs first with the

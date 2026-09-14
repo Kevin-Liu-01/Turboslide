@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { useLayoutEffect, useRef, useState } from 'react';
 
 import { applyThemeToTree } from './theme';
@@ -5,6 +6,14 @@ import type { Theme } from './theme';
 
 /** How long the outgoing slide stays for its fade; matches --pt-dur-fast in tokens.css. */
 const OUT_MS = 120;
+
+/**
+ * The current slide's body carries the one view transition name of the stage (gslides-parity
+ * SPEC-4 0.40): a route transition (the router's `defaultViewTransition`) animates it as its own
+ * group; the leaving body carries none, since one name belongs to one element. Slide changes
+ * keep the keyed fade below and start no document transition.
+ */
+const STAGE_STYLE: CSSProperties = { viewTransitionName: 'ts-stage' };
 
 export type SlideViewProps = {
   /** the slide id: the key of the body; a change starts the slide change motion */
@@ -70,6 +79,7 @@ export function SlideView({ slideId, html, theme }: SlideViewProps) {
         ref={body}
         className="pt-slide"
         data-slide-id={slideId}
+        style={STAGE_STYLE}
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </>

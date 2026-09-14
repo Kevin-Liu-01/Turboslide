@@ -278,3 +278,18 @@ Estimate: 8 agent hours.
 ## What is round five
 
 In the order of SPEC-4 section 7: the live monochrome hero after the shader split and a second measurement; the per deck card; the 320 px clone twins; the blob tier deck index; the render worker on a host and Chromium out of the secret holding function; field INP and Lighthouse CI; the cold start and function size gates; the round three dither patterns in the crate; the base function's Chromium split; a second sheet theme; React's `<ViewTransition>`; and SPEC-3 section 17's list. Each is recorded as round five's in `docs/performance.md` and `docs/brand.md` without naming a round on any product surface.
+
+## Day 0 amendments
+
+Recorded by the integrator on 2026-09-14 over `main` at `d5d7f07` (`BASE`); the full list with its reasons is `docs/gslides-parity/build-4/integrator.md` section 3, and the orchestrator's rulings stand above SPEC-4 where they differ.
+
+- `EditorSkeleton.tsx` and `PresenterSkeleton.tsx` are `apps/studio/src/components/` files (round three put them in the studio); B1 owns them there for the curtain picture only.
+- `recordDeckOpened` and `RECENT_KEY` are defined in `apps/studio/src/routes/decks.index.tsx` (B3); B3 extends the signature and the stored shape, B4 passes the new arguments from `controller.tsx`.
+- The selection colour (the orchestrator's ruling 1): B1 owns one `--pt-select` addition in `packages/chrome/src/tokens.css` (the git gate reads "differs from `BASE` by that block only"), its readers in `packages/chrome/src/Overlay.css`, `packages/viewer/src/{Editor,Marquee,Guides}.css` and the selection chip, and the chrome lint's colour rule in `packages/lint/src/chrome.ts` with its test. The remote collaborator outlines keep the six hues; the export, the deck content, the menus, `/home`, the card and the README stay paper and ink.
+- The You need access page as `notFoundComponent` (ruling 3): B3 on the deck, edit and present routes; on `print.$deckId.tsx` (B1's file) through a request in `b3.md` that the integrator applies.
+- `packages/native/npm/linux-x64-gnu/.gitignore` (B4) drops its `*.node` line when the addon is committed; the root `.gitignore` already negates that one file and tracks `packages/native/wasm/`.
+- `/home` (B2) renders a `main` element (the perf check's landmark), never reuses `.ts-home-page` (the `/decks` class), and names its root class in `b2.md` for the chrome lint's roots (`packages/lint/src/chrome.ts`, the integrator's edit at merge 2).
+- B1's acceptance "no `--ts-` token in `apps/studio/src/styles.css`" reads "none of the eleven identity tokens of SPEC-4 1.8": round three's ten `--ts-` presence tokens stay.
+- The four views of SPEC-3 6.7 are the `account.decks` action's views, not page views; B3's Delete forever change lands in `decks.trash.tsx` alone.
+- `@vercel/functions` is pinned at 3.9.7 (SPEC-4 names no version); `@turboslide/theme` depends on `@turboslide/effects` for `brand.ts`'s `bayer8`.
+- Check steps 29 to 31 are in `scripts/check.mjs` as gated stubs: 29 runs once `scripts/build-brand.ts` exists, 30 on a machine linked to the Vercel project once `apps/studio/public/brand-manifest.json` exists (or `TURBOSLIDE_CHECK_VERCEL=1`), 31 with `TURBOSLIDE_CHECK_PERF=1` until the integrator removes the gate at merge 2.

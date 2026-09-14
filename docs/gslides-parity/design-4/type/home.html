@@ -1,485 +1,1673 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Turboslide</title>
-<meta name="description" content="An agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export.">
-<meta name="theme-color" content="#070707">
-<link rel="icon" href="favicon/favicon.ico" sizes="32x32">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="favicon/apple-touch-icon.png">
-<!-- The theme boot script of the studio, verbatim (packages/viewer/src/theme.ts THEME_BOOT_SCRIPT):
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Turboslide</title>
+    <meta
+      name="description"
+      content="An agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export."
+    />
+    <meta name="theme-color" content="#070707" />
+    <link rel="icon" href="favicon/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="favicon/apple-touch-icon.png" />
+    <!-- The theme boot script of the studio, verbatim (packages/viewer/src/theme.ts THEME_BOOT_SCRIPT):
      gt-theme, then gt-deck-theme, default dark, never prefers-color-scheme. -->
-<script>try{var t=localStorage.getItem('gt-theme');if(t!=='light'&&t!=='dark')t=localStorage.getItem('gt-deck-theme');document.documentElement.setAttribute('data-theme',t==='light'||t==='dark'?t:'dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
-<!-- The real chrome tokens, unchanged (packages/chrome/src/tokens.css). Every colour, line, corner and
+    <script>
+      try {
+        var t = localStorage.getItem('gt-theme');
+        if (t !== 'light' && t !== 'dark') t = localStorage.getItem('gt-deck-theme');
+        document.documentElement.setAttribute(
+          'data-theme',
+          t === 'light' || t === 'dark' ? t : 'dark',
+        );
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    </script>
+    <!-- The real chrome tokens, unchanged (packages/chrome/src/tokens.css). Every colour, line, corner and
      duration on this page is one of them; the --ts- tokens below are the additions proposal 3 makes. -->
-<link rel="stylesheet" href="../../../../packages/chrome/src/tokens.css">
-<style>
-/* Mockup only: the build gets Inter from @turboslide/fonts as 'Inter' and uses --pt-display and
+    <link rel="stylesheet" href="../../../../packages/chrome/src/tokens.css" />
+    <style>
+      /* Mockup only: the build gets Inter from @turboslide/fonts as 'Inter' and uses --pt-display and
    --pt-text; this file loads the same InterVariable.woff2 from the repository under a second name so
    a checkout renders it and a machine without the file falls back to the stack. */
-@font-face { font-family: 'Inter Local'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('../../../../packages/fonts/assets/InterVariable.woff2') format('woff2'); }
+      @font-face {
+        font-family: 'Inter Local';
+        font-style: normal;
+        font-weight: 100 900;
+        font-display: swap;
+        src: url('../../../../packages/fonts/assets/InterVariable.woff2') format('woff2');
+      }
 
-/* ---- the --ts- tokens proposal 3 adds (apps/studio/src/styles.css in the build; section 3 of the proposal) ---- */
-:root {
-  --ts-face: 'Inter Local', 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  /* the /home type ladder, the only page allowed above 13 px chrome type; weights never above 500 */
-  --ts-h1: 56px;   --ts-h1-lh: 1.05;
-  --ts-h2: 32px;   --ts-h2-lh: 1.12;
-  --ts-h3: 20px;   --ts-h3-lh: 1.25;
-  --ts-lead: 20px; --ts-lead-lh: 1.45;
-  --ts-body: 15px; --ts-body-lh: 1.55;
-  --ts-small: 13px;
-  --ts-figure: 40px;
-  --ts-track-display: -0.025em;
-  --ts-track-mid: -0.01em;
-  /* the dither surface: the twin, its natural size (cells stay integers), the cell */
-  --ts-twin: url('previews/hero-dark.png');
-  --ts-twin-size: 1600px 900px;
-  --ts-cell: 2px;
-  /* the page column and the measure */
-  --ts-page: 1120px;
-  --ts-measure: 62ch;
-  --ts-gutter: 24px;
-  /* motion: the page reads the shell's durations; nothing else moves */
-  --ts-dur: var(--pt-dur-fast);
-}
-:root[data-theme='light'] { --ts-twin: url('previews/hero-light.png'); }
+      /* ---- the --ts- tokens proposal 3 adds (apps/studio/src/styles.css in the build; section 3 of the proposal) ---- */
+      :root {
+        --ts-face: 'Inter Local', 'Inter', 'Helvetica Neue', Arial, sans-serif;
+        /* the /home type ladder, the only page allowed above 13 px chrome type; weights never above 500 */
+        --ts-h1: 56px;
+        --ts-h1-lh: 1.05;
+        --ts-h2: 32px;
+        --ts-h2-lh: 1.12;
+        --ts-h3: 20px;
+        --ts-h3-lh: 1.25;
+        --ts-lead: 20px;
+        --ts-lead-lh: 1.45;
+        --ts-body: 15px;
+        --ts-body-lh: 1.55;
+        --ts-small: 13px;
+        --ts-figure: 40px;
+        --ts-track-display: -0.025em;
+        --ts-track-mid: -0.01em;
+        /* the dither surface: the twin, its natural size (cells stay integers), the cell */
+        --ts-twin: url('previews/hero-dark.png');
+        --ts-twin-size: 1600px 900px;
+        --ts-cell: 2px;
+        /* the page column and the measure */
+        --ts-page: 1120px;
+        --ts-measure: 62ch;
+        --ts-gutter: 24px;
+        /* motion: the page reads the shell's durations; nothing else moves */
+        --ts-dur: var(--pt-dur-fast);
+      }
+      :root[data-theme='light'] {
+        --ts-twin: url('previews/hero-light.png');
+      }
 
-*, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: auto; }
-body { margin: 0; background: var(--pt-paper); color: var(--pt-ink); font: var(--ts-body)/var(--ts-body-lh) var(--ts-face); -webkit-font-smoothing: antialiased; }
-img { max-width: 100%; display: block; }
-a { color: inherit; }
-h1, h2, h3 { font-weight: 500; font-feature-settings: 'cv11', 'ss01'; margin: 0; text-wrap: balance; }
-h1 { font-size: var(--ts-h1); line-height: var(--ts-h1-lh); letter-spacing: var(--ts-track-display); }
-h2 { font-size: var(--ts-h2); line-height: var(--ts-h2-lh); letter-spacing: var(--ts-track-display); }
-h3 { font-size: var(--ts-h3); line-height: var(--ts-h3-lh); letter-spacing: var(--ts-track-mid); }
-p { margin: 0; }
-.lead { font-size: var(--ts-lead); line-height: var(--ts-lead-lh); color: var(--pt-ink); max-width: var(--ts-measure); }
-.muted { color: var(--pt-ink-2); }
-.wrap { max-width: var(--ts-page); margin: 0 auto; padding: 0 var(--ts-gutter); }
-.ts-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
-.num { font-variant-numeric: tabular-nums; }
-code, .cmd { font-family: var(--pt-mono); font-size: var(--ts-small); }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html {
+        scroll-behavior: auto;
+      }
+      body {
+        margin: 0;
+        background: var(--pt-paper);
+        color: var(--pt-ink);
+        font: var(--ts-body)/var(--ts-body-lh) var(--ts-face);
+        -webkit-font-smoothing: antialiased;
+      }
+      img {
+        max-width: 100%;
+        display: block;
+      }
+      a {
+        color: inherit;
+      }
+      h1,
+      h2,
+      h3 {
+        font-weight: 500;
+        font-feature-settings: 'cv11', 'ss01';
+        margin: 0;
+        text-wrap: balance;
+      }
+      h1 {
+        font-size: var(--ts-h1);
+        line-height: var(--ts-h1-lh);
+        letter-spacing: var(--ts-track-display);
+      }
+      h2 {
+        font-size: var(--ts-h2);
+        line-height: var(--ts-h2-lh);
+        letter-spacing: var(--ts-track-display);
+      }
+      h3 {
+        font-size: var(--ts-h3);
+        line-height: var(--ts-h3-lh);
+        letter-spacing: var(--ts-track-mid);
+      }
+      p {
+        margin: 0;
+      }
+      .lead {
+        font-size: var(--ts-lead);
+        line-height: var(--ts-lead-lh);
+        color: var(--pt-ink);
+        max-width: var(--ts-measure);
+      }
+      .muted {
+        color: var(--pt-ink-2);
+      }
+      .wrap {
+        max-width: var(--ts-page);
+        margin: 0 auto;
+        padding: 0 var(--ts-gutter);
+      }
+      .ts-sprite {
+        position: absolute;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+      }
+      .num {
+        font-variant-numeric: tabular-nums;
+      }
+      code,
+      .cmd {
+        font-family: var(--pt-mono);
+        font-size: var(--ts-small);
+      }
 
-/* ---- the app bar: the tile, the live word, the links; one rule under it (structural) ---- */
-.bar { border-bottom: 1px solid var(--pt-hair); }
-.bar .wrap { display: flex; align-items: center; gap: 28px; height: 56px; }
-.brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; font-size: 20px; font-weight: 500; letter-spacing: var(--ts-track-mid); font-feature-settings: 'cv11', 'ss01'; }
-.tile { width: 24px; height: 24px; display: block; }
-.bar nav { display: flex; gap: 20px; margin-left: 8px; }
-.bar nav a { text-decoration: none; color: var(--pt-ink-2); font-size: var(--ts-small); }
-.bar nav a:hover { color: var(--pt-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
-.bar .end { margin-left: auto; display: flex; gap: 8px; }
+      /* ---- the app bar: the tile, the live word, the links; one rule under it (structural) ---- */
+      .bar {
+        border-bottom: 1px solid var(--pt-hair);
+      }
+      .bar .wrap {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+        height: 56px;
+      }
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: var(--ts-track-mid);
+        font-feature-settings: 'cv11', 'ss01';
+      }
+      .tile {
+        width: 24px;
+        height: 24px;
+        display: block;
+      }
+      .bar nav {
+        display: flex;
+        gap: 20px;
+        margin-left: 8px;
+      }
+      .bar nav a {
+        text-decoration: none;
+        color: var(--pt-ink-2);
+        font-size: var(--ts-small);
+      }
+      .bar nav a:hover {
+        color: var(--pt-ink);
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+      }
+      .bar .end {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+      }
 
-/* ---- the hero: the twin at its natural size, anchored right; the copy on the opener plate ---- */
-.hero { position: relative; background: var(--pt-paper) var(--ts-twin) no-repeat right bottom / var(--ts-twin-size); image-rendering: pixelated; border-bottom: 1px solid var(--pt-hair); }
-.hero .wrap { padding-top: 72px; padding-bottom: 72px; min-height: 620px; display: grid; align-content: center; }
-.plate { background: var(--pt-paper); padding: 26px 30px 26px; max-width: 760px; display: grid; gap: 24px; }
-.wm { width: 560px; max-width: 100%; height: auto; }
-.wm.light { display: none; }
-:root[data-theme='light'] .wm.light { display: block; }
-:root[data-theme='light'] .wm.dark { display: none; }
-.actions { display: flex; gap: 8px; flex-wrap: wrap; }
-.actions .pt-ib { padding: 0 14px; text-decoration: none; }
-.facts { color: var(--pt-ink-2); font-size: var(--ts-small); }
+      /* ---- the hero: the twin at its natural size, anchored right; the copy on the opener plate ---- */
+      .hero {
+        position: relative;
+        background: var(--pt-paper) var(--ts-twin) no-repeat right bottom / var(--ts-twin-size);
+        image-rendering: pixelated;
+        border-bottom: 1px solid var(--pt-hair);
+      }
+      .hero .wrap {
+        padding-top: 72px;
+        padding-bottom: 72px;
+        min-height: 620px;
+        display: grid;
+        align-content: center;
+      }
+      .plate {
+        background: var(--pt-paper);
+        padding: 26px 30px 26px;
+        max-width: 760px;
+        display: grid;
+        gap: 24px;
+      }
+      .wm {
+        width: 560px;
+        max-width: 100%;
+        height: auto;
+      }
+      .wm.light {
+        display: none;
+      }
+      :root[data-theme='light'] .wm.light {
+        display: block;
+      }
+      :root[data-theme='light'] .wm.dark {
+        display: none;
+      }
+      .actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .actions .pt-ib {
+        padding: 0 14px;
+        text-decoration: none;
+      }
+      .facts {
+        color: var(--pt-ink-2);
+        font-size: var(--ts-small);
+      }
 
-/* ---- the editor picture under the hero ---- */
-.shot { border: 1px solid var(--pt-edge); background: var(--pt-paper); }
-.shot img { aspect-ratio: 16 / 10; object-fit: cover; width: 100%; height: auto; }
-.editor-shot { padding: 48px 0 0; }
-.editor-shot .light { display: none; }
-:root[data-theme='light'] .editor-shot .light { display: block; }
-:root[data-theme='light'] .editor-shot .dark { display: none; }
-.caption { font-size: var(--ts-small); color: var(--pt-ink-2); margin-top: 10px; }
+      /* ---- the editor picture under the hero ---- */
+      .shot {
+        border: 1px solid var(--pt-edge);
+        background: var(--pt-paper);
+      }
+      .shot img {
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+        width: 100%;
+        height: auto;
+      }
+      .editor-shot {
+        padding: 48px 0 0;
+      }
+      .editor-shot .light {
+        display: none;
+      }
+      :root[data-theme='light'] .editor-shot .light {
+        display: block;
+      }
+      :root[data-theme='light'] .editor-shot .dark {
+        display: none;
+      }
+      .caption {
+        font-size: var(--ts-small);
+        color: var(--pt-ink-2);
+        margin-top: 10px;
+      }
 
-/* ---- sections: a rule at the top of each (structural), rows inside (row) ---- */
-section.band { padding: 56px 0 64px; border-top: 1px solid var(--pt-hair); }
-section.band:first-of-type { border-top: 0; }
-.head { display: grid; gap: 12px; margin-bottom: 36px; max-width: 760px; }
+      /* ---- sections: a rule at the top of each (structural), rows inside (row) ---- */
+      section.band {
+        padding: 56px 0 64px;
+        border-top: 1px solid var(--pt-hair);
+      }
+      section.band:first-of-type {
+        border-top: 0;
+      }
+      .head {
+        display: grid;
+        gap: 12px;
+        margin-bottom: 36px;
+        max-width: 760px;
+      }
 
-/* the numbers strip */
-.numbers { display: grid; grid-template-columns: repeat(6, 1fr); }
-.numbers > div { padding: 0 20px 0 0; border-left: 1px solid var(--pt-hair-soft); padding-left: 20px; }
-.numbers > div:first-child { border-left: 0; padding-left: 0; }
-.numbers b { display: block; font-size: var(--ts-figure); font-weight: 500; letter-spacing: var(--ts-track-display); line-height: 1; white-space: nowrap; font-feature-settings: 'cv11', 'ss01'; }
-.numbers span { display: block; margin-top: 10px; font-size: var(--ts-small); color: var(--pt-ink-2); }
+      /* the numbers strip */
+      .numbers {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+      }
+      .numbers > div {
+        padding: 0 20px 0 0;
+        border-left: 1px solid var(--pt-hair-soft);
+        padding-left: 20px;
+      }
+      .numbers > div:first-child {
+        border-left: 0;
+        padding-left: 0;
+      }
+      .numbers b {
+        display: block;
+        font-size: var(--ts-figure);
+        font-weight: 500;
+        letter-spacing: var(--ts-track-display);
+        line-height: 1;
+        white-space: nowrap;
+        font-feature-settings: 'cv11', 'ss01';
+      }
+      .numbers span {
+        display: block;
+        margin-top: 10px;
+        font-size: var(--ts-small);
+        color: var(--pt-ink-2);
+      }
 
-/* the editor in one picture */
-.two { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 48px; align-items: start; }
-.rows { list-style: none; margin: 0; padding: 0; }
-.rows li { padding: 16px 0; border-top: 1px solid var(--pt-hair-soft); color: var(--pt-ink-2); }
-.rows li:first-child { border-top: 0; padding-top: 0; }
-.rows li b { display: block; color: var(--pt-ink); font-weight: 500; margin-bottom: 4px; letter-spacing: var(--ts-track-mid); }
+      /* the editor in one picture */
+      .two {
+        display: grid;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+        gap: 48px;
+        align-items: start;
+      }
+      .rows {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .rows li {
+        padding: 16px 0;
+        border-top: 1px solid var(--pt-hair-soft);
+        color: var(--pt-ink-2);
+      }
+      .rows li:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+      .rows li b {
+        display: block;
+        color: var(--pt-ink);
+        font-weight: 500;
+        margin-bottom: 4px;
+        letter-spacing: var(--ts-track-mid);
+      }
 
-/* the feature cards */
-.cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 32px; }
-.card { display: grid; gap: 14px; align-content: start; }
-.card .shot img { aspect-ratio: 16 / 10; }
-.card .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.card .pair .shot img { aspect-ratio: 16 / 10; }
-.card .icon { height: 64px; width: 64px; display: grid; place-items: center; background: var(--pt-plate); border: 1px solid var(--pt-hair-soft); }
-.card .icon svg { width: 24px; height: 24px; fill: var(--pt-ink); }
-.card p { color: var(--pt-ink-2); }
+      /* the feature cards */
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 40px 32px;
+      }
+      .card {
+        display: grid;
+        gap: 14px;
+        align-content: start;
+      }
+      .card .shot img {
+        aspect-ratio: 16 / 10;
+      }
+      .card .pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .card .pair .shot img {
+        aspect-ratio: 16 / 10;
+      }
+      .card .icon {
+        height: 64px;
+        width: 64px;
+        display: grid;
+        place-items: center;
+        background: var(--pt-plate);
+        border: 1px solid var(--pt-hair-soft);
+      }
+      .card .icon svg {
+        width: 24px;
+        height: 24px;
+        fill: var(--pt-ink);
+      }
+      .card p {
+        color: var(--pt-ink-2);
+      }
 
-/* dithers and shaders */
-.twins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-.fig { border: 1px solid var(--pt-edge); aspect-ratio: 16 / 9; background-color: var(--pt-paper); }
-.fig.cut { background: var(--ts-twin) -1250px -700px / var(--ts-twin-size) no-repeat; image-rendering: pixelated; }
-.fig img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: auto; }
-.twins .caption { margin-top: 8px; }
+      /* dithers and shaders */
+      .twins {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 24px;
+      }
+      .fig {
+        border: 1px solid var(--pt-edge);
+        aspect-ratio: 16 / 9;
+        background-color: var(--pt-paper);
+      }
+      .fig.cut {
+        background: var(--ts-twin) -1250px -700px / var(--ts-twin-size) no-repeat;
+        image-rendering: pixelated;
+      }
+      .fig img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        aspect-ratio: auto;
+      }
+      .twins .caption {
+        margin-top: 8px;
+      }
 
-/* why it is fast */
-.speed { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--pt-hair); }
-.speed li { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 6fr) minmax(0, 3fr); gap: 32px; padding: 20px 0; border-bottom: 1px solid var(--pt-hair-soft); }
-.speed li h3 { font-size: 17px; }
-.speed li p { color: var(--pt-ink-2); }
-.speed li .n { color: var(--pt-ink); font-variant-numeric: tabular-nums; }
-.honest { margin-top: 28px; max-width: var(--ts-measure); color: var(--pt-ink-2); }
+      /* why it is fast */
+      .speed {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border-top: 1px solid var(--pt-hair);
+      }
+      .speed li {
+        display: grid;
+        grid-template-columns: minmax(0, 3fr) minmax(0, 6fr) minmax(0, 3fr);
+        gap: 32px;
+        padding: 20px 0;
+        border-bottom: 1px solid var(--pt-hair-soft);
+      }
+      .speed li h3 {
+        font-size: 17px;
+      }
+      .speed li p {
+        color: var(--pt-ink-2);
+      }
+      .speed li .n {
+        color: var(--pt-ink);
+        font-variant-numeric: tabular-nums;
+      }
+      .honest {
+        margin-top: 28px;
+        max-width: var(--ts-measure);
+        color: var(--pt-ink-2);
+      }
 
-/* for agents */
-.agents { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--pt-hair); }
-.agents li { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 4fr) minmax(0, 6fr); gap: 32px; padding: 18px 0; border-bottom: 1px solid var(--pt-hair-soft); align-items: start; }
-.agents li b { font-weight: 500; letter-spacing: var(--ts-track-mid); }
-.agents li p { color: var(--pt-ink-2); }
-.cmd { display: block; padding: 10px 14px; border: 1px solid var(--pt-hair); background: var(--pt-plate); white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; color: var(--pt-ink); }
-.cmd .t { color: var(--pt-titanium); }
+      /* for agents */
+      .agents {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        border-top: 1px solid var(--pt-hair);
+      }
+      .agents li {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 4fr) minmax(0, 6fr);
+        gap: 32px;
+        padding: 18px 0;
+        border-bottom: 1px solid var(--pt-hair-soft);
+        align-items: start;
+      }
+      .agents li b {
+        font-weight: 500;
+        letter-spacing: var(--ts-track-mid);
+      }
+      .agents li p {
+        color: var(--pt-ink-2);
+      }
+      .cmd {
+        display: block;
+        padding: 10px 14px;
+        border: 1px solid var(--pt-hair);
+        background: var(--pt-plate);
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        line-height: 1.5;
+        color: var(--pt-ink);
+      }
+      .cmd .t {
+        color: var(--pt-titanium);
+      }
 
-/* compared with Google Slides */
-table { width: 100%; border-collapse: collapse; }
-th, td { text-align: left; vertical-align: top; padding: 14px 20px 14px 0; border-bottom: 1px solid var(--pt-hair-soft); }
-th { font-weight: 500; border-bottom: 1px solid var(--pt-hair); color: var(--pt-ink); }
-td { color: var(--pt-ink-2); }
-td:first-child { color: var(--pt-ink); font-weight: 500; width: 16%; }
-td:last-child, th:last-child { padding-right: 0; }
+      /* compared with Google Slides */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        text-align: left;
+        vertical-align: top;
+        padding: 14px 20px 14px 0;
+        border-bottom: 1px solid var(--pt-hair-soft);
+      }
+      th {
+        font-weight: 500;
+        border-bottom: 1px solid var(--pt-hair);
+        color: var(--pt-ink);
+      }
+      td {
+        color: var(--pt-ink-2);
+      }
+      td:first-child {
+        color: var(--pt-ink);
+        font-weight: 500;
+        width: 16%;
+      }
+      td:last-child,
+      th:last-child {
+        padding-right: 0;
+      }
 
-/* the footer */
-footer { border-top: 1px solid var(--pt-hair); padding: 48px 0 64px; font-size: var(--ts-small); }
-.cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 32px; }
-.cols h3 { font-size: var(--ts-small); font-weight: 500; letter-spacing: 0; margin-bottom: 12px; }
-.cols ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.cols a { text-decoration: none; color: var(--pt-ink-2); }
-.cols a:hover { color: var(--pt-ink); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
-.tail { margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--pt-hair-soft); display: flex; justify-content: space-between; align-items: center; gap: 24px; color: var(--pt-ink-2); flex-wrap: wrap; }
-.tail .brand { font-size: 15px; }
-.tail .tile { width: 20px; height: 20px; }
+      /* the footer */
+      footer {
+        border-top: 1px solid var(--pt-hair);
+        padding: 48px 0 64px;
+        font-size: var(--ts-small);
+      }
+      .cols {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 32px;
+      }
+      .cols h3 {
+        font-size: var(--ts-small);
+        font-weight: 500;
+        letter-spacing: 0;
+        margin-bottom: 12px;
+      }
+      .cols ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+      }
+      .cols a {
+        text-decoration: none;
+        color: var(--pt-ink-2);
+      }
+      .cols a:hover {
+        color: var(--pt-ink);
+        text-decoration: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 4px;
+      }
+      .tail {
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 1px solid var(--pt-hair-soft);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        color: var(--pt-ink-2);
+        flex-wrap: wrap;
+      }
+      .tail .brand {
+        font-size: 15px;
+      }
+      .tail .tile {
+        width: 20px;
+        height: 20px;
+      }
 
-/* narrow widths: the column stacks, the twin stays at its natural size and crops */
-@media (max-width: 1100px) {
-  .numbers { grid-template-columns: repeat(3, 1fr); row-gap: 28px; }
-  .numbers > div:nth-child(4) { border-left: 0; padding-left: 0; }
-  .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .two, .twins { grid-template-columns: 1fr; }
-  .speed li, .agents li { grid-template-columns: 1fr; gap: 8px; }
-  .cols { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 640px) {
-  :root { --ts-h1: 36px; --ts-h2: 26px; --ts-lead: 18px; --ts-figure: 32px; }
-  .bar nav { display: none; }
-  .hero .wrap { padding-top: 40px; padding-bottom: 40px; min-height: 0; }
-  .plate { padding: 20px; }
-  .numbers { grid-template-columns: repeat(2, 1fr); }
-  .numbers > div:nth-child(odd) { border-left: 0; padding-left: 0; }
-  .numbers > div:nth-child(4) { border-left: 1px solid var(--pt-hair-soft); padding-left: 20px; }
-  .cards { grid-template-columns: 1fr; }
-  .cols { grid-template-columns: 1fr; }
-  td:first-child { width: auto; }
-}
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-}
-</style>
-</head>
-<body>
-<!-- Heroicons 20 solid from packages/theme/assets/sprite.svg, the three the icon cards use -->
-<svg class="ts-sprite" aria-hidden="true" focusable="false"><symbol id="i-bars-3-bottom-left" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75Zm0 10.5a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1-.75-.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Z" clip-rule="evenodd"/></symbol>
-<symbol id="i-table-cells" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M.99 5.24A2.25 2.25 0 0 1 3.25 3h13.5A2.25 2.25 0 0 1 19 5.25l.01 9.5A2.25 2.25 0 0 1 16.76 17H3.26A2.267 2.267 0 0 1 1 14.74l-.01-9.5Zm8.26 9.52v-.625a.75.75 0 0 0-.75-.75H3.25a.75.75 0 0 0-.75.75v.615c0 .414.336.75.75.75h5.373a.75.75 0 0 0 .627-.74Zm1.5 0a.75.75 0 0 0 .627.74h5.373a.75.75 0 0 0 .75-.75v-.615a.75.75 0 0 0-.75-.75H11.5a.75.75 0 0 0-.75.75v.625Zm6.75-3.63v-.625a.75.75 0 0 0-.75-.75H11.5a.75.75 0 0 0-.75.75v.625c0 .414.336.75.75.75h5.25a.75.75 0 0 0 .75-.75Zm-8.25 0v-.625a.75.75 0 0 0-.75-.75H3.25a.75.75 0 0 0-.75.75v.625c0 .414.336.75.75.75H8.5a.75.75 0 0 0 .75-.75ZM17.5 7.5v-.625a.75.75 0 0 0-.75-.75H11.5a.75.75 0 0 0-.75.75V7.5c0 .414.336.75.75.75h5.25a.75.75 0 0 0 .75-.75Zm-8.25 0v-.625a.75.75 0 0 0-.75-.75H3.25a.75.75 0 0 0-.75.75V7.5c0 .414.336.75.75.75H8.5a.75.75 0 0 0 .75-.75Z" clip-rule="evenodd"/></symbol>
-<symbol id="i-check-badge" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd"/></symbol>
-<symbol id="i-command-line" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.25 3A2.25 2.25 0 0 0 1 5.25v9.5A2.25 2.25 0 0 0 3.25 17h13.5A2.25 2.25 0 0 0 19 14.75v-9.5A2.25 2.25 0 0 0 16.75 3H3.25Zm.943 8.752a.75.75 0 0 1 .055-1.06L6.128 9l-1.88-1.693a.75.75 0 1 1 1.004-1.114l2.5 2.25a.75.75 0 0 1 0 1.114l-2.5 2.25a.75.75 0 0 1-1.06-.055ZM9.75 10.25a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5h-2.5Z" clip-rule="evenodd"/></symbol></svg>
+      /* narrow widths: the column stacks, the twin stays at its natural size and crops */
+      @media (max-width: 1100px) {
+        .numbers {
+          grid-template-columns: repeat(3, 1fr);
+          row-gap: 28px;
+        }
+        .numbers > div:nth-child(4) {
+          border-left: 0;
+          padding-left: 0;
+        }
+        .cards {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .two,
+        .twins {
+          grid-template-columns: 1fr;
+        }
+        .speed li,
+        .agents li {
+          grid-template-columns: 1fr;
+          gap: 8px;
+        }
+        .cols {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 640px) {
+        :root {
+          --ts-h1: 36px;
+          --ts-h2: 26px;
+          --ts-lead: 18px;
+          --ts-figure: 32px;
+        }
+        .bar nav {
+          display: none;
+        }
+        .hero .wrap {
+          padding-top: 40px;
+          padding-bottom: 40px;
+          min-height: 0;
+        }
+        .plate {
+          padding: 20px;
+        }
+        .numbers {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .numbers > div:nth-child(odd) {
+          border-left: 0;
+          padding-left: 0;
+        }
+        .numbers > div:nth-child(4) {
+          border-left: 1px solid var(--pt-hair-soft);
+          padding-left: 20px;
+        }
+        .cards {
+          grid-template-columns: 1fr;
+        }
+        .cols {
+          grid-template-columns: 1fr;
+        }
+        td:first-child {
+          width: auto;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Heroicons 20 solid from packages/theme/assets/sprite.svg, the three the icon cards use -->
+    <svg class="ts-sprite" aria-hidden="true" focusable="false">
+      <symbol id="i-bars-3-bottom-left" viewBox="0 0 20 20">
+        <path
+          fill-rule="evenodd"
+          d="M2 4.75A.75.75 0 0 1 2.75 4h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 4.75Zm0 10.5a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5a.75.75 0 0 1-.75-.75ZM2 10a.75.75 0 0 1 .75-.75h14.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 10Z"
+          clip-rule="evenodd"
+        />
+      </symbol>
+      <symbol id="i-table-cells" viewBox="0 0 20 20">
+        <path
+          fill-rule="evenodd"
+          d="M.99 5.24A2.25 2.25 0 0 1 3.25 3h13.5A2.25 2.25 0 0 1 19 5.25l.01 9.5A2.25 2.25 0 0 1 16.76 17H3.26A2.267 2.267 0 0 1 1 14.74l-.01-9.5Zm8.26 9.52v-.625a.75.75 0 0 0-.75-.75H3.25a.75.75 0 0 0-.75.75v.615c0 .414.336.75.75.75h5.373a.75.75 0 0 0 .627-.74Zm1.5 0a.75.75 0 0 0 .627.74h5.373a.75.75 0 0 0 .75-.75v-.615a.75.75 0 0 0-.75-.75H11.5a.75.75 0 0 0-.75.75v.625Zm6.75-3.63v-.625a.75.75 0 0 0-.75-.75H11.5a.75.75 0 0 0-.75.75v.625c0 .414.336.75.75.75h5.25a.75.75 0 0 0 .75-.75Zm-8.25 0v-.625a.75.75 0 0 0-.75-.75H3.25a.75.75 0 0 0-.75.75v.625c0 .414.336.75.75.75H8.5a.75.75 0 0 0 .75-.75ZM17.5 7.5v-.625a.75.75 0 0 0-.75-.75H11.5a.75.75 0 0 0-.75.75V7.5c0 .414.336.75.75.75h5.25a.75.75 0 0 0 .75-.75Zm-8.25 0v-.625a.75.75 0 0 0-.75-.75H3.25a.75.75 0 0 0-.75.75V7.5c0 .414.336.75.75.75H8.5a.75.75 0 0 0 .75-.75Z"
+          clip-rule="evenodd"
+        />
+      </symbol>
+      <symbol id="i-check-badge" viewBox="0 0 20 20">
+        <path
+          fill-rule="evenodd"
+          d="M16.403 12.652a3 3 0 0 0 0-5.304 3 3 0 0 0-3.75-3.751 3 3 0 0 0-5.305 0 3 3 0 0 0-3.751 3.75 3 3 0 0 0 0 5.305 3 3 0 0 0 3.75 3.751 3 3 0 0 0 5.305 0 3 3 0 0 0 3.751-3.75Zm-2.546-4.46a.75.75 0 0 0-1.214-.883l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z"
+          clip-rule="evenodd"
+        />
+      </symbol>
+      <symbol id="i-command-line" viewBox="0 0 20 20">
+        <path
+          fill-rule="evenodd"
+          d="M3.25 3A2.25 2.25 0 0 0 1 5.25v9.5A2.25 2.25 0 0 0 3.25 17h13.5A2.25 2.25 0 0 0 19 14.75v-9.5A2.25 2.25 0 0 0 16.75 3H3.25Zm.943 8.752a.75.75 0 0 1 .055-1.06L6.128 9l-1.88-1.693a.75.75 0 1 1 1.004-1.114l2.5 2.25a.75.75 0 0 1 0 1.114l-2.5 2.25a.75.75 0 0 1-1.06-.055ZM9.75 10.25a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5h-2.5Z"
+          clip-rule="evenodd"
+        />
+      </symbol>
+    </svg>
 
-<header class="bar">
-  <div class="wrap">
-    <a class="brand" href="https://turboslide.vercel.app/home" aria-label="Turboslide home" title="Turboslide">
-      <!-- the tile at 24 px: the hint on the 16 unit grid, the 1 px frame in --pt-edge, the T in --pt-ink -->
-      <svg class="tile" viewBox="0 0 16 16" aria-hidden="true"><rect width="16" height="16" fill="var(--pt-paper)"/><rect x="0.5" y="0.5" width="15" height="15" fill="none" stroke="var(--pt-edge)" stroke-width="1"/><path fill="var(--pt-ink)" d="M3 2h10v2H9v10H7V4H3z"/></svg>
-      <span>Turboslide</span>
-    </a>
-    <nav aria-label="Site">
-      <a href="https://turboslide.vercel.app/decks">Your presentations</a>
-      <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md">Documentation</a>
-      <a href="#agents">For agents</a>
-      <a href="https://github.com/Kevin-Liu-01/Turboslide">GitHub</a>
-    </nav>
-    <div class="end">
-      <a class="pt-ib is-solid" href="https://turboslide.vercel.app/new" title="New Presentation, a fresh presentation that is created on its first edit">New Presentation</a>
-    </div>
-  </div>
-</header>
-
-<main>
-  <section class="hero" aria-labelledby="hero-title">
-    <div class="wrap">
-      <div class="plate">
-        <img class="wm dark" src="wordmark-display-ink.svg" alt="Turboslide" width="560" height="119">
-        <img class="wm light" src="wordmark-display.svg" alt="Turboslide" width="560" height="119">
-        <h1 id="hero-title">Google Slides' behaviours, a canvas on every slide, and a PowerPoint that matches the screen.</h1>
-        <p class="lead">A slides editor for a sales team and for the agents that work beside it. The menus, the toolbar, the filmstrip and the shortcuts are Google's; every object drags, resizes and rotates; every capability is one named action on the CLI, over MCP, over HTTP and inside the page.</p>
-        <div class="actions">
-          <a class="pt-ib is-solid" href="https://turboslide.vercel.app/new" title="Opens a fresh presentation; it is created in the store on its first edit">New Presentation</a>
-          <a class="pt-ib" href="https://turboslide.vercel.app/deck/gt-brand" title="Opens the 85 slide GT brand deck in the read only viewer">Open the GT Deck</a>
-          <a class="pt-ib" href="https://github.com/Kevin-Liu-01/Turboslide" title="The repository, MIT licence">GitHub</a>
+    <header class="bar">
+      <div class="wrap">
+        <a
+          class="brand"
+          href="https://turboslide.vercel.app/home"
+          aria-label="Turboslide home"
+          title="Turboslide"
+        >
+          <!-- the tile at 24 px: the hint on the 16 unit grid, the 1 px frame in --pt-edge, the T in --pt-ink -->
+          <svg class="tile" viewBox="0 0 16 16" aria-hidden="true">
+            <rect width="16" height="16" fill="var(--pt-paper)" />
+            <rect
+              x="0.5"
+              y="0.5"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="var(--pt-edge)"
+              stroke-width="1"
+            />
+            <path fill="var(--pt-ink)" d="M3 2h10v2H9v10H7V4H3z" />
+          </svg>
+          <span>Turboslide</span>
+        </a>
+        <nav aria-label="Site">
+          <a href="https://turboslide.vercel.app/decks">Your presentations</a>
+          <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md"
+            >Documentation</a
+          >
+          <a href="#agents">For agents</a>
+          <a href="https://github.com/Kevin-Liu-01/Turboslide">GitHub</a>
+        </nav>
+        <div class="end">
+          <a
+            class="pt-ib is-solid"
+            href="https://turboslide.vercel.app/new"
+            title="New Presentation, a fresh presentation that is created on its first edit"
+            >New Presentation</a
+          >
         </div>
-        <p class="facts">No account. Open source under the MIT licence. Hosted at turboslide.vercel.app.</p>
       </div>
-    </div>
-  </section>
+    </header>
 
-  <div class="wrap editor-shot">
-    <figure class="shot dark" style="margin:0"><img src="../../../readme/01-new-presentation.jpg" alt="The fresh Untitled presentation on the Title slide with the menu bar, the toolbar, the filmstrip and the speaker notes pane, in the dark appearance" width="2880" height="1800" loading="eager" decoding="async"></figure>
-    <figure class="shot light" style="margin:0"><img src="../../../readme/13-editor-light.jpg" alt="The editor on a content slide of the GT brand deck in the light appearance" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-    <p class="caption">The editor at /new. The root of the hosted studio redirects here; the presentation is created in the store on its first edit.</p>
-  </div>
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="wrap">
+          <div class="plate">
+            <img
+              class="wm dark"
+              src="wordmark-display-ink.svg"
+              alt="Turboslide"
+              width="560"
+              height="119"
+            />
+            <img
+              class="wm light"
+              src="wordmark-display.svg"
+              alt="Turboslide"
+              width="560"
+              height="119"
+            />
+            <h1 id="hero-title">
+              Google Slides' behaviours, a canvas on every slide, and a PowerPoint that matches the
+              screen.
+            </h1>
+            <p class="lead">
+              A slides editor for a sales team and for the agents that work beside it. The menus,
+              the toolbar, the filmstrip and the shortcuts are Google's; every object drags, resizes
+              and rotates; every capability is one named action on the CLI, over MCP, over HTTP and
+              inside the page.
+            </p>
+            <div class="actions">
+              <a
+                class="pt-ib is-solid"
+                href="https://turboslide.vercel.app/new"
+                title="Opens a fresh presentation; it is created in the store on its first edit"
+                >New Presentation</a
+              >
+              <a
+                class="pt-ib"
+                href="https://turboslide.vercel.app/deck/gt-brand"
+                title="Opens the 85 slide GT brand deck in the read only viewer"
+                >Open the GT Deck</a
+              >
+              <a
+                class="pt-ib"
+                href="https://github.com/Kevin-Liu-01/Turboslide"
+                title="The repository, MIT licence"
+                >GitHub</a
+              >
+            </div>
+            <p class="facts">
+              No account. Open source under the MIT licence. Hosted at turboslide.vercel.app.
+            </p>
+          </div>
+        </div>
+      </section>
 
-  <div class="wrap">
-    <section class="band" aria-label="Numbers">
-      <div class="numbers">
-        <div><b class="num">105</b><span>actions, one table for the click, the CLI, MCP and the API</span></div>
-        <div><b class="num">21</b><span>layouts, Google's eleven first and the ten GT layouts after them</span></div>
-        <div><b class="num">135</b><span>shape presets drawn from the PowerPoint geometry</span></div>
-        <div><b class="num">0.003 %</b><span>worst page mismatch on the 170 page export of the GT deck</span></div>
-        <div><b class="num">17</b><span>shader materials with typed controls</span></div>
-        <div><b>MIT</b><span>licence, with the code on GitHub</span></div>
+      <div class="wrap editor-shot">
+        <figure class="shot dark" style="margin: 0">
+          <img
+            src="../../../readme/01-new-presentation.jpg"
+            alt="The fresh Untitled presentation on the Title slide with the menu bar, the toolbar, the filmstrip and the speaker notes pane, in the dark appearance"
+            width="2880"
+            height="1800"
+            loading="eager"
+            decoding="async"
+          />
+        </figure>
+        <figure class="shot light" style="margin: 0">
+          <img
+            src="../../../readme/13-editor-light.jpg"
+            alt="The editor on a content slide of the GT brand deck in the light appearance"
+            width="2880"
+            height="1800"
+            loading="lazy"
+            decoding="async"
+          />
+        </figure>
+        <p class="caption">
+          The editor at /new. The root of the hosted studio redirects here; the presentation is
+          created in the store on its first edit.
+        </p>
       </div>
-    </section>
 
-    <section class="band" aria-labelledby="frame-title">
-      <div class="two">
-        <div>
-          <h2 id="frame-title">Google Slides' frame, on every slide a canvas</h2>
-          <ul class="rows" style="margin-top:28px">
-            <li><b>The same shell</b>The same menus, toolbar, filmstrip, speaker notes and right click menus, in Google's order, with Google's shortcuts. An item Turboslide does not have is in its place, disabled, with one sentence on what to do instead.</li>
-            <li><b>Every object moves</b>Every object drags, resizes, rotates, groups and reorders. The first drag on a slide converts it to a canvas without moving a pixel, and one undo puts the layout back.</li>
-            <li><b>One look</b>Inter, paper and ink, one pixel rules, a light and a dark appearance that the stage, the thumbnails, the slideshow and every download follow.</li>
+      <div class="wrap">
+        <section class="band" aria-label="Numbers">
+          <div class="numbers">
+            <div>
+              <b class="num">105</b
+              ><span>actions, one table for the click, the CLI, MCP and the API</span>
+            </div>
+            <div>
+              <b class="num">21</b
+              ><span>layouts, Google's eleven first and the ten GT layouts after them</span>
+            </div>
+            <div>
+              <b class="num">135</b><span>shape presets drawn from the PowerPoint geometry</span>
+            </div>
+            <div>
+              <b class="num">0.003 %</b
+              ><span>worst page mismatch on the 170 page export of the GT deck</span>
+            </div>
+            <div><b class="num">17</b><span>shader materials with typed controls</span></div>
+            <div><b>MIT</b><span>licence, with the code on GitHub</span></div>
+          </div>
+        </section>
+
+        <section class="band" aria-labelledby="frame-title">
+          <div class="two">
+            <div>
+              <h2 id="frame-title">Google Slides' frame, on every slide a canvas</h2>
+              <ul class="rows" style="margin-top: 28px">
+                <li>
+                  <b>The same shell</b>The same menus, toolbar, filmstrip, speaker notes and right
+                  click menus, in Google's order, with Google's shortcuts. An item Turboslide does
+                  not have is in its place, disabled, with one sentence on what to do instead.
+                </li>
+                <li>
+                  <b>Every object moves</b>Every object drags, resizes, rotates, groups and
+                  reorders. The first drag on a slide converts it to a canvas without moving a
+                  pixel, and one undo puts the layout back.
+                </li>
+                <li>
+                  <b>One look</b>Inter, paper and ink, one pixel rules, a light and a dark
+                  appearance that the stage, the thumbnails, the slideshow and every download
+                  follow.
+                </li>
+              </ul>
+            </div>
+            <figure class="shot" style="margin: 0">
+              <img
+                src="../../../readme/06-canvas-rotation.jpg"
+                alt="Rotation by the handle with the degree readout, beside a chart and a table"
+                width="2880"
+                height="1800"
+                loading="lazy"
+                decoding="async"
+              />
+            </figure>
+          </div>
+        </section>
+
+        <section class="band" aria-labelledby="features-title">
+          <div class="head">
+            <h2 id="features-title">What it does</h2>
+            <p class="lead muted">
+              Twelve groups, in the order of the feature tour in the README. Every picture is a
+              screenshot of the hosted studio.
+            </p>
+          </div>
+          <div class="cards">
+            <article class="card">
+              <div class="pair">
+                <figure class="shot" style="margin: 0">
+                  <img
+                    src="../../../readme/02-file-menu.jpg"
+                    alt="The File menu open with its Download submenu expanded"
+                    width="2880"
+                    height="1800"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="shot" style="margin: 0">
+                  <img
+                    src="../../../readme/05-filmstrip-menu.jpg"
+                    alt="The filmstrip's right click menu"
+                    width="2880"
+                    height="1800"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+              </div>
+              <h3>The Google Slides shell</h3>
+              <p>
+                Ten menus, a toolbar whose tail follows the selection, the filmstrip, the notes
+                pane, the right panels and the bottom bar. Search the menus finds every item by
+                name, and every control carries its name and its key.
+              </p>
+            </article>
+            <article class="card">
+              <figure class="shot" style="margin: 0">
+                <img
+                  src="../../../readme/07-canvas-snap-guides.jpg"
+                  alt="A group dragged into alignment with the snap guide"
+                  width="2880"
+                  height="1800"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <h3>The canvas</h3>
+              <p>
+                Drag, resize and rotate with live readouts. Snap guides, rulers, guides, zoom to
+                1600 percent, marquee selection, z order, groups, crop mode and connectors that
+                follow the shape they are attached to.
+              </p>
+            </article>
+            <article class="card">
+              <figure class="shot" style="margin: 0">
+                <img
+                  src="../../../readme/04-layout-grid.jpg"
+                  alt="The layout grid with Google's eleven layouts and the ten GT layouts"
+                  width="2880"
+                  height="1800"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <h3>Layouts and themes</h3>
+              <p>
+                Twenty one layouts in one grid: Google's eleven and the ten GT layouts. Apply layout
+                keeps the content and never refuses. A new presentation opens on a Title slide with
+                four starter pictures already in it.
+              </p>
+            </article>
+            <article class="card">
+              <div class="icon">
+                <svg viewBox="0 0 20 20"><use href="#i-bars-3-bottom-left" /></svg>
+              </div>
+              <h3>Text</h3>
+              <p>
+                Bold, italic, underline, strikethrough, super and subscript, colour and highlight on
+                a range. Lists with nine bullet and six numbering presets, line spacing, columns,
+                indents, alignment, autofit, find and replace across the deck, links to a URL or a
+                slide.
+              </p>
+            </article>
+            <article class="card">
+              <figure class="shot" style="margin: 0">
+                <img
+                  src="../../../readme/08-format-options.jpg"
+                  alt="Format options on a rotated rectangle"
+                  width="2880"
+                  height="1800"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <h3>Objects, pictures and materials</h3>
+              <p>
+                135 shapes in Google's four categories, seven line kinds with ten end decorations,
+                fills, borders, dashes and shadows. Pictures upload, crop, mask to any shape and
+                adjust. Seventeen shader materials play live on the stage, and a photograph becomes
+                a two tone dither in one step.
+              </p>
+            </article>
+            <article class="card">
+              <div class="icon">
+                <svg viewBox="0 0 20 20"><use href="#i-table-cells" /></svg>
+              </div>
+              <h3>Tables</h3>
+              <p>
+                A hover grid up to 20 by 20. Insert and delete rows and columns, merge and unmerge,
+                distribute, header rows, cell fills and borders. Tab moves between cells. The
+                editable export writes a real PowerPoint table.
+              </p>
+            </article>
+            <article class="card">
+              <figure class="shot" style="margin: 0">
+                <img
+                  src="../../../readme/03-insert-menu.jpg"
+                  alt="The Insert menu with the Chart submenu"
+                  width="2880"
+                  height="1800"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <h3>Charts and diagrams</h3>
+              <p>
+                Bar, column, line and pie charts with a data grid in the panel, up to 12 categories
+                and 6 series. Six diagram templates in three styles insert as a group you edit like
+                any other.
+              </p>
+            </article>
+            <article class="card">
+              <figure class="shot" style="margin: 0">
+                <img
+                  src="../../../readme/09-download-dialog.jpg"
+                  alt="The Download dialog with the Perfect and Editable text modes"
+                  width="2880"
+                  height="1800"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <h3>Exports</h3>
+              <p>
+                Perfect PowerPoint by default: each page is the rendered slide over searchable text,
+                checked against the screen before the file is written. Editable text PowerPoint,
+                PDF, a single web page, plain text, JPEG and PNG beside it.
+              </p>
+            </article>
+            <article class="card">
+              <figure class="shot" style="margin: 0">
+                <img
+                  src="../../../readme/11-presenter-console.jpg"
+                  alt="Presenter view with the timer, the notes and the previews"
+                  width="2880"
+                  height="1800"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <h3>Present</h3>
+              <p>
+                Slideshow from the current slide, Presenter view in a second window with the timer,
+                the notes and the next slide, Google's presenting keys, a laser pointer, and a
+                present link you can send.
+              </p>
+            </article>
+            <article class="card">
+              <div class="pair">
+                <figure class="shot" style="margin: 0">
+                  <img
+                    src="../../../readme/14-book-view.jpg"
+                    alt="The viewer's book view"
+                    width="2880"
+                    height="1800"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+                <figure class="shot" style="margin: 0">
+                  <img
+                    src="../../../readme/15-grid-view.jpg"
+                    alt="The viewer's grid view"
+                    width="2880"
+                    height="1800"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </figure>
+              </div>
+              <h3>The viewer and sharing</h3>
+              <p>
+                A read only link with Slide, Grid and Book views, an embed for any site, and a Share
+                dialog with the view, present and edit links. Skipped slides and speaker notes stay
+                out of what you share unless you ask.
+              </p>
+            </article>
+            <article class="card">
+              <figure class="shot" style="margin: 0">
+                <img
+                  src="../../../readme/10-decks-home.jpg"
+                  alt="The presentations page with cards and thumbnails"
+                  width="2880"
+                  height="1800"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <h3>Home and files</h3>
+              <p>
+                Recent presentations as cards with thumbnails, Make a copy, Rename, Move to trash
+                with Undo, Import slides from another presentation, Version history with named
+                versions, and a bundle you can download and upload.
+              </p>
+            </article>
+            <article class="card">
+              <div class="icon">
+                <svg viewBox="0 0 20 20"><use href="#i-check-badge" /></svg>
+              </div>
+              <h3>Quality gates</h3>
+              <p>
+                Fifty five grammar rules check overflow, contrast, type sizes and copy in both
+                themes, with Fix for the mechanical ones. A 25 step acceptance chain and a 2,100 row
+                parity audit run before anything ships.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="band" aria-labelledby="dither-title">
+          <div class="head">
+            <h2 id="dither-title">Dithers and shaders, from the deck to the interface</h2>
+            <p class="lead muted">
+              The GT brand deck draws its photographs as two tone dithers: an eight by eight Bayer
+              screen at two pixel cells, cut from a toned and cropped picture, with a light twin
+              that is the exact inverse of the dark one. The same pipeline cut the picture behind
+              the heading of this page from a frozen frame of a shader material.
+            </p>
+          </div>
+          <div class="twins">
+            <div>
+              <figure class="fig" style="margin: 0">
+                <img
+                  src="../../../readme/12-slideshow-dither.jpg"
+                  alt="The Blue Marble slide of the GT deck in the slideshow, a two tone dither with its plate"
+                  width="2400"
+                  height="1500"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <p class="caption">
+                The Blue Marble slide of the GT deck in the slideshow, a two tone dither with its
+                plate.
+              </p>
+            </div>
+            <div>
+              <figure class="fig" style="margin: 0">
+                <img
+                  src="previews/hero-frame.jpg"
+                  alt="A frozen frame of the mesh gradient material in the ink and paper preset"
+                  width="1600"
+                  height="900"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </figure>
+              <p class="caption">
+                A frozen frame of the mesh gradient material in the ink and paper preset, captured
+                at 1600 by 900 on Metal.
+              </p>
+            </div>
+            <div>
+              <figure
+                class="fig cut"
+                style="margin: 0"
+                role="img"
+                aria-label="A crop of the dithered twin of the same frame at one cell per two pixels"
+              ></figure>
+              <p class="caption">
+                The same frame through the two tone pipeline, shown at its own cell size: two
+                pixels, never scaled between.
+              </p>
+            </div>
+          </div>
+          <p class="honest">
+            The pipeline runs on any photograph or on a frozen frame of a shader material, reports
+            how clear the plate stays, and is written three times with one arithmetic: in
+            TypeScript, in a Rust addon for Node and in a Rust module for the browser, with a test
+            that proves the three light the same cells. Seventeen Paper Shaders materials play live
+            on the stage with typed controls and the GT palette presets, and every one is captured
+            as frozen frames for the thumbnails and the exports.
+          </p>
+        </section>
+
+        <section class="band" aria-labelledby="fast-title">
+          <div class="head">
+            <h2 id="fast-title">Why it is fast</h2>
+            <p class="lead muted">
+              Most of the speed is structural: one renderer, contracts generated ahead of time,
+              immutable documents and caches, and export work that runs where the browser already
+              is. The numbers below are measured, and each one names the file that produces it.
+            </p>
+          </div>
+          <ol class="speed">
+            <li>
+              <h3>One renderer</h3>
+              <p>
+                One function turns a slide into the same HTML and CSS for the editor, the viewer,
+                the embed, the CLI's screenshots and the exporters. A render at one revision is the
+                same pixels on every surface, so nothing is drawn twice and nothing has to be
+                reconciled.
+              </p>
+              <p class="n">
+                170 renders of the GT deck in 18.3 s in the acceptance chain; a slide is ready in 6
+                ms at the median (packages/render/src/slide.ts)
+              </p>
+            </li>
+            <li>
+              <h3>Contracts generated once</h3>
+              <p>
+                Every operation is one entry in one table. The CLI parsers, the MCP tools, the HTTP
+                contract, the window API list and the skills are generated from it and committed, so
+                describing the API costs nothing per request and a stale copy fails the build.
+              </p>
+              <p class="n">
+                105 actions, 89 MCP tools, 87 HTTP paths, from one file
+                (packages/schema/src/actions.ts)
+              </p>
+            </li>
+            <li>
+              <h3>Rust where the arithmetic must not drift</h3>
+              <p>
+                The dither and image comparison pipeline is a Rust crate compiled to a Node addon
+                and to WebAssembly, with a TypeScript copy of the same arithmetic where neither is
+                built. The crate exists so that a dither approved in the browser and one produced on
+                a server light the same cells; where the addon is built it also cuts a screen in
+                less than half the time. The hosted studio runs the TypeScript copy today.
+              </p>
+              <p class="n">
+                20 ms for a 1600 by 900 screen through the addon, 23 ms through wasm, 52 ms in
+                TypeScript (docs/native.md)
+              </p>
+            </li>
+            <li>
+              <h3>The export is a screenshot</h3>
+              <p>
+                Perfect PowerPoint rasterises each page in Chromium at twice the sheet size, stores
+                it in the smallest encoding that decodes within budget, then decodes it again and
+                compares it with the shot before the file is written. The page is the screen, and
+                there is no second layout engine to disagree with it.
+              </p>
+              <p class="n">
+                worst decoded mismatch 0.003 percent over 170 pages; about 15.5 MiB per theme
+                (docs/pptx.md)
+              </p>
+            </li>
+            <li>
+              <h3>Export in batches</h3>
+              <p>
+                On the hosted studio a long deck exports in batches of sixty slides, each one
+                function call, with a progress sentence and a merge at the end. A failed batch is
+                retried on its own; the file is never started over.
+              </p>
+              <p class="n">
+                one slide in 7.5 s cold; the 85 slide GT deck in about four minutes
+                (docs/hosting.md)
+              </p>
+            </li>
+            <li>
+              <h3>Compute that lasts</h3>
+              <p>
+                The export and render routes run on Vercel functions with an 800 second budget and
+                3,009 MB of memory, on fluid compute, so several requests to one deployment share
+                one warm process and a render never waits for a cold start when the process is
+                already up.
+              </p>
+              <p class="n">
+                800 s and 3,009 MB on /api/export, /api/render and the server functions
+                (apps/studio/vite.deploy.config.ts)
+              </p>
+            </li>
+            <li>
+              <h3>Routes load before the click</h3>
+              <p>
+                The router preloads a route's code and data as soon as the pointer reaches its link,
+                so the move from the presentations page to a presentation starts before the click
+                lands.
+              </p>
+              <p class="n">
+                a click on a card lands on a ready editor in 399 ms for a one slide presentation and
+                723 ms for the 85 slide GT deck, warm (research-4/04, section 5)
+              </p>
+            </li>
+            <li>
+              <h3>Immutable documents and caches</h3>
+              <p>
+                Every committed write stores the whole document under the hash of its bytes, so a
+                reader proves it has the current document from one header and fetches no slide it
+                already holds. Thumbnails named by revision are cached for a year, and the GT deck's
+                pictures are static files on the CDN that answer before the function runs.
+              </p>
+              <p class="n">
+                a cached thumbnail in 239 to 385 ms; a picture from the CDN in 112 to 299 ms
+                (docs/hosting.md, section 7)
+              </p>
+            </li>
+          </ol>
+          <p class="honest">
+            What is still slow is measured too: the first paint of a new presentation is 0.9 s on a
+            cold cache and 0.4 s warm, the presentations page paints at 2.8 s at the median because
+            it syncs every presentation in the store, and a thumbnail after an edit takes 2.4 to 3.8
+            s. Those numbers are this round's targets.
+          </p>
+        </section>
+
+        <section class="band" id="agents" aria-labelledby="agents-title">
+          <div class="head">
+            <h2 id="agents-title">For agents</h2>
+            <p class="lead muted">
+              Every capability of the editor is an action. The same 105 actions run on the CLI, over
+              MCP, over HTTP and inside an open page, through one validator, and every write names
+              the revision it read.
+            </p>
+          </div>
+          <ul class="agents">
+            <li>
+              <b>CLI</b>
+              <p>
+                Edits a decks folder with no browser page; --json gives machine output and
+                --base-revision names the revision the write read.
+              </p>
+              <code class="cmd"
+                >pnpm exec turboslide slide new --layout split --after title --deck decks/gt-brand
+                --json</code
+              >
+            </li>
+            <li>
+              <b>MCP</b>
+              <p>
+                One deck_&lt;action&gt; tool per action over stdio or streamable HTTP, with render
+                tools that return PNGs and the deck_review prompt for the judge lenses.
+              </p>
+              <code class="cmd"
+                >pnpm exec turboslide mcp --deck decks/gt-brand
+                <span class="t"># or, with a bearer token</span>
+                POST https://turboslide.vercel.app/mcp?deck=gt-brand</code
+              >
+            </li>
+            <li>
+              <b>HTTP</b>
+              <p>
+                One JSON object in, the normalized result and its findings out; a stale revision is
+                409 with the current document.
+              </p>
+              <code class="cmd"
+                >curl -X POST 'https://turboslide.vercel.app/api/actions/deck.info?deck=gt-brand' \
+                -H 'authorization: Bearer $TURBOSLIDE_TOKEN' -H 'content-type: application/json' -d
+                '{}'</code
+              >
+            </li>
+            <li>
+              <b>Window API</b>
+              <p>
+                Inside an open editor, viewer or presenter page, the same actions run through the
+                same dispatcher a click uses.
+              </p>
+              <code class="cmd"
+                >window.turboslide.studio.invoke('view.goto', { slideId: 'thesis' })</code
+              >
+            </li>
+            <li>
+              <b>OpenAPI</b>
+              <p>
+                The OpenAPI 3.1 document, the manifest and the llms guides are generated from the
+                action table and committed.
+              </p>
+              <code class="cmd"
+                >packages/agent/generated/openapi.json
+                <span class="t"
+                  ># on GitHub today; GET /openapi.json once the round bundles it</span
+                ></code
+              >
+            </li>
+            <li>
+              <b>Skills</b>
+              <p>
+                Four skills with generated reference tables: discovery and the write protocol,
+                writing slides in the grammar, driving the live page, verifying.
+              </p>
+              <code class="cmd"
+                >skills/turboslide-api/SKILL.md skills/turboslide-create/SKILL.md
+                skills/turboslide-studio/SKILL.md skills/turboslide-verify/SKILL.md</code
+              >
+            </li>
           </ul>
+          <p class="honest">
+            The hosted agent routes accept a bearer token set by the deployment's owner; a checkout
+            serves them to localhost without one. A deck moves between a checkout and the hosted
+            studio with <code>turboslide deck push</code> and <code>deck pull</code>.
+          </p>
+        </section>
+
+        <section class="band" aria-labelledby="compare-title">
+          <div class="head">
+            <h2 id="compare-title">Compared with Google Slides</h2>
+            <p class="lead muted">
+              Turboslide follows Google Slides' structure and behaviours on purpose, so the
+              differences are the point. Google Slides is a product of Google LLC; Turboslide is not
+              affiliated with Google.
+            </p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Google Slides</th>
+                <th>Turboslide</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Account</td>
+                <td>
+                  A Google account; the product page's calls to action are Sign in and Try Slides
+                  for work.
+                </td>
+                <td>No account. Anyone with a link opens it; the store is shared.</td>
+              </tr>
+              <tr>
+                <td>Where the file lives</td>
+                <td>Google Drive.</td>
+                <td>
+                  A folder in a checkout, or a Vercel Blob store on the hosted studio, with one
+                  immutable copy per revision.
+                </td>
+              </tr>
+              <tr>
+                <td>Editing together</td>
+                <td>
+                  Real time co editing with live pointers, comments, assignments and a comments
+                  panel.
+                </td>
+                <td>
+                  One editor holds a ten minute lease on the slide it edits; another writer's change
+                  arrives within a second with a banner. No comments yet.
+                </td>
+              </tr>
+              <tr>
+                <td>Export</td>
+                <td>PowerPoint, ODP, PDF, plain text, JPEG, PNG and SVG of the current slide.</td>
+                <td>
+                  PowerPoint in two modes, one pixel identical to the screen with a report; PDF, one
+                  file web page, plain text, JPEG, PNG and the Turboslide bundle. No ODP or SVG.
+                </td>
+              </tr>
+              <tr>
+                <td>Import</td>
+                <td>PowerPoint and Canva files; Import slides from another presentation.</td>
+                <td>
+                  Import slides from a presentation on this studio; open a Turboslide bundle. No
+                  PowerPoint import yet.
+                </td>
+              </tr>
+              <tr>
+                <td>Automation</td>
+                <td>
+                  A REST API with presentations.get and batchUpdate, Apps Script and add-ons; the
+                  developer site lists an MCP server.
+                </td>
+                <td>
+                  105 actions on the CLI, MCP, HTTP and the window API, generated from one table
+                  with an OpenAPI document and four skills.
+                </td>
+              </tr>
+              <tr>
+                <td>Layouts and themes</td>
+                <td>Many themes and templates; eleven predefined layouts per theme.</td>
+                <td>One theme, gt-ink-paper, with Google's eleven layouts and ten GT layouts.</td>
+              </tr>
+              <tr>
+                <td>Pictures</td>
+                <td>
+                  Stock and web images, Drive and Photos, GIFs and stickers, Gemini image
+                  generation.
+                </td>
+                <td>
+                  Upload, URL or this presentation; crop, mask, adjust; two tone dithers and
+                  seventeen shader materials.
+                </td>
+              </tr>
+              <tr>
+                <td>Transitions</td>
+                <td>Slide transitions and object animations.</td>
+                <td>None; the Transition item is present and disabled with a sentence.</td>
+              </tr>
+              <tr>
+                <td>Presenting</td>
+                <td>Slideshow, Presenter view, present from Meet, recording.</td>
+                <td>
+                  Slideshow, Presenter view in a second window, Google's keys, a present link.
+                </td>
+              </tr>
+              <tr>
+                <td>Offline</td>
+                <td>With the Docs Offline extension in Chrome or Edge.</td>
+                <td>The slideshow keeps running after load; the editor needs the server.</td>
+              </tr>
+              <tr>
+                <td>Licence and hosting</td>
+                <td>Part of Google Workspace.</td>
+                <td>MIT; run it from a checkout or deploy it to Vercel.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="wrap">
+        <div class="cols">
+          <div>
+            <h3>Studio</h3>
+            <ul>
+              <li><a href="https://turboslide.vercel.app/new">New presentation</a></li>
+              <li><a href="https://turboslide.vercel.app/decks">Your presentations</a></li>
+              <li><a href="https://turboslide.vercel.app/deck/gt-brand">The GT deck</a></li>
+              <li>
+                <a href="https://turboslide.vercel.app/deck/gt-brand?present=1"
+                  >Present the GT deck</a
+                >
+              </li>
+              <li><a href="https://turboslide.vercel.app/decks/trash">Trash</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3>Documentation</h3>
+            <ul>
+              <li>
+                <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md"
+                  >The documentation index</a
+                >
+              </li>
+              <li>
+                <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/spec/SPEC.md"
+                  >The specification</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/gslides-parity/SPEC.md"
+                  >Google Slides parity</a
+                >
+              </li>
+              <li>
+                <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/grammar.md"
+                  >The grammar</a
+                >
+              </li>
+              <li>
+                <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/pptx.md"
+                  >PowerPoint export</a
+                >
+              </li>
+              <li>
+                <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/hosting.md"
+                  >Hosting</a
+                >
+              </li>
+              <li>
+                <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/native.md"
+                  >The native module</a
+                >
+              </li>
+              <li>
+                <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/AGENTS.md"
+                  >Rules for the repository</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3>Agents</h3>
+            <ul>
+              <li><a href="https://turboslide.vercel.app/api/agent">Manifest</a></li>
+              <li>
+                <a
+                  href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/openapi.json"
+                  >OpenAPI</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/llms.txt"
+                  >llms.txt</a
+                >
+              </li>
+              <li><a href="https://turboslide.vercel.app/mcp">MCP</a></li>
+              <li>
+                <a
+                  href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-api/SKILL.md"
+                  >turboslide-api</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-create/SKILL.md"
+                  >turboslide-create</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-studio/SKILL.md"
+                  >turboslide-studio</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-verify/SKILL.md"
+                  >turboslide-verify</a
+                >
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3>Licence</h3>
+            <ul>
+              <li>
+                <a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/LICENSE"
+                  >MIT licence, copyright 2026 Kevin Liu</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/THIRD_PARTY_NOTICES.md"
+                  >Third party notices</a
+                >
+              </li>
+              <li><a href="https://github.com/Kevin-Liu-01/Turboslide">GitHub</a></li>
+            </ul>
+          </div>
         </div>
-        <figure class="shot" style="margin:0"><img src="../../../readme/06-canvas-rotation.jpg" alt="Rotation by the handle with the degree readout, beside a chart and a table" width="2880" height="1800" loading="lazy" decoding="async"></figure>
+        <div class="tail">
+          <span class="brand"
+            ><svg class="tile" viewBox="0 0 16 16" aria-hidden="true">
+              <rect width="16" height="16" fill="var(--pt-paper)" />
+              <rect
+                x="0.5"
+                y="0.5"
+                width="15"
+                height="15"
+                fill="none"
+                stroke="var(--pt-edge)"
+                stroke-width="1"
+              />
+              <path fill="var(--pt-ink)" d="M3 2h10v2H9v10H7V4H3z" /></svg
+            ><span>Turboslide</span></span
+          >
+          <span
+            >Turboslide is General Translation's slides editor. Google Slides is a product of Google
+            LLC.</span
+          >
+          <span class="pt-seg" role="group" aria-label="Appearance">
+            <button
+              class="pt-ib"
+              type="button"
+              data-theme-pick="light"
+              aria-pressed="false"
+              title="Light appearance for the chrome, stored in this browser"
+            >
+              Light
+            </button>
+            <button
+              class="pt-ib"
+              type="button"
+              data-theme-pick="dark"
+              aria-pressed="false"
+              title="Dark appearance for the chrome, stored in this browser"
+            >
+              Dark
+            </button>
+          </span>
+        </div>
       </div>
-    </section>
-
-    <section class="band" aria-labelledby="features-title">
-      <div class="head"><h2 id="features-title">What it does</h2><p class="lead muted">Twelve groups, in the order of the feature tour in the README. Every picture is a screenshot of the hosted studio.</p></div>
-      <div class="cards">
-        <article class="card">
-          <div class="pair">
-            <figure class="shot" style="margin:0"><img src="../../../readme/02-file-menu.jpg" alt="The File menu open with its Download submenu expanded" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-            <figure class="shot" style="margin:0"><img src="../../../readme/05-filmstrip-menu.jpg" alt="The filmstrip's right click menu" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-          </div>
-          <h3>The Google Slides shell</h3>
-          <p>Ten menus, a toolbar whose tail follows the selection, the filmstrip, the notes pane, the right panels and the bottom bar. Search the menus finds every item by name, and every control carries its name and its key.</p>
-        </article>
-        <article class="card">
-          <figure class="shot" style="margin:0"><img src="../../../readme/07-canvas-snap-guides.jpg" alt="A group dragged into alignment with the snap guide" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-          <h3>The canvas</h3>
-          <p>Drag, resize and rotate with live readouts. Snap guides, rulers, guides, zoom to 1600 percent, marquee selection, z order, groups, crop mode and connectors that follow the shape they are attached to.</p>
-        </article>
-        <article class="card">
-          <figure class="shot" style="margin:0"><img src="../../../readme/04-layout-grid.jpg" alt="The layout grid with Google's eleven layouts and the ten GT layouts" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-          <h3>Layouts and themes</h3>
-          <p>Twenty one layouts in one grid: Google's eleven and the ten GT layouts. Apply layout keeps the content and never refuses. A new presentation opens on a Title slide with four starter pictures already in it.</p>
-        </article>
-        <article class="card">
-          <div class="icon"><svg viewBox="0 0 20 20"><use href="#i-bars-3-bottom-left"/></svg></div>
-          <h3>Text</h3>
-          <p>Bold, italic, underline, strikethrough, super and subscript, colour and highlight on a range. Lists with nine bullet and six numbering presets, line spacing, columns, indents, alignment, autofit, find and replace across the deck, links to a URL or a slide.</p>
-        </article>
-        <article class="card">
-          <figure class="shot" style="margin:0"><img src="../../../readme/08-format-options.jpg" alt="Format options on a rotated rectangle" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-          <h3>Objects, pictures and materials</h3>
-          <p>135 shapes in Google's four categories, seven line kinds with ten end decorations, fills, borders, dashes and shadows. Pictures upload, crop, mask to any shape and adjust. Seventeen shader materials play live on the stage, and a photograph becomes a two tone dither in one step.</p>
-        </article>
-        <article class="card">
-          <div class="icon"><svg viewBox="0 0 20 20"><use href="#i-table-cells"/></svg></div>
-          <h3>Tables</h3>
-          <p>A hover grid up to 20 by 20. Insert and delete rows and columns, merge and unmerge, distribute, header rows, cell fills and borders. Tab moves between cells. The editable export writes a real PowerPoint table.</p>
-        </article>
-        <article class="card">
-          <figure class="shot" style="margin:0"><img src="../../../readme/03-insert-menu.jpg" alt="The Insert menu with the Chart submenu" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-          <h3>Charts and diagrams</h3>
-          <p>Bar, column, line and pie charts with a data grid in the panel, up to 12 categories and 6 series. Six diagram templates in three styles insert as a group you edit like any other.</p>
-        </article>
-        <article class="card">
-          <figure class="shot" style="margin:0"><img src="../../../readme/09-download-dialog.jpg" alt="The Download dialog with the Perfect and Editable text modes" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-          <h3>Exports</h3>
-          <p>Perfect PowerPoint by default: each page is the rendered slide over searchable text, checked against the screen before the file is written. Editable text PowerPoint, PDF, a single web page, plain text, JPEG and PNG beside it.</p>
-        </article>
-        <article class="card">
-          <figure class="shot" style="margin:0"><img src="../../../readme/11-presenter-console.jpg" alt="Presenter view with the timer, the notes and the previews" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-          <h3>Present</h3>
-          <p>Slideshow from the current slide, Presenter view in a second window with the timer, the notes and the next slide, Google's presenting keys, a laser pointer, and a present link you can send.</p>
-        </article>
-        <article class="card">
-          <div class="pair">
-            <figure class="shot" style="margin:0"><img src="../../../readme/14-book-view.jpg" alt="The viewer's book view" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-            <figure class="shot" style="margin:0"><img src="../../../readme/15-grid-view.jpg" alt="The viewer's grid view" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-          </div>
-          <h3>The viewer and sharing</h3>
-          <p>A read only link with Slide, Grid and Book views, an embed for any site, and a Share dialog with the view, present and edit links. Skipped slides and speaker notes stay out of what you share unless you ask.</p>
-        </article>
-        <article class="card">
-          <figure class="shot" style="margin:0"><img src="../../../readme/10-decks-home.jpg" alt="The presentations page with cards and thumbnails" width="2880" height="1800" loading="lazy" decoding="async"></figure>
-          <h3>Home and files</h3>
-          <p>Recent presentations as cards with thumbnails, Make a copy, Rename, Move to trash with Undo, Import slides from another presentation, Version history with named versions, and a bundle you can download and upload.</p>
-        </article>
-        <article class="card">
-          <div class="icon"><svg viewBox="0 0 20 20"><use href="#i-check-badge"/></svg></div>
-          <h3>Quality gates</h3>
-          <p>Fifty five grammar rules check overflow, contrast, type sizes and copy in both themes, with Fix for the mechanical ones. A 25 step acceptance chain and a 2,100 row parity audit run before anything ships.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="band" aria-labelledby="dither-title">
-      <div class="head"><h2 id="dither-title">Dithers and shaders, from the deck to the interface</h2>
-        <p class="lead muted">The GT brand deck draws its photographs as two tone dithers: an eight by eight Bayer screen at two pixel cells, cut from a toned and cropped picture, with a light twin that is the exact inverse of the dark one. The same pipeline cut the picture behind the heading of this page from a frozen frame of a shader material.</p></div>
-      <div class="twins">
-        <div><figure class="fig" style="margin:0"><img src="../../../readme/12-slideshow-dither.jpg" alt="The Blue Marble slide of the GT deck in the slideshow, a two tone dither with its plate" width="2400" height="1500" loading="lazy" decoding="async"></figure><p class="caption">The Blue Marble slide of the GT deck in the slideshow, a two tone dither with its plate.</p></div>
-        <div><figure class="fig" style="margin:0"><img src="previews/hero-frame.jpg" alt="A frozen frame of the mesh gradient material in the ink and paper preset" width="1600" height="900" loading="lazy" decoding="async"></figure><p class="caption">A frozen frame of the mesh gradient material in the ink and paper preset, captured at 1600 by 900 on Metal.</p></div>
-        <div><figure class="fig cut" style="margin:0" role="img" aria-label="A crop of the dithered twin of the same frame at one cell per two pixels"></figure><p class="caption">The same frame through the two tone pipeline, shown at its own cell size: two pixels, never scaled between.</p></div>
-      </div>
-      <p class="honest">The pipeline runs on any photograph or on a frozen frame of a shader material, reports how clear the plate stays, and is written three times with one arithmetic: in TypeScript, in a Rust addon for Node and in a Rust module for the browser, with a test that proves the three light the same cells. Seventeen Paper Shaders materials play live on the stage with typed controls and the GT palette presets, and every one is captured as frozen frames for the thumbnails and the exports.</p>
-    </section>
-
-    <section class="band" aria-labelledby="fast-title">
-      <div class="head"><h2 id="fast-title">Why it is fast</h2>
-        <p class="lead muted">Most of the speed is structural: one renderer, contracts generated ahead of time, immutable documents and caches, and export work that runs where the browser already is. The numbers below are measured, and each one names the file that produces it.</p></div>
-      <ol class="speed">
-        <li><h3>One renderer</h3><p>One function turns a slide into the same HTML and CSS for the editor, the viewer, the embed, the CLI's screenshots and the exporters. A render at one revision is the same pixels on every surface, so nothing is drawn twice and nothing has to be reconciled.</p><p class="n">170 renders of the GT deck in 18.3 s in the acceptance chain; a slide is ready in 6 ms at the median (packages/render/src/slide.ts)</p></li>
-        <li><h3>Contracts generated once</h3><p>Every operation is one entry in one table. The CLI parsers, the MCP tools, the HTTP contract, the window API list and the skills are generated from it and committed, so describing the API costs nothing per request and a stale copy fails the build.</p><p class="n">105 actions, 89 MCP tools, 87 HTTP paths, from one file (packages/schema/src/actions.ts)</p></li>
-        <li><h3>Rust where the arithmetic must not drift</h3><p>The dither and image comparison pipeline is a Rust crate compiled to a Node addon and to WebAssembly, with a TypeScript copy of the same arithmetic where neither is built. The crate exists so that a dither approved in the browser and one produced on a server light the same cells; where the addon is built it also cuts a screen in less than half the time. The hosted studio runs the TypeScript copy today.</p><p class="n">20 ms for a 1600 by 900 screen through the addon, 23 ms through wasm, 52 ms in TypeScript (docs/native.md)</p></li>
-        <li><h3>The export is a screenshot</h3><p>Perfect PowerPoint rasterises each page in Chromium at twice the sheet size, stores it in the smallest encoding that decodes within budget, then decodes it again and compares it with the shot before the file is written. The page is the screen, and there is no second layout engine to disagree with it.</p><p class="n">worst decoded mismatch 0.003 percent over 170 pages; about 15.5 MiB per theme (docs/pptx.md)</p></li>
-        <li><h3>Export in batches</h3><p>On the hosted studio a long deck exports in batches of sixty slides, each one function call, with a progress sentence and a merge at the end. A failed batch is retried on its own; the file is never started over.</p><p class="n">one slide in 7.5 s cold; the 85 slide GT deck in about four minutes (docs/hosting.md)</p></li>
-        <li><h3>Compute that lasts</h3><p>The export and render routes run on Vercel functions with an 800 second budget and 3,009 MB of memory, on fluid compute, so several requests to one deployment share one warm process and a render never waits for a cold start when the process is already up.</p><p class="n">800 s and 3,009 MB on /api/export, /api/render and the server functions (apps/studio/vite.deploy.config.ts)</p></li>
-        <li><h3>Routes load before the click</h3><p>The router preloads a route's code and data as soon as the pointer reaches its link, so the move from the presentations page to a presentation starts before the click lands.</p><p class="n">a click on a card lands on a ready editor in 399 ms for a one slide presentation and 723 ms for the 85 slide GT deck, warm (research-4/04, section 5)</p></li>
-        <li><h3>Immutable documents and caches</h3><p>Every committed write stores the whole document under the hash of its bytes, so a reader proves it has the current document from one header and fetches no slide it already holds. Thumbnails named by revision are cached for a year, and the GT deck's pictures are static files on the CDN that answer before the function runs.</p><p class="n">a cached thumbnail in 239 to 385 ms; a picture from the CDN in 112 to 299 ms (docs/hosting.md, section 7)</p></li>
-      </ol>
-      <p class="honest">What is still slow is measured too: the first paint of a new presentation is 0.9 s on a cold cache and 0.4 s warm, the presentations page paints at 2.8 s at the median because it syncs every presentation in the store, and a thumbnail after an edit takes 2.4 to 3.8 s. Those numbers are this round's targets.</p>
-    </section>
-
-    <section class="band" id="agents" aria-labelledby="agents-title">
-      <div class="head"><h2 id="agents-title">For agents</h2>
-        <p class="lead muted">Every capability of the editor is an action. The same 105 actions run on the CLI, over MCP, over HTTP and inside an open page, through one validator, and every write names the revision it read.</p></div>
-      <ul class="agents">
-        <li><b>CLI</b><p>Edits a decks folder with no browser page; --json gives machine output and --base-revision names the revision the write read.</p><code class="cmd">pnpm exec turboslide slide new --layout split --after title --deck decks/gt-brand --json</code></li>
-        <li><b>MCP</b><p>One deck_&lt;action&gt; tool per action over stdio or streamable HTTP, with render tools that return PNGs and the deck_review prompt for the judge lenses.</p><code class="cmd">pnpm exec turboslide mcp --deck decks/gt-brand
-<span class="t"># or, with a bearer token</span>
-POST https://turboslide.vercel.app/mcp?deck=gt-brand</code></li>
-        <li><b>HTTP</b><p>One JSON object in, the normalized result and its findings out; a stale revision is 409 with the current document.</p><code class="cmd">curl -X POST 'https://turboslide.vercel.app/api/actions/deck.info?deck=gt-brand' \
-  -H 'authorization: Bearer $TURBOSLIDE_TOKEN' -H 'content-type: application/json' -d '{}'</code></li>
-        <li><b>Window API</b><p>Inside an open editor, viewer or presenter page, the same actions run through the same dispatcher a click uses.</p><code class="cmd">window.turboslide.studio.invoke('view.goto', { slideId: 'thesis' })</code></li>
-        <li><b>OpenAPI</b><p>The OpenAPI 3.1 document, the manifest and the llms guides are generated from the action table and committed.</p><code class="cmd">packages/agent/generated/openapi.json <span class="t"># on GitHub today; GET /openapi.json once the round bundles it</span></code></li>
-        <li><b>Skills</b><p>Four skills with generated reference tables: discovery and the write protocol, writing slides in the grammar, driving the live page, verifying.</p><code class="cmd">skills/turboslide-api/SKILL.md
-skills/turboslide-create/SKILL.md
-skills/turboslide-studio/SKILL.md
-skills/turboslide-verify/SKILL.md</code></li>
-      </ul>
-      <p class="honest">The hosted agent routes accept a bearer token set by the deployment's owner; a checkout serves them to localhost without one. A deck moves between a checkout and the hosted studio with <code>turboslide deck push</code> and <code>deck pull</code>.</p>
-    </section>
-
-    <section class="band" aria-labelledby="compare-title">
-      <div class="head"><h2 id="compare-title">Compared with Google Slides</h2>
-        <p class="lead muted">Turboslide follows Google Slides' structure and behaviours on purpose, so the differences are the point. Google Slides is a product of Google LLC; Turboslide is not affiliated with Google.</p></div>
-      <table>
-        <thead><tr><th></th><th>Google Slides</th><th>Turboslide</th></tr></thead>
-        <tbody>
-          <tr><td>Account</td><td>A Google account; the product page's calls to action are Sign in and Try Slides for work.</td><td>No account. Anyone with a link opens it; the store is shared.</td></tr>
-          <tr><td>Where the file lives</td><td>Google Drive.</td><td>A folder in a checkout, or a Vercel Blob store on the hosted studio, with one immutable copy per revision.</td></tr>
-          <tr><td>Editing together</td><td>Real time co editing with live pointers, comments, assignments and a comments panel.</td><td>One editor holds a ten minute lease on the slide it edits; another writer's change arrives within a second with a banner. No comments yet.</td></tr>
-          <tr><td>Export</td><td>PowerPoint, ODP, PDF, plain text, JPEG, PNG and SVG of the current slide.</td><td>PowerPoint in two modes, one pixel identical to the screen with a report; PDF, one file web page, plain text, JPEG, PNG and the Turboslide bundle. No ODP or SVG.</td></tr>
-          <tr><td>Import</td><td>PowerPoint and Canva files; Import slides from another presentation.</td><td>Import slides from a presentation on this studio; open a Turboslide bundle. No PowerPoint import yet.</td></tr>
-          <tr><td>Automation</td><td>A REST API with presentations.get and batchUpdate, Apps Script and add-ons; the developer site lists an MCP server.</td><td>105 actions on the CLI, MCP, HTTP and the window API, generated from one table with an OpenAPI document and four skills.</td></tr>
-          <tr><td>Layouts and themes</td><td>Many themes and templates; eleven predefined layouts per theme.</td><td>One theme, gt-ink-paper, with Google's eleven layouts and ten GT layouts.</td></tr>
-          <tr><td>Pictures</td><td>Stock and web images, Drive and Photos, GIFs and stickers, Gemini image generation.</td><td>Upload, URL or this presentation; crop, mask, adjust; two tone dithers and seventeen shader materials.</td></tr>
-          <tr><td>Transitions</td><td>Slide transitions and object animations.</td><td>None; the Transition item is present and disabled with a sentence.</td></tr>
-          <tr><td>Presenting</td><td>Slideshow, Presenter view, present from Meet, recording.</td><td>Slideshow, Presenter view in a second window, Google's keys, a present link.</td></tr>
-          <tr><td>Offline</td><td>With the Docs Offline extension in Chrome or Edge.</td><td>The slideshow keeps running after load; the editor needs the server.</td></tr>
-          <tr><td>Licence and hosting</td><td>Part of Google Workspace.</td><td>MIT; run it from a checkout or deploy it to Vercel.</td></tr>
-        </tbody>
-      </table>
-    </section>
-  </div>
-</main>
-
-<footer>
-  <div class="wrap">
-    <div class="cols">
-      <div><h3>Studio</h3><ul>
-        <li><a href="https://turboslide.vercel.app/new">New presentation</a></li>
-        <li><a href="https://turboslide.vercel.app/decks">Your presentations</a></li>
-        <li><a href="https://turboslide.vercel.app/deck/gt-brand">The GT deck</a></li>
-        <li><a href="https://turboslide.vercel.app/deck/gt-brand?present=1">Present the GT deck</a></li>
-        <li><a href="https://turboslide.vercel.app/decks/trash">Trash</a></li>
-      </ul></div>
-      <div><h3>Documentation</h3><ul>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/README.md">The documentation index</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/spec/SPEC.md">The specification</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/gslides-parity/SPEC.md">Google Slides parity</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/grammar.md">The grammar</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/pptx.md">PowerPoint export</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/hosting.md">Hosting</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/docs/native.md">The native module</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/AGENTS.md">Rules for the repository</a></li>
-      </ul></div>
-      <div><h3>Agents</h3><ul>
-        <li><a href="https://turboslide.vercel.app/api/agent">Manifest</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/openapi.json">OpenAPI</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/packages/agent/generated/llms.txt">llms.txt</a></li>
-        <li><a href="https://turboslide.vercel.app/mcp">MCP</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-api/SKILL.md">turboslide-api</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-create/SKILL.md">turboslide-create</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-studio/SKILL.md">turboslide-studio</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/skills/turboslide-verify/SKILL.md">turboslide-verify</a></li>
-      </ul></div>
-      <div><h3>Licence</h3><ul>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/LICENSE">MIT licence, copyright 2026 Kevin Liu</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide/blob/main/THIRD_PARTY_NOTICES.md">Third party notices</a></li>
-        <li><a href="https://github.com/Kevin-Liu-01/Turboslide">GitHub</a></li>
-      </ul></div>
-    </div>
-    <div class="tail">
-      <span class="brand"><svg class="tile" viewBox="0 0 16 16" aria-hidden="true"><rect width="16" height="16" fill="var(--pt-paper)"/><rect x="0.5" y="0.5" width="15" height="15" fill="none" stroke="var(--pt-edge)" stroke-width="1"/><path fill="var(--pt-ink)" d="M3 2h10v2H9v10H7V4H3z"/></svg><span>Turboslide</span></span>
-      <span>Turboslide is General Translation's slides editor. Google Slides is a product of Google LLC.</span>
-      <span class="pt-seg" role="group" aria-label="Appearance">
-        <button class="pt-ib" type="button" data-theme-pick="light" aria-pressed="false" title="Light appearance for the chrome, stored in this browser">Light</button>
-        <button class="pt-ib" type="button" data-theme-pick="dark" aria-pressed="false" title="Dark appearance for the chrome, stored in this browser">Dark</button>
-      </span>
-    </div>
-  </div>
-</footer>
-<script>
-// The appearance control (View > Appearance in the editor; here in the footer): stores gt-theme, the
-// key the boot script reads, so the choice holds across the studio.
-(function () {
-  function apply(t) {
-    document.documentElement.setAttribute('data-theme', t);
-    try { localStorage.setItem('gt-theme', t); } catch (e) {}
-    document.querySelectorAll('[data-theme-pick]').forEach(function (b) {
-      var on = b.getAttribute('data-theme-pick') === t;
-      b.classList.toggle('is-on', on);
-      b.setAttribute('aria-pressed', String(on));
-    });
-  }
-  document.querySelectorAll('[data-theme-pick]').forEach(function (b) {
-    b.addEventListener('click', function () { apply(b.getAttribute('data-theme-pick')); });
-  });
-  var current = document.documentElement.getAttribute('data-theme') || 'dark';
-  document.querySelectorAll('[data-theme-pick]').forEach(function (b) {
-    var on = b.getAttribute('data-theme-pick') === current;
-    b.classList.toggle('is-on', on);
-    b.setAttribute('aria-pressed', String(on));
-  });
-})();
-</script>
-</body>
+    </footer>
+    <script>
+      // The appearance control (View > Appearance in the editor; here in the footer): stores gt-theme, the
+      // key the boot script reads, so the choice holds across the studio.
+      (function () {
+        function apply(t) {
+          document.documentElement.setAttribute('data-theme', t);
+          try {
+            localStorage.setItem('gt-theme', t);
+          } catch (e) {}
+          document.querySelectorAll('[data-theme-pick]').forEach(function (b) {
+            var on = b.getAttribute('data-theme-pick') === t;
+            b.classList.toggle('is-on', on);
+            b.setAttribute('aria-pressed', String(on));
+          });
+        }
+        document.querySelectorAll('[data-theme-pick]').forEach(function (b) {
+          b.addEventListener('click', function () {
+            apply(b.getAttribute('data-theme-pick'));
+          });
+        });
+        var current = document.documentElement.getAttribute('data-theme') || 'dark';
+        document.querySelectorAll('[data-theme-pick]').forEach(function (b) {
+          var on = b.getAttribute('data-theme-pick') === current;
+          b.classList.toggle('is-on', on);
+          b.setAttribute('aria-pressed', String(on));
+        });
+      })();
+    </script>
+  </body>
 </html>

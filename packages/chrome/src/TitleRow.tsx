@@ -2,8 +2,7 @@ import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { useRef, useState } from 'react';
 
 import { useEditorShell } from './editor-shell-context';
-import type { IdentityView } from './editor-shell';
-import { GtMark } from './GtMark';
+import type { IdentityView, LinkComponent } from './editor-shell';
 import { Icon } from './icons';
 import { cn } from './lib/cn';
 import { Menu } from './Menu';
@@ -15,12 +14,16 @@ import { nameOf } from './presence/IdentityChip';
 import { PresenceSlot } from './presence/PresenceSlot';
 import { ToolButton } from './ToolButton';
 import { tipProps } from './Tooltip';
+import { TurboslideMark } from './TurboslideMark';
 
 import './TitleRow.css';
 
 /**
- * The title row (gslides-parity SPEC 1.1, 2.0; SPEC-3 4.2, 0.43, 9.3): 44 px, full width. Left:
- * the GT mark as a link to /decks, the title field (click to rename, Enter commits, Esc restores,
+ * The title row (gslides-parity SPEC 1.1, 2.0; SPEC-3 4.2, 0.43, 9.3; SPEC-4 0.16, 1.10): 44 px,
+ * full width. Left: the Turboslide mark (24 px, solid) as a link to /decks through the router's
+ * `Link` the studio passes as `linkComponent` (a plain anchor when the input has none), with the
+ * `title.appIcon` label and tooltip and `data-control="title.home"` so the parity audit and the
+ * perf check find it; the title field (click to rename, Enter commits, Esc restores,
  * one deck.rename), the save words with the cloud glyph in one fixed cell (five phrases,
  * aria-live), the Last edit clock that opens Version history and names the newest record's author
  * through the identity the route resolved, with a 6 px dot when a record landed since this tab
@@ -356,6 +359,46 @@ export type TitleRowProps = {
   onShowMenus: () => void;
 };
 
+/**
+ * The mark's link (SPEC-4 0.16, 1.10): the `linkComponent` the studio passes, so the click is a
+ * same document transition with `preload: 'intent'`, else a plain anchor to the same path. The
+ * label, the tooltip and `data-control="title.home"` are the same on both.
+ */
+export function TitleHomeLink({
+  to,
+  link,
+  label,
+  doc,
+  menuItem,
+}: {
+  to: string;
+  link: LinkComponent | undefined;
+  label: string;
+  doc: string | undefined;
+  menuItem: string;
+}) {
+  const shared = {
+    className: 'ts-title-home',
+    'data-control': 'title.home',
+    'data-menu-item': menuItem,
+    'aria-label': label,
+    ...tipProps({ name: label, doc }),
+  };
+  const mark = <TurboslideMark size={24} aria-hidden="true" />;
+  if (link === undefined)
+    return (
+      <a href={to} {...shared}>
+        {mark}
+      </a>
+    );
+  const Link = link;
+  return (
+    <Link to={to} preload="intent" {...shared}>
+      {mark}
+    </Link>
+  );
+}
+
 export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
   const shell = useEditorShell();
   const home = itemById('title.appIcon');
@@ -367,16 +410,13 @@ export function TitleRow({ compact, onShowMenus }: TitleRowProps) {
   return (
     <header className="ts-title-row" data-control="title.row">
       <div className="ts-title-l">
-        <a
-          className="ts-title-home"
-          href={homePath}
-          data-control="title.home"
-          data-menu-item={home.id}
-          aria-label={home.label}
-          {...tipProps({ name: home.label, doc: home.doc })}
-        >
-          <GtMark width={31} height={20} />
-        </a>
+        <TitleHomeLink
+          to={homePath}
+          link={shell.input.linkComponent}
+          label={home.label}
+          doc={home.doc}
+          menuItem={home.id}
+        />
         <TitleField />
         <SaveState />
         <LastEdit />

@@ -2,10 +2,10 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { Link, createFileRoute, notFound } from '@tanstack/react-router';
 
-import { GtMark } from '@turboslide/chrome/GtMark';
 import { PRESENT, SNACKBARS, STUB_PREFIX } from '@turboslide/chrome/menus/strings';
 import { Snackbar, useSnackbar } from '@turboslide/chrome/Snackbar';
 import { tipProps } from '@turboslide/chrome/Tooltip';
+import { TurboslideMark } from '@turboslide/chrome/TurboslideMark';
 import { Frame } from '@turboslide/viewer/Frame';
 import { SHEET_H, SHEET_W } from '@turboslide/viewer/model';
 import type { ViewerSlide } from '@turboslide/viewer/model';
@@ -14,6 +14,7 @@ import type { Theme } from '@turboslide/viewer/theme';
 
 import { useMountEffect } from '../components/useMountEffect';
 import { getDeck } from '../server/decks';
+import { AccessPage } from './-access-page';
 import {
   EXPORT_POLL_MS,
   exportCapabilities,
@@ -172,7 +173,8 @@ function PrintPage() {
           <span className="pt-lb">Close preview</span>
         </Link>
         <span className="ts-print-title">
-          <GtMark width={25} height={16} />
+          {/* the Turboslide mark at 20 px before the title (gslides-parity SPEC-4 1.10); the GT mark stays the theme's, on the sheet */}
+          <TurboslideMark size={20} />
           <span>{payload.deck.title}</span>
         </span>
         <label className="ts-print-layout">
@@ -330,17 +332,16 @@ function PrintPage1({
   );
 }
 
+/**
+ * The You need access page as the print route's `notFoundComponent` (gslides-parity SPEC-3 6.5,
+ * 9.3; VERIFICATION-3 finding 53; the round four orchestrator's ruling 3, applied by the
+ * integrator at merge 2 on build-4/b3.md R7): the loader answers null for a missing and a
+ * restricted deck alike, so this page is the 404 body in both cases, in the server's HTML because
+ * the print route stays full SSR.
+ */
 function PrintMissing() {
   const { deckId } = Route.useParams();
-  return (
-    <main className="ts-home">
-      <h1>No presentation named {deckId}</h1>
-      <p>
-        Nothing to print under that address. <Link to="/decks">Your presentations</Link> are listed
-        on the home page.
-      </p>
-    </main>
-  );
+  return <AccessPage deckId={deckId} />;
 }
 
 /**

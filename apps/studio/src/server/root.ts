@@ -99,6 +99,46 @@ const devBlobClient: BlobClientFactory = async () => {
   return mod.vercelBlobClient(process.env);
 };
 
+/**
+ * The origins a hosted instance can fetch the seed deck's twins from when the bundle no longer
+ * carries them (gslides-parity SPEC-4 0.35, 3.6; `SEED_PATTERN` drops `assets/**` and the twins
+ * stay static files of the deployment at `/decks/gt-brand/assets/<file>`, served by the CDN):
+ * `TURBOSLIDE_PUBLIC_ORIGIN` first, then the project's production URL (every deployment ships
+ * the same twins), then this deployment's own URL (a preview behind deployment protection may
+ * refuse the function's own fetch of it, which is why production comes first).
+ */
+export function seedAssetOrigins(env: Record<string, string | undefined> = process.env): string[] {
+  const out: string[] = [];
+  const explicit = env.TURBOSLIDE_PUBLIC_ORIGIN;
+  if (explicit !== undefined && explicit !== '') out.push(explicit.replace(/\/$/, ''));
+  for (const name of ['VERCEL_PROJECT_PRODUCTION_URL', 'VERCEL_URL'] as const) {
+    const host = env[name];
+    if (host !== undefined && host !== '' && !out.includes(`https://${host}`))
+      out.push(`https://${host}`);
+  }
+  return out;
+}
+
+/** A twin of a seed deck from the deployment's static files, or null when no origin answers it. */
+async function fetchSeedAsset(deckId: string, relative: string): Promise<Uint8Array | null> {
+  if (!(SEED_FOLDERS as readonly string[]).includes(deckId)) return null;
+  if (relative === '' || relative.includes('..') || relative.startsWith('/')) return null;
+  for (const origin of seedAssetOrigins()) {
+    try {
+      const response = await fetch(
+        `${origin}/decks/${encodeURIComponent(deckId)}/assets/${relative.split('/').map(encodeURIComponent).join('/')}`,
+      );
+      if (!response.ok) continue;
+      const type = response.headers.get('content-type') ?? '';
+      if (type.startsWith('text/html')) continue;
+      return new Uint8Array(await response.arrayBuffer());
+    } catch {
+      // the next origin
+    }
+  }
+  return null;
+}
+
 function runtime(): Runtime {
   if (shared.__turboslideRuntime !== undefined) return shared.__turboslideRuntime;
   const selection = selectStore(process.env);
@@ -124,6 +164,7 @@ function runtime(): Runtime {
     overlayRoot: overlayRoot(process.env),
     seed,
     blob,
+    ...(selection.kind === 'file' ? {} : { fetchAsset: fetchSeedAsset }),
     log,
   });
   if (selection.kind !== 'file') {
@@ -520,7 +561,13 @@ function jobEntries(workerDir: string, now: number, keepMs: number): DerivedEntr
 
 const REVISION_NAME = /^\d+$/;
 
-/** <base>/<deck>/<revision>: every revision but the deck's newest is dead; an odd name ages out like a job. */
+/**
+ * <base>/<deck>/<name>: for the render cache, every revision but the deck's newest is dead and an
+ * odd name ages out like a job. The thumbnail cache is keyed by stamp since round four (thumbs.ts,
+ * gslides-parity SPEC-4 0.31): a numbered folder (a home card's revision) is dead below the newest
+ * number as before, and a stamp folder is never dead by age, because the current stamp of a slide
+ * is not knowable from the folder's name; the byte budget below evicts it oldest first.
+ */
 function revisionEntries(
   kind: 'cache' | 'thumbs',
   base: string,
@@ -538,12 +585,17 @@ function revisionEntries(
     for (const revision of revisions) {
       const mtime = newestMtime(revision.path);
       const numbered = REVISION_NAME.test(revision.name);
+      const dead = numbered
+        ? Number(revision.name) < newest
+        : kind === 'thumbs'
+          ? false
+          : now - mtime > keepMs;
       out.push({
         kind,
         path: revision.path,
         mtime,
         bytes: treeBytes(revision.path),
-        dead: numbered ? Number(revision.name) < newest : now - mtime > keepMs,
+        dead,
         parent: deck.path,
       });
     }

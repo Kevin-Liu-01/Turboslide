@@ -400,6 +400,55 @@ test('Presenter view lists the unskipped slides with their notes and syncs with 
   await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveClass(/is-present/);
 });
 
+test("the presenter window's studio handle arrives within the bound, its document carries the skeleton, and a built server's JavaScript stays under the ceiling (SPEC-4 0.36, 3.7)", async ({
+  page,
+  context,
+}) => {
+  /* the document of the presenter route (`ssr: 'data-only'`): the console's skeleton where the
+     console will stand, the payload in the document, no server function round trip after */
+  const html = await (await page.request.get(`/present/${DECK}`)).text();
+  expect(html).toContain('data-skeleton="presenter"');
+  expect(html).toMatch(/<meta name="robots" content="noindex"[^>]*\/?>/);
+  /* the popup, as the editor's Presenter view opens it (presentActions.ts): the handle and the
+     console within 5 s on a dev server, a bound wide enough for an unbundled module graph; the
+     measured number is printed and the ceiling of SPEC-4 4.1 is the node-server build's
+     (scripts/perf-budget.mjs) */
+  const console_ = await context.newPage();
+  const t0 = Date.now();
+  await console_.goto(`/present/${DECK}`);
+  await console_.waitForFunction(() => Boolean(window.turboslide?.studio), null, {
+    timeout: 5_000,
+  });
+  const handleMs = Date.now() - t0;
+  await expect(console_.locator('.ts-presenter:not(.ts-skeleton)')).toBeVisible();
+  const consoleMs = Date.now() - t0;
+  console.log(`presenter: studio handle ${handleMs} ms, console ${consoleMs} ms after navigation`);
+  const serverFns = await console_.evaluate(() =>
+    performance
+      .getEntriesByType('resource')
+      .map((entry) => entry.name)
+      .filter((name) => /\/_serverFn\//.test(name) && /readEditorDeck/i.test(name)),
+  );
+  expect(serverFns).toEqual([]);
+  /* the JavaScript the window loaded, decoded: asserted against the /present ceiling on a built
+     server (no Vite client module on the page), reported on a dev server whose modules are not
+     bundled */
+  const js = await console_.evaluate(() => {
+    const entries = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
+    const scripts = entries.filter((entry) => /\.(?:m?js|tsx?)(?:\?|$)/.test(entry.name));
+    return {
+      dev: scripts.some((entry) => /\/@vite\/client|\/@fs\/|\/src\//.test(entry.name)),
+      decoded: scripts.reduce((sum, entry) => sum + entry.decodedBodySize, 0),
+      files: scripts.length,
+    };
+  });
+  console.log(
+    `presenter: ${js.files} scripts, ${Math.round(js.decoded / 1024)} KB decoded${js.dev ? ' (dev server, unbundled)' : ''}`,
+  );
+  if (!js.dev) expect(js.decoded).toBeLessThanOrEqual(1_200 * 1024);
+  await console_.close();
+});
+
 test('?screen=1 on the presenter address opens the audience form', async ({ page }) => {
   await page.goto(`/present/${DECK}?screen=1`);
   await expect(page).toHaveURL(new RegExp(`/deck/${DECK}\\?present=1$`));

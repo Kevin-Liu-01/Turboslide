@@ -36,6 +36,25 @@ function requestNonce(): string | undefined {
   }
 }
 
+/**
+ * The route transition (gslides-parity SPEC-4 0.40; PP 5): a same document navigation whose path
+ * changes runs under `document.startViewTransition` with the type `route`, so the browser
+ * snapshots the old page and cross fades to the new one while the loader runs; brand.css sets the
+ * two `::view-transition-*` durations from `--pt-dur-leave` and `--pt-dur-enter`, which the
+ * reduced motion block of tokens.css zeroes. A reader who asked for reduced motion gets no
+ * transition at all here (`false`), not a zero length one: the browser would still freeze
+ * rendering for the snapshot pair. A search or hash change on the same path (a view toggle, a
+ * slide change) runs no transition; SlideView.tsx keeps its keyed fade for the slides. Firefox
+ * has no view transitions and the router falls back to a plain update.
+ */
+function routeTransitionTypes({ pathChanged }: { pathChanged: boolean }): string[] | false {
+  if (!pathChanged) return false;
+  if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+  }
+  return ['route'];
+}
+
 export function getRouter() {
   registerDitherWorker();
   const nonce = requestNonce();
@@ -43,7 +62,14 @@ export function getRouter() {
     routeTree,
     scrollRestoration: true,
     defaultPreload: 'intent',
-    defaultPreloadStaleTime: 0,
+    // Preloaded loader data stays fresh for 30 s (gslides-parity SPEC-4 0.39; PP 5; R03 3.1): a
+    // hover on a card then a click within that window opens the deck at the preloaded revision
+    // instead of running the loader again, and the round three room stream (SPEC-3 3.3) adopts a
+    // newer revision within its latency. Round one set 0 ("let an external cache decide") and no
+    // external cache exists. The window is the behaviour change 0.39 records: a deck edited on
+    // another instance in the 30 s after a hover opens one revision behind, for that latency.
+    defaultPreloadStaleTime: 30_000,
+    defaultViewTransition: { types: routeTransitionTypes },
     ...(nonce === undefined ? {} : { ssr: { nonce } }),
   });
 

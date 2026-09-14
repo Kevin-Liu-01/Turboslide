@@ -9,6 +9,11 @@ import type { Page } from '@playwright/test';
 // drag to reorder as one slide.move, Google's right-click menu in the order of SPEC 4.2 with Skip
 // and Unskip, Delete with the snackbar and Undo, and the layout list from Apply layout.
 //
+// Round four (gslides-parity SPEC-4 0.30, 0.41, 3.2; MILESTONES-4 B4 item 7): the cards are clone
+// first and capture never, so a typed heading shows on its card within 50 ms of the local commit
+// and no /api/render request leaves the editor's page for the filmstrip; one observer over the
+// list decides which cards hold a clone.
+//
 // The spec works on a scratch copy of decks/fixture under decks/e2e-film with four content slides
 // and removes it afterwards. It runs against the dev server the builder starts on its own port:
 // TURBOSLIDE_E2E_BASE, else PLAYWRIGHT_BASE_URL (the base playwright.config.ts gives every other
@@ -302,5 +307,115 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
       )
       .toBe('big-number');
     await expect(menu(page)).toHaveCount(0);
+  });
+});
+
+test.describe('the clone first filmstrip (SPEC-4 0.30, 0.41)', () => {
+  test('a typed heading is on its card within 50 ms of the commit, and the filmstrip asks the render route for nothing', async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    const renders: string[] = [];
+    page.on('request', (request) => {
+      if (request.url().includes('/api/render/')) renders.push(request.url());
+    });
+    await openEditor(page);
+    await settled(page);
+    /* every card is a clone first frame: no capture is asked for and none is shown */
+    const thumbs = page.locator('.ts-filmstrip .ts-card .ts-thumb');
+    await expect(thumbs).toHaveCount(4);
+    for (const capture of await thumbs.evaluateAll((els) =>
+      els.map((el) => el.getAttribute('data-capture')),
+    ))
+      expect(capture).toBe('never');
+    await expect(page.locator('.ts-filmstrip .ts-thumb-img')).toHaveCount(0);
+    /* the cards near the list hold a clone (all four here), the frame and the number stay on every card */
+    await expect(page.locator('.ts-filmstrip .ts-card[data-near]')).toHaveCount(4);
+    await expect(page.locator('.ts-filmstrip .ts-card [data-thumb="clone"]')).toHaveCount(4);
+    /* type into the heading of the current slide and stamp the reducer, the clone and the save in the page */
+    await card(page, 'content-rule').click();
+    await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+      'data-active',
+      'content-rule',
+    );
+    const run = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
+    const box = await run.boundingBox();
+    expect(box).not.toBeNull();
+    await page.mouse.click(box!.x + 8, box!.y + 8);
+    await expect(run).toHaveAttribute('contenteditable', 'true');
+    const from = await page.evaluate(
+      () => window.turboslide!.studio.describe().state.revision as number,
+    );
+    const TEXT = 'Filmstrip clone row';
+    await page.evaluate(
+      ([revision, text]) => {
+        const w = {
+          from: revision,
+          text,
+          lastKey: null as number | null,
+          commitAt: null as number | null,
+          cloneAt: null as number | null,
+          savedAt: null as number | null,
+          renderer: null as number | null,
+        };
+        (window as unknown as { __tsFilm: typeof w }).__tsFilm = w;
+        window.addEventListener('keyup', () => (w.lastKey = performance.now()), { capture: true });
+        const tick = () => {
+          const now = performance.now();
+          let s: { revision?: number; serverRevision?: number; pending?: number };
+          try {
+            s = window.turboslide!.studio.describe().state as typeof s;
+          } catch {
+            return;
+          }
+          const card = document.querySelector('.ts-filmstrip .ts-card.is-current .pt-slide');
+          if (w.cloneAt === null && card && (card.textContent ?? '').includes(text))
+            w.cloneAt = now;
+          if (w.commitAt === null && (s.revision ?? 0) > w.from) w.commitAt = now;
+          if (
+            w.savedAt === null &&
+            (s.revision ?? 0) > w.from &&
+            (s.serverRevision ?? 0) >= (s.revision ?? 0) &&
+            s.pending === 0
+          )
+            w.savedAt = now;
+        };
+        setInterval(tick, 4);
+      },
+      [from, TEXT] as const,
+    );
+    await page.keyboard.press('End');
+    await page.keyboard.type(` ${TEXT}`);
+    await page.waitForFunction(
+      () => {
+        const w = (window as unknown as { __tsFilm: { savedAt: number | null } }).__tsFilm;
+        return w.savedAt !== null;
+      },
+      null,
+      { timeout: 60_000 },
+    );
+    const w = await page.evaluate(
+      () =>
+        (
+          window as unknown as {
+            __tsFilm: {
+              lastKey: number | null;
+              commitAt: number | null;
+              cloneAt: number | null;
+              savedAt: number | null;
+            };
+          }
+        ).__tsFilm,
+    );
+    expect(w.cloneAt).not.toBeNull();
+    expect(w.commitAt).not.toBeNull();
+    /* the clone carries the text at the reducer, before the room answers: within 50 ms of the commit stamp */
+    expect(w.cloneAt! - w.commitAt!).toBeLessThanOrEqual(50);
+    console.log(
+      `filmstrip clone: last keyup ${Math.round(w.lastKey ?? 0)} ms, clone ${Math.round(w.cloneAt ?? 0)} ms, revision moved ${Math.round(w.commitAt ?? 0)} ms, saved ${Math.round(w.savedAt ?? 0)} ms (page clock)`,
+    );
+    await expect(card(page, 'content-rule').locator('.pt-slide')).toContainText(TEXT);
+    /* nothing from this page asked the render route for a picture */
+    expect(renders).toEqual([]);
   });
 });

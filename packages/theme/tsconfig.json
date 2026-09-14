@@ -1,10 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../../tooling/tsconfig/node.json",
-  "include": ["src", "scripts", "vitest.config.ts"],
+  "include": ["src", "scripts", "brand", "vitest.config.ts"],
   "references": [
     {
       "path": "../schema"
+    },
+    {
+      "path": "../effects"
     }
   ]
 }

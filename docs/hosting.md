@@ -50,7 +50,8 @@ sibling name and a rename so a reader never sees a half-written slide.
 
 The GT deck's twins are also static files of the deployment (`publicAssets` at
 `/decks/gt-brand/assets`, one hour cache, fallthrough on), so Vercel's CDN answers them before the
-function runs; a twin added later reaches the function's assets route.
+function runs; a twin added later reaches the function's assets route. Round four moves the 30 MB
+of twins out of the server bundle and keeps them as those static files and on Blob (section 12.3).
 
 A second group, `packages`, carries the runtime files the renderer and the exporter read from the
 workspace and a function does not have: `packages/theme/src/gt-ink-paper/{sheet,stage}.css`,
@@ -222,7 +223,8 @@ mode: 'folded')`), so a deck made on one instance appears on the next.
 `/decks/<id>/assets/<file>` streams the twin from the overlay when this instance has it (the seed
 deck, a deck it created) and otherwise answers a 302 to the twin's Blob URL (one `head`, cached per
 process). `BlobStore.pullAssets()` downloads a deck's twins into the overlay for code that reads
-them from disk (an export).
+them from disk (an export). Round four adds the thumbnail cache under the same prefix
+(`decks/<id>/.thumbs/`, section 12.2), which `pull()` and the mirror skip.
 
 ### Costs
 
@@ -299,7 +301,8 @@ Environment variables the hosted studio reads:
 - `SERVER_ONLY` carries `@sparticuz/chromium` in both Vite configs, `traceDeps:
 ['@sparticuz/chromium*']` copies the package with its `bin/` folder, and `apps/studio/package.json`
   declares the package as an optional dependency so Nitro's tracer can resolve it
-  (`docs/hosting-chromium.md` section 6 has the measurement).
+  (`docs/hosting-chromium.md` section 6 has the measurement). Round four adds the Linux addon of
+  the native module to the same two lists and the `routeRules` of section 12.1.
 - `serverAssets` has the second group, `packages` (section 2).
 - Deploying a preview from the CLI: the project's root directory is `apps/studio`, so `vercel
 deploy --yes --archive=tgz` runs from the repository root (linked with `vercel link --project
@@ -338,7 +341,8 @@ Deployment Protection. The deck transfer round of 2026-09-11 implemented the sec
   `/api/export`, the full-size and JSON variants of `/api/render` and the two bundle routes require
   it, and the `?w=` thumbnail variant stays open (an `<img>` carries no header; the result is cached
   per revision and the work is bounded to the deck's slides at three widths and two themes).
-- The editor keeps its export because `edit.$deckId.tsx` `runSyncExport` calls the `syncExport`
+- The editor keeps its export because `runSyncExport` (in `apps/studio/src/editor/controller.tsx`
+  since the round four editor split; `routes/edit.$deckId.tsx` before it) calls the `syncExport`
   server function of `apps/studio/src/server/download.ts` (the same `runSyncExport` and the same
   JSON answer as the route's `?sync=1&format=json`, reached same origin under the CSRF middleware),
   and its full-size renders go through the `renderSlideImages` server function; the page holds no
@@ -552,7 +556,8 @@ Every route below runs on the file, tmp and Blob backends through the same serve
   are the pieces to wire.
 - `/openapi.json`, `/llms.txt` and `/llms-full.txt` still read `packages/agent/generated` under
   `repoRoot()`, which is the overlay when hosted, so they serve the placeholder stubs
-  (`docs/hosting-diagnosis.md` section 2). Bundling the generated files as imports fixes it.
+  (`docs/hosting-diagnosis.md` section 2; production answered a 236 byte `/openapi.json` on
+  2026-09-13). Bundling the generated files as imports fixes it; round four does so (section 12.5).
 - Renders and exports inside the function are `docs/hosting-chromium.md` (section 3b has what the
   previews taught); the render worker's local mode reads the overlay through `TURBOSLIDE_DECKS_DIR`.
 - One instance runs one Chromium job at a time (the local queue), and Fluid compute sends several
@@ -762,3 +767,107 @@ Environment variables the round adds (every secret differs between preview and p
 | `TURBOSLIDE_EGRESS`, `TURBOSLIDE_WEB_SECURITY`       | you                   | the capture browser's egress denial and `strict` web security (B4, docs/security.md)           |
 | `TURBOSLIDE_PUBLIC_STORE_HOST`                       | you, hosted           | the public store's host for the CSP's `img-src` (B4)                                           |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | the Upstash install   | the Upstash rate limiter replaces the memory one when both are set (B4)                        |
+
+## 12. Round four: the CDN rules, the thumbnail cache, the seed twins and the native addon
+
+The Google Slides parity round four (`docs/gslides-parity/SPEC-4.md` sections 0.13, 0.31, 0.35,
+0.38, 0.43, 0.45, 1.6, 3.6, 3.11; `docs/performance.md` is the plan's record) changes what the
+deployment serves from the CDN and what the function carries. Written on 2026-09-14 after merge 1
+of that round; each item names its state on that tree and the builder key of `MILESTONES-4.md`
+that lands it, so a reader after the ship step should check the file the item names before
+relying on the sentence.
+
+### 12.1 The `routeRules` and the root redirect
+
+`vite.deploy.config.ts` gains Nitro `routeRules` (B3, day 4) so the CDN answers the identity's files
+and the twins with a cache policy and the root redirect never wakes the function:
+
+| Path                                                                                   | Rule                                                                                                                                                                                      |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/favicon.ico`, `/icon.svg`, `/apple-touch-icon.png`, `/og/turboslide.png`             | `public, max-age=86400, stale-while-revalidate=604800` (a day in the browser, a week of stale service)                                                                                    |
+| `/manifest.webmanifest`                                                                | `public, max-age=86400`                                                                                                                                                                   |
+| `/icons/**`                                                                            | a week, a month stale                                                                                                                                                                     |
+| `/brand/**` (the two tone twins of the identity), `/home/**` (the `/home` screenshots) | content hashed names, `public, max-age=31536000, immutable`                                                                                                                               |
+| `/decks/gt-brand/assets/**`                                                            | an hour in the browser, a day of `s-maxage`, a week stale (`publicAssets` above gave an hour alone)                                                                                       |
+| `/`                                                                                    | `{ redirect: { to: '/new', statusCode: 307 } }` with the `x-robots-tag: noindex` header, compiled into `config.json`; `routes/index.tsx` keeps its `beforeLoad` for the client side visit |
+
+`/home` is prerendered at build (the start plugin's `prerender.enabled` with `/home` in `pages`)
+and served as a static file, so its second request is a CDN `HIT` like the icon paths. Check step
+30 (`node scripts/check-vercel-output.mjs` after a `NITRO_PRESET=vercel` build) asserts one route
+per header rule and the redirect in `.vercel/output/config.json`, every file of the icon set and
+the prerendered `/home` under `static/`, and prints each function directory's size against the
+250 MB cap; the perf budget's `cdn` rows request each path twice and expect `x-vercel-cache: HIT`
+on the second answer. Measured before the round (2026-09-14): every icon path, `/og/turboslide.png`
+and `/home` answered a function 404 with `MISS`. State on 2026-09-14: the icon set is in
+`apps/studio/public/` since merge 1 and the `routeRules` had not landed.
+
+### 12.2 The thumbnail cache on Blob
+
+The capture path's cache moves from the instance's `/tmp` (`<state>/thumbs/<deckId>/<revision>/
+<theme>@<width>/<slideId>.png`, swept by section 3's routine) to Blob under
+`decks/<id>/.thumbs/<stamp>/<theme>@<width>/<slide>.png`, put with a year's `cacheControlMaxAge`
+(B4, day 3; SPEC-4 0.31). `GET /api/render/<slide>?w=&r=<stamp>` answers a 302 to the Blob URL
+when the object exists and the store is public, streams the body under
+`TURBOSLIDE_BLOB_ACCESS=private`, else renders, puts and answers; without `r` the route answers
+the newest stored thumbnail with `s-maxage=60, stale-while-revalidate=86400` and refreshes inside
+`waitUntil()` from `@vercel/functions` (in the catalog since day 0 at 3.9.7). Retention keeps the
+newest three stamps per slide and theme, pruned in the same `waitUntil` as the render; `pull()`'s
+listing and the mirror skip the `.thumbs/` prefix. The signed short lived URL of round three
+(SPEC-3 8.13: an HMAC over deck id, width, revision and role, ten minutes) stays, so a CDN entry
+lives at most ten minutes per signature while the Blob object is shared across instances and
+signatures: one render per stamp holds, one CDN hit per signature does not, and the copy claims the
+former only. The editor's own filmstrip stops asking for captures at all (SPEC-4 0.30: the card is
+the renderer's HTML); the viewer's grid, the home cards and the presenter keep them.
+
+### 12.3 The seed twins leave the function bundle
+
+`SEED_PATTERN` drops `assets/**` (B3), so the seed deck's 30 MB of twins are no longer base64
+chunks of the server bundle (72 MB of the 2026-09-11 `__server.func` measurement in section 6,
+with 146.6 MB per function directory once Chromium is traced); they stay static files of the
+deployment under `/decks/gt-brand/assets/` and on Blob after `seedOnce`. `ensureDeckAssets`
+(`server/root.ts`, B4) pulls the seed deck's twins from the deployment's static URL or from Blob
+for a render or an export, and a deck created from the GT template copies its 202 twins from the
+same source, because the GT template card on `/decks` copies them into the new deck on a fresh
+instance and would otherwise break. `scripts/check-vercel-output.mjs` prints every function
+directory's size; the 200 MB gate is round five's. The base function keeps the Chromium package,
+since Nitro's `traceDeps` is one list per deployment.
+
+### 12.4 The native addon in the function
+
+The Linux x64 glibc addon of the native module (`packages/native/npm/linux-x64-gnu/
+turboslide-native.linux-x64-gnu.node`, about 770 KB) and the wasm module are committed build
+outputs since round four, regenerated by a CI job against a glibc floor of 2.28 and recorded with
+their sha256 in `packages/native/BUILD-RECORD.json` (SPEC-4 0.38; `docs/native.md` "Round four").
+`vite.deploy.config.ts` treats `@turboslide/native-linux-x64-gnu` as `SERVER_ONLY` treats `sharp`
+(external on the server, a stub in the client) and `traceDeps` gains it (B4's lines, applied by
+B3), so the function holds the addon and `select.ts` picks `native` through its existing loading
+order. `hosted-smoke.mjs` reads `describeBackends()` through `/api/agent`'s instance facts on a
+preview and fails when the selection is not `native` once the addon is committed, and records the
+runtime's glibc (`process.report.header.glibcVersionRuntime`) once into `docs/native.md`.
+`TURBOSLIDE_EFFECTS_BACKEND=typescript` is the documented pin if the addon misbehaves. State on
+2026-09-14: the root `.gitignore` tracks the wasm folder and negates the one addon file; no addon
+is committed and the hosted studio runs the TypeScript stages.
+
+### 12.5 The contracts routes serve the bundle
+
+`/openapi.json`, `/llms.txt` and `/llms-full.txt` serve the generated files bundled with the
+function (an import of the committed text, `public, max-age=300, s-maxage=86400`) instead of
+reading `packages/agent/generated` under `repoRoot()`, which is the overlay when hosted and
+answered placeholders on production (section 8; B4, `apps/studio/src/server/contracts.ts` and the
+three route files). The MCP server's `instructions` gain one sentence naming `/home` as the
+product page and `/llms.txt` as the agent guide (B1, day 3; SPEC-4 0.18).
+
+### 12.6 The check on a checkout
+
+Check step 31 builds the node-server output (`NITRO_PRESET=node-server pnpm --filter
+@turboslide/studio build:deploy`), starts `node apps/studio/.output/server/index.mjs` on 4321 with
+`TURBOSLIDE_STORE=tmp` and runs `scripts/perf-budget.mjs` against it (`docs/performance.md`
+section 4). That server, like every tmp store server since round three, refuses every request
+with a 500 unless `TURBOSLIDE_SESSION_SECRET` is set (a tmp store has no state folder to mint it
+from; `apps/studio/src/server/auth/secret.ts`) and needs `TURBOSLIDE_DOWNLOAD_SECRET` for its
+export tokens; the runner sets both to obviously fake values, the way `playwright.config.ts` does
+for its own server and section 11 allows on a checkout. `scripts/hosted-smoke.mjs` gains the rows
+of the round on a preview: `/home` (200, the hero sentence, a CDN `HIT` on the second request), the
+icon paths and `/og/turboslide.png` with the CDN hit, the thumbnail 302 or body, the backend
+assertion with the glibc record, one render and one template copy of the GT deck (200 and 202
+twins).

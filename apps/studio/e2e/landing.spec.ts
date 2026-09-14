@@ -80,10 +80,15 @@ test.describe.configure({ mode: 'serial' });
 test('/ answers a 307 to /new with X-Robots-Tag: noindex and the browser lands on /new', async ({
   page,
 }) => {
+  /* two layers answer the same way (gslides-parity SPEC-4 0.43): the node-server and Vercel
+     builds redirect from Nitro's route rule (vite.deploy.config.ts ROUTE_RULES, compiled into
+     the deployment's config.json so the function never wakes), the dev server from the route's
+     beforeLoad (routes/index.tsx); either way the status, the location and the header are these */
   const response = await page.request.get('/', { maxRedirects: 0 });
   expect(response.status()).toBe(307);
   expect(response.headers()['location']).toMatch(/\/new$/);
   expect(response.headers()['x-robots-tag']).toMatch(/noindex/i);
+  expect((response.headers()['x-robots-tag'] ?? '').trim().toLowerCase()).toBe('noindex');
   await page.goto('/');
   await expect(page).toHaveURL(/\/new$/);
   await expect(page).toHaveTitle('Untitled presentation, Turboslide');

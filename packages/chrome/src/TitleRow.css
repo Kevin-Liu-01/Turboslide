@@ -1,6 +1,7 @@
 /* TitleRow (TitleRow.tsx): the first of the editor's rows (gslides-parity SPEC 1.1, 1.2), 44 px
    (--pt-title-h), full width, its bottom edge in --pt-hair (the menu bar under it draws no rule).
-   Left group: the mark, the title as a 13.5 px display button (a field over the same box while
+   Left group: the Turboslide mark at --ts-mark in its 32 px link box (SPEC-4 1.10), the title as
+   a 13.5 px display button (a field over the same box while
    renaming), the save words in titanium with the cloud glyph, the clock. Right group: the
    disabled comments glyph, the Slideshow split button (the one solid pair of the row), Share
    ruled in --pt-hair. 8 px gaps; radius 0; colors are tokens only. */
@@ -46,6 +47,13 @@
   height: 32px;
   color: var(--pt-ink);
   border: 1px solid transparent;
+}
+
+/* the Turboslide mark at --ts-mark (gslides-parity SPEC-4 1.8, 1.10): the solid form, 24 px, so
+   the 16 unit path lands on integer edges at 1.5 px per unit */
+.ts-title-home .ts-mark {
+  width: var(--ts-mark, 24px);
+  height: var(--ts-mark, 24px);
 }
 
 .ts-title-home:hover {

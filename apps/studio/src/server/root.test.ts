@@ -82,10 +82,13 @@ describe('sweepDerived (finding 20)', () => {
     const rev5 = revision(cache, 'demo', '5', old);
     // another deck whose only revision is old: the newest of its deck, so it stays
     const otherOnly = revision(cache, 'other', '9', old);
-    // thumbnails follow the same rule
+    // thumbnails follow the same rule for numbered folders (the home cards' revision)
     const thumbs = join(t.stateDir, 'thumbs');
     const thumb7 = revision(thumbs, 'demo', '7', old, 300);
     const thumb8 = revision(thumbs, 'demo', '8', recent, 300);
+    // a stamp folder (round four, thumbs.ts: the slide's content stamp) is never dead by age; the
+    // budget evicts it oldest first when room is needed
+    const thumbStamp = revision(thumbs, 'demo', '454dfda1', old, 300);
     // builds live for the download window
     const buildOld = join(t.workerDir, 'builds', 'demo', 'demo.html');
     const buildRecent = join(t.workerDir, 'builds', 'other', 'other.html');
@@ -103,6 +106,7 @@ describe('sweepDerived (finding 20)', () => {
     expect(existsSync(otherOnly)).toBe(true);
     expect(existsSync(thumb7)).toBe(false);
     expect(existsSync(thumb8)).toBe(true);
+    expect(existsSync(thumbStamp)).toBe(true);
     expect(existsSync(buildOld)).toBe(false);
     expect(existsSync(buildRecent)).toBe(true);
     // the emptied deck folder of the build goes, the cache deck folder that still has revisions stays
@@ -116,10 +120,10 @@ describe('sweepDerived (finding 20)', () => {
       builds: { removed: 1, bytes: 2000 },
     });
     expect(report.removedBytes).toBe(5100 + 1010 + 310 + 2000);
-    // kept: done-recent, rev4, rev5, other/9, thumb8, other.html; the running job is not an
-    // entry at all (it is never weighed against the budget either)
-    expect(report.kept).toBe(6);
-    expect(report.keptBytes).toBe(5100 + 1010 + 1010 + 1010 + 310 + 2000);
+    // kept: done-recent, rev4, rev5, other/9, thumb8, the stamp folder, other.html; the running
+    // job is not an entry at all (it is never weighed against the budget either)
+    expect(report.kept).toBe(7);
+    expect(report.keptBytes).toBe(5100 + 1010 + 1010 + 1010 + 310 + 310 + 2000);
   });
 
   it('evicts oldest first down to the budget, never under the grace, never a running job', () => {

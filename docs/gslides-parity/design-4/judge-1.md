@@ -4,11 +4,11 @@ Written 2026-09-13 against the three proposals in `docs/gslides-parity/design-4/
 
 ## 0 The result in one page
 
-| Proposal | Distinctiveness | Legibility at 16 px | Fit with Prototemplate | Technical and agent signal | Home page | Buildability | Total |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1, the dither is the identity | 7 | 7 | 9 | 8 | 8 | 8 | 47 |
-| 2, the shader is the identity | 5 | 6 | 6 | 8 | 7 | 7 | 39 |
-| 3, type first | 6 | 9 | 9 | 6 | 7 | 6 | 43 |
+| Proposal                      | Distinctiveness | Legibility at 16 px | Fit with Prototemplate | Technical and agent signal | Home page | Buildability | Total |
+| ----------------------------- | --------------- | ------------------- | ---------------------- | -------------------------- | --------- | ------------ | ----- |
+| 1, the dither is the identity | 7               | 7                   | 9                      | 8                          | 8         | 8            | 47    |
+| 2, the shader is the identity | 5               | 6                   | 6                      | 8                          | 7         | 7            | 39    |
+| 3, type first                 | 6               | 9                   | 9                      | 6                          | 7         | 6            | 43    |
 
 The winner is proposal 1. Its mark is the only one of the three that is the same construction at every size and the only one that carries the product's argument (a slide, a plate, the screen) at 16 px and at 512 px without a second drawing; its hero and its Open Graph card are the strongest dithered pictures in the round; and it stays inside Prototemplate with no accent and no new duration or radius. It has two defects that the grafts below fix: the titanium tab icon disappears among the grey placeholder icons on both strips wherever the scheme block is ignored, and the three frame cut every four seconds on the hero is motion the product does not need.
 

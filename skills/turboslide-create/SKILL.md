@@ -10,7 +10,7 @@ Write the document, not the pixels. A slide is a kind, a layout and typed blocks
 ## Before writing
 
 1. Read [references/grammar.md](references/grammar.md): the sheet, the text markup, the slide kinds with their plate anatomy, the layouts and their slots, every block type with its properties and snap sets, the lint rules.
-2. Read the deck: `turboslide info --json`, then `turboslide slide get <id> --json` for a neighbouring slide of the same archetype and copy its shape. Over HTTP the same reads are `POST /api/actions/deck.info` and `POST /api/actions/slide.get`.
+2. Read the deck: `turboslide info --json`, then `turboslide slide get <id> --json` for a neighbouring slide of the same archetype and copy its shape. Over HTTP the same reads are `POST /api/actions/deck.info` and `POST /api/actions/slide.get`. On a hosted studio the agent guide is `/llms.txt` and the product page `/home`; the GT brand deck, the record every layout was drawn from, is `/deck/gt-brand`.
 3. Pick the archetype from the grammar table; if no block expresses the idea, say so and use an `html` escape with a `note` that names what the grammar lacks. The count of escapes is the honest scope of the grammar.
 
 ## Writing rules

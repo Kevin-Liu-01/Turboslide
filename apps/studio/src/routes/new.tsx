@@ -1,19 +1,17 @@
-import type { ComponentType } from 'react';
 import { useMemo, useState } from 'react';
 
-import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { parseAuthor } from '@turboslide/schema/mutations';
-import type { Author } from '@turboslide/schema/mutations';
 import { TITLE_ROW } from '@turboslide/chrome/menus/strings';
 
 import { EditorSkeleton } from '../components/EditorSkeleton';
 import { useMountEffect } from '../components/useMountEffect';
+import { EditorRoot } from '../editor/EditorRoot';
 import { DECK_CREATED_EVENT, readDraftDeck } from '../server/write';
-import type { DeckCreatedDetail, EditorDeck } from '../server/write';
-import * as editRoute from './edit.$deckId';
-import { validateEditSearch } from './edit.$deckId';
-import type { EditSearch } from './edit.$deckId';
+import type { DeckCreatedDetail } from '../server/write';
+import { validateEditSearch } from './-edit-search';
+import type { EditSearch } from './-edit-search';
 
 /**
  * The fresh presentation, /new (gslides-parity SPEC 6.1; MILESTONES B5 item 1): the editor on a
@@ -24,8 +22,7 @@ import type { EditSearch } from './edit.$deckId';
  * applies the edit against revision 0. When that write lands the page raises `DECK_CREATED_EVENT`
  * and this route moves the address to /edit/<id>, so a reload lands on the saved deck while the
  * editor keeps its state. A reload of /new before any write shows a fresh draft again; two tabs
- * on /new create two decks. The route is `ssr: false` like /edit and is `noindex`
- * (routes/__root.tsx).
+ * on /new create two decks. The route is `noindex` (routes/__root.tsx).
  *
  * The address moves through the browser's own `History.prototype.replaceState`, not the router
  * (gslides-parity SPEC-2 8.6, 0.29; VERIFICATION finding 4): `@tanstack/history` replaces
@@ -39,35 +36,42 @@ import type { EditSearch } from './edit.$deckId';
  * is why a view toggle after the save updates the search on this route and pins the address again
  * rather than navigating to the edit route (a remount would lose the history the same way).
  *
- * The editor itself is `EditorRoot` of edit.$deckId.tsx (the integrator's file). Until that
- * module exports it, the namespace read below is undefined and the page says so instead of
- * failing the tree's typecheck; the request to export it, with the draft behaviours the editor
- * owns (the "Not saved yet" title row, the auto-title mutation of SPEC 6.3 in `commit`), is in
- * docs/gslides-parity/build/b5.md. Once exported, this file imports it directly.
+ * Round four (gslides-parity SPEC-4 0.34, 0.42; PP 3.5, 6): `ssr: 'data-only'` runs the loader
+ * on the server, so the draft rides the document as dehydrated loader data and the server
+ * renders the skeleton where the editor will stand; the client renders the editor without a
+ * `readDraftDeck` round trip. `pendingMinMs: 0` beside `pendingMs: 0`, because the router's
+ * default of 500 ms would hold the skeleton after the editor is ready. `shouldReload: false`
+ * closes the window VERIFICATION-3 finding 51 measured: the loader ran again on every search
+ * change of this route (a Mode or View toggle after the first save; `staleTime` 0 reloads a
+ * successful match on every navigation to it), and a run whose answer arrives while the editor
+ * stands is a round trip nothing reads (`holdDraft` already made it answer the same draft); with
+ * `shouldReload: false` the loader runs when the route is entered and when the router
+ * invalidates it, never on a search change, so no pending state and no skeleton can appear
+ * beside the live editor, and a return to /new after leaving it is a new match and a fresh draft.
+ * `holdDraft` stays as the second belt. A `/new` document that Chrome prerenders from /home's
+ * speculation rules (0.42) runs its loader and renders, but the editor's session attach and the
+ * room stream wait for `prerenderingchange` (editor/EditorRoot.tsx, editor/shell-bridge.tsx).
+ *
+ * The editor itself is `EditorRoot` of ../editor/EditorRoot.tsx, imported here and read by the
+ * component alone (gslides-parity SPEC-4 0.44; PP 7 row 1): the router's code splitting moves
+ * the component and that import into this route's lazy chunk, so the editor's graph leaves the
+ * entry every route loads. Before the round four split this file imported the edit route as a
+ * namespace at module level, which kept the whole editor in the entry.
  */
 
-/** The author of a browser session when ?author= is absent (edit.$deckId.tsx DEFAULT_AUTHOR). */
+/** The author of a browser session when ?author= is absent (editor/EditorRoot.tsx DEFAULT_AUTHOR). */
 const DEFAULT_AUTHOR = 'studio';
 
-type DraftEditorProps = {
-  payload: EditorDeck;
-  search: EditSearch;
-  author: Author;
-  onSearch: (patch: Partial<EditSearch>) => void;
-  onDeckCreated: (deckId: string) => void;
-};
-
-/* the editor component, when the edit route exports it (see the module comment) */
-const EditorRoot: ComponentType<DraftEditorProps> | undefined = (
-  editRoute as { EditorRoot?: ComponentType<DraftEditorProps> }
-).EditorRoot;
-
 export const Route = createFileRoute('/new')({
-  ssr: false,
+  ssr: 'data-only',
   validateSearch: validateEditSearch,
-  // first paint carries the editor's rows and columns while the loader answers (SPEC-3 9.2 E1)
+  // first paint carries the editor's rows and columns while the loader answers (SPEC-3 9.2 E1);
+  // under 'data-only' the skeleton is the server's markup for the route (SPEC-4 0.34)
   pendingComponent: EditorSkeleton,
   pendingMs: 0,
+  pendingMinMs: 0,
+  // the loader runs on entry and on invalidation, never on a search change (finding 51)
+  shouldReload: false,
   loader: () => readDraftDeck(),
   head: () => ({ meta: [{ title: `${TITLE_ROW.untitled}, Turboslide` }] }),
   component: NewPage,
@@ -132,7 +136,6 @@ function NewPage() {
     void navigate({ to: '/edit/$deckId', params: { deckId } });
   };
 
-  if (EditorRoot === undefined) return <DraftPending payload={payload} />;
   return (
     <EditorRoot
       key={payload.deckId}
@@ -142,18 +145,5 @@ function NewPage() {
       onSearch={onSearch}
       onDeckCreated={onDeckCreated}
     />
-  );
-}
-
-/** Shown while the editor module does not export its root yet (the module comment). */
-function DraftPending({ payload }: { payload: EditorDeck }) {
-  return (
-    <main className="ts-home" data-draft={payload.deckId}>
-      <h1>{payload.document.deck.title}</h1>
-      <p>
-        The editor is not attached to this page yet. Open{' '}
-        <Link to="/decks">your presentations</Link> to edit an existing one.
-      </p>
-    </main>
   );
 }

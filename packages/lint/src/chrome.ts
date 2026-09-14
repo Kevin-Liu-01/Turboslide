@@ -12,12 +12,15 @@
 //      fix is different (one owner keeps the line, the other drops its side);
 //   3. border roles: every visible border in chrome draws --pt-hair, --pt-hair-soft or --pt-edge;
 //      --pt-ink only on an element in an active state; outlines are rings in the three roles,
-//      ink or paper;
+//      ink or paper; since round four (gslides-parity round four, the orchestrator's ruling 1)
+//      the canvas selection surfaces named by `select` may draw --pt-select and the snap guides
+//      named by `guides` may draw --pt-guide, and nothing else may;
 //   4. missing seams (page mode only), self-stacks and invisible seams.
 // The function is self-contained: Playwright serializes it, so it reads only its argument.
 // A state that did not apply is an infrastructure failure, never a pass (lint-lines.mjs line 113).
 
-export type ChromeRoles = 'hair' | 'soft' | 'edge' | 'ink' | 'paper' | 'titanium';
+export type ChromeRoles =
+  'hair' | 'soft' | 'edge' | 'ink' | 'paper' | 'titanium' | 'select' | 'guide';
 
 export type ChromeScope = {
   /** Selectors of the shell roots that make an element chrome. */
@@ -44,6 +47,16 @@ export type ChromeScope = {
    * for 3, outside any active state; absent means no such element.
    */
   lint?: string;
+  /**
+   * The canvas selection surfaces of round four (the orchestrator's ruling 1 over SPEC-4 0.3;
+   * Kevin's directive d): the selection ring, the hover outline, the handles, the marquee, the
+   * crop frame, the group box and the selection chip may draw `--pt-select` as a border or a
+   * ring, whether or not an active state is near (the hover outline has none); absent means
+   * the token is allowed nowhere.
+   */
+  select?: string;
+  /** The snap guides (Guides.css): the one surface that may draw `--pt-guide`. */
+  guides?: string;
 };
 
 export type AuditConfig = { ALLOW: string[]; chrome: ChromeScope | null };
@@ -132,6 +145,10 @@ export const SHELL_CHROME: ChromeScope = {
     ink: ['--pt-ink', '--ink'],
     paper: ['--pt-paper', '--paper'],
     titanium: ['--pt-titanium', '--titanium'],
+    /* round four (ruling 1): the selection colour and the guide colour of tokens.css; the deck's
+       document declares neither, so the role reads as absent there */
+    select: ['--pt-select'],
+    guide: ['--pt-guide'],
   },
   active:
     '.is-on, .is-active, .is-editing, .is-solid, [aria-pressed="true"], [aria-current], [aria-selected="true"], [aria-expanded="true"]',
@@ -143,11 +160,17 @@ export const SHELL_CHROME: ChromeScope = {
  */
 export const TURBOSLIDE_CHROME: ChromeScope = {
   ...SHELL_CHROME,
+  /* round four (gslides-parity SPEC-4 6.2; build-4/b2.md R1): the /home product page's root
+     `.ts-product` and the Not found page's root `.ts-notfound` join, so step 18 audits both */
   roots:
-    '.pt-viewer, .pt-corner, .pt-corner-layer, .pt-help, .pt-toast, .pt-preview, .ts-studio, .ts-chrome, .ts-home-page, .ts-trash-page, .ts-menu, .ts-dialog, .ts-layout-plate',
+    '.pt-viewer, .pt-corner, .pt-corner-layer, .pt-help, .pt-toast, .pt-preview, .ts-studio, .ts-chrome, .ts-home-page, .ts-trash-page, .ts-menu, .ts-dialog, .ts-layout-plate, .ts-product, .ts-notfound',
   content: '.ts-stage, .ts-sheet, .stage, .sheet-flow .sheet > *, .pt-page-body, .pt-root, iframe',
   active: `${SHELL_CHROME.active}, .is-selected, [data-selected="true"], .ts-chip.is-self`,
   lint: '.ts-lint-box',
+  /* the canvas selection surfaces of Overlay.css and Marquee.css (ruling 1) */
+  select:
+    '.ts-select, .ts-select-chip, .ts-hover, .ts-handle, .ts-marquee, .ts-group, .ts-crop-frame, .ts-turn',
+  guides: '.ts-guide',
   collab:
     '.ts-flag, .ts-remote-outline, .ts-remote-caret, .ts-remote-pointer, .ts-following-plate, .ts-chip-stripe, .is-following, .has-halo',
   collabColors: COLLAB_COLORS,
@@ -411,6 +434,10 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
       /* a lint box is titanium (severity 1 and 2) or ink (3) by the junction table, not a seam */
       if ((role === 'titanium' || role === 'ink') && chrome.lint && el.matches(chrome.lint))
         continue;
+      /* the canvas selection surfaces draw the selection colour and the guides the guide colour
+         (round four, ruling 1); a pseudo rule belongs to its host, so the host is what matches */
+      if (role === 'select' && chrome.select && el.matches(chrome.select)) continue;
+      if (role === 'guide' && chrome.guides && el.matches(chrome.guides)) continue;
       colors.push({
         kind: 'border',
         owner: isPseudo ? `pseudo:${owner}` : owner,
@@ -431,7 +458,9 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
     const ow = parseFloat(cs.outlineWidth);
     if (cs.outlineStyle !== 'none' && ow >= 1 && visible(cs.outlineColor)) {
       const role = roleOf(cs.outlineColor);
-      if ((!role || !RING_ROLES.includes(role)) && !collabColor(el, cs.outlineColor))
+      const selectRing =
+        role === 'select' && Boolean(chrome.select) && el.matches(chrome.select ?? '');
+      if ((!role || !RING_ROLES.includes(role)) && !selectRing && !collabColor(el, cs.outlineColor))
         colors.push({
           kind: 'outline',
           owner,

@@ -1,32 +1,14 @@
 {
- "stem": [
-  523,
-  746
- ],
- "stemWidth": 223,
- "arm": [
-  1295,
-  1490
- ],
- "armThickness": 195,
- "cap": 1490,
- "xHeight": 1056,
- "oCounterX": [
-  281,
-  865
- ],
- "oCounterY": [
-  158,
-  203
- ],
- "oRuns": [
-  [
-   67,
-   281
-  ],
-  [
-   865,
-   1078
+  "stem": [523, 746],
+  "stemWidth": 223,
+  "arm": [1295, 1490],
+  "armThickness": 195,
+  "cap": 1490,
+  "xHeight": 1056,
+  "oCounterX": [281, 865],
+  "oCounterY": [158, 203],
+  "oRuns": [
+    [67, 281],
+    [865, 1078]
   ]
- ]
 }

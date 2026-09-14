@@ -41,6 +41,22 @@
 // 403 and the twin URL derivability rows need B2's and B3's routes and the private store; they run
 // when `--share-token <token>` and `--publish-token <token>` are given and are otherwise listed
 // as skipped, never as passed.
+//
+// Round four (gslides-parity SPEC-4 2.6, 4.1, 0.31, 0.38; MILESTONES-4 "Integrator"; build-4/b1.md
+// R12, b2.md R4, b4.md R11): `/home` is a 200 product page (the `main.ts-product` root, the hero
+// sentence, the Speculation Rules script, no noindex); the icon set, the card, the eight twins
+// under `/brand/` and `/home` are requested twice and the second answer must be a 200 of the right
+// type, at the byte count `apps/studio/public/brand-manifest.json` records when the checkout is
+// beside the script, and `x-vercel-cache: HIT` on an https deployment (the static layer answers
+// before the function); the thumbnail cache: a render without `r` carries
+// `cache-control: public, s-maxage=60, stale-while-revalidate=86400` and `x-turboslide-stamp`, and
+// the same request with `r=<stamp>` twice is a CDN hit, a 302 to a Blob object
+// (`x-turboslide-source: blob`) or a 200 body on a private store. With the bearer, `/api/agent`'s
+// `instance` block is read (`effectsBackend`, `glibcVersionRuntime`) and reported (the row fails
+// only when the block is missing; it asserts `native` once the Linux addon is committed, SPEC-4
+// 0.38), and with `--template-copy` one deck is created from the GT template through
+// `deck.create`, moved to the trash and deleted forever, so the row leaves the store as it found
+// it (the row writes; pass it against a preview or a store you own).
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -59,10 +75,12 @@ function parseArgs(argv) {
     restricted: null,
     shareToken: null,
     publishToken: null,
+    templateCopy: false,
   };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--deck') out.deck = argv[++i] ?? out.deck;
+    else if (arg === '--template-copy') out.templateCopy = true;
     else if (arg === '--asset') out.asset = argv[++i] ?? null;
     else if (arg === '--base' || arg === '--url') out.url = argv[++i] ?? null;
     else if (arg === '--timeout') out.timeoutMs = Number(argv[++i] ?? out.timeoutMs);
@@ -259,8 +277,15 @@ async function probe(base, path, timeoutMs, init = {}) {
       headers: { ...protectionHeaders(), ...(init.headers ?? {}) },
     });
     const type = response.headers.get('content-type') ?? '';
-    const text = type.startsWith('text/') || type.includes('json') ? await response.text() : '';
-    const bytes = text === '' ? Number(response.headers.get('content-length') ?? 0) : text.length;
+    const textual = type.startsWith('text/') || type.includes('json');
+    const text = textual ? await response.text() : '';
+    // a binary answer's bytes are read from the body (the CDN rows compare them with the brand
+    // manifest); a redirect or an empty answer is 0
+    const bytes = textual
+      ? text.length
+      : response.status === 200
+        ? (await response.arrayBuffer()).byteLength
+        : Number(response.headers.get('content-length') ?? 0);
     const headers = {};
     for (const [name, value] of response.headers) headers[name] = value;
     return {
@@ -296,6 +321,16 @@ const SHELL_MARKS = ['<!DOCTYPE html>', 'gt-theme', '<script'];
 // the router stamps its nonce on head tags as well once `ssr.nonce` is wired (round three), so the
 // meta may carry further attributes after `content`
 const NOINDEX_META = /<meta\s+name="robots"\s+content="noindex"[^>]*\/?>/;
+
+/** SPEC-4 2.6: what the served /home carries (the hero sentence's fragment as React escapes it). */
+const HOME_MARKS = [
+  '<main class="ts-product"',
+  'Google Slides&#x27; menus, toolbar and shortcuts',
+  '<script type="speculationrules"',
+];
+
+/** A Vercel preview deployment (never the production alias): `<project>-<hash>-<team>.vercel.app`. */
+const isPreview = (url) => /^https:\/\/[^/]+-[a-z0-9]{9}-[^/.]+\.vercel\.app\//.test(url);
 
 const isPage = (r) => r.status === 200 && r.type.includes('text/html');
 const isShell = (r) => isPage(r) && SHELL_MARKS.every((m) => r.text.includes(m));
@@ -368,6 +403,25 @@ function checks(deck, asset) {
       pass: isPage,
       detail: (r) => `${r.bytes} chars`,
     },
+    {
+      // gslides-parity SPEC-4 2.6 (build-4/b2.md R4): the product page's root, the hero sentence
+      // as React serialises it (the apostrophe is &#x27;), the Speculation Rules script, indexable
+      name: '/home',
+      path: '/home',
+      expect:
+        'a 200 product page: main.ts-product, the hero sentence, a speculationrules script, no noindex',
+      // the noindex meta is the app's and is always asserted; the x-robots-tag header is asserted on
+      // production and on a local server, and reported on a preview: Vercel stamps
+      // `x-robots-tag: noindex` on every answer of a non production deployment (measured on the
+      // merge 2 preview: static files and pages alike; production carries it on `/` alone)
+      pass: (r) =>
+        isPage(r) &&
+        HOME_MARKS.every((m) => r.text.includes(m)) &&
+        !NOINDEX_META.test(r.text) &&
+        (isPreview(r.url) || !/noindex/i.test(r.robots)),
+      detail: (r) =>
+        `${r.bytes} chars; ${HOME_MARKS.filter((m) => r.text.includes(m)).length}/${HOME_MARKS.length} marks; ${NOINDEX_META.test(r.text) ? 'noindex meta' : 'no noindex meta'}; x-robots-tag ${r.robots || 'none'}${isPreview(r.url) && /noindex/i.test(r.robots) ? ' (the platform stamps it on every preview answer; reported)' : ''}`,
+    },
   ];
   if (asset !== null) {
     rows.push({
@@ -412,7 +466,10 @@ function cspOf(r) {
 function securityChecks(base, deck, args) {
   const https = base.startsWith('https:');
   const rows = [];
-  for (const path of ['/', `/edit/${deck}`, `/deck/${deck}`]) {
+  // `/` left the loop at round four's merge 2: the root redirect is compiled into the Build Output's
+  // config.json (SPEC-4 0.43) and the CDN answers it without waking the function, so the headers
+  // of 8.8 are not on it by design; the `/` row above asserts the 307 and its x-robots-tag
+  for (const path of [`/edit/${deck}`, `/deck/${deck}`]) {
     rows.push({
       name: `headers ${path}`,
       path,
@@ -471,14 +528,20 @@ function securityChecks(base, deck, args) {
     name: 'unsigned thumbnail',
     path: `/api/render/title?deck=${encodeURIComponent(deck)}&theme=light&w=160`,
     expect:
-      '403 in enforce mode (SPEC-3 8.13), 200 in shadow mode, or 404 for a deck without that slide',
-    pass: (r) => r.status === 403 || r.status === 200 || r.status === 404,
+      '403 in enforce mode (SPEC-3 8.13), 200 or a 302 to the stored object in shadow mode (SPEC-4 0.31), or 404 for a deck without that slide',
+    pass: (r) =>
+      r.status === 403 ||
+      r.status === 200 ||
+      r.status === 404 ||
+      (r.status === 302 && /\.blob\.vercel-storage\.com\//.test(r.location)),
     detail: (r) =>
       r.status === 403
         ? 'enforce: refused without the grant'
         : r.status === 200
           ? 'shadow: served and logged'
-          : 'no such slide',
+          : r.status === 302
+            ? `shadow: the stored object (${r.location.replace(/\?.*$/, '').slice(0, 72)})`
+            : 'no such slide',
   });
   rows.push({
     name: 'csp report endpoint',
@@ -514,6 +577,289 @@ function securityChecks(base, deck, args) {
     }
   }
   return rows;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Round four rows (SPEC-4 4.1's last row, 0.31, 0.38; MILESTONES-4 "Integrator")
+
+/** The icon set, the card and /home (SPEC-4 4.1) plus the eight twins under /brand/ (b1.md R12). */
+const CDN_PATHS = [
+  '/favicon.ico',
+  '/icon.svg',
+  '/apple-touch-icon.png',
+  '/manifest.webmanifest',
+  '/icons/icon-512.png',
+  '/og/turboslide.png',
+  '/brand/hero-dark.png',
+  '/brand/hero-light.png',
+  '/brand/figure-dark.png',
+  '/brand/figure-light.png',
+  '/brand/notfound-dark.png',
+  '/brand/notfound-light.png',
+  '/brand/og-screen-dark.png',
+  '/brand/og-screen-light.png',
+  '/home',
+];
+
+/** The content type a static path must answer with (the prefix that matters). */
+function expectedType(path) {
+  if (path.endsWith('.png')) return 'image/png';
+  if (path.endsWith('.ico')) return 'image/';
+  if (path.endsWith('.svg')) return 'image/svg+xml';
+  if (path.endsWith('.webmanifest')) return 'manifest';
+  return 'text/html';
+}
+
+/** The byte count brand-manifest.json records for a public path, when the checkout is here. */
+function manifestBytes(path) {
+  const file = join(ROOT, 'apps/studio/public/brand-manifest.json');
+  if (!existsSync(file)) return null;
+  try {
+    const manifest = JSON.parse(readFileSync(file, 'utf8'));
+    const record = manifest.files?.[`apps/studio/public${path}`];
+    return typeof record?.bytes === 'number' ? record.bytes : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Each static path twice: the second answer is a 200 of the right type, at the manifest's bytes
+ * where it records the file, and a CDN hit on an https deployment (`x-vercel-cache: HIT`, the
+ * static layer before the function; R02 section 1 measured function 404s on the round three
+ * deploy). On http (a local server) the cache header is reported, not asserted.
+ */
+async function cdnRows(base, timeoutMs) {
+  const https = base.startsWith('https:');
+  const rows = [];
+  for (const path of CDN_PATHS) {
+    const first = await probe(base, path, timeoutMs);
+    const second = await probe(base, path, timeoutMs);
+    const type = expectedType(path);
+    const bytes = path.endsWith('.png') || path.endsWith('.ico') ? manifestBytes(path) : null;
+    const cache = second.headers['x-vercel-cache'] ?? null;
+    const ok =
+      second.error === undefined &&
+      second.status === 200 &&
+      (type === 'manifest' ? /manifest|json/.test(second.type) : second.type.startsWith(type)) &&
+      (bytes === null || second.bytes === bytes) &&
+      (!https || cache === 'HIT');
+    rows.push({
+      row: {
+        name: `cdn ${path}`,
+        expect: `200 ${type}${bytes === null ? '' : ` of ${bytes} B`}${https ? ', x-vercel-cache HIT on the second request' : ''}`,
+        detail: () =>
+          `${second.type || 'no type'} ${second.bytes} B; first ${first.status} ${first.headers['x-vercel-cache'] ?? '-'}, second ${second.status} ${cache ?? '-'}; ${second.headers['cache-control'] ?? 'no cache-control'}`,
+      },
+      r: second,
+      ok,
+    });
+  }
+  return rows;
+}
+
+/** The first slide id of the deck in this checkout, else `title` (the GT deck's opener). */
+function firstSlideId(deck) {
+  const manifest = join(ROOT, 'decks', deck, 'deck.json');
+  if (!existsSync(manifest)) return 'title';
+  try {
+    const raw = JSON.parse(readFileSync(manifest, 'utf8'));
+    // the manifest orders slides by section (sections[].slideIds); round one's flat list is read too
+    const first = raw.sections?.[0]?.slideIds?.[0] ?? raw.slides?.[0];
+    const id = typeof first === 'string' ? first : first?.id;
+    return typeof id === 'string' && id !== '' ? id : 'title';
+  } catch {
+    return 'title';
+  }
+}
+
+/**
+ * The thumbnail cache (SPEC-4 0.31; b4.md R11): without `r` the newest stored thumbnail with the
+ * stale while revalidate header and the stamp; with `r=<stamp>` twice, the second answer a CDN
+ * hit, a 302 to the Blob object, or a 200 body on a private store. In enforce mode (SPEC-3 8.13)
+ * the route answers 403 without a grant, and both rows record that instead of failing.
+ */
+async function thumbnailRows(base, deck, timeoutMs) {
+  const https = base.startsWith('https:');
+  const slide = firstSlideId(deck);
+  const path = `/api/render/${encodeURIComponent(slide)}?deck=${encodeURIComponent(deck)}&theme=dark&w=320`;
+  const plain = await probe(base, path, timeoutMs);
+  const stamp = plain.headers['x-turboslide-stamp'] ?? null;
+  const rows = [];
+  const enforce = plain.status === 403;
+  rows.push({
+    row: {
+      name: 'thumbnail without r',
+      expect:
+        'a 200 body or a 302 to the stored object on a public store, with x-turboslide-stamp and, on a local server, cache-control public, s-maxage=60, stale-while-revalidate=86400 (the CDN rewrites it on https; 403 recorded in enforce mode)',
+      detail: () =>
+        enforce
+          ? 'enforce mode: refused without the grant'
+          : `${plain.status}${plain.status === 302 ? ` -> ${plain.location.replace(/\?.*$/, '').slice(0, 60)}` : ''}; ${plain.headers['cache-control'] ?? 'no cache-control'}; ${plain.headers['x-vercel-cache'] ?? 'no CDN'}${plain.headers['set-cookie'] ? '; set-cookie present (the CDN does not cache it)' : ''}; stamp ${stamp ?? 'none'}; source ${plain.headers['x-turboslide-source'] ?? '-'}; fresh ${plain.headers['x-turboslide-fresh'] ?? '-'}`,
+    },
+    r: plain,
+    ok:
+      plain.error === undefined &&
+      (enforce ||
+        ((plain.status === 200 ||
+          (plain.status === 302 && /\.blob\.vercel-storage\.com\//.test(plain.location))) &&
+          stamp !== null &&
+          // the exact header on a local server; a Vercel deployment's CDN rewrites cache-control on
+          // the way out (s-maxage and stale-while-revalidate are the CDN's, the client sees `public`
+          // or `public, max-age=0, must-revalidate`), so on https the row asserts the stamp and
+          // records the header and x-vercel-cache as the CDN returned them
+          (https ||
+            /public, s-maxage=60, stale-while-revalidate=86400/.test(
+              plain.headers['cache-control'] ?? '',
+            )))),
+  });
+  if (enforce || stamp === null) {
+    rows.push({
+      row: {
+        name: 'thumbnail with r twice',
+        expect: 'a stamp from the row above',
+        detail: () => (enforce ? 'enforce mode: not requested' : 'no stamp to request'),
+      },
+      r: plain,
+      ok: enforce,
+    });
+    return rows;
+  }
+  const stamped = `${path}&r=${encodeURIComponent(stamp)}`;
+  const first = await probe(base, stamped, timeoutMs);
+  const second = await probe(base, stamped, timeoutMs);
+  const cache = second.headers['x-vercel-cache'] ?? null;
+  const blobRedirect =
+    second.status === 302 &&
+    second.location !== '' &&
+    (second.headers['x-turboslide-source'] === 'blob' ||
+      /blob\.vercel-storage\.com/.test(second.location));
+  const body = second.status === 200 && second.type.startsWith('image/');
+  const immutable = /max-age=31536000, immutable/.test(second.headers['cache-control'] ?? '');
+  rows.push({
+    row: {
+      name: 'thumbnail with r twice',
+      expect:
+        'the second answer a CDN hit (x-vercel-cache HIT), a 302 to the Blob object (x-turboslide-source blob) or a 200 body, immutable for a year',
+      detail: () =>
+        `first ${first.status} ${first.headers['x-vercel-cache'] ?? '-'} ${first.headers['x-turboslide-source'] ?? ''}; second ${second.status} ${cache ?? '-'} ${second.headers['x-turboslide-source'] ?? ''}${second.location ? ` -> ${second.location.replace(/\?.*$/, '').slice(0, 80)}` : ''}; ${second.headers['cache-control'] ?? 'no cache-control'}`,
+    },
+    r: second,
+    ok: second.error === undefined && (cache === 'HIT' || blobRedirect || body) && immutable,
+  });
+  return rows;
+}
+
+/**
+ * The instance facts of /api/agent with the bearer (SPEC-4 0.38, 3.9; b4.md R11): the effects
+ * backend the function selected and the runtime's glibc. Reported until the Linux addon is
+ * committed; the row fails only when the block is missing.
+ */
+async function backendRow(base, headers, timeoutMs) {
+  const r = await probe(base, '/api/agent', timeoutMs, { headers });
+  let instance = null;
+  try {
+    instance = JSON.parse(r.text)?.instance ?? null;
+  } catch {
+    // not JSON
+  }
+  return {
+    row: {
+      name: 'effects backend',
+      expect:
+        'instance.effectsBackend and instance.glibcVersionRuntime on /api/agent (native once the addon is committed)',
+      detail: () =>
+        instance === null
+          ? `${r.status}: no instance block (${r.text.slice(0, 120)})`
+          : `${instance.effectsBackend}; glibc ${instance.glibcVersionRuntime ?? 'none reported'}; node ${instance.node} ${instance.platform}${instance.effectsBackend === 'native' ? '' : ' (the TypeScript or wasm stages: the Linux addon is not committed, SPEC-4 0.38)'}`,
+    },
+    r,
+    ok: r.status === 200 && instance !== null && typeof instance.effectsBackend === 'string',
+  };
+}
+
+/**
+ * One template copy (MILESTONES-4 "Integrator": "one render and one template copy"): deck.create
+ * from the GT template, then deck.trash and deck.remove with the revisions the answers name, so
+ * the store is as it was. A failure leaves the deck id in the row for a hand cleanup.
+ */
+async function templateCopyRow(base, headers) {
+  const id = `smoke-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).slice(2, 6)}`;
+  const t = performance.now();
+  const lines = [];
+  const created = await postJson(
+    base,
+    '/api/actions/deck.create',
+    { name: `Smoke ${id}`, id, from: 'gt-brand' },
+    headers,
+    EXPORT_TIMEOUT_MS,
+  );
+  if (created.status !== 200) {
+    return {
+      ok: false,
+      detail: `deck.create ${created.status}: ${created.text.slice(0, 200)}`,
+      ms: Math.round(performance.now() - t),
+    };
+  }
+  const revisionOf = (json) =>
+    typeof json?.revision === 'number'
+      ? json.revision
+      : typeof json?.output?.revision === 'number'
+        ? json.output.revision
+        : typeof json?.deck?.revision === 'number'
+          ? json.deck.revision
+          : null;
+  let revision = revisionOf(created.json);
+  if (revision === null) {
+    const info = await postJson(base, `/api/actions/deck.info?deck=${id}`, {}, headers, 60_000);
+    revision = revisionOf(info.json);
+  }
+  lines.push(`created ${id} at r${revision ?? '?'} in ${created.ms} ms`);
+  if (revision === null) {
+    return {
+      ok: false,
+      detail: `${lines.join('; ')}; no revision in the answer, the deck is left in place`,
+      ms: Math.round(performance.now() - t),
+    };
+  }
+  const trashed = await postJson(
+    base,
+    `/api/actions/deck.trash?deck=${id}`,
+    { id, baseRevision: revision },
+    headers,
+    60_000,
+  );
+  if (trashed.status !== 200) {
+    return {
+      ok: false,
+      detail: `${lines.join('; ')}; deck.trash ${trashed.status}: ${trashed.text.slice(0, 160)}; ${id} is left in place`,
+      ms: Math.round(performance.now() - t),
+    };
+  }
+  const afterTrash = revisionOf(trashed.json) ?? revision;
+  lines.push(`trashed at r${afterTrash} in ${trashed.ms} ms`);
+  const removed = await postJson(
+    base,
+    `/api/actions/deck.remove?deck=${id}`,
+    { id, confirm: true, baseRevision: afterTrash },
+    headers,
+    60_000,
+  );
+  if (removed.status !== 200) {
+    return {
+      ok: false,
+      detail: `${lines.join('; ')}; deck.remove ${removed.status}: ${removed.text.slice(0, 160)}; ${id} is in the trash`,
+      ms: Math.round(performance.now() - t),
+    };
+  }
+  lines.push(`removed in ${removed.ms} ms`);
+  const gone = await probe(base, `/deck/${id}`, 30_000);
+  lines.push(`/deck/${id} answers ${gone.status}`);
+  return {
+    ok: gone.status === 404,
+    detail: lines.join('; '),
+    ms: Math.round(performance.now() - t),
+  };
 }
 
 /** The rows that need B2's and B3's routes: listed as skipped with the flag that turns them on. */
@@ -567,8 +913,19 @@ async function main() {
   for (const skipped of skippedSecurityRows(args)) {
     console.log(`skip  ${skipped.name}: ${skipped.why}`);
   }
+  // the round four rows without a bearer: the static layer twice, the thumbnail cache
+  results.push(...(await cdnRows(base, args.timeoutMs)));
+  results.push(...(await thumbnailRows(base, args.deck, args.timeoutMs)));
   // the round two rows, with the bearer (SPEC-2 8.1, 8.2)
   const headers = bearerHeaders(args.tokenEnv);
+  if (args.tokenEnv === null) {
+    console.log(
+      'skip  effects backend: pass --token-env <VAR> (the row reads /api/agent with the bearer)',
+    );
+    console.log(
+      'skip  template copy: pass --token-env <VAR> and --template-copy (the row writes one deck and removes it)',
+    );
+  }
   if (args.tokenEnv !== null) {
     if (headers.authorization === undefined) {
       results.push({
@@ -577,6 +934,23 @@ async function main() {
         ok: false,
       });
     } else {
+      results.push(await backendRow(base, headers, args.timeoutMs));
+      if (args.templateCopy) {
+        const copied = await templateCopyRow(base, headers);
+        results.push({
+          row: {
+            name: 'template copy',
+            expect: 'deck.create from the GT template, then trashed and deleted forever',
+            detail: () => copied.detail,
+          },
+          r: { status: copied.ok ? 200 : '-', ms: copied.ms },
+          ok: copied.ok,
+        });
+      } else {
+        console.log(
+          'skip  template copy: pass --template-copy (the row writes one deck and removes it)',
+        );
+      }
       const snap = await snapshotsRow(base, args.deck, headers);
       results.push({
         row: {

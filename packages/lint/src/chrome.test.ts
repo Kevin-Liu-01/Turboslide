@@ -48,6 +48,28 @@ describe('chrome audit configuration', () => {
     expect(DECK_CHROME.prefix).toBeNull();
   });
 
+  test('the selection colour and the guide colour are roles allowed on the canvas selection surfaces alone (round four, ruling 1)', () => {
+    // the two tokens of tokens.css join the colour allow list by name; the studio scope names the
+    // elements that may draw them, and the shell and deck scopes name none
+    expect(SHELL_CHROME.tokens.select).toEqual(['--pt-select']);
+    expect(SHELL_CHROME.tokens.guide).toEqual(['--pt-guide']);
+    for (const owner of [
+      '.ts-select',
+      '.ts-select-chip',
+      '.ts-hover',
+      '.ts-handle',
+      '.ts-marquee',
+      '.ts-group',
+      '.ts-crop-frame',
+    ])
+      expect(TURBOSLIDE_CHROME.select).toContain(owner);
+    expect(TURBOSLIDE_CHROME.guides).toBe('.ts-guide');
+    expect(SHELL_CHROME.select).toBeUndefined();
+    expect(DECK_CHROME.select).toBeUndefined();
+    // the collaborator hues are unchanged: the remote outlines keep the six hues
+    expect(TURBOSLIDE_CHROME.collabColors).toHaveLength(8);
+  });
+
   test('the in-page functions are self-contained so Playwright can serialize them', () => {
     for (const fn of [auditDocument, probeState]) {
       const source = fn.toString();

@@ -1,12 +1,22 @@
 /* Progress: the last row of .pt-main, a 2px track with an ink fill. The
-   fill is a full-width span scaled from its left edge, so every move is a
+   fill is a full-width span moved from its right edge, so every move is a
    transform (directive 7.4) and Progress.tsx can write it from a scroll
    frame without a render. The track is a row rule (--pt-hair-soft; SPEC 2.2
-   line law). Ported from Prototemplate/src/components/viewer/Progress.css. */
+   line law). Ported from Prototemplate/src/components/viewer/Progress.css.
+
+   Round four (gslides-parity SPEC-4 0.15, 1.9): the fill's leading sixteen
+   cells are the deck's ramp behind --ts-cell. Progress.tsx sets the fill's
+   mask-image inline (a solid layer and the ramp's threshold map from
+   rampInk); this sheet sizes the two layers, the body to everything but the
+   last sixteen cells and the ramp to sixteen cells of one cell row. The
+   fill moves with translateX instead of the port's scaleX, so its masked
+   right end is the leading edge and never stretches; the track clips the
+   part moved out. The track's height stays the port's 2 px, one cell row. */
 .pt-progress {
   grid-row: 3;
   position: relative;
   height: 2px;
+  overflow: hidden;
   background: var(--pt-hair-soft);
 }
 
@@ -17,9 +27,22 @@
   height: 100%;
   width: 100%;
   background: var(--pt-ink);
-  transform: scaleX(0);
-  transform-origin: 0 0;
+  transform: translateX(-100%);
   transition: transform 160ms ease-out;
+  mask-size:
+    calc(100% - 16 * var(--ts-cell, 2px)) 100%,
+    calc(16 * var(--ts-cell, 2px)) 100%;
+  mask-position:
+    left top,
+    right top;
+  mask-repeat: no-repeat;
+  -webkit-mask-size:
+    calc(100% - 16 * var(--ts-cell, 2px)) 100%,
+    calc(16 * var(--ts-cell, 2px)) 100%;
+  -webkit-mask-position:
+    left top,
+    right top;
+  -webkit-mask-repeat: no-repeat;
 }
 
 @media (prefers-reduced-motion: reduce) {

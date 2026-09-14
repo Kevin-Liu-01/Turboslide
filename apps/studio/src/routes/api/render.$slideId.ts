@@ -12,13 +12,18 @@ import { authorize, authorizeMode, denialBody, requestContext } from '../../serv
 import { requireFlag } from '../../server/flags';
 import { logSecurityEvent } from '../../server/log';
 import { ensureDeckAssets, workerClientOptions } from '../../server/root';
-import { getThumbnail, isThumbWidth, thumbResponse } from '../../server/thumbs';
+import { getThumbnail, isThumbStamp, isThumbWidth, thumbResponse } from '../../server/thumbs';
+import type { ThumbRequest } from '../../server/thumbs';
 import { THUMB_GRANT_QUERY, verifyThumbGrant } from '../../server/tokens';
 
 // GET /api/render/:slideId?deck=gt-brand&theme=light&scale=1[&format=json|jpg]: the facade over the
 // render worker (SPEC 3.4; MILESTONES M2 item 6). With ?w=160|320|640 the response is the
-// downsampled thumbnail from server/thumbs.ts (M3 item 5), cached on disk per revision; a request
-// that also names a stamp (?r=) is immutable for the browser. The worker is reached over HTTP when
+// downsampled thumbnail from server/thumbs.ts (M3 item 5): on this instance's disk and, on the
+// blob tier, in the store under `decks/<id>/.thumbs/<stamp>/` shared by every instance
+// (gslides-parity SPEC-4 0.31). A request that names a stamp (?r=) is immutable for the browser
+// and the CDN and answers a 302 to the stored object on a public store; a request without one
+// answers the newest stored thumbnail with `s-maxage=60, stale-while-revalidate=86400` and renders
+// the current one after the response. The worker is reached over HTTP when
 // TURBOSLIDE_WORKER_URL is set; otherwise the same job runs in this process through the local queue,
 // which drives the turboslide CLI as a child process where the binary exists, so headless Chromium
 // never runs inside the web app (SPEC 3.3 item 7), and through runCli() in this process inside a
@@ -123,9 +128,16 @@ export const Route = createFileRoute('/api/render/$slideId')({
             }
           }
           try {
-            const request_ = { deckId, slideId, theme, width } as const;
+            const r = url.searchParams.get('r');
+            const request_: ThumbRequest = {
+              deckId,
+              slideId,
+              theme,
+              width,
+              r: isThumbStamp(r) ? r : null,
+            };
             const thumb = await getThumbnail(request_);
-            return thumbResponse(thumb, request_, { revisionInUrl: url.searchParams.has('r') });
+            return thumbResponse(thumb, request_, { revisionInUrl: request_.r !== null });
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             const status =

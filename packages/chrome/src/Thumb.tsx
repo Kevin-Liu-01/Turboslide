@@ -39,10 +39,25 @@ export type ThumbProps = {
   frame?: boolean;
   /** the blank plate's text when neither a capture nor html exists (the slide number) */
   fallbackText?: string;
+  /**
+   * Whether this frame may request a capture from the render route (gslides-parity SPEC-4 0.30,
+   * 3.2; MILESTONES-4 "The seams"): `when-available` (the default) fetches the static capture once
+   * the row is near the viewport; `never` keeps the live clone and asks the render route for
+   * nothing, which is the editor's filmstrip since round four (the clone is the renderer's HTML
+   * at the local commit, so a typed heading shows on its card before any network answer).
+   */
+  capture?: 'never' | 'when-available';
+  /**
+   * The parent's window decision (SPEC-4 0.41: one IntersectionObserver over the list, both
+   * ways): true mounts the clone, false unmounts it and leaves the plate or the decoded capture.
+   * Absent, the frame watches its own position once and stays near from the first sighting.
+   */
+  near?: boolean;
 };
 
 /**
- * How many captures fetch at once across every Thumb on the page. A capture is a render request
+ * How many captures fetch at once across every Thumb on the page (the frames with `capture`
+ * `when-available`; the filmstrip's clone first cards never take a slot). A capture is a render request
  * (/api/render/:slideId?w=) that a cold instance answers in seconds; with the sidebar's 85 cards
  * asking at once, the browser's six connections to a dev server were all held by renders and an
  * editor write waited 10 to 16 s behind them, and on the host the renders compete with the write
@@ -80,18 +95,34 @@ function releaseSlot(): void {
  */
 export const THUMB_NEAR_MARGIN = '200% 0px';
 
-export function Thumb({ shot, html, theme, frame = true, fallbackText = '' }: ThumbProps) {
-  const src = shot ? (theme === 'dark' ? (shot.dark ?? shot.light) : shot.light) : undefined;
+export function Thumb({
+  shot,
+  html,
+  theme,
+  frame = true,
+  fallbackText = '',
+  capture = 'when-available',
+  near: nearProp,
+}: ThumbProps) {
+  const src =
+    capture === 'never' || shot === undefined
+      ? undefined
+      : theme === 'dark'
+        ? (shot.dark ?? shot.light)
+        : shot.light;
   /* the src that has decoded, and the src that failed; a new src starts over */
   const [loaded, setLoaded] = useState<string | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
   /* false on the server and for the hydrating render, true from the first client effect */
   const [mounted, setMounted] = useState(false);
   useMountEffect(() => setMounted(true));
-  /* true once the row is within THUMB_NEAR_MARGIN of the viewport (at once where no observer exists) */
+  /* true once the row is within THUMB_NEAR_MARGIN of the viewport (at once where no observer
+     exists); a parent that runs the shared window passes the decision as `near` instead */
   const root = useRef<HTMLSpanElement>(null);
-  const [near, setNear] = useState(false);
+  const [ownNear, setNear] = useState(false);
+  const near = nearProp ?? ownNear;
   useEffect(() => {
+    if (nearProp !== undefined) return undefined;
     const el = root.current;
     if (el === null || typeof IntersectionObserver === 'undefined') {
       setNear(true);
@@ -108,7 +139,7 @@ export function Thumb({ shot, html, theme, frame = true, fallbackText = '' }: Th
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [nearProp]);
   /* the src holding a fetch slot: the img mounts once the slot is granted and frees it on load or error */
   const [granted, setGranted] = useState<string | null>(null);
   const slot = useRef<string | null>(null);
@@ -142,7 +173,12 @@ export function Thumb({ shot, html, theme, frame = true, fallbackText = '' }: Th
   const clone = mounted && near && !ready && html !== undefined;
   const state = ready ? 'static' : clone ? 'clone' : 'plate';
   return (
-    <span ref={root} className={cn('ts-thumb', ready && 'is-static')} data-thumb={state}>
+    <span
+      ref={root}
+      className={cn('ts-thumb', ready && 'is-static')}
+      data-thumb={state}
+      data-capture={capture}
+    >
       {clone ? <LiveClone html={html} theme={theme} frame={frame} /> : null}
       {state === 'plate' ? (
         <span className="ts-thumb-plate" aria-hidden="true">

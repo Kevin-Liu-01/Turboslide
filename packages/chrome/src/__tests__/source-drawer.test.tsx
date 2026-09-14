@@ -62,6 +62,15 @@ function typeInEditor(text: string) {
   });
 }
 
+/* the CodeMirror module loads on the drawer's first open (SourceDrawer.tsx loadSourceEditor,
+   gslides-parity SPEC-4 0.44): one microtask for the import and one for the effect that mounts */
+async function mounted(): Promise<void> {
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
+}
+
 afterEach(cleanup);
 
 describe('SourceDrawer', () => {
@@ -82,6 +91,7 @@ describe('SourceDrawer', () => {
         deckId="gt-brand"
       />,
     );
+    await mounted();
     expect(fake.text).toBe(`${JSON.stringify(before, null, 2)}\n`);
     typeInEditor(JSON.stringify(edited(), null, 2));
     expect(screen.getByText('edited')).toBeTruthy();
@@ -121,6 +131,7 @@ describe('SourceDrawer', () => {
         deckId="gt-brand"
       />,
     );
+    await mounted();
     typeInEditor('{ "id": "content-rule", ');
     fireEvent.click(screen.getByLabelText('Apply source'));
     await waitFor(() => expect(screen.getByText('Issues')).toBeTruthy());
@@ -129,7 +140,7 @@ describe('SourceDrawer', () => {
     expect(screen.getByText(/Invalid JSON/)).toBeTruthy();
   });
 
-  it('keeps a dirty draft and shows the banner when the slide moves, and reloads on request', () => {
+  it('keeps a dirty draft and shows the banner when the slide moves, and reloads on request', async () => {
     const dispatch = vi.fn<EditorDispatch>(async () => ({}));
     const view = render(
       <SourceDrawer
@@ -141,6 +152,7 @@ describe('SourceDrawer', () => {
         deckId="gt-brand"
       />,
     );
+    await mounted();
     const draft = JSON.stringify({ ...before, notes: 'mine' }, null, 2);
     typeInEditor(draft);
     const theirs = normalized({ ...before, notes: 'theirs' });
@@ -162,7 +174,7 @@ describe('SourceDrawer', () => {
     expect(screen.queryByText(/changed this slide/)).toBeNull();
   });
 
-  it('follows the document while the draft is clean', () => {
+  it('follows the document while the draft is clean', async () => {
     const dispatch = vi.fn<EditorDispatch>(async () => ({}));
     const view = render(
       <SourceDrawer
@@ -174,6 +186,7 @@ describe('SourceDrawer', () => {
         deckId="gt-brand"
       />,
     );
+    await mounted();
     const theirs = normalized({ ...before, notes: 'theirs' });
     view.rerender(
       <SourceDrawer
@@ -212,6 +225,7 @@ describe('SourceDrawer', () => {
         registerOwner={registerOwner}
       />,
     );
+    await mounted();
     expect(registerOwner).toHaveBeenCalledTimes(1);
     const owner = registerOwner.mock.calls[0]?.[1];
     if (owner === undefined) throw new Error('the drawer did not register');
@@ -238,6 +252,7 @@ describe('SourceDrawer', () => {
         registerOwner={registerOwner}
       />,
     );
+    await mounted();
     const owner = registerOwner.mock.calls[0]?.[1];
     if (owner === undefined) throw new Error('the drawer did not register');
     expect(owner.slideId).toBe('content-rule');

@@ -90,10 +90,7 @@ export function cellRects(image) {
 
 /** An SVG of the mark at N cells, currentColor, crisp edges. */
 export function markSvg(N, { title = 'Turboslide' } = {}) {
-  const body =
-    N === 8
-      ? `<path fill-rule="evenodd" d="${markPath(1)}"/>`
-      : cellRects(markBits(N));
+  const body = N === 8 ? `<path fill-rule="evenodd" d="${markPath(1)}"/>` : cellRects(markBits(N));
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${N} ${N}" width="${N}" height="${N}" fill="currentColor" shape-rendering="crispEdges" role="img" aria-label="${title}"><title>${title}</title>${body}</svg>`;
 }
 

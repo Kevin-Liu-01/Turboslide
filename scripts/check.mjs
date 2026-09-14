@@ -30,6 +30,30 @@
 // step 28. `--list` prints 28 steps. The runner's dev server carries the environment step 26
 // names: the memory channel, a checkout auth database under .turboslide/, captured mail, and a
 // fake download secret for the tmp store rule of server/tokens.ts.
+//
+// Round four (gslides-parity SPEC-4 6.1, 0.46): three steps join, 29 to 31, so `--list` prints 31.
+// Step 29 is the generated files check: `node scripts/build-brand.ts --check` (the icon set, the
+// twins by bytes, the card, the two build records and facts.json against the tree; it launches
+// Chrome for Testing once for the card compare when chromium-1217 is present and the fonts venv's
+// python once for the outlines, and prints why it skips either, build-4/b1.md R13), then
+// `node scripts/build-home-assets.ts --check` (the /home screenshots and facts-data.ts against
+// facts.json, b2.md R2), `node packages/schema/scripts/build-definitions.mjs --check` (the shape
+// table as one compact string and ids.ts, b4.md R3) and `node packages/native/scripts/check-record.mjs`
+// (the wasm module rebuilt when the toolchain is present and compared with BUILD-RECORD.json, the
+// Linux addon by hash; b4.md R6, SPEC-4 0.38). Step 30 is the Vercel output check after a
+// `NITRO_PRESET=vercel` build (scripts/check-vercel-output.mjs: the routes per rule, the static
+// files of 0.13 with the twins, the prerendered /home, the function directory sizes); it runs on
+// a machine linked to the Vercel project once the icon set's brand-manifest.json is in the tree,
+// or with TURBOSLIDE_CHECK_VERCEL=1 (=0 skips it on a linked machine), and is skipped in CI the
+// way the Prototemplate steps are. Step 31 is the perf budget (scripts/perf-budget.mjs, SPEC-4
+// 4.8) against the node-server build the runner makes with `NITRO_PRESET=node-server pnpm
+// --filter @turboslide/studio build:deploy` and serves on 4321 with TURBOSLIDE_STORE=tmp, the path
+// docs/hosting.md documents, never the dev server and never `vite preview`, followed by the per
+// route preload ceilings of SPEC-4 3.12 read from the served heads (check-client-bundle.mjs
+// --base); in CI the perf command carries --report until two runs agree (0.46). The step's
+// TURBOSLIDE_CHECK_PERF opt in of days 0 to 5 was removed at merge 2 (build-4/integrator.md).
+// Step 18's URL list gains /home and the Not found page (/no-such-page) and step 26's list gains
+// home-page.spec.ts (6.1).
 import { spawn, spawnSync } from 'node:child_process';
 import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -49,7 +73,8 @@ const SERVER_TIMEOUT_MS = 120_000;
 // them (measured: `--only 18` on a cold server failed three runs of three with `state "list" did
 // not apply` on the first audit, while the same step passed in the full chain after step 17 had
 // warmed the server; the shell driver now also waits for hydration, this keeps that wait short).
-const WARM_PATHS = ['/deck/gt-brand', '/edit/gt-brand', '/new', '/decks'];
+// (/home joined at round four's merge 2; the Not found page is a 404 and is not warmed)
+const WARM_PATHS = ['/deck/gt-brand', '/edit/gt-brand', '/new', '/decks', '/home'];
 const WARM_TIMEOUT_MS = 120_000;
 const WARM_MODULE_CAP = 4000;
 const WARM_CONCURRENCY = 8;
@@ -77,7 +102,8 @@ const CONTAINER_IMAGE = 'turboslide-render-worker';
 const EXPORT_BATCH = '3';
 // Step 26 (SPEC-3 16.1): the round three specs against the runner's own dev server, each with
 // two browser contexts on the memory channel; a spec whose builder has not landed the file is
-// skipped by name with a line, never a silent pass (the list is the specification's).
+// skipped by name with a line, never a silent pass (the list is the specification's). Round four
+// (SPEC-4 6.1) adds B2's home-page.spec.ts (the /home page) so its green is its own.
 const ROUND_THREE_SPECS = [
   'apps/studio/e2e/realtime.spec.ts',
   'apps/studio/e2e/presence.spec.ts',
@@ -87,11 +113,39 @@ const ROUND_THREE_SPECS = [
   'apps/studio/e2e/accounts.spec.ts',
   'apps/studio/e2e/dither.spec.ts',
   'apps/studio/e2e/security.spec.ts',
+  'apps/studio/e2e/home-page.spec.ts',
 ];
 // Step 27 (SPEC-3 9.4, 16.5): the layout shift audit against `vite preview` of the production
 // build on its own port (AGENTS.md port table: 4344 is B5's preview); the script is B5's.
 const LAYOUT_SHIFT_AUDIT = 'scripts/layout-shift-audit.mjs';
 const PREVIEW_PORT = '4344';
+// Round four (SPEC-4 6.1, steps 29 to 31): B1's brand build with the other generated file checks
+// behind it, the Vercel output check gated on the project link and the icon set, the perf budget
+// against the node-server build on 4321.
+const BUILD_BRAND = 'scripts/build-brand.ts';
+const BUILD_HOME_ASSETS = 'scripts/build-home-assets.ts';
+const BUILD_DEFINITIONS = 'packages/schema/scripts/build-definitions.mjs';
+const NATIVE_RECORD_CHECK = 'packages/native/scripts/check-record.mjs';
+const CLIENT_BUNDLE_CHECK = 'scripts/check-client-bundle.mjs';
+// the node-server build's client output, where its documents' preloaded chunks live (SPEC-4 3.12)
+const NODE_SERVER_CLIENT = 'apps/studio/.output/public';
+const VERCEL_OUTPUT_CHECK = 'scripts/check-vercel-output.mjs';
+const VERCEL_LINK = '.vercel/project.json';
+const BRAND_MANIFEST = 'apps/studio/public/brand-manifest.json';
+const PERF_BUDGET = 'scripts/perf-budget.mjs';
+const NODE_SERVER_ENTRY = 'apps/studio/.output/server/index.mjs';
+const NODE_SERVER_LOG = '.turboslide/node-server.log';
+// the node-server build's own environment: the tmp store SPEC-4 0.46 names, the port, and the two
+// secrets every hosted store requires (docs/hosting.md section 11: the session secret seals the
+// anonymous principal cookie and the download secret signs export URLs; a tmp store has no state
+// folder to mint them from, so the build answered 500 on every route without them on day 0). The
+// values are the obviously fake ones playwright.config.ts gives its own server; never a real one.
+const NODE_SERVER_ENV = {
+  TURBOSLIDE_STORE: 'tmp',
+  PORT: '4321',
+  TURBOSLIDE_SESSION_SECRET: 'check-node-server-session-secret-00000000000000',
+  TURBOSLIDE_DOWNLOAD_SECRET: 'check-node-server-download-secret-0000000000',
+};
 // The environment the runner's dev server carries (SPEC-3 16.1 step 26; server/tokens.ts).
 const SERVER_ENV = {
   TURBOSLIDE_EXPORT_BATCH: EXPORT_BATCH,
@@ -109,8 +163,12 @@ const SERVER_ENV = {
 // HTML (SPEC 5.3) and the export parts that rewrite their own job's files.
 const INNER_HTML_ALLOW = [
   'apps/studio/src/routes/__root.tsx',
-  'apps/studio/src/routes/edit.$deckId.tsx',
-  'apps/studio/src/routes/present.$deckId.tsx',
+  // the sprite mount moved from routes/edit.$deckId.tsx at round four's merge 1 (the editor split,
+  // SPEC-4 0.44; build-4/b3.md R1)
+  'apps/studio/src/editor/EditorRoot.tsx',
+  // the presenter's sprite mount moved from routes/present.$deckId.tsx to the presenter's own
+  // chunk at merge 2 (SPEC-4 0.36; build-4/b3.md R9); the route file has no call site left
+  'apps/studio/src/components/PresenterPage.tsx',
   'apps/studio/src/routes/print.$deckId.tsx',
   'apps/studio/src/components/DeckViewer.tsx',
   'packages/viewer/src/SlideView.tsx',
@@ -133,6 +191,12 @@ const OVERWRITE_ALLOW = [
   // documents client (SPEC-3 8.9): record rewrites, never a public asset (the integrator, merge 2)
   'packages/store/src/comments-store.ts',
   'packages/store/src/migrate.ts',
+  // the thumbnail cache's stamped objects `decks/<id>/.thumbs/<stamp>/<theme>@<w>/<slide>.png`
+  // (gslides-parity SPEC-4 0.31; B4's day 3): the key carries the slide's content stamp, so a
+  // second put writes the same pixels (two instances rendering one stamp), and the older stamps
+  // are pruned behind the response; derived data under the deck's hidden folder, never a user
+  // asset the assets route serves (the integrator, round four merge 2)
+  'apps/studio/src/server/thumbs.ts',
   // the share link hash index `links/<hex>.json` beside the access records (hotfix B, SPEC-3 6.4,
   // VERIFICATION-3 finding 34 F2): a record naming the deck a link hash belongs to, written with
   // an overwriting put so two instances indexing one link never conflict; never a public asset
@@ -187,7 +251,9 @@ const steps = [
     // Search and the Export menu, and the M5 verification found its chip drawn under Search at
     // 1280 while only /deck was audited here
     // gslides-parity SPEC 14.1: the editor, the draft and the home page join the audit
-    cmd: `pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/deck/gt-brand --widths 1440,1280,390 --themes light,dark && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/edit/gt-brand --widths 1440,1280,390 --themes light,dark --states ${EDITOR_STATES} && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/new --widths 1440,1280,390 --themes light,dark --states ${EDITOR_STATES} && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/decks --widths 1440,1280,390 --themes light,dark --states ''`,
+    // gslides-parity SPEC-4 6.1, 6.2: the /home product page and the Not found page (a 404 the
+    // shell driver accepts when the document carries the Not found root), both without states
+    cmd: `pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/deck/gt-brand --widths 1440,1280,390 --themes light,dark && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/edit/gt-brand --widths 1440,1280,390 --themes light,dark --states ${EDITOR_STATES} && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/new --widths 1440,1280,390 --themes light,dark --states ${EDITOR_STATES} && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/decks --widths 1440,1280,390 --themes light,dark --states '' && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/home --widths 1440,1280,390 --themes light,dark --states '' && pnpm exec turboslide lint --chrome --url ${STUDIO_URL}/no-such-page --widths 1440,1280,390 --themes light,dark --states ''`,
     needs: 'server',
   },
   // MILESTONES.md M2 acceptance, added after the M2 review found 41 files that `pnpm format` had
@@ -249,6 +315,24 @@ const steps = [
         cmd: 'pnpm exec vitest run --dir packages/render __tests__/img-size __tests__/collab',
       },
   { cmd: 'node scripts/check.mjs --audit' },
+  // gslides-parity SPEC-4 6.1, steps 29 to 31 (0.46): the generated files checks (the brand
+  // build, the /home assets, the shape table, the native record), the Vercel output check after
+  // a Vercel build, the perf budget against the node-server build
+  {
+    cmd: `node ${BUILD_BRAND} --check && node ${BUILD_HOME_ASSETS} --check && node ${BUILD_DEFINITIONS} --check && node ${NATIVE_RECORD_CHECK}`,
+    needs: 'brand',
+  },
+  {
+    cmd: `NITRO_PRESET=vercel pnpm --filter @turboslide/studio build:deploy && node ${VERCEL_OUTPUT_CHECK}`,
+    needs: 'vercel',
+  },
+  {
+    // --report in CI until two runs agree (SPEC-4 0.46); the scaling factor is recorded in the
+    // script's header and the flag removed there. The per route preload ceilings of SPEC-4 3.12
+    // read the same server's heads against the node-server build's client output.
+    cmd: `node ${PERF_BUDGET} --base ${STUDIO_URL} --profile local --write --runs 3 --json .turboslide/perf-budget.json${process.env.CI ? ' --report' : ''} && node ${CLIENT_BUNDLE_CHECK} apps/studio/dist --base ${STUDIO_URL} --client ${NODE_SERVER_CLIENT}`,
+    needs: 'node-server',
+  },
 ];
 
 const argv = process.argv.slice(2);
@@ -285,7 +369,14 @@ const hasDocker = (() => {
   const probe = spawnSync('docker', ['info'], { stdio: 'ignore' });
   return probe.status === 0;
 })();
-
+// step 30 (SPEC-4 6.1): the Vercel build on a linked machine once the icon set exists, or forced
+// with TURBOSLIDE_CHECK_VERCEL=1; =0 skips it on a linked machine (merge 1 opened the gate with
+// B1's brand-manifest.json while the assertions wait for B3's routeRules and B2's /home at merge 2)
+const hasVercelBuild =
+  process.env.TURBOSLIDE_CHECK_VERCEL === '1' ||
+  (process.env.TURBOSLIDE_CHECK_VERCEL !== '0' &&
+    existsSync(resolve(ROOT, VERCEL_LINK)) &&
+    existsSync(resolve(ROOT, BRAND_MANIFEST)));
 process.chdir(ROOT);
 mkdirSync('.turboslide', { recursive: true });
 
@@ -576,8 +667,86 @@ async function stopServer() {
   console.log('check: dev server stopped');
 }
 
+let nodeServer = null;
+let nodeServerLog = null;
+
+/**
+ * Step 31's server (SPEC-4 0.46, 4.8): the node-server build of the studio served on 4321 with
+ * the tmp store, the start command docs/hosting.md and the TanStack hosting guide give for the
+ * Nitro build, so the check measures the production build and never the dev server. The build
+ * is part of the step's cost. Something already answering on 4321 is a failure, not a reuse: a
+ * dev server there would measure the wrong thing.
+ */
+async function ensureNodeServer() {
+  if (nodeServer) return;
+  if (await isUp(STUDIO_URL))
+    throw new Error(
+      `something already answers on ${STUDIO_URL}; step 31 needs 4321 for its own node-server build`,
+    );
+  console.log(
+    'check: building the node-server output (NITRO_PRESET=node-server pnpm --filter @turboslide/studio build:deploy)',
+  );
+  const build = spawnSync('pnpm', ['--filter', '@turboslide/studio', 'build:deploy'], {
+    cwd: ROOT,
+    stdio: 'inherit',
+    env: { ...process.env, NITRO_PRESET: 'node-server' },
+  });
+  if (build.status !== 0)
+    throw new Error(`the node-server build exited with ${build.status ?? build.signal}`);
+  if (!existsSync(resolve(ROOT, NODE_SERVER_ENTRY)))
+    throw new Error(`${NODE_SERVER_ENTRY} is missing after the build`);
+  nodeServerLog = cappedLog(NODE_SERVER_LOG);
+  const child = spawn('node', [NODE_SERVER_ENTRY], {
+    cwd: ROOT,
+    detached: true,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    env: { ...process.env, ...SERVER_ENV, ...NODE_SERVER_ENV },
+  });
+  child.stdout?.on('data', (chunk) => nodeServerLog.write(chunk));
+  child.stderr?.on('data', (chunk) => nodeServerLog.write(chunk));
+  nodeServer = child;
+  console.log(
+    `check: starting the node-server build on 4321 with TURBOSLIDE_STORE=tmp (log capped in ${NODE_SERVER_LOG})`,
+  );
+  const deadline = Date.now() + SERVER_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    if (await isUp(STUDIO_URL)) return;
+    if (child.exitCode !== null)
+      throw new Error(
+        `the node server exited with ${child.exitCode} before answering; see ${NODE_SERVER_LOG}`,
+      );
+    await sleep(500);
+  }
+  throw new Error(
+    `the node server did not answer on 4321 within ${SERVER_TIMEOUT_MS / 1000} s; see ${NODE_SERVER_LOG}`,
+  );
+}
+
+async function stopNodeServer() {
+  if (!nodeServer) return;
+  const child = nodeServer;
+  nodeServer = null;
+  try {
+    process.kill(-child.pid, 'SIGTERM');
+  } catch {
+    // already gone
+  }
+  const deadline = Date.now() + 5000;
+  while (child.exitCode === null && Date.now() < deadline) await sleep(100);
+  if (child.exitCode === null) {
+    try {
+      process.kill(-child.pid, 'SIGKILL');
+    } catch {
+      // already gone
+    }
+  }
+  nodeServerLog?.close();
+  console.log('check: node server stopped');
+}
+
 process.on('SIGINT', async () => {
   await stopServer();
+  await stopNodeServer();
   process.exit(130);
 });
 
@@ -598,7 +767,11 @@ for (const step of selected) {
           ? 'no Docker daemon answers; the verifier runs the container verification (SPEC-2 11.3)'
           : step.needs === 'preview' && !(await isUp(`http://localhost:${PREVIEW_PORT}`))
             ? `no production preview answers on ${PREVIEW_PORT}; start \`vite preview --port ${PREVIEW_PORT}\` from apps/studio over \`pnpm build\` (SPEC-3 16.1 step 27)`
-            : null;
+            : step.needs === 'brand' && !existsSync(resolve(ROOT, BUILD_BRAND))
+              ? `${BUILD_BRAND} is not in the tree yet (B1, SPEC-4 6.1 step 29)`
+              : step.needs === 'vercel' && !hasVercelBuild
+                ? `the Vercel build runs on a machine linked to the project (${VERCEL_LINK}) once ${BRAND_MANIFEST} is in the tree, or with TURBOSLIDE_CHECK_VERCEL=1; TURBOSLIDE_CHECK_VERCEL=0 skips it (SPEC-4 6.1 step 30)`
+                : null;
   if (step.missing !== undefined && step.missing.length > 0)
     console.log(
       `${label}: ${step.missing.length} spec(s) not in the tree yet: ${step.missing.join(', ')}`,
@@ -621,6 +794,15 @@ for (const step of selected) {
       break;
     }
   }
+  if (step.needs === 'node-server') {
+    try {
+      await ensureNodeServer();
+    } catch (error) {
+      console.error(`${label}: FAIL ${error instanceof Error ? error.message : String(error)}`);
+      exitCode = 1;
+      break;
+    }
+  }
   console.log(`${label}: ${step.cmd}`);
   const t = Date.now();
   const result = spawnSync(step.cmd, {
@@ -635,13 +817,16 @@ for (const step of selected) {
   if (result.status !== 0) {
     console.error(`${label}: FAIL exit ${result.status ?? result.signal} after ${seconds} s`);
     exitCode = result.status ?? 1;
+    if (step.needs === 'node-server') await stopNodeServer();
     break;
   }
   console.log(`${label}: ok in ${seconds} s`);
   if (step.n === lastServerStep) await stopServer();
+  if (step.needs === 'node-server') await stopNodeServer();
 }
 
 await stopServer();
+await stopNodeServer();
 const total = ((Date.now() - startedAt) / 1000).toFixed(1);
 if (exitCode === 0)
   console.log(`check: all ${selected.length} selected step(s) passed in ${total} s`);

@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from 'react';
 
+import { THEME_COLORS } from '@turboslide/theme/brand/site';
+
 import { drawAllDither } from './dither';
 
 /**
@@ -105,11 +107,27 @@ export function applyThemeToTree(root: ParentNode, theme: Theme): void {
   drawAllDither(root, theme);
 }
 
+/**
+ * The `theme-color` meta follows the stored theme (gslides-parity SPEC-4 1.6; research-4 report 02
+ * section 2.4): one value, the theme's `--pt-paper`, no `media` attribute, so the browser's own
+ * chrome follows the page and not the operating system. The studio's root route carries the meta
+ * and a boot script sets it before first paint; this keeps it right after a toggle or a message.
+ * A document without the meta (a test, an embed host) is left alone.
+ */
+export function writeThemeColor(
+  theme: Theme,
+  doc: Pick<Document, 'querySelector'> = document,
+): void {
+  const meta = doc.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', THEME_COLORS[theme]);
+}
+
 /** Stamps the attribute, persists the dual key, updates the document's twins and tells every frame. */
 export function applyTheme(theme: Theme): void {
   document.documentElement.dataset.theme = theme;
   store(THEME_KEY, theme);
   store(DECK_THEME_KEY, theme);
+  writeThemeColor(theme);
   applyThemeToTree(document, theme);
   broadcastTheme(theme);
 }
@@ -132,6 +150,7 @@ export function installThemeBridge(): () => void {
     if (e.key !== THEME_KEY || !isTheme(e.newValue)) return;
     if (readTheme() === e.newValue) return;
     document.documentElement.dataset.theme = e.newValue;
+    writeThemeColor(e.newValue);
     applyThemeToTree(document, e.newValue);
   };
   const onMessage = (e: MessageEvent) => {
@@ -140,6 +159,7 @@ export function installThemeBridge(): () => void {
     if (readTheme() === data.theme) return;
     document.documentElement.dataset.theme = data.theme;
     store(DECK_THEME_KEY, data.theme);
+    writeThemeColor(data.theme);
     applyThemeToTree(document, data.theme);
   };
   window.addEventListener('storage', onStorage);

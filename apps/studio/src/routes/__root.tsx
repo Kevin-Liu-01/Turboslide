@@ -4,11 +4,15 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
+import brandCss from '@turboslide/chrome/brand.css?url';
+import { EmptyFigure } from '@turboslide/chrome/EmptyFigure';
 import tokensCss from '@turboslide/chrome/tokens.css?url';
+import { tipProps } from '@turboslide/chrome/Tooltip';
 import interWoff2 from '@turboslide/fonts/assets/InterVariable.woff2?url';
 import interCss from '@turboslide/fonts/inter.css?url';
 import interItalicWoff2 from '../../../../packages/fonts/assets/InterVariable-Italic.woff2?url';
 import { BLOCK_CSS } from '@turboslide/render/block-css';
+import { SITE } from '@turboslide/theme/brand/site';
 import sheetCss from '@turboslide/theme/gt-ink-paper/sheet.css?url';
 import stageCss from '@turboslide/theme/gt-ink-paper/stage.css?url';
 import { THEME_BOOT_SCRIPT } from '@turboslide/viewer/theme';
@@ -18,17 +22,33 @@ import appCss from '../styles.css?url';
 
 // The document shell (SPEC 3.4): the theme boot script (gt-theme then
 // gt-deck-theme, default dark, never prefers-color-scheme) runs in the head
-// before first paint; the chrome tokens (--pt-), the sheet theme (.ts-sheet),
-// the stage rules, the renderer's block CSS and the one face (Inter) load once
-// for every route.
+// before first paint; the chrome tokens (--pt-), the identity tokens (--ts-,
+// gslides-parity SPEC-4 0.8), the sheet theme (.ts-sheet), the stage rules,
+// the renderer's block CSS and the one face (Inter) load once for every
+// route. The head carries the icon set, the manifest and the site card of
+// SPEC-4 1.6 (research-4 report 02 section 4.1) from packages/theme/brand/site.ts.
 
 /**
- * The routes a crawler is told to leave alone (gslides-parity SPEC 6.1, 6.8, 13.4): the fresh
- * presentation, because the root now renders an editor; the trash; the print preview. The
- * presenter window carries its own meta in its route (SPEC 9.3). `/deck` and `/embed` stay
- * indexable: they are the links a rep sends.
+ * The routes a crawler is told to leave alone (gslides-parity SPEC 6.1, 6.8, 13.4; SPEC-4 0.34):
+ * the fresh presentation, because the root now renders an editor; the trash; the print preview;
+ * the editor, because its `'data-only'` render puts the dehydrated document in the HTML. The
+ * presenter window carries its own meta in its route (SPEC 9.3). `/deck`, `/embed` and `/home`
+ * stay indexable: they are the links a rep sends and the product page.
  */
-const NOINDEX_ROUTES: ReadonlySet<string> = new Set(['/new', '/decks/trash', '/print/$deckId']);
+const NOINDEX_ROUTES: ReadonlySet<string> = new Set([
+  '/new',
+  '/decks/trash',
+  '/print/$deckId',
+  '/edit/$deckId',
+]);
+
+/**
+ * The `theme-color` statement (SPEC-4 1.6; R02 2.4): the meta carries the dark paper in the
+ * server's HTML and this script, placed after the head's content, sets it to the stamped theme's
+ * `--pt-paper` before first paint, so the browser's own chrome follows the stored theme and not
+ * the operating system's. `applyTheme` (@turboslide/viewer/theme) does the same on a toggle.
+ */
+export const THEME_COLOR_BOOT_SCRIPT = `(function(){try{var m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute('content',document.documentElement.getAttribute('data-theme')==='light'?'${SITE.themeColor.light}':'${SITE.themeColor.dark}')}catch(e){}})();`;
 
 /**
  * The shell geometry boot script (gslides-parity SPEC-3 9.2 D1, D4, D6; research-3 05 3.3): runs
@@ -48,16 +68,43 @@ export const Route = createRootRoute({
   head: ({ matches }) => {
     const leaf = matches[matches.length - 1];
     const noindex = leaf !== undefined && NOINDEX_ROUTES.has(leaf.routeId);
+    /* the card's absolute address (R02 4.1): TURBOSLIDE_PUBLIC_ORIGIN when the deployment sets
+       it, else production; a route with a loader may set its own og:url from its request */
+    const card = `${SITE.origin()}${SITE.card.path}`;
     return {
       meta: [
         { charSet: 'utf-8' },
         { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { title: 'Turboslide' },
+        { name: 'description', content: SITE.description },
+        { name: 'application-name', content: SITE.name },
+        { name: 'apple-mobile-web-app-title', content: SITE.name },
+        /* one value, kept equal to --pt-paper by THEME_COLOR_BOOT_SCRIPT and the toggle (SPEC-4 1.6) */
+        { name: 'theme-color', content: SITE.themeColor.dark },
+        { property: 'og:site_name', content: SITE.name },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:locale', content: 'en_US' },
+        { property: 'og:title', content: SITE.name },
+        { property: 'og:description', content: SITE.description },
+        { property: 'og:image', content: card },
+        { property: 'og:image:type', content: SITE.card.type },
+        { property: 'og:image:width', content: String(SITE.card.width) },
+        { property: 'og:image:height', content: String(SITE.card.height) },
+        { property: 'og:image:alt', content: SITE.imageAlt },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:title', content: SITE.name },
+        { name: 'twitter:description', content: SITE.description },
+        { name: 'twitter:image', content: card },
+        { name: 'twitter:image:alt', content: SITE.imageAlt },
         ...(noindex ? [{ name: 'robots', content: 'noindex' }] : []),
       ],
       links: [
-        /* no favicon file yet: an empty data URL keeps the browser from asking for /favicon.ico */
-        { rel: 'icon', href: 'data:,' },
+        /* the icon set of SPEC-4 0.13 (R02 4.1): the ICO first with its sizes, the SVG tile second,
+           the touch icon and the manifest; every one a static file the CDN answers */
+        { rel: 'icon', href: SITE.icons.favicon, sizes: '32x32' },
+        { rel: 'icon', href: SITE.icons.svg, type: 'image/svg+xml' },
+        { rel: 'apple-touch-icon', href: SITE.icons.touch },
+        { rel: 'manifest', href: SITE.icons.manifest },
         /* both Inter faces start with the HTML (SPEC-3 9.2 G1): the request no longer waits for
            the stylesheet, and the metric matched fallback face of inter.css covers the swap */
         {
@@ -76,6 +123,8 @@ export const Route = createRootRoute({
         },
         { rel: 'stylesheet', href: interCss },
         { rel: 'stylesheet', href: tokensCss },
+        /* the identity tokens after the chrome tokens they read (SPEC-4 0.8) */
+        { rel: 'stylesheet', href: brandCss },
         { rel: 'stylesheet', href: sheetCss },
         { rel: 'stylesheet', href: stageCss },
         { rel: 'stylesheet', href: appCss },
@@ -86,14 +135,55 @@ export const Route = createRootRoute({
   notFoundComponent: NotFound,
 });
 
+/**
+ * Not found (gslides-parity SPEC-4 1.10): the 64 px mark over the notfound twin's crop, the
+ * heading, one sentence and three `.pt-ib` buttons, all router links now that the /home route is
+ * in the route tree (the About Turboslide button was a plain anchor until B2's route landed).
+ */
 function NotFound() {
   return (
-    <main className="ts-home">
-      <h1>Not found</h1>
-      <p>
-        No page at this address. <Link to="/new">Start a new presentation</Link> or open{' '}
-        <Link to="/decks">your presentations</Link>.
-      </p>
+    <main className="ts-notfound" data-control="notfound">
+      <EmptyFigure
+        figure="notfound"
+        heading="h1"
+        mark={64}
+        title="Not found"
+        sentence="No page at this address. Start a new presentation, open your presentations or read what Turboslide is."
+        action={
+          <div className="ts-notfound-actions">
+            <Link
+              to="/new"
+              className="pt-ib is-solid"
+              data-control="notfound.new"
+              {...tipProps({ name: 'New Presentation', doc: 'Starts a blank presentation.' })}
+            >
+              New Presentation
+            </Link>
+            <Link
+              to="/decks"
+              className="pt-ib"
+              data-control="notfound.decks"
+              {...tipProps({
+                name: 'Your Presentations',
+                doc: 'Every presentation on this Turboslide.',
+              })}
+            >
+              Your Presentations
+            </Link>
+            <Link
+              to="/home"
+              className="pt-ib"
+              data-control="notfound.about"
+              {...tipProps({
+                name: 'About Turboslide',
+                doc: 'What Turboslide is and how fast it runs.',
+              })}
+            >
+              About Turboslide
+            </Link>
+          </div>
+        }
+      />
     </main>
   );
 }
@@ -143,6 +233,12 @@ function RootDocument({ children }: { children: ReactNode }) {
           dangerouslySetInnerHTML={{ __html: SHELL_BOOT_SCRIPT }}
         />
         <HeadContent />
+        {/* the theme-color meta follows the stamped theme before first paint (SPEC-4 1.6) */}
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: THEME_COLOR_BOOT_SCRIPT }}
+        />
         {/* the CSS the renderer owns (SPEC 5.2), after the theme's sheet.css and under the same .ts-sheet root */}
         <style
           nonce={nonce}

@@ -184,6 +184,11 @@ export function vercelBlobClient(
             allowOverwrite: options.overwrite,
             ...(options.contentType === undefined ? {} : { contentType: options.contentType }),
             ...(options.ifMatch === undefined ? {} : { ifMatch: options.ifMatch }),
+            // the object's own max age (gslides-parity SPEC-4 0.31; build-4/b4.md R1): the
+            // thumbnail cache's stamped objects take a year, everything else the store's default
+            ...(options.cacheControlMaxAge === undefined
+              ? {}
+              : { cacheControlMaxAge: options.cacheControlMaxAge }),
           },
         );
         return entryOf(result);

@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 import { createDispatcher } from '@turboslide/agent/dispatch';
 import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
@@ -25,7 +25,7 @@ import {
 } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
-import type { DeckPayload } from '../server/decks';
+import type { DeckPayload, DeckSlidesPayload } from '../server/decks';
 import { renderSlideImages } from '../server/render';
 import { Slideshow } from './Slideshow';
 import type { SlideshowState } from './Slideshow';
@@ -39,9 +39,16 @@ import { useStudioSession } from './useStudioSession';
  * the frame protocol on (SPEC 5.3: the gt-theme and gt-deck-slide postMessage
  * protocol and the #NN hash contract are preserved; the studio writes
  * #s/<slideId> as the stable form).
+ *
+ * The deferred slides (gslides-parity SPEC-4 3.11): the document carries the first slide's HTML
+ * and `rest` is the other slides' HTML on its way from the router's stream; the viewer merges it
+ * into the deck when it lands, so the sidebar's clones and the grid fill in a moment after first
+ * paint. Until then those items render with an empty `html`, which the clones draw as the plate.
  */
 export type DeckViewerProps = {
   payload: DeckPayload;
+  /** the other slides' HTML, streamed behind the document (SPEC-4 3.11); absent for a whole payload */
+  rest?: Promise<DeckSlidesPayload | null>;
   /** ?mode= from the route, ahead of the saved mode */
   mode?: ShellMode;
   /** ?theme= from the route: applied once on mount, ahead of the stored theme */
@@ -93,15 +100,48 @@ function postSlide(n: number): void {
   }
 }
 
+/** The deck with the streamed HTML merged in (SPEC-4 3.11); the same object when nothing arrived. */
+export function mergeDeferredSlides(
+  deck: ViewerDeck,
+  html: Readonly<Record<string, string>> | null,
+): ViewerDeck {
+  if (html === null || Object.keys(html).length === 0) return deck;
+  return {
+    ...deck,
+    slides: deck.slides.map((slide) =>
+      slide.html === '' && html[slide.id] !== undefined
+        ? { ...slide, html: html[slide.id]! }
+        : slide,
+    ),
+  };
+}
+
 export function DeckViewer({
   payload,
+  rest,
   mode,
   theme,
   present = false,
   embed = false,
   onModeChange,
 }: DeckViewerProps) {
-  const { deck, sprite } = payload;
+  const { sprite } = payload;
+  /* the streamed slides once they land (SPEC-4 3.11); the server and the first client render agree on none */
+  const [deferred, setDeferred] = useState<Record<string, string> | null>(null);
+  useEffect(() => {
+    if (rest === undefined || payload.partial !== true) return;
+    let alive = true;
+    rest
+      .then((answer) => {
+        if (alive && answer !== null && answer.revision === payload.deck.revision)
+          setDeferred(answer.html);
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [rest, payload]);
+  const deck = useMemo(() => mergeDeferredSlides(payload.deck, deferred), [payload.deck, deferred]);
   const sections = useMemo(() => toSections(deck), [deck]);
   /* the slideshow's facts (blank slide, laser, full screen) for describe().state while presenting */
   const show = useRef<SlideshowState | null>(null);

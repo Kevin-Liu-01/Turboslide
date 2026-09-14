@@ -1,245 +1,245 @@
 # Layout shift audit
 
-Base http://localhost:4344, deck gt-brand, 109 cells in 611 s, Chromium 147.0.7727.15 (Chrome for Testing 147.0.7727.15, ANGLE Metal, no WebGL), 2026-09-14T13:24:05.033Z.
+Base http://localhost:4344, deck gt-brand, 109 cells in 626 s, Chromium 147.0.7727.15 (Chrome for Testing 147.0.7727.15, ANGLE Metal, no WebGL), 2026-09-14T20:26:54.075Z.
 
-| Cell | Status | Load CLS | Load entries | States run | States skipped |
-| --- | --- | --- | --- | --- | --- |
-| new 1440 light | 200 | 0.0000 | 0 | 1 | 0 |
-| new 1440 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| new 1280 light | 200 | 0.0000 | 0 | 0 | 0 |
-| new 1280 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| new 390 light | 200 | 0.0000 | 0 | 0 | 0 |
-| new 390 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| edit 1440 light | 200 | 0.0000 | 0 | 11 | 7 |
-| edit 1440 light notesHidden | 200 | 0.0134 | 1 | 0 | 0 |
-| edit 1440 light listClosed | 200 | 0.0000 | 0 | 0 | 0 |
-| edit 1440 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| edit 1440 dark notesHidden | 200 | 0.0134 | 1 | 0 | 0 |
-| edit 1440 dark listClosed | 200 | 0.0000 | 0 | 0 | 0 |
-| edit 1280 light | 200 | 0.0000 | 0 | 0 | 0 |
-| edit 1280 light notesHidden | 200 | 0.0119 | 1 | 0 | 0 |
-| edit 1280 light listClosed | 200 | 0.0000 | 0 | 0 | 0 |
-| edit 1280 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| edit 1280 dark notesHidden | 200 | 0.0119 | 1 | 0 | 0 |
-| edit 1280 dark listClosed | 200 | 0.0000 | 0 | 0 | 0 |
-| edit 390 light | 200 | 0.0000 | 0 | 0 | 0 |
-| edit 390 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| deck 1440 light | 200 | 0.0021 | 1 | 1 | 0 |
-| deck 1440 light listClosed | 200 | 0.0008 | 1 | 0 | 0 |
-| deck 1440 light outline | 200 | 0.1172 | 1 | 0 | 0 |
-| deck 1440 light listClosedOutline | 200 | 0.0008 | 1 | 0 | 0 |
-| deck 1440 light gridSaved | 200 | 0.0027 | 1 | 0 | 0 |
-| deck 1440 light hash | 200 | 0.0120 | 2 | 0 | 0 |
-| deck 1440 dark | 200 | 0.0021 | 1 | 0 | 0 |
-| deck 1440 dark listClosed | 200 | 0.0008 | 1 | 0 | 0 |
-| deck 1440 dark outline | 200 | 0.1172 | 1 | 0 | 0 |
-| deck 1440 dark listClosedOutline | 200 | 0.0008 | 1 | 0 | 0 |
-| deck 1440 dark gridSaved | 200 | 0.0027 | 1 | 0 | 0 |
-| deck 1440 dark hash | 200 | 0.0120 | 2 | 0 | 0 |
-| deck 1280 light | 200 | 0.0017 | 1 | 0 | 0 |
-| deck 1280 light listClosed | 200 | 0.0043 | 1 | 0 | 0 |
-| deck 1280 light outline | 200 | 0.1306 | 2 | 0 | 0 |
-| deck 1280 light listClosedOutline | 200 | 0.0043 | 1 | 0 | 0 |
-| deck 1280 light gridSaved | 200 | 0.0037 | 1 | 0 | 0 |
-| deck 1280 light hash | 200 | 0.0127 | 2 | 0 | 0 |
-| deck 1280 dark | 200 | 0.0017 | 1 | 0 | 0 |
-| deck 1280 dark listClosed | 200 | 0.0043 | 1 | 0 | 0 |
-| deck 1280 dark outline | 200 | 0.1306 | 2 | 0 | 0 |
-| deck 1280 dark listClosedOutline | 200 | 0.0043 | 1 | 0 | 0 |
-| deck 1280 dark gridSaved | 200 | 0.0037 | 1 | 0 | 0 |
-| deck 1280 dark hash | 200 | 0.0127 | 2 | 0 | 0 |
-| deck 390 light | 200 | 0.0000 | 1 | 0 | 0 |
-| deck 390 dark | 200 | 0.0000 | 1 | 0 | 0 |
-| embed 1440 light | 200 | 0.0021 | 1 | 0 | 0 |
-| embed 1440 dark | 200 | 0.0021 | 1 | 0 | 0 |
-| embed 1280 light | 200 | 0.0017 | 1 | 0 | 0 |
-| embed 1280 dark | 200 | 0.0017 | 1 | 0 | 0 |
-| embed 390 light | 200 | 0.0000 | 1 | 0 | 0 |
-| embed 390 dark | 200 | 0.0000 | 1 | 0 | 0 |
-| decks 1440 light | 200 | 0.0000 | 0 | 1 | 0 |
-| decks 1440 light listView | 200 | 0.0026 | 1 | 0 | 0 |
-| decks 1440 light sortTitle | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1440 light openedHistory | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1440 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1440 dark listView | 200 | 0.0026 | 1 | 0 | 0 |
-| decks 1440 dark sortTitle | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1440 dark openedHistory | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1280 light | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1280 light listView | 200 | 0.0037 | 1 | 0 | 0 |
-| decks 1280 light sortTitle | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1280 light openedHistory | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1280 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1280 dark listView | 200 | 0.0037 | 1 | 0 | 0 |
-| decks 1280 dark sortTitle | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1280 dark openedHistory | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 390 light | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 390 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| trash 1440 light | 200 | 0.0000 | 0 | 0 | 0 |
-| trash 1440 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| trash 1280 light | 200 | 0.0000 | 0 | 0 | 0 |
-| trash 1280 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| trash 390 light | 200 | 0.0000 | 0 | 0 | 0 |
-| trash 390 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| present 1440 light | 200 | 0.0000 | 0 | 2 | 0 |
-| present 1440 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| present 1280 light | 200 | 0.0000 | 0 | 0 | 0 |
-| present 1280 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| present 390 light | 200 | 0.0000 | 0 | 0 | 0 |
-| present 390 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| print 1440 light | 200 | 0.0000 | 0 | 1 | 1 |
-| print 1440 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| print 1280 light | 200 | 0.0000 | 0 | 0 | 0 |
-| print 1280 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| print 390 light | 200 | 0.0000 | 0 | 0 | 0 |
-| print 390 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| deckPresent 1440 light | 200 | 0.0647 | 2 | 0 | 0 |
-| deckPresent 1440 dark | 200 | 0.0647 | 2 | 0 | 0 |
-| deckPresent 1280 light | 200 | 0.0729 | 2 | 0 | 0 |
-| deckPresent 1280 dark | 200 | 0.0729 | 2 | 0 | 0 |
-| deckPresent 390 light | 200 | 0.0000 | 1 | 0 | 0 |
-| deckPresent 390 dark | 200 | 0.0000 | 1 | 0 | 0 |
-| deck 1440 light F | 200 | 0.0021 | 2 | 0 | 0 |
-| deck 1440 light I | 200 | 0.0021 | 1 | 0 | 0 |
-| deck 1440 light B | 200 | 0.0000 | 0 | 0 | 0 |
-| edit 1440 light F | 200 | 0.0004 | 1 | 0 | 0 |
-| edit 1440 light I | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1440 light F | 200 | 0.0003 | 1 | 0 | 0 |
-| decks 1440 light I | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1440 light B | 200 | 0.0000 | 0 | 0 | 0 |
-| print 1440 light F | 200 | 0.0002 | 1 | 0 | 0 |
-| print 1440 light I | 200 | 0.0000 | 0 | 0 | 0 |
-| print 1440 light B | 200 | 0.0000 | 0 | 0 | 0 |
-| present 1440 light F | 200 | 0.0002 | 1 | 0 | 0 |
-| present 1440 light I | 200 | 0.0000 | 0 | 0 | 0 |
-| deck 1440 light reduced | 200 | 0.0021 | 1 | 0 | 0 |
-| embed 1440 light framed |  | 0.0000 | 0 | 0 | 0 |
+| Cell                              | Status | Load CLS | Load entries | States run | States skipped |
+| --------------------------------- | ------ | -------- | ------------ | ---------- | -------------- |
+| new 1440 light                    | 200    | 0.0000   | 0            | 1          | 0              |
+| new 1440 dark                     | 200    | 0.0000   | 0            | 0          | 0              |
+| new 1280 light                    | 200    | 0.0000   | 0            | 0          | 0              |
+| new 1280 dark                     | 200    | 0.0000   | 0            | 0          | 0              |
+| new 390 light                     | 200    | 0.0000   | 0            | 0          | 0              |
+| new 390 dark                      | 200    | 0.0000   | 0            | 0          | 0              |
+| edit 1440 light                   | 200    | 0.0000   | 0            | 12         | 6              |
+| edit 1440 light notesHidden       | 200    | 0.0134   | 1            | 0          | 0              |
+| edit 1440 light listClosed        | 200    | 0.0000   | 0            | 0          | 0              |
+| edit 1440 dark                    | 200    | 0.0000   | 0            | 0          | 0              |
+| edit 1440 dark notesHidden        | 200    | 0.0134   | 1            | 0          | 0              |
+| edit 1440 dark listClosed         | 200    | 0.0000   | 0            | 0          | 0              |
+| edit 1280 light                   | 200    | 0.0000   | 0            | 0          | 0              |
+| edit 1280 light notesHidden       | 200    | 0.0119   | 1            | 0          | 0              |
+| edit 1280 light listClosed        | 200    | 0.0000   | 0            | 0          | 0              |
+| edit 1280 dark                    | 200    | 0.0000   | 0            | 0          | 0              |
+| edit 1280 dark notesHidden        | 200    | 0.0119   | 1            | 0          | 0              |
+| edit 1280 dark listClosed         | 200    | 0.0000   | 0            | 0          | 0              |
+| edit 390 light                    | 200    | 0.0000   | 0            | 0          | 0              |
+| edit 390 dark                     | 200    | 0.0000   | 0            | 0          | 0              |
+| deck 1440 light                   | 200    | 0.0021   | 1            | 1          | 0              |
+| deck 1440 light listClosed        | 200    | 0.0008   | 1            | 0          | 0              |
+| deck 1440 light outline           | 200    | 0.1172   | 1            | 0          | 0              |
+| deck 1440 light listClosedOutline | 200    | 0.0008   | 1            | 0          | 0              |
+| deck 1440 light gridSaved         | 200    | 0.0027   | 1            | 0          | 0              |
+| deck 1440 light hash              | 200    | 0.0120   | 2            | 0          | 0              |
+| deck 1440 dark                    | 200    | 0.0021   | 1            | 0          | 0              |
+| deck 1440 dark listClosed         | 200    | 0.0008   | 1            | 0          | 0              |
+| deck 1440 dark outline            | 200    | 0.1172   | 1            | 0          | 0              |
+| deck 1440 dark listClosedOutline  | 200    | 0.0008   | 1            | 0          | 0              |
+| deck 1440 dark gridSaved          | 200    | 0.0027   | 1            | 0          | 0              |
+| deck 1440 dark hash               | 200    | 0.0120   | 2            | 0          | 0              |
+| deck 1280 light                   | 200    | 0.0017   | 1            | 0          | 0              |
+| deck 1280 light listClosed        | 200    | 0.0043   | 1            | 0          | 0              |
+| deck 1280 light outline           | 200    | 0.1306   | 2            | 0          | 0              |
+| deck 1280 light listClosedOutline | 200    | 0.0043   | 1            | 0          | 0              |
+| deck 1280 light gridSaved         | 200    | 0.0037   | 1            | 0          | 0              |
+| deck 1280 light hash              | 200    | 0.0127   | 2            | 0          | 0              |
+| deck 1280 dark                    | 200    | 0.0017   | 1            | 0          | 0              |
+| deck 1280 dark listClosed         | 200    | 0.0043   | 1            | 0          | 0              |
+| deck 1280 dark outline            | 200    | 0.1306   | 2            | 0          | 0              |
+| deck 1280 dark listClosedOutline  | 200    | 0.0043   | 1            | 0          | 0              |
+| deck 1280 dark gridSaved          | 200    | 0.0037   | 1            | 0          | 0              |
+| deck 1280 dark hash               | 200    | 0.0127   | 2            | 0          | 0              |
+| deck 390 light                    | 200    | 0.0000   | 1            | 0          | 0              |
+| deck 390 dark                     | 200    | 0.0000   | 1            | 0          | 0              |
+| embed 1440 light                  | 200    | 0.0021   | 1            | 0          | 0              |
+| embed 1440 dark                   | 200    | 0.0021   | 1            | 0          | 0              |
+| embed 1280 light                  | 200    | 0.0017   | 1            | 0          | 0              |
+| embed 1280 dark                   | 200    | 0.0017   | 1            | 0          | 0              |
+| embed 390 light                   | 200    | 0.0000   | 1            | 0          | 0              |
+| embed 390 dark                    | 200    | 0.0000   | 1            | 0          | 0              |
+| decks 1440 light                  | 200    | 0.0003   | 1            | 1          | 0              |
+| decks 1440 light listView         | 200    | 0.0026   | 1            | 0          | 0              |
+| decks 1440 light sortTitle        | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 1440 light openedHistory    | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 1440 dark                   | 200    | 0.0003   | 1            | 0          | 0              |
+| decks 1440 dark listView          | 200    | 0.0026   | 2            | 0          | 0              |
+| decks 1440 dark sortTitle         | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 1440 dark openedHistory     | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 1280 light                  | 200    | 0.0004   | 1            | 0          | 0              |
+| decks 1280 light listView         | 200    | 0.0037   | 1            | 0          | 0              |
+| decks 1280 light sortTitle        | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 1280 light openedHistory    | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 1280 dark                   | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 1280 dark listView          | 200    | 0.0037   | 1            | 0          | 0              |
+| decks 1280 dark sortTitle         | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 1280 dark openedHistory     | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 390 light                   | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 390 dark                    | 200    | 0.0000   | 0            | 0          | 0              |
+| trash 1440 light                  | 200    | 0.0000   | 0            | 0          | 0              |
+| trash 1440 dark                   | 200    | 0.0000   | 0            | 0          | 0              |
+| trash 1280 light                  | 200    | 0.0000   | 0            | 0          | 0              |
+| trash 1280 dark                   | 200    | 0.0000   | 0            | 0          | 0              |
+| trash 390 light                   | 200    | 0.0000   | 0            | 0          | 0              |
+| trash 390 dark                    | 200    | 0.0000   | 0            | 0          | 0              |
+| present 1440 light                | 200    | 0.0000   | 0            | 2          | 0              |
+| present 1440 dark                 | 200    | 0.0000   | 0            | 0          | 0              |
+| present 1280 light                | 200    | 0.0000   | 0            | 0          | 0              |
+| present 1280 dark                 | 200    | 0.0000   | 0            | 0          | 0              |
+| present 390 light                 | 200    | 0.0000   | 0            | 0          | 0              |
+| present 390 dark                  | 200    | 0.0000   | 0            | 0          | 0              |
+| print 1440 light                  | 200    | 0.0000   | 0            | 1          | 1              |
+| print 1440 dark                   | 200    | 0.0000   | 0            | 0          | 0              |
+| print 1280 light                  | 200    | 0.0000   | 0            | 0          | 0              |
+| print 1280 dark                   | 200    | 0.0000   | 0            | 0          | 0              |
+| print 390 light                   | 200    | 0.0000   | 0            | 0          | 0              |
+| print 390 dark                    | 200    | 0.0000   | 0            | 0          | 0              |
+| deckPresent 1440 light            | 200    | 0.0647   | 2            | 0          | 0              |
+| deckPresent 1440 dark             | 200    | 0.0647   | 2            | 0          | 0              |
+| deckPresent 1280 light            | 200    | 0.0729   | 2            | 0          | 0              |
+| deckPresent 1280 dark             | 200    | 0.0729   | 2            | 0          | 0              |
+| deckPresent 390 light             | 200    | 0.0000   | 1            | 0          | 0              |
+| deckPresent 390 dark              | 200    | 0.0000   | 1            | 0          | 0              |
+| deck 1440 light F                 | 200    | 0.0021   | 2            | 0          | 0              |
+| deck 1440 light I                 | 200    | 0.0021   | 1            | 0          | 0              |
+| deck 1440 light B                 | 200    | 0.0000   | 0            | 0          | 0              |
+| edit 1440 light F                 | 200    | 0.0007   | 1            | 0          | 0              |
+| edit 1440 light I                 | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 1440 light F                | 200    | 0.0003   | 1            | 0          | 0              |
+| decks 1440 light I                | 200    | 0.0000   | 0            | 0          | 0              |
+| decks 1440 light B                | 200    | 0.0000   | 0            | 0          | 0              |
+| print 1440 light F                | 200    | 0.0002   | 1            | 0          | 0              |
+| print 1440 light I                | 200    | 0.0000   | 0            | 0          | 0              |
+| print 1440 light B                | 200    | 0.0000   | 0            | 0          | 0              |
+| present 1440 light F              | 200    | 0.0002   | 1            | 0          | 0              |
+| present 1440 light I              | 200    | 0.0000   | 0            | 0          | 0              |
+| deck 1440 light reduced           | 200    | 0.0021   | 1            | 0          | 0              |
+| embed 1440 light framed           |        | 0.0000   | 0            | 0          | 0              |
 
 ## Failures
 
-| Cell | Audit id | Why |
-| --- | --- | --- |
-| edit 1440 light | ? | state panel: entries in 17 frames |
-| edit 1440 light | ? | state inbox: entries in 16 frames |
-| edit 1440 light notesHidden | E2 | load entry 0.0134 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet |
-| edit 1440 dark notesHidden | E2 | load entry 0.0134 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet |
-| edit 1280 light notesHidden | E2 | load entry 0.0119 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet |
-| edit 1280 dark notesHidden | E2 | load entry 0.0119 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet |
-| deck 1440 light | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
-| deck 1440 light listClosed | D1 | load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep |
-| deck 1440 light outline | D1 | load entry 0.1172 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow |
-| deck 1440 light listClosedOutline | D1 | load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep |
-| deck 1440 light gridSaved | D1 | load entry 0.0027 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep |
-| deck 1440 light hash | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
-| deck 1440 light hash | D1 | load entry 0.0099 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll.is-shots > section.pt-grp |
-| deck 1440 dark | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
-| deck 1440 dark listClosed | D1 | load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep |
-| deck 1440 dark outline | D1 | load entry 0.1172 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow |
-| deck 1440 dark listClosedOutline | D1 | load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep |
-| deck 1440 dark gridSaved | D1 | load entry 0.0027 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep |
-| deck 1440 dark hash | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
-| deck 1440 dark hash | D1 | load entry 0.0099 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll.is-shots > section.pt-grp |
-| deck 1280 light | D1 | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg |
-| deck 1280 light listClosed | D1 | load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep |
-| deck 1280 light outline | D1 | load entry 0.0021 from div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > div.pt-seg.has-ind / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.is-solid.hide-sm / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.pt-theme / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.hide-sm.pt-full / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.pt-copy |
-| deck 1280 light outline | D1 | load entry 0.1285 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow |
-| deck 1280 light listClosedOutline | D1 | load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep |
-| deck 1280 light gridSaved | D1 | load entry 0.0037 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep |
-| deck 1280 light hash | D1 | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg |
-| deck 1280 light hash | D1 | load entry 0.0109 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll.is-shots > section.pt-grp |
-| deck 1280 dark | D1 | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg |
-| deck 1280 dark listClosed | D1 | load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep |
-| deck 1280 dark outline | D1 | load entry 0.0021 from div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > div.pt-seg.has-ind / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.is-solid.hide-sm / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.pt-theme / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.hide-sm.pt-full / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.pt-copy |
-| deck 1280 dark outline | D1 | load entry 0.1285 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow |
-| deck 1280 dark listClosedOutline | D1 | load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep |
-| deck 1280 dark gridSaved | D1 | load entry 0.0037 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep |
-| deck 1280 dark hash | D1 | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg |
-| deck 1280 dark hash | D1 | load entry 0.0109 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll.is-shots > section.pt-grp |
-| deck 390 light | D1 | load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r |
-| deck 390 dark | D1 | load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r |
-| embed 1440 light | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
-| embed 1440 dark | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
-| embed 1280 light | D1 | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg |
-| embed 1280 dark | D1 | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg |
-| embed 390 light | D1 | load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r |
-| embed 390 dark | D1 | load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r |
-| decks 1440 light | L5 | state filter: html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
-| decks 1440 light | L5 | state filter: html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
-| decks 1440 light | ? | state filter: entries in 2 frames |
-| decks 1440 light listView | L5 | load entry 0.0026 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
-| decks 1440 dark listView | L5 | load entry 0.0026 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
-| decks 1280 light listView | L5 | load entry 0.0037 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
-| decks 1280 dark listView | L5 | load entry 0.0037 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
-| present 1440 light | ? | state timerHour: body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-timer > button.ts-presenter-text-btn / body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-timer > button.ts-presenter-text-btn |
-| present 1440 light | ? | state timerHour: entries in 1 frames |
-| deckPresent 1440 light | E2 | load entry 0.0472 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage |
-| deckPresent 1440 light | E2 | load entry 0.0175 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present / div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage / div.sheet.is-present > div.ts-stage.stage > div.pt-slide > section.slide.opener.s-opener > div.ts-chips |
-| deckPresent 1440 dark | E2 | load entry 0.0472 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage |
-| deckPresent 1440 dark | E2 | load entry 0.0175 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present / div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage / div.sheet.is-present > div.ts-stage.stage > div.pt-slide > section.slide.opener.s-opener > div.ts-chips |
-| deckPresent 1280 light | E2 | load entry 0.0531 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage |
-| deckPresent 1280 light | E2 | load entry 0.0197 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present / div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage |
-| deckPresent 1280 dark | E2 | load entry 0.0531 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage |
-| deckPresent 1280 dark | E2 | load entry 0.0197 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present / div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage / div.sheet.is-present > div.ts-stage.stage > div.pt-slide > section.slide.opener.s-opener > div.ts-chips |
-| deckPresent 390 light | E2 | load entry 0.0616 from body > div.pt-viewer.is-present.sb-open > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-present |
-| deckPresent 390 dark | E2 | load entry 0.0616 from body > div.pt-viewer.is-present.sb-open > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-present |
-| deck 1440 light F | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
-| deck 1440 light F | D1 | load entry 0.0005 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-slide > section.slide.is-on > div.in > div.center > div.big /  |
-| deck 1440 light I | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
-| edit 1440 light F | G1 | load entry 0.0004 from body > div.ts-editor > div.pt-viewer.is-editor > header.ts-title-row > div.ts-title-r / div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title / div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot / div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot / div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title |
-| decks 1440 light F | L5 | load entry 0.0003 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail / body > main.ts-home.ts-home-page > section.ts-recent > div.ts-recent-head > div.ts-recent-tools / body > main.ts-home.ts-home-page > section#templates.ts-strip > div.ts-strip-head > a.ts-strip-gallery |
-| print 1440 light F | ? | load entry 0.0002 from html > body > main.ts-print > header.ts-print-bar > label.ts-print-layout / html > body > main.ts-print > header.ts-print-bar > button.pt-ib.is-text / html > body > main.ts-print > header.ts-print-bar > label.ts-print-check / html > body > main.ts-print > header.ts-print-bar > span.ts-print-title |
-| present 1440 light F | P3 | load entry 0.0002 from div.ts-presenter-row > div.ts-presenter-current > div.ts-presenter-pick > button.ts-presenter-counter > span.ts-presenter-counter-title / div.ts-presenter > div.ts-presenter-body > aside.ts-presenter-side > div.ts-presenter-tabs > button#ts-presenter-tab-audience.ts-presenter-tab.is-disabled /  / body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-facts > span.ts-presenter-link / body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-facts > span.ts-presenter-clock |
-| deck 1440 light reduced | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
+| Cell                              | Audit id | Why                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| --------------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| edit 1440 light                   | ?        | state panel: entries in 17 frames                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| edit 1440 light                   | ?        | state inbox: entries in 17 frames                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| edit 1440 light notesHidden       | E2       | load entry 0.0134 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| edit 1440 dark notesHidden        | E2       | load entry 0.0134 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| edit 1280 light notesHidden       | E2       | load entry 0.0119 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| edit 1280 dark notesHidden        | E2       | load entry 0.0119 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| deck 1440 light                   | D1       | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| deck 1440 light listClosed        | D1       | load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep                                                                                                                                                                         |
+| deck 1440 light outline           | D1       | load entry 0.1172 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow                                                                                                           |
+| deck 1440 light listClosedOutline | D1       | load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep                                                                                                                                                                         |
+| deck 1440 light gridSaved         | D1       | load entry 0.0027 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep                                                                                                |
+| deck 1440 light hash              | D1       | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| deck 1440 light hash              | D1       | load entry 0.0099 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll.is-shots > section.pt-grp                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| deck 1440 dark                    | D1       | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| deck 1440 dark listClosed         | D1       | load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep                                                                                                                                                                         |
+| deck 1440 dark outline            | D1       | load entry 0.1172 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow                                                                                                           |
+| deck 1440 dark listClosedOutline  | D1       | load entry 0.0008 from div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep                                                                                                                                                                         |
+| deck 1440 dark gridSaved          | D1       | load entry 0.0027 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep                                                                                                |
+| deck 1440 dark hash               | D1       | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| deck 1440 dark hash               | D1       | load entry 0.0099 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll.is-shots > section.pt-grp                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| deck 1280 light                   | D1       | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg                                                                                                  |
+| deck 1280 light listClosed        | D1       | load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep                                         |
+| deck 1280 light outline           | D1       | load entry 0.0021 from div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > div.pt-seg.has-ind / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.is-solid.hide-sm / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.pt-theme / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.hide-sm.pt-full / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.pt-copy |
+| deck 1280 light outline           | D1       | load entry 0.1285 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow                                                                                                           |
+| deck 1280 light listClosedOutline | D1       | load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep                                         |
+| deck 1280 light gridSaved         | D1       | load entry 0.0037 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep                                                                                                |
+| deck 1280 light hash              | D1       | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg                                                                                                  |
+| deck 1280 light hash              | D1       | load entry 0.0109 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll.is-shots > section.pt-grp                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| deck 1280 dark                    | D1       | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg                                                                                                  |
+| deck 1280 dark listClosed         | D1       | load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep                                         |
+| deck 1280 dark outline            | D1       | load entry 0.0021 from div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > div.pt-seg.has-ind / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.is-solid.hide-sm / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.pt-theme / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.hide-sm.pt-full / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r > button.pt-ib.pt-copy |
+| deck 1280 dark outline            | D1       | load entry 0.1285 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow / div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll > section.pt-grp > a.pt-orow                                                                                                           |
+| deck 1280 dark listClosedOutline  | D1       | load entry 0.0043 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > span.pt-sep                                         |
+| deck 1280 dark gridSaved          | D1       | load entry 0.0037 from body > div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-prev / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar > div.pt-bar-l > span.pt-sep                                                                                                |
+| deck 1280 dark hash               | D1       | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg                                                                                                  |
+| deck 1280 dark hash               | D1       | load entry 0.0109 from body > div.pt-viewer > aside.pt-sb > nav.pt-tree.pt-scroll.is-shots > section.pt-grp                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| deck 390 light                    | D1       | load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| deck 390 dark                     | D1       | load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| embed 1440 light                  | D1       | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| embed 1440 dark                   | D1       | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| embed 1280 light                  | D1       | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg                                                                                                  |
+| embed 1280 dark                   | D1       | load entry 0.0017 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-next / section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-l > button.pt-ib.pt-prev > svg                                                                                                  |
+| embed 390 light                   | D1       | load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| embed 390 dark                    | D1       | load entry 0.0002 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1.is-tight-2 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| decks 1440 light                  | L5       | load entry 0.0003 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail / body > main.ts-home.ts-home-page > section.ts-recent > div.ts-recent-head > div.ts-recent-tools / body > main.ts-home.ts-home-page > section#templates.ts-strip > div.ts-strip-head > a.ts-strip-gallery                                                                                                                                                                                                                                                          |
+| decks 1440 light                  | L5       | state filter: html > body > main.ts-home.ts-home-page > footer.ts-home-tail                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| decks 1440 light                  | L5       | state filter: html > body > main.ts-home.ts-home-page > footer.ts-home-tail                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| decks 1440 light                  | ?        | state filter: entries in 2 frames                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| decks 1440 light listView         | L5       | load entry 0.0026 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| decks 1440 dark                   | L5       | load entry 0.0003 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail / body > main.ts-home.ts-home-page > section.ts-recent > div.ts-recent-head > div.ts-recent-tools / body > main.ts-home.ts-home-page > section#templates.ts-strip > div.ts-strip-head > a.ts-strip-gallery                                                                                                                                                                                                                                                          |
+| decks 1440 dark listView          | L5       | load entry 0.0003 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail / body > main.ts-home.ts-home-page > section.ts-recent > div.ts-recent-head > div.ts-recent-tools / body > main.ts-home.ts-home-page > section#templates.ts-strip > div.ts-strip-head > a.ts-strip-gallery                                                                                                                                                                                                                                                          |
+| decks 1440 dark listView          | L5       | load entry 0.0026 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| decks 1280 light                  | L5       | load entry 0.0004 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail / body > main.ts-home.ts-home-page > section.ts-recent > div.ts-recent-head > div.ts-recent-tools / body > main.ts-home.ts-home-page > section#templates.ts-strip > div.ts-strip-head > a.ts-strip-gallery                                                                                                                                                                                                                                                          |
+| decks 1280 light listView         | L5       | load entry 0.0037 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| decks 1280 dark listView          | L5       | load entry 0.0037 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| present 1440 light                | ?        | state timerHour: body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-timer > button.ts-presenter-text-btn / body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-timer > button.ts-presenter-text-btn                                                                                                                                                                                                                                                                                                                 |
+| present 1440 light                | ?        | state timerHour: entries in 1 frames                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| deckPresent 1440 light            | E2       | load entry 0.0472 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage                                                                                                                                                                                                                                                                                                                                                                                                         |
+| deckPresent 1440 light            | E2       | load entry 0.0175 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present / div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage / div.sheet.is-present > div.ts-stage.stage > div.pt-slide > section.slide.opener.s-opener > div.ts-chips                                                                                                                                                                        |
+| deckPresent 1440 dark             | E2       | load entry 0.0472 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage                                                                                                                                                                                                                                                                                                                                                                                                         |
+| deckPresent 1440 dark             | E2       | load entry 0.0175 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present                                                                                                                                                                                                                                                                                                                                                                                                             |
+| deckPresent 1280 light            | E2       | load entry 0.0531 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage                                                                                                                                                                                                                                                                                                                                                                                                         |
+| deckPresent 1280 light            | E2       | load entry 0.0197 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present / div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage / div.sheet.is-present > div.ts-stage.stage > div.pt-slide > section.slide.opener.s-opener > div.ts-chips                                                                                                                                                                        |
+| deckPresent 1280 dark             | E2       | load entry 0.0531 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage                                                                                                                                                                                                                                                                                                                                                                                                         |
+| deckPresent 1280 dark             | E2       | load entry 0.0197 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present                                                                                                                                                                                                                                                                                                                                                                                                             |
+| deckPresent 390 light             | E2       | load entry 0.0616 from body > div.pt-viewer.is-present.sb-open > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-present                                                                                                                                                                                                                                                                                                                                                                                                               |
+| deckPresent 390 dark              | E2       | load entry 0.0616 from body > div.pt-viewer.is-present.sb-open > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-present                                                                                                                                                                                                                                                                                                                                                                                                               |
+| deck 1440 light F                 | D1       | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| deck 1440 light F                 | D1       | load entry 0.0005 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-slide > section.slide.is-on > div.in > div.center > div.big /                                                                                                                                                                 |
+| deck 1440 light I                 | D1       | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| edit 1440 light F                 | G1       | load entry 0.0007 from body > div.ts-editor > div.pt-viewer.is-editor > header.ts-title-row > div.ts-title-r / div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title / div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot / div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot / div.pt-slide > section.slide.is-on > div.in > div.center > div.big                                                               |
+| decks 1440 light F                | L5       | load entry 0.0003 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail / body > main.ts-home.ts-home-page > section.ts-recent > div.ts-recent-head > div.ts-recent-tools / body > main.ts-home.ts-home-page > section#templates.ts-strip > div.ts-strip-head > a.ts-strip-gallery                                                                                                                                                                                                                                                          |
+| print 1440 light F                | ?        | load entry 0.0002 from html > body > main.ts-print > header.ts-print-bar > label.ts-print-layout / html > body > main.ts-print > header.ts-print-bar > button.pt-ib.is-text / html > body > main.ts-print > header.ts-print-bar > label.ts-print-check / html > body > main.ts-print > header.ts-print-bar > span.ts-print-title                                                                                                                                                                                                                         |
+| present 1440 light F              | P3       | load entry 0.0002 from div.ts-presenter-row > div.ts-presenter-current > div.ts-presenter-pick > button.ts-presenter-counter > span.ts-presenter-counter-title / div.ts-presenter > div.ts-presenter-body > aside.ts-presenter-side > div.ts-presenter-tabs > button#ts-presenter-tab-audience.ts-presenter-tab.is-disabled / / body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-facts > span.ts-presenter-link / body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-facts > span.ts-presenter-clock             |
+| deck 1440 light reduced           | D1       | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 ## Skipped states
 
 - edit 1440 light: filmstrip (enter failed: page.click: Timeout 30000ms exceeded.
-Call log:
+  Call log:
   - waiting for locator('[data-menu-item="view.filmstrip"]')
-)
+    )
 - edit 1440 light: write (enter failed: page.evaluate: RangeError: Unknown action "slide.setNotes"
-    at t (http://localhost:4344/assets/useStudioSession-BoZ2_HHm.js:1:1580)
-    at Object.dispatch (http://localhost:4344/assets/useStudioSession-BoZ2_HHm.js:1:1778)
-    at X (http://localhost:4344/assets/edit._deckId-Bpvt4QCe.js:2:24143)
-    at Object.<anonymous> (http://localhost:4344/assets/useStudioSession-BoZ2_HHm.js:1:2441)
-    at N (http://localhost:4344/assets/useStudioSession-BoZ2_HHm.js:1:8634)
-    at Object.invoke (http://localhost:4344/assets/useStudioSession-BoZ2_HHm.js:1:11080)
-    at eval (eval at evaluate (:311:30), <anonymous>:7:22)
-    at async <anonymous>:337:30)
+  at t (http://localhost:4344/assets/useStudioSession-Ce-WL9RY.js:1:1830)
+  at Object.dispatch (http://localhost:4344/assets/useStudioSession-Ce-WL9RY.js:1:2030)
+  at W (http://localhost:4344/assets/EditorRoot-DfvKTr7p.js:18:24233)
+  at Object.<anonymous> (http://localhost:4344/assets/useStudioSession-Ce-WL9RY.js:1:2695)
+  at et (http://localhost:4344/assets/useStudioSession-Ce-WL9RY.js:1:8925)
+  at Object.invoke (http://localhost:4344/assets/useStudioSession-Ce-WL9RY.js:1:11400)
+  at eval (eval at evaluate (:311:30), <anonymous>:7:22)
+  at async <anonymous>:337:30)
 - edit 1440 light: ditherDrag (control absent: [data-control="formatOptions.dither.black.slider"])
 - edit 1440 light: share (control absent: [data-control="title.share"])
-- edit 1440 light: signIn (enter failed: page.click: Timeout 30000ms exceeded.
-Call log:
-  - waiting for locator('[data-menu-item="title.account.signIn"]')
-)
 - edit 1440 light: follow (control absent: [data-control="title.presence.more"])
 - edit 1440 light: join20 (enter failed: page.evaluate: Error: skip:no presence simulation hook (window.__tsPresenceSimulate)
-    at eval (eval at evaluate (:311:30), <anonymous>:4:17)
-    at UtilityScript.evaluate (<anonymous>:313:16)
-    at UtilityScript.<anonymous> (<anonymous>:1:44))
+  at eval (eval at evaluate (:311:30), <anonymous>:4:17)
+  at UtilityScript.evaluate (<anonymous>:313:16)
+  at UtilityScript.<anonymous> (<anonymous>:1:44))
 - print 1440 light: printSkipped (enter failed: page.click: Timeout 30000ms exceeded.
-Call log:
+  Call log:
   - waiting for locator('[data-control="print.skipped"]')
     - locator resolved to <input type="checkbox" data-control="print.skipped"/>
   - attempting click action
     2 × waiting for element to be visible, enabled and stable
-      - element is visible, enabled and stable
-      - scrolling into view if needed
-      - done scrolling
-      - <span aria-hidden="true" class="ts-hm-dialog-box"></span> intercepts pointer events
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+    - <span aria-hidden="true" class="ts-hm-dialog-box"></span> intercepts pointer events
     - retrying click action
     - waiting 20ms
-    2 × waiting for element to be visible, enabled and stable
+      2 × waiting for element to be visible, enabled and stable
       - element is visible, enabled and stable
       - scrolling into view if needed
       - done scrolling
       - <span aria-hidden="true" class="ts-hm-dialog-box"></span> intercepts pointer events
     - retrying click action
       - waiting 100ms
-    58 × waiting for element to be visible, enabled and stable
-       - element is visible, enabled and stable
-       - scrolling into view if needed
-       - done scrolling
-       - <span aria-hidden="true" class="ts-hm-dialog-box"></span> intercepts pointer events
-     - retrying click action
-       - waiting 500ms
-)
+        58 × waiting for element to be visible, enabled and stable
+      - element is visible, enabled and stable
+      - scrolling into view if needed
+      - done scrolling
+      - <span aria-hidden="true" class="ts-hm-dialog-box"></span> intercepts pointer events
+    - retrying click action
+      - waiting 500ms
+        )

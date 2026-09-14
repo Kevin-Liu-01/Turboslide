@@ -1,9 +1,12 @@
 /* The marquee rectangle (Marquee.tsx), drawn inside the overlay layer in CSS pixels. Line law
-   (SPEC 2.2): one 1px rule, --pt-ink as a state because a marquee is an active gesture; no fill,
-   so the sheet under it stays legible. It never takes the pointer. */
+   (SPEC 2.2): one 1px rule; no fill, so the sheet under it stays legible. It never takes the
+   pointer. The colour is --pt-select since round four (gslides-parity round four, the
+   orchestrator's ruling 1; Kevin's directive d): a marquee is an active gesture and reads on a
+   white slide and on a dark photograph alike, where the ink rule of the earlier rounds blended
+   into a dark picture. */
 .ts-marquee {
   position: absolute;
   box-sizing: border-box;
-  border: 1px solid var(--pt-ink);
+  border: 1px solid var(--pt-select);
   pointer-events: none;
 }

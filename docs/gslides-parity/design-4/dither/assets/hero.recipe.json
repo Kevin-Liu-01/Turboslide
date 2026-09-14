@@ -14,10 +14,7 @@
       "u_scale": 1,
       "u_shape": "none"
     },
-    "size": [
-      3200,
-      1800
-    ],
+    "size": [3200, 1800],
     "backend": "angle-metal",
     "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Max, Unspecified Version)",
     "treatment": {
@@ -31,11 +28,7 @@
       "bayer": 8,
       "resampler": "lanczos3"
     },
-    "anchors": [
-      4000,
-      5500,
-      7000
-    ]
+    "anchors": [4000, 5500, 7000]
   },
   "frames": [
     {
@@ -58,10 +51,7 @@
     }
   ],
   "og": {
-    "cells": [
-      120,
-      63
-    ],
+    "cells": [120, 63],
     "cellPx": 10,
     "litFraction": 0.2217,
     "bytes": 1956

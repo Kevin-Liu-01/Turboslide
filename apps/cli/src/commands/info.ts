@@ -1,8 +1,12 @@
-// deck.info (SPEC 7.1): title, theme, sections with slide ids and titles, counts, revision.
+// deck.info (SPEC 7.1): title, theme, sections with slide ids and titles, counts, revision. The
+// human output opens with the banner of gslides-parity SPEC-4 1.11 (the mark, the version, the
+// address, the action count and the effects backend) with the deck's id, revision and slide count
+// on its fourth line; the --json result is the facts alone.
 import { flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
 import { findDeckDir, loadDeck, slideRows } from '../deck-files.ts';
 import { canvasCounts } from '../store-actions.ts';
+import { bannerFacts, printBanner } from './banner.ts';
 
 export async function info(ctx: CommandContext): Promise<number> {
   const dir = findDeckDir(ctx.cwd, flagString(ctx.args, 'deck'), ctx.env);
@@ -37,6 +41,12 @@ export async function info(ctx: CommandContext): Promise<number> {
     updatedAt: loaded.deck.updatedAt,
   };
   ctx.out.result(result);
+  printBanner(
+    ctx,
+    bannerFacts(
+      `deck ${loaded.deck.id} at revision ${loaded.deck.revision}, ${rows.length} slides`,
+    ),
+  );
   ctx.out.human(
     `${loaded.deck.title} (${loaded.deck.id}), theme ${loaded.deck.theme}, revision ${loaded.deck.revision}`,
   );

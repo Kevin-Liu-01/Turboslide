@@ -41,17 +41,17 @@ The solid form is one path on a 16 unit box: `M0 0h16v16H0z M2 8h8v6H2z`, even o
 
 ### 1.3 The sizes, measured
 
-| Use | Size | N | Cell | File | Bytes | Colours |
-| --- | --- | --- | --- | --- | --- | --- |
-| Favicon, title row, terminal | 16 px | 8 | solid | `previews/mark-16-paper.png` | 111 | 2 |
-| /decks app bar, /home navigation | 16 px | 8 | solid | `mark-small.svg` | 544 | currentColor |
-| Title row | 24 px | 8 | solid (3 px cells) | `mark-small.svg` | | |
-| ICO 32 entry, small lockups | 32 px | 16 | 2 px | `mark-32.svg`, `previews/mark-32-paper.png` | 3,074 and 220 | 2 |
-| Wordmark mark, ICO 48 entry | 48 px | 24 | 2 px | `wordmark.svg` | 6,787 | |
-| Not found, README stacked lockup | 64 px | 32 | 2 px | `previews/mark-64-paper.png` | 426 | 2 |
-| Touch icon tile | 180 px tile, 128 px mark | 32 | 4 px | `icons/apple-touch-icon.png` | 1,397 | 2 |
-| Manifest icons | 192 and 512 tiles | 40, 56 | 4 and 8 px | `icons/icon-192.png`, `icons/icon-512.png` | 367 and 1,123 | 2 |
-| The full mark | 512 px | 64 | 8 px | `mark.svg`, `previews/mark-512-paper.png` | 38,590 and 8,345 | 2 |
+| Use                              | Size                     | N      | Cell               | File                                        | Bytes            | Colours      |
+| -------------------------------- | ------------------------ | ------ | ------------------ | ------------------------------------------- | ---------------- | ------------ |
+| Favicon, title row, terminal     | 16 px                    | 8      | solid              | `previews/mark-16-paper.png`                | 111              | 2            |
+| /decks app bar, /home navigation | 16 px                    | 8      | solid              | `mark-small.svg`                            | 544              | currentColor |
+| Title row                        | 24 px                    | 8      | solid (3 px cells) | `mark-small.svg`                            |                  |              |
+| ICO 32 entry, small lockups      | 32 px                    | 16     | 2 px               | `mark-32.svg`, `previews/mark-32-paper.png` | 3,074 and 220    | 2            |
+| Wordmark mark, ICO 48 entry      | 48 px                    | 24     | 2 px               | `wordmark.svg`                              | 6,787            |              |
+| Not found, README stacked lockup | 64 px                    | 32     | 2 px               | `previews/mark-64-paper.png`                | 426              | 2            |
+| Touch icon tile                  | 180 px tile, 128 px mark | 32     | 4 px               | `icons/apple-touch-icon.png`                | 1,397            | 2            |
+| Manifest icons                   | 192 and 512 tiles        | 40, 56 | 4 and 8 px         | `icons/icon-192.png`, `icons/icon-512.png`  | 367 and 1,123    | 2            |
+| The full mark                    | 512 px                   | 64     | 8 px               | `mark.svg`, `previews/mark-512-paper.png`   | 38,590 and 8,345 | 2            |
 
 Every preview PNG was checked for its colour count with sharp: the 16, 32 and 512 px marks contain exactly two colours (ink `#070707` and paper `#ffffff`, or paper ink `#f2f2f0` and ink), which is report 01's acceptance item 5.
 
@@ -77,16 +77,16 @@ The GT mark stays where it is content of the `gt-ink-paper` theme: the sheet's w
 
 All under `dither/icons/`, produced by `dither/build-assets.mjs` from `mark.mjs` (the brand builder turns that script into `scripts/build-icons.ts` with the output under `apps/studio/public/`, report 02 section 6).
 
-| Path | Size | Bytes | What it is |
-| --- | --- | --- | --- |
-| `favicon.ico` | 16, 32, 48 | 15,086 | Three 32 bit BMP entries with AND masks (report 02 section 6.3). Pillow lists `{(16, 16), (32, 32), (48, 48)}` and every entry decodes to 0 differing pixels against its source PNG |
-| `favicon-16.png`, `-32`, `-48` | | 116, 228, 303 | The ICO's sources: the mark in titanium on transparent, solid at 16, 2 px cells at 32 and 48 |
-| `icon.svg` | 16 unit grid | 628 | The solid form; a `<style>` with the titanium base and `@media (prefers-color-scheme: light)` ink, `dark` paper ink |
-| `apple-touch-icon.png` | 180 | 1,397 | An opaque ink tile with the paper ink mark at 128 px, 4 px cells, no corners of its own |
-| `icon-192.png`, `icon-512.png` | 192, 512 | 367, 1,123 | Manifest `any` icons: the ink tile, the mark at 160 and 448 px |
-| `icon-mask-192.png`, `icon-mask-512.png` | 192, 512 | 323, 841 | Manifest `maskable` icons: the mark at 96 and 256 px, inside the 40 percent safe circle (a 256 px square's corner is 181 px from the centre, the circle's radius is 205) |
-| `icon-mono-512.png` | 512 | 7,460 | The solid form as alpha, for the `monochrome` purpose |
-| `manifest.webmanifest` | | 973 | `name`, `short_name`, `start_url: /home`, `display: standalone`, `background_color` and `theme_color #070707`, the five icons with one purpose each |
+| Path                                     | Size         | Bytes         | What it is                                                                                                                                                                          |
+| ---------------------------------------- | ------------ | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `favicon.ico`                            | 16, 32, 48   | 15,086        | Three 32 bit BMP entries with AND masks (report 02 section 6.3). Pillow lists `{(16, 16), (32, 32), (48, 48)}` and every entry decodes to 0 differing pixels against its source PNG |
+| `favicon-16.png`, `-32`, `-48`           |              | 116, 228, 303 | The ICO's sources: the mark in titanium on transparent, solid at 16, 2 px cells at 32 and 48                                                                                        |
+| `icon.svg`                               | 16 unit grid | 628           | The solid form; a `<style>` with the titanium base and `@media (prefers-color-scheme: light)` ink, `dark` paper ink                                                                 |
+| `apple-touch-icon.png`                   | 180          | 1,397         | An opaque ink tile with the paper ink mark at 128 px, 4 px cells, no corners of its own                                                                                             |
+| `icon-192.png`, `icon-512.png`           | 192, 512     | 367, 1,123    | Manifest `any` icons: the ink tile, the mark at 160 and 448 px                                                                                                                      |
+| `icon-mask-192.png`, `icon-mask-512.png` | 192, 512     | 323, 841      | Manifest `maskable` icons: the mark at 96 and 256 px, inside the 40 percent safe circle (a 256 px square's corner is 181 px from the centre, the circle's radius is 205)            |
+| `icon-mono-512.png`                      | 512          | 7,460         | The solid form as alpha, for the `monochrome` purpose                                                                                                                               |
+| `manifest.webmanifest`                   |              | 973           | `name`, `short_name`, `start_url: /home`, `display: standalone`, `background_color` and `theme_color #070707`, the five icons with one purpose each                                 |
 
 Why titanium for the tab icon's base: Safari renders an SVG favicon's base colours and ignores the media block (report 02 section 2.1, T2), and an ICO has no scheme. An ink mark disappears on a dark strip and a paper mark on a light one, and my mark is a figure with a window, so no two colour drawing reads on both strips as Linear's does. Titanium `#8a8f98` is the token the sheet already uses for the same reason (the GT wordmark on every slide is titanium so it sits on both twins, `packages/render/src/stage.ts`). Measured contrast: 3.25:1 on a white active tab, 3.71:1 on Chrome's dark strip `#35363a`, 4.95:1 on `#202124`, 2.48:1 on Chrome's light inactive strip `#dee1e6`. Where the media block is honoured (Chrome, Firefox, report 02 section 2.1) the icon is ink on light and paper ink on dark at 20:1 and 18:1. `previews/favicon-tab-strips.png` shows both cases on both strips.
 
@@ -110,15 +110,15 @@ Every `--pt-` token in `packages/chrome/src/tokens.css` keeps its name and value
 
 Ten `--ts-` tokens, declared in `apps/studio/src/styles.css` beside the `--pt-` import, read by the /home page, the Not found page and the empty states. They read the `--pt-` tokens and never redefine them.
 
-| Token | Value | What it is |
-| --- | --- | --- |
-| `--ts-cell` | `2px` | One dither cell at 1x. Twins are 1600 by 900 with 2 px cells; a surface shows a twin at that size and crops it, never scales it |
-| `--ts-mark` | `24px` | The title row mark |
-| `--ts-h1`, `--ts-h2`, `--ts-h3` | `56px`, `32px`, `20px` | The /home ladder, weight 500, `-0.025em` on h1 and h2, `-0.01em` on h3; scaled from the sheet's `LADDER` (`packages/theme/src/tokens.ts`) under the 500 weight cap. At 760 px and below h1 is 40 and h2 26 |
-| `--ts-lead`, `--ts-body`, `--ts-small` | `20px`, `15px`, `13px` | The /home body ladder; 13 px is the chrome size and the smallest text on the page |
-| `--ts-hero-hold` | `4000ms`, `0ms` under reduced motion | How long a hero frame holds before the cut to the next |
-| `--ts-dur-cut` | `0ms` | The change between two 1-bit frames is a cut; a fade between them produces gray |
-| `--ts-plate` | `var(--pt-paper)` | The plate is the ground showing through; it draws no rule |
+| Token                                  | Value                                | What it is                                                                                                                                                                                                 |
+| -------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--ts-cell`                            | `2px`                                | One dither cell at 1x. Twins are 1600 by 900 with 2 px cells; a surface shows a twin at that size and crops it, never scales it                                                                            |
+| `--ts-mark`                            | `24px`                               | The title row mark                                                                                                                                                                                         |
+| `--ts-h1`, `--ts-h2`, `--ts-h3`        | `56px`, `32px`, `20px`               | The /home ladder, weight 500, `-0.025em` on h1 and h2, `-0.01em` on h3; scaled from the sheet's `LADDER` (`packages/theme/src/tokens.ts`) under the 500 weight cap. At 760 px and below h1 is 40 and h2 26 |
+| `--ts-lead`, `--ts-body`, `--ts-small` | `20px`, `15px`, `13px`               | The /home body ladder; 13 px is the chrome size and the smallest text on the page                                                                                                                          |
+| `--ts-hero-hold`                       | `4000ms`, `0ms` under reduced motion | How long a hero frame holds before the cut to the next                                                                                                                                                     |
+| `--ts-dur-cut`                         | `0ms`                                | The change between two 1-bit frames is a cut; a fade between them produces gray                                                                                                                            |
+| `--ts-plate`                           | `var(--pt-paper)`                    | The plate is the ground showing through; it draws no rule                                                                                                                                                  |
 
 Radii: none new; the mark, the plates, the cards and the hero are square. Motion: the six `--pt-dur-*` tokens and the hero hold are the whole vocabulary; nothing on /home animates on load; the hero's three frames change by a cut and never by a fade; `prefers-reduced-motion` sets the hold to 0 ms and the page shows frame one; a hidden tab pauses the cut.
 
@@ -138,20 +138,20 @@ Inter is the one face. Display is weight 500 with `cv11` and `ss01` at every siz
 
 ### 3.6 Where dithers and shaders appear, and where they never do
 
-| Surface | Dither | Shader | The rule, as built |
-| --- | --- | --- | --- |
-| The mark at 48 px and above | Yes, the construction of section 1 | No | Solid below 48 px |
-| /home hero | Yes: three captured frames as twins at 2 px cells, cut every 4 s | Captured only; no live mount on /home | Section 4.2; a still frame under reduced motion |
-| Empty states (no presentations, empty trash, no results) | Yes, a 320 by 180 crop of a twin at 1:1 in a `--pt-edge` frame | No | Title, one sentence, one primary action; `chrome.html` |
-| Not found | Yes, the 64 px mark (32 cells) | No | `chrome.html` |
-| Anonymous avatars and presence chips | Yes, a 24 px ink square of 8 by 8 cells at 3 px whose tier is `hash(author) mod 48 + 8` | No | The name stands beside it in words; `chrome.html` |
-| Progress | Yes, a length bar of ink cells whose leading 16 cells are the deck's ramp (`rampInk`, `packages/effects/src/ramp.ts`) | No | The track is one 1 px `--pt-hair-soft` line; the threshold map is fixed and the length moves |
-| README hero and the Open Graph card | Yes | Captured only | Sections 2.2 and 5 |
-| Present mode surround | No | No | Flat `--pt-panel-ink` (build deviation B6) |
-| Menus, toolbar, panels, dialogs, snackbars, tooltips | No | No | The line law and 13 px text |
-| Text, icons, form controls | No | No | Heroicons stay solid |
-| Filmstrip thumbnails, layout tiles, the workspace around the sheet | No | No | A thumbnail shows the slide's pixels; the workspace is flat `--pt-plate` |
-| The sheet | Only as content the user placed | Only as content | The identity never draws on the customer's slide |
+| Surface                                                            | Dither                                                                                                                | Shader                                | The rule, as built                                                                           |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------- |
+| The mark at 48 px and above                                        | Yes, the construction of section 1                                                                                    | No                                    | Solid below 48 px                                                                            |
+| /home hero                                                         | Yes: three captured frames as twins at 2 px cells, cut every 4 s                                                      | Captured only; no live mount on /home | Section 4.2; a still frame under reduced motion                                              |
+| Empty states (no presentations, empty trash, no results)           | Yes, a 320 by 180 crop of a twin at 1:1 in a `--pt-edge` frame                                                        | No                                    | Title, one sentence, one primary action; `chrome.html`                                       |
+| Not found                                                          | Yes, the 64 px mark (32 cells)                                                                                        | No                                    | `chrome.html`                                                                                |
+| Anonymous avatars and presence chips                               | Yes, a 24 px ink square of 8 by 8 cells at 3 px whose tier is `hash(author) mod 48 + 8`                               | No                                    | The name stands beside it in words; `chrome.html`                                            |
+| Progress                                                           | Yes, a length bar of ink cells whose leading 16 cells are the deck's ramp (`rampInk`, `packages/effects/src/ramp.ts`) | No                                    | The track is one 1 px `--pt-hair-soft` line; the threshold map is fixed and the length moves |
+| README hero and the Open Graph card                                | Yes                                                                                                                   | Captured only                         | Sections 2.2 and 5                                                                           |
+| Present mode surround                                              | No                                                                                                                    | No                                    | Flat `--pt-panel-ink` (build deviation B6)                                                   |
+| Menus, toolbar, panels, dialogs, snackbars, tooltips               | No                                                                                                                    | No                                    | The line law and 13 px text                                                                  |
+| Text, icons, form controls                                         | No                                                                                                                    | No                                    | Heroicons stay solid                                                                         |
+| Filmstrip thumbnails, layout tiles, the workspace around the sheet | No                                                                                                                    | No                                    | A thumbnail shows the slide's pixels; the workspace is flat `--pt-plate`                     |
+| The sheet                                                          | Only as content the user placed                                                                                       | Only as content                       | The identity never draws on the customer's slide                                             |
 
 Cells never shimmer: a dither in motion changes the tone under a fixed threshold map (the hero's three frames are three tone fields under one screen), and nothing re-seeds per frame (report 01 section 3.2 principle 5).
 
@@ -163,11 +163,11 @@ Cells never shimmer: a dither in motion changes the tone under a fixed threshold
 
 Screenshots by Playwright with Chrome for Testing 147 at device scale factor 1, `reducedMotion: reduce`, after `document.fonts.ready`:
 
-| File | Viewport | Page height | Facts checked |
-| --- | --- | --- | --- |
-| `previews/home.png` | 1440, dark | 10,423 px | `document.fonts.check('500 20px Inter')` true; every image decoded; `--pt-ink` resolves to `#f2f2f0` |
-| `previews/home-light.png` | 1440, light | 11,123 px | the same, `--pt-ink` `#070707`; the hero shows the light twins and the paper plate |
-| `previews/home-390.png` | 390, dark | 20,049 px | no horizontal overflow (the first shot came out 470 px wide because the navigation links did not collapse; the mock now hides them under 760 px) |
+| File                      | Viewport    | Page height | Facts checked                                                                                                                                    |
+| ------------------------- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `previews/home.png`       | 1440, dark  | 10,423 px   | `document.fonts.check('500 20px Inter')` true; every image decoded; `--pt-ink` resolves to `#f2f2f0`                                             |
+| `previews/home-light.png` | 1440, light | 11,123 px   | the same, `--pt-ink` `#070707`; the hero shows the light twins and the paper plate                                                               |
+| `previews/home-390.png`   | 390, dark   | 20,049 px   | no horizontal overflow (the first shot came out 470 px wide because the navigation links did not collapse; the mock now hides them under 760 px) |
 
 Opening the mock from disk in a browser: Chrome loads the token file and the pictures from `file://` but blocks the font from another `file://` path, so start Chrome with `--allow-file-access-from-files` (what the shoot did) or serve the repository root over HTTP; otherwise the page falls back to Helvetica Neue.
 
@@ -177,11 +177,11 @@ The live page shows a 1600 by 900 two tone twin at its own cells (`background-si
 
 The frames are real captures. A script mirroring `packages/materials/src/capture.ts` served `@paper-design/shaders` 0.0.78's dist from memory on a fixed origin through Playwright's request routing, mounted `liquidMetalFragmentShader` with `ShaderMount` at speed 0, minimum pixel ratio 2 and the 3200 by 1800 cap, set the frame to 4000, 5500 and 7000 ms (`MATERIAL_ANCHORS`), and screenshotted the canvas at 3200 by 1800 on ANGLE Metal (renderer string "ANGLE (Apple, ANGLE Metal Renderer: Apple M5 Max, Unspecified Version)"). The recipe: `u_colorBack #000000`, `u_colorTint #ffffff`, `u_softness 0.05`, `u_shiftRed 0`, `u_shiftBlue 0`, `u_contour 0.6`, `u_repetition 3`, `u_distortion 0.07`, `u_angle 70`, `u_scale 1`, `u_shape none`. That is the deck's recorded liquid metal recipe (`LIQUID_METAL_DECK`, `presets.ts`) on the whole canvas instead of the diamond or the sphere, so it is the GT material family without repeating the Prototemplate and Glyphfield opener. Each frame then ran through `twoToneScreenTypeScript` (`pipeline.ts`, the reference stage order with the pinned Lanczos3) with autocontrast 0.5, black point 160, white point 250 and gamma 1.5, was scaled 2x nearest and encoded as 1-bit PNGs:
 
-| Frame | Lit fraction (dark twin) | Dark twin | Light twin |
-| --- | --- | --- | --- |
-| 4000 ms | 0.3006 | `assets/hero-1-dark.png`, 14,428 bytes | `assets/hero-1-light.png`, 14,419 bytes |
-| 5500 ms | 0.3075 | `assets/hero-2-dark.png`, 14,736 bytes | `assets/hero-2-light.png`, 14,721 bytes |
-| 7000 ms | 0.2917 | `assets/hero-3-dark.png`, 14,480 bytes | `assets/hero-3-light.png`, 14,471 bytes |
+| Frame   | Lit fraction (dark twin) | Dark twin                              | Light twin                              |
+| ------- | ------------------------ | -------------------------------------- | --------------------------------------- |
+| 4000 ms | 0.3006                   | `assets/hero-1-dark.png`, 14,428 bytes | `assets/hero-1-light.png`, 14,419 bytes |
+| 5500 ms | 0.3075                   | `assets/hero-2-dark.png`, 14,736 bytes | `assets/hero-2-light.png`, 14,721 bytes |
+| 7000 ms | 0.2917                   | `assets/hero-3-dark.png`, 14,480 bytes | `assets/hero-3-light.png`, 14,471 bytes |
 
 The recipe, the renderer, the treatment and the anchors are recorded in `assets/hero.recipe.json`, the shape `material.capture` writes as a sidecar. `assets/hero-frame-continuous.jpg` is the 7.0 second frame before the screen, for the proposal only. The three lit fractions sit inside the GT twins' range of 2.4 to 43.6 percent (research-3 report 06 section 1.3); the tone sweep that chose them is in the scratchpad (`sheet-hero.png`, `sheet-hero2.png`: black 0 to 160, gamma 1 to 1.6, lit 0.29 to 0.59).
 
@@ -239,16 +239,16 @@ The page uses the ladder of section 3.2 and nothing else. Every seam is one 1 px
 
 Contrast, computed with the WCAG relative luminance formula on the token values:
 
-| Pair | Ratio | Where it is used |
-| --- | --- | --- |
-| `--pt-ink` `#070707` on `--pt-paper` `#ffffff` | 20.14:1 | Headings and body, light |
-| `--pt-ink` `#f2f2f0` on `--pt-paper` `#070707` (dark) | 17.97:1 | Headings and body, dark |
-| `--pt-ink-2` `#3a3d44` on paper | 10.88:1 | Captions, the fact line, secondary copy, light |
-| `--pt-ink-2` `#b9bcc3` on ink | 10.59:1 | The same, dark |
-| Ink on `--pt-plate` composited `#f6f6f6` | 18.64:1 | Commands in hairline boxes, light |
-| `--pt-panel-text` on `--pt-panel-ink` | 14.41:1 | The CLI banner box |
-| `--pt-titanium` `#8a8f98` on paper | 3.25:1 | The tab icon base only; never text under 19 px |
-| `--pt-titanium` on ink | 6.20:1 | The same |
+| Pair                                                  | Ratio   | Where it is used                               |
+| ----------------------------------------------------- | ------- | ---------------------------------------------- |
+| `--pt-ink` `#070707` on `--pt-paper` `#ffffff`        | 20.14:1 | Headings and body, light                       |
+| `--pt-ink` `#f2f2f0` on `--pt-paper` `#070707` (dark) | 17.97:1 | Headings and body, dark                        |
+| `--pt-ink-2` `#3a3d44` on paper                       | 10.88:1 | Captions, the fact line, secondary copy, light |
+| `--pt-ink-2` `#b9bcc3` on ink                         | 10.59:1 | The same, dark                                 |
+| Ink on `--pt-plate` composited `#f6f6f6`              | 18.64:1 | Commands in hairline boxes, light              |
+| `--pt-panel-text` on `--pt-panel-ink`                 | 14.41:1 | The CLI banner box                             |
+| `--pt-titanium` `#8a8f98` on paper                    | 3.25:1  | The tab icon base only; never text under 19 px |
+| `--pt-titanium` on ink                                | 6.20:1  | The same                                       |
 
 Rules: titanium never sets text below 19 px on /home or in the new surfaces (the fact line and every caption are `--pt-ink-2`); the smallest text is 13 px; the plate under the hero heading is opaque paper, so the heading never sits on cells; a two tone crop used as a figure carries `role="img"` and one sentence, or `aria-hidden="true"` when it is decoration (the hero frames are `aria-hidden`; the plate's text is the content); the mark's alt text is "Turboslide" (`<title>` inside every SVG, `aria-label` on the links "Turboslide home"); the hero's cut respects `prefers-reduced-motion` (the hold becomes 0 ms and frame one stands) and pauses when the tab is hidden; nothing flashes (three cuts per twelve seconds, well under any threshold); every button and link has a visible focus outline (`.pt-ib:focus-visible`, 1 px ink); the theme button's label names the appearance it switches to; the hero picture's credit is text on the page. The icon set's base is a graphic at 3.25:1 to 4.95:1 on the strips that ignore the media block, which meets the 3:1 floor for non text on the active tab and the dark strip and falls to 2.48:1 on Chrome's light inactive strip; the media block gives 20:1 and 18:1 where it is honoured.
 
@@ -256,26 +256,26 @@ Rules: titanium never sets text below 19 px on /home or in the new surfaces (the
 
 ### 7.1 Who owns what
 
-| Role | Files | Deliverable |
-| --- | --- | --- |
-| Brand builder | `packages/theme/brand/turboslide-mark.svg` (from `dither/mark.svg`, `mark-small.svg`), `packages/theme/brand/site.ts`, `packages/theme/brand/og-template.html` (from `dither/og.html`), `scripts/build-icons.ts` (from `dither/build-assets.mjs`), `apps/studio/public/{favicon.ico,icon.svg,apple-touch-icon.png,manifest.webmanifest,robots.txt,icons/*,og/turboslide.png}`, `packages/chrome/src/TurboslideMark.tsx`, `packages/chrome/src/TitleRow.tsx` line 273, `apps/studio/src/routes/decks.index.tsx` lines 530 to 537 and `decks.css`, `apps/studio/src/routes/__root.tsx` head and `NotFound`, `packages/theme/src/copy.ts` `PROPER_NOUNS`, `packages/chrome/src/menus/strings.ts` new strings, `apps/cli/src/commands/version.ts` banner, `PORTED_FROM.json`, `vite.deploy.config.ts` `routeRules` | The mark in every chrome surface, the icon set served from the CDN, the card |
-| Home builder | `apps/studio/src/routes/home.tsx`, `home.css` (from `dither/home.html`), `apps/studio/public/home/*.jpg` (the fifteen shots, content hashed), `apps/studio/public/brand/hero-{1,2,3}-{dark,light}.png` produced by `turboslide material capture` with the recipe of `assets/hero.recipe.json`, `apps/studio/e2e/home.spec.ts`, `scripts/hosted-smoke.mjs` row | The /home route, indexable, with the honest numbers |
-| Perf builder | `apps/studio/src/router.tsx`, `apps/studio/src/routes/new.tsx` line 13 and the chunk graph so /home carries no editor or shader code, the title row's Link render prop, `preload: 'viewport'` on the deck cards, the Speculation Rules script for `/new` | /home under 400 KB decoded JavaScript (report 03 section 3.2's estimate), the editor to /decks transition under 1 s |
-| Integrator | `scripts/check.mjs` steps (the icon build `--check`, the Vercel output assertion), `docs/gslides-parity/BUILD-STATUS-3.md`, the merge order (brand, then home, then perf), `THIRD_PARTY_NOTICES.md` unchanged (no new dependency) | One tree that builds and deploys to a preview |
-| Verifier | `docs/gslides-parity/verification-4/` | The checks of 7.3 with screenshots and numbers |
+| Role          | Files                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Deliverable                                                                                                         |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Brand builder | `packages/theme/brand/turboslide-mark.svg` (from `dither/mark.svg`, `mark-small.svg`), `packages/theme/brand/site.ts`, `packages/theme/brand/og-template.html` (from `dither/og.html`), `scripts/build-icons.ts` (from `dither/build-assets.mjs`), `apps/studio/public/{favicon.ico,icon.svg,apple-touch-icon.png,manifest.webmanifest,robots.txt,icons/*,og/turboslide.png}`, `packages/chrome/src/TurboslideMark.tsx`, `packages/chrome/src/TitleRow.tsx` line 273, `apps/studio/src/routes/decks.index.tsx` lines 530 to 537 and `decks.css`, `apps/studio/src/routes/__root.tsx` head and `NotFound`, `packages/theme/src/copy.ts` `PROPER_NOUNS`, `packages/chrome/src/menus/strings.ts` new strings, `apps/cli/src/commands/version.ts` banner, `PORTED_FROM.json`, `vite.deploy.config.ts` `routeRules` | The mark in every chrome surface, the icon set served from the CDN, the card                                        |
+| Home builder  | `apps/studio/src/routes/home.tsx`, `home.css` (from `dither/home.html`), `apps/studio/public/home/*.jpg` (the fifteen shots, content hashed), `apps/studio/public/brand/hero-{1,2,3}-{dark,light}.png` produced by `turboslide material capture` with the recipe of `assets/hero.recipe.json`, `apps/studio/e2e/home.spec.ts`, `scripts/hosted-smoke.mjs` row                                                                                                                                                                                                                                                                                                                                                                                                                                                  | The /home route, indexable, with the honest numbers                                                                 |
+| Perf builder  | `apps/studio/src/router.tsx`, `apps/studio/src/routes/new.tsx` line 13 and the chunk graph so /home carries no editor or shader code, the title row's Link render prop, `preload: 'viewport'` on the deck cards, the Speculation Rules script for `/new`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | /home under 400 KB decoded JavaScript (report 03 section 3.2's estimate), the editor to /decks transition under 1 s |
+| Integrator    | `scripts/check.mjs` steps (the icon build `--check`, the Vercel output assertion), `docs/gslides-parity/BUILD-STATUS-3.md`, the merge order (brand, then home, then perf), `THIRD_PARTY_NOTICES.md` unchanged (no new dependency)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | One tree that builds and deploys to a preview                                                                       |
+| Verifier      | `docs/gslides-parity/verification-4/`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | The checks of 7.3 with screenshots and numbers                                                                      |
 
 ### 7.2 What this proposal hands over
 
-| Path (under `docs/gslides-parity/design-4/dither/`) | What it is |
-| --- | --- |
-| `mark.mjs` | The generator: `WINDOW`, `FIELD_END`, `markBits(N)`, `markPath`, `cellRects`, `markSvg`, `markBlocks`; imports `bayer8` from the effects package |
-| `mark.svg`, `mark-small.svg`, `mark-32.svg`, `wordmark.svg`, `icon.svg` | The SVG sources |
-| `build-assets.mjs` | Builds the previews, the icon set, the ICO, the manifest, the size sheet and the tab strips |
-| `icons/*` | The icon set of section 2.1 |
-| `assets/hero-{1,2,3}-{dark,light}.png`, `assets/hero.recipe.json`, `assets/hero-frame-continuous.jpg`, `assets/og-screen-{dark,light}.png` | The hero twins, their recipe, the reference frame, the card's screen |
-| `home.html`, `chrome.html`, `og.html` | The mocks |
-| `previews/home.png`, `home-light.png`, `home-390.png`, `chrome.png`, `chrome-light.png`, `og.png` | The page shots |
-| `previews/mark-{512,180,64,32,16}-{paper,ink}.png`, `mark-sizes.png`, `mark-16-paper-8x.png`, `mark-32-paper-8x.png`, `favicon-tab-strips.png`, `wordmark-{paper,ink}.png`, `wordmark-paper-3x.png`, `lockup-stacked-ink.png` | The mark previews |
+| Path (under `docs/gslides-parity/design-4/dither/`)                                                                                                                                                                           | What it is                                                                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mark.mjs`                                                                                                                                                                                                                    | The generator: `WINDOW`, `FIELD_END`, `markBits(N)`, `markPath`, `cellRects`, `markSvg`, `markBlocks`; imports `bayer8` from the effects package |
+| `mark.svg`, `mark-small.svg`, `mark-32.svg`, `wordmark.svg`, `icon.svg`                                                                                                                                                       | The SVG sources                                                                                                                                  |
+| `build-assets.mjs`                                                                                                                                                                                                            | Builds the previews, the icon set, the ICO, the manifest, the size sheet and the tab strips                                                      |
+| `icons/*`                                                                                                                                                                                                                     | The icon set of section 2.1                                                                                                                      |
+| `assets/hero-{1,2,3}-{dark,light}.png`, `assets/hero.recipe.json`, `assets/hero-frame-continuous.jpg`, `assets/og-screen-{dark,light}.png`                                                                                    | The hero twins, their recipe, the reference frame, the card's screen                                                                             |
+| `home.html`, `chrome.html`, `og.html`                                                                                                                                                                                         | The mocks                                                                                                                                        |
+| `previews/home.png`, `home-light.png`, `home-390.png`, `chrome.png`, `chrome-light.png`, `og.png`                                                                                                                             | The page shots                                                                                                                                   |
+| `previews/mark-{512,180,64,32,16}-{paper,ink}.png`, `mark-sizes.png`, `mark-16-paper-8x.png`, `mark-32-paper-8x.png`, `favicon-tab-strips.png`, `wordmark-{paper,ink}.png`, `wordmark-paper-3x.png`, `lockup-stacked-ink.png` | The mark previews                                                                                                                                |
 
 ### 7.3 Acceptance
 

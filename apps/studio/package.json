@@ -41,6 +41,7 @@
     "@turboslide/viewer": "workspace:*",
     "@upstash/ratelimit": "catalog:",
     "@upstash/redis": "catalog:",
+    "@vercel/functions": "catalog:",
     "better-auth": "catalog:",
     "ioredis": "catalog:",
     "kysely": "catalog:",

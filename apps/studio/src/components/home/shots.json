@@ -1,0 +1,486 @@
+{
+  "generatedBy": "scripts/build-home-assets.ts",
+  "quality": 82,
+  "shots": [
+    {
+      "name": "01-new-presentation",
+      "source": "docs/readme/01-new-presentation.jpg",
+      "sourceSha256": "6a41955a5d133c6a375118cff162c6b347058aec833c69ab6438a5996557fda8",
+      "width": 2880,
+      "height": 1800,
+      "variants": [
+        {
+          "path": "/home/01-new-presentation-6a41955a5d.jpg",
+          "width": 2880,
+          "height": 1800,
+          "bytes": 102185,
+          "sha256": "6a41955a5d133c6a375118cff162c6b347058aec833c69ab6438a5996557fda8"
+        },
+        {
+          "path": "/home/01-new-presentation-1440-95c7e90e54.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 40468,
+          "sha256": "95c7e90e54e0752cb966b0ad1a39aa84adccd0eda9d7a70f6fcd5816b941a3f2"
+        },
+        {
+          "path": "/home/01-new-presentation-720-20c22125f5.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 14873,
+          "sha256": "20c22125f58de13025fbbf5adf80e258751d35c023761d4e2de800bfa12f4066"
+        }
+      ]
+    },
+    {
+      "name": "02-file-menu",
+      "source": "docs/readme/02-file-menu.jpg",
+      "sourceSha256": "9ec491fd3d8606797e85a8e583aa0adc1b0962998b2a5f6d63b0e4edaeb0f7c3",
+      "width": 2880,
+      "height": 1800,
+      "variants": [
+        {
+          "path": "/home/02-file-menu-9ec491fd3d.jpg",
+          "width": 2880,
+          "height": 1800,
+          "bytes": 136444,
+          "sha256": "9ec491fd3d8606797e85a8e583aa0adc1b0962998b2a5f6d63b0e4edaeb0f7c3"
+        },
+        {
+          "path": "/home/02-file-menu-1440-107f684fa6.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 54359,
+          "sha256": "107f684fa6ac03b6e852e00b49513ffc9b633741b9901f80988fd2bba2218ee2"
+        },
+        {
+          "path": "/home/02-file-menu-720-f6bd3d6446.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 19187,
+          "sha256": "f6bd3d64461e0c3320e2ee49bdd2964dc1d0c6ec30be9f5a7612391b2114c427"
+        }
+      ]
+    },
+    {
+      "name": "03-insert-menu",
+      "source": "docs/readme/03-insert-menu.jpg",
+      "sourceSha256": "244a51534941b25d4ae6014f505a78624b006c50b1231ca267a6384877532e74",
+      "width": 2880,
+      "height": 1800,
+      "variants": [
+        {
+          "path": "/home/03-insert-menu-244a515349.jpg",
+          "width": 2880,
+          "height": 1800,
+          "bytes": 204805,
+          "sha256": "244a51534941b25d4ae6014f505a78624b006c50b1231ca267a6384877532e74"
+        },
+        {
+          "path": "/home/03-insert-menu-1440-4ff453f3fc.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 79441,
+          "sha256": "4ff453f3fc1d3c7e16fcc06d0d1359ad9f2135ca39e2584699c59f524c49580f"
+        },
+        {
+          "path": "/home/03-insert-menu-720-6b09157d08.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 27100,
+          "sha256": "6b09157d089e67d3949053676810fca4665d83d2c82c0982da32d6b9055d10a5"
+        }
+      ]
+    },
+    {
+      "name": "04-layout-grid",
+      "source": "docs/readme/04-layout-grid.jpg",
+      "sourceSha256": "5d2943bed3811f2b4e96e8d168af39b5bd16eceed26836f7a4ea538ae2f5373a",
+      "width": 2880,
+      "height": 1800,
+      "variants": [
+        {
+          "path": "/home/04-layout-grid-5d2943bed3.jpg",
+          "width": 2880,
+          "height": 1800,
+          "bytes": 258715,
+          "sha256": "5d2943bed3811f2b4e96e8d168af39b5bd16eceed26836f7a4ea538ae2f5373a"
+        },
+        {
+          "path": "/home/04-layout-grid-1440-a047577213.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 98805,
+          "sha256": "a047577213f1516baf89d6ef1ec0662672239f69206a777a7d9946b47e157b87"
+        },
+        {
+          "path": "/home/04-layout-grid-720-59885d1f58.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 33327,
+          "sha256": "59885d1f586148e31a4fff1c4ba2e4c9d74337409b8abe69c06413fbee5ba7dd"
+        }
+      ]
+    },
+    {
+      "name": "05-filmstrip-menu",
+      "source": "docs/readme/05-filmstrip-menu.jpg",
+      "sourceSha256": "9bae4246f3fcaed138479bbd3d1bbe8c8b2834caaca15706006cbc09238a4337",
+      "width": 2880,
+      "height": 1800,
+      "variants": [
+        {
+          "path": "/home/05-filmstrip-menu-9bae4246f3.jpg",
+          "width": 2880,
+          "height": 1800,
+          "bytes": 199217,
+          "sha256": "9bae4246f3fcaed138479bbd3d1bbe8c8b2834caaca15706006cbc09238a4337"
+        },
+        {
+          "path": "/home/05-filmstrip-menu-1440-4201fc7be3.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 77205,
+          "sha256": "4201fc7be32e2465dd2e621ef8b15abf0b83c59d413fae7a96ada049cf647991"
+        },
+        {
+          "path": "/home/05-filmstrip-menu-720-c94c373d71.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 26511,
+          "sha256": "c94c373d7176fe926cc323c8979f0828e7d10c2b77506f610b4cf7b680501e80"
+        }
+      ]
+    },
+    {
+      "name": "06-canvas-rotation",
+      "source": "docs/readme/06-canvas-rotation.jpg",
+      "sourceSha256": "1f65cd739e3456d770b3f7a48e952b23af132d9a512eb1634befdb8c330dcb0d",
+      "width": 2880,
+      "height": 1800,
+      "variants": [
+        {
+          "path": "/home/06-canvas-rotation-1f65cd739e.jpg",
+          "width": 2880,
+          "height": 1800,
+          "bytes": 159535,
+          "sha256": "1f65cd739e3456d770b3f7a48e952b23af132d9a512eb1634befdb8c330dcb0d"
+        },
+        {
+          "path": "/home/06-canvas-rotation-1440-1247310512.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 65963,
+          "sha256": "1247310512087caa0be691d3b8e9484365e67a8b569a9b13365867317009239e"
+        },
+        {
+          "path": "/home/06-canvas-rotation-720-95bc95cfb5.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 25006,
+          "sha256": "95bc95cfb59e2a4f653973db68b9ad5b76eaf0876150a038ecff75a352583c38"
+        }
+      ]
+    },
+    {
+      "name": "07-canvas-snap-guides",
+      "source": "docs/readme/07-canvas-snap-guides.jpg",
+      "sourceSha256": "889630a5bd4666a46f86a473f706bd305308cc2db86fc0d81f3240812c18d998",
+      "width": 2880,
+      "height": 1800,
+      "variants": [
+        {
+          "path": "/home/07-canvas-snap-guides-889630a5bd.jpg",
+          "width": 2880,
+          "height": 1800,
+          "bytes": 147736,
+          "sha256": "889630a5bd4666a46f86a473f706bd305308cc2db86fc0d81f3240812c18d998"
+        },
+        {
+          "path": "/home/07-canvas-snap-guides-1440-2368b55cd7.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 61159,
+          "sha256": "2368b55cd7f3c00655aa4cdd5081086f2220b32a3ec3bbbaa86cc2e5132ad9ba"
+        },
+        {
+          "path": "/home/07-canvas-snap-guides-720-bc9c6b9e05.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 23178,
+          "sha256": "bc9c6b9e05794e2036dda41c2fd3711436716701ec4b0f78d60629c5941b44af"
+        }
+      ]
+    },
+    {
+      "name": "08-format-options",
+      "source": "docs/readme/08-format-options.jpg",
+      "sourceSha256": "1c7429bb8f2afca3b529578401662867d93827319d8742937c69c4598ffcda22",
+      "width": 2880,
+      "height": 1800,
+      "variants": [
+        {
+          "path": "/home/08-format-options-1c7429bb8f.jpg",
+          "width": 2880,
+          "height": 1800,
+          "bytes": 183235,
+          "sha256": "1c7429bb8f2afca3b529578401662867d93827319d8742937c69c4598ffcda22"
+        },
+        {
+          "path": "/home/08-format-options-1440-68705c671c.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 75391,
+          "sha256": "68705c671cf616947430ec3509ebdaff02358f8c05cba9c667e37c19d5f7ac01"
+        },
+        {
+          "path": "/home/08-format-options-720-1310aeb890.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 27057,
+          "sha256": "1310aeb890efdc5a4de9af885b0df1a1580e3b90f98add24153e34f2556e55fb"
+        }
+      ]
+    },
+    {
+      "name": "09-download-dialog",
+      "source": "docs/readme/09-download-dialog.jpg",
+      "sourceSha256": "86952d03f1e49874e012ea6573e7462e6ebf9d00c31d2f0a14ba9774a615c2a8",
+      "width": 2880,
+      "height": 1800,
+      "variants": [
+        {
+          "path": "/home/09-download-dialog-86952d03f1.jpg",
+          "width": 2880,
+          "height": 1800,
+          "bytes": 186647,
+          "sha256": "86952d03f1e49874e012ea6573e7462e6ebf9d00c31d2f0a14ba9774a615c2a8"
+        },
+        {
+          "path": "/home/09-download-dialog-1440-04724d326e.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 71938,
+          "sha256": "04724d326e5f66597a1e7ec0adb53346f775083cae0b15f46a6b299f8b586c57"
+        },
+        {
+          "path": "/home/09-download-dialog-720-f4bd9083d7.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 24692,
+          "sha256": "f4bd9083d74fe6ca64f897c7b5f71116d32f48b631b8a5cc26f394e8e682b1f9"
+        }
+      ]
+    },
+    {
+      "name": "10-decks-home",
+      "source": "docs/readme/10-decks-home.jpg",
+      "sourceSha256": "67260bab7e6fd213f7df3defcef3330cca51b6bd43dc948fa043161f534d457b",
+      "width": 2880,
+      "height": 1800,
+      "variants": [
+        {
+          "path": "/home/10-decks-home-67260bab7e.jpg",
+          "width": 2880,
+          "height": 1800,
+          "bytes": 269212,
+          "sha256": "67260bab7e6fd213f7df3defcef3330cca51b6bd43dc948fa043161f534d457b"
+        },
+        {
+          "path": "/home/10-decks-home-1440-6c1d687a93.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 84039,
+          "sha256": "6c1d687a9387cc9f94b109d004b2b7fbab1403edba18a36feef611be034eaf3b"
+        },
+        {
+          "path": "/home/10-decks-home-720-7296b7a9ad.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 25233,
+          "sha256": "7296b7a9adb89084e08beb989c506fe62cf0703469cf7bfc65aed1e07d0562dd"
+        }
+      ]
+    },
+    {
+      "name": "11-presenter-console",
+      "source": "docs/readme/11-presenter-console.jpg",
+      "sourceSha256": "b7b684f66e2a665d82e2b0f34e06dd666f45a9f8b0aeb48915f8c1aae20b4a56",
+      "width": 2400,
+      "height": 1500,
+      "variants": [
+        {
+          "path": "/home/11-presenter-console-b7b684f66e.jpg",
+          "width": 2400,
+          "height": 1500,
+          "bytes": 307575,
+          "sha256": "b7b684f66e2a665d82e2b0f34e06dd666f45a9f8b0aeb48915f8c1aae20b4a56"
+        },
+        {
+          "path": "/home/11-presenter-console-1440-f33c5148fc.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 102949,
+          "sha256": "f33c5148fc06296d2d86d98da094939712ca48552b4b7b4cc23756be33674de1"
+        },
+        {
+          "path": "/home/11-presenter-console-720-7074523836.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 22201,
+          "sha256": "70745238364fa8e3b35f890024a193525d57d8cd65bd703c213254ca5c8fc59b"
+        }
+      ]
+    },
+    {
+      "name": "12-slideshow-dither",
+      "source": "docs/readme/12-slideshow-dither.jpg",
+      "sourceSha256": "18bb44509103e7a337fdba485a4d02abc88fd2bbd2ffd799a1f7dbedcae82a1e",
+      "width": 2400,
+      "height": 1500,
+      "variants": [
+        {
+          "path": "/home/12-slideshow-dither-18bb445091.jpg",
+          "width": 2400,
+          "height": 1500,
+          "bytes": 305881,
+          "sha256": "18bb44509103e7a337fdba485a4d02abc88fd2bbd2ffd799a1f7dbedcae82a1e"
+        },
+        {
+          "path": "/home/12-slideshow-dither-1440-e014ccd87a.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 144757,
+          "sha256": "e014ccd87ac6af3850e7942d6e12b15af108109c7a3cfecff487d10f3e7da81d"
+        },
+        {
+          "path": "/home/12-slideshow-dither-720-cfc33e9a36.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 48355,
+          "sha256": "cfc33e9a36db4f20b4af0da4b879b0f3531f469a27fb81352e5f44f28e331a62"
+        }
+      ]
+    },
+    {
+      "name": "13-editor-light",
+      "source": "docs/readme/13-editor-light.jpg",
+      "sourceSha256": "9a99c28fbed97cdb67b3fbf05389f2ac5928aab710aff86d11dbb6921a86084a",
+      "width": 2880,
+      "height": 1800,
+      "variants": [
+        {
+          "path": "/home/13-editor-light-9a99c28fbe.jpg",
+          "width": 2880,
+          "height": 1800,
+          "bytes": 191636,
+          "sha256": "9a99c28fbed97cdb67b3fbf05389f2ac5928aab710aff86d11dbb6921a86084a"
+        },
+        {
+          "path": "/home/13-editor-light-1440-52b8286784.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 71194,
+          "sha256": "52b8286784526e3be5f8b7e794b6e4389b1211f52bb7f7ab5293c6685053d886"
+        },
+        {
+          "path": "/home/13-editor-light-720-705c421a97.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 24310,
+          "sha256": "705c421a9750554a73cf1694a815cfe591321781cdb8edc8f3bfa307345d3ae3"
+        }
+      ]
+    },
+    {
+      "name": "14-book-view",
+      "source": "docs/readme/14-book-view.jpg",
+      "sourceSha256": "ed625c23c26eba549fabc0fb71452dc05b0d80ada131996641f66ba7e5dd9ae5",
+      "width": 1920,
+      "height": 1200,
+      "variants": [
+        {
+          "path": "/home/14-book-view-ed625c23c2.jpg",
+          "width": 1920,
+          "height": 1200,
+          "bytes": 333817,
+          "sha256": "ed625c23c26eba549fabc0fb71452dc05b0d80ada131996641f66ba7e5dd9ae5"
+        },
+        {
+          "path": "/home/14-book-view-1440-b0ab3b5353.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 177590,
+          "sha256": "b0ab3b53536783d9b9cc9af9f10a75a96a2c43eddb379db73a81799d598df455"
+        },
+        {
+          "path": "/home/14-book-view-720-db32761d56.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 43099,
+          "sha256": "db32761d561281bb4eaa121d5844b60a9894e9e2e9b6c2c8923d7820222e53ef"
+        }
+      ]
+    },
+    {
+      "name": "15-grid-view",
+      "source": "docs/readme/15-grid-view.jpg",
+      "sourceSha256": "cd1a6abd548c940262b6cfb5f41dd728b76cef73ad55eecae0d2a4cb26a97501",
+      "width": 2400,
+      "height": 1500,
+      "variants": [
+        {
+          "path": "/home/15-grid-view-cd1a6abd54.jpg",
+          "width": 2400,
+          "height": 1500,
+          "bytes": 289066,
+          "sha256": "cd1a6abd548c940262b6cfb5f41dd728b76cef73ad55eecae0d2a4cb26a97501"
+        },
+        {
+          "path": "/home/15-grid-view-1440-b2dbd64ed8.jpg",
+          "width": 1440,
+          "height": 900,
+          "bytes": 107620,
+          "sha256": "b2dbd64ed8ff034dabbc4a40c32991a987330bde61e94a2127cca3fbeb682e33"
+        },
+        {
+          "path": "/home/15-grid-view-720-b986059692.jpg",
+          "width": 720,
+          "height": 450,
+          "bytes": 32526,
+          "sha256": "b9860596920ae896e82314b535a86523599425553f7e1a6c6273eda56e3f250d"
+        }
+      ]
+    },
+    {
+      "name": "hero-frame",
+      "source": "docs/gslides-parity/design-4/dither/assets/hero-frame-continuous.jpg",
+      "sourceSha256": "ff3ff239caec09423dc62a7be5bbf84728c55b2a2ddad51acb3d95c57944408e",
+      "width": 1600,
+      "height": 900,
+      "variants": [
+        {
+          "path": "/home/hero-frame-ff3ff239ca.jpg",
+          "width": 1600,
+          "height": 900,
+          "bytes": 211898,
+          "sha256": "ff3ff239caec09423dc62a7be5bbf84728c55b2a2ddad51acb3d95c57944408e"
+        },
+        {
+          "path": "/home/hero-frame-1440-a50f48ac05.jpg",
+          "width": 1440,
+          "height": 810,
+          "bytes": 105380,
+          "sha256": "a50f48ac05a28a0e4d9c301b26f26dff76a0ef6d82a4cd2582c353a34eec1383"
+        },
+        {
+          "path": "/home/hero-frame-720-b569f4258f.jpg",
+          "width": 720,
+          "height": 405,
+          "bytes": 39568,
+          "sha256": "b569f4258fc01ee9f894a0c5bd01ee4de78b2be09a47ee01714f544134adc846"
+        }
+      ]
+    }
+  ]
+}

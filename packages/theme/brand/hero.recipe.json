@@ -1,0 +1,327 @@
+{
+  "generator": "scripts/build-brand.ts --capture",
+  "capturedAt": "2026-09-14T17:37:53.060Z",
+  "materialId": "paper:liquid-metal",
+  "uniforms": {
+    "u_colorBack": "#000000",
+    "u_colorTint": "#ffffff",
+    "u_repetition": 3,
+    "u_softness": 0.05,
+    "u_shiftRed": 0,
+    "u_shiftBlue": 0,
+    "u_distortion": 0.07,
+    "u_contour": 0.6,
+    "u_angle": 70,
+    "u_shape": "none",
+    "u_fit": "contain",
+    "u_scale": 1,
+    "u_rotation": 0,
+    "u_offsetX": 0,
+    "u_offsetY": 0,
+    "u_originX": 0.5,
+    "u_originY": 0.5,
+    "u_worldWidth": 0,
+    "u_worldHeight": 0
+  },
+  "size": [3200, 1800],
+  "backend": "angle-metal",
+  "renderer": "Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max",
+  "twoTone": true,
+  "treatment": {
+    "kind": "two-tone",
+    "autocontrast": 0.5,
+    "black": 160,
+    "white": 250,
+    "gamma": 1.5,
+    "polarity": "dark-ground",
+    "cell": 2,
+    "bayer": 8,
+    "resampler": "lanczos3"
+  },
+  "plate": "lower-left",
+  "plateBox": [137, 500, 740, 271],
+  "effectsBackend": "native",
+  "palettes": {
+    "dark": {
+      "unlit": "#070707",
+      "lit": "#f2f2f0"
+    },
+    "light": {
+      "unlit": "#070707",
+      "lit": "#ffffff"
+    }
+  },
+  "scan": {
+    "fromMs": 0,
+    "toMs": 10000,
+    "stepMs": 500,
+    "rule": "fewest lit cells under PLATE_BOXES.opener, then fewest in its 30 px band, then the farthest nearest lit cell, then the earlier anchor; the figure and the Not found frames are the next two by the same rule at least 1,000 ms from every chosen anchor (SPEC-4 0.7)"
+  },
+  "frames": [
+    {
+      "anchor": 0,
+      "recipeKey": "sha256:ae59ae23aaa10b6381d6c6b8ebb240cfe9bc2cfe92f9507530a48344d91ac693",
+      "litFraction": 0.3036,
+      "litUnder": 14470,
+      "litInBand": 4620,
+      "nearestLitPx": 0,
+      "warnings": ["14470 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 500,
+      "recipeKey": "sha256:50725aeef3e44a8101f21daafaf60453a9263738d77db367fbb4009121c5caeb",
+      "litFraction": 0.2968,
+      "litUnder": 15628,
+      "litInBand": 3786,
+      "nearestLitPx": 0,
+      "warnings": ["15628 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 1000,
+      "recipeKey": "sha256:82c18983eb580ac5ae0a0d371ac40a631295cf765964ef51d25fd8a6e250452a",
+      "litFraction": 0.3041,
+      "litUnder": 16271,
+      "litInBand": 3515,
+      "nearestLitPx": 0,
+      "warnings": ["16271 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 1500,
+      "recipeKey": "sha256:3640f464d3f23c04a751f18111e643214f8404e15da911a65c0bc13125b95de7",
+      "litFraction": 0.2975,
+      "litUnder": 15730,
+      "litInBand": 4373,
+      "nearestLitPx": 0,
+      "warnings": ["15730 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 2000,
+      "recipeKey": "sha256:afbb3f533a058423a19cf099dc72f624d67bf4111dae28da155264837bd6fbdd",
+      "litFraction": 0.3067,
+      "litUnder": 14584,
+      "litInBand": 5672,
+      "nearestLitPx": 0,
+      "warnings": ["14584 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 2500,
+      "recipeKey": "sha256:c3a7fc5e71152c7aec1413bbd16580fb903a7070870bb19bcc535f5454c5773c",
+      "litFraction": 0.3098,
+      "litUnder": 14029,
+      "litInBand": 6092,
+      "nearestLitPx": 0,
+      "warnings": ["14029 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 3000,
+      "recipeKey": "sha256:3671da92b976ee4bdd5914718ef67c9e1de6b876b0f0fa667d8c6eaf624c2699",
+      "litFraction": 0.3032,
+      "litUnder": 14101,
+      "litInBand": 5587,
+      "nearestLitPx": 0,
+      "warnings": ["14101 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 3500,
+      "recipeKey": "sha256:81c96f02e549039d7c5c7f009b2a7e3dc01349ece2b54f94bddad99a28843cb6",
+      "litFraction": 0.2852,
+      "litUnder": 14773,
+      "litInBand": 4237,
+      "nearestLitPx": 0,
+      "warnings": ["14773 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 4000,
+      "recipeKey": "sha256:cc754b0e051b97884978fc9efe11fbe81a6c513b1a79510feb6deb2a37df3a20",
+      "litFraction": 0.3006,
+      "litUnder": 15481,
+      "litInBand": 3535,
+      "nearestLitPx": 0,
+      "warnings": ["15481 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 4500,
+      "recipeKey": "sha256:469f740aa947bbf3dc35c46be761764ce70e5bfffb3096fd39dbc8678a4dcf2c",
+      "litFraction": 0.3085,
+      "litUnder": 16606,
+      "litInBand": 3514,
+      "nearestLitPx": 0,
+      "warnings": ["16606 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 5000,
+      "recipeKey": "sha256:2bc3370567c4f3903a30206f3c979cf4657e84831b33f9c38f0916c63d856796",
+      "litFraction": 0.3019,
+      "litUnder": 16021,
+      "litInBand": 4372,
+      "nearestLitPx": 0,
+      "warnings": ["16021 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 5500,
+      "recipeKey": "sha256:4cd998f9649b5fe547646b4f97262ea2bb77e89ede7d0e68c89a2f2755f89ec1",
+      "litFraction": 0.3075,
+      "litUnder": 14604,
+      "litInBand": 5189,
+      "nearestLitPx": 0,
+      "warnings": ["14604 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 6000,
+      "recipeKey": "sha256:809563348fc5d31fd44952dbcab40974f4b5db9f1503d42ee69d49d0f36aec63",
+      "litFraction": 0.3045,
+      "litUnder": 13878,
+      "litInBand": 5791,
+      "nearestLitPx": 0,
+      "warnings": ["13878 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 6500,
+      "recipeKey": "sha256:a6cb6750be5da57e6d59608e77d29718a8746abb6625acf6a89273d128eeecd2",
+      "litFraction": 0.2871,
+      "litUnder": 14780,
+      "litInBand": 4455,
+      "nearestLitPx": 0,
+      "warnings": ["14780 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 7000,
+      "recipeKey": "sha256:df67c29969bd0527eda992207738c58da137782bc4469d87f654682ec81c8567",
+      "litFraction": 0.2917,
+      "litUnder": 15291,
+      "litInBand": 3744,
+      "nearestLitPx": 0,
+      "warnings": ["15291 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 7500,
+      "recipeKey": "sha256:0a83a33dea1bc3950cf45a31916fdbbe178417c42b808428b36ca94cf760b767",
+      "litFraction": 0.3039,
+      "litUnder": 16075,
+      "litInBand": 3447,
+      "nearestLitPx": 0,
+      "warnings": ["16075 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 8000,
+      "recipeKey": "sha256:2724f20e1c0e8aea13d572ab8181170e291a5a78bce20c5f01e4ca370c67add2",
+      "litFraction": 0.3115,
+      "litUnder": 16060,
+      "litInBand": 3901,
+      "nearestLitPx": 0,
+      "warnings": ["16060 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 8500,
+      "recipeKey": "sha256:824226432a15818e519edd0397a81500acc39e426a07af06a7b1d8d4abc20456",
+      "litFraction": 0.3191,
+      "litUnder": 14749,
+      "litInBand": 5669,
+      "nearestLitPx": 0,
+      "warnings": ["14749 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 9000,
+      "recipeKey": "sha256:3f5a579a07c1efda49ec134d1e0ee013da505f7db49ce79315fdb23618fef3a7",
+      "litFraction": 0.3096,
+      "litUnder": 14329,
+      "litInBand": 5915,
+      "nearestLitPx": 0,
+      "warnings": ["14329 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 9500,
+      "recipeKey": "sha256:1b5fa13a4188929a92391ee9849d1acc435d1b2d2f025ee8fcefaf696199fe82",
+      "litFraction": 0.3046,
+      "litUnder": 14029,
+      "litInBand": 6207,
+      "nearestLitPx": 0,
+      "warnings": ["14029 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    {
+      "anchor": 10000,
+      "recipeKey": "sha256:6366ec1b1c79ba2105fbd019200ad7d96f072b5709e7fe243454212a1d675cb1",
+      "litFraction": 0.2966,
+      "litUnder": 14015,
+      "litInBand": 5196,
+      "nearestLitPx": 0,
+      "warnings": ["14015 lit cell(s) under the plate (picture/plate-clear)"]
+    }
+  ],
+  "chosen": {
+    "hero": {
+      "anchor": 6000,
+      "recipeKey": "sha256:809563348fc5d31fd44952dbcab40974f4b5db9f1503d42ee69d49d0f36aec63",
+      "litFraction": 0.3045,
+      "litUnder": 13878,
+      "litInBand": 5791,
+      "nearestLitPx": 0,
+      "warnings": ["13878 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    "figure": {
+      "anchor": 10000,
+      "recipeKey": "sha256:6366ec1b1c79ba2105fbd019200ad7d96f072b5709e7fe243454212a1d675cb1",
+      "litFraction": 0.2966,
+      "litUnder": 14015,
+      "litInBand": 5196,
+      "nearestLitPx": 0,
+      "warnings": ["14015 lit cell(s) under the plate (picture/plate-clear)"]
+    },
+    "notfound": {
+      "anchor": 2500,
+      "recipeKey": "sha256:c3a7fc5e71152c7aec1413bbd16580fb903a7070870bb19bcc535f5454c5773c",
+      "litFraction": 0.3098,
+      "litUnder": 14029,
+      "litInBand": 6092,
+      "nearestLitPx": 0,
+      "warnings": ["14029 lit cell(s) under the plate (picture/plate-clear)"]
+    }
+  },
+  "twins": {
+    "hero": {
+      "anchor": 6000,
+      "dark": "/brand/hero-dark.png",
+      "light": "/brand/hero-light.png",
+      "darkBytes": 13679,
+      "lightBytes": 13689,
+      "inkFraction": {
+        "dark": 0.69545,
+        "light": 0.30455
+      },
+      "size": [1600, 900]
+    },
+    "figure": {
+      "anchor": 10000,
+      "dark": "/brand/figure-dark.png",
+      "light": "/brand/figure-light.png",
+      "darkBytes": 13873,
+      "lightBytes": 13892,
+      "inkFraction": {
+        "dark": 0.703361,
+        "light": 0.296639
+      },
+      "size": [1600, 900]
+    },
+    "notfound": {
+      "anchor": 2500,
+      "dark": "/brand/notfound-dark.png",
+      "light": "/brand/notfound-light.png",
+      "darkBytes": 13866,
+      "lightBytes": 13862,
+      "inkFraction": {
+        "dark": 0.690211,
+        "light": 0.309789
+      },
+      "size": [1600, 900]
+    }
+  },
+  "og": {
+    "cells": [120, 63],
+    "cellPx": 10,
+    "litFraction": 0.2446,
+    "darkBytes": 1885,
+    "lightBytes": 1887,
+    "dark": "/brand/og-screen-dark.png",
+    "light": "/brand/og-screen-light.png"
+  }
+}

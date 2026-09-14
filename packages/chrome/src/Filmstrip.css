@@ -1,0 +1,261 @@
+/* The editor's filmstrip (gslides-parity SPEC 4.1, 4.5), moved out of Sidebar.css in round four
+   (gslides-parity SPEC-4 0.44; PP 7 row 7) with Filmstrip.tsx: the cards, the section labels, the
+   drop line, the shake and the round three card marks. The tree's rules stay in Sidebar.css. */
+
+/* ---- the filmstrip (gslides-parity SPEC 4.1, 4.5): one card per slide, the number in a 28px
+   gutter in tabular figures, the 16:9 thumbnail in a --pt-edge frame (200 by 112 in the 256px
+   column), the current card ringed in ink at 2px, other selected cards in ink at 1px, a skipped
+   card at 40 percent with the eye-slash glyph at its top right, passive 20px titanium section
+   labels, the drop line in ink between cards, a refused drop shaking for 200ms. Line law (SPEC
+   2.2): the aside owns its right edge; a frame draws its one --pt-edge line; the current ring is
+   ink as a state (the same pair every current frame in the shell uses). Colors are tokens only;
+   motion is the fast duration and the shake, both off under reduced motion. ---- */
+.ts-filmstrip .ts-film {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 12px 32px 8px;
+  outline: none;
+}
+
+.ts-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  column-gap: 0;
+  align-items: start;
+  cursor: pointer;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 118px;
+}
+
+.ts-card:focus-visible {
+  outline: none;
+}
+
+.ts-card-n {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pt-titanium);
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  padding: 2px 0 0 2px;
+}
+
+.ts-card.is-current .ts-card-n,
+.ts-card.is-selected .ts-card-n {
+  color: var(--pt-ink);
+}
+
+.ts-card-frame {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  overflow: hidden;
+  transition: border-color var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-card:hover .ts-card-frame,
+.ts-card:focus-visible .ts-card-frame {
+  border-color: var(--pt-ink);
+}
+
+/* a selected card rings in ink; the current card's ring is 2px */
+.ts-card.is-selected .ts-card-frame {
+  border-color: var(--pt-ink);
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+.ts-card.is-current .ts-card-frame {
+  border-color: var(--pt-ink);
+  outline: 2px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+/* a skipped slide: the thumbnail at 40 percent, the glyph at the top right (SPEC 4.1) */
+.ts-card.is-skipped .ts-card-frame > .ts-thumb {
+  opacity: 0.4;
+}
+
+.ts-card-skip {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  background: var(--pt-paper);
+  color: var(--pt-ink-2);
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-card-skip svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* the empty state: one empty frame reading the prompt (SPEC 4.5) */
+.ts-card.is-empty {
+  cursor: default;
+}
+
+.ts-card-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 8px;
+  text-align: center;
+  color: var(--pt-titanium);
+  font: 12.5px/1.4 var(--pt-text);
+}
+
+/* the section labels: passive 20px titanium rows between the groups (SPEC 4.1) */
+.ts-film-section {
+  height: 20px;
+  margin: 4px 0 -4px 30px;
+  color: var(--pt-titanium);
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: -0.005em;
+  font-feature-settings: 'cv11', 'ss01';
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
+.ts-film-section.is-drop::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 4px;
+  bottom: -7px;
+  height: 2px;
+  background: var(--pt-ink);
+}
+
+/* drag: the dragged cards fade; the drop line is 2px ink above or below the card under the pointer */
+.ts-card.is-dragging {
+  opacity: 0.4;
+}
+
+.ts-card[data-drop]::after {
+  content: '';
+  position: absolute;
+  left: 28px;
+  right: 0;
+  height: 2px;
+  background: var(--pt-ink);
+  pointer-events: none;
+}
+
+.ts-card[data-drop='before']::after {
+  top: -7px;
+}
+
+.ts-card[data-drop='after']::after {
+  bottom: -7px;
+}
+
+/* a refused position (the opener rule, SPEC 4.1): the card shakes for 200ms */
+.ts-card.is-refused,
+.ts-film-section.is-refused {
+  animation: ts-shake 200ms var(--pt-ease-out) both;
+}
+
+@keyframes ts-shake {
+  0%,
+  100% {
+    transform: none;
+  }
+
+  25% {
+    transform: translateX(-3px);
+  }
+
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-card-frame {
+    transition: none;
+  }
+
+  .ts-card.is-refused,
+  .ts-film-section.is-refused {
+    animation: none;
+  }
+}
+
+/* Round three (gslides-parity SPEC-3 4.3, 5.3; research 11 6.4, 8 P11): the collaborator marks
+   inside the card frame at the top right (absolute, so the card's intrinsic size holds), the +N
+   chip in 9 px tabular figures, the comment count chip under the number in the gutter (present at
+   zero as an empty box), the 12 px chip of the outline density where the lease dot was. */
+.ts-card-marks {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: inline-flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.ts-card-marks-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 500 9px/1 var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-card-n {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.ts-card-comments {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 20px;
+  height: 16px;
+  padding: 0 3px;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 500 10px/1 var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-card-comments.is-empty {
+  border-color: transparent;
+}

@@ -1,19 +1,55 @@
-<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}#host{width:1600px;height:900px;position:relative;overflow:hidden}</style></head>
-<body><div id="host"></div>
-<script type="module">
-import * as P from '/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/@paper-design+shaders@0.0.78/node_modules/@paper-design/shaders/dist/index.js';
-window.__P = P;
-window.__mountRecipe = async (shaderName, uniforms, frameMs) => {
-  const host = document.getElementById('host');
-  host.innerHTML = '';
-  const img = new Image(); img.src = P.emptyPixel; await img.decode();
-  const u = { ...uniforms, u_image: img, u_isImage: false };
-  const frag = P[shaderName + 'FragmentShader'];
-  const mount = new P.ShaderMount(host, frag, u, { preserveDrawingBuffer: true, antialias: false }, 0, frameMs, 1, 1600 * 900 + 1, ['u_image']);
-  window.__mount = mount;
-  await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-  return 'ok';
-};
-window.__setFrame = async (ms) => { window.__mount.setFrame(ms); await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); return 'ok'; };
-window.__ready = true;
-</script></body></html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: #000;
+      }
+      #host {
+        width: 1600px;
+        height: 900px;
+        position: relative;
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="host"></div>
+    <script type="module">
+      import * as P from '/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/@paper-design+shaders@0.0.78/node_modules/@paper-design/shaders/dist/index.js';
+      window.__P = P;
+      window.__mountRecipe = async (shaderName, uniforms, frameMs) => {
+        const host = document.getElementById('host');
+        host.innerHTML = '';
+        const img = new Image();
+        img.src = P.emptyPixel;
+        await img.decode();
+        const u = { ...uniforms, u_image: img, u_isImage: false };
+        const frag = P[shaderName + 'FragmentShader'];
+        const mount = new P.ShaderMount(
+          host,
+          frag,
+          u,
+          { preserveDrawingBuffer: true, antialias: false },
+          0,
+          frameMs,
+          1,
+          1600 * 900 + 1,
+          ['u_image'],
+        );
+        window.__mount = mount;
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return 'ok';
+      };
+      window.__setFrame = async (ms) => {
+        window.__mount.setFrame(ms);
+        await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+        return 'ok';
+      };
+      window.__ready = true;
+    </script>
+  </body>
+</html>

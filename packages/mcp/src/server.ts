@@ -78,6 +78,7 @@ const INSTRUCTIONS = [
   'Every write takes the baseRevision you read and returns the normalized result; a stale revision is refused with a 409 error body that carries the current revision, so re-read and retry once.',
   'Render tools return the images as image content beside the JSON; the latest render of any slide is also deck://render/<slideId>/<theme>, and the contact sheet with its cell map is deck://sheet/<theme>.',
   'deck_lint returns Finding[]; a severity 3 finding blocks the ship step. The deck_review prompt holds the judge lens instructions.',
+  'The product page is /home and the agent guide is /llms.txt.',
 ].join(' ');
 
 async function loadImages(

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>Turboslide Open Graph card</title>
+    <!--
+  The site wide Open Graph image (gslides-parity SPEC-4 1.7; research-4 report 02 section 6.4),
+  1200 by 630, rendered in Chromium at device scale factor 1 by scripts/build-brand.ts into
+  apps/studio/public/og/turboslide.png. The composition is the mark at card size: the hero's frame
+  through the screen at 10 px cells (/brand/og-screen-dark.png, 120 by 63 cells, so a 552 px feed
+  card still shows 4.6 px cells and a 360 px unfurl 3 px); the plate cut from it at the mark's
+  proportions (left 150, width 600, bottom 79, height 236) carrying the 48 px solid mark, the word
+  as outlines and the one sentence; the address top left on its own plate. Nothing that matters
+  sits within 48 px of an edge (X crops 1.91:1 to 2:1). Generated; edit the template function in
+  scripts/build-brand.ts.
+-->
+    <link rel="stylesheet" href="../../fonts/src/inter.css" />
+    <link rel="stylesheet" href="../../chrome/src/tokens.css" />
+    <link rel="stylesheet" href="../../chrome/src/brand.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+      }
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: var(--pt-paper);
+        color: var(--pt-ink);
+        font-family: var(--pt-display);
+        font-feature-settings: 'cv11', 'ss01';
+        -webkit-font-smoothing: antialiased;
+      }
+      .card {
+        position: relative;
+        width: 1200px;
+        height: 630px;
+        background: url('../../../apps/studio/public/brand/og-screen-dark.png') 0 0 no-repeat;
+        background-size: 1200px 630px;
+        image-rendering: pixelated;
+      }
+      .plate {
+        position: absolute;
+        left: 150px;
+        bottom: 79px;
+        width: 600px;
+        height: 236px;
+        box-sizing: border-box;
+        background: var(--ts-plate);
+        padding: 30px 32px 0;
+      }
+      .lock {
+        display: flex;
+        align-items: flex-end;
+        gap: 16px;
+        height: 66px;
+      }
+      .lock .mark {
+        width: 48px;
+        height: 48px;
+        fill: currentColor;
+        display: block;
+        margin-bottom: 15px;
+      }
+      .lock .word {
+        display: block;
+        fill: currentColor;
+      }
+      .lock b {
+        font-weight: 500;
+        font-size: 66px;
+        line-height: 1;
+        letter-spacing: -0.025em;
+      }
+      .plate p {
+        margin: 22px 0 0;
+        font-family: var(--pt-text);
+        font-size: 22px;
+        line-height: 1.4;
+        color: var(--pt-ink-2);
+        max-width: 536px;
+      }
+      .url {
+        position: absolute;
+        left: 150px;
+        top: 60px;
+        font-family: var(--pt-mono);
+        font-size: 20px;
+        color: var(--pt-ink);
+        background: var(--ts-plate);
+        padding: 6px 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <span class="url">turboslide.vercel.app</span>
+      <div class="plate">
+        <div class="lock">
+          <svg class="mark" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+            <path fill-rule="evenodd" d="M0 0h16v16H0z M2 8h8v6H2z" /></svg
+          ><svg class="word" viewBox="0 0 289 66" width="289" height="66" aria-hidden="true">
+            <path
+              transform="translate(0 51) scale(0.0322265625)"
+              d="M48.2 -1295.4V-1490H1218.7V-1295.4H745.5V0H523V-1295.4Z M1519.8 20.7Q1411.9 20.7 1325 -26.5Q1238.1 -73.7 1187.9 -167.1Q1137.6 -260.5 1137.6 -398.2V-1056H1349V-424.2Q1349 -297.7 1410 -232.9Q1471.1 -168 1580.5 -168Q1652.1 -168 1709.7 -197.1Q1767.3 -226.1 1801.1 -288.3Q1834.9 -350.5 1834.9 -448.4V-1056H2046.3V0H1839.1V-262.3H1887.8Q1836.3 -121 1743.8 -50.1Q1651.3 20.7 1519.8 20.7Z M2232.4 0V-1056H2435.1V-885.3H2438.7Q2467.7 -971.8 2530.4 -1020.5Q2593 -1069.1 2693.8 -1069.1Q2717.9 -1069.1 2738.1 -1067.5Q2758.3 -1065.8 2770.8 -1064.2V-867.2Q2758.9 -869.7 2727.7 -873.4Q2696.5 -877 2659.3 -877Q2600.6 -877 2551.3 -849.9Q2502 -822.7 2472.9 -766.7Q2443.8 -710.7 2443.8 -624.1V0Z M3399.4 20.7Q3331 20.7 3269.8 0.9Q3208.5 -18.8 3158.2 -59.2Q3107.9 -99.5 3072.4 -160.7H3070.6V0H2863.2V-1490H3074.6V-903.2H3076.4Q3110.4 -961.7 3159.8 -1000.1Q3209.2 -1038.4 3270.6 -1057.6Q3332.1 -1076.7 3400.1 -1076.7Q3537.2 -1076.7 3639.9 -1007.5Q3742.7 -938.4 3799.9 -814.8Q3857 -691.2 3857 -528.4Q3857 -365.3 3800.1 -241.6Q3743.2 -117.9 3640.4 -48.6Q3537.6 20.7 3399.4 20.7ZM3356.7 -161.3Q3442 -161.3 3506.2 -203.5Q3570.5 -245.7 3606.9 -327.6Q3643.3 -409.4 3643.3 -528.4Q3643.3 -648.1 3606.9 -729.8Q3570.5 -811.5 3506.2 -853.7Q3442 -895.9 3356.7 -895.9Q3266.6 -895.9 3199.9 -850.4Q3133.2 -804.9 3096.9 -722.4Q3060.6 -639.9 3060.6 -528.4Q3060.6 -417.6 3096.9 -334.9Q3133.2 -252.2 3199.9 -206.7Q3266.6 -161.3 3356.7 -161.3Z M4446 24Q4295.5 24 4181.5 -46Q4067.5 -115.9 4004 -239.9Q3940.5 -363.9 3940.5 -526.4Q3940.5 -689.6 4004 -814.3Q4067.5 -939.1 4181.5 -1009.5Q4295.5 -1080 4446 -1080Q4597.5 -1080 4711 -1009.5Q4824.5 -939.1 4888 -814.3Q4951.5 -689.6 4951.5 -526.4Q4951.5 -363.9 4888 -239.9Q4824.5 -115.9 4711 -46Q4597.5 24 4446 24ZM4446 -158.4Q4536.6 -158.4 4601.9 -203.5Q4667.1 -248.5 4702.4 -331.5Q4737.7 -414.6 4737.7 -526.4Q4737.7 -640 4702.4 -722.9Q4667.1 -805.8 4601.9 -851.7Q4536.6 -897.6 4446 -897.6Q4356.4 -897.6 4290.6 -852.1Q4224.9 -806.7 4189.6 -723.3Q4154.3 -640 4154.3 -526.4Q4154.3 -413.7 4189.6 -331.1Q4224.9 -248.5 4290.2 -203.5Q4355.5 -158.4 4446 -158.4Z M5478.2 24.5Q5357.3 24.5 5260.3 -14.2Q5163.4 -52.9 5104 -129.9Q5044.5 -206.9 5036.8 -321.2H5245.5Q5254.1 -235.7 5312.7 -189.4Q5371.3 -143.1 5473.8 -143.1Q5574.7 -143.1 5632.6 -184.1Q5690.5 -225.2 5690.5 -288.1Q5690.5 -342 5649.2 -374.6Q5607.9 -407.2 5538.9 -422.1L5363.8 -460.7Q5214.7 -494 5137.7 -569.9Q5060.8 -645.8 5060.8 -763.2Q5060.8 -856.6 5111.3 -927.9Q5161.8 -999.2 5252.9 -1039.3Q5344.1 -1079.5 5465.2 -1079.5Q5584.2 -1079.5 5676.6 -1037.2Q5768.9 -995 5822.5 -917.8Q5876.1 -840.5 5879.1 -733.7H5677.4Q5676.4 -810.9 5619.3 -861.5Q5562.2 -912.2 5468.1 -912.2Q5378.1 -912.2 5325 -870.2Q5271.8 -828.1 5271.8 -767.1Q5271.8 -713.4 5312.5 -680.4Q5353.2 -647.3 5424 -631.1L5604 -591.4Q5758.7 -556.9 5831.3 -485.7Q5903.8 -414.6 5903.8 -299.7Q5903.8 -199.2 5848.6 -126.4Q5793.5 -53.6 5697.2 -14.5Q5600.9 24.5 5478.2 24.5Z M6250 -1490V0H6038.6V-1490Z M6436.4 0V-1056H6647.8V0ZM6541.9 -1237.5Q6485.6 -1237.5 6447 -1275.2Q6408.5 -1313 6408.5 -1367.3Q6408.5 -1421.9 6447 -1459.4Q6485.6 -1496.9 6541.5 -1496.9Q6598.1 -1496.9 6636.8 -1459.4Q6675.4 -1421.9 6675.4 -1366.9Q6675.4 -1312.7 6636.7 -1275.1Q6598 -1237.5 6541.9 -1237.5Z M7240.4 20.7Q7103.2 20.7 6999.9 -48.6Q6896.5 -117.9 6839.6 -241.6Q6782.7 -365.3 6782.7 -528.4Q6782.7 -691.2 6839.9 -814.8Q6897.1 -938.4 7000.3 -1007.5Q7103.5 -1076.7 7239.6 -1076.7Q7308.6 -1076.7 7369.6 -1057.6Q7430.6 -1038.4 7480.1 -1000.1Q7529.5 -961.7 7563.3 -903.2H7565.2V-1490H7776.6V0H7569.2V-160.7H7567.3Q7531.9 -99.5 7481.6 -59.2Q7431.3 -18.8 7370.4 0.9Q7309.5 20.7 7240.4 20.7ZM7283.1 -161.3Q7373.4 -161.3 7440 -206.7Q7506.6 -252.2 7542.9 -334.9Q7579.2 -417.6 7579.2 -528.4Q7579.2 -639.9 7542.9 -722.4Q7506.6 -804.9 7440 -850.4Q7373.4 -895.9 7283.1 -895.9Q7198.8 -895.9 7134 -853.7Q7069.3 -811.5 7032.9 -729.8Q6996.5 -648.1 6996.5 -528.4Q6996.5 -409.4 7032.9 -327.6Q7069.3 -245.7 7134 -203.5Q7198.8 -161.3 7283.1 -161.3Z M8414.3 24Q8257.7 24 8145 -46.9Q8032.4 -117.8 7972 -242.4Q7911.5 -367 7911.5 -526.4Q7911.5 -687.5 7974.3 -812.4Q8037.1 -937.4 8148.1 -1008.7Q8259.1 -1080 8403 -1080Q8515.2 -1080 8605.9 -1040.1Q8696.7 -1000.2 8761.7 -926.4Q8826.6 -852.7 8861.4 -751.7Q8896.2 -650.6 8896.2 -528.3V-470.5H8006.6V-630.6H8785.5L8692.5 -581.7Q8692.5 -680.4 8657.2 -752.7Q8621.8 -825 8557.4 -864.4Q8493 -903.9 8405 -903.9Q8318 -903.9 8253.9 -864.4Q8189.8 -825 8154.5 -752.7Q8119.1 -680.4 8119.1 -581.7V-490.8Q8119.1 -391 8153.9 -314.6Q8188.7 -238.1 8255.4 -195.2Q8322.1 -152.3 8417.2 -152.3Q8486.4 -152.3 8539.4 -173.6Q8592.3 -194.8 8627.4 -232.9Q8662.5 -271.1 8677.6 -321.2H8880.7Q8860.9 -219 8795.5 -141.3Q8730.2 -63.6 8631.9 -19.8Q8533.6 24 8414.3 24Z"
+            />
+          </svg>
+        </div>
+        <p>
+          An agent native slides editor with Google Slides' behaviours, a canvas on every slide and
+          a pixel identical PowerPoint export.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

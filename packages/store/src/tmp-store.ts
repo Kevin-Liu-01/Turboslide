@@ -6,14 +6,14 @@
 // them. The tmp backend is the overlay alone: FileStore over each deck, edits kept for the life
 // of the instance, `persistent: false` so the editor shows the notice. blob-store.ts reuses the
 // same overlay as its mirror.
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, mkdirSync, renameSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 
-import { openFileStore } from './file-store.ts';
+import { loadDeckDir, openFileStore } from './file-store.ts';
 import type { HostedDecks, HostedOptions } from './hosted.ts';
 import { assetPathWithin, checkRevision, factsFor } from './hosted.ts';
 import type { SeedSource } from './seed.ts';
-import { isAssetKey, materializeSeed, seedDeckIds } from './seed.ts';
+import { eachLimit, isAssetKey, isSafeKey, materializeSeed, seedDeckIds } from './seed.ts';
 import {
   copyDeck,
   createDeck,
@@ -47,8 +47,38 @@ export type Overlay = {
 export type OverlayOptions = {
   root: string;
   seed: SeedSource | null;
+  /**
+   * A twin the seed does not carry, by deck id and file name, from the deployment's static files
+   * (gslides-parity SPEC-4 0.35; `HostedOptions.fetchAsset`): the `tmp` tier's fallback when the
+   * bundle drops `gt-brand/assets/**` (build-4/b4.md R2, the integrator at merge 2). The blob
+   * tier keeps its own fetch and upload in blob-store.ts and passes nothing here.
+   */
+  fetchAsset?: (deckId: string, relative: string) => Promise<Uint8Array | null>;
   log?: (line: string) => void;
 };
+
+/** The twin paths (`assets/<file>`) a deck's manifest names, read from the overlay's copy of deck.json. */
+function twinNames(decksDir: string, deckId: string): string[] {
+  const dir = join(decksDir, deckId);
+  if (!existsSync(join(dir, 'deck.json'))) return [];
+  try {
+    const { document } = loadDeckDir(dir);
+    return Object.values(document.deck.assets).flatMap((asset) =>
+      Object.values(asset.twins).filter(
+        (relative): relative is string => typeof relative === 'string' && isSafeKey(relative),
+      ),
+    );
+  } catch {
+    return [];
+  }
+}
+
+function writeAtomic(path: string, bytes: Uint8Array): void {
+  mkdirSync(dirname(path), { recursive: true });
+  const tmp = `${path}.${process.pid}.tmp`;
+  writeFileSync(tmp, bytes);
+  renameSync(tmp, path);
+}
 
 export function createOverlay(options: OverlayOptions): Overlay {
   const root = options.root;
@@ -95,6 +125,27 @@ export function createOverlay(options: OverlayOptions): Overlay {
         log(
           `seed ${seed.name}: ${result.written} twins of ${deckId} written (${Math.round(result.bytes / 1024)} KB), ${result.skipped} present, ${Math.round(performance.now() - t)} ms`,
         );
+        // the twins the seed does not carry (the bundle drops gt-brand/assets/**, SPEC-4 0.35),
+        // fetched from the static source when the runtime names one; a twin no origin answers
+        // stays missing and the assets route answers 404 for it as before
+        const fetchAsset = options.fetchAsset;
+        if (fetchAsset === undefined) return;
+        const dir = join(decksDir, deckId);
+        const missing = twinNames(decksDir, deckId).filter(
+          (relative) => !existsSync(join(dir, ...relative.split('/'))),
+        );
+        if (missing.length === 0) return;
+        const t2 = performance.now();
+        let fetched = 0;
+        await eachLimit(missing, 8, async (relative) => {
+          const bytes = await fetchAsset(deckId, relative.replace(/^assets\//, ''));
+          if (bytes === null) return;
+          writeAtomic(join(dir, ...relative.split('/')), bytes);
+          fetched += 1;
+        });
+        log(
+          `tmp: fetched ${fetched} of ${missing.length} missing twins of ${deckId} in ${Math.round(performance.now() - t2)} ms`,
+        );
       })();
       assetPromises.set(deckId, pending);
     }
@@ -120,6 +171,7 @@ export function tmpDecks(options: HostedOptions): HostedDecks {
   const overlay = createOverlay({
     root: options.overlayRoot,
     seed: options.seed,
+    ...(options.fetchAsset === undefined ? {} : { fetchAsset: options.fetchAsset }),
     ...(options.log === undefined ? {} : { log: options.log }),
   });
   const storeOptions = options.now === undefined ? {} : { now: options.now };

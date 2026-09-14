@@ -8,13 +8,15 @@ import { join } from 'node:path';
 
 const require = createRequire('/Users/kevinliu/repos/Turboslide/package.json');
 const sharp = require('sharp');
-const { bayerThreshold } = await import('/Users/kevinliu/repos/Turboslide/packages/effects/src/bayer.ts');
+const { bayerThreshold } =
+  await import('/Users/kevinliu/repos/Turboslide/packages/effects/src/bayer.ts');
 
 const OUT = '/Users/kevinliu/repos/Turboslide/docs/gslides-parity/design-4/type';
 const PREV = join(OUT, 'previews');
 const FAV = join(OUT, 'favicon');
 const VAR = join(PREV, 'variants');
-const SCRATCH = '/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/type3';
+const SCRATCH =
+  '/private/tmp/claude-501/-Users-kevinliu-gt-gt-cloud/293a64b7-8ef6-4b00-b382-682288c84431/scratchpad/type3';
 for (const d of [OUT, PREV, FAV, VAR]) mkdirSync(d, { recursive: true });
 
 // ---- tokens (packages/chrome/src/tokens.css; the composites of packages/theme/src/tokens.ts) ----
@@ -55,14 +57,18 @@ function outlineT(scale, x, y, fill, id = 'r') {
     for (let c = 0; c < COLS; c += 1) {
       if (tone * 255 > bayerThreshold(r, c)) {
         // row 0 is the top of the ramp, just under the solid stem
-        rects.push(`<rect x="${(STEM[0] + c * cell).toFixed(2)}" y="${(rampTop - (r + 1) * cell).toFixed(2)}" width="${cell.toFixed(2)}" height="${cell.toFixed(2)}"/>`);
+        rects.push(
+          `<rect x="${(STEM[0] + c * cell).toFixed(2)}" y="${(rampTop - (r + 1) * cell).toFixed(2)}" width="${cell.toFixed(2)}" height="${cell.toFixed(2)}"/>`,
+        );
       }
     }
   }
-  return `<g fill="${fill}" transform="translate(${x} ${y}) scale(${scale} ${-scale})">` +
+  return (
+    `<g fill="${fill}" transform="translate(${x} ${y}) scale(${scale} ${-scale})">` +
     `<clipPath id="${id}"><rect x="${T_BOUNDS[0] - 10}" y="${rampTop.toFixed(2)}" width="${T_BOUNDS[2] - T_BOUNDS[0] + 20}" height="${CAP - rampTop + 20}"/></clipPath>` +
     `<path clip-path="url(#${id})" d="${T_PATH}"/>` +
-    `<g shape-rendering="crispEdges">${rects.join('')}</g></g>`;
+    `<g shape-rendering="crispEdges">${rects.join('')}</g></g>`
+  );
 }
 /** The outline T centered in a `size` tile with its cap 12/16 of the tile (the hint's proportion). */
 function outlineTInTile(size, fill, pad = 0) {
@@ -76,22 +82,49 @@ function outlineTInTile(size, fill, pad = 0) {
 
 // ---- the hint: the same T on the 16 unit grid (cap 12, width 10, stem 2, arm 2) ----
 const GRID = 16;
-const HINT = { barX: 3, barY: 2, barW: 10, barH: 2, stemX: 7, stemW: 2, stemY: 4, footY: 14, rampFromY: 10 };
+const HINT = {
+  barX: 3,
+  barY: 2,
+  barW: 10,
+  barH: 2,
+  stemX: 7,
+  stemW: 2,
+  stemY: 4,
+  footY: 14,
+  rampFromY: 10,
+};
 const hintPath = `M${HINT.barX} ${HINT.barY}h${HINT.barW}v${HINT.barH}h-${(HINT.barW - HINT.stemW) / 2}v${HINT.footY - HINT.stemY}h-${HINT.stemW}v-${HINT.footY - HINT.stemY}h-${(HINT.barW - HINT.stemW) / 2}z`;
 /** Cells appear at 2 px; the hint holds 4 cells across its 2 unit stem, so cells exist from unit 4 (a 64 px tile). */
 function hintRects(unit, pad, fill, { cells = true } = {}) {
   const cell = cells && unit >= 4 ? unit / 2 : 0;
   const rect = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}"/>`;
-  const parts = [rect(pad + HINT.barX * unit, pad + HINT.barY * unit, HINT.barW * unit, HINT.barH * unit)];
+  const parts = [
+    rect(pad + HINT.barX * unit, pad + HINT.barY * unit, HINT.barW * unit, HINT.barH * unit),
+  ];
   const solidEnd = cell > 0 ? HINT.rampFromY : HINT.footY;
-  parts.push(rect(pad + HINT.stemX * unit, pad + HINT.stemY * unit, HINT.stemW * unit, (solidEnd - HINT.stemY) * unit));
+  parts.push(
+    rect(
+      pad + HINT.stemX * unit,
+      pad + HINT.stemY * unit,
+      HINT.stemW * unit,
+      (solidEnd - HINT.stemY) * unit,
+    ),
+  );
   if (cell > 0) {
     const rows = ((HINT.footY - HINT.rampFromY) * unit) / cell;
     const cols = (HINT.stemW * unit) / cell;
     for (let r = 0; r < rows; r += 1) {
       const tone = 1 - ((r + 1) / (rows + 1)) * (1 - END_TONE);
       for (let c = 0; c < cols; c += 1) {
-        if (tone * 255 > bayerThreshold(r, c)) parts.push(rect(pad + HINT.stemX * unit + c * cell, pad + HINT.rampFromY * unit + r * cell, cell, cell));
+        if (tone * 255 > bayerThreshold(r, c))
+          parts.push(
+            rect(
+              pad + HINT.stemX * unit + c * cell,
+              pad + HINT.rampFromY * unit + r * cell,
+              cell,
+              cell,
+            ),
+          );
       }
     }
   }
@@ -99,19 +132,27 @@ function hintRects(unit, pad, fill, { cells = true } = {}) {
 }
 
 /** The tile: plate, the 1 px frame in the edge composite, the T (hint at 64 px and below, outline above). */
-function tileSvg(size, theme, { frame = true, pad = 0, hint = size <= 64, unit = (size - 2 * pad) / GRID, cells = true } = {}) {
+function tileSvg(
+  size,
+  theme,
+  { frame = true, pad = 0, hint = size <= 64, unit = (size - 2 * pad) / GRID, cells = true } = {},
+) {
   const t = THEME[theme];
   const frameRect = frame
     ? `<rect x="0.5" y="0.5" width="${size - 1}" height="${size - 1}" fill="none" stroke="${t.frame}" stroke-width="1" shape-rendering="crispEdges"/>`
     : '';
   const letter = hint ? hintRects(unit, pad, t.ink, { cells }) : outlineTInTile(size, t.ink, pad);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">` +
-    `<rect width="${size}" height="${size}" fill="${t.plate}"/>${frameRect}${letter}</svg>`;
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">` +
+    `<rect width="${size}" height="${size}" fill="${t.plate}"/>${frameRect}${letter}</svg>`
+  );
 }
 
 // ---- SVG sources ----
 const HEAD = '<?xml version="1.0" encoding="UTF-8"?>\n';
-writeFileSync(join(OUT, 'mark.svg'), `${HEAD}<!-- Turboslide mark: the T of Inter Display Medium (InterVariable 4.001 at opsz 32, wght 500;
+writeFileSync(
+  join(OUT, 'mark.svg'),
+  `${HEAD}<!-- Turboslide mark: the T of Inter Display Medium (InterVariable 4.001 at opsz 32, wght 500;
      SIL OFL 1.1) with the lowest 40 percent of its stem cut by the deck's 8 by 8 Bayer screen
      (packages/effects/src/bayer.ts, thresholds (m + 0.5) / 64): four cells across the stem, the
      tone falling from 1 to 0.25 so the tiers nest. Fill is currentColor; the host sets the ink.
@@ -119,15 +160,19 @@ writeFileSync(join(OUT, 'mark.svg'), `${HEAD}<!-- Turboslide mark: the T of Inte
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" fill="currentColor" role="img" aria-label="Turboslide">
 ${outlineTInTile(512, 'currentColor')}
 </svg>
-`);
-writeFileSync(join(OUT, 'mark-small.svg'), `${HEAD}<!-- Turboslide mark, the hint: the same T on a 16 unit cell grid (cap 12, width 10, stem 2,
+`,
+);
+writeFileSync(
+  join(OUT, 'mark-small.svg'),
+  `${HEAD}<!-- Turboslide mark, the hint: the same T on a 16 unit cell grid (cap 12, width 10, stem 2,
      arm 2, from Inter Display Medium's 0.786, 0.149 and 0.131 of cap), solid. For 16 and 32 px
      (the tab icon, the title row, the app bar); at 64 px the host adds the 2 px cells of
      hintRects (see build-marks.mjs). Fill is currentColor. -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" role="img" aria-label="Turboslide">
 <path shape-rendering="crispEdges" d="${hintPath}"/>
 </svg>
-`);
+`,
+);
 const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
 <style>.p{fill:#ffffff}.f{stroke:#656565}.i{fill:#070707}@media (prefers-color-scheme: dark){.p{fill:#070707}.f{stroke:#888887}.i{fill:#f2f2f0}}</style>
 <rect class="p" width="16" height="16"/>
@@ -146,7 +191,9 @@ function wordPaths(fontSize, x, y, fill, { skipFirst = false } = {}) {
   positions.chars.forEach((c, i) => {
     if (skipFirst && i === 0) return;
     const g = glyphs.glyphs[c.ch];
-    out.push(`<path transform="translate(${(x + c.x * px).toFixed(3)} ${y.toFixed(3)}) scale(${s.toFixed(6)} ${(-s).toFixed(6)})" d="${g.d}"/>`);
+    out.push(
+      `<path transform="translate(${(x + c.x * px).toFixed(3)} ${y.toFixed(3)}) scale(${s.toFixed(6)} ${(-s).toFixed(6)})" d="${g.d}"/>`,
+    );
   });
   return `<g fill="${fill}">${out.join('')}</g>`;
 }
@@ -220,27 +267,49 @@ const SIZES = [
 ];
 for (const { size, frame, pad } of SIZES) {
   for (const theme of ['paper', 'ink']) {
-    await sharp(Buffer.from(tileSvg(size, theme, { frame, pad }))).png({ palette: true }).toFile(join(PREV, `mark-${size}-${theme}.png`));
+    await sharp(Buffer.from(tileSvg(size, theme, { frame, pad })))
+      .png({ palette: true })
+      .toFile(join(PREV, `mark-${size}-${theme}.png`));
   }
 }
 // the bare mark at 512 on both grounds
 for (const theme of ['paper', 'ink']) {
   const t = THEME[theme];
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><rect width="512" height="512" fill="${t.plate}"/>${outlineTInTile(512, t.ink)}</svg>`;
-  await sharp(Buffer.from(svg)).png({ palette: true }).toFile(join(PREV, `mark-bare-512-${theme}.png`));
+  await sharp(Buffer.from(svg))
+    .png({ palette: true })
+    .toFile(join(PREV, `mark-bare-512-${theme}.png`));
 }
 // the wordmarks at 2x
-for (const name of ['wordmark', 'wordmark-ink', 'wordmark-stacked', 'wordmark-stacked-ink', 'wordmark-display', 'wordmark-display-ink']) {
+for (const name of [
+  'wordmark',
+  'wordmark-ink',
+  'wordmark-stacked',
+  'wordmark-stacked-ink',
+  'wordmark-display',
+  'wordmark-display-ink',
+]) {
   const svg = readFileSync(join(OUT, `${name}.svg`), 'utf8');
   const meta = await sharp(Buffer.from(svg)).metadata();
-  await sharp(Buffer.from(svg), { density: 144 }).resize(meta.width * 2).png().toFile(join(PREV, `${name}.png`));
+  await sharp(Buffer.from(svg), { density: 144 })
+    .resize(meta.width * 2)
+    .png()
+    .toFile(join(PREV, `${name}.png`));
 }
 // the app bar and title row sizes of the tile (20 and 24 px) at 1x and 2x, for the chrome sheet
 for (const size of [20, 24]) {
   for (const theme of ['paper', 'ink']) {
     const svg = tileSvg(size, theme, { frame: true, pad: 0, hint: true, cells: false });
-    await sharp(Buffer.from(svg)).png().toFile(join(PREV, `tile-${size}-${theme}.png`));
-    await sharp(Buffer.from(svg.replace(`width="${size}" height="${size}"`, `width="${size * 2}" height="${size * 2}"`))).png().toFile(join(PREV, `tile-${size}-${theme}@2x.png`));
+    await sharp(Buffer.from(svg))
+      .png()
+      .toFile(join(PREV, `tile-${size}-${theme}.png`));
+    await sharp(
+      Buffer.from(
+        svg.replace(`width="${size}" height="${size}"`, `width="${size * 2}" height="${size * 2}"`),
+      ),
+    )
+      .png()
+      .toFile(join(PREV, `tile-${size}-${theme}@2x.png`));
   }
 }
 
@@ -265,7 +334,10 @@ for (const size of [20, 24]) {
   const svg = base.replace('</svg>', `${closed}${slide}</svg>`);
   writeFileSync(join(VAR, 'o-slide-counter.svg'), svg);
   const meta = await sharp(Buffer.from(svg)).metadata();
-  await sharp(Buffer.from(svg), { density: 144 }).resize(meta.width * 2).png().toFile(join(VAR, 'o-slide-counter.png'));
+  await sharp(Buffer.from(svg), { density: 144 })
+    .resize(meta.width * 2)
+    .png()
+    .toFile(join(VAR, 'o-slide-counter.png'));
 }
 // B. The doubled line T (the GT mark's grammar): a 3 unit stem of two hairlines at 16, 32 and 64.
 {
@@ -276,16 +348,23 @@ for (const size of [20, 24]) {
       const g = (x, y, w, h) => `<rect x="${x}" y="${y}" width="${w}" height="${h}"/>`;
       const body = `<g fill="${t.ink}" shape-rendering="crispEdges">${g(3 * u, 2 * u, 10 * u, u)}${g(3 * u, 4 * u, 10 * u, u)}${g(6.5 * u, 5 * u, u, 9 * u)}${g(8.5 * u, 5 * u, u, 9 * u)}</g>`;
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" fill="${t.plate}"/><rect x="0.5" y="0.5" width="${size - 1}" height="${size - 1}" fill="none" stroke="${t.frame}" stroke-width="1" shape-rendering="crispEdges"/>${body}</svg>`;
-      await sharp(Buffer.from(svg)).png().toFile(join(VAR, `doubled-T-${size}-${theme}.png`));
+      await sharp(Buffer.from(svg))
+        .png()
+        .toFile(join(VAR, `doubled-T-${size}-${theme}.png`));
     }
   }
 }
 // C. The hint at 512 (the cell T scaled up), to compare with the outline.
-await sharp(Buffer.from(tileSvg(512, 'paper', { hint: true }))).png({ palette: true }).toFile(join(VAR, 'hint-512-paper.png'));
+await sharp(Buffer.from(tileSvg(512, 'paper', { hint: true })))
+  .png({ palette: true })
+  .toFile(join(VAR, 'hint-512-paper.png'));
 
 // ---- the favicon set (research-4/02 section 3) ----
 async function raw(svg) {
-  const { data, info } = await sharp(Buffer.from(svg)).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { data, info } = await sharp(Buffer.from(svg))
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
   return { data, width: info.width, height: info.height };
 }
 function ico(images) {
@@ -331,38 +410,71 @@ function ico(images) {
   return Buffer.concat([header, ...dirs, ...bodies]);
 }
 const icoImages = [];
-for (const size of [16, 32, 48]) icoImages.push(await raw(tileSvg(size, 'paper', { frame: true, hint: true })));
+for (const size of [16, 32, 48])
+  icoImages.push(await raw(tileSvg(size, 'paper', { frame: true, hint: true })));
 writeFileSync(join(FAV, 'favicon.ico'), ico(icoImages));
-await sharp(Buffer.from(tileSvg(180, 'ink', { frame: false, pad: 10 }))).png({ palette: true }).toFile(join(FAV, 'apple-touch-icon.png'));
-await sharp(Buffer.from(tileSvg(192, 'ink', { frame: true }))).png({ palette: true }).toFile(join(FAV, 'icon-192.png'));
-await sharp(Buffer.from(tileSvg(512, 'ink', { frame: true }))).png({ palette: true }).toFile(join(FAV, 'icon-512.png'));
+await sharp(Buffer.from(tileSvg(180, 'ink', { frame: false, pad: 10 })))
+  .png({ palette: true })
+  .toFile(join(FAV, 'apple-touch-icon.png'));
+await sharp(Buffer.from(tileSvg(192, 'ink', { frame: true })))
+  .png({ palette: true })
+  .toFile(join(FAV, 'icon-192.png'));
+await sharp(Buffer.from(tileSvg(512, 'ink', { frame: true })))
+  .png({ palette: true })
+  .toFile(join(FAV, 'icon-512.png'));
 // maskable: the letter inside the 409 px safe circle (cap 288, width 226, diagonal 367), the plate bleeds
-await sharp(Buffer.from(tileSvg(512, 'ink', { frame: false, pad: 64 }))).png({ palette: true }).toFile(join(FAV, 'icon-mask-512.png'));
-await sharp(Buffer.from(tileSvg(192, 'ink', { frame: false, pad: 24 }))).png({ palette: true }).toFile(join(FAV, 'icon-mask-192.png'));
-writeFileSync(join(FAV, 'manifest.webmanifest'), `${JSON.stringify({
-  id: '/',
-  name: 'Turboslide',
-  short_name: 'Turboslide',
-  description: 'An agent native slides editor with Google Slides\' behaviours, a canvas on every slide and a pixel identical PowerPoint export.',
-  start_url: '/home',
-  scope: '/',
-  display: 'standalone',
-  background_color: '#070707',
-  theme_color: '#070707',
-  icons: [
-    { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
-    { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-    { src: '/icons/icon-mask-192.png', sizes: '192x192', type: 'image/png', purpose: 'maskable' },
-    { src: '/icons/icon-mask-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
-  ],
-}, null, 2)}\n`);
+await sharp(Buffer.from(tileSvg(512, 'ink', { frame: false, pad: 64 })))
+  .png({ palette: true })
+  .toFile(join(FAV, 'icon-mask-512.png'));
+await sharp(Buffer.from(tileSvg(192, 'ink', { frame: false, pad: 24 })))
+  .png({ palette: true })
+  .toFile(join(FAV, 'icon-mask-192.png'));
+writeFileSync(
+  join(FAV, 'manifest.webmanifest'),
+  `${JSON.stringify(
+    {
+      id: '/',
+      name: 'Turboslide',
+      short_name: 'Turboslide',
+      description:
+        "An agent native slides editor with Google Slides' behaviours, a canvas on every slide and a pixel identical PowerPoint export.",
+      start_url: '/home',
+      scope: '/',
+      display: 'standalone',
+      background_color: '#070707',
+      theme_color: '#070707',
+      icons: [
+        { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+        {
+          src: '/icons/icon-mask-192.png',
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'maskable',
+        },
+        {
+          src: '/icons/icon-mask-512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable',
+        },
+      ],
+    },
+    null,
+    2,
+  )}\n`,
+);
 
 // ---- the CLI banner from the hint's bitmap: two grid rows per text row, half blocks ----
-const bitmap = Array.from({ length: GRID }, (_, y) => Array.from({ length: GRID }, (_, x) => {
-  const inBar = x >= HINT.barX && x < HINT.barX + HINT.barW && y >= HINT.barY && y < HINT.barY + HINT.barH;
-  const inStem = x >= HINT.stemX && x < HINT.stemX + HINT.stemW && y >= HINT.stemY && y < HINT.footY;
-  return inBar || inStem ? 1 : 0;
-}));
+const bitmap = Array.from({ length: GRID }, (_, y) =>
+  Array.from({ length: GRID }, (_, x) => {
+    const inBar =
+      x >= HINT.barX && x < HINT.barX + HINT.barW && y >= HINT.barY && y < HINT.barY + HINT.barH;
+    const inStem =
+      x >= HINT.stemX && x < HINT.stemX + HINT.stemW && y >= HINT.stemY && y < HINT.footY;
+    return inBar || inStem ? 1 : 0;
+  }),
+);
 const rows = [];
 for (let y = 0; y < GRID; y += 2) {
   let row = '';
@@ -375,6 +487,26 @@ for (let y = 0; y < GRID; y += 2) {
 }
 writeFileSync(join(OUT, 'banner.txt'), `${rows.slice(1, 7).join('\n')}\n`);
 const cell = (STEM[1] - STEM[0]) / COLS;
-console.log('outline: stem', STEM, 'cell', cell.toFixed(2), 'font units; rows', Math.round((ARM_BOTTOM * RAMP_SHARE) / cell), '; ramp top', (Math.round((ARM_BOTTOM * RAMP_SHARE) / cell) * cell).toFixed(1), 'of', ARM_BOTTOM);
-console.log('at 512: scale', ((512 * 0.75) / CAP).toFixed(4), 'cell px', ((cell * 512 * 0.75) / CAP).toFixed(2), '| at 180 (pad 10): cell px', ((cell * 160 * 0.75) / CAP).toFixed(2), '| at 132 px type: cell px', ((cell * 132) / UPM).toFixed(2));
+console.log(
+  'outline: stem',
+  STEM,
+  'cell',
+  cell.toFixed(2),
+  'font units; rows',
+  Math.round((ARM_BOTTOM * RAMP_SHARE) / cell),
+  '; ramp top',
+  (Math.round((ARM_BOTTOM * RAMP_SHARE) / cell) * cell).toFixed(1),
+  'of',
+  ARM_BOTTOM,
+);
+console.log(
+  'at 512: scale',
+  ((512 * 0.75) / CAP).toFixed(4),
+  'cell px',
+  ((cell * 512 * 0.75) / CAP).toFixed(2),
+  '| at 180 (pad 10): cell px',
+  ((cell * 160 * 0.75) / CAP).toFixed(2),
+  '| at 132 px type: cell px',
+  ((cell * 132) / UPM).toFixed(2),
+);
 console.log('done');

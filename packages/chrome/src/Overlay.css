@@ -1,30 +1,36 @@
 /* The stage overlay in edit mode (SPEC 6.4; SPEC 2.2 junction table). Everything here is placed
    in CSS pixels by Overlay.tsx from sheet boxes times k, so a rule is 1px at every stage scale.
-   Colors are the chrome tokens only. Line law: the hover outline is structural --pt-hair; the
-   selection ring is --pt-ink as a state (.is-selected, allowed as `ts-select` in the audit); a
-   handle's rule is --pt-hair at rest and --pt-ink while it is being dragged (.is-active); the drop
-   line is ink while a drag is on. The lint boxes follow SPEC 2.2: ink for severity 3, titanium for
-   1 and 2, with a 13px chip naming the rule. The chip and the lint chip are filled labels, not
-   lines. Motion: the hover outline fades over the fast duration and nothing else animates; the
-   reduced motion block turns that off. */
+   Colors are the chrome tokens only. Line law: the selection surfaces read --pt-select since
+   round four (gslides-parity round four, the orchestrator's ruling 1 over SPEC-4 0.3; Kevin's
+   directive d: "canvas boxes turn blue so they don't blend in with the background"): the hover
+   outline, the selection ring (.is-selected, allowed as `ts-select` in the audit), the eight
+   resize squares and the rotation handle, the crop frame and its handles, the group box and the
+   selection chip, because an ink ring on a dark photograph and a hair ring on a white slide both
+   disappeared. The chrome lint accepts the token on these elements (packages/lint/src/chrome.ts,
+   the `select` role). The slide-level handles (the seam, the plate) stay silent at rest and take
+   the token while active; the drop line is ink while a drag is on. The lint boxes follow SPEC
+   2.2: ink for severity 3, titanium for 1 and 2, with a 13px chip naming the rule. The chip and
+   the lint chip are filled labels, not lines. Motion: the hover outline fades over the fast
+   duration and nothing else animates; the reduced motion block turns that off. */
 
 .ts-hover {
   position: absolute;
   box-sizing: border-box;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-select);
   pointer-events: none;
   animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
 }
 
-/* the ring: ink as a state, never in the sheet's markup */
+/* the ring: the selection colour as a state, never in the sheet's markup */
 .ts-select {
   position: absolute;
   box-sizing: border-box;
-  border: 1px solid var(--pt-ink);
+  border: 1px solid var(--pt-select);
   pointer-events: none;
 }
 
-/* the chip naming `type · id`, outside the ring; as a button it is the block's drag handle */
+/* the chip naming `type · id`, outside the ring; as a button it is the block's drag handle. Paper
+   text on the selection colour holds 4.5:1 in both appearances (tokens.css) */
 .ts-select-chip {
   position: absolute;
   z-index: 1;
@@ -35,7 +41,7 @@
   padding: 0 6px;
   border: 0;
   border-radius: 0;
-  background: var(--pt-ink);
+  background: var(--pt-select);
   color: var(--pt-paper);
   font: 500 13px/1 var(--pt-text);
   white-space: nowrap;
@@ -144,11 +150,11 @@
 }
 
 .ts-handle.is-active[data-shape='v']::before {
-  background: var(--pt-ink);
+  background: var(--pt-select);
 }
 
 .ts-handle.is-active[data-shape='square']::before {
-  border-color: var(--pt-ink);
+  border-color: var(--pt-select);
 }
 
 .ts-handle.is-active {
@@ -211,16 +217,16 @@
   pointer-events: none;
 }
 
-/* every other block of a multi-selection draws the same ink ring as the anchor */
+/* every other block of a multi-selection draws the same ring as the anchor */
 .ts-select.is-extra {
-  border-color: var(--pt-ink);
+  border-color: var(--pt-select);
 }
 
-/* the box around a multi-selection: hair, so the group reads as one without a second ink ring */
+/* the box around a multi-selection (ruling 1: the group box takes the selection colour) */
 .ts-group {
   position: absolute;
   box-sizing: border-box;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-select);
   pointer-events: none;
 }
 
@@ -229,17 +235,19 @@
   cursor: move;
 }
 
-/* the eight resize squares of a positioned block: the deck's 11px square on paper with a hair
-   ring, ink while dragged; the cursor comes from the handle through its inline style */
+/* the eight resize squares of a positioned block: the deck's 11px square on paper with a ring in
+   the selection colour, filled with it while dragged or under the pointer (ruling 1); the cursor
+   comes from the handle through its inline style */
 .ts-handle[data-kind='free-resize']::before {
   inset: 0;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-select);
   background: var(--pt-paper);
 }
 
 .ts-handle[data-kind='free-resize'].is-active::before,
 .ts-handle[data-kind='free-resize']:hover::before {
-  border-color: var(--pt-ink);
+  border-color: var(--pt-select);
+  background: var(--pt-select);
 }
 
 /* the frame of a positioned block is its drag surface (gslides-parity SPEC 10.2): four 8px edge
@@ -266,11 +274,12 @@
   position: absolute;
 }
 
-/* the rotation ring: a 12px ring on paper with a hair rule, ink while dragged or hovered, joined
-   to the object's top centre by a 1px hair line drawn through ::after (SPEC-2 6.1 row 11) */
+/* the rotation ring: a 12px ring on paper with a rule in the selection colour, filled while
+   dragged or hovered, joined to the object's top centre by a 1px line in the same colour drawn
+   through ::after (SPEC-2 6.1 row 11; ruling 1) */
 .ts-handle[data-kind='free-rotate']::before {
   inset: 0;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-select);
   border-radius: 50%;
   background: var(--pt-paper);
 }
@@ -283,33 +292,36 @@
   width: 1px;
   height: 18px;
   margin-left: -0.5px;
-  background: var(--pt-hair);
+  background: var(--pt-select);
   pointer-events: none;
 }
 
 .ts-handle[data-kind='free-rotate'].is-active::before,
 .ts-handle[data-kind='free-rotate']:hover::before {
-  border-color: var(--pt-ink);
+  border-color: var(--pt-select);
+  background: var(--pt-select);
 }
 
 .ts-handle[data-kind='free-rotate'].is-active {
   cursor: grabbing;
 }
 
-/* a line's end handles: the deck's square, ink while dragged */
+/* a line's end handles: the deck's square in the selection colour, filled while dragged */
 .ts-handle[data-kind='line-end']::before {
   inset: 0;
-  border: 1px solid var(--pt-hair);
+  border: 1px solid var(--pt-select);
   background: var(--pt-paper);
 }
 
 .ts-handle[data-kind='line-end'].is-active::before,
 .ts-handle[data-kind='line-end']:hover::before {
-  border-color: var(--pt-ink);
+  border-color: var(--pt-select);
+  background: var(--pt-select);
 }
 
 /* crop mode (SPEC-2 6.1 row 19): the picture's full extent dimmed under a hair outline, the frame
-   in ink, the eight handles black squares as Google draws them */
+   and the eight handles in the selection colour (ruling 1), the handles filled with it as Google
+   fills its black squares */
 .ts-crop-full {
   position: absolute;
   box-sizing: border-box;
@@ -321,14 +333,14 @@
 .ts-crop-frame {
   position: absolute;
   box-sizing: border-box;
-  border: 1px solid var(--pt-ink);
+  border: 1px solid var(--pt-select);
   pointer-events: none;
 }
 
 .ts-handle[data-kind='crop-edge']::before {
   inset: 0;
   border: 1px solid var(--pt-paper);
-  background: var(--pt-ink);
+  background: var(--pt-select);
 }
 
 /* the readouts (SPEC-2 0.86): the size while a resize is down, the angle while a rotation is down */

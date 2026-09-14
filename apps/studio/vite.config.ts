@@ -56,8 +56,24 @@ function externalServerOnly(): Plugin {
   };
 }
 
+// The vendor chunk group (gslides-parity SPEC-4 0.44, 3.12; PP 7; Rolldown `codeSplitting.groups`),
+// the same group as vite.deploy.config.ts so `pnpm build` and scripts/check-client-bundle.mjs
+// read the chunks the deployment ships: React, the scheduler and the router in one `vendor`
+// chunk that caches across deployments while the app's chunks change. The client environment
+// alone.
+const VENDOR_TEST =
+  /node_modules[\\/](?:react|react-dom|scheduler|@tanstack[\\/](?:react-router|router-core|history|react-start|react-start-client|start-client-core))[\\/]/;
+const CLIENT_BUILD = {
+  build: {
+    rolldownOptions: {
+      output: { codeSplitting: { groups: [{ name: 'vendor', test: VENDOR_TEST, priority: 10 }] } },
+    },
+  },
+};
+
 export default defineConfig({
   resolve: { tsconfigPaths: true },
+  environments: { client: CLIENT_BUILD },
   plugins: [externalServerOnly(), devtools(), tanstackStart(), viteReact()],
   server: {
     port: 4321,

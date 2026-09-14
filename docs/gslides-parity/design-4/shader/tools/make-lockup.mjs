@@ -71,10 +71,19 @@ writeFileSync(`${OUT}/wordmark-text.svg`, text);
   writeFileSync(`${OUT}/lockup-stacked.svg`, stacked);
 }
 // previews on paper and on ink at 2x
-for (const [name, plate, ink] of [['paper', '#ffffff', '#070707'], ['ink', '#070707', '#f2f2f0']]) {
-  const svg = horizontal.replace('fill="currentColor"', `fill="${ink}"`).replace('<g fill=', `<rect width="${W}" height="${S}" fill="${plate}"/>\n  <g fill=`);
-  await sharp(Buffer.from(svg), { density: 144 }).png().toFile(`${OUT}/previews/wordmark-${name}.png`);
-  const st = readFileSync(`${OUT}/lockup-stacked.svg`, 'utf8').replace('fill="currentColor"', `fill="${ink}"`).replace('<g fill=', `<rect width="100%" height="100%" fill="${plate}"/>\n  <g fill=`);
+for (const [name, plate, ink] of [
+  ['paper', '#ffffff', '#070707'],
+  ['ink', '#070707', '#f2f2f0'],
+]) {
+  const svg = horizontal
+    .replace('fill="currentColor"', `fill="${ink}"`)
+    .replace('<g fill=', `<rect width="${W}" height="${S}" fill="${plate}"/>\n  <g fill=`);
+  await sharp(Buffer.from(svg), { density: 144 })
+    .png()
+    .toFile(`${OUT}/previews/wordmark-${name}.png`);
+  const st = readFileSync(`${OUT}/lockup-stacked.svg`, 'utf8')
+    .replace('fill="currentColor"', `fill="${ink}"`)
+    .replace('<g fill=', `<rect width="100%" height="100%" fill="${plate}"/>\n  <g fill=`);
   await sharp(Buffer.from(st)).png().toFile(`${OUT}/previews/lockup-stacked-${name}.png`);
 }
 console.log('lockup', { W, S, F: F.toFixed(2), textX, baseline, textW: textW.toFixed(1) });

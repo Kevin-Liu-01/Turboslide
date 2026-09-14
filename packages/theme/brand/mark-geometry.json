@@ -1,0 +1,116 @@
+{
+  "generator": "scripts/build-brand.ts",
+  "threshold": "solid below 64 px; 2 px cells at 64, 4 px from 128 to 256, 8 px at 448 and 512 (SPEC-4 0.5, 1.1)",
+  "rows": [
+    {
+      "path": "apps/studio/public/favicon.ico#16",
+      "tile": 16,
+      "mark": 12,
+      "cells": 8,
+      "cell": 1.5,
+      "lit": 120,
+      "colours": 3,
+      "plate": "paper"
+    },
+    {
+      "path": "apps/studio/public/favicon.ico#32",
+      "tile": 32,
+      "mark": 24,
+      "cells": 8,
+      "cell": 3,
+      "lit": 468,
+      "colours": 3,
+      "plate": "paper"
+    },
+    {
+      "path": "apps/studio/public/favicon.ico#48",
+      "tile": 48,
+      "mark": 40,
+      "cells": 8,
+      "cell": 5,
+      "lit": 1300,
+      "colours": 3,
+      "plate": "paper"
+    },
+    {
+      "path": "apps/studio/public/apple-touch-icon.png",
+      "tile": 180,
+      "mark": 128,
+      "cells": 32,
+      "cell": 4,
+      "lit": 9760,
+      "colours": 2,
+      "plate": "ink"
+    },
+    {
+      "path": "apps/studio/public/icons/icon-192.png",
+      "tile": 192,
+      "mark": 160,
+      "cells": 40,
+      "cell": 4,
+      "lit": 15136,
+      "colours": 2,
+      "plate": "ink"
+    },
+    {
+      "path": "apps/studio/public/icons/icon-dark-192.png",
+      "tile": 192,
+      "mark": 160,
+      "cells": 40,
+      "cell": 4,
+      "lit": 15136,
+      "colours": 2,
+      "plate": "paper"
+    },
+    {
+      "path": "apps/studio/public/icons/icon-512.png",
+      "tile": 512,
+      "mark": 448,
+      "cells": 56,
+      "cell": 8,
+      "lit": 117824,
+      "colours": 2,
+      "plate": "ink"
+    },
+    {
+      "path": "apps/studio/public/icons/icon-dark-512.png",
+      "tile": 512,
+      "mark": 448,
+      "cells": 56,
+      "cell": 8,
+      "lit": 117824,
+      "colours": 2,
+      "plate": "paper"
+    },
+    {
+      "path": "apps/studio/public/icons/icon-mask-192.png",
+      "tile": 192,
+      "mark": 96,
+      "cells": 48,
+      "cell": 2,
+      "lit": 5392,
+      "colours": 2,
+      "plate": "ink"
+    },
+    {
+      "path": "apps/studio/public/icons/icon-mask-512.png",
+      "tile": 512,
+      "mark": 256,
+      "cells": 64,
+      "cell": 4,
+      "lit": 38400,
+      "colours": 2,
+      "plate": "ink"
+    },
+    {
+      "path": "apps/studio/public/icons/icon-mono-512.png",
+      "tile": 512,
+      "mark": 448,
+      "cells": 8,
+      "cell": 56,
+      "lit": 163072,
+      "colours": 2,
+      "plate": "none"
+    }
+  ]
+}

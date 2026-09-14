@@ -1,0 +1,107 @@
+{
+  "generator": "scripts/build-brand.ts --previews",
+  "records": [
+    {
+      "variant": "proposal 2, the slide frame and T with the ramp panel",
+      "source": "docs/gslides-parity/design-4/shader/tools/make-mark.mjs (geometry, panelCells, markShapes; copied here so the module is not rerun)",
+      "file": "packages/theme/brand/previews/variants/p2-frame-t-16-paper.png",
+      "measured": {
+        "size": 16,
+        "frameHeightPx": 8,
+        "rowsOutsideFrame": 8,
+        "strokePx": 1,
+        "stemPx": 2,
+        "cellPx": 0,
+        "rampCells": 0
+      },
+      "reason": "Rejected as the product mark (SPEC-4 0.2; J1 rejection 5, J3 rejection 5): the 16:9 frame leaves 8 of 16 rows outside it (50 percent of the box), its stroke is 1 px and no cell fits at this size; the form reads as a letter and a screen before a slide, and J2's choice of it is on Kevin's list (section 8)."
+    },
+    {
+      "variant": "proposal 2, the slide frame and T with the ramp panel",
+      "source": "docs/gslides-parity/design-4/shader/tools/make-mark.mjs (geometry, panelCells, markShapes; copied here so the module is not rerun)",
+      "file": "packages/theme/brand/previews/variants/p2-frame-t-32-paper.png",
+      "measured": {
+        "size": 32,
+        "frameHeightPx": 15,
+        "rowsOutsideFrame": 17,
+        "strokePx": 1,
+        "stemPx": 2,
+        "cellPx": 2,
+        "rampCells": 20
+      },
+      "reason": "Rejected as the product mark (SPEC-4 0.2; J1 rejection 5, J3 rejection 5): the 16:9 frame leaves 17 of 32 rows outside it (53 percent of the box), its stroke is 1 px and the panel holds 20 cells of 2 px; the form reads as a letter and a screen before a slide, and J2's choice of it is on Kevin's list (section 8)."
+    },
+    {
+      "variant": "proposal 2, the slide frame and T with the ramp panel",
+      "source": "docs/gslides-parity/design-4/shader/tools/make-mark.mjs (geometry, panelCells, markShapes; copied here so the module is not rerun)",
+      "file": "packages/theme/brand/previews/variants/p2-frame-t-64-paper.png",
+      "measured": {
+        "size": 64,
+        "frameHeightPx": 32,
+        "rowsOutsideFrame": 32,
+        "strokePx": 2,
+        "stemPx": 4,
+        "cellPx": 2,
+        "rampCells": 86
+      },
+      "reason": "Rejected as the product mark (SPEC-4 0.2; J1 rejection 5, J3 rejection 5): the 16:9 frame leaves 32 of 64 rows outside it (50 percent of the box), its stroke is 2 px and the panel holds 86 cells of 2 px; the form reads as a letter and a screen before a slide, and J2's choice of it is on Kevin's list (section 8)."
+    },
+    {
+      "variant": "proposal 2, the slide frame and T with the ramp panel",
+      "source": "docs/gslides-parity/design-4/shader/tools/make-mark.mjs (geometry, panelCells, markShapes; copied here so the module is not rerun)",
+      "file": "packages/theme/brand/previews/variants/p2-frame-t-512-paper.png",
+      "measured": {
+        "size": 512,
+        "frameHeightPx": 256,
+        "rowsOutsideFrame": 256,
+        "strokePx": 16,
+        "stemPx": 32,
+        "cellPx": 8,
+        "rampCells": 317
+      },
+      "reason": "Rejected as the product mark (SPEC-4 0.2; J1 rejection 5, J3 rejection 5): the 16:9 frame leaves 256 of 512 rows outside it (50 percent of the box), its stroke is 16 px and the panel holds 317 cells of 8 px; the form reads as a letter and a screen before a slide, and J2's choice of it is on Kevin's list (section 8)."
+    },
+    {
+      "variant": "proposal 3, the Inter T tile with the dissolving foot",
+      "source": "docs/gslides-parity/design-4/type/tools/build-marks.mjs (HINT, hintRects; copied here so the module is not rerun)",
+      "file": "packages/theme/brand/previews/variants/p3-t-tile-16-paper.png",
+      "measured": {
+        "size": 16,
+        "stemPx": 2,
+        "armPx": 2,
+        "cellPx": 0,
+        "rampCells": 0,
+        "letterShareOfBox": 0.1563
+      },
+      "reason": "Rejected as the product mark (SPEC-4 0.2; J1 rejection 2, J3 rejection 3): the letter covers 15.6 percent of the box with a 2 px stem and no ramp cell at this size; it reads as a Latin letter first (R01 6.3 item 13) and the ramp needs 64 px before a cell exists. Its tile (the plate and the 1 px frame) is what SPEC-4 0.4 kept."
+    },
+    {
+      "variant": "proposal 3, the Inter T tile with the dissolving foot",
+      "source": "docs/gslides-parity/design-4/type/tools/build-marks.mjs (HINT, hintRects; copied here so the module is not rerun)",
+      "file": "packages/theme/brand/previews/variants/p3-t-tile-32-paper.png",
+      "measured": {
+        "size": 32,
+        "stemPx": 4,
+        "armPx": 4,
+        "cellPx": 0,
+        "rampCells": 0,
+        "letterShareOfBox": 0.1563
+      },
+      "reason": "Rejected as the product mark (SPEC-4 0.2; J1 rejection 2, J3 rejection 3): the letter covers 15.6 percent of the box with a 4 px stem and no ramp cell at this size; it reads as a Latin letter first (R01 6.3 item 13) and the ramp needs 64 px before a cell exists. Its tile (the plate and the 1 px frame) is what SPEC-4 0.4 kept."
+    },
+    {
+      "variant": "proposal 3, the Inter T tile with the dissolving foot",
+      "source": "docs/gslides-parity/design-4/type/tools/build-marks.mjs (HINT, hintRects; copied here so the module is not rerun)",
+      "file": "packages/theme/brand/previews/variants/p3-t-tile-64-paper.png",
+      "measured": {
+        "size": 64,
+        "stemPx": 8,
+        "armPx": 8,
+        "cellPx": 2,
+        "rampCells": 20,
+        "letterShareOfBox": 0.1563
+      },
+      "reason": "Rejected as the product mark (SPEC-4 0.2; J1 rejection 2, J3 rejection 3): the letter covers 15.6 percent of the box with a 8 px stem and 20 ramp cells of 2 px; it reads as a Latin letter first (R01 6.3 item 13) and the ramp needs 64 px before a cell exists. Its tile (the plate and the 1 px frame) is what SPEC-4 0.4 kept."
+    }
+  ]
+}

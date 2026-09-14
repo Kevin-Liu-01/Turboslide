@@ -177,6 +177,36 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+test("the server's HTML carries the skeleton and the robots meta, and the editor mounts without a readEditorDeck request (SPEC-4 0.34)", async ({
+  page,
+}) => {
+  /* the document (`ssr: 'data-only'`): the skeleton's title row where the editor will stand, no
+     stage, the noindex meta because the dehydrated document is in the HTML */
+  const html = await (await page.request.get(`/edit/${DECK}`)).text();
+  expect(html).toContain('data-skeleton="editor"');
+  expect(html).toMatch(/<header class="ts-title-row ts-skeleton-row"/);
+  expect(html).not.toContain('ts-stagewrap');
+  expect(html).toMatch(/<meta name="robots" content="noindex"[^>]*\/?>/);
+  /* the payload rides the document: the page's network log holds no server function call for
+     the editor's read; the editor still comes up with the document and settles */
+  const serverFns: string[] = [];
+  page.on('request', (request) => {
+    if (request.url().includes('/_serverFn/')) serverFns.push(request.url());
+  });
+  await page.goto(`/edit/${DECK}`);
+  await page.waitForFunction(() => {
+    try {
+      return Boolean(window.turboslide?.studio);
+    } catch {
+      return false;
+    }
+  });
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
+  expect(serverFns.filter((url) => /readEditorDeck/i.test(url))).toEqual([]);
+  /* the skeleton has left with the editor up (finding 51's window stays closed) */
+  await expect(page.locator('[data-skeleton="editor"]')).toHaveCount(0);
+});
+
 test('the key column edge and the column seam write snapped values', async ({ page }) => {
   test.setTimeout(120_000);
   await openEditor(page);

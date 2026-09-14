@@ -1,8 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import type { RefObject } from 'react';
 
-import { mountMaterial } from '@turboslide/materials/mount';
-import type { MaterialHandle } from '@turboslide/materials/mount';
+import type { MaterialHandle, mountMaterial as mountMaterialFn } from '@turboslide/materials/mount';
 import type { MaterialRecipe } from '@turboslide/schema/blocks/material';
 
 import { MATERIAL_PLAY_EVENT } from './dither';
@@ -37,6 +36,26 @@ export type MaterialMountProps = {
   speed?: number;
   onError?: (error: unknown) => void;
 };
+
+type MountModule = { mountMaterial: typeof mountMaterialFn };
+
+let mountModule: Promise<MountModule> | null = null;
+
+/**
+ * The Paper Shaders mount, loaded on the first `[data-recipe]` root and never before (gslides-parity
+ * SPEC-4 0.44, 3.12; PP 7 row 4): `@turboslide/materials/mount` carries the shader library with
+ * its GLSL sources (about 250 to 300 KB decoded), which every route paid for while no material
+ * was on screen. One `import()` per page, shared by every stage; a failed load is reported through
+ * `onError` and the frozen frame stays, which is the frame contract. This is one of the four
+ * `import()` sites AGENTS.md allows in the browser graph.
+ */
+export function loadMaterialMount(): Promise<MountModule> {
+  mountModule ??= import('@turboslide/materials/mount').catch((error: unknown) => {
+    mountModule = null;
+    throw error;
+  });
+  return mountModule;
+}
 
 /** The recipe a root carries, or null when the attribute does not parse. */
 export function readRecipe(element: Element): MaterialRecipe | null {
@@ -113,20 +132,34 @@ export function MaterialMount({
     let alive = true;
     const handles: MaterialHandle[] = [];
     const created: HTMLElement[] = [];
-    const roots = [...root.querySelectorAll('[data-recipe]')];
-    for (const element of roots) {
-      if (ditheredRoot(element, playing)) continue;
+    const roots = [...root.querySelectorAll('[data-recipe]')].filter(
+      (element) => !ditheredRoot(element, playing),
+    );
+    const targets = roots.flatMap((element) => {
       const recipe = readRecipe(element);
       const target = hostFor(element);
-      if (recipe === null || target === null) continue;
+      if (recipe === null || target === null) return [];
       if (target.created) created.push(target.host);
-      mountMaterial(target.host, recipe, { speed, frame: recipe.anchor ?? 0 })
-        .then((handle) => {
-          if (!alive) {
-            handle.dispose();
-            return;
+      return [{ recipe, host: target.host }];
+    });
+    if (targets.length > 0) {
+      // the shader library arrives with the first material root of the page (SPEC-4 0.44)
+      loadMaterialMount()
+        .then(({ mountMaterial }) => {
+          if (!alive) return;
+          for (const { recipe, host } of targets) {
+            mountMaterial(host, recipe, { speed, frame: recipe.anchor ?? 0 })
+              .then((handle) => {
+                if (!alive) {
+                  handle.dispose();
+                  return;
+                }
+                handles.push(handle);
+              })
+              .catch((error: unknown) => {
+                if (alive) onError?.(error);
+              });
           }
-          handles.push(handle);
         })
         .catch((error: unknown) => {
           if (alive) onError?.(error);

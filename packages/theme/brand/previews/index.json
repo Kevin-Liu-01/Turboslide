@@ -1,0 +1,94 @@
+{
+  "generator": "scripts/build-brand.ts --previews",
+  "writtenAt": "2026-09-14T17:57:29.242Z",
+  "files": [
+    {
+      "path": "packages/theme/brand/previews/mark-sizes.png",
+      "bytes": 30105
+    },
+    {
+      "path": "packages/theme/brand/previews/mark-16-tile-8x.png",
+      "bytes": 424
+    },
+    {
+      "path": "packages/theme/brand/previews/mark-32-tile-8x.png",
+      "bytes": 1093
+    },
+    {
+      "path": "packages/theme/brand/previews/mark-16-paper-8x.png",
+      "bytes": 363
+    },
+    {
+      "path": "packages/theme/brand/previews/mark-32-paper-8x.png",
+      "bytes": 885
+    },
+    {
+      "path": "packages/theme/brand/previews/tab-strips-1x.png",
+      "bytes": 11417
+    },
+    {
+      "path": "packages/theme/brand/previews/tab-strips-2x.png",
+      "bytes": 25662
+    },
+    {
+      "path": "packages/theme/brand/previews/confusion-sheet.png",
+      "bytes": 19408
+    },
+    {
+      "path": "packages/theme/brand/previews/confusion-sheet-4x.png",
+      "bytes": 49556
+    },
+    {
+      "path": "packages/theme/brand/previews/raster-edges.png",
+      "bytes": 22612
+    },
+    {
+      "path": "packages/theme/brand/previews/raster-edges.json",
+      "bytes": 1441
+    },
+    {
+      "path": "packages/theme/brand/previews/variants/p2-frame-t-16-paper.png",
+      "bytes": 115
+    },
+    {
+      "path": "packages/theme/brand/previews/variants/p2-frame-t-32-paper.png",
+      "bytes": 168
+    },
+    {
+      "path": "packages/theme/brand/previews/variants/p2-frame-t-64-paper.png",
+      "bytes": 227
+    },
+    {
+      "path": "packages/theme/brand/previews/variants/p2-frame-t-512-paper.png",
+      "bytes": 3447
+    },
+    {
+      "path": "packages/theme/brand/previews/variants/p3-t-tile-16-paper.png",
+      "bytes": 125
+    },
+    {
+      "path": "packages/theme/brand/previews/variants/p3-t-tile-32-paper.png",
+      "bytes": 150
+    },
+    {
+      "path": "packages/theme/brand/previews/variants/p3-t-tile-64-paper.png",
+      "bytes": 221
+    },
+    {
+      "path": "packages/theme/brand/previews/variants/variants.json",
+      "bytes": 5908
+    },
+    {
+      "path": "packages/theme/brand/previews/variants/cell-threshold-1x.png",
+      "bytes": 51423
+    },
+    {
+      "path": "packages/theme/brand/previews/variants/cell-threshold-2x.png",
+      "bytes": 119700
+    },
+    {
+      "path": "packages/theme/brand/previews/hero-scan.png",
+      "bytes": 282907
+    }
+  ]
+}

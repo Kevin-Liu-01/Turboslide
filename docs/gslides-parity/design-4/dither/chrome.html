@@ -1,132 +1,1104 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Turboslide chrome surfaces</title>
-<!--
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Turboslide chrome surfaces</title>
+    <!--
   The app chrome changes of design-4 proposal 1, mocked with the real tokens: the title row mark,
   the /decks app bar lockup, the Not found page, an empty state, the anonymous avatar chips, the
   progress texture, the present mode surround and the print bar, and the CLI banner. Every box is
   the product's own class where one exists (.pt-ib, --pt- tokens). Static; no framework.
 -->
-<script>(function(){try{var t=localStorage.getItem('gt-theme');document.documentElement.dataset.theme=(t==='light'||t==='dark')?t:'dark'}catch(e){document.documentElement.dataset.theme='dark'}})();</script>
-<link rel="stylesheet" href="../../../../packages/chrome/src/tokens.css">
-<style>
-@font-face { font-family: 'Inter'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('../../../../packages/fonts/assets/InterVariable.woff2') format('woff2'); }
-:root { --ts-mark: 24px; --ts-cell: 2px; }
-*, *::before, *::after { box-sizing: border-box; }
-body { margin: 0; background: var(--pt-paper); color: var(--pt-ink); font: 13px/1.5 var(--pt-text); -webkit-font-smoothing: antialiased; padding: 32px 40px 64px; }
-h1 { font: 500 24px/1.1 var(--pt-display); letter-spacing: -0.02em; font-feature-settings: 'cv11', 'ss01'; margin: 0 0 6px; }
-h2 { font: 500 15px/1.3 var(--pt-display); letter-spacing: -0.01em; margin: 40px 0 12px; }
-.lede { color: var(--pt-ink-2); margin: 0; max-width: 70ch; }
-.frame { border: 1px solid var(--pt-edge); background: var(--pt-paper); }
-.note { color: var(--pt-ink-2); font-size: 12px; margin-top: 8px; }
-.mark { display: block; fill: currentColor; }
-.dither { image-rendering: pixelated; }
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem('gt-theme');
+          document.documentElement.dataset.theme = t === 'light' || t === 'dark' ? t : 'dark';
+        } catch (e) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
+    <link rel="stylesheet" href="../../../../packages/chrome/src/tokens.css" />
+    <style>
+      @font-face {
+        font-family: 'Inter';
+        font-style: normal;
+        font-weight: 100 900;
+        font-display: swap;
+        src: url('../../../../packages/fonts/assets/InterVariable.woff2') format('woff2');
+      }
+      :root {
+        --ts-mark: 24px;
+        --ts-cell: 2px;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--pt-paper);
+        color: var(--pt-ink);
+        font: 13px/1.5 var(--pt-text);
+        -webkit-font-smoothing: antialiased;
+        padding: 32px 40px 64px;
+      }
+      h1 {
+        font: 500 24px/1.1 var(--pt-display);
+        letter-spacing: -0.02em;
+        font-feature-settings: 'cv11', 'ss01';
+        margin: 0 0 6px;
+      }
+      h2 {
+        font: 500 15px/1.3 var(--pt-display);
+        letter-spacing: -0.01em;
+        margin: 40px 0 12px;
+      }
+      .lede {
+        color: var(--pt-ink-2);
+        margin: 0;
+        max-width: 70ch;
+      }
+      .frame {
+        border: 1px solid var(--pt-edge);
+        background: var(--pt-paper);
+      }
+      .note {
+        color: var(--pt-ink-2);
+        font-size: 12px;
+        margin-top: 8px;
+      }
+      .mark {
+        display: block;
+        fill: currentColor;
+      }
+      .dither {
+        image-rendering: pixelated;
+      }
 
-/* the title row (TitleRow.css shape): 44 px, the mark as a link to /decks, the title, the save words, the clock; Slideshow and Share on the right */
-.title-row { height: var(--pt-title-h); display: flex; align-items: center; gap: 8px; padding: 0 8px 0 12px; border-bottom: 1px solid var(--pt-hair); }
-.title-home { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; color: var(--pt-ink); }
-.title-home:focus-visible { outline: 1px solid var(--pt-ink); outline-offset: -1px; }
-.title-name { font: 500 13.5px/1 var(--pt-display); font-feature-settings: 'cv11', 'ss01'; padding: 0 6px; height: 28px; display: inline-flex; align-items: center; border: 1px solid transparent; }
-.title-name:hover { border-color: var(--pt-hair); }
-.save { color: var(--pt-titanium); display: inline-flex; align-items: center; gap: 6px; }
-.save svg { width: 16px; height: 16px; fill: currentColor; }
-.title-r { margin-left: auto; display: inline-flex; gap: 8px; align-items: center; }
-.menu-row { height: var(--pt-menu-h); display: flex; align-items: center; gap: 2px; padding: 0 8px; border-bottom: 1px solid var(--pt-hair-soft); color: var(--pt-ink-2); }
-.menu-row span { padding: 0 8px; }
+      /* the title row (TitleRow.css shape): 44 px, the mark as a link to /decks, the title, the save words, the clock; Slideshow and Share on the right */
+      .title-row {
+        height: var(--pt-title-h);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 8px 0 12px;
+        border-bottom: 1px solid var(--pt-hair);
+      }
+      .title-home {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        color: var(--pt-ink);
+      }
+      .title-home:focus-visible {
+        outline: 1px solid var(--pt-ink);
+        outline-offset: -1px;
+      }
+      .title-name {
+        font: 500 13.5px/1 var(--pt-display);
+        font-feature-settings: 'cv11', 'ss01';
+        padding: 0 6px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid transparent;
+      }
+      .title-name:hover {
+        border-color: var(--pt-hair);
+      }
+      .save {
+        color: var(--pt-titanium);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .save svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+      }
+      .title-r {
+        margin-left: auto;
+        display: inline-flex;
+        gap: 8px;
+        align-items: center;
+      }
+      .menu-row {
+        height: var(--pt-menu-h);
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        padding: 0 8px;
+        border-bottom: 1px solid var(--pt-hair-soft);
+        color: var(--pt-ink-2);
+      }
+      .menu-row span {
+        padding: 0 8px;
+      }
 
-/* the /decks app bar */
-.appbar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 24px; padding: 12px 24px 16px; border-bottom: 1px solid var(--pt-hair); }
-.appbar-brand { display: inline-flex; align-items: center; gap: 10px; color: var(--pt-ink); text-decoration: none; font: 500 22px/1 var(--pt-display); letter-spacing: -0.01em; font-feature-settings: 'cv11', 'ss01'; }
-.appbar-brand svg { width: 16px; height: 16px; }
-.search { position: relative; max-width: 560px; width: 100%; justify-self: center; }
-.search input { width: 100%; height: 40px; padding: 0 12px 0 38px; border: 1px solid var(--pt-hair); border-radius: var(--pt-radius); background: var(--pt-plate); color: var(--pt-ink); font: 14px var(--pt-text); }
-.search svg { position: absolute; left: 12px; top: 12px; width: 16px; height: 16px; fill: var(--pt-ink-2); }
+      /* the /decks app bar */
+      .appbar {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 24px;
+        padding: 12px 24px 16px;
+        border-bottom: 1px solid var(--pt-hair);
+      }
+      .appbar-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        color: var(--pt-ink);
+        text-decoration: none;
+        font: 500 22px/1 var(--pt-display);
+        letter-spacing: -0.01em;
+        font-feature-settings: 'cv11', 'ss01';
+      }
+      .appbar-brand svg {
+        width: 16px;
+        height: 16px;
+      }
+      .search {
+        position: relative;
+        max-width: 560px;
+        width: 100%;
+        justify-self: center;
+      }
+      .search input {
+        width: 100%;
+        height: 40px;
+        padding: 0 12px 0 38px;
+        border: 1px solid var(--pt-hair);
+        border-radius: var(--pt-radius);
+        background: var(--pt-plate);
+        color: var(--pt-ink);
+        font: 14px var(--pt-text);
+      }
+      .search svg {
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        width: 16px;
+        height: 16px;
+        fill: var(--pt-ink-2);
+      }
 
-/* the grid of surfaces */
-.surfaces { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 16px; }
-.surface { border: 1px solid var(--pt-hair); background: var(--pt-paper); padding: 16px; min-height: 260px; display: flex; flex-direction: column; gap: 12px; }
-.surface h3 { font: 500 13px/1.3 var(--pt-display); margin: 0; }
-.surface .body { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 10px; }
-.empty-fig { width: 320px; height: 180px; border: 1px solid var(--pt-edge); background: url('assets/hero-2-dark.png') -640px -360px no-repeat; background-size: 1600px 900px; image-rendering: pixelated; }
-:root:not([data-theme='dark']) .empty-fig { background-image: url('assets/hero-2-light.png'); }
-.empty h4 { font: 500 15px/1.3 var(--pt-display); margin: 8px 0 0; letter-spacing: -0.01em; }
-.empty p { margin: 0; color: var(--pt-ink-2); }
-.avatars { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-.avatar { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px 0 2px; border: 1px solid var(--pt-hair); font-size: 12px; color: var(--pt-ink-2); }
-.avatar svg { width: 24px; height: 24px; display: block; }
-.avatar svg rect.g { fill: var(--pt-ink); } .avatar svg rect.c { fill: var(--pt-paper); }
-.progress { width: 320px; }
-.progress .track { position: relative; height: 8px; border-bottom: 1px solid var(--pt-hair-soft); }
-.progress svg { display: block; width: 320px; height: 8px; }
-.progress svg rect { fill: var(--pt-ink); }
-.progress .words { margin-top: 8px; color: var(--pt-ink-2); }
-.present { width: 320px; height: 180px; background: var(--pt-panel-ink); display: flex; align-items: center; justify-content: center; }
-.present .sheet { width: 256px; height: 144px; background: #070707; color: #f2f2f0; border: 1px solid rgba(242,242,240,0.22); position: relative; }
-.present .sheet i { position: absolute; left: 14px; bottom: 10px; width: 20px; height: 13px; background: #8a8f98; opacity: .9; }
-.present .sheet b { position: absolute; left: 14px; top: 14px; font: 500 12px var(--pt-display); }
-.print-bar { display: flex; align-items: center; gap: 12px; height: var(--pt-bar-h); padding: 0 12px; border-bottom: 1px solid var(--pt-hair); background: var(--pt-paper); }
-.print-bar .pt-ib { border-color: var(--pt-hair); }
-.print-sheets { background: var(--pt-plate); padding: 16px; display: flex; gap: 12px; }
-.print-sheets div { width: 128px; height: 72px; background: var(--pt-paper); border: 1px solid var(--pt-hair); }
-.notfound { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-.notfound svg { width: 64px; height: 64px; }
-.notfound h4 { font: 500 28px/1.1 var(--pt-display); letter-spacing: -0.02em; margin: 6px 0 0; }
-.notfound p { margin: 0; color: var(--pt-ink-2); font-size: 14px; }
-pre.cli { margin: 0; padding: 14px 16px; background: var(--pt-panel-ink); color: var(--pt-panel-text); font: 13px/1.2 var(--pt-mono); border: 1px solid var(--pt-hair); white-space: pre; overflow: auto; }
-.never { border: 1px solid var(--pt-hair); padding: 12px 16px; color: var(--pt-ink-2); max-width: 70ch; }
-</style>
-</head>
-<body>
-<h1>Turboslide chrome surfaces</h1>
-<p class="lede">The mark in the places the identity touches, with the real tokens. The mark is solid below 48 px and cellular from 48 px; the dither appears only where a picture would be.</p>
+      /* the grid of surfaces */
+      .surfaces {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 24px;
+        margin-top: 16px;
+      }
+      .surface {
+        border: 1px solid var(--pt-hair);
+        background: var(--pt-paper);
+        padding: 16px;
+        min-height: 260px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .surface h3 {
+        font: 500 13px/1.3 var(--pt-display);
+        margin: 0;
+      }
+      .surface .body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .empty-fig {
+        width: 320px;
+        height: 180px;
+        border: 1px solid var(--pt-edge);
+        background: url('assets/hero-2-dark.png') -640px -360px no-repeat;
+        background-size: 1600px 900px;
+        image-rendering: pixelated;
+      }
+      :root:not([data-theme='dark']) .empty-fig {
+        background-image: url('assets/hero-2-light.png');
+      }
+      .empty h4 {
+        font: 500 15px/1.3 var(--pt-display);
+        margin: 8px 0 0;
+        letter-spacing: -0.01em;
+      }
+      .empty p {
+        margin: 0;
+        color: var(--pt-ink-2);
+      }
+      .avatars {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      .avatar {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 28px;
+        padding: 0 10px 0 2px;
+        border: 1px solid var(--pt-hair);
+        font-size: 12px;
+        color: var(--pt-ink-2);
+      }
+      .avatar svg {
+        width: 24px;
+        height: 24px;
+        display: block;
+      }
+      .avatar svg rect.g {
+        fill: var(--pt-ink);
+      }
+      .avatar svg rect.c {
+        fill: var(--pt-paper);
+      }
+      .progress {
+        width: 320px;
+      }
+      .progress .track {
+        position: relative;
+        height: 8px;
+        border-bottom: 1px solid var(--pt-hair-soft);
+      }
+      .progress svg {
+        display: block;
+        width: 320px;
+        height: 8px;
+      }
+      .progress svg rect {
+        fill: var(--pt-ink);
+      }
+      .progress .words {
+        margin-top: 8px;
+        color: var(--pt-ink-2);
+      }
+      .present {
+        width: 320px;
+        height: 180px;
+        background: var(--pt-panel-ink);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .present .sheet {
+        width: 256px;
+        height: 144px;
+        background: #070707;
+        color: #f2f2f0;
+        border: 1px solid rgba(242, 242, 240, 0.22);
+        position: relative;
+      }
+      .present .sheet i {
+        position: absolute;
+        left: 14px;
+        bottom: 10px;
+        width: 20px;
+        height: 13px;
+        background: #8a8f98;
+        opacity: 0.9;
+      }
+      .present .sheet b {
+        position: absolute;
+        left: 14px;
+        top: 14px;
+        font: 500 12px var(--pt-display);
+      }
+      .print-bar {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: var(--pt-bar-h);
+        padding: 0 12px;
+        border-bottom: 1px solid var(--pt-hair);
+        background: var(--pt-paper);
+      }
+      .print-bar .pt-ib {
+        border-color: var(--pt-hair);
+      }
+      .print-sheets {
+        background: var(--pt-plate);
+        padding: 16px;
+        display: flex;
+        gap: 12px;
+      }
+      .print-sheets div {
+        width: 128px;
+        height: 72px;
+        background: var(--pt-paper);
+        border: 1px solid var(--pt-hair);
+      }
+      .notfound {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .notfound svg {
+        width: 64px;
+        height: 64px;
+      }
+      .notfound h4 {
+        font: 500 28px/1.1 var(--pt-display);
+        letter-spacing: -0.02em;
+        margin: 6px 0 0;
+      }
+      .notfound p {
+        margin: 0;
+        color: var(--pt-ink-2);
+        font-size: 14px;
+      }
+      pre.cli {
+        margin: 0;
+        padding: 14px 16px;
+        background: var(--pt-panel-ink);
+        color: var(--pt-panel-text);
+        font: 13px/1.2 var(--pt-mono);
+        border: 1px solid var(--pt-hair);
+        white-space: pre;
+        overflow: auto;
+      }
+      .never {
+        border: 1px solid var(--pt-hair);
+        padding: 12px 16px;
+        color: var(--pt-ink-2);
+        max-width: 70ch;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Turboslide chrome surfaces</h1>
+    <p class="lede">
+      The mark in the places the identity touches, with the real tokens. The mark is solid below 48
+      px and cellular from 48 px; the dither appears only where a picture would be.
+    </p>
 
-<h2>The title row (/edit, /new): the mark at 24 px, solid, as the link to /decks</h2>
-<div class="frame">
-  <div class="title-row">
-    <a class="title-home" href="#" aria-label="Turboslide home" title="Turboslide home. Every presentation on this Turboslide."><svg class="mark" width="24" height="24" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill-rule="evenodd" d="M0 0h16v16H0z M2 8h8v6H2z"/></svg></a>
-    <span class="title-name">Q3 partner review</span>
-    <span class="save"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5.5 16a3.5 3.5 0 0 1-.369-6.98 4 4 0 1 1 7.753-1.977A4.5 4.5 0 1 1 13.5 16h-8Z"/></svg>All changes saved</span>
-    <span class="save">Last edit was 2 minutes ago</span>
-    <div class="title-r">
-      <button class="pt-ib" type="button" title="Slideshow. Present from the current slide."><span class="pt-lb">Slideshow</span></button>
-      <button class="pt-ib is-solid" type="button" title="Share. The view, present and edit links."><span class="pt-lb">Share</span></button>
+    <h2>The title row (/edit, /new): the mark at 24 px, solid, as the link to /decks</h2>
+    <div class="frame">
+      <div class="title-row">
+        <a
+          class="title-home"
+          href="#"
+          aria-label="Turboslide home"
+          title="Turboslide home. Every presentation on this Turboslide."
+          ><svg
+            class="mark"
+            width="24"
+            height="24"
+            viewBox="0 0 16 16"
+            shape-rendering="crispEdges"
+            aria-hidden="true"
+          >
+            <path fill-rule="evenodd" d="M0 0h16v16H0z M2 8h8v6H2z" /></svg
+        ></a>
+        <span class="title-name">Q3 partner review</span>
+        <span class="save"
+          ><svg viewBox="0 0 20 20" aria-hidden="true">
+            <path
+              d="M5.5 16a3.5 3.5 0 0 1-.369-6.98 4 4 0 1 1 7.753-1.977A4.5 4.5 0 1 1 13.5 16h-8Z"
+            /></svg
+          >All changes saved</span
+        >
+        <span class="save">Last edit was 2 minutes ago</span>
+        <div class="title-r">
+          <button class="pt-ib" type="button" title="Slideshow. Present from the current slide.">
+            <span class="pt-lb">Slideshow</span>
+          </button>
+          <button
+            class="pt-ib is-solid"
+            type="button"
+            title="Share. The view, present and edit links."
+          >
+            <span class="pt-lb">Share</span>
+          </button>
+        </div>
+      </div>
+      <div class="menu-row">
+        <span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span
+        ><span>Slide</span><span>Arrange</span><span>Tools</span><span>Extensions</span
+        ><span>Help</span>
+      </div>
     </div>
-  </div>
-  <div class="menu-row"><span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span><span>Slide</span><span>Arrange</span><span>Tools</span><span>Extensions</span><span>Help</span></div>
-</div>
-<p class="note">TitleRow.tsx line 273 swaps GtMark for TurboslideMark; the tooltip stays "Turboslide home" and its sentence. The link becomes the router's Link so intent preload applies (research-4 report 03 section 3.1).</p>
+    <p class="note">
+      TitleRow.tsx line 273 swaps GtMark for TurboslideMark; the tooltip stays "Turboslide home" and
+      its sentence. The link becomes the router's Link so intent preload applies (research-4 report
+      03 section 3.1).
+    </p>
 
-<h2>The /decks app bar: the 16 px solid mark at the cap height of the word set at 22 px</h2>
-<div class="frame">
-  <div class="appbar">
-    <a class="appbar-brand" href="#" title="Turboslide. Your presentations."><svg class="mark" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill-rule="evenodd" d="M0 0h16v16H0z M2 8h8v6H2z"/></svg><span>Turboslide</span></a>
-    <label class="search"><svg viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd"/></svg><input type="search" placeholder="Search presentations" aria-label="Search presentations"></label>
-    <a class="pt-ib" href="#" title="Product page. What Turboslide is, for someone new.">About Turboslide</a>
-  </div>
-</div>
-<p class="note">decks.index.tsx lines 530 to 537: the mark and the word are one Link to /decks; the word is live text at 22 px so the 16 px mark meets its cap height (Inter's cap height is 0.727 em). The Search pill keeps the one 6 px corner.</p>
+    <h2>The /decks app bar: the 16 px solid mark at the cap height of the word set at 22 px</h2>
+    <div class="frame">
+      <div class="appbar">
+        <a class="appbar-brand" href="#" title="Turboslide. Your presentations."
+          ><svg class="mark" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+            <path fill-rule="evenodd" d="M0 0h16v16H0z M2 8h8v6H2z" /></svg
+          ><span>Turboslide</span></a
+        >
+        <label class="search"
+          ><svg viewBox="0 0 20 20" aria-hidden="true">
+            <path
+              fill-rule="evenodd"
+              d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z"
+              clip-rule="evenodd"
+            /></svg
+          ><input
+            type="search"
+            placeholder="Search presentations"
+            aria-label="Search presentations"
+        /></label>
+        <a class="pt-ib" href="#" title="Product page. What Turboslide is, for someone new."
+          >About Turboslide</a
+        >
+      </div>
+    </div>
+    <p class="note">
+      decks.index.tsx lines 530 to 537: the mark and the word are one Link to /decks; the word is
+      live text at 22 px so the 16 px mark meets its cap height (Inter's cap height is 0.727 em).
+      The Search pill keeps the one 6 px corner.
+    </p>
 
-<h2>Where the dither appears, and where it never does</h2>
-<div class="surfaces">
-  <div class="surface"><h3>Not found (the root route's notFoundComponent)</h3><div class="body notfound"><svg class="mark" viewBox="0 0 32 32" shape-rendering="crispEdges" aria-label="Turboslide" role="img"><rect x="0" y="0" width="1" height="1"/><rect x="2" y="0" width="1" height="1"/><rect x="4" y="0" width="1" height="1"/><rect x="6" y="0" width="1" height="1"/><rect x="8" y="0" width="1" height="1"/><rect x="10" y="0" width="1" height="1"/><rect x="12" y="0" width="1" height="1"/><rect x="14" y="0" width="1" height="1"/><rect x="16" y="0" width="1" height="1"/><rect x="18" y="0" width="1" height="1"/><rect x="20" y="0" width="1" height="1"/><rect x="22" y="0" width="1" height="1"/><rect x="24" y="0" width="1" height="1"/><rect x="26" y="0" width="1" height="1"/><rect x="28" y="0" width="1" height="1"/><rect x="30" y="0" width="1" height="1"/><rect x="1" y="1" width="1" height="1"/><rect x="3" y="1" width="1" height="1"/><rect x="5" y="1" width="1" height="1"/><rect x="7" y="1" width="1" height="1"/><rect x="9" y="1" width="1" height="1"/><rect x="11" y="1" width="1" height="1"/><rect x="13" y="1" width="1" height="1"/><rect x="15" y="1" width="1" height="1"/><rect x="17" y="1" width="1" height="1"/><rect x="19" y="1" width="1" height="1"/><rect x="21" y="1" width="1" height="1"/><rect x="23" y="1" width="1" height="1"/><rect x="25" y="1" width="1" height="1"/><rect x="27" y="1" width="1" height="1"/><rect x="29" y="1" width="1" height="1"/><rect x="0" y="2" width="1" height="1"/><rect x="2" y="2" width="1" height="1"/><rect x="4" y="2" width="1" height="1"/><rect x="6" y="2" width="1" height="1"/><rect x="8" y="2" width="1" height="1"/><rect x="10" y="2" width="1" height="1"/><rect x="12" y="2" width="1" height="1"/><rect x="14" y="2" width="1" height="1"/><rect x="16" y="2" width="1" height="1"/><rect x="18" y="2" width="1" height="1"/><rect x="20" y="2" width="1" height="1"/><rect x="22" y="2" width="1" height="1"/><rect x="24" y="2" width="1" height="1"/><rect x="26" y="2" width="1" height="1"/><rect x="28" y="2" width="1" height="1"/><rect x="30" y="2" width="1" height="1"/><rect x="1" y="3" width="1" height="1"/><rect x="3" y="3" width="1" height="1"/><rect x="5" y="3" width="1" height="1"/><rect x="7" y="3" width="1" height="1"/><rect x="9" y="3" width="1" height="1"/><rect x="11" y="3" width="1" height="1"/><rect x="13" y="3" width="1" height="1"/><rect x="15" y="3" width="1" height="1"/><rect x="17" y="3" width="1" height="1"/><rect x="19" y="3" width="1" height="1"/><rect x="21" y="3" width="1" height="1"/><rect x="23" y="3" width="1" height="1"/><rect x="25" y="3" width="1" height="1"/><rect x="27" y="3" width="1" height="1"/><rect x="31" y="3" width="1" height="1"/><rect x="0" y="4" width="3" height="1"/><rect x="4" y="4" width="3" height="1"/><rect x="8" y="4" width="3" height="1"/><rect x="12" y="4" width="3" height="1"/><rect x="16" y="4" width="3" height="1"/><rect x="20" y="4" width="3" height="1"/><rect x="24" y="4" width="1" height="1"/><rect x="26" y="4" width="1" height="1"/><rect x="28" y="4" width="1" height="1"/><rect x="30" y="4" width="1" height="1"/><rect x="1" y="5" width="1" height="1"/><rect x="3" y="5" width="1" height="1"/><rect x="5" y="5" width="1" height="1"/><rect x="7" y="5" width="1" height="1"/><rect x="9" y="5" width="1" height="1"/><rect x="11" y="5" width="1" height="1"/><rect x="13" y="5" width="1" height="1"/><rect x="15" y="5" width="1" height="1"/><rect x="17" y="5" width="1" height="1"/><rect x="19" y="5" width="1" height="1"/><rect x="21" y="5" width="1" height="1"/><rect x="23" y="5" width="1" height="1"/><rect x="25" y="5" width="1" height="1"/><rect x="27" y="5" width="1" height="1"/><rect x="29" y="5" width="1" height="1"/><rect x="31" y="5" width="1" height="1"/><rect x="0" y="6" width="1" height="1"/><rect x="2" y="6" width="3" height="1"/><rect x="6" y="6" width="3" height="1"/><rect x="10" y="6" width="3" height="1"/><rect x="14" y="6" width="3" height="1"/><rect x="18" y="6" width="3" height="1"/><rect x="22" y="6" width="3" height="1"/><rect x="26" y="6" width="1" height="1"/><rect x="28" y="6" width="1" height="1"/><rect x="30" y="6" width="1" height="1"/><rect x="1" y="7" width="1" height="1"/><rect x="3" y="7" width="1" height="1"/><rect x="5" y="7" width="1" height="1"/><rect x="7" y="7" width="1" height="1"/><rect x="9" y="7" width="1" height="1"/><rect x="11" y="7" width="1" height="1"/><rect x="13" y="7" width="1" height="1"/><rect x="15" y="7" width="1" height="1"/><rect x="17" y="7" width="1" height="1"/><rect x="19" y="7" width="1" height="1"/><rect x="21" y="7" width="1" height="1"/><rect x="23" y="7" width="1" height="1"/><rect x="25" y="7" width="1" height="1"/><rect x="27" y="7" width="1" height="1"/><rect x="29" y="7" width="1" height="1"/><rect x="31" y="7" width="1" height="1"/><rect x="0" y="8" width="27" height="1"/><rect x="28" y="8" width="3" height="1"/><rect x="1" y="9" width="1" height="1"/><rect x="3" y="9" width="1" height="1"/><rect x="5" y="9" width="1" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="9" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="13" y="9" width="1" height="1"/><rect x="15" y="9" width="1" height="1"/><rect x="17" y="9" width="1" height="1"/><rect x="19" y="9" width="1" height="1"/><rect x="21" y="9" width="1" height="1"/><rect x="23" y="9" width="1" height="1"/><rect x="25" y="9" width="1" height="1"/><rect x="27" y="9" width="1" height="1"/><rect x="29" y="9" width="1" height="1"/><rect x="31" y="9" width="1" height="1"/><rect x="0" y="10" width="29" height="1"/><rect x="30" y="10" width="1" height="1"/><rect x="1" y="11" width="3" height="1"/><rect x="5" y="11" width="1" height="1"/><rect x="7" y="11" width="1" height="1"/><rect x="9" y="11" width="3" height="1"/><rect x="13" y="11" width="1" height="1"/><rect x="15" y="11" width="1" height="1"/><rect x="17" y="11" width="3" height="1"/><rect x="21" y="11" width="1" height="1"/><rect x="23" y="11" width="1" height="1"/><rect x="25" y="11" width="1" height="1"/><rect x="27" y="11" width="1" height="1"/><rect x="29" y="11" width="1" height="1"/><rect x="31" y="11" width="1" height="1"/><rect x="0" y="12" width="31" height="1"/><rect x="0" y="13" width="2" height="1"/><rect x="3" y="13" width="7" height="1"/><rect x="11" y="13" width="7" height="1"/><rect x="19" y="13" width="3" height="1"/><rect x="23" y="13" width="3" height="1"/><rect x="27" y="13" width="1" height="1"/><rect x="29" y="13" width="1" height="1"/><rect x="31" y="13" width="1" height="1"/><rect x="0" y="14" width="29" height="1"/><rect x="30" y="14" width="1" height="1"/><rect x="1" y="15" width="7" height="1"/><rect x="9" y="15" width="7" height="1"/><rect x="17" y="15" width="7" height="1"/><rect x="25" y="15" width="1" height="1"/><rect x="27" y="15" width="1" height="1"/><rect x="29" y="15" width="1" height="1"/><rect x="31" y="15" width="1" height="1"/><rect x="0" y="16" width="4" height="1"/><rect x="20" y="16" width="11" height="1"/><rect x="0" y="17" width="4" height="1"/><rect x="20" y="17" width="2" height="1"/><rect x="23" y="17" width="3" height="1"/><rect x="27" y="17" width="1" height="1"/><rect x="29" y="17" width="1" height="1"/><rect x="31" y="17" width="1" height="1"/><rect x="0" y="18" width="4" height="1"/><rect x="20" y="18" width="9" height="1"/><rect x="30" y="18" width="1" height="1"/><rect x="1" y="19" width="3" height="1"/><rect x="20" y="19" width="4" height="1"/><rect x="25" y="19" width="1" height="1"/><rect x="27" y="19" width="1" height="1"/><rect x="29" y="19" width="1" height="1"/><rect x="31" y="19" width="1" height="1"/><rect x="0" y="20" width="4" height="1"/><rect x="20" y="20" width="11" height="1"/><rect x="0" y="21" width="4" height="1"/><rect x="20" y="21" width="6" height="1"/><rect x="27" y="21" width="1" height="1"/><rect x="29" y="21" width="1" height="1"/><rect x="31" y="21" width="1" height="1"/><rect x="0" y="22" width="4" height="1"/><rect x="20" y="22" width="9" height="1"/><rect x="30" y="22" width="1" height="1"/><rect x="1" y="23" width="3" height="1"/><rect x="20" y="23" width="4" height="1"/><rect x="25" y="23" width="1" height="1"/><rect x="27" y="23" width="1" height="1"/><rect x="29" y="23" width="1" height="1"/><rect x="31" y="23" width="1" height="1"/><rect x="0" y="24" width="4" height="1"/><rect x="20" y="24" width="11" height="1"/><rect x="0" y="25" width="4" height="1"/><rect x="20" y="25" width="2" height="1"/><rect x="23" y="25" width="3" height="1"/><rect x="27" y="25" width="1" height="1"/><rect x="29" y="25" width="1" height="1"/><rect x="31" y="25" width="1" height="1"/><rect x="0" y="26" width="4" height="1"/><rect x="20" y="26" width="9" height="1"/><rect x="30" y="26" width="1" height="1"/><rect x="1" y="27" width="3" height="1"/><rect x="20" y="27" width="4" height="1"/><rect x="25" y="27" width="1" height="1"/><rect x="27" y="27" width="1" height="1"/><rect x="29" y="27" width="1" height="1"/><rect x="31" y="27" width="1" height="1"/><rect x="0" y="28" width="31" height="1"/><rect x="0" y="29" width="2" height="1"/><rect x="3" y="29" width="19" height="1"/><rect x="23" y="29" width="3" height="1"/><rect x="27" y="29" width="1" height="1"/><rect x="29" y="29" width="1" height="1"/><rect x="31" y="29" width="1" height="1"/><rect x="0" y="30" width="29" height="1"/><rect x="30" y="30" width="1" height="1"/><rect x="1" y="31" width="1" height="1"/><rect x="3" y="31" width="1" height="1"/><rect x="5" y="31" width="3" height="1"/><rect x="9" y="31" width="3" height="1"/><rect x="13" y="31" width="3" height="1"/><rect x="17" y="31" width="3" height="1"/><rect x="21" y="31" width="3" height="1"/><rect x="25" y="31" width="1" height="1"/><rect x="27" y="31" width="1" height="1"/><rect x="29" y="31" width="1" height="1"/><rect x="31" y="31" width="1" height="1"/></svg><h4>Not found</h4><p>No page at this address. Start a new presentation or open your presentations.</p><div style="display:flex;gap:8px"><a class="pt-ib is-solid" href="#">New Presentation</a><a class="pt-ib" href="#" style="border-color:var(--pt-hair)">Your Presentations</a></div></div></div>
-  <div class="surface"><h3>Empty state (no presentations, empty trash, no results)</h3><div class="body empty"><div class="empty-fig dither" role="img" aria-label="A two tone figure, a crop of the liquid metal twin at one cell per two pixels"></div><h4>No presentations yet</h4><p>A new presentation is one click; the GT deck is one more.</p><a class="pt-ib is-solid" href="#">New Presentation</a></div></div>
-  <div class="surface"><h3>Anonymous avatars: an ink square whose tier is keyed by the author id</h3><div class="body"><div class="avatars"><span class="avatar" title="kevin, tier 42 of 64"><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect class="g" width="8" height="8"/><rect class="c" x="0" y="0" width="1" height="1"/><rect class="c" x="1" y="0" width="1" height="1"/><rect class="c" x="2" y="0" width="1" height="1"/><rect class="c" x="3" y="0" width="1" height="1"/><rect class="c" x="4" y="0" width="1" height="1"/><rect class="c" x="5" y="0" width="1" height="1"/><rect class="c" x="6" y="0" width="1" height="1"/><rect class="c" x="1" y="1" width="1" height="1"/><rect class="c" x="3" y="1" width="1" height="1"/><rect class="c" x="5" y="1" width="1" height="1"/><rect class="c" x="7" y="1" width="1" height="1"/><rect class="c" x="0" y="2" width="1" height="1"/><rect class="c" x="2" y="2" width="1" height="1"/><rect class="c" x="3" y="2" width="1" height="1"/><rect class="c" x="4" y="2" width="1" height="1"/><rect class="c" x="6" y="2" width="1" height="1"/><rect class="c" x="7" y="2" width="1" height="1"/><rect class="c" x="1" y="3" width="1" height="1"/><rect class="c" x="3" y="3" width="1" height="1"/><rect class="c" x="5" y="3" width="1" height="1"/><rect class="c" x="7" y="3" width="1" height="1"/><rect class="c" x="0" y="4" width="1" height="1"/><rect class="c" x="1" y="4" width="1" height="1"/><rect class="c" x="2" y="4" width="1" height="1"/><rect class="c" x="4" y="4" width="1" height="1"/><rect class="c" x="5" y="4" width="1" height="1"/><rect class="c" x="6" y="4" width="1" height="1"/><rect class="c" x="7" y="4" width="1" height="1"/><rect class="c" x="1" y="5" width="1" height="1"/><rect class="c" x="3" y="5" width="1" height="1"/><rect class="c" x="5" y="5" width="1" height="1"/><rect class="c" x="7" y="5" width="1" height="1"/><rect class="c" x="0" y="6" width="1" height="1"/><rect class="c" x="2" y="6" width="1" height="1"/><rect class="c" x="3" y="6" width="1" height="1"/><rect class="c" x="4" y="6" width="1" height="1"/><rect class="c" x="6" y="6" width="1" height="1"/><rect class="c" x="7" y="6" width="1" height="1"/><rect class="c" x="1" y="7" width="1" height="1"/><rect class="c" x="3" y="7" width="1" height="1"/><rect class="c" x="5" y="7" width="1" height="1"/><rect class="c" x="7" y="7" width="1" height="1"/></svg>kevin</span><span class="avatar" title="agent:claude, tier 38 of 64"><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect class="g" width="8" height="8"/><rect class="c" x="0" y="0" width="1" height="1"/><rect class="c" x="1" y="0" width="1" height="1"/><rect class="c" x="2" y="0" width="1" height="1"/><rect class="c" x="4" y="0" width="1" height="1"/><rect class="c" x="5" y="0" width="1" height="1"/><rect class="c" x="6" y="0" width="1" height="1"/><rect class="c" x="1" y="1" width="1" height="1"/><rect class="c" x="3" y="1" width="1" height="1"/><rect class="c" x="5" y="1" width="1" height="1"/><rect class="c" x="7" y="1" width="1" height="1"/><rect class="c" x="0" y="2" width="1" height="1"/><rect class="c" x="2" y="2" width="1" height="1"/><rect class="c" x="3" y="2" width="1" height="1"/><rect class="c" x="4" y="2" width="1" height="1"/><rect class="c" x="6" y="2" width="1" height="1"/><rect class="c" x="1" y="3" width="1" height="1"/><rect class="c" x="3" y="3" width="1" height="1"/><rect class="c" x="5" y="3" width="1" height="1"/><rect class="c" x="7" y="3" width="1" height="1"/><rect class="c" x="0" y="4" width="1" height="1"/><rect class="c" x="1" y="4" width="1" height="1"/><rect class="c" x="2" y="4" width="1" height="1"/><rect class="c" x="4" y="4" width="1" height="1"/><rect class="c" x="5" y="4" width="1" height="1"/><rect class="c" x="6" y="4" width="1" height="1"/><rect class="c" x="1" y="5" width="1" height="1"/><rect class="c" x="3" y="5" width="1" height="1"/><rect class="c" x="5" y="5" width="1" height="1"/><rect class="c" x="7" y="5" width="1" height="1"/><rect class="c" x="0" y="6" width="1" height="1"/><rect class="c" x="2" y="6" width="1" height="1"/><rect class="c" x="4" y="6" width="1" height="1"/><rect class="c" x="6" y="6" width="1" height="1"/><rect class="c" x="7" y="6" width="1" height="1"/><rect class="c" x="1" y="7" width="1" height="1"/><rect class="c" x="3" y="7" width="1" height="1"/><rect class="c" x="5" y="7" width="1" height="1"/><rect class="c" x="7" y="7" width="1" height="1"/></svg>agent:claude</span><span class="avatar" title="anon-7f3a, tier 55 of 64"><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect class="g" width="8" height="8"/><rect class="c" x="0" y="0" width="1" height="1"/><rect class="c" x="1" y="0" width="1" height="1"/><rect class="c" x="2" y="0" width="1" height="1"/><rect class="c" x="3" y="0" width="1" height="1"/><rect class="c" x="4" y="0" width="1" height="1"/><rect class="c" x="5" y="0" width="1" height="1"/><rect class="c" x="6" y="0" width="1" height="1"/><rect class="c" x="7" y="0" width="1" height="1"/><rect class="c" x="0" y="1" width="1" height="1"/><rect class="c" x="1" y="1" width="1" height="1"/><rect class="c" x="3" y="1" width="1" height="1"/><rect class="c" x="4" y="1" width="1" height="1"/><rect class="c" x="5" y="1" width="1" height="1"/><rect class="c" x="7" y="1" width="1" height="1"/><rect class="c" x="0" y="2" width="1" height="1"/><rect class="c" x="1" y="2" width="1" height="1"/><rect class="c" x="2" y="2" width="1" height="1"/><rect class="c" x="3" y="2" width="1" height="1"/><rect class="c" x="4" y="2" width="1" height="1"/><rect class="c" x="5" y="2" width="1" height="1"/><rect class="c" x="6" y="2" width="1" height="1"/><rect class="c" x="7" y="2" width="1" height="1"/><rect class="c" x="1" y="3" width="1" height="1"/><rect class="c" x="2" y="3" width="1" height="1"/><rect class="c" x="3" y="3" width="1" height="1"/><rect class="c" x="5" y="3" width="1" height="1"/><rect class="c" x="6" y="3" width="1" height="1"/><rect class="c" x="7" y="3" width="1" height="1"/><rect class="c" x="0" y="4" width="1" height="1"/><rect class="c" x="1" y="4" width="1" height="1"/><rect class="c" x="2" y="4" width="1" height="1"/><rect class="c" x="3" y="4" width="1" height="1"/><rect class="c" x="4" y="4" width="1" height="1"/><rect class="c" x="5" y="4" width="1" height="1"/><rect class="c" x="6" y="4" width="1" height="1"/><rect class="c" x="7" y="4" width="1" height="1"/><rect class="c" x="0" y="5" width="1" height="1"/><rect class="c" x="1" y="5" width="1" height="1"/><rect class="c" x="3" y="5" width="1" height="1"/><rect class="c" x="4" y="5" width="1" height="1"/><rect class="c" x="5" y="5" width="1" height="1"/><rect class="c" x="7" y="5" width="1" height="1"/><rect class="c" x="0" y="6" width="1" height="1"/><rect class="c" x="1" y="6" width="1" height="1"/><rect class="c" x="2" y="6" width="1" height="1"/><rect class="c" x="3" y="6" width="1" height="1"/><rect class="c" x="4" y="6" width="1" height="1"/><rect class="c" x="5" y="6" width="1" height="1"/><rect class="c" x="6" y="6" width="1" height="1"/><rect class="c" x="7" y="6" width="1" height="1"/><rect class="c" x="1" y="7" width="1" height="1"/><rect class="c" x="3" y="7" width="1" height="1"/><rect class="c" x="5" y="7" width="1" height="1"/><rect class="c" x="6" y="7" width="1" height="1"/><rect class="c" x="7" y="7" width="1" height="1"/></svg>anon-7f3a</span><span class="avatar" title="reviewer, tier 18 of 64"><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect class="g" width="8" height="8"/><rect class="c" x="0" y="0" width="1" height="1"/><rect class="c" x="2" y="0" width="1" height="1"/><rect class="c" x="4" y="0" width="1" height="1"/><rect class="c" x="6" y="0" width="1" height="1"/><rect class="c" x="1" y="1" width="1" height="1"/><rect class="c" x="0" y="2" width="1" height="1"/><rect class="c" x="2" y="2" width="1" height="1"/><rect class="c" x="4" y="2" width="1" height="1"/><rect class="c" x="6" y="2" width="1" height="1"/><rect class="c" x="0" y="4" width="1" height="1"/><rect class="c" x="2" y="4" width="1" height="1"/><rect class="c" x="4" y="4" width="1" height="1"/><rect class="c" x="6" y="4" width="1" height="1"/><rect class="c" x="5" y="5" width="1" height="1"/><rect class="c" x="0" y="6" width="1" height="1"/><rect class="c" x="2" y="6" width="1" height="1"/><rect class="c" x="4" y="6" width="1" height="1"/><rect class="c" x="6" y="6" width="1" height="1"/></svg>reviewer</span><span class="avatar" title="agent:codex, tier 19 of 64"><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect class="g" width="8" height="8"/><rect class="c" x="0" y="0" width="1" height="1"/><rect class="c" x="2" y="0" width="1" height="1"/><rect class="c" x="4" y="0" width="1" height="1"/><rect class="c" x="6" y="0" width="1" height="1"/><rect class="c" x="1" y="1" width="1" height="1"/><rect class="c" x="5" y="1" width="1" height="1"/><rect class="c" x="0" y="2" width="1" height="1"/><rect class="c" x="2" y="2" width="1" height="1"/><rect class="c" x="4" y="2" width="1" height="1"/><rect class="c" x="6" y="2" width="1" height="1"/><rect class="c" x="0" y="4" width="1" height="1"/><rect class="c" x="2" y="4" width="1" height="1"/><rect class="c" x="4" y="4" width="1" height="1"/><rect class="c" x="6" y="4" width="1" height="1"/><rect class="c" x="5" y="5" width="1" height="1"/><rect class="c" x="0" y="6" width="1" height="1"/><rect class="c" x="2" y="6" width="1" height="1"/><rect class="c" x="4" y="6" width="1" height="1"/><rect class="c" x="6" y="6" width="1" height="1"/></svg>agent:codex</span><span class="avatar" title="sales, tier 47 of 64"><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true"><rect class="g" width="8" height="8"/><rect class="c" x="0" y="0" width="1" height="1"/><rect class="c" x="1" y="0" width="1" height="1"/><rect class="c" x="2" y="0" width="1" height="1"/><rect class="c" x="3" y="0" width="1" height="1"/><rect class="c" x="4" y="0" width="1" height="1"/><rect class="c" x="5" y="0" width="1" height="1"/><rect class="c" x="6" y="0" width="1" height="1"/><rect class="c" x="7" y="0" width="1" height="1"/><rect class="c" x="1" y="1" width="1" height="1"/><rect class="c" x="3" y="1" width="1" height="1"/><rect class="c" x="5" y="1" width="1" height="1"/><rect class="c" x="7" y="1" width="1" height="1"/><rect class="c" x="0" y="2" width="1" height="1"/><rect class="c" x="1" y="2" width="1" height="1"/><rect class="c" x="2" y="2" width="1" height="1"/><rect class="c" x="3" y="2" width="1" height="1"/><rect class="c" x="4" y="2" width="1" height="1"/><rect class="c" x="5" y="2" width="1" height="1"/><rect class="c" x="6" y="2" width="1" height="1"/><rect class="c" x="7" y="2" width="1" height="1"/><rect class="c" x="1" y="3" width="1" height="1"/><rect class="c" x="3" y="3" width="1" height="1"/><rect class="c" x="5" y="3" width="1" height="1"/><rect class="c" x="7" y="3" width="1" height="1"/><rect class="c" x="0" y="4" width="1" height="1"/><rect class="c" x="1" y="4" width="1" height="1"/><rect class="c" x="2" y="4" width="1" height="1"/><rect class="c" x="3" y="4" width="1" height="1"/><rect class="c" x="4" y="4" width="1" height="1"/><rect class="c" x="5" y="4" width="1" height="1"/><rect class="c" x="6" y="4" width="1" height="1"/><rect class="c" x="7" y="4" width="1" height="1"/><rect class="c" x="1" y="5" width="1" height="1"/><rect class="c" x="3" y="5" width="1" height="1"/><rect class="c" x="5" y="5" width="1" height="1"/><rect class="c" x="7" y="5" width="1" height="1"/><rect class="c" x="0" y="6" width="1" height="1"/><rect class="c" x="2" y="6" width="1" height="1"/><rect class="c" x="3" y="6" width="1" height="1"/><rect class="c" x="4" y="6" width="1" height="1"/><rect class="c" x="5" y="6" width="1" height="1"/><rect class="c" x="6" y="6" width="1" height="1"/><rect class="c" x="7" y="6" width="1" height="1"/><rect class="c" x="1" y="7" width="1" height="1"/><rect class="c" x="3" y="7" width="1" height="1"/><rect class="c" x="5" y="7" width="1" height="1"/><rect class="c" x="7" y="7" width="1" height="1"/></svg>sales</span></div><p class="note" style="margin:0">Twenty four pixels, 8 by 8 cells of 3 px; the tier is hash(author) mod 48 plus 8, so two authors share a square only when their tiers collide. The name stands beside it in words.</p></div></div>
-  <div class="surface"><h3>Progress: a length bar whose leading edge is the house ramp</h3><div class="body"><div class="progress"><div class="track"><svg viewBox="0 0 160 4" shape-rendering="crispEdges" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="59" height="1"/><rect x="60" y="0" width="1" height="1"/><rect x="62" y="0" width="1" height="1"/><rect x="64" y="0" width="1" height="1"/><rect x="0" y="1" width="54" height="1"/><rect x="55" y="1" width="1" height="1"/><rect x="57" y="1" width="1" height="1"/><rect x="59" y="1" width="1" height="1"/><rect x="61" y="1" width="1" height="1"/><rect x="0" y="2" width="57" height="1"/><rect x="58" y="2" width="1" height="1"/><rect x="60" y="2" width="1" height="1"/><rect x="62" y="2" width="1" height="1"/><rect x="0" y="3" width="52" height="1"/><rect x="53" y="3" width="1" height="1"/><rect x="55" y="3" width="1" height="1"/><rect x="57" y="3" width="1" height="1"/><rect x="59" y="3" width="1" height="1"/></svg></div><p class="words">Exporting slide 31 of 85, batch 1 of 2</p></div><p class="note" style="margin:0">The track is one 1 px --pt-hair-soft line; the fill is ink cells; the 16 cell ramp at the edge is the deck's own ramp. The threshold map is fixed; only the length moves.</p></div></div>
-  <div class="surface"><h3>Present mode surround: flat, never dithered</h3><div class="body"><div class="present"><div class="sheet"><b>Q3 partner review</b><i aria-hidden="true"></i></div></div><p class="note" style="margin:0">--pt-panel-ink, the surround both themes share (build deviation B6). The sheet keeps the GT wordmark in titanium; the identity never draws on the customer's slide.</p></div></div>
-  <div class="surface"><h3>Print (/print/:deckId): the bar, the sheets on the plate</h3><div class="body" style="align-items:stretch"><div class="frame"><div class="print-bar"><svg class="mark" width="20" height="20" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true"><path fill-rule="evenodd" d="M0 0h16v16H0z M2 8h8v6H2z"/></svg><span>Print settings and preview</span><span style="margin-left:auto;display:inline-flex;gap:8px"><button class="pt-ib" type="button">Close</button><button class="pt-ib is-solid" type="button">Print</button></span></div><div class="print-sheets"><div></div><div></div><div></div></div></div><p class="note" style="margin:0">The bar gains the 20 px mark before its title; nothing else changes. The plate stays flat.</p></div></div>
-</div>
+    <h2>Where the dither appears, and where it never does</h2>
+    <div class="surfaces">
+      <div class="surface">
+        <h3>Not found (the root route's notFoundComponent)</h3>
+        <div class="body notfound">
+          <svg
+            class="mark"
+            viewBox="0 0 32 32"
+            shape-rendering="crispEdges"
+            aria-label="Turboslide"
+            role="img"
+          >
+            <rect x="0" y="0" width="1" height="1" />
+            <rect x="2" y="0" width="1" height="1" />
+            <rect x="4" y="0" width="1" height="1" />
+            <rect x="6" y="0" width="1" height="1" />
+            <rect x="8" y="0" width="1" height="1" />
+            <rect x="10" y="0" width="1" height="1" />
+            <rect x="12" y="0" width="1" height="1" />
+            <rect x="14" y="0" width="1" height="1" />
+            <rect x="16" y="0" width="1" height="1" />
+            <rect x="18" y="0" width="1" height="1" />
+            <rect x="20" y="0" width="1" height="1" />
+            <rect x="22" y="0" width="1" height="1" />
+            <rect x="24" y="0" width="1" height="1" />
+            <rect x="26" y="0" width="1" height="1" />
+            <rect x="28" y="0" width="1" height="1" />
+            <rect x="30" y="0" width="1" height="1" />
+            <rect x="1" y="1" width="1" height="1" />
+            <rect x="3" y="1" width="1" height="1" />
+            <rect x="5" y="1" width="1" height="1" />
+            <rect x="7" y="1" width="1" height="1" />
+            <rect x="9" y="1" width="1" height="1" />
+            <rect x="11" y="1" width="1" height="1" />
+            <rect x="13" y="1" width="1" height="1" />
+            <rect x="15" y="1" width="1" height="1" />
+            <rect x="17" y="1" width="1" height="1" />
+            <rect x="19" y="1" width="1" height="1" />
+            <rect x="21" y="1" width="1" height="1" />
+            <rect x="23" y="1" width="1" height="1" />
+            <rect x="25" y="1" width="1" height="1" />
+            <rect x="27" y="1" width="1" height="1" />
+            <rect x="29" y="1" width="1" height="1" />
+            <rect x="0" y="2" width="1" height="1" />
+            <rect x="2" y="2" width="1" height="1" />
+            <rect x="4" y="2" width="1" height="1" />
+            <rect x="6" y="2" width="1" height="1" />
+            <rect x="8" y="2" width="1" height="1" />
+            <rect x="10" y="2" width="1" height="1" />
+            <rect x="12" y="2" width="1" height="1" />
+            <rect x="14" y="2" width="1" height="1" />
+            <rect x="16" y="2" width="1" height="1" />
+            <rect x="18" y="2" width="1" height="1" />
+            <rect x="20" y="2" width="1" height="1" />
+            <rect x="22" y="2" width="1" height="1" />
+            <rect x="24" y="2" width="1" height="1" />
+            <rect x="26" y="2" width="1" height="1" />
+            <rect x="28" y="2" width="1" height="1" />
+            <rect x="30" y="2" width="1" height="1" />
+            <rect x="1" y="3" width="1" height="1" />
+            <rect x="3" y="3" width="1" height="1" />
+            <rect x="5" y="3" width="1" height="1" />
+            <rect x="7" y="3" width="1" height="1" />
+            <rect x="9" y="3" width="1" height="1" />
+            <rect x="11" y="3" width="1" height="1" />
+            <rect x="13" y="3" width="1" height="1" />
+            <rect x="15" y="3" width="1" height="1" />
+            <rect x="17" y="3" width="1" height="1" />
+            <rect x="19" y="3" width="1" height="1" />
+            <rect x="21" y="3" width="1" height="1" />
+            <rect x="23" y="3" width="1" height="1" />
+            <rect x="25" y="3" width="1" height="1" />
+            <rect x="27" y="3" width="1" height="1" />
+            <rect x="31" y="3" width="1" height="1" />
+            <rect x="0" y="4" width="3" height="1" />
+            <rect x="4" y="4" width="3" height="1" />
+            <rect x="8" y="4" width="3" height="1" />
+            <rect x="12" y="4" width="3" height="1" />
+            <rect x="16" y="4" width="3" height="1" />
+            <rect x="20" y="4" width="3" height="1" />
+            <rect x="24" y="4" width="1" height="1" />
+            <rect x="26" y="4" width="1" height="1" />
+            <rect x="28" y="4" width="1" height="1" />
+            <rect x="30" y="4" width="1" height="1" />
+            <rect x="1" y="5" width="1" height="1" />
+            <rect x="3" y="5" width="1" height="1" />
+            <rect x="5" y="5" width="1" height="1" />
+            <rect x="7" y="5" width="1" height="1" />
+            <rect x="9" y="5" width="1" height="1" />
+            <rect x="11" y="5" width="1" height="1" />
+            <rect x="13" y="5" width="1" height="1" />
+            <rect x="15" y="5" width="1" height="1" />
+            <rect x="17" y="5" width="1" height="1" />
+            <rect x="19" y="5" width="1" height="1" />
+            <rect x="21" y="5" width="1" height="1" />
+            <rect x="23" y="5" width="1" height="1" />
+            <rect x="25" y="5" width="1" height="1" />
+            <rect x="27" y="5" width="1" height="1" />
+            <rect x="29" y="5" width="1" height="1" />
+            <rect x="31" y="5" width="1" height="1" />
+            <rect x="0" y="6" width="1" height="1" />
+            <rect x="2" y="6" width="3" height="1" />
+            <rect x="6" y="6" width="3" height="1" />
+            <rect x="10" y="6" width="3" height="1" />
+            <rect x="14" y="6" width="3" height="1" />
+            <rect x="18" y="6" width="3" height="1" />
+            <rect x="22" y="6" width="3" height="1" />
+            <rect x="26" y="6" width="1" height="1" />
+            <rect x="28" y="6" width="1" height="1" />
+            <rect x="30" y="6" width="1" height="1" />
+            <rect x="1" y="7" width="1" height="1" />
+            <rect x="3" y="7" width="1" height="1" />
+            <rect x="5" y="7" width="1" height="1" />
+            <rect x="7" y="7" width="1" height="1" />
+            <rect x="9" y="7" width="1" height="1" />
+            <rect x="11" y="7" width="1" height="1" />
+            <rect x="13" y="7" width="1" height="1" />
+            <rect x="15" y="7" width="1" height="1" />
+            <rect x="17" y="7" width="1" height="1" />
+            <rect x="19" y="7" width="1" height="1" />
+            <rect x="21" y="7" width="1" height="1" />
+            <rect x="23" y="7" width="1" height="1" />
+            <rect x="25" y="7" width="1" height="1" />
+            <rect x="27" y="7" width="1" height="1" />
+            <rect x="29" y="7" width="1" height="1" />
+            <rect x="31" y="7" width="1" height="1" />
+            <rect x="0" y="8" width="27" height="1" />
+            <rect x="28" y="8" width="3" height="1" />
+            <rect x="1" y="9" width="1" height="1" />
+            <rect x="3" y="9" width="1" height="1" />
+            <rect x="5" y="9" width="1" height="1" />
+            <rect x="7" y="9" width="1" height="1" />
+            <rect x="9" y="9" width="1" height="1" />
+            <rect x="11" y="9" width="1" height="1" />
+            <rect x="13" y="9" width="1" height="1" />
+            <rect x="15" y="9" width="1" height="1" />
+            <rect x="17" y="9" width="1" height="1" />
+            <rect x="19" y="9" width="1" height="1" />
+            <rect x="21" y="9" width="1" height="1" />
+            <rect x="23" y="9" width="1" height="1" />
+            <rect x="25" y="9" width="1" height="1" />
+            <rect x="27" y="9" width="1" height="1" />
+            <rect x="29" y="9" width="1" height="1" />
+            <rect x="31" y="9" width="1" height="1" />
+            <rect x="0" y="10" width="29" height="1" />
+            <rect x="30" y="10" width="1" height="1" />
+            <rect x="1" y="11" width="3" height="1" />
+            <rect x="5" y="11" width="1" height="1" />
+            <rect x="7" y="11" width="1" height="1" />
+            <rect x="9" y="11" width="3" height="1" />
+            <rect x="13" y="11" width="1" height="1" />
+            <rect x="15" y="11" width="1" height="1" />
+            <rect x="17" y="11" width="3" height="1" />
+            <rect x="21" y="11" width="1" height="1" />
+            <rect x="23" y="11" width="1" height="1" />
+            <rect x="25" y="11" width="1" height="1" />
+            <rect x="27" y="11" width="1" height="1" />
+            <rect x="29" y="11" width="1" height="1" />
+            <rect x="31" y="11" width="1" height="1" />
+            <rect x="0" y="12" width="31" height="1" />
+            <rect x="0" y="13" width="2" height="1" />
+            <rect x="3" y="13" width="7" height="1" />
+            <rect x="11" y="13" width="7" height="1" />
+            <rect x="19" y="13" width="3" height="1" />
+            <rect x="23" y="13" width="3" height="1" />
+            <rect x="27" y="13" width="1" height="1" />
+            <rect x="29" y="13" width="1" height="1" />
+            <rect x="31" y="13" width="1" height="1" />
+            <rect x="0" y="14" width="29" height="1" />
+            <rect x="30" y="14" width="1" height="1" />
+            <rect x="1" y="15" width="7" height="1" />
+            <rect x="9" y="15" width="7" height="1" />
+            <rect x="17" y="15" width="7" height="1" />
+            <rect x="25" y="15" width="1" height="1" />
+            <rect x="27" y="15" width="1" height="1" />
+            <rect x="29" y="15" width="1" height="1" />
+            <rect x="31" y="15" width="1" height="1" />
+            <rect x="0" y="16" width="4" height="1" />
+            <rect x="20" y="16" width="11" height="1" />
+            <rect x="0" y="17" width="4" height="1" />
+            <rect x="20" y="17" width="2" height="1" />
+            <rect x="23" y="17" width="3" height="1" />
+            <rect x="27" y="17" width="1" height="1" />
+            <rect x="29" y="17" width="1" height="1" />
+            <rect x="31" y="17" width="1" height="1" />
+            <rect x="0" y="18" width="4" height="1" />
+            <rect x="20" y="18" width="9" height="1" />
+            <rect x="30" y="18" width="1" height="1" />
+            <rect x="1" y="19" width="3" height="1" />
+            <rect x="20" y="19" width="4" height="1" />
+            <rect x="25" y="19" width="1" height="1" />
+            <rect x="27" y="19" width="1" height="1" />
+            <rect x="29" y="19" width="1" height="1" />
+            <rect x="31" y="19" width="1" height="1" />
+            <rect x="0" y="20" width="4" height="1" />
+            <rect x="20" y="20" width="11" height="1" />
+            <rect x="0" y="21" width="4" height="1" />
+            <rect x="20" y="21" width="6" height="1" />
+            <rect x="27" y="21" width="1" height="1" />
+            <rect x="29" y="21" width="1" height="1" />
+            <rect x="31" y="21" width="1" height="1" />
+            <rect x="0" y="22" width="4" height="1" />
+            <rect x="20" y="22" width="9" height="1" />
+            <rect x="30" y="22" width="1" height="1" />
+            <rect x="1" y="23" width="3" height="1" />
+            <rect x="20" y="23" width="4" height="1" />
+            <rect x="25" y="23" width="1" height="1" />
+            <rect x="27" y="23" width="1" height="1" />
+            <rect x="29" y="23" width="1" height="1" />
+            <rect x="31" y="23" width="1" height="1" />
+            <rect x="0" y="24" width="4" height="1" />
+            <rect x="20" y="24" width="11" height="1" />
+            <rect x="0" y="25" width="4" height="1" />
+            <rect x="20" y="25" width="2" height="1" />
+            <rect x="23" y="25" width="3" height="1" />
+            <rect x="27" y="25" width="1" height="1" />
+            <rect x="29" y="25" width="1" height="1" />
+            <rect x="31" y="25" width="1" height="1" />
+            <rect x="0" y="26" width="4" height="1" />
+            <rect x="20" y="26" width="9" height="1" />
+            <rect x="30" y="26" width="1" height="1" />
+            <rect x="1" y="27" width="3" height="1" />
+            <rect x="20" y="27" width="4" height="1" />
+            <rect x="25" y="27" width="1" height="1" />
+            <rect x="27" y="27" width="1" height="1" />
+            <rect x="29" y="27" width="1" height="1" />
+            <rect x="31" y="27" width="1" height="1" />
+            <rect x="0" y="28" width="31" height="1" />
+            <rect x="0" y="29" width="2" height="1" />
+            <rect x="3" y="29" width="19" height="1" />
+            <rect x="23" y="29" width="3" height="1" />
+            <rect x="27" y="29" width="1" height="1" />
+            <rect x="29" y="29" width="1" height="1" />
+            <rect x="31" y="29" width="1" height="1" />
+            <rect x="0" y="30" width="29" height="1" />
+            <rect x="30" y="30" width="1" height="1" />
+            <rect x="1" y="31" width="1" height="1" />
+            <rect x="3" y="31" width="1" height="1" />
+            <rect x="5" y="31" width="3" height="1" />
+            <rect x="9" y="31" width="3" height="1" />
+            <rect x="13" y="31" width="3" height="1" />
+            <rect x="17" y="31" width="3" height="1" />
+            <rect x="21" y="31" width="3" height="1" />
+            <rect x="25" y="31" width="1" height="1" />
+            <rect x="27" y="31" width="1" height="1" />
+            <rect x="29" y="31" width="1" height="1" />
+            <rect x="31" y="31" width="1" height="1" />
+          </svg>
+          <h4>Not found</h4>
+          <p>No page at this address. Start a new presentation or open your presentations.</p>
+          <div style="display: flex; gap: 8px">
+            <a class="pt-ib is-solid" href="#">New Presentation</a
+            ><a class="pt-ib" href="#" style="border-color: var(--pt-hair)">Your Presentations</a>
+          </div>
+        </div>
+      </div>
+      <div class="surface">
+        <h3>Empty state (no presentations, empty trash, no results)</h3>
+        <div class="body empty">
+          <div
+            class="empty-fig dither"
+            role="img"
+            aria-label="A two tone figure, a crop of the liquid metal twin at one cell per two pixels"
+          ></div>
+          <h4>No presentations yet</h4>
+          <p>A new presentation is one click; the GT deck is one more.</p>
+          <a class="pt-ib is-solid" href="#">New Presentation</a>
+        </div>
+      </div>
+      <div class="surface">
+        <h3>Anonymous avatars: an ink square whose tier is keyed by the author id</h3>
+        <div class="body">
+          <div class="avatars">
+            <span class="avatar" title="kevin, tier 42 of 64"
+              ><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
+                <rect class="g" width="8" height="8" />
+                <rect class="c" x="0" y="0" width="1" height="1" />
+                <rect class="c" x="1" y="0" width="1" height="1" />
+                <rect class="c" x="2" y="0" width="1" height="1" />
+                <rect class="c" x="3" y="0" width="1" height="1" />
+                <rect class="c" x="4" y="0" width="1" height="1" />
+                <rect class="c" x="5" y="0" width="1" height="1" />
+                <rect class="c" x="6" y="0" width="1" height="1" />
+                <rect class="c" x="1" y="1" width="1" height="1" />
+                <rect class="c" x="3" y="1" width="1" height="1" />
+                <rect class="c" x="5" y="1" width="1" height="1" />
+                <rect class="c" x="7" y="1" width="1" height="1" />
+                <rect class="c" x="0" y="2" width="1" height="1" />
+                <rect class="c" x="2" y="2" width="1" height="1" />
+                <rect class="c" x="3" y="2" width="1" height="1" />
+                <rect class="c" x="4" y="2" width="1" height="1" />
+                <rect class="c" x="6" y="2" width="1" height="1" />
+                <rect class="c" x="7" y="2" width="1" height="1" />
+                <rect class="c" x="1" y="3" width="1" height="1" />
+                <rect class="c" x="3" y="3" width="1" height="1" />
+                <rect class="c" x="5" y="3" width="1" height="1" />
+                <rect class="c" x="7" y="3" width="1" height="1" />
+                <rect class="c" x="0" y="4" width="1" height="1" />
+                <rect class="c" x="1" y="4" width="1" height="1" />
+                <rect class="c" x="2" y="4" width="1" height="1" />
+                <rect class="c" x="4" y="4" width="1" height="1" />
+                <rect class="c" x="5" y="4" width="1" height="1" />
+                <rect class="c" x="6" y="4" width="1" height="1" />
+                <rect class="c" x="7" y="4" width="1" height="1" />
+                <rect class="c" x="1" y="5" width="1" height="1" />
+                <rect class="c" x="3" y="5" width="1" height="1" />
+                <rect class="c" x="5" y="5" width="1" height="1" />
+                <rect class="c" x="7" y="5" width="1" height="1" />
+                <rect class="c" x="0" y="6" width="1" height="1" />
+                <rect class="c" x="2" y="6" width="1" height="1" />
+                <rect class="c" x="3" y="6" width="1" height="1" />
+                <rect class="c" x="4" y="6" width="1" height="1" />
+                <rect class="c" x="6" y="6" width="1" height="1" />
+                <rect class="c" x="7" y="6" width="1" height="1" />
+                <rect class="c" x="1" y="7" width="1" height="1" />
+                <rect class="c" x="3" y="7" width="1" height="1" />
+                <rect class="c" x="5" y="7" width="1" height="1" />
+                <rect class="c" x="7" y="7" width="1" height="1" /></svg
+              >kevin</span
+            ><span class="avatar" title="agent:claude, tier 38 of 64"
+              ><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
+                <rect class="g" width="8" height="8" />
+                <rect class="c" x="0" y="0" width="1" height="1" />
+                <rect class="c" x="1" y="0" width="1" height="1" />
+                <rect class="c" x="2" y="0" width="1" height="1" />
+                <rect class="c" x="4" y="0" width="1" height="1" />
+                <rect class="c" x="5" y="0" width="1" height="1" />
+                <rect class="c" x="6" y="0" width="1" height="1" />
+                <rect class="c" x="1" y="1" width="1" height="1" />
+                <rect class="c" x="3" y="1" width="1" height="1" />
+                <rect class="c" x="5" y="1" width="1" height="1" />
+                <rect class="c" x="7" y="1" width="1" height="1" />
+                <rect class="c" x="0" y="2" width="1" height="1" />
+                <rect class="c" x="2" y="2" width="1" height="1" />
+                <rect class="c" x="3" y="2" width="1" height="1" />
+                <rect class="c" x="4" y="2" width="1" height="1" />
+                <rect class="c" x="6" y="2" width="1" height="1" />
+                <rect class="c" x="1" y="3" width="1" height="1" />
+                <rect class="c" x="3" y="3" width="1" height="1" />
+                <rect class="c" x="5" y="3" width="1" height="1" />
+                <rect class="c" x="7" y="3" width="1" height="1" />
+                <rect class="c" x="0" y="4" width="1" height="1" />
+                <rect class="c" x="1" y="4" width="1" height="1" />
+                <rect class="c" x="2" y="4" width="1" height="1" />
+                <rect class="c" x="4" y="4" width="1" height="1" />
+                <rect class="c" x="5" y="4" width="1" height="1" />
+                <rect class="c" x="6" y="4" width="1" height="1" />
+                <rect class="c" x="1" y="5" width="1" height="1" />
+                <rect class="c" x="3" y="5" width="1" height="1" />
+                <rect class="c" x="5" y="5" width="1" height="1" />
+                <rect class="c" x="7" y="5" width="1" height="1" />
+                <rect class="c" x="0" y="6" width="1" height="1" />
+                <rect class="c" x="2" y="6" width="1" height="1" />
+                <rect class="c" x="4" y="6" width="1" height="1" />
+                <rect class="c" x="6" y="6" width="1" height="1" />
+                <rect class="c" x="7" y="6" width="1" height="1" />
+                <rect class="c" x="1" y="7" width="1" height="1" />
+                <rect class="c" x="3" y="7" width="1" height="1" />
+                <rect class="c" x="5" y="7" width="1" height="1" />
+                <rect class="c" x="7" y="7" width="1" height="1" /></svg
+              >agent:claude</span
+            ><span class="avatar" title="anon-7f3a, tier 55 of 64"
+              ><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
+                <rect class="g" width="8" height="8" />
+                <rect class="c" x="0" y="0" width="1" height="1" />
+                <rect class="c" x="1" y="0" width="1" height="1" />
+                <rect class="c" x="2" y="0" width="1" height="1" />
+                <rect class="c" x="3" y="0" width="1" height="1" />
+                <rect class="c" x="4" y="0" width="1" height="1" />
+                <rect class="c" x="5" y="0" width="1" height="1" />
+                <rect class="c" x="6" y="0" width="1" height="1" />
+                <rect class="c" x="7" y="0" width="1" height="1" />
+                <rect class="c" x="0" y="1" width="1" height="1" />
+                <rect class="c" x="1" y="1" width="1" height="1" />
+                <rect class="c" x="3" y="1" width="1" height="1" />
+                <rect class="c" x="4" y="1" width="1" height="1" />
+                <rect class="c" x="5" y="1" width="1" height="1" />
+                <rect class="c" x="7" y="1" width="1" height="1" />
+                <rect class="c" x="0" y="2" width="1" height="1" />
+                <rect class="c" x="1" y="2" width="1" height="1" />
+                <rect class="c" x="2" y="2" width="1" height="1" />
+                <rect class="c" x="3" y="2" width="1" height="1" />
+                <rect class="c" x="4" y="2" width="1" height="1" />
+                <rect class="c" x="5" y="2" width="1" height="1" />
+                <rect class="c" x="6" y="2" width="1" height="1" />
+                <rect class="c" x="7" y="2" width="1" height="1" />
+                <rect class="c" x="1" y="3" width="1" height="1" />
+                <rect class="c" x="2" y="3" width="1" height="1" />
+                <rect class="c" x="3" y="3" width="1" height="1" />
+                <rect class="c" x="5" y="3" width="1" height="1" />
+                <rect class="c" x="6" y="3" width="1" height="1" />
+                <rect class="c" x="7" y="3" width="1" height="1" />
+                <rect class="c" x="0" y="4" width="1" height="1" />
+                <rect class="c" x="1" y="4" width="1" height="1" />
+                <rect class="c" x="2" y="4" width="1" height="1" />
+                <rect class="c" x="3" y="4" width="1" height="1" />
+                <rect class="c" x="4" y="4" width="1" height="1" />
+                <rect class="c" x="5" y="4" width="1" height="1" />
+                <rect class="c" x="6" y="4" width="1" height="1" />
+                <rect class="c" x="7" y="4" width="1" height="1" />
+                <rect class="c" x="0" y="5" width="1" height="1" />
+                <rect class="c" x="1" y="5" width="1" height="1" />
+                <rect class="c" x="3" y="5" width="1" height="1" />
+                <rect class="c" x="4" y="5" width="1" height="1" />
+                <rect class="c" x="5" y="5" width="1" height="1" />
+                <rect class="c" x="7" y="5" width="1" height="1" />
+                <rect class="c" x="0" y="6" width="1" height="1" />
+                <rect class="c" x="1" y="6" width="1" height="1" />
+                <rect class="c" x="2" y="6" width="1" height="1" />
+                <rect class="c" x="3" y="6" width="1" height="1" />
+                <rect class="c" x="4" y="6" width="1" height="1" />
+                <rect class="c" x="5" y="6" width="1" height="1" />
+                <rect class="c" x="6" y="6" width="1" height="1" />
+                <rect class="c" x="7" y="6" width="1" height="1" />
+                <rect class="c" x="1" y="7" width="1" height="1" />
+                <rect class="c" x="3" y="7" width="1" height="1" />
+                <rect class="c" x="5" y="7" width="1" height="1" />
+                <rect class="c" x="6" y="7" width="1" height="1" />
+                <rect class="c" x="7" y="7" width="1" height="1" /></svg
+              >anon-7f3a</span
+            ><span class="avatar" title="reviewer, tier 18 of 64"
+              ><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
+                <rect class="g" width="8" height="8" />
+                <rect class="c" x="0" y="0" width="1" height="1" />
+                <rect class="c" x="2" y="0" width="1" height="1" />
+                <rect class="c" x="4" y="0" width="1" height="1" />
+                <rect class="c" x="6" y="0" width="1" height="1" />
+                <rect class="c" x="1" y="1" width="1" height="1" />
+                <rect class="c" x="0" y="2" width="1" height="1" />
+                <rect class="c" x="2" y="2" width="1" height="1" />
+                <rect class="c" x="4" y="2" width="1" height="1" />
+                <rect class="c" x="6" y="2" width="1" height="1" />
+                <rect class="c" x="0" y="4" width="1" height="1" />
+                <rect class="c" x="2" y="4" width="1" height="1" />
+                <rect class="c" x="4" y="4" width="1" height="1" />
+                <rect class="c" x="6" y="4" width="1" height="1" />
+                <rect class="c" x="5" y="5" width="1" height="1" />
+                <rect class="c" x="0" y="6" width="1" height="1" />
+                <rect class="c" x="2" y="6" width="1" height="1" />
+                <rect class="c" x="4" y="6" width="1" height="1" />
+                <rect class="c" x="6" y="6" width="1" height="1" /></svg
+              >reviewer</span
+            ><span class="avatar" title="agent:codex, tier 19 of 64"
+              ><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
+                <rect class="g" width="8" height="8" />
+                <rect class="c" x="0" y="0" width="1" height="1" />
+                <rect class="c" x="2" y="0" width="1" height="1" />
+                <rect class="c" x="4" y="0" width="1" height="1" />
+                <rect class="c" x="6" y="0" width="1" height="1" />
+                <rect class="c" x="1" y="1" width="1" height="1" />
+                <rect class="c" x="5" y="1" width="1" height="1" />
+                <rect class="c" x="0" y="2" width="1" height="1" />
+                <rect class="c" x="2" y="2" width="1" height="1" />
+                <rect class="c" x="4" y="2" width="1" height="1" />
+                <rect class="c" x="6" y="2" width="1" height="1" />
+                <rect class="c" x="0" y="4" width="1" height="1" />
+                <rect class="c" x="2" y="4" width="1" height="1" />
+                <rect class="c" x="4" y="4" width="1" height="1" />
+                <rect class="c" x="6" y="4" width="1" height="1" />
+                <rect class="c" x="5" y="5" width="1" height="1" />
+                <rect class="c" x="0" y="6" width="1" height="1" />
+                <rect class="c" x="2" y="6" width="1" height="1" />
+                <rect class="c" x="4" y="6" width="1" height="1" />
+                <rect class="c" x="6" y="6" width="1" height="1" /></svg
+              >agent:codex</span
+            ><span class="avatar" title="sales, tier 47 of 64"
+              ><svg viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true">
+                <rect class="g" width="8" height="8" />
+                <rect class="c" x="0" y="0" width="1" height="1" />
+                <rect class="c" x="1" y="0" width="1" height="1" />
+                <rect class="c" x="2" y="0" width="1" height="1" />
+                <rect class="c" x="3" y="0" width="1" height="1" />
+                <rect class="c" x="4" y="0" width="1" height="1" />
+                <rect class="c" x="5" y="0" width="1" height="1" />
+                <rect class="c" x="6" y="0" width="1" height="1" />
+                <rect class="c" x="7" y="0" width="1" height="1" />
+                <rect class="c" x="1" y="1" width="1" height="1" />
+                <rect class="c" x="3" y="1" width="1" height="1" />
+                <rect class="c" x="5" y="1" width="1" height="1" />
+                <rect class="c" x="7" y="1" width="1" height="1" />
+                <rect class="c" x="0" y="2" width="1" height="1" />
+                <rect class="c" x="1" y="2" width="1" height="1" />
+                <rect class="c" x="2" y="2" width="1" height="1" />
+                <rect class="c" x="3" y="2" width="1" height="1" />
+                <rect class="c" x="4" y="2" width="1" height="1" />
+                <rect class="c" x="5" y="2" width="1" height="1" />
+                <rect class="c" x="6" y="2" width="1" height="1" />
+                <rect class="c" x="7" y="2" width="1" height="1" />
+                <rect class="c" x="1" y="3" width="1" height="1" />
+                <rect class="c" x="3" y="3" width="1" height="1" />
+                <rect class="c" x="5" y="3" width="1" height="1" />
+                <rect class="c" x="7" y="3" width="1" height="1" />
+                <rect class="c" x="0" y="4" width="1" height="1" />
+                <rect class="c" x="1" y="4" width="1" height="1" />
+                <rect class="c" x="2" y="4" width="1" height="1" />
+                <rect class="c" x="3" y="4" width="1" height="1" />
+                <rect class="c" x="4" y="4" width="1" height="1" />
+                <rect class="c" x="5" y="4" width="1" height="1" />
+                <rect class="c" x="6" y="4" width="1" height="1" />
+                <rect class="c" x="7" y="4" width="1" height="1" />
+                <rect class="c" x="1" y="5" width="1" height="1" />
+                <rect class="c" x="3" y="5" width="1" height="1" />
+                <rect class="c" x="5" y="5" width="1" height="1" />
+                <rect class="c" x="7" y="5" width="1" height="1" />
+                <rect class="c" x="0" y="6" width="1" height="1" />
+                <rect class="c" x="2" y="6" width="1" height="1" />
+                <rect class="c" x="3" y="6" width="1" height="1" />
+                <rect class="c" x="4" y="6" width="1" height="1" />
+                <rect class="c" x="5" y="6" width="1" height="1" />
+                <rect class="c" x="6" y="6" width="1" height="1" />
+                <rect class="c" x="7" y="6" width="1" height="1" />
+                <rect class="c" x="1" y="7" width="1" height="1" />
+                <rect class="c" x="3" y="7" width="1" height="1" />
+                <rect class="c" x="5" y="7" width="1" height="1" />
+                <rect class="c" x="7" y="7" width="1" height="1" /></svg
+              >sales</span
+            >
+          </div>
+          <p class="note" style="margin: 0">
+            Twenty four pixels, 8 by 8 cells of 3 px; the tier is hash(author) mod 48 plus 8, so two
+            authors share a square only when their tiers collide. The name stands beside it in
+            words.
+          </p>
+        </div>
+      </div>
+      <div class="surface">
+        <h3>Progress: a length bar whose leading edge is the house ramp</h3>
+        <div class="body">
+          <div class="progress">
+            <div class="track">
+              <svg
+                viewBox="0 0 160 4"
+                shape-rendering="crispEdges"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              >
+                <rect x="0" y="0" width="59" height="1" />
+                <rect x="60" y="0" width="1" height="1" />
+                <rect x="62" y="0" width="1" height="1" />
+                <rect x="64" y="0" width="1" height="1" />
+                <rect x="0" y="1" width="54" height="1" />
+                <rect x="55" y="1" width="1" height="1" />
+                <rect x="57" y="1" width="1" height="1" />
+                <rect x="59" y="1" width="1" height="1" />
+                <rect x="61" y="1" width="1" height="1" />
+                <rect x="0" y="2" width="57" height="1" />
+                <rect x="58" y="2" width="1" height="1" />
+                <rect x="60" y="2" width="1" height="1" />
+                <rect x="62" y="2" width="1" height="1" />
+                <rect x="0" y="3" width="52" height="1" />
+                <rect x="53" y="3" width="1" height="1" />
+                <rect x="55" y="3" width="1" height="1" />
+                <rect x="57" y="3" width="1" height="1" />
+                <rect x="59" y="3" width="1" height="1" />
+              </svg>
+            </div>
+            <p class="words">Exporting slide 31 of 85, batch 1 of 2</p>
+          </div>
+          <p class="note" style="margin: 0">
+            The track is one 1 px --pt-hair-soft line; the fill is ink cells; the 16 cell ramp at
+            the edge is the deck's own ramp. The threshold map is fixed; only the length moves.
+          </p>
+        </div>
+      </div>
+      <div class="surface">
+        <h3>Present mode surround: flat, never dithered</h3>
+        <div class="body">
+          <div class="present">
+            <div class="sheet"><b>Q3 partner review</b><i aria-hidden="true"></i></div>
+          </div>
+          <p class="note" style="margin: 0">
+            --pt-panel-ink, the surround both themes share (build deviation B6). The sheet keeps the
+            GT wordmark in titanium; the identity never draws on the customer's slide.
+          </p>
+        </div>
+      </div>
+      <div class="surface">
+        <h3>Print (/print/:deckId): the bar, the sheets on the plate</h3>
+        <div class="body" style="align-items: stretch">
+          <div class="frame">
+            <div class="print-bar">
+              <svg
+                class="mark"
+                width="20"
+                height="20"
+                viewBox="0 0 16 16"
+                shape-rendering="crispEdges"
+                aria-hidden="true"
+              >
+                <path fill-rule="evenodd" d="M0 0h16v16H0z M2 8h8v6H2z" /></svg
+              ><span>Print settings and preview</span
+              ><span style="margin-left: auto; display: inline-flex; gap: 8px"
+                ><button class="pt-ib" type="button">Close</button
+                ><button class="pt-ib is-solid" type="button">Print</button></span
+              >
+            </div>
+            <div class="print-sheets">
+              <div></div>
+              <div></div>
+              <div></div>
+            </div>
+          </div>
+          <p class="note" style="margin: 0">
+            The bar gains the 20 px mark before its title; nothing else changes. The plate stays
+            flat.
+          </p>
+        </div>
+      </div>
+    </div>
 
-<h2>The terminal: turboslide --version prints the 16 px mark as block characters, then the word and the version</h2>
-<pre class="cli">████████  Turboslide 0.1.0
+    <h2>
+      The terminal: turboslide --version prints the 16 px mark as block characters, then the word
+      and the version
+    </h2>
+    <pre class="cli">
+████████  Turboslide 0.1.0
 ████████  https://turboslide.vercel.app
 █    ███  105 actions, effects backend: typescript
 █▄▄▄▄███  deck gt-brand at revision 31</pre>
-<p class="note">Four lines from the same 8 by 8 bitmap that draws the favicon (mark.mjs markBlocks(8)); U+2580, U+2584 and U+2588 only; no colour, so NO_COLOR changes nothing. The 16 cell variant (eight lines) is the banner of turboslide info.</p>
+    <p class="note">
+      Four lines from the same 8 by 8 bitmap that draws the favicon (mark.mjs markBlocks(8));
+      U+2580, U+2584 and U+2588 only; no colour, so NO_COLOR changes nothing. The 16 cell variant
+      (eight lines) is the banner of turboslide info.
+    </p>
 
-<h2>Never</h2>
-<div class="never">No dither on menus, the toolbar, panels, dialogs, snackbars, tooltips, text, icons, form controls, filmstrip thumbnails, layout tiles, the workspace around the sheet, the present surround or the sheet's frame and wordmark. No accent colour anywhere in chrome. No logo animation, no splash, no fade between two 1-bit images.</div>
-</body>
+    <h2>Never</h2>
+    <div class="never">
+      No dither on menus, the toolbar, panels, dialogs, snackbars, tooltips, text, icons, form
+      controls, filmstrip thumbnails, layout tiles, the workspace around the sheet, the present
+      surround or the sheet's frame and wordmark. No accent colour anywhere in chrome. No logo
+      animation, no splash, no fade between two 1-bit images.
+    </div>
+  </body>
 </html>

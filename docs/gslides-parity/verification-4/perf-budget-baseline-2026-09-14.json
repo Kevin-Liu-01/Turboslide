@@ -1,0 +1,3136 @@
+{
+  "startedAt": "2026-09-14T14:30:49.719Z",
+  "base": "https://turboslide.vercel.app",
+  "profile": "deployment",
+  "deck": "gt-brand",
+  "platform": "darwin",
+  "chromeFlags": ["--use-gl=angle", "--use-angle=metal", "--ignore-gpu-blocklist"],
+  "trustedHeader": false,
+  "routes": [
+    {
+      "route": "/",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 94.867,
+      "fcp": 300,
+      "lcp": 924,
+      "ready": 908,
+      "jsDecoded": 3122113,
+      "jsTransfer": 874858,
+      "jsCount": 20,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 67,
+      "cls": 0,
+      "nodes": 665,
+      "errors": [],
+      "lcpEl": null,
+      "samples": [
+        {
+          "ttfb": 122.171,
+          "ready": 1014.5,
+          "wall": 1047,
+          "error": null,
+          "status": 200,
+          "fcp": 344,
+          "lcp": 1044,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 67,
+          "loaf": [
+            {
+              "t": 256,
+              "d": 67,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 405,
+              "d": 57,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 874858,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 665,
+          "heapUsed": 16112884,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        },
+        {
+          "ttfb": 86.367,
+          "ready": 892.5999999642372,
+          "wall": 926,
+          "error": null,
+          "status": 200,
+          "fcp": 280,
+          "lcp": 908,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 62,
+          "loaf": [
+            {
+              "t": 201,
+              "d": 62,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 280,
+              "d": 58,
+              "b": 6,
+              "s": ["index-D6IA9RCO.js:55"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 874858,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 665,
+          "heapUsed": 16355372,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        },
+        {
+          "ttfb": 94.867,
+          "ready": 908,
+          "wall": 941,
+          "error": null,
+          "status": 200,
+          "fcp": 300,
+          "lcp": 924,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 68,
+          "loaf": [
+            {
+              "t": 210,
+              "d": 68,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 296,
+              "d": 59,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 874858,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 665,
+          "heapUsed": 16094656,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 90.802,
+      "fcp": 280,
+      "lcp": 896,
+      "ready": 876.8999999761581,
+      "jsDecoded": 3122113,
+      "jsTransfer": 0,
+      "jsCount": 20,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 59,
+      "cls": 0,
+      "nodes": 666,
+      "errors": [],
+      "lcpEl": null,
+      "samples": [
+        {
+          "ttfb": 90.802,
+          "ready": 828.9000000357628,
+          "wall": 862,
+          "error": null,
+          "status": 200,
+          "fcp": 224,
+          "lcp": 848,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 57,
+          "loaf": [
+            {
+              "t": 211,
+              "d": 57,
+              "b": 6,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 665,
+          "heapUsed": 16105256,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        },
+        {
+          "ttfb": 119.996,
+          "ready": 876.8999999761581,
+          "wall": 909,
+          "error": null,
+          "status": 200,
+          "fcp": 280,
+          "lcp": 896,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 59,
+          "loaf": [
+            {
+              "t": 264,
+              "d": 59,
+              "b": 6,
+              "s": ["index-D6IA9RCO.js:55"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 666,
+          "heapUsed": 16090600,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        },
+        {
+          "ttfb": 90.061,
+          "ready": 876.9000000357628,
+          "wall": 910,
+          "error": null,
+          "status": 200,
+          "fcp": 280,
+          "lcp": 896,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 59,
+          "loaf": [
+            {
+              "t": 204,
+              "d": 54,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 259,
+              "d": 59,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 666,
+          "heapUsed": 16385300,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        }
+      ]
+    },
+    {
+      "route": "/home",
+      "absent": true
+    },
+    {
+      "route": "/new",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 113.339,
+      "fcp": 208,
+      "lcp": 844,
+      "ready": 823.2000000476837,
+      "jsDecoded": 3122113,
+      "jsTransfer": 874858,
+      "jsCount": 20,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 67,
+      "cls": 0,
+      "nodes": 665,
+      "errors": [],
+      "lcpEl": null,
+      "samples": [
+        {
+          "ttfb": 113.339,
+          "ready": 823.2000000476837,
+          "wall": 856,
+          "error": null,
+          "status": 200,
+          "fcp": 208,
+          "lcp": 844,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 67,
+          "loaf": [
+            {
+              "t": 124,
+              "d": 67,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 207,
+              "d": 64,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 874858,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 665,
+          "heapUsed": 16135548,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        },
+        {
+          "ttfb": 107.178,
+          "ready": 821.1000000238419,
+          "wall": 855,
+          "error": null,
+          "status": 200,
+          "fcp": 200,
+          "lcp": 840,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 63,
+          "loaf": [
+            {
+              "t": 118,
+              "d": 63,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 207,
+              "d": 61,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 874858,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 665,
+          "heapUsed": 16343372,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        },
+        {
+          "ttfb": 113.57,
+          "ready": 843.3999999761581,
+          "wall": 875,
+          "error": null,
+          "status": 200,
+          "fcp": 324,
+          "lcp": 864,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 177,
+          "loaf": [
+            {
+              "t": 125,
+              "d": 177,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57", "index-D6IA9RCO.js:6"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 874858,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 665,
+          "heapUsed": 16111700,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        }
+      ]
+    },
+    {
+      "route": "/new",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 82.881,
+      "fcp": 148,
+      "lcp": 764,
+      "ready": 749.5,
+      "jsDecoded": 3122113,
+      "jsTransfer": 0,
+      "jsCount": 20,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 60,
+      "cls": 0,
+      "nodes": 665,
+      "errors": [],
+      "lcpEl": null,
+      "samples": [
+        {
+          "ttfb": 82.881,
+          "ready": 758.4000000357628,
+          "wall": 792,
+          "error": null,
+          "status": 200,
+          "fcp": 164,
+          "lcp": 772,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 95,
+              "d": 50,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 146,
+              "d": 60,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 666,
+          "heapUsed": 16044840,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        },
+        {
+          "ttfb": 93.149,
+          "ready": 749.5,
+          "wall": 784,
+          "error": null,
+          "status": 200,
+          "fcp": 148,
+          "lcp": 764,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 127,
+              "d": 60,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            },
+            {
+              "t": 696,
+              "d": 52,
+              "b": 0,
+              "s": [":45"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 665,
+          "heapUsed": 16112456,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        },
+        {
+          "ttfb": 82.089,
+          "ready": 726.1999999880791,
+          "wall": 760,
+          "error": null,
+          "status": 200,
+          "fcp": 140,
+          "lcp": 748,
+          "lcpEl": null,
+          "cls": 0,
+          "loafMax": 57,
+          "loaf": [
+            {
+              "t": 119,
+              "d": 57,
+              "b": 6,
+              "s": ["index-D6IA9RCO.js:55"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 665,
+          "heapUsed": 16108196,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/new"
+        }
+      ]
+    },
+    {
+      "route": "/decks",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 5334.678,
+      "fcp": 5644,
+      "lcp": 6072,
+      "ready": 5704.800000011921,
+      "jsDecoded": 3045067,
+      "jsTransfer": 846722,
+      "jsCount": 19,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 152,
+      "cls": 0,
+      "nodes": 350,
+      "errors": [],
+      "lcpEl": "P.ts-recent-lead",
+      "samples": [
+        {
+          "ttfb": 5887.378,
+          "ready": 6132.699999988079,
+          "wall": 6171,
+          "error": null,
+          "status": 200,
+          "fcp": 6072,
+          "lcp": 6072,
+          "lcpEl": "P.ts-recent-lead",
+          "cls": 0,
+          "loafMax": 152,
+          "loaf": [
+            {
+              "t": 5898,
+              "d": 152,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 6053,
+              "d": 59,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 846722,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 350,
+          "heapUsed": 11993856,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks"
+        },
+        {
+          "ttfb": 5334.678,
+          "ready": 5704.800000011921,
+          "wall": 5743,
+          "error": null,
+          "status": 200,
+          "fcp": 5644,
+          "lcp": 6744,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 274,
+          "loaf": [
+            {
+              "t": 5348,
+              "d": 274,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 5624,
+              "d": 59,
+              "b": 9,
+              "s": ["index-D6IA9RCO.js:58"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 846722,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 350,
+          "heapUsed": 12034144,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks"
+        },
+        {
+          "ttfb": 831.697,
+          "ready": 1017,
+          "wall": 1054,
+          "error": null,
+          "status": 200,
+          "fcp": 948,
+          "lcp": 1048,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 88,
+          "loaf": [
+            {
+              "t": 843,
+              "d": 88,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 936,
+              "d": 59,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 846722,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 351,
+          "heapUsed": 12422764,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks"
+        }
+      ]
+    },
+    {
+      "route": "/decks",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 6300.16,
+      "fcp": 6420,
+      "lcp": 6728,
+      "ready": 6491.600000023842,
+      "jsDecoded": 3045067,
+      "jsTransfer": 0,
+      "jsCount": 19,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 85,
+      "cls": 0,
+      "nodes": 351,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 6300.16,
+          "ready": 6491.600000023842,
+          "wall": 6533,
+          "error": null,
+          "status": 200,
+          "fcp": 6420,
+          "lcp": 6728,
+          "lcpEl": "IMG",
+          "cls": 0.00003621429317772634,
+          "loafMax": 85,
+          "loaf": [
+            {
+              "t": 6314,
+              "d": 85,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 6413,
+              "d": 58,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 350,
+          "heapUsed": 12027948,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks"
+        },
+        {
+          "ttfb": 7125.953,
+          "ready": 7301.399999976158,
+          "wall": 7338,
+          "error": null,
+          "status": 200,
+          "fcp": 7240,
+          "lcp": 7512,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 81,
+          "loaf": [
+            {
+              "t": 7137,
+              "d": 81,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 7222,
+              "d": 59,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 351,
+          "heapUsed": 12020036,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks"
+        },
+        {
+          "ttfb": 5303.889,
+          "ready": 5486.399999976158,
+          "wall": 5530,
+          "error": null,
+          "status": 200,
+          "fcp": 5420,
+          "lcp": 5512,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 87,
+          "loaf": [
+            {
+              "t": 5315,
+              "d": 87,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 5405,
+              "d": 60,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 351,
+          "heapUsed": 12023084,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks"
+        }
+      ]
+    },
+    {
+      "route": "/decks/trash",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 411.911,
+      "fcp": 524,
+      "lcp": 560,
+      "ready": 640.2000000476837,
+      "jsDecoded": 3032656,
+      "jsTransfer": 842711,
+      "jsCount": 19,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 85,
+      "cls": 0,
+      "nodes": 105,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 773.885,
+          "ready": 1021.2999999523163,
+          "wall": 1062,
+          "error": null,
+          "status": 200,
+          "fcp": 920,
+          "lcp": 2076,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 117,
+          "loaf": [
+            {
+              "t": 787,
+              "d": 117,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 947,
+              "d": 62,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 842711,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 105,
+          "heapUsed": 11339160,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks/trash"
+        },
+        {
+          "ttfb": 333.215,
+          "ready": 522,
+          "wall": 562,
+          "error": null,
+          "status": 200,
+          "fcp": 436,
+          "lcp": 464,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 76,
+          "loaf": [
+            {
+              "t": 344,
+              "d": 76,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 450,
+              "d": 60,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 842711,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 105,
+          "heapUsed": 11358480,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks/trash"
+        },
+        {
+          "ttfb": 411.911,
+          "ready": 640.2000000476837,
+          "wall": 679,
+          "error": null,
+          "status": 200,
+          "fcp": 524,
+          "lcp": 560,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 85,
+          "loaf": [
+            {
+              "t": 423,
+              "d": 85,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 571,
+              "d": 57,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 842711,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 105,
+          "heapUsed": 11329756,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks/trash"
+        }
+      ]
+    },
+    {
+      "route": "/decks/trash",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 396.072,
+      "fcp": 480,
+      "lcp": 488,
+      "ready": 535.6999999880791,
+      "jsDecoded": 3032656,
+      "jsTransfer": 0,
+      "jsCount": 19,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 59,
+      "cls": 0,
+      "nodes": 106,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 312.377,
+          "ready": 419.89999997615814,
+          "wall": 458,
+          "error": null,
+          "status": 200,
+          "fcp": 364,
+          "lcp": 372,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 347,
+              "d": 60,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 105,
+          "heapUsed": 11365748,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks/trash"
+        },
+        {
+          "ttfb": 396.072,
+          "ready": 536.1999999880791,
+          "wall": 575,
+          "error": null,
+          "status": 200,
+          "fcp": 480,
+          "lcp": 488,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 59,
+          "loaf": [
+            {
+              "t": 464,
+              "d": 59,
+              "b": 6,
+              "s": ["index-D6IA9RCO.js:55"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 106,
+          "heapUsed": 11287052,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks/trash"
+        },
+        {
+          "ttfb": 396.889,
+          "ready": 535.6999999880791,
+          "wall": 580,
+          "error": null,
+          "status": 200,
+          "fcp": 480,
+          "lcp": 488,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 59,
+          "loaf": [
+            {
+              "t": 408,
+              "d": 53,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 463,
+              "d": 59,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 106,
+          "heapUsed": 11343540,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/decks/trash"
+        }
+      ]
+    },
+    {
+      "route": "/deck/gt-brand",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 247.501,
+      "fcp": 376,
+      "lcp": 400,
+      "ready": 560.3999999761581,
+      "jsDecoded": 3128584,
+      "jsTransfer": 879007,
+      "jsCount": 23,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 99,
+      "cls": 0.0021485001929012343,
+      "nodes": 1899,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 380.081,
+          "ready": 686.1999999880791,
+          "wall": 721,
+          "error": null,
+          "status": 200,
+          "fcp": 484,
+          "lcp": 668,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 70,
+          "loaf": [
+            {
+              "t": 391,
+              "d": 70,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 582,
+              "d": 59,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 879007,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1898,
+          "heapUsed": 14487164,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/deck/gt-brand"
+        },
+        {
+          "ttfb": 225.263,
+          "ready": 525.2000000476837,
+          "wall": 560,
+          "error": null,
+          "status": 200,
+          "fcp": 376,
+          "lcp": 376,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 111,
+          "loaf": [
+            {
+              "t": 236,
+              "d": 111,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 417,
+              "d": 64,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 879007,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1899,
+          "heapUsed": 14464412,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/deck/gt-brand"
+        },
+        {
+          "ttfb": 247.501,
+          "ready": 560.3999999761581,
+          "wall": 595,
+          "error": null,
+          "status": 200,
+          "fcp": 376,
+          "lcp": 400,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 99,
+          "loaf": [
+            {
+              "t": 257,
+              "d": 99,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 455,
+              "d": 59,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 879007,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1901,
+          "heapUsed": 14463032,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/deck/gt-brand"
+        }
+      ]
+    },
+    {
+      "route": "/deck/gt-brand",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 209.127,
+      "fcp": 300,
+      "lcp": 324,
+      "ready": 451.5,
+      "jsDecoded": 3128584,
+      "jsTransfer": 0,
+      "jsCount": 23,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 61,
+      "cls": 0.0021485001929012343,
+      "nodes": 1897,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 204.448,
+          "ready": 495.5999999642372,
+          "wall": 528,
+          "error": null,
+          "status": 200,
+          "fcp": 300,
+          "lcp": 324,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 61,
+          "loaf": [
+            {
+              "t": 215,
+              "d": 53,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 388,
+              "d": 61,
+              "b": 10,
+              "s": ["index-D6IA9RCO.js:58"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1888,
+          "heapUsed": 14309292,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/deck/gt-brand"
+        },
+        {
+          "ttfb": 263.518,
+          "ready": 451.5,
+          "wall": 483,
+          "error": null,
+          "status": 200,
+          "fcp": 356,
+          "lcp": 356,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 61,
+          "loaf": [
+            {
+              "t": 278,
+              "d": 51,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 338,
+              "d": 61,
+              "b": 9,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1897,
+          "heapUsed": 14566692,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/deck/gt-brand"
+        },
+        {
+          "ttfb": 209.127,
+          "ready": 392.30000001192093,
+          "wall": 431,
+          "error": null,
+          "status": 200,
+          "fcp": 292,
+          "lcp": 292,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 59,
+          "loaf": [
+            {
+              "t": 282,
+              "d": 59,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1897,
+          "heapUsed": 14569356,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/deck/gt-brand"
+        }
+      ]
+    },
+    {
+      "route": "/edit/gt-brand",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 140.55,
+      "fcp": 516,
+      "lcp": 1308,
+      "ready": 1266.8999999761581,
+      "jsDecoded": 3263637,
+      "jsTransfer": 924185,
+      "jsCount": 21,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 321,
+      "cls": 0,
+      "nodes": 1513,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 140.55,
+          "ready": 1014.3999999761581,
+          "wall": 1046,
+          "error": null,
+          "status": 200,
+          "fcp": 344,
+          "lcp": 1116,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 169,
+          "loaf": [
+            {
+              "t": 153,
+              "d": 169,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 339,
+              "d": 60,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:58"]
+            },
+            {
+              "t": 905,
+              "d": 105,
+              "b": 47,
+              "s": ["createServerFn-D-KIR8hu.js:93"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 924185,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1480,
+          "heapUsed": 23092876,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/edit/gt-brand"
+        },
+        {
+          "ttfb": 252.164,
+          "ready": 1302.7000000476837,
+          "wall": 1337,
+          "error": null,
+          "status": 200,
+          "fcp": 608,
+          "lcp": 1408,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 321,
+          "loaf": [
+            {
+              "t": 264,
+              "d": 321,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 603,
+              "d": 64,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:58"]
+            },
+            {
+              "t": 1196,
+              "d": 101,
+              "b": 46,
+              "s": ["createServerFn-D-KIR8hu.js:91"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 924185,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1513,
+          "heapUsed": 23147288,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/edit/gt-brand"
+        },
+        {
+          "ttfb": 114.04,
+          "ready": 1266.8999999761581,
+          "wall": 1299,
+          "error": null,
+          "status": 200,
+          "fcp": 516,
+          "lcp": 1308,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 369,
+          "loaf": [
+            {
+              "t": 126,
+              "d": 369,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 598,
+              "d": 61,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            },
+            {
+              "t": 1163,
+              "d": 99,
+              "b": 42,
+              "s": [":87"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 924185,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1648,
+          "heapUsed": 22950932,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/edit/gt-brand"
+        }
+      ]
+    },
+    {
+      "route": "/edit/gt-brand",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 120.069,
+      "fcp": 180,
+      "lcp": 896,
+      "ready": 862.0999999642372,
+      "jsDecoded": 3263637,
+      "jsTransfer": 0,
+      "jsCount": 21,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 100,
+      "cls": 0,
+      "nodes": 1480,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 154.397,
+          "ready": 1047.199999988079,
+          "wall": 1081,
+          "error": null,
+          "status": 200,
+          "fcp": 200,
+          "lcp": 1136,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 100,
+          "loaf": [
+            {
+              "t": 189,
+              "d": 59,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            },
+            {
+              "t": 942,
+              "d": 100,
+              "b": 48,
+              "s": ["createServerFn-D-KIR8hu.js:93"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1480,
+          "heapUsed": 21803048,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/edit/gt-brand"
+        },
+        {
+          "ttfb": 120.069,
+          "ready": 862.0999999642372,
+          "wall": 907,
+          "error": null,
+          "status": 200,
+          "fcp": 180,
+          "lcp": 896,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 106,
+          "loaf": [
+            {
+              "t": 159,
+              "d": 63,
+              "b": 13,
+              "s": ["index-D6IA9RCO.js:62"]
+            },
+            {
+              "t": 751,
+              "d": 106,
+              "b": 52,
+              "s": ["createServerFn-D-KIR8hu.js:98"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1634,
+          "heapUsed": 23388040,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/edit/gt-brand"
+        },
+        {
+          "ttfb": 116.887,
+          "ready": 811.5,
+          "wall": 844,
+          "error": null,
+          "status": 200,
+          "fcp": 172,
+          "lcp": 848,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 86,
+          "loaf": [
+            {
+              "t": 152,
+              "d": 59,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            },
+            {
+              "t": 721,
+              "d": 86,
+              "b": 36,
+              "s": [":81"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1407,
+          "heapUsed": 20034712,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/edit/gt-brand"
+        }
+      ]
+    },
+    {
+      "route": "/present/gt-brand",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 141.328,
+      "fcp": 996,
+      "lcp": 1020,
+      "ready": 974.3000000119209,
+      "jsDecoded": 3132922,
+      "jsTransfer": 879296,
+      "jsCount": 21,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 63,
+      "cls": 0,
+      "nodes": 412,
+      "errors": [],
+      "lcpEl": "IMG.opener-img",
+      "samples": [
+        {
+          "ttfb": 191.527,
+          "ready": 1097.5999999642372,
+          "wall": 1132,
+          "error": null,
+          "status": 200,
+          "fcp": 1124,
+          "lcp": 1148,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 119,
+          "loaf": [
+            {
+              "t": 203,
+              "d": 119,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 473,
+              "d": 60,
+              "b": 9,
+              "s": ["index-D6IA9RCO.js:58"]
+            },
+            {
+              "t": 1048,
+              "d": 52,
+              "b": 0,
+              "s": ["createServerFn-D-KIR8hu.js:48"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 879296,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 412,
+          "heapUsed": 13944556,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/present/gt-brand"
+        },
+        {
+          "ttfb": 141.328,
+          "ready": 974.3000000119209,
+          "wall": 1008,
+          "error": null,
+          "status": 200,
+          "fcp": 996,
+          "lcp": 1020,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 61,
+          "loaf": [
+            {
+              "t": 152,
+              "d": 61,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 235,
+              "d": 58,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            },
+            {
+              "t": 924,
+              "d": 52,
+              "b": 0,
+              "s": ["createServerFn-D-KIR8hu.js:45"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 879296,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 412,
+          "heapUsed": 14000936,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/present/gt-brand"
+        },
+        {
+          "ttfb": 137.399,
+          "ready": 836.4000000357628,
+          "wall": 869,
+          "error": null,
+          "status": 200,
+          "fcp": 860,
+          "lcp": 904,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 63,
+          "loaf": [
+            {
+              "t": 148,
+              "d": 63,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 224,
+              "d": 62,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 879296,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 413,
+          "heapUsed": 14034456,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/present/gt-brand"
+        }
+      ]
+    },
+    {
+      "route": "/present/gt-brand",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 134.675,
+      "fcp": 852,
+      "lcp": 888,
+      "ready": 834.4000000357628,
+      "jsDecoded": 3132922,
+      "jsTransfer": 0,
+      "jsCount": 21,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 60,
+      "cls": 0,
+      "nodes": 412,
+      "errors": [],
+      "lcpEl": "IMG.opener-img",
+      "samples": [
+        {
+          "ttfb": 134.675,
+          "ready": 780.5,
+          "wall": 816,
+          "error": null,
+          "status": 200,
+          "fcp": 800,
+          "lcp": 816,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 58,
+          "loaf": [
+            {
+              "t": 172,
+              "d": 58,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 412,
+          "heapUsed": 14050152,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/present/gt-brand"
+        },
+        {
+          "ttfb": 89.383,
+          "ready": 1620.5,
+          "wall": 1653,
+          "error": null,
+          "status": 200,
+          "fcp": 1644,
+          "lcp": 1652,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 122,
+              "d": 60,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 412,
+          "heapUsed": 14022544,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/present/gt-brand"
+        },
+        {
+          "ttfb": 136.714,
+          "ready": 834.4000000357628,
+          "wall": 868,
+          "error": null,
+          "status": 200,
+          "fcp": 852,
+          "lcp": 888,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 61,
+          "loaf": [
+            {
+              "t": 147,
+              "d": 53,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 201,
+              "d": 59,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            },
+            {
+              "t": 775,
+              "d": 61,
+              "b": 1,
+              "s": ["createServerFn-D-KIR8hu.js:50"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 0,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 413,
+          "heapUsed": 14006000,
+          "layoutCount": 0,
+          "finalUrl": "https://turboslide.vercel.app/present/gt-brand"
+        }
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "name": "decks->edit",
+      "ms": 598,
+      "how": "in page"
+    },
+    {
+      "name": "back",
+      "ms": 18,
+      "how": "wall"
+    },
+    {
+      "name": "edit->decks",
+      "ms": 1114,
+      "how": "wall, document navigation"
+    },
+    {
+      "name": "trash->decks",
+      "ms": 3.800000011920929,
+      "how": "in page"
+    },
+    {
+      "name": "slideChange",
+      "ms": 14.300000011920929,
+      "how": "in page, painted frame",
+      "slideId": "thesis"
+    },
+    {
+      "name": "slideshow",
+      "ms": 17.69999998807907,
+      "how": "in page, painted frame"
+    },
+    {
+      "name": "layoutGrid",
+      "ms": 11.300000011920929,
+      "how": "in page, painted frame"
+    }
+  ],
+  "filmstrip": {
+    "passes": [
+      {
+        "pass": 1,
+        "direction": "down",
+        "frames": 241,
+        "fps": 118.53022520742788,
+        "median": 8.300000000000182,
+        "p95": 10.100000000000364,
+        "max": 16.899999999999636,
+        "over33": 0,
+        "over50": 0
+      },
+      {
+        "pass": 2,
+        "direction": "up",
+        "frames": 250,
+        "fps": 119.4588370754174,
+        "median": 8.300000000000182,
+        "p95": 10.100000000000364,
+        "max": 17.599999999999454,
+        "over33": 0,
+        "over50": 0
+      },
+      {
+        "pass": 3,
+        "direction": "down",
+        "frames": 247,
+        "fps": 119.912259322447,
+        "median": 8.300000000001091,
+        "p95": 10.100000000000364,
+        "max": 10.399999999999636,
+        "over33": 0,
+        "over50": 0
+      }
+    ],
+    "nodes": 4921,
+    "cards": 85
+  },
+  "idle": {
+    "seconds": 60,
+    "serverFn": 465,
+    "perMinute": 465,
+    "events": 0,
+    "eventsPerMinute": 0,
+    "other": 12
+  },
+  "twins": {
+    "total": 2,
+    "refetched": 2,
+    "list": [
+      {
+        "name": "opener-brand-dark.jpg",
+        "transfer": 300,
+        "decoded": 0
+      },
+      {
+        "name": "mood-earth-dark.jpg",
+        "transfer": 300,
+        "decoded": 0
+      }
+    ]
+  },
+  "write": null,
+  "finishedAt": "2026-09-14T14:34:32.821Z",
+  "rows": [
+    {
+      "check": "routes",
+      "name": "/ cold ttfb",
+      "value": 94.867,
+      "limit": 200,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold fcp",
+      "value": 300,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold lcp",
+      "value": 924,
+      "limit": 700,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold ready",
+      "value": 908,
+      "limit": 700,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold js decoded",
+      "value": 3122113,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold longest animation frame",
+      "value": 67,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold dom nodes",
+      "value": 665,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm ttfb",
+      "value": 90.802,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm fcp",
+      "value": 280,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm lcp",
+      "value": 896,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm ready",
+      "value": 876.8999999761581,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm js decoded",
+      "value": 3122113,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm longest animation frame",
+      "value": 59,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm dom nodes",
+      "value": 666,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold ttfb",
+      "value": 113.339,
+      "limit": 200,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold fcp",
+      "value": 208,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold lcp",
+      "value": 844,
+      "limit": 700,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold ready",
+      "value": 823.2000000476837,
+      "limit": 700,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold js decoded",
+      "value": 3122113,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold longest animation frame",
+      "value": 67,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold dom nodes",
+      "value": 665,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm ttfb",
+      "value": 82.881,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm fcp",
+      "value": 148,
+      "limit": 250,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm lcp",
+      "value": 764,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm ready",
+      "value": 749.5,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm js decoded",
+      "value": 3122113,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm longest animation frame",
+      "value": 60,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm dom nodes",
+      "value": 665,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold ttfb",
+      "value": 5334.678,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold fcp",
+      "value": 5644,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold lcp",
+      "value": 6072,
+      "limit": 1000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold ready",
+      "value": 5704.800000011921,
+      "limit": 1000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold js decoded",
+      "value": 3045067,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold longest animation frame",
+      "value": 152,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold dom nodes",
+      "value": 350,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm ttfb",
+      "value": 6300.16,
+      "limit": 300,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm fcp",
+      "value": 6420,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm lcp",
+      "value": 6728,
+      "limit": 600,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm ready",
+      "value": 6491.600000023842,
+      "limit": 600,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm js decoded",
+      "value": 3045067,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm longest animation frame",
+      "value": 85,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm dom nodes",
+      "value": 351,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold ttfb",
+      "value": 411.911,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold fcp",
+      "value": 524,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold lcp",
+      "value": 560,
+      "limit": 1000,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold ready",
+      "value": 640.2000000476837,
+      "limit": 1000,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold js decoded",
+      "value": 3032656,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold longest animation frame",
+      "value": 85,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold dom nodes",
+      "value": 105,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm ttfb",
+      "value": 396.072,
+      "limit": 300,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm fcp",
+      "value": 480,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm lcp",
+      "value": 488,
+      "limit": 600,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm ready",
+      "value": 535.6999999880791,
+      "limit": 600,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm js decoded",
+      "value": 3032656,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm longest animation frame",
+      "value": 59,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm dom nodes",
+      "value": 106,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold ttfb",
+      "value": 247.501,
+      "limit": 500,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold fcp",
+      "value": 376,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold lcp",
+      "value": 400,
+      "limit": 600,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold ready",
+      "value": 560.3999999761581,
+      "limit": 800,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold js decoded",
+      "value": 3128584,
+      "limit": 1000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold longest animation frame",
+      "value": 99,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold cls",
+      "value": 0.0021485001929012343,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold dom nodes",
+      "value": 1899,
+      "limit": 1500,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm ttfb",
+      "value": 209.127,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm fcp",
+      "value": 300,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm lcp",
+      "value": 324,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm ready",
+      "value": 451.5,
+      "limit": 600,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm js decoded",
+      "value": 3128584,
+      "limit": 1000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm longest animation frame",
+      "value": 61,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm cls",
+      "value": 0.0021485001929012343,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm dom nodes",
+      "value": 1897,
+      "limit": 1500,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold ttfb",
+      "value": 140.55,
+      "limit": 200,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold fcp",
+      "value": 516,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold lcp",
+      "value": 1308,
+      "limit": 1200,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold ready",
+      "value": 1266.8999999761581,
+      "limit": 1200,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold js decoded",
+      "value": 3263637,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold longest animation frame",
+      "value": 321,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold dom nodes",
+      "value": 1513,
+      "limit": 1500,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm ttfb",
+      "value": 120.069,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm fcp",
+      "value": 180,
+      "limit": 250,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm lcp",
+      "value": 896,
+      "limit": 700,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm ready",
+      "value": 862.0999999642372,
+      "limit": 700,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm js decoded",
+      "value": 3263637,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm longest animation frame",
+      "value": 100,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm dom nodes",
+      "value": 1480,
+      "limit": 1500,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold ttfb",
+      "value": 141.328,
+      "limit": 200,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold fcp",
+      "value": 996,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold lcp",
+      "value": 1020,
+      "limit": 800,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold ready",
+      "value": 974.3000000119209,
+      "limit": 800,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold js decoded",
+      "value": 3132922,
+      "limit": 1200000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold longest animation frame",
+      "value": 63,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold dom nodes",
+      "value": 412,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm ttfb",
+      "value": 134.675,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm fcp",
+      "value": 852,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm lcp",
+      "value": 888,
+      "limit": 500,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm ready",
+      "value": 834.4000000357628,
+      "limit": 500,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm js decoded",
+      "value": 3132922,
+      "limit": 1200000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm longest animation frame",
+      "value": 60,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm dom nodes",
+      "value": 412,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "transitions",
+      "name": "decks->edit (in page)",
+      "value": 598,
+      "limit": 500,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "transitions",
+      "name": "back (wall)",
+      "value": 18,
+      "limit": 100,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "transitions",
+      "name": "edit->decks (wall, document navigation)",
+      "value": 1114,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "transitions",
+      "name": "trash->decks (in page)",
+      "value": 3.800000011920929,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "transitions",
+      "name": "slideChange (in page, painted frame)",
+      "value": 14.300000011920929,
+      "limit": 50,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "transitions",
+      "name": "slideshow (in page, painted frame)",
+      "value": 17.69999998807907,
+      "limit": 50,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "transitions",
+      "name": "layoutGrid (in page, painted frame)",
+      "value": 11.300000011920929,
+      "limit": 50,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "filmstrip",
+      "name": "first pass longest frame",
+      "value": 16.899999999999636,
+      "limit": 100,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "filmstrip",
+      "name": "steady passes p95 frame",
+      "value": 10.100000000000364,
+      "limit": 20,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "filmstrip",
+      "name": "steady passes longest frame",
+      "value": 17.599999999999454,
+      "limit": 50,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "filmstrip",
+      "name": "steady passes fps",
+      "value": 119.4588370754174,
+      "limit": 50,
+      "kind": "floor",
+      "ok": true,
+      "unit": "fps"
+    },
+    {
+      "check": "filmstrip",
+      "name": "dom nodes with 85 cards",
+      "value": 4921,
+      "limit": 1500,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "count"
+    },
+    {
+      "check": "idle",
+      "name": "server function calls per minute (60 s window)",
+      "value": 465,
+      "limit": 4,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "count"
+    },
+    {
+      "check": "idle",
+      "name": "event stream connections per minute (60 s window)",
+      "value": 0,
+      "limit": 2,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "twins",
+      "name": "twins re-fetched on the second visit (of 2)",
+      "value": 2,
+      "limit": 0,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "count"
+    }
+  ],
+  "failures": 63
+}

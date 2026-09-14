@@ -3,7 +3,11 @@
 // and the characters the copy rules forbid. The linter in @turboslide/lint reads these; a deck may
 // extend the noun list from deck.json (SPEC open question 13).
 
-/** Capitalized as written, wherever they appear in a heading (DECK-GRAMMAR.md:22). */
+/**
+ * Capitalized as written, wherever they appear in a heading (DECK-GRAMMAR.md:22). "Turboslide"
+ * joins the list in round four (gslides-parity SPEC-4 1.2; R01 6.1 item 4): one word, one
+ * capital, so the sentence case lint keeps it in a heading.
+ */
 export const PROPER_NOUNS = [
   'General Translation',
   'Prototemplate',
@@ -11,6 +15,7 @@ export const PROPER_NOUNS = [
   'Locadex',
   'Inter',
   'Heroicons',
+  'Turboslide',
 ] as const;
 
 /** Product tokens keep their exact form and never open a heading (DECK-GRAMMAR.md:22; slide 14). */

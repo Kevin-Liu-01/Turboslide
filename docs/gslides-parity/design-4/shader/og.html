@@ -1,39 +1,106 @@
 <!doctype html>
 <html lang="en" data-theme="dark">
-<head>
-<meta charset="utf-8">
-<title>Turboslide social image</title>
-<!-- The site wide Open Graph image, 1200 by 630 (research-4 report 02 sections 2.5 and 3): the mark at 192 px,
+  <head>
+    <meta charset="utf-8" />
+    <title>Turboslide social image</title>
+    <!-- The site wide Open Graph image, 1200 by 630 (research-4 report 02 sections 2.5 and 3): the mark at 192 px,
      the wordmark as live Inter, one sentence, the address, and a band of the liquid metal field cut at 70 by 79
      cells of 8 px so the screen survives the card widths of every platform (report 02 section 5.4). The real
      build renders this page through @turboslide/headless at 1200 by 630 and device scale factor 1 and writes
      apps/studio/public/og/turboslide.png (report 02 section 6.3 step 8). No text sits within 48 px of an edge. -->
-<link rel="stylesheet" href="../../../../packages/fonts/src/inter.css">
-<link rel="stylesheet" href="../../../../packages/chrome/src/tokens.css">
-<style>
-  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
-  body { background: var(--pt-paper); color: var(--pt-ink); font-family: var(--pt-text); position: relative; }
-  .band { position: absolute; right: 0; top: 0; width: 560px; height: 630px; overflow: hidden; border-left: 1px solid var(--pt-edge); }
-  .band img { display: block; width: 560px; height: 632px; image-rendering: pixelated; }
-  .col { position: absolute; left: 64px; top: 64px; width: 500px; }
-  .mark { display: block; width: 192px; height: 192px; margin: -48px 0 0 -12px; }
-  h1 { margin: 8px 0 0; font-family: var(--pt-display); font-weight: 500; font-size: 72px; line-height: 1; letter-spacing: -0.025em; font-feature-settings: 'cv11', 'ss01'; }
-  p { margin: 24px 0 0; font-size: 26px; line-height: 1.35; color: var(--pt-ink-2); max-width: 20ch; }
-  .facts { position: absolute; left: 64px; bottom: 64px; font: 16px/1.5 var(--pt-mono); color: var(--pt-titanium); }
-</style>
-</head>
-<body>
-  <div class="band"><img src="previews/og-band-dark.png" alt=""></div>
-  <div class="col">
-    <svg class="mark" viewBox="0 0 192 192" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true"><rect x="12" y="49" width="168" height="12"/>
-    <rect x="12" y="61" width="6" height="82"/>
-    <rect x="174" y="61" width="6" height="82"/>
-    <rect x="12" y="137" width="168" height="6"/>
-    <rect x="90" y="61" width="12" height="76"/>
-    <path d="M102 61h4v4h-4zM106 61h4v4h-4zM110 61h4v4h-4zM114 61h4v4h-4zM118 61h4v4h-4zM122 61h4v4h-4zM130 61h4v4h-4zM134 61h4v4h-4zM138 61h4v4h-4zM146 61h4v4h-4zM154 61h4v4h-4zM162 61h4v4h-4zM102 65h4v4h-4zM106 65h4v4h-4zM110 65h4v4h-4zM114 65h4v4h-4zM118 65h4v4h-4zM126 65h4v4h-4zM134 65h4v4h-4zM142 65h4v4h-4zM150 65h4v4h-4zM102 69h4v4h-4zM106 69h4v4h-4zM110 69h4v4h-4zM114 69h4v4h-4zM118 69h4v4h-4zM122 69h4v4h-4zM126 69h4v4h-4zM130 69h4v4h-4zM138 69h4v4h-4zM146 69h4v4h-4zM154 69h4v4h-4zM102 73h4v4h-4zM106 73h4v4h-4zM110 73h4v4h-4zM118 73h4v4h-4zM126 73h4v4h-4zM134 73h4v4h-4zM142 73h4v4h-4zM102 77h4v4h-4zM106 77h4v4h-4zM110 77h4v4h-4zM114 77h4v4h-4zM118 77h4v4h-4zM122 77h4v4h-4zM130 77h4v4h-4zM138 77h4v4h-4zM146 77h4v4h-4zM154 77h4v4h-4zM162 77h4v4h-4zM102 81h4v4h-4zM110 81h4v4h-4zM114 81h4v4h-4zM118 81h4v4h-4zM126 81h4v4h-4zM134 81h4v4h-4zM150 81h4v4h-4zM102 85h4v4h-4zM106 85h4v4h-4zM110 85h4v4h-4zM114 85h4v4h-4zM118 85h4v4h-4zM122 85h4v4h-4zM126 85h4v4h-4zM130 85h4v4h-4zM138 85h4v4h-4zM146 85h4v4h-4zM154 85h4v4h-4zM102 89h4v4h-4zM106 89h4v4h-4zM110 89h4v4h-4zM118 89h4v4h-4zM126 89h4v4h-4zM134 89h4v4h-4zM142 89h4v4h-4zM102 93h4v4h-4zM106 93h4v4h-4zM110 93h4v4h-4zM114 93h4v4h-4zM118 93h4v4h-4zM122 93h4v4h-4zM130 93h4v4h-4zM134 93h4v4h-4zM138 93h4v4h-4zM146 93h4v4h-4zM154 93h4v4h-4zM162 93h4v4h-4zM102 97h4v4h-4zM106 97h4v4h-4zM110 97h4v4h-4zM114 97h4v4h-4zM118 97h4v4h-4zM126 97h4v4h-4zM134 97h4v4h-4zM142 97h4v4h-4zM150 97h4v4h-4zM102 101h4v4h-4zM106 101h4v4h-4zM110 101h4v4h-4zM114 101h4v4h-4zM118 101h4v4h-4zM122 101h4v4h-4zM126 101h4v4h-4zM130 101h4v4h-4zM138 101h4v4h-4zM146 101h4v4h-4zM154 101h4v4h-4zM102 105h4v4h-4zM106 105h4v4h-4zM110 105h4v4h-4zM118 105h4v4h-4zM126 105h4v4h-4zM134 105h4v4h-4zM142 105h4v4h-4zM102 109h4v4h-4zM106 109h4v4h-4zM110 109h4v4h-4zM114 109h4v4h-4zM118 109h4v4h-4zM122 109h4v4h-4zM130 109h4v4h-4zM138 109h4v4h-4zM146 109h4v4h-4zM154 109h4v4h-4zM162 109h4v4h-4zM102 113h4v4h-4zM110 113h4v4h-4zM114 113h4v4h-4zM118 113h4v4h-4zM126 113h4v4h-4zM134 113h4v4h-4zM150 113h4v4h-4zM102 117h4v4h-4zM106 117h4v4h-4zM110 117h4v4h-4zM114 117h4v4h-4zM118 117h4v4h-4zM122 117h4v4h-4zM126 117h4v4h-4zM130 117h4v4h-4zM138 117h4v4h-4zM146 117h4v4h-4zM154 117h4v4h-4zM102 121h4v4h-4zM106 121h4v4h-4zM110 121h4v4h-4zM118 121h4v4h-4zM126 121h4v4h-4zM134 121h4v4h-4zM142 121h4v4h-4zM102 125h4v4h-4zM106 125h4v4h-4zM110 125h4v4h-4zM114 125h4v4h-4zM118 125h4v4h-4zM122 125h4v4h-4zM130 125h4v4h-4zM134 125h4v4h-4zM138 125h4v4h-4zM146 125h4v4h-4zM154 125h4v4h-4zM162 125h4v4h-4zM102 129h4v4h-4zM106 129h4v4h-4zM110 129h4v4h-4zM114 129h4v4h-4zM118 129h4v4h-4zM126 129h4v4h-4zM134 129h4v4h-4zM142 129h4v4h-4zM150 129h4v4h-4zM102 133h4v4h-4zM106 133h4v4h-4zM110 133h4v4h-4zM114 133h4v4h-4zM118 133h4v4h-4zM122 133h4v4h-4zM126 133h4v4h-4zM130 133h4v4h-4zM138 133h4v4h-4zM146 133h4v4h-4zM154 133h4v4h-4z"/></svg>
-    <h1>Turboslide</h1>
-    <p>Google Slides' behaviours, a canvas on every slide, and a PowerPoint that matches the screen.</p>
-  </div>
-  <div class="facts">turboslide.vercel.app · no account · MIT</div>
-</body>
+    <link rel="stylesheet" href="../../../../packages/fonts/src/inter.css" />
+    <link rel="stylesheet" href="../../../../packages/chrome/src/tokens.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+      }
+      body {
+        background: var(--pt-paper);
+        color: var(--pt-ink);
+        font-family: var(--pt-text);
+        position: relative;
+      }
+      .band {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 560px;
+        height: 630px;
+        overflow: hidden;
+        border-left: 1px solid var(--pt-edge);
+      }
+      .band img {
+        display: block;
+        width: 560px;
+        height: 632px;
+        image-rendering: pixelated;
+      }
+      .col {
+        position: absolute;
+        left: 64px;
+        top: 64px;
+        width: 500px;
+      }
+      .mark {
+        display: block;
+        width: 192px;
+        height: 192px;
+        margin: -48px 0 0 -12px;
+      }
+      h1 {
+        margin: 8px 0 0;
+        font-family: var(--pt-display);
+        font-weight: 500;
+        font-size: 72px;
+        line-height: 1;
+        letter-spacing: -0.025em;
+        font-feature-settings: 'cv11', 'ss01';
+      }
+      p {
+        margin: 24px 0 0;
+        font-size: 26px;
+        line-height: 1.35;
+        color: var(--pt-ink-2);
+        max-width: 20ch;
+      }
+      .facts {
+        position: absolute;
+        left: 64px;
+        bottom: 64px;
+        font: 16px/1.5 var(--pt-mono);
+        color: var(--pt-titanium);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="band"><img src="previews/og-band-dark.png" alt="" /></div>
+    <div class="col">
+      <svg
+        class="mark"
+        viewBox="0 0 192 192"
+        shape-rendering="crispEdges"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <rect x="12" y="49" width="168" height="12" />
+        <rect x="12" y="61" width="6" height="82" />
+        <rect x="174" y="61" width="6" height="82" />
+        <rect x="12" y="137" width="168" height="6" />
+        <rect x="90" y="61" width="12" height="76" />
+        <path
+          d="M102 61h4v4h-4zM106 61h4v4h-4zM110 61h4v4h-4zM114 61h4v4h-4zM118 61h4v4h-4zM122 61h4v4h-4zM130 61h4v4h-4zM134 61h4v4h-4zM138 61h4v4h-4zM146 61h4v4h-4zM154 61h4v4h-4zM162 61h4v4h-4zM102 65h4v4h-4zM106 65h4v4h-4zM110 65h4v4h-4zM114 65h4v4h-4zM118 65h4v4h-4zM126 65h4v4h-4zM134 65h4v4h-4zM142 65h4v4h-4zM150 65h4v4h-4zM102 69h4v4h-4zM106 69h4v4h-4zM110 69h4v4h-4zM114 69h4v4h-4zM118 69h4v4h-4zM122 69h4v4h-4zM126 69h4v4h-4zM130 69h4v4h-4zM138 69h4v4h-4zM146 69h4v4h-4zM154 69h4v4h-4zM102 73h4v4h-4zM106 73h4v4h-4zM110 73h4v4h-4zM118 73h4v4h-4zM126 73h4v4h-4zM134 73h4v4h-4zM142 73h4v4h-4zM102 77h4v4h-4zM106 77h4v4h-4zM110 77h4v4h-4zM114 77h4v4h-4zM118 77h4v4h-4zM122 77h4v4h-4zM130 77h4v4h-4zM138 77h4v4h-4zM146 77h4v4h-4zM154 77h4v4h-4zM162 77h4v4h-4zM102 81h4v4h-4zM110 81h4v4h-4zM114 81h4v4h-4zM118 81h4v4h-4zM126 81h4v4h-4zM134 81h4v4h-4zM150 81h4v4h-4zM102 85h4v4h-4zM106 85h4v4h-4zM110 85h4v4h-4zM114 85h4v4h-4zM118 85h4v4h-4zM122 85h4v4h-4zM126 85h4v4h-4zM130 85h4v4h-4zM138 85h4v4h-4zM146 85h4v4h-4zM154 85h4v4h-4zM102 89h4v4h-4zM106 89h4v4h-4zM110 89h4v4h-4zM118 89h4v4h-4zM126 89h4v4h-4zM134 89h4v4h-4zM142 89h4v4h-4zM102 93h4v4h-4zM106 93h4v4h-4zM110 93h4v4h-4zM114 93h4v4h-4zM118 93h4v4h-4zM122 93h4v4h-4zM130 93h4v4h-4zM134 93h4v4h-4zM138 93h4v4h-4zM146 93h4v4h-4zM154 93h4v4h-4zM162 93h4v4h-4zM102 97h4v4h-4zM106 97h4v4h-4zM110 97h4v4h-4zM114 97h4v4h-4zM118 97h4v4h-4zM126 97h4v4h-4zM134 97h4v4h-4zM142 97h4v4h-4zM150 97h4v4h-4zM102 101h4v4h-4zM106 101h4v4h-4zM110 101h4v4h-4zM114 101h4v4h-4zM118 101h4v4h-4zM122 101h4v4h-4zM126 101h4v4h-4zM130 101h4v4h-4zM138 101h4v4h-4zM146 101h4v4h-4zM154 101h4v4h-4zM102 105h4v4h-4zM106 105h4v4h-4zM110 105h4v4h-4zM118 105h4v4h-4zM126 105h4v4h-4zM134 105h4v4h-4zM142 105h4v4h-4zM102 109h4v4h-4zM106 109h4v4h-4zM110 109h4v4h-4zM114 109h4v4h-4zM118 109h4v4h-4zM122 109h4v4h-4zM130 109h4v4h-4zM138 109h4v4h-4zM146 109h4v4h-4zM154 109h4v4h-4zM162 109h4v4h-4zM102 113h4v4h-4zM110 113h4v4h-4zM114 113h4v4h-4zM118 113h4v4h-4zM126 113h4v4h-4zM134 113h4v4h-4zM150 113h4v4h-4zM102 117h4v4h-4zM106 117h4v4h-4zM110 117h4v4h-4zM114 117h4v4h-4zM118 117h4v4h-4zM122 117h4v4h-4zM126 117h4v4h-4zM130 117h4v4h-4zM138 117h4v4h-4zM146 117h4v4h-4zM154 117h4v4h-4zM102 121h4v4h-4zM106 121h4v4h-4zM110 121h4v4h-4zM118 121h4v4h-4zM126 121h4v4h-4zM134 121h4v4h-4zM142 121h4v4h-4zM102 125h4v4h-4zM106 125h4v4h-4zM110 125h4v4h-4zM114 125h4v4h-4zM118 125h4v4h-4zM122 125h4v4h-4zM130 125h4v4h-4zM134 125h4v4h-4zM138 125h4v4h-4zM146 125h4v4h-4zM154 125h4v4h-4zM162 125h4v4h-4zM102 129h4v4h-4zM106 129h4v4h-4zM110 129h4v4h-4zM114 129h4v4h-4zM118 129h4v4h-4zM126 129h4v4h-4zM134 129h4v4h-4zM142 129h4v4h-4zM150 129h4v4h-4zM102 133h4v4h-4zM106 133h4v4h-4zM110 133h4v4h-4zM114 133h4v4h-4zM118 133h4v4h-4zM122 133h4v4h-4zM126 133h4v4h-4zM130 133h4v4h-4zM138 133h4v4h-4zM146 133h4v4h-4zM154 133h4v4h-4z"
+        />
+      </svg>
+      <h1>Turboslide</h1>
+      <p>
+        Google Slides' behaviours, a canvas on every slide, and a PowerPoint that matches the
+        screen.
+      </p>
+    </div>
+    <div class="facts">turboslide.vercel.app · no account · MIT</div>
+  </body>
 </html>

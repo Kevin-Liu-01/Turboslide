@@ -16,6 +16,25 @@
 //      studio's lint server function loads the rendered layer inside its handler, so a builtin
 //      in the client output means a server module joined the browser graph again.
 //
+//   4. gslides-parity SPEC-4 0.44, 3.12 (round four, the integrator at merge 2): the largest
+//      client chunk stays under 600,000 bytes (measured 1,122,594 before the bundle diet), and,
+//      with --base <origin>, the chunks each route's served document preloads (its `<script
+//      type="module" src>` and `<link rel="modulepreload" href>` tags, read from the SSR'd head
+//      of /decks, /deck/gt-brand and /edit/gt-brand) sum to less than the route's `js decoded`
+//      ceiling of SPEC-4 4.1, sized from the client output that serves them (--client <dir>, the
+//      node-server build's apps/studio/.output/public; <dist>/client otherwise). Check step 31
+//      runs that form against the node-server build on 4321 after the perf budget.
+//      The largest chunk ceiling gates once every diet step of 3.12 has landed (SPEC-4 0.27), and
+//      the vendor group (React, the scheduler and the router in a `vendor` chunk through
+//      Rolldown's `output.codeSplitting.groups`) has not: measured at merge 2 on Vite 8.2.2 with
+//      Rolldown 1.2.8, the group splits a 216 KB vendor chunk out of a bare Rolldown build of the
+//      same entry, and inside the studio's Vite build neither `codeSplitting.groups` nor
+//      `output.manualChunks` is consulted (a function `test` or `name` is called zero times and
+//      the output is byte identical with and without them), from the environment config or the
+//      top level (build-4/integrator.md section 17). Until a `vendor-*.js` chunk is in the client
+//      output the ceiling is reported with that reason and the entry chunk's attribution, never
+//      failed; the per route preload ceilings below are asserted regardless.
+//
 // The default server output is <dist>/server. A Nitro deploy build (apps/studio/.output/server)
 // is checked too when it exists, or pass it with --server. Source maps are skipped: a client map
 // may carry the original source text without the code having shipped.
@@ -23,6 +42,14 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
 const MARKER = 'TURBOSLIDE_SERVER_ONLY_MARKER';
+/** SPEC-4 3.12, 4.1: the largest client chunk, in bytes. */
+const LARGEST_CHUNK_BYTES = 600_000;
+/** SPEC-4 3.12: the per route preload ceilings (bytes of the chunks the served document names). */
+const ROUTE_PRELOAD_CEILINGS = {
+  '/decks': 600_000,
+  '/deck/gt-brand': 1_000_000,
+  '/edit/gt-brand': 2_000_000,
+};
 /**
  * The builtins a page must never name (SPEC-2 8.3), matched as module specifiers in quotes. The
  * three of the specification, plus node:child_process: the render worker's cli.ts imports it,
@@ -44,13 +71,20 @@ const SOLID_PATTERNS = [
 const TEXT_EXTENSIONS = new Set(['.js', '.mjs', '.cjs', '.css', '.html', '.json', '.txt']);
 
 const argv = process.argv.slice(2);
-const positional = argv.filter((a) => !a.startsWith('--'));
 const extraServers = [];
+let base = null;
+let clientOverride = null;
+const positional = [];
 for (let i = 0; i < argv.length; i += 1) {
-  if (argv[i] === '--server' && argv[i + 1]) extraServers.push(argv[i + 1]);
+  if (argv[i] === '--server' && argv[i + 1]) extraServers.push(argv[++i]);
+  else if (argv[i] === '--base' && argv[i + 1]) base = argv[++i].replace(/\/$/, '');
+  else if (argv[i] === '--client' && argv[i + 1]) clientOverride = argv[++i];
+  else if (!argv[i].startsWith('--')) positional.push(argv[i]);
 }
 if (positional.length !== 1) {
-  console.error('usage: node scripts/check-client-bundle.mjs <dist dir> [--server <dir>]');
+  console.error(
+    'usage: node scripts/check-client-bundle.mjs <dist dir> [--server <dir>]... [--base <origin> [--client <dir>]]',
+  );
   process.exit(2);
 }
 
@@ -140,6 +174,85 @@ for (const dir of presentServers) {
     const contentHit = SOLID_PATTERNS.find((p) => p.test(text));
     if (contentHit)
       failures.push(`Solid or devtools code in server output (${contentHit}): ${rel}`);
+  }
+}
+
+// 4. The largest client chunk (SPEC-4 3.12): every script under the client output, source maps
+//    excluded; the node-server build's output when --client names it, else <dist>/client.
+const chunkDir = clientOverride ? resolve(clientOverride) : clientDir;
+const chunkFiles = walk(chunkDir).filter((f) => /\.(?:js|mjs|cjs)$/.test(f));
+if (chunkFiles.length === 0) {
+  failures.push(`no client script under ${chunkDir} for the largest chunk ceiling (SPEC-4 3.12)`);
+} else {
+  const sized = chunkFiles
+    .map((f) => ({ file: f, bytes: statSync(f).size }))
+    .sort((a, b) => b.bytes - a.bytes);
+  const largest = sized[0];
+  // the vendor group of SPEC-4 3.12 has landed when a vendor chunk is in the output; until then
+  // the ceiling is a report (SPEC-4 0.27: the ceiling gates once every diet step has landed)
+  const vendorLanded = sized.some((s) =>
+    /(?:^|[\\/])vendor-[^\\/]*\.js$/.test(relative(chunkDir, s.file)),
+  );
+  notes.push(
+    `largest client chunk under ${relative(process.cwd(), chunkDir)}: ${relative(chunkDir, largest.file)} ${largest.bytes} B (ceiling ${LARGEST_CHUNK_BYTES}, ${vendorLanded ? 'asserted' : 'reported: no vendor chunk in the output, the vendor group of SPEC-4 3.12 has not landed'}); next ${sized
+      .slice(1, 4)
+      .map((s) => `${relative(chunkDir, s.file)} ${s.bytes}`)
+      .join(', ')}`,
+  );
+  if (largest.bytes > LARGEST_CHUNK_BYTES) {
+    const line = `largest client chunk ${relative(chunkDir, largest.file)} is ${largest.bytes} B, over the ${LARGEST_CHUNK_BYTES} B ceiling (SPEC-4 3.12, 4.1)`;
+    if (vendorLanded) failures.push(line);
+    else notes.push(`OVER (reported) ${line}`);
+  }
+}
+
+// 5. The per route preload ceilings (SPEC-4 3.12), from the served heads when --base is given.
+if (base !== null) {
+  const sizeOf = new Map(
+    chunkFiles.map((f) => ['/' + relative(chunkDir, f).split('\\').join('/'), statSync(f).size]),
+  );
+  for (const [route, ceiling] of Object.entries(ROUTE_PRELOAD_CEILINGS)) {
+    let html;
+    try {
+      const response = await fetch(`${base}${route}`, { signal: AbortSignal.timeout(60_000) });
+      if (response.status !== 200) {
+        failures.push(
+          `${route} answered ${response.status} on ${base}; no head to read (SPEC-4 3.12)`,
+        );
+        continue;
+      }
+      html = await response.text();
+    } catch (error) {
+      failures.push(
+        `${route} on ${base}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+      continue;
+    }
+    const named = new Set();
+    for (const m of html.matchAll(/<script\b[^>]*\bsrc="([^"]+\.(?:m?js))"/g)) named.add(m[1]);
+    for (const m of html.matchAll(/<link\b[^>]*\brel="modulepreload"[^>]*\bhref="([^"]+)"/g))
+      named.add(m[1]);
+    for (const m of html.matchAll(/<link\b[^>]*\bhref="([^"]+)"[^>]*\brel="modulepreload"/g))
+      named.add(m[1]);
+    let total = 0;
+    const unknown = [];
+    for (const href of named) {
+      const path = href.replace(/^https?:\/\/[^/]+/, '').split('?')[0];
+      const bytes = sizeOf.get(path);
+      if (bytes === undefined) unknown.push(path);
+      else total += bytes;
+    }
+    notes.push(
+      `${route} preloads ${named.size} chunk(s), ${total} B on disk (ceiling ${ceiling})${unknown.length ? `; ${unknown.length} not under ${relative(process.cwd(), chunkDir)}: ${unknown.slice(0, 3).join(', ')}` : ''}`,
+    );
+    if (named.size === 0)
+      failures.push(
+        `${route} names no script or modulepreload in its head; nothing to measure (SPEC-4 3.12)`,
+      );
+    if (total > ceiling)
+      failures.push(
+        `${route} preloads ${total} B of chunks, over the ${ceiling} B ceiling (SPEC-4 3.12, 4.1)`,
+      );
   }
 }
 

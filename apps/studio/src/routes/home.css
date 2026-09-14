@@ -1,0 +1,971 @@
+/* The product page, /home (gslides-parity SPEC-4 section 2, 1.8, 1.9; design-4 proposal 1
+   section 4; round four B2). One sheet for the nine bands. Colours are the --pt- tokens of
+   tokens.css alone (the identity is paper and ink, SPEC-4 0.3); sizes are the --ts- identity
+   tokens brand.css puts on :root (this sheet declares none, b1.md R7); every rule is 1 px in one
+   of the three roles of the line law (structural --pt-hair on band edges and the grids' outer
+   border, row --pt-hair-soft between rows and cells, frame --pt-edge around a picture) and drawn
+   once: a grid is a 1 px gap over a --pt-hair-soft ground, so no two cells draw the same seam.
+   The hero twin is a 1600 by 900 picture at 2 px cells shown at that size and cropped, never
+   scaled (image-rendering: pixelated). Nothing animates apart from the .pt-ib colour transitions
+   tokens.css defines; the reduced motion block there zeroes them. The twins reach this sheet as
+   custom properties home.tsx sets from SITE.twins, so no file path is written here. */
+
+/* the document scrolls with no smoothing, said explicitly (SPEC-4 0.23) */
+html:has(.ts-product) {
+  scroll-behavior: auto;
+}
+
+.ts-product {
+  display: block;
+  min-width: 0;
+  color: var(--pt-ink);
+  background: var(--pt-paper);
+  font: var(--ts-body) / 1.55 var(--pt-text);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+.ts-product p {
+  margin: 0;
+}
+
+.ts-product a {
+  color: inherit;
+}
+
+.ts-product-rail {
+  max-width: var(--ts-rail);
+  margin: 0 auto;
+  padding: 0 24px;
+  min-width: 0;
+}
+
+/* ---- the ladder (SPEC-4 1.8): weight 500, the display face, no trailing period anywhere ---- */
+.ts-product-h1,
+.ts-product-h2,
+.ts-product-h3,
+.ts-product-foot-heading {
+  margin: 0;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  text-wrap: balance;
+  color: var(--pt-ink);
+}
+
+.ts-product-h1 {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  font-size: 66px;
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+/* the lockup's mark stands on the word's baseline at the cap height (SPEC-4 1.2) */
+.ts-product-h1-mark {
+  align-self: center;
+  margin-top: 6px;
+}
+
+.ts-product-h2 {
+  font-size: var(--ts-h2);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+}
+
+.ts-product-h3 {
+  font-size: var(--ts-h3);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+.ts-product-lead {
+  font-size: var(--ts-lead);
+  line-height: 1.45;
+  color: var(--pt-ink);
+}
+
+.ts-product-band-head .ts-product-lead,
+.ts-product-claims {
+  color: var(--pt-ink-2);
+}
+
+/* the source lines (SPEC-4 0.20): monospace as an instrument, 13 px, secondary ink */
+.ts-product-source {
+  display: block;
+  margin-top: 8px;
+  font-family: var(--pt-mono);
+  font-size: var(--ts-small);
+  line-height: 1.5;
+  color: var(--pt-ink-2);
+  overflow-wrap: anywhere;
+}
+
+.ts-product-caption {
+  margin-top: 10px;
+  font-size: var(--ts-small);
+  line-height: 1.5;
+  color: var(--pt-ink-2);
+}
+
+.ts-product-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* the theme pair (HomeEditor.tsx): the stored theme shows one picture of the two; the rules
+   outrank the shot frame's `img` rule, so the hidden picture takes no box and no request */
+.ts-product .ts-product-only-light {
+  display: block;
+}
+
+.ts-product .ts-product-only-dark {
+  display: none;
+}
+
+:root[data-theme='dark'] .ts-product .ts-product-only-light {
+  display: none;
+}
+
+:root[data-theme='dark'] .ts-product .ts-product-only-dark {
+  display: block;
+}
+
+/* ---- the navigation: 44 px (--pt-title-h), one rule under it (SPEC-4 2.2 item 1) ---- */
+.ts-product-nav {
+  height: var(--pt-title-h);
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-product-nav-row {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+/* the horizontal lockup at 22 px type: the 16 px solid mark, a 10 px gap (SPEC-4 1.2) */
+.ts-product-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+  color: var(--pt-ink);
+  text-decoration: none;
+}
+
+.ts-product-lockup .ts-mark {
+  width: 16px;
+  height: 16px;
+}
+
+.ts-product-lockup-word {
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.ts-product-lockup-small .ts-product-lockup-word {
+  font-size: 15px;
+}
+
+.ts-product-lockup:hover .ts-product-lockup-word {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.ts-product-lockup:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-product-nav-links {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.ts-product-nav-links .pt-ib {
+  text-decoration: none;
+}
+
+/* the appearance group: two aria-pressed buttons, the pressed one in the shell's on state */
+.ts-product-appearance {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 8px;
+}
+
+/* ---- the hero: the twin at its own cells, the plate lower left (SPEC-4 2.3) ---- */
+.ts-product-hero {
+  position: relative;
+  height: 640px;
+  overflow: hidden;
+  background: var(--pt-paper);
+}
+
+.ts-product-hero-twin {
+  position: absolute;
+  inset: 0;
+  background-color: var(--pt-paper);
+  background-repeat: no-repeat;
+  background-position: center 38%;
+  background-size: 1600px 900px;
+  background-image: var(--ts-product-hero-light);
+  image-rendering: pixelated;
+}
+
+:root[data-theme='dark'] .ts-product-hero-twin {
+  background-image: var(--ts-product-hero-dark);
+}
+
+.ts-product-hero-rail {
+  position: relative;
+  height: 100%;
+}
+
+.ts-product-plate {
+  position: absolute;
+  left: 24px;
+  bottom: 56px;
+  box-sizing: border-box;
+  width: 740px;
+  max-width: calc(100% - 48px);
+  padding: 28px 32px;
+  background: var(--ts-plate);
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-product-hero-sentence {
+  margin-top: 14px;
+  max-width: 640px;
+}
+
+.ts-product-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.ts-product-cta .pt-ib {
+  height: 40px;
+  padding: 0 16px;
+  font-size: 14px;
+  text-decoration: none;
+  border-color: var(--pt-hair);
+  color: var(--pt-ink);
+}
+
+.ts-product-cta .pt-ib.is-solid {
+  color: var(--pt-paper);
+  border-color: var(--pt-ink);
+}
+
+.ts-product-hero-facts {
+  margin-top: 18px;
+  font-size: var(--ts-small);
+  line-height: 1.5;
+  color: var(--pt-ink-2);
+}
+
+/* the material credit under the band, on the page's ground (SPEC-4 0.22) */
+.ts-product-credit {
+  padding: 10px 0 0;
+  font-size: var(--ts-small);
+  line-height: 1.5;
+  color: var(--pt-ink-2);
+  text-align: right;
+}
+
+/* ---- the numbers strip: six cells, one seam each (SPEC-4 2.2 item 3) ---- */
+.ts-product-numbers-band {
+  padding: 24px 0 0;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-product-numbers {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0 0 56px;
+  background: var(--pt-hair-soft);
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-product-number {
+  background: var(--pt-paper);
+  padding: 24px 16px;
+  min-width: 0;
+}
+
+/* the figure never wraps: "0.003 %" at --ts-figure fits a sixth of the rail less the padding */
+.ts-product-figure {
+  margin: 0 0 10px;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: var(--ts-figure);
+  line-height: 1;
+  letter-spacing: -0.03em;
+  min-height: var(--ts-figure);
+  white-space: nowrap;
+  color: var(--pt-ink);
+}
+
+.ts-product-number-line {
+  margin: 0;
+  font-size: var(--ts-small);
+  line-height: 1.5;
+  color: var(--pt-ink-2);
+}
+
+.ts-product-number .ts-product-source {
+  margin: 8px 0 0;
+  font-size: 12px;
+}
+
+/* ---- the bands ---- */
+.ts-product-band {
+  padding: 72px 0;
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-product-band-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 32px 72px;
+  align-items: end;
+  margin-bottom: 40px;
+}
+
+/* a picture in its frame (the edge role), on the panel ink so a dark shot has no halo */
+.ts-product-shot {
+  margin: 0;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-panel-ink);
+  min-width: 0;
+}
+
+.ts-product-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ts-product-shot .ts-product-caption {
+  padding: 10px 12px 12px;
+  background: var(--pt-paper);
+  border-top: 1px solid var(--pt-edge);
+  margin: 0;
+}
+
+.ts-product-two {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: 56px 72px;
+  align-items: start;
+}
+
+.ts-product-editor {
+  margin-top: 56px;
+}
+
+.ts-product-editor-shot {
+  margin-top: 24px;
+}
+
+.ts-product-claims {
+  display: grid;
+  gap: 24px;
+}
+
+.ts-product-claims p {
+  padding-top: 16px;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-product-claims p:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+/* ---- the feature grid: one seam between cells, never two (SPEC-4 2.2 item 5) ---- */
+.ts-product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--pt-hair-soft);
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-product-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0 0 24px;
+  background: var(--pt-paper);
+}
+
+.ts-product-card-fig {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  background: var(--pt-plate);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ts-product-card-fig img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* two pictures side by side: the pair's seam is the one gap over the ground */
+.ts-product-card-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--pt-hair-soft);
+  align-items: stretch;
+}
+
+.ts-product-card-icon svg {
+  width: 28px;
+  height: 28px;
+  color: var(--pt-ink-2);
+}
+
+.ts-product-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 24px 8px;
+}
+
+.ts-product-card-title-icon {
+  color: var(--pt-ink-2);
+  flex: 0 0 auto;
+}
+
+.ts-product-card-copy {
+  padding: 0 24px;
+  color: var(--pt-ink-2);
+}
+
+/* ---- dithers and shaders: the pipeline strip and the specimens (SPEC-4 2.2 item 6) ---- */
+.ts-product-pipe {
+  list-style: none;
+  margin: 56px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--pt-hair-soft);
+  border: 1px solid var(--pt-hair);
+  counter-reset: none;
+}
+
+.ts-product-pipe-cell {
+  background: var(--pt-paper);
+  padding: 0 0 16px;
+  min-width: 0;
+}
+
+.ts-product-pipe-cell .ts-product-caption {
+  padding: 0 16px;
+  margin-top: 14px;
+}
+
+.ts-product-pipe-win {
+  height: 180px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  background: var(--pt-paper);
+}
+
+.ts-product-pipe-win img {
+  display: block;
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+/* the hero frame through the screen at 1:1: the same twin the hero shows, another crop */
+.ts-product-pipe-twin {
+  background-repeat: no-repeat;
+  background-size: 1600px 900px;
+  background-position: -640px -300px;
+  background-image: var(--ts-product-hero-light);
+  image-rendering: pixelated;
+}
+
+:root[data-theme='dark'] .ts-product-pipe-twin {
+  background-image: var(--ts-product-hero-dark);
+}
+
+.ts-product-pipe-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--pt-ink);
+}
+
+.ts-product-specimens-head {
+  margin-top: 56px;
+}
+
+.ts-product-specimens {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px 40px;
+}
+
+.ts-product-specimen {
+  min-width: 0;
+}
+
+.ts-product-specimen .ts-empty-fig {
+  max-width: 100%;
+}
+
+.ts-product-specimen .ts-empty-action .pt-ib {
+  text-decoration: none;
+}
+
+/* the loading curtain specimen: the figure where the sheet will be, the ramp on the track */
+.ts-product-curtain {
+  position: relative;
+  box-sizing: border-box;
+  width: 320px;
+  max-width: 100%;
+  height: 180px;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  overflow: hidden;
+}
+
+.ts-product-curtain-sheet {
+  position: absolute;
+  inset: 24px 24px 22px;
+  background-color: var(--pt-paper);
+  background-repeat: no-repeat;
+  background-size: 1600px 900px;
+  background-position: -640px -360px;
+  background-image: var(--ts-product-figure-light);
+  image-rendering: pixelated;
+}
+
+:root[data-theme='dark'] .ts-product-curtain-sheet {
+  background-image: var(--ts-product-figure-dark);
+}
+
+/* the track: one cell row of --pt-hair-soft under the sheet, the fill in ink with the ramp on
+   its leading edge (Progress.css sizes the two mask layers the same way); 12 px above the frame's
+   edge so the two lines never read as a double (the line law's 1 to 4 px window) */
+.ts-product-curtain-track {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 12px;
+  height: 2px;
+  overflow: hidden;
+  background: var(--pt-hair-soft);
+}
+
+.ts-product-curtain-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background: var(--pt-ink);
+  mask-size:
+    calc(100% - 16 * var(--ts-cell)) 100%,
+    calc(16 * var(--ts-cell)) 100%;
+  mask-position:
+    left top,
+    right top;
+  mask-repeat: no-repeat;
+  -webkit-mask-size:
+    calc(100% - 16 * var(--ts-cell)) 100%,
+    calc(16 * var(--ts-cell)) 100%;
+  -webkit-mask-position:
+    left top,
+    right top;
+  -webkit-mask-repeat: no-repeat;
+}
+
+/* the presence chip specimen: the chrome's chip geometry (presence.css), monochrome */
+.ts-product-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 180px;
+  padding: 0 16px;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  max-width: 320px;
+  box-sizing: border-box;
+}
+
+.ts-product-chip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 24px;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+}
+
+.ts-product-chip svg {
+  display: block;
+  fill: var(--pt-ink);
+}
+
+.ts-product-chip-initials {
+  fill: var(--pt-ink);
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-feature-settings: 'cv11', 'ss01';
+  paint-order: stroke fill;
+  stroke: var(--pt-paper);
+  stroke-width: 2px;
+}
+
+.ts-product-chip-name {
+  font-size: var(--ts-small);
+  color: var(--pt-ink);
+}
+
+/* ---- why it is fast: rows (SPEC-4 2.2 item 7) ---- */
+.ts-product-rows {
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-product-row {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 320px;
+  gap: 24px 48px;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  align-items: start;
+}
+
+.ts-product-row-title {
+  font-size: 17px;
+}
+
+.ts-product-row-body {
+  color: var(--pt-ink-2);
+}
+
+.ts-product-row-number {
+  display: block;
+  font-family: var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: 17px;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--pt-ink);
+}
+
+.ts-product-closing {
+  padding-top: 28px;
+  max-width: 900px;
+  color: var(--pt-ink-2);
+}
+
+/* ---- for agents: the contract in mono, hairline boxes (SPEC-4 2.2 item 8) ---- */
+.ts-product-agents {
+  border-top: 1px solid var(--pt-hair);
+}
+
+.ts-product-agent {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 20px 40px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  align-items: start;
+}
+
+.ts-product-agent-label {
+  font-weight: 500;
+  font-size: var(--ts-body);
+}
+
+.ts-product-agent-sentence {
+  color: var(--pt-ink-2);
+  margin-bottom: 10px;
+}
+
+.ts-product-cmd {
+  display: block;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--pt-mono);
+  font-size: var(--ts-small);
+  line-height: 1.55;
+  border: 1px solid var(--pt-hair);
+  background: var(--pt-plate);
+  padding: 10px 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--pt-ink);
+}
+
+.ts-product-cmd code {
+  font: inherit;
+}
+
+.ts-product-cmd-push {
+  margin-top: 12px;
+  max-width: 900px;
+}
+
+.ts-product-agent-link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: var(--ts-small);
+  color: var(--pt-ink-2);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+.ts-product-agent-link:hover {
+  color: var(--pt-ink);
+}
+
+/* ---- compared with Google Slides (SPEC-4 2.2 item 9) ---- */
+.ts-product-table-scroll {
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.ts-product-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+.ts-product-table th,
+.ts-product-table td {
+  text-align: left;
+  vertical-align: top;
+  padding: 14px 20px 14px 0;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  font-size: var(--ts-body);
+  line-height: 1.5;
+}
+
+.ts-product-table thead th {
+  font-weight: 500;
+  color: var(--pt-ink);
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-product-table tbody th {
+  font-weight: 500;
+  color: var(--pt-ink);
+  width: 18%;
+}
+
+.ts-product-table td:nth-child(2) {
+  color: var(--pt-ink-2);
+  width: 38%;
+}
+
+.ts-product-table td:nth-child(3) {
+  color: var(--pt-ink);
+}
+
+/* ---- the footer (SPEC-4 2.2 item 10) ---- */
+.ts-product-footer {
+  padding: 56px 0 64px;
+}
+
+.ts-product-foot {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.ts-product-foot-heading {
+  font-size: var(--ts-body);
+  margin-bottom: 12px;
+}
+
+.ts-product-foot-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.ts-product-foot-link {
+  color: var(--pt-ink-2);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.ts-product-foot-link:hover {
+  color: var(--pt-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ts-product-foot-link:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 2px;
+}
+
+.ts-product-foot-line {
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid var(--pt-hair-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  color: var(--pt-ink-2);
+  font-size: var(--ts-small);
+}
+
+/* ---- the responsive rule (P1 4.4): two columns under 1100, one under 760 ---- */
+@media (max-width: 1100px) {
+  .ts-product-row {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+
+  .ts-product-row-figure {
+    grid-column: 2;
+  }
+
+  .ts-product-numbers {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ts-product-specimens {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .ts-product-band {
+    padding: 48px 0;
+  }
+
+  .ts-product-band-head,
+  .ts-product-two,
+  .ts-product-foot,
+  .ts-product-grid,
+  .ts-product-pipe,
+  .ts-product-specimens {
+    grid-template-columns: 1fr;
+  }
+
+  .ts-product-h1 {
+    font-size: 44px;
+    gap: 12px;
+  }
+
+  .ts-product-h1 .ts-mark {
+    width: 32px;
+    height: 32px;
+  }
+
+  .ts-product-hero {
+    height: 520px;
+  }
+
+  .ts-product-hero-twin {
+    background-position: 40% 30%;
+  }
+
+  /* the plate across the bottom of the band */
+  .ts-product-plate {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    max-width: none;
+    padding: 24px 24px 28px;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+  }
+
+  .ts-product-credit {
+    text-align: left;
+  }
+
+  .ts-product-numbers {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ts-product-row {
+    grid-template-columns: 1fr;
+  }
+
+  .ts-product-row-figure {
+    grid-column: 1;
+  }
+
+  .ts-product-agent {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  /* the four links hide; the button and the appearance group stay (SPEC-4 2.2 item 1); the
+     lockup keeps its mark and drops its word, so the row fits 390 px (the link keeps its name) */
+  .ts-product-nav-links .ts-product-nav-link,
+  .ts-product-nav .ts-product-lockup-word {
+    display: none;
+  }
+
+  .ts-product-nav-row {
+    gap: 12px;
+  }
+
+  .ts-product-appearance {
+    margin: 0 4px;
+  }
+
+  .ts-product-table tbody th,
+  .ts-product-table td:nth-child(2) {
+    width: auto;
+  }
+}

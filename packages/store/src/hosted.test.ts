@@ -16,7 +16,16 @@ import type { Author, Mutation } from '@turboslide/schema/mutations';
 
 import { memoryBlobClient } from './blob-fake.ts';
 import type { FakeBlobClient } from './blob-fake.ts';
-import { openBlobStore, pushDeckDir } from './blob-store.ts';
+import {
+  isMirroredDocument,
+  openBlobStore,
+  parseThumbPathname,
+  pruneThumbs,
+  pushDeckDir,
+  storedThumbs,
+  thumbPathname,
+  thumbsPrefix,
+} from './blob-store.ts';
 import type { BlobStore } from './blob-store.ts';
 import { digestAssetName, openFileStore } from './file-store.ts';
 import { openHostedDecks } from './hosted.ts';
@@ -725,6 +734,233 @@ describe('hosted stores', () => {
       });
       const typed: VersionRecord[] = await b.records();
       expect(typed.map((r) => r.n)).toEqual([1, 2]);
+    });
+  });
+
+  // -------------------------------------------------------------------------------------------
+  // Round four (gslides-parity SPEC-4 0.29, 0.31, 0.33, 0.35; MILESTONES-4 B4 item 1)
+
+  describe('round four store seams', () => {
+    it('writes in four rounds: the head with the leases, the snapshot with the changed bodies, the commit alone, the record last', async () => {
+      const { fake, a } = await blobPair();
+      await a.sync();
+      fake.calls.length = 0;
+      const outcome = await a.write({
+        baseRevision: 412,
+        author: agentA,
+        mutations: [setSize(22)],
+      });
+      expect(outcome.ok).toBe(true);
+      if (!outcome.ok) return;
+      const ops = fake.calls.map((call) => `${call.op} ${call.pathname}`);
+      const at = (needle: string) => ops.findIndex((op) => op.startsWith(needle));
+      const key = outcome.entry.snapshot!;
+      // round one: the head and the leases read, before anything is put
+      const firstPut = ops.findIndex((op) => op.startsWith('put '));
+      expect(at('head decks/gt-brand/deck.json')).toBeGreaterThanOrEqual(0);
+      expect(at('get decks/gt-brand/leases.json')).toBeGreaterThanOrEqual(0);
+      expect(at('head decks/gt-brand/deck.json')).toBeLessThan(firstPut);
+      expect(at('get decks/gt-brand/leases.json')).toBeLessThan(firstPut);
+      // round two: the snapshot and the changed slide body both precede the manifest
+      const commit = at('put decks/gt-brand/deck.json');
+      expect(at(`put decks/gt-brand/${snapshotPath(key)}`)).toBeLessThan(commit);
+      expect(at('put decks/gt-brand/slides/content-rule.json')).toBeLessThan(commit);
+      // round three is the commit alone, round four the record: the puts are the two bodies of
+      // round two in either order, then the manifest, then the record and nothing else
+      const puts = ops.filter((op) => op.startsWith('put '));
+      expect(puts.slice(0, -2).sort()).toEqual(
+        [
+          `put decks/gt-brand/${snapshotPath(key)}`,
+          'put decks/gt-brand/slides/content-rule.json',
+        ].sort(),
+      );
+      expect(puts[puts.length - 2]).toBe('put decks/gt-brand/deck.json');
+      expect(puts[puts.length - 1]).toBe('put decks/gt-brand/versions/1.json');
+      expect(at('put decks/gt-brand/versions/1.json')).toBeGreaterThan(commit);
+      expect(ops.filter((op) => op.startsWith('del '))).toEqual([]);
+    });
+
+    it('deletes a removed slide body after the commit and before the record', async () => {
+      const { fake, a, b } = await blobPair();
+      await a.sync();
+      fake.calls.length = 0;
+      const outcome = await a.write({
+        baseRevision: 412,
+        author: agentA,
+        mutations: [{ op: 'slide.remove', slideId: 'thesis' }],
+      });
+      expect(outcome.ok).toBe(true);
+      const ops = fake.calls.map((call) => `${call.op} ${call.pathname}`);
+      const commit = ops.indexOf('put decks/gt-brand/deck.json');
+      const del = ops.indexOf('del decks/gt-brand/slides/thesis.json');
+      const record = ops.indexOf('put decks/gt-brand/versions/1.json');
+      expect(commit).toBeGreaterThanOrEqual(0);
+      expect(del).toBeGreaterThan(commit);
+      expect(record).toBeGreaterThan(del);
+      expect(fake.blobs.has('decks/gt-brand/slides/thesis.json')).toBe(false);
+      // the peer reads the document without the slide
+      const seen = await b.read();
+      expect(seen.document.slides['thesis']).toBeUndefined();
+    });
+
+    it('lists the decks from their manifests through origin reads, and opens no mirror for them', async () => {
+      const fake = memoryBlobClient();
+      const first = collection('blob', join(root, 'overlay-list-1'), fake);
+      await first.ready();
+      clock = '2026-09-14T11:00:00.000Z';
+      await first.create({ name: 'Second deck', from: 'blank' });
+      // another instance moves one manifest's title straight in the store
+      const stored = fake.blobs.get('decks/second-deck/deck.json')!;
+      const manifest = JSON.parse(new TextDecoder().decode(stored.bytes)) as {
+        title: string;
+        updatedAt: string;
+      };
+      manifest.title = 'Renamed elsewhere';
+      manifest.updatedAt = '2026-09-14T12:00:00.000Z';
+      await fake.put(
+        'decks/second-deck/deck.json',
+        new TextEncoder().encode(JSON.stringify(manifest)),
+        { overwrite: true },
+      );
+      const second = collection('blob', join(root, 'overlay-list-2'), fake);
+      await second.ready();
+      fake.calls.length = 0;
+      const heads = await second.list();
+      expect(heads.map((head) => [head.id, head.title])).toEqual([
+        ['second-deck', 'Renamed elsewhere'],
+        ['gt-brand', WORKED_DECK.title],
+      ]);
+      const gt = heads.find((head) => head.id === 'gt-brand')!;
+      expect(gt).toMatchObject({
+        slides: WORKED_SLIDES.length,
+        sections: WORKED_DECK.sections.length,
+        revision: 412,
+        updatedAt: WORKED_DECK.updatedAt,
+        createdAt: WORKED_DECK.createdAt,
+      });
+      // one folders call and one origin read per deck; no head, no list of a deck prefix
+      const ops = fake.calls.map((call) => call.op);
+      expect(ops.filter((op) => op === 'folders')).toHaveLength(1);
+      expect(
+        fake.calls
+          .filter((call) => call.op === 'get')
+          .map((call) => call.pathname)
+          .sort(),
+      ).toEqual(['decks/gt-brand/deck.json', 'decks/second-deck/deck.json']);
+      expect(ops).not.toContain('list');
+      expect(ops).not.toContain('head');
+      // no mirror was written for the listed decks on this instance
+      expect(existsSync(join(second.decksDir, 'second-deck'))).toBe(false);
+      // the trash filter reads the manifest's stamp
+      await first.trash('second-deck');
+      expect((await second.list()).map((head) => head.id)).toEqual(['gt-brand']);
+      expect((await second.list({ includeTrashed: true })).map((head) => head.id)).toEqual([
+        'second-deck',
+        'gt-brand',
+      ]);
+    });
+
+    it('keeps the thumbnail cache out of the mirror and prunes it to the newest three stamps per slide and theme', async () => {
+      const { fake, a } = await blobPair();
+      const png = new Uint8Array([1, 2, 3]);
+      const stamps = ['aaaa0001', 'aaaa0002', 'aaaa0003', 'aaaa0004'];
+      for (const [i, stamp] of stamps.entries()) {
+        clock = `2026-09-14T10:0${i}:00.000Z`;
+        for (const width of [320, 160])
+          await fake.put(thumbPathname('gt-brand', stamp, 'dark', width, 'title'), png, {
+            overwrite: true,
+          });
+        await fake.put(thumbPathname('gt-brand', stamp, 'light', 320, 'title'), png, {
+          overwrite: true,
+        });
+      }
+      await fake.put(thumbPathname('gt-brand', 'bbbb0001', 'dark', 320, 'thesis'), png, {
+        overwrite: true,
+      });
+      expect(isMirroredDocument('.thumbs/aaaa0001/dark@320/title.png')).toBe(false);
+      expect(
+        parseThumbPathname(thumbPathname('gt-brand', 'aaaa0001', 'dark', 320, 'title')),
+      ).toEqual({
+        deckId: 'gt-brand',
+        stamp: 'aaaa0001',
+        theme: 'dark',
+        width: 320,
+        slideId: 'title',
+      });
+      // a pull sees the cache in the listing and fetches nothing of it
+      fake.calls.length = 0;
+      await a.sync(true);
+      const gets = fake.calls.filter((c) => c.op === 'get').map((c) => c.pathname);
+      expect(gets.some((p) => p.includes('/.thumbs/'))).toBe(false);
+      // the newest stored thumb of a slide and theme at a width
+      const newest = storedThumbs(
+        await fake.list(thumbsPrefix('gt-brand')),
+        'gt-brand',
+        'title',
+        'dark',
+        320,
+      );
+      expect(newest.map((row) => row.key.stamp)).toEqual([
+        'aaaa0004',
+        'aaaa0003',
+        'aaaa0002',
+        'aaaa0001',
+      ]);
+      // the prune: the oldest stamp goes at every width; the light theme and the other slide stay
+      const doomed = await pruneThumbs(fake, 'gt-brand', 'title', 'dark');
+      expect(doomed.sort()).toEqual([
+        thumbPathname('gt-brand', 'aaaa0001', 'dark', 160, 'title'),
+        thumbPathname('gt-brand', 'aaaa0001', 'dark', 320, 'title'),
+      ]);
+      expect(fake.blobs.has(thumbPathname('gt-brand', 'aaaa0001', 'light', 320, 'title'))).toBe(
+        true,
+      );
+      expect(fake.blobs.has(thumbPathname('gt-brand', 'bbbb0001', 'dark', 320, 'thesis'))).toBe(
+        true,
+      );
+      expect(fake.blobs.has(thumbPathname('gt-brand', 'aaaa0002', 'dark', 320, 'title'))).toBe(
+        true,
+      );
+      expect(await pruneThumbs(fake, 'gt-brand', 'title', 'dark')).toEqual([]);
+    });
+
+    it('fetches a seed deck’s twins from the static source when neither the bundle nor the store holds them (SPEC-4 0.35)', async () => {
+      // a seed whose bundle carries no twins (SEED_PATTERN dropped assets/**)
+      const bare = join(root, 'seed-bare');
+      writeSeedDecks(bare);
+      rmSync(join(bare, 'gt-brand', 'assets'), { recursive: true, force: true });
+      const fake = memoryBlobClient();
+      const fetched: string[] = [];
+      const fetchAsset = async (deckId: string, relative: string): Promise<Uint8Array | null> => {
+        fetched.push(`${deckId}/${relative}`);
+        return relative.endsWith('.png') ? PNG : null;
+      };
+      const decks = openHostedDecks({
+        selection: selectStore({ TURBOSLIDE_STORE: 'blob', BLOB_READ_WRITE_TOKEN: 'test' }),
+        workspaceDecksDir: null,
+        overlayRoot: join(root, 'overlay-bare'),
+        seed: directorySeed(bare),
+        blob: fake,
+        fetchAsset,
+        now,
+      });
+      await decks.ready();
+      // the seed went up with its twins fetched from the static source
+      expect(fake.blobs.has('decks/gt-brand/assets/mood-earth-light.png')).toBe(true);
+      const twinCount = Object.values(WORKED_DECK.assets).reduce(
+        (sum, asset) => sum + Object.keys(asset.twins).length,
+        0,
+      );
+      expect(fetched.filter((row) => row.startsWith('gt-brand/'))).toHaveLength(twinCount);
+      // a render's ensureAssets and the template copy find the twins on disk
+      await decks.ensureAssets('gt-brand');
+      expect(await decks.assetFile('gt-brand', 'mood-earth-light.png')).not.toBeNull();
+      clock = '2026-09-14T11:00:00.000Z';
+      const created = await decks.create({ name: 'From template', from: 'gt-brand' });
+      expect(created.counts.assets).toBe(Object.keys(WORKED_DECK.assets).length);
+      expect(
+        existsSync(join(decks.decksDir, 'from-template', 'assets', 'mood-earth-light.png')),
+      ).toBe(true);
     });
   });
 

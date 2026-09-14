@@ -1,7 +1,7 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
-import { repoRoot } from './root';
+import describeJson from '@turboslide/agent/generated/describe.json?raw';
+import llmsFull from '@turboslide/agent/generated/llms-full.txt?raw';
+import llms from '@turboslide/agent/generated/llms.txt?raw';
+import openapi from '@turboslide/agent/generated/openapi.json?raw';
 
 /**
  * The generated agent contracts the studio serves (SPEC 7.1, MILESTONES M1
@@ -9,62 +9,33 @@ import { repoRoot } from './root';
  * describe().actions are written by `pnpm generate:contracts` into
  * packages/agent/generated and served here verbatim, so the HTTP surface and
  * the committed files cannot disagree. /api/agent adds the instance's runtime
- * facts on top (routes/api/agent.ts, @turboslide/agent/http/manifest). The
- * fallbacks below name the generator instead of inventing an action list.
+ * facts on top (routes/api/agent.ts, @turboslide/agent/http/manifest).
+ *
+ * Round four (gslides-parity SPEC-4 3.11; R05 8.4): the files travel inside
+ * the server bundle as raw strings (`?raw`), so a hosted function answers the
+ * committed contracts instead of the stubs it answered when it had no
+ * checkout to read them from (production served the placeholders until this
+ * round). The routes send `CONTRACTS_CACHE_CONTROL` so the CDN holds a copy for
+ * a day and the browser for five minutes; a deploy changes the bundle, so the
+ * function answers the new file and the CDN's copy is a day old at worst.
  */
 
-const GENERATED = ['packages', 'agent', 'generated'];
+/** The cache rule of the three contracts routes (SPEC-4 3.11). */
+export const CONTRACTS_CACHE_CONTROL = 'public, max-age=300, s-maxage=86400';
 
-function readGenerated(name: string): string | null {
-  const path = join(repoRoot(), ...GENERATED, name);
-  return existsSync(path) ? readFileSync(path, 'utf8') : null;
-}
-
-/** The OpenAPI 3.1 document, or a stub naming the generator. */
+/** The OpenAPI 3.1 document. */
 export function openApiDocument(): string {
-  return (
-    readGenerated('openapi.json') ??
-    JSON.stringify(
-      {
-        openapi: '3.1.0',
-        info: {
-          title: 'Turboslide',
-          version: '0.0.0',
-          description:
-            'Placeholder: packages/agent/generated/openapi.json has not been generated yet. Run pnpm generate:contracts.',
-        },
-        paths: {},
-      },
-      null,
-      2,
-    )
-  );
+  return openapi;
 }
 
-/** The llms-full.txt guide (every action and rule), or a stub naming the generator. */
+/** The llms-full.txt guide (every action and rule). */
 export function llmsFullText(): string {
-  return (
-    readGenerated('llms-full.txt') ??
-    'Placeholder: packages/agent/generated/llms-full.txt has not been generated yet. Run pnpm generate:contracts.\n'
-  );
+  return llmsFull;
 }
 
-/** The llms.txt index, or a stub naming the generator. */
+/** The llms.txt index. */
 export function llmsText(): string {
-  return (
-    readGenerated('llms.txt') ??
-    [
-      '# Turboslide',
-      '',
-      '> A block document with a validator and a grammar linter; every operation is a named action.',
-      '',
-      'Placeholder: packages/agent/generated/llms.txt has not been generated yet. Run pnpm generate:contracts.',
-      '',
-      '- /api/agent: describe() with the action table',
-      '- /openapi.json: the OpenAPI 3.1 document',
-      '',
-    ].join('\n')
-  );
+  return llms;
 }
 
 export type Describe = {
@@ -78,23 +49,12 @@ export type Describe = {
 
 /** describe(): the manifest with the action table (SPEC 7.4), read only in M1 (no writes). */
 export function describe(): Describe {
-  const raw = readGenerated('describe.json');
-  if (raw) {
-    const parsed = JSON.parse(raw) as { actions?: unknown[]; version?: string };
-    return {
-      name: 'turboslide',
-      version: parsed.version ?? '0.0.0',
-      transports: ['http'],
-      actions: parsed.actions ?? [],
-      generated: true,
-    };
-  }
+  const parsed = JSON.parse(describeJson) as { actions?: unknown[]; version?: string };
   return {
     name: 'turboslide',
-    version: '0.0.0',
+    version: parsed.version ?? '0.0.0',
     transports: ['http'],
-    actions: [],
-    generated: false,
-    note: 'packages/agent/generated/describe.json has not been generated yet. Run pnpm generate:contracts.',
+    actions: parsed.actions ?? [],
+    generated: true,
   };
 }

@@ -1,5 +1,5 @@
-import type { CSSProperties, DragEvent, KeyboardEvent, MouseEvent } from 'react';
-import { Fragment, useState } from 'react';
+import type { CSSProperties, DragEvent, KeyboardEvent, MouseEvent, RefObject } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import { LiveClone } from './LiveClone';
 import { pad2, trimTitle } from './model';
@@ -15,6 +15,113 @@ export const GRID_DEFAULT_TILE: GridTileSize = 300;
 
 /** Where a dragged tile would land: before or after the tile under the pointer. */
 export type GridDrop = { id: string; half: 'before' | 'after' };
+
+/**
+ * How far past the scroll region's edges a card counts as near (gslides-parity SPEC-4 0.41): two
+ * viewports of cards ahead and behind hold their clone, the rest hold the plate.
+ */
+export const NEAR_ROOT_MARGIN = '200% 0px';
+
+export type NearWindow = {
+  /** true when the card is inside the window, or when the environment has no IntersectionObserver */
+  isNear: (id: string) => boolean;
+  /** the ref callback a card passes to its root element; stable per id */
+  track: (id: string) => (el: HTMLElement | null) => void;
+};
+
+/**
+ * One IntersectionObserver over a scroll region deciding which cards mount their live clone
+ * (gslides-parity SPEC-4 0.41; PP 5 "A virtualized filmstrip"): every card stays in the DOM (the
+ * frame, the number, the glyph) and only the cards within `rootMargin` of the region hold a
+ * clone, both ways, so a scroll through an 85 slide deck never accumulates 85 clones (the
+ * verifier's day 0 count: 4,921 nodes after three passes on production, 1,218 locally). The
+ * editor's filmstrip, the viewer's sidebar and this grid share it; `Thumb` takes the decision as
+ * its `near` prop. Without an IntersectionObserver (a test, an old browser) every card is near.
+ * The cards' ids come from the `track(id)` ref callbacks, so a card that moves or leaves is
+ * forgotten with its element.
+ */
+export function useNearWindow(
+  root: RefObject<HTMLElement | null>,
+  options: { rootMargin?: string; enabled?: boolean } = {},
+): NearWindow {
+  const { rootMargin = NEAR_ROOT_MARGIN, enabled = true } = options;
+  const supported = typeof IntersectionObserver !== 'undefined';
+  const [near, setNear] = useState<ReadonlySet<string>>(() => new Set());
+  const observer = useRef<IntersectionObserver | null>(null);
+  const elements = useRef(new Map<Element, string>());
+  const pending = useRef(new Map<string, HTMLElement>());
+  const callbacks = useRef(new Map<string, (el: HTMLElement | null) => void>());
+
+  useEffect(() => {
+    if (!enabled || !supported) return undefined;
+    const region = root.current;
+    if (region === null) return undefined;
+    const io = new IntersectionObserver(
+      (entries) => {
+        setNear((prev) => {
+          let next: Set<string> | null = null;
+          for (const entry of entries) {
+            const id = elements.current.get(entry.target);
+            if (id === undefined) continue;
+            const inside = entry.isIntersecting;
+            if (inside === prev.has(id)) continue;
+            next ??= new Set(prev);
+            if (inside) next.add(id);
+            else next.delete(id);
+          }
+          return next ?? prev;
+        });
+      },
+      { root: region, rootMargin },
+    );
+    observer.current = io;
+    for (const [id, el] of pending.current) {
+      elements.current.set(el, id);
+      io.observe(el);
+    }
+    pending.current.clear();
+    return () => {
+      io.disconnect();
+      observer.current = null;
+      for (const [el, id] of elements.current) {
+        if (el instanceof HTMLElement) pending.current.set(id, el);
+      }
+      elements.current.clear();
+    };
+  }, [root, rootMargin, enabled, supported]);
+
+  const track = useCallback((id: string) => {
+    let callback = callbacks.current.get(id);
+    if (callback === undefined) {
+      callback = (el: HTMLElement | null) => {
+        const io = observer.current;
+        if (el === null) {
+          for (const [element, known] of elements.current) {
+            if (known !== id) continue;
+            io?.unobserve(element);
+            elements.current.delete(element);
+          }
+          pending.current.delete(id);
+          return;
+        }
+        if (io === null) {
+          pending.current.set(id, el);
+          return;
+        }
+        elements.current.set(el, id);
+        io.observe(el);
+      };
+      callbacks.current.set(id, callback);
+    }
+    return callback;
+  }, []);
+
+  const isNear = useCallback(
+    (id: string) => !enabled || !supported || near.has(id),
+    [enabled, supported, near],
+  );
+  return { isNear, track };
+}
 
 /** The one `slide.move` target a drop stands for (Sidebar.tsx targetFor is the same arithmetic). */
 export type GridMoveTarget = { sectionId: string; after?: string };
@@ -133,6 +240,10 @@ export function GridView({
   edit,
 }: GridViewProps) {
   const byId = new Map(deck.slides.map((slide) => [slide.id, slide]));
+  const region = useRef<HTMLDivElement>(null);
+  /* the clones mount for the tiles near the viewport alone (SPEC-4 0.41); the frame, the number
+     and the glyph stay for every tile, so the keyboard walk and the selection keep working */
+  const window_ = useNearWindow(region);
   const [dragging, setDragging] = useState<string[] | null>(null);
   const [drop, setDrop] = useState<GridDrop | null>(null);
   const selected = edit?.selected ?? [active];
@@ -199,6 +310,7 @@ export function GridView({
 
   return (
     <div
+      ref={region}
       className={edit ? 'pt-grid pt-scroll is-edit' : 'pt-grid pt-scroll'}
       role="region"
       aria-label={label}
@@ -218,9 +330,12 @@ export function GridView({
               const isSelected = edit ? selected.includes(slide.id) : on;
               const select = () => pick(slide, null);
               const name = `Slide ${slide.n}${slide.skip ? ', skipped' : ''}`;
+              const near = window_.isNear(slide.id);
               return (
                 <div
                   key={slide.id}
+                  ref={window_.track(slide.id)}
+                  data-near={near ? '' : undefined}
                   className={[
                     'pt-thumb',
                     on && 'is-active',
@@ -264,7 +379,7 @@ export function GridView({
                   <div className="n">{pad2(slide.n)}</div>
                   <div className="pt-thumb-body">
                     <div className="pt-thumb-frame">
-                      <LiveClone html={slide.html} theme={theme} />
+                      {near ? <LiveClone html={slide.html} theme={theme} /> : null}
                       {slide.shot ? <StaticShot shot={slide.shot} theme={theme} /> : null}
                       {slide.skip ? (
                         <span className="pt-thumb-skip" aria-hidden="true">

@@ -8,11 +8,11 @@ What I read before judging: `AGENTS.md`, `README.md`, `docs/spec/SPEC.md` sectio
 
 Each criterion 1 to 10; the total is the sum.
 
-| Proposal | Distinctiveness | Legibility at 16 px | Fit with Prototemplate | Technical and agent signal | Home page | Buildability | Total |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1, the dither is the identity | 6 | 7 | 9 | 8 | 8 | 8 | 46 |
-| 2, the shader is the identity | 7 | 7 | 7 | 9 | 9 | 8 | 47 |
-| 3, type first | 5 | 9 | 8 | 7 | 7 | 8 | 44 |
+| Proposal                      | Distinctiveness | Legibility at 16 px | Fit with Prototemplate | Technical and agent signal | Home page | Buildability | Total |
+| ----------------------------- | --------------- | ------------------- | ---------------------- | -------------------------- | --------- | ------------ | ----- |
+| 1, the dither is the identity | 6               | 7                   | 9                      | 8                          | 8         | 8            | 46    |
+| 2, the shader is the identity | 7               | 7                   | 7                      | 9                          | 9         | 8            | 47    |
+| 3, type first                 | 5               | 9                   | 8                      | 7                          | 7         | 8            | 44    |
 
 Winner: proposal 2, with the grafts and rejections of sections 3 and 4. The margin over proposal 1 is one point and it is real: proposal 2's mark carries the product's texture at the sizes people see every day, and its home page is the most finished. Proposal 1 is the closest Prototemplate fit and has the most striking hero; proposal 3 is the most legible mark and the best typographic craft.
 

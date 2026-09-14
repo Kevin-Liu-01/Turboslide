@@ -1,9 +1,10 @@
 // The snap guides of the freeform stage: while a drag or a resize snaps to a rail, the content
 // box, a seam, a plate edge or another block's edge or center, the overlay draws a 1px line in
-// --pt-titanium over the sheet along the line the box took (this round's directive). A guide is a
-// SnapLine from the snap engine with its extent already stretched to cover the source and the
-// snapped box (snap.ts guideFor). `mergeGuides` folds duplicates so two blocks on the same edge
-// draw one line. The component lives in the overlay layer in CSS pixels, never inside the sheet.
+// --pt-guide over the sheet along the line the box took (Guides.css; --pt-titanium until round
+// four, when the orchestrator's ruling 1 gave the guides their own colour). A guide is a SnapLine
+// from the snap engine with its extent already stretched to cover the source and the snapped box
+// (snap.ts guideFor). `mergeGuides` folds duplicates so two blocks on the same edge draw one
+// line. The component lives in the overlay layer in CSS pixels, never inside the sheet.
 import type { CSSProperties } from 'react';
 
 import type { SnapLine } from './snap';

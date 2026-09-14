@@ -4,11 +4,11 @@ Written 2026-09-13 against `main` at 28cb63b (the working tree of that day; the 
 
 ## 0 The verdict in one page
 
-| Proposal | Distinctiveness | Legibility at 16 px | Fit with Prototemplate | Technical and agent signal | Home page | Buildability | Total |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1, the dither is the identity | 6 | 7 | 8 | 8 | 8 | 8 | 45 |
-| 2, the shader is the identity | 7 | 5 | 6 | 9 | 8 | 7 | 42 |
-| 3, type first | 5 | 9 | 9 | 6 | 7 | 8 | 44 |
+| Proposal                      | Distinctiveness | Legibility at 16 px | Fit with Prototemplate | Technical and agent signal | Home page | Buildability | Total |
+| ----------------------------- | --------------- | ------------------- | ---------------------- | -------------------------- | --------- | ------------ | ----- |
+| 1, the dither is the identity | 6               | 7                   | 8                      | 8                          | 8         | 8            | 45    |
+| 2, the shader is the identity | 7               | 5                   | 6                      | 9                          | 8         | 7            | 42    |
+| 3, type first                 | 5               | 9                   | 9                      | 6                          | 7         | 8            | 44    |
 
 The winner is proposal 1. Its mark is the product's own composition (the opener with its plate cut from the picture, the composition `plateClear` measures), it is one construction at every size from one generator, every raster it ships holds exactly two colours, it changes no `--pt-` token and adds no colour, and its home page is the most complete. It wins by one point over proposal 3, whose tile is the most legible 16 px icon of the three and whose identity is the most disciplined, and by three over proposal 2, whose build pipeline is the best engineered but whose mark fails at 16 px and whose accent and live shader break the round's monochrome and speed directives.
 

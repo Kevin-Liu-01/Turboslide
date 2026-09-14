@@ -51,6 +51,19 @@
      whether empty or full so a join or a notification moves nothing */
   --pt-presence-w: 184px;
   --pt-inbox-w: 60px;
+  /* The selection colour of round four (gslides-parity round four, the orchestrator's ruling 1
+     over SPEC-4 0.3; Kevin's directive d: "canvas boxes turn blue so they don't blend in with
+     the background"): the canvas selection ring, the eight handles and the rotation handle, the
+     marquee, the hover outline, the crop frame, the group box and the selection chip read
+     --pt-select (Overlay.css, Marquee.css); the snap guides read --pt-guide (Guides.css). Each
+     value holds at least 3:1 (WCAG 2.2 SC 1.4.11) against both the paper and the ink of its
+     appearance, so a box reads on a white slide and on a dark photograph: #1a73e8 is 4.51:1 on
+     #ffffff and 4.47:1 on #070707; #d6336c is 4.62:1 and 4.36:1 (packages/theme/src/brand.ts
+     SELECTION_COLORS, brand.test.ts). The remote collaborator outlines keep the six hues; the
+     export, the deck content, the menus, /home, the card and the README stay paper and ink.
+     Every other token keeps its name and value (SPEC-4 0.9). */
+  --pt-select: #1a73e8;
+  --pt-guide: #d6336c;
   --pt-rail: 1170px;
   /* The one corner in chrome (Kevin's directive): the Search pill's 6px,
      shared by the segmented control at both sizes (the toolbar's format seg,
@@ -107,6 +120,10 @@
   --pt-cross: rgba(255, 255, 255, 0.34);
   --pt-edge: rgba(242, 242, 240, 0.55);
   --pt-thumb: rgba(242, 242, 240, 0.32);
+  /* the selection colour on dark chrome (ruling 1): #3d86f0 is 5.63:1 on #070707 and 3.58:1 on
+     #ffffff; #f0397a is 5.34:1 and 3.77:1 */
+  --pt-select: #3d86f0;
+  --pt-guide: #f0397a;
 }
 
 /* Scroll regions (directive 8.11): one thin scrollbar for every scrolling

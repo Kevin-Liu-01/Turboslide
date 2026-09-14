@@ -42,8 +42,12 @@ const values = (name) => {
 
 const BASE = values('base')[0] ?? 'http://localhost:4321';
 const urls = values('url');
+// the default pages: the editor, the viewer, the files page and, since round four, the /home
+// product page (gslides-parity SPEC-4 2.6, 6.2; build-4/b2.md R3). One page alone is `--url`.
 const pages =
-  urls.length > 0 ? urls : [`${BASE}/edit/gt-brand`, `${BASE}/deck/gt-brand`, `${BASE}/decks`];
+  urls.length > 0
+    ? urls
+    : [`${BASE}/edit/gt-brand`, `${BASE}/deck/gt-brand`, `${BASE}/decks`, `${BASE}/home`];
 const width = Number(values('width')[0] ?? 1440);
 const theme = values('theme')[0] ?? 'light';
 const edit = flag('edit') || urls.length === 0;
@@ -246,7 +250,9 @@ async function loadPage(page, target) {
       () =>
         Boolean(document.querySelector('.pt-viewer[data-settled]')) ||
         Boolean(window.turboslide?.studio) ||
-        Boolean(document.querySelector('.ts-decks-page')),
+        Boolean(document.querySelector('.ts-decks-page')) ||
+        /* the /home product page and the files pages stamp data-hydrated on their main element */
+        Boolean(document.querySelector('main[data-hydrated]')),
       null,
       { timeout: 60000 },
     )

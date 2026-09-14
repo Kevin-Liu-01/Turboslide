@@ -11,6 +11,10 @@
  * holds numbered 16:9 frames for the first slides (the count is not known before the loader
  * answers, so three frames stand in and the real filmstrip lays its cards over the same column).
  * Nothing here carries `data-settled`: the specs and the audit wait for the real shell's mark.
+ * The curtain picture (gslides-parity SPEC-4 0.15): the stage box holds a `ts-curtain-host` laid
+ * over it and, inside, the `ts-curtain`, the empty state's figure twin at integer cells in a 16:9
+ * box centred where the sheet will be (brand.css); the skeleton's own boxes are unchanged so the
+ * layout shift gate stays at zero, and the sheet replaces the picture in place.
  */
 const MENU_TITLES = [
   'File',
@@ -62,7 +66,11 @@ export function EditorSkeleton() {
         </div>
       </aside>
       <section className="pt-main ts-skeleton-main" aria-hidden="true">
-        <div className="pt-stagewrap ts-skeleton-stagewrap" />
+        <div className="pt-stagewrap ts-skeleton-stagewrap">
+          <div className="ts-curtain-host">
+            <div className="ts-curtain" />
+          </div>
+        </div>
         <div className="ts-notes-slot" />
       </section>
       <footer className="ts-bottombar ts-skeleton-row" aria-hidden="true" />

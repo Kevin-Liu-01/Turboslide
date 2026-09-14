@@ -91,11 +91,15 @@
   margin-top: 16px;
 }
 
+/* the hosting and external revision banners sit at the right end of the title row's height
+   under the bar, over the stage's right column, never over the toolbar's left group (the
+   Layout button; verification-4/BASELINE.md finding 7: centred under the bar the hosting banner
+   covered toolbar.layout on the tmp tier and the perf check's click timed out) */
 .ts-banner {
   position: fixed;
-  left: 50%;
-  top: calc(var(--pt-bar-h) + 12px);
-  transform: translateX(-50%);
+  right: 16px;
+  top: calc(var(--pt-bar-h) + var(--pt-menu-h) + var(--pt-tool-h) + 12px);
+  max-width: min(560px, calc(100vw - var(--pt-sb-w) - 48px));
   display: flex;
   align-items: center;
   gap: 12px;
@@ -105,7 +109,7 @@
   border: 1px solid var(--pt-hair);
   z-index: 19;
   font: 12.5px/1.4 var(--pt-text);
-  white-space: nowrap;
+  white-space: normal;
 }
 
 @media (max-width: 900px) {

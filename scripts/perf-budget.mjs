@@ -1,11 +1,44 @@
 #!/usr/bin/env node
-// The performance budget check of round four (docs/gslides-parity/design-4/performance-plan.md:
-// the budgets are its section 8, the check's design its section 9). Proposed home:
-// scripts/perf-budget.mjs; this copy under design-4 is the design, with its runs recorded in the
-// plan. It drives one Chrome for Testing page at a time through playwright-core from the
-// repository's node_modules, measures the routes, the transitions, the filmstrip, the idle network
-// and the twin cache of a running studio, compares every number with the budget of the chosen
-// profile and exits 1 when one is over (or, for a floor, under). Read only unless --write.
+// The performance budget check of round four (docs/gslides-parity/SPEC-4.md section 4: the
+// budgets are 4.1 to 4.7 and the check is 4.8; the design is
+// docs/gslides-parity/design-4/performance-plan.md sections 8 and 9 with the copy beside it, moved
+// here by the integrator on day 0 with the root lookup, the stream pattern of 4.4 and the rows of
+// 4.7: image bytes per route, the icon set's CDN hits, the cold first byte of /new and /decks,
+// the LCP element of /home, and the reserved field INP row). It is check step 31
+// (scripts/check.mjs, `needs: 'node-server'`): the node-server build served on 4321 with the tmp
+// store, never the dev server and never `vite preview`. It drives one Chrome for Testing page at a
+// time through playwright-core from the repository's node_modules, measures the routes, the
+// transitions, the filmstrip, the idle network, the twin cache and the CDN answers of a running
+// studio, compares every number with the budget of the chosen profile and exits 1 when one is over
+// (or, for a floor, under). Read only unless --write.
+//
+// The `local` ceilings are set for Kevin's machine. In CI (`CI` set) scripts/check.mjs adds
+// --report until two CI runs agree; the integrator then records the runner's scaling factor here
+// and removes the flag. Scaling factor: not yet recorded (no CI run of step 31 has happened).
+//
+// Merge 2 of round four (build-4/integrator.md; the verifier's day 0 requests 1, 3 and 4 in
+// build-4/verifier.md and B4's R14 in build-4/b4.md), four metric changes recorded here:
+//   - DOM nodes: the `dom nodes` rows read CDP `Performance.getMetrics` `Nodes` after
+//     `HeapProfiler.collectGarbage`, so a windowed filmstrip is measured as the DOM it holds and
+//     not as the collector's backlog of detached clones (B4 measured 7,221 against a live DOM of
+//     1,860 to 2,040 before the GC); the live element count (`document.querySelectorAll('*')`) is
+//     recorded beside it as `elements`.
+//   - The local commit (SPEC-4 4.6 row 1): `commitAt` is the first tick where the studio's
+//     `describe().state.pending` rises above zero or its revision moves, which is the reducer's
+//     write queued in the page; before, it read `revision > from`, which on round three moves when
+//     `POST /api/decks/<id>/ops` answers (the network, not the reducer). The acknowledgement is
+//     recorded as `ackAt`.
+//   - Saved on the memory channel: `TURBOSLIDE_STORE=tmp` runs the memory realtime channel, whose
+//     checkpoint lands on a fixed two second cadence, so 4.6's local ceilings for "saved" (600 and
+//     250 ms) cannot be met by construction on the node-server build the check measures. On the
+//     `local` profile "saved" is the server's acknowledgement (`revision > from`, the ops answer
+//     with the record durable on the tmp store) and the row's name says so; the checkpoint
+//     (`serverRevision >= revision && pending === 0`) is still recorded as `checkpointAt` and
+//     stays the "saved" stamp of the `deployment` profile, where the blob channel's checkpoint is
+//     the durable write. Decided by the integrator with B4's report (b4.md section 1.7).
+//   - Twins: a 304 revalidation (transferSize about 300 bytes of headers, decodedBodySize 0) is
+//     not a re-fetch; the row counts entries whose transferSize and decodedBodySize are both
+//     above zero and reports the revalidations beside them.
 //
 //   node scripts/perf-budget.mjs --base http://localhost:4321 --profile local --write
 //   node scripts/perf-budget.mjs --base https://<preview>.vercel.app --profile deployment
@@ -15,7 +48,7 @@
 // production build of apps/studio served on this machine with TURBOSLIDE_STORE=tmp, deployment is
 // a Vercel preview or production reached from the check machine); --deck <id> (gt-brand);
 // --runs <n> (3; cold and warm samples per route, medians compared); --only <checks> (routes,
-// transitions, filmstrip, idle, twins, write); --idle-seconds <n> (60); --write (the write path
+// transitions, filmstrip, idle, twins, cdn, vitals, write); --idle-seconds <n> (60); --write (the write path
 // on /new: a scratch deck is created and left in place, so pass it only against a tmp store or a
 // preview you own; the deck id is printed); --json <file> (the raw numbers); --report (print the
 // table and exit 0 whatever the result, for a baseline run); --chrome <path> (else
@@ -32,20 +65,24 @@
 // poll; a transition is pointerdown to the landmark in page for a same-document navigation and wall
 // clock for a document navigation; filmstrip frames are requestAnimationFrame timestamps while the
 // wheel fires 18 times at 80 ms gaps over .ts-film; idle calls are /_serverFn/ responses and
-// /api/events/ requests per minute on an open editor; twins are the deck's asset pictures
-// re-fetched on a second visit of /deck; the write path's stamps (last keyup, local commit, the
-// current card's clone carrying the text, the saved revision) are taken in the page at 4 ms.
+// stream connections (/api/decks/<id>/stream, SPEC-4 4.4) per minute on an open editor; twins are
+// the deck's asset pictures re-fetched on a second visit of /deck; image bytes are the Resource
+// Timing image entries' decodedBodySize (the transferSize reported beside it) that finished before
+// the ready mark and, on /home, after a full scroll (SPEC-4 0.28); the CDN rows request each icon
+// path, the card and /home twice and read x-vercel-cache on the second answer (4.1's last row); the
+// LCP element row reads the LCP entry's element and URL (0.47); the write path's stamps (last
+// keyup, local commit, the current card's clone carrying the text, the saved revision) are taken
+// in the page at 4 ms.
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-// scripts/perf-budget.mjs sits one level under the root; this design copy sits three levels down
-const ROOT = [resolve(HERE, '..'), resolve(HERE, '../../..')].find((dir) =>
-  existsSync(resolve(dir, 'pnpm-workspace.yaml')),
-);
-if (!ROOT) throw new Error('perf-budget: cannot find the repository root');
+// scripts/perf-budget.mjs sits one level under the repository root
+const ROOT = resolve(HERE, '..');
+if (!existsSync(resolve(ROOT, 'pnpm-workspace.yaml')))
+  throw new Error('perf-budget: cannot find the repository root');
 const require = createRequire(resolve(ROOT, 'package.json'));
 const { chromium } = require('playwright-core');
 
@@ -64,16 +101,36 @@ const TRUSTED_HEADERS = process.env.VERCEL_OIDC_TOKEN
   : {};
 
 // ---------------------------------------------------------------------------------------------
-// Budgets: the ceilings a run must stay under, per profile (performance-plan.md section 8). A
-// missing key means the metric is reported and not asserted. Units are milliseconds unless the
-// key says bytes, count, fps or ratio. `steadyFpsMin` is a floor, every other key a ceiling.
+// Budgets: the ceilings a run must stay under, per profile (SPEC-4 section 4; performance-plan.md
+// section 8). A missing key means the metric is reported and not asserted. Units are milliseconds
+// unless the key says bytes, count, fps or ratio. `steadyFpsMin` is a floor, every other key a
+// ceiling; `lcpElement` and `cdn.hit` are flags. The image rows (SPEC-4 0.28, 4.1) read the
+// decoded bytes; the cold first byte of /new and /decks on a fresh instance (4.1: 1,200 ms on a
+// deployment) is reported this round and gated from round five, so it has no key; `cdn` is null
+// where no CDN answers (the local profile, "not measured locally").
 
 const BUDGETS = {
   local: {
     routes: {
       '/home': {
-        cold: { ttfb: 60, lcp: 400, ready: 400, jsDecoded: 600_000 },
-        warm: { ttfb: 40, lcp: 200, ready: 200, jsDecoded: 600_000 },
+        cold: {
+          ttfb: 60,
+          lcp: 400,
+          ready: 400,
+          jsDecoded: 600_000,
+          imagesBeforeReady: 500_000,
+          imagesAfterScroll: 2_000_000,
+          lcpElement: true,
+        },
+        warm: {
+          ttfb: 40,
+          lcp: 200,
+          ready: 200,
+          jsDecoded: 600_000,
+          imagesBeforeReady: 500_000,
+          imagesAfterScroll: 2_000_000,
+          lcpElement: true,
+        },
       },
       '/': {
         cold: { ttfb: 60, lcp: 450, ready: 450, jsDecoded: 2_000_000 },
@@ -84,8 +141,8 @@ const BUDGETS = {
         warm: { ttfb: 40, fcp: 150, lcp: 250, ready: 250, jsDecoded: 2_000_000 },
       },
       '/decks': {
-        cold: { ttfb: 150, lcp: 500, ready: 500, jsDecoded: 600_000 },
-        warm: { ttfb: 100, lcp: 300, ready: 300, jsDecoded: 600_000 },
+        cold: { ttfb: 150, lcp: 500, ready: 500, jsDecoded: 600_000, images: 1_500_000 },
+        warm: { ttfb: 100, lcp: 300, ready: 300, jsDecoded: 600_000, images: 1_500_000 },
       },
       '/decks/trash': {
         cold: { ttfb: 150, lcp: 500, ready: 500, jsDecoded: 600_000 },
@@ -121,6 +178,8 @@ const BUDGETS = {
     filmstrip: { steadyP95: 20, steadyMax: 50, firstPassMax: 100, nodes: 1500, steadyFpsMin: 50 },
     idle: { serverFnPerMinute: 4, eventsPerMinute: 2 },
     twins: { refetched: 0 },
+    cdn: null,
+    vitals: { inp: null },
     write: {
       textKeyToCommit: 450,
       textKeyToSaved: 600,
@@ -134,8 +193,24 @@ const BUDGETS = {
   deployment: {
     routes: {
       '/home': {
-        cold: { ttfb: 150, lcp: 800, ready: 800, jsDecoded: 600_000 },
-        warm: { ttfb: 100, lcp: 400, ready: 400, jsDecoded: 600_000 },
+        cold: {
+          ttfb: 150,
+          lcp: 800,
+          ready: 800,
+          jsDecoded: 600_000,
+          imagesBeforeReady: 500_000,
+          imagesAfterScroll: 2_000_000,
+          lcpElement: true,
+        },
+        warm: {
+          ttfb: 100,
+          lcp: 400,
+          ready: 400,
+          jsDecoded: 600_000,
+          imagesBeforeReady: 500_000,
+          imagesAfterScroll: 2_000_000,
+          lcpElement: true,
+        },
       },
       '/': {
         cold: { ttfb: 200, lcp: 700, ready: 700, jsDecoded: 2_000_000 },
@@ -146,8 +221,8 @@ const BUDGETS = {
         warm: { ttfb: 150, fcp: 250, lcp: 400, ready: 400, jsDecoded: 2_000_000 },
       },
       '/decks': {
-        cold: { ttfb: 400, lcp: 1_000, ready: 1_000, jsDecoded: 600_000 },
-        warm: { ttfb: 300, lcp: 600, ready: 600, jsDecoded: 600_000 },
+        cold: { ttfb: 400, lcp: 1_000, ready: 1_000, jsDecoded: 600_000, images: 1_500_000 },
+        warm: { ttfb: 300, lcp: 600, ready: 600, jsDecoded: 600_000, images: 1_500_000 },
       },
       '/decks/trash': {
         cold: { ttfb: 400, lcp: 1_000, ready: 1_000, jsDecoded: 600_000 },
@@ -183,6 +258,8 @@ const BUDGETS = {
     filmstrip: { steadyP95: 20, steadyMax: 50, firstPassMax: 100, nodes: 1500, steadyFpsMin: 50 },
     idle: { serverFnPerMinute: 4, eventsPerMinute: 2 },
     twins: { refetched: 0 },
+    cdn: { hit: true },
+    vitals: { inp: null },
     // the capture after a save is reported, not asserted, on a deployment: a cold instance renders in seconds
     write: {
       textKeyToCommit: 450,
@@ -291,19 +368,27 @@ const INIT = `(() => {
   // the write probe (the write check): from a revision, stamp the local commit, the current card's
   // clone carrying the typed text, and the saved revision, at 4 ms, in the page
   window.__tsWrite = null;
-  window.__tsWriteProbe = (from, text) => {
-    const w = { from, text, lastKey: null, commitAt: null, cloneAt: null, savedAt: null, timer: 0 };
+  // ackMeansSaved: on the local profile the acknowledgement is the saved stamp (the memory
+  // channel's checkpoint cadence; the header's merge 2 note); the checkpoint is recorded either way
+  window.__tsWriteProbe = (from, text, ackMeansSaved) => {
+    const w = { from, text, lastKey: null, commitAt: null, ackAt: null, cloneAt: null, savedAt: null, checkpointAt: null, timer: 0 };
     window.__tsWrite = w;
     const tick = () => {
       const now = performance.now();
       let s;
       try { s = window.turboslide.studio.describe().state; } catch { return; }
-      if (w.commitAt === null && s.revision > from) w.commitAt = now;
+      // the reducer's write is queued in the page (pending rises) or already acknowledged
+      if (w.commitAt === null && (s.pending > 0 || s.revision > from)) w.commitAt = now;
+      if (w.ackAt === null && s.revision > from) w.ackAt = now;
       if (w.commitAt !== null && w.cloneAt === null && text) {
         const card = document.querySelector('.ts-filmstrip .ts-card.is-current .pt-slide');
         if (card && (card.textContent || '').includes(text)) w.cloneAt = now;
       }
-      if (w.savedAt === null && s.revision > from && s.serverRevision >= s.revision && s.pending === 0) w.savedAt = now;
+      if (w.checkpointAt === null && s.revision > from && s.serverRevision >= s.revision && s.pending === 0) w.checkpointAt = now;
+      if (w.savedAt === null) {
+        if (ackMeansSaved && w.ackAt !== null) w.savedAt = w.ackAt;
+        else if (!ackMeansSaved && w.checkpointAt !== null) w.savedAt = w.checkpointAt;
+      }
       if (w.savedAt !== null && (w.cloneAt !== null || !text)) clearInterval(w.timer);
     };
     w.timer = setInterval(tick, 4);
@@ -326,7 +411,7 @@ function landmark(route) {
   if (route === '/decks/trash')
     return `() => Boolean(document.querySelector('.ts-trash-page[data-hydrated]'))`;
   if (route === '/home')
-    return `() => document.readyState === 'complete' && Boolean(document.querySelector('.ts-home-page, main'))`;
+    return `() => document.readyState === 'complete' && Boolean(document.querySelector('main'))`;
   return `() => document.readyState === 'complete'`;
 }
 
@@ -378,6 +463,8 @@ const results = {
   filmstrip: null,
   idle: null,
   twins: null,
+  cdn: null,
+  vitals: null,
   write: null,
 };
 const rows = [];
@@ -388,7 +475,75 @@ function shown(value, unit) {
   if (unit === 'bytes') return `${(value / 1024).toFixed(0)} KB`;
   if (unit === 'count' || unit === 'fps') return String(Math.round(value));
   if (unit === 'ratio') return value.toFixed(4);
+  if (unit === 'flag') return value ? 'yes' : 'no';
   return `${Math.round(value)} ms`;
+}
+
+/**
+ * Records a yes or no row (SPEC-4 0.47: the LCP element of /home, the CDN hit on an icon path).
+ * Asserted when `asserted` is true, else reported like a null limit.
+ */
+function assertFlag(check, name, ok, asserted) {
+  const pass = !asserted || ok === true;
+  if (!pass) failures += 1;
+  rows.push({
+    check,
+    name,
+    value: ok ? 1 : 0,
+    limit: asserted ? 1 : null,
+    kind: 'flag',
+    ok: pass,
+    unit: 'flag',
+  });
+  console.log(
+    `${asserted ? (pass ? 'ok  ' : 'FAIL') : 'info'} ${check.padEnd(11)} ${name.padEnd(60)} ${shown(ok ? 1 : 0, 'flag').padStart(10)}${asserted ? '  expected yes' : ''}`,
+  );
+}
+
+/** SPEC-4 2.3, 0.47: the LCP element of /home is the plate's text or the twin. The recorder gives the element as TAG.firstClass and the entry's URL when it has one. */
+function lcpIsPlateOrTwin(el, url) {
+  if (typeof url === 'string' && /\/brand\//.test(url)) return true;
+  return typeof el === 'string' && /^(?:H1|H2|P|SPAN|A|STRONG|EM)(?:\.|$)/.test(el);
+}
+
+/** The bytes of the image entries that finished before `until` (every entry when null): decoded, with the transfer beside it. */
+function imageBytes(images, until) {
+  const list = (images ?? []).filter((r) => until === null || r.end <= until);
+  return {
+    decoded: list.reduce((a, r) => a + r.decoded, 0),
+    transfer: list.reduce((a, r) => a + r.transfer, 0),
+    count: list.length,
+  };
+}
+
+// The image entries of the page (SPEC-4 0.28): an <img>, a CSS background or any resource with an
+// image extension or the thumbnail route, with the bytes Resource Timing exposes for same origin
+// answers (a cross origin image without Timing-Allow-Origin reports zero and is counted as such).
+const IMAGE_ENTRIES = `(() => {
+  const IMAGE_RE = /\\.(?:png|jpe?g|webp|gif|avif|svg|ico)(?:\\?|$)/i;
+  return performance
+    .getEntriesByType('resource')
+    .filter((r) => r.initiatorType === 'img' || IMAGE_RE.test(r.name) || r.name.includes('/api/render/'))
+    .map((r) => ({ name: r.name.replace(location.origin, ''), initiator: r.initiatorType, transfer: r.transferSize || 0, decoded: r.decodedBodySize || 0, end: r.responseEnd }));
+})()`;
+
+/** Scrolls the page to its end in viewport steps and waits for the lazy images to land (SPEC-4 0.28: the bytes after a full scroll). */
+async function fullScroll(page) {
+  await page.evaluate(async () => {
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const step = Math.max(200, window.innerHeight - 80);
+    for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
+      window.scrollTo(0, y);
+      await wait(120);
+    }
+    window.scrollTo(0, document.documentElement.scrollHeight);
+    const deadline = performance.now() + 5000;
+    while (performance.now() < deadline) {
+      if ([...document.images].every((img) => img.complete)) break;
+      await wait(100);
+    }
+    await wait(300);
+  });
 }
 
 /**
@@ -473,21 +628,41 @@ async function readyAt(page, route) {
         : null;
     if (r.startsWith('/deck/')) return ts.settledAt;
     if (r === '/decks' || r === '/decks/trash') return ts.hydratedAt;
-    return ts.firstDom['main'] ?? ts.firstDom['.ts-home-page'] ?? null;
+    return ts.firstDom['main'] ?? null;
   }, route);
 }
 
+/**
+ * The page's DOM and heap facts: CDP `Nodes` after a garbage collection (detached nodes the
+ * collector has not reached yet are not the page's DOM; B4's R14, the header's merge 2 note) and
+ * the live element count beside it.
+ */
 async function pageMetrics(page) {
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('Performance.enable');
+  try {
+    await cdp.send('HeapProfiler.enable');
+    await cdp.send('HeapProfiler.collectGarbage');
+  } catch {
+    // no heap profiler on this target: the count below is the collector's view
+  }
   const { metrics } = await cdp.send('Performance.getMetrics');
   await cdp.detach();
   const pick = Object.fromEntries(metrics.map((m) => [m.name, m.value]));
-  return { nodes: pick.Nodes, heapUsed: pick.JSHeapUsedSize, layoutCount: pick.LayoutCount };
+  const elements = await page
+    .evaluate(() => document.querySelectorAll('*').length)
+    .catch(() => null);
+  return {
+    nodes: pick.Nodes,
+    elements,
+    heapUsed: pick.JSHeapUsedSize,
+    layoutCount: pick.LayoutCount,
+  };
 }
 
 async function resources(page) {
-  return page.evaluate(() => {
+  const images = await page.evaluate(IMAGE_ENTRIES);
+  const summary = await page.evaluate(() => {
     const res = performance.getEntriesByType('resource');
     const js = res.filter((r) => /\.js(\?|$)/.test(r.name));
     const paint = Object.fromEntries(
@@ -502,6 +677,7 @@ async function resources(page) {
       fcp: paint['first-contentful-paint'] ?? null,
       lcp: ts.lcp ? ts.lcp.t : null,
       lcpEl: ts.lcp ? ts.lcp.el : null,
+      lcpUrl: ts.lcp ? ts.lcp.url : null,
       cls: ts.cls ?? null,
       loafMax: ts.loaf && ts.loaf.length ? Math.max(...ts.loaf.map((l) => l.d)) : 0,
       loaf: ts.loaf ?? [],
@@ -512,6 +688,7 @@ async function resources(page) {
       largestJsName: largest ? largest.name.split('/').pop() : null,
     };
   });
+  return { ...summary, images };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -558,14 +735,36 @@ async function routeLoads() {
         const res = await resources(page);
         const ready = await readyAt(page, route);
         const metrics = await pageMetrics(page);
+        // SPEC-4 0.28: the image bytes before the ready mark, every image at the sample, and on
+        // /home the bytes after a full scroll; /decks reports how many cards the list held
+        const before = imageBytes(res.images, ready);
+        const all = imageBytes(res.images, null);
+        let afterScroll = null;
+        if (route === '/home') {
+          await fullScroll(page);
+          afterScroll = imageBytes(await page.evaluate(IMAGE_ENTRIES), null);
+        }
+        const cards =
+          route === '/decks' ? await page.locator('[data-control^="home.open."]').count() : null;
+        const { images, ...rest } = res;
         samples[kind].push({
           ttfb: timing ? timing.responseStart : null,
           ready: ready ?? (error ? null : wall),
           wall,
           error,
           status,
-          ...res,
+          ...rest,
           ...metrics,
+          imagesBeforeReady: before.decoded,
+          imagesBeforeReadyTransfer: before.transfer,
+          imagesAll: all.decoded,
+          imagesTransfer: all.transfer,
+          imagesCount: all.count,
+          imagesAfterScroll: afterScroll ? afterScroll.decoded : null,
+          imagesAfterScrollCount: afterScroll ? afterScroll.count : null,
+          images,
+          cards,
+          lcpOk: lcpIsPlateOrTwin(res.lcpEl, res.lcpUrl),
           finalUrl: page.url(),
         });
         await page.close();
@@ -599,8 +798,17 @@ async function routeLoads() {
         loafMax: med('loafMax'),
         cls: med('cls'),
         nodes: med('nodes'),
+        elements: med('elements'),
+        imagesBeforeReady: med('imagesBeforeReady'),
+        imagesAll: med('imagesAll'),
+        imagesTransfer: med('imagesTransfer'),
+        imagesCount: med('imagesCount'),
+        imagesAfterScroll: med('imagesAfterScroll'),
+        cards: list[0]?.cards ?? null,
         errors: list.map((s) => s.error).filter(Boolean),
         lcpEl: list[0]?.lcpEl ?? null,
+        lcpUrl: list[0]?.lcpUrl ?? null,
+        lcpOk: list.length > 0 && list.every((s) => s.lcpOk === true),
       };
       results.routes.push({ ...row, samples: list });
       const b = { ...(budget.routes['*']?.[kind] ?? {}), ...(budget.routes[fam]?.[kind] ?? {}) };
@@ -619,7 +827,61 @@ async function routeLoads() {
       );
       assert('routes', label('longest animation frame'), row.loafMax, b.loafMax);
       assert('routes', label('cls'), row.cls, b.cls, 'ratio');
-      assert('routes', label('dom nodes'), row.nodes, b.nodes, 'count');
+      assert(
+        'routes',
+        label(`dom nodes (after GC; ${row.elements ?? '?'} live elements)`),
+        row.nodes,
+        b.nodes,
+        'count',
+      );
+      // SPEC-4 4.7: the image bytes per route, the LCP element of /home, the cold first byte
+      if (fam === '/home') {
+        assert(
+          'routes',
+          label('images before ready (decoded)'),
+          row.imagesBeforeReady,
+          b.imagesBeforeReady,
+          'bytes',
+        );
+        assert(
+          'routes',
+          label('images after a full scroll (decoded)'),
+          row.imagesAfterScroll,
+          b.imagesAfterScroll,
+          'bytes',
+        );
+        assertFlag(
+          'routes',
+          label(`lcp element is the plate text or the twin (${row.lcpEl ?? '?'})`),
+          row.lcpOk,
+          b.lcpElement === true,
+        );
+      } else if (fam === '/decks') {
+        assert(
+          'routes',
+          label(`images with ${row.cards ?? '?'} cards (decoded)`),
+          row.imagesAll,
+          b.images,
+          'bytes',
+        );
+      } else {
+        assert(
+          'routes',
+          label('images before ready (decoded)'),
+          row.imagesBeforeReady,
+          null,
+          'bytes',
+        );
+      }
+      if ((route === '/new' || route === '/decks') && kind === 'cold') {
+        const worst = Math.max(...list.map((s) => s.ttfb ?? 0));
+        assert(
+          'routes',
+          label('first byte, worst cold sample (a fresh instance is not forced; reported)'),
+          worst > 0 ? worst : null,
+          null,
+        );
+      }
       for (const e of row.errors) console.log(`     routes      ${route} ${kind}: ${e}`);
     }
   }
@@ -818,9 +1080,9 @@ async function filmstrip() {
     passes.push(pass);
     await sleep(700);
   }
-  const nodes = (await pageMetrics(page)).nodes;
+  const { nodes, elements } = await pageMetrics(page);
   const cards = await page.locator('.ts-filmstrip .ts-card').count();
-  results.filmstrip = { passes, nodes, cards };
+  results.filmstrip = { passes, nodes, elements, cards };
   assert('filmstrip', 'first pass longest frame', passes[0]?.max, budget.filmstrip.firstPassMax);
   assert(
     'filmstrip',
@@ -842,12 +1104,21 @@ async function filmstrip() {
     'fps',
     { floor: true },
   );
-  assert('filmstrip', `dom nodes with ${cards} cards`, nodes, budget.filmstrip.nodes, 'count');
+  assert(
+    'filmstrip',
+    `dom nodes with ${cards} cards (after GC; ${elements ?? '?'} live elements)`,
+    nodes,
+    budget.filmstrip.nodes,
+    'count',
+  );
   await context.close();
 }
 
 // ---------------------------------------------------------------------------------------------
-// Check 4: the idle editor's network per minute: server function calls and event stream connections
+// Check 4: the idle editor's network per minute: server function calls and stream connections
+// (the round three per deck stream, GET /api/decks/:id/stream; SPEC-4 4.4)
+
+const STREAM_PATTERN = /\/api\/decks\/[^/?]+\/stream/;
 
 async function idle() {
   const context = await newContext();
@@ -861,7 +1132,7 @@ async function idle() {
   await sleep(args.idleSeconds * 1000);
   const window_ = responses.slice(start).filter((r) => r.at - t0 >= 0);
   const fn = window_.filter((r) => r.url.includes('/_serverFn/'));
-  const events = window_.filter((r) => r.url.includes('/api/events/'));
+  const events = window_.filter((r) => STREAM_PATTERN.test(r.url));
   const perMinute = (fn.length / args.idleSeconds) * 60;
   const eventsPerMinute = (events.length / args.idleSeconds) * 60;
   results.idle = {
@@ -870,6 +1141,7 @@ async function idle() {
     perMinute,
     events: events.length,
     eventsPerMinute,
+    pattern: STREAM_PATTERN.source,
     other: window_.length - fn.length - events.length,
   };
   assert(
@@ -881,7 +1153,7 @@ async function idle() {
   );
   assert(
     'idle',
-    `event stream connections per minute (${args.idleSeconds} s window)`,
+    `stream connections per minute (/api/decks/*/stream, ${args.idleSeconds} s window)`,
     eventsPerMinute,
     budget.idle.eventsPerMinute,
     'count',
@@ -913,11 +1185,18 @@ async function twins() {
           })),
       args.deck,
     );
-    const refetched = list.filter((r) => r.transfer > 0);
-    results.twins = { total: list.length, refetched: refetched.length, list };
+    // a body came over the wire; a 304 (headers alone, decoded 0) is a revalidation, reported
+    const refetched = list.filter((r) => r.transfer > 0 && r.decoded > 0);
+    const revalidated = list.filter((r) => r.transfer > 0 && r.decoded === 0);
+    results.twins = {
+      total: list.length,
+      refetched: refetched.length,
+      revalidated: revalidated.length,
+      list,
+    };
     assert(
       'twins',
-      `twins re-fetched on the second visit (of ${list.length})`,
+      `twins re-fetched on the second visit (of ${list.length}; ${revalidated.length} revalidated with a 304)`,
       refetched.length,
       budget.twins.refetched,
       'count',
@@ -927,7 +1206,72 @@ async function twins() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Check 6 (--write): the write path on /new; leaves a scratch deck behind
+// Check 6: the icon set, the card and /home from the CDN (SPEC-4 0.47, 4.1's last row): each path
+// requested twice; the second answer must be a 200 with x-vercel-cache HIT on a deployment (the
+// static layer answers before the function, R02 section 1 measured function 404s today). Reported
+// where the profile has no CDN.
+
+const CDN_PATHS = [
+  '/favicon.ico',
+  '/icon.svg',
+  '/apple-touch-icon.png',
+  '/manifest.webmanifest',
+  '/icons/icon-512.png',
+  '/og/turboslide.png',
+  '/home',
+];
+
+async function cdnHits() {
+  const context = await newContext();
+  const asserted = budget.cdn !== null && budget.cdn.hit === true;
+  const list = [];
+  for (const path of CDN_PATHS) {
+    const get = () =>
+      context.request
+        .get(`${args.base}${path}`, { timeout: 60_000, maxRedirects: 0 })
+        .catch(() => null);
+    const first = await get();
+    await sleep(300);
+    const second = await get();
+    const headers = second ? second.headers() : {};
+    const body = second ? await second.body().catch(() => null) : null;
+    const entry = {
+      path,
+      status: [first ? first.status() : null, second ? second.status() : null],
+      cache: headers['x-vercel-cache'] ?? null,
+      cacheControl: headers['cache-control'] ?? null,
+      type: headers['content-type'] ?? null,
+      bytes: body ? body.length : null,
+    };
+    list.push(entry);
+    const ok = entry.status[1] === 200 && entry.cache === 'HIT';
+    assertFlag(
+      'cdn',
+      `${path} second request is a CDN hit (status ${entry.status[1] ?? '?'}, x-vercel-cache ${entry.cache ?? 'none'})`,
+      ok,
+      asserted,
+    );
+  }
+  results.cdn = list;
+  await context.close();
+}
+
+// ---------------------------------------------------------------------------------------------
+// Check 7: field INP (SPEC-4 4.7): the row is reserved with the endpoint name and no ceiling; the
+// collection through web-vitals/attribution posted to /api/vitals is round five's.
+
+function vitals() {
+  results.vitals = { endpoint: '/api/vitals', collected: false };
+  assert(
+    'vitals',
+    'field INP p75 from /api/vitals (reserved; no ceiling this round)',
+    null,
+    budget.vitals?.inp ?? null,
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+// Check 8 (--write): the write path on /new; leaves a scratch deck behind
 
 async function writePath() {
   const context = await newContext();
@@ -946,9 +1290,22 @@ async function writePath() {
     return page.evaluate(() => {
       const w = window.__tsWrite;
       clearInterval(w.timer);
-      return { lastKey: w.lastKey, commitAt: w.commitAt, cloneAt: w.cloneAt, savedAt: w.savedAt };
+      return {
+        lastKey: w.lastKey,
+        commitAt: w.commitAt,
+        ackAt: w.ackAt,
+        cloneAt: w.cloneAt,
+        savedAt: w.savedAt,
+        checkpointAt: w.checkpointAt,
+      };
     });
   };
+  // the local profile measures the tmp store's memory channel, whose checkpoint is a two second
+  // cadence: "saved" is the acknowledgement there and the checkpoint on a deployment (the header)
+  const ackMeansSaved = args.profile === 'local';
+  const savedLabel = ackMeansSaved
+    ? 'saved revision (acknowledged; memory channel)'
+    : 'saved revision';
   // the first heading run: click into it, type, wait for the local commit and the saved write
   const run = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run]').first();
   await run.waitFor({ timeout: 30_000 });
@@ -961,17 +1318,21 @@ async function writePath() {
   );
   const r0 = (await state()).revision;
   const TEXT = 'Perf budget heading';
-  await page.evaluate((input) => window.__tsWriteProbe(input.from, input.text), {
+  await page.evaluate((input) => window.__tsWriteProbe(input.from, input.text, input.ack), {
     from: r0,
     text: TEXT,
+    ack: ackMeansSaved,
   });
   await page.keyboard.type(TEXT, { delay: 30 });
   const w1 = await probed();
   await page.waitForURL(/\/edit\//, { timeout: 60_000 }).catch(() => undefined);
   const deckId = decodeURIComponent(new URL(page.url()).pathname.split('/')[2] ?? '');
+  const since = (stamp) => (w1.lastKey === null || stamp === null ? null : stamp - w1.lastKey);
   const text = {
-    keyToCommit: w1.lastKey === null ? null : w1.commitAt - w1.lastKey,
-    keyToSaved: w1.lastKey === null ? null : w1.savedAt - w1.lastKey,
+    keyToCommit: since(w1.commitAt),
+    keyToAck: since(w1.ackAt),
+    keyToSaved: since(w1.savedAt),
+    keyToCheckpoint: since(w1.checkpointAt),
     cloneAfterCommit: w1.cloneAt === null || w1.commitAt === null ? null : w1.cloneAt - w1.commitAt,
   };
   await page.keyboard.press('Escape');
@@ -979,7 +1340,10 @@ async function writePath() {
   // New slide from the toolbar: the card's painted frame and the saved write
   const n = await page.locator('.ts-filmstrip .ts-card:not(.is-empty)').count();
   const r1 = (await state()).revision;
-  await page.evaluate((from) => window.__tsWriteProbe(from, ''), r1);
+  await page.evaluate((input) => window.__tsWriteProbe(input.from, '', input.ack), {
+    from: r1,
+    ack: ackMeansSaved,
+  });
   // the button itself; its split wrapper (toolbar.newSlide.split) comes first in DOM order
   let newSlide = page.locator('[data-control="toolbar.newSlide"]').first();
   if ((await newSlide.count()) === 0)
@@ -990,7 +1354,12 @@ async function writePath() {
     `() => document.querySelectorAll('.ts-filmstrip .ts-card:not(.is-empty)').length > ${n}`,
   );
   const w2 = await probed();
-  const slide = { paint: t.paintMs, saved: t.down === null ? null : w2.savedAt - t.down };
+  const slide = {
+    paint: t.paintMs,
+    saved: t.down === null ? null : w2.savedAt - t.down,
+    ack: t.down === null || w2.ackAt === null ? null : w2.ackAt - t.down,
+    checkpoint: t.down === null || w2.checkpointAt === null ? null : w2.checkpointAt - t.down,
+  };
   // the capture of the edited slide after the save: the render route's thumbnail at the saved
   // revision, timed from this process (a function render, or a CDN hit when one exists)
   const st = await state();
@@ -1038,7 +1407,7 @@ async function writePath() {
   const renders = responses
     .filter((r) => r.url.includes('/api/render/'))
     .map((r) => ({ status: r.status, cache: r.headers['x-vercel-cache'] ?? null }));
-  results.write = { deckId, text, slide, capture, homeCard, renders };
+  results.write = { deckId, ackMeansSaved, text, slide, capture, homeCard, renders };
   assert(
     'write',
     'text burst: last keyup to local commit',
@@ -1047,9 +1416,18 @@ async function writePath() {
   );
   assert(
     'write',
-    'text burst: last keyup to saved revision',
+    `text burst: last keyup to ${savedLabel}`,
     text.keyToSaved,
     budget.write.textKeyToSaved,
+  );
+  // the other stamp, reported: the checkpoint on the local profile, the acknowledgement on a deployment
+  assert(
+    'write',
+    ackMeansSaved
+      ? 'text burst: last keyup to checkpoint (reported; the memory channel cadence)'
+      : 'text burst: last keyup to acknowledgement (reported)',
+    ackMeansSaved ? text.keyToCheckpoint : text.keyToAck,
+    null,
   );
   assert(
     'write',
@@ -1065,9 +1443,17 @@ async function writePath() {
   );
   assert(
     'write',
-    'new slide: pointerdown to saved revision',
+    `new slide: pointerdown to ${savedLabel}`,
     slide.saved,
     budget.write.newSlideSaved,
+  );
+  assert(
+    'write',
+    ackMeansSaved
+      ? 'new slide: pointerdown to checkpoint (reported; the memory channel cadence)'
+      : 'new slide: pointerdown to acknowledgement (reported)',
+    ackMeansSaved ? slide.checkpoint : slide.ack,
+    null,
   );
   assert(
     'write',
@@ -1095,6 +1481,8 @@ try {
   if (wants('filmstrip')) await filmstrip();
   if (wants('idle')) await idle();
   if (wants('twins')) await twins();
+  if (wants('cdn')) await cdnHits();
+  if (wants('vitals')) vitals();
   if (wants('write') && args.write) await writePath();
 } finally {
   await browser.close();

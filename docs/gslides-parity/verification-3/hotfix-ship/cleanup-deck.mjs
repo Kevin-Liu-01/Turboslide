@@ -10,12 +10,18 @@ const act = async (action, body) => {
     body: JSON.stringify(body ?? {}),
   });
   const text = await r.text();
-  let json = null; try { json = JSON.parse(text); } catch {}
+  let json = null;
+  try {
+    json = JSON.parse(text);
+  } catch {}
   return { status: r.status, json, text: text.slice(0, 160) };
 };
 const info = await act('deck.info');
 console.log('deck.info', info.status, JSON.stringify(info.json ?? info.text).slice(0, 120));
-if (info.status === 404 || info.json === null) { console.log('already gone'); process.exit(0); }
+if (info.status === 404 || info.json === null) {
+  console.log('already gone');
+  process.exit(0);
+}
 let rev = info.json.revision ?? 0;
 if (!info.json.trashedAt) {
   const t = await act('deck.trash', { id: DECK, baseRevision: rev });
@@ -26,4 +32,8 @@ if (!info.json.trashedAt) {
 const rm = await act('deck.remove', { id: DECK, confirm: true, baseRevision: rev });
 console.log('deck.remove', rm.status, JSON.stringify(rm.json ?? rm.text).slice(0, 120));
 const gone = await act('deck.info');
-console.log('after remove, deck.info', gone.status, JSON.stringify(gone.json ?? gone.text).slice(0, 80));
+console.log(
+  'after remove, deck.info',
+  gone.status,
+  JSON.stringify(gone.json ?? gone.text).slice(0, 80),
+);

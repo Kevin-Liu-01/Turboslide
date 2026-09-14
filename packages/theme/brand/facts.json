@@ -1,0 +1,1185 @@
+{
+  "generator": "scripts/build-brand.ts --facts",
+  "writtenAt": "2026-09-14",
+  "actions": {
+    "count": 169,
+    "source": "packages/schema/src/actions.ts ACTION_IDS; packages/agent/generated/manifest.json actionCount"
+  },
+  "mcpTools": {
+    "count": 146,
+    "source": "packages/agent/generated/mcp-tools.json tools"
+  },
+  "httpPaths": {
+    "count": 153,
+    "source": "packages/agent/generated/openapi.json paths"
+  },
+  "layouts": {
+    "count": 21,
+    "source": "packages/schema/src/layouts.ts LAYOUTS"
+  },
+  "shapePresets": {
+    "count": 135,
+    "source": "packages/schema/src/shapes.ts SHAPE_PRESETS"
+  },
+  "materials": {
+    "count": 17,
+    "source": "packages/materials/src/catalog.ts MATERIAL_IDS"
+  },
+  "checkSteps": {
+    "count": 31,
+    "source": "node scripts/check.mjs --list"
+  },
+  "parityRows": {
+    "pass": 2980,
+    "fail": 5,
+    "skip": 384,
+    "total": 3369,
+    "source": "docs/gslides-parity/verification-3/parity-audit.json",
+    "date": "2026-09-14",
+    "base": "http://localhost:4321"
+  },
+  "licence": {
+    "name": "MIT",
+    "source": "LICENSE"
+  },
+  "export": {
+    "worstPageMismatchPercent": 0.003,
+    "source": "docs/HOSTED-STATUS.md (the flatten export of the 85 slide GT deck: perfect true, worst decoded mismatch 0.003 percent, horizon, 194 of 5,760,000 px); README.md \"Perfect PPTX\""
+  },
+  "measured": {
+    "source": "docs/gslides-parity/verification-4/perf-budget-baseline-2026-09-14.json",
+    "date": "2026-09-14",
+    "profile": "deployment",
+    "base": "https://turboslide.vercel.app",
+    "rows": [
+      {
+        "check": "routes",
+        "name": "/ cold ttfb",
+        "value": 94.867,
+        "limit": 200,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/ cold fcp",
+        "value": 300,
+        "limit": null,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/ cold lcp",
+        "value": 924,
+        "limit": 700,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/ cold ready",
+        "value": 908,
+        "limit": 700,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/ cold js decoded",
+        "value": 3122113,
+        "limit": 2000000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/ cold largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/ cold longest animation frame",
+        "value": 67,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/ cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/ cold dom nodes",
+        "value": 665,
+        "limit": null,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/ warm ttfb",
+        "value": 90.802,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/ warm fcp",
+        "value": 280,
+        "limit": null,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/ warm lcp",
+        "value": 896,
+        "limit": 400,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/ warm ready",
+        "value": 876.8999999761581,
+        "limit": 400,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/ warm js decoded",
+        "value": 3122113,
+        "limit": 2000000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/ warm largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/ warm longest animation frame",
+        "value": 59,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/ warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/ warm dom nodes",
+        "value": 666,
+        "limit": null,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/new cold ttfb",
+        "value": 113.339,
+        "limit": 200,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/new cold fcp",
+        "value": 208,
+        "limit": 400,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/new cold lcp",
+        "value": 844,
+        "limit": 700,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/new cold ready",
+        "value": 823.2000000476837,
+        "limit": 700,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/new cold js decoded",
+        "value": 3122113,
+        "limit": 2000000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/new cold largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/new cold longest animation frame",
+        "value": 67,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/new cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/new cold dom nodes",
+        "value": 665,
+        "limit": null,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/new warm ttfb",
+        "value": 82.881,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/new warm fcp",
+        "value": 148,
+        "limit": 250,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/new warm lcp",
+        "value": 764,
+        "limit": 400,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/new warm ready",
+        "value": 749.5,
+        "limit": 400,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/new warm js decoded",
+        "value": 3122113,
+        "limit": 2000000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/new warm largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/new warm longest animation frame",
+        "value": 60,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/new warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/new warm dom nodes",
+        "value": 665,
+        "limit": null,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold ttfb",
+        "value": 5334.678,
+        "limit": 400,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold fcp",
+        "value": 5644,
+        "limit": null,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold lcp",
+        "value": 6072,
+        "limit": 1000,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold ready",
+        "value": 5704.800000011921,
+        "limit": 1000,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold js decoded",
+        "value": 3045067,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold longest animation frame",
+        "value": 152,
+        "limit": 150,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks cold dom nodes",
+        "value": 350,
+        "limit": null,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm ttfb",
+        "value": 6300.16,
+        "limit": 300,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm fcp",
+        "value": 6420,
+        "limit": null,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm lcp",
+        "value": 6728,
+        "limit": 600,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm ready",
+        "value": 6491.600000023842,
+        "limit": 600,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm js decoded",
+        "value": 3045067,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm longest animation frame",
+        "value": 85,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks warm dom nodes",
+        "value": 351,
+        "limit": null,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold ttfb",
+        "value": 411.911,
+        "limit": 400,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold fcp",
+        "value": 524,
+        "limit": null,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold lcp",
+        "value": 560,
+        "limit": 1000,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold ready",
+        "value": 640.2000000476837,
+        "limit": 1000,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold js decoded",
+        "value": 3032656,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold longest animation frame",
+        "value": 85,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash cold dom nodes",
+        "value": 105,
+        "limit": null,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm ttfb",
+        "value": 396.072,
+        "limit": 300,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm fcp",
+        "value": 480,
+        "limit": null,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm lcp",
+        "value": 488,
+        "limit": 600,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm ready",
+        "value": 535.6999999880791,
+        "limit": 600,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm js decoded",
+        "value": 3032656,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm longest animation frame",
+        "value": 59,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/decks/trash warm dom nodes",
+        "value": 106,
+        "limit": null,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold ttfb",
+        "value": 247.501,
+        "limit": 500,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold fcp",
+        "value": 376,
+        "limit": null,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold lcp",
+        "value": 400,
+        "limit": 600,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold ready",
+        "value": 560.3999999761581,
+        "limit": 800,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold js decoded",
+        "value": 3128584,
+        "limit": 1000000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold longest animation frame",
+        "value": 99,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold cls",
+        "value": 0.0021485001929012343,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand cold dom nodes",
+        "value": 1899,
+        "limit": 1500,
+        "unit": "count",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm ttfb",
+        "value": 209.127,
+        "limit": 400,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm fcp",
+        "value": 300,
+        "limit": null,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm lcp",
+        "value": 324,
+        "limit": 400,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm ready",
+        "value": 451.5,
+        "limit": 600,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm js decoded",
+        "value": 3128584,
+        "limit": 1000000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm longest animation frame",
+        "value": 61,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm cls",
+        "value": 0.0021485001929012343,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/deck/gt-brand warm dom nodes",
+        "value": 1897,
+        "limit": 1500,
+        "unit": "count",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold ttfb",
+        "value": 140.55,
+        "limit": 200,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold fcp",
+        "value": 516,
+        "limit": 400,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold lcp",
+        "value": 1308,
+        "limit": 1200,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold ready",
+        "value": 1266.8999999761581,
+        "limit": 1200,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold js decoded",
+        "value": 3263637,
+        "limit": 2000000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold longest animation frame",
+        "value": 321,
+        "limit": 150,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand cold dom nodes",
+        "value": 1513,
+        "limit": 1500,
+        "unit": "count",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm ttfb",
+        "value": 120.069,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm fcp",
+        "value": 180,
+        "limit": 250,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm lcp",
+        "value": 896,
+        "limit": 700,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm ready",
+        "value": 862.0999999642372,
+        "limit": 700,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm js decoded",
+        "value": 3263637,
+        "limit": 2000000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm longest animation frame",
+        "value": 100,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/edit/gt-brand warm dom nodes",
+        "value": 1480,
+        "limit": 1500,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold ttfb",
+        "value": 141.328,
+        "limit": 200,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold fcp",
+        "value": 996,
+        "limit": null,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold lcp",
+        "value": 1020,
+        "limit": 800,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold ready",
+        "value": 974.3000000119209,
+        "limit": 800,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold js decoded",
+        "value": 3132922,
+        "limit": 1200000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold longest animation frame",
+        "value": 63,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand cold dom nodes",
+        "value": 412,
+        "limit": null,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm ttfb",
+        "value": 134.675,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm fcp",
+        "value": 852,
+        "limit": null,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm lcp",
+        "value": 888,
+        "limit": 500,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm ready",
+        "value": 834.4000000357628,
+        "limit": 500,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm js decoded",
+        "value": 3132922,
+        "limit": 1200000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm largest js (index-D6IA9RCO.js)",
+        "value": 1202643,
+        "limit": 600000,
+        "unit": "bytes",
+        "ok": false
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm longest animation frame",
+        "value": 60,
+        "limit": 150,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm cls",
+        "value": 0,
+        "limit": 0.05,
+        "unit": "ratio",
+        "ok": true
+      },
+      {
+        "check": "routes",
+        "name": "/present/gt-brand warm dom nodes",
+        "value": 412,
+        "limit": null,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "transitions",
+        "name": "decks->edit (in page)",
+        "value": 598,
+        "limit": 500,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "transitions",
+        "name": "back (wall)",
+        "value": 18,
+        "limit": 100,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "transitions",
+        "name": "edit->decks (wall, document navigation)",
+        "value": 1114,
+        "limit": 400,
+        "unit": "ms",
+        "ok": false
+      },
+      {
+        "check": "transitions",
+        "name": "trash->decks (in page)",
+        "value": 3.800000011920929,
+        "limit": 400,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "transitions",
+        "name": "slideChange (in page, painted frame)",
+        "value": 14.300000011920929,
+        "limit": 50,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "transitions",
+        "name": "slideshow (in page, painted frame)",
+        "value": 17.69999998807907,
+        "limit": 50,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "transitions",
+        "name": "layoutGrid (in page, painted frame)",
+        "value": 11.300000011920929,
+        "limit": 50,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "filmstrip",
+        "name": "first pass longest frame",
+        "value": 16.899999999999636,
+        "limit": 100,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "filmstrip",
+        "name": "steady passes p95 frame",
+        "value": 10.100000000000364,
+        "limit": 20,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "filmstrip",
+        "name": "steady passes longest frame",
+        "value": 17.599999999999454,
+        "limit": 50,
+        "unit": "ms",
+        "ok": true
+      },
+      {
+        "check": "filmstrip",
+        "name": "steady passes fps",
+        "value": 119.4588370754174,
+        "limit": 50,
+        "unit": "fps",
+        "ok": true
+      },
+      {
+        "check": "filmstrip",
+        "name": "dom nodes with 85 cards",
+        "value": 4921,
+        "limit": 1500,
+        "unit": "count",
+        "ok": false
+      },
+      {
+        "check": "idle",
+        "name": "server function calls per minute (60 s window)",
+        "value": 465,
+        "limit": 4,
+        "unit": "count",
+        "ok": false
+      },
+      {
+        "check": "idle",
+        "name": "event stream connections per minute (60 s window)",
+        "value": 0,
+        "limit": 2,
+        "unit": "count",
+        "ok": true
+      },
+      {
+        "check": "twins",
+        "name": "twins re-fetched on the second visit (of 2)",
+        "value": 2,
+        "limit": 0,
+        "unit": "count",
+        "ok": false
+      }
+    ]
+  }
+}

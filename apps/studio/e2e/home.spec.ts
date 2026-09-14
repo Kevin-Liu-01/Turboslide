@@ -15,6 +15,13 @@ import type { Page } from '@playwright/test';
 //
 // The Open dialog (File > Open) is B3's; "the Open dialog lists and opens" of SPEC 14.3 is
 // asserted by the chrome's own specs once the dialog is mounted, not here.
+//
+// Round four (gslides-parity SPEC-4 0.29, 0.32, 3.1, 3.3; MILESTONES-4 B3 item 6): the Recent row
+// is in the server's HTML once this browser has opened a deck (the record's cookie mirror,
+// routes/-recent.ts) and the store's cards are in the same document or arrive after it; Delete
+// forever takes the card out within 100 ms of the confirm click and it stays out after the
+// loader answers; a removal the store refuses (a stale revision planted in the manifest) brings
+// the card back with the error sentence in the snackbar.
 
 const ROOT = join(import.meta.dirname, '..', '..', '..');
 const DECKS = join(ROOT, 'decks');
@@ -52,11 +59,20 @@ function removeDeck(id: string): void {
   rmSync(join(ROOT, '.turboslide', 'thumbs', id), { recursive: true, force: true });
 }
 
-function manifestOf(id: string): { title: string; trashedAt?: string } {
+function manifestOf(id: string): { title: string; trashedAt?: string; revision: number } {
   return JSON.parse(readFileSync(join(DECKS, id, 'deck.json'), 'utf8')) as {
     title: string;
     trashedAt?: string;
+    revision: number;
   };
+}
+
+/** Moves the manifest's revision on disk, so a write carrying the card's revision is refused as stale. */
+function bumpRevision(id: string, by = 7): void {
+  const path = join(DECKS, id, 'deck.json');
+  const manifest = JSON.parse(readFileSync(path, 'utf8')) as { revision: number };
+  manifest.revision += by;
+  writeFileSync(path, `${JSON.stringify(manifest, null, 2)}\n`);
 }
 
 /** /decks with its handlers attached. */
@@ -280,10 +296,12 @@ test('Move to trash hides the deck, Undo brings it back, the trash page restores
   const card = page.locator(`[data-control="trash.card.${COPY}"]`);
   await expect(card).toBeVisible();
   await expect(card.locator('.ts-hm-card-when')).toContainText('Trashed');
-  /* Restore puts it back */
+  /* Restore puts it back: the card leaves at the click (SPEC-4 0.32), the empty figure follows */
   await card.locator(`[data-control="trash.restore.${COPY}"]`).click();
   await expect(card).toHaveCount(0, { timeout: 15_000 });
-  await expect(page.locator('[data-control="trash.empty-state"]')).toHaveText('Trash is empty');
+  await expect(page.locator('[data-control="trash.empty-state"] .ts-empty-title')).toHaveText(
+    'Trash is empty',
+  );
   expect(manifestOf(COPY).trashedAt).toBeUndefined();
   await openHome(page);
   await expect(page.locator(`[data-control="home.card.${COPY}"]`)).toBeVisible();
@@ -302,13 +320,85 @@ test('Move to trash hides the deck, Undo brings it back, the trash page restores
   await page.keyboard.press('Escape');
   await expect(dialog).toHaveCount(0);
   expect(existsSync(join(DECKS, COPY, 'deck.json'))).toBe(true);
+  /* the optimistic path (SPEC-4 0.32): the card is out within 100 ms of the confirm click, and
+     stays out once the loader has answered and the folder is gone */
   await page.locator(`[data-control="trash.delete.${COPY}"]`).click();
+  const confirmAt = Date.now();
   await page.locator('[data-control="trash.confirm.ok"]').click();
   await expect(page.locator(`[data-control="trash.card.${COPY}"]`)).toHaveCount(0, {
+    timeout: 100,
+  });
+  const goneMs = Date.now() - confirmAt;
+  console.log(`delete forever: the card left ${goneMs} ms after the confirm click`);
+  await expect.poll(() => existsSync(join(DECKS, COPY)), { timeout: 15_000 }).toBe(false);
+  await expect(page.locator(`[data-control="trash.card.${COPY}"]`)).toHaveCount(0);
+  await expect(page.locator('[data-control="trash.empty"]')).toBeDisabled();
+});
+
+test('a refused Delete forever brings the card back with the sentence (SPEC-4 0.32)', async ({
+  page,
+}) => {
+  /* alpha goes to the trash, then its manifest moves on disk behind the page's back: the card's
+     revision is stale and the store refuses the removal */
+  await openHome(page);
+  await openCardMenu(page, ALPHA);
+  await page.locator('#home-card-menu [role="menuitem"]', { hasText: 'Move to trash' }).click();
+  await expect(async () => expect(manifestOf(ALPHA).trashedAt).toBeDefined()).toPass();
+  await openTrash(page);
+  const card = page.locator(`[data-control="trash.card.${ALPHA}"]`);
+  await expect(card).toBeVisible();
+  bumpRevision(ALPHA);
+  await page.locator(`[data-control="trash.delete.${ALPHA}"]`).click();
+  await page.locator('[data-control="trash.confirm.ok"]').click();
+  /* the card comes back with the refusal in the snackbar; the folder stays */
+  await expect(page.locator('[data-control="snackbar"]')).toContainText('Delete forever:', {
     timeout: 15_000,
   });
-  expect(existsSync(join(DECKS, COPY))).toBe(false);
-  await expect(page.locator('[data-control="trash.empty"]')).toBeDisabled();
+  await expect(page.locator('[data-control="snackbar"]')).toContainText(/stale/i);
+  await expect(card).toBeVisible();
+  expect(existsSync(join(DECKS, ALPHA, 'deck.json'))).toBe(true);
+  /* Restore with the fresh revision puts alpha back on the home page */
+  await openTrash(page);
+  await page.locator(`[data-control="trash.restore.${ALPHA}"]`).click();
+  await expect(page.locator(`[data-control="trash.card.${ALPHA}"]`)).toHaveCount(0, {
+    timeout: 15_000,
+  });
+  await expect(async () => expect(manifestOf(ALPHA).trashedAt).toBeUndefined()).toPass();
+});
+
+test("the Recent row is in the server's HTML once this browser opened a deck, and the store's cards are in the document (SPEC-4 0.29)", async ({
+  page,
+}) => {
+  /* a browser that opened nothing here: no Recent row, the store's cards */
+  let html = await (await page.request.get('/decks')).text();
+  expect(html).not.toContain('data-control="home.recent"');
+  /* open beta from its card: the record and its cookie mirror carry the facts of the card */
+  await openHome(page);
+  await page.locator(`[data-control="home.open.${BETA}"]`).click();
+  await expect(page).toHaveURL(new RegExp(`/edit/${BETA}`));
+  await page.waitForFunction(() => Boolean(window.turboslide?.studio), null, { timeout: 60_000 });
+  const cookies = await page.context().cookies();
+  const recent = cookies.find((cookie) => cookie.name === 'ts-recent');
+  expect(recent?.path).toBe('/decks');
+  expect(decodeURIComponent(recent?.value ?? '')).toContain(BETA);
+  /* the server's HTML carries the row with beta's card, and the store's cards after it */
+  html = await (await page.request.get('/decks')).text();
+  const rowAt = html.indexOf('data-control="home.recent"');
+  const cardAt = html.indexOf(`data-control="home.recent.${BETA}"`);
+  const listAt = html.indexOf('data-control="home.cards"');
+  expect(rowAt).toBeGreaterThan(0);
+  expect(cardAt).toBeGreaterThan(rowAt);
+  expect(html).toContain('Opened on this device');
+  /* the list is in the same document on the file store; on a slow store the frames stand in */
+  expect(listAt > rowAt || html.includes('data-control="home.pending"')).toBe(true);
+  /* the row is not hidden until mounted: the cookie gave the server the opened order */
+  expect(html).not.toMatch(/class="ts-recent"[^>]*data-pending/);
+  /* on the page the row's card opens the editor, and the store's card of beta is there too */
+  await openHome(page);
+  await expect(page.locator(`[data-control="home.recent.${BETA}"]`)).toBeVisible();
+  await expect(page.locator(`[data-control="home.card.${BETA}"]`)).toBeVisible();
+  await page.locator(`[data-control="home.recent.open.${BETA}"]`).click();
+  await expect(page).toHaveURL(new RegExp(`/edit/${BETA}`));
 });
 
 test('the Blank card opens /new', async ({ page }) => {

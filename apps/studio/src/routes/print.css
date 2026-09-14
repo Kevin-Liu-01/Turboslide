@@ -62,6 +62,13 @@
   flex: none;
 }
 
+/* the 20 px Turboslide mark (gslides-parity SPEC-4 1.1, 1.10): the 16 unit solid path at 1.25
+   units per pixel with crisp edges; the raster check of 0.50 is recorded in build-4/b1.md */
+.ts-print-title .ts-mark {
+  width: 20px;
+  height: 20px;
+}
+
 .ts-print-layout select {
   height: 32px;
   padding: 0 28px 0 10px;

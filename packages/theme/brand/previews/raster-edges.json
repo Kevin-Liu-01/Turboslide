@@ -1,0 +1,66 @@
+{
+  "generator": "scripts/build-brand.ts --previews",
+  "rule": "SPEC-4 0.50: the 20 px print bar mark and the 24 px title row mark as rasters at 1x and 2x; a soft edge is a third colour; rasterized by librsvg (sharp) from the SVG path with shape-rendering crispEdges",
+  "records": [
+    {
+      "size": 16,
+      "scale": 1,
+      "px": 16,
+      "colours": 2,
+      "leftRailPx": 2,
+      "bottomRailPx": 2,
+      "windowEdges": [2, 10, 8, 14],
+      "soft": false
+    },
+    {
+      "size": 16,
+      "scale": 2,
+      "px": 32,
+      "colours": 2,
+      "leftRailPx": 4,
+      "bottomRailPx": 4,
+      "windowEdges": [4, 20, 16, 28],
+      "soft": false
+    },
+    {
+      "size": 20,
+      "scale": 1,
+      "px": 20,
+      "colours": 2,
+      "leftRailPx": 2,
+      "bottomRailPx": 3,
+      "windowEdges": [2.5, 12.5, 10, 17.5],
+      "soft": false
+    },
+    {
+      "size": 20,
+      "scale": 2,
+      "px": 40,
+      "colours": 2,
+      "leftRailPx": 5,
+      "bottomRailPx": 5,
+      "windowEdges": [5, 25, 20, 35],
+      "soft": false
+    },
+    {
+      "size": 24,
+      "scale": 1,
+      "px": 24,
+      "colours": 2,
+      "leftRailPx": 3,
+      "bottomRailPx": 3,
+      "windowEdges": [3, 15, 12, 21],
+      "soft": false
+    },
+    {
+      "size": 24,
+      "scale": 2,
+      "px": 48,
+      "colours": 2,
+      "leftRailPx": 6,
+      "bottomRailPx": 6,
+      "windowEdges": [6, 30, 24, 42],
+      "soft": false
+    }
+  ]
+}

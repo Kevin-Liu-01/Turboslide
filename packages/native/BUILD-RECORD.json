@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "crate": "crates/turboslide-native",
+  "crateCommit": "3ee5b090c9794fb30b346ab5bfcf5273dcacbb71",
+  "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+  "wasmBindgen": "0.2.128",
+  "outputs": {
+    "wasm/turboslide_native.js": {
+      "bytes": 23001,
+      "sha256": "d228dbe8d6da1ae72ac4aebd9df08ebf109cb2e450bb34bfbcade6e119085f9a",
+      "builtBy": "local",
+      "built": "2026-09-14",
+      "machine": "Apple M5 Max, macOS 26.4, cargo 1.98.1, wasm32-unknown-unknown",
+      "runId": null,
+      "runUrl": null
+    },
+    "wasm/turboslide_native_bg.wasm": {
+      "bytes": 273863,
+      "sha256": "6286f96a8c67b8c6d2bbc1ba8903340f4a086347cbcf6d8d9fb43c1e0c11f450",
+      "builtBy": "local",
+      "built": "2026-09-14",
+      "machine": "Apple M5 Max, macOS 26.4, cargo 1.98.1, wasm32-unknown-unknown",
+      "runId": null,
+      "runUrl": null
+    },
+    "wasm/turboslide_native.d.ts": {
+      "bytes": 6924,
+      "sha256": "671ee877c08c899627134cc79bfc07a0234fdc85cb7d47cc09af51de813210b9",
+      "builtBy": "local",
+      "built": "2026-09-14",
+      "machine": "Apple M5 Max, macOS 26.4, cargo 1.98.1, wasm32-unknown-unknown",
+      "runId": null,
+      "runUrl": null
+    },
+    "wasm/turboslide_native_bg.wasm.d.ts": {
+      "bytes": 3559,
+      "sha256": "950fb740c59e7302d41ee15ad8f118fc3493397cc09a20a1814c1cd1ef31da20",
+      "builtBy": "local",
+      "built": "2026-09-14",
+      "machine": "Apple M5 Max, macOS 26.4, cargo 1.98.1, wasm32-unknown-unknown",
+      "runId": null,
+      "runUrl": null
+    },
+    "npm/linux-x64-gnu/turboslide-native.linux-x64-gnu.node": {
+      "bytes": null,
+      "sha256": null,
+      "builtBy": "ci",
+      "built": null,
+      "runId": null,
+      "runUrl": null,
+      "glibcFloor": "2.28",
+      "note": "not built yet: the Linux addon is built by .github/workflows/native.yml on ubuntu (cargo zigbuild against glibc 2.28) and committed with this record; until then the function selects the TypeScript stages and describeBackends().selected is typescript"
+    }
+  },
+  "rule": "A committed output changes only in a commit that also carries this record with the workflow run id and the sha256 of every file (gslides-parity SPEC-4 0.38). node packages/native/scripts/check-record.mjs compares the files with this record and, with cargo and wasm-bindgen installed, rebuilds the wasm module and compares again."
+}

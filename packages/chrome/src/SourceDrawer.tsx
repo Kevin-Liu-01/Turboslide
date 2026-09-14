@@ -7,8 +7,7 @@ import type { EditorDispatch } from './dispatch';
 import { cn } from './lib/cn';
 import { applySourceText, slidePutCommand, slideSource } from './source/apply';
 import type { ApplySourceResult } from './source/apply';
-import type { SourceEditor } from './source/editor';
-import { createSourceEditor } from './source/editor';
+import type { SourceEditor, SourceEditorOptions } from './source/editor';
 import { ToolButton } from './ToolButton';
 
 import './SourceDrawer.css';
@@ -54,6 +53,27 @@ export type SourceDrawerProps = {
 };
 
 type Baseline = { slideId: string; text: string; revision: number };
+
+type EditorModule = {
+  createSourceEditor: (parent: HTMLElement, options: SourceEditorOptions) => SourceEditor;
+};
+
+let editorModule: Promise<EditorModule> | null = null;
+
+/**
+ * CodeMirror arrives when the drawer first opens (gslides-parity SPEC-4 0.44, 3.12; PP 7 row 5):
+ * `source/editor.ts` is the one place the chrome touches CodeMirror (six packages, on the order
+ * of 300 KB decoded), and every route carried it while the drawer sat closed. One `import()` per
+ * page, one of the four sites AGENTS.md allows in the browser graph; a load that fails leaves the
+ * drawer's chrome without a text field and reports the reason through `onNotice`.
+ */
+export function loadSourceEditor(): Promise<EditorModule> {
+  editorModule ??= import('./source/editor').catch((error: unknown) => {
+    editorModule = null;
+    throw error;
+  });
+  return editorModule;
+}
 
 export function SourceDrawer({
   open,
@@ -163,19 +183,32 @@ export function SourceDrawer({
     void applyRef.current(source).catch(() => undefined);
   };
 
-  /* the editor mounts with the drawer and leaves with it; the DOM needs it, so an effect */
+  /* the editor mounts with the drawer and leaves with it; the DOM needs it, so an effect. The
+     CodeMirror module arrives on the first open (SPEC-4 0.44); a drawer closed before it lands
+     mounts nothing */
   useEffect(() => {
     const el = host.current;
     if (!open || !el) return;
-    const created = createSourceEditor(el, {
-      text: draftRef.current,
-      onChange: (text) => setDraft(text),
-      onApply: () => applyFromUi(editor.current?.getText() ?? draftRef.current),
-    });
-    editor.current = created;
-    created.focus();
+    let alive = true;
+    let created: SourceEditor | null = null;
+    loadSourceEditor()
+      .then(({ createSourceEditor }) => {
+        if (!alive) return;
+        created = createSourceEditor(el, {
+          text: draftRef.current,
+          onChange: (text) => setDraft(text),
+          onApply: () => applyFromUi(editor.current?.getText() ?? draftRef.current),
+        });
+        editor.current = created;
+        created.focus();
+      })
+      .catch((error: unknown) => {
+        if (alive)
+          onNotice?.(`Source editor: ${error instanceof Error ? error.message : String(error)}`);
+      });
     return () => {
-      created.destroy();
+      alive = false;
+      created?.destroy();
       editor.current = null;
     };
   }, [open]);

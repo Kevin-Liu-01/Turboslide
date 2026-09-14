@@ -23,6 +23,9 @@
     },
     {
       "path": "../identity"
+    },
+    {
+      "path": "../theme"
     }
   ]
 }

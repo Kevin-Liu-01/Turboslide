@@ -1,0 +1,3135 @@
+{
+  "startedAt": "2026-09-14T14:53:08.794Z",
+  "base": "http://localhost:4346",
+  "profile": "local",
+  "deck": "gt-brand",
+  "platform": "darwin",
+  "chromeFlags": ["--use-gl=angle", "--use-angle=metal", "--ignore-gpu-blocklist"],
+  "trustedHeader": false,
+  "routes": [
+    {
+      "route": "/",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 1.599,
+      "fcp": 60,
+      "lcp": 692,
+      "ready": 673.3000000119209,
+      "jsDecoded": 3122113,
+      "jsTransfer": 850043,
+      "jsCount": 20,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 62,
+      "cls": 0,
+      "nodes": 668,
+      "errors": [],
+      "lcpEl": "SPAN",
+      "samples": [
+        {
+          "ttfb": 1.781,
+          "ready": 670.3000000119209,
+          "wall": 703,
+          "error": null,
+          "status": 200,
+          "fcp": 60,
+          "lcp": 700,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 58,
+          "loaf": [
+            {
+              "t": 57,
+              "d": 58,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 850043,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16108260,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        },
+        {
+          "ttfb": 1.599,
+          "ready": 673.3000000119209,
+          "wall": 706,
+          "error": null,
+          "status": 200,
+          "fcp": 60,
+          "lcp": 692,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 62,
+          "loaf": [
+            {
+              "t": 56,
+              "d": 62,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 850043,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16040748,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        },
+        {
+          "ttfb": 1.421,
+          "ready": 673.5999999642372,
+          "wall": 706,
+          "error": null,
+          "status": 200,
+          "fcp": 68,
+          "lcp": 692,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 63,
+          "loaf": [
+            {
+              "t": 55,
+              "d": 63,
+              "b": 9,
+              "s": ["index-D6IA9RCO.js:58"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 850043,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16036952,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        }
+      ]
+    },
+    {
+      "route": "/",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 1.836,
+      "fcp": 60,
+      "lcp": 672,
+      "ready": 652.5,
+      "jsDecoded": 3122113,
+      "jsTransfer": 6000,
+      "jsCount": 20,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 60,
+      "cls": 0,
+      "nodes": 668,
+      "errors": [],
+      "lcpEl": "SPAN",
+      "samples": [
+        {
+          "ttfb": 1.836,
+          "ready": 649.3999999761581,
+          "wall": 691,
+          "error": null,
+          "status": 200,
+          "fcp": 48,
+          "lcp": 664,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 37,
+              "d": 60,
+              "b": 6,
+              "s": ["index-D6IA9RCO.js:55"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 6000,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16048948,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        },
+        {
+          "ttfb": 2.306,
+          "ready": 652.5,
+          "wall": 687,
+          "error": null,
+          "status": 200,
+          "fcp": 64,
+          "lcp": 672,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 38,
+              "d": 60,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 6000,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16106924,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        },
+        {
+          "ttfb": 1.47,
+          "ready": 653.8999999761581,
+          "wall": 687,
+          "error": null,
+          "status": 200,
+          "fcp": 60,
+          "lcp": 672,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 62,
+          "loaf": [
+            {
+              "t": 36,
+              "d": 62,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 6000,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16051796,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        }
+      ]
+    },
+    {
+      "route": "/home",
+      "absent": true
+    },
+    {
+      "route": "/new",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 2.019,
+      "fcp": 64,
+      "lcp": 688,
+      "ready": 671.8000000119209,
+      "jsDecoded": 3122113,
+      "jsTransfer": 850043,
+      "jsCount": 20,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 63,
+      "cls": 0,
+      "nodes": 668,
+      "errors": [],
+      "lcpEl": "SPAN",
+      "samples": [
+        {
+          "ttfb": 2.167,
+          "ready": 667.6999999880791,
+          "wall": 700,
+          "error": null,
+          "status": 200,
+          "fcp": 64,
+          "lcp": 688,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 52,
+              "d": 60,
+              "b": 6,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 850043,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16107532,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        },
+        {
+          "ttfb": 1.977,
+          "ready": 671.8000000119209,
+          "wall": 704,
+          "error": null,
+          "status": 200,
+          "fcp": 56,
+          "lcp": 688,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 63,
+          "loaf": [
+            {
+              "t": 52,
+              "d": 63,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 850043,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16113152,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        },
+        {
+          "ttfb": 2.019,
+          "ready": 686.7000000476837,
+          "wall": 719,
+          "error": null,
+          "status": 200,
+          "fcp": 68,
+          "lcp": 700,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 72,
+          "loaf": [
+            {
+              "t": 55,
+              "d": 72,
+              "b": 16,
+              "s": ["index-D6IA9RCO.js:65"]
+            },
+            {
+              "t": 634,
+              "d": 50,
+              "b": 0,
+              "s": [":45"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 850043,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16114236,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        }
+      ]
+    },
+    {
+      "route": "/new",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 1.998,
+      "fcp": 60,
+      "lcp": 660,
+      "ready": 647.7999999523163,
+      "jsDecoded": 3122113,
+      "jsTransfer": 6000,
+      "jsCount": 20,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 61,
+      "cls": 0,
+      "nodes": 668,
+      "errors": [],
+      "lcpEl": "SPAN",
+      "samples": [
+        {
+          "ttfb": 1.998,
+          "ready": 649.7999999523163,
+          "wall": 683,
+          "error": null,
+          "status": 200,
+          "fcp": 48,
+          "lcp": 664,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 61,
+          "loaf": [
+            {
+              "t": 35,
+              "d": 61,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 6000,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16115404,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        },
+        {
+          "ttfb": 2.385,
+          "ready": 647.1999999880791,
+          "wall": 679,
+          "error": null,
+          "status": 200,
+          "fcp": 60,
+          "lcp": 660,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 34,
+              "d": 60,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 6000,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16107300,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        },
+        {
+          "ttfb": 1.976,
+          "ready": 647.7999999523163,
+          "wall": 679,
+          "error": null,
+          "status": 200,
+          "fcp": 60,
+          "lcp": 660,
+          "lcpEl": "SPAN",
+          "cls": 0,
+          "loafMax": 63,
+          "loaf": [
+            {
+              "t": 33,
+              "d": 63,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 20,
+          "jsDecoded": 3122113,
+          "jsTransfer": 6000,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 668,
+          "heapUsed": 16117032,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/new"
+        }
+      ]
+    },
+    {
+      "route": "/decks",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 18.05,
+      "fcp": 120,
+      "lcp": 212,
+      "ready": 179.4000000357628,
+      "jsDecoded": 3045067,
+      "jsTransfer": 822838,
+      "jsCount": 19,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 63,
+      "cls": 0,
+      "nodes": 626,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 19.989,
+          "ready": 193.39999997615814,
+          "wall": 225,
+          "error": null,
+          "status": 200,
+          "fcp": 120,
+          "lcp": 232,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 66,
+          "loaf": [
+            {
+              "t": 32,
+              "d": 66,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 100,
+              "d": 65,
+              "b": 14,
+              "s": ["index-D6IA9RCO.js:62"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 822838,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 626,
+          "heapUsed": 13622892,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks"
+        },
+        {
+          "ttfb": 17.738,
+          "ready": 176.69999998807907,
+          "wall": 214,
+          "error": null,
+          "status": 200,
+          "fcp": 120,
+          "lcp": 212,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 61,
+          "loaf": [
+            {
+              "t": 28,
+              "d": 61,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 92,
+              "d": 59,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 822838,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 626,
+          "heapUsed": 13646104,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks"
+        },
+        {
+          "ttfb": 18.05,
+          "ready": 179.4000000357628,
+          "wall": 216,
+          "error": null,
+          "status": 200,
+          "fcp": 112,
+          "lcp": 212,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 63,
+          "loaf": [
+            {
+              "t": 29,
+              "d": 63,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 94,
+              "d": 59,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 822838,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 626,
+          "heapUsed": 13623772,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks"
+        }
+      ]
+    },
+    {
+      "route": "/decks",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 18.072,
+      "fcp": 116,
+      "lcp": 208,
+      "ready": 176.80000001192093,
+      "jsDecoded": 3045067,
+      "jsTransfer": 5700,
+      "jsCount": 19,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 59,
+      "cls": 0,
+      "nodes": 626,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 17.835,
+          "ready": 174.5999999642372,
+          "wall": 207,
+          "error": null,
+          "status": 200,
+          "fcp": 120,
+          "lcp": 204,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 59,
+          "loaf": [
+            {
+              "t": 29,
+              "d": 59,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 93,
+              "d": 58,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 5700,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 626,
+          "heapUsed": 13607900,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks"
+        },
+        {
+          "ttfb": 18.072,
+          "ready": 176.80000001192093,
+          "wall": 209,
+          "error": null,
+          "status": 200,
+          "fcp": 112,
+          "lcp": 212,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 59,
+          "loaf": [
+            {
+              "t": 30,
+              "d": 59,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 95,
+              "d": 57,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 5700,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 626,
+          "heapUsed": 13553816,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks"
+        },
+        {
+          "ttfb": 18.245,
+          "ready": 176.80000001192093,
+          "wall": 220,
+          "error": null,
+          "status": 200,
+          "fcp": 116,
+          "lcp": 208,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 29,
+              "d": 58,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 91,
+              "d": 60,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3045067,
+          "jsTransfer": 5700,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 626,
+          "heapUsed": 13650436,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks"
+        }
+      ]
+    },
+    {
+      "route": "/decks/trash",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 10.069,
+      "fcp": 68,
+      "lcp": 76,
+      "ready": 134.5,
+      "jsDecoded": 3032656,
+      "jsTransfer": 818963,
+      "jsCount": 19,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 64,
+      "cls": 0,
+      "nodes": 122,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 9.342,
+          "ready": 131.19999998807907,
+          "wall": 164,
+          "error": null,
+          "status": 200,
+          "fcp": 68,
+          "lcp": 84,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 61,
+          "loaf": [
+            {
+              "t": 57,
+              "d": 61,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 818963,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 122,
+          "heapUsed": 11315256,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks/trash"
+        },
+        {
+          "ttfb": 10.069,
+          "ready": 175.5,
+          "wall": 218,
+          "error": null,
+          "status": 200,
+          "fcp": 68,
+          "lcp": 76,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 85,
+          "loaf": [
+            {
+              "t": 71,
+              "d": 85,
+              "b": 31,
+              "s": ["index-D6IA9RCO.js:80"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 818963,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 122,
+          "heapUsed": 11334392,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks/trash"
+        },
+        {
+          "ttfb": 10.121,
+          "ready": 134.5,
+          "wall": 175,
+          "error": null,
+          "status": 200,
+          "fcp": 68,
+          "lcp": 76,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 64,
+          "loaf": [
+            {
+              "t": 57,
+              "d": 64,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 818963,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 122,
+          "heapUsed": 11368236,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks/trash"
+        }
+      ]
+    },
+    {
+      "route": "/decks/trash",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 10.008,
+      "fcp": 72,
+      "lcp": 128,
+      "ready": 120,
+      "jsDecoded": 3032656,
+      "jsTransfer": 5700,
+      "jsCount": 19,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 62,
+      "cls": 0,
+      "nodes": 122,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 9.76,
+          "ready": 120,
+          "wall": 160,
+          "error": null,
+          "status": 200,
+          "fcp": 72,
+          "lcp": 128,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 62,
+          "loaf": [
+            {
+              "t": 45,
+              "d": 62,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 5700,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 122,
+          "heapUsed": 11316096,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks/trash"
+        },
+        {
+          "ttfb": 10.865,
+          "ready": 120,
+          "wall": 159,
+          "error": null,
+          "status": 200,
+          "fcp": 72,
+          "lcp": 128,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 62,
+          "loaf": [
+            {
+              "t": 44,
+              "d": 62,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 5700,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 122,
+          "heapUsed": 11302700,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks/trash"
+        },
+        {
+          "ttfb": 10.008,
+          "ready": 121.09999996423721,
+          "wall": 161,
+          "error": null,
+          "status": 200,
+          "fcp": 64,
+          "lcp": 80,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 61,
+          "loaf": [
+            {
+              "t": 46,
+              "d": 61,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 19,
+          "jsDecoded": 3032656,
+          "jsTransfer": 5700,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 122,
+          "heapUsed": 11338344,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/decks/trash"
+        }
+      ]
+    },
+    {
+      "route": "/deck/gt-brand",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 34.403,
+      "fcp": 140,
+      "lcp": 140,
+      "ready": 231,
+      "jsDecoded": 3128584,
+      "jsTransfer": 854111,
+      "jsCount": 23,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 64,
+      "cls": 0.0021485001929012343,
+      "nodes": 1897,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 34.403,
+          "ready": 242.39999997615814,
+          "wall": 281,
+          "error": null,
+          "status": 200,
+          "fcp": 144,
+          "lcp": 144,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 70,
+          "loaf": [
+            {
+              "t": 47,
+              "d": 59,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 116,
+              "d": 70,
+              "b": 19,
+              "s": ["index-D6IA9RCO.js:66"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 854111,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1897,
+          "heapUsed": 14551944,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/deck/gt-brand"
+        },
+        {
+          "ttfb": 30.841,
+          "ready": 218.9000000357628,
+          "wall": 259,
+          "error": null,
+          "status": 200,
+          "fcp": 128,
+          "lcp": 128,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 64,
+          "loaf": [
+            {
+              "t": 43,
+              "d": 55,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 102,
+              "d": 64,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 854111,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1897,
+          "heapUsed": 14519968,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/deck/gt-brand"
+        },
+        {
+          "ttfb": 44.646,
+          "ready": 231,
+          "wall": 269,
+          "error": null,
+          "status": 200,
+          "fcp": 140,
+          "lcp": 140,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 63,
+          "loaf": [
+            {
+              "t": 58,
+              "d": 53,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 115,
+              "d": 63,
+              "b": 10,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 854111,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1897,
+          "heapUsed": 14576168,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/deck/gt-brand"
+        }
+      ]
+    },
+    {
+      "route": "/deck/gt-brand",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 31.558,
+      "fcp": 124,
+      "lcp": 124,
+      "ready": 215.89999997615814,
+      "jsDecoded": 3128584,
+      "jsTransfer": 6900,
+      "jsCount": 23,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 60,
+      "cls": 0.0021485001929012343,
+      "nodes": 1896,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 32.457,
+          "ready": 215.89999997615814,
+          "wall": 249,
+          "error": null,
+          "status": 200,
+          "fcp": 136,
+          "lcp": 136,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 59,
+          "loaf": [
+            {
+              "t": 48,
+              "d": 52,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 104,
+              "d": 59,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 6900,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1896,
+          "heapUsed": 14551128,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/deck/gt-brand"
+        },
+        {
+          "ttfb": 31.558,
+          "ready": 217.80000001192093,
+          "wall": 254,
+          "error": null,
+          "status": 200,
+          "fcp": 124,
+          "lcp": 124,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 44,
+              "d": 53,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 105,
+              "d": 60,
+              "b": 9,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 6900,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1896,
+          "heapUsed": 14518684,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/deck/gt-brand"
+        },
+        {
+          "ttfb": 31.059,
+          "ready": 214.69999998807907,
+          "wall": 248,
+          "error": null,
+          "status": 200,
+          "fcp": 124,
+          "lcp": 124,
+          "lcpEl": "IMG",
+          "cls": 0.0021485001929012343,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 43,
+              "d": 51,
+              "b": 0,
+              "s": []
+            },
+            {
+              "t": 99,
+              "d": 60,
+              "b": 9,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 23,
+          "jsDecoded": 3128584,
+          "jsTransfer": 6900,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1896,
+          "heapUsed": 14585256,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/deck/gt-brand"
+        }
+      ]
+    },
+    {
+      "route": "/edit/gt-brand",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 2.373,
+      "fcp": 60,
+      "lcp": 796,
+      "ready": 727.6999999880791,
+      "jsDecoded": 3263637,
+      "jsTransfer": 897242,
+      "jsCount": 21,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 90,
+      "cls": 0,
+      "nodes": 1444,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 2.373,
+          "ready": 727.6999999880791,
+          "wall": 761,
+          "error": null,
+          "status": 200,
+          "fcp": 64,
+          "lcp": 800,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 101,
+          "loaf": [
+            {
+              "t": 54,
+              "d": 62,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            },
+            {
+              "t": 622,
+              "d": 101,
+              "b": 46,
+              "s": [":91"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 897242,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1444,
+          "heapUsed": 20881676,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/edit/gt-brand"
+        },
+        {
+          "ttfb": 2.006,
+          "ready": 715.2999999523163,
+          "wall": 750,
+          "error": null,
+          "status": 200,
+          "fcp": 60,
+          "lcp": 784,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 87,
+          "loaf": [
+            {
+              "t": 47,
+              "d": 65,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57"]
+            },
+            {
+              "t": 624,
+              "d": 87,
+              "b": 36,
+              "s": [":82"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 897242,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1448,
+          "heapUsed": 21781772,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/edit/gt-brand"
+        },
+        {
+          "ttfb": 2.435,
+          "ready": 728.3000000119209,
+          "wall": 763,
+          "error": null,
+          "status": 200,
+          "fcp": 60,
+          "lcp": 796,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 90,
+          "loaf": [
+            {
+              "t": 49,
+              "d": 73,
+              "b": 15,
+              "s": ["index-D6IA9RCO.js:64"]
+            },
+            {
+              "t": 634,
+              "d": 90,
+              "b": 39,
+              "s": [":85"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 897242,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1401,
+          "heapUsed": 20819824,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/edit/gt-brand"
+        }
+      ]
+    },
+    {
+      "route": "/edit/gt-brand",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 1.949,
+      "fcp": 60,
+      "lcp": 720,
+      "ready": 699.2999999523163,
+      "jsDecoded": 3263637,
+      "jsTransfer": 6300,
+      "jsCount": 21,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 93,
+      "cls": 0,
+      "nodes": 1442,
+      "errors": [],
+      "lcpEl": "IMG",
+      "samples": [
+        {
+          "ttfb": 2.269,
+          "ready": 699.2999999523163,
+          "wall": 732,
+          "error": null,
+          "status": 200,
+          "fcp": 56,
+          "lcp": 720,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 93,
+          "loaf": [
+            {
+              "t": 35,
+              "d": 62,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            },
+            {
+              "t": 602,
+              "d": 93,
+              "b": 37,
+              "s": [":83"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 6300,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1446,
+          "heapUsed": 21706632,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/edit/gt-brand"
+        },
+        {
+          "ttfb": 1.827,
+          "ready": 703,
+          "wall": 735,
+          "error": null,
+          "status": 200,
+          "fcp": 64,
+          "lcp": 728,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 89,
+          "loaf": [
+            {
+              "t": 34,
+              "d": 63,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            },
+            {
+              "t": 610,
+              "d": 89,
+              "b": 38,
+              "s": [":83"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 6300,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1442,
+          "heapUsed": 20781364,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/edit/gt-brand"
+        },
+        {
+          "ttfb": 1.949,
+          "ready": 697.2000000476837,
+          "wall": 731,
+          "error": null,
+          "status": 200,
+          "fcp": 60,
+          "lcp": 720,
+          "lcpEl": "IMG",
+          "cls": 0,
+          "loafMax": 94,
+          "loaf": [
+            {
+              "t": 32,
+              "d": 62,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            },
+            {
+              "t": 599,
+              "d": 94,
+              "b": 38,
+              "s": [":83"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3263637,
+          "jsTransfer": 6300,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 1403,
+          "heapUsed": 21558372,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/edit/gt-brand"
+        }
+      ]
+    },
+    {
+      "route": "/present/gt-brand",
+      "kind": "cold",
+      "n": 3,
+      "ttfb": 1.909,
+      "fcp": 692,
+      "lcp": 700,
+      "ready": 666.7000000476837,
+      "jsDecoded": 3132922,
+      "jsTransfer": 854345,
+      "jsCount": 21,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 59,
+      "cls": 0,
+      "nodes": 412,
+      "errors": [],
+      "lcpEl": "IMG.opener-img",
+      "samples": [
+        {
+          "ttfb": 1.792,
+          "ready": 666.7000000476837,
+          "wall": 700,
+          "error": null,
+          "status": 200,
+          "fcp": 692,
+          "lcp": 700,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 64,
+          "loaf": [
+            {
+              "t": 46,
+              "d": 64,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 854345,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 412,
+          "heapUsed": 14020256,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/present/gt-brand"
+        },
+        {
+          "ttfb": 1.909,
+          "ready": 670,
+          "wall": 704,
+          "error": null,
+          "status": 200,
+          "fcp": 692,
+          "lcp": 700,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 59,
+          "loaf": [
+            {
+              "t": 54,
+              "d": 59,
+              "b": 8,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 854345,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 412,
+          "heapUsed": 14041388,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/present/gt-brand"
+        },
+        {
+          "ttfb": 2.071,
+          "ready": 661.6000000238419,
+          "wall": 696,
+          "error": null,
+          "status": 200,
+          "fcp": 684,
+          "lcp": 692,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 58,
+          "loaf": [
+            {
+              "t": 55,
+              "d": 58,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 854345,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 412,
+          "heapUsed": 14053764,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/present/gt-brand"
+        }
+      ]
+    },
+    {
+      "route": "/present/gt-brand",
+      "kind": "warm",
+      "n": 3,
+      "ttfb": 1.967,
+      "fcp": 668,
+      "lcp": 808,
+      "ready": 645.8000000119209,
+      "jsDecoded": 3132922,
+      "jsTransfer": 6300,
+      "jsCount": 21,
+      "largestJs": 1202643,
+      "largestJsName": "index-D6IA9RCO.js",
+      "loafMax": 60,
+      "cls": 0,
+      "nodes": 412,
+      "errors": [],
+      "lcpEl": "IMG.opener-img",
+      "samples": [
+        {
+          "ttfb": 1.885,
+          "ready": 644.2000000476837,
+          "wall": 678,
+          "error": null,
+          "status": 200,
+          "fcp": 668,
+          "lcp": 812,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 33,
+              "d": 60,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 6300,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 412,
+          "heapUsed": 14057184,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/present/gt-brand"
+        },
+        {
+          "ttfb": 1.972,
+          "ready": 645.8000000119209,
+          "wall": 679,
+          "error": null,
+          "status": 200,
+          "fcp": 664,
+          "lcp": 808,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 58,
+          "loaf": [
+            {
+              "t": 36,
+              "d": 58,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:57"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 6300,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 412,
+          "heapUsed": 14031708,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/present/gt-brand"
+        },
+        {
+          "ttfb": 1.967,
+          "ready": 646.3999999761581,
+          "wall": 679,
+          "error": null,
+          "status": 200,
+          "fcp": 672,
+          "lcp": 804,
+          "lcpEl": "IMG.opener-img",
+          "cls": 0,
+          "loafMax": 60,
+          "loaf": [
+            {
+              "t": 35,
+              "d": 60,
+              "b": 7,
+              "s": ["index-D6IA9RCO.js:56"]
+            }
+          ],
+          "jsCount": 21,
+          "jsDecoded": 3132922,
+          "jsTransfer": 6300,
+          "largestJs": 1202643,
+          "largestJsName": "index-D6IA9RCO.js",
+          "nodes": 412,
+          "heapUsed": 14074900,
+          "layoutCount": 0,
+          "finalUrl": "http://localhost:4346/present/gt-brand"
+        }
+      ]
+    }
+  ],
+  "transitions": [],
+  "filmstrip": {
+    "passes": [
+      {
+        "pass": 1,
+        "direction": "down",
+        "frames": 243,
+        "fps": 119.50617283950615,
+        "median": 8.300000000000182,
+        "p95": 10,
+        "max": 16.59999999999991,
+        "over33": 0,
+        "over50": 0
+      },
+      {
+        "pass": 2,
+        "direction": "up",
+        "frames": 246,
+        "fps": 119.51219512195124,
+        "median": 8.300000000000182,
+        "p95": 10,
+        "max": 17,
+        "over33": 0,
+        "over50": 0
+      },
+      {
+        "pass": 3,
+        "direction": "down",
+        "frames": 247,
+        "fps": 119.52191235059757,
+        "median": 8.299999999999272,
+        "p95": 9.899999999999636,
+        "max": 17,
+        "over33": 0,
+        "over50": 0
+      }
+    ],
+    "nodes": 1218,
+    "cards": 85
+  },
+  "idle": {
+    "seconds": 60,
+    "serverFn": 5,
+    "perMinute": 5,
+    "events": 0,
+    "eventsPerMinute": 0,
+    "other": 11
+  },
+  "twins": {
+    "total": 2,
+    "refetched": 0,
+    "list": [
+      {
+        "name": "opener-brand-dark.jpg",
+        "transfer": 0,
+        "decoded": 515192
+      },
+      {
+        "name": "mood-earth-dark.jpg",
+        "transfer": 0,
+        "decoded": 232175
+      }
+    ]
+  },
+  "write": {
+    "deckId": "untitled-20260914-8a73",
+    "text": {
+      "keyToCommit": 91.59999996423721,
+      "keyToSaved": 108.19999998807907,
+      "cloneAfterCommit": 0
+    },
+    "slide": {
+      "paint": 9.099999964237213,
+      "saved": 2021.2999999523163
+    },
+    "capture": {
+      "ms": 1470,
+      "status": 200,
+      "cached": "0",
+      "cdn": null
+    },
+    "homeCard": 1489,
+    "renders": [
+      {
+        "status": 404,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      },
+      {
+        "status": 200,
+        "cache": null
+      }
+    ]
+  },
+  "finishedAt": "2026-09-14T14:55:56.430Z",
+  "rows": [
+    {
+      "check": "routes",
+      "name": "/ cold ttfb",
+      "value": 1.599,
+      "limit": 60,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold fcp",
+      "value": 60,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold lcp",
+      "value": 692,
+      "limit": 450,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold ready",
+      "value": 673.3000000119209,
+      "limit": 450,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold js decoded",
+      "value": 3122113,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold longest animation frame",
+      "value": 62,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/ cold dom nodes",
+      "value": 668,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm ttfb",
+      "value": 1.836,
+      "limit": 40,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm fcp",
+      "value": 60,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm lcp",
+      "value": 672,
+      "limit": 250,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm ready",
+      "value": 652.5,
+      "limit": 250,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm js decoded",
+      "value": 3122113,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm longest animation frame",
+      "value": 60,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/ warm dom nodes",
+      "value": 668,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold ttfb",
+      "value": 2.019,
+      "limit": 60,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold fcp",
+      "value": 64,
+      "limit": 250,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold lcp",
+      "value": 688,
+      "limit": 450,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold ready",
+      "value": 671.8000000119209,
+      "limit": 450,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold js decoded",
+      "value": 3122113,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold longest animation frame",
+      "value": 63,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/new cold dom nodes",
+      "value": 668,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm ttfb",
+      "value": 1.998,
+      "limit": 40,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm fcp",
+      "value": 60,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm lcp",
+      "value": 660,
+      "limit": 250,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm ready",
+      "value": 647.7999999523163,
+      "limit": 250,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm js decoded",
+      "value": 3122113,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm longest animation frame",
+      "value": 61,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/new warm dom nodes",
+      "value": 668,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold ttfb",
+      "value": 18.05,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold fcp",
+      "value": 120,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold lcp",
+      "value": 212,
+      "limit": 500,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold ready",
+      "value": 179.4000000357628,
+      "limit": 500,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold js decoded",
+      "value": 3045067,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold longest animation frame",
+      "value": 63,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/decks cold dom nodes",
+      "value": 626,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm ttfb",
+      "value": 18.072,
+      "limit": 100,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm fcp",
+      "value": 116,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm lcp",
+      "value": 208,
+      "limit": 300,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm ready",
+      "value": 176.80000001192093,
+      "limit": 300,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm js decoded",
+      "value": 3045067,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm longest animation frame",
+      "value": 59,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/decks warm dom nodes",
+      "value": 626,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold ttfb",
+      "value": 10.069,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold fcp",
+      "value": 68,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold lcp",
+      "value": 76,
+      "limit": 500,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold ready",
+      "value": 134.5,
+      "limit": 500,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold js decoded",
+      "value": 3032656,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold longest animation frame",
+      "value": 64,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash cold dom nodes",
+      "value": 122,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm ttfb",
+      "value": 10.008,
+      "limit": 100,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm fcp",
+      "value": 72,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm lcp",
+      "value": 128,
+      "limit": 300,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm ready",
+      "value": 120,
+      "limit": 300,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm js decoded",
+      "value": 3032656,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm longest animation frame",
+      "value": 62,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/decks/trash warm dom nodes",
+      "value": 122,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold ttfb",
+      "value": 34.403,
+      "limit": 250,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold fcp",
+      "value": 140,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold lcp",
+      "value": 140,
+      "limit": 500,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold ready",
+      "value": 231,
+      "limit": 600,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold js decoded",
+      "value": 3128584,
+      "limit": 1000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold longest animation frame",
+      "value": 64,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold cls",
+      "value": 0.0021485001929012343,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand cold dom nodes",
+      "value": 1897,
+      "limit": 1500,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm ttfb",
+      "value": 31.558,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm fcp",
+      "value": 124,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm lcp",
+      "value": 124,
+      "limit": 300,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm ready",
+      "value": 215.89999997615814,
+      "limit": 400,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm js decoded",
+      "value": 3128584,
+      "limit": 1000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm longest animation frame",
+      "value": 60,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm cls",
+      "value": 0.0021485001929012343,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/deck/gt-brand warm dom nodes",
+      "value": 1896,
+      "limit": 1500,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold ttfb",
+      "value": 2.373,
+      "limit": 60,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold fcp",
+      "value": 60,
+      "limit": 250,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold lcp",
+      "value": 796,
+      "limit": 700,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold ready",
+      "value": 727.6999999880791,
+      "limit": 700,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold js decoded",
+      "value": 3263637,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold longest animation frame",
+      "value": 90,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand cold dom nodes",
+      "value": 1444,
+      "limit": 1500,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm ttfb",
+      "value": 1.949,
+      "limit": 40,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm fcp",
+      "value": 60,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm lcp",
+      "value": 720,
+      "limit": 450,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm ready",
+      "value": 699.2999999523163,
+      "limit": 450,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm js decoded",
+      "value": 3263637,
+      "limit": 2000000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm longest animation frame",
+      "value": 93,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/edit/gt-brand warm dom nodes",
+      "value": 1442,
+      "limit": 1500,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold ttfb",
+      "value": 1.909,
+      "limit": 60,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold fcp",
+      "value": 692,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold lcp",
+      "value": 700,
+      "limit": 500,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold ready",
+      "value": 666.7000000476837,
+      "limit": 500,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold js decoded",
+      "value": 3132922,
+      "limit": 1200000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold longest animation frame",
+      "value": 59,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand cold dom nodes",
+      "value": 412,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm ttfb",
+      "value": 1.967,
+      "limit": 40,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm fcp",
+      "value": 668,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm lcp",
+      "value": 808,
+      "limit": 300,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm ready",
+      "value": 645.8000000119209,
+      "limit": 300,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm js decoded",
+      "value": 3132922,
+      "limit": 1200000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm largest js (index-D6IA9RCO.js)",
+      "value": 1202643,
+      "limit": 600000,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "bytes"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm longest animation frame",
+      "value": 60,
+      "limit": 150,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm cls",
+      "value": 0,
+      "limit": 0.05,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ratio"
+    },
+    {
+      "check": "routes",
+      "name": "/present/gt-brand warm dom nodes",
+      "value": 412,
+      "limit": null,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "filmstrip",
+      "name": "first pass longest frame",
+      "value": 16.59999999999991,
+      "limit": 100,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "filmstrip",
+      "name": "steady passes p95 frame",
+      "value": 10,
+      "limit": 20,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "filmstrip",
+      "name": "steady passes longest frame",
+      "value": 17,
+      "limit": 50,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "filmstrip",
+      "name": "steady passes fps",
+      "value": 119.51219512195124,
+      "limit": 50,
+      "kind": "floor",
+      "ok": true,
+      "unit": "fps"
+    },
+    {
+      "check": "filmstrip",
+      "name": "dom nodes with 85 cards",
+      "value": 1218,
+      "limit": 1500,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "idle",
+      "name": "server function calls per minute (60 s window)",
+      "value": 5,
+      "limit": 4,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "count"
+    },
+    {
+      "check": "idle",
+      "name": "event stream connections per minute (60 s window)",
+      "value": 0,
+      "limit": 2,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "twins",
+      "name": "twins re-fetched on the second visit (of 2)",
+      "value": 0,
+      "limit": 0,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "count"
+    },
+    {
+      "check": "write",
+      "name": "text burst: last keyup to local commit",
+      "value": 91.59999996423721,
+      "limit": 450,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "write",
+      "name": "text burst: last keyup to saved revision",
+      "value": 108.19999998807907,
+      "limit": 600,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "write",
+      "name": "text burst: current card clone carries the text after the commit",
+      "value": 0,
+      "limit": 50,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "write",
+      "name": "new slide: pointerdown to painted card",
+      "value": 9.099999964237213,
+      "limit": 16,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "write",
+      "name": "new slide: pointerdown to saved revision",
+      "value": 2021.2999999523163,
+      "limit": 250,
+      "kind": "ceiling",
+      "ok": false,
+      "unit": "ms"
+    },
+    {
+      "check": "write",
+      "name": "capture of the edited slide after the save (status 200, cached 0)",
+      "value": 1470,
+      "limit": 2000,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    },
+    {
+      "check": "write",
+      "name": "home card of the scratch deck on the next /decks visit",
+      "value": 1489,
+      "limit": 1500,
+      "kind": "ceiling",
+      "ok": true,
+      "unit": "ms"
+    }
+  ],
+  "failures": 48
+}

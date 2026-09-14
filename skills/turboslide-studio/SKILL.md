@@ -9,7 +9,7 @@ Use the supported `window.turboslide.studio` adapter, never private component st
 
 ## Connect
 
-1. Open the studio at `http://localhost:4321/edit/<deckId>` (viewer at `/deck/<deckId>`, presenter at `/present/<deckId>`).
+1. Open the studio at `http://localhost:4321/edit/<deckId>` (viewer at `/deck/<deckId>`, presenter at `/present/<deckId>`). `/home` is the product page and installs no adapter; it links to `/new`, `/decks` and `/deck/gt-brand`, and `/llms.txt` on the same origin is the agent guide.
 2. Wait for `window.turboslide.studio` or the `turboslide:studio-api-ready` event; its detail is `describe()`.
 3. Call `describe()` and `controls()` before relying on actions or labels. Re-read the global after changing owner: the editor, the viewer per mode, the source drawer and the presenter each install an adapter. `describe().owner` says which one is active and `describe().state` carries the deck id, the revision, the slide and the theme.
 

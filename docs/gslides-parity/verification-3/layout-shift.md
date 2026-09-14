@@ -1,6 +1,6 @@
 # Layout shift audit
 
-Base http://localhost:4344, deck gt-brand, 109 cells in 663 s, Chromium 147.0.7727.15 (Chrome for Testing 147.0.7727.15, ANGLE Metal, no WebGL), 2026-09-14T08:44:49.186Z.
+Base http://localhost:4344, deck gt-brand, 109 cells in 611 s, Chromium 147.0.7727.15 (Chrome for Testing 147.0.7727.15, ANGLE Metal, no WebGL), 2026-09-14T13:24:05.033Z.
 
 | Cell | Status | Load CLS | Load entries | States run | States skipped |
 | --- | --- | --- | --- | --- | --- |
@@ -57,19 +57,19 @@ Base http://localhost:4344, deck gt-brand, 109 cells in 663 s, Chromium 147.0.77
 | embed 390 light | 200 | 0.0000 | 1 | 0 | 0 |
 | embed 390 dark | 200 | 0.0000 | 1 | 0 | 0 |
 | decks 1440 light | 200 | 0.0000 | 0 | 1 | 0 |
-| decks 1440 light listView | 200 | 0.0021 | 1 | 0 | 0 |
+| decks 1440 light listView | 200 | 0.0026 | 1 | 0 | 0 |
 | decks 1440 light sortTitle | 200 | 0.0000 | 0 | 0 | 0 |
 | decks 1440 light openedHistory | 200 | 0.0000 | 0 | 0 | 0 |
 | decks 1440 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1440 dark listView | 200 | 0.0021 | 1 | 0 | 0 |
+| decks 1440 dark listView | 200 | 0.0026 | 1 | 0 | 0 |
 | decks 1440 dark sortTitle | 200 | 0.0000 | 0 | 0 | 0 |
 | decks 1440 dark openedHistory | 200 | 0.0000 | 0 | 0 | 0 |
 | decks 1280 light | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1280 light listView | 200 | 0.0000 | 0 | 0 | 0 |
+| decks 1280 light listView | 200 | 0.0037 | 1 | 0 | 0 |
 | decks 1280 light sortTitle | 200 | 0.0000 | 0 | 0 | 0 |
 | decks 1280 light openedHistory | 200 | 0.0000 | 0 | 0 | 0 |
 | decks 1280 dark | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1280 dark listView | 200 | 0.0000 | 0 | 0 | 0 |
+| decks 1280 dark listView | 200 | 0.0037 | 1 | 0 | 0 |
 | decks 1280 dark sortTitle | 200 | 0.0000 | 0 | 0 | 0 |
 | decks 1280 dark openedHistory | 200 | 0.0000 | 0 | 0 | 0 |
 | decks 390 light | 200 | 0.0000 | 0 | 0 | 0 |
@@ -103,7 +103,7 @@ Base http://localhost:4344, deck gt-brand, 109 cells in 663 s, Chromium 147.0.77
 | deck 1440 light B | 200 | 0.0000 | 0 | 0 | 0 |
 | edit 1440 light F | 200 | 0.0004 | 1 | 0 | 0 |
 | edit 1440 light I | 200 | 0.0000 | 0 | 0 | 0 |
-| decks 1440 light F | 200 | 0.0010 | 1 | 0 | 0 |
+| decks 1440 light F | 200 | 0.0003 | 1 | 0 | 0 |
 | decks 1440 light I | 200 | 0.0000 | 0 | 0 | 0 |
 | decks 1440 light B | 200 | 0.0000 | 0 | 0 | 0 |
 | print 1440 light F | 200 | 0.0002 | 1 | 0 | 0 |
@@ -118,7 +118,7 @@ Base http://localhost:4344, deck gt-brand, 109 cells in 663 s, Chromium 147.0.77
 
 | Cell | Audit id | Why |
 | --- | --- | --- |
-| edit 1440 light | ? | state panel: entries in 16 frames |
+| edit 1440 light | ? | state panel: entries in 17 frames |
 | edit 1440 light | ? | state inbox: entries in 16 frames |
 | edit 1440 light notesHidden | E2 | load entry 0.0134 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet |
 | edit 1440 dark notesHidden | E2 | load entry 0.0134 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.ts-editor > div.pt-sheet-stage > div.sheet |
@@ -165,25 +165,27 @@ Base http://localhost:4344, deck gt-brand, 109 cells in 663 s, Chromium 147.0.77
 | decks 1440 light | L5 | state filter: html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
 | decks 1440 light | L5 | state filter: html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
 | decks 1440 light | ? | state filter: entries in 2 frames |
-| decks 1440 light listView | L5 | load entry 0.0021 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
-| decks 1440 dark listView | L5 | load entry 0.0021 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
+| decks 1440 light listView | L5 | load entry 0.0026 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
+| decks 1440 dark listView | L5 | load entry 0.0026 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
+| decks 1280 light listView | L5 | load entry 0.0037 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
+| decks 1280 dark listView | L5 | load entry 0.0037 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
 | present 1440 light | ? | state timerHour: body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-timer > button.ts-presenter-text-btn / body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-timer > button.ts-presenter-text-btn |
 | present 1440 light | ? | state timerHour: entries in 1 frames |
 | deckPresent 1440 light | E2 | load entry 0.0472 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage |
-| deckPresent 1440 light | E2 | load entry 0.0175 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present |
+| deckPresent 1440 light | E2 | load entry 0.0175 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present / div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage / div.sheet.is-present > div.ts-stage.stage > div.pt-slide > section.slide.opener.s-opener > div.ts-chips |
 | deckPresent 1440 dark | E2 | load entry 0.0472 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage |
-| deckPresent 1440 dark | E2 | load entry 0.0175 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present |
+| deckPresent 1440 dark | E2 | load entry 0.0175 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present / div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage / div.sheet.is-present > div.ts-stage.stage > div.pt-slide > section.slide.opener.s-opener > div.ts-chips |
 | deckPresent 1280 light | E2 | load entry 0.0531 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage |
-| deckPresent 1280 light | E2 | load entry 0.0197 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present |
+| deckPresent 1280 light | E2 | load entry 0.0197 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present / div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage |
 | deckPresent 1280 dark | E2 | load entry 0.0531 from div.pt-viewer.is-present > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage |
-| deckPresent 1280 dark | E2 | load entry 0.0197 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present |
+| deckPresent 1280 dark | E2 | load entry 0.0197 from section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present / div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-picture > div.pt-sheet-stage > div.sheet.is-present > div.ts-stage.stage / div.sheet.is-present > div.ts-stage.stage > div.pt-slide > section.slide.opener.s-opener > div.ts-chips |
 | deckPresent 390 light | E2 | load entry 0.0616 from body > div.pt-viewer.is-present.sb-open > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-present |
 | deckPresent 390 dark | E2 | load entry 0.0616 from body > div.pt-viewer.is-present.sb-open > section.pt-main > div.pt-stagewrap > div.ts-stagewrap.ts-sheet.is-present |
 | deck 1440 light F | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
 | deck 1440 light F | D1 | load entry 0.0005 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-next / div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-l > button.pt-ib.pt-count / div.pt-slide > section.slide.is-on > div.in > div.center > div.big /  |
 | deck 1440 light I | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
 | edit 1440 light F | G1 | load entry 0.0004 from body > div.ts-editor > div.pt-viewer.is-editor > header.ts-title-row > div.ts-title-r / div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title / div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot / div.ts-editor > div.pt-viewer.is-editor > div.ts-toolbar > div.ts-tb-tail > span.ts-tb-slot / div.ts-editor > div.pt-viewer.is-editor > nav.ts-menubar > div.ts-menubar-titles > button.ts-menubar-title |
-| decks 1440 light F | E10 | load entry 0.0010 from body > main.ts-home.ts-home-page > section.ts-recent > ul.ts-cards > li.ts-hm-card / body > main.ts-home.ts-home-page > section.ts-recent > ul.ts-cards > li.ts-hm-card / body > main.ts-home.ts-home-page > section.ts-recent > ul.ts-cards > li.ts-hm-card / body > main.ts-home.ts-home-page > section.ts-recent > ul.ts-cards > li.ts-hm-card / html > body > main.ts-home.ts-home-page > footer.ts-home-tail |
+| decks 1440 light F | L5 | load entry 0.0003 from html > body > main.ts-home.ts-home-page > footer.ts-home-tail / body > main.ts-home.ts-home-page > section.ts-recent > div.ts-recent-head > div.ts-recent-tools / body > main.ts-home.ts-home-page > section#templates.ts-strip > div.ts-strip-head > a.ts-strip-gallery |
 | print 1440 light F | ? | load entry 0.0002 from html > body > main.ts-print > header.ts-print-bar > label.ts-print-layout / html > body > main.ts-print > header.ts-print-bar > button.pt-ib.is-text / html > body > main.ts-print > header.ts-print-bar > label.ts-print-check / html > body > main.ts-print > header.ts-print-bar > span.ts-print-title |
 | present 1440 light F | P3 | load entry 0.0002 from div.ts-presenter-row > div.ts-presenter-current > div.ts-presenter-pick > button.ts-presenter-counter > span.ts-presenter-counter-title / div.ts-presenter > div.ts-presenter-body > aside.ts-presenter-side > div.ts-presenter-tabs > button#ts-presenter-tab-audience.ts-presenter-tab.is-disabled /  / body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-facts > span.ts-presenter-link / body > div.ts-presenter > header.ts-presenter-head > div.ts-presenter-facts > span.ts-presenter-clock |
 | deck 1440 light reduced | D1 | load entry 0.0021 from body > div.pt-viewer > section.pt-main > div.pt-toolbar.is-tight-1 > div.pt-bar-r |
@@ -195,12 +197,12 @@ Call log:
   - waiting for locator('[data-menu-item="view.filmstrip"]')
 )
 - edit 1440 light: write (enter failed: page.evaluate: RangeError: Unknown action "slide.setNotes"
-    at t (http://localhost:4344/assets/useStudioSession-B1rairBV.js:1:1546)
-    at Object.dispatch (http://localhost:4344/assets/useStudioSession-B1rairBV.js:1:1744)
-    at X (http://localhost:4344/assets/edit._deckId-CQ4w5ias.js:2:24143)
-    at Object.<anonymous> (http://localhost:4344/assets/useStudioSession-B1rairBV.js:1:2407)
-    at N (http://localhost:4344/assets/useStudioSession-B1rairBV.js:1:8600)
-    at Object.invoke (http://localhost:4344/assets/useStudioSession-B1rairBV.js:1:11046)
+    at t (http://localhost:4344/assets/useStudioSession-BoZ2_HHm.js:1:1580)
+    at Object.dispatch (http://localhost:4344/assets/useStudioSession-BoZ2_HHm.js:1:1778)
+    at X (http://localhost:4344/assets/edit._deckId-Bpvt4QCe.js:2:24143)
+    at Object.<anonymous> (http://localhost:4344/assets/useStudioSession-BoZ2_HHm.js:1:2441)
+    at N (http://localhost:4344/assets/useStudioSession-BoZ2_HHm.js:1:8634)
+    at Object.invoke (http://localhost:4344/assets/useStudioSession-BoZ2_HHm.js:1:11080)
     at eval (eval at evaluate (:311:30), <anonymous>:7:22)
     at async <anonymous>:337:30)
 - edit 1440 light: ditherDrag (control absent: [data-control="formatOptions.dither.black.slider"])

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { expect, test } from '@playwright/test';
@@ -70,7 +70,7 @@ async function openNew(page: Page): Promise<string> {
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
   const rows = await invoke<Row[]>(page, 'slide.list');
   const first = rows[0];
   if (!first) throw new Error('the fresh presentation has no slide');
@@ -180,7 +180,7 @@ test.describe.serial('the dither pipeline in the editor', () => {
     const created = await invokeDeckAddress(page);
     await page.goto(created);
     await page.waitForFunction(() => Boolean(window.turboslide?.studio));
-    await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+    await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
     await installFrameLog(page);
     await openBackgroundDialog(page);
     await expect(page.locator('[data-control="dialog.background.picture"]')).toBeVisible();
@@ -222,7 +222,7 @@ test.describe.serial('the dither pipeline in the editor', () => {
     test.setTimeout(180_000);
     await page.goto(await invokeDeckAddress(page));
     await page.waitForFunction(() => Boolean(window.turboslide?.studio));
-    await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+    await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
     await installFrameLog(page);
     await expect(
       page.locator(
@@ -313,7 +313,7 @@ test.describe.serial('the dither pipeline in the editor', () => {
     test.setTimeout(120_000);
     await page.goto(await invokeDeckAddress(page));
     await page.waitForFunction(() => Boolean(window.turboslide?.studio));
-    await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+    await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
     await installFrameLog(page);
     const canvas = page.locator(
       '.pt-stagewrap .picture[data-dither-state="live"] canvas.picture-dither:not([hidden])',
@@ -351,7 +351,7 @@ test.describe.serial('the dither pipeline in the editor', () => {
     test.setTimeout(600_000);
     await page.goto(await invokeDeckAddress(page));
     await page.waitForFunction(() => Boolean(window.turboslide?.studio));
-    await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+    await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
     type Report = {
       perfect: boolean;
       residual: string[];
@@ -383,8 +383,40 @@ test.describe.serial('the dither pipeline in the editor', () => {
       baseRevision: (await invoke<{ revision: number }>(page, 'deck.info')).revision,
     }).catch(() => null);
     if (dry !== null) expect(dry.missing.length).toBeGreaterThanOrEqual(0);
+    /* the deck the first test created goes with the run: on the file store its folder is under the
+       checkout's decks/ (the tmp overlay holds nothing here); a run that failed before this point
+       keeps it for the trace */
+    await removeDitherDeck(page);
   });
 });
+
+/** Removes the run's deck from a file store's decks/ folder (a tmp overlay holds nothing here). */
+async function removeDitherDeck(page: Page): Promise<void> {
+  const id = /\/edit\/([^/?#]+)/.exec(page.url())?.[1];
+  if (id === undefined || !/^untitled-\d{8}-[a-z0-9]{4}$/.test(decodeURIComponent(id))) return;
+  const deckId = decodeURIComponent(id);
+  /* the room writes the folder again with its checkpoint (SPEC-3 0.8): wait until every write
+     is covered before the folder goes */
+  await page
+    .waitForFunction(
+      () => {
+        const state = window.turboslide?.studio?.describe().state as
+          { revision?: number; serverRevision?: number; pending?: number } | undefined;
+        return (
+          state !== undefined && state.pending === 0 && state.revision === state.serverRevision
+        );
+      },
+      null,
+      { timeout: 20_000 },
+    )
+    .catch(() => undefined);
+  for (const dir of [
+    join(ROOT, 'decks', deckId),
+    join(ROOT, '.turboslide', 'worker', 'cache', deckId),
+    join(ROOT, '.turboslide', 'thumbs', deckId),
+  ])
+    rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+}
 
 /** The address of the deck the first test created, kept on disk beside the budget for the serial tests. */
 async function invokeDeckAddress(page: Page): Promise<string> {

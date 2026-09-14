@@ -1,0 +1,26 @@
+{
+  "base": "http://localhost:4321",
+  "at": "2026-09-14T12:09:26.559Z",
+  "rows": [
+    {
+      "name": "the slide",
+      "ok": true,
+      "evidence": "split-1: blocks h (heading) \"\", p1 (paragraph) \"\", p2 (paragraph) \"\""
+    },
+    {
+      "name": "S2 round 1: A types in the heading and B in the body within a second; both land on both pages",
+      "ok": false,
+      "evidence": "carets true/true; typed in 321 ms; at 8 s {\"A\":{\"revision\":3,\"pending\":0,\"h\":\"alpha\",\"p\":\"bravo\"},\"B\":{\"revision\":3,\"pending\":0,\"h\":\"alpha\",\"p\":\"bravo\"}}"
+    },
+    {
+      "name": "S2 round 2: A and B type in the same body within a second; every letter of both lands on both pages (3.5)",
+      "ok": true,
+      "evidence": "carets true/true; typed in 413 ms; before \"bravo\"; at 3 s {\"A\":{\"revision\":5,\"pending\":0,\"h\":\"alpha\",\"p\":\"bravo delta charlie\"},\"B\":{\"revision\":5,\"pending\":0,\"h\":\"alpha\",\"p\":\"bravo delta charlie\"}}; at 8 s {\"A\":{\"revision\":5,\"pending\":0,\"h\":\"alpha\",\"p\":\"bravo delta charlie\"},\"B\":{\"revision\":5,\"pending\":0,\"h\":\"alpha\",\"p\":\"bravo delta charlie\"}}"
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "evidence": "verifier-s2-mu179g67 trashed and removed"
+    }
+  ]
+}

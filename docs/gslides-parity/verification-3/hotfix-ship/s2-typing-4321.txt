@@ -1,0 +1,11 @@
+ok   the slide: split-1: blocks h (heading) "", p1 (paragraph) "", p2 (paragraph) ""
+   round 1 at 1 s: {"A":{"revision":1,"pending":0,"h":"alpha","p":"bravo"},"B":{"revision":1,"pending":0,"h":"alpha","p":"bravo"}}; recent records 1:slide.insert@
+   round 1 at 3 s: {"A":{"revision":3,"pending":0,"h":"alpha","p":"bravo"},"B":{"revision":3,"pending":0,"h":"alpha","p":"bravo"}}; recent records 1:slide.insert@ | 2:text.splice@h | 3:text.splice@p1
+   round 1 at 8 s: {"A":{"revision":3,"pending":0,"h":"alpha","p":"bravo"},"B":{"revision":3,"pending":0,"h":"alpha","p":"bravo"}}; recent records 1:slide.insert@ | 2:text.splice@h | 3:text.splice@p1
+FAIL S2 round 1: A types in the heading and B in the body within a second; both land on both pages: carets true/true; typed in 321 ms; at 8 s {"A":{"revision":3,"pending":0,"h":"alpha","p":"bravo"},"B":{"revision":3,"pending":0,"h":"alpha","p":"bravo"}}
+   round 2 at 1 s: {"A":{"revision":3,"pending":0,"h":"alpha","p":"bravo delta charlie"},"B":{"revision":3,"pending":0,"h":"alpha","p":"bravo delta charlie"}}; recent records 1:slide.insert@ | 2:text.splice@h | 3:text.splice@p1
+   round 2 at 3 s: {"A":{"revision":5,"pending":0,"h":"alpha","p":"bravo delta charlie"},"B":{"revision":5,"pending":0,"h":"alpha","p":"bravo delta charlie"}}; recent records 2:text.splice@h | 3:text.splice@p1 | 4:text.splice@p1 | 5:text.splice@p1
+   round 2 at 8 s: {"A":{"revision":5,"pending":0,"h":"alpha","p":"bravo delta charlie"},"B":{"revision":5,"pending":0,"h":"alpha","p":"bravo delta charlie"}}; recent records 2:text.splice@h | 3:text.splice@p1 | 4:text.splice@p1 | 5:text.splice@p1
+ok   S2 round 2: A and B type in the same body within a second; every letter of both lands on both pages (3.5): carets true/true; typed in 413 ms; before "bravo"; at 3 s {"A":{"revision":5,"pending":0,"h":"alpha","p":"bravo delta charlie"},"B":{"revision":5,"pending":0,"h":"alpha","p":"bravo delta charlie"}}; at 8 s {"A":{"revision":5,"pending":0,"h":"alpha","p":"bravo delta charlie"},"B":{"revision":5,"pending":0,"h":"alpha","p":"bravo delta charlie"}}
+ok   cleanup: verifier-s2-mu179g67 trashed and removed
+S2 typing probe: 3 ok, 1 fail

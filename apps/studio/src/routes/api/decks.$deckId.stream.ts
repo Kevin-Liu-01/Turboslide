@@ -5,6 +5,7 @@ import { streamLifetimeMs, streamRetryMs } from '@turboslide/realtime/admission'
 import { STREAM_HEARTBEAT_MS, sseComment, sseFrame, sseRetry } from '@turboslide/realtime/protocol';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
+import { accessStore } from '../../server/access';
 import { denialBody } from '../../server/authorize';
 import {
   bindClient,
@@ -127,10 +128,15 @@ async function serve(request: Request, deckId: string): Promise<Response> {
           const last = filtered.entries[filtered.entries.length - 1];
           write(sseFrame(filtered, last?.seq));
         } else write(sseFrame(filtered));
-        if (event.type === 'access') void recheck();
+        if (event.type === 'access') void recheck(true);
       });
       const heartbeat = setInterval(() => write(sseComment()), STREAM_HEARTBEAT_MS);
-      const recheck = async (): Promise<void> => {
+      const recheck = async (fresh = false): Promise<void> => {
+        // an access event names a share write: drop this instance's cached record first so the
+        // recheck reads the record that write produced, on the redis tier at once when another
+        // instance wrote it (VERIFICATION-3 finding 34; hotfix B request R3). On the blob tier
+        // the event is process local and the drop repeats what the writer's hooks did.
+        if (fresh) (await accessStore()).drop(deckId);
         const again = await decideFor(identity, deckId, 'read', 'stream');
         if (!again.ok || again.shadow !== undefined) {
           write(sseFrame({ type: 'access', revision: 0 }));

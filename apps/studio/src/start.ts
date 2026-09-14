@@ -57,40 +57,22 @@ async function serverRequestMiddleware(): Promise<AnyRequestMiddleware[]> {
  * the same seams.
  */
 async function bindServerSeams(): Promise<void> {
-  const [authorize, access, identity, links, root, room, ratelimit, tokens, index] =
-    await Promise.all([
-      import('./server/authorize'),
-      import('./server/access'),
-      import('./server/auth/identity'),
-      import('./server/auth/links'),
-      import('./server/root'),
-      import('./server/room'),
-      import('./server/ratelimit'),
-      import('./server/tokens'),
-      import('./server/index'),
-    ]);
+  const [authorize, access, identity, root, room, ratelimit, tokens, index] = await Promise.all([
+    import('./server/authorize'),
+    import('./server/access'),
+    import('./server/auth/identity'),
+    import('./server/root'),
+    import('./server/room'),
+    import('./server/ratelimit'),
+    import('./server/tokens'),
+    import('./server/index'),
+  ]);
   authorize.bindAuthorize({ loadRecord: access.loadAccessRecord });
   identity.bindIdentityHooks({
-    findShareLink: async (hash) => {
-      const now = new Date();
-      const heads = await root.listStoredDecks();
-      for (const head of heads) {
-        const record = await access.readAccess(head.id).catch(() => null);
-        if (record === null) continue;
-        const hit = links.findLinkInRecord(record, hash, now);
-        if (hit !== null) return hit;
-      }
-      // a miss through the cache: the link may have been minted on another instance seconds ago
-      // (VERIFICATION-3 finding 34), so one pass past the cache before the 404; an unknown token
-      // costs one store read per deck, bounded by the deck count
-      for (const head of heads) {
-        const stored = await access.readStoredAccessFresh(head.id).catch(() => null);
-        if (stored === null) continue;
-        const hit = links.findLinkInRecord(stored.record, hash, now);
-        if (hit !== null) return hit;
-      }
-      return null;
-    },
+    // the link hash index names the deck and one record read answers, read past this instance's
+    // cache when the exchange asks (VERIFICATION-3 finding 34 F1 and F2; server/access.ts); a
+    // miss falls back to the scan of every stored deck's record
+    findShareLink: (hash, options) => access.findShareLink(hash, options),
     deckIndex: (principalId, view) => index.accountDecks({ principalId, admin: false }, view),
   });
   const redis = room.redisCommands();

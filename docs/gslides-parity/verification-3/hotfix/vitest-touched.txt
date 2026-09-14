@@ -1,0 +1,70 @@
+=== packages/realtime 11:45:09
+
+ RUN  v4.1.11 /Users/kevinliu/repos/Turboslide/packages/realtime
+
+
+ Test Files  10 passed (10)
+      Tests  80 passed (80)
+   Start at  04:45:09
+   Duration  2.00s (transform 1.59s, setup 0ms, import 2.36s, tests 2.20s, environment 0ms)
+
+=== packages/realtime exit 0
+=== packages/viewer 11:45:11
+
+ RUN  v4.1.11 /Users/kevinliu/repos/Turboslide/packages/viewer
+
+
+ Test Files  26 passed (26)
+      Tests  240 passed (240)
+   Start at  04:45:11
+   Duration  1.22s (transform 4.93s, setup 0ms, import 7.64s, tests 193ms, environment 1.68s)
+
+=== packages/viewer exit 0
+=== packages/store 11:45:13
+
+ RUN  v4.1.11 /Users/kevinliu/repos/Turboslide/packages/store
+
+
+ Test Files  12 passed (12)
+      Tests  128 passed (128)
+   Start at  04:45:13
+   Duration  1.47s (transform 2.44s, setup 0ms, import 3.99s, tests 2.15s, environment 1ms)
+
+=== packages/store exit 0
+=== packages/identity 11:45:14
+
+ RUN  v4.1.11 /Users/kevinliu/repos/Turboslide/packages/identity
+
+
+ Test Files  10 passed (10)
+      Tests  79 passed (79)
+   Start at  04:45:15
+   Duration  1.03s (transform 762ms, setup 0ms, import 1.05s, tests 1.40s, environment 0ms)
+
+=== packages/identity exit 0
+=== apps/studio 11:45:16
+(node:24429) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24428) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24450) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  25 passed (25)
+      Tests  173 passed (173)
+   Start at  04:45:16
+   Duration  1.53s (transform 5.83s, setup 0ms, import 10.98s, tests 1.85s, environment 1ms)
+
+=== apps/studio exit 0
+=== packages/chrome 11:45:17
+
+ RUN  v4.1.11 /Users/kevinliu/repos/Turboslide/packages/chrome
+
+
+ Test Files  53 passed (53)
+      Tests  483 passed (483)
+   Start at  04:45:18
+   Duration  7.65s (transform 21.81s, setup 0ms, import 44.00s, tests 20.20s, environment 50.15s)
+
+=== packages/chrome exit 0
+done

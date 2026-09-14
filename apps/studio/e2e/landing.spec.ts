@@ -93,7 +93,10 @@ test('/new is noindex and a visit that only looks writes nothing to the store', 
   page,
 }) => {
   const html = await (await page.request.get('/new')).text();
-  expect(html).toMatch(/<meta name="robots" content="noindex"\s*\/?>/);
+  // round three stamps the CSP nonce on every head tag (routes/__root.tsx; VERIFICATION-3 step 21
+  // "the robots meta carries a nonce"), so the meta closes after its attributes rather than right
+  // after content; the noindex directive itself is unchanged
+  expect(html).toMatch(/<meta name="robots" content="noindex"[^>]*\/?>/);
   const seen = draftDecks();
   await page.goto('/new');
   await expect(page).toHaveTitle('Untitled presentation, Turboslide');
@@ -244,6 +247,47 @@ test('the first edit (editor attached) creates the deck, moves the address to /e
   await expect(page).toHaveURL(new RegExp(`/edit/${info.id}`));
   await editorReady(page);
   expect((await invoke<Info>(page, 'deck.info')).title).toBe('Q4 review');
+});
+
+test('a double click on the empty title placeholder edits it, and typing saves the deck (SPEC 6.1; VERIFICATION-3 finding 45)', async ({
+  page,
+}) => {
+  // the first thing a sales user meets at the root address: double click the visible title
+  // placeholder, type, and the first burst creates the deck and moves the address. Before the fix
+  // the second click of the double blurred the session the first click opened (the empty
+  // placeholder collapsed to the caret once its prompt left) and nothing was written.
+  await page.goto('/new');
+  await editorReady(page);
+  const info = await invoke<Info>(page, 'deck.info');
+  expect(existsSync(join(DECKS, info.id))).toBe(false);
+  const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="heading/text"]');
+  const box = await heading.boundingBox();
+  expect(box).not.toBeNull();
+  await page.mouse.dblclick(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  /* the double click opened the inline session and it stayed open (the run is editable, focused) */
+  await expect(heading).toHaveAttribute('contenteditable', 'true');
+  const caretInside = await page.evaluate(() => {
+    const selection = window.getSelection();
+    const run = document.querySelector('.ts-stagewrap.ts-editor [data-run="heading/text"]');
+    return Boolean(selection && run && run.contains(document.activeElement));
+  });
+  expect(caretInside).toBe(true);
+  /* typing lands and the first burst creates the deck under the draft id and moves the address */
+  await page.keyboard.type('Q4 review', { delay: 25 });
+  await page.keyboard.press('Escape');
+  await expect(page).toHaveURL(new RegExp(`/edit/${info.id}`), { timeout: 20_000 });
+  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  const after = await invoke<Info>(page, 'deck.info');
+  expect(after.revision).toBe(1);
+  expect(after.title).toBe('Q4 review');
+  /* the deck exists in the store and the room attached over the stream after the first write */
+  expect(existsSync(join(DECKS, info.id, 'deck.json'))).toBe(true);
+  const sync = await page.evaluate(
+    () =>
+      window.turboslide!.studio.describe().state.sync as { transport: string; connected: boolean },
+  );
+  expect(sync.transport).toBe('sse');
+  expect(sync.connected).toBe(true);
 });
 
 test('two tabs on /new (editor attached) get two drafts', async ({ context }) => {

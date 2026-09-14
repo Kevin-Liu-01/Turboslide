@@ -1,0 +1,72 @@
+check  1/28: pnpm install --frozen-lockfile
+packages/native/npm/darwin-x64           | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["darwin"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-arm64-gnu      | [WARN] Unsupported platform: wanted: {"cpu":["arm64"],"os":["linux"],"libc":["glibc"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-arm64-musl     | [WARN] Unsupported platform: wanted: {"cpu":["arm64"],"os":["linux"],"libc":["musl"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-x64-gnu        | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["linux"],"libc":["glibc"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-x64-musl       | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["linux"],"libc":["musl"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/win32-x64-msvc       | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["win32"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+Scope: all 32 workspace projects
+Already up to date
+Done in 224ms using pnpm v11.15.1
+check  1/28: ok in 0.3 s
+check  2/28: pnpm exec tsr generate --config apps/studio/tsr.config.json
+(node:24816) Warning: Accessing non-existent property 'replaceRouteChunk' of module exports inside circular dependency
+(Use `node --trace-warnings ...` to show where the warning was created)
+check  2/28: ok in 0.7 s
+check  3/28: git ls-files --error-unmatch packages/agent/generated skills/*/references docs/grammar.md packages/schema/src/rules.json packages/lint/fixtures/index.json ':(literal)apps/studio/src/routes/openapi[.]json.ts' > /dev/null && pnpm generate:contracts && git diff --exit-code -- packages/agent/generated skills/*/references docs/grammar.md packages/schema/src/rules.json packages/lint/fixtures/index.json ':(literal)apps/studio/src/routes/openapi[.]json.ts'
+$ pnpm --filter @turboslide/agent generate
+packages/native/npm/darwin-x64           | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["darwin"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-arm64-gnu      | [WARN] Unsupported platform: wanted: {"cpu":["arm64"],"os":["linux"],"libc":["glibc"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-arm64-musl     | [WARN] Unsupported platform: wanted: {"cpu":["arm64"],"os":["linux"],"libc":["musl"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-x64-gnu        | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["linux"],"libc":["glibc"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/linux-x64-musl       | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["linux"],"libc":["musl"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+packages/native/npm/win32-x64-msvc       | [WARN] Unsupported platform: wanted: {"cpu":["x64"],"os":["win32"],"libc":["any"]} (current: {"os":"darwin","cpu":"arm64","libc":"unknown"})
+$ node src/generate/main.ts
+generate:contracts: 14 files current
+check  3/28: ok in 1.3 s
+check  4/28: pnpm exec tsc -b
+check  4/28: ok in 0.4 s
+check  5/28: pnpm test
+$ vitest run
+
+ RUN  v4.1.11 /Users/kevinliu/repos/Turboslide
+
+stdout | src/redis.test.ts > redisChannel > admits 1,000 appends from two contending instances with no lost entry and every wait under 50 ms
+contention: 1000 appends, 15 retries, 8 under the append lock, most attempts by one writer 3, wait p50 0.03 ms, p95 0.07 ms, max 88.46 ms (load 17.5 on 18 cpus)
+
+ ❯ |realtime| src/redis.test.ts (17 tests | 1 failed) 276ms
+     × admits 1,000 appends from two contending instances with no lost entry and every wait under 50 ms 126ms
+(node:25882) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:25887) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:25869) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:25872) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:25916) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |realtime| src/redis.test.ts > redisChannel > admits 1,000 appends from two contending instances with no lost entry and every wait under 50 ms
+AssertionError: expected 88.46199999999999 to be less than 50
+ ❯ src/redis.test.ts:148:30
+    146|     expect(mostAttempts).toBeLessThanOrEqual(16);
+    147|     expect(percentile(0.95)).toBeLessThan(50);
+    148|     if (!busy) expect(worst).toBeLessThan(50);
+       |                              ^
+    149|
+    150|     // every instance's listeners saw every op once, in order
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 265 passed (266)
+      Tests  1 failed | 2849 passed | 3 skipped (2853)
+   Start at  04:46:02
+   Duration  78.79s (transform 138.85s, setup 0ms, import 274.46s, tests 312.51s, environment 65.50s)
+
+[ELIFECYCLE] Test failed. See above for more details.
+check  5/28: FAIL exit 1 after 79.6 s
+check: stopped after a failure (82.2 s)

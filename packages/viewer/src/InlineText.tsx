@@ -389,6 +389,24 @@ export function runKey(slideId: string, blockId: string, pointer: string): strin
   return `${slideId}:${blockId}/${pointer}`;
 }
 
+/**
+ * Whether a mousedown should keep the caret in the run being edited (SPEC 6.4: double click to
+ * edit; VERIFICATION-3 finding 45). The first click of a double click makes a run editable and
+ * removes its prompt, so an empty placeholder collapses to the caret; the second click of the
+ * double then lands beside the run and its native focus shift would blur and end the session the
+ * first click just opened. When a session is still live (`ended` false) and a repeat click
+ * (`detail` two or more) lands outside the editable, the default is prevented so the focus stays.
+ * A single click, a click inside the run (where the browser's own word selection belongs) and a
+ * session that has already ended are left alone.
+ */
+export function keepsCaretOnRepeatClick(input: {
+  ended: boolean;
+  detail: number;
+  insideEditable: boolean;
+}): boolean {
+  return !input.ended && input.detail >= 2 && !input.insideEditable;
+}
+
 /* the markup a session absorbed from a collaborator since its last burst, per run; the next burst
    diffs against it (textBurstMutation) and clears it */
 const absorbedBases = new Map<string, Markup>();
@@ -1383,6 +1401,20 @@ export function InlineText({
       if (to instanceof Node && popover.current?.contains(to)) return;
       finish('blur');
     };
+    // The second click of a double click that opened this session keeps the caret (SPEC 6.4:
+    // double click to edit). The first click makes the run editable and its prompt leaves, so an
+    // empty placeholder collapses to the caret; the second click of the double lands beside the
+    // run, and its native focus shift would blur and end the session the first click just opened
+    // (the /new title placeholder, VERIFICATION-3 finding 45). Preventing the default on that
+    // second mousedown keeps the focus in the editable. A double click on a run that already
+    // holds text lands inside the editable, so the browser's own word selection is untouched, and
+    // a session that has already ended (done) never swallows a click.
+    const onDocMouseDown = (e: MouseEvent) => {
+      const insideEditable = e.target instanceof Node && element.contains(e.target);
+      if (keepsCaretOnRepeatClick({ ended: done.current, detail: e.detail, insideEditable })) {
+        e.preventDefault();
+      }
+    };
     const onPaste = (e: ClipboardEvent) => {
       // pasted text lands as plain text; a line break is a paragraph break on a multiline
       // pointer and a space elsewhere (SPEC 4.2; gslides-parity SPEC 7.4)
@@ -1397,12 +1429,14 @@ export function InlineText({
     element.addEventListener('input', onInputEvent);
     element.addEventListener('blur', onBlur);
     element.addEventListener('paste', onPaste);
+    document.addEventListener('mousedown', onDocMouseDown, true);
     window.addEventListener(TEXT_CHANGED_EVENT, onTextChanged);
     listeners.current = () => {
       element.removeEventListener('keydown', onKey);
       element.removeEventListener('input', onInputEvent);
       element.removeEventListener('blur', onBlur);
       element.removeEventListener('paste', onPaste);
+      document.removeEventListener('mousedown', onDocMouseDown, true);
       window.removeEventListener(TEXT_CHANGED_EVENT, onTextChanged);
       document.removeEventListener('selectionchange', onSelectionChange);
       callbacks.current.onHandle?.(null);

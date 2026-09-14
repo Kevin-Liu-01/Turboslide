@@ -9,24 +9,31 @@ import {
 } from '@turboslide/schema/access';
 import type { Capability, Role, Via } from '@turboslide/schema/access';
 import { ConflictError } from '@turboslide/schema/errors';
+import { canonicalJson } from '@turboslide/schema/json';
 import {
-  AccessPreconditionError,
   blobAccessStore,
   blobIndexStore,
+  blobLinkIndex,
   cachedAccessStore,
   fileAccessStore,
   fileIndexStore,
+  fileLinkIndex,
+  isAccessPrecondition,
   memoryAccessBus,
   memoryHeadCache,
+  newLinkHashes,
 } from '@turboslide/store/hosted';
 import type {
   AccessStore,
   CachedAccessStore,
   HeadCache,
   IndexStore,
+  LinkIndex,
   StoredAccess,
 } from '@turboslide/store/hosted';
 
+import type { ShareLinkHit, ShareLinkLookupOptions } from './auth/identity';
+import { findLinkInRecord } from './auth/links';
 import type { AuthContext } from './authorize';
 import { denialBody } from './authorize';
 import type { RequestIdentity } from './room';
@@ -35,26 +42,47 @@ import { decksDir, exportBlobClient, stateDir, storeSelection } from './root';
 /**
  * The access record on this studio (gslides-parity SPEC-3 2.2, 6.1; MILESTONES-3 B2 day 5): the
  * store the backend selects (`decks/<id>/.turboslide/access.json` on a checkout and the tmp
- * overlay, `decks/<id>/access.json` on the Blob store), behind the 60 s cache whose drop message
- * rides the room's channel hosted, the per identity index and the head cache beside it, and the
- * loader `authorize()` binds (`loadAccessRecord`). The share actions of section 12 land here on
- * day 5; this module is what day 3's routes read for the roster's switches.
+ * overlay, `decks/<id>/access.json` on the Blob store), behind the read through cache, the per
+ * identity index, the link hash index and the head cache beside it, and the loader `authorize()`
+ * binds (`loadAccessRecord`). The share actions of section 12 run over `hostedAccessHooks`, and
+ * the link exchange finds a link through `findShareLink`.
+ *
+ * The cache and the instances (VERIFICATION-3 finding 34). The drop bus is process local on every
+ * hosted tier this round (the redis tier's shared `PUBLISH access:<deckId>` is Kevin's install),
+ * so another instance's write never drops this instance's entry. Three rules bound the stale
+ * window: the blob tier trusts an entry for `BLOB_ACCESS_TTL_MS` (5 s) instead of 60 s; every
+ * share write and every link exchange reads past the cache (`readStoredAccessFresh`, the F1
+ * "drop before the fresh read"), so a write's `ifMatch` etag is the store's and a mint or a
+ * revocation seconds old counts on every instance; and the link hash index (`links/<hex>`,
+ * written beside the record before the record itself, F2) makes the exchange one record read
+ * instead of one per deck. A conflict the store still reports is never the store's own sentence:
+ * `hostedAccessHooks.save` retries once when the store holds the very record the write based on
+ * under another etag, and otherwise answers the SPEC-3 sentence with the current record attached.
  */
 
 /** How long a blob tier instance trusts a record it read (finding 34); the file tier keeps 60 s. */
 export const BLOB_ACCESS_TTL_MS = 5_000;
+
+/** The 409 sentence of a share write that lost to another (SPEC-3 6.1, 6.9). */
+export const SHARE_CONFLICT_SENTENCE =
+  'The sharing settings changed since they were read; reload and retry';
 
 type Shared = typeof globalThis & {
   __turboslideAccess?: {
     access: CachedAccessStore;
     index: IndexStore;
     heads: HeadCache;
+    links: LinkIndex;
     kind: AccessStore['kind'];
   };
 };
 
 const shared = globalThis as Shared;
 let building: Promise<NonNullable<Shared['__turboslideAccess']>> | undefined;
+
+function warn(line: string): void {
+  console.error(`turboslide access: ${line}`);
+}
 
 async function build(): Promise<NonNullable<Shared['__turboslideAccess']>> {
   const selection = storeSelection();
@@ -66,10 +94,11 @@ async function build(): Promise<NonNullable<Shared['__turboslideAccess']>> {
         // the bus is process local, so on the blob tier another instance's write never drops
         // this instance's entry: a short trust window bounds the stale read (VERIFICATION-3
         // finding 34: a link minted or revoked on one instance took up to a minute to land on
-        // another); the redis tier's shared drop message is round four's
+        // another); the redis tier's shared drop message is Kevin's install
         access: cachedAccessStore(blobAccessStore(client), { bus, ttlMs: BLOB_ACCESS_TTL_MS }),
         index: blobIndexStore(client),
         heads: memoryHeadCache(),
+        links: blobLinkIndex(client),
         kind: 'blob',
       };
     }
@@ -78,6 +107,7 @@ async function build(): Promise<NonNullable<Shared['__turboslideAccess']>> {
     access: cachedAccessStore(fileAccessStore(decksDir()), { bus }),
     index: fileIndexStore(stateDir()),
     heads: memoryHeadCache(),
+    links: fileLinkIndex(stateDir()),
     kind: 'file',
   };
 }
@@ -104,6 +134,11 @@ export async function headCache(): Promise<HeadCache> {
   return (await stores()).heads;
 }
 
+/** The link hash index beside the records (SPEC-3 6.4; finding 34 F2). */
+export async function linkIndex(): Promise<LinkIndex> {
+  return (await stores()).links;
+}
+
 /** The stored record with its etag, or null for a deck nobody claimed. */
 export async function readStoredAccess(deckId: string): Promise<StoredAccess | null> {
   return (await accessStore()).read(deckId);
@@ -111,8 +146,8 @@ export async function readStoredAccess(deckId: string): Promise<StoredAccess | n
 
 /**
  * The stored record read past this instance's cache (VERIFICATION-3 finding 34, F1 "drop before
- * the fresh read"): what a write bases its etag on, and what a link exchange falls back to when
- * the cached record knows no such link. One store read per call.
+ * the fresh read"): what a write bases its etag on, and what a link exchange reads. One store
+ * read per call.
  */
 export async function readStoredAccessFresh(deckId: string): Promise<StoredAccess | null> {
   const store = await accessStore();
@@ -182,7 +217,7 @@ export async function recordNewDeck(
   try {
     return await store.write(deckId, record, { ifMatch: null });
   } catch (error) {
-    if (error instanceof AccessPreconditionError) return error.current;
+    if (isAccessPrecondition(error)) return error.current;
     throw error;
   }
 }
@@ -211,59 +246,216 @@ export function standingOf(
 export type { AuthContext };
 
 // ---------------------------------------------------------------------------------------------
-// The share actions' hooks and reads (SPEC-3 6.9; MILESTONES-3 B2 day 5)
+// The share actions' hooks (SPEC-3 6.9; MILESTONES-3 B2 day 5; VERIFICATION-3 finding 34)
+
+/** What the hooks and the lookup run over; the process wide stores by default, fakes in a test. */
+export type AccessHookDeps = {
+  store: Pick<CachedAccessStore, 'read' | 'write' | 'drop'>;
+  links: LinkIndex;
+  /** announces the change to the room's open tabs (SPEC-3 2.2, 6.3); the realtime channel by default */
+  announce: (deckId: string, revision: number) => Promise<void>;
+  now?: () => string;
+};
+
+async function defaultHookDeps(): Promise<AccessHookDeps> {
+  const [store, links] = await Promise.all([accessStore(), linkIndex()]);
+  return {
+    store,
+    links,
+    announce: async (deckId, revision) => {
+      // the room learns of the change (SPEC-3 2.2, 6.3): every open tab re-reads its role and
+      // the stream re-decides the connection; loaded late, as shareWriteFor does, because
+      // room.ts imports this module (VERIFICATION-3 findings 1 and 4: a viewer's page had no
+      // signal when the owner turned on "Viewers can see comments")
+      const { realtimeChannel } = await import('./room');
+      await realtimeChannel().publish(deckId, { type: 'access', revision });
+    },
+  };
+}
+
+function sameRecord(a: AccessRecord, b: AccessRecord): boolean {
+  return canonicalJson(a) === canonicalJson(b);
+}
+
+/** The 409 a share write answers when the record moved: the current record travels with it. */
+function shareConflict(current: StoredAccess | null): ConflictError {
+  return new ConflictError(SHARE_CONFLICT_SENTENCE, {
+    currentRevision: current?.record.revision ?? 0,
+    ...(current === null ? {} : { current: current.record }),
+  });
+}
 
 /**
- * The `load` and `save` a share action runs over the access store: `load` keeps the etag it
- * read, `save` writes with it as `ifMatch`, so two owners changing one record from two instances
- * meet a 409 instead of a lost write (2.2). B1's record functions take these as `AccessDeps.load`
- * and `AccessDeps.save`; the store's cache drops on every write through its bus.
+ * Indexes the links a save mints (`links/<hex>` to the deck and link id), before the record is
+ * written so the exchange on another instance never reads an indexed record without its entry.
+ * A failed index write is logged and never blocks the share write: the exchange's record scan
+ * covers a missing entry and heals it.
  */
-export function hostedAccessHooks(deckId: string): {
+async function indexNewLinks(
+  links: LinkIndex,
+  deckId: string,
+  previous: AccessRecord | null,
+  next: AccessRecord,
+): Promise<void> {
+  for (const link of newLinkHashes(previous, next)) {
+    try {
+      await links.put(link.hash, { deckId, linkId: link.id });
+    } catch (error) {
+      warn(
+        `indexing link ${link.id} of ${deckId} failed: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
+  }
+}
+
+/**
+ * The conditional write with the one retry of finding 34: a conflict against the very record the
+ * write based on (the store holds equal bytes under another etag, the case a lagging copy of
+ * `access.json` produces) is retried once on the store's etag; a record that changed is the
+ * SPEC-3 sentence with the current record attached. The store's own sentence never leaves here.
+ */
+async function writeBasedOn(
+  store: AccessHookDeps['store'],
+  deckId: string,
+  record: AccessRecord,
+  based: StoredAccess | null,
+): Promise<StoredAccess> {
+  try {
+    return await store.write(deckId, record, { ifMatch: based?.etag ?? null });
+  } catch (error) {
+    if (!isAccessPrecondition(error)) throw error;
+    let current = error.current;
+    if (current === undefined) {
+      store.drop(deckId);
+      current = await store.read(deckId);
+    }
+    if (current !== null && based !== null && sameRecord(current.record, based.record)) {
+      try {
+        return await store.write(deckId, record, { ifMatch: current.etag });
+      } catch (again) {
+        if (!isAccessPrecondition(again)) throw again;
+        throw shareConflict(again.current ?? current);
+      }
+    }
+    throw shareConflict(current);
+  }
+}
+
+/**
+ * The `load` and `save` a share action runs over the access store: `load` reads past the cache
+ * and keeps what it read, `save` indexes the new links, writes with the read etag as `ifMatch`
+ * and announces the change, so two owners changing one record from two instances meet a 409
+ * instead of a lost write (2.2). B1's record functions take these as `AccessDeps.load` and
+ * `AccessDeps.save`; the store's cache drops on every write through its bus.
+ */
+export function hostedAccessHooks(
+  deckId: string,
+  deps?: AccessHookDeps,
+): {
   load: () => Promise<AccessRecord | null>;
   save: (record: AccessRecord) => Promise<void>;
 } {
-  let etag: string | null | undefined;
+  // undefined until load() ran; null for a deck with no stored record
+  let loaded: StoredAccess | null | undefined;
+  const resolved = async (): Promise<AccessHookDeps> => deps ?? defaultHookDeps();
+  const fresh = async (store: AccessHookDeps['store']): Promise<StoredAccess | null> => {
+    store.drop(deckId);
+    return store.read(deckId);
+  };
   return {
     async load() {
+      const d = await resolved();
       // past the cache: the etag a share write bases on must be the store's, not an entry another
       // instance's write has made stale (finding 34: "access.json changed in the Blob store since
       // it was read" on the second link a rep minted within a minute)
-      const stored = await readStoredAccessFresh(deckId);
-      etag = stored?.etag ?? null;
+      loaded = await fresh(d.store);
       // one record on the studio (VERIFICATION-3 finding 4): a deck nobody claimed is the legacy
       // open record `decide()` and the loader read, never the checkout's "the folder's holder is
       // the owner" synthesis of the record functions (that one stands on a checkout's CLI, where
       // no hooks are passed); the first save of a claim or a share write then lands with
       // `ifMatch: null`, so two instances cannot both create the record
-      return stored?.record ?? synthesizeLegacyRecord(deckId, new Date().toISOString());
+      return (
+        loaded?.record ??
+        synthesizeLegacyRecord(deckId, (d.now ?? (() => new Date().toISOString()))())
+      );
     },
     async save(record) {
-      try {
-        const written = await writeAccess(deckId, record, etag);
-        etag = written.etag;
-        // the room learns of the change (SPEC-3 2.2, 6.3): every open tab re-reads its role and
-        // the stream re-decides the connection; loaded late, as shareWriteFor does, because
-        // room.ts imports this module (VERIFICATION-3 findings 1 and 4: a viewer's page had no
-        // signal when the owner turned on "Viewers can see comments")
-        const { realtimeChannel } = await import('./room');
-        await realtimeChannel()
-          .publish(deckId, { type: 'access', revision: record.revision })
-          .catch(() => undefined);
-      } catch (error) {
-        if (error instanceof AccessPreconditionError) {
-          throw new ConflictError(
-            'The sharing settings changed since they were read; reload and retry',
-            {
-              currentRevision: record.revision,
-            },
-          );
-        }
-        throw error;
-      }
+      const d = await resolved();
+      const parsed = accessRecordSchema.parse(record);
+      // a save without a load bases on a fresh read (the record functions always load first)
+      if (loaded === undefined) loaded = await fresh(d.store);
+      await indexNewLinks(d.links, deckId, loaded?.record ?? null, parsed);
+      loaded = await writeBasedOn(d.store, deckId, parsed, loaded);
+      await d.announce(deckId, parsed.revision).catch(() => undefined);
     },
   };
 }
+
+// ---------------------------------------------------------------------------------------------
+// The link lookup of the exchange (SPEC-3 6.4; VERIFICATION-3 finding 34 F1 and F2)
+
+export type ShareLinkLookupDeps = {
+  store: Pick<CachedAccessStore, 'read' | 'drop'>;
+  links: LinkIndex;
+  /** the ids of the stored decks, for the scan a miss in the index falls back to */
+  deckIds: () => Promise<string[]>;
+  now?: () => Date;
+};
+
+async function defaultLookupDeps(): Promise<ShareLinkLookupDeps> {
+  const [store, links] = await Promise.all([accessStore(), linkIndex()]);
+  return {
+    store,
+    links,
+    deckIds: async () => {
+      const { listStoredDecks } = await import('./root');
+      return (await listStoredDecks()).map((head) => head.id);
+    },
+  };
+}
+
+/**
+ * The share link a token hash names, or null (`bindIdentityHooks({ findShareLink })` in start.ts):
+ * the index names the deck and one record read answers, live or dead; an entry the record does
+ * not know (an index written before a lost record write, a deck id reused) and a hash the index
+ * never saw (a link minted by the CLI on a checkout, an entry whose write failed) fall back to
+ * the scan of every stored deck's record, one read each, and a hit heals the index. With
+ * `fresh`, every record is read past this instance's cache (the exchange always asks for that:
+ * a mint or a revocation seconds old counts on every instance, F1).
+ */
+export async function findShareLink(
+  hash: string,
+  options: ShareLinkLookupOptions,
+  deps?: ShareLinkLookupDeps,
+): Promise<ShareLinkHit | null> {
+  const d = deps ?? (await defaultLookupDeps());
+  const now = (d.now ?? (() => new Date()))();
+  const readRecord = async (deckId: string): Promise<AccessRecord | null> => {
+    if (options.fresh) d.store.drop(deckId);
+    const stored = await d.store.read(deckId).catch(() => null);
+    return stored?.record ?? null;
+  };
+  const names = (record: AccessRecord): boolean => record.links.some((link) => link.hash === hash);
+  const indexed = await d.links.get(hash).catch(() => null);
+  if (indexed !== null) {
+    const record = await readRecord(indexed.deckId);
+    if (record !== null && names(record)) return findLinkInRecord(record, hash, now);
+  }
+  for (const deckId of await d.deckIds()) {
+    const record = await readRecord(deckId);
+    if (record === null || !names(record)) continue;
+    const hit = findLinkInRecord(record, hash, now);
+    if (hit !== null) {
+      await d.links.put(hash, { deckId: hit.deckId, linkId: hit.linkId }).catch(() => undefined);
+    }
+    // a hash names one token: the record that holds it is the answer, live or dead
+    return hit;
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The share reads and writes of the routes (SPEC-3 6.9)
 
 export type ShareGetView = {
   record: Partial<AccessRecord> & Pick<AccessRecord, 'deckId' | 'owner' | 'generalAccess'>;

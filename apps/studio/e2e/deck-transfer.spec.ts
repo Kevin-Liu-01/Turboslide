@@ -38,7 +38,13 @@ function removeCreated(): void {
   for (const id of created) {
     rmSync(join(ROOT, 'decks', id), { recursive: true, force: true });
     rmSync(join(ROOT, '.turboslide', 'worker', 'cache', id), { recursive: true, force: true });
-    rmSync(join(ROOT, '.turboslide', 'thumbs', id), { recursive: true, force: true });
+    rmSync(join(ROOT, '.turboslide', 'thumbs', id), {
+      recursive: true,
+      force: true,
+      /* the thumbnail worker may still be writing a frame into the folder */
+      maxRetries: 5,
+      retryDelay: 100,
+    });
   }
   created.length = 0;
 }
@@ -65,7 +71,7 @@ async function editorReady(page: Page): Promise<void> {
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
 }
 
 async function invoke<T>(page: Page, action: string, input?: unknown): Promise<T> {
@@ -198,11 +204,19 @@ test('Import slides copies the assets the slides need, through slide.import', as
   writeFileSync(join(dir, 'deck.json'), `${JSON.stringify(manifest, null, 2)}\n`);
   created.push(target);
   expect(existsSync(join(dir, 'assets'))).toBe(false);
-  /* the source's Section header from the test above references a starter picture */
-  const sourceManifest = JSON.parse(
-    readFileSync(join(ROOT, 'decks', SOURCE, 'deck.json'), 'utf8'),
-  ) as { sections: { slideIds: string[] }[] };
-  const opener = sourceManifest.sections.flatMap((s) => s.slideIds).find((id) => id !== 'title');
+  /* the source's Section header from the test above references a starter picture; the write
+     reaches the store with the room's checkpoint (SPEC-3 0.8: 2 s idle, 10 s at most), which is
+     where slide.import reads the source, so the manifest on disk is polled for it */
+  const slideIdsOnDisk = () =>
+    (
+      JSON.parse(readFileSync(join(ROOT, 'decks', SOURCE, 'deck.json'), 'utf8')) as {
+        sections: { slideIds: string[] }[];
+      }
+    ).sections.flatMap((s) => s.slideIds);
+  await expect
+    .poll(() => slideIdsOnDisk().filter((id) => id !== 'title').length, { timeout: 30_000 })
+    .toBeGreaterThan(0);
+  const opener = slideIdsOnDisk().find((id) => id !== 'title');
   expect(opener).toBeDefined();
   await page.goto(`/edit/${target}?author=agent:e2e-transfer`);
   await editorReady(page);
@@ -253,6 +267,6 @@ test('/deck/<id>?present=1 opens the presentation in present mode', async ({ pag
   await page.goto(`/deck/${DECK}?present=1`);
   await expect(page.locator('.pt-viewer.is-present')).toBeVisible({ timeout: 15_000 });
   await page.goto(`/deck/${DECK}`);
-  await expect(page.locator('.pt-viewer')).toBeVisible();
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toBeVisible();
   await expect(page.locator('.pt-viewer.is-present')).toHaveCount(0);
 });

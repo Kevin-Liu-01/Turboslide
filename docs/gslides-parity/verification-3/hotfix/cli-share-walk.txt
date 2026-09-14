@@ -1,0 +1,40 @@
+ok   comment add slide:table -m "check this"
+ok   comment reply <threadId> -m "done"
+ok   comment resolve <threadId>
+ok   comments --for-me
+ok   share access --mode link --role viewer
+ok   share link --role commenter
+ok   share get
+ok   share stop
+ok   deck publish
+ok   deck unpublish
+ok   block dither rotated#photo --pattern bayer8 --black 120 --white 230 --gamma 0.9
+ok   picture materialize --dry-run
+ok   slide background-picture title --asset fixture-photo --dither
+ok   presence list
+ok   sync status
+ok   account me
+ok   notifications --unread
+ok   version diff
+ok   validate
+share e2e: 19 steps passed
+  comment add slide:table -m "check this" (47 ms)
+  comment reply <threadId> -m "done" (7 ms)
+  comment resolve <threadId> (7 ms)
+  comments --for-me (20 ms)
+  share access --mode link --role viewer (8 ms)
+  share link --role commenter (6 ms)
+  share get (0 ms)
+  share stop (5 ms)
+  deck publish (5 ms)
+  deck unpublish (4 ms)
+  block dither rotated#photo --pattern bayer8 --black 120 --white 230 --gamma 0.9 (26 ms)
+  picture materialize --dry-run (11 ms)
+  slide background-picture title --asset fixture-photo --dither (776 ms)
+  presence list (2 ms)
+  sync status (4 ms)
+  account me (1 ms)
+  notifications --unread (1 ms)
+  version diff (10 ms)
+  validate (3 ms)
+exit 0

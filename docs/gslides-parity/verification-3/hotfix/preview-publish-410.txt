@@ -1,0 +1,16 @@
+bearer 64 chars; oidc 1242 chars
+ok   deck.copy one slide: 200 in 3582 ms
+ok   deck.publish answers the player url with ?p=: 200 {"record":{"schemaVersion":1,"deckId":"verifier-pub-mu16j0ot","owner":"agent:bootstrap","pendingOwner":null,"createdAt":"2026-09-14T11:48:34.899Z","createdBy":"
+ok   the first page minted the identity cookie for the player: 200; cookie held (value not printed)
+ok   the player answers 200 with x-robots-tag noindex and the robots meta: 200; x-robots-tag noindex; meta true; /deck/verifier-pub-mu16j0ot?p=<token>&present=1
+ok   the embed answers 200 with noindex header and meta: 200; x-robots-tag noindex; /embed/verifier-pub-mu16j0ot?p=<token>
+FAIL the plain /deck answers 200 without the header: 200; x-robots-tag noindex
+ok   a wrong token is not a 410 (shadow admits, enforce 404): 200
+ok   deck.unpublish: 200 in 336 ms
+ok   the player answers 410 with the sentence after unpublish: 410; x-robots-tag noindex; sentence true
+ok   the embed answers 410 after unpublish: 410
+ok   the plain /deck still answers 200 after unpublish (shadow): 200
+ok   scratch deck trashed and removed: trash 200, remove 200
+publish-410-probe: 1 row(s) failed against https://turboslide-au3unsded-kl01s-projects.vercel.app
+exit 1
+all-done

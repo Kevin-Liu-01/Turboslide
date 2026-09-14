@@ -1,14 +1,14 @@
 {
   "base": "http://localhost:4321",
-  "at": "2026-09-14T08:16:51.648Z",
-  "commit": "a1dcc7e",
-  "seconds": 1120,
-  "scratchDeck": "untitled-20260914-s1bk",
+  "at": "2026-09-14T12:44:35.740Z",
+  "commit": "fb96cd4",
+  "seconds": 1106,
+  "scratchDeck": "untitled-20260914-9u9b",
   "namePromptAnswered": 1,
   "summary": {
-    "pass": 2633,
-    "fail": 8,
-    "skip": 350
+    "pass": 2980,
+    "fail": 5,
+    "skip": 384
   },
   "perSection": {
     "firstOpen": {
@@ -17,7 +17,7 @@
       "skip": 0
     },
     "defaultViewWords": {
-      "pass": 43,
+      "pass": 44,
       "fail": 0,
       "skip": 0
     },
@@ -97,7 +97,7 @@
       "skip": 0
     },
     "formatOptions:objects": {
-      "pass": 6,
+      "pass": 7,
       "fail": 0,
       "skip": 0
     },
@@ -108,7 +108,7 @@
     },
     "contextMenu:objects": {
       "pass": 6,
-      "fail": 0,
+      "fail": 1,
       "skip": 1
     },
     "effects:shape": {
@@ -117,13 +117,13 @@
       "skip": 0
     },
     "shortcuts:objects": {
-      "pass": 0,
-      "fail": 4,
+      "pass": 11,
+      "fail": 0,
       "skip": 0
     },
     "effects:line": {
-      "pass": 4,
-      "fail": 1,
+      "pass": 5,
+      "fail": 0,
       "skip": 0
     },
     "rows:image": {
@@ -137,7 +137,7 @@
       "skip": 0
     },
     "toolbar:objects": {
-      "pass": 1,
+      "pass": 4,
       "fail": 0,
       "skip": 0
     },
@@ -146,13 +146,18 @@
       "fail": 0,
       "skip": 0
     },
-    "rows:objects": {
-      "pass": 4,
+    "rows:twoObjects": {
+      "pass": 328,
       "fail": 0,
-      "skip": 0
+      "skip": 34
     },
     "effects:objects": {
-      "pass": 3,
+      "pass": 5,
+      "fail": 1,
+      "skip": 0
+    },
+    "rows:objects": {
+      "pass": 4,
       "fail": 0,
       "skip": 0
     },
@@ -979,6 +984,195 @@
         }
       }
     },
+    "twoObjects": {
+      "title": {
+        "now": {
+          "pass": 20,
+          "fail": 0,
+          "skip": 1
+        },
+        "later": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "file": {
+        "now": {
+          "pass": 29,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 1
+        },
+        "omit": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "edit": {
+        "now": {
+          "pass": 11,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "view": {
+        "now": {
+          "pass": 39,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "insert": {
+        "now": {
+          "pass": 34,
+          "fail": 0,
+          "skip": 4
+        },
+        "later": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 7,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "format": {
+        "now": {
+          "pass": 77,
+          "fail": 0,
+          "skip": 24
+        },
+        "later": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 2
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "slide": {
+        "now": {
+          "pass": 12,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "arrange": {
+        "now": {
+          "pass": 24,
+          "fail": 0,
+          "skip": 2
+        },
+        "later": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "tools": {
+        "now": {
+          "pass": 18,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "extensions": {
+        "now": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "help": {
+        "now": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    },
     "objects": {
       "view": {
         "now": {
@@ -1342,7 +1536,7 @@
     {
       "section": "firstOpen",
       "id": "the first write creates the deck and moves the address",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-s1bk; save words \"All changes saved\"; title \"Audit scratch\"",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b; save words \"All changes saved\"; title \"Audit scratch\"",
       "pass": true
     },
     {
@@ -4932,7 +5126,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260914-s1bk",
+      "where": "/edit/untitled-20260914-9u9b",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -5026,7 +5220,7 @@
       "menu": "title",
       "effect": "route",
       "label": "Turboslide home",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-s1bk -> http://localhost:4321/decks",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b -> http://localhost:4321/decks",
       "pass": true
     },
     {
@@ -5116,7 +5310,7 @@
       "menu": "title",
       "effect": "client",
       "label": "Presenter view",
-      "evidence": "second window http://localhost:4321/present/untitled-20260914-s1bk; this window presenting",
+      "evidence": "second window http://localhost:4321/present/untitled-20260914-9u9b; this window presenting",
       "pass": true
     },
     {
@@ -5140,7 +5334,7 @@
       "menu": "title",
       "effect": "dialog",
       "label": "Share",
-      "evidence": "dialog dialog.share \"Share Audit scratch\"; focus inside; Esc closed it; focus after: share.open",
+      "evidence": "dialog dialog.share \"Share Audit scratch\"; focus inside; Esc closed it; focus after: BODY",
       "pass": true
     },
     {
@@ -5329,7 +5523,7 @@
       "menu": "file",
       "effect": "client",
       "label": "Copy link",
-      "evidence": "clipboard \"http://localhost:4321/deck/untitled-20260914-s1bk\" wanted \"http://localhost:4321/deck/untitled-20260914-s1bk\"; snackbar \"Link copied\"",
+      "evidence": "clipboard \"http://localhost:4321/deck/untitled-20260914-9u9b\" wanted \"http://localhost:4321/deck/untitled-20260914-9u9b\"; snackbar \"Link copied\"",
       "pass": true
     },
     {
@@ -5368,7 +5562,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Plain Text (.txt)",
-      "evidence": "download untitled-20260914-s1bk.txt",
+      "evidence": "download untitled-20260914-9u9b.txt",
       "pass": true
     },
     {
@@ -5377,7 +5571,7 @@
       "menu": "file",
       "effect": "action",
       "label": "JPEG image (.jpg, current slide)",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-s1bk&theme=light&scale=2&revision=3",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-9u9b&theme=light&scale=2&revision=3",
       "pass": true
     },
     {
@@ -5386,7 +5580,7 @@
       "menu": "file",
       "effect": "action",
       "label": "PNG image (.png, current slide)",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-s1bk&theme=light&scale=2&revision=3",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-9u9b&theme=light&scale=2&revision=3",
       "pass": true
     },
     {
@@ -5404,7 +5598,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Turboslide bundle (.zip)",
-      "evidence": "download untitled-20260914-s1bk-r3.zip",
+      "evidence": "download untitled-20260914-9u9b-r3.zip",
       "pass": true
     },
     {
@@ -5470,7 +5664,7 @@
       "menu": "file",
       "effect": "route",
       "label": "Print settings and preview",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-s1bk#s/title -> http://localhost:4321/print/untitled-20260914-s1bk",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b#s/title -> http://localhost:4321/print/untitled-20260914-9u9b",
       "pass": true
     },
     {
@@ -5479,7 +5673,7 @@
       "menu": "file",
       "effect": "route",
       "label": "Print",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-s1bk#s/title -> http://localhost:4321/print/untitled-20260914-s1bk",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b#s/title -> http://localhost:4321/print/untitled-20260914-9u9b",
       "pass": true
     },
     {
@@ -7153,7 +7347,7 @@
       "menu": "tools",
       "effect": "action",
       "label": "Render this slide",
-      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-s1bk&theme=light&scale=1&revision=19",
+      "evidence": "new tab http://localhost:4321/api/render/title?deck=untitled-20260914-9u9b&theme=light&scale=1&revision=19",
       "pass": true
     },
     {
@@ -7675,7 +7869,7 @@
       "id": "file.print",
       "key": "Cmd+P",
       "chord": "Cmd+P",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-s1bk#s/title -> http://localhost:4321/print/untitled-20260914-s1bk",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b#s/title -> http://localhost:4321/print/untitled-20260914-9u9b",
       "pass": true
     },
     {
@@ -7699,7 +7893,7 @@
       "id": "view.zoom.in",
       "key": "Cmd+Plus",
       "chord": "Cmd+Plus",
-      "evidence": "zoom \"fit\" -> 0.75",
+      "evidence": "zoom \"fit\" -> 1",
       "pass": true
     },
     {
@@ -7707,7 +7901,7 @@
       "id": "view.zoom.out",
       "key": "Cmd+Minus",
       "chord": "Cmd+Minus",
-      "evidence": "zoom \"fit\" -> 0.5",
+      "evidence": "zoom \"fit\" -> 0.75",
       "pass": true
     },
     {
@@ -12153,14 +12347,14 @@
       "section": "shortcuts:text",
       "id": "key.text.justify",
       "key": "Cmd+Shift+J",
-      "evidence": "revision 145 -> 146; align justify; page still at /edit/untitled-20260914-s1bk",
+      "evidence": "revision 145 -> 146; align justify; page still at /edit/untitled-20260914-9u9b",
       "pass": true
     },
     {
       "section": "shortcuts:text",
       "id": "key.text.indentMore",
       "key": "Cmd+]",
-      "evidence": "revision 147 -> 148; indent 64; page still at /edit/untitled-20260914-s1bk",
+      "evidence": "revision 147 -> 148; indent 64; page still at /edit/untitled-20260914-9u9b",
       "pass": true
     },
     {
@@ -16053,29 +16247,78 @@
       "section": "shortcuts:objects",
       "id": "key.rotate.right15",
       "key": "Option+Right",
-      "evidence": "revision 193 -> null; rotate 0 -> 15; the slide converted in the same write",
-      "pass": false
+      "evidence": "revision 193 -> 194; rotate 0 -> 15; the slide converted in the same write",
+      "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.rotate.left1",
       "key": "Option+Shift+Left",
-      "evidence": "could not select audit-shape",
-      "pass": false
+      "evidence": "revision 195 -> 196; rotate 0 -> 359; the slide converted in the same write",
+      "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.nudge.right1",
       "key": "Right",
-      "evidence": "could not select audit-shape",
-      "pass": false
+      "evidence": "revision 197 -> 198; x 137 -> 138; the slide converted in the same write",
+      "pass": true
     },
     {
       "section": "shortcuts:objects",
       "id": "key.nudge.down10",
       "key": "Shift+Down",
-      "evidence": "could not select audit-shape",
-      "pass": false
+      "evidence": "revision 199 -> 200; y 853.125 -> 863.125; the slide converted in the same write",
+      "pass": true
+    },
+    {
+      "section": "shortcuts:objects",
+      "id": "readout.angle",
+      "key": "Option+Right",
+      "evidence": "readout \"15°\"",
+      "pass": true
+    },
+    {
+      "section": "shortcuts:objects",
+      "id": "key.duplicate",
+      "key": "Cmd+D",
+      "evidence": "revision 203 -> 204; objects 7 -> 8; copy audit-shape-2 at {\"x\":153,\"y\":869.125,\"w\":836,\"h\":120,\"z\":7}",
+      "pass": true
+    },
+    {
+      "section": "shortcuts:objects",
+      "id": "key.tab",
+      "key": "Tab",
+      "evidence": "selection audit-shape -> p1",
+      "pass": true
+    },
+    {
+      "section": "shortcuts:objects",
+      "id": "key.selectAll",
+      "key": "Cmd+A",
+      "evidence": "chip \"7 objects\" over 7 objects",
+      "pass": true
+    },
+    {
+      "section": "shortcuts:objects",
+      "id": "key.group",
+      "key": "Cmd+Option+G",
+      "evidence": "chip \"2 objects\"; revision 205 -> 206; group group with 2 members; chip now \"Group\"",
+      "pass": true
+    },
+    {
+      "section": "shortcuts:objects",
+      "id": "key.ungroup",
+      "key": "Cmd+Option+Shift+G",
+      "evidence": "revision 206 -> 207; 0 members left in group",
+      "pass": true
+    },
+    {
+      "section": "shortcuts:objects",
+      "id": "key.delete",
+      "key": "Delete",
+      "evidence": "chip \"Shape\"; revision 209 -> 210; objects 7 -> 6; snackbar \"Shape deletedUndo\"",
+      "pass": true
     },
     {
       "section": "contextMenu:objects",
@@ -16140,8 +16383,8 @@
     {
       "section": "formatOptions:objects",
       "id": "sections.line",
-      "shown": ["size", "position", "shadow", "line", "altText"],
-      "evidence": "sections size, position, shadow, line, altText",
+      "shown": ["size", "position", "layout", "shadow", "line", "altText"],
+      "evidence": "sections size, position, layout, shadow, line, altText",
       "pass": true
     },
     {
@@ -16150,8 +16393,8 @@
       "menu": "format",
       "effect": "action",
       "label": "Circle",
-      "evidence": "no write (revision 193); snackbar \"baseRevision 193 is stale; the document is at revision 194\"",
-      "pass": false
+      "evidence": "revision 211 -> 212; lineStart none -> fillCircle (wanted fillCircle)",
+      "pass": true
     },
     {
       "section": "effects:line",
@@ -16159,7 +16402,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Arrow",
-      "evidence": "revision 194 -> 195; lineEnd none -> fillArrow (wanted fillArrow)",
+      "evidence": "revision 213 -> 214; lineEnd none -> fillArrow (wanted fillArrow)",
       "pass": true
     },
     {
@@ -16168,7 +16411,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Open diamond",
-      "evidence": "revision 196 -> 197; lineEnd none -> openDiamond (wanted openDiamond)",
+      "evidence": "revision 215 -> 216; lineEnd none -> openDiamond (wanted openDiamond)",
       "pass": true
     },
     {
@@ -16177,7 +16420,7 @@
       "menu": "format",
       "effect": "action",
       "label": "Dash",
-      "evidence": "revision 198 -> 199; dash solid -> dash (wanted dash)",
+      "evidence": "revision 217 -> 218; dash solid -> dash (wanted dash)",
       "pass": true
     },
     {
@@ -16186,7 +16429,7 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Rotate clockwise 90°",
-      "evidence": "revision 200 -> 201; rotate 0 -> 90 (wanted 90)",
+      "evidence": "revision 219 -> 220; rotate 0 -> 90 (wanted 90); the slide converted to the canvas in the same write",
       "pass": true
     },
     {
@@ -19817,8 +20060,17 @@
     {
       "section": "formatOptions:objects",
       "id": "sections.image",
-      "shown": ["size", "position", "picture", "adjustments", "dither", "shadow", "altText"],
-      "evidence": "sections size, position, picture, adjustments, dither, shadow, altText; controls without a tooltip: block.audit-shot.fit, block.audit-shot.crop, block.audit-shot.captionSize",
+      "shown": [
+        "size",
+        "position",
+        "layout",
+        "picture",
+        "adjustments",
+        "dither",
+        "shadow",
+        "altText"
+      ],
+      "evidence": "sections size, position, layout, picture, adjustments, dither, shadow, altText; controls without a tooltip: block.audit-shot.fit, block.audit-shot.crop, block.audit-shot.captionSize",
       "pass": true
     },
     {
@@ -19836,20 +20088,20 @@
       "menu": "arrange",
       "effect": "action",
       "label": "Flip horizontally",
-      "evidence": "revision 202 -> 203; flip none -> h",
+      "evidence": "revision 221 -> 222; flip none -> h; the slide converted to the canvas in the same write",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "format.image.maskImage.pick",
-      "evidence": "picked ellipse; revision 204 -> 205; mask none -> ellipse",
+      "evidence": "picked ellipse; revision 223 -> 224; mask none -> ellipse",
       "pass": true
     },
     {
       "section": "effects:image",
       "id": "format.image.resetImage",
       "menu": "format",
-      "evidence": "revision 207 -> 208; mask ellipse -> none",
+      "evidence": "revision 226 -> 227; mask ellipse -> none",
       "pass": true
     },
     {
@@ -19907,8 +20159,8 @@
     {
       "section": "formatOptions:objects",
       "id": "sections.table",
-      "shown": ["size", "position", "textFitting", "text", "shadow", "table", "altText"],
-      "evidence": "sections size, position, textFitting, text, shadow, table, altText; controls without a tooltip: block.audit-table.border.weight, block.audit-table.border.color",
+      "shown": ["size", "position", "layout", "textFitting", "text", "shadow", "table", "altText"],
+      "evidence": "sections size, position, layout, textFitting, text, shadow, table, altText; controls without a tooltip: block.audit-table.border.weight, block.audit-table.border.color",
       "pass": true
     },
     {
@@ -20050,13 +20302,3710 @@
       "id": "format.chartType",
       "menu": "context",
       "label": "Chart type",
-      "evidence": "revision 211 -> 212; kind bar -> pie",
+      "evidence": "revision 230 -> 231; kind bar -> pie",
       "pass": true
     },
     {
       "section": "defaultViewWords",
       "where": "a chart selected",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.appIcon",
+      "menu": "title",
+      "status": "now",
+      "label": "Turboslide home",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.name",
+      "menu": "title",
+      "status": "now",
+      "label": "Rename",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.star",
+      "menu": "title",
+      "status": "omit",
+      "label": "Star",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.move",
+      "menu": "title",
+      "status": "omit",
+      "label": "Move",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.saveState",
+      "menu": "title",
+      "status": "now",
+      "label": "Document status",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.lastEdit",
+      "menu": "title",
+      "status": "now",
+      "label": "Last edit",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.presence",
+      "menu": "title",
+      "status": "now",
+      "label": "Collaborators",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.presence.follow",
+      "menu": "title",
+      "status": "now",
+      "label": "Follow",
+      "check": "present",
+      "evidence": "1 participant row(s), none offering Follow: Follow is refused for anonymous people, who get Go to slide (SPEC-3 4.4)",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.presence.goTo",
+      "menu": "title",
+      "status": "now",
+      "label": "Go to slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.presence.joinChat",
+      "menu": "title",
+      "status": "later",
+      "label": "Join chat",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.presence.me",
+      "menu": "title",
+      "status": "now",
+      "label": "You",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.comments",
+      "menu": "title",
+      "status": "now",
+      "label": "Show all comments",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.inbox",
+      "menu": "title",
+      "status": "now",
+      "label": "Notifications",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.meet",
+      "menu": "title",
+      "status": "omit",
+      "label": "Meet",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.record",
+      "menu": "title",
+      "status": "omit",
+      "label": "Record",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.slideshow",
+      "menu": "title",
+      "status": "now",
+      "label": "Slideshow",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.slideshow.presenterView",
+      "menu": "title",
+      "status": "now",
+      "label": "Presenter view",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.slideshow.startFromBeginning",
+      "menu": "title",
+      "status": "now",
+      "label": "Start from beginning",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.slideshow.presentOnAnotherScreen",
+      "menu": "title",
+      "status": "later",
+      "label": "Present on another screen",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.slideshow.displayOptions",
+      "menu": "title",
+      "status": "omit",
+      "label": "Presentation display options",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.share",
+      "menu": "title",
+      "status": "now",
+      "label": "Share",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.account",
+      "menu": "title",
+      "status": "now",
+      "label": "Account",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.account.changeName",
+      "menu": "title",
+      "status": "now",
+      "label": "Change name",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.account.changeAvatar",
+      "menu": "title",
+      "status": "now",
+      "label": "Change avatar",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.account.signIn",
+      "menu": "title",
+      "status": "now",
+      "label": "Sign in",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.account.signOut",
+      "menu": "title",
+      "status": "now",
+      "label": "Sign out",
+      "check": "absent by predicate",
+      "evidence": "when: signedIn",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.account.forget",
+      "menu": "title",
+      "status": "now",
+      "label": "Forget this browser",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.account.sessions",
+      "menu": "title",
+      "status": "now",
+      "label": "Sessions",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "title.gemini",
+      "menu": "title",
+      "status": "omit",
+      "label": "Ask Gemini",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.new",
+      "menu": "file",
+      "status": "now",
+      "label": "New",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.new.presentation",
+      "menu": "file",
+      "status": "now",
+      "label": "Presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.new.templateGallery",
+      "menu": "file",
+      "status": "now",
+      "label": "From template gallery",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.open",
+      "menu": "file",
+      "status": "now",
+      "label": "Open…",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.importSlides",
+      "menu": "file",
+      "status": "now",
+      "label": "Import slides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.makeCopy",
+      "menu": "file",
+      "status": "now",
+      "label": "Make a copy",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.makeCopy.entire",
+      "menu": "file",
+      "status": "now",
+      "label": "Entire presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.makeCopy.selected",
+      "menu": "file",
+      "status": "now",
+      "label": "Selected slides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.share",
+      "menu": "file",
+      "status": "now",
+      "label": "Share",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.share.withOthers",
+      "menu": "file",
+      "status": "now",
+      "label": "Share with others",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.share.publish",
+      "menu": "file",
+      "status": "now",
+      "label": "Publish to web",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.share.copyLink",
+      "menu": "file",
+      "status": "now",
+      "label": "Copy link",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.email",
+      "menu": "file",
+      "status": "later",
+      "label": "Email",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.email.thisFile",
+      "menu": "file",
+      "status": "omit",
+      "label": "Email this file",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.email.collaborators",
+      "menu": "file",
+      "status": "later",
+      "label": "Email collaborators",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.download",
+      "menu": "file",
+      "status": "now",
+      "label": "Download",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.download.pptx",
+      "menu": "file",
+      "status": "now",
+      "label": "Microsoft PowerPoint (.pptx)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.download.odp",
+      "menu": "file",
+      "status": "later",
+      "label": "ODP Document (.odp)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.download.pdf",
+      "menu": "file",
+      "status": "now",
+      "label": "PDF Document (.pdf)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.download.txt",
+      "menu": "file",
+      "status": "now",
+      "label": "Plain Text (.txt)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.download.jpg",
+      "menu": "file",
+      "status": "now",
+      "label": "JPEG image (.jpg, current slide)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.download.png",
+      "menu": "file",
+      "status": "now",
+      "label": "PNG image (.png, current slide)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.download.svg",
+      "menu": "file",
+      "status": "later",
+      "label": "Scalable Vector Graphics (.svg, current slide)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.download.html",
+      "menu": "file",
+      "status": "now",
+      "label": "Web page (.html)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.download.zip",
+      "menu": "file",
+      "status": "now",
+      "label": "Turboslide bundle (.zip)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.rename",
+      "menu": "file",
+      "status": "now",
+      "label": "Rename",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.move",
+      "menu": "file",
+      "status": "omit",
+      "label": "Move",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.addShortcut",
+      "menu": "file",
+      "status": "omit",
+      "label": "Add shortcut to Drive",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.moveToTrash",
+      "menu": "file",
+      "status": "now",
+      "label": "Move to trash",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.versionHistory",
+      "menu": "file",
+      "status": "now",
+      "label": "Version history",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.versionHistory.nameCurrent",
+      "menu": "file",
+      "status": "now",
+      "label": "Name current version",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.versionHistory.see",
+      "menu": "file",
+      "status": "now",
+      "label": "See version history",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.versionHistory.showChanges",
+      "menu": "file",
+      "status": "now",
+      "label": "Show changes",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.versionHistory.deleteOlder",
+      "menu": "file",
+      "status": "later",
+      "label": "Delete this and older versions",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.versionHistory.deleteHistory",
+      "menu": "file",
+      "status": "later",
+      "label": "Delete history",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.approvals",
+      "menu": "file",
+      "status": "omit",
+      "label": "Approvals",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.offline",
+      "menu": "file",
+      "status": "omit",
+      "label": "Make available offline",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.details",
+      "menu": "file",
+      "status": "now",
+      "label": "Details",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.language",
+      "menu": "file",
+      "status": "omit",
+      "label": "Language",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.pageSetup",
+      "menu": "file",
+      "status": "later",
+      "label": "Page setup",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.printPreview",
+      "menu": "file",
+      "status": "now",
+      "label": "Print settings and preview",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "file.print",
+      "menu": "file",
+      "status": "now",
+      "label": "Print",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "edit.undo",
+      "menu": "edit",
+      "status": "now",
+      "label": "Undo",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "edit.redo",
+      "menu": "edit",
+      "status": "now",
+      "label": "Redo",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "edit.cut",
+      "menu": "edit",
+      "status": "now",
+      "label": "Cut",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "edit.copy",
+      "menu": "edit",
+      "status": "now",
+      "label": "Copy",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "edit.paste",
+      "menu": "edit",
+      "status": "now",
+      "label": "Paste",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "edit.pasteWithoutFormatting",
+      "menu": "edit",
+      "status": "now",
+      "label": "Paste without formatting",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "edit.delete",
+      "menu": "edit",
+      "status": "now",
+      "label": "Delete",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "edit.duplicate",
+      "menu": "edit",
+      "status": "now",
+      "label": "Duplicate",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "edit.selectAll",
+      "menu": "edit",
+      "status": "now",
+      "label": "Select all",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "edit.selectNone",
+      "menu": "edit",
+      "status": "now",
+      "label": "Select none",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "edit.findReplace",
+      "menu": "edit",
+      "status": "now",
+      "label": "Find and replace",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.slideshow",
+      "menu": "view",
+      "status": "now",
+      "label": "Slideshow",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.motion",
+      "menu": "view",
+      "status": "omit",
+      "label": "Motion",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.themeBuilder",
+      "menu": "view",
+      "status": "omit",
+      "label": "Theme builder",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.gridView",
+      "menu": "view",
+      "status": "now",
+      "label": "Grid view",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.zoom",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.zoom.in",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom in",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.zoom.out",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom out",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.zoom.fit",
+      "menu": "view",
+      "status": "now",
+      "label": "Fit",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.zoom.50",
+      "menu": "view",
+      "status": "now",
+      "label": "50%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.zoom.100",
+      "menu": "view",
+      "status": "now",
+      "label": "100%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.zoom.200",
+      "menu": "view",
+      "status": "now",
+      "label": "200%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.showRuler",
+      "menu": "view",
+      "status": "now",
+      "label": "Show ruler",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.guides",
+      "menu": "view",
+      "status": "now",
+      "label": "Guides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.guides.show",
+      "menu": "view",
+      "status": "now",
+      "label": "Show guides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.guides.addVertical",
+      "menu": "view",
+      "status": "now",
+      "label": "Add vertical guide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.guides.addHorizontal",
+      "menu": "view",
+      "status": "now",
+      "label": "Add horizontal guide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.guides.edit",
+      "menu": "view",
+      "status": "later",
+      "label": "Edit guides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.guides.clear",
+      "menu": "view",
+      "status": "now",
+      "label": "Clear guides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.guides.delete",
+      "menu": "view",
+      "status": "now",
+      "label": "Delete guide",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.snapTo",
+      "menu": "view",
+      "status": "now",
+      "label": "Snap to",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.snapTo.guides",
+      "menu": "view",
+      "status": "now",
+      "label": "Guides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.snapTo.grid",
+      "menu": "view",
+      "status": "now",
+      "label": "Grid",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.comments",
+      "menu": "view",
+      "status": "now",
+      "label": "Comments",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.comments.showAll",
+      "menu": "view",
+      "status": "now",
+      "label": "Show all comments",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.comments.expand",
+      "menu": "view",
+      "status": "now",
+      "label": "Expand comments",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.comments.minimize",
+      "menu": "view",
+      "status": "now",
+      "label": "Minimize comments",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.comments.hide",
+      "menu": "view",
+      "status": "now",
+      "label": "Hide comments",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.livePointers",
+      "menu": "view",
+      "status": "now",
+      "label": "Live pointers",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.livePointers.mine",
+      "menu": "view",
+      "status": "now",
+      "label": "Show my pointer",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.livePointers.collaborators",
+      "menu": "view",
+      "status": "now",
+      "label": "Show collaborator pointers",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.showSpeakerNotes",
+      "menu": "view",
+      "status": "now",
+      "label": "Show speaker notes",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.showFilmstrip",
+      "menu": "view",
+      "status": "now",
+      "label": "Show filmstrip",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.mode",
+      "menu": "view",
+      "status": "now",
+      "label": "Mode",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.mode.editing",
+      "menu": "view",
+      "status": "now",
+      "label": "Editing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.mode.commenting",
+      "menu": "view",
+      "status": "now",
+      "label": "Commenting",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.mode.viewing",
+      "menu": "view",
+      "status": "now",
+      "label": "Viewing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.fullScreen",
+      "menu": "view",
+      "status": "now",
+      "label": "Full screen",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.showSections",
+      "menu": "view",
+      "status": "now",
+      "label": "Show sections",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.appearance",
+      "menu": "view",
+      "status": "now",
+      "label": "Appearance",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.appearance.light",
+      "menu": "view",
+      "status": "now",
+      "label": "Light",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.appearance.dark",
+      "menu": "view",
+      "status": "now",
+      "label": "Dark",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "view.appearance.match",
+      "menu": "view",
+      "status": "now",
+      "label": "Match the presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.image",
+      "menu": "insert",
+      "status": "now",
+      "label": "Image",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.image.upload",
+      "menu": "insert",
+      "status": "now",
+      "label": "Upload from computer",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.image.stockWeb",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Stock & web",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.image.drivePhotos",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Drive & Photos",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.image.camera",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Camera",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.image.byUrl",
+      "menu": "insert",
+      "status": "now",
+      "label": "By URL",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.image.fromThisPresentation",
+      "menu": "insert",
+      "status": "now",
+      "label": "From this presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.textBox",
+      "menu": "insert",
+      "status": "now",
+      "label": "Text box",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.audio",
+      "menu": "insert",
+      "status": "later",
+      "label": "Audio",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.video",
+      "menu": "insert",
+      "status": "later",
+      "label": "Video",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.shape",
+      "menu": "insert",
+      "status": "now",
+      "label": "Shape",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.shape.shapes",
+      "menu": "insert",
+      "status": "now",
+      "label": "Shapes",
+      "check": "row",
+      "evidence": "level 1; shapes plate with 99 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.shape.shapes.rectangle",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rectangle",
+      "check": "present",
+      "evidence": "drawn as a tile of the shapes plate of insert.shape.shapes (99 tiles)",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.shape.shapes.rounded",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rounded rectangle",
+      "check": "present",
+      "evidence": "drawn as a tile of the shapes plate of insert.shape.shapes (99 tiles)",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.shape.shapes.ellipse",
+      "menu": "insert",
+      "status": "now",
+      "label": "Ellipse",
+      "check": "present",
+      "evidence": "drawn as a tile of the shapes plate of insert.shape.shapes (99 tiles)",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.shape.arrows",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrows",
+      "check": "row",
+      "evidence": "level 1; shapes plate with 26 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.shape.arrows.arrow",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrow",
+      "check": "present",
+      "evidence": "drawn as a tile of the shapes plate of insert.shape.arrows (26 tiles)",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.shape.callouts",
+      "menu": "insert",
+      "status": "now",
+      "label": "Callouts",
+      "check": "row",
+      "evidence": "level 1; shapes plate with 4 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.shape.equation",
+      "menu": "insert",
+      "status": "now",
+      "label": "Equation",
+      "check": "row",
+      "evidence": "level 1; shapes plate with 6 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.table",
+      "menu": "insert",
+      "status": "now",
+      "label": "Table",
+      "check": "row",
+      "evidence": "level 0; tableGrid plate with 400 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.chart",
+      "menu": "insert",
+      "status": "now",
+      "label": "Chart",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.chart.bar",
+      "menu": "insert",
+      "status": "now",
+      "label": "Bar",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.chart.column",
+      "menu": "insert",
+      "status": "now",
+      "label": "Column",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.chart.line",
+      "menu": "insert",
+      "status": "now",
+      "label": "Line",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.chart.pie",
+      "menu": "insert",
+      "status": "now",
+      "label": "Pie",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.chart.fromSheets",
+      "menu": "insert",
+      "status": "omit",
+      "label": "From Sheets",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.diagram",
+      "menu": "insert",
+      "status": "now",
+      "label": "Diagram",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.wordArt",
+      "menu": "insert",
+      "status": "now",
+      "label": "Word art",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.line",
+      "menu": "insert",
+      "status": "now",
+      "label": "Line",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.line.line",
+      "menu": "insert",
+      "status": "now",
+      "label": "Line",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.line.arrow",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrow",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.line.rule",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rule",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.line.elbowConnector",
+      "menu": "insert",
+      "status": "now",
+      "label": "Elbow connector",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.line.curvedConnector",
+      "menu": "insert",
+      "status": "now",
+      "label": "Curved connector",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.line.curve",
+      "menu": "insert",
+      "status": "now",
+      "label": "Curve",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.line.polyline",
+      "menu": "insert",
+      "status": "now",
+      "label": "Polyline",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.line.scribble",
+      "menu": "insert",
+      "status": "now",
+      "label": "Scribble",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.specialCharacters",
+      "menu": "insert",
+      "status": "now",
+      "label": "Special characters",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.animation",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Animation",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.link",
+      "menu": "insert",
+      "status": "now",
+      "label": "Link",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.comment",
+      "menu": "insert",
+      "status": "now",
+      "label": "Comment",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.newSlide",
+      "menu": "insert",
+      "status": "now",
+      "label": "New slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.slideNumbers",
+      "menu": "insert",
+      "status": "now",
+      "label": "Slide numbers",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.placeholder",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Placeholder",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.templates",
+      "menu": "insert",
+      "status": "later",
+      "label": "Templates",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.buildingBlocks",
+      "menu": "insert",
+      "status": "later",
+      "label": "Building blocks",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.speakerSpotlight",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Speaker spotlight",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.icon",
+      "menu": "insert",
+      "status": "now",
+      "label": "Icon",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "insert.material",
+      "menu": "insert",
+      "status": "now",
+      "label": "Material",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text",
+      "menu": "format",
+      "status": "now",
+      "label": "Text",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.bold",
+      "menu": "format",
+      "status": "now",
+      "label": "Bold",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.italic",
+      "menu": "format",
+      "status": "now",
+      "label": "Italic",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.underline",
+      "menu": "format",
+      "status": "now",
+      "label": "Underline",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.strikethrough",
+      "menu": "format",
+      "status": "now",
+      "label": "Strikethrough",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.superscript",
+      "menu": "format",
+      "status": "now",
+      "label": "Superscript",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.subscript",
+      "menu": "format",
+      "status": "now",
+      "label": "Subscript",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.size",
+      "menu": "format",
+      "status": "now",
+      "label": "Size",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.size.increase",
+      "menu": "format",
+      "status": "now",
+      "label": "Increase font size",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.size.decrease",
+      "menu": "format",
+      "status": "now",
+      "label": "Decrease font size",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.capitalization",
+      "menu": "format",
+      "status": "now",
+      "label": "Capitalization",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.capitalization.lower",
+      "menu": "format",
+      "status": "now",
+      "label": "lowercase",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.capitalization.upper",
+      "menu": "format",
+      "status": "now",
+      "label": "UPPERCASE",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.text.capitalization.title",
+      "menu": "format",
+      "status": "now",
+      "label": "Title Case",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.alignIndent",
+      "menu": "format",
+      "status": "now",
+      "label": "Align & indent",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.alignIndent.left",
+      "menu": "format",
+      "status": "now",
+      "label": "Left",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.alignIndent.center",
+      "menu": "format",
+      "status": "now",
+      "label": "Center",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.alignIndent.right",
+      "menu": "format",
+      "status": "now",
+      "label": "Right",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.alignIndent.justified",
+      "menu": "format",
+      "status": "now",
+      "label": "Justified",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.alignIndent.increaseIndent",
+      "menu": "format",
+      "status": "now",
+      "label": "Increase indent",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.alignIndent.decreaseIndent",
+      "menu": "format",
+      "status": "now",
+      "label": "Decrease indent",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.alignIndent.indentationOptions",
+      "menu": "format",
+      "status": "later",
+      "label": "Indentation options",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.spacing",
+      "menu": "format",
+      "status": "now",
+      "label": "Line & paragraph spacing",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.spacing.single",
+      "menu": "format",
+      "status": "now",
+      "label": "Single",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.spacing.1_15",
+      "menu": "format",
+      "status": "now",
+      "label": "1.15",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.spacing.1_5",
+      "menu": "format",
+      "status": "now",
+      "label": "1.5",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.spacing.double",
+      "menu": "format",
+      "status": "now",
+      "label": "Double",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.spacing.addBefore",
+      "menu": "format",
+      "status": "now",
+      "label": "Add space before paragraph",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.spacing.addAfter",
+      "menu": "format",
+      "status": "now",
+      "label": "Add space after paragraph",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.spacing.custom",
+      "menu": "format",
+      "status": "now",
+      "label": "Custom spacing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bulletsNumbering",
+      "menu": "format",
+      "status": "now",
+      "label": "Bullets & numbering",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bulletsNumbering.numbered",
+      "menu": "format",
+      "status": "now",
+      "label": "Numbered list",
+      "check": "row",
+      "evidence": "level 1; numberPresets plate with 6 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bulletsNumbering.bulleted",
+      "menu": "format",
+      "status": "now",
+      "label": "Bulleted list",
+      "check": "row",
+      "evidence": "level 1; bulletPresets plate with 9 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bulletsNumbering.listOptions",
+      "menu": "format",
+      "status": "now",
+      "label": "List options",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bulletsNumbering.listOptions.restart",
+      "menu": "format",
+      "status": "later",
+      "label": "Restart numbering",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bulletsNumbering.listOptions.prefixSuffix",
+      "menu": "format",
+      "status": "later",
+      "label": "Edit prefix and suffix",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bulletsNumbering.listOptions.moreBullets",
+      "menu": "format",
+      "status": "now",
+      "label": "More bullets",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table",
+      "menu": "format",
+      "status": "now",
+      "label": "Table",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table.insertRowAbove",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert row above",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table.insertRowBelow",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert row below",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table.insertColumnLeft",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert column left",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table.insertColumnRight",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert column right",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table.deleteRow",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete row",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table.deleteColumn",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete column",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table.deleteTable",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete table",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table.distributeRows",
+      "menu": "format",
+      "status": "now",
+      "label": "Distribute rows",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table.distributeColumns",
+      "menu": "format",
+      "status": "now",
+      "label": "Distribute columns",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table.mergeCells",
+      "menu": "format",
+      "status": "now",
+      "label": "Merge cells",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.table.unmergeCells",
+      "menu": "format",
+      "status": "now",
+      "label": "Unmerge cells",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.image",
+      "menu": "format",
+      "status": "now",
+      "label": "Image",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.image.cropImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Crop image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.image.maskImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Mask image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.image.replaceImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Replace image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.image.replaceImage.upload",
+      "menu": "format",
+      "status": "now",
+      "label": "Upload from computer",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.image.replaceImage.byUrl",
+      "menu": "format",
+      "status": "now",
+      "label": "By URL",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.image.replaceImage.fromThisPresentation",
+      "menu": "format",
+      "status": "now",
+      "label": "From this presentation",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.image.resetImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Reset image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.image.dither",
+      "menu": "format",
+      "status": "now",
+      "label": "Dither",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.image.imageOptions",
+      "menu": "format",
+      "status": "now",
+      "label": "Image options",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines",
+      "menu": "format",
+      "status": "now",
+      "label": "Borders & lines",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.borderColor",
+      "menu": "format",
+      "status": "now",
+      "label": "Border color",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.borderWeight",
+      "menu": "format",
+      "status": "now",
+      "label": "Border weight",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.borderDash",
+      "menu": "format",
+      "status": "now",
+      "label": "Border dash",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.borderDash.solid",
+      "menu": "format",
+      "status": "now",
+      "label": "Solid",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.borderDash.dot",
+      "menu": "format",
+      "status": "now",
+      "label": "Dot",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.borderDash.dash",
+      "menu": "format",
+      "status": "now",
+      "label": "Dash",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.borderDash.dashDot",
+      "menu": "format",
+      "status": "now",
+      "label": "Dash dot",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.borderDash.longDash",
+      "menu": "format",
+      "status": "now",
+      "label": "Long dash",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.borderDash.longDashDot",
+      "menu": "format",
+      "status": "now",
+      "label": "Long dash dot",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineStart",
+      "menu": "format",
+      "status": "now",
+      "label": "Line start",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineStart.none",
+      "menu": "format",
+      "status": "now",
+      "label": "None",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineStart.fillArrow",
+      "menu": "format",
+      "status": "now",
+      "label": "Arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineStart.stealth",
+      "menu": "format",
+      "status": "now",
+      "label": "Stealth arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineStart.fillCircle",
+      "menu": "format",
+      "status": "now",
+      "label": "Circle",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineStart.fillSquare",
+      "menu": "format",
+      "status": "now",
+      "label": "Square",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineStart.fillDiamond",
+      "menu": "format",
+      "status": "now",
+      "label": "Diamond",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineStart.openArrow",
+      "menu": "format",
+      "status": "now",
+      "label": "Open arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineStart.openCircle",
+      "menu": "format",
+      "status": "now",
+      "label": "Open circle",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineStart.openSquare",
+      "menu": "format",
+      "status": "now",
+      "label": "Open square",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineStart.openDiamond",
+      "menu": "format",
+      "status": "now",
+      "label": "Open diamond",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineEnd",
+      "menu": "format",
+      "status": "now",
+      "label": "Line end",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineEnd.none",
+      "menu": "format",
+      "status": "now",
+      "label": "None",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineEnd.fillArrow",
+      "menu": "format",
+      "status": "now",
+      "label": "Arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineEnd.stealth",
+      "menu": "format",
+      "status": "now",
+      "label": "Stealth arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineEnd.fillCircle",
+      "menu": "format",
+      "status": "now",
+      "label": "Circle",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineEnd.fillSquare",
+      "menu": "format",
+      "status": "now",
+      "label": "Square",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineEnd.fillDiamond",
+      "menu": "format",
+      "status": "now",
+      "label": "Diamond",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineEnd.openArrow",
+      "menu": "format",
+      "status": "now",
+      "label": "Open arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineEnd.openCircle",
+      "menu": "format",
+      "status": "now",
+      "label": "Open circle",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineEnd.openSquare",
+      "menu": "format",
+      "status": "now",
+      "label": "Open square",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.bordersLines.lineEnd.openDiamond",
+      "menu": "format",
+      "status": "now",
+      "label": "Open diamond",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.formatOptions",
+      "menu": "format",
+      "status": "now",
+      "label": "Format options",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.clearFormatting",
+      "menu": "format",
+      "status": "now",
+      "label": "Clear formatting",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.altText",
+      "menu": "format",
+      "status": "now",
+      "label": "Alt text",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.textFitting",
+      "menu": "format",
+      "status": "now",
+      "label": "Text fitting",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.dropShadow",
+      "menu": "format",
+      "status": "now",
+      "label": "Drop shadow",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.changeShape",
+      "menu": "format",
+      "status": "now",
+      "label": "Change shape",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.editData",
+      "menu": "format",
+      "status": "now",
+      "label": "Edit data",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.editHtml",
+      "menu": "format",
+      "status": "now",
+      "label": "Edit HTML",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.chartType",
+      "menu": "format",
+      "status": "now",
+      "label": "Chart type",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.chartType.bar",
+      "menu": "format",
+      "status": "now",
+      "label": "Bar",
+      "check": "not in the bar (under a context only row)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.chartType.column",
+      "menu": "format",
+      "status": "now",
+      "label": "Column",
+      "check": "not in the bar (under a context only row)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.chartType.line",
+      "menu": "format",
+      "status": "now",
+      "label": "Line",
+      "check": "not in the bar (under a context only row)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "format.chartType.pie",
+      "menu": "format",
+      "status": "now",
+      "label": "Pie",
+      "check": "not in the bar (under a context only row)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.newSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "New slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.duplicateSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Duplicate slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.deleteSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Delete slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.skipSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Skip slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.moveSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.moveSlide.up",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide up",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.moveSlide.down",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide down",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.moveSlide.toBeginning",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide to beginning",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.moveSlide.toEnd",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide to end",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.changeBackground",
+      "menu": "slide",
+      "status": "now",
+      "label": "Change background",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.applyLayout",
+      "menu": "slide",
+      "status": "now",
+      "label": "Apply layout",
+      "check": "row",
+      "evidence": "level 0; layouts plate with 21 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.transition",
+      "menu": "slide",
+      "status": "later",
+      "label": "Transition",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.editTheme",
+      "menu": "slide",
+      "status": "later",
+      "label": "Edit theme",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "slide.changeTheme",
+      "menu": "slide",
+      "status": "now",
+      "label": "Change theme",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.order",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Order",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.order.bringToFront",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bring to front",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.order.bringForward",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bring forward",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.order.sendBackward",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Send backward",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.order.sendToBack",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Send to back",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.align",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Align",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.align.left",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Left",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.align.center",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Center",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.align.right",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Right",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.align.top",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Top",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.align.middle",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Middle",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.align.bottom",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bottom",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.distribute",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Distribute",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.distribute.horizontally",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Horizontally",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.distribute.vertically",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Vertically",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.centerOnPage",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Center on page",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.centerOnPage.horizontally",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Horizontally",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.centerOnPage.vertically",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Vertically",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.rotate",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Rotate",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.rotate.clockwise",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Rotate clockwise 90°",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.rotate.counterClockwise",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Rotate counter-clockwise 90°",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.rotate.flipHorizontally",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Flip horizontally",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.rotate.flipVertically",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Flip vertically",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.group",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Group",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.ungroup",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Ungroup",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "arrange.regroup",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Regroup",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.spelling",
+      "menu": "tools",
+      "status": "now",
+      "label": "Spelling",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.spelling.spellCheck",
+      "menu": "tools",
+      "status": "later",
+      "label": "Spell check",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.spelling.underlineErrors",
+      "menu": "tools",
+      "status": "now",
+      "label": "Underline errors",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.spelling.personalDictionary",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Personal dictionary",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.explore",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Explore",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.linkedObjects",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Linked objects",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.dictionary",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Dictionary",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.qaHistory",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Q&A history",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.dictateNotes",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Dictate speaker notes",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.notificationSettings",
+      "menu": "tools",
+      "status": "now",
+      "label": "Notification settings",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.preferences",
+      "menu": "tools",
+      "status": "later",
+      "label": "Preferences",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.accessibilitySettings",
+      "menu": "tools",
+      "status": "now",
+      "label": "Accessibility settings",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.accessibilitySettings.collaboratorAnnouncements",
+      "menu": "tools",
+      "status": "now",
+      "label": "Turn on collaborator announcements",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.accessibilitySettings.screenReader",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Turn on screen reader support",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.accessibilitySettings.braille",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Turn on braille support",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.activityDashboard",
+      "menu": "tools",
+      "status": "now",
+      "label": "Activity dashboard",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.activityDashboard.viewers",
+      "menu": "tools",
+      "status": "later",
+      "label": "Viewers",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.checkSlides",
+      "menu": "tools",
+      "status": "now",
+      "label": "Check slides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.advanced",
+      "menu": "tools",
+      "status": "now",
+      "label": "Advanced",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.advanced.showSource",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show source",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.advanced.sideBySide",
+      "menu": "tools",
+      "status": "now",
+      "label": "Light and dark side by side",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.advanced.suggestionMarks",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show suggestion marks on the slide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.advanced.showIds",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show slide and block ids",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.advanced.renderSlide",
+      "menu": "tools",
+      "status": "now",
+      "label": "Render this slide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.advanced.changeHistory",
+      "menu": "tools",
+      "status": "now",
+      "label": "Change history",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.advanced.sectionsTree",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show sections as a tree",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.advanced.readAsBook",
+      "menu": "tools",
+      "status": "now",
+      "label": "Read as a book",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.advanced.picturesMaterials",
+      "menu": "tools",
+      "status": "now",
+      "label": "Pictures and materials",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "tools.advanced.runAction",
+      "menu": "tools",
+      "status": "now",
+      "label": "Run an action…",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "extensions.addOns",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "extensions.addOns.get",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Get add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "extensions.addOns.manage",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Manage add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "extensions.installedAddOns",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Installed add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "extensions.appsScript",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Apps Script",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "extensions.appSheet",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "AppSheet",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "extensions.agentAccess",
+      "menu": "extensions",
+      "status": "now",
+      "label": "Agent access",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "extensions.embedInSite",
+      "menu": "extensions",
+      "status": "now",
+      "label": "Embed in a site",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "help.searchMenus",
+      "menu": "help",
+      "status": "now",
+      "label": "Search the menus",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "help.help",
+      "menu": "help",
+      "status": "now",
+      "label": "Help",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "help.training",
+      "menu": "help",
+      "status": "omit",
+      "label": "Training",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "help.updates",
+      "menu": "help",
+      "status": "omit",
+      "label": "Updates",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "help.improve",
+      "menu": "help",
+      "status": "now",
+      "label": "Help Turboslide improve",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "help.privacyPolicy",
+      "menu": "help",
+      "status": "omit",
+      "label": "Privacy Policy",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "help.termsOfService",
+      "menu": "help",
+      "status": "omit",
+      "label": "Terms of Service",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:twoObjects",
+      "id": "help.keyboardShortcuts",
+      "menu": "help",
+      "status": "now",
+      "label": "Keyboard shortcuts",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "effects:objects",
+      "id": "arrange.group",
+      "menu": "arrange",
+      "evidence": "revision 233 -> 234; group group with 2 members",
+      "pass": true
+    },
+    {
+      "section": "toolbar:objects",
+      "id": "group.chip",
+      "evidence": "chip \"Group\"",
+      "pass": true
+    },
+    {
+      "section": "toolbar:objects",
+      "id": "toolbar.group",
+      "kind": "group",
+      "wanted": [
+        "toolbar.search",
+        "toolbar.newSlide",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.fillColor",
+        "toolbar.borderColor",
+        "toolbar.borderWeight",
+        "toolbar.borderDash",
+        "toolbar.formatOptions",
+        "toolbar.hideMenus"
+      ],
+      "observed": [
+        "toolbar.search",
+        "toolbar.newSlide",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.fillColor",
+        "toolbar.borderColor",
+        "toolbar.borderWeight",
+        "toolbar.borderDash",
+        "toolbar.formatOptions",
+        "toolbar.hideMenus"
+      ],
+      "evidence": "13 controls in the order of SPEC 3",
+      "check": "order",
+      "pass": true
+    },
+    {
+      "section": "contextMenu:objects",
+      "id": "group",
+      "wanted": [
+        "arrange.ungroup",
+        "-",
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.delete",
+        "edit.duplicate",
+        "-",
+        "arrange.order",
+        "arrange.rotate",
+        "arrange.centerOnPage",
+        "arrange.align",
+        "arrange.distribute",
+        "-",
+        "format.dropShadow",
+        "format.formatOptions",
+        "format.altText",
+        "-",
+        "insert.comment"
+      ],
+      "observed": [
+        "arrange.ungroup",
+        "-",
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "edit.delete",
+        "edit.duplicate",
+        "-",
+        "arrange.order",
+        "arrange.rotate",
+        "arrange.centerOnPage",
+        "arrange.align",
+        "arrange.distribute",
+        "-",
+        "format.dropShadow",
+        "format.formatOptions",
+        "format.altText",
+        "-",
+        "insert.comment"
+      ],
+      "check": "order",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "Format options with a group selected",
+      "evidence": "0 text nodes, 0 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "formatOptions:objects",
+      "id": "sections.group",
+      "shown": ["size", "position", "text", "colour", "shadow", "block"],
+      "evidence": "sections size, position, text, colour, shadow, block; controls without a tooltip: block.audit-shape.arrowheads, block.audit-shape.orientation, block.audit-shape.typography.align, block.audit-shape.typography.columns, block.audit-shape.fill, block.audit-shape.stroke, block.audit-shape.color",
+      "pass": true
+    },
+    {
+      "section": "toolbar:objects",
+      "id": "group.ring",
+      "evidence": "the union ring carries role=\"group\"",
+      "pass": true
+    },
+    {
+      "section": "effects:objects",
+      "id": "arrange.ungroup",
+      "menu": "arrange",
+      "evidence": "revision 234 -> 235; 0 members left",
+      "pass": true
+    },
+    {
+      "section": "effects:objects",
+      "id": "arrange.regroup",
+      "menu": "arrange",
+      "evidence": "revision 235 -> 236; group group",
       "pass": true
     },
     {
@@ -20069,17 +24018,16 @@
     {
       "section": "contextMenu:objects",
       "id": "guide",
-      "wanted": ["view.guides.delete", "view.guides.edit"],
-      "observed": ["view.guides.delete", "view.guides.edit"],
-      "check": "order",
-      "pass": true
+      "check": "opens",
+      "evidence": "TimeoutError: page.waitForSelector: Timeout 4000ms exceeded.\nCall log:\n  - waiting for locator('[role=\"menu\"]') to be visible\n",
+      "pass": false
     },
     {
       "section": "effects:objects",
       "id": "view.guides.delete",
       "menu": "view",
-      "evidence": "revision 215 -> 216; guides null",
-      "pass": true
+      "evidence": "no Delete guide row in the guide menu",
+      "pass": false
     },
     {
       "section": "rows:objects",
@@ -20171,37 +24119,37 @@
     {
       "section": "pickers:objects",
       "id": "insert.table.pick",
-      "evidence": "picked 4x3; revision 221 -> 222; objects 7 -> 8; table 4 by 3 at {\"x\":320,\"y\":290,\"w\":960,\"h\":320,\"z\":8}",
+      "evidence": "picked 4x3; revision 244 -> 245; objects 7 -> 8; table 4 by 3 at {\"x\":320,\"y\":290,\"w\":960,\"h\":320,\"z\":8}",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.shape.shapes.pick",
-      "evidence": "picked hexagon; revision 223 -> 224; objects 7 -> 8; hexagon at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "evidence": "picked hexagon; revision 246 -> 247; objects 7 -> 8; hexagon at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.shape.arrows.pick",
-      "evidence": "picked rightArrow; revision 225 -> 226; objects 7 -> 8; rightArrow at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "evidence": "picked rightArrow; revision 248 -> 249; objects 7 -> 8; rightArrow at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.shape.callouts.pick",
-      "evidence": "picked wedgeRectCallout; revision 227 -> 228; objects 7 -> 8; wedgeRectCallout at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "evidence": "picked wedgeRectCallout; revision 250 -> 251; objects 7 -> 8; wedgeRectCallout at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.shape.equation.pick",
-      "evidence": "picked mathPlus; revision 229 -> 230; objects 7 -> 8; mathPlus at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "evidence": "picked mathPlus; revision 252 -> 253; objects 7 -> 8; mathPlus at {\"x\":1360,\"y\":765,\"w\":240,\"h\":160,\"z\":8}; the stage armed the shape tool; clicked an empty spot on the sheet",
       "pass": true
     },
     {
       "section": "pickers:objects",
       "id": "insert.specialCharacters.pick",
-      "evidence": "picked dialog.specialCharacters.pick.8592; revision 231 -> 232; objects 7 -> 8; the dialog stays open",
+      "evidence": "picked dialog.specialCharacters.pick.8592; revision 254 -> 255; objects 7 -> 8; the dialog stays open",
       "pass": true
     },
     {
@@ -20213,21 +24161,21 @@
     {
       "section": "pickers:objects",
       "id": "insert.diagram.insert",
-      "evidence": "revision 233 -> 234; objects 7 -> 18; groups process",
+      "evidence": "revision 256 -> 257; objects 7 -> 18; groups process",
       "pass": true
     },
     {
       "section": "effects:objects",
       "id": "slide.changeBackground.color",
       "menu": "slide",
-      "evidence": "picked dialog.background.color.ink; Done clicked; revision 235 -> 236; background {\"color\":\"ink\"}",
+      "evidence": "picked dialog.background.color.ink; Done clicked; revision 258 -> 259; background {\"color\":\"ink\"}",
       "pass": true
     },
     {
       "section": "effects:objects",
       "id": "slide.changeBackground.choose",
       "menu": "slide",
-      "evidence": "chose dialog.background.choose.opener-brand; revision 237 -> 238; objects 7 -> 8; picture {\"x\":0,\"y\":0,\"w\":1600,\"h\":900,\"z\":0} (lowest z 0)",
+      "evidence": "chose dialog.background.choose.opener-brand; revision 260 -> 261; objects 7 -> 8; picture {\"x\":0,\"y\":0,\"w\":1600,\"h\":900,\"z\":0} (lowest z 0)",
       "pass": true
     },
     {
@@ -20259,7 +24207,7 @@
     {
       "section": "dither:scratch",
       "id": "dialog.background.upload",
-      "evidence": "the covering picture picture (asset ref-rosetta) landed in 274 ms; revision 239 -> 240",
+      "evidence": "the covering picture picture (asset ref-rosetta) landed in 329 ms; revision 262 -> 263",
       "pass": true
     },
     {
@@ -20302,7 +24250,7 @@
     {
       "section": "roles:scratch",
       "id": "owner.record",
-      "evidence": "record revision 0, owner anon_4e1054b…, general access restricted/viewer; the page's access facts {\"deckId\":\"untitled-20260914-s1bk\",\"revision\":0,\"owner\":\"anon_4e1054b0-fd51-46d9-b4cc-a72eefc3c24a\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"restricted\",\"role\":\"viewer\"},\"links\":[],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"owner\",\"via\":\"owner\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"readNotes\",\"write\",\"history\",\"export\",\"exportNotes\",\"rename\",\"copy\",\"trash\",\"restore\",\"publish\",\"follow\",\"share\",\"settings\",\"remove\",\"transfer\"],\"mode\":\"restricted\"}",
+      "evidence": "record revision 0, owner anon_d6d1f13…, general access restricted/viewer; the page's access facts {\"deckId\":\"untitled-20260914-9u9b\",\"revision\":0,\"owner\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"restricted\",\"role\":\"viewer\"},\"links\":[],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"owner\",\"via\":\"owner\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"readNotes\",\"write\",\"history\",\"export\",\"exportNotes\",\"rename\",\"copy\",\"trash\",\"restore\",\"publish\",\"follow\",\"share\",\"settings\",\"remove\",\"transfer\"],\"mode\":\"restricted\"}",
       "pass": true
     },
     {
@@ -20314,13 +24262,13 @@
     {
       "section": "roles:scratch",
       "id": "viewer.landing",
-      "evidence": "the viewer link landed on /deck/untitled-20260914-s1bk; address carries a token: false",
+      "evidence": "the viewer link landed on /deck/untitled-20260914-9u9b; address carries a token: false",
       "pass": true
     },
     {
       "section": "roles:scratch",
       "id": "viewer.mode",
-      "evidence": "data-edit-mode viewing; access facts {\"deckId\":\"untitled-20260914-s1bk\",\"revision\":1,\"owner\":\"anon_4e1054b0-fd51-46d9-b4cc-a72eefc3c24a\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_28Qtz44fRkYGz2as\",\"role\":\"viewer\",\"createdAt\":\"2026-09-14T08:14:52.387Z\",\"createdBy\":\"anon_4e1054b0-fd51-46d9-b4cc-a72eefc3c24a\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"viewer\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"export\",\"copy\"],\"mode\":\"link\"}",
+      "evidence": "data-edit-mode viewing; access facts {\"deckId\":\"untitled-20260914-9u9b\",\"revision\":1,\"owner\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_aUq25NntOsZDLZNS\",\"role\":\"viewer\",\"createdAt\":\"2026-09-14T12:42:45.196Z\",\"createdBy\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"viewer\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"export\",\"copy\"],\"mode\":\"link\"}",
       "pass": true
     },
     {
@@ -23790,7 +27738,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260914-s1bk as a viewer",
+      "where": "/edit/untitled-20260914-9u9b as a viewer",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -23803,7 +27751,7 @@
     {
       "section": "roles:scratch",
       "id": "commenter.landing",
-      "evidence": "the commenter link landed on /edit/untitled-20260914-s1bk",
+      "evidence": "the commenter link landed on /edit/untitled-20260914-9u9b",
       "pass": true
     },
     {
@@ -23815,7 +27763,7 @@
     {
       "section": "roles:scratch",
       "id": "commenter.role",
-      "evidence": "describe().state.access reads {\"deckId\":\"untitled-20260914-s1bk\",\"revision\":2,\"owner\":\"anon_4e1054b0-fd51-46d9-b4cc-a72eefc3c24a\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_28Qtz44fRkYGz2as\",\"role\":\"viewer\",\"createdAt\":\"2026-09-14T08:14:52.387Z\",\"createdBy\":\"anon_4e1054b0-fd51-46d9-b4cc-a72eefc3c24a\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0},{\"id\":\"lnk_qw2RL3sq2Q3N5hN8\",\"role\":\"commenter\",\"createdAt\":\"2026-09-14T08:14:59.404Z\",\"createdBy\":\"anon_4e1054b0-fd51-46d9-b4cc-a72eefc3c24a\",\"revokedAt\":null,\"expiresAt\":null,\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"commenter\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"export\",\"copy\"],\"mode\":\"link\"}; the rows below are read against the matrix of 6.2 for a commenter: read, presence, readSkipped, comment, readComments, export, copy",
+      "evidence": "describe().state.access reads {\"deckId\":\"untitled-20260914-9u9b\",\"revision\":2,\"owner\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"pendingOwner\":null,\"generalAccess\":{\"mode\":\"link\",\"role\":\"viewer\"},\"links\":[{\"id\":\"lnk_aUq25NntOsZDLZNS\",\"role\":\"viewer\",\"createdAt\":\"2026-09-14T12:42:45.196Z\",\"createdBy\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"revokedAt\":null,\"expiresAt\":null,\"label\":\"Anyone with the link\",\"useCount\":0},{\"id\":\"lnk_f6UtgE-yh5pO1x9F\",\"role\":\"commenter\",\"createdAt\":\"2026-09-14T12:42:51.580Z\",\"createdBy\":\"anon_d6d1f13a-329d-47bd-bae7-1394c4f05a83\",\"revokedAt\":null,\"expiresAt\":null,\"useCount\":0}],\"publish\":null,\"grants\":[],\"requests\":[],\"settings\":{\"editorsCanShare\":true,\"viewersCanDownload\":true,\"viewersCanSeeComments\":false,\"showNamesToLinkVisitors\":false,\"allowHtmlBlocks\":false},\"claimable\":false,\"role\":\"commenter\",\"via\":\"link\",\"capabilities\":[\"read\",\"presence\",\"readSkipped\",\"comment\",\"readComments\",\"export\",\"copy\"],\"mode\":\"link\"}; the rows below are read against the matrix of 6.2 for a commenter: read, presence, readSkipped, comment, readComments, export, copy",
       "pass": true
     },
     {
@@ -27261,7 +31209,7 @@
     },
     {
       "section": "defaultViewWords",
-      "where": "/edit/untitled-20260914-s1bk as a commenter",
+      "where": "/edit/untitled-20260914-9u9b as a commenter",
       "evidence": "0 text nodes, 0 tooltips, none of 36 words",
       "pass": true
     },
@@ -27277,13 +31225,13 @@
       "menu": "title",
       "effect": "action",
       "label": "Forget this browser",
-      "evidence": "own chip \"Gallium 864 (you)\" -> \"Foil 520 (you)\"; the page's principal anon_a4f8fa5a-017e-4e31-a90f-72857db6d5eb -> anon_8b96d8f7-b43b-4203-a9b8-05ff1d3ae420; confirm dialog \"Forget this browser\" confirmed",
+      "evidence": "own chip \"Rhodium 648 (you)\" -> \"Foil 284 (you)\"; the page's principal anon_91fadbca-3c2f-48ab-8ffd-1486ec26e5d6 -> anon_d315a2dc-6c04-4f90-856b-e2e6c22f3bfd; confirm dialog \"Forget this browser\" confirmed",
       "pass": true
     },
     {
       "section": "tooltipAudit",
       "id": "tooltip-audit",
-      "evidence": "exit 0; {\"width\":1440,\"theme\":\"light\",\"pages\":[{\"url\":\"http://localhost:4321/new\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/edit/untitled-20260914-s1bk\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/decks\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]}],\"missing\":0,\"titleOnly\":0,\"broken\":0}",
+      "evidence": "exit 0; {\"width\":1440,\"theme\":\"light\",\"pages\":[{\"url\":\"http://localhost:4321/new\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/edit/untitled-20260914-9u9b\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]},{\"url\":\"http://localhost:4321/decks\",\"surfaces\":[{\"surface\":\"page\",\"hits\":[],\"titleOnly\":[]}]}],\"missing\":0,\"titleOnly\":0,\"broken\":0}",
       "pass": true
     },
     {
@@ -27292,7 +31240,7 @@
       "menu": "file",
       "effect": "action",
       "label": "Move to trash",
-      "evidence": "http://localhost:4321/edit/untitled-20260914-s1bk -> /decks \"\"",
+      "evidence": "http://localhost:4321/edit/untitled-20260914-9u9b -> /decks \"\"",
       "pass": true
     },
     {
@@ -27300,7 +31248,7 @@
       "id": "trash.delete",
       "menu": "home",
       "label": "Delete forever",
-      "evidence": "the card of untitled-20260914-s1bk left the trash",
+      "evidence": "the card of untitled-20260914-9u9b left the trash",
       "pass": true
     },
     {

@@ -235,30 +235,44 @@ test('rotate and Stop sharing kill the link; publish gives the player, the embed
   const owner = await ownerContext(browser);
   const pageO = await owner.newPage();
   await openDeck(pageO, `/edit/${COPY}`);
-  let record = (await state<Access>(pageO, 'access'))!;
-  const link = await invoke<{ url: string; link: { id: string } }>(pageO, 'share.createLink', {
+  /* every share write bases on the record as the server holds it now, read through share.get,
+     and a write the record moved under is re-read and retried once, which is what the SPEC-3 6.4
+     sentence ("re-read and retry") tells a client to do: the previous row's link exchanges wrote
+     the visitors' grants into this record, and a page opened right after them held the record one
+     revision behind (the round three hotfix ship step, check step 26) */
+  const shareWrite = async <T>(action: string, input: Record<string, unknown>): Promise<T> => {
+    const base = async () => {
+      const got = await invoke<{ revision?: number; record?: { revision: number } }>(
+        pageO,
+        'share.get',
+        { id: COPY },
+      );
+      return got.record?.revision ?? got.revision ?? 0;
+    };
+    try {
+      return await invoke<T>(pageO, action, { ...input, baseRevision: await base() });
+    } catch (error) {
+      if (!/re-read and retry|changed since they were read/.test(String(error))) throw error;
+      return invoke<T>(pageO, action, { ...input, baseRevision: await base() });
+    }
+  };
+  const link = await shareWrite<{ url: string; link: { id: string } }>('share.createLink', {
     id: COPY,
     role: 'viewer',
-    baseRevision: record.revision,
   });
-  record = (await state<Access>(pageO, 'access'))!;
-  const rotated = await invoke<{ url: string }>(pageO, 'share.rotateLink', {
+  const rotated = await shareWrite<{ url: string }>('share.rotateLink', {
     id: COPY,
     linkId: link.link.id,
-    baseRevision: record.revision,
   });
   expect(rotated.url).not.toBe(link.url);
   const dead = await pageO.request.get(link.url, { maxRedirects: 0 });
   expect(dead.status()).toBe(404);
-  record = (await state<Access>(pageO, 'access'))!;
-  await invoke(pageO, 'share.stop', { id: COPY, baseRevision: record.revision });
+  await shareWrite('share.stop', { id: COPY });
   const stopped = await pageO.request.get(rotated.url, { maxRedirects: 0 });
   expect(stopped.status()).toBe(404);
 
-  record = (await state<Access>(pageO, 'access'))!;
-  const published = await invoke<{ url: string; embed: string }>(pageO, 'deck.publish', {
+  const published = await shareWrite<{ url: string; embed: string }>('deck.publish', {
     id: COPY,
-    baseRevision: record.revision,
   });
   expect(published.url).toContain('?p=');
   const player = await browser.newContext();
@@ -266,20 +280,36 @@ test('rotate and Stop sharing kill the link; publish gives the player, the embed
   const playerResponse = await pageP.goto(published.url);
   expect(playerResponse?.status()).toBe(200);
   expect(playerResponse?.headers()['x-robots-tag']).toContain('noindex');
-  await pageP.goto('about:blank');
-  await pageP.setContent(
-    `<iframe id="f" src="${new URL(published.embed, pageO.url()).href}" width="960" height="540"></iframe>`,
-  );
-  const message = await pageP.evaluate(
-    () =>
-      new Promise<unknown>((resolve) => {
-        window.addEventListener('message', (event) => resolve(event.data), { once: true });
-        setTimeout(() => resolve(null), 15_000);
-      }),
-  );
+  // a same-origin host page around the frame, as Prototemplate's DeckFrame is (viewer.spec.ts):
+  // the embed's frame-ancestors admits the studio's own origin on a dev server, the recorder is
+  // installed before the frame is appended so the opening slide message is not missed, and the
+  // frame src is the embed's own path so the host and the frame share the origin (the round three
+  // hotfix ship step, check step 26; DeckViewer.tsx postSlide posts with target origin '*')
+  await pageP.goto(new URL('/decks', published.url).href);
+  const embedPath = new URL(published.embed, published.url);
+  const messages = await pageP.evaluateHandle((src) => {
+    const seen: unknown[] = [];
+    window.addEventListener('message', (event) => {
+      const data = event.data as { type?: string };
+      if (data?.type === 'gt-deck-slide') seen.push(data);
+    });
+    const frame = document.createElement('iframe');
+    frame.id = 'embed';
+    frame.src = src;
+    frame.width = '960';
+    frame.height = '540';
+    document.body.appendChild(frame);
+    return seen;
+  }, `${embedPath.pathname}${embedPath.search}`);
+  await expect
+    .poll(() => messages.evaluate((seen) => seen.length), {
+      timeout: 15_000,
+      message: 'the embed posts gt-deck-slide',
+    })
+    .toBeGreaterThan(0);
+  const message = await messages.evaluate((seen) => seen[0] ?? null);
   expect(message, 'the embed posts gt-deck-slide').not.toBeNull();
-  record = (await state<Access>(pageO, 'access'))!;
-  await invoke(pageO, 'deck.unpublish', { id: COPY, baseRevision: record.revision });
+  await shareWrite('deck.unpublish', { id: COPY });
   const gone = await pageP.request.get(published.url);
   expect(gone.status()).toBe(410);
   expect(await gone.text()).toContain('This presentation is no longer published');

@@ -311,6 +311,16 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
   let offline = false;
   /** the head the last hello named; a resync moves the position here */
   let helloSeq = options.seq;
+  /**
+   * Whether this client has caught the stream up to the head the last hello named (SPEC-3 3.6;
+   * VERIFICATION-3 finding 33). A freshly opened page whose document is a revision behind the
+   * stream (a write landed just before it opened) holds its first flush until the replay has
+   * drained, so the first write is transformed against what landed and never sent on a base the
+   * server would have to resync. The keystrokes are applied locally and stay pending meanwhile,
+   * so nothing is lost; a reconnect that names a head ahead of this client's position gates the
+   * flush again until the replay is drained.
+   */
+  let caughtUp = false;
   let tier: RealtimeTier = options.tier ?? 'memory';
   let stream: StreamHandle | null = null;
   let flushTimer: unknown;
@@ -503,6 +513,13 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     emitStatus();
   };
 
+  /** The replay has reached the head the last hello named: the first flush may go (finding 33). */
+  const noteCaughtUp = (): void => {
+    if (caughtUp || seq < helloSeq) return;
+    caughtUp = true;
+    if (pending.some((op) => !op.inflight)) scheduleFlush('now');
+  };
+
   /** Drains the contiguous entries buffered by seq. */
   const drain = (): void => {
     for (;;) {
@@ -513,6 +530,7 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     }
     // anything at or below the seq is a duplicate
     for (const key of [...incoming.keys()]) if (key <= seq) incoming.delete(key);
+    noteCaughtUp();
   };
 
   const take = (entry: Entry): void => {
@@ -534,6 +552,8 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
     server = fresh;
     revision = fresh.deck.revision;
     seq = Math.max(seq, helloSeq);
+    // the reload brought the document to the head, so the pending ops (re-folded on it) may flush
+    caughtUp = true;
     incoming.clear();
     retained = [];
     for (const op of pending) op.inflight = false;
@@ -555,6 +575,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
         tier = event.tier;
         roster = event.clients;
         helloSeq = event.seq;
+        // caught up when this client's position already reaches the head; otherwise the flush
+        // waits for the replay to drain (finding 33), which noteCaughtUp arms
+        caughtUp = seq >= helloSeq;
         connected = true;
         offline = false;
         backoff = 0;
@@ -663,6 +686,9 @@ export function createRoomClient(options: RoomClientOptions): RoomClient {
       return;
     }
     if (clientId === null || !connected) return;
+    // hold the first flush until the replay has caught the stream up (finding 33): the op stays
+    // pending and applied locally, and goes once it has been transformed against what landed
+    if (!caughtUp) return;
     const unsent = pending.filter((op) => !op.inflight);
     if (unsent.length === 0) return;
     const batch: PendingOp[] = [];

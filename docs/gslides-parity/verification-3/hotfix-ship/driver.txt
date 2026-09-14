@@ -1,0 +1,11 @@
+driver: start 2026-09-14T12:20:08Z load 3.95 4.57 4.84
+driver: from 2 exit 1 2026-09-14T12:21:33Z load 13.07 8.26 6.27
+driver: from 6 exit 1 2026-09-14T12:21:39Z load 12.26 8.17 6.26
+driver: vite preview started on 4344 (pid )
+driver: from 7 exit 1 2026-09-14T12:25:58Z load 4.86 6.21 5.87
+driver: from 20 exit 1 2026-09-14T12:44:41Z load 5.04 4.94 5.04
+driver: from 21 exit 1 2026-09-14T13:07:27Z load 4.95 4.94 5.03
+driver: from 22 exit 1 2026-09-14T13:24:03Z load 4.36 5.09 5.23
+driver: from 27 exit 1 2026-09-14T13:34:16Z load 5.82 4.79 4.90
+driver: from 28 exit 0 2026-09-14T13:34:16Z load 5.82 4.79 4.90
+driver: done 2026-09-14T13:34:16Z

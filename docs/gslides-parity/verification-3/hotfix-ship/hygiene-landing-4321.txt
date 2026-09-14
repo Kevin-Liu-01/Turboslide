@@ -1,0 +1,16 @@
+
+Running 11 tests using 1 worker
+
+  ✓   1 apps/studio/e2e/hygiene.spec.ts:121:1 › Help > Help Turboslide improve opens the repository’s issue page in a new tab (SPEC-2 0.28) (1.8s)
+  ✓   2 apps/studio/e2e/hygiene.spec.ts:141:1 › the first write from /new can be undone and the address stays on the saved deck (SPEC-2 0.29) (5.7s)
+  ✓   3 apps/studio/e2e/hygiene.spec.ts:189:1 › Edit > Select all with the filmstrip focused selects every card, and Edit > Cut removes the selected slides with no snackbar (SPEC-2 0.30) (4.3s)
+  ✓   4 apps/studio/e2e/hygiene.spec.ts:236:1 › Edit > Select none clears a block selection (SPEC-2 0.61) (1.9s)
+  ✓   5 apps/studio/e2e/landing.spec.ts:80:1 › / answers a 307 to /new with X-Robots-Tag: noindex and the browser lands on /new (196ms)
+  ✓   6 apps/studio/e2e/landing.spec.ts:92:1 › /new is noindex and a visit that only looks writes nothing to the store (2.1s)
+  ✓   7 apps/studio/e2e/landing.spec.ts:112:1 › the first write against a draft id creates the deck in the store (server functions, no editor) (1.2s)
+  ✓   8 apps/studio/e2e/landing.spec.ts:176:1 › the draft (editor attached) reads Untitled presentation, one Title slide, the two prompts and Not saved yet (876ms)
+  ✓   9 apps/studio/e2e/landing.spec.ts:200:1 › the first edit (editor attached) creates the deck, moves the address to /edit/<id> and takes the heading as the title (2.3s)
+  ✓  10 apps/studio/e2e/landing.spec.ts:252:1 › a double click on the empty title placeholder edits it, and typing saves the deck (SPEC 6.1; VERIFICATION-3 finding 45) (1.4s)
+  ✓  11 apps/studio/e2e/landing.spec.ts:293:1 › two tabs on /new (editor attached) get two drafts (1.3s)
+
+  11 passed (23.5s)

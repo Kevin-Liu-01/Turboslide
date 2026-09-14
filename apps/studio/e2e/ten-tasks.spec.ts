@@ -127,7 +127,13 @@ function seedDeck(): void {
 function removeDeck(id: string): void {
   rmSync(join(DECKS, id), { recursive: true, force: true });
   rmSync(join(ROOT, '.turboslide', 'worker', 'cache', id), { recursive: true, force: true });
-  rmSync(join(ROOT, '.turboslide', 'thumbs', id), { recursive: true, force: true });
+  rmSync(join(ROOT, '.turboslide', 'thumbs', id), {
+    recursive: true,
+    force: true,
+    /* the thumbnail worker may still be writing a frame into the folder */
+    maxRetries: 5,
+    retryDelay: 100,
+  });
 }
 
 /** A 2 by 2 opaque PNG, the smallest picture the asset pipeline takes. */
@@ -146,7 +152,7 @@ async function editorReady(page: Page): Promise<void> {
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
 }
 
 /**
@@ -161,7 +167,10 @@ async function openEditor(page: Page, slideId?: string): Promise<void> {
   await editorReady(page);
   if (slideId !== undefined) {
     await invoke(page, 'view.goto', { slideId });
-    await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', slideId);
+    await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+      'data-active',
+      slideId,
+    );
   }
   await expect(page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run]').first()).toBeVisible();
 }
@@ -180,7 +189,10 @@ async function revision(page: Page): Promise<number> {
 /** The editor's pending writes have all reached the server. */
 async function settled(page: Page): Promise<void> {
   await page.waitForFunction(() => {
-    const state = window.turboslide!.studio.describe().state as {
+    /* the registry is re-installed when an owner element changes; a poll that lands in that
+       moment reads false instead of failing the wait with a TypeError */
+    if (typeof window.turboslide?.studio?.describe !== 'function') return false;
+    const state = window.turboslide.studio.describe().state as {
       revision?: number;
       serverRevision?: number;
       pending?: number;
@@ -324,20 +336,23 @@ test('task 4: swap a logo with one drop', async ({ page }) => {
   await openEditor(page, 'prompt');
   /* the setup, not counted: a picture in the deck and a picture block on the slide */
   const png = `data:image/png;base64,${Buffer.from(PNG_2X2).toString('base64')}`;
+  const beforeAsset = await revision(page);
   await invoke(page, 'asset.add', {
     id: 'logo-old',
     file: png,
     role: 'capture',
     alt: 'Old logo',
-    baseRevision: await revision(page),
+    baseRevision: beforeAsset,
   });
-  /* the asset's write comes back over the watch channel */
+  /* the asset's write comes back over the stream: the page's revision follows it before the next
+     write bases on that revision (a base behind the document is refused as stale) */
   await expect
     .poll(
       async () => (await invoke<{ counts: { assets: number } }>(page, 'deck.info')).counts.assets,
       { timeout: 20_000 },
     )
     .toBeGreaterThan(0);
+  await expect.poll(() => revision(page), { timeout: 20_000 }).toBeGreaterThan(beforeAsset);
   await settled(page);
   await invoke(page, 'block.insert', {
     slideId: 'prompt',
@@ -391,9 +406,13 @@ test('task 5: add, duplicate, delete and reorder slides in one press each', asyn
   await expect(card(page, added!)).toBeVisible({ timeout: SETTLE_MS });
   await allChangesSaved(page);
   /* the new slide is current (the route's selectSoon keeps the intent until the filmstrip renders it) */
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', added!, {
-    timeout: SETTLE_MS,
-  });
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    added!,
+    {
+      timeout: SETTLE_MS,
+    },
+  );
   await card(page, added!).focus();
   await k.press('ControlOrMeta+d', card(page, added!));
   await expect
@@ -460,7 +479,10 @@ test('task 7: update the pricing table and the big number', async ({ page }) => 
   });
   await settled(page);
   await invoke(page, 'view.goto', { slideId: 'table' });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', 'table');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    'table',
+  );
   /* the task: click the first price cell, type, Tab through the cells */
   const cell = (r: number, c: number) =>
     page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-run="table/rows/${r}/cells/${c}"]`);
@@ -487,7 +509,10 @@ test('task 7: update the pricing table and the big number', async ({ page }) => 
   const big = (await rows(page)).find((row) => row.template === 'big-number');
   expect(big).toBeTruthy();
   await invoke(page, 'view.goto', { slideId: big!.id });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', big!.id);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    big!.id,
+  );
   const number = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run="h/text"]');
   const nbox = await number.boundingBox();
   expect(nbox).not.toBeNull();
@@ -523,11 +548,11 @@ test('task 9: present over a call with Presenter view in two clicks', async ({ p
   await k.click(menuItem(page, 'title.slideshow.presenterView'));
   const presenter = await popup;
   await expect(presenter).toHaveURL(new RegExp(`/present/${DECK}`));
-  await expect(page.locator('.pt-viewer')).toHaveClass(/is-present/);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveClass(/is-present/);
   await expect(page.locator('.ts-slideshow')).toBeAttached();
   await presenter.close();
   await page.keyboard.press('Escape');
-  await expect(page.locator('.pt-viewer')).not.toHaveClass(/is-present/);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).not.toHaveClass(/is-present/);
   record(9, k.c);
 });
 
@@ -535,10 +560,11 @@ test('task 10: send a link or a PDF', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   const k = counter(page);
   await openEditor(page, 'title');
-  /* Share, Copy link under View link: a read only address */
+  /* Share, then the dialog's Copy link (SPEC-3 0.16, 5.x item 6): on a deck with no link it copies
+     the read only /deck address; a general access link would copy its /s/ form */
   await k.click(control(page, 'share.open'));
   await expect(control(page, 'dialog.share')).toBeVisible();
-  await k.click(control(page, 'dialog.share.view.copy'));
+  await k.click(control(page, 'dialog.share.copyLink'));
   await expect
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
     .toMatch(new RegExp(`/deck/${DECK}$`));
@@ -587,7 +613,10 @@ test('the current slide follows a removal: Delete slide, and Undo after New slid
     .poll(async () => (await rows(page)).map((row) => row.id), { timeout: 20_000 })
     .toEqual(afterDelete);
   const expectedAfterDelete = replacementFor(before, afterDelete, 'numbered')!;
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', expectedAfterDelete);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    expectedAfterDelete,
+  );
   await expect.poll(() => currentSlide(page)).toBe(expectedAfterDelete);
   expect((await slide(page, await currentSlide(page))).kind).toBeTruthy();
   await settled(page);
@@ -601,7 +630,10 @@ test('the current slide follows a removal: Delete slide, and Undo after New slid
   /* Ctrl+M on the focused card inserts and selects a new slide; Undo removes it and the slide
      that took its place is current, never the removed one */
   await card(page, 'numbered').click();
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', 'numbered');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    'numbered',
+  );
   await card(page, 'numbered').focus();
   await card(page, 'numbered').press('Control+m');
   await expect
@@ -609,19 +641,25 @@ test('the current slide follows a removal: Delete slide, and Undo after New slid
     .toBe(before.length + 1);
   const withNew = (await rows(page)).map((row) => row.id);
   const added = withNew.find((id) => !before.includes(id))!;
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', added);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-active', added);
   await settled(page);
   await page.locator('body').press('ControlOrMeta+z');
   await expect
     .poll(async () => (await rows(page)).map((row) => row.id), { timeout: 20_000 })
     .toEqual(before);
   const expectedAfterUndoNew = replacementFor(withNew, before, added)!;
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', expectedAfterUndoNew);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    expectedAfterUndoNew,
+  );
   await expect.poll(() => currentSlide(page)).toBe(expectedAfterUndoNew);
   await settled(page);
   /* Slide > Duplicate slide selects the copy; Undo removes it the same way */
   await card(page, 'numbered').click();
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', 'numbered');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    'numbered',
+  );
   await control(page, 'menubar.slide').click();
   await menuItem(page, 'slide.duplicateSlide').click();
   await expect
@@ -629,14 +667,17 @@ test('the current slide follows a removal: Delete slide, and Undo after New slid
     .toBe(before.length + 1);
   const withCopy = (await rows(page)).map((row) => row.id);
   const copy = withCopy.find((id) => !before.includes(id))!;
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', copy);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-active', copy);
   await settled(page);
   await page.locator('body').press('ControlOrMeta+z');
   await expect
     .poll(async () => (await rows(page)).map((row) => row.id), { timeout: 20_000 })
     .toEqual(before);
   const expectedAfterUndoCopy = replacementFor(withCopy, before, copy)!;
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', expectedAfterUndoCopy);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    expectedAfterUndoCopy,
+  );
   await expect.poll(() => currentSlide(page)).toBe(expectedAfterUndoCopy);
 });
 
@@ -652,7 +693,10 @@ test('Edit > Copy, Paste and Cut from the menu bar act on the selected slide car
   /* a click on the card gives the filmstrip focus; the menu bar takes it, and the Edit menu still
      acts on the card (SPEC 2.2: slides in the filmstrip) */
   await card(page, 'links').click();
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', 'links');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    'links',
+  );
   await control(page, 'menubar.edit').click();
   await expect(menuItem(page, 'edit.copy')).not.toHaveAttribute('aria-disabled', 'true');
   await menuItem(page, 'edit.copy').click();
@@ -674,7 +718,7 @@ test('Edit > Copy, Paste and Cut from the menu bar act on the selected slide car
   /* Cut on the copy removes it without a snackbar, leaves it on the clipboard, and the slide that
      took its place is current */
   await card(page, copy).click();
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', copy);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-active', copy);
   await control(page, 'menubar.edit').click();
   await menuItem(page, 'edit.cut').click();
   await expect
@@ -686,6 +730,9 @@ test('Edit > Copy, Paste and Cut from the menu bar act on the selected slide car
     .poll(() => page.evaluate(() => navigator.clipboard.readText()))
     .toContain(`"id":"${copy}"`);
   const expected = replacementFor(withCopy, before, copy)!;
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', expected);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    expected,
+  );
   await expect.poll(() => currentSlide(page)).toBe(expected);
 });

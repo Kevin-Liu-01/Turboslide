@@ -1,0 +1,11 @@
+ok   deck.copy of gt-brand: ship-copy-mu1alrtq in 99 ms
+ok   the copy opened: 1180 ms; revision 0, sync {"seq":0,"revision":0,"pending":0,"retained":0,"tier":"memory","transport":"sse","connected":true}
+ok   the room connected: 1182 ms after open; sync {"seq":0,"revision":0,"pending":0,"retained":0,"tier":"memory","transport":"sse","connected":true}
+ok   the first /ops POST was issued: 243 ms after the first keystroke
+ok   the first /ops POST answered: 18710 ms after the keystroke, status 200
+ok   the revision moved: 1 from 0, 18762 ms to settle, 20651 ms to the revision
+FAIL the keystroke reached the document:  blog posts, README and CLI text, and posts on X, LinkedIn, GitHub, and Discord.
+FAIL the vertical guide at 800 is drawn: absent
+cleanup: ship-copy-mu1alrtq trashed and removed
+
+copy-first-write-probe: 2 step(s) failed against http://localhost:4321

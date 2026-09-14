@@ -52,7 +52,13 @@ function seedDeck(): void {
 function removeDeck(): void {
   rmSync(DECK_DIR, { recursive: true, force: true });
   rmSync(join(ROOT, '.turboslide', 'worker', 'cache', DECK), { recursive: true, force: true });
-  rmSync(join(ROOT, '.turboslide', 'thumbs', DECK), { recursive: true, force: true });
+  rmSync(join(ROOT, '.turboslide', 'thumbs', DECK), {
+    recursive: true,
+    force: true,
+    /* the thumbnail worker may still be writing a frame into the folder */
+    maxRetries: 5,
+    retryDelay: 100,
+  });
 }
 
 async function openEditor(page: Page): Promise<void> {
@@ -64,15 +70,18 @@ async function openEditor(page: Page): Promise<void> {
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
   await page.evaluate(() =>
     window.turboslide!.studio.invoke('view.goto', { slideId: 'content-rule' }),
   );
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', SLIDE);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-active', SLIDE);
   /* the parity shell prints no revision (gslides-parity SPEC 1.1): the confirmed state is read
      through describe().state */
   await page.waitForFunction(() => {
-    const state = window.turboslide!.studio.describe().state as {
+    /* the registry is re-installed when an owner element changes; a poll that lands in that
+       moment reads false instead of failing the wait with a TypeError */
+    if (typeof window.turboslide?.studio?.describe !== 'function') return false;
+    const state = window.turboslide.studio.describe().state as {
       revision?: number;
       serverRevision?: number;
       pending?: number;
@@ -104,19 +113,33 @@ async function seedSlide(page: Page): Promise<void> {
     const p = slide.slots.left.find((block) => block.id === 'p');
     if (!p) throw new Error('the fixture has no paragraph');
     p.text = 'Every line of copy states a number or a mechanism — or it goes.';
-    slide.slots.right.push({
-      id: 'table',
-      type: 'rows',
-      key: 240,
-      items: [
-        { key: 'Locales', value: 'Eight from one build.' },
-        { key: 'Formats', value: 'Numbers, currency and dates.' },
-      ],
-    });
+    /* a server whose room already holds the block (a run before this one on the same server
+       process) keeps it: block ids are unique within a slide (SPEC 4.4) */
+    if (!slide.slots.right.some((block) => block['id'] === 'table'))
+      slide.slots.right.push({
+        id: 'table',
+        type: 'rows',
+        key: 240,
+        items: [
+          { key: 'Locales', value: 'Eight from one build.' },
+          { key: 'Formats', value: 'Numbers, currency and dates.' },
+        ],
+      });
     await studio.applySource(slide);
   });
   const seeded = await source(page);
-  expect(seeded.slots.right.find((block) => block.id === 'table')?.key).toBe(240);
+  expect(typeof seeded.slots.right.find((block) => block.id === 'table')?.key).toBe('number');
+  /* the seed's write reaches the server before the steps write: a seed still pending would ride in
+     the next write's entry and the version log would show two mutations for one gesture */
+  await page.waitForFunction(() => {
+    if (typeof window.turboslide?.studio?.describe !== 'function') return false;
+    const state = window.turboslide.studio.describe().state as {
+      revision?: number;
+      serverRevision?: number;
+      pending?: number;
+    };
+    return state.pending === 0 && state.revision === state.serverRevision;
+  });
 }
 
 /** A pointer drag from the center of a handle by dx and dy CSS pixels, in steps. */
@@ -215,16 +238,18 @@ test('inline text with a bare GT renders the mark and keeps the letters', async 
   await expect(page.locator('.ts-stagewrap.ts-editor[data-editing]')).toHaveCount(1);
   await page.keyboard.press('End');
   await page.keyboard.type(' with GT now');
-  /* Esc keeps the text (gslides-parity SPEC 10.2); the typing is one text.replace burst (7.2.15) */
+  /* Esc keeps the text (gslides-parity SPEC 10.2); the typing is one burst (7.2.15), which the
+     multiplayer text path of round three writes as text.splice in plain text offsets (SPEC-3 0.4,
+     3.1; text.replace keeps its markup meaning for agents and stored records) */
   await page.keyboard.press('Escape');
   await expect.poll(async () => (await versions(page)).length).toBe(before + 1);
   const write = (await versions(page)).at(-1)!;
   expect(write.mutations[0]).toMatchObject({
-    op: 'text.replace',
+    op: 'text.splice',
     blockId: 'list',
     path: '/items/0/text',
   });
-  expect(String((write.mutations[0] as { text?: string }).text)).toContain('with GT now');
+  expect(String((write.mutations[0] as { insert?: string }).insert)).toContain('with GT now');
   // the document keeps the letters; the render shows the mark
   const text = (await source(page)).slots.right.find((b) => b.id === 'list')?.items?.[0]?.text;
   expect(text).toContain('GT');

@@ -12,7 +12,7 @@ const DECK = '/deck/gt-brand';
 
 async function openDeck(page: Page, path = DECK): Promise<number> {
   await page.goto(path);
-  const shell = page.locator('.pt-viewer');
+  const shell = page.locator('.pt-viewer:not(.ts-skeleton)');
   await expect(shell).toHaveAttribute('data-settled', '');
   const total = Number(await shell.getAttribute('data-total'));
   expect(total).toBeGreaterThan(0);
@@ -33,7 +33,7 @@ test.beforeEach(async ({ page }) => {
 test('the deck opens dark on its first slide with the sheet fitted', async ({ page }) => {
   await openDeck(page);
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  const shell = page.locator('.pt-viewer');
+  const shell = page.locator('.pt-viewer:not(.ts-skeleton)');
   await expect(shell).toHaveAttribute('data-mode', 'slide');
   await expect(shell).toHaveAttribute('data-index', '0');
   const sheet = page.locator('.pt-sheet-stage > .sheet');
@@ -46,7 +46,7 @@ test('the deck opens dark on its first slide with the sheet fitted', async ({ pa
 
 test('g, b, d and p change the mode, the theme and the present state', async ({ page }) => {
   await openDeck(page);
-  const shell = page.locator('.pt-viewer');
+  const shell = page.locator('.pt-viewer:not(.ts-skeleton)');
   const body = page.locator('body');
 
   await body.press('g');
@@ -74,7 +74,7 @@ test('g, b, d and p change the mode, the theme and the present state', async ({ 
 
 test('digits then Enter go to a slide by number and write the stable hash', async ({ page }) => {
   const total = await openDeck(page);
-  const shell = page.locator('.pt-viewer');
+  const shell = page.locator('.pt-viewer:not(.ts-skeleton)');
   const body = page.locator('body');
   const target = total >= 12 ? 12 : total;
   for (const digit of String(target)) await body.press(digit);
@@ -93,12 +93,15 @@ test('digits then Enter go to a slide by number and write the stable hash', asyn
   await body.press('ArrowLeft');
   await expect(shell).toHaveAttribute('data-index', String(Math.max(0, target - 2)));
   await page.goto(`${DECK}#${total}`);
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-index', String(total - 1));
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-index',
+    String(total - 1),
+  );
 });
 
 test('the toolbar seg, the sidebar rows and the grid tiles select', async ({ page }) => {
   const total = await openDeck(page);
-  const shell = page.locator('.pt-viewer');
+  const shell = page.locator('.pt-viewer:not(.ts-skeleton)');
   await page.getByRole('group', { name: 'View' }).getByRole('button', { name: 'Grid' }).click();
   await expect(shell).toHaveAttribute('data-mode', 'grid');
   const last = page.locator('.pt-grid .pt-thumb').last();
@@ -132,9 +135,11 @@ test('the embed posts gt-deck-slide on navigation and applies gt-theme', async (
     return seen;
   });
   const frame = page.frameLocator('#deck');
-  await expect(frame.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
-  await expect(frame.locator('.pt-viewer')).toHaveAttribute('data-index', '1');
-  const total = Number(await frame.locator('.pt-viewer').getAttribute('data-total'));
+  await expect(frame.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
+  await expect(frame.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-index', '1');
+  const total = Number(
+    await frame.locator('.pt-viewer:not(.ts-skeleton)').getAttribute('data-total'),
+  );
 
   // the theme message from the host lands in the frame (SPEC 5.3)
   await page.evaluate(() => {
@@ -146,13 +151,13 @@ test('the embed posts gt-deck-slide on navigation and applies gt-theme', async (
   // a pick inside the frame reaches the host as { type: 'gt-deck-slide', n } and the frame's hash is #NN;
   // the click also hands the frame keyboard focus, so the arrows page it afterwards
   await frame.locator('.pt-orow').first().click();
-  await expect(frame.locator('.pt-viewer')).toHaveAttribute('data-index', '0');
+  await expect(frame.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-index', '0');
   await expect.poll(() => messages.evaluate((seen) => seen.map((m) => m.n))).toContain(1);
   if (total > 1) {
     /* the host hands the frame keyboard focus, as DeckFrame.tsx does on load */
     await page.locator('#deck').focus();
     await page.keyboard.press('ArrowRight');
-    await expect(frame.locator('.pt-viewer')).toHaveAttribute('data-index', '1');
+    await expect(frame.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-index', '1');
     await expect.poll(() => messages.evaluate((seen) => seen.map((m) => m.n))).toContain(2);
   }
   await expect

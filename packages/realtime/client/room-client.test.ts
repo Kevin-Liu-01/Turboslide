@@ -12,13 +12,20 @@ import { getAt } from '@turboslide/schema/pointer';
 import { plainOf } from '@turboslide/schema/text';
 import { validateDocument } from '@turboslide/schema/validate';
 
+import type { Entry, RoomEvent } from '../src/channel.ts';
 import { memoryChannel } from '../src/memory.ts';
 import { until } from '../src/channel-contract.ts';
+import type { OpsPost } from '../src/protocol.ts';
 import { fakeRoomServer, reconnectingTransport } from './fake-transport.ts';
 import type { FakeIdentity } from './fake-transport.ts';
 import { memoryPendingStore } from './pending-store.ts';
 import { createRoomClient } from './room-client.ts';
-import type { DocumentChange, RoomClientOptions, SyncStatus } from './room-client.ts';
+import type {
+  DocumentChange,
+  RoomClientOptions,
+  RoomTransport,
+  SyncStatus,
+} from './room-client.ts';
 
 const SLIDE = 'content-rule';
 const BLOCK = 'p1';
@@ -296,5 +303,159 @@ describe('createRoomClient', () => {
     expect(textOf(v.room.document())).toBe(before);
     expect(v.room.status().pending).toBe(0);
     await v.room.stop();
+  });
+
+  // ------------------------------------------------------------------------------------------
+  // Finding 33: the acknowledged revision is applied before the next write, and a freshly opened
+  // page holds its first write until the replay catches the stream up (SPEC-3 3.6). These use a
+  // hand-driven transport so the hello, the replay and the POST response interleave exactly.
+
+  const CLIENT_A = 'a'.repeat(32);
+  const CLIENT_B = 'b'.repeat(32);
+
+  /** A transport the test fires events into, recording every POST body and answering each op. */
+  function drivenTransport(options: {
+    author: FakeIdentity['author'];
+    /** the seq the first admitted op takes; each op takes the next */
+    fromSeq: number;
+    /** the server revision after each admitted op (the blob tier moves it per op) */
+    revisionAfter: (admitted: number) => number;
+  }): RoomTransport & { fire: (event: RoomEvent) => void; posts: OpsPost[] } {
+    const posts: OpsPost[] = [];
+    let onEvent: ((event: RoomEvent) => void) | null = null;
+    let head = options.fromSeq - 1;
+    let admitted = 0;
+    return {
+      fire(event) {
+        onEvent?.(event);
+      },
+      posts,
+      open(o) {
+        onEvent = o.onEvent;
+        return { close: () => undefined };
+      },
+      async postOps(body) {
+        posts.push(structuredClone(body));
+        const entries: Entry[] = body.entries.map((entry) => {
+          head += 1;
+          admitted += 1;
+          return {
+            seq: head,
+            rev: 0,
+            kind: 'edit',
+            author: options.author,
+            clientId: body.clientId,
+            opId: entry.opId,
+            mutations: (entry as { mutations?: Mutation[] }).mutations ?? [],
+            at: new Date().toISOString(),
+          };
+        });
+        return { ok: true, entries, rejected: [], head, revision: options.revisionAfter(admitted) };
+      },
+      async postPresence() {
+        return undefined;
+      },
+    };
+  }
+
+  it('applies the acknowledged revision so a second write before the echo is not stale (finding 33)', async () => {
+    const document = normalized();
+    const openSeq = 5;
+    const baseRev = document.deck.revision;
+    const transport = drivenTransport({
+      author: kevin.author,
+      fromSeq: openSeq + 1,
+      revisionAfter: (n) => baseRev + n,
+    });
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: openSeq,
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    room.start();
+    transport.fire({
+      type: 'hello',
+      seq: openSeq,
+      revision: baseRev,
+      clientId: CLIENT_A,
+      role: 'editor',
+      clients: [],
+      editing: 1,
+      tier: 'memory',
+    });
+    const first = room.apply([splice(0, 0, 'a')], 'type', 'now');
+    expect((await first.settled) as { seq: number }).toHaveProperty('seq');
+    // the acknowledged revision is adopted, so the next write does not base on a stale one
+    expect(room.status().revision).toBe(baseRev + 1);
+    // a second write issued before the first op's stream echo bases on the advanced position
+    const second = room.apply([splice(1, 0, 'b')], 'type', 'now');
+    expect((await second.settled) as { seq: number }).toHaveProperty('seq');
+    expect(room.rejects()).toHaveLength(0);
+    expect(transport.posts).toHaveLength(2);
+    expect(transport.posts[1]!.base.seq).toBeGreaterThan(transport.posts[0]!.base.seq);
+    await room.stop();
+  });
+
+  it('holds the first write until the replay catches up, then sends it transformed (finding 33)', async () => {
+    const document = normalized();
+    const openSeq = 5; // the page was handed the document at this stream position
+    const headSeq = 6; // a write landed just before it opened, so the stream head is ahead
+    const baseRev = document.deck.revision;
+    const transport = drivenTransport({
+      author: kevin.author,
+      fromSeq: headSeq + 1,
+      revisionAfter: () => baseRev,
+    });
+    const room = createRoomClient({
+      deckId: 'gt-brand',
+      transport,
+      document,
+      seq: openSeq,
+      transform: testTransform,
+      onChange: () => undefined,
+    });
+    room.start();
+    // hello names a head ahead of this client's position: the replay is still pending
+    transport.fire({
+      type: 'hello',
+      seq: headSeq,
+      revision: baseRev,
+      clientId: CLIENT_B,
+      role: 'editor',
+      clients: [],
+      editing: 1,
+      tier: 'memory',
+    });
+    // the rep types immediately, before the replay has arrived
+    const applied = room.apply([splice(0, 0, 'k')], 'type', 'now');
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    // the first write is held on the stale base, and the keystroke is not lost (still pending)
+    expect(transport.posts).toHaveLength(0);
+    expect(room.status().pending).toBe(1);
+    // the entry that landed before the open arrives on the stream (another author inserted at 0)
+    transport.fire({
+      type: 'op',
+      entry: {
+        seq: headSeq,
+        rev: baseRev,
+        kind: 'edit',
+        author: maya.author,
+        clientId: 'server',
+        opId: 'server:1',
+        mutations: [splice(0, 0, 'E')],
+        at: new Date().toISOString(),
+      },
+    });
+    expect((await applied.settled) as { seq: number }).toHaveProperty('seq');
+    // now it flushed, on the caught-up base and transformed past the landed insert
+    expect(transport.posts).toHaveLength(1);
+    expect(transport.posts[0]!.base.seq).toBe(headSeq);
+    expect(transport.posts[0]!.entries[0]).toMatchObject({
+      mutations: [splice(1, 0, 'k')],
+    });
+    await room.stop();
   });
 });

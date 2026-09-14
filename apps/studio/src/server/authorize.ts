@@ -179,7 +179,8 @@ export function roleOf(
  * The call every server function and route makes first (SPEC-3 6.2). Deny by default: a loader
  * failure is a denial (404 in enforce mode, logged either way). In shadow mode a denial comes
  * back as `ok: true` with the legacy role and the denial attached under `shadow`, so the caller
- * proceeds as today and the log shows what enforcement will refuse.
+ * proceeds as today and the log shows what enforcement will refuse; the one denial shadow mode
+ * refuses is the 410 of a revoked publish token (the comment at the check says why).
  */
 export async function authorize(
   ctx: AuthContext,
@@ -213,14 +214,19 @@ export async function authorize(
   }
   const decision = d.decide(record, ctx, capability);
   if (decision.ok) return decision;
+  // a revoked publish token is refused in shadow mode as well (SPEC-3 6.4: the player "answers
+  // 410 'This presentation is no longer published' after deck.unpublish"): publishing is a round
+  // three construct, so the shadow week has no earlier behaviour to keep for it, and a dead
+  // published link must not open the deck it once showed; every other denial passes as before
+  const refused = mode === 'enforce' || decision.code === 'gone';
   logSecurityEvent({
     ...base,
     event: 'authorize.deny',
     status: decision.status,
     reason: decision.code,
-    shadow: mode === 'shadow',
+    shadow: !refused,
   });
-  if (mode === 'enforce') return decision;
+  if (refused) return decision;
   const legacy = roleOf((record as AccessRecord | null) ?? null, ctx, d.now());
   return {
     ok: true,

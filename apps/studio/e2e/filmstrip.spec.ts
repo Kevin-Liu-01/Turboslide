@@ -11,10 +11,13 @@ import type { Page } from '@playwright/test';
 //
 // The spec works on a scratch copy of decks/fixture under decks/e2e-film with four content slides
 // and removes it afterwards. It runs against the dev server the builder starts on its own port:
-// TURBOSLIDE_E2E_BASE (default http://localhost:4321, the shared playwright.config.ts base); the
-// integrator owns playwright.config.ts.
+// TURBOSLIDE_E2E_BASE, else PLAYWRIGHT_BASE_URL (the base playwright.config.ts gives every other
+// spec, SPEC-2 0.43), else http://localhost:4321; the integrator owns playwright.config.ts.
 
-const BASE = process.env['TURBOSLIDE_E2E_BASE'] ?? 'http://localhost:4321';
+const BASE =
+  process.env['TURBOSLIDE_E2E_BASE'] ??
+  process.env['PLAYWRIGHT_BASE_URL'] ??
+  'http://localhost:4321';
 test.use({ baseURL: BASE });
 
 const ROOT = join(import.meta.dirname, '..', '..', '..');
@@ -66,7 +69,13 @@ function seedDeck(): void {
 function removeDeck(): void {
   rmSync(DECK_DIR, { recursive: true, force: true });
   rmSync(join(ROOT, '.turboslide', 'worker', 'cache', DECK), { recursive: true, force: true });
-  rmSync(join(ROOT, '.turboslide', 'thumbs', DECK), { recursive: true, force: true });
+  rmSync(join(ROOT, '.turboslide', 'thumbs', DECK), {
+    recursive: true,
+    force: true,
+    /* the thumbnail worker may still be writing a frame into the folder */
+    maxRetries: 5,
+    retryDelay: 100,
+  });
 }
 
 async function openEditor(page: Page): Promise<void> {
@@ -78,7 +87,7 @@ async function openEditor(page: Page): Promise<void> {
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
   await expect(page.locator('.ts-filmstrip .ts-card[data-id="title"]')).toBeVisible();
 }
 
@@ -101,7 +110,10 @@ async function skipped(page: Page): Promise<string[]> {
 
 async function settled(page: Page): Promise<void> {
   await page.waitForFunction(() => {
-    const state = window.turboslide!.studio.describe().state as {
+    /* the registry is re-installed when an owner element changes; a poll that lands in that
+       moment reads false instead of failing the wait with a TypeError */
+    if (typeof window.turboslide?.studio?.describe !== 'function') return false;
+    const state = window.turboslide.studio.describe().state as {
       revision?: number;
       serverRevision?: number;
       pending?: number;
@@ -145,7 +157,10 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
     await expect(page.locator('.ts-filmstrip .pt-filter')).toHaveCount(0);
     /* Shift click extends the range, the shell's current card follows a plain click */
     await card(page, 'content-rule').click();
-    await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', 'content-rule');
+    await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+      'data-active',
+      'content-rule',
+    );
     await card(page, 'third').click({ modifiers: ['Shift'] });
     await expect(page.locator('.ts-filmstrip .ts-card[aria-selected="true"]')).toHaveCount(3);
     await card(page, 'second').click({ modifiers: ['ControlOrMeta'] });
@@ -162,7 +177,9 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
       'aria-disabled',
       'true',
     );
-    await expect(menu(page).locator('[data-menu-item="insert.comment"]')).toHaveAttribute(
+    /* Comment on a thumbnail anchors a comment to that slide (SPEC-3 5.3, 13.1; the row was Later
+       in round two and is enabled in Editing mode with the comment capability) */
+    await expect(menu(page).locator('[data-menu-item="insert.comment"]')).not.toHaveAttribute(
       'aria-disabled',
       'true',
     );
@@ -236,7 +253,10 @@ test.describe('the filmstrip (SPEC 4.1, 4.2)', () => {
     });
     /* Delete from the keyboard: the snackbar names the slide and Undo restores it */
     await card(page, 'second').click();
-    await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', 'second');
+    await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+      'data-active',
+      'second',
+    );
     await card(page, 'second').press('Delete');
     await expect
       .poll(() => order(page), { timeout: 20_000 })

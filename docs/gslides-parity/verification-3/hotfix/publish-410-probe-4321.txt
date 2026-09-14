@@ -1,0 +1,13 @@
+ok   deck.copy one slide: 200 in 61 ms
+ok   deck.publish answers the player url with ?p=: 200 {"record":{"schemaVersion":1,"deckId":"verifier-pub-mu16dpkn","owner":"usr_checkout","pendingOwner":null,"createdAt":"2026-09-14T11:44:23.795Z","createdBy":"usr
+ok   the first page minted the identity cookie for the player: 200; cookie held (value not printed)
+ok   the player answers 200 with x-robots-tag noindex and the robots meta: 200; x-robots-tag noindex; meta true; /deck/verifier-pub-mu16dpkn?p=<token>&present=1
+ok   the embed answers 200 with noindex header and meta: 200; x-robots-tag noindex; /embed/verifier-pub-mu16dpkn?p=<token>
+ok   the plain /deck answers 200 without the header: 200; x-robots-tag null
+ok   a wrong token is not a 410 (shadow admits, enforce 404): 200
+ok   deck.unpublish: 200 in 3 ms
+ok   the player answers 410 with the sentence after unpublish: 410; x-robots-tag noindex; sentence true
+ok   the embed answers 410 after unpublish: 410
+ok   the plain /deck still answers 200 after unpublish (shadow): 200
+ok   scratch deck trashed and removed: trash 200, remove 200
+publish-410-probe: all rows ok against http://localhost:4321

@@ -53,12 +53,18 @@ function seedDeck(): void {
 function removeDeck(): void {
   rmSync(DECK_DIR, { recursive: true, force: true });
   rmSync(join(ROOT, '.turboslide', 'worker', 'cache', DECK), { recursive: true, force: true });
-  rmSync(join(ROOT, '.turboslide', 'thumbs', DECK), { recursive: true, force: true });
+  rmSync(join(ROOT, '.turboslide', 'thumbs', DECK), {
+    recursive: true,
+    force: true,
+    /* the thumbnail worker may still be writing a frame into the folder */
+    maxRetries: 5,
+    retryDelay: 100,
+  });
 }
 
 async function openAudience(page: Page): Promise<void> {
   await page.goto(`/deck/${DECK}?present=1`);
-  const viewer = page.locator('.pt-viewer');
+  const viewer = page.locator('.pt-viewer:not(.ts-skeleton)');
   await expect(viewer).toHaveAttribute('data-settled', '');
   await expect(viewer).toHaveClass(/is-present/);
   await expect(page.locator('.ts-slideshow')).toBeAttached();
@@ -95,7 +101,7 @@ test('the presenting keys, the blank slides, the laser and the toolbar on the au
 }) => {
   await openAudience(page);
   const show = page.locator('.ts-slideshow');
-  const viewer = page.locator('.pt-viewer');
+  const viewer = page.locator('.pt-viewer:not(.ts-skeleton)');
   const body = page.locator('body');
   const total = Number(await show.getAttribute('data-total'));
   expect(total).toBeGreaterThan(3);
@@ -278,7 +284,7 @@ test('Presenter view lists the unskipped slides with their notes and syncs with 
   // the console in a second window of the same browser: BroadcastChannel reaches it
   const console = await context.newPage();
   await console.goto(`/present/${DECK}`);
-  const root = console.locator('.ts-presenter');
+  const root = console.locator('.ts-presenter:not(.ts-skeleton)');
   await expect(root).toBeVisible();
   await expect(root).toHaveAttribute('data-total', String(PLAY.length));
   const counter = console.locator('[data-control="presenter.counter"]');
@@ -372,30 +378,30 @@ test('Presenter view lists the unskipped slides with their notes and syncs with 
 
   // leaving the show tells the console; view.present from the console starts it again and ends it
   await page.locator('body').press('Escape');
-  await expect(page.locator('.pt-viewer')).not.toHaveClass(/is-present/);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).not.toHaveClass(/is-present/);
   await expect(console.locator('[data-control="presenter.connection"]')).toHaveAttribute(
     'data-connected',
     'false',
   );
   await page.evaluate(() => window.turboslide!.studio.invoke('view.present', { on: true }));
-  await expect(page.locator('.pt-viewer')).toHaveClass(/is-present/);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveClass(/is-present/);
   await expect(console.locator('[data-control="presenter.connection"]')).toHaveAttribute(
     'data-connected',
     'true',
   );
   await console.evaluate(() => window.turboslide!.studio.invoke('view.present', { on: false }));
-  await expect(page.locator('.pt-viewer')).not.toHaveClass(/is-present/);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).not.toHaveClass(/is-present/);
 
   // closing the console leaves the show running
   await page.evaluate(() => window.turboslide!.studio.invoke('view.present', { on: true }));
-  await expect(page.locator('.pt-viewer')).toHaveClass(/is-present/);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveClass(/is-present/);
   await console.close();
   await page.waitForTimeout(300);
-  await expect(page.locator('.pt-viewer')).toHaveClass(/is-present/);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveClass(/is-present/);
 });
 
 test('?screen=1 on the presenter address opens the audience form', async ({ page }) => {
   await page.goto(`/present/${DECK}?screen=1`);
   await expect(page).toHaveURL(new RegExp(`/deck/${DECK}\\?present=1$`));
-  await expect(page.locator('.pt-viewer')).toHaveClass(/is-present/);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveClass(/is-present/);
 });

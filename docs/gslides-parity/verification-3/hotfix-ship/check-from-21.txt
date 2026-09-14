@@ -1,0 +1,460 @@
+check: starting the studio dev server on 4321 (log capped in .turboslide/dev-server.log)
+check: warmed /deck/gt-brand and /edit/gt-brand and /new and /decks with 1297 client module(s) in 4.8 s
+check 21/28: pnpm exec playwright test apps/studio/e2e/ten-tasks.spec.ts apps/studio/e2e/text-editing.spec.ts apps/studio/e2e/filmstrip.spec.ts apps/studio/e2e/home.spec.ts apps/studio/e2e/present.spec.ts apps/studio/e2e/landing.spec.ts apps/studio/e2e/gslides-actions.spec.ts apps/studio/e2e/deck-transfer.spec.ts apps/studio/e2e/canvas.spec.ts apps/studio/e2e/objects.spec.ts apps/studio/e2e/text-styles.spec.ts apps/studio/e2e/tables.spec.ts apps/studio/e2e/charts.spec.ts apps/studio/e2e/hygiene.spec.ts apps/studio/e2e/export-batch.spec.ts
+
+Running 67 tests using 1 worker
+
+  ✘   1 apps/studio/e2e/canvas.spec.ts:323:1 › the canvas walk: one slide of every kind, one write per gesture, the conversion in the first write, one undo restores the kind (4.1m)
+  -   2 apps/studio/e2e/canvas.spec.ts:558:1 › step 5: the photograph is dragged, resized, cropped and sent to back, and the shader re-mounts at its box
+  -   3 apps/studio/e2e/canvas.spec.ts:660:1 › step 6: rulers, guides, zoom to 1600 and pan
+  -   4 apps/studio/e2e/canvas.spec.ts:788:1 › step 8: the fresh Title slide’s empty heading drags before anything is typed; the workspace marquee, deselect and menu; the covering photograph’s menu
+  ✓   5 apps/studio/e2e/charts.spec.ts:147:1 › Insert > Chart > Bar lands a chart with the placeholder data, centred at 960 by 540 (2.4s)
+  ✓   6 apps/studio/e2e/charts.spec.ts:204:1 › the data grid edits a value and adds a series, Chart type to Pie keeps the first series, the legend moves, the TXT export lists the data (4.6s)
+  ✓   7 apps/studio/e2e/deck-transfer.spec.ts:104:1 › Download on a home card downloads the deck as a zip (1.2s)
+  ✓   8 apps/studio/e2e/deck-transfer.spec.ts:119:1 › a bundle posted to the upload route creates the deck under a free id and the editor opens it (1.9s)
+  ✓   9 apps/studio/e2e/deck-transfer.spec.ts:149:1 › Make a copy with selected slides and removed notes, through deck.copy (1.7s)
+  ✓  10 apps/studio/e2e/deck-transfer.spec.ts:192:1 › Import slides copies the assets the slides need, through slide.import (4.5s)
+  ✓  11 apps/studio/e2e/deck-transfer.spec.ts:246:1 › File > Download > Turboslide bundle (.zip) downloads the deck from the editor (1.5s)
+  ✓  12 apps/studio/e2e/deck-transfer.spec.ts:266:1 › /deck/<id>?present=1 opens the presentation in present mode (1.7s)
+  ✓  13 apps/studio/e2e/export-batch.spec.ts:106:3 › the batched Perfect export over the http route (SPEC-2 8.1) › the batches of 3 and one merge produce a perfect file that export check accepts (24.8s)
+  ✓  14 apps/studio/e2e/export-batch.spec.ts:201:3 › the batched Perfect export over the http route (SPEC-2 8.1) › a replaced twin makes a batch answer stale, and a missing job is 404 (38ms)
+  ✓  15 apps/studio/e2e/filmstrip.spec.ts:147:3 › the filmstrip (SPEC 4.1, 4.2) › cards, the current ring, multi-select, the right-click order, skip and unskip (2.0s)
+  ✓  16 apps/studio/e2e/filmstrip.spec.ts:223:3 › the filmstrip (SPEC 4.1, 4.2) › drag reorders as one slide.move, Delete shows the snackbar and Undo brings the slide back (3.9s)
+  ✓  17 apps/studio/e2e/filmstrip.spec.ts:276:3 › the filmstrip (SPEC 4.1, 4.2) › Apply layout lists the 21 layouts with the current one checked, and a pick is one slide.applyLayout (1.8s)
+  ✘  18 apps/studio/e2e/gslides-actions.spec.ts:99:3 › the fourteen actions of the parity round through the window API › document actions run through the editor and reads carry the new facts (1.7s)
+  ✓  19 apps/studio/e2e/gslides-actions.spec.ts:205:3 › the fourteen actions of the parity round through the window API › collection actions and slide.import run on the server (1.7s)
+  ✘  20 apps/studio/e2e/gslides-actions.spec.ts:321:3 › the thirty six actions of round two through the window API › every canvas, text, table, chart, shape, line and diagram action resolves in the editor (1.5s)
+  ✘  21 apps/studio/e2e/gslides-actions.spec.ts:704:3 › the menus over the stage selection (VERIFICATION-2 findings 5 and 6) › Arrange reads two selected objects and Change shape draws its plate in the right-click menu (1.6s)
+  ✓  22 apps/studio/e2e/home.spec.ts:102:1 › the three bands: the strip, the recent cards with thumbnails, search, sort and the view toggle (1.5s)
+  ✓  23 apps/studio/e2e/home.spec.ts:169:1 › the card menu carries the items in order, follows the menu pattern and opens the deck (2.2s)
+  ✓  24 apps/studio/e2e/home.spec.ts:210:1 › Rename in place writes the title (1.3s)
+  ✓  25 apps/studio/e2e/home.spec.ts:225:1 › Make a copy opens the copy in a new tab without the speaker notes (1.5s)
+  ✓  26 apps/studio/e2e/home.spec.ts:256:1 › Move to trash hides the deck, Undo brings it back, the trash page restores and deletes forever (4.0s)
+  ✓  27 apps/studio/e2e/home.spec.ts:314:1 › the Blank card opens /new (1.2s)
+  ✓  28 apps/studio/e2e/hygiene.spec.ts:121:1 › Help > Help Turboslide improve opens the repository’s issue page in a new tab (SPEC-2 0.28) (1.8s)
+  ✓  29 apps/studio/e2e/hygiene.spec.ts:141:1 › the first write from /new can be undone and the address stays on the saved deck (SPEC-2 0.29) (6.1s)
+  ✓  30 apps/studio/e2e/hygiene.spec.ts:189:1 › Edit > Select all with the filmstrip focused selects every card, and Edit > Cut removes the selected slides with no snackbar (SPEC-2 0.30) (4.1s)
+  ✓  31 apps/studio/e2e/hygiene.spec.ts:236:1 › Edit > Select none clears a block selection (SPEC-2 0.61) (2.0s)
+  ✓  32 apps/studio/e2e/landing.spec.ts:80:1 › / answers a 307 to /new with X-Robots-Tag: noindex and the browser lands on /new (198ms)
+  ✓  33 apps/studio/e2e/landing.spec.ts:92:1 › /new is noindex and a visit that only looks writes nothing to the store (2.0s)
+  ✓  34 apps/studio/e2e/landing.spec.ts:112:1 › the first write against a draft id creates the deck in the store (server functions, no editor) (1.1s)
+  ✓  35 apps/studio/e2e/landing.spec.ts:176:1 › the draft (editor attached) reads Untitled presentation, one Title slide, the two prompts and Not saved yet (1.4s)
+  ✓  36 apps/studio/e2e/landing.spec.ts:200:1 › the first edit (editor attached) creates the deck, moves the address to /edit/<id> and takes the heading as the title (2.7s)
+  ✓  37 apps/studio/e2e/landing.spec.ts:252:1 › a double click on the empty title placeholder edits it, and typing saves the deck (SPEC 6.1; VERIFICATION-3 finding 45) (1.8s)
+  ✓  38 apps/studio/e2e/landing.spec.ts:293:1 › two tabs on /new (editor attached) get two drafts (1.9s)
+  ✘  39 apps/studio/e2e/objects.spec.ts:159:1 › a text box drawn on the Title slide converts it; move, rotate, flip, group, ungroup, regroup, delete, each one write undone back to the Title slide (10.0m)
+  -  40 apps/studio/e2e/objects.spec.ts:340:1 › the export fixture’s canvas-title slide is unchanged by a reload
+  ✓  41 apps/studio/e2e/present.spec.ts:99:1 › the presenting keys, the blank slides, the laser and the toolbar on the audience surface (9.3s)
+  ✓  42 apps/studio/e2e/present.spec.ts:277:1 › Presenter view lists the unskipped slides with their notes and syncs with the slideshow window (6.8s)
+  ✓  43 apps/studio/e2e/present.spec.ts:403:1 › ?screen=1 on the presenter address opens the audience form (1.2s)
+  ✓  44 apps/studio/e2e/tables.spec.ts:157:1 › Insert > Table opens the hover grid, the caption follows the pointer and a click inserts 4 by 3 (2.4s)
+  ✘  45 apps/studio/e2e/tables.spec.ts:191:1 › a cell range, Merge cells and Unmerge cells (9.1s)
+  -  46 apps/studio/e2e/tables.spec.ts:280:1 › a cell fill, Distribute rows and two rows inserted below
+  ✓  47 apps/studio/e2e/ten-tasks.spec.ts:254:1 › task 1: open the right deck from the home page in one click (2.0s)
+  ✓  48 apps/studio/e2e/ten-tasks.spec.ts:264:1 › task 2: make a copy for a prospect and name it in three clicks and one key (8.0s)
+task 3: the rename's write settled in 2019 ms
+  ✓  49 apps/studio/e2e/ten-tasks.spec.ts:296:1 › task 3: retype the customer name on the cover and across the deck (4.7s)
+  ✘  50 apps/studio/e2e/ten-tasks.spec.ts:334:1 › task 4: swap a logo with one drop (8.9s)
+  ✓  51 apps/studio/e2e/ten-tasks.spec.ts:390:1 › task 5: add, duplicate, delete and reorder slides in one press each (15.0s)
+  ✓  52 apps/studio/e2e/ten-tasks.spec.ts:446:1 › task 6: hide the slides that do not apply (1.8s)
+  ✓  53 apps/studio/e2e/ten-tasks.spec.ts:470:1 › task 7: update the pricing table and the big number (13.6s)
+  ✘  54 apps/studio/e2e/ten-tasks.spec.ts:529:1 › task 8: write a talk track in one click (21.4s)
+  ✓  55 apps/studio/e2e/ten-tasks.spec.ts:543:1 › task 9: present over a call with Presenter view in two clicks (8.6s)
+  ✓  56 apps/studio/e2e/ten-tasks.spec.ts:559:1 › task 10: send a link or a PDF (2.2s)
+  ✘  57 apps/studio/e2e/ten-tasks.spec.ts:600:1 › the current slide follows a removal: Delete slide, and Undo after New slide and Duplicate slide (2.0m)
+  ✓  58 apps/studio/e2e/ten-tasks.spec.ts:684:1 › Edit > Copy, Paste and Cut from the menu bar act on the selected slide card (11.1s)
+  ✓  59 apps/studio/e2e/text-editing.spec.ts:152:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › a click places the caret, a pause writes one burst, Esc keeps the text and one Cmd Z removes the burst (10.5s)
+  ✓  60 apps/studio/e2e/text-editing.spec.ts:215:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Enter breaks a paragraph in a multiline pointer and commits in a heading; Shift Enter is the same break (8.1s)
+  ✓  61 apps/studio/e2e/text-editing.spec.ts:256:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Enter at the end of a list item appends an item and Backspace on the empty item removes it (2.4s)
+  ✓  62 apps/studio/e2e/text-editing.spec.ts:293:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Tab walks the table cells and adds a row past the last with the Row added snackbar (1.9s)
+  ✘  63 apps/studio/e2e/text-editing.spec.ts:339:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Cmd C and Cmd V paste a copy of the block through the envelope, Cmd D duplicates and Delete removes (18.6s)
+  ✘  64 apps/studio/e2e/text-editing.spec.ts:382:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › no bare letter changes the view with a block selected, and the arrows nudge the block by a pixel on a grammar slide (SPEC-2 0.87) (31.0s)
+  ✓  65 apps/studio/e2e/text-styles.spec.ts:123:1 › the marks on a range write one text.replace each and toggle off again; the caret word takes a mark with no range (29.2s)
+  ✓  66 apps/studio/e2e/text-styles.spec.ts:203:1 › Cmd ] and Cmd [ indent a text block by 64 px and step a list item’s level; Tab at the start of an item raises it to 9 at most (26.8s)
+  ✓  67 apps/studio/e2e/text-styles.spec.ts:279:1 › the special characters insert lands at the caret as one text.insert, and paint format carries italic (22.1s)
+
+
+  1) apps/studio/e2e/canvas.spec.ts:323:1 › the canvas walk: one slide of every kind, one write per gesture, the conversion in the first write, one undo restores the kind 
+
+    Error: page.evaluate: NotImplementedError: validate.run is declared in the action table and lands in M1
+        at Object.dispatch (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/packages/agent/src/dispatch.ts:52:37)
+        at invoke (http://localhost:4321/src/routes/edit.$deckId.tsx?tsr-split=component:2307:47)
+        at Object.<anonymous> (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/packages/agent/src/window/adapter.ts:26:62)
+        at invokeAction (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/packages/agent/src/window/invoke.ts:84:19)
+        at Object.invoke (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/packages/agent/src/window/registry.ts:133:11)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:43)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at Object.dispatch (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/packages/agent/src/dispatch.ts:52:37)
+        at invoke (http://localhost:4321/src/routes/edit.$deckId.tsx?tsr-split=component:2307:47)
+        at Object.<anonymous> (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/packages/agent/src/window/adapter.ts:26:62)
+        at invokeAction (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/packages/agent/src/window/invoke.ts:84:19)
+        at Object.invoke (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/packages/agent/src/window/registry.ts:133:11)
+        at eval (eval at evaluate (:311:30), <anonymous>:1:43)
+        at UtilityScript.evaluate (<anonymous>:313:16)
+        at UtilityScript.<anonymous> (<anonymous>:1:44)
+        at invoke (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/canvas.spec.ts:74:15)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/canvas.spec.ts:539:27
+
+    Error Context: .turboslide/playwright/canvas-the-canvas-walk-one-907e4--one-undo-restores-the-kind/error-context.md
+
+    Error Context: .turboslide/playwright/canvas-the-canvas-walk-one-907e4--one-undo-restores-the-kind/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/canvas-the-canvas-walk-one-907e4--one-undo-restores-the-kind/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/canvas-the-canvas-walk-one-907e4--one-undo-restores-the-kind/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) apps/studio/e2e/gslides-actions.spec.ts:99:3 › the fourteen actions of the parity round through the window API › document actions run through the editor and reads carry the new facts 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 2
+    Received: 1
+
+      117 |     );
+      118 |     expect(created.slide.template).toBe('big-number');
+    > 119 |     expect(created.revision).toBe(start.revision + 1);
+          |                              ^
+      120 |     await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', created.slide.id);
+      121 |     let list = await rows(page);
+      122 |     expect(list.map((row) => row.id)).toEqual(['title', 'content-rule', created.slide.id]);
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:119:30
+
+    Error Context: .turboslide/playwright/gslides-actions-the-fourte-da9e1-d-reads-carry-the-new-facts/error-context.md
+
+    Error Context: .turboslide/playwright/gslides-actions-the-fourte-da9e1-d-reads-carry-the-new-facts/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/gslides-actions-the-fourte-da9e1-d-reads-carry-the-new-facts/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/gslides-actions-the-fourte-da9e1-d-reads-carry-the-new-facts/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) apps/studio/e2e/gslides-actions.spec.ts:321:3 › the thirty six actions of round two through the window API › every canvas, text, table, chart, shape, line and diagram action resolves in the editor 
+
+    Error: deck.guides
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 4
+    Received: 3
+
+      331 |     ): Promise<T> => {
+      332 |       const out = await invoke<T>(page, action, { ...input, baseRevision: revision });
+    > 333 |       expect(out.revision, action).toBe(revision + 1);
+          |                                    ^
+      334 |       revision = out.revision;
+      335 |       return out;
+      336 |     };
+        at write (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:333:36)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:343:5
+
+    Error Context: .turboslide/playwright/gslides-actions-the-thirty-daa83-tion-resolves-in-the-editor/error-context.md
+
+    Error Context: .turboslide/playwright/gslides-actions-the-thirty-daa83-tion-resolves-in-the-editor/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/gslides-actions-the-thirty-daa83-tion-resolves-in-the-editor/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/gslides-actions-the-thirty-daa83-tion-resolves-in-the-editor/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) apps/studio/e2e/gslides-actions.spec.ts:704:3 › the menus over the stage selection (VERIFICATION-2 findings 5 and 6) › Arrange reads two selected objects and Change shape draws its plate in the right-click menu 
+
+    Error: block.insert
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 4
+    Received: 2
+
+      713 |     ): Promise<T> => {
+      714 |       const out = await invoke<T>(page, action, { ...input, baseRevision: revision });
+    > 715 |       expect(out.revision, action).toBe(revision + 1);
+          |                                    ^
+      716 |       revision = out.revision;
+      717 |       return out;
+      718 |     };
+        at write (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:715:36)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:739:7
+
+    Error Context: .turboslide/playwright/gslides-actions-the-menus--e1503-ate-in-the-right-click-menu/error-context.md
+
+    Error Context: .turboslide/playwright/gslides-actions-the-menus--e1503-ate-in-the-right-click-menu/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/gslides-actions-the-menus--e1503-ate-in-the-right-click-menu/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/gslides-actions-the-menus--e1503-ate-in-the-right-click-menu/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) apps/studio/e2e/objects.spec.ts:159:1 › a text box drawn on the Title slide converts it; move, rotate, flip, group, ungroup, regroup, delete, each one write undone back to the Title slide 
+
+    Test timeout of 600000ms exceeded.
+
+    Error: locator.click: Test timeout of 600000ms exceeded.
+    Call log:
+      - waiting for locator('[data-menu-item="insert.shape.shapes.rectangle"]')
+
+
+      276 |   await page.locator('[data-menu-item="insert.shape"]').click();
+      277 |   await page.locator('[data-menu-item="insert.shape.shapes"]').click();
+    > 278 |   await page.locator('[data-menu-item="insert.shape.shapes.rectangle"]').click();
+          |                                                                          ^
+      279 |   await drag(page, at(1000, 500), 200 * k, 120 * k);
+      280 |   await expectOneWrite(page, log);
+      281 |   await settled(page);
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/objects.spec.ts:278:74
+
+    Error Context: .turboslide/playwright/objects-a-text-box-drawn-o-49e0d-one-back-to-the-Title-slide/error-context.md
+
+    Error Context: .turboslide/playwright/objects-a-text-box-drawn-o-49e0d-one-back-to-the-Title-slide/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/objects-a-text-box-drawn-o-49e0d-one-back-to-the-Title-slide/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/objects-a-text-box-drawn-o-49e0d-one-back-to-the-Title-slide/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) apps/studio/e2e/tables.spec.ts:191:1 › a cell range, Merge cells and Unmerge cells ────────────
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('.ts-stagewrap.ts-editor .pt-slide [data-run^="table/rows/"]')
+    Expected: 12
+    Received: 9
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 5000ms
+      - waiting for locator('.ts-stagewrap.ts-editor .pt-slide [data-run^="table/rows/"]')
+        14 × locator resolved to 9 elements
+           - unexpected value "9"
+
+
+      275 |     .poll(async () => (await tableOf(page, slideId)).spans ?? [], { timeout: 30_000 })
+      276 |     .toEqual([]);
+    > 277 |   await expect(cells(page, 'table')).toHaveCount(12);
+          |                                      ^
+      278 | });
+      279 |
+      280 | test('a cell fill, Distribute rows and two rows inserted below', async ({ page }) => {
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/tables.spec.ts:277:38
+
+    Error Context: .turboslide/playwright/tables-a-cell-range-Merge-cells-and-Unmerge-cells/error-context.md
+
+    Error Context: .turboslide/playwright/tables-a-cell-range-Merge-cells-and-Unmerge-cells/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/tables-a-cell-range-Merge-cells-and-Unmerge-cells/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/tables-a-cell-range-Merge-cells-and-Unmerge-cells/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) apps/studio/e2e/ten-tasks.spec.ts:334:1 › task 4: swap a logo with one drop ───────────────────
+
+    Error: page.evaluate: Error: baseRevision 3 is stale; the document is at revision 4
+
+      177 |
+      178 | async function invoke<T>(page: Page, action: string, input?: unknown): Promise<T> {
+    > 179 |   return page.evaluate(([id, value]) => window.turboslide!.studio.invoke(id, value), [
+          |               ^
+      180 |     action,
+      181 |     input,
+      182 |   ] as const) as Promise<T>;
+        at Object.deserialize (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/@tanstack+router-core@1.171.28/node_modules/@tanstack/router-core/dist/esm/ssr/serializer/ShallowErrorPlugin.js?v=728ea863:27:10)
+        at deserializePlugin (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1485:76)
+        at deserialize$1 (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1596:19)
+        at assignProperty (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1339:84)
+        at deserializeProperties (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1361:87)
+        at deserializeObject (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1366:2)
+        at deserialize$1 (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1582:19)
+        at deserializeTop (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1615:10)
+        at fromCrossJSON (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:2844:9)
+        at getResponse (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/@tanstack+start-client-core@1.170.28/node_modules/@tanstack/start-client-core/dist/esm/client-rpc/serverFnFetcher.js?v=728ea863:164:14)
+        at Object.deserialize (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/@tanstack+router-core@1.171.28/node_modules/@tanstack/router-core/dist/esm/ssr/serializer/ShallowErrorPlugin.js?v=728ea863:27:10)
+        at deserializePlugin (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1485:76)
+        at deserialize$1 (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1596:19)
+        at assignProperty (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1339:84)
+        at deserializeProperties (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1361:87)
+        at deserializeObject (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1366:2)
+        at deserialize$1 (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1582:19)
+        at deserializeTop (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1615:10)
+        at fromCrossJSON (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:2844:9)
+        at getResponse (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/@tanstack+start-client-core@1.170.28/node_modules/@tanstack/start-client-core/dist/esm/client-rpc/serverFnFetcher.js?v=728ea863:164:14)
+        at invoke (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/ten-tasks.spec.ts:179:15)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/ten-tasks.spec.ts:340:9
+
+    Error Context: .turboslide/playwright/ten-tasks-task-4-swap-a-logo-with-one-drop/error-context.md
+
+    Error Context: .turboslide/playwright/ten-tasks-task-4-swap-a-logo-with-one-drop/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/ten-tasks-task-4-swap-a-logo-with-one-drop/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/ten-tasks-task-4-swap-a-logo-with-one-drop/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) apps/studio/e2e/ten-tasks.spec.ts:529:1 › task 8: write a talk track in one click ─────────────
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "Open with the migration story."
+    Received: undefined
+
+    Call Log:
+    - Timeout 20000ms exceeded while waiting on the predicate
+
+      537 |   await expect
+      538 |     .poll(async () => (await slide(page, 'links')).notes, { timeout: 20_000 })
+    > 539 |     .toBe('Open with the migration story.');
+          |      ^
+      540 |   record(8, k.c);
+      541 | });
+      542 |
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/ten-tasks.spec.ts:539:6
+
+    Error Context: .turboslide/playwright/ten-tasks-task-8-write-a-talk-track-in-one-click/error-context.md
+
+    Error Context: .turboslide/playwright/ten-tasks-task-8-write-a-talk-track-in-one-click/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/ten-tasks-task-8-write-a-talk-track-in-one-click/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/ten-tasks-task-8-write-a-talk-track-in-one-click/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) apps/studio/e2e/ten-tasks.spec.ts:600:1 › the current slide follows a removal: Delete slide, and Undo after New slide and Duplicate slide 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: page.waitForFunction: Test timeout of 120000ms exceeded.
+
+      189 | /** The editor's pending writes have all reached the server. */
+      190 | async function settled(page: Page): Promise<void> {
+    > 191 |   await page.waitForFunction(() => {
+          |              ^
+      192 |     /* the registry is re-installed when an owner element changes; a poll that lands in that
+      193 |        moment reads false instead of failing the wait with a TypeError */
+      194 |     if (typeof window.turboslide?.studio?.describe !== 'function') return false;
+        at settled (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/ten-tasks.spec.ts:191:14)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/ten-tasks.spec.ts:629:9
+
+    Error Context: .turboslide/playwright/ten-tasks-the-current-slid-73779-w-slide-and-Duplicate-slide/error-context.md
+
+    Error Context: .turboslide/playwright/ten-tasks-the-current-slid-73779-w-slide-and-Duplicate-slide/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/ten-tasks-the-current-slid-73779-w-slide-and-Duplicate-slide/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/ten-tasks-the-current-slid-73779-w-slide-and-Duplicate-slide/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) apps/studio/e2e/text-editing.spec.ts:339:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Cmd C and Cmd V paste a copy of the block through the envelope, Cmd D duplicates and Delete removes 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    +   "h-2-2",
+        "h",
+        "h-2",
+    -   "h-2-2",
+        "p",
+        "list",
+      ]
+
+    Call Log:
+    - Timeout 15000ms exceeded while waiting on the predicate
+
+      370 |     await settled(page);
+      371 |     await page.keyboard.press('ControlOrMeta+d');
+    > 372 |     await expect.poll(() => ids(), { timeout: 15_000 }).toEqual(['h', 'h-2', 'h-2-2', 'p', 'list']);
+          |                                                         ^
+      373 |     await expect
+      374 |       .poll(() => page.evaluate(() => window.turboslide!.studio.describe().state.blockId))
+      375 |       .toBe('h-2-2');
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/text-editing.spec.ts:372:57
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--7c1b0-plicates-and-Delete-removes/error-context.md
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--7c1b0-plicates-and-Delete-removes/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/text-editing-text-editing--7c1b0-plicates-and-Delete-removes/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/text-editing-text-editing--7c1b0-plicates-and-Delete-removes/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) apps/studio/e2e/text-editing.spec.ts:382:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › no bare letter changes the view with a block selected, and the arrows nudge the block by a pixel on a grammar slide (SPEC-2 0.87) 
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 9
+    Received:   9
+
+    Call Log:
+    - Timeout 30000ms exceeded while waiting on the predicate
+
+      424 |        down and 1 px right, the first press converting the slide to the canvas in the same write;
+      425 |        round one held the arrows inert on a grammar slide */
+    > 426 |     await expect.poll(() => revision(page), { timeout: 30_000 }).toBeGreaterThan(startRevision);
+          |                                                                  ^
+      427 |     await settled(page);
+      428 |     const slide = (await page.evaluate(() =>
+      429 |       window.turboslide!.studio.invoke('slide.get', { slideId: 'content-rule' }),
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/text-editing.spec.ts:426:66
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--9c362--grammar-slide-SPEC-2-0-87-/error-context.md
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--9c362--grammar-slide-SPEC-2-0-87-/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/text-editing-text-editing--9c362--grammar-slide-SPEC-2-0-87-/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/text-editing-text-editing--9c362--grammar-slide-SPEC-2-0-87-/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11 failed
+    apps/studio/e2e/canvas.spec.ts:323:1 › the canvas walk: one slide of every kind, one write per gesture, the conversion in the first write, one undo restores the kind 
+    apps/studio/e2e/gslides-actions.spec.ts:99:3 › the fourteen actions of the parity round through the window API › document actions run through the editor and reads carry the new facts 
+    apps/studio/e2e/gslides-actions.spec.ts:321:3 › the thirty six actions of round two through the window API › every canvas, text, table, chart, shape, line and diagram action resolves in the editor 
+    apps/studio/e2e/gslides-actions.spec.ts:704:3 › the menus over the stage selection (VERIFICATION-2 findings 5 and 6) › Arrange reads two selected objects and Change shape draws its plate in the right-click menu 
+    apps/studio/e2e/objects.spec.ts:159:1 › a text box drawn on the Title slide converts it; move, rotate, flip, group, ungroup, regroup, delete, each one write undone back to the Title slide 
+    apps/studio/e2e/tables.spec.ts:191:1 › a cell range, Merge cells and Unmerge cells ─────────────
+    apps/studio/e2e/ten-tasks.spec.ts:334:1 › task 4: swap a logo with one drop ────────────────────
+    apps/studio/e2e/ten-tasks.spec.ts:529:1 › task 8: write a talk track in one click ──────────────
+    apps/studio/e2e/ten-tasks.spec.ts:600:1 › the current slide follows a removal: Delete slide, and Undo after New slide and Duplicate slide 
+    apps/studio/e2e/text-editing.spec.ts:339:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Cmd C and Cmd V paste a copy of the block through the envelope, Cmd D duplicates and Delete removes 
+    apps/studio/e2e/text-editing.spec.ts:382:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › no bare letter changes the view with a block selected, and the arrows nudge the block by a pixel on a grammar slide (SPEC-2 0.87) 
+  5 did not run
+  51 passed (22.5m)
+check 21/28: FAIL exit 1 after 1349.8 s
+check: dev server stopped
+check: stopped after a failure (1366.1 s)

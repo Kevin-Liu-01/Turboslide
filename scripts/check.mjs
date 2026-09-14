@@ -133,6 +133,10 @@ const OVERWRITE_ALLOW = [
   // documents client (SPEC-3 8.9): record rewrites, never a public asset (the integrator, merge 2)
   'packages/store/src/comments-store.ts',
   'packages/store/src/migrate.ts',
+  // the share link hash index `links/<hex>.json` beside the access records (hotfix B, SPEC-3 6.4,
+  // VERIFICATION-3 finding 34 F2): a record naming the deck a link hash belongs to, written with
+  // an overwriting put so two instances indexing one link never conflict; never a public asset
+  'packages/store/src/access-store.ts',
 ];
 
 // MILESTONES.md, M1 acceptance, in order. `needs` marks the environment a step depends on.

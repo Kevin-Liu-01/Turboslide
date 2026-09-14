@@ -1,0 +1,54 @@
+
+Running 11 tests using 1 worker
+
+  ✓   1 apps/studio/e2e/realtime.spec.ts:181:1 › two contexts open one deck as two labels and see each other in the roster (3.7s)
+realtime: 200 keystrokes typed in 3009 ms, both tabs converged 5168 ms after the last one (16.3 target 2000 ms; finding 39)
+  ✓   2 apps/studio/e2e/realtime.spec.ts:206:1 › two contexts type in one paragraph and converge byte for byte over 200 keystrokes, no character lost (9.2s)
+realtime: op to screen on the dev server p50 325 ms, p95 351 ms (322, 309, 345, 325, 312, 350, 327, 320, 288, 327, 351, 291)
+  ✓   3 apps/studio/e2e/realtime.spec.ts:257:1 › a keystroke reaches the other tab: the op to screen latency on the dev server (5.8s)
+  ✓   4 apps/studio/e2e/realtime.spec.ts:282:1 › a block change and a keystroke on one slide both apply (2.5s)
+realtime: an agent write reached both tabs in 350 ms
+  ✓   5 apps/studio/e2e/realtime.spec.ts:326:1 › an agent write through /api/actions appears in both tabs within 1 s (425ms)
+  ✓   6 apps/studio/e2e/realtime.spec.ts:344:1 › undo in A never reverts B’s later change (4.6s)
+  ✓   7 apps/studio/e2e/realtime.spec.ts:364:1 › a tab that lost its stream replays what landed and resends its pending queue (8.6s)
+  ✓   8 apps/studio/e2e/realtime.spec.ts:389:1 › a rejected op comes back to its author with its content (2.9s)
+  ✓   9 apps/studio/e2e/realtime.spec.ts:428:1 › a position more than 2,000 entries behind resyncs and rebases the pending ops (2.4m)
+  ✘  10 apps/studio/e2e/realtime.spec.ts:473:1 › a closed tab’s pending queue is offered on the next open and Apply lands it (24.7s)
+  -  11 apps/studio/e2e/realtime.spec.ts:501:1 › sync.status reads the same numbers through the window API and describe().state
+
+
+  1) apps/studio/e2e/realtime.spec.ts:473:1 › a closed tab’s pending queue is offered on the next open and Apply lands it 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "WVVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEvery line of copy states a number or a mechanism. The rule from the product video review: if a line could appear unchanged in a competitor's video, cut it. The same test applies to site copy, docs introductions, blog posts, README and CLI text, and posts on X, LinkedIn, GitHub, and Discord.BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB drag offline late123"
+    Received: "WVVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEvery line of copy states a number or a mechanism. The rule from the product video review: if a line could appear unchanged in a competitor's video, cut it. The same test applies to site copy, docs introductions, blog posts, README and CLI text, and posts on X, LinkedIn, GitHub, and Discord.BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB drag offline late12323"
+
+    Call Log:
+    - Timeout 10000ms exceeded while waiting on the predicate
+
+      495 |   await pageA.locator('[data-control="sync.persisted.apply"]').click();
+      496 |   await settled(pageA, 30_000);
+    > 497 |   await expect.poll(() => runText(pageB, PARA), { timeout: 10_000 }).toBe(`${before}123`);
+          |                                                                      ^
+      498 |   await expect(plate).toBeHidden();
+      499 | });
+      500 |
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/realtime.spec.ts:497:70
+
+    Error Context: .turboslide/playwright/realtime-a-closed-tab’s-pe-32a73-ext-open-and-Apply-lands-it/error-context.md
+
+    Error Context: .turboslide/playwright/realtime-a-closed-tab’s-pe-32a73-ext-open-and-Apply-lands-it/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/realtime-a-closed-tab’s-pe-32a73-ext-open-and-Apply-lands-it/trace.zip
+    Usage:
+
+        npx playwright show-trace .turboslide/playwright/realtime-a-closed-tab’s-pe-32a73-ext-open-and-Apply-lands-it/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    apps/studio/e2e/realtime.spec.ts:473:1 › a closed tab’s pending queue is offered on the next open and Apply lands it 
+  1 did not run
+  9 passed (3.5m)

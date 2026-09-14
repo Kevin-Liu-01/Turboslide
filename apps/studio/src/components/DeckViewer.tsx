@@ -77,11 +77,17 @@ function toSections(deck: ViewerDeck): readonly ShellSection[] {
   }));
 }
 
-/** Tells the page around the frame which slide is up (DeckFrame.tsx mirrors it into its address). */
+/**
+ * Tells the page around the frame which slide is up (DeckFrame.tsx mirrors it into its address).
+ * The target origin is `*`: the embed is framed by Prototemplate and the customer domains the
+ * `frame-ancestors` rule of server/headers.ts admits, none of them the studio's own origin, and the
+ * message carries a slide number and nothing else (hotfix B request R2; VERIFICATION-3 step 21,
+ * share.spec.ts row 3: with `window.location.origin` a parent on another origin received nothing).
+ */
 function postSlide(n: number): void {
   if (window.parent === window) return;
   try {
-    window.parent.postMessage({ type: 'gt-deck-slide', n }, window.location.origin);
+    window.parent.postMessage({ type: 'gt-deck-slide', n }, '*');
   } catch {
     // a detached frame: nothing to tell
   }

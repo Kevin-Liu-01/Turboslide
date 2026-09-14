@@ -350,25 +350,17 @@ export const Route = createFileRoute('/api/export/$deckId')({
         const denied = cancelling ? null : unauthorized(request);
         if (denied) return denied;
         if (!SLUG_PATTERN.test(params.deckId)) return badRequest('deckId must be a slug');
+        let ctx: Awaited<ReturnType<typeof requestContext>> | null = null;
         if (!cancelling) {
-          const ctx = await requestContext(request);
+          ctx = await requestContext(request);
           const refused = await refusedBy(ctx, params.deckId, 'export', 'export.run');
           if (refused !== null) return refused;
-          const identity = identityLabel(ctx) ?? 'anonymous';
           const flagged = await requireFlag('exports', {
-            identity,
+            identity: identityLabel(ctx) ?? 'anonymous',
             deckId: params.deckId,
             action: 'export.run',
           });
           if (flagged !== null) return flagged;
-          const quota = await checkQuota('exportsPerDay', {
-            identity,
-            tier: tierOf(ctx),
-            deckId: params.deckId,
-            action: 'export.run',
-            transport: 'route',
-          });
-          if (quota instanceof RateLimitedError) return rateLimitedResponse(quota);
         }
         const length = Number(request.headers.get('content-length') ?? 0);
         if (length > BODY_LIMIT)
@@ -395,6 +387,26 @@ export const Route = createFileRoute('/api/export/$deckId')({
         const url = new URL(request.url);
         // `sync` is the transport's flag, not an export.run field; it leaves before validation
         const { sync: syncFlag, ...fields } = body as Record<string, unknown>;
+        // the day's export quota is paid once per export: by the plan (`?start=1`) and by the
+        // single call path. A batch or a merge of a job the plan started (SPEC-2 8.1:
+        // `?batch=<i>&job=<id>`, `?merge=<id>`, or the body's `batch` and `merge` fields)
+        // continues that export and passes the capability and the kill switch above and not the
+        // quota again: a 28 page deck in batches of 3 is one export of the day, not eleven
+        const continuing =
+          url.searchParams.has('merge') ||
+          (url.searchParams.has('batch') && url.searchParams.has('job')) ||
+          (typeof fields.batch === 'object' && fields.batch !== null) ||
+          (typeof fields.merge === 'object' && fields.merge !== null);
+        if (ctx !== null && !continuing) {
+          const quota = await checkQuota('exportsPerDay', {
+            identity: identityLabel(ctx) ?? 'anonymous',
+            tier: tierOf(ctx),
+            deckId: params.deckId,
+            action: 'export.run',
+            transport: 'route',
+          });
+          if (quota instanceof RateLimitedError) return rateLimitedResponse(quota);
+        }
         // the batched export's forms (SPEC-2 8.1) answer before the single call path
         const batched = await batchedPost(params.deckId, url, fields);
         if (batched !== null) return batched;

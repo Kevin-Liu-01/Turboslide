@@ -29,7 +29,15 @@ const SOURCE = 'gt-brand';
 const RECORDINGS = join(ROOT, '.turboslide', 'canvas-walk');
 const COPY = `e2e-canvas-${Date.now().toString(36)}`;
 
-type Pos = { x: number; y: number; w: number; h: number; z?: number; rotate?: number };
+type Pos = {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  z?: number;
+  rotate?: number;
+  group?: string;
+};
 type Block = { id: string; type: string; pos?: Pos };
 type Slide = {
   id: string;
@@ -81,7 +89,10 @@ async function slideGet(page: Page, slideId: string): Promise<Slide> {
 /** The editor's confirmed revision: pending writes have reached the server. */
 async function settled(page: Page): Promise<void> {
   await page.waitForFunction(() => {
-    const state = window.turboslide!.studio.describe().state as {
+    /* the registry is re-installed when an owner element changes; a poll that lands in that
+       moment reads false instead of failing the wait with a TypeError */
+    if (typeof window.turboslide?.studio?.describe !== 'function') return false;
+    const state = window.turboslide.studio.describe().state as {
       revision?: number;
       serverRevision?: number;
       pending?: number;
@@ -99,7 +110,7 @@ async function openDeck(page: Page, deckId: string): Promise<void> {
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
   await settled(page);
   fontsRestored = (await restoreThemeFonts(page)) || fontsRestored;
 }
@@ -148,7 +159,10 @@ async function restoreThemeFonts(page: Page): Promise<boolean> {
 
 async function goTo(page: Page, slideId: string): Promise<void> {
   await invoke(page, 'view.goto', { slideId });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', slideId);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    slideId,
+  );
   await expect(
     page.locator(`.ts-stagewrap.ts-editor .pt-slide[data-slide-id="${slideId}"]`),
   ).toBeVisible();
@@ -193,16 +207,60 @@ async function drag(
   for (const key of modifiers) await page.keyboard.up(key);
 }
 
-/** Selects an object through the stage: Tab from the page selects the first, then Tab walks; the chip names the selection. */
+/**
+ * A point of the sheet where the pointer resolves to the object (`elementFromPoint` inside its
+ * `[data-block]` or `[data-free]` element), or null: the axis aligned box of a rotated object
+ * starts outside it, and a covering photograph's box reaches into the chrome above the stage, so
+ * a press on the box's corner landed on the title row and the chords that followed moved the
+ * slide instead of the object (Cmd Down on the title row is Move slide down). The candidates are
+ * a grid over the box clipped to the sheet, the corners first.
+ */
+async function pointOn(page: Page, objectId: string): Promise<{ x: number; y: number } | null> {
+  return page.evaluate((id) => {
+    const sheet = document.querySelector('.ts-stagewrap.ts-editor .ts-stage');
+    const el = document.querySelector(`.ts-stagewrap.ts-editor .pt-slide [data-block="${id}"]`);
+    if (!sheet || !el) return null;
+    const s = sheet.getBoundingClientRect();
+    const b = el.getBoundingClientRect();
+    const left = Math.max(b.left, s.left) + 2;
+    const top = Math.max(b.top, s.top) + 2;
+    const right = Math.min(b.right, s.right) - 2;
+    const bottom = Math.min(b.bottom, s.bottom) - 2;
+    if (right <= left || bottom <= top) return null;
+    const steps = 8;
+    const candidates: { x: number; y: number }[] = [];
+    for (let i = 0; i <= steps; i += 1)
+      for (let j = 0; j <= steps; j += 1)
+        candidates.push({
+          x: left + ((right - left) * i) / steps,
+          y: top + ((bottom - top) * j) / steps,
+        });
+    for (const point of candidates) {
+      const hit = document.elementFromPoint(point.x, point.y);
+      if (!hit) continue;
+      const owner = hit.closest('[data-block], [data-free]');
+      if (
+        owner !== null &&
+        (owner.getAttribute('data-block') === id || owner.getAttribute('data-free') === id)
+      )
+        return point;
+    }
+    return null;
+  }, objectId);
+}
+
+/** Selects an object through the stage: a press on a point of the sheet that resolves to it; the chip names the selection. */
 async function selectObject(page: Page, slideId: string, objectId: string): Promise<void> {
   /* a click on the frame of the object: the overlay's frame edges take the pointer once it is
-     selected, so the first click lands on the object's element (its top left corner, outside
-     text) and the stage resolves it */
+     selected, so the first click lands on the object's element (a point inside the sheet where
+     the object answers the pointer, else its top left corner) and the stage resolves it */
   const el = page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-block="${objectId}"]`).first();
   const count = await el.count();
   if (count > 0) {
+    const point = await pointOn(page, objectId);
     const box = await el.boundingBox();
-    if (box) {
+    if (point) await page.mouse.click(point.x, point.y);
+    else if (box) {
       /* the picture kinds hide the slide's own image and paint it as the backdrop, so a press on
          the slide outside the plate resolves to the photograph */
       await page.mouse.click(box.x + 2, box.y + 2);
@@ -278,12 +336,15 @@ test('the canvas walk: one slide of every kind, one write per gesture, the conve
   await openDeck(page, COPY);
   const rows = await invoke<Row[]>(page, 'slide.list');
   const walked = new Set<string>();
-  const k = await stageScale(page);
 
   for (const step of WALK) {
     if (!rows.some((row) => row.id === step.id)) continue;
     walked.add(step.id);
     await goTo(page, step.id);
+    /* CSS pixels per sheet pixel at this step: the stage refits when a panel or a card opens
+       beside it, and a scale read once before the walk made the pointer's 40 by 24 land short of
+       or past the snap tolerance on a later slide */
+    const k = await stageScale(page);
     const before = await slideGet(page, step.id);
     expect(before.kind).toBe(step.kind);
     const committed = JSON.parse(
@@ -361,10 +422,27 @@ test('the canvas walk: one slide of every kind, one write per gesture, the conve
     await selectObject(page, step.id, step.object);
     const east = page.locator(`.ts-overlay [data-control="handle.${step.object}.resize.e"]`);
     await expect(east).toBeVisible();
-    const widthBefore = (await slideGet(page, step.id)).slots?.['main']?.find(
-      (b) => b.id === step.object,
-    )?.pos?.w;
-    await drag(page, east, 80 * k, 0);
+    const stackAtResize = (await slideGet(page, step.id)).slots?.['main'] ?? [];
+    const resizing = stackAtResize.find((b) => b.id === step.object);
+    const widthBefore = resizing?.pos?.w;
+    /* a member of a group resizes with the group (SPEC-2 0.102): the east handle widens the
+       union by 80 and every member scales by the union's factor, so a member grows by its share */
+    const groupId = resizing?.pos?.group;
+    const members =
+      groupId === undefined
+        ? []
+        : stackAtResize.filter((b) => b.pos?.group === groupId && b.pos !== undefined);
+    const unionWidth =
+      members.length > 1
+        ? Math.max(...members.map((b) => b.pos!.x + b.pos!.w)) -
+          Math.min(...members.map((b) => b.pos!.x))
+        : (widthBefore ?? 0);
+    const expectedGrowth =
+      members.length > 1 && widthBefore !== undefined ? (80 * widthBefore) / unionWidth : 80;
+    /* the scale again: the conversion and the selection can open a card or a panel beside the
+       stage, which refits it between the drag and the resize */
+    const kResize = await stageScale(page);
+    await drag(page, east, 80 * kResize, 0);
     await expect
       .poll(async () => (await versions(page)).length, { timeout: 30_000 })
       .toBe(logAfterUndo + 1);
@@ -375,7 +453,7 @@ test('the canvas walk: one slide of every kind, one write per gesture, the conve
       (b) => b.id === step.object,
     )?.pos?.w;
     expect(widthAfter).toBeDefined();
-    expect(Math.abs(widthAfter! - widthBefore! - 80)).toBeLessThanOrEqual(8);
+    expect(Math.abs(widthAfter! - widthBefore! - expectedGrowth)).toBeLessThanOrEqual(8);
 
     // the rotation: 15 degrees with the handle and Shift
     await selectObject(page, step.id, step.object);
@@ -719,7 +797,7 @@ test('step 8: the fresh Title slide’s empty heading drags before anything is t
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
   await page.waitForTimeout(400);
   const k = await stageScale(page);
   const heading = page.locator('.ts-stagewrap.ts-editor .pt-slide [data-block="heading"]');
@@ -738,7 +816,7 @@ test('step 8: the fresh Title slide’s empty heading drags before anything is t
   const described = await page.evaluate(() => window.turboslide!.studio.describe());
   const deckId =
     (described as { deckId?: string }).deckId ?? (described.state as { deckId?: string }).deckId;
-  const active = await page.locator('.pt-viewer').getAttribute('data-active');
+  const active = await page.locator('.pt-viewer:not(.ts-skeleton)').getAttribute('data-active');
   const slide = await slideGet(page, active ?? 'title');
   expect(slide.kind).toBe('content');
   const headingPos = slide.slots?.['main']?.find((b) => b.id === 'heading')?.pos;

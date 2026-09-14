@@ -47,7 +47,10 @@ async function versions(page: Page): Promise<Version[]> {
 
 async function settled(page: Page): Promise<void> {
   await page.waitForFunction(() => {
-    const state = window.turboslide!.studio.describe().state as {
+    /* the registry is re-installed when an owner element changes; a poll that lands in that
+       moment reads false instead of failing the wait with a TypeError */
+    if (typeof window.turboslide?.studio?.describe !== 'function') return false;
+    const state = window.turboslide.studio.describe().state as {
       revision?: number;
       serverRevision?: number;
       pending?: number;
@@ -65,13 +68,16 @@ async function openDeck(page: Page, deckId: string): Promise<void> {
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
   await settled(page);
 }
 
 async function goTo(page: Page, slideId: string): Promise<void> {
   await invoke(page, 'view.goto', { slideId });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', slideId);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    slideId,
+  );
   await page.waitForTimeout(250);
 }
 
@@ -312,7 +318,13 @@ test('the special characters insert lands at the caret as one text.insert, and p
   await page.keyboard.press('ControlOrMeta+i');
   await expect.poll(() => logLength(page), { timeout: 10_000 }).toBe(log + 1);
   await settled(page);
-  expect(await text(page, 'h')).toMatch(/^\[.*\]\{i\}$/);
+  /* the heading kept the underline and the strikethrough of the test above: italic lands on every
+     run of the range and each run keeps its own marks (SPEC-3 3.1), so every run reads `i` */
+  const italicised = await text(page, 'h');
+  const runs = [...italicised.matchAll(/\[[^\]]*\]\{([^}]*)\}/g)];
+  expect(runs.length).toBeGreaterThan(0);
+  expect(runs.map((run) => run[0]).join('')).toBe(italicised);
+  expect(runs.every((run) => run[1]!.split(' ').includes('i'))).toBe(true);
   await page.keyboard.press('Escape');
   await settled(page);
   /* the heading as an object with italic text; Cmd Option C then Cmd Option V on the paragraph */

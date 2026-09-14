@@ -1,0 +1,230 @@
+check  6/28: pnpm build && node scripts/check-client-bundle.mjs apps/studio/dist && node scripts/check.mjs --greps
+$ turbo run build
+• turbo 2.10.12
+
+   • Packages in scope: @turboslide/agent, @turboslide/chrome, @turboslide/cli, @turboslide/effects, @turboslide/eslint-config, @turboslide/export, @turboslide/fonts, @turboslide/headless, @turboslide/identity, @turboslide/import, @turboslide/lint, @turboslide/materials, @turboslide/mcp, @turboslide/native, @turboslide/native-darwin-arm64, @turboslide/native-darwin-x64, @turboslide/native-linux-arm64-gnu, @turboslide/native-linux-arm64-musl, @turboslide/native-linux-x64-gnu, @turboslide/native-linux-x64-musl, @turboslide/native-win32-x64-msvc, @turboslide/prettier-config, @turboslide/realtime, @turboslide/render, @turboslide/render-worker, @turboslide/schema, @turboslide/store, @turboslide/studio, @turboslide/theme, @turboslide/tsconfig, @turboslide/viewer
+   • Running build in 31 packages
+   • Remote caching disabled
+
+@turboslide/native:build: cache bypass, force executing 02195bff2c1afe4a
+@turboslide/native:build: $ node scripts/build.mjs
+@turboslide/native:build: [native] /Users/kevinliu/.cargo/bin/cargo build --release --features napi --manifest-path /Users/kevinliu/repos/Turboslide/crates/turboslide-native/Cargo.toml
+@turboslide/native:build:     Finished `release` profile [optimized] target(s) in 0.04s
+@turboslide/native:build: [native] addon darwin-arm64: /Users/kevinliu/repos/Turboslide/packages/native/npm/darwin-arm64/turboslide-native.darwin-arm64.node (771968 bytes)
+@turboslide/native:build: [native] /Users/kevinliu/.cargo/bin/cargo build --release --target wasm32-unknown-unknown --features wasm --manifest-path /Users/kevinliu/repos/Turboslide/crates/turboslide-native/Cargo.toml
+@turboslide/native:build:     Finished `release` profile [optimized] target(s) in 0.03s
+@turboslide/native:build: [native] /Users/kevinliu/.cargo/bin/wasm-bindgen --target web --out-dir /Users/kevinliu/repos/Turboslide/packages/native/wasm --out-name turboslide_native /Users/kevinliu/repos/Turboslide/crates/turboslide-native/target/wasm32-unknown-unknown/release/turboslide_native.wasm
+@turboslide/native:build: [native] wasm: /Users/kevinliu/repos/Turboslide/packages/native/wasm/turboslide_native.js, /Users/kevinliu/repos/Turboslide/packages/native/wasm/turboslide_native_bg.wasm (273863 bytes)
+@turboslide/cli:build: cache hit, replaying logs a99e77042bb0f924
+@turboslide/cli:build: $ tsdown
+@turboslide/cli:build: ℹ tsdown v0.23.0 powered by rolldown v1.2.8
+@turboslide/cli:build: ℹ config file: /Users/kevinliu/repos/Turboslide/apps/cli/tsdown.config.ts 
+@turboslide/cli:build: ℹ entry: src/main.ts
+@turboslide/cli:build: ℹ tsconfig: tsconfig.json
+@turboslide/cli:build: ℹ Build start
+@turboslide/cli:build: ℹ Cleaning 195 files
+@turboslide/cli:build: ℹ dist/main.mjs  480.85 kB │ gzip: 117.99 kB
+@turboslide/cli:build: ℹ 1 files, total: 480.85 kB
+@turboslide/cli:build: ✔ Build complete in 62ms
+@turboslide/studio:build: cache miss, executing 6c85e8775f405dd9
+@turboslide/studio:build: $ vite build
+@turboslide/studio:build: vite v8.2.2 building client environment for production...
+@turboslide/studio:build: transforming...
+@turboslide/studio:build: 
+@turboslide/studio:build: [@tanstack/devtools-vite] Removed devtools code from: /src/routes/__root.tsx
+@turboslide/studio:build: 
+@turboslide/studio:build: [plugin rolldown:vite-resolve] Module "node:fs" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/lint/src/rendered/bitmap.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+@turboslide/studio:build: [plugin rolldown:vite-resolve] Module "node:path" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/lint/src/rendered/bitmap.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+@turboslide/studio:build: [plugin rolldown:vite-resolve] Module "node:zlib" has been externalized for browser compatibility, imported by "/Users/kevinliu/repos/Turboslide/packages/lint/src/rendered/png.ts". See https://vite.dev/guide/troubleshooting.html#module-externalized-for-browser-compatibility for more details.
+@turboslide/studio:build: ✓ 780 modules transformed.
+@turboslide/studio:build: rendering chunks...
+@turboslide/studio:build: computing gzip size...
+@turboslide/studio:build: dist/client/assets/dither.worker-BzdfNrQx.js               93.43 kB
+@turboslide/studio:build: dist/client/assets/InterVariable-DiVDrmQJ.woff2           352.24 kB
+@turboslide/studio:build: dist/client/assets/InterVariable-Italic-d6KXgdvN.woff2    380.90 kB
+@turboslide/studio:build: dist/client/assets/inter-DJL1FIyQ.css                       0.44 kB │ gzip:   0.24 kB
+@turboslide/studio:build: dist/client/assets/stage-DAHOds8-.css                       0.93 kB │ gzip:   0.38 kB
+@turboslide/studio:build: dist/client/assets/Tooltip-DeKqSo45.css                     1.14 kB │ gzip:   0.55 kB
+@turboslide/studio:build: dist/client/assets/GtMark-CFjz9Jl4.css                      1.39 kB │ gzip:   0.62 kB
+@turboslide/studio:build: dist/client/assets/Menu-BY1xdogY.css                        2.03 kB │ gzip:   0.78 kB
+@turboslide/studio:build: dist/client/assets/useStudioSession-CIsb7PjM.css            2.35 kB │ gzip:   0.88 kB
+@turboslide/studio:build: dist/client/assets/tokens-BnF3ONlG.css                      4.53 kB │ gzip:   1.39 kB
+@turboslide/studio:build: dist/client/assets/styles-CUVxzxxu.css                      4.79 kB │ gzip:   1.45 kB
+@turboslide/studio:build: dist/client/assets/present-B0bV1g0e.css                     5.42 kB │ gzip:   1.43 kB
+@turboslide/studio:build: dist/client/assets/sheet-HLA9YaqE.css                      13.18 kB │ gzip:   3.25 kB
+@turboslide/studio:build: dist/client/assets/index-ETVbrmG_.css                      36.27 kB │ gzip:   6.59 kB
+@turboslide/studio:build: dist/client/assets/render-D-83T36C.css                    152.23 kB │ gzip:  23.03 kB
+@turboslide/studio:build: dist/client/assets/model-BpJWsx66.js                        0.26 kB │ gzip:   0.20 kB
+@turboslide/studio:build: dist/client/assets/embed._deckId-BjpWUFfP.js                0.28 kB │ gzip:   0.22 kB
+@turboslide/studio:build: dist/client/assets/useMountEffect-DCIizILd.js               0.36 kB │ gzip:   0.23 kB
+@turboslide/studio:build: dist/client/assets/routes-a9pAz8P8.js                       0.42 kB │ gzip:   0.28 kB
+@turboslide/studio:build: dist/client/assets/print._deckId-CUAVN055.js                0.70 kB │ gzip:   0.42 kB
+@turboslide/studio:build: dist/client/assets/jsx-runtime-BkSabwWG.js                  0.96 kB │ gzip:   0.55 kB
+@turboslide/studio:build: dist/client/assets/present._deckId-CvUVA2rp.js              0.96 kB │ gzip:   0.59 kB
+@turboslide/studio:build: dist/client/assets/deck._deckId-Dl-ZWfaL.js                 1.04 kB │ gzip:   0.58 kB
+@turboslide/studio:build: dist/client/assets/deck._deckId-Brui_bQI.js                 1.08 kB │ gzip:   0.62 kB
+@turboslide/studio:build: dist/client/assets/deck._deckId-1NHsS3uk.js                 1.10 kB │ gzip:   0.62 kB
+@turboslide/studio:build: dist/client/assets/new-ZWBfVa91.js                          1.53 kB │ gzip:   0.83 kB
+@turboslide/studio:build: dist/client/assets/decks-DgfnIQCR.js                        1.62 kB │ gzip:   0.75 kB
+@turboslide/studio:build: dist/client/assets/GtMark-CF9mAz88.js                       2.97 kB │ gzip:   1.50 kB
+@turboslide/studio:build: dist/client/assets/DeckViewer-BlvsbSEG.js                   4.75 kB │ gzip:   2.17 kB
+@turboslide/studio:build: dist/client/assets/device-DvfJUPug.js                       4.87 kB │ gzip:   1.72 kB
+@turboslide/studio:build: dist/client/assets/decks.trash-COtmIuzT.js                  5.50 kB │ gzip:   1.94 kB
+@turboslide/studio:build: dist/client/assets/preload-helper-0n1gJGsi.js               5.67 kB │ gzip:   2.20 kB
+@turboslide/studio:build: dist/client/assets/print._deckId-7upylZfF.js                6.12 kB │ gzip:   2.38 kB
+@turboslide/studio:build: dist/client/assets/Menu-DFaX7rT5.js                         8.85 kB │ gzip:   3.36 kB
+@turboslide/studio:build: dist/client/assets/present._deckId-C0hDhTy-.js             11.37 kB │ gzip:   3.88 kB
+@turboslide/studio:build: dist/client/assets/decks.index-DLhrr47Z.js                 17.91 kB │ gzip:   5.82 kB
+@turboslide/studio:build: dist/client/assets/strings-DjqwuNtw.js                     18.76 kB │ gzip:   7.34 kB
+@turboslide/studio:build: dist/client/assets/useStudioSession-BoZ2_HHm.js            23.55 kB │ gzip:   8.97 kB
+@turboslide/studio:build: dist/client/assets/link-DootD-a8.js                        29.29 kB │ gzip:  10.93 kB
+@turboslide/studio:build: dist/client/assets/createServerFn-D-KIR8hu.js              39.78 kB │ gzip:  12.54 kB
+@turboslide/studio:build: dist/client/assets/Tooltip-BFETTJ38.js                     48.95 kB │ gzip:  14.90 kB
+@turboslide/studio:build: dist/client/assets/slide-CRnvWZUr.js                       59.05 kB │ gzip:  20.18 kB
+@turboslide/studio:build: dist/client/assets/edit._deckId-D2fDyt_F.js                71.35 kB │ gzip:  24.01 kB
+@turboslide/studio:build: dist/client/assets/keys-bVdDn9s7.js                        71.53 kB │ gzip:  19.73 kB
+@turboslide/studio:build: dist/client/assets/edit._deckId-Bpvt4QCe.js                71.70 kB │ gzip:  24.15 kB
+@turboslide/studio:build: dist/client/assets/Frame-B_4Pg7lW.js                      192.95 kB │ gzip:  59.07 kB
+@turboslide/studio:build: dist/client/assets/render-DV1uNm6o.js                     582.38 kB │ gzip: 170.67 kB
+@turboslide/studio:build: dist/client/assets/dither-key-3-G63s7k.js                 737.51 kB │ gzip:  93.10 kB
+@turboslide/studio:build: dist/client/assets/index-D6IA9RCO.js                    1,202.64 kB │ gzip: 388.53 kB
+@turboslide/studio:build: 
+@turboslide/studio:build: ✓ built in 2.03s
+@turboslide/studio:build: [plugin builtin:vite-reporter] 
+@turboslide/studio:build: (!) Some chunks are larger than 500 kB after minification. Consider:
+@turboslide/studio:build: - Using dynamic import() to code-split the application
+@turboslide/studio:build: - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+@turboslide/studio:build: - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+@turboslide/studio:build: vite v8.2.2 building ssr environment for production...
+@turboslide/studio:build: transforming...
+@turboslide/studio:build: 
+@turboslide/studio:build: [@tanstack/devtools-vite] Removed devtools code from: /src/routes/__root.tsx
+@turboslide/studio:build: 
+@turboslide/studio:build: ✓ 1838 modules transformed.
+@turboslide/studio:build: rendering chunks...
+@turboslide/studio:build: computing gzip size...
+@turboslide/studio:build: dist/server/assets/kysely-adapter-DtcypM_N.js                        0.13 kB │ gzip:   0.10 kB
+@turboslide/studio:build: dist/server/assets/core-RrmWoKne.js                                  0.25 kB │ gzip:   0.18 kB
+@turboslide/studio:build: dist/server/assets/empty-plugin-adapters-5PvIP3d0.js                 0.31 kB │ gzip:   0.21 kB
+@turboslide/studio:build: dist/server/assets/createServerRpc-kQhTU1Q_.js                       0.47 kB │ gzip:   0.30 kB
+@turboslide/studio:build: dist/server/assets/embed._deckId-D6YIY9AY.js                         0.47 kB │ gzip:   0.30 kB
+@turboslide/studio:build: dist/server/assets/copy-DM5fggIo.js                                  0.52 kB │ gzip:   0.34 kB
+@turboslide/studio:build: dist/server/assets/json-DWkeza1F.js                                  0.56 kB │ gzip:   0.32 kB
+@turboslide/studio:build: dist/server/assets/createSsrRpc-CcUPuhkG.js                          0.61 kB │ gzip:   0.37 kB
+@turboslide/studio:build: dist/server/assets/routes-D7ELzDFN.js                                0.74 kB │ gzip:   0.41 kB
+@turboslide/studio:build: dist/server/assets/health-KQrTD6Gr.js                                0.74 kB │ gzip:   0.41 kB
+@turboslide/studio:build: dist/server/assets/useMountEffect-CF82CygD.js                        0.80 kB │ gzip:   0.40 kB
+@turboslide/studio:build: dist/server/assets/kysely-migration-tables-DFfmKhq--BvJQi-9c.js      0.95 kB │ gzip:   0.52 kB
+@turboslide/studio:build: dist/server/assets/print._deckId-DM90Y6wE.js                         1.17 kB │ gzip:   0.60 kB
+@turboslide/studio:build: dist/server/assets/lint-rendered-94z151mg.js                         1.34 kB │ gzip:   0.67 kB
+@turboslide/studio:build: dist/server/assets/middleware-CySpZf-B.js                            1.56 kB │ gzip:   0.72 kB
+@turboslide/studio:build: dist/server/assets/warm-CVA6Mcgo.js                                  1.64 kB │ gzip:   0.78 kB
+@turboslide/studio:build: dist/server/assets/present._deckId-B2yG60fN.js                       1.87 kB │ gzip:   0.92 kB
+@turboslide/studio:build: dist/server/assets/rolldown-runtime-BMI-E3GI.js                      1.92 kB │ gzip:   0.87 kB
+@turboslide/studio:build: dist/server/assets/errors-Conu33x9.js                                1.97 kB │ gzip:   0.77 kB
+@turboslide/studio:build: dist/server/assets/decks.index-kk-_A_pD.js                           2.10 kB │ gzip:   1.08 kB
+@turboslide/studio:build: dist/server/assets/bundle-7Yw8n-UW.js                                2.11 kB │ gzip:   1.04 kB
+@turboslide/studio:build: dist/server/assets/deck._deckId-CnPXCEbe.js                          2.17 kB │ gzip:   1.04 kB
+@turboslide/studio:build: dist/server/assets/deck._deckId-CmIHVfGV.js                          2.26 kB │ gzip:   1.05 kB
+@turboslide/studio:build: dist/server/assets/deck._deckId-DqkTk2a2.js                          2.33 kB │ gzip:   1.08 kB
+@turboslide/studio:build: dist/server/assets/dispatch-Bd9gUHmq.js                              2.40 kB │ gzip:   1.10 kB
+@turboslide/studio:build: dist/server/assets/theme-node-Bt1CTHR7.js                            2.86 kB │ gzip:   1.30 kB
+@turboslide/studio:build: dist/server/assets/token-CjSj2F3k.js                                 3.05 kB │ gzip:   1.14 kB
+@turboslide/studio:build: dist/server/assets/metrics-DCW5c3pL.js                               3.22 kB │ gzip:   1.44 kB
+@turboslide/studio:build: dist/server/assets/log-BB0ThOKN.js                                   3.32 kB │ gzip:   1.54 kB
+@turboslide/studio:build: dist/server/assets/lint-COU_e5gE.js                                  3.45 kB │ gzip:   1.63 kB
+@turboslide/studio:build: dist/server/assets/blob-disk-CekM9mNG.js                             3.98 kB │ gzip:   1.51 kB
+@turboslide/studio:build: dist/server/assets/lint-B92ONdi5.js                                  4.02 kB │ gzip:   1.80 kB
+@turboslide/studio:build: dist/server/assets/_tanstack-start-manifest_v-DDQ05CjD.js            4.15 kB │ gzip:   1.20 kB
+@turboslide/studio:build: dist/server/assets/render-DZtKD8VX.js                                4.35 kB │ gzip:   2.09 kB
+@turboslide/studio:build: dist/server/assets/bun-sqlite-dialect-C7ftEUSI-C0dEWE8n.js           4.67 kB │ gzip:   1.68 kB
+@turboslide/studio:build: dist/server/assets/node-sqlite-dialect-DXDxjSOf.js                   4.67 kB │ gzip:   1.67 kB
+@turboslide/studio:build: dist/server/assets/bundle-D3fp2gSu.js                                4.76 kB │ gzip:   1.97 kB
+@turboslide/studio:build: dist/server/assets/server-DIZJeGzd.js                                4.84 kB │ gzip:   1.59 kB
+@turboslide/studio:build: dist/server/assets/GtMark-CqwEHUkN.js                                4.94 kB │ gzip:   2.27 kB
+@turboslide/studio:build: dist/server/assets/d1-sqlite-dialect-D4qp4-wW-B2V3VQ-W.js            5.25 kB │ gzip:   1.88 kB
+@turboslide/studio:build: dist/server/assets/new-B9tAODvL.js                                   5.62 kB │ gzip:   2.43 kB
+@turboslide/studio:build: dist/server/assets/labels-CCrXCmMe.js                                5.69 kB │ gzip:   2.55 kB
+@turboslide/studio:build: dist/server/assets/deck._deckId-FEzDs4vB.js                          6.01 kB │ gzip:   2.52 kB
+@turboslide/studio:build: dist/server/assets/flags-CG-_y4Mx.js                                 6.10 kB │ gzip:   2.43 kB
+@turboslide/studio:build: dist/server/assets/render-UMvy6iBm.js                                6.27 kB │ gzip:   2.55 kB
+@turboslide/studio:build: dist/server/assets/start-CmW1oXru.js                                 6.32 kB │ gzip:   2.76 kB
+@turboslide/studio:build: dist/server/assets/cli-BpFE01kH.js                                   6.85 kB │ gzip:   2.69 kB
+@turboslide/studio:build: dist/server/assets/agent-actions-12aFnY_q.js                         7.75 kB │ gzip:   3.09 kB
+@turboslide/studio:build: dist/server/assets/plan-BQz5y2Hg.js                                  8.16 kB │ gzip:   3.30 kB
+@turboslide/studio:build: dist/server/assets/device-CXxiMXov.js                                8.33 kB │ gzip:   2.29 kB
+@turboslide/studio:build: dist/server/assets/sessions-OSajuQQF.js                              8.56 kB │ gzip:   2.97 kB
+@turboslide/studio:build: dist/server/assets/decks-Ju3xHSBV.js                                 9.06 kB │ gzip:   3.30 kB
+@turboslide/studio:build: dist/server/assets/decks.index-C34iNgkZ.js                           9.28 kB │ gzip:   3.92 kB
+@turboslide/studio:build: dist/server/assets/decks.trash-CCWEd4f1.js                           9.53 kB │ gzip:   2.85 kB
+@turboslide/studio:build: dist/server/assets/thumbs-Dk4jTR7E.js                                9.94 kB │ gzip:   3.76 kB
+@turboslide/studio:build: dist/server/assets/DeckViewer-BOQ-UYUZ.js                           10.07 kB │ gzip:   3.74 kB
+@turboslide/studio:build: dist/server/assets/print._deckId-DgF1DtKa.js                        10.28 kB │ gzip:   3.38 kB
+@turboslide/studio:build: dist/server/assets/write-CmwHDeXf.js                                10.42 kB │ gzip:   4.10 kB
+@turboslide/studio:build: dist/server/assets/export-sync-Cp6JtEZP.js                          10.45 kB │ gzip:   3.94 kB
+@turboslide/studio:build: dist/server/assets/secret-CQfJ5pIv.js                               11.15 kB │ gzip:   3.99 kB
+@turboslide/studio:build: dist/server/assets/bundle-core-_Y4Ew2rE.js                          11.25 kB │ gzip:   4.44 kB
+@turboslide/studio:build: dist/server/assets/download-DhhWp708.js                             13.78 kB │ gzip:   5.11 kB
+@turboslide/studio:build: dist/server/assets/sessions-s031rmmL.js                             13.82 kB │ gzip:   4.56 kB
+@turboslide/studio:build: dist/server/assets/export-DLtCKz_i.js                               14.50 kB │ gzip:   4.78 kB
+@turboslide/studio:build: dist/server/assets/dist-s1UNEjU3.js                                 14.70 kB │ gzip:   4.16 kB
+@turboslide/studio:build: dist/server/assets/auth-Bci_iIc2.js                                 14.80 kB │ gzip:   5.24 kB
+@turboslide/studio:build: dist/server/assets/Frame-CbXrqzHA.js                                15.24 kB │ gzip:   5.24 kB
+@turboslide/studio:build: dist/server/assets/ratelimit-DeA9i2n1.js                            16.50 kB │ gzip:   5.04 kB
+@turboslide/studio:build: dist/server/assets/headers-CNpP-Zth.js                              17.72 kB │ gzip:   6.15 kB
+@turboslide/studio:build: dist/server/assets/download-DgG9UMS7.js                             17.99 kB │ gzip:   5.59 kB
+@turboslide/studio:build: dist/server/assets/write-p_eggmCn.js                                19.09 kB │ gzip:   6.41 kB
+@turboslide/studio:build: dist/server/assets/Menu-m7sYdB6U.js                                 19.10 kB │ gzip:   5.80 kB
+@turboslide/studio:build: dist/server/assets/tokens-CqCUwYff.js                               20.12 kB │ gzip:   7.32 kB
+@turboslide/studio:build: dist/server/assets/present._deckId-5MTVJw1j.js                      20.53 kB │ gzip:   5.58 kB
+@turboslide/studio:build: dist/server/assets/authorize-hzT3xAQn.js                            20.87 kB │ gzip:   6.89 kB
+@turboslide/studio:build: dist/server/assets/access-Doq7mJ_m.js                               22.22 kB │ gzip:   7.54 kB
+@turboslide/studio:build: dist/server/assets/export-batch-BA0Yj3Zu.js                         24.05 kB │ gzip:   7.96 kB
+@turboslide/studio:build: dist/server/assets/decks-B88ue3Rx.js                                24.24 kB │ gzip:   7.08 kB
+@turboslide/studio:build: dist/server/assets/strings-BtESNr2P.js                              26.97 kB │ gzip:  10.07 kB
+@turboslide/studio:build: dist/server/assets/unpack-C5-XR0by.js                               28.79 kB │ gzip:   8.68 kB
+@turboslide/studio:build: dist/server/assets/apply-layout-D8NreE2F.js                         29.34 kB │ gzip:   8.23 kB
+@turboslide/studio:build: dist/server/assets/client-BuZbp9v_.js                               29.66 kB │ gzip:   8.88 kB
+@turboslide/studio:build: dist/server/assets/recipe-CHdwoZn2.js                               29.97 kB │ gzip:   8.53 kB
+@turboslide/studio:build: dist/server/assets/decks.index-BR1yl6uS.js                          33.48 kB │ gzip:   9.36 kB
+@turboslide/studio:build: dist/server/assets/sprite-DZV4lkPD.js                               36.69 kB │ gzip:  10.75 kB
+@turboslide/studio:build: dist/server/assets/useStudioSession-uZ32osc-.js                     44.92 kB │ gzip:  14.24 kB
+@turboslide/studio:build: dist/server/assets/Tooltip-BjYVjmFK.js                              56.82 kB │ gzip:  17.30 kB
+@turboslide/studio:build: dist/server/assets/html-escape-DSRUeUCg.js                          75.04 kB │ gzip:  24.32 kB
+@turboslide/studio:build: dist/server/assets/factory-CqyXuTMS.js                              92.44 kB │ gzip:  21.14 kB
+@turboslide/studio:build: dist/server/assets/keys-9gk_e2uO.js                                103.59 kB │ gzip:  26.54 kB
+@turboslide/studio:build: dist/server/assets/slide-DvzOD9OL.js                               105.91 kB │ gzip:  30.79 kB
+@turboslide/studio:build: dist/server/assets/tokens-s3yB38Zw.js                              106.98 kB │ gzip:  32.91 kB
+@turboslide/studio:build: dist/server/assets/seed-DdCi6rmE.js                                107.15 kB │ gzip:  28.45 kB
+@turboslide/studio:build: dist/server/assets/root-DQoOCazp.js                                116.36 kB │ gzip:  31.78 kB
+@turboslide/studio:build: dist/server/assets/run-Csi1no-c.js                                 131.36 kB │ gzip:  37.40 kB
+@turboslide/studio:build: dist/server/assets/room-CIxXX9oK.js                                132.03 kB │ gzip:  37.05 kB
+@turboslide/studio:build: dist/server/assets/router-Y9qwN-Mi.js                              137.06 kB │ gzip:  35.66 kB
+@turboslide/studio:build: dist/server/assets/edit._deckId-5UblSXvs.js                        138.97 kB │ gzip:  39.10 kB
+@turboslide/studio:build: dist/server/assets/edit._deckId-B8-QqncI.js                        139.72 kB │ gzip:  39.32 kB
+@turboslide/studio:build: dist/server/assets/ids-C3m55-z6.js                                 204.24 kB │ gzip:  44.54 kB
+@turboslide/studio:build: dist/server/server.js                                              248.76 kB │ gzip:  58.37 kB
+@turboslide/studio:build: dist/server/assets/report-XcTMbTNx.js                              389.36 kB │ gzip:  98.29 kB
+@turboslide/studio:build: dist/server/assets/server-CjVRr4sA.js                              439.08 kB │ gzip: 101.33 kB
+@turboslide/studio:build: dist/server/assets/dispatch-Cov9Kj26.js                            440.82 kB │ gzip: 126.08 kB
+@turboslide/studio:build: dist/server/assets/extract-DZ_hBNvZ.js                             561.02 kB │ gzip: 164.01 kB
+@turboslide/studio:build: dist/server/assets/cli-D4NxpJBh.js                                 739.72 kB │ gzip: 192.44 kB
+@turboslide/studio:build: dist/server/assets/actions-D4S4_HyB.js                             939.04 kB │ gzip: 133.43 kB
+@turboslide/studio:build: dist/server/assets/identity-DlwDGKGy.js                            954.26 kB │ gzip: 221.74 kB
+@turboslide/studio:build: dist/server/assets/Slideshow-BTXg3Ec4.js                           973.70 kB │ gzip: 244.33 kB
+@turboslide/studio:build: dist/server/assets/actions-DXCOcNP5.js                           1,388.03 kB │ gzip: 329.11 kB
+@turboslide/studio:build: dist/server/assets/edit._deckId-B0SAFj0Q.js                      1,409.45 kB │ gzip: 376.01 kB
+@turboslide/studio:build: 
+@turboslide/studio:build: ✓ built in 2.83s
+
+ Tasks:    3 successful, 3 total
+Cached:    1 cached, 3 total
+  Time:    6.507s 
+
+check-client-bundle: marker in client files: 0 of 47 text files
+check-client-bundle: marker in server files under apps/studio/dist/server: 1 of 111 text files
+check-client-bundle: node builtins (node:fs, node:path, node:zlib, node:child_process) in client scripts: 0 of 35 files
+check-client-bundle: ok
+check greps: innerHTML 24 call site(s) in the allowlist, overwrite: true 11 in the allowlist; apps/studio/dist/server 10.7 MB, apps/studio/dist/client 4.2 MB
+check  6/28: ok in 7.2 s
+check: all 1 selected step(s) passed in 7.3 s

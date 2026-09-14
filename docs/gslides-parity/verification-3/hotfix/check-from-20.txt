@@ -1,0 +1,42 @@
+check: starting the studio dev server on 4321 (log capped in .turboslide/dev-server.log)
+check: warmed /deck/gt-brand and /edit/gt-brand and /new and /decks with 1297 client module(s) in 4.8 s
+check 20/28: node scripts/gslides-parity-audit.mjs --base http://localhost:4321 --out docs/gslides-parity/verification-3/parity-audit.json
+audit: http://localhost:4321 (local), commit fb96cd4
+audit: scratch deck untitled-20260914-3jzh
+firstOpen                    pass   12  fail   0  skip   0
+defaultViewWords             pass    2  fail   0  skip   0
+toolbar:new                  pass    1  fail   0  skip   0
+presence:scratch             pass    2  fail   0  skip   0
+rows:scratch                 pass  302  fail   1  skip  59
+contextMenu:scratch          pass    2  fail   0  skip   0
+effects:scratch              pass    0  fail   3  skip   0
+infrastructure               pass    0  fail   2  skip   0
+rows on scratch:
+  title        now 19/20 (1 unreachable)  later 2/2  omit 6/6
+  file         now 29/29 (0 unreachable)  later 6/6  omit 6/6
+  edit         now 11/11 (0 unreachable)  later 0/0  omit 0/0
+  view         now 39/39 (0 unreachable)  later 1/1  omit 2/2
+  insert       now 34/34 (4 unreachable)  later 4/4  omit 7/7
+  format       now 68/68 (33 unreachable)  later 1/1  omit 0/0
+  slide        now 12/12 (0 unreachable)  later 2/2  omit 0/0
+  arrange      now 8/8 (18 unreachable)  later 0/0  omit 0/0
+  tools        now 18/18 (0 unreachable)  later 3/3  omit 8/8
+  extensions   now 2/2 (0 unreachable)  later 0/0  omit 6/6
+  help         now 4/4 (0 unreachable)  later 0/0  omit 4/4
+audit: 321 pass, 6 fail, 59 skipped in 39 s; report docs/gslides-parity/verification-3/parity-audit.json
+  FAIL rows:scratch title.account.signIn: no [data-menu-item] rendered on its path
+  FAIL effects:scratch title.appIcon: threw: Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:4321/edit/untitled-20260914-3jzh
+Call log:
+  - navigating to "http://localhost:4321/edit/untitled-20260914-3jzh", waiting until
+  FAIL effects:scratch title.name: threw: Error: page.evaluate: TypeError: Cannot read properties of undefined (reading 'studio')
+    at eval (eval at evaluate (:311:30), <anonymous>:1:36)
+    at UtilityScript.evaluate (<anonymous>:313
+  FAIL effects:scratch title.saveState: threw: Error: page.click: Target page, context or browser has been closed
+Call log:
+  - waiting for locator('[data-control="title.row"] [data-menu-item="title.saveState"]')
+
+  FAIL infrastructure run: page.$$: Target page, context or browser has been closed
+    at closeMenus (/Users/kevinliu/repos/Turboslide/scripts/gslides-parity-audit.mjs:441:29)
+    at closeOverlays (/Users/kevinliu/repos/Turbos
+  FAIL infrastructure cleanup: the scratch deck untitled-20260914-3jzh stayed in the store: Error: page.goto: Target page, context or browser has been closed
+check 20/28: FAIL exit 1 after 39.6 s

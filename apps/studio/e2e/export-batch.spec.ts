@@ -9,12 +9,15 @@ import type { APIRequestContext } from '@playwright/test';
 // export.run's `batch` and `merge` on `POST /api/export/:deckId`, driven the way the Download
 // dialog's `runBatchedExport` drives the server functions. Against a dev server started with
 // `TURBOSLIDE_STORE=tmp TURBOSLIDE_EXPORT_BATCH=3` on the builder's port, over a scratch copy of
-// decks/fixture/gslides (11.2's total, 27 slides, one skipped, so 26 in the play list): the plan
-// answers 9 batches, every batch renders into the job, a repeat of a batch answers the same
-// shape (idempotent), the merge answers the JSON variant's body with `perfect: true` and the
-// merge's peak memory, `turboslide export check` accepts the file, a replaced twin makes a batch
-// answer `stale: 'asset'`, and cancel removes the job. The deck is seeded into the server's decks
-// folder (TURBOSLIDE_E2E_DECKS_DIR, the tmp overlay's, SPEC-2 0.43) and removed afterwards.
+// decks/fixture/gslides (11.2's total; the play list is read from the fixture, SPEC-2 0.42, so the
+// counts follow it: 29 slides with one skipped make 28 pages and 10 batches of 3 since the two
+// dither slides of round three joined the fixture): the plan answers the batches, every batch
+// renders into the job, a repeat of a batch answers the same shape (idempotent), the merge
+// answers the JSON variant's body with `perfect: true` and the merge's peak memory, `turboslide
+// export check` accepts the file, a replaced twin makes a batch answer `stale: 'asset'`, and
+// cancel removes the job. A cancel carries the cancel token the plan minted (`?ct=`, SPEC-3 8.13):
+// the job id alone is refused with 403. The deck is seeded into the server's decks folder
+// (TURBOSLIDE_E2E_DECKS_DIR, the tmp overlay's, SPEC-2 0.43) and removed afterwards.
 
 const ROOT = join(import.meta.dirname, '..', '..', '..');
 const DECKS = process.env['TURBOSLIDE_E2E_DECKS_DIR'] ?? join(ROOT, 'decks');
@@ -24,10 +27,28 @@ const OUT = join(ROOT, '.turboslide', 'e2e-batch');
 const FIXTURE = join(ROOT, 'decks', 'fixture', 'gslides');
 /** The batch size the server was started with (TURBOSLIDE_EXPORT_BATCH=3 in the acceptance line). */
 const BATCH = Number(process.env['TURBOSLIDE_EXPORT_BATCH'] ?? 3);
-const PLAY = 26;
+/** The fixture's unskipped slides in order: the pages of the export (SPEC-2 0.42, 11.2). */
+const PLAY = playOf(FIXTURE).length;
+const BATCHES = Math.ceil(PLAY / BATCH);
+
+function playOf(dir: string): string[] {
+  const manifest = JSON.parse(readFileSync(join(dir, 'deck.json'), 'utf8')) as {
+    sections: { slideIds: string[] }[];
+  };
+  return manifest.sections
+    .flatMap((section) => section.slideIds)
+    .filter((id) => {
+      const slide = JSON.parse(readFileSync(join(dir, 'slides', `${id}.json`), 'utf8')) as {
+        skip?: boolean;
+      };
+      return slide.skip !== true;
+    });
+}
 
 type Start = {
   jobId: string;
+  /** the capability of `?cancel=` (SPEC-3 8.13) */
+  cancelToken: string;
   revision: number;
   batches: string[][];
   batchSize: number;
@@ -82,7 +103,7 @@ test.describe('the batched Perfect export over the http route (SPEC-2 8.1)', () 
     removeDeck();
   });
 
-  test('9 batches of 3 and one merge produce a perfect file that export check accepts', async ({
+  test('the batches of 3 and one merge produce a perfect file that export check accepts', async ({
     request,
   }) => {
     test.setTimeout(600_000);
@@ -90,7 +111,8 @@ test.describe('the batched Perfect export over the http route (SPEC-2 8.1)', () 
     expect(started.jobId).toMatch(/^b[0-9a-z]+-[0-9a-f]{8}$/);
     expect(started.total).toBe(PLAY);
     expect(started.batchSize).toBe(BATCH);
-    expect(started.batches).toHaveLength(Math.ceil(PLAY / BATCH));
+    expect(started.cancelToken).toMatch(/^[0-9a-f]{16,}$/);
+    expect(started.batches).toHaveLength(BATCHES);
     expect(started.batches.flat()).toHaveLength(PLAY);
     expect(started.batches.flat()).not.toContain('skipped');
     const times: number[] = [];
@@ -127,9 +149,9 @@ test.describe('the batched Perfect export over the http route (SPEC-2 8.1)', () 
     expect(merged.report.slides.map((s) => s.slideId)).toEqual(started.batches.flat());
     expect(merged.report.perfect).toBe(true);
     expect(merged.report.passed).toBe(true);
-    expect(merged.report.residual.some((line) => line.startsWith('batched: 9 batch(es)'))).toBe(
-      true,
-    );
+    expect(
+      merged.report.residual.some((line) => line.startsWith(`batched: ${BATCHES} batch(es)`)),
+    ).toBe(true);
     expect(merged.peakMb).toBeGreaterThan(0);
     test.info().annotations.push({
       type: 'merge',
@@ -164,10 +186,12 @@ test.describe('the batched Perfect export over the http route (SPEC-2 8.1)', () 
     expect(report.ok()).toBe(true);
     expect(((await report.json()) as { perfect: boolean }).perfect).toBe(true);
 
-    /* cancel removes the job: the file is gone */
+    /* cancel without the token is refused (SPEC-3 8.13); with it the job goes and the file is gone */
+    const bare = await request.post(`/api/export/${DECK}?cancel=${started.jobId}`, { data: {} });
+    expect(bare.status()).toBe(403);
     const cancelled = await post<{ jobId: string; removed: number }>(
       request,
-      `cancel=${started.jobId}`,
+      `cancel=${started.jobId}&ct=${started.cancelToken}`,
     );
     expect(cancelled.removed).toBeGreaterThan(0);
     const gone = await request.get(file.url!);
@@ -199,7 +223,7 @@ test.describe('the batched Perfect export over the http route (SPEC-2 8.1)', () 
     } finally {
       writeFileSync(file, original);
     }
-    await post(request, `cancel=${started.jobId}`);
+    await post(request, `cancel=${started.jobId}&ct=${started.cancelToken}`);
     const missing = await request.post(`/api/export/${DECK}?batch=0&job=${started.jobId}`, {
       data: {},
     });

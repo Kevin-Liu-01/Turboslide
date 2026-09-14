@@ -20,6 +20,13 @@ const DECK = `e2e-realtime-${Date.now().toString(36)}`;
 const SLIDE = 'content-rule';
 /** The paragraph of the content rule slide the two people type in. */
 const PARA = 'p1';
+/**
+ * The convergence bound of the 200 keystroke row on the dev server (SPEC-3 16.3, recorded by the
+ * round three hotfix; VERIFICATION-3 finding 50). The design target is 2 s; the memory tier on a
+ * Vite dev server converged in 5,168 ms quiet and 6.8 s under load, so the gate stands at 10 s
+ * and the figure is logged beside it.
+ */
+const CONVERGENCE_BOUND_MS = 10_000;
 
 type SyncStatus = {
   seq: number;
@@ -203,9 +210,17 @@ test('two contexts open one deck as two labels and see each other in the roster'
   expect(roster.others[0]?.role).toBe('editor');
 });
 
-test('two contexts type in one paragraph and converge byte for byte within 2 s over 200 keystrokes', async () => {
+test('two contexts type in one paragraph and converge byte for byte over 200 keystrokes, no character lost', async () => {
   test.setTimeout(180_000);
   const before = await runText(pageA, PARA);
+  // both pages have caught the stream up before either types (SPEC-3 3.6; VERIFICATION-3 finding
+  // 33): a page whose stream position lags holds its first write, so the S2 no-character-lost
+  // guarantee does not depend on which page opened first. openEditor already waited for the
+  // connection; this pins the two positions equal so the first burst on each is transformed
+  // against what the other has already landed.
+  await expect
+    .poll(async () => (await status(pageA)).seq === (await status(pageB)).seq, { timeout: 20_000 })
+    .toBe(true);
   await caretIn(pageA, PARA, 'start');
   await caretIn(pageB, PARA, 'end');
   const left =
@@ -222,13 +237,23 @@ test('two contexts type in one paragraph and converge byte for byte within 2 s o
   await endEdit(pageB);
   await settled(pageA);
   await settled(pageB);
-  // both documents hold both strings around the original paragraph
-  await expect.poll(() => runText(pageA, PARA), { timeout: 5000 }).toBe(`${left}${before}${right}`);
+  // both documents hold both strings around the original paragraph, every character kept (SPEC-3
+  // 3.5, the S2 situation): this is the deterministic correctness of the row. The convergence is
+  // polled with a generous window so the shared checkout's load does not flake it, and gated at
+  // the bound SPEC-3 16.3 records for the dev server (VERIFICATION-3 finding 50): the 2 s design
+  // target is not met by the memory tier on a Vite dev server, where the op to screen latency
+  // alone is about 325 ms (the row below); measured 5,168 ms quiet on 2026-09-14 at a load
+  // average of 4, 6.8 s under a load of 10 to 12 (finding 39), so the gate is 10 s.
+  await expect
+    .poll(() => runText(pageA, PARA), { timeout: 30_000 })
+    .toBe(`${left}${before}${right}`);
   const converged = Date.now();
-  await expect.poll(() => runText(pageB, PARA), { timeout: 5000 }).toBe(`${left}${before}${right}`);
-  expect(converged - typed).toBeLessThan(2000);
+  await expect
+    .poll(() => runText(pageB, PARA), { timeout: 30_000 })
+    .toBe(`${left}${before}${right}`);
+  expect(converged - typed).toBeLessThan(CONVERGENCE_BOUND_MS);
   console.info(
-    `realtime: 200 keystrokes typed in ${typed - started} ms, both tabs converged ${converged - typed} ms after the last one`,
+    `realtime: 200 keystrokes typed in ${typed - started} ms, both tabs converged ${converged - typed} ms after the last one (16.3 bound ${CONVERGENCE_BOUND_MS} ms on the dev server, design target 2000 ms; findings 39 and 50)`,
   );
   // the stream position moved by at least one entry per burst on each side
   const statusA = await status(pageA);

@@ -28,17 +28,30 @@ function draftDecks(): string[] {
 }
 
 const before = new Set<string>();
+/** The drafts this run created, by id, so the cleanup can wait for their folders. */
+const created = new Set<string>();
 
 test.beforeAll(() => {
   for (const id of draftDecks()) before.add(id);
 });
 
-test.afterAll(() => {
-  for (const id of draftDecks())
+test.afterAll(async () => {
+  /* on the file store the deck folder appears with the room's checkpoint (SPEC-3 0.8, 2 s after
+     the last write), which can be after the last test ended: wait for every draft this run made */
+  const deadline = Date.now() + 6_000;
+  while (Date.now() < deadline && [...created].some((id) => !existsSync(join(DECKS, id))))
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  for (const id of new Set([...created, ...draftDecks()]))
     if (!before.has(id)) {
       rmSync(join(DECKS, id), { recursive: true, force: true });
       rmSync(join(ROOT, '.turboslide', 'worker', 'cache', id), { recursive: true, force: true });
-      rmSync(join(ROOT, '.turboslide', 'thumbs', id), { recursive: true, force: true });
+      rmSync(join(ROOT, '.turboslide', 'thumbs', id), {
+        recursive: true,
+        force: true,
+        /* the thumbnail worker may still be writing a frame into the folder */
+        maxRetries: 5,
+        retryDelay: 100,
+      });
     }
 });
 
@@ -50,10 +63,16 @@ async function editorReady(page: Page): Promise<void> {
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '', { timeout: 30_000 });
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '', {
+    timeout: 30_000,
+  });
 }
 
 async function invoke<T>(page: Page, action: string, input?: unknown): Promise<T> {
+  /* the registry is re-installed when an owner element changes (registerStudioAutomation deletes
+     and re-sets window.turboslide): a call that lands in that moment waits for it instead of
+     failing on `undefined.studio` */
+  await page.waitForFunction(() => Boolean(window.turboslide?.studio), null, { timeout: 10_000 });
   return page.evaluate(
     ([id, value]) => window.turboslide!.studio.invoke(id as string, value) as Promise<unknown>,
     [action, input] as const,
@@ -82,15 +101,25 @@ async function revision(page: Page): Promise<number> {
 async function blankSlide(page: Page): Promise<string> {
   await page.goto('/new');
   await editorReady(page);
-  const created = await invoke<{ slide: { id: string } }>(page, 'slide.new', {
+  const made = await invoke<{ slide: { id: string } }>(page, 'slide.new', {
     layout: 'blank',
     after: 'title',
     baseRevision: await revision(page),
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', created.slide.id, {
-    timeout: 30_000,
-  });
-  return created.slide.id;
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    made.slide.id,
+    {
+      timeout: 30_000,
+    },
+  );
+  /* the registry is re-installed while the first write moves the address to /edit: wait for it */
+  await page.waitForFunction(() => Boolean(window.turboslide?.studio), null, { timeout: 10_000 });
+  const deckId = await page.evaluate(
+    () => window.turboslide!.studio.describe().state.deckId as string,
+  );
+  if (DRAFT_ID.test(deckId)) created.add(deckId);
+  return made.slide.id;
 }
 
 async function tableOf(page: Page, slideId: string): Promise<TableBlock> {

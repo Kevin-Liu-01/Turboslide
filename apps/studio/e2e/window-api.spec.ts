@@ -48,11 +48,11 @@ async function openEditor(page: Page): Promise<void> {
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
   await page.evaluate(() =>
     window.turboslide!.studio.invoke('view.goto', { slideId: 'content-rule' }),
   );
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', SLIDE);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-active', SLIDE);
 }
 
 async function versionCount(page: Page): Promise<number> {
@@ -246,7 +246,10 @@ test('set by label and by data-control id are one action call each, and the rend
     { op: 'block.set', slideId: 'content-rule', blockId: 'list', path: '/size', value: 22 },
   ]);
   await page.waitForFunction(() => {
-    const state = window.turboslide!.studio.describe().state as {
+    /* the registry is re-installed when an owner element changes; a poll that lands in that
+       moment reads false instead of failing the wait with a TypeError */
+    if (typeof window.turboslide?.studio?.describe !== 'function') return false;
+    const state = window.turboslide.studio.describe().state as {
       revision?: number;
       serverRevision?: number;
       pending?: number;

@@ -48,7 +48,7 @@ async function studioReady(page: Page): Promise<void> {
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
 }
 
 async function openEditor(page: Page, slideId?: string): Promise<void> {
@@ -56,7 +56,10 @@ async function openEditor(page: Page, slideId?: string): Promise<void> {
   await studioReady(page);
   if (slideId !== undefined) {
     await invoke(page, 'view.goto', { slideId });
-    await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', slideId);
+    await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+      'data-active',
+      slideId,
+    );
   }
   await expect(page.locator('.ts-stagewrap.ts-editor .pt-slide [data-run]').first()).toBeVisible();
 }
@@ -195,7 +198,10 @@ test('Edit > Select all with the filmstrip focused selects every card, and Edit 
   expect(before.length).toBeGreaterThan(2);
   /* a click on a card gives the filmstrip focus; the menu bar takes it, and Edit still acts on the cards */
   await card(page, 'breaks').click();
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', 'breaks');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    'breaks',
+  );
   await control(page, 'menubar.edit').click();
   await expect(menuItem(page, 'edit.selectAll')).not.toHaveAttribute('aria-disabled', 'true');
   await menuItem(page, 'edit.selectAll').click();

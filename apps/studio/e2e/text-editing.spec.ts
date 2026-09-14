@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 // B4 acceptance of the Google Slides parity round (gslides-parity SPEC 14.3, text-editing.spec):
-// a single click places the caret where it landed, typing writes one text.replace per 400 ms
+// a single click places the caret where it landed, typing writes one text.splice per 400 ms
 // pause so one Cmd Z removes one burst, Esc keeps the text and selects the block, Enter breaks a
 // paragraph in a multiline pointer and appends an item in a list, Tab walks the cells of a table
 // and adds a row past the last with the Row added snackbar, and no bare letter changes the view.
@@ -29,7 +29,15 @@ const DECK_DIR = join(DECKS, DECK);
 type Version = {
   n: number;
   revision: number;
-  mutations: { op: string; path?: string; text?: string; value?: unknown }[];
+  mutations: {
+    op: string;
+    path?: string;
+    text?: string;
+    value?: unknown;
+    at?: number;
+    remove?: number;
+    insert?: string;
+  }[];
 };
 
 function seedDeck(): void {
@@ -174,8 +182,13 @@ test.describe('text editing on the canvas (SPEC 10.2, 7.2.15, 7.4)', () => {
     await expect.poll(() => revision(page), { timeout: 10_000 }).toBe(start + 1);
     const afterFirst = await versions(page);
     const burst = afterFirst[afterFirst.length - 1]?.mutations[0];
-    expect(burst?.op).toBe('text.replace');
-    expect(burst?.text).toBe(' now');
+    // round three re-pins the typing path from text.replace to text.splice (SPEC-3 0.4, 3.1): a
+    // burst that changes the plain text travels as one splice of the characters it added, so no
+    // character is lost when two people type in one run (3.5). text.replace keeps its meaning for
+    // a marks-only change; the insert here carries the same characters the old text.replace did.
+    expect(burst?.op).toBe('text.splice');
+    expect(burst?.insert).toBe(' now');
+    expect(burst?.remove).toBe(0);
     /* the session survives the write: still editable, still focused */
     await expect(heading).toHaveAttribute('contenteditable', 'true');
     await page.keyboard.type(' twice', { delay: 30 });

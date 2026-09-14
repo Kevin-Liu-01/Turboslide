@@ -1,0 +1,14 @@
+bearer 64 chars; oidc 1242 chars
+ok   deck.info gt-brand through the bearer: status 200 revision 31 in 295 ms
+ok   deck.copy scratch (one slide): status 200 in 3557 ms
+ok   1. share.createLink viewer: status 200 in 663 ms; /s/<22 chars>; link id lnk_gTBAphGb9HjbIhPX; record revision 1
+ok   2. the viewer link exchanged from a fresh context: 303 to /deck/<id> with the sealed cookie: 303; location /deck/verifier-share-mu16icnx; x-robots-tag noindex; instance 0-0958d8c7503d; landed on try 1, 274 ms after the mint
+ok   3. share.createLink commenter after the exchange: 200, no raw Blob sentence: status 200 in 414 ms; based on record revision 1 (the mint answered 1, the exchange moved it to 1); body the record
+ok   3c. the commenter link lands on /edit/<id>: 303; location /edit/verifier-share-mu16icnx; x-robots-tag noindex; instance 1-2881e0558357 173 ms after the mint
+ok   4. share.revokeLink viewer: 200, no raw Blob sentence: alive before 303; revoke 200 in 302 ms
+ok   5. the revoked link answers 404 on every request after the 5 s TTL: first 404 at 213 ms; 21 navigations over 20 s on 21 instance id(s); after 6 s: 404 404 404 404 404 404 404 404 404 404 404 404 404 404
+ok   5b. the revoke was seen at once on the instance that served it: first 404 at 213 ms
+ok   6. an unknown token is the 404 page with the sentence: 404; location -; x-robots-tag noindex; instance 3-beb4446f7171; body <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-sc
+ok   scratch deck removed: deck.trash 200; deck.remove 200
+11 ok, 0 fail
+exit 0

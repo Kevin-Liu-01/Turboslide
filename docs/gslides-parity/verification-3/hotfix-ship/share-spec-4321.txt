@@ -1,0 +1,42 @@
+
+Running 4 tests using 1 worker
+
+  ✓  1 apps/studio/e2e/share.spec.ts:103:1 › the Share dialog opens on Restricted with the people field first and the footer sentence; the toolbar Copy link holds no token (5.0s)
+  ✓  2 apps/studio/e2e/share.spec.ts:145:1 › a stranger receives the You need access page on four routes and 403 on the writes; a viewer link lands on /deck without notes and /edit opens Viewing with View only; a commenter link lands in Commenting (13.8s)
+  ✓  3 apps/studio/e2e/share.spec.ts:231:1 › rotate and Stop sharing kill the link; publish gives the player, the embed answers and 410 after unpublish (4.3s)
+  ✘  4 apps/studio/e2e/share.spec.ts:320:1 › request access shows the dot on Share, the banner and Approve as commenter; a legacy deck shows the claim (3.0m)
+
+
+  1) apps/studio/e2e/share.spec.ts:320:1 › request access shows the dot on Share, the banner and Approve as commenter; a legacy deck shows the claim 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: locator.selectOption: Test ended.
+    Call log:
+      - waiting for locator('[data-control="access.role"]')
+
+
+      328 |   const pageS = await stranger.newPage();
+      329 |   await pageS.goto(`/deck/${COPY}`);
+    > 330 |   await pageS.locator('[data-control="access.role"]').selectOption('commenter');
+          |                                                       ^
+      331 |   await pageS.locator('[data-control="access.email"]').fill('reviewer@example.test');
+      332 |   await pageS.locator('[data-control="access.request"]').click();
+      333 |   await expect(pageS.locator('[data-control="access.answer"]')).toHaveText(
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/share.spec.ts:330:55
+
+    Error Context: .turboslide/playwright/share-request-access-shows-4a9f6-legacy-deck-shows-the-claim/error-context.md
+
+    Error Context: .turboslide/playwright/share-request-access-shows-4a9f6-legacy-deck-shows-the-claim/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/share-request-access-shows-4a9f6-legacy-deck-shows-the-claim/trace.zip
+    Usage:
+
+        npx playwright show-trace .turboslide/playwright/share-request-access-shows-4a9f6-legacy-deck-shows-the-claim/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    apps/studio/e2e/share.spec.ts:320:1 › request access shows the dot on Share, the banner and Approve as commenter; a legacy deck shows the claim 
+  3 passed (3.4m)

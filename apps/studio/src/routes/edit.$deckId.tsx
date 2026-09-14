@@ -3054,7 +3054,13 @@ function createEditorController(init: {
     const record = snapshot.access.record;
     return {
       deckId,
-      revision: snapshot.document.deck.revision,
+      // the revision a caller reads is the one a base check enforces (SPEC-3 3.10; VERIFICATION-3
+      // finding 33): `reportedRevision()` folds the room client's acknowledged revision in, so a
+      // driver that reads `describe().state.revision` and writes with it as `baseRevision` meets
+      // the same number `checkBase` compares against, and its second write in the window before a
+      // checkpoint moves the document is not refused as stale. It matches `sync.revision` below;
+      // the document's own revision (which a checkpoint moves) stays on `serverRevision`.
+      revision: reportedRevision(),
       serverRevision: snapshot.serverRevision,
       pending: snapshot.pending,
       slideId: snapshot.activeSlide,
@@ -3402,7 +3408,7 @@ function thumbShotFor(deckId: string, slide: Slide): { light: string; dark: stri
   return { light: url('light'), dark: url('dark') };
 }
 
-function toViewerDeck(snap: EditorSnapshot): ViewerDeck {
+function toViewerDeck(snap: EditorSnapshot, draft: boolean): ViewerDeck {
   const { deck, slides } = snap.document;
   const assetBase = ASSET_BASE(snap.deckId);
   const out: ViewerSlide[] = [];
@@ -3426,7 +3432,10 @@ function toViewerDeck(snap: EditorSnapshot): ViewerDeck {
         kind: slide.kind,
         sectionId: section.id,
         html: snap.html.get(slideId) ?? '',
-        shot: thumbShotFor(snap.deckId, slide),
+        // an unsaved draft (SPEC 6.1) has no folder yet: the capture route answers 404 for it
+        // (server/thumbs.ts isUnsavedDraft), so the filmstrip keeps its live clone and asks for
+        // no capture until the first write creates the deck (VERIFICATION-3 finding 45's 404)
+        ...(draft ? {} : { shot: thumbShotFor(snap.deckId, slide) }),
         ...(picture ? { picture } : {}),
         ...(slide.notes !== undefined ? { notes: slide.notes } : {}),
         // the parity facts (gslides-parity SPEC 7.2.1, 7.2.2): the show and the grid read skip, the grid the layout
@@ -3751,7 +3760,10 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     };
   });
 
-  const viewerDeck = useMemo(() => toViewerDeck(snap), [snap.document, snap.html, snap.deckId]);
+  const viewerDeck = useMemo(
+    () => toViewerDeck(snap, draft),
+    [snap.document, snap.html, snap.deckId, draft],
+  );
   const findings = useMemo(() => controller.allFindings(), [controller, snap.document]);
   const sections = useMemo(
     () => toSections(viewerDeck, findings, snap.leases, author),

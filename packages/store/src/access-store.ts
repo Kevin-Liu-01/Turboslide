@@ -9,12 +9,18 @@
 // `PUBLISH access:<deckId>` of 6.1; a checkout's memory bus). The etag is the md5 of the bytes in
 // quotes on every backend, the value Vercel Blob answers, so the same conflict rule holds on a
 // checkout and hosted: a stale `ifMatch` is an AccessPreconditionError the transports map to 409
-// with the current record attached. Framework free; the studio's server/access.ts wires it.
+// with the current record attached. Beside the record, a link hash index (`links/<hex>` to the
+// deck and link id, VERIFICATION-3 finding 34 F2) lets the exchange read one record instead of
+// every deck's. A Blob conflict is matched by class and by name: the deployed function loads
+// this module twice (the Nitro server chunk that builds the Blob client and the SSR chunk that
+// runs the store), so an `instanceof` across the two copies fails and the raw store sentence
+// ("… changed in the Blob store since it was read") reached a person in the production walk.
+// Framework free; the studio's server/access.ts wires it.
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
-import type { AccessRecord } from '@turboslide/schema/access';
+import type { AccessRecord, ShareLink } from '@turboslide/schema/access';
 import { accessRecordSchema } from '@turboslide/schema/access';
 import { canonicalJson } from '@turboslide/schema/json';
 import { z } from 'zod';
@@ -61,6 +67,24 @@ export class AccessPreconditionError extends Error {
     this.deckId = deckId;
     this.current = current;
   }
+}
+
+/**
+ * True for the store's two conflict classes, whichever module copy threw them (a bundle that
+ * carries two copies of blob-store.ts defeats `instanceof`; the name survives).
+ */
+export function isBlobConflict(error: unknown): boolean {
+  if (error instanceof BlobPreconditionError || error instanceof BlobExistsError) return true;
+  return (
+    error instanceof Error &&
+    (error.name === 'BlobPreconditionError' || error.name === 'BlobExistsError')
+  );
+}
+
+/** True for an AccessPreconditionError from any copy of this module. */
+export function isAccessPrecondition(error: unknown): error is AccessPreconditionError {
+  if (error instanceof AccessPreconditionError) return true;
+  return error instanceof Error && error.name === 'AccessPreconditionError' && 'current' in error;
 }
 
 /** The etag every backend answers: the md5 of the bytes in quotes (Vercel Blob's, measured 2026-09-11). */
@@ -166,7 +190,7 @@ export function blobAccessStore(client: BlobClient): AccessStore {
         });
         return { record: accessRecordSchema.parse(record), etag: entry.version };
       } catch (error) {
-        if (error instanceof BlobPreconditionError || error instanceof BlobExistsError) {
+        if (isBlobConflict(error)) {
           throw new AccessPreconditionError(deckId, await readAt(deckId));
         }
         throw error;
@@ -408,7 +432,7 @@ export function blobIndexStore(client: BlobClient): IndexStore {
           });
           return next;
         } catch (error) {
-          if (error instanceof BlobPreconditionError || error instanceof BlobExistsError) continue;
+          if (isBlobConflict(error)) continue;
           throw error;
         }
       }
@@ -508,6 +532,119 @@ export const indexUpdates = {
     };
   },
 };
+
+// ---------------------------------------------------------------------------------------------
+// The link hash index (SPEC-3 6.4; VERIFICATION-3 finding 34 F2): links/<hex> to the deck
+
+/** What the index holds for a token hash: the deck the link is on and the link's id. */
+export type LinkIndexEntry = { deckId: string; linkId: string };
+
+export type LinkIndex = {
+  /** the entry for `sha256:<hex>`, or null when no link with that hash was ever indexed here */
+  get: (hash: string) => Promise<LinkIndexEntry | null>;
+  /** writes the entry; idempotent, so two instances indexing one link never conflict */
+  put: (hash: string, entry: LinkIndexEntry) => Promise<void>;
+  remove: (hash: string) => Promise<void>;
+};
+
+/** Where the index lives on the Blob store and under the state folder. */
+export const LINKS_PREFIX = 'links/';
+
+const HASH_PATTERN = /^sha256:([0-9a-f]{64})$/;
+
+/**
+ * The index key of a token hash: the hex alone, so the path holds no colon. A value that is not
+ * `sha256:<hex>` is a TypeError; the exchange validates the token's grammar before it hashes.
+ */
+export function linkIndexKey(hash: string): string {
+  const match = HASH_PATTERN.exec(hash);
+  if (match === null) throw new TypeError('a link index key is sha256:<hex>');
+  return `${LINKS_PREFIX}${match[1]}.json`;
+}
+
+const linkIndexEntrySchema = z.strictObject({
+  deckId: z.string().min(1),
+  linkId: z.string().min(1),
+}) satisfies z.ZodType<LinkIndexEntry>;
+
+function parseLinkIndexEntry(bytes: Uint8Array): LinkIndexEntry | null {
+  try {
+    const parsed = linkIndexEntrySchema.safeParse(
+      JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes)),
+    );
+    return parsed.success ? parsed.data : null;
+  } catch {
+    // a torn or foreign body is a miss; the lookup falls back to the record scan
+    return null;
+  }
+}
+
+function linkIndexBytes(entry: LinkIndexEntry): Uint8Array {
+  return new TextEncoder().encode(canonicalJson(linkIndexEntrySchema.parse(entry)));
+}
+
+/**
+ * The hashes `next` carries that `previous` did not: the links a share write minted, which the
+ * writer indexes before it saves the record. A record with no previous (the first write) indexes
+ * every link it holds.
+ */
+export function newLinkHashes(previous: AccessRecord | null, next: AccessRecord): ShareLink[] {
+  const known = new Set(previous?.links.map((link) => link.hash) ?? []);
+  return next.links.filter((link) => !known.has(link.hash));
+}
+
+/** `<stateDir>/links/<hex>.json` on a checkout and the tmp overlay. */
+export function fileLinkIndex(stateDir: string): LinkIndex {
+  const pathOf = (hash: string): string => join(stateDir, linkIndexKey(hash));
+  return {
+    async get(hash) {
+      const path = pathOf(hash);
+      if (!existsSync(path)) return null;
+      return parseLinkIndexEntry(new Uint8Array(readFileSync(path)));
+    },
+    async put(hash, entry) {
+      writeAtomic(pathOf(hash), linkIndexBytes(entry));
+    },
+    async remove(hash) {
+      rmSync(pathOf(hash), { force: true });
+    },
+  };
+}
+
+/** `links/<hex>.json` on the Blob store the records live on; a put overwrites, so it never conflicts. */
+export function blobLinkIndex(client: BlobClient): LinkIndex {
+  return {
+    async get(hash) {
+      const fetched = await client.get(linkIndexKey(hash));
+      return fetched === null ? null : parseLinkIndexEntry(fetched.bytes);
+    },
+    async put(hash, entry) {
+      await client.put(linkIndexKey(hash), linkIndexBytes(entry), {
+        overwrite: true,
+        contentType: 'application/json',
+      });
+    },
+    async remove(hash) {
+      await client.del([linkIndexKey(hash)]);
+    },
+  };
+}
+
+export function memoryLinkIndex(): LinkIndex & { readonly entries: Map<string, LinkIndexEntry> } {
+  const entries = new Map<string, LinkIndexEntry>();
+  return {
+    entries,
+    async get(hash) {
+      return entries.get(linkIndexKey(hash)) ?? null;
+    },
+    async put(hash, entry) {
+      entries.set(linkIndexKey(hash), linkIndexEntrySchema.parse(entry));
+    },
+    async remove(hash) {
+      entries.delete(linkIndexKey(hash));
+    },
+  };
+}
 
 // ---------------------------------------------------------------------------------------------
 // The head cache (SPEC-3 6.7): head:<deckId>, written by the commit path, read by the home page

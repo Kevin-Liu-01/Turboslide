@@ -55,7 +55,10 @@ async function slideGet(page: Page, slideId: string): Promise<Slide> {
 
 async function settled(page: Page): Promise<void> {
   await page.waitForFunction(() => {
-    const state = window.turboslide!.studio.describe().state as {
+    /* the registry is re-installed when an owner element changes; a poll that lands in that
+       moment reads false instead of failing the wait with a TypeError */
+    if (typeof window.turboslide?.studio?.describe !== 'function') return false;
+    const state = window.turboslide.studio.describe().state as {
       revision?: number;
       serverRevision?: number;
       pending?: number;
@@ -73,13 +76,16 @@ async function openDeck(page: Page, deckId: string): Promise<void> {
       return false;
     }
   });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
   await settled(page);
 }
 
 async function goTo(page: Page, slideId: string): Promise<void> {
   await invoke(page, 'view.goto', { slideId });
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', slideId);
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute(
+    'data-active',
+    slideId,
+  );
   await page.waitForTimeout(250);
 }
 
@@ -248,9 +254,11 @@ test('a text box drawn on the Title slide converts it; move, rotate, flip, group
   expect(objects(await slideGet(page, SLIDE)).find((b) => b.id === textId)!.pos!.rotate).toBe(45);
   log = await logLength(page);
   await page.keyboard.press('Alt+Shift+ArrowLeft');
+  /* the angle chip shows on the key press and stays 600 ms (SPEC-2 6.1 row 12, 0.86): it is read
+     before the write's round trip through the room settles, which takes longer than the chip */
+  await expect(page.locator('.ts-overlay .ts-readout')).toHaveText('44°');
   await expectOneWrite(page, log);
   expect(objects(await slideGet(page, SLIDE)).find((b) => b.id === textId)!.pos!.rotate).toBe(44);
-  await expect(page.locator('.ts-overlay .ts-readout')).toHaveText('44°');
 
   /* the flip through Arrange > Rotate > Flip horizontally */
   await select(textId);
@@ -346,7 +354,7 @@ test('the export fixture’s canvas-title slide is unchanged by a reload', async
   await goTo(page, 'canvas-title');
   await page.reload();
   await page.waitForFunction(() => Boolean(window.turboslide?.studio));
-  await expect(page.locator('.pt-viewer')).toHaveAttribute('data-settled', '');
+  await expect(page.locator('.pt-viewer:not(.ts-skeleton)')).toHaveAttribute('data-settled', '');
   const after = await slideGet(page, 'canvas-title');
   expect(after).toEqual(before);
 });

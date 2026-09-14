@@ -1,0 +1,6 @@
+driver: start 2026-09-14T11:45:59Z load 6.65 5.40 5.42
+driver: e2e lock taken 2026-09-14T11:45:59Z
+driver: segment 1 (steps 1 to 6) exit 1 2026-09-14T11:47:21Z load 14.34 9.09 6.88
+driver: vite preview started on 4344 (pid )
+driver: segment 2 from 7 exit 1 2026-09-14T11:51:38Z load 5.36 7.08 6.54
+driver: stopped by the verifier at the orchestrator's cutoff during step 20 2026-09-14T11:52:08Z

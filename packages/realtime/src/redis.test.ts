@@ -134,7 +134,11 @@ describe('redisChannel', () => {
     const worst = sorted[sorted.length - 1] ?? 0;
     const mostAttempts = Math.max(...attempts);
     const load = loadavg()[0] ?? 0;
-    const busy = load > cpus().length;
+    // busy from half the cpus up (VERIFICATION-3 findings 45 and 49): the whole tree's vitest run
+    // saturates every cpu while the one minute load average lags behind it, and this row read a
+    // max of 88.46 ms at a load of 17.5 and 73.17 ms at 17.9 on 18 cpus with the p95 at 0.07 ms
+    // and 0.05 ms, so a load above half the cpus logs the max and asserts the percentile alone
+    const busy = load > cpus().length / 2;
     console.info(
       `contention: ${total} appends, ${retries} retries, ${locked} under the append lock, most attempts by one writer ${mostAttempts}, wait p50 ${percentile(0.5).toFixed(2)} ms, p95 ${percentile(0.95).toFixed(2)} ms, max ${worst.toFixed(2)} ms (load ${load.toFixed(1)} on ${cpus().length} cpus${busy ? ', the max is logged and not asserted' : ''})`,
     );

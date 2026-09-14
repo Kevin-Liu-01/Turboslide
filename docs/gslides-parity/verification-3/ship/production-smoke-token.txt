@@ -1,0 +1,29 @@
+token for https://turboslide.vercel.app: 64 characters, saved 2026-09-11T23:13:03.969Z
+skip  /s/<token> exchange: pass --share-token <token> (SPEC-3 6.4; B3 route)
+skip  410 after unpublish: pass --publish-token <token> (SPEC-3 6.4; B2 route)
+skip  private document 403: the private store of SPEC-3 11.5 R2 is not connected this round
+skip  twin URL not derivable: the storage layout v2 (d/<id>/<assetKey>/) lands with the migration
+skip  restricted 404: pass --restricted <deck id> with an access record
+path                                       status  ms     result  detail
+/                                          307     208    pass    location /new; x-robots-tag noindex
+/new                                       200     206    pass    29827 chars; 3/3 shell marks; noindex
+/deck/gt-brand                             200     488    pass    393228 chars; 0 notes key(s)
+/edit/gt-brand                             200     103    pass    29913 chars; 3/3 shell marks
+/decks                                     200     636    pass    16 card(s)
+/decks/trash                               200     536    pass    31172 chars
+/print/gt-brand                            200     272    pass    85 page(s)
+/present/gt-brand                          200     290    pass    29677 chars
+/decks/gt-brand/assets/cover-fumadocs.png  200     13     pass    image/png 335538 B
+/api/agent                                 401     97     pass    bearer rule
+headers /                                  307     111    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /edit/gt-brand                     200     100    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /deck/gt-brand                     200     363    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /embed/gt-brand                    200     397    pass    x-frame-options none; https://prototemplate.com https://*.prototemplate.com
+json asset attachment                      200     10     pass    attachment; sandbox; default-src 'none'
+cross site text/plain POST                 415     87     pass    415
+unsigned thumbnail                         200     183    pass    shadow: served and logged
+csp report endpoint                        204     2119   pass    204
+deck.info snapshots                        200     2479   pass    0 snapshot(s), revision 31
+export batched                             -       6245   FAIL    expected a perfect file from every batch and one merge; plan r31: 85 slide(s) in 2 batch(es) of 60 (4747 ms); batch 0 502: {"error":{"message":"browserType.launch: Target page, context or browser has been closed\nBrowser logs:\n\n<launching> /tmp/chromium-nocore.sh --disable-field-trial-config --disable-background-network
+19/20 passed against https://turboslide.vercel.app/
+exit 1

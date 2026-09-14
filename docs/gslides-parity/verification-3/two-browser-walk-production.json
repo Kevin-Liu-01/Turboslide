@@ -1,0 +1,175 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "at": "2026-09-14T09:17:12.300Z",
+  "seconds": 205,
+  "summary": {
+    "ok": 18,
+    "fail": 13,
+    "notes": 0
+  },
+  "rows": [
+    {
+      "name": "scratch deck",
+      "ok": true,
+      "evidence": "verifier-walk-mu11021q from gt-brand's first three slides (opener-brand, title, thesis)"
+    },
+    {
+      "name": "S4 named anonymous principal",
+      "ok": true,
+      "evidence": "account.setName Maya: {\"principal\":{\"id\":\"anon_203b6148-12df-4f6f-8e28-5f75c8d0b2b4\",\"kind\":\"anonymous\",\"admin\":false},\"trust\":\"guest\",\"label\"; state.account {\"principalId\":\"anon_203b6148-12df-4f6f-8e28-5f75c8d0b2b4\",\"label\":\"Pewter 931\",\"trust\":\"label\",\"signedIn\":false,\"signInAvailable\":false}"
+    },
+    {
+      "name": "S4 the own chip names the principal",
+      "ok": true,
+      "evidence": "own chip tooltip \"Pewter 931 (you)\""
+    },
+    {
+      "name": "S4 the own chip menu is the account surface",
+      "ok": true,
+      "evidence": "rows title.account.changeName, title.account.changeAvatar, title.account.forget, title.account.sessions; sentence \"PPewter 931Not signed in\""
+    },
+    {
+      "name": "S4 nothing else in the chrome mentions accounts",
+      "ok": true,
+      "evidence": "0 account word(s) in the default view text"
+    },
+    {
+      "name": "presence chip within 10 s",
+      "ok": true,
+      "evidence": "B's chip on A after 1034 ms",
+      "ms": 1034
+    },
+    {
+      "name": "presence in the window state",
+      "ok": true,
+      "evidence": "A presence {\"clientId\":\"18a48cda497ce6bdee5f5a1054c11784\",\"others\":[{\"clientId\":\"ff7ef4a7cfbf69c599715189fe28e8ad\",\"principalId\":\"anon_0c3da986-1817-4dcb-bc42-5a0866bcb80f\",\"kind\":\"human\",\"label\":\"Chromium 781\",\"trust\":\"label\",\"mark\":{\"density\":3,\"glyphSeed\":356513419,\"presenter\":false,\"self\":false,\"trust\":\"label\",\"label\":\"Chromium 781\",\"variant\":\"initials\",\"initials\":\"C\",\"hue\":{\"slot\":5,\"hex\":\"#148d51\"}},\"role\":\"editor\",\"slideId\":\"opener-brand\",\"selection\":{\"blockIds\":[]},\"presenting\":false,\"idle\":false,\"lastSeenAt\":\"2026-09-14T09:14:03.691Z\"}],\"count\":1,\"following\":null,\"pointersVisible\":true}; B clientId ff7ef4a7cfbf69c599715189fe28e8ad"
+    },
+    {
+      "name": "roster lists both",
+      "ok": false,
+      "evidence": "title.presence.goTo:CChromium 781editor · slide 1Go to slide | title.presence.joinChat:Join chat"
+    },
+    {
+      "name": "op to screen, A write to B document (10 writes)",
+      "ok": false,
+      "evidence": "landed 1 of 10; p50 3772 ms, p95 3772 ms, max 3772 ms; samples , 3772, , , , , , , , ",
+      "p50": 3772,
+      "p95": 3772,
+      "samples": [null, 3772, null, null, null, null, null, null, null, null]
+    },
+    {
+      "name": "S2 two edits on one slide within a second, both land, no keystroke lost",
+      "ok": false,
+      "evidence": "A typed \" alpha\" into h, B \" bravo\" into p1 in 283 ms (carets true/true); not converged within 15 s: A \"\" B \"\"; before \"\" / \"\"",
+      "ms": 15361
+    },
+    {
+      "name": "S2 the save words",
+      "ok": true,
+      "evidence": "\"All changes saved\""
+    },
+    {
+      "name": "remote caret and flag on A",
+      "ok": false,
+      "evidence": "0 remote element(s) after 6002 ms; flag \"null\"",
+      "ms": 6002
+    },
+    {
+      "name": "Follow moves the stage with B and shows the plate",
+      "ok": false,
+      "evidence": "presence.follow {\"following\":\"ff7ef4a7cfbf69c599715189fe28e8ad\",\"slideId\":\"opener-brand\"}; plate \"CFollowing Chromium 781·Stop\"; A followed to opener-brand then null"
+    },
+    {
+      "name": "Stop ends following",
+      "ok": true,
+      "evidence": "the plate is gone"
+    },
+    {
+      "name": "the chip offers Go to slide for an anonymous editor (4.4)",
+      "ok": true,
+      "evidence": "chip tooltip \"Chromium 781 · slide 1\""
+    },
+    {
+      "name": "S1 comment.add with a mention",
+      "ok": true,
+      "evidence": "{\"thread\":{\"id\":\"01m2fk90cqrka2w4xmzm6b1w14\",\"deckId\":\"verifier-walk-mu11021q\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"title\"},\"comment\":{\"id\":\"01m2fk90cqrka2w4xmzm; mention of anon_0c3da986-1817-4dcb-bc42-5a0866bcb80f"
+    },
+    {
+      "name": "S1 the comment reaches B within 2 s: marker, filmstrip chip, inbox plate",
+      "ok": false,
+      "evidence": "0 marker(s) after 6521 ms; filmstrip chip \"\"; inbox plate \"\"",
+      "ms": 6521
+    },
+    {
+      "name": "S1 B reads the thread",
+      "ok": true,
+      "evidence": "comment.list on B: {\"threads\":[{\"id\":\"01m2fk90cqrka2w4xmzm6b1w14\",\"deckId\":\"verifier-walk-mu11021q\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"title\"},\"comment\":{\"id\":\"01m2fk90cqrka2w4xm"
+    },
+    {
+      "name": "S1 the Comments panel on B lists the thread with For you",
+      "ok": false,
+      "evidence": "panel open; For you tab \"For you\"; thread card absent"
+    },
+    {
+      "name": "S1 B resolves; A sees the resolve within 2 s",
+      "ok": true,
+      "evidence": "comment.resolve {\"thread\":{\"id\":\"01m2fk90cqrka2w4xmzm6b1w14\",\"deckId\":\"verifier-walk-mu11021q\",\"; A saw it after 177 ms",
+      "ms": 177
+    },
+    {
+      "name": "S1 A inbox after the resolve",
+      "ok": true,
+      "evidence": "{\"notifications\":[],\"unread\":0}"
+    },
+    {
+      "name": "S3 the Share dialog opens on Restricted with the people field first and the footer sentence",
+      "ok": true,
+      "evidence": "width 520; mode \"restricted\"; people field above General access true; footer \"Speaker notes and skipped slides never travel with a view or comment link\"; legacy \"null\"; claim \"null\"; review \"No pending requests\""
+    },
+    {
+      "name": "S3 Anyone with the link defaults to Viewer and Copy link copies an /s/ link",
+      "ok": false,
+      "evidence": "role \"null\"; clipboard https://turboslide.vercel.app/deck/verifier-walk-mu11021q; address bar holds no token"
+    },
+    {
+      "name": "S3 the prospect lands on the viewer form with no token in the address and no notes",
+      "ok": true,
+      "evidence": "landed /deck/verifier-walk-mu11021q (status 200); notes in the payload: false; comment markers 0"
+    },
+    {
+      "name": "S3 /edit for the prospect is Viewing with View only",
+      "ok": false,
+      "evidence": "data-edit-mode editing; button \"null\""
+    },
+    {
+      "name": "S1 commenter link",
+      "ok": false,
+      "evidence": "{\"error\":\"Error: page.evaluate: Error: decks/verifier-walk-mu11021q/access.json changed in the Blob store since it was read\\n    at Object.deserialize (https://"
+    },
+    {
+      "name": "version history by author shows both authors",
+      "ok": false,
+      "evidence": "1 window(s), 0 version row(s), marks Chromium 781, guest | Pewter 931, guest; Show changes true; \"Version history Only show named versions Name current version Today C7 P9 02:14 AM to 02:16 AM Chromium 781, Pewter 931 · 3 changes ▸ Show changes\""
+    },
+    {
+      "name": "Show changes hatches the changed blocks by author",
+      "ok": true,
+      "evidence": "1 diff element(s)"
+    },
+    {
+      "name": "a stranger after Stop sharing receives the You need access page",
+      "ok": false,
+      "evidence": "status 200; sentence \"null\"; the server's TURBOSLIDE_AUTHORIZE as the walk knows it: shadow (the default)"
+    },
+    {
+      "name": "the revoked viewer link is dead",
+      "ok": false,
+      "evidence": "status 200; path /deck/verifier-walk-mu11021q"
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "evidence": "verifier-walk-mu11021q trashed and removed"
+    }
+  ]
+}

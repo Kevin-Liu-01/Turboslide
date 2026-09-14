@@ -1,0 +1,113 @@
+bypass-cli (Bypass managed rules for the CLI and MCP clients on the agent routes; active true; log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> Bypass managed rules for the CLI and MCP clients on the agent routes [Enabled] SPEC-3 8.3 Managed: a bypass for the turboslide/ user agent and MCP clients on /api/actions/*, /api/agent and /mcp, which cannot solve a challenge and still need the bearer key; scoped to the agent paths so the bypass is narrow Group 1 (AND)
+R7 (R7 agent routes without Authorization; active true; rate_limit 30/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R7 agent routes without Authorization [Enabled] SPEC-3 8.3 R7: /api/actions/*, /api/agent and /mcp without an Authorization header 30 per 60 s per IP, then deny for 1 h; token guessing and scanners Group 1 (AND): path starts with /api/actions/ header[authorization] does not exist OR Group 2 (AND): path equals /api/agen
+R3 (R3 exports per IP; active true; rate_limit 12/600s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R3 exports per IP [Enabled] SPEC-3 8.3 R3: /api/x/export/* and /api/export/* 12 per 10 min per IP, then deny for 15 min; an export is minutes of CPU Group 1 (AND): path starts with /api/x/export/ OR Group 2 (AND): path starts with /api/export/ Action: Rate Limit (12/600s) Rate Limit: 12 req / 600s (fixed_window) Keys: 
+R4 (R4 bundles per IP; active true; rate_limit 6/600s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R4 bundles per IP [Enabled] SPEC-3 8.3 R4: /api/decks/bundle and /api/decks/*/bundle 6 per 10 min per IP, then deny for 15 min; 200 MB uploads Group 1 (AND): path equals /api/decks/bundle OR Group 2 (AND): path matches regex ^/api/decks/[^/]+/bundle$ Action: Rate Limit (6/600s) Rate Limit: 6 req / 600s (fixed_window) K
+R8 (R8 sign in per IP; active true; rate_limit 10/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R8 sign in per IP [Enabled] SPEC-3 8.3 R8: /api/auth/* and /device 10 per 60 s per IP, then deny for 15 min; brute force Group 1 (AND): path starts with /api/auth/ OR Group 2 (AND): path equals /device Action: Rate Limit (10/60s) Rate Limit: 10 req / 60s (fixed_window) Keys: ip If exceeded: log Staging rule > Success! 
+R9 (R9 sign in per client fingerprint; active true; rate_limit 60/600s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R9 sign in per client fingerprint [Enabled] SPEC-3 8.3 R9: /api/auth/* and /device 60 per 10 min per JA4, then challenge; distributed brute force with one client fingerprint Group 1 (AND): path starts with /api/auth/ OR Group 2 (AND): path equals /device Action: Rate Limit (60/600s) Rate Limit: 60 req / 600s (fixed_win
+R16 (R16 share, access and link exchange per IP; active true; rate_limit 20/600s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R16 share, access and link exchange per IP [Enabled] SPEC-3 8.3 R16: /api/share/*, /api/access/* and /s/* 20 per 10 min per IP, then deny for 15 min; share changes and requests are rare Group 1 (AND): path starts with /api/share/ OR Group 2 (AND): path starts with /api/access/ OR Group 3 (AND): path starts with /s/ Act
+R17 (R17 upload tokens per IP; active true; rate_limit 20/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R17 upload tokens per IP [Enabled] SPEC-3 8.3 R17: /api/x/upload/* 20 per 60 s per IP; one token per upload Conditions: path starts with /api/x/upload/ Action: Rate Limit (20/60s) Rate Limit: 20 req / 60s (fixed_window) Keys: ip If exceeded: log Staging rule > Success! Rule "R17 upload tokens per IP" staged [104ms] WAR
+R18 (R18 avatars per IP; active true; rate_limit 10/600s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R18 avatars per IP [Enabled] SPEC-3 8.3 R18: /api/avatar/* 10 per 10 min per IP; avatars change rarely Conditions: path starts with /api/avatar/ Action: Rate Limit (10/600s) Rate Limit: 10 req / 600s (fixed_window) Keys: ip If exceeded: log Staging rule > Success! Rule "R18 avatars per IP" staged [199ms] WARNING! This 
+R2 (R2 renders per IP; active true; rate_limit 240/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R2 renders per IP [Enabled] SPEC-3 8.3 R2: /api/x/render/* and /api/render/* 240 per 60 s per IP; a deck open at two widths is under 200 Group 1 (AND): path starts with /api/x/render/ OR Group 2 (AND): path starts with /api/render/ Action: Rate Limit (240/60s) Rate Limit: 240 req / 60s (fixed_window) Keys: ip If exceed
+R5 (R5 agent actions per IP; active true; rate_limit 300/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R5 agent actions per IP [Enabled] SPEC-3 8.3 R5: /api/actions/* 300 per 60 s per IP; an agent writes at human speed Conditions: path starts with /api/actions/ Action: Rate Limit (300/60s) Rate Limit: 300 req / 60s (fixed_window) Keys: ip If exceeded: log Staging rule > Success! Rule "R5 agent actions per IP" staged [18
+R6 (R6 MCP per IP; active true; rate_limit 300/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R6 MCP per IP [Enabled] SPEC-3 8.3 R6: /mcp 300 per 60 s per IP, as R5 Conditions: path equals /mcp Action: Rate Limit (300/60s) Rate Limit: 300 req / 60s (fixed_window) Keys: ip If exceeded: log Staging rule > Success! Rule "R6 MCP per IP" staged [122ms] WARNING! This rule will rate limit matching requests. Legitimate
+R12 (R12 stream opens per IP; active true; rate_limit 30/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R12 stream opens per IP [Enabled] SPEC-3 8.3 R12: GET /api/decks/*/stream 30 per 60 s per IP; eight tabs reconnecting every 300 s is under 2 per minute Conditions: method equals GET path matches regex ^/api/decks/[^/]+/stream$ Action: Rate Limit (30/60s) Rate Limit: 30 req / 60s (fixed_window) Keys: ip If exceeded: log
+R13 (R13 operations per IP; active true; rate_limit 3600/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R13 operations per IP [Enabled] SPEC-3 8.3 R13: POST /api/decks/*/ops 3600 per 60 s per IP; 60 per second per client, one client per IP in the normal case Conditions: method equals POST path matches regex ^/api/decks/[^/]+/ops$ Action: Rate Limit (3600/60s) Rate Limit: 3600 req / 60s (fixed_window) Keys: ip If exceeded
+R14 (R14 presence per IP; active true; rate_limit 900/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R14 presence per IP [Enabled] SPEC-3 8.3 R14: POST /api/decks/*/presence 900 per 60 s per IP; 15 batches per second Conditions: method equals POST path matches regex ^/api/decks/[^/]+/presence$ Action: Rate Limit (900/60s) Rate Limit: 900 req / 60s (fixed_window) Keys: ip If exceeded: log Staging rule > Success! Rule "
+R15 (R15 comment writes per IP; active true; rate_limit 30/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R15 comment writes per IP [Enabled] SPEC-3 8.3 R15: /api/comments/* writes (POST, PATCH, DELETE) 30 per 60 s per IP; a person writes a comment every few seconds at most Conditions: path starts with /api/comments/ method is any of POST, PATCH, DELETE Action: Rate Limit (30/60s) Rate Limit: 30 req / 60s (fixed_window) Ke
+R20 (R20 notifications per IP; active true; rate_limit 120/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R20 notifications per IP [Enabled] SPEC-3 8.3 R20: /api/notify/* 120 per 60 s per IP; the inbox polls at most every few seconds Conditions: path starts with /api/notify/ Action: Rate Limit (120/60s) Rate Limit: 120 req / 60s (fixed_window) Keys: ip If exceeded: log Staging rule > Success! Rule "R20 notifications per IP
+R21 (R21 stream opens per client fingerprint; active true; rate_limit 600/600s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R21 stream opens per client fingerprint [Enabled] SPEC-3 8.3 R21: /api/decks/*/stream 600 per 10 min per JA4, then challenge; a flood of opens from one client fingerprint across IPs Conditions: path matches regex ^/api/decks/[^/]+/stream$ Action: Rate Limit (600/600s) Rate Limit: 600 req / 600s (fixed_window) Keys: ja4
+R10 (R10 assets per IP; active true; rate_limit 600/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R10 assets per IP [Enabled] SPEC-3 8.3 R10: /decks/*/assets/* 600 per 60 s per IP; hotlinking Conditions: path matches regex ^/decks/[^/]+/assets/ Action: Rate Limit (600/60s) Rate Limit: 600 req / 60s (fixed_window) Keys: ip If exceeded: log Staging rule > Success! Rule "R10 assets per IP" staged [153ms] WARNING! This
+R1 (R1 server functions per IP; active true; rate_limit 600/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R1 server functions per IP [Enabled] SPEC-3 8.3 R1: /_serverFn/* 600 per 60 s per IP; the editor stays well under it, scripts do not Conditions: path starts with /_serverFn/ Action: Rate Limit (600/60s) Rate Limit: 600 req / 60s (fixed_window) Keys: ip If exceeded: log Staging rule > Success! Rule "R1 server functions 
+R16b (R16b deck pages per IP; active true; rate_limit 120/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R16b deck pages per IP [Enabled] SPEC-3 8.3 R16b: the You need access page 120 per 60 s per IP. Pro rules cannot match a response status, so the rule counts the four page routes that render it (/deck/*, /edit/*, /present/*, /print/*); 120 page loads a minute is far above a person Group 1 (AND): path starts with /deck/ 
+R11 (R11 whole site per client fingerprint; active true; rate_limit 200/10s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R11 whole site per client fingerprint [Enabled] SPEC-3 8.3 R11: every path 200 per 10 s per JA4, then challenge; a flood from one client fingerprint Conditions: path starts with / Action: Rate Limit (200/10s) Rate Limit: 200 req / 10s (fixed_window) Keys: ja4 If exceeded: log Staging rule > Success! Rule "R11 whole sit
+R19 (R19 WebSocket upgrades per IP (round four); active false; rate_limit 30/60s -> log): exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> R19 WebSocket upgrades per IP (round four) [Disabled] SPEC-3 8.3 R19: reserved for GET /api/decks/*/ws, 30 per 60 s per IP, as R12; the upgrade handler is round four (SPEC-3 17), so the rule is committed inactive Conditions: method equals GET path matches regex ^/api/decks/[^/]+/ws$ Action: Rate Limit (30/60s) Rate Lim
+
+diff: exit 0
+<claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" />
+Fetching draft changes for turboslide
+
+Pending changes (23):
+
+  + Added rule "Bypass managed rules for the CLI and MCP clients on the agent routes"
+  + Added rule "R7 agent routes without Authorization"
+  + Added rule "R3 exports per IP"
+  + Added rule "R4 bundles per IP"
+  + Added rule "R8 sign in per IP"
+  + Added rule "R9 sign in per client fingerprint"
+  + Added rule "R16 share, access and link exchange per IP"
+  + Added rule "R17 upload tokens per IP"
+  + Added rule "R18 avatars per IP"
+  + Added rule "R2 renders per IP"
+  + Added rule "R5 agent actions per IP"
+  + Added rule "R6 MCP per IP"
+  + Added rule "R12 stream opens per IP"
+  + Added rule "R13 operations per IP"
+  + Added rule "R14 presence per IP"
+  + Added rule "R15 comment writes per IP"
+  + Added rule "R20 notifications per IP"
+  + Added rule "R21 stream opens per client fingerprint"
+  + Added rule "R10 assets per IP"
+  + Added rule "R1 server functions per IP"
+  + Added rule "R16b deck pages per IP"
+  + Added rule "R11 whole site per client fingerprint"
+  + Added rule "R19 WebSocket upgrades per IP (round four)"
+
+  Run vercel firewall publish --non-interactive to publish, or vercel firewall discard --non-interactive to discard.
+
+publish: exit 0; <claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" /> Fetching draft changes for turboslide Changes to be published (23): + Added rule "Bypass managed rules for the CLI and MCP clients on the agent routes" + Added rule "R7 agent routes without Authorization" + Added rule "R3 exports per IP" + Added rule "R4 bundles per IP" + Added rule "R8 sign in per IP" + Added rule "R9 sign in per client fingerprint" + Added rule "R16 share, access and link exchange per IP" + Added rule "R17 upload tokens per IP" + Added rule "R18 avatars per IP" + Added rule "R2 renders per IP" + 
+
+rules after the publish: exit 0
+<claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" />
+Fetching custom rules for turboslide
+
+    #    Name                                                                   Action                  Status
+    1    Bypass managed rules for the CLI and MCP clients on the agent routes   Log                     Enabled
+         rule_bypass_managed_rules_for_the_cli_and_mcp_clients_on_the_agent_ro_Im3w3L
+    2    R7 agent routes without Authorization                                  Rate Limit (30/60s)     Enabled
+         rule_r7_agent_routes_without_authorization_3RxAYP
+    3    R3 exports per IP                                                      Rate Limit (12/600s)    Enabled
+         rule_r3_exports_per_ip_mVW5P7
+    4    R4 bundles per IP                                                      Rate Limit (6/600s)     Enabled
+         rule_r4_bundles_per_ip_6hSf6p
+    5    R8 sign in per IP                                                      Rate Limit (10/60s)     Enabled
+         rule_r8_sign_in_per_ip_suhaec
+    6    R9 sign in per client fingerprint                                      Rate Limit (60/600s)    Enabled
+         rule_r9_sign_in_per_client_fingerprint_2WNAQX
+    7    R16 share, access and link exchange per IP                             Rate Limit (20/600s)    Enabled
+         rule_r16_share_access_and_link_exchange_per_ip_cEsjFI
+    8    R17 upload tokens per IP                                               Rate Limit (20/60s)     Enabled
+         rule_r17_upload_tokens_per_ip_nokK4E
+    9    R18 avatars per IP                                                     Rate Limit (10/600s)    Enabled
+         rule_r18_avatars_per_ip_aAtYVA
+    10   R2 renders per IP                                                      Rate Limit (240/60s)    Enabled
+         rule_r2_renders_per_ip_9jIzsb
+    11   R5 agent actions per IP                                                Rate Limit (300/60s)    Enabled
+         rule_r5_agent_actions_per_ip_4Izw5i
+    12   R6 MCP per IP                                                          Rate Limit (300/60s)    Enabled
+         rule_r6_mcp_per_ip_rCkaVc
+    13   R12 stream opens per IP                                                Rate Limit (30/60s)     Enabled
+         rule_r12_stream_opens_per_ip_o4Iyfz
+    14   R13 operations per IP                                                  Rate Limit (3600/60s)   Enabled
+         rule_r13_operations_per_ip_XAUtjM
+    15   R14 presence per IP                                                    Rate Limit (900/60s)    Enabled
+         rule_r14_presence_per_ip_9QtWLL
+    16   R15 comment writes per IP                                              Rate Limit (30/60s)     Enabled
+         rule_r15_comment_writes_per_ip_4kia73
+    17   R20 notifications per IP                                               Rate Limit (120/60s)    Enabled
+         rule_r20_notifications_per_ip_LtivjX
+    18   R21 stream opens per client fingerprint                                Rate Limit (600/600s)   Enabled
+         rule_r21_stream_opens_per_client_fingerprint_kINVgf
+    19   R10 assets per IP                                                      Rate Limit (600/60s)    Enabled
+         rule_r10_assets_per_ip_3fKHPC
+    20   R1 server functions per IP                                             Rate Limit (600/60s)    Enabled
+         rule_r1_server_functions_per_ip_JGX80b
+    21   R16b deck pages per IP                                                 Rate Limit (120/60s)    Enabled
+         rule_r16b_deck_pages_per_ip_KUgJJ4
+    22   R11 whole site per client fingerprint                                  Rate Limit (200/10s)    Enabled
+         rule_r11_whole_site_per_client_fingerprint_Q1za8Z
+    23   R19 WebSocket upgrades per IP (round four)                             Rate Limit (30/60s)     Disabled
+         rule_r19_web_socket_upgrades_per_ip_round_four_2Ztzj8
+
+  Showing live configuration.
+
+managed Bot Protection (log mode now, challenge after the week) has no CLI row here: Kevin's setting in the Firewall tab

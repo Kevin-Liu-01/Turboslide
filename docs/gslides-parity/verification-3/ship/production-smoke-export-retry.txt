@@ -1,0 +1,28 @@
+token for https://turboslide.vercel.app: 64 characters, saved 2026-09-11T23:13:03.969Z
+skip  /s/<token> exchange: pass --share-token <token> (SPEC-3 6.4; B3 route)
+skip  410 after unpublish: pass --publish-token <token> (SPEC-3 6.4; B2 route)
+skip  private document 403: the private store of SPEC-3 11.5 R2 is not connected this round
+skip  twin URL not derivable: the storage layout v2 (d/<id>/<assetKey>/) lands with the migration
+skip  restricted 404: pass --restricted <deck id> with an access record
+path                                       status  ms     result  detail
+/                                          307     193    pass    location /new; x-robots-tag noindex
+/new                                       200     146    pass    29827 chars; 3/3 shell marks; noindex
+/deck/gt-brand                             200     453    pass    393228 chars; 0 notes key(s)
+/edit/gt-brand                             200     109    pass    29913 chars; 3/3 shell marks
+/decks                                     200     4587   pass    16 card(s)
+/decks/trash                               200     469    pass    31172 chars
+/print/gt-brand                            200     437    pass    85 page(s)
+/present/gt-brand                          200     135    pass    29677 chars
+/decks/gt-brand/assets/cover-fumadocs.png  200     27     pass    image/png 335538 B
+/api/agent                                 401     146    pass    bearer rule
+headers /                                  307     154    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /edit/gt-brand                     200     157    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /deck/gt-brand                     200     466    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /embed/gt-brand                    200     464    pass    x-frame-options none; https://prototemplate.com https://*.prototemplate.com
+json asset attachment                      200     14     pass    attachment; sandbox; default-src 'none'
+cross site text/plain POST                 415     143    pass    415
+unsigned thumbnail                         200     2469   pass    shadow: served and logged
+csp report endpoint                        204     155    pass    204
+deck.info snapshots                        200     309    pass    0 snapshot(s), revision 31
+export batched                             200     19371  pass    plan r31: 6 slide(s) in 1 batch(es) of 60 (1022 ms); batch 0: 6 slide(s) in 10037 ms (10382 ms on the wire); merge: 6 page(s) in 6911 ms (7153 ms on the wire), peak 854.8 MiB, perfect true, gt-brand-light.pptx 353255 B stored
+20/20 passed against https://turboslide.vercel.app/

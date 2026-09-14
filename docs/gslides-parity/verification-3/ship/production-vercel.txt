@@ -1,0 +1,73 @@
+vercel ls --prod at 02:13:00 PDT
+<claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" />
+> Production deployments for kl01s-projects/turboslide [86ms]
+
+  Age     Project                       Deployment                                                 Status      Environment     Duration     Username         
+  2m      kl01s-projects/turboslide     https://turboslide-g7whhxqxx-kl01s-projects.vercel.app     ● Ready     Production      1m           kevin-liu-01     
+  11h     kl01s-projects/turboslide     https://turboslide-c3bp53giq-kl01s-projects.vercel.app     ● Ready     Production      49s          kevin-liu-01     
+  14h     kl01s-projects/turboslide     https://turboslide-26ri8mw1h-kl01s-projects.vercel.app     ● Ready     Production      50s          kevin-liu-01     
+  15h     kl01s-projects/turboslide     https://turboslide-hxfp7104h-kl01s-projects.vercel.app     ● Ready     Production      47s          kevin-liu-01     
+  15h     kl01s-projects/turboslide     https://turboslide-1uhwap5ew-kl01s-projects.vercel.app     ● Ready     Production      57s          kevin-liu-01     
+  2d      kl01s-projects/turboslide     https://turboslide-ml5hej65o-kl01s-projects.vercel.app     ● Ready     Production      44s          kevin-liu-01     
+  2d      kl01s-projects/turboslide     https://turboslide-lhgurbsn4-kl01s-projects.vercel.app     ● Ready     Production      47s          kevin-liu-01     
+  2d      kl01s-projects/turboslide     https://turboslide-odcmvvrlh-kl01s-projects.vercel.app     ● Ready     Production      41s          kevin-liu-01     
+  2d      kl01s-projects/turboslide     https://turboslide-c6wfk81cc-kl01s-projects.vercel.app     ● Ready     Production      44s          kevin-liu-01     
+  2d      kl01s-projects/turboslide     https://turboslide-kgu6an9md-kl01s-projects.vercel.app     ● Ready     Production      41s          kevin-liu-01     
+  2d      kl01s-projects/turboslide     https://turboslide-9hhdmk89c-kl01s-projects.vercel.app     ● Ready     Production      46s          kevin-liu-01     
+  3d      kl01s-projects/studio         https://studio-nbk6mxk7u-kl01s-projects.vercel.app         ● Ready     Production      27s          kevin-liu-01     
+  3d      kl01s-projects/studio         https://studio-pzo6qo9p4-kl01s-projects.vercel.app         ● Ready     Production      23s          kevin-liu-01     
+  3d      kl01s-projects/studio         https://studio-ge12lf1pc-kl01s-projects.vercel.app         ● Ready     Production      19s          kevin-liu-01     
+  3d      kl01s-projects/studio         https://studio-fh0idd55s-kl01s-projects.vercel.app         ● Ready     Production      18s          kevin-liu-01     
+  3d      kl01s-projects/studio         https://studio-47mbxldly-kl01s-projects.vercel.app         ● Ready     Production      17s          kevin-liu-01     
+  3d      kl01s-projects/studio         https://studio-8mke44k24-kl01s-projects.vercel.app         ● Error     Production      22s          kevin-liu-01     
+
+https://turboslide-g7whhxqxx-kl01s-projects.vercel.app
+https://turboslide-c3bp53giq-kl01s-projects.vercel.app
+https://turboslide-26ri8mw1h-kl01s-projects.vercel.app
+https://turboslide-hxfp7104h-kl01s-projects.vercel.app
+https://turboslide-1uhwap5ew-kl01s-projects.vercel.app
+https://turboslide-ml5hej65o-kl01s-projects.vercel.app
+https://turboslide-lhgurbsn4-kl01s-projects.vercel.app
+https://turboslide-odcmvvrlh-kl01s-projects.vercel.app
+https://turboslide-c6wfk81cc-kl01s-projects.vercel.app
+https://turboslide-kgu6an9md-kl01s-projects.vercel.app
+https://turboslide-9hhdmk89c-kl01s-projects.vercel.app
+https://studio-nbk6mxk7u-kl01s-projects.vercel.app
+https://studio-pzo6qo9p4-kl01s-projects.vercel.app
+https://studio-ge12lf1pc-kl01s-projects.vercel.app
+https://studio-fh0idd55s-kl01s-projects.vercel.app
+https://studio-47mbxldly-kl01s-projects.vercel.app
+https://studio-8mke44k24-kl01s-projects.vercel.app
+
+vercel inspect turboslide-g7whhxqxx-kl01s-projects.vercel.app
+<claude-code-hint v="1" type="plugin" value="vercel@claude-plugins-official" />
+> Fetched deployment "turboslide-g7whhxqxx-kl01s-projects.vercel.app" in kl01s-projects [299ms]
+
+  General
+
+    id		dpl_7RFeZg9vZ6TnwB7ZSHuWekekKmtb
+    name	turboslide
+    target	production
+    status	● Ready
+    url		https://turboslide-g7whhxqxx-kl01s-projects.vercel.app
+    created	Mon Sep 14 2026 02:10:45 GMT-0700 (Pacific Daylight Time) [2m ago]
+
+
+  Aliases
+
+    ╶ https://turboslide.vercel.app
+    ╶ https://turboslide-kl01s-projects.vercel.app
+    ╶ https://turboslide-git-main-kl01s-projects.vercel.app
+    
+
+  Builds
+
+    ┌ .        [0ms]
+    ├── λ __server (107.03MB) [iad1]
+    ├── λ _serverFn/[...] (107.03MB) [iad1]
+    ├── λ api/decks/[...]/bundle (107.03MB) [iad1]
+    ├── λ api/decks/bundle (107.03MB) [iad1]
+    ├── λ api/export/[...] (107.03MB) [iad1]
+    └── 3 output items hidden
+    
+

@@ -166,11 +166,74 @@ rule because production stays working on the degraded tiers in shadow mode (sect
 
 ## 4. The commit and the push
 
-(filled in below)
+Commit `1178478c6d11f651c15200bd3f2fd020694a5c91` on `main`, "Turboslide round three: multiplayer,
+presence, comments, share roles, optional accounts, security, layout shift, background dithers",
+authored as the repository's local identity (Kevin <kk23907751@gmail.com>) at 02:10:22 PDT with
+the body carrying the acceptance summary and the account boundary (what runs on the degraded tiers
+and the variables that turn the full tiers on) and the trailer `Co-Authored-By: Claude Fable 5.1
+<noreply@anthropic.com>`; 788 paths, 381,776 insertions, 45,308 deletions, staged by the explicit
+list `verification-3/ship/commit-paths.mjs` printed (`git status --porcelain -uall` minus the
+other workflow's `.github/`, `design-4/`, `verification-4/`, the eight scratch decks specs and
+probes left under `decks/` and `scripts/__pycache__/`; 1,251 paths excluded, every one of them in
+those sets), and checked after staging for `.github`, `.turboslide`, `.vercel`, `dist`, `target`,
+`node_modules`, `__pycache__`, `.log`, `.env`, `.sqlite`, `.tsbuildinfo`, `.pyc`, `research-4`,
+`design-4`, `verification-4`, `SPEC-4`, `MILESTONES-4` and `decks/e2e-`, `decks/untitled-` (none).
+The commit carries the regenerated contracts (14 files), the fonts (`Inter Fallback`), the fixture
+deck's two dither slides, four variants and three threads, `firewall/rules.json`,
+`packages/realtime`, `packages/identity`, the six builders' reports, the verifier's record and
+evidence (`verification-3/`, the `.log` files staying local under the root `*.log` rule as in
+rounds one and two; the JSON, Markdown, PNG, `.mjs` and `.sh` evidence travels), this report and
+the ship scripts under `verification-3/ship/`. `git status` after the commit shows no modified
+tracked file; the untracked remainder is the other workflow's and the scratch decks. `node
+scripts/check.mjs --only 3` after the commit: ok (`ship/check-only-3.txt`; the contracts are
+tracked and the diff is empty), which closes the one step the chain could not pass on the
+uncommitted tree.
+
+`git fetch origin` read `origin/main` at `a1dcc7e`, the commit's parent; pushed `a1dcc7e..1178478`
+to `origin/main` at 02:10:36 to 02:10:40 PDT. The second commit, "Turboslide round three: the
+production table", carries VERIFICATION-3.md section 16, this report's sections 5 to 7, the
+production screenshots under `verification-3/production-*.jpg`, the walk's production JSON, the
+ship evidence under `verification-3/ship/` (the poll, the smoke rows, the firewall answer, the
+Vercel record) and the `appliedAt` line of `firewall/rules.json` if the rules were applied.
 
 ## 5. Production
 
-(filled in below)
+VERIFICATION-3.md section 16 is the production table; the facts in one place:
+
+- The deploy: the Vercel Git integration built `dpl_7RFeZg9vZ6TnwB7ZSHuWekekKmtb`
+  (`turboslide-g7whhxqxx-kl01s-projects.vercel.app`) from the push, created 02:10:45 PDT, Ready in
+  about a minute, aliased to `https://turboslide.vercel.app`, `turboslide-kl01s-projects.vercel.app`
+  and `turboslide-git-main-kl01s-projects.vercel.app`, five functions at 107.03 MB in `iad1`
+  (`ship/production-vercel.txt`). The poll (`ship/poll-deploy.mjs`, `production-poll.txt`) read the
+  round two deploy on three polls (`/new` 24,563 B, `ts-presence` 0) and the new one at 02:12:26,
+  106 s after the push (`/new` 29,827 B; `ts-presence` 26, `ts-comment-marker` 9,
+  `ts-remote-caret` 6 bytes of markers in its assets).
+- The environment (section 1 of `set-production-env.sh`, `production-env.txt`): the six variables
+  above, all stored as sensitive by the project's policy; `TURBOSLIDE_MAIL=off` and not `capture`
+  because captured mail wants a database or a file the function cannot keep and nothing sends while
+  sign in is off; `TURBOSLIDE_PUBLIC_STORE_HOST` read from one listed blob's host through the
+  read write token in a subshell (the host is a public URL, the token never printed). A rerun of the
+  script rotates the session secret and signs every anonymous principal out of its name, so it runs
+  once.
+- The smoke: 18 of 18 at 02:13:17 (`production-smoke.txt`); with the bearer 19 of 20 on the first
+  run, the batched export's first batch answering 502 from the cold function's Chromium launch
+  (`browserType.launch: Target page, context or browser has been closed`), then 20 of 20 with six
+  slides and 20 of 20 with the whole deck (236.5 s, `perfect: true`, 16,277,390 B;
+  `production-smoke-token.txt`, `-export-retry.txt`, `-export-full.txt`).
+- The two browser walk: 18 ok, 13 fail in 205 s (`two-browser-walk-production.json`,
+  `production-01` to `-11.jpg`, `ship/production-walk.txt`), the failures the blob tier's
+  propagation, finding 33's stale refusals, finding 37's late comment, finding 43's empty version
+  rows and finding 34's conflict on the second link (section 16 has each row); the scratch deck
+  trashed and removed.
+- `share.get` on a deck written after the deploy reports its record (`production-share-get.mjs`,
+  `.txt`); a keystroke between two browsers lands in 2.0 to 2.9 s on the blob tier with two of five
+  refused as stale (`production-propagation.txt`); B in A's roster in 4.8 s (1.0 s in the walk).
+- The WAF: the plan accepted the 23 rules; staged and published in log mode at 02:20 PDT
+  (`production-firewall.txt`; `vercel firewall overview` "Enabled, 22 active, 1 inactive"); the
+  ids written into `firewall/rules.json` beside `appliedAt`; Bot Protection is Kevin's setting.
+- The storage migration: not run on production (section 6, the second Kevin item).
+- R0, R1, R3 (shadow), R4 (blob tier), R5's surfaces and R7 are live; R2 waits on the private
+  store, R6 on the sending domain, R8 on Kevin's date.
 
 ## 6. Blockers recorded for the next fix round, and what waits on Kevin
 
@@ -262,4 +325,24 @@ editor` default ends and a missing access record becomes a 404 (`TURBOSLIDE_MISS
 
 ## 7. Commands run
 
-(filled in below)
+| Command                                                                                                                                                                       | Result                                                                                                          |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `git status --short`, `git grep -n '<<<<<<<'`, `lsof` on 4321, 3005, 4331 to 4336, 4344, `git check-ignore -v`                                                                | 440 lines; no marker outside prose; ports free; `*.log`, `.turboslide`, `decks/*/comments/` ignored             |
+| `pnpm generate:contracts` (three times), `node_modules/.bin/tsc -b` (four times)                                                                                              | "14 files current"; exit 0                                                                                      |
+| `pnpm format:check`; `prettier --write` on 30 files of this round and the ship step's own edits                                                                               | 79 files listed, 30 of this round; clean after                                                                  |
+| `vitest run` in `packages/schema` (transform), `packages/store` (all), `packages/chrome` (all), `apps/studio` (all), `packages/effects` (parity), `packages/identity` (marks) | 24; 122; 483; 166; 26; 9 passed                                                                                 |
+| `vercel whoami`, `vercel env ls`, `vercel firewall overview`, `vercel blob list --limit 1` (the read write token in a subshell)                                               | the account; two variables stored; "Not configured"; the public store host                                      |
+| `sh verification-3/ship/set-production-env.sh <host>`                                                                                                                         | six production variables set, values never printed (`production-env.txt`)                                       |
+| `sh verification-3/ship/run-check-chain.sh` (eight segments from step 4)                                                                                                      | section 3; 4321 and 4344 free after (the leftover `vite preview` killed by hand)                                |
+| `sh verification-3/ship/rerun-26-and-5.sh`                                                                                                                                    | step 26: 20 passed, 6 failed, 14 did not run; step 5: ok, 2,830 passed                                          |
+| `node verification-3/ship/commit-paths.mjs`; `git add -- <788 paths>`; `git commit -F <message>`; `git fetch origin`; `git push origin main`                                  | `1178478`; `a1dcc7e..1178478` at 02:10:40 PDT                                                                   |
+| `node scripts/check.mjs --only 3`                                                                                                                                             | ok after the commit                                                                                             |
+| `node verification-3/ship/poll-deploy.mjs https://turboslide.vercel.app 15`                                                                                                   | the round three chrome at 02:12:26, poll 4                                                                      |
+| `vercel ls --prod`; `vercel inspect turboslide-g7whhxqxx-kl01s-projects.vercel.app`                                                                                           | Ready, created 02:10:45, aliased to turboslide.vercel.app (`production-vercel.txt`)                             |
+| `node scripts/hosted-smoke.mjs --base https://turboslide.vercel.app`                                                                                                          | 18 of 18                                                                                                        |
+| `run-with-token.mjs <host> -- node scripts/hosted-smoke.mjs ... --token-env TURBOSLIDE_TOKEN --export-batch` (whole deck, then `--slides 6`, then the whole deck again)       | 19 of 20 (the cold 502); 20 of 20; 20 of 20 in 236.5 s, perfect                                                 |
+| `node verification-3/walk/two-browser-walk.mjs --base https://turboslide.vercel.app --out verification-3 --tag production`; `sips` to JPEG                                    | 18 ok, 13 fail in 205 s; 11 screenshots                                                                         |
+| `node verification-3/ship/apply-firewall.mjs`                                                                                                                                 | 23 rules staged and published in log mode; the ids into `firewall/rules.json`; `headers.test.ts` 16 of 16 after |
+| `run-with-token.mjs <host> -- node verification-3/ship/production-share-get.mjs`                                                                                              | the record on a fresh copy, a viewer link, the copy removed                                                     |
+| `run-with-token.mjs <host> -- node verification-3/preview/blob-propagation-probe.mjs https://turboslide.vercel.app 5`                                                         | presence 4.8 s; writes 2.0 to 2.9 s, 3 of 5 landed; both pages at revision 4; the copy removed                  |
+| the second commit and push                                                                                                                                                    | the hash in the final report                                                                                    |

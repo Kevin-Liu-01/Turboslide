@@ -1,0 +1,15 @@
+token for https://turboslide.vercel.app: 64 characters, saved 2026-09-11T23:13:03.969Z
+deck.copy 200 verifier-prop-mu11f6tc
+A settled in 948 ms; sync {"seq":0,"revision":0,"pending":0,"retained":0,"tier":"blob","transport":"poll","connected":false}; label Silica 636; role editor
+B settled in 892 ms; sync {"seq":0,"revision":0,"pending":0,"retained":0,"tier":"blob","transport":"poll","connected":false}; label Chrome 792; role editor
+presence: B in A's roster after 4804 ms
+A write 1: acknowledged on A after 1294 ms; seen on B after 2879 ms
+A write 2: acknowledged on A error ConflictError: baseRevision 0 is stale; the document is at revision 1; seen on B never within 60 s
+A write 3: acknowledged on A after 557 ms; seen on B after 2048 ms
+A write 4: acknowledged on A error ConflictError: baseRevision 1 is stale; the document is at revision 2; seen on B never within 60 s
+A write 5: acknowledged on A after 1658 ms; seen on B after 1951 ms
+op to screen A to B: 3 of 5 landed; p50 2048 ms; p95 2879 ms; max 2879 ms
+bearer write: 200 in 892 ms; seen on A after 2765 ms; seen on B after 2042 ms
+A at the end: revision 4; sync {"seq":4,"revision":4,"pending":0,"retained":0,"tier":"blob","transport":"sse","connected":true}; save words "All changes saved"; others 1
+B at the end: revision 4; sync {"seq":4,"revision":4,"pending":0,"retained":0,"tier":"blob","transport":"sse","connected":true}; save words "All changes saved"; others 0
+cleanup: trash 200 remove 200

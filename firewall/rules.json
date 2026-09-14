@@ -3,7 +3,7 @@
   "version": 1,
   "project": "turboslide",
   "mode": "log",
-  "appliedAt": null,
+  "appliedAt": "2026-09-14T09:20:44Z",
   "enforceAfter": "one week of log mode reviewed in the Firewall traffic page per rule id",
   "rules": [
     {
@@ -51,7 +51,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r1_server_functions_per_ip_JGX80b"
     },
     {
       "key": "R2",
@@ -107,7 +108,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r2_renders_per_ip_9jIzsb"
     },
     {
       "key": "R3",
@@ -163,7 +165,8 @@
           "redirect": null,
           "actionDuration": "15m"
         }
-      }
+      },
+      "id": "rule_r3_exports_per_ip_mVW5P7"
     },
     {
       "key": "R4",
@@ -219,7 +222,8 @@
           "redirect": null,
           "actionDuration": "15m"
         }
-      }
+      },
+      "id": "rule_r4_bundles_per_ip_6hSf6p"
     },
     {
       "key": "R5",
@@ -266,7 +270,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r5_agent_actions_per_ip_4Izw5i"
     },
     {
       "key": "R6",
@@ -313,7 +318,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r6_mcp_per_ip_rCkaVc"
     },
     {
       "key": "R7",
@@ -393,7 +399,8 @@
           "redirect": null,
           "actionDuration": "1h"
         }
-      }
+      },
+      "id": "rule_r7_agent_routes_without_authorization_3RxAYP"
     },
     {
       "key": "R8",
@@ -449,7 +456,8 @@
           "redirect": null,
           "actionDuration": "15m"
         }
-      }
+      },
+      "id": "rule_r8_sign_in_per_ip_suhaec"
     },
     {
       "key": "R9",
@@ -505,7 +513,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r9_sign_in_per_client_fingerprint_2WNAQX"
     },
     {
       "key": "R10",
@@ -552,7 +561,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r10_assets_per_ip_3fKHPC"
     },
     {
       "key": "R11",
@@ -599,7 +609,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r11_whole_site_per_client_fingerprint_Q1za8Z"
     },
     {
       "key": "R12",
@@ -651,7 +662,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r12_stream_opens_per_ip_o4Iyfz"
     },
     {
       "key": "R13",
@@ -703,7 +715,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r13_operations_per_ip_XAUtjM"
     },
     {
       "key": "R14",
@@ -755,7 +768,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r14_presence_per_ip_9QtWLL"
     },
     {
       "key": "R15",
@@ -807,7 +821,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r15_comment_writes_per_ip_4kia73"
     },
     {
       "key": "R16",
@@ -872,7 +887,8 @@
           "redirect": null,
           "actionDuration": "15m"
         }
-      }
+      },
+      "id": "rule_r16_share_access_and_link_exchange_per_ip_cEsjFI"
     },
     {
       "key": "R16b",
@@ -946,7 +962,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r16b_deck_pages_per_ip_KUgJJ4"
     },
     {
       "key": "R17",
@@ -993,7 +1010,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r17_upload_tokens_per_ip_nokK4E"
     },
     {
       "key": "R18",
@@ -1040,7 +1058,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r18_avatars_per_ip_aAtYVA"
     },
     {
       "key": "R19",
@@ -1092,7 +1111,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r19_web_socket_upgrades_per_ip_round_four_2Ztzj8"
     },
     {
       "key": "R20",
@@ -1139,7 +1159,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r20_notifications_per_ip_LtivjX"
     },
     {
       "key": "R21",
@@ -1186,7 +1207,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_r21_stream_opens_per_client_fingerprint_kINVgf"
     },
     {
       "key": "bypass-cli",
@@ -1254,7 +1276,8 @@
           "redirect": null,
           "actionDuration": null
         }
-      }
+      },
+      "id": "rule_bypass_managed_rules_for_the_cli_and_mcp_clients_on_the_agent_ro_Im3w3L"
     }
   ],
   "managed": {
@@ -1288,5 +1311,14 @@
     "R16b",
     "R11",
     "R19"
-  ]
+  ],
+  "applied": {
+    "by": "the ship step (docs/gslides-parity/build-3/ship.md section 5), through `vercel firewall rules add --json` per rule in the `order` sequence and one `vercel firewall publish`; docs/gslides-parity/verification-3/ship/production-firewall.txt is the record",
+    "mode": "log",
+    "project": "turboslide",
+    "team": "kl01s-projects",
+    "rules": 23,
+    "active": 22,
+    "botProtection": "not applied by the CLI (no row for the managed ruleset); Kevin turns Bot Protection to log mode in the Firewall tab"
+  }
 }

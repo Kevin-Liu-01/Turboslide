@@ -4,8 +4,9 @@ Kept by the integrator (`docs/gslides-parity/MILESTONES-3.md`, "Integrator"). On
 builder: what landed at merge 1 and at merge 2, what is carried to the fixer round, and the open
 requests with where they went. Section numbers refer to `docs/gslides-parity/SPEC-3.md` unless
 prefixed SPEC or SPEC-2. Written at merge 1 and rewritten at merge 2, 2026-09-13, over `main` at
-`28cb63b`; nothing is committed until the ship step. Full notes: `docs/gslides-parity/build-3/b1.md`
-to `b6.md` and `integrator.md` (sections 8 to 15 are merge 2). Kevin's directives of the round:
+`28cb63b`; nothing was committed until the ship step, which committed the round on `main` as `1178478`
+on 2026-09-14 (the section "The ship step" below). Full notes: `docs/gslides-parity/build-3/b1.md`
+to `b6.md`, `integrator.md` (sections 8 to 15 are merge 2) and `ship.md`. Kevin's directives of the round:
 every Google Slides feature with its exact behaviour and a cleaner interface for the sales team;
 multiplayer with every collaboration feature, optional logins and avatars; no layout shift;
 attacks prevented and rate limited; pictures as backgrounds with dithers over them; every
@@ -294,13 +295,39 @@ localhost caller, `presence.list` over HTTP from the file records, the local tok
 flipped, the narrower CSRF exemptions, the import protection chain, the overwrite allowlist,
 `share.emailCollaborators` 501 by design, the vitest budgets under load, the tamper flip).
 
-Next: the verifier's pass on the preview `turboslide-igavfcg2x` and on a dev server (the eight
-specs of step 26 with the builders' stage 2 reports as the map of what each still needs, the
-parity audit, the layout shift audit on 4344, the multiplayer walk over the blob channel, S1 to
-S4), then the fixer round in each builder's files, then the ship step: `pnpm check` 28 of 28 with
-the contracts, the fonts and the fixture committed; the two secrets on production; the merge and
-the production deploy with R0 to R5 in order; the WAF rules in log mode if the plan accepts them;
-R6 on Kevin's domain and R8 on Kevin's date.
+The verifier's two passes are `docs/gslides-parity/VERIFICATION-3.md` (pass 2 replaced pass 1 in
+place; pass 1's evidence is under `verification-3/pass-1/`), the fixer round's records are in each
+builder's report, and the ship step is below.
+
+## The ship step
+
+`docs/gslides-parity/build-3/ship.md` is the record; VERIFICATION-3.md section 16 is the production
+table. In short: the chain ran step by step on the fixed tree (19 of the 25 steps run passing in the
+chain, step 5 passing alone with per test budgets, step 3 passing once the contracts were committed;
+the six failing steps are the verifier's six with fewer or the same misses: 20 at 8 rows, 21 at 21
+of 66 round two tests, 26 at 6 of 40 with `share.spec.ts` rows 1 and 2 passing for the first time,
+27 at 58 of 109 cells at zero, 19 on the other workflow's files, 25 on Docker's disk). Fixed at the
+ship step in seam files with tests: the blob tier's record cache window and the fresh read before a
+share write and an exchange miss (finding 34, narrowed), the name prompt as a real dialog when opened
+from Change name (finding 36), the share spec's owner context and viewer locator (finding 40), the
+refused write's sentence for a viewer or commenter (finding 44), the property tests' budgets
+(finding 45), the formatting of 30 files (finding 38). Committed on `main` as `1178478` (788 paths)
+and pushed at 02:10:40 PDT; the production deploy `dpl_7RFeZg9vZ6TnwB7ZSHuWekekKmtb` answered the
+round three chrome at 02:12:26. Production runs the degraded tiers in shadow mode with the
+environment of SPEC-3 11.4 set through the vercel CLI (`TURBOSLIDE_AUTHORIZE=shadow`,
+`TURBOSLIDE_REALTIME=blob`, `TURBOSLIDE_MAIL=off`, the session and download secrets generated and
+never printed, the public store host for the CSP). The hosted smoke 18 of 18 and, with the bearer,
+20 of 20 including the batched Perfect export of the 85 slides (236.5 s, perfect; the first hit of
+the cold function answered one 502 from Chromium's launch and the retries did not reproduce it); the
+two browser walk 18 ok and 13 fail on the blob tier (presence in 1 s, a write in 2 to 3 s, the
+comment late, the record cache's conflict on the second link: findings 33, 34, 37, 43); a
+production `share.get` on a deck written after the deploy reports its record; the WAF rules of
+`firewall/rules.json` applied in log mode (23 rules, 22 active, the ids in the file); the storage
+migration not run on production (no preview migration recorded; Kevin's step). The second commit,
+"Turboslide round three: the production table", carries the table, the ship report and the evidence.
+What waits on Kevin and the blockers for the next fix round: `ship.md` section 6 (the two
+Marketplace installs, the private store and the migration, the sending domain, the R8 date,
+findings 23, 33, 34's remainder, 48 and the severity 2 rows).
 
 ## Carried from VERIFICATION-2 sections 10 and 14
 

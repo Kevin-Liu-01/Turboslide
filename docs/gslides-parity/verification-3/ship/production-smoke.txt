@@ -1,0 +1,25 @@
+skip  /s/<token> exchange: pass --share-token <token> (SPEC-3 6.4; B3 route)
+skip  410 after unpublish: pass --publish-token <token> (SPEC-3 6.4; B2 route)
+skip  private document 403: the private store of SPEC-3 11.5 R2 is not connected this round
+skip  twin URL not derivable: the storage layout v2 (d/<id>/<assetKey>/) lands with the migration
+skip  restricted 404: pass --restricted <deck id> with an access record
+path                                       status  ms     result  detail
+/                                          307     1692   pass    location /new; x-robots-tag noindex
+/new                                       200     165    pass    29827 chars; 3/3 shell marks; noindex
+/deck/gt-brand                             200     2365   pass    393228 chars; 0 notes key(s)
+/edit/gt-brand                             200     117    pass    29913 chars; 3/3 shell marks
+/decks                                     200     4411   pass    16 card(s)
+/decks/trash                               200     296    pass    31172 chars
+/print/gt-brand                            200     298    pass    85 page(s)
+/present/gt-brand                          200     107    pass    29677 chars
+/decks/gt-brand/assets/cover-fumadocs.png  200     189    pass    image/png 335538 B
+/api/agent                                 401     127    pass    bearer rule
+headers /                                  307     127    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /edit/gt-brand                     200     113    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /deck/gt-brand                     200     210    pass    every header; csp worker-src blob ok; x-frame-options DENY
+headers /embed/gt-brand                    200     371    pass    x-frame-options none; https://prototemplate.com https://*.prototemplate.com
+json asset attachment                      200     102    pass    attachment; sandbox; default-src 'none'
+cross site text/plain POST                 415     105    pass    415
+unsigned thumbnail                         200     6882   pass    shadow: served and logged
+csp report endpoint                        204     203    pass    204
+18/18 passed against https://turboslide.vercel.app/

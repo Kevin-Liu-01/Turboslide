@@ -1,0 +1,10 @@
+02:10:54 poll 1: / 307 -> /new
+  /new 200 24563 B; 11 stylesheet(s), 1 script(s), 12 fetched; markers ts-presence 0, ts-comment-marker 0, ts-remote-caret 0; x-vercel-id sfo1::iad1::zvf2x-1789377054464-9297f8f18449
+02:11:24 poll 2: / 307 -> /new
+  /new 200 24563 B; 11 stylesheet(s), 1 script(s), 12 fetched; markers ts-presence 0, ts-comment-marker 0, ts-remote-caret 0; x-vercel-id sfo1::iad1::2x22t-1789377085039-e2f2f6a60739
+02:11:55 poll 3: / 307 -> /new
+  /new 200 24563 B; 11 stylesheet(s), 1 script(s), 12 fetched; markers ts-presence 0, ts-comment-marker 0, ts-remote-caret 0; x-vercel-id sfo1::iad1::9vxtb-1789377115589-d033cb8dc816
+02:12:26 poll 4: / 307 -> /new
+  /new 200 29827 B; 11 stylesheet(s), 1 script(s), 12 fetched; markers ts-presence 26, ts-comment-marker 9, ts-remote-caret 6; x-vercel-id sfo1::iad1::7k4lh-1789377148291-728d9346618f
+02:12:26: the round three chrome answers on /new after 4 poll(s)
+exit 0

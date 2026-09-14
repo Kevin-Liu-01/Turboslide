@@ -1,0 +1,264 @@
+# Google Slides parity research 02 (round five): media, templates, import and page
+
+Written 2026-09-14 for the Turboslide round five parity work (the last parity round). Every source in this report was read on 2026-09-14 and is listed with its URL in the Sources section at the end. Nothing here was checked inside a signed-in Google account; every statement rests on public Google help pages, public Google product and developer posts, or public third party articles. Where a claim could not be confirmed from a public source it is tagged unverified in the table and repeated in the Unverified section.
+
+The report covers four areas of Google Slides that earlier rounds deferred and that a standalone editor can offer:
+
+- (a) Insert > Audio and Insert > Video: sources, playback options, rendering in the editor and in present mode, thumbnails and poster frames, limits
+- (b) templates: the home page gallery and featured strip, the 2025 sidebar's Templates and Building blocks panes, File > New > From template gallery
+- (c) import: File > Import slides, Import theme, opening a PPTX, Download as ODP and SVG
+- (d) page: File > Page setup, Print settings and preview, Tools > Preferences, Spelling and Dictionary, Explore, Dictate speaker notes, the Accessibility settings dialog and the Accessibility menu
+
+Each table uses the same five columns: Feature, Behaviour, Position and label, Shortcut, Source. Source cells cite entries from the Sources section, for example G1 or T3, and a tag: Google means a Google owned page, secondary means a third party page, unverified means no public page confirmed the exact label or behaviour. Round one research is cited as R01 (research/01-menu-bar.md), R02 (research/02-editor-surface.md) and R03 (research/03-home-themes-layouts-io.md); the menu model at main d5d7f07 is cited as MODEL. Google Slides is the reference product; no Google icon, logo, artwork, template or theme asset is reproduced here, and none should be copied into Turboslide.
+
+## Summary
+
+1. Audio in Google Slides is Drive only: .mp3 and .wav files already in the user's Drive, chosen through the Drive picker, placed as a speaker icon. There is no upload from the computer and no URL entry. The Format options panel has one section, Audio playback, with five fields reported by every secondary source: Start playing (On click or Automatically), Volume when presenting, Loop audio, Stop on slide change and Hide icon when presenting. Google's own page documents the file types and the insertion steps but not the playback fields (a.1).
+2. Video has three sources in one dialog (Search YouTube, By URL, Google Drive) and a Video playback section with a Play mode of three values (on click, automatically, manual, with on click the default since October 2020), Start at and End at times and a Mute audio checkbox. Google's 2020 post says autoplay of a video is sequenced with the slide's animations in the Motion sidebar (a.2).
+3. Templates reach the user through four doors: the featured strip and the Template gallery page on the home page, File > New > From template gallery, the Templates button in the toolbar and Insert > Templates since November 2024, and the Templates pane of the right sidebar since March 2025. A template opens as a full copy from the gallery, or as single slides or "Insert all slides" from the pane. Google's 2024 and 2025 posts name the use cases (sales pitches, product roadmaps, strategic plans, lesson plans, book reports, project reports, milestone celebrations, workshop facilitation, team games, business proposals, product pitches, marketing plans, quarterly reviews, team intros) but no category labels; templates and building blocks exist only in the English (US) locale (b.1).
+4. Building blocks are groups of native Slides objects inserted from the Building blocks pane or Insert > Building blocks by click or drag. Google names agendas, quotes, key statistics, headlines, text callouts and calls to action; the press names the pane's categories as Agendas, Lists, Key statistics, Quotes, Headlines, People and Cards. A block ungroups with the normal right click Ungroup (b.1).
+5. Import slides is a two step dialog: pick a presentation (Presentations tab from Drive or Upload tab for a file such as a PowerPoint deck), then pick slides from a thumbnail grid with All and None, a selected count, the "Keep original theme" checkbox and the "Import slides" button; imported slides land at the end. Import theme sits at the bottom right of the Themes panel and accepts a Google Slides or PowerPoint presentation. A PPTX in Drive opens in Slides in place and saves back to the Office file; converting makes a copy, capped at 100 MB (c.1).
+6. Download offers seven formats; ODP is a whole deck format that the Drive export API also lists, and SVG is a current slide format that only the UI offers (c.1).
+7. Page setup has four options (Standard 4:3, Widescreen 16:9, Widescreen 16:10, Custom) and Custom takes width and height in inches, centimeters, points or pixels. The size applies to every slide and existing objects keep their coordinates, so they shift. Measurement units are a Preferences checkbox and a ruler menu (d.1).
+8. Print settings and preview is a full page with a toolbar: a layout dropdown that defaults to "1 slide without notes" and offers "1 slide with notes" and handouts of 2, 3, 4, 6 and 9 slides per page, Landscape and Portrait, "Include skipped slides", "Hide background", "Download as PDF" and Print. Notes appear only in the one slide with notes layout; the three per page handout draws ruled lines beside the slides (d.2).
+9. Preferences is a dialog with a General tab of autocorrect checkboxes (capitalisation, links, lists, quotes, and spelling per Google's Docs and Slides page), the autofit preference, the measurement unit preference and Smart Compose toggles, and a Substitutions tab with a master "Automatic substitution" checkbox, a Replace and With table with per row checkboxes and Remove (d.3).
+10. Spell check is a card with Change, Change all, Ignore and Ignore all, plus an Underline errors toggle and a Personal dictionary dialog. Dictionary is a side panel behind Ctrl+Shift+Y. Explore was retired on 2024-01-30 and the tool finder replaced it. Voice typing in Slides is "Dictate speaker notes" in Chrome, Edge and Safari with no voice commands. Accessibility settings is a dialog with screen reader, braille and screen magnifier checkboxes; screen reader support adds an Accessibility menu to the menu bar (d.4, d.5).
+
+## (a) Insert > Audio and Insert > Video
+
+### a.1 Audio
+
+| Feature | Behaviour | Position and label | Shortcut | Source |
+| --- | --- | --- | --- | --- |
+| Menu entry | Opens the Drive picker filtered to audio. Google's steps: select the slide, click Insert then Audio, choose an audio file, click Select. | Insert menu, "Audio", between Image or Text box rows and Video (R01 lists the Insert menu order) | none published; Insert menu opens with Alt+I (Windows) or Ctrl+Option+I (Mac) | G1 Google; G24 Google; R01 |
+| Sources | Only files already stored in the user's Drive. "You can add .mp3 and .wav files stored in your Drive to a presentation." No upload from the computer, no URL, no recording. Third parties add that other formats (AAC, M4A, OGG, FLAC, WMA) are not listed by the picker. | Drive picker with My Drive, Shared with me and Recent | none | G1 Google; T1 secondary; R01 |
+| Browser support for .wav | Google lists Chrome, Firefox, Safari and Microsoft Edge for .wav playback. | n/a | none | G1 Google |
+| Placement | A speaker icon is placed on the slide. It is an object: it moves, and Format options has Size & rotation (width, height, lock aspect ratio) and Position (X and Y from the top left or the centre) for it. The icon can be replaced with the user's own image from the context menu. | Canvas; the icon defaults to a small square near the centre (exact default size unverified) | none | T3 secondary; T1 secondary; default size unverified |
+| Format options, Audio playback section | The panel section for the selected audio. Fields reported by every secondary source: "Start playing" with "On click" (default) and "Automatically"; "Volume when presenting" slider from 0 to 100; "Loop audio" checkbox; "Stop on slide change" checkbox (checked by default: "audio will stop when changing slides"); "Hide icon when presenting" checkbox. Slidesgo states that Hide icon is available only when Start playing is Automatically. Google's page documents no playback fields. | Format options sidebar, "Audio playback" section; also reached from the toolbar Format options button and the context menu | none | T1 secondary; T3 secondary; T5 secondary; R01; Google page silent |
+| Present mode | On click: the icon shows and a click starts playback. Automatically: playback starts when the slide is shown. The icon is hidden when Hide icon when presenting is checked and the audio still plays. With Stop on slide change unchecked the audio continues across slides; with it checked it stops when the slide changes. Loop restarts the file until the slide changes or the show ends. | Present mode | Ctrl+F5 or Cmd+Enter starts the show | T1 secondary; T3 secondary; T5 secondary; G24 Google |
+| Permissions | A viewer must have access to the Drive file; third parties advise sharing the audio file to anyone with the link when playback fails. Google documents the equivalent prompt for Drive videos ("they'll be prompted to request access"), not for audio. | n/a | none | T1 secondary; G3 Google (video) |
+| Volume control | Google Slides has no in-presentation volume control beyond the Volume when presenting slider; SlideStack states there are no in-slide volume controls during the show. | Format options only | none | T5 secondary |
+| Thumbnail | The filmstrip thumbnail shows the speaker icon as any other object. | Filmstrip | none | inference from the object model; unverified |
+| Limits | No file size cap for audio is published beyond Drive's own limits. Third parties report one audio object per slide in practice and no cross fade between clips. | n/a | none | T1 secondary; unverified |
+| Mobile | Insertion is web only; mobile playback of automatic audio is reported as unreliable. | n/a | none | T1 secondary |
+| Export | Whether a downloaded PPTX carries the audio is not confirmed by any page read. | n/a | none | unverified |
+
+### a.2 Video
+
+| Feature | Behaviour | Position and label | Shortcut | Source |
+| --- | --- | --- | --- | --- |
+| Menu entry | Opens the "Insert video" dialog. | Insert menu, "Video", after Audio | none published | G1 Google; R01 |
+| Dialog tabs | Google prints three sources: "Search YouTube", "By URL" and "Google Drive". The Search tab searches YouTube inside the dialog; By URL accepts a YouTube link (and, per ChatSlide, a Drive video link); Google Drive lists the user's Drive videos. A Select button confirms. | Centred modal, tabs across the top, Select at the bottom | none | G1 Google; T2 secondary; T4 secondary; R01 |
+| Drive videos | Inserting Drive videos has been possible since 2017-02-08. "If a person viewing your presentation doesn't have permission to view a video embedded within it, they'll be prompted to request access." Videos "can only be inserted from the web application"; playback works on web and mobile. | Google Drive tab | none | G3 Google |
+| Rendering in the editor | A rectangle showing the video's thumbnail with a play control overlay. ChatSlide reports that the thumbnail updates to the frame at the Start at time. The object has Size & rotation, Position and Drop shadow in Format options; resizing keeps the aspect ratio from the corners. A video cannot be cropped or masked. | Canvas | none | T2 secondary; T4 secondary |
+| Format options, Video playback: Play | Three values. "Play (on click): Video plays when you advance the slide. This is the default." "Play (automatically): Video plays without any clicks." "Play (manual): Video plays when you click specifically on the embedded video in the slide." On click became the default on 2020-10-14; videos inserted before that kept manual. "Google Slides now automatically plays videos like other animation or slide transitions." | Format options sidebar, "Video playback" section, a dropdown | none | G1 Google; G2 Google |
+| Format options, Video playback: Start at and End at | Two time fields that trim the played range. Google's 2017 post names "start and end time" among the "Video options"; the labels "Start at" and "End at" and the minutes:seconds entry come from third parties. | Same section, two text fields | none | G3 Google; T2 secondary; T4 secondary |
+| Format options, Video playback: Mute audio | A checkbox that silences the video during the show. Google's 2017 post names "muted or with sound"; the label "Mute audio" comes from third parties. | Same section, checkbox | none | G3 Google; T2 secondary; T4 secondary |
+| Older labels | Before 2020 the section had an "Autoplay when presenting" checkbox instead of the Play dropdown; older tutorials still print it. | Historic | none | T4 secondary; G2 Google |
+| Sequencing with animations | The 2020 post: video playback can be sequenced "in the animations sidebar, so you can coordinate playback with other animations on the slide". This is the Motion panel of round five area (A). | Motion panel | none | G2 Google |
+| Present mode | On click: the video starts when the presenter advances (click, key or clicker) while on the slide. Automatically: it starts when the slide appears. Manual: the presenter clicks the video itself. Playback is inline inside the slide. YouTube videos play through the YouTube player with its controls and branding; Drive videos play through a plain player. | Present mode | Ctrl+F5 or Cmd+Enter | G1 Google; G2 Google; T2 secondary |
+| Poster frame in exports | No Google page describes the PDF or PPTX rendering. ChatSlide reports that YouTube embeds may survive in a downloaded PPTX and Drive videos do not. | n/a | none | T2 secondary; unverified |
+| File limits | Drive accepts video uploads to its own quota (ChatSlide: 5 TB per file); Drive previews MP4, MOV, WebM and AVI among others. No Slides specific cap is published. | n/a | none | G15 Google; T2 secondary |
+| Mobile | Insertion needs the web editor; playback works in the apps. | n/a | none | G3 Google; T2 secondary |
+
+## (b) Templates and building blocks
+
+### b.1 Gallery, panes and blocks
+
+| Feature | Behaviour | Position and label | Shortcut | Source |
+| --- | --- | --- | --- | --- |
+| Featured strip on the home page | Under the heading "Start a new presentation": a Blank presentation card and a row of featured template cards; clicking a template opens a copy as a new presentation. The strip can be hidden with Menu, Settings, "Display recent templates on home screens". | Home page, top; "Template gallery" link at the right end of the strip header | none | G5 Google; R03 |
+| Template gallery page | "At the top right, click Template Gallery. Click the template you want to use." The page has a General tab with Google's templates and, for Workspace accounts, a tab named after the organisation with submitted templates. Third parties list the Slides categories as Personal, Work and Education with named templates (Personal: General Presentation, Your Slides Carnival, Big Idea, Portfolio, Photo Album, Look Book, Recipe Book, Recipe Showcase, Yearbook, Party Invite; Work: Professional Profiles, Prototyping, Consulting Proposals, Pitches, Status Reports, Case Studies, Employee Certificate; Education: Lesson Plans, Book Reports, Field Trips, Flash Cards, Science Projects, Science Fair, Student Certificate). That list predates the 2024 refresh and may lag the live gallery. | Full page replacing the home page; category headings down the page | none | G5 Google; T8 secondary; R03; current categories unverified |
+| File > New > From template gallery | Opens the gallery in a new tab; a copy of the chosen template opens. Google prints "From Template Gallery". | File menu, New submenu, last row | none | G6 Google; G7 Google; R01 |
+| Languages | Templates across the editors are offered in 21 languages; Slides templates and building blocks "are currently only available in English (US) locale". | n/a | none | G5 Google; G6 Google; G4 Google |
+| Templates button and Insert > Templates (November 2024) | A refreshed library of "modern, professionally designed templates". Reached from "the new 'Templates' button in the Slides toolbar or by going to Insert > Templates". The user can "choose to insert all slides or just the ones you need". Named use cases: sales pitches, product roadmaps and strategic plans (business); lesson plans, book reports and project reports (education); milestone celebrations, workshop facilitation and team games (collaboration). Rollout from 2024-11-07 (Rapid) and 2024-11-21 (Scheduled). | Toolbar top left, "Templates"; Insert menu, "Templates" | none | G9 Google; G6 Google |
+| Second wave (April 2025) | More templates for "business proposals, product pitches, marketing plans, quarterly reviews, team intros or celebrations, and more", reached from the sidebar or Insert > Templates. Rollout from 2025-04-22 and 2025-05-06. | Sidebar Templates pane; Insert menu | none | G10 Google; T9 secondary |
+| Templates pane | The pane lists templates by purpose ("such as a project kickoff presentation or marketing plan presentation"); choosing one shows its slides; the user inserts single slides or clicks "Insert all slides". | Right sidebar, "Templates" pane | none | G6 Google; T7 secondary |
+| The 2025 sidebar | Announced 2025-03-31: "a new sidebar on the right side of your canvas" with panes Templates, Building blocks, Stock images (stock photos, web images, stickers and GIFs), Image generation, Speaker spotlight and Slides recordings. 9to5Google also shows a Drive folder pane for the user's own images. Rollout 2025-03-31 (Rapid) and 2025-04-21 (Scheduled); English (United States) only for templates and building blocks; premium panes need specific editions. | Vertical strip at the right end of the toolbar; each icon opens its pane | none | G8 Google; G11 Google; T6 secondary; R01 |
+| Insert > Building blocks | "A building block is a formatted piece of content, like agendas, quotes, or key statistics." Google's page also names headlines, text callouts and calls to action. Steps: click Insert then Building blocks, "select or drag" the block onto the slide, then "select a building block type" to see more options. | Insert menu, "Building blocks", after Templates | none | G4 Google; G8 Google |
+| Building blocks pane categories | The pane groups blocks by category. Computerworld: "Agendas, Lists, Key statistics, and Quotes"; 9to5Google: Agendas, Lists, Key statistics, Quotes, Headlines, People and Cards. Google's own list of exact category labels is not published. | Right sidebar, "Building blocks" pane | none | T6 secondary; T7 secondary; exact labels unverified |
+| Editing a block | Blocks "are composed of native Slides elements and can be de-grouped and customized once inserted". The user can move the block, remove shapes or text and revise text; right click, "Ungroup" splits it into its objects. | Canvas; context menu | none | G4 Google; G8 Google |
+| Sales starter content | Google's blog frames the library as covering "everything from planning to pitching", including annual planning, proposals for new clients and workshop facilitation. No sales starter deck as such is named. | n/a | none | G11 Google |
+| Organisation templates | Workspace admins can set a domain template that appears when creating a presentation, in the template sidebar and via Insert > Templates; users submit templates from the organisation tab. Limits: 5 themes per presentation and 100 layouts per theme. | Gallery organisation tab; admin console | none | R03 |
+
+## (c) Import and download
+
+### c.1 Import slides, Import theme, PPTX, ODP and SVG
+
+| Feature | Behaviour | Position and label | Shortcut | Source |
+| --- | --- | --- | --- | --- |
+| File > Import slides | Google's steps: "Click File and then Import slides. Choose a presentation from Drive or choose a presentation to upload from your computer. Click Select. Click the slides in the presentation you'd like to import. Use the Select Slides: All option to quickly select all slides. Check the Keep original theme box if you want to import the slides unmodified. Uncheck the box if you want the slides to fit into the look of your new presentation. Click Import slides." | File menu, "Import slides" | none | G12 Google |
+| Import slides dialog, step one | Two tabs: "Presentations" (recent Slides files with a search box, list and grid toggles and sort) and "Upload" (browse or drag a file; PowerPoint files are accepted). Select confirms. | Centred modal | none | T10 secondary; R03 |
+| Import slides dialog, step two | A grid of slide thumbnails with "All" and "None" links (Google prints "Select Slides: All"), a Back button, the count of selected slides at the bottom, the "Keep original theme" checkbox and the "Import slides" button. Imported slides land at the end of the presentation. | Centred modal | none | G12 Google; T10 secondary |
+| Keep original theme | Checked: the slides keep their source theme, which adds a theme to the file (Google caps a file at 5 themes). Unchecked: the slides adopt the current theme and its layouts. | Dialog footer | none | G12 Google; R03 |
+| Import theme | "Slide, Change theme, Import theme" at the bottom right of the Themes panel. The user double clicks a presentation, clicks the theme and clicks Import theme. "Your imported theme must be from an existing Google Slides or PowerPoint presentation." The picker is the same family as Import slides (Drive tabs and Upload). | Themes panel, bottom right, "Import theme" button; then a centred modal | none | G6 Google; G7 Google; G12 Google; R03 |
+| Open a PPTX in place | In Drive, double click the file and click "Open with Google Slides" at the top. "Any changes you make are saved to the original Microsoft Office file." This is Office editing, not conversion. | Drive; the Slides editor with the Office file open | none | G14 Google |
+| Convert a PPTX to Slides | "If you want to use Add-ons, Apps Scripts, protected ranges, or translate options, you can convert an Office file to Google Docs, Sheets, or Slides. When you convert, you make a copy of your Office file." Third parties name the menu row "Save as Google Slides" in the File menu. Drive caps conversion at "up to 100 MB for presentations converted to Google Slides". | File menu of an Office file, "Save as Google Slides" (label secondary) | none | G13 Google; G15 Google; T11 secondary |
+| What a conversion changes | SlideModel's list: complex animations (motion paths, emphasis sequences) and PowerPoint only transitions (Morph, 3D rotation) do not transfer; desktop only fonts are substituted and layouts shift; SmartArt becomes static shapes or a flattened image; embedded audio and video files often do not transfer; Excel linked charts and some tables become static images; custom masters, placeholders and layouts may change; embedded Word and Excel objects, OLE objects and macros do not function; most hyperlinks survive but triggers and macro buttons do not; gradients, advanced shape effects, transparency and layer order can shift. Several tutorials mention a notice about unsupported features with a "View details" link; no Google page read confirms that label. | Post conversion notice (label unverified) | none | T11 secondary; notice label unverified |
+| Home page upload | The Open dialog's Upload tab takes a file from the computer; a PPTX opens in Slides. | Open dialog, "Upload" tab | Ctrl+O or Cmd+O opens the dialog | R03; G24 Google |
+| Download as ODP | "ODP Document (.odp)" exports the whole deck. The Drive export API lists application/vnd.oasis.opendocument.presentation for presentations, alongside PPTX, PDF and plain text. | File menu, Download submenu, second row | none | R03; G16 Google; G17 Google |
+| Download as SVG | "Scalable Vector Graphics (.svg, current slide)" exports one slide as SVG. The Drive export API does not list SVG, PNG or JPEG for presentations, so the three image downloads are editor only. | File menu, Download submenu, last of the three image rows | none | R03; G16 Google |
+| Other downloads | "Microsoft PowerPoint (.pptx)", "PDF Document (.pdf)", "Plain Text (.txt)", "JPEG image (.jpg, current slide)", "PNG image (.png, current slide)". TXT carries slide text and speaker notes. | Download submenu | none | R03 |
+
+## (d) Page setup, print, preferences, spelling, dictionary, explore, voice, accessibility
+
+### d.1 Page setup and units
+
+| Feature | Behaviour | Position and label | Shortcut | Source |
+| --- | --- | --- | --- | --- |
+| File > Page setup | A dialog with a size dropdown: "Standard (4:3)", "Widescreen (16:9)", "Widescreen (16:10)" and "Custom". Google: "To pick a size, click the Down arrow. For a custom size, below 'Custom,' enter a size and pick a unit of measurement (inches, centimeters, points, or pixels)." | File menu, "Page setup", near the bottom above Print; centred modal | none | G18 Google |
+| Custom size | Width and height fields with a unit dropdown of inches, centimeters, points and pixels. | Dialog | none | G18 Google |
+| Confirm button | Plus AI and Google's help text say OK; other third parties say Apply. Round one recorded the same disagreement. | Dialog footer | none | T12 secondary; R03; label unverified |
+| Default size | Widescreen 16:9 at 960 by 540 pixels (10 by 5.625 inches at 96 pixels per inch). Plus AI lists common pixel sizes per preset: 4:3 at 1024 by 768 or 1280 by 960; 16:9 at 1280 by 720 or 1920 by 1080; 16:10 at 1280 by 800 or 1920 by 1200. | n/a | none | T12 secondary |
+| Scope of a change | The size applies to all slides; "you cannot change sizes for individual slides". Existing objects keep their positions and sizes, so "your slide elements may appear differently" (placement, sizing, backgrounds). | n/a | none | T12 secondary; G18 Google |
+| Measurement units | "Click Tools and then Preferences. Enable Use measurement unit preferences. Select Inches, Centimeters or Pixels." The ruler also has a menu: click the ruler, hover "Change units", pick a unit, or "Reset to presentation default" (the locale default). | Tools > Preferences, General tab; ruler | none | G18 Google |
+
+### d.2 Print settings and preview
+
+| Feature | Behaviour | Position and label | Shortcut | Source |
+| --- | --- | --- | --- | --- |
+| File > Print | "Print without changes: Click Print." In Slides a PDF is produced for the browser's print dialog: "A PDF file will automatically download." | File menu, "Print", last row | Ctrl+P or Cmd+P | G19 Google; G24 Google |
+| File > Print settings and preview | Opens a full page preview with a toolbar. Google's steps name the toolbar rows: "Adjust orientation: Click Print settings and preview in the toolbar, then click Handout, Landscape." and "Print with speaker notes: Click Print settings and preview in the toolbar, then click 1 slide with notes." | File menu, "Print settings and preview"; the preview replaces the editor | none | G19 Google; R03 |
+| Layout dropdown | Defaults to "1 slide without notes". Options: "1 slide with notes" and handouts of 2, 3, 4, 6 and 9 slides per page. Google prints the word "Handout"; the exact handout strings differ between sources ("Handout - 2 slides per page" in older guides, "2 slides" and "3 slides with notes" in a 2026 guide), so the strings are recorded as unverified. | Preview toolbar, left | none | G19 Google; T13 secondary; T14 secondary; exact strings unverified |
+| Notes pages | Only "1 slide with notes" prints notes: the slide on the top half and the speaker notes below. The three per page handout puts the slides in a column on the left and ruled lines on the right. There is no two or four slides with notes layout. | Layout dropdown | none | T13 secondary; T14 secondary |
+| Orientation | "Landscape" and "Portrait". | Preview toolbar | none | G19 Google; T14 secondary |
+| Include skipped slides | A checkbox; skipped slides are left out of the printout unless it is checked. | Preview toolbar | none | T15 secondary; R03 |
+| Hide background | A checkbox that removes the theme background from the printout to save ink; images and text still print. | Preview toolbar | none | T14 secondary |
+| Download as PDF | Saves the preview as a PDF instead of printing. | Preview toolbar, right | none | T13 secondary; T14 secondary |
+| Print and Close preview | "Print" opens the browser print dialog for the current settings; a close control returns to the editor (its label is reported as "Close preview" but not confirmed). | Preview toolbar, right | none | G19 Google; label unverified |
+
+### d.3 Preferences
+
+| Feature | Behaviour | Position and label | Shortcut | Source |
+| --- | --- | --- | --- | --- |
+| Tools > Preferences | A dialog with two tabs, "General" and "Substitutions". | Tools menu, "Preferences"; centred modal | none | G20 Google; G23 Google; R01 |
+| General: autocorrect | "Auto-correct can automatically correct capitalisation and spelling in Google Docs and Slides. It can also automatically detect links, lists and quotes." The Slides spelling page: "Autocorrect checks capitalization and creates links and lists." Each function is a checkbox: "To turn off certain auto-corrects, such as automatic capitalisation, spelling corrections or link detection, untick the box next to the function." The exact Slides labels are reported by third parties as "Automatically capitalize words", "Use smart quotes", "Automatically detect links" and "Automatically detect lists"; BrightCarbon prints "Automatically detect links" and "Automatically capitalise words". The Docs dialog adds "Automatically correct spelling", "Automatically detect markdown", "Suggest action items", "Suggest contacts in comments", "Show Smart Compose suggestions", "Show Smart Reply suggestions" and "Show link details"; which of these Slides shows is not confirmed. | General tab | none | G20 Google; G23 Google; T15 secondary; T16 secondary; Slides label set unverified |
+| General: autofit | "Use custom autofit preferences." with a choice of "Do not autofit.", "Shrink text on overflow" (the default for theme placeholders) and "Resize shape to fit text" (the default for text boxes). Changes affect presentations created after the January 2021 update. | General tab | none | G21 Google |
+| General: measurement units | "Use measurement unit preferences" with Inches, Centimeters and Pixels. | General tab | none | G18 Google |
+| General: Smart Compose and Smart Reply | BrightCarbon reports Smart Compose and Smart Reply toggles in the Slides dialog. | General tab | none | T15 secondary |
+| Substitutions | A master checkbox "Automatic substitution" turns all substitutions off at once. A table of Replace and With pairs; "next to the word, untick the box" to disable one, click "Remove" to delete it; the user adds custom pairs (BrightCarbon: copyright and trademark symbols, superscript and subscript). The default pair list is not published on a page read. | Substitutions tab | none | G20 Google; G23 Google; T15 secondary; default list unverified |
+
+### d.4 Spelling and Dictionary
+
+| Feature | Behaviour | Position and label | Shortcut | Source |
+| --- | --- | --- | --- | --- |
+| Tools > Spelling > Spell check | A card that steps through misspellings with "Change" (and "Change all" in its dropdown) and "Ignore" (and "Ignore all"). Misspelled words are underlined in red; right click accepts or rejects a suggestion. No spell check shortcut is published for Slides. | Tools menu, "Spelling" submenu, "Spell check"; the card sits over the canvas | Ctrl+' and Ctrl+; (Cmd+' and Cmd+; on Mac) move to the next and previous misspelling | G23 Google; G24 Google; R01 |
+| Underline errors | A toggle for the red underlines across presentations. | Spelling submenu, "Underline errors" | none | G23 Google |
+| Personal dictionary | A dialog where the user enters words that spell check should accept. | Spelling submenu, "Personal dictionary" | none | G23 Google |
+| Tools > Dictionary | A side panel with a search field; it shows the definition, part of speech and pronunciation, synonyms and antonyms, with hyperlinked words that open their own definitions. With a word selected, the panel opens on that word. Tutorials show it in Slides as well as Docs. A context menu "Define" row is reported for Docs; its presence in Slides is not confirmed. | Tools menu, "Dictionary"; right sidebar panel | Ctrl+Shift+Y or Cmd+Shift+Y ("Open dictionary") | G24 Google; T17 secondary; T18 secondary; context menu row unverified |
+
+### d.5 Explore, Dictate speaker notes and the Accessibility menu
+
+| Feature | Behaviour | Position and label | Shortcut | Source |
+| --- | --- | --- | --- | --- |
+| Explore (retired) | Google's notice: "Explore in Google Docs, Sheets, and Slides will no longer be available by January 30, 2024." In Slides it offered layout suggestions for the current slide and a search over the web, images and Drive. Google points to the tool finder and to "@" insertion instead. The shortcut is still printed on Google's shortcuts page. Round one: do not build an Explore button. | Formerly a button at the bottom right of the editor and a Tools row | Ctrl+Alt+Shift+I or Cmd+Option+Shift+I ("Open Explore") | T19 secondary quoting Google; G24 Google; G26 Google; R02 8.6 |
+| Tool finder | The replacement: "Find menu items and tools", "View recommended actions", "Get suggestions for related actions as you type", "Activate Find & replace". Available in Docs, Sheets, Slides and Vids. | Toolbar, first control (a search icon); also in the Help menu | Alt+/ or Option+/ | G26 Google |
+| Tools > Dictate speaker notes | Google's current label: "Dictate speaker notes" (older tutorials print "Voice type speaker notes"). Steps: click Tools, click Dictate speaker notes; "The speaker notes open and a microphone box displays"; click the microphone to start and again to stop; a language dropdown sits above the microphone. Works in the latest Chrome, Edge and Safari. "Voice commands aren't available in Slides speaker notes." Whether spoken punctuation (Period, Comma, New line) works in Slides notes is not stated for Slides. | Tools menu, "Dictate speaker notes"; the microphone box floats over the notes pane | none published for Slides; Ctrl+Alt+Shift+S or Cmd+Option+Shift+S opens the notes panel | G25 Google; G24 Google; R01 |
+| Tools > Accessibility settings | A dialog. Google prints the checkboxes "Turn on screen reader support" and "Turn on braille support"; the 2019 launch post adds a screen magnifier checkbox ("screen reader support, braille support and screen magnifier support") and says the magnifier applies to Slides and Drawings on Mac and Chrome OS. A collaborator announcements checkbox is reported by BrightCarbon (round one) and is in Turboslide's model already; its Google label is not confirmed. The menu row is also printed as "Accessibility" in some places. | Tools menu, "Accessibility settings"; centred modal | Ctrl+Alt+Z or Option+Cmd+Z toggles screen reader support; Ctrl+Alt+H or Cmd+Option+H toggles braille support | G27 Google; G29 Google; G24 Google; T20 secondary; R01; magnifier and announcements labels unverified |
+| Accessibility menu | "If the screen reader option is selected from the accessibility settings dialog, an Accessibility menu will be displayed at the top of Docs, Sheets, and Slides for easy access." Documented items: "Verbalize to screen reader" with "Verbalize selection formatting" and "Verbalize selection"; navigation rows for comments and formatting changes. Focus moves to the canvas with Ctrl+Alt+Shift+C (Cmd+Option+Shift+C) and Tab steps through the objects; the filmstrip takes Up and Down arrows. | Eleventh menu at the right end of the menu bar, "Accessibility" | Alt+A (Chrome), Alt+Shift+A (other browsers), Ctrl+Option+A (Mac); Verbalize selection Ctrl+Alt+X; Verbalize selection formatting Ctrl+Alt then A then F | G29 Google; G28 Google; G24 Google; R01 |
+| Braille mode | "Docs, Sheets, and Slides have a Braille mode that's needed when using a Braille display." With braille off, the filmstrip announces the entire content of a slide. | Accessibility settings dialog | Ctrl+Alt+H or Cmd+Option+H | G27 Google; G28 Google |
+
+## Turboslide today
+
+The menu model at main d5d7f07 (MODEL) records the current state of every row this report covers:
+
+- `insert.audio` and `insert.video` are Later with the clause "Link to a recording instead".
+- `insert.templates` and `insert.buildingBlocks` are Later with the clause "Start from the GT brand deck on the home page"; `file.new.templateGallery` is Now and routes to `/decks#templates`.
+- `file.importSlides` is Now (the Import slides dialog reads Turboslide bundles); `file.download.odp` and `file.download.svg` are Later with the clause "Only PowerPoint, PDF, text, pictures and the web page download"; the other five Download rows are Now.
+- `file.pageSetup` is Later with the clause "The GT theme is 16:9 at 1600 by 900"; `file.printPreview` and `file.print` are Now and route to `/print/:deckId`.
+- `tools.spelling.spellCheck` is Later (the browser underlines and offers suggestions on right click); `tools.spelling.underlineErrors` is Now as a toggle; `tools.spelling.personalDictionary`, `tools.explore`, `tools.dictionary` and `tools.dictateNotes` are Omit ("A Google service" or the 2024 retirement).
+- `tools.preferences` is Later with the clause "Text fitting is set per text box in Format options; the ruler reads inches".
+- `tools.accessibilitySettings` is a submenu with `collaboratorAnnouncements` Now and `screenReader` and `braille` Omit ("The browser's screen reader works on the DOM").
+- `help.training` and `help.updates` are Omit.
+
+## Notes for the design step
+
+These are the facts from the tables that the design of round five will need to decide against. They are observations, not designs.
+
+1. Google's audio object is a speaker icon with five playback fields and no per show volume control; the document shape needs a media reference, a start mode, a volume, a loop flag, a stop on slide change flag and a hide icon flag. The icon is an ordinary positioned object with Size & rotation and Position.
+2. Google's video object carries a source (YouTube id, URL or stored file), a play mode of three values, a start time, an end time and a mute flag, and the editor shows the frame at the start time as the poster. Google sequences an automatic video with the slide's animations, so the Motion panel of area (A) must list videos.
+3. Google's template entry points are a home gallery (copy the whole template), a Templates pane (single slides or all slides) and File > New. Building blocks are groups of native objects; a block library in Turboslide is a set of grouped blocks that ungroups with the existing Ungroup.
+4. Import slides is two steps and a checkbox; its Upload tab accepts PPTX, which means the OOXML reader of area (D) serves both Import slides and Open. Import theme adds a theme to the file, and Google caps themes at 5 per file and layouts at 100 per theme.
+5. Page setup applies to every slide and leaves object coordinates alone. Print needs seven layouts, two orientations and two checkboxes, and only one layout carries notes.
+6. Preferences is two tabs; the substitutions table is the one part with user data. Spell check is a card over the canvas with four buttons. Dictionary, Dictate speaker notes and the screen magnifier depend on browser or platform services (a dictionary source, the Web Speech API, the OS magnifier), and Explore is retired.
+
+## Unverified
+
+- The default size of the audio speaker icon and its filmstrip rendering.
+- Whether a downloaded PPTX carries inserted audio; whether PDF export shows a poster frame for a video.
+- The exact labels "Start at", "End at" and "Mute audio" (Google names the fields only as start and end time and muted or with sound).
+- The current category labels of the Template gallery page after the 2024 and 2025 refreshes; the Personal, Work and Education list is from a third party and predates them.
+- The exact category labels of the Building blocks pane (Agendas, Lists, Key statistics, Quotes, Headlines, People, Cards are from the press).
+- The label of the conversion notice and its "View details" link when a PPTX is converted, and the "Save as Google Slides" row label.
+- The Page setup confirm button (OK or Apply).
+- The exact handout strings in the print layout dropdown and the label of the close control in the print preview.
+- The exact set of General tab checkboxes in the Slides Preferences dialog and the default substitution pairs.
+- The presence of a "Define" row in the Slides context menu.
+- Whether spoken punctuation commands work in Slides speaker notes.
+- The exact labels of the screen magnifier and collaborator announcements checkboxes in Accessibility settings.
+
+## Sources
+
+All read on 2026-09-14.
+
+Google pages:
+
+- G1 Insert or delete images & videos (Google Slides). https://support.google.com/docs/answer/97447?hl=en&co=GENIE.Platform%3DDesktop
+- G2 Google Workspace Updates, New default video playback option in Google Slides (2020-10-14). https://workspaceupdates.googleblog.com/2020/10/new-video-playback-option-google-slides.html
+- G3 Google Workspace Updates, Insert videos from Google Drive in Google Slides (2017-02-08). https://workspaceupdates.googleblog.com/2017/02/insert-videos-from-google-drive-in.html
+- G4 Use building blocks in Google Slides. https://support.google.com/docs/answer/15720996?hl=en
+- G5 Use templates. https://support.google.com/docs/answer/148833?hl=en
+- G6 Use a Template or change the theme, background, or layout in Google Slides. https://support.google.com/docs/answer/1705254?hl=en&co=GENIE.Platform%3DDesktop
+- G7 Use a Template or change the theme, background, or layout in Google Slides (Google Workspace Learning Center). https://support.google.com/a/users/answer/10164039?hl=en
+- G8 Google Workspace Updates, New sidebar with design elements in Google Slides makes building presentations easier (2025-03-31). https://workspaceupdates.googleblog.com/2025/03/new-sidebar-with-design-elements-in-google-slides.html
+- G9 Google Workspace Updates, Introducing a refreshed library of high-quality Google Slides templates (2024-11-07). https://workspaceupdates.googleblog.com/2024/11/new-templates-in-google-slides.html
+- G10 Google Workspace Updates, Introducing even more high-quality Google Slides templates (2025-04-22). https://workspaceupdates.googleblog.com/2025/04/even-more-high-quality-google-slides-templates.html
+- G11 Google Workspace blog, Creating visually stunning presentations in Google Slides just got easier (2025-03-31). https://workspace.google.com/blog/productivity-collaboration/creating-visually-stunning-presentations-google-slides-just-got-easier
+- G12 Tips for great presentations (Google Workspace Learning Center). https://support.google.com/a/users/answer/9282978?hl=en
+- G13 Work with Microsoft Office files. https://support.google.com/docs/answer/9406611?hl=en
+- G14 Switch from Microsoft PowerPoint to Google Slides (Google Workspace Learning Center). https://support.google.com/a/users/answer/9310378?hl=en
+- G15 Files you can store in Google Drive. https://support.google.com/drive/answer/37603?hl=en
+- G16 Google Drive API, Export MIME types for Google Workspace documents. https://developers.google.com/workspace/drive/api/guides/ref-export-formats
+- G17 Create, view, or download a file. https://support.google.com/docs/answer/49114?hl=en
+- G18 Change slide size & measurement units in Google Slides. https://support.google.com/docs/answer/3447672?hl=en&co=GENIE.Platform%3DDesktop
+- G19 Print a file. https://support.google.com/docs/answer/143346?hl=en&co=GENIE.Platform%3DDesktop
+- G20 Manage writing suggestions in Google Docs and Slides. https://support.google.com/docs/answer/12022089?hl=en&co=GENIE.Platform%3DDesktop
+- G21 Change how text fits in placeholders & text boxes. https://support.google.com/docs/answer/10364036?hl=en
+- G22 Work with links & bookmarks. https://support.google.com/docs/answer/45893?hl=en&co=GENIE.Platform%3DDesktop
+- G23 Check your spelling in Google Slides. https://support.google.com/docs/answer/9764808?hl=en
+- G24 Keyboard shortcuts for Google Slides. https://support.google.com/docs/answer/1696717?hl=en&co=GENIE.Platform%3DDesktop
+- G25 Type & edit with your voice. https://support.google.com/docs/answer/4492226?hl=en&co=GENIE.Platform%3DDesktop
+- G26 Tool finder for Docs, Sheets, Slides & Vids. https://support.google.com/docs/answer/13466905?hl=en
+- G27 Use Google Docs Editors with a screen reader. https://support.google.com/docs/answer/6282736?hl=en&co=GENIE.Platform%3DDesktop
+- G28 Use Google Slides with a screen reader (Google Accessibility Help). https://support.google.com/accessibility/answer/1634140?hl=en
+- G29 Google Workspace Updates, Accessibility settings are now easier to access on Docs, Sheets, and Slides (2019-02-27). https://workspaceupdates.googleblog.com/2019/02/accessibility-settings-editors.html
+
+Secondary pages:
+
+- T1 ChatSlide, How to Add Audio to Google Slides (2026 guide). https://www.chatslide.ai/guides/how-to-add-audio-to-google-slides
+- T2 ChatSlide, How to Add a Video to Google Slides (2026): YouTube, Drive, or Upload. https://www.chatslide.ai/guides/how-to-embed-a-video-in-google-slides
+- T3 Slidesgo School, How to add and edit audio or music in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-and-edit-audio-or-music-in-google-slides
+- T4 Slidesgo School, How to add a video in Google Slides. https://slidesgo.com/slidesgo-school/google-slides-tutorials/how-to-add-a-video-in-google-slides
+- T5 SlideStack, How to easily add and edit audio or music in Google Slides. https://slidestack.com/blog/how-to-easily-add-and-edit-audio-or-music-in-google-slides
+- T6 9to5Google, Google Slides getting new sidebar, building blocks, and more (2025-03-31). https://9to5google.com/2025/03/31/google-slides-sidebar/
+- T7 Computerworld, Google Slides cheat sheet. https://www.computerworld.com/article/1658651/how-to-use-google-slides.html
+- T8 Alphr, Where to find free Google Slides templates. https://www.alphr.com/where-to-find-free-google-slides-templates/
+- T9 Android Police, Google Slides adds a fresh batch of templates to kickstart your next presentation (2025). https://www.androidpolice.com/google-slides-fresh-batch-of-templates-2025/
+- T10 How-To Geek, How to Import Slides From Another Presentation in Google Slides. https://www.howtogeek.com/787547/how-to-import-slides-from-another-presentation-in-google-slides/
+- T11 SlideModel, How to Fix Compatibility Issues from PowerPoint to Google Slides. https://slidemodel.com/fix-compatibility-powerpoint-google-slides/
+- T12 Plus AI, Google Slides size and dimensions. https://plusai.com/blog/google-slides-size-and-dimensions/
+- T13 SlidesAI, How to Print Google Slides with Notes. https://www.slidesai.io/blog/how-to-print-google-slides-with-notes
+- T14 Bricks, How to Print Google Slides. https://www.thebricks.com/resources/how-to-print-google-slides
+- T15 BrightCarbon, Google Slides: The ULTIMATE guide. https://www.brightcarbon.com/blog/google-slides-ultimate-guide/
+- T16 Lexnet, Google Docs Preferences: Should You Change Default Settings? https://www.lexnetcg.com/blog/google-docs/preferences/
+- T17 MakeUseOf, How to Use the Dictionary in Google Docs. https://www.makeuseof.com/how-to-use-dictionary-google-docs/
+- T18 The Techie Teacher, How to Quickly Find Definitions of Words in Google Drive (2019-09). https://www.thetechieteacher.net/2019/09/how-to-quickly-find-definitions-of.html
+- T19 Alice Keeler, Google Explore: What happened to it (2023-03-24, updated 2024-10-15). https://alicekeeler.com/2023/03/24/google-explore-what-happened-to-it/
+- T20 G3ict, Google Adds Braille Support to Sheets, Magnifier Tool to Slides and Drawings. https://g3ict.org/headlines/google-adds-braille-support-to-sheets-magnifier-tool-to-slides-and-drawings
+
+Repository cross references:
+
+- R01 docs/gslides-parity/research/01-menu-bar.md (round one menu inventory, sources G01 to G52 and T01 to T36 there).
+- R02 docs/gslides-parity/research/02-editor-surface.md, section 8.6 (Explore retired).
+- R03 docs/gslides-parity/research/03-home-themes-layouts-io.md (home page, gallery, Import slides, Import theme, Download, Page setup, Print).
+- MODEL packages/chrome/src/menus/model.ts at d5d7f07 (row status Now, Later or Omit with each row's clause).

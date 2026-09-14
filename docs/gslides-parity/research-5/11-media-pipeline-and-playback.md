@@ -1,0 +1,605 @@
+# Media pipeline and playback: upload, storage, YouTube, the show, the camera and the second screen
+
+Written 2026-09-14 for the Turboslide round five parity work (the last parity round), scope item B and the Camera, Speaker spotlight and Present on another screen rows of report 03. Every repository file was read at main `d5d7f07` with `git show`, never from the working tree, and is cited as L followed by the path and line numbers. Every external fact was read on 2026-09-14 and is cited as V (Vercel), Y (YouTube and Google), B (browser vendors and MDN), S (specifications and registries), N (the npm registry) or M (a measurement made with `curl` on 2026-09-14 against a public URL), all listed in the Sources section with URLs. Nothing was checked inside a signed in account. Sibling reports are cited as R02 (`02-media-templates-import-page.md`), R03 (`03-later-rows-and-edit-theme.md`), R05 (`05-motion-media-export.md`) and R07 (`07-turboslide-inventory-5.md`), and the round three security reports as R3-04 and R3-10. Every table carries a Verified or unverified column; an unverified row is repeated in the Unverified section. No Google, YouTube or PowerPoint icon or artwork is reproduced or proposed; the play glyph and the speaker glyph are Turboslide's own drawings.
+
+## How to read this report
+
+Report 05 fixed the `MediaBlock` document shape (R05 section 3), the PPTX writing (7.1 to 7.5), the caps proposal (8), the poster policy (7.3) and the one hook in the standalone runtime (9.2). Report 02 recorded Google's fields (R02 a.1, a.2). Report 07 inventoried the asset pipeline and present mode (R07 1.6, 3, 4, 5.4, 11). This report fills the plumbing between them, one section per question of the brief: intake (1), serving (2), posters (3), YouTube (4), playback in the show and the standalone runtime (5), the camera and the spotlight (6), the second screen (7), and the actions, rows, fixtures and checks (8). A summary of decisions opens the report; the decisions Kevin must take, the unverified statements and the sources close it.
+
+## Summary of decisions
+
+1. Accepted formats: video `mp4` (H.264 with AAC) and `webm` (VP9 or VP8 with Opus or Vorbis); audio `mp3`, `m4a` (AAC) and `wav` (PCM). The list is the intersection report 05 fixed with what PowerPoint plays on Windows (B24) and what every current browser plays (B5), and it is a superset of Google's `mp3` and `wav` (R02 a.1). `mov`, `ogg`, `mkv`, `avi`, `aac` (ADTS) and `flac` are refused at intake with a one sentence message naming the accepted list; `ogg` and `mov` are the two candidates for a later widening (section 1.1).
+2. The render worker's browser cannot decode H.264 or AAC. The hosted Chromium is `chrome-headless-shell` (L `packages/headless/src/launch.ts:44`, `docs/hosting-chromium.md:41,165`), Playwright's Chromium lacks the codecs Google Chrome bundles (B1), and chromium.org lists H.264 and AAC as Google Chrome only while MP3, Opus, Vorbis, VP9, FLAC and PCM are in Chromium (B6). Consequences: no server side poster for `mp4` or `m4a`, e2e fixtures in `webm`, `wav` and `mp3`, and the `media.info` output carries a per engine playability advisory (sections 1.1, 3, 8).
+3. A media sniff by container signature (`ftyp`, `ID3` or the MPEG frame sync, `RIFF WAVE`, the EBML header with DocType `webm`, `OggS`) lives in a framework free module both the store's bundle scan and the headless intake import, beside the two `sniffImage` copies that exist today (L `packages/headless/src/capture/shared.ts:534-566`, `packages/store/src/bundle.ts:216-235`). Section 1.2 gives the byte table.
+4. Duration, dimensions and codecs come from Turboslide's own small parsers (ISOBMFF `mvhd`, `tkhd`, `stsd`; EBML `Info` and `Tracks`; MP3 `Xing`, `VBRI` and frame walking; WAV `fmt` and `data`), about four hundred lines with fixtures, rather than a dependency. Of the six libraries evaluated, `mediabunny` (MPL-2.0) is the one to take if own parsers are refused, and `music-metadata` (MIT) is a fitting test oracle as a dev dependency (section 1.3).
+5. The asset record becomes a union: today's picture record unchanged, plus a `MediaAsset` discriminated by `kind: 'audio' | 'video'` with `file`, `mime`, `bytes`, `sha256`, `durationMs`, `size`, `codecs`, `poster` and `source`. It stays in `deck.assets` so report 05's `source: { asset: AssetId }` and `poster?: AssetId` hold without a second map (section 1.4).
+6. Storage and serving: media files are stored digest named under `assets/` like twins, with the audio and video content types added to the Blob content type table, the asset route's type table and its inline list (L `packages/store/src/blob-store.ts:137-147`, `apps/studio/src/routes/decks.$deckId.assets.$.ts:22-30`, `apps/studio/src/server/headers.ts:64`). The Blob put sets `cacheControlMaxAge` to one year because the name carries the digest (section 2).
+7. The public Vercel Blob store answers Range requests: a `HEAD` on a public blob returned `accept-ranges: bytes`, a `Range: bytes=0-99` request returned `206` with `content-range`, and both carried `access-control-allow-origin: *` (M1, M2). Seeking, Start at and the poster canvas therefore work against the store. Vercel's documentation does not state Range support; the fact is measured, not documented (section 2).
+8. The checkout's asset route streams whole files with no Range support (L `decks.$deckId.assets.$.ts:44-46`); it gains `206`, `Accept-Ranges`, `Content-Range`, `416` and `HEAD`. On Vercel's `tmp` tier that route is a function and a function response body is capped at 4.5 MB (V3; the recorded 4,718,592 bytes, R07 11.2), so media insertion on the `tmp` tier is refused with a notice, or capped at 4 MB; Kevin picks (section 2, decisions 6).
+9. Hosted uploads over 4.5 MB must go from the browser to Blob directly. Today's presigned route always answers `backend: 'local'` and the browser `PUT`s to `/api/x/upload/put/<token>`, a function (L `apps/studio/src/server/upload.ts:26-38,258-266`, `apps/studio/src/routes/api/x.upload.$.ts`), which the 4.5 MB request body cap kills for a picture over 4.5 MB and for every video. The `blob` backend the module header reserves is built in this round with `handleUploadPresigned` and `uploadPresigned` (V6) against the private store's `uploads/` prefix, `allowedContentTypes` gaining the five media types and `maximumSizeInBytes` the tier's cap. A 150 MB agent upload to a hosted deck takes the same three steps, wrapped by the CLI (section 1.8).
+10. Caps: report 05's values stand as `QUOTAS` rows `largestAudioBytes` (25 MB anonymous, 50 MB account and agent), `largestVideoBytes` (25 MB, 200 MB, 200 MB), `mediaPerDay` (10, 100, 300) and `mediaBytesPerDay` (200 MB, 5 GB, 10 GB), and a `DECK_CAPS.mediaBytes` of 300 MB beside the 200 MB public asset cap (section 1.7). The bundle cap of 200 MB conflicts with a deck holding 300 MB of media; the recommendation is 500 MB with the unpack streaming to disk (decision 5).
+11. Privacy: media on the public store are readable by anyone holding the URL, the position storage layout v2 already takes for the twins (L `docs/hosting.md:640-660`). A recorded talk is more sensitive than a dithered picture, so the report lists three positions for Kevin (the picture precedent, the deferred `assetKey` prefix shipped for media first, or the private store with signed GET URLs) and recommends the `assetKey` prefix (section 2, decisions 3).
+12. Posters are captured in the editor: a `<video crossorigin="anonymous" preload="metadata">` seeked to `startMs`, drawn to a canvas, `toBlob` as JPEG, stored as a picture asset through the existing intake, recaptured when Start at changes. The failure modes are a tainted canvas (a host without CORS headers; the Blob store sends them, M1), a codec the browser cannot decode, and a `seeked` that never fires; each falls back to Turboslide's own frame with the play glyph, the title and the duration (section 3).
+13. YouTube: the By URL grammar is the eight schemes YouTube registers with oEmbed plus the `embed/` form (Y10, Y2); playlists without a video id are refused; `t` and `start` map to Start at. The player is the IFrame Player API on `www.youtube-nocookie.com` with `enablejsapi=1`, `origin`, `start`, `end`, `mute`, `playsinline=1`, `rel=0` and `controls=1` (Y1, Y2, Y5). Controls stay visible and unobscured, the player is never smaller than 200 by 200 px, and at most one player autoplays per page, which the terms require (Y3). The CSP gains `frame-src https://www.youtube-nocookie.com https://www.youtube.com` and the IFrame API script is loaded by a nonced loader under `'strict-dynamic'` (section 4).
+14. YouTube titles come from the oEmbed endpoint and thumbnails from `i.ytimg.com`, both without a key (M3, M4); both hosts join the `safeFetch` allow list for that one use. Storing a YouTube thumbnail in a deck as the poster is not the default: YouTube's developer policies cap storage of non authorized API data at 30 days (Y4) and the export outlives that. The default poster is Turboslide's own frame with the title; a live thumbnail is shown in the editor only. Whether a user may pin the thumbnail as their poster is Kevin's decision 2 (section 4).
+15. The Search YouTube tab needs the YouTube Data API v3 and a key; a new project's default quota is 100 `search.list` calls per day (Y8), so the tab ships disabled with its clause until Kevin decides (decisions 1). The standalone form of a YouTube block is the iframe when online and the poster with a link otherwise.
+16. Playback rules in the show: media elements are mounted only by the show and the standalone motion script, never by `renderSlide`, so clones, thumbnails, the presenter console and the print document carry the poster only (the runtime's `cloneSlide` and the console's `LiveClone` copy markup verbatim, L `packages/viewer/standalone/runtime.ts:218-231`, `packages/viewer/src/LiveClone.tsx`). Start at and End at run through `currentTime` and a `timeupdate` listener with a re-armed timer, not Media Fragments. Audio with Stop on slide change unchecked lives in a deck level layer outside the slide DOM. Volume is `element.volume` and is read only on iOS (B9). A click on a `manual` media object toggles it and never advances (section 5).
+17. Autoplay: muted autoplay is always allowed; audible autoplay needs prior interaction with the site, a media engagement threshold or an installed app (B2, B3, B4). The show is normally started by a click, which is the activation. The audience route opened from a link has none: the first automatic media that rejects with `NotAllowedError` plays muted and a one line toast offers sound; the standalone runtime does the same (section 5).
+18. Camera and Speaker spotlight run on `getUserMedia`. The studio's own `Permissions-Policy` header denies `camera` and `microphone` to every origin including itself (L `headers.ts:103-104`), so both directives change to `(self)` before either feature, or Voice type, can work. The capture dialog writes a picture asset; the spotlight is a placeholder block that shows the live camera during the show and exports as its placeholder picture (section 6).
+19. Present on another screen and Presentation display options flip to Now on browsers with the Window Management API (Chrome 100 and Chromium browsers, B15, B16, B17): the show goes fullscreen on a chosen screen through `requestFullscreen({ screen })` and the presenter window opens on the other. Firefox and Safari have no such API (B17), so the row shows disabled with the drag clause there. The Presentation API stays out: Firefox and Safari lack it (B19) and its receivers are Cast devices, Google's (section 7).
+20. Actions: `media.insert`, `media.setPlayback`, `media.poster`, `media.info`, `media.list`, `camera.capture` and `view.presentOnScreen`, each with CLI, MCP and window forms; the rows `insert.audio`, `insert.video`, `insert.image.camera`, `insert.speakerSpotlight`, `title.slideshow.presentOnAnotherScreen` and `title.slideshow.displayOptions` flip to Now and the `NO_MEDIA` clause is deleted; fixtures are generated, synthetic files; the check chain gains one `media` step (section 8).
+
+## 1 Intake
+
+### 1.1 Formats
+
+Three tables, then the verdict. The first table is browser playback, with the render worker's engine as its own column because it decides posters and e2e fixtures.
+
+| Format (container, codecs) | Google Chrome and Edge (the local Chrome for Testing build, L `launch.ts:27`) | Chromium builds: Playwright's Chromium and `chrome-headless-shell` (the render worker) | Safari | Firefox | Verified or unverified |
+| --- | --- | --- | --- | --- | --- |
+| `mp4`, H.264 with AAC | Yes (B5, B6) | No: H.264 and AAC are "Limited to Google Chrome" (B6); "Chromium does not have all the codecs that Google Chrome or Microsoft Edge are bundling" (B1) | Yes (B5) | Yes where the operating system decodes H.264 and AAC (B5) | Verified for Chromium and Safari; the Chrome for Testing build's codec set is presumed from its being "a versioned binary that's as close to regular Chrome as possible" (B23), unverified |
+| `webm`, VP9 or VP8 with Opus or Vorbis | Yes (B5) | Yes: VP8, VP9, Opus, Vorbis are open codecs in Chromium (B6) | Yes per MDN (B5); WebKit's own post names VP8, VP9 and Vorbis on macOS in Safari 14.1 (B7); Opus in WebM and iOS are not named there | Yes (B5) | Verified except Safari's Opus in WebM and iOS versions, unverified |
+| `mp3` | Yes (B5) | Yes: MP3 is listed among Chromium's open audio codecs (B6) | Yes (B5) | Yes (B5) | Verified |
+| `wav`, PCM | Yes (B5) | Yes (B6 lists PCM) | Yes (B5) | Yes (B5) | Verified |
+| `m4a`, AAC in MP4 | Yes (B5) | No: AAC is Google Chrome only (B6) | Yes (B5) | Where the OS decodes AAC (B5) | Verified |
+| `ogg`, Opus or Vorbis | Yes (B5) | Yes (B6) | Safari 18.4 and later on macOS 15.4 and iOS 18.4 (B5) | Yes (B5) | Verified |
+| `mov`, QuickTime | chromium.org lists "MP4 (QuickTime/ MOV / ISO-BMFF / CMAF)" as a container (B6); MDN's QuickTime row says only older Safari versions (B5) | As Chrome for the container; the codecs inside a `mov` are often ProRes or HEVC, which no browser here decodes | Yes for H.264 content (Apple's container) | No (B5) | Unverified: the two sources disagree on Chromium |
+
+PowerPoint (B24):
+
+| Platform | Video | Audio | Recommendation on the page |
+| --- | --- | --- | --- |
+| Windows | `.mp4`, `.m4v` (H.264 with AAC), `.mov`, `.webm` ("Web Media Extensions needs to be installed for WebM with Vorbis audio encoding") | `.m4a`, `.aac`, `.mp3`, `.wav` | "Video: .mp4 files encoded with H.264 video and AAC audio. Audio: .m4a files encoded with AAC audio" |
+| macOS | `.avi`, `.mp4`, `.mpg4`, `.m4v`, `.mpg`, `.mpeg`, `.mpe`, `.m75`, `.m15`, `.m2v`, `.ts`, `.mov`, `.qt`, `.dif` (no `.webm`) | `.aiff`, `.aif`, `.au`, `.snd`, `.mp3`, `.mpga`, `.mp2`, `.mp4`, `.mpg4`, `.wav`, `.wave`, `.bwf`, `.aa`, `.aax`, `.m4a`, `.aac`, `.adts`, `.caf`, `.m4r`, `.ac3`, `.eac3`, `.ec3` | as above |
+
+No file size limit appears on the page (B24). Verified.
+
+Google (R02 a.1, a.2): audio `.mp3` and `.wav` from Drive; video from YouTube or Drive, with Drive's own preview list (`mp4`, `mov`, `webm`, `avi` among others) and no Slides specific format list. Verified against R02's Google pages.
+
+Verdict, the intake table:
+
+| Extension | Accepted | Sniff | Stored content type | Why |
+| --- | --- | --- | --- | --- |
+| `.mp4`, `.m4v` | Yes, as `video/mp4` | `ftyp` with a brand from the mp4 set | `video/mp4` | every browser and both PowerPoints; the render worker cannot decode it (posters in the browser only) |
+| `.webm` | Yes, as `video/webm` | EBML header, DocType `webm` | `video/webm` | the format the render worker decodes; PowerPoint for Windows plays it; the residual names the Mac gap (R05 7.5) |
+| `.mp3` | Yes | `ID3` or frame sync | `audio/mpeg` | Google's and PowerPoint's list; decodes everywhere |
+| `.m4a` | Yes, as `audio/mp4` | `ftyp` brand `M4A ` or an mp4 brand with a sound track only | `audio/mp4` | PowerPoint's recommended audio |
+| `.wav` | Yes | `RIFF` and `WAVE` | `audio/wav` | Google's and PowerPoint's list; the simplest fixture |
+| `.mov` | No, "Save it as mp4" | `ftyp` brand `qt  ` | none | Firefox and the render worker do not play it; the codecs inside are often undecodable |
+| `.ogg`, `.oga`, `.opus` | No, "Convert to mp3 or m4a" | `OggS` | none | not on PowerPoint's Windows list; Safari from 18.4 only; a later widening candidate |
+| `.mkv`, `.avi`, `.flac`, `.aac` | No, with the accepted list | EBML DocType `matroska`; `RIFF` and `AVI `; `fLaC`; ADTS sync `0xFFF` | none | outside every reference list |
+
+A file whose extension and bytes disagree is refused, as the picture path does (L `upload.ts:290-306`). The sniff decides the extension the store writes.
+
+### 1.2 The media sniff
+
+| Format | Signature | Source | Verified or unverified |
+| --- | --- | --- | --- |
+| ISOBMFF (`mp4`, `m4a`, `m4v`, `mov`) | bytes 4 to 7 are `ftyp`; bytes 0 to 3 are the box size; the major brand is bytes 8 to 11 and the compatible brands follow in fours (S4) | S4 (the file type atom with a major brand and compatible brands, and "QuickTime files use 'qt  '"), S5 | Verified |
+| the mp4 brand set | `isom` ("All files based on the ISO Base Media File Format"), `iso2`, `iso5`, `iso6`, `mp41` ("MP4 version 1"), `mp42`, `avc1` ("Advanced Video Coding extensions"), `dash`, `cmfc`, `M4V ` | S5 | Verified |
+| the m4a brand | `M4A ` ("iTunes MPEG-4 audio protected or not, can contain audio + video + 3g text track + chapter track"); the intake treats a file with that brand or with only sound tracks as audio | S5 | Verified |
+| the mov brand | `qt  ` ("QuickTime") | S5 | Verified |
+| MP3 with a tag | `ID3` at byte 0, version bytes, flags, a 28 bit synchsafe size in four bytes, so the audio starts at 10 plus the size, plus 10 more when the footer flag is set; then the frame sync | S9 sections 3.1, 3.4, 6.2 | Verified |
+| MP3 frame sync | eleven set bits (`0xFFE0` mask), then the version bits (`11` MPEG-1, `10` MPEG-2, `00` MPEG-2.5) and the layer bits (`01` Layer III) | S7 | Verified |
+| WAV | `RIFF` at 0, `WAVE` at 8 (the existing WebP branch already reads `RIFF` at 0 and `WEBP` at 8, L `shared.ts:544-556`) | S10 | Verified |
+| WebM | the EBML header element id `0x1A45DFA3` at byte 0 ("Each EBML Document has to start with this"), then inside the header the DocType element id `0x4282` with the string `webm`; `matroska` names an `mkv` | S1 sections 8.1, 11.2.1, 11.2.6 | Verified |
+| Ogg | `OggS` (`0x4f 0x67 0x67 0x53`) at byte 0 | S3 section 6 | Verified |
+
+Where the sniff lives. `bundle.ts` keeps its own `sniffImage` because the store package must stay free of `sharp` (L `bundle.ts:1-10`), and the headless package has the other copy. The media sniff goes into one framework free module, `packages/store/src/media/sniff.ts` (no Node imports beyond `Uint8Array`), and `packages/headless/src/capture/shared.ts` re-exports it for `readInput`, so the two intakes and the bundle scan agree by construction. `assetKindOf` and `assetProblem` (L `bundle.ts:193-257`) gain the five accepted extensions, each checked against the media sniff the way an image is checked against `sniffImage`, so a `.mp4` holding an `mkv` is refused before a byte is written (L `unpack.ts:1-9` keeps its rule).
+
+### 1.3 Duration, dimensions and codecs without ffmpeg
+
+The parsers read the whole file from disk or a `File` slice in the browser; a `moov` box may sit after `mdat`, so a streaming sniff of the first kilobytes is not enough for `mp4`.
+
+| Format | Where the facts are | What is read | Source | Verified or unverified |
+| --- | --- | --- | --- | --- |
+| ISOBMFF duration | `moov` > `mvhd`: version (1 byte), flags (3), creation and modification times, time scale ("the number of time units that pass per second in its time coordinate system"), duration ("in time scale units") | `durationMs = duration * 1000 / timescale`; version 0 fields are 32 bit and version 1 fields 64 bit, at offsets 12 and 16 (version 0) or 20 and 24 (version 1) | S4 for the fields and their order and sizes; the offsets are the report's arithmetic | Field order verified; the version 1 layout is unverified against the text |
+| ISOBMFF dimensions | `moov` > `trak` > `tkhd`: track id, duration, layer, alternate group, volume, matrix, then track width and track height as 32 bit fixed point numbers | `width = tkhdWidth >> 16` and the same for height, from the first track whose `hdlr` handler is `vide` | S4 | Verified for the fields; the 16.16 read is the report's |
+| ISOBMFF codecs | `stbl` > `stsd`: the sample description's data format four character code (`avc1`, `mp4a`), with width and height on a video description and the sample rate on a sound description | the codec list is the four character codes: `avc1`, `avc3` ("Advanced Video Coding"), `hvc1`, `hev1` (HEVC), `vp09` ("VP9 video"), `av01`, `mp4a` ("MPEG-4 Audio"), `Opus`, `fLaC`; a file whose video code is `hvc1`, `hev1` or `av01` is accepted with a playability warning | S4, S6 | Verified |
+| WebM duration | `Segment` (`0x18538067`) > `Info` (`0x1549A966`) > `TimestampScale` (`0x2AD7B1`, default 1000000, "Base unit for Segment Ticks and Track Ticks, in nanoseconds") and `Duration` (`0x4489`, "Duration of the Segment, expressed in Segment Ticks") | `durationMs = Duration * TimestampScale / 1e6`; element ids and sizes are variable size integers whose first set bit marks the length (S1 section 4) | S2 sections 5.1, 5.1.2.9, 5.1.2.10; S1 | Verified |
+| WebM dimensions and codecs | `Tracks` (`0x1654AE6B`) > `TrackEntry` (`0xAE`) > `TrackType` (`0x83`, 1 video, 2 audio), `CodecID` (`0x86`), `Video` (`0xE0`) > `PixelWidth` (`0xB0`), `PixelHeight` (`0xBA`), `Audio` (`0xE1`) > `SamplingFrequency` (`0xB5`), `Channels` (`0x9F`) | the walk stops at the first `Cluster`; the codec ids are the Matroska strings (`V_VP9`, `A_OPUS`) which the codec mapping document defines, not RFC 9559 itself | S2 sections 5.1.4 to 5.1.4.1.28.7 | Verified for the ids; the codec strings unverified against the mapping document |
+| WebM without `Duration` | a file recorded by `MediaRecorder` and never remuxed has no `Duration` and no `Cues` | `durationMs: null` in the record; the browser fills it on the first `loadedmetadata` through `media.info --refresh`, or the recorder's own clock supplies it (section 6) | inference from the element being optional in S2 | Unverified as a MediaRecorder fact |
+| MP3 frame facts | the header's bitrate index (MPEG-1 Layer III: 32 to 320 kbps), sampling rate index (44100, 48000, 32000 for MPEG-1), padding bit; "FrameLengthInBytes = 144 * BitRate / SampleRate + Padding"; 1152 samples per frame for Layer II and III | the first frame after the tag gives the sample rate and channel mode | S7 | Verified; the 576 samples per frame of MPEG-2 and 2.5 Layer III is the report's knowledge, unverified here |
+| MP3 VBR, Xing | the `Xing` (or `Info`) string inside the first frame at byte 36 for MPEG-1 stereo, 21 for MPEG-1 mono and MPEG-2 stereo, 13 for MPEG-2 mono; a flags word (frames flag, bytes flag), then the frame count "including the first info one" and the byte count, then a 100 entry table of contents | `durationMs = frames * samplesPerFrame * 1000 / sampleRate` | S8 | Verified for the layout; the duration formula is the report's arithmetic |
+| MP3 VBR, VBRI | the `VBRI` string at 32 bytes after the frame header, with version, delay, quality, bytes, frames and a table of contents | as above | the report's knowledge; the fetched pages do not describe it | Unverified |
+| MP3 CBR without a header | `durationMs = (bytes - tagBytes) * 8000 / bitrate` | a fallback of walking every frame header and counting frames is exact and costs one pass over at most 50 MB | S7 for the frame length | Verified formula |
+| WAV | `RIFF` chunk (`RIFF`, size, `WAVE`), `fmt ` chunk (`wFormatTag` 1 for PCM, `0xFFFE` for `WAVE_FORMAT_EXTENSIBLE`, `nChannels`, `nSamplesPerSec`, `nAvgBytesPerSec`, `nBlockAlign`, `wBitsPerSample`), `data` chunk (`data`, size) | `durationMs = dataSize * 1000 / nAvgBytesPerSec`; a `WAVE_FORMAT_EXTENSIBLE` with a PCM or float sub format is accepted; any other tag (ADPCM, MP3 in WAV) is refused | S10 | Verified |
+
+The library table:
+
+| Library | Version | Licence | Unpacked size | Runs in | Reads | Verdict | Source |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `music-metadata` | 11.15.0 | MIT | 558 KB, 197 files, ten dependencies (`strtok3`, `token-types`, `file-type`, `debug` and others) | Node 18 and later; "It can also be used in a browser environment when bundled with a module bundler" with `parseBlob` and `parseWebStream` | MP3, MP4 and M4A, WAV, WebM, Matroska, Ogg, FLAC; duration, sample rate, channels, codec, container, bitrate; `pixelWidth` and `pixelHeight` on video tracks | Fit for a test oracle as a dev dependency; too broad a parser surface for untrusted input inside the function as a runtime dependency | N1, N7 |
+| `mp4box` | 2.4.1 | BSD-3-Clause | 2.26 MB, no dependencies | Node 20.8.1 and later, browsers | MP4 only | No: one container, a large file | N2 |
+| `mediabunny` | 1.56.2 | MPL-2.0 | 10.6 MB, 286 files (tree shaken by the bundler; two type only dependencies) | browsers and Node | MP4, MOV, WebM, Matroska, WAV, MP3, Ogg, FLAC; it also writes and converts, so it could remux a MediaRecorder WebM to add a duration | The one dependency to take if own parsers are refused; MPL-2.0 is a file level copyleft that a dependency use satisfies | N3 |
+| `file-type` | 22.1.0 | MIT | 138 KB, four dependencies | Node 22 and later | the type by signature only, no duration | No: the sniff is sixty lines of Turboslide's own | N4 |
+| `@remotion/media-parser` | 4.0.524 | "Remotion License https://remotion.dev/license" | 2.8 MB | browsers and Node | video files | No: a company licence | N5 |
+| `mediainfo.js` | 0.3.7 | BSD-2-Clause | 4.4 MB with a WebAssembly module | browsers and Node 18 and later | everything MediaInfoLib reads | No: a WebAssembly module in the function and the largest surface | N6 |
+
+Recommendation: own parsers in `packages/store/src/media/` (`sniff.ts`, `isobmff.ts`, `ebml.ts`, `mp3.ts`, `wav.ts`, `info.ts` returning one `MediaInfo`), each parser bounded (at most 64 boxes deep, a 16 MB read window for `moov`, a frame walk that stops at the byte count), each refusing rather than guessing, tested against the fixtures of section 8. This is the rule the picture sniff already follows: a small parser Turboslide owns before a decoder sees the bytes (L `shared.ts:528-533`).
+
+### 1.4 The asset record
+
+Today every asset is a picture: `twins`, `size`, `scale`, `inline`, `source` (L `packages/schema/src/assets.ts:11-58,111-135`; R07 1.6). A media file has none of those. The choice is between a second map (`deck.media`) and a union in `deck.assets`. Report 05's block points at `AssetId` for both the file and the poster (R05 section 3), so the union keeps that shape:
+
+```ts
+// packages/schema/src/assets.ts, additive at version 1 (SPEC 7.7)
+export type PictureAsset = Asset;              // today's record, kind absent
+export type MediaAsset = {
+  id: AssetId;
+  kind: 'audio' | 'video';
+  role: 'media';                                // one new ASSET_ROLES entry
+  /** assets/<id>.<sha8>.<ext>, digest named like a twin, never overwritten */
+  file: string;
+  mime: 'video/mp4' | 'video/webm' | 'audio/mpeg' | 'audio/mp4' | 'audio/wav';
+  bytes: number;
+  sha256: string;
+  /** null when the container states none (a recorded webm); refreshed from the browser */
+  durationMs: number | null;
+  /** video: coded pixels */
+  size?: [number, number];
+  /** the sample entry codes or Matroska codec ids: ['avc1', 'mp4a'], ['V_VP9', 'A_OPUS'] */
+  codecs: string[];
+  /** the default poster, a picture asset; a block may name its own (R05 section 3) */
+  poster?: AssetId;
+  title?: string;
+  source:
+    | { kind: 'file' }
+    | { kind: 'url'; origin: string }
+    | { kind: 'upload' }
+    | { kind: 'camera' | 'recording'; at: string };
+  ext?: Record<string, unknown>;
+};
+export type AnyAsset = PictureAsset | MediaAsset;   // deck.assets values
+```
+
+Consequences, each additive: `assetSchema` becomes a zod union discriminated on `kind`; `validateDeck` gains three rules (a `media` block's `source.asset` names a `MediaAsset` whose `kind` matches the block's, a `poster` names a picture asset, a `MediaAsset.file` is under `assets/`); the standalone build's `assetUris` loop and the bundle's twin logic skip `kind` media; `ASSET_ROLES` gains `media` (the poster keeps a picture role, `thumb` or `other`); `asset.add` stays a picture action and `media.insert` runs the media intake (section 8). The block itself is report 05's `MediaBlock` unchanged; this report adds nothing to it except that `poster` on the block wins over `poster` on the asset.
+
+### 1.5 Content types across the store
+
+| Table | Today | Add |
+| --- | --- | --- |
+| `blobContentType` (L `blob-store.ts:137-150`) | json, png, jpg, jpeg, webp, svg, gif, md, txt; else `application/octet-stream` | `.mp4` and `.m4v` `video/mp4`, `.webm` `video/webm`, `.mp3` `audio/mpeg`, `.m4a` `audio/mp4`, `.wav` `audio/wav` |
+| the asset route `TYPES` (L `decks.$deckId.assets.$.ts:22-30`) | the same seven | the same five; a checkout otherwise serves a video as `application/octet-stream` with `Content-Disposition: attachment` and a sandbox policy (L `headers.ts:76-93`) |
+| `INLINE_TYPES` (L `headers.ts:64`) | the four raster types | the five media types, so media go out inline with `nosniff` and `Cross-Origin-Resource-Policy: same-site` and never as an attachment |
+| `UPLOAD_CONTENT_TYPES` (L `upload.ts:44-49`) | the four raster types | the five media types on the media grant only (section 1.8) |
+| `DeckStore.putAsset(relative, bytes, contentType?)` (L `store.ts:186-193`) | `contentType` defaults from the extension | unchanged; gains a sibling `putAssetFile(relative, path, contentType)` that streams from disk so a 200 MB file is never a `Uint8Array` in the function (the Blob SDK's `put` takes a stream, V5) |
+| `@vercel/blob` `put` options (L `blob-vercel.ts:175-186`) | `access`, `addRandomSuffix: false`, `allowOverwrite`, `contentType`; no `cacheControlMaxAge`, so the default of one month applies (V5) | `cacheControlMaxAge: 31536000` for every digest named file, and `multipart: true` above 100 MB, the size Vercel recommends it from (V1) |
+
+### 1.6 The bundle
+
+The manifest lists every file under `assets/` with `bytes` and `sha256` (L `bundle.ts:26-38`), so media travel with no manifest change. The scan (`assetKindOf`, `assetProblem`) gains the media extensions and the media sniff (section 1.2). Two numbers move: `BUNDLE_MAX_BYTES` is 200 MB (L `bundle.ts:22`) and the inflate cap is twice that (L `docs/deck-transfer.md:44`), while section 1.7 lets a deck hold 300 MB of media beside 200 MB of public assets. The recommendation is 500 MB for the zip and an unpack that writes entries to the staging folder as it reads them rather than holding the archive in memory; media are stored, not deflated, so the inflate ratio stays one. The hosted bundle route already refuses bodies over the cap with 413 and takes large bundles as `{ url }` from the Blob host (L `deck-transfer.md:86,117`), which is the path a 400 MB bundle must use since a function body is 4.5 MB (V3). Kevin confirms the raise (decisions 5).
+
+### 1.7 Quotas and deck caps
+
+New `QUOTAS` rows (L `ratelimit.ts:88-253`), with report 05's values (R05 section 8):
+
+| Quota | Anonymous | Account | Agent | Window | Sentence |
+| --- | --- | --- | --- | --- | --- |
+| `largestAudioBytes` | 25 MB | 50 MB | 50 MB | none | "This audio file is too large" |
+| `largestVideoBytes` | 25 MB | 200 MB | 200 MB | none | "This video is too large" |
+| `mediaPerDay` | 10 | 100 | 300 | day | "You have reached today’s limit for audio and video" |
+| `mediaBytesPerDay` | 200 MB | 5 GB | 10 GB | day | the same sentence |
+
+`DECK_CAPS` (L `ratelimit.ts:260-276`) gains `mediaBytes: 300 * MB`, checked in `media.insert` against the sum of `MediaAsset.bytes` on the deck; `uploadsInFlightBytes` (500 MB) already covers one 200 MB upload and a sweep. The size rows hold on every tier because they compare a number (L `ratelimit.ts:26-28`); the windowed rows hold only where a shared counter exists, the recorded degraded state.
+
+### 1.8 The upload paths
+
+Facts:
+
+| Fact | Source | Verified or unverified |
+| --- | --- | --- |
+| "The maximum payload size for the request body or the response body of a Vercel Function is 4.5 MB"; over it "413: FUNCTION_PAYLOAD_TOO_LARGE" | V3 | Verified |
+| "When you need to upload files larger than 4.5 MB, you can use client uploads. The file goes directly from the browser to Vercel Blob, secured by a token exchange between your server and Vercel Blob" | V2 | Verified |
+| `handleUpload` needs `BLOB_READ_WRITE_TOKEN`; `handleUploadPresigned` "works with OIDC and verifies callbacks with `BLOB_WEBHOOK_PUBLIC_KEY`" | V2 | Verified |
+| `issueSignedToken` takes `pathname`, `operations: ['put']`, `allowedContentTypes` ("rejects requests whose `Content-Type` header is not in the list"), `maximumSizeInBytes` ("rejects requests larger than the configured size"), `validUntil` (at most 7 days); "The PUT options enforce constraints on the upload at the CDN, so the URL is safe to hand to a client even if the client controls the request body" | V6 | Verified |
+| `onUploadCompleted` needs a public callback URL and does not run against localhost without a tunnel | V2 | Verified |
+| Multipart is recommended above 100 MB; parts are at least 5 MB | V1, V5 | Verified |
+| Client uploads carry no data transfer charge | V1 | Verified |
+| Today's grant always says `backend: 'local'` and the PUT goes to `/api/x/upload/put/<token>`, a function route that streams to the instance's folder; the header records that the `blob` form "the account boundary of this round does not create" | L `upload.ts:26-38,258-266`, `x.upload.$.ts:1-10` | Verified |
+| `asset.add { url }` and `readInput` cap at `MAX_INPUT_BYTES` 25 MB; the HTTP transport caps an asset body at 25 MB | L `shared.ts:168,500-520`; `dispatch.ts:21-22` | Verified |
+
+The three paths, each ending in the same intake (`sniffMedia`, `mediaInfo`, `sha256`, `putAssetFile`, the `MediaAsset` record and the `media` block in one write):
+
+1. A checkout, or any file under 3 MB anywhere: `media.insert { file }` with a path (CLI, `allowPaths`) or a `data:` URL (the editor's drop). `readInput` gains a `maxBytes` per kind so a 200 MB video passes where a 25 MB picture cap stands; on a checkout the whole file is in memory once, which is fine on a developer's machine.
+2. A hosted instance, the editor: `POST /api/x/upload/media { deckId, contentType, bytes }` runs `authorize(write)`, the `uploads` flag, the tier's largest cap, `mediaPerDay`, `mediaBytesPerDay` and the one in flight slot (the picture grant's checks, L `upload.ts:143-256`), then answers the presigned form: `handleUploadPresigned` with `getSignedToken` minting `issueSignedToken({ pathname: 'uploads/<principalId>/<uuid>', operations: ['put'], allowedContentTypes: [the one declared type], maximumSizeInBytes: bytes, validUntil: now + 10 min })` and `urlOptions { addRandomSuffix: false, allowOverwrite: false, cacheControlMaxAge: 60 }` against the private store (the design R3-10 5.3 recorded, with `handleUploadPresigned` in place of `handleUpload` so no read write token is in flight). The browser calls `uploadPresigned` with `multipart` above 100 MB. `onUploadCompleted` is not relied on; the editor calls `media.insert { upload: key }` when the PUT returns, as the picture design says.
+3. `media.insert { upload }` on the server: `readUpload` becomes a stream to `<tmpdir>/turboslide-uploads/<uuid>` (525 MB of `/tmp`, R07 11.2) through the SDK's `get(pathname, { access: 'private' })` by pathname, never a URL (R3-10 5.3 step 4); the sniff reads the first 64 bytes, the parser reads the file, `sha256` streams it, `putAssetFile` streams it to the public store under `decks/<id>/assets/<id>.<sha8>.<ext>` with the content type and `cacheControlMaxAge` one year, the record commits, the upload object is deleted, the temp file removed. The bytes cross the function once as an internal fetch, which the 4.5 MB rule does not cover (V3 speaks of the request and response bodies).
+
+A 150 MB file from an agent to a hosted deck follows path 2 and 3 with the CLI as the browser: `turboslide media insert <slideId> --file talk.mp4 --from <studio>` requests the grant with its bearer, PUTs the bytes with the declared `Content-Type` (the CDN refuses another type, V6), then calls the action with `upload`. The MCP tool `deck_media_insert` takes `upload` when a client did the PUT itself, `url` for an allow listed host, and `file` on a checkout or stdio transport; the tool description says which applies. The `local` backend stays for a checkout and for the `tmp` tier under 4 MB (section 2 on that tier). The `blob` backend requires `TURBOSLIDE_BLOB_PRIVATE_TOKEN`, the variable storage layout v2 already names (L `hosting.md:640-660`); without the private store, hosted media insertion refuses with the sentence "Audio and video need the private store" and the runbook line.
+
+## 2 Serving
+
+Measured and documented facts:
+
+| Fact | Source | Verified or unverified |
+| --- | --- | --- |
+| `HEAD` on a public blob (Vercel's own documentation example) answered `200` with `accept-ranges: bytes`, `access-control-allow-origin: *`, `access-control-allow-headers: content-type`, `cache-control: public, max-age=31536000, s-maxage=300`, `content-disposition: inline; filename="blob.png"`, an md5 `etag`, `x-content-type-options: nosniff`, `x-vercel-cache: HIT` | M1 | Verified by measurement |
+| `GET` with `Range: bytes=0-99` and an `Origin` header answered `206` with `content-range: bytes 0-99/2275823`, `content-length: 100`, `accept-ranges: bytes` and `access-control-allow-origin: *` | M2 | Verified by measurement |
+| `OPTIONS` answered `405` while still carrying the two `access-control` headers; a media element's `Range` request does not preflight in current browsers, so the 405 does not block `<video crossorigin="anonymous">` | M2; the Fetch standard's safelisting of `Range` for media requests was not re-read | Measurement verified; the safelist statement unverified |
+| Vercel's pages do not mention Range or 206; the SDK and storage pages speak of caching, ETag and 304 only | V1, V4, V5 | Verified absence |
+| "Vercel Blob sets it [`content-disposition`] to `inline` for displayable types" including videos and audio, "and `attachment` for everything else" | V4 | Verified |
+| Public URLs are `https://<store-id>.public.blob.vercel-storage.com/<pathname>`; "Vercel will cache blobs up to 512 MB. Bigger blobs will always be served from the origin" | V4 | Verified |
+| `cacheControlMaxAge` "Defaults to one month. Cannot be set to a value lower than 1 minute"; overwrites propagate in up to 60 seconds; Vercel recommends treating blobs as immutable | V1, V5 | Verified |
+| Private blobs are delivered "Through your Functions via `get()`"; public ones by "Direct blob URL"; Blob Data Transfer is "3x more cost-efficient than Fast Data Transfer on average" | V1 | Verified |
+| A checkout's asset route streams the whole file with `createReadStream`, sets no `Accept-Ranges`, honours no `Range` and has no `HEAD` handler; a deck made on another instance gets a `302` to the Blob URL | L `decks.$deckId.assets.$.ts:36-58` | Verified |
+| Storage layout v2 keeps the twins on the public store "because a browser `<img>` needs a URL" and moves documents private; the keyed `d/<id>/<assetKey>/` prefix of R3-10 is a recorded deviation, not shipped | L `hosting.md:640-660,693-699`; R3-10 5.2 decision 1 | Verified |
+
+Rules the design adopts:
+
+1. Media never pass through a function on the way to a browser. Hosted, the renderer's `assetBase` for media is the Blob URL itself (`AssetPut.url`, L `store.ts:55-60`), not the `302` hop, because a `302` per Range request doubles every seek. The `302` stays for pictures.
+2. The checkout route gains Range: parse `Range: bytes=a-b` (one range), `statSync` for the size, `416` with `Content-Range: bytes */size` when unsatisfiable, `createReadStream(file, { start, end })`, `206` with `Content-Range`, `Content-Length`, `Accept-Ranges: bytes`; a `HEAD` handler with the same headers and no body; `Cache-Control: public, max-age=31536000, immutable` for digest named files (every `assets/` file is). The same route serves the `tmp` tier's overlay.
+3. The `tmp` tier is a function: a function response body over 4.5 MB cannot leave (V3; the recorded 4,718,592 bytes, R07 11.2). The tier therefore refuses `media.insert` with "Audio and video need the Blob store on this instance" or accepts files under 4 MB; Kevin picks (decisions 6). The default in this report is the refusal, because a 4 MB video is a few seconds and the tier's edits do not persist anyway (L `hosting.md:10-31`).
+4. Cache: the Blob put carries `cacheControlMaxAge: 31536000`; the checkout route the equivalent header. A poster is a picture and follows the picture rules.
+5. CORS: the Blob store sends `access-control-allow-origin: *` (M1), which the poster canvas needs (section 3). The checkout route is same origin and needs nothing; the hosted page's media come from the store host, which `img-src` already names for pictures (L `headers.ts:203`) and `media-src` must name for media: `media-src 'self' blob: https://<store>` is a new directive, because today `default-src 'self'` governs media and a Blob URL would be blocked once `TURBOSLIDE_CSP=enforce` (L `headers.ts:198-216`). `blob:` is for the camera preview and the recorder.
+6. Privacy. A public store answers anyone holding the URL (V1). The URL of a media file is `https://<store-id>.public.blob.vercel-storage.com/decks/<deckId>/assets/<id>.<sha8>.<ext>`: the store id is fixed per deployment, the deck id is a slug that appears in every link, the asset id is chosen by the user, and `sha8` is 32 bits of the content digest. A viewer removed from a restricted deck keeps every URL they saw; a stranger who knows the deck id must guess the id and eight hex digits. This is the twins' position today (L `hosting.md:642-645`; R3-10 5.2 decision 1 planned the `assetKey` prefix as the fix and `hosting.md:693-699` records it as not shipped). Media differ from dithered twins in what they reveal, so the report gives Kevin three positions (decisions 3): keep the picture precedent; ship the 128 bit `assetKey` prefix for media files first (`d/<deckId>/<assetKey>/<file>`, the page receiving the prefix after `authorize(read)`, rotation on revocation), which needs the assets route change B4 that the migration deferred; or store media on the private store and hand the page presigned `GET` URLs (`issueSignedToken` with `operations: ['get']`, at most 7 days, V6), which costs Fast Data Transfer through the CDN and drops the browser cache across sessions. The recommendation is the `assetKey` prefix for media, with the picture precedent as the interim and a sentence in the Share dialog while it lasts.
+
+## 3 Posters
+
+| Fact | Source | Verified or unverified |
+| --- | --- | --- |
+| A canvas is tainted "as soon as you draw into a canvas any data that was loaded from another origin without CORS approval"; `toBlob()`, `toDataURL()`, `getImageData()` and `captureStream()` then throw a `SecurityError`; the `crossorigin` attribute with a matching `Access-Control-Allow-Origin` header avoids it | B8 | Verified; B8 speaks of images, the same rule applies to a video frame drawn with `drawImage` (unverified against a page) |
+| The Blob store sends `access-control-allow-origin: *` on media (M1), `i.ytimg.com` sends it on thumbnails together with `cross-origin-resource-policy: cross-origin` (M4) | M1, M4 | Verified by measurement |
+| The render worker's Chromium is `chrome-headless-shell` (`chrome-headless-shell 147.0.7727.0, SwiftShader` in every hosted record) and Chromium builds lack H.264 and AAC | L `hosting-chromium.md:41,165`; B1, B6 | Verified |
+| On iOS "preload and autoplay are disabled. No data is loaded until the user initiates it" | B9 | Verified |
+
+The browser path (the editor, after `media.insert` and on every Start at change, debounced 500 ms):
+
+1. `const v = document.createElement('video'); v.crossOrigin = 'anonymous'; v.preload = 'metadata'; v.muted = true; v.playsInline = true; v.src = url;` where `url` is the asset's serving URL (same origin on a checkout, the Blob URL hosted).
+2. On `loadedmetadata`: `v.currentTime = startMs / 1000`; on `seeked` (with a 4 s timeout): draw to a canvas at `min(v.videoWidth, 1600)` wide with the aspect kept, `canvas.toBlob(cb, 'image/jpeg', 0.88)`.
+3. The blob becomes a `data:` URL (always under 3 MB at 1600 px, so the picture data URL path applies) and `media.poster { blockId, atMs: startMs, file: dataUrl }` runs `asset.add` internally with role `thumb`, then writes `poster` on the block; the previous poster asset is removed when no other block names it.
+4. On iOS the capture needs a user gesture (B9); the editor captures on the Start at field's change event, which is one.
+
+Failure modes and the fallback:
+
+| Failure | Detection | Fallback |
+| --- | --- | --- |
+| a codec the browser cannot decode (`mp4` in a Chromium build, HEVC or AV1 in most engines) | `error` event with `MEDIA_ERR_SRC_NOT_SUPPORTED`, or `v.canPlayType(mime)` returning `''` beforehand | Turboslide's own frame: the theme's paper with the play glyph in ink, the title (or the file name) and `durationMs` formatted as `m:ss`, rendered by the string renderer, so the frame exists without any asset; `media.info` reports `playable: false` for the engine |
+| a tainted canvas (a media URL from a host without CORS headers, only possible with `media.insert { url }` from an allow listed host) | `SecurityError` on `toBlob` | the same frame; the residual line names the host |
+| `seeked` never fires (a stream without an index, a `moov` at the end with `preload="metadata"` not fetching it) | the 4 s timeout | the same frame; retry once with `preload="auto"` |
+| the render worker asked for a poster (`media.poster` over CLI or MCP with no browser) | the worker's engine cannot decode `mp4` and `m4a` | `webm` posters are captured in the worker's Chromium through the same code in a page; `mp4` posters answer `unsupported codec in the render engine; capture in the editor or pass --file` |
+
+Audio has no frame: the poster is the speaker glyph of Turboslide's own drawing in the theme's ink, drawn by the string renderer at the block's box, rasterised for the PPTX blip as report 05 7.3 fixes. Both glyphs are new drawings under `packages/theme`, not copies of Google's or PowerPoint's icons.
+
+Fixtures for the worker and the e2e are `webm` (VP9 with Opus), `wav` and `mp3`, all decodable by Chromium (B6); `mp4` fixtures test the sniff and the parser only (section 8).
+
+## 4 YouTube
+
+### 4.1 The By URL grammar
+
+| Form | Rule | Source | Verified or unverified |
+| --- | --- | --- | --- |
+| `https://www.youtube.com/watch?v=<id>` (also `m.` and no subdomain) | the `v` query parameter | Y10 registers `https://www.youtube.com/watch?v=*` | Verified |
+| `https://www.youtube.com/v/<id>` | the first path segment after `v` | Y10 | Verified |
+| `https://youtu.be/<id>` | the first path segment; `t=` in the query | Y10; Y9 for the share link's start time | Verified |
+| `https://www.youtube.com/shorts/<id>` | the segment after `shorts` | Y10 | Verified |
+| `https://www.youtube.com/live/<id>` | the segment after `live` | Y10 | Verified |
+| `https://www.youtube.com/embed/<id>` and `https://www.youtube-nocookie.com/embed/<id>` | the segment after `embed`; `start` and `end` in the query | Y2, Y5 | Verified |
+| `https://music.youtube.com/watch?v=<id>` | the `v` parameter | Y10 | Verified |
+| `playlist?list=` without `v` (both hosts) | refused: "Paste a link to one video" | Y10 lists the playlist scheme; Google's dialog inserts one video (R02 a.2) | Verified as a form; the refusal is the design |
+| `t` (share links) and `start` (embed) | seconds, or `1h2m3s`, mapped to `playback.startMs`; `end` to `endMs` | Y9 ("enter the start time before you copy the link"), Y2 | The `1h2m3s` grammar is observed practice, unverified against a page |
+| the id | the segment or parameter as given, validated as `[A-Za-z0-9_-]{11}` | no Google page read states the length | Unverified |
+
+The oEmbed endpoint accepted the `youtu.be/<id>?t=30` form and the playlist form with `200` (M3), so resolution goes through the grammar first and oEmbed second.
+
+### 4.2 The player
+
+| Fact | Source | Verified or unverified |
+| --- | --- | --- |
+| The API script is `https://www.youtube.com/iframe_api`, calling `onYouTubeIframeAPIReady`; `enablejsapi=1` and `origin` ("the URL scheme and full domain of your host page") are the two parameters the API needs; the browser must support `postMessage`; events `onReady`, `onStateChange`, `onPlaybackQualityChange`, `onError`, `onApiChange`; states -1, 0, 1, 2, 3, 5; functions `playVideo`, `pauseVideo`, `seekTo`, `mute`, `unMute`, `setVolume`, `loadVideoById({ videoId, startSeconds, endSeconds })`, `getDuration`, `destroy` | Y1 | Verified |
+| "Embedded players must have a viewport that is at least 200px by 200px"; for 16:9 "at least 480 pixels wide and 270 pixels tall" | Y1, Y3 | Verified |
+| Parameters: `autoplay` (0 or 1, "playback will occur without any user interaction with the player"), `controls` (0 hides the controls), `end` ("when the player should stop playing"), `loop` (needs `playlist` set to the same id for one video), `mute`, `origin`, `playsinline`, `rel` (since 2018 related videos cannot be disabled, only limited to the same channel), `start`, `fs`, `cc_load_policy`; `modestbranding` "is deprecated and has no effect" | Y2 | Verified |
+| Privacy enhanced mode: "Change the domain for the embed URL in your HTML from https://www.youtube.com to https://www.youtube-nocookie.com" | Y5 | Verified |
+| Terms: "You must not display overlays, frames, or other visual elements in front of any part of a YouTube embedded player, including player controls"; "An API Client must not initiate an automatic playback until the player is visible and more than half of the player is visible on the page or screen"; one automatically playing player per page; "You must not use mouseovers or touch events on a YouTube player to initiate any action on the user's behalf"; "You must not make changes to the YouTube player that are not explicitly described by the API documentation" | Y3 | Verified |
+| Policies: "API Clients must not separate, isolate, or modify the audio or video components of any YouTube audiovisual content" (III.I.7); non authorized API data may be stored "not longer than 30 calendar days" (III.E.4.d); "You can limit the data shared with YouTube before a user interacts with the YouTube embedded player by setting Autoplay to false" (III.E.4.i) | Y4 | Verified |
+| The `youtube-nocookie.com` embed page sends `cross-origin-resource-policy: cross-origin` and a `script-src` with `'strict-dynamic'` and reports; it sends no `X-Frame-Options`, so it may be framed | M5 | Verified by measurement |
+| The oEmbed answer for a video carries `title`, `author_name`, `author_url`, `thumbnail_url` (`https://i.ytimg.com/vi/<id>/hqdefault.jpg`, 480 by 360), `thumbnail_width`, `thumbnail_height` and an iframe `html` with `allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"`; the answer is `application/json` with no CORS header | M3 | Verified by measurement; the endpoint is registered at oembed.com (Y10) and has no Google documentation page read |
+| Thumbnail sizes are default 120 by 90, medium 320 by 180, high 480 by 360, standard 640 by 480, maxres 1280 by 720; the host `i.ytimg.com` and the `vi/<id>/<name>.jpg` path come from the oEmbed answer and the measurement, not from the Data API page | Y6, M3, M4 | Sizes verified; the URL pattern verified by measurement for `hqdefault` and `maxresdefault` |
+| The Data API needs a Google Cloud project with the API enabled; "Projects that enable the YouTube Data API have a default quota allocation of 100 search.list calls, 100 videos.insert calls, and 10,000 units per day combined for all other endpoints"; a search "costs 1 unit" in its own bucket | Y7, Y8 | Verified |
+
+The design:
+
+- The iframe is `https://www.youtube-nocookie.com/embed/<id>?enablejsapi=1&origin=<studio origin>&playsinline=1&rel=0&controls=1&start=<s>&end=<s>&mute=<0|1>` with `allow="autoplay; fullscreen; picture-in-picture"` and `title` set to the video's title (the oEmbed `html` carries the `allow` list YouTube itself writes, M3). `controls=0` is never written and nothing is drawn over the player (Y3). `loop` is not offered for YouTube because the parameter needs a `playlist` and Google's dialog has no loop for video (R02 a.2).
+- Sizing: the block's box is scaled with the sheet by the same transform as every object; the player's CSS size is the box at 1600 by 900, so a box under 200 by 200 sheet pixels is refused at insert with "A YouTube player is at least 200 by 200 pixels" (Y1) and the default box is 960 by 540 (Y3's 480 by 270 recommendation doubled for the 2x sheet). The residual notes that a scaled sheet on a small screen may show the player under 200 CSS pixels; the terms speak of the viewport, and the show is normally fullscreen.
+- Control: the IFrame API, loaded once per page by a nonced loader (`script-src 'self' 'nonce-…' 'strict-dynamic'`, L `headers.ts:201`: a script created by a nonced script inherits trust, and `iframe_api` then inserts its own widget script the same way). For browsers without `'strict-dynamic'` the directive also lists `https://www.youtube.com https://s.ytimg.com`, which the strict dynamic engines ignore. `frame-src` gains `https://www.youtube-nocookie.com https://www.youtube.com` (the API can rewrite the frame to the `.com` host; both are listed). `img-src` gains `https://i.ytimg.com` only for the editor's live thumbnail (4.3); the show and every export use the stored poster.
+- Playback in the show follows section 5: `start: 'auto'` calls `playVideo()` when the slide's schedule reaches the `playMedia` step and the player is more than half visible (it is, in a show); `click` on the slide's next click; `manual` leaves the player's own controls. Only one YouTube block per slide may be `auto` (Y3, one automatically playing player per page); the second is downgraded to `click` at insert with a notice.
+- The presenter window never loads a player: the console's clones are markup copies (L `PresenterConsole.tsx:143,326`), so `renderSlide` emits the poster and a data attribute only, never an iframe, and the show mounts the iframe over the poster. The channel gains a `media` message (section 5.6) so the console shows the state and can pause.
+- Standalone HTML: the same iframe when online; the poster with the video's URL as a link when the runtime detects no network (`navigator.onLine` false or the API script failing to load in 5 s).
+- Exports: report 05's forms stand (R05 7.2): pptxgenjs's online form with the poster blip in Editable text, the poster in Perfect, PDF and JPEG.
+
+### 4.3 Titles, thumbnails and the licence position
+
+Titles and thumbnails are fetched server side at insert time through `safeFetch` (L `shared.ts:352-364`) with `www.youtube.com` (the oEmbed path only, `maxBytes` 64 KB) and `i.ytimg.com` (`maxBytes` 2 MB) added to `DEFAULT_ALLOW_HOSTS` and `HOSTED_ALLOW_HOSTS` (L `shared.ts:82-94`), keeping the pinned lookup and the redirect rules of R3-04 P6. The title lands on `MediaAsset.title` for the frame and `aria-label`.
+
+The thumbnail question (R05 7.2 left it to the design): YouTube's developer policies cap the storage of non authorized API data at 30 days (Y4 III.E.4.d). The oEmbed endpoint and the `i.ytimg.com` host are not listed as YouTube API Services, so whether the rule binds a thumbnail fetched from them is a legal reading this report does not make (Unverified). A deck poster lives for years and travels into PPTX, PDF and HTML exports, so the safe default is:
+
+- the default poster of a YouTube block is Turboslide's own frame: paper, the play glyph in ink, the title from oEmbed, the channel name in the small size, no YouTube artwork;
+- the editor shows the live `hqdefault.jpg` in the Insert video dialog's preview and the inspector only (an `<img>` from `i.ytimg.com`, never stored);
+- a user may capture their own frame by pasting a picture as the poster, as with any media block;
+- "Use the video's thumbnail as the poster" is an explicit action Kevin allows or not (decisions 2). If allowed, the thumbnail is stored as the user's picture asset with `source.kind: 'url'` and the origin recorded, the way a Wikimedia picture is.
+
+### 4.4 Search YouTube
+
+The tab needs `search.list` of the Data API v3, which needs a Google Cloud project, the API enabled and a key (Y8), with a default of 100 searches per day per project (Y8), a number that a public product exhausts before noon. The tab ships in the dialog disabled with the clause "Search needs a YouTube Data API key" until Kevin decides (decisions 1); the standalone HTML has no search in any case.
+
+## 5 Playback in the show and the standalone runtime
+
+### 5.1 Where media elements exist
+
+| Surface | Rule |
+| --- | --- |
+| `renderSlide` output (the editor, the sheet route, the print document, the stills, the thumbnails, the standalone file, the presenter console's clones) | the poster picture (or Turboslide's frame) inside a `.ts-media` root with `data-media="<blockId>"`, `data-kind`, `data-src`, `data-start`, `data-end`, `data-play`, `data-loop`, `data-volume`, `data-mute`, `data-stop-on-change`, `data-hide-icon`, `role="button"`, `tabindex="0"`, `aria-label="<alt>"`; never a `<video>`, `<audio>` or `<iframe>` |
+| the show (`Slideshow.tsx`) and the standalone motion script (R05 9.2) | mount the element over the poster when the slide is shown, unmount when it leaves (video) or when `stopOnSlideChange` says so (audio) |
+| `cloneSlide` and `LiveClone` | unchanged: copies of the poster markup, which is why the renderer never emits an element (L `runtime.ts:218-231` clones with `cloneNode(true)`, `LiveClone.tsx` assigns the markup) |
+
+### 5.2 Autoplay
+
+| Engine | Rule | Source | Verified or unverified |
+| --- | --- | --- | --- |
+| Chrome 66 and later | "Muted autoplay is always allowed"; with sound when "The user has interacted with the domain (click, tap, etc.)", the Media Engagement Index threshold is crossed on desktop, or the site is installed; "Once an origin has received autoplay permission, it can delegate that permission to cross-origin iframes with the permissions policy for autoplay"; a blocked `play()` rejects with `NotAllowedError` | B2 | Verified |
+| WebKit on iOS | `autoplay` honoured for videos with "no audio tracks" or that are "muted", when visible; "If a `<video>` element gains an audio track or becomes un-muted without a user gesture, playback will pause"; `playsinline` keeps the video in the page | B3 | Verified |
+| iOS volume and streams | "The `volume` property is not settable in JavaScript. Reading the `volume` property always returns 1"; "all devices running iOS are limited to playback of a single audio or video stream at any time" (an older page, still Apple's) | B9 | Verified as the page's text; its currency for today's iOS is unverified |
+| Firefox and the cross browser rule | autoplay allowed when muted, after interaction, when allow listed, or through the `autoplay` Permissions Policy on an iframe; inaudible media are not blocked; `navigator.getAutoplayPolicy('mediaelement')` answers `allowed`, `allowed-muted` or `disallowed` where implemented | B4 | Verified |
+
+Consequences: the show started by the Present button has activation. The audience route `?present=1` opened from a link, and the standalone file opened from disk, may not. The controller therefore calls `play()` and, on `NotAllowedError`, sets `muted = true`, plays again, and shows one toast ("Sound is off until you click") that the next click clears by unmuting the playing elements; `navigator.getAutoplayPolicy` is consulted first where it exists to skip the failed attempt. The YouTube iframe carries `allow="autoplay"` and inherits the page's permission (B2).
+
+### 5.3 Start at, End at, Loop
+
+| Approach | Facts | Verdict |
+| --- | --- | --- |
+| Media Fragments URI `#t=start,end` | the syntax `#t=[starttime][,endtime]` in seconds or `h:m:s` (B21); caniuse lists partial support in every engine (B20) and the notes explaining what is partial were not read; no page read states how `loop` interacts with an end time | Not used: partial, unverified end handling, no loop semantics |
+| `currentTime` and `timeupdate` | `loadedmetadata` then `currentTime = startMs / 1000`; `timeupdate` fires a few times a second, so a `setTimeout` for `(endMs - currentTime * 1000) / playbackRate` is re-armed on every `timeupdate` and fires the end; on end: `pause()` and `currentTime = startMs`, or the same and `play()` when `loop` | Adopted; the same code in the show and the standalone motion script |
+| the `loop` attribute | whole file loop only | used when `startMs` and `endMs` are both absent; the range loop otherwise |
+
+For a YouTube block, `start` and `end` are player parameters and `loop` is not offered (4.2).
+
+### 5.4 The five audio fields and the three video fields
+
+| Field | The show | Notes |
+| --- | --- | --- |
+| Start playing Automatically, Play (automatically) | the `playMedia` step of `compileMotion` (R05 sections 3 and 4) calls `controller.play(blockId)` when the slide enters or its `withPrevious` or `afterPrevious` place is reached | one automatically playing YouTube player per page (Y3) |
+| On click, Play (on click) | the `playMedia` step as its own click step in the schedule | "Video plays when you advance the slide" (R02 a.2) |
+| Play (manual) | no schedule entry; the object is a control: a click or Enter or Space on the focused `.ts-media` toggles play and pause | see 5.5 |
+| Volume when presenting | `element.volume = volume / 100`; the YouTube player `setVolume(volume)` | read only on iOS (B9) |
+| Mute audio | `element.muted = true`; `mute=1` on the iframe | |
+| Loop audio | 5.3 | |
+| Stop on slide change (default on) | a video element lives in the slide layer and unmounts with the slide; an audio element with `stopOnSlideChange !== false` pauses and resets on slide change | |
+| Stop on slide change off | the audio element lives in a deck level layer (`#ts-media-layer`, a child of the Slideshow root, not of any `.slide`), keyed by block id, and keeps playing across slides until the show ends, the deck's last slide is passed, or the same block is reached again | the standalone motion script keeps the same layer under `#ts-stagewrap` |
+| Hide icon when presenting | the `.ts-media` root gets `visibility: hidden` in the show only; the stills keep the icon (R05 9.1) | the layer plays with no box |
+| Start at, End at | 5.3 | the poster follows Start at (section 3) |
+
+### 5.5 Clicks and keys
+
+Facts: the Stage's click hands `onStep` to the DeckViewer, which advances the show (L `apps/studio/src/components/DeckViewer.tsx:200-209`); the key resolver returns `next` for Space, Enter, Right, Page down and swallows other bare keys, with a `control` flag that passes keys to the slideshow's own controls (L `presentKeys.ts:44-56,77-116`); the standalone runtime advances on a click of either half of the sheet unless the target is inside `a, button, input` (L `runtime.ts:700-705`).
+
+Changes: `onStep` returns early when `event.target.closest('.ts-media, .ts-media-layer')` is not null and hands the event to the media controller, which toggles a `manual` block, and does nothing for `auto` and `click` blocks (their own controls, when shown, are the browser's); `isControlTarget` treats `.ts-media[role="button"]` as a control so Space and Enter toggle the focused media instead of advancing; the standalone runtime's exclusion list gains `.ts-media, .ts-media-layer, iframe, video, audio`. Clicks inside a YouTube iframe never reach the page, so no rule is needed there beyond the exclusion.
+
+### 5.6 Several media, the schedule, the presenter console
+
+- Several media per slide are allowed; on iOS the platform plays one stream (B9), so the second `auto` start pauses the first there and the residual says so.
+- The schedule is report 05's `compileMotion`; `playMedia` steps carry the block id and the controller is the only code that touches elements. The step index already joins the `state` message in R05 9.3.
+- The channel (L `presentSync.ts:17-35`) gains `{ type: 'media'; blockId; state: 'playing' | 'paused' | 'ended'; positionMs; durationMs }` from the audience on every state change, and `{ type: 'mediaControl'; blockId; action: 'play' | 'pause' | 'restart' }` from the presenter. The console shows a row per playing block ("Playing: <title> 0:42 / 2:10") with Pause and Restart; its clones stay silent and element free, so two players never sound at once (Y3 and common sense).
+- Captions are out of scope (the Captions stub stays, L `strings.ts:22` per R07 3.4). The alt text is the `aria-label` of the `.ts-media` root and the `title` of the iframe.
+
+### 5.7 The standalone HTML
+
+Facts: the file inlines every asset as a `data:` URI by its inline rule under a 16 MB budget and carries no CSP meta (L `packages/render/src/standalone.ts:1-5,150-178`); a base64 body is four thirds of the bytes (L `standalone.ts:24-31` counts it).
+
+Rules: `build.run` and `export.run` for HTML take `media: 'inline' | 'url' | 'poster'` (R05 12 has `media?: 'embed' | 'poster'` for PPTX; HTML adds `url`). `inline` embeds media as `data:` URIs while the file stays under budget, largest first to fall back; `url` writes the hosted Blob URL (readable by anyone, section 2) and is the default when the deck is hosted; `poster` writes the poster only with a one line note in the frame. The file keeps no CSP meta: a meta policy would have to name the store host and the YouTube hosts and would break a file copied to another host; the file already runs no third party script other than the YouTube API when a YouTube block exists. The motion script (R05 9.2) owns the controller and the media layer, written once and ported the same way as `runtime.ts`.
+
+## 6 Camera and Speaker spotlight
+
+| Fact | Source | Verified or unverified |
+| --- | --- | --- |
+| `getUserMedia()` "is only available in secure contexts"; "The two Permissions Policy directives that apply to `getUserMedia()` are `camera` and `microphone`"; it "must always get user permission before opening any media gathering input"; errors `NotAllowedError`, `NotFoundError`, `NotReadableError`, `OverconstrainedError`, `SecurityError`; "Baseline: Widely available" since September 2017 | B10 | Verified |
+| The `camera` directive's "default allowlist for `camera` is `self`"; where a policy blocks it, `getUserMedia()` "rejects with a `NotAllowedError`" | B11 | Verified; that an empty allowlist `camera=()` blocks every origin is the Permissions Policy grammar, restated by the page, unverified as a quote |
+| The studio sends `Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=(), interest-cohort=()` on every response | L `headers.ts:103-104,270` | Verified |
+| `MediaRecorder` is available in Chrome 47, Firefox 25, Safari 14.1 and iOS Safari 14; it records with a `mimeType` such as `video/webm` or `video/mp4`, and `isTypeSupported` answers per engine; `dataavailable` delivers chunks per `timeslice` | B12, B13 | Verified |
+| "Safari currently supports the MP4 file format with H.264 as video codec and AAC as audio codec" for MediaRecorder (2020) | B14 | Verified for 2020; that Chrome and Firefox produce WebM is common practice, unverified against a page read here |
+
+The header must change before anything below works: `camera=(self), microphone=(self)` on the editor, the presenter and the present routes (the microphone is also what Voice type of scope item E needs), `camera=()` and `microphone=()` elsewhere. The `/embed` route keeps both closed.
+
+Camera (`insert.image.camera`, flipping the wrong `GOOGLE_SERVICE` reason R03 section 1 records at L `model.ts:1189`): a dialog `Camera` with a `<video autoplay muted playsinline>` preview of `getUserMedia({ video: { width: { ideal: 1600 }, height: { ideal: 900 }, facingMode: 'user' }, audio: false })`, a device picker from `enumerateDevices` when more than one camera exists, a Capture button that draws the frame to a canvas and a Use photo button that runs `asset.add { file: dataUrl, role: 'other', alt, source: { kind: 'camera', at } }` and inserts a picture block (the same path as a pasted picture, under 3 MB at 1600 px). Refusals map to sentences: `NotAllowedError` "Allow the camera in the browser to take a photo", `NotFoundError` "No camera was found". The stream's tracks stop on close. Insecure contexts (a plain `http://` dev server that is not `localhost`) show "The camera needs https".
+
+Speaker spotlight (`insert.speakerSpotlight`, R03 proposes the flip): a `spotlight` block, a positioned shape with `shape` geometry (rectangle, ellipse or any preset) and a `placeholder` picture (Turboslide's own person glyph on the theme's plate). In the editor it draws as the placeholder; in the show the controller mounts a muted `<video autoplay playsinline>` fed by the presenter's camera, clipped by the shape (`object-fit: cover`, the shape's `clip-path`), asking for the camera once per show at the first spotlight slide (activation is the Present click). Nothing is stored; the audience window is the one that shows the camera, so the presenter's own console shows the placeholder. Every export writes the placeholder picture (Perfect, PDF, JPEG, HTML) and the Editable text PPTX writes it as a picture named `ts:<slide>#<block>`, the residual naming the block as a spotlight. When the camera is refused the show keeps the placeholder.
+
+Record (Kevin's decision 8 in R03): the standalone form is `MediaRecorder` over `getUserMedia({ video, audio })`, or over `getDisplayMedia` plus the microphone for a recording of the show, writing chunks to a `Blob` and, at stop, uploading the file through the media path of section 1.8 as a `MediaAsset` with `source.kind: 'recording'`, `mime` from `isTypeSupported` (`video/webm;codecs=vp9,opus` on Chromium and Firefox, `video/mp4` on Safari, B14), and `durationMs` from the recorder's own clock because the container may state none (1.3). Playback of an unremuxed recording seeks poorly (no cues); `mediabunny` (1.3) is the remux option if the feature is built. The recording is attached to the deck as any media block or offered as a download; the size is the reason it is Kevin's.
+
+## 7 Present on another screen and Presentation display options
+
+| Fact | Source | Verified or unverified |
+| --- | --- | --- |
+| The Window Management API: `window.getScreenDetails()` "Returns a Promise that fulfills with a `ScreenDetails` object instance"; `Screen.isExtended` is true with several screens; `Element.requestFullscreen()` gains a `screen` option that "Specifies on which screen you want to put the element in fullscreen mode"; the permission and policy name is `window-management`; a `NotAllowedError` when blocked | B15 | Verified |
+| "The Window Management API was part of the capabilities project and is now available from Chrome 100"; the permission prompt appears on the first call; `window.open()` is placed with `left` and `top` from the screen details; "The old `window-placement` permission name is no longer supported" | B16 | Verified |
+| `ScreenDetails`: Chrome 100, Edge and Opera as Chrome, Chrome for Android `false`, Firefox `false`, Safari `false`; experimental, standard track | B17 | Verified |
+| The Presentation API "lets a user agent (such as a Web browser) effectively display web content through large presentation devices such as projectors and network-connected televisions" with a controlling and a receiving context; experimental, limited availability | B18 | Verified |
+| `PresentationRequest`: Chrome 47, Chrome for Android, Edge and Opera as Chrome, Firefox `false`, Safari `false`, WebView `false`; secure context required since Chrome 61 | B19 | Verified |
+| The presenter route redirects `?screen=1` to the audience form and the two windows sync over `BroadcastChannel`; the two rows are `later('title.slideshow.presentOnAnotherScreen', ..., 'Presenter view opens a second window you can drag to another screen', { google: 'Present using Chromecast' })` and `omit('title.slideshow.displayOptions', ..., "Chrome's multi screen permission flow; Presenter view covers the two window case")` | L `present.$deckId.tsx:30-70`; `model.ts:724-735` | Verified |
+
+Recommendation:
+
+- Both rows flip to Now, with the Window Management API as the mechanism and a disabled state where `'getScreenDetails' in window` is false (Firefox, Safari, every mobile browser), whose tooltip is today's drag clause. The model rows are static; the disabled state is runtime, the pattern the stubs use.
+- Present on another screen: when `screen.isExtended` is true, `getScreenDetails()` (the first call prompts for `window-management`), pick the screen that is not `currentScreen` (or the one the user chose in Presentation display options), then `document.documentElement.requestFullscreen({ screen })` on the current window, which becomes the audience, and `window.open(presenterPath, presenterWindowName, 'left=<x>,top=<y>,width=<w>,height=<h>')` with the other screen's `availLeft`, `availTop`, `availWidth`, `availHeight` for the presenter view. The click on the row is the activation both calls need. When `isExtended` is false the row behaves as Presenter view today with the notice "One screen is connected".
+- Presentation display options: a small dialog listing the screens by `ScreenDetailed.label` with two radios per screen (Show, Presenter view) and a Remember checkbox stored per browser; the dialog appears only where the API exists.
+- The Presentation API is not used: its receivers are Cast devices and Android, Firefox and Safari have none (B19), and the Google label `Present using Chromecast` names Google's service; the `google` field on the row already records that name. A Chromium user can still cast the audience tab from the browser menu.
+- The unverified item: whether a window opened by `window.open` may itself enter fullscreen without a gesture inside it (Chrome's companion window capability). The design above needs no such thing because the current window goes fullscreen and the new window is the presenter console.
+
+## 8 Actions, rows, fixtures and checks
+
+### 8.1 Actions
+
+Every action follows SPEC 7.1: one input object, the CLI flags are its fields, the MCP tool takes the same object, the window handler runs on the attached page. The editor is the window owner for the media actions; the presenter and the show are owners for `view.presentOnScreen`, like `view.present` today (L `present.$deckId.tsx:30-42`).
+
+| Action | Input | Output | CLI | MCP | Window |
+| --- | --- | --- | --- | --- | --- |
+| `media.insert` | `slideId`; exactly one of `file` (a path or `data:` URL), `url` (an allow listed https URL), `upload` (a presigned key), `youtube` (any form of 4.1); `alt`; `title?`; `pos?` (box, default 960 by 540 centred for video, 96 by 96 for audio); `playback?` (report 05's fields); `id?`; `baseRevision` | `{ revision, blockId, assetId?, info: MediaInfo }` | `turboslide media insert <slideId> --file talk.mp4 \| --url <https> \| --upload <key> \| --youtube <url> --alt <alt> --title <title> --start click\|auto\|manual --start-at 12 --end-at 90 --mute --loop --volume 80 --hide-icon --no-stop-on-slide-change --x --y --w --h`; with `--from <studio>` and a file over 3 MB the CLI performs the grant, the PUT and the action | `deck_media_insert` | the editor's drop, paste and the two dialogs call it |
+| `media.setPlayback` | `blockId`, `playback` (partial), `baseRevision` | `{ revision }`; refuses `endMs <= startMs`, `volume` outside 0 to 100, `loop` on YouTube, a second `auto` YouTube block on a slide | `turboslide media playback <blockId> --start auto --start-at 12 --end-at 90 ...` | `deck_media_playback` | the inspector's Audio playback and Video playback sections (`block.set` still writes the same field) |
+| `media.poster` | `blockId`; `atMs?` (default the block's `startMs`); `file?` (a frame supplied by the caller) | `{ revision, poster: AssetId, captured: 'browser' \| 'worker' \| 'file' }` | `turboslide media poster <blockId> --at 12000 \| --file frame.png` | `deck_media_poster` | the editor captures (section 3); the CLI and MCP without a page use the render worker for `webm` and answer `unsupported codec` for `mp4` |
+| `media.info` | `assetId` or `blockId`; `refresh?` (the attached page re-reads `duration`, `videoWidth`, `videoHeight` through a media element) | `MediaInfo`: `kind`, `mime`, `bytes`, `sha256`, `durationMs`, `size`, `codecs`, `poster`, `playable: { chromium: boolean; chrome: boolean; safari: boolean; firefox: 'yes' \| 'os' }` from the tables of 1.1 | `turboslide media info <id>` | `deck_media_info` | read only, any owner |
+| `media.list` | none | every `MediaAsset` with the blocks that use it, the deck's media bytes and the 300 MB cap | `turboslide media list` | `deck_media_list` | read only |
+| `camera.capture` | `slideId?`, `pos?`, `alt`, `facing?: 'user' \| 'environment'` | `{ revision, assetId, blockId? }` | `turboslide camera capture --from <studio> --slide <id>`: opens the dialog on the attached page and waits for Use photo or Cancel | `deck_camera_capture` | the `Camera` dialog is the executor; without an attached page the action answers "Needs the editor open" |
+| `view.presentOnScreen` | `screen?: number \| 'other'`, `presenter?: number` | `{ screens: [{ label, primary, current }], show: number, presenter: number }` | `turboslide view present --screen other --from <studio>` (a new flag on `view.present`, or this action) | `deck_present_on_screen` | the show or the editor is the executor; answers `unsupported` where the API is absent |
+
+The presigned grant is a route (`POST /api/x/upload/media`), not an action, as the picture grant is; the CLI wraps it. `export.run` and `build.run` gain `media: 'inline' | 'url' | 'poster'` for HTML beside report 05's `media: 'embed' | 'poster'` for PPTX.
+
+### 8.2 Rows
+
+| Row | Today | After | Clause or notes |
+| --- | --- | --- | --- |
+| `insert.audio` (L `model.ts:1204`) | Later, `NO_MEDIA` | Now, `dialog('InsertAudio')`: Upload and By URL tabs; a Drive tab does not exist | Google's label kept |
+| `insert.video` (L `model.ts:1205`) | Later, `NO_MEDIA` | Now, `dialog('InsertVideo')`: Search YouTube (disabled with "Search needs a YouTube Data API key"), By URL (YouTube or an https media URL), Upload | Google's three tab names kept |
+| `insert.image.camera` (L `model.ts:1189`) | Omit, `GOOGLE_SERVICE` | Now, `dialog('Camera')` | the recorded reason was wrong (R03 section 1) |
+| `insert.speakerSpotlight` (L `model.ts:1354`) | Omit, "Meet only" | Now, inserts a `spotlight` block | Kevin's decision 9 in R03 puts the row in or out of the round |
+| `title.record` (L `model.ts:709`) | Omit, `GOOGLE_SERVICE` | unchanged unless Kevin's decision 8 | section 6 gives the standalone form |
+| `title.slideshow.presentOnAnotherScreen` (L `model.ts:724-730`) | Later | Now, disabled where the Window Management API is absent | keeps `google: 'Present using Chromecast'` |
+| `title.slideshow.displayOptions` (L `model.ts:731-735`) | Omit | Now, `dialog('DisplayOptions')`, disabled as above | |
+| `NO_MEDIA` (L `model.ts:542`) | "Link to a recording instead" | deleted | R03 section 1 lists it among the clauses that disappear |
+| the toolbar and the Format options sidebar | Text fitting for text | "Audio playback" and "Video playback" sections replace Text fitting for media (R05 section 3's fields, Google's labels from R02 a.1 and a.2) | |
+
+### 8.3 Fixtures
+
+All fixtures are synthetic files generated from test patterns, so no licence question arises; the commands are recorded in `fixtures/media/README.md` and the files are committed once. Where `ffmpeg` is named it runs on the builder's machine, never in the check chain.
+
+| File | How it is made | Used by |
+| --- | --- | --- |
+| `tone-1s.wav` | generated inside the test: PCM 16 bit, mono, 8 kHz, one second of a 440 Hz sine, 16,044 bytes; also a `WAVE_FORMAT_EXTENSIBLE` variant and an `ADPCM` variant for the refusal | the sniff, the WAV parser, the show e2e, the export check |
+| `tone-1s.mp3` and `tone-vbr.mp3` | `ffmpeg -i tone-1s.wav -c:a libmp3lame -b:a 32k` and `-q:a 9` (a `Xing` header); an `ID3v2` tag with a footer prepended by `ffmpeg -id3v2_version 4` | the MP3 parser (CBR, Xing, ID3 skip), the show e2e |
+| `bars-1s.webm` | `ffmpeg -f lavfi -i testsrc=size=320x180:rate=10 -f lavfi -i sine=frequency=440 -t 1 -c:v libvpx-vp9 -c:a libopus bars-1s.webm` | the EBML parser, the poster capture in Chromium, the show e2e, the export check |
+| `bars-1s.mp4` and `tone-1s.m4a` | `ffmpeg ... -c:v libx264 -c:a aac -movflags +faststart` and a second copy without `faststart` (the `moov` after `mdat`) | the ISOBMFF parser only; the sniff and content type checks |
+| `recorded.webm` | a MediaRecorder capture in the e2e (Chromium, a canvas stream) with no `Duration` | the `durationMs: null` path and `media.info --refresh` |
+| refusals | `bars-1s.mov` (`qt  ` brand), `tone.ogg`, a `.mp4` file holding the `webm` bytes, a truncated `mp4`, a file over the cap by declared size | the refusal sentences and the sniff mismatch path |
+
+### 8.4 Checks
+
+- Unit: `packages/store/src/media/*.test.ts` (the signature table of 1.2 against every fixture, the parser facts of 1.3 with expected `durationMs` within 20 ms, `size`, `codecs`; optionally the same facts from `music-metadata` as a dev dependency oracle); `bundle.test.ts` gains media entries and the mismatch refusal; `headers.test.ts` gains the `media-src` and `frame-src` directives and the `camera=(self)` policy per route; the assets route test gains `Range`, `206`, `416` and `HEAD`; the quota table gains the four rows; `validate.test.ts` gains the three media rules; the standalone build test gains the three `media` modes and the budget fallback.
+- e2e (`apps/studio/e2e/media.spec.ts`, Playwright's Chromium, so `webm`, `wav` and `mp3` only): insert `bars-1s.webm` and `tone-1s.wav` on a checkout; the poster asset exists and its width is 320; present: the `auto` video plays (muted after a `NotAllowedError`, or unmuted after the click that started the show), `manual` audio does not start and a click on it toggles without advancing, Start at 0.5 s and End at 0.8 s stop within 250 ms, Stop on slide change off keeps the audio element in the layer on the next slide, the presenter window reports `media` messages and never holds a `<video>`; a YouTube block renders the poster and mounts an iframe on `www.youtube-nocookie.com` in the show (the network call is stubbed by `page.route`).
+- Export check (R05 section 10 leg 1): the "round five:" line counts `a:audioFile` and `a:videoFile`, `p14:media`, the media parts by extension and bytes, the poster blip per media shape, and the five media content types in `[Content_Types].xml`; leg 2 asserts a `draw:plugin` or `draw:frame` with an `xlink:href` into the ODP's `Media/` folder per media block; the stills leg treats the poster as a picture region.
+- The check chain gains one step, `media` (the unit files above plus the fixture digest list), so `pnpm check` runs 32 steps after round four's 31.
+
+## Decisions for Kevin
+
+1. The YouTube Data API key for the Search YouTube tab, with the default of 100 `search.list` calls per project per day (Y8) and the quota increase request that a public product needs; until then the tab is disabled with its clause.
+2. Thumbnail storage: keep Turboslide's own frame with the title as the only poster of a YouTube block (the default here), or allow "Use the video's thumbnail as the poster" as a user action that stores an `i.ytimg.com` frame in their deck, against the 30 day storage rule of the developer policies (Y4) whose reach over oEmbed and thumbnail URLs this report does not judge.
+3. The public asset URL position for media on restricted decks: the picture precedent, the `assetKey` prefix shipped for media first (recommended), or private storage with signed GET URLs.
+4. Record (R03 decision 8): the `MediaRecorder` form of section 6 and the storage it implies.
+5. The bundle cap: 500 MB with a streaming unpack, or media left out of bundles.
+6. The `tmp` tier: refuse media (recommended) or accept files under 4 MB.
+7. Whether `ogg` and `mov` join the accepted list later, with the export residual that PowerPoint for Windows does not list `ogg` and Firefox does not play `mov`.
+8. Whether the disabled state of Present on another screen and Presentation display options in Firefox and Safari is acceptable as Now, or the rows stay Later on those browsers' account.
+
+## Unverified
+
+1. The Chrome for Testing build at `chromium-1217` decodes H.264 and AAC; presumed from its being a Chrome flavour (B23), to be confirmed by `canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')` in the check step.
+2. Safari's Opus in WebM support and the iOS version that plays WebM; WebKit's 14.1 post names VP8, VP9 and Vorbis on macOS only (B7), MDN says Yes without a version (B5).
+3. Media Fragments end time support per browser; caniuse's notes were not readable (B20).
+4. The VBRI header offset (32 bytes after the frame header) and the 576 samples per frame of MPEG-2 and 2.5 Layer III; the MPEG-1 Layer III facts are verified (S7, S8).
+5. `Range` as a request header that needs no CORS preflight on media requests; the store answered `405` to `OPTIONS` while sending the allow headers (M2).
+6. The default cache header on Turboslide's own store: the measured blob was Vercel's documentation example with a one year `max-age`; the SDK default is one month (V5); the report sets one year explicitly.
+7. The host the presigned `PUT` targets, for `connect-src` (the `TURBOSLIDE_PRESIGN_HOST` variable exists for it, L `headers.ts:166`).
+8. Vercel Blob's Range support is measured (M1, M2), not documented (V1, V4, V5 are silent).
+9. The eleven character YouTube id and the `1h2m3s` grammar of `t`; the `shorts/` and `live/` forms rest on the oEmbed scheme list (Y10).
+10. Whether the oEmbed endpoint and `i.ytimg.com` fall under the YouTube API Services Terms and the 30 day storage rule (Y4).
+11. The ISOBMFF version 1 `mvhd` layout (64 bit times) and the `tkhd` offsets of width and height; the field order and sizes are verified (S4), the offsets are the report's arithmetic.
+12. Chromium's playback of `.mov`: chromium.org lists the QuickTime container (B6) while MDN's row says no (B5).
+13. PowerPoint for Windows and WebM with Opus; the page names Vorbis and an extension pack (B24).
+14. A `MediaRecorder` WebM without `Duration` and `Cues`; inferred from the elements being optional (S2).
+15. The effect of `Content-Disposition: attachment` on a `<video>` source; not tested, and moot once media join `INLINE_TYPES`.
+16. The currency of Apple's iOS page (B9) for today's iOS; its statements are the ones the design respects.
+17. Chrome's and Firefox's `MediaRecorder` container being WebM; MDN names `video/webm` as an option (B12) and WebKit names MP4 for Safari (B14).
+18. Whether the same tainting rule that B8 states for images applies to video frames drawn with `drawImage`; the design assumes it does and sets `crossorigin` anyway.
+
+## Sources
+
+All read on 2026-09-14.
+
+Vercel (V):
+
+- V1 Vercel Blob overview. https://vercel.com/docs/vercel-blob
+- V2 Client uploads with Vercel Blob. https://vercel.com/docs/vercel-blob/client-upload
+- V3 Vercel Functions limits. https://vercel.com/docs/functions/limitations
+- V4 Vercel Blob public storage. https://vercel.com/docs/vercel-blob/public-storage
+- V5 Vercel Blob SDK reference. https://vercel.com/docs/vercel-blob/using-blob-sdk
+- V6 Vercel signed URLs. https://vercel.com/docs/vercel-blob/vercel-signed-urls
+
+YouTube and Google (Y):
+
+- Y1 YouTube IFrame Player API reference. https://developers.google.com/youtube/iframe_api_reference
+- Y2 YouTube embedded players and player parameters. https://developers.google.com/youtube/player_parameters
+- Y3 YouTube API Services, required minimum functionality. https://developers.google.com/youtube/terms/required-minimum-functionality
+- Y4 YouTube API Services, developer policies. https://developers.google.com/youtube/terms/developer-policies
+- Y5 Embed videos and playlists (YouTube Help). https://support.google.com/youtube/answer/171780
+- Y6 YouTube Data API, thumbnails resource. https://developers.google.com/youtube/v3/docs/thumbnails
+- Y7 YouTube Data API, search.list. https://developers.google.com/youtube/v3/docs/search/list
+- Y8 YouTube Data API, getting started (quota). https://developers.google.com/youtube/v3/getting-started
+- Y9 Share videos and channels (YouTube Help). https://support.google.com/youtube/answer/57741
+- Y10 oEmbed providers registry, the YouTube entry. https://oembed.com/providers.json
+
+Browser vendors and MDN (B):
+
+- B1 Playwright, Browsers. https://playwright.dev/docs/browsers
+- B2 Chrome developers, Autoplay policy in Chrome (2018). https://developer.chrome.com/blog/autoplay
+- B3 WebKit, New video policies for iOS (2016-07-25). https://webkit.org/blog/6784/new-video-policies-for-ios/
+- B4 MDN, Autoplay guide for media and Web Audio APIs. https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Autoplay
+- B5 MDN, Media container formats. https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Formats/Containers
+- B6 The Chromium Projects, Audio and video. https://www.chromium.org/audio-video/
+- B7 WebKit, New WebKit features in Safari 14.1 (2021-04-29). https://webkit.org/blog/11648/new-webkit-features-in-safari-14-1/
+- B8 MDN, Allowing cross-origin use of images and canvas. https://developer.mozilla.org/en-US/docs/Web/HTML/How_to/CORS_enabled_image
+- B9 Apple, Safari HTML5 audio and video guide, iOS specific considerations. https://developer.apple.com/library/archive/documentation/AudioVideo/Conceptual/Using_HTML5_Audio_Video/Device-SpecificConsiderations/Device-SpecificConsiderations.html
+- B10 MDN, MediaDevices.getUserMedia(). https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+- B11 MDN, Permissions-Policy camera directive. https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/camera
+- B12 MDN, MediaRecorder. https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder
+- B13 MDN browser compat data, api/MediaRecorder.json. https://raw.githubusercontent.com/mdn/browser-compat-data/main/api/MediaRecorder.json
+- B14 WebKit, MediaRecorder API (2020-11-23). https://webkit.org/blog/11353/mediarecorder-api/
+- B15 MDN, Window Management API. https://developer.mozilla.org/en-US/docs/Web/API/Window_Management_API
+- B16 Chrome developers, Managing several displays with the Window Management API. https://developer.chrome.com/docs/capabilities/web-apis/window-management
+- B17 MDN browser compat data, api/ScreenDetails.json. https://raw.githubusercontent.com/mdn/browser-compat-data/main/api/ScreenDetails.json
+- B18 MDN, Presentation API. https://developer.mozilla.org/en-US/docs/Web/API/Presentation_API
+- B19 MDN browser compat data, api/PresentationRequest.json. https://raw.githubusercontent.com/mdn/browser-compat-data/main/api/PresentationRequest.json
+- B20 caniuse, Media Fragments URI. https://caniuse.com/media-fragments
+- B21 MDN, Audio and video delivery, specifying playback range. https://developer.mozilla.org/en-US/docs/Web/Media/Guides/Audio_and_video_delivery
+- B22 MDN, HTTP range requests. https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Range_requests
+- B23 Chrome developers, Chrome for Testing (2023-06-12). https://developer.chrome.com/blog/chrome-for-testing
+- B24 Microsoft Support, Video and audio file formats supported in PowerPoint. https://support.microsoft.com/en-us/office/video-and-audio-file-formats-supported-in-powerpoint-d8b12450-26db-4c7b-a5c1-593d3418fb59
+
+Specifications and registries (S):
+
+- S1 RFC 8794, Extensible Binary Meta Language. https://www.rfc-editor.org/rfc/rfc8794.html
+- S2 RFC 9559, Matroska media container format specification. https://www.rfc-editor.org/rfc/rfc9559.html
+- S3 RFC 3533, The Ogg encapsulation format version 0. https://www.rfc-editor.org/rfc/rfc3533.html
+- S4 Apple, QuickTime File Format specification, movie atoms (mvhd, tkhd, stsd, ftyp). https://developer.apple.com/library/archive/documentation/QuickTime/QTFF/QTFFChap2/qtff2.html
+- S5 MP4 Registration Authority, registered brands. https://mp4ra.org/registered-types/brands
+- S6 MP4 Registration Authority, registered codecs. https://mp4ra.org/registered-types/codecs
+- S7 Predrag Supurovic, MPEG audio frame header. http://www.datavoyage.com/mpgscript/mpeghdr.htm
+- S8 MP3 inside (the Xing header). https://www.multiweb.cz/twoinches/mp3inside.htm
+- S9 id3.org, ID3 tag version 2.4.0, main structure. https://id3.org/id3v2.4.0-structure
+- S10 McGill University, WAVE specifications. https://www.mmsp.ece.mcgill.ca/Documents/AudioFormats/WAVE/WAVE.html
+
+The npm registry (N):
+
+- N1 music-metadata 11.15.0. https://registry.npmjs.org/music-metadata/latest
+- N2 mp4box 2.4.1. https://registry.npmjs.org/mp4box/latest
+- N3 mediabunny 1.56.2. https://registry.npmjs.org/mediabunny/latest
+- N4 file-type 22.1.0. https://registry.npmjs.org/file-type/latest
+- N5 @remotion/media-parser 4.0.524. https://registry.npmjs.org/@remotion/media-parser/latest
+- N6 mediainfo.js 0.3.7. https://registry.npmjs.org/mediainfo.js/latest
+- N7 music-metadata README. https://raw.githubusercontent.com/Borewit/music-metadata/master/README.md
+
+Measurements (M), made with `curl` on 2026-09-14 against public URLs, no account:
+
+- M1 `HEAD https://1sxstfwepd7zn41q.public.blob.vercel-storage.com/blob-oYnXSVczoLa9yBYMFJOSNdaiiervF5.png` (the blob Vercel's own documentation links, V1): `200`, `accept-ranges: bytes`, `access-control-allow-origin: *`, `access-control-allow-headers: content-type`, `cache-control: public, max-age=31536000, s-maxage=300`, `content-disposition: inline; filename="blob.png"`, `etag`, `x-content-type-options: nosniff`, `x-vercel-cache: HIT`.
+- M2 The same URL with `Range: bytes=0-99` and `Origin: https://turboslide.vercel.app`: `206`, `content-range: bytes 0-99/2275823`, `content-length: 100`, the same allow headers; `OPTIONS` with a preflight's headers: `405` with the same two `access-control` headers.
+- M3 `GET https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=M7lc1UVf-VE&format=json` (the video id the IFrame API documentation uses): `200 application/json` with `title`, `author_name`, `author_url`, `thumbnail_url` `https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg`, `thumbnail_width` 480, `thumbnail_height` 360 and the iframe `html`; the `youtu.be/<id>?t=30` and `playlist?list=` forms also answered `200`.
+- M4 `HEAD https://i.ytimg.com/vi/M7lc1UVf-VE/hqdefault.jpg` with an `Origin` header: `200 image/jpeg`, `access-control-allow-origin: *`, `cross-origin-resource-policy: cross-origin`, `cache-control: public, max-age=7200`; `maxresdefault.jpg` answered `200` as well.
+- M5 `GET https://www.youtube-nocookie.com/embed/M7lc1UVf-VE?enablejsapi=1&origin=https://turboslide.vercel.app`: `200`, a `content-security-policy` with `script-src 'nonce-…' 'strict-dynamic'`, `cross-origin-resource-policy: cross-origin`, no `x-frame-options`.
+
+Repository files at `d5d7f07` (L):
+
+- `apps/studio/src/server/upload.ts`, `apps/studio/src/server/ratelimit.ts`, `apps/studio/src/server/headers.ts`, `apps/studio/src/routes/api/x.upload.$.ts`, `apps/studio/src/routes/api/x.csp.$.ts`, `apps/studio/src/routes/decks.$deckId.assets.$.ts`, `apps/studio/src/routes/present.$deckId.tsx`, `apps/studio/src/components/Slideshow.tsx`, `apps/studio/src/components/DeckViewer.tsx`
+- `packages/headless/src/capture/shared.ts`, `packages/headless/src/launch.ts`
+- `packages/store/src/store.ts`, `packages/store/src/blob-store.ts`, `packages/store/src/blob-vercel.ts`, `packages/store/src/file-store.ts`, `packages/store/src/hosted.ts`, `packages/store/src/bundle.ts`, `packages/store/src/unpack.ts`
+- `packages/schema/src/assets.ts`, `packages/schema/src/actions.ts`, `packages/materials/src/actions.ts`, `packages/agent/src/http/dispatch.ts`
+- `packages/render/src/standalone.ts`, `packages/viewer/standalone/runtime.ts`, `packages/viewer/src/LiveClone.tsx`, `packages/viewer/src/present/presentKeys.ts`, `packages/viewer/src/present/presentSync.ts`, `packages/viewer/src/present/PresenterConsole.tsx`
+- `packages/chrome/src/menus/model.ts`
+- `docs/hosting.md`, `docs/hosting-chromium.md`, `docs/deck-transfer.md`
+- `docs/gslides-parity/research/05-objects-and-format-options.md`, `docs/gslides-parity/research-3/04-security-and-rate-limiting.md`, `docs/gslides-parity/research-3/10-security-and-storage-addendum.md`
+
+Sibling reports (R): `docs/gslides-parity/research-5/02-media-templates-import-page.md`, `03-later-rows-and-edit-theme.md`, `05-motion-media-export.md`, `07-turboslide-inventory-5.md`.

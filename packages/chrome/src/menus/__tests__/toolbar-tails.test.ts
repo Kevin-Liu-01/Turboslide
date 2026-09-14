@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 
 import { TOOLBAR_TAIL_DEFAULT, findItem } from '../model.ts';
 import { forbiddenWordsIn, stubClause } from '../strings.ts';
-import { HIDE_MENUS_CONTROL, TOOLBAR_TAILS, tailFor, tailLabels } from '../toolbar-tails.ts';
+import {
+  HIDE_MENUS_CONTROL,
+  TOOLBAR_TAILS,
+  TOOLBAR_TAIL_END,
+  tailFor,
+  tailLabels,
+} from '../toolbar-tails.ts';
 import type { TailKind } from '../toolbar-tails.ts';
 
 // The contextual toolbar tails (gslides-parity SPEC 3.2 to 3.8 with the round two flips of SPEC-2
@@ -72,7 +78,7 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
       ).toBeUndefined();
   });
 
-  it('an image: the frame controls, Crop with the Mask arrow, Replace, Image options, Reset (3.4)', () => {
+  it('an image: the frame controls, Crop with the Mask arrow, Replace, Image options, Reset, Dither (3.4; SPEC-3 13.2)', () => {
     expect(tailLabels('image')).toEqual([
       'Border color',
       'Border weight',
@@ -81,6 +87,7 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
       'Replace image',
       'Image options',
       'Reset image',
+      'Dither',
       'Format options',
     ]);
     const crop = TOOLBAR_TAILS.image.find((control) => control.control === 'toolbar.cropImage');
@@ -93,6 +100,45 @@ describe('the tails of SPEC 3.2 to 3.8 with SPEC-2 4.2', () => {
       expect(TOOLBAR_TAILS.image.find((each) => each.control === control)?.status, control).toBe(
         'now',
       );
+    /* SPEC-3 10.5, 13.2: the Dither toggle runs the picture's row and is a Turboslide addition */
+    const dither = TOOLBAR_TAILS.image.find((control) => control.control === 'toolbar.dither');
+    expect(dither?.item).toBe('format.image.dither');
+    expect(dither?.turboslide).toBe(true);
+    expect(findItem('format.image.dither')?.effect).toEqual({
+      kind: 'action',
+      id: 'picture.dither',
+    });
+  });
+
+  it('the tail’s right end: the pointer toggle for editors and the View only button for viewers (SPEC-3 13.2)', () => {
+    expect(TOOLBAR_TAIL_END.map((control) => control.control)).toEqual([
+      'toolbar.pointer',
+      'toolbar.viewOnly',
+    ]);
+    const pointer = TOOLBAR_TAIL_END[0];
+    expect(pointer?.item).toBe('view.livePointers.mine');
+    expect(pointer?.when).toBe('write');
+    expect(pointer?.label).toBe('Show my pointer');
+    const viewOnly = TOOLBAR_TAIL_END[1];
+    expect(viewOnly?.label).toBe('View only');
+    expect(viewOnly?.when).toBe('viewOnly');
+    expect(viewOnly?.effect).toEqual({
+      kind: 'action',
+      id: 'share.requestAccess',
+      input: { role: 'editor' },
+    });
+    /* neither is part of a selection's tail: they are drawn apart, like Hide the menus */
+    for (const kind of Object.keys(TOOLBAR_TAILS) as TailKind[])
+      for (const control of tailFor(kind))
+        expect(
+          ['toolbar.pointer', 'toolbar.viewOnly'],
+          `${kind}: ${control.control}`,
+        ).not.toContain(control.control);
+    for (const control of TOOLBAR_TAIL_END) {
+      expect(forbiddenWordsIn(control.label), control.control).toEqual([]);
+      if (control.doc !== undefined)
+        expect(forbiddenWordsIn(control.doc), control.control).toEqual([]);
+    }
   });
 
   it('a line: colour, weight, dash, start and end, all Now (3.5)', () => {
@@ -203,22 +249,31 @@ describe('every tail control', () => {
         if (control.arrow !== undefined)
           expect(findItem(control.arrow), `${control.control} -> ${control.arrow}`).toBeDefined();
         expect(
-          control.status === 'now' && control.item === undefined && control.op === undefined,
+          control.status === 'now' &&
+            control.item === undefined &&
+            control.op === undefined &&
+            control.effect === undefined,
           `${control.control} runs nothing`,
         ).toBe(false);
       }
     }
   });
 
-  it('leaves Insert comment as the one Later control outside the default tail', () => {
+  it('leaves no Later control outside the default tail: Insert comment is live since SPEC-3 5.3', () => {
     const later: string[] = [];
     for (const kind of kinds)
       if (kind !== 'default')
         for (const control of TOOLBAR_TAILS[kind])
           if (control.status === 'later') later.push(`${kind}:${control.control}`);
-    expect(new Set(later.map((each) => each.split(':')[1]))).toEqual(
-      new Set(['toolbar.insertComment']),
-    );
+    expect(later).toEqual([]);
+    for (const kind of ['text', 'shape', 'table'] as const) {
+      const comment = TOOLBAR_TAILS[kind].find(
+        (control) => control.control === 'toolbar.insertComment',
+      );
+      expect(comment?.status, kind).toBe('now');
+      expect(comment?.item, kind).toBe('insert.comment');
+      expect(comment?.when, kind).toBe('comment');
+    }
   });
 
   it('never wraps: every tail fits the More button rule with the same control ids', () => {

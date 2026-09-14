@@ -179,3 +179,8 @@ ${DITHER_SCRIPT}
   show(fromHash(), { hash: false });
   window.addEventListener('load', function () { fit(); drawAllDither(stage, isDark()); });
 })();`;
+
+// The live dither overlay runtime (dither-runtime.ts, gslides-parity SPEC-3 10.3) is reachable
+// through this subpath until the package's exports carry `./dither-runtime` (a request of
+// build-3/b5.md); the module references the DOM lib itself, as measure-dom.ts does.
+export * from './dither-runtime.ts';

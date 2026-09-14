@@ -13,13 +13,81 @@ import type { Author } from '@turboslide/schema/mutations';
 import { z } from 'zod';
 
 import type { ActionContext, Dispatcher } from '../dispatch.ts';
-import { authorize, requestAuthor, requestDeckId, requestForce } from './auth.ts';
+import { authorize, isLocalHost, requestAuthor, requestDeckId, requestForce } from './auth.ts';
 import type { Env } from './auth.ts';
 import { errorResponse, jsonResponse, refuse } from './errors.ts';
 
 /** Request bodies are capped at 1 MB for writes and 25 MB for asset uploads (SPEC 11). */
 export const WRITE_BODY_LIMIT = 1024 * 1024;
 export const ASSET_BODY_LIMIT = 25 * 1024 * 1024;
+
+/**
+ * Forwarded host trust (gslides-parity SPEC-3 8.8, 11.4; report 04 F11). `X-Forwarded-Host` is
+ * the name a proxy says the client used. On Vercel the platform sets it and it equals `Host`; on
+ * the `node-server` preset behind a proxy that forwards client headers, or on any deployment that
+ * forgot its token, a client can send `X-Forwarded-Host: localhost` and open the agent surface,
+ * because the localhost rule of auth.ts believes the header. The rule here: without
+ * `TURBOSLIDE_TRUST_PROXY=1` a forwarded host can narrow the answer (a public name refuses) and
+ * never widen it (a local name is ignored and `Host` decides); with it the forwarded host is the
+ * host. The check runs beside `authorize()` in handleActionRequest and in the studio's routes.
+ */
+export const TRUST_PROXY_ENV = 'TURBOSLIDE_TRUST_PROXY';
+
+export function trustsProxy(env: Env = process.env): boolean {
+  const value = env[TRUST_PROXY_ENV]?.trim().toLowerCase();
+  return value === '1' || value === 'true' || value === 'yes';
+}
+
+/** The first `X-Forwarded-Host` entry, or undefined. */
+export function forwardedHost(request: Request): string | undefined {
+  const value = request.headers.get('x-forwarded-host');
+  if (!value) return undefined;
+  const first = value.split(',')[0]?.trim();
+  return first === undefined || first === '' ? undefined : first;
+}
+
+/** `Host`, then the request URL's host: the name the listening socket saw. */
+export function socketHost(request: Request): string {
+  const host = request.headers.get('host');
+  if (host) return host.trim();
+  try {
+    return new URL(request.url).host;
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * The host the request is judged by: the forwarded host when the proxy is trusted; otherwise the
+ * socket's host, unless the forwarded host names a public address, which refuses (the narrowing
+ * direction is always safe).
+ */
+export function effectiveHost(request: Request, env: Env = process.env): string {
+  const forwarded = forwardedHost(request);
+  const socket = socketHost(request);
+  if (trustsProxy(env)) return forwarded ?? socket;
+  if (forwarded !== undefined && !isLocalHost(forwarded)) return forwarded;
+  return socket;
+}
+
+/** True when the request may use the open localhost rule: every host it names is local. */
+export function isLocalRequest(request: Request, env: Env = process.env): boolean {
+  return isLocalHost(effectiveHost(request, env));
+}
+
+/**
+ * The refusal for a request auth.ts admitted on the localhost rule through a forwarded header
+ * the deployment does not trust (a spoofed `X-Forwarded-Host: localhost` over a public `Host`),
+ * or null when the request is local by every name it carries.
+ */
+export function refuseSpoofedLocalhost(request: Request, env: Env = process.env): Response | null {
+  if (isLocalRequest(request, env)) return null;
+  return refuse(
+    401,
+    'unauthorized',
+    `the agent surface is open only on localhost; this instance (host ${socketHost(request) || 'unknown'}) has no ${'TURBOSLIDE_TOKEN'} set, so requests off localhost are refused`,
+  );
+}
 
 /** The actions whose bodies may carry an upload and get the larger cap. */
 const ASSET_ACTIONS: ReadonlySet<ActionId> = new Set<ActionId>(['asset.add', 'asset.capture']);
@@ -128,6 +196,11 @@ export async function handleActionRequest(
   const env = options.env ?? process.env;
   const auth = authorize(request, env);
   if (!auth.ok) return refuse(auth.status, auth.code, auth.message);
+  if (auth.mode === 'localhost') {
+    // the localhost rule holds only when every host the request names is local (SPEC-3 8.8)
+    const spoofed = refuseSpoofedLocalhost(request, env);
+    if (spoofed !== null) return spoofed;
+  }
   if (!isActionId(actionId)) {
     return refuse(404, 'unknown_action', `Unknown action "${actionId}"; GET /api/agent lists them`);
   }

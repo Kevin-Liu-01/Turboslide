@@ -139,11 +139,12 @@ describe('ContextMenu', () => {
     expect(dup?.textContent).toContain('⌘D');
     const newSlide = document.querySelector('[data-menu-item="slide.newSlide"]');
     expect(newSlide?.textContent).toContain('⌃M');
-    /* the stubs are present and disabled, with the stub sentence */
+    /* the stubs are present and disabled, with the stub sentence; Comment is live (SPEC-3 5.3) */
     const transition = document.querySelector('[data-menu-item="slide.transition"]');
     expect(transition?.getAttribute('aria-disabled')).toBe('true');
     const comment = document.querySelector('[data-menu-item="insert.comment"]');
-    expect(comment?.getAttribute('aria-disabled')).toBe('true');
+    expect(comment).not.toBeNull();
+    expect(comment?.getAttribute('aria-disabled')).toBeNull();
     /* Change background opens the one Background dialog on every slide kind (SPEC-2 0.74) */
     expect(
       document

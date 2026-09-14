@@ -28,6 +28,7 @@
     "./http/sessions": "./src/http/sessions.ts",
     "./window/adapter": "./src/window/adapter.ts",
     "./window/controls": "./src/window/controls.ts",
+    "./window/guard": "./src/window/guard.ts",
     "./window/history": "./src/window/history.ts",
     "./window/invoke": "./src/window/invoke.ts",
     "./window/ready": "./src/window/ready.ts",

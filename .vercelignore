@@ -22,3 +22,6 @@ packages/native/wasm/*
 !packages/native/wasm/README.md
 .repos
 .github
+# The WAF rules file is applied through the Vercel API by the integrator, never by the build
+# (gslides-parity SPEC-3 8.3, 11.5 R0)
+firewall

@@ -1,5 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
-import type { DeckDocument } from '@turboslide/schema/deck';
+import { getRequest, setCookie } from '@tanstack/react-start/server';
+import type { AccessRecord, Capability, Role, Via } from '@turboslide/schema/access';
+import type { DeckDocument, Slide } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { authorSchema, writeSchema } from '@turboslide/schema/mutations';
 import type { Author, Lease, Mutation, Version, Write } from '@turboslide/schema/mutations';
@@ -13,6 +15,7 @@ import { DEFAULT_BLANK_TITLE } from '@turboslide/store/templates';
 import { toVersion } from '@turboslide/store/versions';
 import { spriteMarkup } from '@turboslide/theme/sprite';
 
+import type { MailMode } from './auth/mail/mailer';
 import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
 import {
@@ -76,6 +79,40 @@ function parseAuthor(value: unknown): Author {
   return parsed.data;
 }
 
+/** The caller's identity as the route shows it (gslides-parity SPEC-3 7.8; the chrome's IdentityView). */
+export type EditorIdentity = {
+  principalId: string;
+  label: string;
+  name?: string;
+  trust: 'label' | 'guest' | 'verified' | 'agent';
+  kind: 'anonymous' | 'account' | 'agent';
+  email?: string;
+};
+
+/** The room's facts the editor starts from (SPEC-3 3.6): the stream position of the document it was handed. */
+export type EditorRoom = {
+  /** the last stream entry the document includes; the room client resumes after it */
+  seq: number;
+  tier: 'memory' | 'redis' | 'blob';
+  /** the title row's sentence on the blob tier, else null */
+  notice: string | null;
+};
+
+/**
+ * What the deployment offers for sign in (gslides-parity SPEC-3 7.3; the identity runtime's
+ * `signInMethods`): the own chip's Sign in row exists when `signIn` is true, the dialog offers the
+ * methods that are on, and `mail` says how the sign in mail travels (`capture` on a checkout and
+ * the previews, `resend` once Kevin's sending domain is set, `off` otherwise).
+ */
+export type EditorAuthFacts = {
+  signIn: boolean;
+  email: boolean;
+  passkeys: boolean;
+  passkeysNotice: string | null;
+  github: boolean;
+  mail: MailMode;
+};
+
 export type EditorDeck = {
   deckId: string;
   document: DeckDocument;
@@ -92,7 +129,73 @@ export type EditorDeck = {
    * that write has landed
    */
   draft?: true;
+  /* round three (gslides-parity SPEC-3 3.6, 6.3, 7.8; MILESTONES-3 B2 day 4) */
+  room?: EditorRoom;
+  identity?: EditorIdentity;
+  /** the caller's role on the deck; absent on a draft */
+  role?: Role;
+  via?: Via;
+  capabilities?: Capability[];
+  /** the effective access record (the legacy synthesis for a deck nobody claimed), tokens hashed */
+  access?: AccessRecord;
+  /** the deployment's sign in facts (7.3); absent on a draft */
+  auth?: EditorAuthFacts;
 };
+
+/**
+ * The payload shaped by role (SPEC-3 6.3): notes leave below editor, skipped slides leave below
+ * commenter, the version log leaves without `history`. Pure, so the loader and the tests share it.
+ */
+export function shapeByRole(
+  payload: EditorDeck,
+  capabilities: ReadonlyArray<Capability>,
+): EditorDeck {
+  const caps = new Set(capabilities);
+  let document = payload.document;
+  if (!caps.has('readNotes') || !caps.has('readSkipped')) {
+    const slides: Record<string, Slide> = {};
+    for (const [id, slide] of Object.entries(document.slides)) {
+      if (!caps.has('readSkipped') && slide.skip === true) continue;
+      if (!caps.has('readNotes') && slide.notes !== undefined) {
+        const { notes: _notes, ...rest } = slide;
+        slides[id] = rest as Slide;
+      } else slides[id] = slide;
+    }
+    const sections = caps.has('readSkipped')
+      ? document.deck.sections
+      : document.deck.sections.map((section) => ({
+          ...section,
+          slideIds: section.slideIds.filter((id) => slides[id] !== undefined),
+        }));
+    document = { deck: { ...document.deck, sections }, slides };
+  }
+  return {
+    ...payload,
+    document,
+    versions: caps.has('history') ? payload.versions : [],
+  };
+}
+
+/** Sets the identity cookie a server function minted (the Set-Cookie value of session.ts). */
+function sendMintedCookie(setCookieValue: string | undefined): void {
+  if (setCookieValue === undefined) return;
+  const [pair, ...attributes] = setCookieValue.split(';');
+  const eq = pair?.indexOf('=') ?? -1;
+  if (pair === undefined || eq <= 0) return;
+  const name = pair.slice(0, eq);
+  const value = pair.slice(eq + 1);
+  const secure = attributes.some((attribute) => attribute.trim().toLowerCase() === 'secure');
+  const maxAge = attributes
+    .map((attribute) => /^\s*max-age=(\d+)/i.exec(attribute))
+    .find((match) => match !== null);
+  setCookie(name, value, {
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure,
+    ...(maxAge ? { maxAge: Number(maxAge[1]) } : {}),
+  });
+}
 
 const readEditorDeckFn = createServerFn({ method: 'GET' })
   .validator((input: string) => {
@@ -101,23 +204,64 @@ const readEditorDeckFn = createServerFn({ method: 'GET' })
   })
   .handler(async ({ data }): Promise<string> => {
     if (!(await hasStoredDeck(data.deckId))) return JSON.stringify(null);
-    const store = await storeFor(data.deckId);
-    const [read, versions, leases] = await Promise.all([
-      store.read(),
-      store.listVersions(),
-      store.leases(),
+    // the room and the identity (round three): loaded here, not at the top, so the client stub of
+    // this module never pulls the channel's Node graph (agent-actions.ts explains the rule)
+    const room = await import('./room');
+    const access = await import('./access');
+    const auth = await import('./auth/identity');
+    const identity = await room.requestIdentity(getRequest());
+    sendMintedCookie(identity.setCookie);
+    const decision = await room.decideFor(identity, data.deckId, 'read', 'readEditorDeck');
+    if (!decision.ok) return JSON.stringify(null);
+    const runtime = auth.identityRuntime();
+    const deckRoom = await room.roomFor(data.deckId);
+    const [live, read, versions, leases] = await Promise.all([
+      deckRoom.live(),
+      deckRoom.store.read(),
+      deckRoom.store.listVersions(),
+      deckRoom.store.leases(),
     ]);
+    const record = await access.effectiveAccess(data.deckId);
+    const standing = access.standingOf(decision, record);
+    const resolved = room.resolveIdentity(
+      identity.principalId ?? identity.identity,
+      identity.record,
+    );
+    const selection = room.realtimeSelection();
     const result: EditorDeck = {
       deckId: data.deckId,
-      document: read.document,
+      document: live.document,
       issues: read.issues,
       ok: read.ok,
       sprite: readSprite(),
       versions,
       leases,
       hosting: hostingFacts(),
+      room: { seq: live.seq, tier: selection.tier, notice: selection.notice },
+      identity: {
+        principalId: resolved.principalId,
+        label: resolved.label,
+        ...(resolved.trust === 'guest' || resolved.trust === 'verified'
+          ? { name: resolved.displayName }
+          : {}),
+        trust: resolved.trust,
+        kind: resolved.kind,
+        ...(resolved.email !== undefined ? { email: resolved.email } : {}),
+      },
+      ...(standing.role !== null ? { role: standing.role } : {}),
+      ...(standing.via !== null ? { via: standing.via } : {}),
+      capabilities: standing.capabilities,
+      access: record,
+      auth: {
+        signIn: runtime.methods.available,
+        email: runtime.methods.email,
+        passkeys: runtime.methods.passkeys,
+        passkeysNotice: runtime.methods.passkeysNotice,
+        github: runtime.methods.github,
+        mail: runtime.mailMode,
+      },
     };
-    return JSON.stringify(result);
+    return JSON.stringify(shapeByRole(result, standing.capabilities));
   });
 
 /** The raw normalized document with the version log and the unexpired leases, for the editor's loader. */
@@ -160,14 +304,38 @@ const readDraftDeckFn = createServerFn({ method: 'GET' }).handler(async (): Prom
   return JSON.stringify(result);
 });
 
+/* the drafts an editor on /new holds open in this page (holdDraft), and the last draft read */
+const heldDrafts = new Set<string>();
+let lastDraft: EditorDeck | null = null;
+
+/**
+ * Marks a draft as open in an editor of this page, until the disposer runs (the editor's
+ * unmount). While a draft is held, `readDraftDeck` answers it again instead of minting another:
+ * the router reruns /new's loader on every search change (a Mode or View toggle after the first
+ * save), and a fresh id would remount the editor on a phantom draft at revision 0 and hand the
+ * window API to it (VERIFICATION-3 finding 2). A reload starts a new module, so /new before any
+ * write still shows a fresh draft; two tabs are two modules, so two decks.
+ */
+export function holdDraft(deckId: string): () => void {
+  heldDrafts.add(deckId);
+  return () => {
+    heldDrafts.delete(deckId);
+    if (lastDraft?.deckId === deckId) lastDraft = null;
+  };
+}
+
 /**
  * The document /new edits (gslides-parity SPEC 6.1): the blank template (one Title slide with
  * empty heading and lead, the theme starter pictures, title "Untitled presentation") under a
  * fresh draft id at revision 0, with no version log and no leases. Nothing is written; the first
- * `writeDeck` against the id creates the deck. Two calls give two ids (two tabs, two decks).
+ * `writeDeck` against the id creates the deck. Two calls give two ids (two tabs, two decks),
+ * except while an editor of this page holds the last draft open (`holdDraft`).
  */
 export async function readDraftDeck(): Promise<EditorDeck> {
-  return JSON.parse(await readDraftDeckFn()) as EditorDeck;
+  if (lastDraft !== null && heldDrafts.has(lastDraft.deckId)) return lastDraft;
+  const payload = JSON.parse(await readDraftDeckFn()) as EditorDeck;
+  lastDraft = payload;
+  return payload;
 }
 
 /**
@@ -228,6 +396,8 @@ export type WriteDeckResult =
       document?: DeckDocument;
       /** this write created the deck in the store: the first save of a draft (SPEC 6.1) */
       created?: true;
+      /** the stream position of the entry the room admitted (SPEC-3 3.7 c); the revision on the blob tier */
+      seq?: number;
     }
   | {
       ok: false;
@@ -263,38 +433,65 @@ const writeDeckFn = createServerFn({ method: 'POST' })
     // the first save of a draft (SPEC 6.1): the deck is created from the blank template under the
     // draft's id, then the write applies against revision 0; the id shape keeps any other missing
     // deck a 404, and a write with a base above 0 names a deck that once existed, not a draft
+    // the strict, checkpointed write of round three (gslides-parity SPEC-3 3.7 c, 11.3): the
+    // author is the session's, never the body's, on a browser transport; the write is admitted
+    // through the room so every open tab receives it live, and checkpointed at once so the answer
+    // carries a revision and its record
+    const room = await import('./room');
+    const identity = await room.requestIdentity(getRequest());
+    sendMintedCookie(identity.setCookie);
     let created = false;
     if (data.write.baseRevision === 0 && (await isUnsavedDraft(data.deckId))) {
       await createStoredDeck({ name: DEFAULT_BLANK_TITLE, from: DRAFT_TEMPLATE, id: data.deckId });
       created = true;
+      // the new deck's record (SPEC-3 6.1): restricted, this session its owner, written before
+      // the decision below reads it (VERIFICATION-3 finding 4)
+      const { recordNewDeck } = await import('./access');
+      await recordNewDeck(data.deckId, identity.ctx);
     }
-    const store = await storeFor(data.deckId);
-    const outcome = await store.write(data.write, data.force === true ? { force: true } : {});
+    const decision = await room.decideFor(identity, data.deckId, 'write', 'writeDeck');
+    if (!decision.ok) {
+      throw new RangeError(`No deck ${data.deckId}`);
+    }
+    const author =
+      identity.ctx.agent !== undefined && data.write.author.kind === 'agent'
+        ? data.write.author
+        : room.authorOf(identity);
+    const deckRoom = await room.roomFor(data.deckId);
+    const admitted = await room.admitServerWrite(deckRoom, {
+      author,
+      mutations: data.write.mutations,
+      baseRevision: data.write.baseRevision,
+      strict: true,
+      ...(data.write.note === undefined ? {} : { note: data.write.note }),
+    });
     let result: WriteDeckResult;
-    if (outcome.ok) {
+    if (admitted.ok) {
+      const document = data.returnDocument === true ? (await deckRoom.live()).document : undefined;
       result = {
         ok: true,
-        revision: outcome.revision,
-        entry: outcome.entry,
-        changed: outcome.changed,
-        warnings: outcome.warnings,
-        issues: outcome.issues,
-        ...(data.returnDocument === true ? { document: outcome.document } : {}),
+        revision: admitted.revision,
+        entry: admitted.record,
+        changed: [
+          ...new Set(admitted.record.mutations.flatMap((m) => ('slideId' in m ? [m.slideId] : []))),
+        ],
+        warnings: [],
+        issues: [],
+        ...(document === undefined ? {} : { document }),
         ...(created ? { created: true } : {}),
+        seq: admitted.seq,
       };
-    } else if (outcome.code === 'conflict') {
-      const records = await store.records();
+    } else if (admitted.code === 'conflict') {
       result = {
         ok: false,
         code: 'conflict',
-        message: outcome.message,
-        currentRevision: outcome.currentRevision,
-        current: outcome.current,
-        ...(outcome.holder !== undefined ? { holder: outcome.holder } : {}),
-        since: records.filter((record) => record.revision > data.write.baseRevision),
+        message: admitted.message,
+        currentRevision: admitted.currentRevision,
+        current: admitted.current,
+        since: admitted.since,
       };
     } else {
-      result = outcome;
+      result = { ok: false, code: 'invalid', message: admitted.message, issues: [] };
     }
     return JSON.stringify(result);
   });
@@ -330,8 +527,13 @@ const saveVersionFn = createServerFn({ method: 'POST' })
     };
   })
   .handler(async ({ data }): Promise<string> => {
-    const store = await storeFor(data.deckId);
-    return JSON.stringify(await store.saveVersion(data.author, data.note));
+    // a named version pins the live document (SPEC-3 0.3: version.save forces a checkpoint)
+    const room = await import('./room');
+    const identity = await room.requestIdentity(getRequest());
+    const author = identity.ctx.agent !== undefined ? data.author : room.authorOf(identity);
+    const deckRoom = await room.roomFor(data.deckId);
+    if (deckRoom.tier !== 'blob') await deckRoom.checkpointer.run({ force: true });
+    return JSON.stringify(await deckRoom.store.saveVersion(author, data.note));
   });
 
 /** version.save: a named version at the current revision. */

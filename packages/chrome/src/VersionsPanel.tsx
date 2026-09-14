@@ -5,25 +5,41 @@ import type { Version } from '@turboslide/schema/mutations';
 
 import type { EditorDispatch } from './dispatch';
 import { authorName } from './dispatch';
+import type { IdentityView } from './editor-shell';
 import { cn } from './lib/cn';
 import { Menu } from './Menu';
-import { DEFAULT_MENU_CONTEXT } from './menus/model';
+import { DEFAULT_MENU_CONTEXT, itemById } from './menus/model';
 import type { MenuItem } from './menus/model';
 import { PANELS, stubClause } from './menus/strings';
+import { IdentityChip, nameOf, trustWordOf } from './presence/IdentityChip';
 import { ToolButton } from './ToolButton';
 import { tipProps } from './Tooltip';
+import {
+  MARKS_PER_WINDOW,
+  groupVersions,
+  identityOfAuthor,
+  isLegacyAuthor,
+  namedCap,
+} from './versions-model';
+import type { VersionWindow } from './versions-model';
 
 import './VersionsPanel.css';
 
 /**
  * The versions list (SPEC 6.5, 6.7) and, with `history`, the Version history panel of the Google
- * Slides parity round (gslides-parity SPEC 2.1, 12 "Panels"): the versions grouped by day, newest
- * first, "Only show named versions", "Restore this version" per version, and a More menu per
- * version with "Name this version" and "Make a copy"; "Show changes" is the Later row inside the
- * panel. A named version is one with a note; a write entry reads its mutation count. Restore is a
- * mutation through version.restore with the current baseRevision, so it is undoable. Nothing here
- * reads or writes the log: the studio passes it and the dispatcher acts. Without `history` the
- * component keeps its embedded form for the Inspector: a note field with Save and the flat list.
+ * Slides parity rounds (gslides-parity SPEC 2.1, 12 "Panels"; SPEC-3 0.45, 5.7): the records
+ * grouped by day, newest first, and inside a day by a 15 minute window whose row shows up to four
+ * author marks and the change count and expands to its records; a named record stands alone. Each
+ * record carries its author's 16 px mark and trust word (the round one `studio` author collapses
+ * into "Earlier edits"); "Only show named versions", "Name current version", "Restore this
+ * version" per version, and a More menu per version with "Name this version", "Make a copy" (at
+ * that version, through `deck.copy { atVersion }`) and the two delete rows as disabled stubs with
+ * their clause; the 40 named versions cap with a sentence naming the oldest. "Show changes" is the
+ * checkbox at the panel's bottom, Google's position: it selects a version and the shell runs
+ * `version.diff` against its predecessor and hatches the overlay. Restore is a mutation through
+ * version.restore with the current baseRevision, so it is undoable. Nothing here reads or writes
+ * the log: the studio passes it and the dispatcher acts. Without `history` the component keeps its
+ * embedded form for the Inspector: a note field with Save and the flat list.
  */
 export type VersionsPanelProps = {
   versions: ReadonlyArray<Version>;
@@ -35,6 +51,13 @@ export type VersionsPanelProps = {
   history?: boolean;
   /** Make a copy at a version: opens the Make a copy dialog */
   onMakeCopy?: (version: Version) => void;
+  /** the resolved identities of the records' authors, by principal id (SPEC-3 7.8) */
+  identities?: Readonly<Record<string, IdentityView>>;
+  /** Show changes (SPEC-3 5.7): the checkbox's state and the selected version */
+  showChanges?: boolean;
+  selected?: Version | null;
+  onShowChanges?: (on: boolean) => void;
+  onSelect?: (version: Version | null) => void;
   className?: string;
 };
 
@@ -47,6 +70,12 @@ export function formatWhen(iso: string): string {
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+function formatTime(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 /** The day heading of a version: Today, Yesterday, or the date. */
@@ -68,7 +97,7 @@ export function dayLabel(iso: string, now: Date = new Date()): string {
   });
 }
 
-/** The versions newest first, grouped by day; named only when asked. */
+/** The versions newest first, grouped by day; named only when asked (the round one grouping, kept for the tests). */
 export function groupByDay(
   versions: ReadonlyArray<Version>,
   namedOnly: boolean,
@@ -97,12 +126,9 @@ const MORE_ITEMS: ReadonlyArray<MenuItem> = [
     status: 'now',
     effect: { kind: 'client', handler: 'runAction' },
   },
-  {
-    id: 'version.showChanges',
-    label: 'Show changes',
-    status: 'later',
-    stubReason: 'The changes between versions arrive in a later round',
-  },
+  /* SPEC-3 0.45, 13.3: present and disabled with the clause */
+  { ...itemById('file.versionHistory.deleteOlder'), dividerBefore: true },
+  itemById('file.versionHistory.deleteHistory'),
 ];
 
 export function VersionsPanel({
@@ -112,6 +138,11 @@ export function VersionsPanel({
   embedded = false,
   history = false,
   onMakeCopy,
+  identities,
+  showChanges = false,
+  selected = null,
+  onShowChanges,
+  onSelect,
   className,
 }: VersionsPanelProps) {
   const [note, setNote] = useState('');
@@ -120,6 +151,8 @@ export function VersionsPanel({
   const [namedOnly, setNamedOnly] = useState(false);
   const [more, setMore] = useState<{ version: Version; anchor: HTMLElement } | null>(null);
   const [naming, setNaming] = useState<{ version: Version; value: string } | null>(null);
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const [namingCurrent, setNamingCurrent] = useState<string | null>(null);
   const rows = [...versions].reverse();
   const listRef = useRef<HTMLDivElement>(null);
 
@@ -132,10 +165,20 @@ export function VersionsPanel({
       .finally(() => setBusy(false));
   };
 
+  const cap = namedCap(versions);
+  const saveNamed = (trimmed: string) => {
+    if (trimmed === '' || busy) return;
+    if (cap.full) {
+      setNotice(PANELS.versionHistory.namedCap(cap.oldest ?? ''));
+      return;
+    }
+    run(dispatch('version.save', { note: trimmed }), `Saved "${trimmed}" at r${revision}`);
+  };
+
   const save = () => {
     const trimmed = note.trim();
     if (trimmed === '' || busy) return;
-    run(dispatch('version.save', { note: trimmed }), `Saved "${trimmed}" at r${revision}`);
+    saveNamed(trimmed);
     setNote('');
   };
 
@@ -162,136 +205,274 @@ export function VersionsPanel({
     key: 'Enter',
   });
 
+  const toggleWindow = (key: string) =>
+    setOpen((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+
+  const versionRow = (version: Version, inWindow: boolean) => {
+    const current = version.revision === revision;
+    const identity = identityOfAuthor(version.author, identities);
+    const legacy = isLegacyAuthor(identity);
+    const trust = trustWordOf(identity);
+    const picked = selected?.n === version.n;
+    return (
+      <li
+        key={version.n}
+        className={cn(
+          'ts-version',
+          version.note !== '' && 'is-named',
+          current && 'is-current',
+          inWindow && 'is-in-window',
+          picked && 'is-picked',
+        )}
+        data-version={version.n}
+        data-author={identity.principalId}
+        aria-selected={onSelect ? picked : undefined}
+      >
+        <span className="ts-version-mark" aria-hidden={legacy ? 'true' : undefined}>
+          {legacy ? (
+            <span className="ts-chip is-blank ts-chip-16" />
+          ) : (
+            <IdentityChip identity={identity} size={16} />
+          )}
+        </span>
+        <span className="ts-version-body">
+          {naming?.version.n === version.n ? (
+            <input
+              className="ts-versions-note"
+              type="text"
+              value={naming.value}
+              autoFocus
+              aria-label={PANELS.versionHistory.name}
+              data-control={`versionHistory.${version.n}.name`}
+              {...tipProps({
+                name: PANELS.versionHistory.name,
+                doc: 'Enter saves the name',
+                key: 'Enter',
+              })}
+              onChange={(event) => setNaming({ version, value: event.target.value })}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  const trimmed = naming.value.trim();
+                  setNaming(null);
+                  if (trimmed !== '') saveNamed(trimmed);
+                } else if (event.key === 'Escape') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setNaming(null);
+                }
+              }}
+              onBlur={() => setNaming(null)}
+            />
+          ) : (
+            <button
+              type="button"
+              className="ts-version-note ts-version-pick"
+              data-control={`versionHistory.${version.n}.pick`}
+              onClick={() => onSelect?.(picked ? null : version)}
+              {...tipProps({
+                name: version.note !== '' ? version.note : formatWhen(version.createdAt),
+                doc: showChanges
+                  ? 'Shows this version’s changes on the slide'
+                  : 'Selects this version',
+              })}
+            >
+              {version.note !== ''
+                ? version.note
+                : inWindow
+                  ? formatTime(version.createdAt)
+                  : formatWhen(version.createdAt)}
+            </button>
+          )}
+          <span className="ts-version-meta">
+            {version.note !== '' ? `${formatWhen(version.createdAt)} · ` : ''}
+            <span className="ts-version-author">
+              {nameOf(identity)}
+              {trust !== null ? ` · ${trust}` : ''}
+            </span>
+            {' · '}
+            {version.mutations.length === 0
+              ? 'named'
+              : PANELS.versionHistory.changes(version.mutations.length)}
+            {current ? ' · current' : ''}
+          </span>
+        </span>
+        {!current ? (
+          <ToolButton
+            label={PANELS.versionHistory.restore}
+            title={PANELS.versionHistory.restore}
+            doc="Brings the presentation back to this version; Undo returns"
+            ariaLabel={`${PANELS.versionHistory.restore} ${version.note !== '' ? version.note : formatWhen(version.createdAt)}`}
+            className="ts-version-restore"
+            control={`versionHistory.${version.n}.restore`}
+            onClick={() => restore(version)}
+          />
+        ) : null}
+        <ToolButton
+          icon="ellipsis-vertical"
+          title="More"
+          doc="Name this version, Make a copy"
+          ariaLabel={`More for the version of ${formatWhen(version.createdAt)}`}
+          className="ts-version-more"
+          control={`versionHistory.${version.n}.more`}
+          onClick={() => {
+            const el = listRef.current?.querySelector<HTMLElement>(
+              `[data-control="versionHistory.${version.n}.more"]`,
+            );
+            if (el)
+              setMore((state) => (state?.version.n === version.n ? null : { version, anchor: el }));
+          }}
+        />
+      </li>
+    );
+  };
+
+  const windowRow = (window: VersionWindow) => {
+    const single = window.versions.length === 1 || window.named;
+    if (single) return window.versions.map((version) => versionRow(version, false));
+    const expanded = open.has(window.key);
+    const marks = window.authors.slice(0, MARKS_PER_WINDOW);
+    const more = window.authors.length - marks.length;
+    return (
+      <li
+        key={window.key}
+        className={cn('ts-version-window', expanded && 'is-open')}
+        data-window={window.key}
+      >
+        <button
+          type="button"
+          className="ts-version-window-row"
+          aria-expanded={expanded}
+          data-control={`versionHistory.window.${window.key}`}
+          onClick={() => toggleWindow(window.key)}
+          {...tipProps({
+            name: `${formatTime(window.from)} to ${formatTime(window.to)}`,
+            doc: `${window.versions.length} versions by ${window.authors.length === 1 ? 'one person' : `${window.authors.length} people`}; click to list them`,
+          })}
+        >
+          <span className="ts-version-marks" aria-label={window.authors.map(nameOf).join(', ')}>
+            {marks.map((identity) =>
+              isLegacyAuthor(identity) ? (
+                <span key={identity.principalId} className="ts-chip is-blank ts-chip-16" />
+              ) : (
+                <IdentityChip key={identity.principalId} identity={identity} size={16} />
+              ),
+            )}
+            {more > 0 ? <span className="ts-version-marks-more">+{more}</span> : null}
+          </span>
+          <span className="ts-version-body">
+            <span className="ts-version-note">
+              {formatTime(window.from)} to {formatTime(window.to)}
+            </span>
+            <span className="ts-version-meta">
+              {window.authors.map(nameOf).join(', ')} ·{' '}
+              {PANELS.versionHistory.changes(window.changes)}
+            </span>
+          </span>
+          <span className="ts-version-window-chevron" aria-hidden="true">
+            {expanded ? '▾' : '▸'}
+          </span>
+        </button>
+        {expanded ? (
+          <ul className="ts-versions-list is-window">
+            {window.versions.map((version) => versionRow(version, true))}
+          </ul>
+        ) : null}
+      </li>
+    );
+  };
+
   if (history) {
-    const groups = groupByDay(versions, namedOnly);
+    const days = groupVersions(versions, identities, namedOnly);
+    const showChangesItem = itemById('file.versionHistory.showChanges');
     return (
       <div
         className={cn('ts-versions is-history', className)}
         data-count={versions.length}
+        data-show-changes={showChanges ? '' : undefined}
         ref={listRef}
       >
-        <label
-          className="ts-versions-named"
-          {...tipProps({
-            name: PANELS.versionHistory.onlyNamed,
-            doc: 'Hides the versions every edit writes',
-          })}
-        >
-          <input
-            type="checkbox"
-            checked={namedOnly}
-            data-control="versionHistory.namedOnly"
-            onChange={(event) => setNamedOnly(event.target.checked)}
-          />
-          <span className="ts-versions-named-box" aria-hidden="true" />
-          <span>{PANELS.versionHistory.onlyNamed}</span>
-        </label>
+        <div className="ts-versions-tools">
+          <label
+            className="ts-versions-named"
+            {...tipProps({
+              name: PANELS.versionHistory.onlyNamed,
+              doc: 'Hides the versions every edit writes',
+            })}
+          >
+            <input
+              type="checkbox"
+              checked={namedOnly}
+              data-control="versionHistory.namedOnly"
+              onChange={(event) => setNamedOnly(event.target.checked)}
+            />
+            <span className="ts-versions-named-box" aria-hidden="true" />
+            <span>{PANELS.versionHistory.onlyNamed}</span>
+          </label>
+          {namingCurrent === null ? (
+            <button
+              type="button"
+              className="pt-ib is-text"
+              data-control="versionHistory.nameCurrent"
+              data-menu-item="file.versionHistory.nameCurrent"
+              onClick={() => setNamingCurrent('')}
+              {...tipProps({
+                name: PANELS.versionHistory.nameCurrent,
+                doc: `Up to ${40} named versions`,
+              })}
+            >
+              <span className="pt-lb">{PANELS.versionHistory.nameCurrent}</span>
+            </button>
+          ) : (
+            <input
+              className="ts-versions-note"
+              type="text"
+              value={namingCurrent}
+              autoFocus
+              aria-label={PANELS.versionHistory.nameCurrent}
+              data-control="versionHistory.nameCurrent.field"
+              {...tipProps({
+                name: PANELS.versionHistory.nameCurrent,
+                doc: 'Enter saves the name',
+                key: 'Enter',
+              })}
+              onChange={(event) => setNamingCurrent(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  const trimmed = namingCurrent.trim();
+                  setNamingCurrent(null);
+                  saveNamed(trimmed);
+                } else if (event.key === 'Escape') {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  setNamingCurrent(null);
+                }
+              }}
+              onBlur={() => setNamingCurrent(null)}
+            />
+          )}
+        </div>
         {notice ? (
           <p className="ts-versions-notice" role="status">
             {notice}
           </p>
         ) : null}
-        {groups.length === 0 ? (
+        {days.length === 0 ? (
           <p className="ts-versions-empty">
             {namedOnly ? 'No named versions yet' : 'No versions yet'}
           </p>
         ) : null}
-        {groups.map((group) => (
-          <section key={group.day} className="ts-versions-day" aria-label={group.day}>
-            <h3 className="ts-versions-day-head">{group.day}</h3>
+        {days.map((day) => (
+          <section key={day.day} className="ts-versions-day" aria-label={day.day}>
+            <h3 className="ts-versions-day-head">{day.day}</h3>
             <ul className="ts-versions-list">
-              {group.versions.map((version) => {
-                const current = version.revision === revision;
-                return (
-                  <li
-                    key={version.n}
-                    className={cn(
-                      'ts-version',
-                      version.note !== '' && 'is-named',
-                      current && 'is-current',
-                    )}
-                    data-version={version.n}
-                  >
-                    <span className="ts-version-body">
-                      {naming?.version.n === version.n ? (
-                        <input
-                          className="ts-versions-note"
-                          type="text"
-                          value={naming.value}
-                          autoFocus
-                          aria-label={PANELS.versionHistory.name}
-                          data-control={`versionHistory.${version.n}.name`}
-                          {...tipProps({
-                            name: PANELS.versionHistory.name,
-                            doc: 'Enter saves the name',
-                            key: 'Enter',
-                          })}
-                          onChange={(event) => setNaming({ version, value: event.target.value })}
-                          onKeyDown={(event) => {
-                            if (event.key === 'Enter') {
-                              event.preventDefault();
-                              const trimmed = naming.value.trim();
-                              setNaming(null);
-                              if (trimmed !== '')
-                                run(
-                                  dispatch('version.save', { note: trimmed }),
-                                  `Saved "${trimmed}"`,
-                                );
-                            } else if (event.key === 'Escape') {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              setNaming(null);
-                            }
-                          }}
-                          onBlur={() => setNaming(null)}
-                        />
-                      ) : (
-                        <span className="ts-version-note">
-                          {version.note !== '' ? version.note : formatWhen(version.createdAt)}
-                        </span>
-                      )}
-                      <span className="ts-version-meta">
-                        {version.note !== '' ? `${formatWhen(version.createdAt)} · ` : ''}
-                        {authorName(version.author) === 'studio'
-                          ? ''
-                          : `${authorName(version.author)} · `}
-                        {version.mutations.length === 0
-                          ? 'named'
-                          : `${version.mutations.length} change${version.mutations.length === 1 ? '' : 's'}`}
-                        {current ? ' · current' : ''}
-                      </span>
-                    </span>
-                    {!current ? (
-                      <ToolButton
-                        label={PANELS.versionHistory.restore}
-                        title={PANELS.versionHistory.restore}
-                        doc="Brings the presentation back to this version; Undo returns"
-                        ariaLabel={`${PANELS.versionHistory.restore} ${version.note !== '' ? version.note : formatWhen(version.createdAt)}`}
-                        className="ts-version-restore"
-                        control={`versionHistory.${version.n}.restore`}
-                        onClick={() => restore(version)}
-                      />
-                    ) : null}
-                    <ToolButton
-                      icon="ellipsis-vertical"
-                      title="More"
-                      doc="Name this version, Make a copy"
-                      ariaLabel={`More for the version of ${formatWhen(version.createdAt)}`}
-                      className="ts-version-more"
-                      control={`versionHistory.${version.n}.more`}
-                      onClick={() => {
-                        const el = listRef.current?.querySelector<HTMLElement>(
-                          `[data-control="versionHistory.${version.n}.more"]`,
-                        );
-                        if (el)
-                          setMore((open) =>
-                            open?.version.n === version.n ? null : { version, anchor: el },
-                          );
-                      }}
-                    />
-                  </li>
-                );
-              })}
+              {day.windows.flatMap((window) => windowRow(window))}
             </ul>
           </section>
         ))}
@@ -312,16 +493,24 @@ export function VersionsPanel({
             id="ts-menu-version-more"
           />
         ) : null}
-        <p
-          className="ts-versions-foot"
-          data-status="later"
+        <label
+          className={cn('ts-versions-named ts-versions-foot', showChanges && 'is-on')}
+          data-control="versionHistory.showChanges.row"
           {...tipProps({
-            name: 'Show changes',
-            doc: stubClause('The changes between versions arrive in a later round'),
+            name: showChangesItem.label,
+            doc: showChangesItem.doc ?? 'Hatches what the selected version changed, by author',
           })}
         >
-          Show changes is not available yet
-        </p>
+          <input
+            type="checkbox"
+            checked={showChanges}
+            data-control="versionHistory.showChanges"
+            data-menu-item={showChangesItem.id}
+            onChange={(event) => onShowChanges?.(event.target.checked)}
+          />
+          <span className="ts-versions-named-box" aria-hidden="true" />
+          <span>{showChangesItem.label}</span>
+        </label>
       </div>
     );
   }
@@ -403,3 +592,8 @@ export function VersionsPanel({
     </div>
   );
 }
+
+/** The stub sentence of the two delete rows, for the tests (SPEC-3 0.45). */
+export const DELETE_ROWS_CLAUSE = stubClause(
+  itemById('file.versionHistory.deleteOlder').stubReason ?? '',
+);

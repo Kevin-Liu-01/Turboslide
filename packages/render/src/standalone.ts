@@ -78,6 +78,12 @@ export function themeBootScript(defaultTheme: Theme = 'dark'): string {
   return `try { var t = localStorage.getItem('gt-theme'); if (t !== 'light' && t !== 'dark') t = localStorage.getItem('gt-deck-theme'); document.documentElement.setAttribute('data-theme', t === 'light' || t === 'dark' ? t : '${defaultTheme}'); } catch (e) { document.documentElement.setAttribute('data-theme', '${defaultTheme}'); }`;
 }
 
+/** A picture root in state `live` (dither-attrs.ts): the key follows the state on the same tag. */
+const LIVE_DITHER_ROOT = /data-dither-key="([0-9a-f]{64})"[^>]*data-dither-state="live"/g;
+
+/** The words the build refuses a live dithered picture with (SPEC-3 15). */
+export const MATERIALIZE_FIRST = 'materialize first';
+
 export function renderStandalone(
   deck: Deck,
   slides: Slide[],
@@ -130,6 +136,14 @@ export function renderStandalone(
     play,
     play,
   );
+  // a dithered picture without a materialized variant would need the live runtime, which the
+  // standalone file never carries (gslides-parity SPEC-3 10.4): the build refuses it by name
+  for (const entry of rendered) {
+    for (const match of entry.rendered.html.matchAll(LIVE_DITHER_ROOT)) {
+      const key = match[1] ?? '';
+      missing.push(`${entry.slideId}: dithered picture ${key.slice(0, 12)}: materialize first`);
+    }
+  }
   const total = play.length;
   const firstSlide = byId.get(rendered[0]?.slideId ?? '');
   const stage = renderStage(rendered.map((entry) => entry.rendered.html).join('\n'), {

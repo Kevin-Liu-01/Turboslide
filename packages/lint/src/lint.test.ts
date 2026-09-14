@@ -64,6 +64,9 @@ const STATIC_EXPECTED: RuleId[] = [
   'table/size',
   // the parity round two (docs/gslides-parity/SPEC-2.md 0.60), planted on canvas-objects
   'chart/size',
+  // the parity round three (docs/gslides-parity/SPEC-3.md 8.4): the escape block of bad-escape
+  // carries no htmlSanitized stamp
+  'html/sanitize',
 ];
 
 /** The rules whose findings may carry a documented downward severity override (context.ts FindingDetails). */

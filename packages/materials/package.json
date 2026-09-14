@@ -23,6 +23,7 @@
     "@paper-design/shaders": "catalog:",
     "@turboslide/effects": "workspace:*",
     "@turboslide/headless": "workspace:*",
+    "@turboslide/render": "workspace:*",
     "@turboslide/schema": "workspace:*",
     "@turboslide/store": "workspace:*",
     "playwright-core": "catalog:"

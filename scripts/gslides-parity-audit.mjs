@@ -60,6 +60,11 @@ import { fileURLToPath } from 'node:url';
 
 import { launchBrowser } from '../packages/headless/src/launch.ts';
 import {
+  CAPABILITIES,
+  DEFAULT_ACCESS_SETTINGS,
+  roleAllows,
+} from '../packages/identity/src/access.ts';
+import {
   CONTEXT_MENUS,
   DEFAULT_MENU_CONTEXT,
   DIVIDER,
@@ -73,6 +78,7 @@ import {
   findItem,
   isChecked,
   isEnabled,
+  isPresent,
   menuOf,
   resolveLabel,
   walkItems,
@@ -85,11 +91,17 @@ import {
 } from '../packages/chrome/src/menus/keys.ts';
 import { HIDE_MENUS_CONTROL, tailFor } from '../packages/chrome/src/menus/toolbar-tails.ts';
 import {
+  ACCOUNT,
+  DIALOGS,
   FORBIDDEN_DEFAULT_VIEW_WORDS,
+  INBOX,
+  PRESENCE,
   PROMPTS,
+  REFUSALS,
   STUB_PREFIX,
   TITLE_ROW,
   forbiddenWordsIn,
+  stubClause,
 } from '../packages/chrome/src/menus/strings.ts';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -101,7 +113,7 @@ const value = (name) => {
 };
 
 const BASE = (value('base') ?? 'http://localhost:4321').replace(/\/$/, '');
-const OUT = value('out') ?? 'docs/gslides-parity/verification/parity-audit.json';
+const OUT = value('out') ?? 'docs/gslides-parity/verification-3/parity-audit.json';
 /** an absolute --out is written where it says; a relative one counts from the checkout root */
 const OUT_PATH = isAbsolute(OUT) ? OUT : join(ROOT, OUT);
 const REPORT_ONLY = flag('report');
@@ -114,9 +126,120 @@ const USE_DECK = value('deck');
 const TRASH_USED_DECK = flag('trash');
 /** only these effect ids (debugging) */
 const ONLY_EFFECTS = value('effects') ? new Set(value('effects').split(',')) : null;
-/** only these phases: rows, effects, clipboard, twoSlides, shortcuts, retired, tails, textBlock, objects, tooltip, readonly, home */
+/** only these phases: rows, effects, clipboard, twoSlides, shortcuts, retired, tails, textBlock, objects, roundThree, tooltip, readonly, home */
 const PHASES = value('phases') ? new Set(value('phases').split(',')) : null;
 const phase = (name) => PHASES === null || PHASES.has(name);
+/*
+ * Round three (docs/gslides-parity/SPEC-3.md 16.2; MILESTONES-3 "Verifier"): the title row's two
+ * plate menus (the roster behind the +N chip and the own chip's menu, 4.5 and 7.5) render their
+ * rows with data-menu-item only while open, so the audit opens them from their openers; every row
+ * of the model gains a presence test (a row a role cannot use is absent by id, never disabled,
+ * 13.4); the Later rows of 13.3 carry their exact clause; the round three effects are observed
+ * (a comment lands, a mode switches, a pointer toggle flips, Follow moves the stage, Copy link
+ * holds no token, the panels open); a viewer and a commenter role state run in their own browser
+ * contexts on the scratch deck through the links the owner minted; the Dither section's ids on a
+ * dithered picture and the Background dialog's toggle and chips; the five fixed title row slots
+ * at first paint; the roster by Shift+Tab from the File menu. A second anonymous context (the
+ * collaborator) sits on the scratch deck so the roster carries a Follow row and a Go to slide row.
+ */
+const PLATE_MENUS = {
+  'title.presence': { opener: '[data-control="presence.more"]', menu: '#ts-menu-roster' },
+  'title.account': { opener: '[data-control="title.account"]', menu: '#ts-menu-account' },
+};
+/** SPEC-3 13.3: the rows that stay Later this round, each with its exact clause. */
+const LATER_CLAUSES = {
+  'title.presence.joinChat': 'Leave a comment on the slide instead',
+  'file.email.collaborators': 'The invitation carries your message',
+  'file.versionHistory.deleteOlder':
+    'Named versions are kept; older records thin out after 30 days',
+  'file.versionHistory.deleteHistory':
+    'Named versions are kept; older records thin out after 30 days',
+  'tools.activityDashboard.viewers': 'Turboslide keeps no record of who viewed a presentation',
+};
+/** SPEC-3 4.2, 0.43: the five fixed slots of the title row's right group, left to right (b6.md decision 7). */
+const TITLE_SLOTS = [
+  'title.presence',
+  'title.comments.slot',
+  'title.inbox.slot',
+  'present.split',
+  'share.slot',
+];
+/** SPEC-3 10.7: the rows of the Format options Dither section, by their data-control ids. */
+const DITHER_CONTROLS = [
+  'formatOptions.dither.on',
+  'formatOptions.dither.preset.neutral',
+  'formatOptions.dither.preset.photograph',
+  'formatOptions.dither.pattern',
+  'formatOptions.dither.tone',
+  'formatOptions.dither.cell',
+  'formatOptions.dither.strength',
+  'formatOptions.dither.black',
+  'formatOptions.dither.white',
+  'formatOptions.dither.gamma',
+  'formatOptions.dither.invert',
+  'formatOptions.dither.polarity',
+  'formatOptions.dither.metrics',
+  'formatOptions.dither.advanced',
+  'formatOptions.dither.reset',
+];
+/** SPEC-3 10.6: the Background dialog's Dither toggle, the two chips and the Material row. */
+const BACKGROUND_DITHER_CONTROLS = [
+  'dialog.background.dither',
+  'dialog.background.dither.photograph',
+  'dialog.background.dither.neutral',
+  'dialog.background.material.choose',
+  'dialog.background.material.dither',
+  'dialog.background.material.place',
+];
+/** The Photograph preset the Background dialog's toggle applies (SPEC-3 0.37, 10.6). */
+const PHOTOGRAPH = { pattern: 'bayer8', black: 120, white: 230, gamma: 0.9 };
+/** The collaborator context's page on the scratch deck, set in main; null on the read-only walk. */
+let collaborator = null;
+/** whether the studio's auth routes answer on this base (the Sign in row's predicate, 7.3, 7.5) */
+let signInAvailableCache = null;
+async function signInAvailable(page) {
+  if (signInAvailableCache !== null) return signInAvailableCache;
+  signInAvailableCache = await page
+    .evaluate(() =>
+      fetch('/api/auth/ok', { credentials: 'same-origin' })
+        .then((r) => r.status === 200)
+        .catch(() => false),
+    )
+    .catch(() => false);
+  return signInAvailableCache;
+}
+/** The plate menu a title row item sits in, by its parent, or null. */
+function plateOf(id) {
+  const parent = PARENT.get(id);
+  return parent !== undefined && PLATE_MENUS[parent] !== undefined ? PLATE_MENUS[parent] : null;
+}
+async function openPlate(page, plate) {
+  await closeMenus(page);
+  if ((await page.$(plate.menu)) !== null) return true;
+  const opener = await page.$(plate.opener);
+  if (opener === null) return false;
+  await opener.click();
+  const opened = await page.waitForSelector(plate.menu, { timeout: 4000 }).catch(() => null);
+  return opened !== null;
+}
+/** The rows of an open plate menu: the ids, the state and the tooltip primitive. */
+async function readPlateRows(page, plate) {
+  return page.$$eval(`${plate.menu} [data-menu-item]`, (els) =>
+    els.map((el) => ({
+      id: el.getAttribute('data-menu-item'),
+      status: el.getAttribute('data-status'),
+      disabled: el.getAttribute('aria-disabled') === 'true',
+      role: el.getAttribute('role'),
+      checked: el.getAttribute('aria-checked'),
+      label: el.textContent.replace(/\s+/g, ' ').trim(),
+      key: '',
+      keyshort: null,
+      tip: el.getAttribute('data-tip'),
+      haspopup: el.getAttribute('aria-haspopup'),
+      client: el.getAttribute('data-client'),
+    })),
+  );
+}
 /**
  * The rows docs/gslides-parity/VERIFICATION.md section 9 records as deviations from Google: their
  * effect is not run and the row is reported as skipped with the finding, so the exit code speaks
@@ -160,6 +283,8 @@ const FORMAT_SECTION_ORDER = [
   'colour',
   'picture',
   'adjustments',
+  /* round three (SPEC-3 10.7): the Dither section sits after Adjustments and before Drop shadow */
+  'dither',
   'shadow',
   'table',
   'chart',
@@ -322,13 +447,41 @@ async function closeMenus(page) {
   if ((await page.$$('[role="menu"]')).length > 0) await page.mouse.click(700, 890);
 }
 
+/**
+ * SPEC-3 7.2: the one prompt (How should others see you?) opens after the first inline session
+ * ends and is modal, so a menu bar click behind it waits forever (measured: every effect after
+ * the first typed text timed out at 30 s until the prompt was answered). The audit answers it
+ * with a name once and records that it fired.
+ */
+let namePromptAnswered = 0;
+async function answerNamePrompt(page) {
+  const prompt = await page.$('[data-control="dialog.namePrompt"]');
+  if (prompt === null) return false;
+  const field = await page.$('[data-control="dialog.namePrompt.name"]');
+  if (field) {
+    await field.fill(`Audit ${namePromptAnswered + 1}`);
+    await page.keyboard.press('Enter');
+  } else await page.keyboard.press('Escape');
+  namePromptAnswered += 1;
+  await waitFor(
+    async () => ((await page.$('[data-control="dialog.namePrompt"]')) === null ? true : null),
+    {
+      timeout: 3000,
+    },
+  ).catch(() => null);
+  return true;
+}
+
 async function closeOverlays(page) {
   await closeMenus(page);
+  await answerNamePrompt(page).catch(() => null);
   for (let i = 0; i < 4; i += 1) {
     const dialogs = await page.$$('[role="dialog"]');
     if (dialogs.length === 0) break;
     await page.keyboard.press('Escape');
     await page.waitForTimeout(100);
+    if ((await page.$('[data-control="dialog.namePrompt"]')) !== null)
+      await answerNamePrompt(page).catch(() => null);
   }
 }
 
@@ -391,6 +544,14 @@ async function openSubmenuRow(page, level, rowId) {
 async function openPath(page, id) {
   if (MENU_OF.get(id) === 'title') {
     const parent = PARENT.get(id);
+    /* round three: the roster and the own chip's menu open from their openers (SPEC-3 4.5, 7.5) */
+    const plate = plateOf(id);
+    if (plate !== null) {
+      const opened = await openPlate(page, plate);
+      if (!opened)
+        throw new Error(`the plate menu ${plate.menu} did not open from ${plate.opener}`);
+      return -2;
+    }
     if (parent === 'title.slideshow') {
       await closeMenus(page);
       await page.click('[data-control="present.arrow"]');
@@ -421,6 +582,13 @@ async function assertEnabledRow(page, selector) {
 /** Opens the path and clicks the item's row (a leaf closes the menu; a container opens it). */
 async function activate(page, id) {
   const level = await openPath(page, id);
+  if (level === -2) {
+    const plate = plateOf(id);
+    const row = `${plate.menu} [data-menu-item="${id}"]`;
+    await assertEnabledRow(page, row);
+    await page.click(row, { timeout: 4000 });
+    return;
+  }
   if (level < 0) {
     await page.click(`[data-control="title.row"] [data-menu-item="${id}"]`, { timeout: 4000 });
     return;
@@ -578,8 +746,24 @@ async function contextOf(page, { focus = 'none', selection, clipboard = 'empty' 
   const sections = Array.isArray(info.sections)
     ? info.sections.length
     : (info.counts?.sections ?? 1);
+  /* round three (SPEC-3 3.10, 13.4): the role and the capabilities from the page's access facts
+     (absent on a deck with no record, today's open deck), the identity facts for the own chip's
+     menu, and the editing mode the shell stamps on the root */
+  const roleFacts =
+    st.access?.role !== undefined && st.access?.role !== null
+      ? { role: st.access.role, capabilities: st.access.capabilities ?? [] }
+      : {};
+  const mode = await page.evaluate(
+    () => document.querySelector('.pt-viewer')?.getAttribute('data-edit-mode') ?? 'editing',
+  );
+  const account = {
+    signedIn: st.account?.signedIn === true,
+    signInAvailable: await signInAvailable(page),
+  };
   return {
     ...DEFAULT_MENU_CONTEXT,
+    ...roleFacts,
+    account,
     focus,
     slide: {
       index: Math.max(0, index),
@@ -593,7 +777,7 @@ async function contextOf(page, { focus = 'none', selection, clipboard = 'empty' 
     clipboard,
     history: { undo, redo },
     sections,
-    settings: { ...DEFAULT_MENU_CONTEXT.settings },
+    settings: { ...DEFAULT_MENU_CONTEXT.settings, mode },
   };
 }
 
@@ -608,7 +792,13 @@ async function walkMenus(page, ctx, tag) {
     els.map((el) => ({
       id: el.getAttribute('data-menu-item'),
       disabled: el.getAttribute('aria-disabled') === 'true',
-      tip: el.getAttribute('data-tip'),
+      /* SPEC-3 13.2: the presence slot is a group, not a row; its tooltip primitive sits on the
+         +N opener inside it */
+      tip:
+        el.getAttribute('data-tip') ??
+        (el.getAttribute('role') === 'group'
+          ? (el.querySelector('[data-tip]')?.getAttribute('data-tip') ?? null)
+          : null),
       label: el.textContent.replace(/\s+/g, ' ').trim(),
     })),
   );
@@ -636,6 +826,41 @@ async function walkMenus(page, ctx, tag) {
     rendered.push({ menu: 'title', ...row });
   }
   await closeMenus(page);
+  /* round three (SPEC-3 4.5, 7.5): the roster and the own chip's menu; a participant's row carries
+     Follow or Go to slide, the own row the account menu, the footer the Join chat stub */
+  let rosterParticipants = 0;
+  for (const [parentId, plate] of Object.entries(PLATE_MENUS)) {
+    const opened = await openPlate(page, plate).catch(() => false);
+    if (!opened) {
+      fail(`rows:${tag}`, {
+        id: parentId,
+        menu: 'title',
+        check: 'plate menu opens',
+        evidence: `${plate.menu} did not open from ${plate.opener}`,
+      });
+      continue;
+    }
+    const plateRows = await readPlateRows(page, plate);
+    if (parentId === 'title.presence')
+      rosterParticipants = plateRows.filter(
+        (r) => r.id === 'title.presence.follow' || r.id === 'title.presence.goTo',
+      ).length;
+    for (const row of plateRows) {
+      if (row.status === 'later' || findItem(row.id)?.status === 'later')
+        row.tooltip = await tooltipDocOf(
+          page,
+          `${plate.menu} [data-menu-item="${row.id}"]`,
+          row.label,
+        );
+      /* a plate row is the first of its id (the roster lists one Follow row per participant) */
+      if (!seen.has(row.id)) seen.set(row.id, { ...row, level: 'plate', menu: 'title' });
+      rendered.push({ menu: 'title', ...row });
+    }
+    await page.keyboard.press('Escape');
+    await waitFor(async () => ((await page.$(plate.menu)) === null ? true : null), {
+      timeout: 2000,
+    }).catch(() => null);
+  }
 
   const walkList = async (menuId, items, level) => {
     const listed = await readRows(page, level);
@@ -742,8 +967,40 @@ async function walkMenus(page, ctx, tag) {
         });
       continue;
     }
-    /* a row under a Later or disabled container is not reachable in this state */
+    /* round three (SPEC-3 13.4): a row a role cannot use is absent by id, never disabled; a
+       row whose `when` predicate says no in this context must not be rendered */
     const parentIds = ancestors(item.id);
+    const present =
+      isPresent(item, ctx) && parentIds.every((pid) => isPresent(findItem(pid) ?? {}, ctx));
+    if (!present) {
+      if (found === undefined)
+        pass(section, { ...base, check: 'absent by predicate', evidence: `when: ${item.when}` });
+      else
+        fail(section, {
+          ...base,
+          check: 'absent by predicate',
+          evidence: `rendered while the predicate ${item.when} says absent in this state`,
+        });
+      continue;
+    }
+    /* a roster row needs a participant: Follow and Go to slide render one row per person, and
+       Follow is offered on signed in editors and owners alone (SPEC-3 4.4), so two anonymous
+       contexts render Go to slide rows only */
+    if (
+      found === undefined &&
+      (item.id === 'title.presence.follow' || item.id === 'title.presence.goTo')
+    ) {
+      skip(section, {
+        ...base,
+        check: 'present',
+        evidence:
+          rosterParticipants === 0
+            ? 'no other participant in the room; the roster draws Follow and Go to slide per person'
+            : `${rosterParticipants} participant row(s), none offering ${item.label}: Follow is refused for anonymous people, who get Go to slide (SPEC-3 4.4)`,
+      });
+      continue;
+    }
+    /* a row under a Later or disabled container is not reachable in this state */
     const parentBlocked = parentIds.some((pid) => {
       const p = findItem(pid);
       const prow = seen.get(pid);
@@ -802,6 +1059,14 @@ async function walkMenus(page, ctx, tag) {
         problems.push(
           `stub tooltip "${doc.slice(0, 80)}" does not start with "${STUB_PREFIX}"${found.tooltip?.raw ? ` (plate: ${found.tooltip.raw})` : ''}`,
         );
+      /* SPEC-3 13.3: the rows that stay Later this round carry their exact clause */
+      const clause = LATER_CLAUSES[item.id];
+      if (clause !== undefined) {
+        if (item.stubReason !== clause)
+          problems.push(`the model's clause "${item.stubReason}" is not 13.3's "${clause}"`);
+        if (doc !== stubClause(clause))
+          problems.push(`the tooltip "${doc.slice(0, 120)}" is not "${stubClause(clause)}"`);
+      }
     } else {
       const expected = isEnabled(item, ctx);
       if (found.disabled === expected)
@@ -948,6 +1213,13 @@ async function checkContextMenu(page, target, opener, ctx, tag) {
 const DIALOG_TITLE_OF = {
   'file.share.withOthers': 'Share ',
   'title.share': 'Share ',
+  /* round three (SPEC-3 7.2 to 7.6, 5.5, 6.4): the account dialogs and the rebuilt Publish dialog */
+  'title.account.changeName': ACCOUNT.namePrompt.title,
+  'title.account.changeAvatar': ACCOUNT.avatar.title,
+  'title.account.signIn': ACCOUNT.signInDialog.title,
+  'title.account.sessions': ACCOUNT.profile.title,
+  'tools.notificationSettings': INBOX.settings,
+  'file.share.publish': DIALOGS.publish.title,
 };
 
 /** Observes a dialog whose title matches the effect and closes it with Esc. */
@@ -1045,6 +1317,22 @@ async function toggleState(page, setting) {
         return document.querySelectorAll('.ts-ruler').length === 2;
       case 'showGuides':
         return null;
+      /* round three (SPEC-3 4.6, 5.3, 4.9): the mode the shell stamps on the root, the own pointer
+         button's pressed state, the announcements region's live attribute */
+      case 'mode':
+        return v?.getAttribute('data-edit-mode') ?? null;
+      case 'pointerMine':
+        return (
+          document
+            .querySelector('[data-control="toolbar.pointer"]')
+            ?.getAttribute('aria-pressed') === 'true'
+        );
+      case 'announce':
+        return (
+          document
+            .querySelector('[data-control="presence.announcements"]')
+            ?.getAttribute('aria-live') === 'polite'
+        );
       default:
         return null;
     }
@@ -1053,6 +1341,11 @@ async function toggleState(page, setting) {
 
 async function checkedOf(page, id) {
   const level = await openPath(page, id);
+  if (level === -2) {
+    const plateRows = await readPlateRows(page, plateOf(id));
+    await closeMenus(page);
+    return plateRows.find((r) => r.id === id)?.checked ?? null;
+  }
   const rows = await readRows(page, Math.max(level, 0));
   const row = rows.find((r) => r.id === id);
   await closeMenus(page);
@@ -1308,6 +1601,17 @@ async function runEffect(page, context, item, ctx, deckId, tag) {
       ? {}
       : { focus: ctx.focus, selection: ctx.selection, clipboard: ctx.clipboard },
   ).catch(() => ctx);
+  if (!isPresent(item, ctx)) {
+    skip(section, { ...base, evidence: `absent by its predicate ${item.when} in this state` });
+    return;
+  }
+  if (item.id === 'title.account.forget') {
+    skip(section, {
+      ...base,
+      evidence: 'run on the collaborator context at the end of the round three phase',
+    });
+    return;
+  }
   if (!isEnabled(item, ctx)) {
     skip(section, { ...base, evidence: `disabled by ${item.enabled} in this state` });
     return;
@@ -1751,6 +2055,96 @@ async function runClientEffect(page, context, item) {
       return {
         ok: cleared === true && chips.length === 0,
         evidence: `block ${before} -> ${(await state(page)).blockId}; ${chips.length} selection chips`,
+      };
+    }
+    /* round three (SPEC-3 5.3, 0.16, 4.5, 7.5) */
+    case 'comment': {
+      const listBefore = await invoke(page, 'comment.list', {}).catch(() => null);
+      const before = listBefore?.total ?? listBefore?.threads?.length ?? 0;
+      await activate(page, item.id);
+      const card = await waitFor(() => page.$('[data-control="comment.card"]'), { timeout: 4000 });
+      if (!card)
+        return {
+          ok: false,
+          evidence: `no comment card opened; snackbar "${await snackbarText(page)}"`,
+        };
+      const field = await page.$('[data-control="comment.card"] [data-control$=".field"]');
+      const placeholder = field ? await field.getAttribute('placeholder') : null;
+      if (!field) {
+        await page.keyboard.press('Escape');
+        return { ok: false, evidence: 'the card opened without a text field' };
+      }
+      await field.fill('Audit comment');
+      const submit = await page.$('[data-control="comment.card"] [data-control$=".submit"]');
+      if (submit) await submit.click();
+      else await page.keyboard.press('Control+Enter');
+      const landed = await waitFor(
+        async () => {
+          const list = await invoke(page, 'comment.list', {}).catch(() => null);
+          const now = list?.total ?? list?.threads?.length ?? 0;
+          return now > before ? now : null;
+        },
+        { timeout: 6000 },
+      );
+      const markers = await page.$$('[data-control="comment.marker"]');
+      await page.keyboard.press('Escape');
+      return {
+        ok: landed !== null && markers.length > 0,
+        evidence: `card opened with the field "${placeholder}"; threads ${before} -> ${landed ?? before}; ${markers.length} marker(s)`,
+      };
+    }
+    case 'copyLink': {
+      const deckId = (await state(page)).deckId;
+      await activate(page, item.id);
+      const copied = await waitFor(
+        async () => {
+          const text = await page.evaluate(() => navigator.clipboard.readText()).catch(() => '');
+          return text.includes('/deck/') ? text : null;
+        },
+        { timeout: 4000 },
+      );
+      const origin = new URL(page.url()).origin;
+      const wanted = `${origin}/deck/${deckId}`;
+      return {
+        ok: copied === wanted && !String(copied).includes('/s/'),
+        evidence: `clipboard "${copied}" wanted "${wanted}"; snackbar "${await snackbarText(page)}"`,
+      };
+    }
+    case 'goToClient': {
+      const others = await page.evaluate(() => {
+        const s = window.turboslide.studio.describe().state;
+        return typeof s.presence?.others === 'number'
+          ? s.presence.others
+          : (s.presence?.others?.length ?? 0);
+      });
+      if (others === 0) return { skip: true, evidence: 'no other participant in the room' };
+      const target = collaborator ? (await state(collaborator)).slideId : null;
+      await activate(page, item.id);
+      const landed = await waitFor(
+        async () => {
+          const st = await state(page);
+          return target === null || st.slideId === target ? st.slideId : null;
+        },
+        { timeout: 4000 },
+      );
+      const snack = await snackbarText(page);
+      return {
+        ok: landed !== null && !/Nobody else/i.test(snack),
+        evidence: `current slide ${landed ?? (await state(page)).slideId}, the collaborator's ${target}; snackbar "${snack}"`,
+      };
+    }
+    case 'accountMenu': {
+      await activate(page, item.id);
+      const menu = await waitFor(() => page.$('#ts-menu-account'), { timeout: 4000 });
+      const rowsIn = menu
+        ? await page.$$eval('#ts-menu-account [data-menu-item]', (els) =>
+            els.map((el) => el.getAttribute('data-menu-item')),
+          )
+        : [];
+      await page.keyboard.press('Escape');
+      return {
+        ok: Boolean(menu),
+        evidence: menu ? `the account menu opened with ${rowsIn.join(', ')}` : 'no account menu',
       };
     }
     default:
@@ -2312,6 +2706,51 @@ async function runActionEffect(page, context, item, ctx, deckId) {
       if (outcome.ok) await undo(page);
       return outcome;
     }
+    /* round three (SPEC-3 4.4, 4.5): Follow moves the stage with the person and shows the plate */
+    case 'presence.follow': {
+      const others = await page.evaluate(() => {
+        const s = window.turboslide.studio.describe().state;
+        return typeof s.presence?.others === 'number'
+          ? s.presence.others
+          : (s.presence?.others?.length ?? 0);
+      });
+      if (others === 0) return { skip: true, evidence: 'no other participant in the room' };
+      /* SPEC-3 4.4: Follow is offered on signed in editors and owners alone; anonymous people get Go to slide */
+      const opened = await openPlate(page, PLATE_MENUS['title.presence']).catch(() => false);
+      const followRows = opened
+        ? await page.$$eval(
+            '#ts-menu-roster [data-menu-item="title.presence.follow"]',
+            (els) => els.length,
+          )
+        : 0;
+      await page.keyboard.press('Escape');
+      if (followRows === 0)
+        return {
+          skip: true,
+          evidence: `${others} participant(s), none a signed in editor: the roster offers Go to slide, Follow is refused for anonymous people (SPEC-3 4.4); presence.follow through the window API is the walk's row`,
+        };
+      await activate(page, item.id);
+      const plate = await waitFor(() => page.$('[data-control="presence.following"]'), {
+        timeout: 4000,
+      });
+      const text = plate ? (await plate.textContent())?.replace(/\s+/g, ' ').trim() : '';
+      const following = await page.evaluate(
+        () => window.turboslide.studio.describe().state.presence?.following ?? null,
+      );
+      const stop = await page.$('[data-control="presence.following.stop"]');
+      if (stop) await stop.click();
+      else await page.keyboard.press('Escape');
+      const gone = await waitFor(
+        async () => ((await page.$('[data-control="presence.following"]')) === null ? true : null),
+        { timeout: 4000 },
+      );
+      return {
+        ok: Boolean(plate) && following !== null && Boolean(gone),
+        evidence: `plate "${text}"; following ${following}; Stop ${gone ? 'removed the plate' : 'left it'}`,
+      };
+    }
+    case 'account.signOut':
+      return { skip: true, evidence: 'nobody is signed in on this context' };
     default:
       return { ok: false, evidence: `no observer for the action ${id}` };
   }
@@ -2705,6 +3144,12 @@ async function tailStates(page, context, deckId, tag) {
   const slideId = list[list.findIndex((r) => r.id === st.slideId) + 1]?.id;
   await invoke(page, 'view.goto', { slideId });
   await waitFor(async () => ((await state(page)).slideId === slideId ? true : null));
+  /* the stage animates to the new slide (data-dir); a click during the transition lands on no
+     block (measured: "clicking p1 then Esc selected null" three runs of three on a loaded machine) */
+  await page
+    .waitForSelector(`.pt-viewer[data-active="${slideId}"]`, { timeout: 5000 })
+    .catch(() => null);
+  await page.waitForTimeout(400);
   const slide = (await invoke(page, 'slide.get', { slideId })).slide;
   const blocks = Object.entries(slide.slots ?? {}).flatMap(([slot, list]) =>
     list.map((b) => ({ slot, ...b })),
@@ -4363,6 +4808,932 @@ function runTooltipAudit(urls) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Round three (SPEC-3 16.2): the title row slots, the roster by Shift+Tab, the versions panel,
+// the dither surfaces, the role states
+
+/** SPEC-3 4.2, 0.43: the five fixed slots exist in order as soon as the title row exists and hold their boxes through hydration. */
+async function checkTitleSlots(page, path, tag) {
+  const section = `titleRow:${tag}`;
+  await page.goto(`${BASE}${path}`, { waitUntil: 'domcontentloaded' });
+  await page
+    .waitForSelector('[data-control="title.row"]', { timeout: 120_000, state: 'attached' })
+    .catch(() => null);
+  const measure = () =>
+    page.evaluate((ids) => {
+      const out = {};
+      for (const id of ids) {
+        const el = document.querySelector(`[data-control="${id}"]`);
+        if (!el) {
+          out[id] = null;
+          continue;
+        }
+        const r = el.getBoundingClientRect();
+        out[id] = { x: Math.round(r.x * 10) / 10, w: Math.round(r.width * 10) / 10 };
+      }
+      return out;
+    }, TITLE_SLOTS);
+  const first = await measure();
+  const missingFirst = TITLE_SLOTS.filter((id) => first[id] === null);
+  await ready(page);
+  await settled(page).catch(() => null);
+  const after = await measure();
+  const missingAfter = TITLE_SLOTS.filter((id) => after[id] === null);
+  const ordered = TITLE_SLOTS.every(
+    (id, i) =>
+      i === 0 ||
+      after[id] === null ||
+      after[TITLE_SLOTS[i - 1]] === null ||
+      after[id].x > after[TITLE_SLOTS[i - 1]].x,
+  );
+  const moved = TITLE_SLOTS.filter(
+    (id) =>
+      first[id] !== null &&
+      after[id] !== null &&
+      (Math.abs(first[id].x - after[id].x) > 0.5 || Math.abs(first[id].w - after[id].w) > 0.5),
+  );
+  const presenceWidth = after['title.presence']?.w ?? null;
+  const ok =
+    missingFirst.length === 0 && missingAfter.length === 0 && ordered && moved.length === 0;
+  (ok ? pass : fail)(section, {
+    id: 'title.row.slots',
+    menu: 'title',
+    evidence: `at the row's first paint ${TITLE_SLOTS.length - missingFirst.length} of 5 slots${missingFirst.length ? ` (missing ${missingFirst.join(', ')})` : ''}; after hydration ${TITLE_SLOTS.length - missingAfter.length} of 5, in order ${ordered}; moved between the two reads: ${moved.length ? moved.join(', ') : 'none'}; presence slot ${presenceWidth} px wide (SPEC-3 4.2: 184)`,
+  });
+  (presenceWidth === 184 ? pass : fail)(section, {
+    id: 'title.presence.width',
+    menu: 'title',
+    evidence: `${presenceWidth} px wide (--pt-presence-w 184 px)`,
+  });
+}
+
+/** SPEC-3 14, 4.9: Shift+Tab from any open menu opens the Collaborators list with focus inside it. */
+async function checkRosterShiftTab(page, tag) {
+  const section = `shortcuts:${tag}`;
+  await closeMenus(page);
+  await openBarMenu(page, 'file');
+  await page.keyboard.press('Shift+Tab');
+  const roster = await waitFor(() => page.$('#ts-menu-roster'), { timeout: 3000 });
+  const focused = roster
+    ? await waitFor(
+        () =>
+          page.evaluate(() =>
+            document.activeElement?.closest('#ts-menu-roster') !== null ? true : null,
+          ),
+        { timeout: 1500 },
+      )
+    : null;
+  const label = roster ? await roster.getAttribute('aria-label') : null;
+  const active = await page.evaluate(() => {
+    const el = document.activeElement;
+    return el
+      ? `${el.tagName.toLowerCase()}${el.getAttribute('data-control') ? `[data-control=${el.getAttribute('data-control')}]` : ''}${el.getAttribute('data-menu-item') ? `[data-menu-item=${el.getAttribute('data-menu-item')}]` : ''}`
+      : 'none';
+  });
+  await page.keyboard.press('Escape');
+  await closeMenus(page).catch(() => null);
+  (roster && focused ? pass : fail)(section, {
+    id: 'roster.shiftTab',
+    menu: 'title',
+    evidence: `Shift+Tab from the File menu: roster ${roster ? `opened (aria-label "${label}")` : 'did not open'}; focus ${focused ? 'inside it' : `outside it, on ${active}`}`,
+  });
+}
+
+/** SPEC-3 5.7, 13.2, 13.3: the Version history panel's Show changes checkbox and the disabled delete rows with their clause. */
+async function checkVersionsPanel(page, tag) {
+  const section = `versions:${tag}`;
+  await closeOverlays(page).catch(() => null);
+  await activate(page, 'file.versionHistory.see').catch(() => null);
+  const panel = await waitFor(() => page.$('.ts-rpanel [data-panel-title="Version history"]'), {
+    timeout: 6000,
+  });
+  if (!panel) {
+    fail(section, { id: 'versionHistory.panel', menu: 'file', evidence: 'the panel did not open' });
+    return;
+  }
+  const box = await page.$('[data-menu-item="file.versionHistory.showChanges"]');
+  const boxTip = box
+    ? await page
+        .$eval(
+          '[data-control="versionHistory.showChanges.row"]',
+          (el) =>
+            el.closest('[data-tip]')?.getAttribute('data-tip') ??
+            el.querySelector('[data-tip]')?.getAttribute('data-tip') ??
+            null,
+        )
+        .catch(() => null)
+    : null;
+  let toggled = null;
+  if (box) {
+    await box.evaluate((el) => el.click());
+    toggled = await waitFor(
+      () =>
+        page.evaluate(() =>
+          document.querySelector('.ts-rpanel [data-show-changes]') !== null ? true : null,
+        ),
+      { timeout: 3000 },
+    );
+    await box.evaluate((el) => el.click()).catch(() => null);
+  }
+  (box && toggled ? pass : fail)(section, {
+    id: 'file.versionHistory.showChanges',
+    menu: 'file',
+    evidence: `checkbox ${box ? 'present' : 'absent'} (tooltip ${boxTip}); Show changes ${toggled ? 'stamped data-show-changes on the panel' : 'did not stamp the panel'}`,
+  });
+  /* the delete rows: the row menu of the newest version */
+  const more = await page.$('.ts-rpanel [data-control$=".more"]');
+  if (!more) {
+    skip(section, {
+      id: 'file.versionHistory.deleteOlder',
+      menu: 'file',
+      evidence: 'no version row menu (a fresh deck with no named version)',
+    });
+  } else {
+    await more.click();
+    await page.waitForTimeout(300);
+    for (const id of ['file.versionHistory.deleteOlder', 'file.versionHistory.deleteHistory']) {
+      const row = await page.$(`[data-menu-item="${id}"]`);
+      const disabled = row ? (await row.getAttribute('aria-disabled')) === 'true' : null;
+      const tooltip = row
+        ? await tooltipDocOf(page, `[data-menu-item="${id}"]`, findItem(id).label)
+        : null;
+      const doc = tooltip?.doc ?? '';
+      const ok = row !== null && disabled === true && doc === stubClause(LATER_CLAUSES[id]);
+      (ok ? pass : fail)(section, {
+        id,
+        menu: 'file',
+        status: 'later',
+        evidence: row
+          ? `present, aria-disabled ${disabled}, tooltip "${doc.slice(0, 120)}"`
+          : 'no row in the version menu',
+      });
+    }
+    await page.keyboard.press('Escape');
+  }
+  const close = await page.$('.ts-rpanel [data-control$=".close"]');
+  if (close) await close.click();
+  else await page.keyboard.press('Escape');
+}
+
+/**
+ * SPEC-3 10.6, 10.7, 16.2 and section 1 rule 5: the Background dialog's toggle, chips and Material
+ * row; Upload from computer with a continuous source (the GT deck's Rosetta photograph) lands the
+ * covering picture; the Dither toggle writes the Photograph numbers and the Neutral chip switches
+ * them; the renderer stamps the picture; the Format options Dither section carries every row on
+ * the dithered picture. A block level dither on a committed twin is refused by design (10.1), so
+ * the tail slide's GT picture is not used.
+ */
+async function checkDitherSurfaces(page, states, deckId, tag) {
+  const section = `dither:${tag}`;
+  await resetEditor(page, deckId);
+  await activate(page, 'slide.changeBackground').catch(() => null);
+  let dialog = await waitFor(() => page.$('[data-control="dialog.background"]'), {
+    timeout: 10_000,
+  });
+  if (!dialog) {
+    fail(section, {
+      id: 'dialog.background.dither',
+      evidence: `the Background dialog did not open; dialogs ${JSON.stringify(await dialogs(page))}; snackbar "${await snackbarText(page)}"`,
+    });
+    return;
+  }
+  const present = await page.$$eval('[data-control="dialog.background"] [data-control]', (els) =>
+    els.map((el) => el.getAttribute('data-control')),
+  );
+  const missingBg = BACKGROUND_DITHER_CONTROLS.filter((id) => !present.includes(id));
+  const untippedBg = await page.$$eval(
+    '[data-control="dialog.background"] button, [data-control="dialog.background"] input, [data-control="dialog.background"] select',
+    (els) =>
+      els
+        .filter((el) => !el.closest('[data-tip]') && !el.closest('[aria-hidden="true"]'))
+        .map((el) => el.getAttribute('data-control') ?? el.tagName),
+  );
+  (missingBg.length === 0 ? pass : fail)(section, {
+    id: 'dialog.background.dither',
+    evidence: `${missingBg.length ? `missing ${missingBg.join(', ')}` : 'the Dither toggle, the Photograph and Neutral chips and the Material row (Choose, Dither, Place) present'}${untippedBg.length ? `; controls without a tooltip: ${untippedBg.join(', ')}` : ''}`,
+  });
+  await checkDefaultWords(page, 'dialog Change background');
+  /* SPEC-3 10.6: Dither on before the picture is remembered for the next Choose, so the
+     photograph lands dithered in one write; then Upload from computer with the Rosetta photograph */
+  const st = await state(page);
+  const source = join(ROOT, 'decks', 'gt-brand', 'assets', 'ref-rosetta.jpg');
+  const rev = await revisionOf(page);
+  const toggleFirst = await page.$('[data-control="dialog.background.dither"]');
+  if (toggleFirst) await toggleFirst.evaluate((el) => el.click());
+  await page.waitForTimeout(200);
+  const toggleFirstState = toggleFirst
+    ? await toggleFirst.evaluate(
+        (el) =>
+          el.getAttribute('aria-checked') ??
+          el.getAttribute('aria-pressed') ??
+          (el.matches('input') ? String(el.checked) : el.querySelector('input')?.checked),
+      )
+    : null;
+  const chooser = page.waitForEvent('filechooser', { timeout: 8000 }).catch(() => null);
+  await page.click('[data-control="dialog.background.choose.upload"]').catch(() => null);
+  const picker = await chooser;
+  if (!picker) {
+    fail(section, {
+      id: 'dialog.background.upload',
+      evidence: 'Upload from computer opened no file chooser',
+    });
+    await page.keyboard.press('Escape');
+    return;
+  }
+  await picker.setFiles(source);
+  const coveringOf = async () => {
+    const got = await invoke(page, 'slide.get', { slideId: st.slideId }).catch(() => null);
+    const blocks = Object.values(got?.slide?.slots ?? {}).flat();
+    return (
+      blocks.find(
+        (b) =>
+          b.type === 'picture' &&
+          b.pos &&
+          b.pos.x <= 0 &&
+          b.pos.y <= 0 &&
+          b.pos.x + b.pos.w >= 1600 &&
+          b.pos.y + b.pos.h >= 900,
+      ) ?? null
+    );
+  };
+  const t0 = Date.now();
+  const covering = await waitFor(coveringOf, { timeout: 45_000 });
+  const uploadMs = Date.now() - t0;
+  (covering ? pass : fail)(section, {
+    id: 'dialog.background.upload',
+    evidence: covering
+      ? `the covering picture ${covering.id} (asset ${covering.asset}) landed in ${uploadMs} ms; revision ${rev} -> ${await revisionOf(page)}`
+      : `no covering picture within 45 s; snackbar "${await snackbarText(page)}"`,
+  });
+  if (!covering) {
+    await page.keyboard.press('Escape');
+    return;
+  }
+  await settled(page).catch(() => null);
+  const ditherOf = async () => (await coveringOf())?.dither ?? null;
+  const isPhotograph = (d) =>
+    d &&
+    d.pattern === PHOTOGRAPH.pattern &&
+    d.black === PHOTOGRAPH.black &&
+    d.white === PHOTOGRAPH.white &&
+    d.gamma === PHOTOGRAPH.gamma;
+  const dialogAfterUpload = (await page.$('[data-control="dialog.background"]')) !== null;
+  let photograph = await waitFor(
+    async () => (isPhotograph(await ditherOf()) ? await ditherOf() : null),
+    { timeout: 6000 },
+  );
+  let path = photograph
+    ? 'the toggle before Upload was remembered: one write landed the picture dithered'
+    : 'the picture landed without the dither';
+  /* the dialog closes after Upload (measured); reopen it from the Slide menu and use the toggle on the covering picture */
+  const reopen = async () => {
+    await closeOverlays(page).catch(() => null);
+    await page.keyboard.press('Escape');
+    await page.click('[data-control="menubar.slide"]');
+    await page.waitForSelector('[role="menu"][data-level="0"]', { timeout: 5000 });
+    await page.click('[data-menu-item="slide.changeBackground"]');
+    return waitFor(() => page.$('[data-control="dialog.background"]'), { timeout: 10_000 });
+  };
+  dialog = await page.$('[data-control="dialog.background"]');
+  if (!dialog) dialog = await reopen();
+  const controlsNow = dialog
+    ? await page.$$eval('[data-control="dialog.background"] [data-control]', (els) =>
+        els.map((el) => el.getAttribute('data-control')),
+      )
+    : [];
+  const toggle = dialog ? await page.$('[data-control="dialog.background.dither"]') : null;
+  if (!photograph && toggle) {
+    await toggle.evaluate((el) => el.click());
+    photograph = await waitFor(
+      async () => (isPhotograph(await ditherOf()) ? await ditherOf() : null),
+      { timeout: 10_000 },
+    );
+    path = photograph
+      ? 'the toggle on the covering picture wrote the numbers'
+      : 'the toggle on the covering picture wrote nothing';
+  }
+  (photograph ? pass : fail)(section, {
+    id: 'dialog.background.dither.toggle',
+    evidence: `toggle before the upload ${toggleFirst ? `clicked (state ${toggleFirstState})` : 'absent'}; dialog ${dialogAfterUpload ? 'stayed open' : 'closed'} after the upload; ${path}; dither now ${JSON.stringify(await ditherOf())} (SPEC-3 0.37: ${JSON.stringify(PHOTOGRAPH)}); reopened dialog carries ${controlsNow.filter((id) => id.startsWith('dialog.background.dither') || id.startsWith('dialog.background.picture') || id.startsWith('dialog.background.formatOptions') || id.startsWith('dialog.background.removePicture')).join(', ') || 'no picture or dither row'}`,
+  });
+  const neutralChip = await page.$('[data-control="dialog.background.dither.neutral"]');
+  if (neutralChip) {
+    await neutralChip.evaluate((el) => el.click());
+    const neutral = await waitFor(
+      async () => {
+        const d = await ditherOf();
+        return d && d.black !== PHOTOGRAPH.black ? d : null;
+      },
+      { timeout: 8000 },
+    );
+    (neutral ? pass : fail)(section, {
+      id: 'dialog.background.dither.neutral',
+      evidence: `Neutral wrote ${JSON.stringify(neutral ?? (await ditherOf()))}`,
+    });
+    const photoChip = await page.$('[data-control="dialog.background.dither.photograph"]');
+    if (photoChip) {
+      await photoChip.evaluate((el) => el.click());
+      await waitFor(async () => ((await ditherOf())?.black === PHOTOGRAPH.black ? true : null), {
+        timeout: 8000,
+      });
+    }
+  }
+  await settled(page).catch(() => null);
+  const done = await page.$('[data-control="dialog.background.done"]');
+  if (done) await done.click();
+  else await page.keyboard.press('Escape');
+  await waitFor(async () => ((await dialogs(page)).length === 0 ? true : null), {
+    timeout: 4000,
+  }).catch(() => null);
+  /* the renderer's DOM (10.3) */
+  const dom = await page.evaluate((blockId) => {
+    const block = document.querySelector(`.ts-stagewrap .pt-slide [data-block="${blockId}"]`);
+    const el = block
+      ? block.matches('[data-dither]')
+        ? block
+        : block.querySelector('[data-dither]')
+      : null;
+    return el
+      ? {
+          dither: el.getAttribute('data-dither'),
+          key: el.getAttribute('data-dither-key'),
+          state: el.getAttribute('data-dither-state'),
+          canvas: block.querySelector('canvas.picture-dither') !== null,
+        }
+      : { block: block !== null };
+  }, covering.id);
+  (dom.dither !== undefined ? pass : fail)(section, {
+    id: 'renderer.dither.dom',
+    evidence:
+      dom.dither !== undefined
+        ? `.picture[data-dither=${dom.dither}] key ${dom.key} state ${dom.state}; canvas.picture-dither ${dom.canvas}`
+        : `no [data-dither] under the covering picture (block in the DOM: ${dom.block})`,
+  });
+  /* the Format options Dither section on the dithered picture (10.7) */
+  const selected = await selectBlockByClick(page, covering.id, { text: false });
+  if (selected !== covering.id) {
+    fail(section, {
+      id: 'formatOptions.dither',
+      evidence: `could not select the covering picture (${selected})`,
+    });
+  } else {
+    await activate(page, 'format.formatOptions').catch(() => null);
+    const panel = await waitFor(() => page.$('.ts-rpanel [data-panel-title="Format options"]'), {
+      timeout: 8000,
+    });
+    const ids = panel
+      ? await page.$$eval('.ts-rpanel [data-control^="formatOptions.dither"]', (els) =>
+          els.map((el) => el.getAttribute('data-control')),
+        )
+      : [];
+    const missing = DITHER_CONTROLS.filter((id) => !ids.includes(id));
+    const facts = await page.evaluate(() => {
+      const read = (id) => {
+        const el = document.querySelector(`.ts-rpanel [data-control="${id}"]`);
+        if (!el) return null;
+        const input = el.matches('input') ? el : el.querySelector('input');
+        return (
+          el.getAttribute('aria-checked') ??
+          el.getAttribute('aria-pressed') ??
+          (input ? String(input.checked) : null) ??
+          (el.className.includes('is-active') ||
+          el.className.includes('is-selected') ||
+          el.className.includes('is-on')
+            ? 'true'
+            : el.className)
+        );
+      };
+      return {
+        on: read('formatOptions.dither.on'),
+        photograph: read('formatOptions.dither.preset.photograph'),
+        neutral: read('formatOptions.dither.preset.neutral'),
+        metrics:
+          document
+            .querySelector('.ts-rpanel [data-control="formatOptions.dither.metrics"]')
+            ?.textContent?.replace(/\s+/g, ' ')
+            .trim() ?? null,
+      };
+    });
+    const untipped = panel
+      ? await page.$$eval('.ts-rpanel [data-control^="formatOptions.dither"]', (els) =>
+          els
+            .filter((el) => !el.closest('[data-tip]'))
+            .map((el) => el.getAttribute('data-control')),
+        )
+      : [];
+    (panel &&
+      missing.length === 0 &&
+      String(facts.on) === 'true' &&
+      String(facts.photograph) === 'true' &&
+      untipped.length === 0
+      ? pass
+      : fail)(section, {
+      id: 'formatOptions.dither',
+      evidence: `panel ${panel ? 'open' : 'closed'}; ${ids.length} dither controls${missing.length ? `, missing ${missing.join(', ')}` : ''}; Dither on ${facts.on}; Photograph highlighted ${facts.photograph}, Neutral ${facts.neutral}; metrics "${facts.metrics}"${untipped.length ? `; without a tooltip: ${untipped.join(', ')}` : ''}`,
+    });
+    if (panel) await checkDefaultWords(page, 'Format options > Dither');
+    const close = await page.$('.ts-rpanel [data-control$=".close"]');
+    if (close) await close.click();
+    else await page.keyboard.press('Escape');
+  }
+  void states;
+}
+
+/** Every rendered row of the bar menus, recursively, into `into` (id -> row), for the role states. */
+async function collectRows(page, menuId, items, level, into) {
+  const listed = await readRows(page, level);
+  for (const row of listed)
+    if (!into.has(row.id)) into.set(row.id, { ...row, level, menu: menuId });
+  for (const item of items) {
+    if (item.status === 'omit' || item.contextOnly) continue;
+    const row = listed.find((r) => r.id === item.id);
+    if (!row || row.disabled) continue;
+    const dynamic = item.effect?.kind === 'submenu' && item.effect.dynamic;
+    if (dynamic || !item.items || item.items.length === 0 || row.haspopup !== 'menu') continue;
+    await openSubmenuRow(page, level, item.id).catch(() => null);
+    await collectRows(page, menuId, item.items, level + 1, into);
+  }
+}
+
+/**
+ * SPEC-3 16.2, 13.4: a role state. Every row of the model is rendered exactly when its predicate
+ * and its parents' hold in the role's context (a row a role cannot use is absent by id); the
+ * menus a role cannot use are absent from the bar.
+ */
+async function walkRoleMenus(page, ctx, tag) {
+  const section = `rows:${tag}`;
+  const seen = new Map();
+  for (const row of await page.$$eval('[data-control="title.row"] [data-menu-item]', (els) =>
+    els.map((el) => ({
+      id: el.getAttribute('data-menu-item'),
+      disabled: el.getAttribute('aria-disabled') === 'true',
+      label: el.textContent.replace(/\s+/g, ' ').trim(),
+    })),
+  ))
+    seen.set(row.id, { ...row, level: 0, menu: 'title' });
+  if ((await page.$('[data-control="present.arrow"]')) !== null) {
+    await page.click('[data-control="present.arrow"]');
+    await page.waitForSelector('[role="menu"]', { timeout: 5000 }).catch(() => null);
+    for (const row of await readRows(page, 0))
+      seen.set(row.id, { ...row, level: 0, menu: 'title' });
+    await closeMenus(page);
+  }
+  for (const plate of Object.values(PLATE_MENUS)) {
+    if ((await page.$(plate.opener)) === null) continue;
+    const opened = await openPlate(page, plate).catch(() => false);
+    if (!opened) continue;
+    for (const row of await readPlateRows(page, plate))
+      if (!seen.has(row.id)) seen.set(row.id, { ...row, level: 'plate', menu: 'title' });
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+  }
+  const barMenus = await page.$$eval('[data-control^="menubar."]', (els) =>
+    els.map((el) => el.getAttribute('data-control').slice('menubar.'.length)),
+  );
+  for (const menu of MENUS) {
+    const shown = barMenus.includes(menu.id);
+    const expected = isPresent(menu, ctx);
+    (shown === expected ? pass : fail)(section, {
+      id: `menubar.${menu.id}`,
+      menu: menu.id,
+      check: 'menu present',
+      evidence: `${shown ? 'in the bar' : 'absent'}; the menu's predicate ${menu.when ?? 'always'} says ${expected ? 'present' : 'absent'}`,
+    });
+    if (!shown) continue;
+    await openBarMenu(page, menu.id);
+    await collectRows(page, menu.id, menu.items, 0, seen);
+    await closeMenus(page);
+  }
+  let rendered = 0;
+  let absent = 0;
+  for (const item of allItems()) {
+    if (item.status === 'omit' || item.contextOnly) continue;
+    const menu = MENU_OF.get(item.id);
+    const menuDef = MENUS.find((m) => m.id === menu);
+    const parentIds = ancestors(item.id);
+    const menuShown = menu === 'title' || (menuDef !== undefined && isPresent(menuDef, ctx));
+    const expected =
+      menuShown &&
+      isPresent(item, ctx) &&
+      parentIds.every((pid) => isPresent(findItem(pid) ?? {}, ctx));
+    const found = seen.get(item.id);
+    const base = { id: item.id, menu, status: item.status, label: item.label, when: item.when };
+    if (!expected) {
+      if (found === undefined) {
+        absent += 1;
+        pass(section, {
+          ...base,
+          check: 'absent by role',
+          evidence: `when ${item.when ?? menuDef?.when}`,
+        });
+      } else
+        fail(section, {
+          ...base,
+          check: 'absent by role',
+          evidence: `rendered (level ${found.level}) while the predicate ${item.when ?? menuDef?.when} says absent for a ${ctx.role}`,
+        });
+      continue;
+    }
+    if (found === undefined) {
+      const parentBlocked = parentIds.some((pid) => {
+        const p = findItem(pid);
+        const prow = seen.get(pid);
+        return (
+          p?.status === 'later' ||
+          (prow !== undefined && prow.disabled) ||
+          (p?.effect?.kind === 'submenu' && p.effect.dynamic)
+        );
+      });
+      if (parentBlocked || item.id === 'title.presence.follow' || item.id === 'title.presence.goTo')
+        skip(section, {
+          ...base,
+          check: 'present',
+          evidence: 'under a disabled, Later or plate container, or a per participant roster row',
+        });
+      else
+        fail(section, {
+          ...base,
+          check: 'present',
+          evidence: `no [data-menu-item] rendered for a ${ctx.role}`,
+        });
+      continue;
+    }
+    rendered += 1;
+    pass(section, { ...base, check: 'present', evidence: `level ${found.level}` });
+  }
+  log(`audit: role ${ctx.role}: ${rendered} rows rendered, ${absent} absent by role`);
+}
+
+/** The menu context of a role state from the page's facts alone (the viewer owner exposes no slide.list). */
+/** SPEC-3 6.2: the capabilities a role holds under the default settings, from the identity matrix. */
+function capabilitiesOf(role) {
+  return CAPABILITIES.filter((capability) => roleAllows(role, capability, DEFAULT_ACCESS_SETTINGS));
+}
+
+async function roleContext(page, role) {
+  const st = await state(page);
+  const mode = await page.evaluate(
+    () => document.querySelector('.pt-viewer')?.getAttribute('data-edit-mode') ?? 'editing',
+  );
+  const cards = await page.$$eval('.ts-card[data-id]', (els) => els.length);
+  /* the page's own facts when it carries them (3.10), else the matrix of 6.2 for the link's role */
+  const pageCapabilities = Array.isArray(st.access?.capabilities) ? st.access.capabilities : [];
+  return {
+    ...DEFAULT_MENU_CONTEXT,
+    role: st.access?.role ?? role,
+    pageRole: st.access?.role ?? null,
+    capabilities: pageCapabilities.length > 0 ? pageCapabilities : capabilitiesOf(role),
+    account: {
+      signedIn: st.account?.signedIn === true,
+      signInAvailable: await signInAvailable(page),
+    },
+    slide: { ...DEFAULT_MENU_CONTEXT.slide, count: Math.max(1, cards) },
+    settings: { ...DEFAULT_MENU_CONTEXT.settings, mode },
+  };
+}
+
+/**
+ * SPEC-3 16.2: the viewer and the commenter role states. The owner (the audit page) sets Anyone
+ * with the link as Viewer and mints a commenter link; a fresh context follows each link and the
+ * rows, the Mode menu, the View only button, Insert > Comment and the handles are read there.
+ */
+async function roleStates(page, browser, deckId, tag) {
+  const section = `roles:${tag}`;
+  const readRecord = async () => {
+    const got = await invoke(page, 'share.get', { id: deckId }).catch((e) => ({
+      error: String(e).slice(0, 200),
+    }));
+    return got?.record ?? got;
+  };
+  const record = await readRecord();
+  if (record?.error) {
+    fail(section, {
+      id: 'share.get',
+      evidence: `the owner cannot read the record: ${record.error}`,
+    });
+    return;
+  }
+  const ownerFacts = await state(page);
+  pass(section, {
+    id: 'owner.record',
+    evidence: `record revision ${record.revision}, owner ${record.owner ? String(record.owner).slice(0, 12) + '…' : 'null'}, general access ${record.generalAccess?.mode}/${record.generalAccess?.role}; the page's access facts ${JSON.stringify(ownerFacts.access)}`,
+  });
+  const viewerLink = await invoke(page, 'share.setGeneralAccess', {
+    id: deckId,
+    mode: 'link',
+    role: 'viewer',
+    baseRevision: record.revision ?? 0,
+  }).catch((e) => ({ error: String(e).slice(0, 240) }));
+  if (!viewerLink?.url) {
+    fail(section, {
+      id: 'share.setGeneralAccess',
+      evidence: `no /s/ link: ${JSON.stringify(viewerLink).slice(0, 240)}`,
+    });
+    return;
+  }
+  (/\/s\/[A-Za-z0-9_-]{22}$/.test(viewerLink.url) ? pass : fail)(section, {
+    id: 'share.setGeneralAccess',
+    evidence: `Anyone with the link as Viewer: ${viewerLink.url.replace(/\/s\/.*$/, '/s/<token>')}`,
+  });
+  /* the viewer */
+  const viewerContext = await browser.newContext({
+    viewport: VIEWPORT,
+    extraHTTPHeaders: protectionHeaders(),
+  });
+  const viewer = await viewerContext.newPage();
+  try {
+    await viewer.goto(viewerLink.url, { waitUntil: 'domcontentloaded' });
+    const landed = await waitFor(async () => (viewer.url().includes('/s/') ? null : viewer.url()), {
+      timeout: 15_000,
+    });
+    const landedPath = landed ? new URL(landed).pathname : viewer.url();
+    (landed && landedPath === `/deck/${deckId}` ? pass : fail)(section, {
+      id: 'viewer.landing',
+      evidence: `the viewer link landed on ${landedPath}${landed ? '' : ' (the /s/ address stayed)'}; address carries a token: ${String(viewer.url()).includes('/s/')}`,
+    });
+    await viewer.goto(`${BASE}/edit/${deckId}`, { waitUntil: 'domcontentloaded' });
+    const shell = await viewer
+      .waitForSelector('.pt-viewer[data-settled]', { timeout: 60_000 })
+      .catch(() => null);
+    if (!shell) {
+      fail(section, {
+        id: 'viewer.edit',
+        evidence: `/edit/${deckId} did not settle for the viewer; ${(await viewer.content()).replace(/\s+/g, ' ').slice(0, 200)}`,
+      });
+    } else {
+      const mode = await viewer.$eval('.pt-viewer', (v) => v.getAttribute('data-edit-mode'));
+      const viewOnly = await viewer.$('[data-control="toolbar.viewOnly"]');
+      const viewOnlyText = viewOnly ? (await viewOnly.textContent())?.trim() : null;
+      const modeMenu = await viewer.$$('[data-menu-item="view.mode"]');
+      const editMenu = await viewer.$$('[data-control="menubar.edit"]');
+      const vstate = await state(viewer).catch(() => ({}));
+      (mode === 'viewing' ? pass : fail)(section, {
+        id: 'viewer.mode',
+        evidence: `data-edit-mode ${mode}; access facts ${JSON.stringify(vstate.access)}`,
+      });
+      (viewOnlyText === 'View only' ? pass : fail)(section, {
+        id: 'toolbar.viewOnly',
+        evidence: `View only button ${viewOnly ? `present, reads "${viewOnlyText}"` : 'absent'}`,
+      });
+      (modeMenu.length === 0 && editMenu.length === 0 ? pass : fail)(section, {
+        id: 'view.mode.absent',
+        evidence: `Mode rows ${modeMenu.length}, Edit menu ${editMenu.length} (SPEC-3 13.1: no Mode menu for a viewer)`,
+      });
+      const ctxV = await roleContext(viewer, 'viewer');
+      if (ctxV.pageRole !== 'viewer')
+        fail(section, {
+          id: 'viewer.role',
+          evidence: `describe().state.access reads ${JSON.stringify(vstate.access)} for the link visitor; SPEC-3 3.10 gives the window state the access facts (the rows below are read against the matrix of 6.2 for a viewer: ${ctxV.capabilities.join(', ')})`,
+        });
+      else
+        pass(section, {
+          id: 'viewer.role',
+          evidence: `role viewer, capabilities ${ctxV.capabilities.join(', ')}`,
+        });
+      await walkRoleMenus(viewer, { ...ctxV, role: 'viewer' }, `${tag}:viewer`);
+      /* the handles: a click on a block selects nothing a viewer can drag */
+      const block = await viewer.$('.ts-stagewrap .pt-slide [data-block]');
+      if (block) {
+        const b = await block.boundingBox();
+        if (b) await viewer.mouse.click(b.x + 2, b.y + 2);
+        await viewer.waitForTimeout(300);
+        const handles = await viewer.$$('.ts-overlay [data-control^="handle."]');
+        (handles.length === 0 ? pass : fail)(section, {
+          id: 'viewer.handles',
+          evidence: `${handles.length} handle(s) after a click on a block`,
+        });
+      }
+      /* the reads of the window API (SPEC-3 6.6): a viewer may read */
+      const list = await invoke(viewer, 'slide.list').catch((e) => ({
+        error: String(e).slice(0, 160),
+      }));
+      (Array.isArray(list) ? pass : fail)(section, {
+        id: 'viewer.window.read',
+        evidence: Array.isArray(list)
+          ? `slide.list answers ${list.length} slide(s)`
+          : `slide.list refused: ${list.error}`,
+      });
+      const write = await invoke(viewer, 'deck.rename', {
+        name: 'Viewer write',
+        baseRevision: 1,
+      }).catch((e) => ({ error: String(e).slice(0, 160) }));
+      (write?.error ? pass : fail)(section, {
+        id: 'viewer.window.write',
+        evidence: write?.error
+          ? `deck.rename refused: ${write.error}`
+          : 'deck.rename was accepted for a viewer',
+      });
+      if (viewOnly) {
+        await viewOnly.click();
+        const dialog = await waitFor(
+          async () =>
+            (await dialogs(viewer)).find(
+              (d) =>
+                d.title.startsWith(REFUSALS.requestEditAccess) ||
+                (d.control ?? '').startsWith('dialog.request'),
+            ) ?? null,
+          { timeout: 4000 },
+        );
+        await viewer.keyboard.press('Escape');
+        (dialog ? pass : fail)(section, {
+          id: 'share.requestAccess.dialog',
+          evidence: dialog
+            ? `View only opened "${dialog.title}" (${dialog.control})`
+            : `View only opened nothing; dialogs ${JSON.stringify(await dialogs(viewer))}`,
+        });
+      }
+      await checkDefaultWords(viewer, `/edit/${deckId} as a viewer`);
+    }
+  } catch (error) {
+    fail(section, {
+      id: 'viewer',
+      evidence: `threw: ${String(error?.stack ?? error).slice(0, 400)}`,
+    });
+  } finally {
+    await viewerContext.close().catch(() => null);
+  }
+  /* the commenter */
+  const record2 = await readRecord();
+  const commenterLink = await invoke(page, 'share.createLink', {
+    id: deckId,
+    role: 'commenter',
+    baseRevision: record2?.revision ?? 0,
+  }).catch((e) => ({ error: String(e).slice(0, 240) }));
+  if (!commenterLink?.url) {
+    fail(section, {
+      id: 'share.createLink',
+      evidence: `no commenter link: ${JSON.stringify(commenterLink).slice(0, 240)}`,
+    });
+  } else {
+    pass(section, { id: 'share.createLink', evidence: 'a commenter link minted' });
+    const commenterContext = await browser.newContext({
+      viewport: VIEWPORT,
+      extraHTTPHeaders: protectionHeaders(),
+    });
+    const commenter = await commenterContext.newPage();
+    try {
+      await commenter.goto(commenterLink.url, { waitUntil: 'domcontentloaded' });
+      const landed = await waitFor(
+        async () => (commenter.url().includes('/s/') ? null : commenter.url()),
+        { timeout: 15_000 },
+      );
+      const landedPath = landed ? new URL(landed).pathname : commenter.url();
+      (landedPath === `/edit/${deckId}` ? pass : fail)(section, {
+        id: 'commenter.landing',
+        evidence: `the commenter link landed on ${landedPath}`,
+      });
+      const shell = await commenter
+        .waitForSelector('.pt-viewer[data-settled]', { timeout: 60_000 })
+        .catch(() => null);
+      if (!shell)
+        fail(section, {
+          id: 'commenter.edit',
+          evidence: 'the editor did not settle for the commenter',
+        });
+      else {
+        const mode = await commenter.$eval('.pt-viewer', (v) => v.getAttribute('data-edit-mode'));
+        (mode === 'commenting' ? pass : fail)(section, {
+          id: 'commenter.mode',
+          evidence: `data-edit-mode ${mode}`,
+        });
+        const ctxC = await roleContext(commenter, 'commenter');
+        const cstate = await state(commenter).catch(() => ({}));
+        (ctxC.pageRole === 'commenter' ? pass : fail)(section, {
+          id: 'commenter.role',
+          evidence: `describe().state.access reads ${JSON.stringify(cstate.access)}; the rows below are read against the matrix of 6.2 for a commenter: ${ctxC.capabilities.join(', ')}`,
+        });
+        await walkRoleMenus(commenter, { ...ctxC, role: 'commenter' }, `${tag}:commenter`);
+        const viewOnly = await commenter.$$('[data-control="toolbar.viewOnly"]');
+        (viewOnly.length === 0 ? pass : fail)(section, {
+          id: 'commenter.viewOnly.absent',
+          evidence: `${viewOnly.length} View only button(s)`,
+        });
+        /* Insert > Comment is live: the row is enabled and opens the card */
+        const insertMenu = await commenter.$('[data-control="menubar.insert"]');
+        if (!insertMenu)
+          fail(section, {
+            id: 'insert.comment.live',
+            evidence: 'no Insert menu for the commenter',
+          });
+        else {
+          await openBarMenu(commenter, 'insert');
+          const rowsC = await readRows(commenter, 0);
+          const commentRow = rowsC.find((r) => r.id === 'insert.comment');
+          const textBox = rowsC.find((r) => r.id === 'insert.textBox');
+          if (commentRow && !commentRow.disabled) {
+            await commenter.click(`${ROW_SELECTOR(0)}[data-menu-item="insert.comment"]`);
+            const card = await waitFor(() => commenter.$('[data-control="comment.card"]'), {
+              timeout: 4000,
+            });
+            await commenter.keyboard.press('Escape');
+            (card ? pass : fail)(section, {
+              id: 'insert.comment.live',
+              evidence: `Insert > Comment enabled; the card ${card ? 'opened' : 'did not open'}; Text box row ${textBox ? 'rendered' : 'absent'}; snackbar "${await snackbarText(commenter)}"`,
+            });
+          } else {
+            await closeMenus(commenter);
+            fail(section, {
+              id: 'insert.comment.live',
+              evidence: `Insert > Comment ${commentRow ? 'disabled' : 'absent'} for the commenter; rows ${rowsC.map((r) => r.id).join(', ')}`,
+            });
+          }
+        }
+        const block = await commenter.$('.ts-stagewrap .pt-slide [data-block]');
+        if (block) {
+          const b = await block.boundingBox();
+          if (b) await commenter.mouse.click(b.x + 2, b.y + 2);
+          await commenter.waitForTimeout(300);
+          const handles = await commenter.$$('.ts-overlay [data-control^="handle."]');
+          (handles.length === 0 ? pass : fail)(section, {
+            id: 'commenter.handles',
+            evidence: `${handles.length} handle(s) after a click on a block`,
+          });
+        }
+        await checkDefaultWords(commenter, `/edit/${deckId} as a commenter`);
+      }
+    } catch (error) {
+      fail(section, {
+        id: 'commenter',
+        evidence: `threw: ${String(error?.stack ?? error).slice(0, 400)}`,
+      });
+    } finally {
+      await commenterContext.close().catch(() => null);
+    }
+  }
+  /* back to Restricted */
+  const record3 = await readRecord();
+  const stopped = await invoke(page, 'share.stop', {
+    id: deckId,
+    baseRevision: record3?.revision ?? 0,
+  }).catch((e) => ({ error: String(e).slice(0, 200) }));
+  const after = await readRecord();
+  (after?.generalAccess?.mode === 'restricted' &&
+    (after?.links ?? []).every((l) => l.revokedAt !== null)
+    ? pass
+    : fail)(section, {
+    id: 'share.stop',
+    evidence: `after Stop sharing: general access ${after?.generalAccess?.mode}, ${(after?.links ?? []).filter((l) => l.revokedAt === null).length} live link(s)${stopped?.error ? `; share.stop: ${stopped.error}` : ''}`,
+  });
+}
+
+/** SPEC-3 7.4: Forget this browser on the collaborator's context mints a new label there. */
+async function forgetOnCollaborator(tag) {
+  const section = `effects:${tag}`;
+  if (!collaborator) return;
+  const page = collaborator;
+  const before = await page
+    .$eval('[data-control="title.account"]', (el) => el.getAttribute('data-tip'))
+    .catch(() => null);
+  const item = findItem('title.account.forget');
+  let browserDialog = null;
+  const onDialog = (dialog) => {
+    browserDialog = { type: dialog.type(), message: dialog.message().slice(0, 160) };
+    dialog.accept().catch(() => null);
+  };
+  page.on('dialog', onDialog);
+  try {
+    await activate(page, item.id);
+  } catch (error) {
+    page.off('dialog', onDialog);
+    fail(section, {
+      id: item.id,
+      menu: 'title',
+      evidence: `could not activate: ${String(error).slice(0, 160)}`,
+    });
+    return;
+  }
+  const dialog = await waitFor(async () => (await dialogs(page))[0] ?? null, { timeout: 3000 });
+  let confirmed = false;
+  if (dialog) {
+    const button = await page.$(
+      '[role="dialog"] [data-control$=".confirm"], [role="dialog"] [data-control$=".forget"], [role="dialog"] [data-control$=".ok"]',
+    );
+    if (button) {
+      await button.click();
+      confirmed = true;
+    } else await page.keyboard.press('Escape');
+  }
+  const principalBefore = (await state(page).catch(() => ({}))).account?.principalId ?? null;
+  const changed = await waitFor(
+    async () => {
+      const now = await page
+        .$eval('[data-control="title.account"]', (el) => el.getAttribute('data-tip'))
+        .catch(() => null);
+      return now !== null && now !== before ? now : null;
+    },
+    { timeout: 6000 },
+  );
+  const principalAfter = (await state(page).catch(() => ({}))).account?.principalId ?? null;
+  page.off('dialog', onDialog);
+  (changed !== null ? pass : fail)(section, {
+    id: item.id,
+    menu: 'title',
+    effect: 'action',
+    label: item.label,
+    evidence: `own chip "${before}" -> "${changed ?? before}"; the page's principal ${principalBefore === principalAfter ? 'unchanged' : `${principalBefore} -> ${principalAfter}`}; ${browserDialog ? `browser ${browserDialog.type} "${browserDialog.message}" accepted` : `confirm dialog ${dialog ? `"${dialog.title}" ${confirmed ? 'confirmed' : 'had no confirm control'}` : 'none'}`}`,
+  });
+}
+
+// ---------------------------------------------------------------------------------------------
 // Main
 
 const startedAt = Date.now();
@@ -4483,6 +5854,50 @@ try {
     await settled(page).catch(() => null);
   }
   log(`audit: scratch deck ${scratchDeck}`);
+  /* round three: a second anonymous context on the scratch deck, the collaborator of the roster
+     rows and the Follow and Go to slide effects (SPEC-3 3.11, 4.5) */
+  if (!QUICK && phase('rows')) {
+    try {
+      const collabContext = await launched.browser.newContext({
+        viewport: VIEWPORT,
+        extraHTTPHeaders: protectionHeaders(),
+      });
+      collaborator = await collabContext.newPage();
+      await collaborator.goto(`${BASE}/edit/${scratchDeck}`, { waitUntil: 'domcontentloaded' });
+      await ready(collaborator);
+      const joined = await waitFor(
+        () =>
+          page.evaluate(() => {
+            const s = window.turboslide.studio.describe().state;
+            const n =
+              typeof s.presence?.others === 'number'
+                ? s.presence.others
+                : (s.presence?.others?.length ?? 0);
+            return n > 0 ? n : null;
+          }),
+        { timeout: 10_000 },
+      );
+      (joined ? pass : fail)('presence:scratch', {
+        id: 'collaborator.joins',
+        menu: 'title',
+        evidence: joined
+          ? `the second context appears in the room (${joined} other)`
+          : 'the second context never appeared in the room within 10 s',
+      });
+      const chips = await page.$$eval('[data-control^="presence.chip."]', (els) => els.length);
+      (chips === 1 ? pass : fail)('presence:scratch', {
+        id: 'presence.chip',
+        menu: 'title',
+        evidence: `${chips} chip(s) in the presence slot`,
+      });
+    } catch (error) {
+      fail('presence:scratch', {
+        id: 'collaborator',
+        evidence: `the collaborator context threw: ${String(error).slice(0, 300)}`,
+      });
+      collaborator = null;
+    }
+  }
 
   // 2. the rows, fresh state
   const ctxA = await contextOf(page);
@@ -4693,6 +6108,28 @@ try {
         });
       }
     }
+    /* round three (SPEC-3 16.2): the versions panel, the dither surfaces, the roster by Shift+Tab,
+       the role states, Forget this browser on the collaborator */
+    if (phase('roundThree')) {
+      await resetEditor(page, scratchDeck);
+      for (const [name, run] of [
+        ['versions', () => checkVersionsPanel(page, 'scratch')],
+        ['dither', () => checkDitherSurfaces(page, states, scratchDeck, 'scratch')],
+        ['shiftTab', () => checkRosterShiftTab(page, 'scratch')],
+        ['roles', () => roleStates(page, launched.browser, scratchDeck, 'scratch')],
+        ['forget', () => forgetOnCollaborator('scratch')],
+      ]) {
+        try {
+          await run();
+        } catch (error) {
+          fail('infrastructure', {
+            id: `roundThree.${name}`,
+            evidence: `threw: ${String(error?.stack ?? error).slice(0, 600)}`,
+          });
+        }
+        await resetEditor(page, scratchDeck).catch(() => null);
+      }
+    }
   }
 
   // 8. the tooltip audit
@@ -4708,6 +6145,13 @@ try {
     else fail('tooltipAudit', row);
   }
 
+  if (collaborator) {
+    await collaborator
+      .context()
+      .close()
+      .catch(() => null);
+    collaborator = null;
+  }
   // the cleanup: Move to trash, Delete forever
   if (mustClean()) {
     await page.goto(`${BASE}/edit/${scratchDeck}`, { waitUntil: 'domcontentloaded' });
@@ -4719,6 +6163,8 @@ try {
   // the read-only deck
   if (phase('readonly')) {
     log(`audit: read-only walk of /edit/${READ_ONLY_DECK}`);
+    /* round three (SPEC-3 4.2): the five fixed slots of the title row at the row's first paint */
+    if (!QUICK) await checkTitleSlots(page, `/edit/${READ_ONLY_DECK}`, READ_ONLY_DECK);
     await page.goto(`${BASE}/edit/${READ_ONLY_DECK}`, { waitUntil: 'domcontentloaded' });
     await ready(page);
     const ctxG = await contextOf(page);
@@ -4766,6 +6212,13 @@ try {
   }
 } catch (error) {
   fail('infrastructure', { id: 'run', evidence: String(error?.stack ?? error).slice(0, 800) });
+  if (collaborator) {
+    await collaborator
+      .context()
+      .close()
+      .catch(() => null);
+    collaborator = null;
+  }
   /* a thrown phase must not leave the scratch deck in the store: trash and delete it here too */
   if (scratchDeck && !cleaned && mustClean()) {
     try {
@@ -4818,6 +6271,7 @@ const report = {
   commit,
   seconds: Math.round((Date.now() - startedAt) / 1000),
   scratchDeck,
+  namePromptAnswered,
   summary,
   perSection,
   totals,

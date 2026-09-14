@@ -11,6 +11,11 @@ import { defineConfig } from '@playwright/test';
 // `webServer` is defined, so Playwright never starts or reuses a server on 4321 for that run.
 // The specs never overlap on the shared machine: take `.turboslide/e2e.lock` with `mkdir` before
 // `playwright test`, `rmdir` it after, and wait while it exists (AGENTS.md, dev server rules).
+//
+// Round three (gslides-parity SPEC-3 16.1 step 26, 16.3): the two browser specs run two contexts
+// in one worker against one dev server on the memory channel; when this config starts the server
+// itself it runs with the environment step 26 names (the memory channel, a checkout auth
+// database under .turboslide/, captured mail), so no spec needs a service.
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:4321';
 const external = process.env.PLAYWRIGHT_BASE_URL !== undefined;
 
@@ -33,6 +38,18 @@ export default defineConfig({
     : {
         webServer: {
           command: 'pnpm --filter @turboslide/studio dev',
+          env: {
+            TURBOSLIDE_REALTIME: 'memory',
+            TURBOSLIDE_AUTH_DB: '.turboslide/auth.sqlite',
+            TURBOSLIDE_MAIL: 'capture',
+            // the localhost agent surface stays open for the specs whatever TURBOSLIDE_LOCAL_TOKEN
+            // says, and the library's sign in limiter is off for a spec run (b3.md R12)
+            TURBOSLIDE_LOCAL_OPEN: '1',
+            TURBOSLIDE_AUTH_RATE_LIMIT: 'off',
+            // obviously fake secrets for the identity cookie and the export download URLs
+            TURBOSLIDE_SESSION_SECRET: 'playwright-session-secret-0000000000000000000000',
+            TURBOSLIDE_DOWNLOAD_SECRET: 'playwright-download-secret-000000000000000000',
+          },
           url: baseURL,
           reuseExistingServer: true,
           timeout: 120_000,

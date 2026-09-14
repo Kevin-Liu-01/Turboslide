@@ -193,9 +193,16 @@ test('a text box drawn on the Title slide converts it; move, rotate, flip, group
     const box = await el.boundingBox();
     if (!box) throw new Error(`no ${id}`);
     await page.mouse.click(box.x + 2, box.y + 2);
-    if ((await page.locator('.ts-stagewrap.ts-editor [contenteditable="true"]').count()) > 0)
-      await page.keyboard.press('Escape');
-    await expect(page.locator(`.ts-overlay [data-control="handle.${id}.move"]`)).toBeVisible();
+    const editable = page.locator('.ts-stagewrap.ts-editor [contenteditable="true"]');
+    if ((await editable.count()) > 0) await page.keyboard.press('Escape');
+    const move = page.locator(`.ts-overlay [data-control="handle.${id}.move"]`);
+    if ((await move.count()) === 0) {
+      /* a rotated object's axis aligned bounds start outside it, so the corner press landed on
+         the slide (VERIFICATION-2 finding 28): the centre of the bounds is inside at any angle */
+      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+      if ((await editable.count()) > 0) await page.keyboard.press('Escape');
+    }
+    await expect(move).toBeVisible();
   };
 
   /* the move */

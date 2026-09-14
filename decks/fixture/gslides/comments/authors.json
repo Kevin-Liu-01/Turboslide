@@ -1,0 +1,10 @@
+{
+  "local:maya": {
+    "label": "maya",
+    "kind": "human"
+  },
+  "local:tester": {
+    "label": "tester",
+    "kind": "human"
+  }
+}

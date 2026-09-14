@@ -13,7 +13,13 @@ import {
   requestForce,
   requestHost,
 } from './auth.ts';
-import { handleActionRequest, readJsonBody } from './dispatch.ts';
+import {
+  effectiveHost,
+  handleActionRequest,
+  isLocalRequest,
+  readJsonBody,
+  trustsProxy,
+} from './dispatch.ts';
 import { errorBodyOf } from './errors.ts';
 import { runtimeManifest } from './manifest.ts';
 
@@ -337,5 +343,76 @@ describe('handleActionRequest', () => {
     expect(manifest.execution.http.path).toBe('/api/actions/<id>');
     expect(manifest.actions).toContain('view.goto');
     expect(manifest.actionsByGroup.view).toContain('view.goto');
+  });
+});
+
+describe('forwarded host trust (gslides-parity SPEC-3 8.8, TURBOSLIDE_TRUST_PROXY)', () => {
+  it('reads the forwarded host only under trust, and lets a public forwarded name refuse either way', () => {
+    const spoof = new Request(LOCAL, {
+      headers: { host: 'studio.example.com', 'x-forwarded-host': 'localhost' },
+    });
+    expect(trustsProxy({})).toBe(false);
+    expect(effectiveHost(spoof, {})).toBe('studio.example.com');
+    expect(isLocalRequest(spoof, {})).toBe(false);
+    expect(isLocalRequest(spoof, { TURBOSLIDE_TRUST_PROXY: '1' })).toBe(true);
+    const narrowed = new Request(LOCAL, {
+      headers: { host: 'localhost:4321', 'x-forwarded-host': 'studio.example.com' },
+    });
+    expect(isLocalRequest(narrowed, {})).toBe(false);
+    expect(isLocalRequest(new Request(LOCAL, { headers: { host: 'localhost:4321' } }), {})).toBe(
+      true,
+    );
+  });
+
+  it('refuses a spoofed localhost on the action route without a token, and serves it once trusted', async () => {
+    const d = dispatcher();
+    const spoofed = post(
+      '/api/actions/deck.info',
+      {},
+      {
+        host: 'studio.example.com',
+        'x-forwarded-host': 'localhost',
+      },
+    );
+    const refused = await handleActionRequest(spoofed, 'deck.info', { dispatcher: d, env: {} });
+    expect(refused.status).toBe(401);
+    const body = (await refused.json()) as { error: { code: string; message: string } };
+    expect(body.error.code).toBe('unauthorized');
+    expect(body.error.message).toMatch(/studio\.example\.com/);
+    const trusted = await handleActionRequest(
+      post(
+        '/api/actions/deck.info',
+        {},
+        {
+          host: 'studio.example.com',
+          'x-forwarded-host': 'localhost',
+        },
+      ),
+      'deck.info',
+      { dispatcher: d, env: { TURBOSLIDE_TRUST_PROXY: '1' } },
+    );
+    expect(trusted.status).toBe(200);
+    // a plain localhost request is unchanged
+    const plain = await handleActionRequest(
+      post('/api/actions/deck.info', {}, { host: 'localhost:4321' }),
+      'deck.info',
+      { dispatcher: d, env: {} },
+    );
+    expect(plain.status).toBe(200);
+    // with a token the bearer decides and the forwarded host is not consulted
+    const tokened = await handleActionRequest(
+      post(
+        '/api/actions/deck.info',
+        {},
+        {
+          host: 'studio.example.com',
+          'x-forwarded-host': 'localhost',
+          authorization: 'Bearer secret',
+        },
+      ),
+      'deck.info',
+      { dispatcher: d, env: { TURBOSLIDE_TOKEN: 'secret' } },
+    );
+    expect(tokened.status).toBe(200);
   });
 });

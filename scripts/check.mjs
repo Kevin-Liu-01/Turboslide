@@ -20,11 +20,23 @@
 //   node scripts/check.mjs --strict       fail instead of skipping when the Prototemplate deck, the
 //                                         fonts venv or Docker is missing
 //   node scripts/check.mjs --keep-server  leave a dev server the runner started running
+//
+// Round three (gslides-parity SPEC-3 0.50, 16.1): step 6 also greps the sources for new
+// `dangerouslySetInnerHTML`, `innerHTML` and public `overwrite: true` call sites outside the
+// allowlist (8.4, 8.5) and records the studio function bundle's size beside the client's; the new
+// two browser specs and the security suite run as their own step 26 (never inside step 21, whose
+// finding 28 is a fixer item), the layout shift audit is step 27 against `vite preview` of the
+// production build, and `pnpm audit --prod --audit-level=high` with scripts/audit-allow.json is
+// step 28. `--list` prints 28 steps. The runner's dev server carries the environment step 26
+// names: the memory channel, a checkout auth database under .turboslide/, captured mail, and a
+// fake download secret for the tmp store rule of server/tokens.ts.
 import { spawn, spawnSync } from 'node:child_process';
 import { createWriteStream, existsSync, mkdirSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+const require = createRequire(import.meta.url);
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PROTOTEMPLATE_DECK =
   process.env.TURBOSLIDE_PROTOTEMPLATE_DECK ?? '/Users/kevinliu/repos/Prototemplate/deck';
@@ -63,6 +75,65 @@ const CONTAINER_IMAGE = 'turboslide-render-worker';
 // slide fixture deck in a few minutes; the Download dialog of a deck longer than three slides
 // takes the batched path on that server too, which is the path the spec proves.
 const EXPORT_BATCH = '3';
+// Step 26 (SPEC-3 16.1): the round three specs against the runner's own dev server, each with
+// two browser contexts on the memory channel; a spec whose builder has not landed the file is
+// skipped by name with a line, never a silent pass (the list is the specification's).
+const ROUND_THREE_SPECS = [
+  'apps/studio/e2e/realtime.spec.ts',
+  'apps/studio/e2e/presence.spec.ts',
+  'apps/studio/e2e/comments.spec.ts',
+  'apps/studio/e2e/share.spec.ts',
+  'apps/studio/e2e/versions-by-author.spec.ts',
+  'apps/studio/e2e/accounts.spec.ts',
+  'apps/studio/e2e/dither.spec.ts',
+  'apps/studio/e2e/security.spec.ts',
+];
+// Step 27 (SPEC-3 9.4, 16.5): the layout shift audit against `vite preview` of the production
+// build on its own port (AGENTS.md port table: 4344 is B5's preview); the script is B5's.
+const LAYOUT_SHIFT_AUDIT = 'scripts/layout-shift-audit.mjs';
+const PREVIEW_PORT = '4344';
+// The environment the runner's dev server carries (SPEC-3 16.1 step 26; server/tokens.ts).
+const SERVER_ENV = {
+  TURBOSLIDE_EXPORT_BATCH: EXPORT_BATCH,
+  TURBOSLIDE_REALTIME: 'memory',
+  TURBOSLIDE_AUTH_DB: '.turboslide/auth.sqlite',
+  TURBOSLIDE_MAIL: 'capture',
+  // the same two switches playwright.config.ts gives its own server (b3.md R12): the localhost
+  // agent surface stays open for the specs and the library's sign in limiter is off for the run
+  TURBOSLIDE_LOCAL_OPEN: '1',
+  TURBOSLIDE_AUTH_RATE_LIMIT: 'off',
+};
+// Step 6's source greps (SPEC-3 16.1, 8.4, 8.5): every `dangerouslySetInnerHTML` and `innerHTML`
+// call site outside this list is a failure, and so is `overwrite: true` on a pathname under the
+// public asset prefix. The allowlist names the files that render the one renderer's output as
+// HTML (SPEC 5.3) and the export parts that rewrite their own job's files.
+const INNER_HTML_ALLOW = [
+  'apps/studio/src/routes/__root.tsx',
+  'apps/studio/src/routes/edit.$deckId.tsx',
+  'apps/studio/src/routes/present.$deckId.tsx',
+  'apps/studio/src/routes/print.$deckId.tsx',
+  'apps/studio/src/components/DeckViewer.tsx',
+  'packages/viewer/src/SlideView.tsx',
+  'packages/viewer/src/LiveClone.tsx',
+  'packages/viewer/src/Editor.tsx',
+  'packages/viewer/src/InlineText.tsx',
+  'packages/viewer/src/canvas-measure.ts',
+  'packages/viewer/src/model.ts',
+  'packages/viewer/src/theme.ts',
+  'packages/viewer/standalone/runtime.ts',
+  'packages/identity/src/names.ts',
+  'apps/studio/src/server/decks.ts',
+];
+const OVERWRITE_ALLOW = [
+  'apps/studio/src/server/export-batch.ts',
+  'apps/studio/src/server/export-sync.ts',
+  'packages/store/src/blob-store.ts',
+  // the comment sidecar's thread and author files under decks/<id>/comments/ (records the index
+  // commits under ifMatch, SPEC-3 0.52) and the storage migration's meta file on the private
+  // documents client (SPEC-3 8.9): record rewrites, never a public asset (the integrator, merge 2)
+  'packages/store/src/comments-store.ts',
+  'packages/store/src/migrate.ts',
+];
 
 // MILESTONES.md, M1 acceptance, in order. `needs` marks the environment a step depends on.
 const steps = [
@@ -78,7 +149,9 @@ const steps = [
   },
   { cmd: 'pnpm exec tsc -b' },
   { cmd: 'pnpm test' },
-  { cmd: 'pnpm build && node scripts/check-client-bundle.mjs apps/studio/dist' },
+  {
+    cmd: 'pnpm build && node scripts/check-client-bundle.mjs apps/studio/dist && node scripts/check.mjs --greps',
+  },
   {
     cmd: `pnpm exec turboslide import ${PROTOTEMPLATE_DECK} --into gt-brand --json > .turboslide/import.json`,
     needs: 'prototemplate',
@@ -119,10 +192,12 @@ const steps = [
   { cmd: 'pnpm format:check' },
   // gslides-parity SPEC 14.1, steps 20 and 21: the Google parity audit (the verifier's script;
   // the menu model tests until it exists) and the parity round's end to end specs, the ten tasks
-  // of SPEC 11.2 first
+  // of SPEC 11.2 first. The report lands in the current round's folder (SPEC-3 16.2 names
+  // `verification-3/parity-audit.json`); round two's report under `verification-2/` is a record
+  // and is never rewritten (VERIFICATION-3 finding 20).
   existsSync(PARITY_AUDIT)
     ? {
-        cmd: `node ${PARITY_AUDIT} --base ${STUDIO_URL} --out docs/gslides-parity/verification-2/parity-audit.json`,
+        cmd: `node ${PARITY_AUDIT} --base ${STUDIO_URL} --out docs/gslides-parity/verification-3/parity-audit.json`,
         needs: 'server',
       }
     : {
@@ -148,6 +223,28 @@ const steps = [
     cmd: `docker build -f docker/render-worker.Dockerfile -t ${CONTAINER_IMAGE} . && docker run --rm -v "$PWD/.turboslide/container:/work" ${CONTAINER_IMAGE} turboslide export decks/fixture/gslides --mode native --verify --out /work/gs-native`,
     needs: 'docker',
   },
+  // gslides-parity SPEC-3 16.1, steps 26 to 28 (0.50): the round three specs as their own step,
+  // the layout shift audit against the production preview, the dependency audit
+  {
+    // never a bare `playwright test` (which would run every spec): the present ones by name, or a
+    // named failure when none has landed
+    cmd: ROUND_THREE_SPECS.some((spec) => existsSync(resolve(ROOT, spec)))
+      ? `pnpm exec playwright test ${ROUND_THREE_SPECS.filter((spec) => existsSync(resolve(ROOT, spec))).join(' ')}`
+      : `node -e "console.error('check 26: no round three spec is in the tree yet (SPEC-3 16.1)'); process.exit(1)"`,
+    needs: 'server',
+    // the specs another builder has not landed yet are named, so the step is never a silent pass
+    missing: ROUND_THREE_SPECS.filter((spec) => !existsSync(resolve(ROOT, spec))),
+  },
+  existsSync(resolve(ROOT, LAYOUT_SHIFT_AUDIT))
+    ? {
+        cmd: `node ${LAYOUT_SHIFT_AUDIT} --base http://localhost:${PREVIEW_PORT} --out docs/gslides-parity/verification-3/layout-shift.json`,
+        needs: 'preview',
+      }
+    : {
+        // until B5's script lands: the renderer's img size and collab class pins stand in
+        cmd: 'pnpm exec vitest run --dir packages/render __tests__/img-size __tests__/collab',
+      },
+  { cmd: 'node scripts/check.mjs --audit' },
 ];
 
 const argv = process.argv.slice(2);
@@ -162,6 +259,16 @@ if (flag('list')) {
     console.log(`${String(i + 1).padStart(2)}  ${step.needs ? `[${step.needs}] ` : ''}${step.cmd}`),
   );
   process.exit(0);
+}
+
+// `--greps`: step 6's source rules (SPEC-3 16.1, 8.4, 8.5), runnable alone.
+if (flag('greps')) {
+  process.exit(runGreps());
+}
+
+// `--audit`: step 28, `pnpm audit --prod --audit-level=high` filtered by scripts/audit-allow.json.
+if (flag('audit')) {
+  process.exit(await runAudit());
 }
 
 const from = Number(value('from') ?? 1);
@@ -179,6 +286,107 @@ process.chdir(ROOT);
 mkdirSync('.turboslide', { recursive: true });
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/** The source files a grep walks: TypeScript and TSX under apps/ and packages/, no tests, no output (the scripts read a page's innerHTML in a browser evaluation and are not app sources). */
+function sourceFiles() {
+  const out = spawnSync(
+    'git',
+    ['ls-files', '--cached', '--others', '--exclude-standard', 'apps', 'packages'],
+    { cwd: ROOT, encoding: 'utf8' },
+  );
+  return out.stdout
+    .split('\n')
+    .filter((file) => /\.(?:ts|tsx|mjs)$/.test(file))
+    .filter((file) => !/\.test\.|__tests__|\/e2e\/|\/dist\/|\.gen\.ts$/.test(file))
+    .filter((file) => existsSync(resolve(ROOT, file)));
+}
+
+/**
+ * Step 6's greps (SPEC-3 16.1; 8.4: a new `innerHTML` call site is a review item, 8.5: nothing on
+ * the public store is ever overwritten). The allowlists are the files named above; a hit anywhere
+ * else fails the step and names the file and line.
+ */
+function runGreps() {
+  const { readFileSync } = require('node:fs');
+  const failures = [];
+  let innerHits = 0;
+  let overwriteHits = 0;
+  for (const file of sourceFiles()) {
+    const text = readFileSync(resolve(ROOT, file), 'utf8');
+    const lines = text.split('\n');
+    lines.forEach((line, index) => {
+      if (/dangerouslySetInnerHTML|\.innerHTML\b/.test(line) && !/^\s*(?:\/\/|\*)/.test(line)) {
+        innerHits += 1;
+        if (!INNER_HTML_ALLOW.includes(file))
+          failures.push(`${file}:${index + 1}: innerHTML outside the allowlist (SPEC-3 8.4)`);
+      }
+      if (/overwrite:\s*true/.test(line) && !/^\s*(?:\/\/|\*)/.test(line)) {
+        overwriteHits += 1;
+        if (!OVERWRITE_ALLOW.includes(file))
+          failures.push(`${file}:${index + 1}: overwrite: true outside the allowlist (SPEC-3 8.5)`);
+      }
+    });
+  }
+  // the studio function bundle's size beside the client's (SPEC-3 16.1 step 6, 8.4)
+  const sizes = [];
+  for (const dir of ['apps/studio/dist/server', 'apps/studio/dist/client']) {
+    const du = spawnSync('du', ['-sk', dir], { cwd: ROOT, encoding: 'utf8' });
+    const kb = Number(du.stdout.split(/\s+/)[0]);
+    if (Number.isFinite(kb)) sizes.push(`${dir} ${(kb / 1024).toFixed(1)} MB`);
+  }
+  console.log(
+    `check greps: innerHTML ${innerHits} call site(s) in the allowlist, overwrite: true ${overwriteHits} in the allowlist${sizes.length ? `; ${sizes.join(', ')}` : ''}`,
+  );
+  for (const failure of failures) console.error(`check greps: FAIL ${failure}`);
+  return failures.length === 0 ? 0 : 1;
+}
+
+/**
+ * Step 28 (SPEC-3 8.10, 16.1): `pnpm audit --prod --audit-level=high --json`, with the
+ * advisories scripts/audit-allow.json accepts (each with a reason and an expiry) removed; an
+ * expired acceptance fails the step like a new advisory.
+ */
+async function runAudit() {
+  const { readFileSync } = require('node:fs');
+  const allowPath = resolve(ROOT, 'scripts/audit-allow.json');
+  const allow = existsSync(allowPath)
+    ? JSON.parse(readFileSync(allowPath, 'utf8'))
+    : { accepted: [] };
+  const today = new Date().toISOString().slice(0, 10);
+  const expired = (allow.accepted ?? []).filter((entry) => entry.expires < today);
+  const audit = spawnSync('pnpm', ['audit', '--prod', '--audit-level=high', '--json'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+  });
+  let report;
+  try {
+    report = JSON.parse(audit.stdout);
+  } catch {
+    console.error(
+      `check audit: FAIL pnpm audit answered no JSON (exit ${audit.status}): ${audit.stderr.slice(0, 400)}`,
+    );
+    return 1;
+  }
+  const accepted = new Set((allow.accepted ?? []).map((entry) => entry.id));
+  const advisories = Object.values(report.advisories ?? {});
+  const open = advisories.filter(
+    (advisory) =>
+      ['high', 'critical'].includes(advisory.severity) &&
+      !accepted.has(advisory.github_advisory_id ?? advisory.id) &&
+      !accepted.has(String(advisory.id)),
+  );
+  console.log(
+    `check audit: ${advisories.length} advisory(ies) at high or above, ${advisories.length - open.length} accepted in scripts/audit-allow.json, ${open.length} open, ${expired.length} acceptance(s) expired`,
+  );
+  for (const advisory of open)
+    console.error(
+      `check audit: FAIL ${advisory.github_advisory_id ?? advisory.id} ${advisory.module_name} ${advisory.severity}: ${advisory.title}`,
+    );
+  for (const entry of expired)
+    console.error(`check audit: FAIL acceptance of ${entry.id} expired on ${entry.expires}`);
+  return open.length === 0 && expired.length === 0 ? 0 : 1;
+}
 
 async function isUp(url) {
   try {
@@ -307,7 +515,7 @@ async function ensureServer() {
       cwd: ROOT,
       detached: true,
       stdio: keepServer ? ['ignore', 'ignore', 'ignore'] : ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, TURBOSLIDE_EXPORT_BATCH: EXPORT_BATCH },
+      env: { ...process.env, ...SERVER_ENV },
     },
   );
   child.stdout?.on('data', (chunk) => serverLog.write(chunk));
@@ -384,7 +592,13 @@ for (const step of selected) {
         ? `fonts venv missing at ${FONTS_VENV}; see scripts/build-fonts.py`
         : step.needs === 'docker' && !hasDocker
           ? 'no Docker daemon answers; the verifier runs the container verification (SPEC-2 11.3)'
-          : null;
+          : step.needs === 'preview' && !(await isUp(`http://localhost:${PREVIEW_PORT}`))
+            ? `no production preview answers on ${PREVIEW_PORT}; start \`vite preview --port ${PREVIEW_PORT}\` from apps/studio over \`pnpm build\` (SPEC-3 16.1 step 27)`
+            : null;
+  if (step.missing !== undefined && step.missing.length > 0)
+    console.log(
+      `${label}: ${step.missing.length} spec(s) not in the tree yet: ${step.missing.join(', ')}`,
+    );
   if (missing !== null) {
     if (strict) {
       console.error(`${label}: FAIL ${missing} (--strict)`);
@@ -409,8 +623,9 @@ for (const step of selected) {
     shell: '/bin/sh',
     stdio: 'inherit',
     cwd: ROOT,
-    // the batch size the runner's dev server advertises, for export-batch.spec.ts (step 21)
-    env: { ...process.env, TURBOSLIDE_EXPORT_BATCH: EXPORT_BATCH },
+    // the batch size the runner's dev server advertises, for export-batch.spec.ts (step 21), and
+    // the round three environment of step 26
+    env: { ...process.env, ...SERVER_ENV },
   });
   const seconds = ((Date.now() - t) / 1000).toFixed(1);
   if (result.status !== 0) {

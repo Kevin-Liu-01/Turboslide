@@ -69,6 +69,17 @@ function releaseSlot(): void {
   fetching = Math.max(0, fetching - 1);
 }
 
+/**
+ * How far from the viewport a thumbnail starts loading: two viewports of rows ahead, so a scroll
+ * meets decoded captures, and nothing further. A row past that draws the plate and asks for
+ * nothing: an 85 slide deck opened fresh queued 85 captures and 85 live clones at once, and the
+ * render storm stalled the dev server's one process for seconds, so the room's stream and presence
+ * routes of the same page waited behind it (VERIFICATION-3 finding 32: the second person's chip
+ * missed its 5 s on a full copy while a three slide copy showed it in 3 ms). Google's filmstrip
+ * renders thumbnails as they scroll into view.
+ */
+export const THUMB_NEAR_MARGIN = '200% 0px';
+
 export function Thumb({ shot, html, theme, frame = true, fallbackText = '' }: ThumbProps) {
   const src = shot ? (theme === 'dark' ? (shot.dark ?? shot.light) : shot.light) : undefined;
   /* the src that has decoded, and the src that failed; a new src starts over */
@@ -77,11 +88,32 @@ export function Thumb({ shot, html, theme, frame = true, fallbackText = '' }: Th
   /* false on the server and for the hydrating render, true from the first client effect */
   const [mounted, setMounted] = useState(false);
   useMountEffect(() => setMounted(true));
+  /* true once the row is within THUMB_NEAR_MARGIN of the viewport (at once where no observer exists) */
+  const root = useRef<HTMLSpanElement>(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    const el = root.current;
+    if (el === null || typeof IntersectionObserver === 'undefined') {
+      setNear(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setNear(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: THUMB_NEAR_MARGIN },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
   /* the src holding a fetch slot: the img mounts once the slot is granted and frees it on load or error */
   const [granted, setGranted] = useState<string | null>(null);
   const slot = useRef<string | null>(null);
   useEffect(() => {
-    if (src === undefined) return;
+    if (src === undefined || !near) return;
     let cancelled = false;
     requestSlot(() => {
       if (cancelled) {
@@ -98,7 +130,7 @@ export function Thumb({ shot, html, theme, frame = true, fallbackText = '' }: Th
         releaseSlot();
       }
     };
-  }, [src]);
+  }, [src, near]);
   const settle = (which: string) => {
     if (slot.current === which) {
       slot.current = null;
@@ -107,10 +139,10 @@ export function Thumb({ shot, html, theme, frame = true, fallbackText = '' }: Th
   };
   const ready = src !== undefined && loaded === src;
   const broken = src !== undefined && failed === src;
-  const clone = mounted && !ready && html !== undefined;
+  const clone = mounted && near && !ready && html !== undefined;
   const state = ready ? 'static' : clone ? 'clone' : 'plate';
   return (
-    <span className={cn('ts-thumb', ready && 'is-static')} data-thumb={state}>
+    <span ref={root} className={cn('ts-thumb', ready && 'is-static')} data-thumb={state}>
       {clone ? <LiveClone html={html} theme={theme} frame={frame} /> : null}
       {state === 'plate' ? (
         <span className="ts-thumb-plate" aria-hidden="true">

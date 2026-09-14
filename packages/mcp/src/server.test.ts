@@ -2,6 +2,7 @@
 // tools the dispatcher implements, calls one, reads a resource and gets the prompt.
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { ResourceUpdatedNotificationSchema } from '@modelcontextprotocol/sdk/types.js';
 import { createDispatcher } from '@turboslide/agent/dispatch';
 import { ConflictError } from '@turboslide/schema/errors';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -150,5 +151,63 @@ describe('createMcpServer', () => {
     await expect(
       client.getPrompt({ name: 'deck_review', arguments: { lens: 'vibes' } }),
     ).rejects.toThrow(/Unknown lens/);
+  });
+
+  it('declares resources/subscribe and sends notifications/resources/updated for a subscribed URI (SPEC-3 3.7 g)', async () => {
+    let fire: ((uris: string[]) => void) | undefined;
+    let stopped = 0;
+    const withRecords: DeckSource = {
+      ...source(),
+      comments: async () => ({ threads: [], commentsRevision: 1, total: 0 }),
+      inbox: async () => ({ notifications: [], unread: 0 }),
+      subscribe: (onChange) => {
+        fire = onChange;
+        return () => {
+          stopped += 1;
+        };
+      },
+    };
+    const dispatcher = createDispatcher();
+    const created = createMcpServer({
+      dispatcher,
+      source: withRecords,
+      author,
+      version: '0.0.0-test',
+    });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    await created.server.connect(serverTransport);
+    const client = new Client({ name: 'test', version: '0.0.0' }, { capabilities: {} });
+    const updated: string[] = [];
+    client.setNotificationHandler(ResourceUpdatedNotificationSchema, (notification) => {
+      updated.push(notification.params.uri);
+    });
+    await client.connect(clientTransport);
+    closers.push(async () => {
+      await client.close();
+      await created.server.close();
+    });
+    expect(client.getServerCapabilities()?.resources).toEqual({
+      subscribe: true,
+      listChanged: true,
+    });
+    const listed = (await client.listResources()).resources.map((resource) => resource.uri);
+    expect(listed).toContain('deck://fixture/comments');
+    expect(listed).toContain('deck://inbox');
+    expect(listed).not.toContain('deck://fixture/presence');
+    await client.subscribeResource({ uri: 'deck://fixture/comments' });
+    await client.subscribeResource({ uri: 'deck://inbox' });
+    expect(created.subscriptions()).toContain('deck://fixture/comments');
+    if (fire === undefined) throw new Error('the source was not asked to watch');
+    fire(['deck://fixture/comments', 'deck://fixture/manifest']);
+    fire(['deck://inbox']);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(updated).toEqual(['deck://fixture/comments', 'deck://inbox']);
+    await client.unsubscribeResource({ uri: 'deck://fixture/comments' });
+    fire(['deck://fixture/comments']);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(updated).toHaveLength(2);
+    await expect(client.subscribeResource({ uri: 'deck://nope/what' })).rejects.toThrow();
+    await created.server.close();
+    expect(stopped).toBe(1);
   });
 });

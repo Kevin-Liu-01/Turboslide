@@ -29,7 +29,72 @@ export type SheetPageOptions<S extends SheetScale = RenderScale> = {
   /** Default 1. */
   scale?: S;
   viewport?: { width: number; height: number };
+  /**
+   * The network rule of the page (gslides-parity SPEC-3 0.30, 8.6): `deny` (the default) lets
+   * `file:`, `data:`, `blob:` and `about:` requests and the loopback names through and aborts every
+   * other request, so a slide's markup cannot reach the network from the render; `open` keeps
+   * today's behaviour (`TURBOSLIDE_EGRESS=open`). `allowHosts` names hosts a capture may reach.
+   */
+  egress?: EgressRule;
+  allowHosts?: ReadonlyArray<string>;
 };
+
+export type EgressRule = 'deny' | 'open';
+
+/** The variable that opens the network of render pages; unset is `deny`. */
+export const EGRESS_ENV = 'TURBOSLIDE_EGRESS';
+
+export function defaultEgress(env: NodeJS.ProcessEnv = process.env): EgressRule {
+  return env[EGRESS_ENV]?.trim().toLowerCase() === 'open' ? 'open' : 'deny';
+}
+
+/** The schemes a render page may load without a network: the document and its own resources. */
+const LOCAL_SCHEMES: ReadonlyArray<string> = ['file:', 'data:', 'blob:', 'about:', 'chrome-error:'];
+
+const LOOPBACK =
+  /^(?:localhost|127(?:\.\d{1,3}){3}|\[::1\]|0\.0\.0\.0)(?::\d+)?$|\.localhost(?::\d+)?$/i;
+
+/**
+ * True when a request a render page makes may proceed under the deny rule: a local scheme, a
+ * loopback host (the dev server a measurement page runs on), or an allowlisted host.
+ */
+export function egressAllowed(url: string, allowHosts: ReadonlyArray<string> = []): boolean {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return false;
+  }
+  if (LOCAL_SCHEMES.includes(parsed.protocol)) return true;
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return false;
+  if (LOOPBACK.test(parsed.host)) return true;
+  const host = parsed.hostname.toLowerCase();
+  return allowHosts.some((entry) => {
+    const allowed = entry.toLowerCase();
+    return host === allowed || host.endsWith(`.${allowed}`);
+  });
+}
+
+/**
+ * Closes the network of a context (SPEC-3 8.6 "Chromium's network closed during renders,
+ * thumbnails, exports and captures"): every request outside `egressAllowed` is aborted and
+ * recorded, so a slide whose `html` block names `http://127.0.0.1/x` or an outside beacon renders
+ * with the request aborted in the route log. Returns the blocked URLs so far.
+ */
+export async function denyEgress(
+  context: BrowserContext,
+  allowHosts: ReadonlyArray<string> = [],
+): Promise<{ blocked: () => string[] }> {
+  const blocked: string[] = [];
+  await context.route('**/*', (route) => {
+    const url = route.request().url();
+    if (egressAllowed(url, allowHosts)) return route.continue();
+    blocked.push(url);
+    launchLog(`egress denied: ${url.slice(0, 120)}`);
+    return route.abort('blockedbyclient');
+  });
+  return { blocked: () => [...blocked] };
+}
 
 export type SheetPage<S extends SheetScale = RenderScale> = {
   context: BrowserContext;
@@ -38,6 +103,8 @@ export type SheetPage<S extends SheetScale = RenderScale> = {
   scale: S;
   /** Errors since the last takeErrors(). */
   takeErrors: () => { pageErrors: string[]; consoleErrors: string[] };
+  /** The requests the egress rule aborted since the page opened (SPEC-3 8.6). */
+  blocked: () => string[];
   close: () => Promise<void>;
 };
 
@@ -60,6 +127,10 @@ export async function openSheetPage<S extends SheetScale = RenderScale>(
     'sheet context',
   );
   launchLog(`sheet context ${options.theme} at ${scale}x`);
+  const egress =
+    (options.egress ?? defaultEgress()) === 'deny'
+      ? await denyEgress(context, options.allowHosts ?? [])
+      : { blocked: () => [] as string[] };
   await context.addInitScript((theme: string) => {
     try {
       localStorage.setItem('gt-theme', theme);
@@ -86,6 +157,7 @@ export async function openSheetPage<S extends SheetScale = RenderScale>(
     context,
     page,
     theme: options.theme,
+    blocked: egress.blocked,
     scale,
     takeErrors() {
       const out = { pageErrors, consoleErrors };

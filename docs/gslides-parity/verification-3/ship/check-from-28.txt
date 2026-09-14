@@ -1,0 +1,4 @@
+check 28/28: node scripts/check.mjs --audit
+check audit: 0 advisory(ies) at high or above, 0 accepted in scripts/audit-allow.json, 0 open, 0 acceptance(s) expired
+check 28/28: ok in 1.0 s
+check: all 1 selected step(s) passed in 1.0 s

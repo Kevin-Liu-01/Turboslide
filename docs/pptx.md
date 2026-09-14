@@ -269,6 +269,49 @@ A sheet with translucent pixels (none in the deck) skips the JPEG candidate and 
 the palette or truecolor PNG. `--no-jpeg` on the CLI (`noJpeg` in `exportPptx`) keeps every page a
 PNG for a deterministic file.
 
+## Dithered pictures (gslides-parity SPEC-3 section 10)
+
+A `picture` or `shot` block may carry a `dither` field (SPEC-3 10.1): the deck's two tone screen
+over the picture's continuous source, non destructive, with the pattern, the tone, the cell, the
+strength, the ink and paper points, the midtones, the polarity and the advanced filters. The
+renderer writes the field, its variant key and its state on the block root
+(`data-dither`, `data-dither-key`, `data-dither-state`, `data-dither-source`); when the asset
+record lists a materialized variant for the key (`Asset.variants[key]`, written by
+`turboslide picture materialize`) the image is the variant file and the state is `variant`, else
+the image is the continuous twin, the state is `live`, and the editor draws the effect on a canvas
+over it.
+
+Both export paths read variant files, never a live canvas. `exportPptx` runs a materialization pass
+before the shoot (`packages/export/src/dither-variants.ts`): every dithered picture without a
+variant is rendered through the stages of `@turboslide/effects` (`dither.ts`, `dither-io.ts`), its
+files written under the deck's `assets/` as `<asset>.dither-<key12>-light.png` and `-dark.png`
+(one neutral file for polarity `same`), and recorded on the document the render surface reads, so
+every page is shot in state `variant`. The files are digest named and never overwritten; the deck's
+own record is the store's write (`picture.materialize`, which the CLI and the studio run around an
+export), and the merged report says how many files the pass wrote. `materialize: false` on
+`exportPptx` skips the pass and the residual names the pictures shot live.
+
+Perfect mode: the page raster policy above applies unchanged. A two tone plane at full strength is
+a 1-bit palette PNG as a file, about 4 KB at cell 2; the page that shows it also carries the
+frame's hairlines, so the page raster takes the palette form (exact within the perfect budget), and
+only a page whose colours are exactly two takes the 1-bit form. At the 2x shot the variant's cells
+are `cell * 2` device pixels through the nearest rule, so the raster carries crisp 4 by 4 cells at
+cell 2 rather than the bilinear blow up of a 1x twin.
+
+Editable text: a covering picture at the bottom of the stack whose dither is a plain two tone
+plane (strength 1, no crop, mask, adjustments or frame) travels as `slide.background = { data }`
+with the variant file's own bytes (`SceneBackground.pictureVariantFile`, `pptx/build.ts`), the
+1-bit file the store holds rather than the raster the page shot; every other dithered picture
+travels as its raster at its box, a strength under 1 composited over the continuous picture in the
+file (`dither-io.ts` composites through sharp). The residual names every dithered picture per
+slide as `dither: <slideId>#<blockId> <key12> <state>`, and the background case as travelling
+"from its dither variant file".
+
+PDF prints the page reading the variant. The standalone build (`renderStandalone`) refuses a
+referenced picture without a variant with "materialize first" in its `missing` list, so a slow
+page never ships; the variant files inline under the asset's rule once the CLI's asset inliner
+lists them.
+
 ## Slide names and titles
 
 pptxgenjs names every slide "Slide N" and writes no title placeholder, so PowerPoint's outline,

@@ -40,7 +40,7 @@ const skip =
   !existsSync(resolveExecutable().path) ||
   !existsSync(join(DECK_DIR, 'deck.json'));
 
-/** The play list of SPEC-2 11.2 without the skipped slide: 26 pages of 27 slides. */
+/** The play list of SPEC-2 11.2 without the skipped slide: 28 pages of 29 slides (the two dither slides of SPEC-3 10.10 joined at merge 2). */
 const ORDER = [
   'title',
   'breaks',
@@ -59,6 +59,8 @@ const ORDER = [
   'shadow',
   'background-color',
   'background-picture',
+  'background-dither',
+  'picture-dither-strength',
   'image-tools',
   'table-merge',
   'chart-bar',
@@ -189,7 +191,7 @@ describe.skipIf(skip)('the export fixture deck (gslides-parity SPEC 14.5, SPEC-2
     else console.log(`fixture export output kept at ${out}`);
   });
 
-  test('leaves the skipped slide out unless asked, and numbers the play list of 26', async () => {
+  test('leaves the skipped slide out unless asked, and numbers the play list of 28', async () => {
     for (const result of [flatten, native]) {
       expect(result.omitted).toEqual(['skipped']);
       expect(result.merged.slides.map((s) => s.slideId)).toEqual(ORDER);
@@ -198,15 +200,15 @@ describe.skipIf(skip)('the export fixture deck (gslides-parity SPEC 14.5, SPEC-2
       ).toBe(true);
     }
     expect(withSkipped.omitted).toEqual([]);
-    expect(withSkipped.merged.slides).toHaveLength(27);
-    // the counter counts what the file holds: the last slide of 26 reads 26 / 26
+    expect(withSkipped.merged.slides).toHaveLength(29);
+    // the counter counts what the file holds: the last slide of 28 reads 28 / 28
     const scenes = native.scenes.filter((s) => s.theme === 'light');
     expect(scenes.map((s) => s.n)).toEqual(ORDER.map((_, i) => i + 1));
-    expect(scenes.every((s) => s.total === 26)).toBe(true);
+    expect(scenes.every((s) => s.total === 28)).toBe(true);
     const last = scenes.find((s) => s.slideId === 'autofit');
-    expect(last?.counter?.lines[0]?.runs.map((r) => r.text).join('')).toBe('26 / 26');
-    expect(withSkipped.scenes.every((s) => s.total === 27)).toBe(true);
-    expect(nativeParts.size).toBe(26);
+    expect(last?.counter?.lines[0]?.runs.map((r) => r.text).join('')).toBe('28 / 28');
+    expect(withSkipped.scenes.every((s) => s.total === 29)).toBe(true);
+    expect(nativeParts.size).toBe(28);
   });
 
   test('flatten is perfect and valid with the play list as pages, the converted slides included', async () => {
@@ -214,10 +216,10 @@ describe.skipIf(skip)('the export fixture deck (gslides-parity SPEC 14.5, SPEC-2
     expect(flatten.merged.passed).toBe(true);
     const check = await checkPptx(flatten.files[0] ?? '', { quickLook: false });
     expect(check.valid).toBe(true);
-    expect(check.slides).toBe(26);
+    expect(check.slides).toBe(28);
     expect(
       flatten.merged.residual.some((line) =>
-        /^pages: 26 png-palette; .* worst decoded mismatch 0\.000 percent/.test(line),
+        /^pages: 28 png-palette; .* worst decoded mismatch 0\.000 percent/.test(line),
       ),
     ).toBe(true);
     const { parts } = await partsById(flatten.files[0] ?? '');
@@ -238,7 +240,7 @@ describe.skipIf(skip)('the export fixture deck (gslides-parity SPEC 14.5, SPEC-2
     expect(native.merged.passed).toBe(true);
     const check = await checkPptx(native.files[0] ?? '', { quickLook: false });
     expect(check.valid).toBe(true);
-    expect(check.slides).toBe(26);
+    expect(check.slides).toBe(28);
     expect(factsOf(part('table')).tables).toBe(1);
     expect(
       native.merged.residual.some((line) =>
@@ -439,6 +441,20 @@ describe.skipIf(skip)('the export fixture deck (gslides-parity SPEC 14.5, SPEC-2
         ),
       ),
     ).toBe(true);
+    // the two dither slides of SPEC-3 10.10 (merge 2): the covering picture travels with its
+    // materialized variant and the residual names the block, its key and its state
+    expect(part('background-dither')).toMatch(/<p:bg><p:bgPr><a:blipFill\b/);
+    expect(scene('background-dither')?.background?.pictureRasterId).toBeDefined();
+    expect(
+      native.merged.residual.some((line) =>
+        /^dither: background-dither#\S+ [0-9a-f]{12} /.test(line),
+      ),
+    ).toBe(true);
+    expect(
+      native.merged.residual.some((line) =>
+        /^dither: picture-dither-strength#\S+ [0-9a-f]{12} /.test(line),
+      ),
+    ).toBe(true);
     expect(count(part('image-tools'), /<p:pic>/g)).toBe(3);
     // the shape's alt text is its descr (pptxgenjs writes descr for pictures and charts only)
     expect(part('canvas-title')).toContain(
@@ -585,8 +601,8 @@ describe.skipIf(skip)('the export fixture deck (gslides-parity SPEC 14.5, SPEC-2
   });
 
   test('the PDF has one page per unskipped slide at 960 by 540 pt, every page under the fail line', async () => {
-    expect(pdf.pages).toBe(26);
-    expect(await pdfPageCount(pdf.path)).toBe(26);
+    expect(pdf.pages).toBe(28);
+    expect(await pdfPageCount(pdf.path)).toBe(28);
     expect(await pdfPageSize(pdf.path)).toEqual({ width: 960, height: 540 });
     expect(pdf.omitted).toEqual(['skipped']);
     expect(pdf.report.format).toBe('pdf');

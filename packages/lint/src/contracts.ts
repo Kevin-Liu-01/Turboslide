@@ -65,6 +65,7 @@ export type { RuleId, Rule, RuleLayer, FindingKind } from '@turboslide/schema/ru
 export { RULES, RULE_IDS, isRuleId } from '@turboslide/schema/rules';
 export type { Mutation } from '@turboslide/schema/mutations';
 export type { Box, RenderRecord } from '@turboslide/schema/render';
+export { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 export type { SlideId, BlockId, AssetId, SectionId } from '@turboslide/schema/ids';
 export type { Text } from '@turboslide/schema/text';
 export { parseText } from '@turboslide/schema/text';

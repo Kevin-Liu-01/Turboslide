@@ -1,0 +1,47 @@
+{
+  "base": "http://localhost:4336",
+  "at": "2026-09-14T07:12:21.951Z",
+  "seconds": 132,
+  "summary": {
+    "ok": 6,
+    "fail": 1,
+    "notes": 0
+  },
+  "rows": [
+    {
+      "name": "scratch deck",
+      "ok": true,
+      "evidence": "verifier-walk-mu0wl7sf from gt-brand's first three slides (opener-brand, title, thesis)"
+    },
+    {
+      "name": "S4 named anonymous principal",
+      "ok": true,
+      "evidence": "account.setName Maya: {\"principal\":{\"id\":\"anon_141b9bfa-6789-4dbb-bd8f-af46151ab3f1\",\"kind\":\"anonymous\",\"admin\":false},\"trust\":\"guest\",\"label\"; state.account {\"principalId\":\"anon_141b9bfa-6789-4dbb-bd8f-af46151ab3f1\",\"label\":\"Nylon 214\",\"trust\":\"label\",\"signedIn\":false,\"signInAvailable\":true}"
+    },
+    {
+      "name": "S4 the own chip names the principal",
+      "ok": true,
+      "evidence": "own chip tooltip \"Nylon 214 (you)\""
+    },
+    {
+      "name": "S4 the own chip menu is the account surface",
+      "ok": true,
+      "evidence": "rows title.account.changeName, title.account.changeAvatar, title.account.signIn, title.account.forget, title.account.sessions; sentence \"NNylon 214Not signed in\""
+    },
+    {
+      "name": "S4 nothing else in the chrome mentions accounts",
+      "ok": true,
+      "evidence": "0 account word(s) in the default view text"
+    },
+    {
+      "name": "walk",
+      "ok": false,
+      "evidence": "threw: page.waitForFunction: Timeout 120000ms exceeded.\n    at ready (/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-3/walk/two-browser-walk.mjs:64:14)\n    at open (/Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-3/walk/two-browser-walk.mjs:79:9)\n    at async file:///Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-3/walk/two-browser-walk.mjs:203:3"
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "evidence": "verifier-walk-mu0wl7sf trashed and removed"
+    }
+  ]
+}

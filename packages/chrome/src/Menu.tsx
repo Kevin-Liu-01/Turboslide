@@ -19,6 +19,7 @@ import {
   tooltipDoc,
   visibleItems,
 } from './menus/model.ts';
+import { openRoster } from './presence/roster-hook';
 import { sentence, tipProps } from './Tooltip';
 
 import './Menu.css';
@@ -47,7 +48,12 @@ export type MenuAnchor =
 
 export type MenuPlacement = 'below' | 'right' | 'point';
 
-export type MenuCloseReason = 'escape' | 'select' | 'outside' | 'tab';
+/**
+ * Why a menu closed: `escape` and `tab` return focus to the trigger; `select` and `outside` leave
+ * focus where the pointer put it; `roster` hands focus to the Collaborators list that Shift+Tab
+ * opened (SPEC-3 0.42, 4.5), so nothing pulls it back to the trigger.
+ */
+export type MenuCloseReason = 'escape' | 'select' | 'outside' | 'tab' | 'roster';
 
 export type MenuProps = {
   items: ReadonlyArray<MenuItem>;
@@ -189,7 +195,7 @@ function hasSubmenu(
   const effect = resolveEffect(item, context);
   if (effect !== undefined && effect.kind !== 'submenu') return false;
   if (dynamicNode(item, context, renderDynamic, false) !== null) return true;
-  return item.items !== undefined && visibleItems(item.items).length > 0;
+  return item.items !== undefined && visibleItems(item.items, { context }).length > 0;
 }
 
 /** The label with its access key letter underlined once. */
@@ -252,9 +258,10 @@ function MenuList({
   const hoverTimer = useRef(0);
   const typed = useRef({ buffer: '', at: 0 });
 
+  /* a row a role cannot use is absent, never disabled (SPEC-3 13.4) */
   const visible = useMemo(
-    () => visibleItems(items, { contextOnly: includeContextOnly }),
-    [items, includeContextOnly],
+    () => visibleItems(items, { contextOnly: includeContextOnly, context }),
+    [items, includeContextOnly, context],
   );
   const enabled = useMemo(
     () => visible.filter((item) => isEnabled(item, context)),
@@ -274,18 +281,25 @@ function MenuList({
     );
   }, [anchor, placement, visible.length]);
 
-  /* the first enabled row takes focus on open when asked; a pointer opened root list takes focus
-     itself so keys land here; a pointer opened submenu leaves focus on its parent row */
+  /* the first enabled row takes focus on open when asked; a pointer opened submenu leaves focus
+     on its parent row */
   useMountEffect(() => {
     if (autoFocus) {
       const first = enabled[0];
-      if (first !== undefined) {
-        setFocusId(first.id);
-        return;
-      }
+      if (first !== undefined) setFocusId(first.id);
     }
-    if (level === 0) root.current?.focus();
   });
+
+  /* a pointer opened root list takes focus itself so keys land here (Shift+Tab to the roster,
+     Esc, the arrows), once it is placed: until `position` is set the list is visibility hidden
+     and the browser refuses to focus it, which left focus on the menu title (VERIFICATION-3
+     finding 13); a keyboard opened list has a row to focus instead */
+  const tookFocus = useRef(false);
+  useEffect(() => {
+    if (level !== 0 || position === null || tookFocus.current) return;
+    tookFocus.current = true;
+    if (focusId === null) root.current?.focus();
+  }, [position, level, focusId]);
 
   useEffect(() => {
     if (focusId === null) return;
@@ -392,6 +406,15 @@ function MenuList({
         onCloseLevel('escape');
         return;
       case 'Tab':
+        /* Shift+Tab from any open menu is the Collaborators list (SPEC-3 0.42, 4.5; 01 G5): the
+           whole menu closes without returning focus to its trigger and the roster opens when the
+           title row holds the presence slot; the plate takes focus once it is placed
+           (VERIFICATION-3 finding 13) */
+        if (event.shiftKey && openRoster()) {
+          event.preventDefault();
+          onCloseLevel('roster');
+          return;
+        }
         onCloseLevel('tab');
         return;
       default:
@@ -620,7 +643,7 @@ export function Menu({
 
   const close = useCallback(
     (reason: MenuCloseReason) => {
-      if (reason !== 'outside' && reason !== 'select') returnFocusTo?.focus();
+      if (reason === 'escape' || reason === 'tab') returnFocusTo?.focus();
       onClose(reason);
     },
     [onClose, returnFocusTo],

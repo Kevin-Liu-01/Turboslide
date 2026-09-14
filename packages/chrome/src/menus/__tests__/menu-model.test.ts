@@ -5,13 +5,14 @@ import { describe, expect, it } from 'vitest';
 import { ACTION_IDS } from '@turboslide/schema/actions';
 
 import { assignAccessKeys } from '../keys.ts';
-import type { MenuContext, MenuItem, MenuStatus } from '../model.ts';
+import type { MenuCapability, MenuContext, MenuItem, MenuStatus } from '../model.ts';
 import {
   CONTEXT_MENUS,
   DEFAULT_MENU_CONTEXT,
   DIVIDER,
   GS1_ACTION_IDS,
   GS2_ACTION_IDS,
+  GS3_ACTION_IDS,
   MENUS,
   OMITTED_MENUS,
   TITLE_ROW_ITEMS,
@@ -23,22 +24,29 @@ import {
   contextMenuItems,
   evaluate,
   findItem,
+  hasCapability,
   isChecked,
+  isEnabled,
+  isPresent,
   itemById,
   itemPath,
   resolveLabel,
   statusOfChildren,
   tooltipDoc,
+  visibleItems,
+  visibleMenus,
   walkItems,
 } from '../model.ts';
 import { STUB_PREFIX, forbiddenWordsIn } from '../strings.ts';
 
-// The menu model (SPEC 2.13, 14.2; SPEC-2 section 4): every row of SPEC sections 2.0 to 2.10 is in
-// the model with its round two status; every Google item R01 names (the fixture) is in the model;
-// every now item has an effect, every later item a stub clause from SPEC-2 section 12, every omit
-// item none; every action id exists in the actions table or among the ids of SPEC 7.5 and SPEC-2
-// section 3; the rows SPEC-2 4.1 flips are counted; the toolbar of 3.1 and the card menu of 4.2
-// are in order; the canvas rows (SPEC-2 section 1) are enabled on every slide kind.
+// The menu model (SPEC 2.13, 14.2; SPEC-2 section 4; SPEC-3 section 13): every row of SPEC
+// sections 2.0 to 2.10 is in the model with its round three status; every Google item R01 names
+// (the fixture, with the round three rows report 01 attests) is in the model; every now item has
+// an effect, every later item a stub clause from SPEC-2 section 12 or SPEC-3 13.3, every omit
+// item none; every action id exists in the actions table or among the ids of SPEC 7.5, SPEC-2
+// section 3 and SPEC-3 section 12; the rows SPEC-2 4.1 and SPEC-3 13.1 flip are counted; the
+// toolbar of 3.1 and the card menu of 4.2 are in order; the canvas rows (SPEC-2 section 1) are
+// enabled on every slide kind; a row a role cannot use is absent, never disabled (SPEC-3 13.4).
 
 type Row = {
   menu: string;
@@ -47,13 +55,15 @@ type Row = {
   omits?: string[];
   /** the round one status the row had before SPEC-2 4.1 flipped it */
   was?: MenuStatus;
+  /** the round two status the row had before SPEC-3 section 13 flipped it */
+  was3?: MenuStatus;
 };
 
 const row = (
   menu: string,
   status: MenuStatus,
   ids: string[],
-  extra: { omits?: string[]; was?: MenuStatus } = {},
+  extra: { omits?: string[]; was?: MenuStatus; was3?: MenuStatus } = {},
 ): Row => ({ menu, status, ids, ...extra });
 
 /**
@@ -63,18 +73,40 @@ const row = (
  * items a Now row's note omits; `was` names the round one status of a row SPEC-2 4.1 flipped.
  */
 const SPEC_ROWS: Row[] = [
-  /* 2.0 the title row */
+  /* 2.0 the title row; SPEC-3 4.2, 13.1, 13.2 add the presence slot, the inbox and the own chip */
   row('title', 'now', ['title.appIcon']),
   row('title', 'now', ['title.name']),
   row('title', 'omit', ['title.star']),
   row('title', 'omit', ['title.move']),
   row('title', 'now', ['title.saveState']),
   row('title', 'now', ['title.lastEdit']),
-  row('title', 'later', ['title.comments']),
+  row('title', 'now', [
+    'title.presence',
+    'title.presence.follow',
+    'title.presence.goTo',
+    'title.presence.me',
+  ]),
+  row('title', 'later', ['title.presence.joinChat']),
+  row('title', 'now', ['title.comments'], { was3: 'later' }),
+  row('title', 'now', ['title.inbox']),
   row('title', 'omit', ['title.meet', 'title.record']),
   row('title', 'now', ['title.slideshow']),
   row('title', 'now', ['title.share']),
-  row('title', 'omit', ['title.account', 'title.gemini']),
+  row(
+    'title',
+    'now',
+    [
+      'title.account',
+      'title.account.changeName',
+      'title.account.changeAvatar',
+      'title.account.signIn',
+      'title.account.signOut',
+      'title.account.forget',
+      'title.account.sessions',
+    ],
+    { was3: 'omit' },
+  ),
+  row('title', 'omit', ['title.gemini']),
   /* 2.1 File */
   row('file', 'now', ['file.new.presentation']),
   row('file', 'now', ['file.new.templateGallery']),
@@ -84,7 +116,11 @@ const SPEC_ROWS: Row[] = [
   row('file', 'now', ['file.makeCopy.selected']),
   row('file', 'now', ['file.share.withOthers']),
   row('file', 'now', ['file.share.publish']),
-  row('file', 'omit', ['file.email', 'file.email.thisFile', 'file.email.collaborators']),
+  /* SPEC-3 0.16, 13.2: the address without a token */
+  row('file', 'now', ['file.share.copyLink']),
+  row('file', 'omit', ['file.email.thisFile']),
+  /* SPEC-3 13.3: Email collaborators is Google's row, present with its clause until round four */
+  row('file', 'later', ['file.email', 'file.email.collaborators'], { was3: 'omit' }),
   row('file', 'now', ['file.download.pptx']),
   /* SPEC-2 12: ODP and SVG are present in Google's position with the download clause */
   row('file', 'later', ['file.download.odp'], { was: 'omit' }),
@@ -100,6 +136,9 @@ const SPEC_ROWS: Row[] = [
   row('file', 'now', ['file.moveToTrash']),
   row('file', 'now', ['file.versionHistory.nameCurrent']),
   row('file', 'now', ['file.versionHistory.see']),
+  /* SPEC-3 5.7, 13.2, 13.3: the panel's Show changes checkbox and its two disabled delete rows */
+  row('file', 'now', ['file.versionHistory.showChanges']),
+  row('file', 'later', ['file.versionHistory.deleteOlder', 'file.versionHistory.deleteHistory']),
   row('file', 'omit', ['file.approvals']),
   row('file', 'omit', ['file.offline']),
   row('file', 'now', ['file.details']),
@@ -150,22 +189,31 @@ const SPEC_ROWS: Row[] = [
   row('view', 'later', ['view.guides.edit']),
   row('view', 'now', ['view.snapTo.guides']),
   row('view', 'now', ['view.snapTo.grid']),
-  row('view', 'later', [
-    'view.comments',
-    'view.comments.hide',
-    'view.comments.minimize',
-    'view.comments.expand',
-  ]),
-  row('view', 'omit', [
-    'view.livePointers',
-    'view.livePointers.mine',
-    'view.livePointers.collaborators',
-  ]),
+  /* SPEC-3 5.3, 13.1: the four display modes flip to Now with Show all comments joining them */
+  row(
+    'view',
+    'now',
+    [
+      'view.comments',
+      'view.comments.showAll',
+      'view.comments.expand',
+      'view.comments.minimize',
+      'view.comments.hide',
+    ],
+    { was3: 'later' },
+  ),
+  /* SPEC-3 4.6, 13.1: Google's two Live pointers rows */
+  row(
+    'view',
+    'now',
+    ['view.livePointers', 'view.livePointers.mine', 'view.livePointers.collaborators'],
+    { was3: 'omit' },
+  ),
   row('view', 'now', ['view.showSpeakerNotes']),
   row('view', 'now', ['view.showFilmstrip']),
-  row('view', 'now', ['view.mode', 'view.mode.editing', 'view.mode.viewing'], {
-    omits: ['view.mode.commenting'],
-  }),
+  row('view', 'now', ['view.mode', 'view.mode.editing', 'view.mode.viewing']),
+  /* SPEC-3 5.3, 13.1: the third radio */
+  row('view', 'now', ['view.mode.commenting'], { was3: 'omit' }),
   row('view', 'now', ['view.fullScreen']),
   row('view', 'now', ['view.showSections']),
   row('view', 'now', [
@@ -227,7 +275,8 @@ const SPEC_ROWS: Row[] = [
   row('insert', 'now', ['insert.specialCharacters'], { was: 'omit' }),
   row('insert', 'omit', ['insert.animation']),
   row('insert', 'now', ['insert.link']),
-  row('insert', 'later', ['insert.comment']),
+  /* SPEC-3 5.3, 13.1: the card at the selection */
+  row('insert', 'now', ['insert.comment'], { was3: 'later' }),
   row('insert', 'now', ['insert.newSlide']),
   row('insert', 'now', ['insert.slideNumbers']),
   row('insert', 'omit', ['insert.placeholder']),
@@ -318,6 +367,8 @@ const SPEC_ROWS: Row[] = [
     'format.image.replaceImage.fromThisPresentation',
   ]),
   row('format', 'now', ['format.image.resetImage'], { was: 'later' }),
+  /* SPEC-3 10.5, 13.2: the picture's Dither toggle */
+  row('format', 'now', ['format.image.dither']),
   row('format', 'now', ['format.image.imageOptions']),
   row('format', 'now', ['format.bordersLines.borderColor', 'format.bordersLines.borderWeight']),
   row(
@@ -410,10 +461,24 @@ const SPEC_ROWS: Row[] = [
     'tools.dictionary',
     'tools.qaHistory',
     'tools.dictateNotes',
-    'tools.accessibilitySettings',
-    'tools.activityDashboard',
   ]),
+  /* SPEC-3 5.5, 13.2: Google's per file row */
+  row('tools', 'now', ['tools.notificationSettings']),
   row('tools', 'later', ['tools.preferences']),
+  /* SPEC-3 0.42, 13.1: the submenu with the one row Turboslide can honour */
+  row(
+    'tools',
+    'now',
+    ['tools.accessibilitySettings', 'tools.accessibilitySettings.collaboratorAnnouncements'],
+    { was3: 'omit' },
+  ),
+  row('tools', 'omit', [
+    'tools.accessibilitySettings.screenReader',
+    'tools.accessibilitySettings.braille',
+  ]),
+  /* SPEC-3 5.7, 13.1, 13.3: the Activity panel and its one Later tab */
+  row('tools', 'now', ['tools.activityDashboard'], { was3: 'omit' }),
+  row('tools', 'later', ['tools.activityDashboard.viewers']),
   row('tools', 'now', ['tools.checkSlides']),
   row('tools', 'now', ['tools.advanced.showSource']),
   row('tools', 'now', ['tools.advanced.sideBySide']),
@@ -475,6 +540,8 @@ const OTHER_ROWS: Row[] = [
   row('context', 'now', ['format.dropShadow']),
   row('context', 'now', ['format.changeShape']),
   row('context', 'now', ['format.editData']),
+  /* SPEC-3 0.27: the Edit HTML panel's row, from the html block's right-click menu */
+  row('context', 'now', ['format.editHtml']),
   row('context', 'now', [
     'format.chartType',
     'format.chartType.bar',
@@ -489,29 +556,38 @@ const OTHER_ROWS: Row[] = [
 /**
  * The rows per menu as [now, later, omit], counted over the SPEC rows (Regroup included under
  * Arrange as round one did). Round one read [106, 24, 38] over 168 rows (`build/b3a.md` section
- * 3); round two flips 32 rows (SPEC-2 4.1 and section 12, the View rows included) and adds the
- * paragraph spacing row and the split Guides row (Edit guides stays Later on its own), so the
- * tally reads [132, 16, 24] over 172 rows.
+ * 3); round two flipped 32 rows (SPEC-2 4.1 and section 12, the View rows included) and added the
+ * paragraph spacing row and the split Guides row (Edit guides stays Later on its own), so its
+ * tally read [132, 16, 24] over 172 rows. Round three (SPEC-3 section 13) flips nine rows (Show
+ * all comments, the own chip, Email collaborators, View > Comments, Live pointers, Commenting,
+ * Insert > Comment, Accessibility settings, Activity dashboard) and adds fifteen (the presence
+ * slot, Join chat, the inbox, the own chip's menu, Copy link, the Email submenu as Later, Show
+ * changes, the two delete rows, Commenting on its own row, Dither, Notification settings, the
+ * Accessibility settings submenu's two omitted rows, the Viewers tab), so the tally reads
+ * [146, 17, 24] over 187 rows (build-3/b6.md section 2 has the arithmetic per menu).
  */
 const COUNTS: Record<string, Counts> = {
-  title: [6, 1, 4],
-  file: [22, 3, 5],
+  title: [10, 1, 4],
+  file: [24, 5, 5],
   edit: [11, 0, 0],
-  view: [13, 2, 3],
-  insert: [20, 4, 5],
-  format: [27, 2, 0],
+  view: [16, 1, 2],
+  insert: [21, 3, 5],
+  format: [28, 2, 0],
   slide: [8, 2, 0],
   arrange: [7, 0, 0],
-  tools: [12, 2, 3],
+  tools: [15, 3, 4],
   extensions: [2, 0, 2],
   help: [4, 0, 2],
 };
 
-/** The clauses of SPEC-2 section 12 a Later row may carry after the stub prefix. */
-const SECTION_12_CLAUSES = new Set<string>([
+/**
+ * The clauses of SPEC-2 section 12 and SPEC-3 13.3 a Later row may carry after the stub prefix.
+ * The comment stub clause of rounds one and two ("Leave a note in the speaker notes instead") is
+ * gone: every comment row is Now (SPEC-3 5.3).
+ */
+const LATER_CLAUSES = new Set<string>([
   'The GT theme presents still slides',
   'Link to a recording instead',
-  'Leave a note in the speaker notes instead',
   'Start from the GT brand deck on the home page',
   'The GT theme is 16:9 at 1600 by 900',
   'Drag a guide to move it and right-click it to delete it',
@@ -526,7 +602,26 @@ const SECTION_12_CLAUSES = new Set<string>([
   'Border colour applies to the selected cells',
   'Search by name or browse the categories',
   'Presenter view opens a second window you can drag to another screen',
-  'Turboslide has no accounts yet',
+  /* SPEC-3 13.3 */
+  'Leave a comment on the slide instead',
+  'The invitation carries your message',
+  'Named versions are kept; older records thin out after 30 days',
+  'Turboslide keeps no record of who viewed a presentation',
+]);
+
+/** The comment stub clause of rounds one and two; no row carries it since SPEC-3 5.3. */
+const RETIRED_COMMENTS_CLAUSE = 'Leave a note in the speaker notes instead';
+
+/**
+ * Rows reachable from a panel rather than a right-click menu (SPEC-3 5.7, 13.2, 13.3): the
+ * Version history panel's Show changes checkbox and its two delete rows, and the Activity panel's
+ * Viewers tab; they are `contextOnly` so the menu bar never draws them.
+ */
+const PANEL_ROWS = new Set<string>([
+  'file.versionHistory.showChanges',
+  'file.versionHistory.deleteOlder',
+  'file.versionHistory.deleteHistory',
+  'tools.activityDashboard.viewers',
 ]);
 
 const isContainer = (item: MenuItem): boolean => item.items !== undefined && item.items.length > 0;
@@ -546,6 +641,39 @@ function withObjects(
     slide: { ...DEFAULT_MENU_CONTEXT.slide!, ...slide },
     selection: { ...DEFAULT_MENU_CONTEXT.selection, blocks: count, ...extra },
   };
+}
+
+/** The capabilities of a role (SPEC-3 6.2), for the role state contexts. */
+const CAPABILITIES: Record<'editor' | 'commenter' | 'viewer', MenuCapability[]> = {
+  editor: [
+    'read',
+    'readSkipped',
+    'readNotes',
+    'readComments',
+    'comment',
+    'write',
+    'history',
+    'export',
+    'exportNotes',
+    'share',
+    'rename',
+    'copy',
+    'trash',
+    'restore',
+    'publish',
+    'presence',
+    'follow',
+  ],
+  commenter: ['read', 'readSkipped', 'readComments', 'comment', 'export', 'copy', 'presence'],
+  viewer: ['read', 'export', 'copy', 'presence'],
+};
+
+/** A context for a role, with the capabilities of 6.2 (a viewer without the owner's comments switch). */
+function asRole(
+  role: 'editor' | 'commenter' | 'viewer',
+  extra: Partial<MenuContext> = {},
+): MenuContext {
+  return { ...DEFAULT_MENU_CONTEXT, role, capabilities: CAPABILITIES[role], ...extra };
 }
 
 describe('the SPEC rows', () => {
@@ -590,8 +718,191 @@ describe('the SPEC rows', () => {
     }
     const zero: Counts = [0, 0, 0];
     const total = Object.values(derived).reduce(add, zero);
-    expect(total).toEqual([132, 16, 24]);
-    expect(total[0] + total[1] + total[2]).toBe(172);
+    expect(total).toEqual([146, 17, 24]);
+    expect(total[0] + total[1] + total[2]).toBe(187);
+  });
+
+  it('flips the nine rows of SPEC-3 section 13 away from their round two status, each Now row with a live effect', () => {
+    const flipped = rows.filter((each) => each.was3 !== undefined);
+    for (const each of flipped) {
+      expect(each.status, each.ids.join(', ')).not.toBe(each.was3);
+      if (each.status === 'now')
+        for (const id of each.ids) expect(itemById(id).effect, id).toBeDefined();
+    }
+    expect(flipped.map((each) => each.ids[0])).toEqual([
+      'title.comments',
+      'title.account',
+      'file.email',
+      'view.comments',
+      'view.livePointers',
+      'view.mode.commenting',
+      'insert.comment',
+      'tools.accessibilitySettings',
+      'tools.activityDashboard',
+    ]);
+    /* 13.1: the effects and the role predicates of the flipped rows */
+    expect(itemById('title.comments').effect).toEqual({ kind: 'panel', title: 'Comments' });
+    expect(itemById('title.comments').when).toBe('readComments');
+    expect(itemById('insert.comment').effect).toEqual({ kind: 'client', handler: 'comment' });
+    expect(itemById('insert.comment').key).toEqual({ mac: 'Cmd+Option+M', win: 'Ctrl+Alt+M' });
+    expect(itemById('insert.comment').when).toBe('comment');
+    expect(itemById('insert.comment').enabled).toBe('canComment');
+    for (const [id, value] of [
+      ['view.comments.showAll', 'all'],
+      ['view.comments.expand', 'expanded'],
+      ['view.comments.minimize', 'minimized'],
+      ['view.comments.hide', 'hidden'],
+    ] as const)
+      expect(itemById(id).effect, id).toEqual({ kind: 'toggle', setting: 'comments', value });
+    expect(itemById('view.comments.hide').key).toEqual({
+      mac: 'Cmd+Option+Shift+J',
+      win: 'Ctrl+Alt+Shift+J',
+    });
+    expect(itemById('view.comments').when).toBe('readComments');
+    expect(itemById('view.livePointers.mine').effect).toEqual({
+      kind: 'toggle',
+      setting: 'pointerMine',
+    });
+    expect(itemById('view.livePointers.mine').when).toBe('write');
+    expect(itemById('view.livePointers.collaborators').effect).toEqual({
+      kind: 'toggle',
+      setting: 'pointerOthers',
+    });
+    expect(itemById('view.livePointers.collaborators').when).toBeUndefined();
+    expect(itemById('view.mode.commenting').effect).toEqual({
+      kind: 'toggle',
+      setting: 'mode',
+      value: 'commenting',
+    });
+    expect(itemById('view.mode.commenting').when).toBe('comment');
+    expect(itemById('view.mode').when).toBe('comment');
+    expect(itemById('view.mode.editing').when).toBe('write');
+    expect(itemById('tools.accessibilitySettings').effect).toEqual({ kind: 'submenu' });
+    expect(itemById('tools.accessibilitySettings.collaboratorAnnouncements').effect).toEqual({
+      kind: 'toggle',
+      setting: 'announce',
+    });
+    expect(itemById('tools.activityDashboard').effect).toEqual({
+      kind: 'panel',
+      title: 'Activity',
+    });
+    expect(itemById('tools.activityDashboard').when).toBe('activity');
+    expect(itemById('title.account').google).toBe('Account avatar');
+    expect(itemById('title.account').items?.map((item) => item.label)).toEqual([
+      'Change name',
+      'Change avatar',
+      'Sign in',
+      'Sign out',
+      'Forget this browser',
+      'Sessions',
+    ]);
+    expect(itemById('title.account.signIn').when).toBe('canSignIn');
+    expect(itemById('title.account.signOut').when).toBe('signedIn');
+    expect(itemById('title.account.signOut').effect).toEqual({
+      kind: 'action',
+      id: 'account.signOut',
+    });
+    expect(itemById('title.account.forget').effect).toEqual({
+      kind: 'action',
+      id: 'account.forget',
+    });
+    /* the context menus reach the live Comment row on every target that had the stub */
+    for (const target of [
+      'filmstripCard',
+      'emptyCanvas',
+      'textBlock',
+      'image',
+      'shape',
+      'line',
+      'group',
+      'chart',
+    ] as const)
+      expect(
+        contextMenuIds(target).at(-1) === 'insert.comment' ||
+          contextMenuIds(target).includes('insert.comment'),
+        target,
+      ).toBe(true);
+  });
+
+  it('adds the rows of SPEC-3 13.2 with their effects', () => {
+    expect(itemById('title.inbox').effect).toEqual({ kind: 'panel', title: 'Notifications' });
+    expect(itemById('title.inbox').turboslide).toBe(true);
+    expect(itemById('title.presence').google).toBe('Avatar row');
+    expect(itemById('title.presence').items?.map((item) => item.id)).toEqual([
+      'title.presence.follow',
+      'title.presence.goTo',
+      'title.presence.joinChat',
+      'title.presence.me',
+    ]);
+    expect(itemById('title.presence.follow').effect).toEqual({
+      kind: 'action',
+      id: 'presence.follow',
+    });
+    expect(itemById('title.presence.follow').when).toBe('follow');
+    expect(itemById('title.presence.goTo').effect).toEqual({
+      kind: 'client',
+      handler: 'goToClient',
+    });
+    expect(itemById('title.presence.joinChat').status).toBe('later');
+    expect(itemById('title.presence.joinChat').stubReason).toBe(
+      'Leave a comment on the slide instead',
+    );
+    expect(itemById('title.presence.me').effect).toEqual({
+      kind: 'client',
+      handler: 'accountMenu',
+    });
+    expect(itemById('tools.notificationSettings').effect).toEqual({
+      kind: 'dialog',
+      title: 'Notification settings',
+    });
+    expect(itemById('tools.notificationSettings').when).toBe('comment');
+    expect(itemById('file.share.copyLink').effect).toEqual({ kind: 'client', handler: 'copyLink' });
+    expect(itemById('file.share.copyLink').turboslide).toBe(true);
+    expect(itemById('file.share.publish').when).toBe('publish');
+    expect(itemById('format.image.dither').effect).toEqual({
+      kind: 'action',
+      id: 'picture.dither',
+    });
+    expect(itemById('format.image.dither').turboslide).toBe(true);
+    expect(contextMenuIds('image')).toContain('format.image.dither');
+    expect(itemById('file.versionHistory.showChanges').effect).toEqual({
+      kind: 'toggle',
+      setting: 'showChanges',
+    });
+    expect(itemById('file.versionHistory.showChanges').contextOnly).toBe(true);
+    /* 13.3: the Later rows with their clauses, present and never omitted */
+    for (const [id, clause] of [
+      ['title.presence.joinChat', 'Leave a comment on the slide instead'],
+      ['file.email.collaborators', 'The invitation carries your message'],
+      [
+        'file.versionHistory.deleteOlder',
+        'Named versions are kept; older records thin out after 30 days',
+      ],
+      [
+        'file.versionHistory.deleteHistory',
+        'Named versions are kept; older records thin out after 30 days',
+      ],
+      [
+        'tools.activityDashboard.viewers',
+        'Turboslide keeps no record of who viewed a presentation',
+      ],
+    ] as const) {
+      expect(itemById(id).status, id).toBe('later');
+      expect(itemById(id).stubReason, id).toBe(clause);
+      expect(tooltipDoc(itemById(id), DEFAULT_MENU_CONTEXT), id).toBe(`${STUB_PREFIX}. ${clause}`);
+    }
+  });
+
+  it('keeps no comment row Later and the old comment clause out of every row (SPEC-3 5.3)', () => {
+    for (const item of allItems()) {
+      expect(item.stubReason, item.id).not.toBe(RETIRED_COMMENTS_CLAUSE);
+      if (/comment/i.test(item.id)) expect(item.status, item.id).not.toBe('later');
+    }
+    for (const control of TOOLBAR_TAIL_DEFAULT)
+      expect(control.stubReason).not.toBe(RETIRED_COMMENTS_CLAUSE);
+    expect(
+      TOOLBAR_TAIL_DEFAULT.find((control) => control.control === 'toolbar.insertComment')?.status,
+    ).toBe('now');
   });
 
   it('flips the rows of SPEC-2 4.1 and section 12, every one away from its round one status', () => {
@@ -619,13 +930,11 @@ describe('the SPEC rows', () => {
       expect(itemById(id).status, id).toBe('now');
   });
 
-  it('gives every remaining Later row a clause of SPEC-2 section 12 with no engineering word', () => {
+  it('gives every remaining Later row a clause of SPEC-2 section 12 or SPEC-3 13.3 with no engineering word', () => {
     const later = allItems().filter((item) => item.status === 'later');
     expect(later.length).toBeGreaterThan(0);
     for (const item of later) {
-      expect(SECTION_12_CLAUSES.has(item.stubReason ?? ''), `${item.id}: ${item.stubReason}`).toBe(
-        true,
-      );
+      expect(LATER_CLAUSES.has(item.stubReason ?? ''), `${item.id}: ${item.stubReason}`).toBe(true);
       expect(forbiddenWordsIn(item.stubReason ?? ''), item.id).toEqual([]);
     }
     expect(itemById('view.guides.edit').stubReason).toBe(
@@ -656,6 +965,222 @@ describe('the SPEC rows', () => {
     /* the round two additions of SPEC-2 section 10 are marked too */
     for (const id of ['format.changeShape', 'format.editData', 'format.chartType'])
       expect(itemById(id).turboslide, id).toBe(true);
+    /* the round three additions of SPEC-3 15: the inbox, the roster rows, the own chip's rows, Copy link, Dither */
+    for (const id of [
+      'title.inbox',
+      'title.presence.follow',
+      'title.presence.goTo',
+      'title.presence.me',
+      'title.account.changeName',
+      'title.account.changeAvatar',
+      'title.account.signIn',
+      'title.account.signOut',
+      'title.account.forget',
+      'title.account.sessions',
+      'file.share.copyLink',
+      'format.image.dither',
+    ]) {
+      expect(itemById(id).turboslide, id).toBe(true);
+      expect(itemById(id).status, id).toBe('now');
+    }
+    /* Google's rows of round three carry no mark */
+    for (const id of [
+      'title.presence',
+      'title.presence.joinChat',
+      'title.account',
+      'tools.notificationSettings',
+      'tools.accessibilitySettings.collaboratorAnnouncements',
+      'tools.activityDashboard',
+      'view.comments.showAll',
+      'view.livePointers.mine',
+      'view.mode.commenting',
+    ])
+      expect(itemById(id).turboslide, id).toBeUndefined();
+  });
+});
+
+describe('the role predicates of SPEC-3 13.4', () => {
+  it('reads a context without capabilities as the owner of a checkout: every row present', () => {
+    for (const predicate of [
+      'write',
+      'comment',
+      'readComments',
+      'readNotes',
+      'history',
+      'share',
+      'settings',
+      'publish',
+      'copy',
+      'export',
+      'rename',
+      'trash',
+      'follow',
+      'canComment',
+      'activity',
+    ] as const)
+      expect(evaluate(predicate, DEFAULT_MENU_CONTEXT), predicate).toBe(true);
+    expect(evaluate('viewOnly', DEFAULT_MENU_CONTEXT)).toBe(false);
+    expect(evaluate('signedIn', DEFAULT_MENU_CONTEXT)).toBe(false);
+    expect(evaluate('canSignIn', DEFAULT_MENU_CONTEXT)).toBe(false);
+    expect(hasCapability(DEFAULT_MENU_CONTEXT, 'write')).toBe(true);
+    /* the two identity rows read the account facts, not a role, and wait for them (7.5) */
+    const identityRows = new Set(['title.account.signIn', 'title.account.signOut']);
+    for (const item of allItems()) {
+      if (identityRows.has(item.id)) {
+        expect(isPresent(item, DEFAULT_MENU_CONTEXT), item.id).toBe(false);
+        continue;
+      }
+      expect(isPresent(item, DEFAULT_MENU_CONTEXT), item.id).toBe(true);
+    }
+    for (const menu of MENUS) expect(isPresent(menu, DEFAULT_MENU_CONTEXT), menu.id).toBe(true);
+  });
+
+  it('hides the write menus and rows from a viewer, never disables them, and shows the View only state', () => {
+    const viewer = asRole('viewer');
+    expect(visibleMenus(viewer).map((menu) => menu.id)).toEqual(['file', 'view', 'tools', 'help']);
+    for (const id of [
+      'title.name',
+      'title.saveState',
+      'title.comments',
+      'file.importSlides',
+      'file.rename',
+      'file.moveToTrash',
+      'file.versionHistory',
+      'file.share.publish',
+      'view.comments',
+      'view.mode',
+      'view.livePointers.mine',
+      'view.showSpeakerNotes',
+      'insert.comment',
+      'tools.notificationSettings',
+      'tools.activityDashboard',
+      'tools.checkSlides',
+      'tools.advanced',
+    ])
+      expect(isPresent(itemById(id), viewer), id).toBe(false);
+    for (const id of [
+      'title.presence',
+      'title.inbox',
+      'title.slideshow',
+      'title.share',
+      'title.account',
+      'file.open',
+      'file.makeCopy',
+      'file.share.withOthers',
+      'file.share.copyLink',
+      'file.download',
+      'file.details',
+      'view.zoom',
+      'view.livePointers.collaborators',
+      'help.help',
+    ])
+      expect(isPresent(itemById(id), viewer), id).toBe(true);
+    expect(evaluate('viewOnly', viewer)).toBe(true);
+    expect(evaluate('follow', viewer)).toBe(false);
+    /* a viewer who may read comments under the owner's switch sees the read surfaces alone */
+    const reading = asRole('viewer', { capabilities: [...CAPABILITIES.viewer, 'readComments'] });
+    expect(isPresent(itemById('title.comments'), reading)).toBe(true);
+    expect(isPresent(itemById('view.comments'), reading)).toBe(true);
+    expect(isPresent(itemById('insert.comment'), reading)).toBe(false);
+    expect(isPresent(itemById('view.mode'), reading)).toBe(false);
+  });
+
+  it('shows a commenter the Insert menu with its Comment row alone, and Mode with Commenting and Viewing', () => {
+    const commenter = asRole('commenter');
+    expect(visibleMenus(commenter).map((menu) => menu.id)).toEqual([
+      'file',
+      'view',
+      'insert',
+      'tools',
+      'help',
+    ]);
+    const insert = MENUS.find((menu) => menu.id === 'insert')!;
+    expect(visibleItems(insert.items, { context: commenter }).map((item) => item.id)).toEqual([
+      'insert.comment',
+    ]);
+    expect(isEnabled(itemById('insert.comment'), commenter)).toBe(true);
+    const mode = itemById('view.mode');
+    expect(isPresent(mode, commenter)).toBe(true);
+    expect(visibleItems(mode.items ?? [], { context: commenter }).map((item) => item.id)).toEqual([
+      'view.mode.commenting',
+      'view.mode.viewing',
+    ]);
+    expect(isPresent(itemById('view.showSpeakerNotes'), commenter)).toBe(false);
+    expect(isPresent(itemById('tools.notificationSettings'), commenter)).toBe(true);
+    expect(isPresent(itemById('tools.spelling'), commenter)).toBe(false);
+    /* the Activity panel opens for a commenter only when the owner allows it (5.7) */
+    expect(isPresent(itemById('tools.activityDashboard'), commenter)).toBe(false);
+    expect(
+      isPresent(
+        itemById('tools.activityDashboard'),
+        asRole('commenter', { access: { activityForCommenters: true } }),
+      ),
+    ).toBe(true);
+    /* the context menus drop the rows a commenter cannot use and keep Comment */
+    const card = contextMenuItems('filmstripCard', commenter).map((entry) =>
+      entry === DIVIDER ? '-' : entry.id,
+    );
+    expect(card).toEqual(['insert.comment']);
+    const text = contextMenuItems('textBlock', commenter).map((entry) =>
+      entry === DIVIDER ? '-' : entry.id,
+    );
+    expect(text).toEqual(['insert.comment']);
+    expect(contextMenuItems('textBlock', asRole('viewer'))).toEqual([]);
+    /* an editor sees every row as before */
+    const editor = asRole('editor');
+    expect(visibleMenus(editor).map((menu) => menu.id)).toEqual(MENUS.map((menu) => menu.id));
+    expect(contextMenuItems('filmstripCard', editor).length).toBe(
+      contextMenuItems('filmstripCard', DEFAULT_MENU_CONTEXT).length,
+    );
+  });
+
+  it('disables Comment in Viewing mode with the way back, and checks the three Mode radios and the four display modes', () => {
+    expect(isChecked(itemById('view.mode.editing'), DEFAULT_MENU_CONTEXT)).toBe(true);
+    expect(isChecked(itemById('view.mode.commenting'), DEFAULT_MENU_CONTEXT)).toBe(false);
+    expect(isChecked(itemById('view.mode.viewing'), DEFAULT_MENU_CONTEXT)).toBe(false);
+    const viewing = {
+      ...DEFAULT_MENU_CONTEXT,
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, mode: 'viewing' },
+    };
+    expect(isChecked(itemById('view.mode.viewing'), viewing)).toBe(true);
+    expect(evaluate('canComment', viewing)).toBe(false);
+    expect(isEnabled(itemById('insert.comment'), viewing)).toBe(false);
+    expect(tooltipDoc(itemById('insert.comment'), viewing)).toBe(
+      'Switch to Commenting or Editing under View > Mode to comment',
+    );
+    const commenting = {
+      ...DEFAULT_MENU_CONTEXT,
+      settings: { ...DEFAULT_MENU_CONTEXT.settings, mode: 'commenting' },
+    };
+    expect(isEnabled(itemById('insert.comment'), commenting)).toBe(true);
+    expect(isChecked(itemById('view.comments.showAll'), DEFAULT_MENU_CONTEXT)).toBe(true);
+    expect(isChecked(itemById('view.comments.hide'), DEFAULT_MENU_CONTEXT)).toBe(false);
+    expect(isChecked(itemById('view.livePointers.collaborators'), DEFAULT_MENU_CONTEXT)).toBe(true);
+    expect(isChecked(itemById('view.livePointers.mine'), DEFAULT_MENU_CONTEXT)).toBe(false);
+    /* the own chip's rows read the identity facts */
+    const anonymous = {
+      ...DEFAULT_MENU_CONTEXT,
+      account: { signedIn: false, signInAvailable: true },
+    };
+    expect(isPresent(itemById('title.account.signIn'), anonymous)).toBe(true);
+    expect(isPresent(itemById('title.account.signOut'), anonymous)).toBe(false);
+    const signedIn = {
+      ...DEFAULT_MENU_CONTEXT,
+      account: { signedIn: true, signInAvailable: true },
+    };
+    expect(isPresent(itemById('title.account.signIn'), signedIn)).toBe(false);
+    expect(isPresent(itemById('title.account.signOut'), signedIn)).toBe(true);
+    /* without DATABASE_URL the Sign in row is absent (7.3) */
+    const noSignIn = {
+      ...DEFAULT_MENU_CONTEXT,
+      account: { signedIn: false, signInAvailable: false },
+    };
+    expect(isPresent(itemById('title.account.signIn'), noSignIn)).toBe(false);
+    expect(
+      visibleItems(itemById('title.account').items ?? [], { context: noSignIn }).map(
+        (item) => item.label,
+      ),
+    ).toEqual(['Change name', 'Change avatar', 'Forget this browser', 'Sessions']);
   });
 });
 
@@ -796,12 +1321,24 @@ describe('statuses and effects', () => {
   });
 
   it('gives a container the status of its children and a submenu effect only while something under it is built', () => {
+    /* the Slideshow split button runs the show and Activity dashboard opens its panel: their
+       status is their own and their children are the arrow's rows and the panel's Later tab */
+    const splits = new Set(['title.slideshow', 'tools.activityDashboard']);
     for (const item of items) {
       if (!isContainer(item) || item.items === undefined) continue;
+      if (splits.has(item.id)) {
+        expect(item.status, item.id).toBe('now');
+        expect(item.effect?.kind, item.id).not.toBe('submenu');
+        continue;
+      }
       expect(item.status, item.id).toBe(statusOfChildren(item.items));
-      if (item.status === 'now' && item.id !== 'title.slideshow')
-        expect(item.effect?.kind, item.id).toBe('submenu');
+      if (item.status === 'now') expect(item.effect?.kind, item.id).toBe('submenu');
     }
+    expect(itemById('tools.activityDashboard').effect).toEqual({
+      kind: 'panel',
+      title: 'Activity',
+    });
+    expect(itemById('tools.activityDashboard.viewers').status).toBe('later');
     expect(itemById('slide.applyLayout').effect).toEqual({
       kind: 'submenu',
       dynamic: 'layouts',
@@ -816,8 +1353,13 @@ describe('statuses and effects', () => {
     expect(itemById('insert.table').items).toBeUndefined();
   });
 
-  it('names action ids that exist in the actions table or among the ids of SPEC 7.5 and SPEC-2 section 3', () => {
-    const known = new Set<string>([...ACTION_IDS, ...GS1_ACTION_IDS, ...GS2_ACTION_IDS]);
+  it('names action ids that exist in the actions table or among the ids of SPEC 7.5, SPEC-2 section 3 and SPEC-3 section 12', () => {
+    const known = new Set<string>([
+      ...ACTION_IDS,
+      ...GS1_ACTION_IDS,
+      ...GS2_ACTION_IDS,
+      ...GS3_ACTION_IDS,
+    ]);
     const used = new Set<string>();
     for (const item of items) {
       for (const id of actionIdsOf(item)) {
@@ -825,6 +1367,41 @@ describe('statuses and effects', () => {
         used.add(id);
       }
     }
+    /* SPEC-3 0.40, 12: the 64 ids in the table's order, counted once */
+    expect(GS3_ACTION_IDS).toHaveLength(64);
+    expect(new Set(GS3_ACTION_IDS).size).toBe(64);
+    expect(
+      GS3_ACTION_IDS.filter(
+        (id) =>
+          id.startsWith('presence.') ||
+          id.startsWith('sync.') ||
+          id === 'deck.watch' ||
+          id === 'deck.follow',
+      ),
+    ).toHaveLength(7);
+    expect(
+      GS3_ACTION_IDS.filter(
+        (id) =>
+          id.startsWith('comment.') ||
+          id.startsWith('notification.') ||
+          id === 'activity.list' ||
+          id === 'version.diff',
+      ),
+    ).toHaveLength(17);
+    expect(
+      GS3_ACTION_IDS.filter(
+        (id) => id.startsWith('share.') || id === 'deck.publish' || id === 'deck.unpublish',
+      ),
+    ).toHaveLength(21);
+    expect(GS3_ACTION_IDS.filter((id) => id.startsWith('account.'))).toHaveLength(10);
+    expect(GS3_ACTION_IDS.filter((id) => id.startsWith('admin.'))).toHaveLength(5);
+    expect(
+      GS3_ACTION_IDS.filter(
+        (id) => id.startsWith('picture.') || id.startsWith('slide.setBackground'),
+      ),
+    ).toHaveLength(4);
+    for (const id of ['presence.follow', 'account.signOut', 'account.forget', 'picture.dither'])
+      expect(used.has(id), `${id} is on no menu`).toBe(true);
     for (const id of [
       'slide.new',
       'slide.duplicate',
@@ -883,16 +1460,20 @@ describe('statuses and effects', () => {
     }
   });
 
-  it('follows SPEC 2.0 on the title row and 9.1 on the Slideshow arrow', () => {
+  it('follows SPEC 2.0 on the title row with the five fixed slots of SPEC-3 0.43, and 9.1 on the Slideshow arrow', () => {
     expect(TITLE_ROW_ITEMS.filter((item) => item.status !== 'omit').map((item) => item.id)).toEqual(
       [
         'title.appIcon',
         'title.name',
         'title.saveState',
         'title.lastEdit',
+        /* the right group, left to right: the presence slot, the comments glyph, the inbox plate, Slideshow, Share, then the own chip */
+        'title.presence',
         'title.comments',
+        'title.inbox',
         'title.slideshow',
         'title.share',
+        'title.account',
       ],
     );
     expect(itemById('title.slideshow').items?.map((item) => item.label)).toEqual([
@@ -1205,11 +1786,12 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
       if (control.status === 'later')
         expect(control.stubReason?.length ?? 0, control.control).toBeGreaterThan(0);
     }
+    /* SPEC-3 5.3: Insert comment is live; Transition is the one Later control of the default tail */
     expect(
       TOOLBAR_TAIL_DEFAULT.filter((control) => control.status === 'later').map(
         (control) => control.label,
       ),
-    ).toEqual(['Insert comment', 'Transition']);
+    ).toEqual(['Transition']);
   });
 
   it('lists the card menu in the order of SPEC 4.2', () => {
@@ -1338,7 +1920,7 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
     ).toBe(true);
   });
 
-  it('reaches the context-only items from a right-click menu', () => {
+  it('reaches the context-only items from a right-click menu or a panel', () => {
     const inContext = new Set<string>();
     for (const target of Object.keys(CONTEXT_MENUS) as Array<keyof typeof CONTEXT_MENUS>)
       for (const id of contextMenuIds(target)) {
@@ -1347,6 +1929,7 @@ describe('the toolbar of SPEC 3.1 and the right-click menus of 4.2, 4.3 and SPEC
         for (const child of itemById(id).items ?? []) inContext.add(child.id);
       }
     for (const item of allItems().filter((each) => each.contextOnly === true))
-      expect(inContext.has(item.id), item.id).toBe(true);
+      expect(inContext.has(item.id) || PANEL_ROWS.has(item.id), item.id).toBe(true);
+    for (const id of PANEL_ROWS) expect(itemById(id).contextOnly, id).toBe(true);
   });
 });

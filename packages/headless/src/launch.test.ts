@@ -10,6 +10,7 @@ import {
   rendererString,
   resolveExecutable,
   sparticuzExtraArgs,
+  strictWebSecurity,
   sparticuzInflatedPath,
 } from './launch.ts';
 import { renderImageName, relativeImageRef } from './record.ts';
@@ -121,6 +122,13 @@ describe('launch configuration', () => {
       '--disable-web-security',
       '--no-zygote',
     ]);
+    // TURBOSLIDE_WEB_SECURITY=strict drops the two switches that relax the browser (SPEC-3 8.10)
+    const strict = sparticuzExtraArgs(args, { strictWebSecurity: true });
+    expect(strict).not.toContain('--disable-web-security');
+    expect(strict).not.toContain('--allow-running-insecure-content');
+    expect(strict).toContain('--single-process');
+    expect(strictWebSecurity({})).toBe(false);
+    expect(strictWebSecurity({ TURBOSLIDE_WEB_SECURITY: 'strict' })).toBe(true);
     // the merged list carries the SwiftShader set exactly once and never a second --headless
     const merged = [...LAUNCH_ARGS.swiftshader, ...extra];
     expect(merged.filter((a) => a.startsWith('--use-angle'))).toEqual(['--use-angle=swiftshader']);

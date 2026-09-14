@@ -192,3 +192,41 @@ describe('diffDecks', () => {
     expect(diffDecks(workedDocument(), b)).toEqual([]);
   });
 });
+
+describe('describeMutation for the round three text ops (gslides-parity SPEC-3 3.1)', () => {
+  const address = { slideId: 'content-rule', blockId: 'p1', path: '/text' } as const;
+
+  it('reads a splice as an insertion, a deletion or a replacement with its counts', () => {
+    expect(describeMutation({ op: 'text.splice', ...address, at: 3, remove: 0, insert: 'x' })).toBe(
+      'slide content-rule: block p1 /text inserted 1 character at 3',
+    );
+    expect(describeMutation({ op: 'text.splice', ...address, at: 3, remove: 4, insert: '' })).toBe(
+      'slide content-rule: block p1 /text deleted 4 characters at 3',
+    );
+    expect(
+      describeMutation({ op: 'text.splice', ...address, at: 3, remove: 4, insert: 'ab' }),
+    ).toBe('slide content-rule: block p1 /text replaced 4 characters with 2 characters at 3');
+  });
+
+  it('reads a mark as the flags set and cleared, or the case change, over the range', () => {
+    expect(
+      describeMutation({
+        op: 'text.mark',
+        ...address,
+        range: [3, 8],
+        edit: { kind: 'marks', set: { i: true, link: 'https://x.y' }, clear: ['color'] },
+      }),
+    ).toBe('slide content-rule: block p1 /text marks set i, link; cleared color over 3:8');
+    expect(
+      describeMutation({ op: 'text.mark', ...address, range: [3, 8], edit: { kind: 'marks' } }),
+    ).toBe('slide content-rule: block p1 /text marks unchanged over 3:8');
+    expect(
+      describeMutation({
+        op: 'text.mark',
+        ...address,
+        range: [0, 5],
+        edit: { kind: 'case', mode: 'title' },
+      }),
+    ).toBe('slide content-rule: block p1 /text case changed to title over 0:5');
+  });
+});

@@ -17,6 +17,10 @@
     "./select": "./src/select.ts",
     "./seed": "./src/seed.ts",
     "./hosted": "./src/hosted.ts",
+    "./access-store": "./src/access-store.ts",
+    "./comments-store": "./src/comments-store.ts",
+    "./inbox": "./src/inbox.ts",
+    "./migrate": "./src/migrate.ts",
     "./tmp-store": "./src/tmp-store.ts",
     "./blob-store": "./src/blob-store.ts",
     "./snapshots": "./src/snapshots.ts",
@@ -31,7 +35,8 @@
   },
   "dependencies": {
     "@turboslide/schema": "workspace:*",
-    "@vercel/blob": "catalog:"
+    "@vercel/blob": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "catalog:",

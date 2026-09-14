@@ -1,0 +1,6 @@
+error when starting preview server:
+Error: Port 4344 is already in use
+    at httpServerStart (file:///Users/kevinliu/repos/Turboslide/node_modules/.pnpm/vite@8.2.2_@types+node@24.13.4_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:11681:10)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async preview (file:///Users/kevinliu/repos/Turboslide/node_modules/.pnpm/vite@8.2.2_@types+node@24.13.4_jiti@2.7.0/node_modules/vite/dist/node/chunks/node.js:35870:2)
+    at async CAC.<anonymous> (file:///Users/kevinliu/repos/Turboslide/node_modules/.pnpm/vite@8.2.2_@types+node@24.13.4_jiti@2.7.0/node_modules/vite/dist/node/cli.js:807:18)

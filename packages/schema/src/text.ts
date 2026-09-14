@@ -122,9 +122,18 @@ export function slideLinkUrl(target: SlideLinkTarget): string {
  */
 export type BlockLink = string | { slide: SlideId | SlideLinkKeyword };
 
-/** A URL, or `{ slide }` naming a slide id or one of next, previous, first, last. */
+/**
+ * A URL, or `{ slide }` naming a slide id or one of next, previous, first, last. The URL form
+ * takes https, http, mailto, tel and the slide link forms only (gslides-parity SPEC-3 8.4).
+ */
 export const blockLinkSchema = z.union([
-  z.string().min(1),
+  z
+    .string()
+    .min(1)
+    .refine(
+      (value) => isAllowedLink(value),
+      'a link is https:, http:, mailto:, tel: or a slide link (#s/<id>, #next, #previous, #first, #last)',
+    ),
   z.strictObject({ slide: z.union([slugSchema, z.enum(SLIDE_LINK_KEYWORDS)]) }),
 ]) satisfies z.ZodType<BlockLink>;
 
@@ -615,24 +624,40 @@ export function marksOfRange(text: Text, range: readonly [number, number]): RunM
 export const CASE_MODES = ['lower', 'upper', 'title'] as const;
 export type CaseMode = (typeof CASE_MODES)[number];
 
-/** Title Case as Google writes it: the first letter of every word up, the rest down. */
-export function titleCase(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(
-      /(^|[^\p{L}\p{N}'’])(\p{L})/gu,
-      (_m, before: string, letter: string) => `${before}${letter.toUpperCase()}`,
-    );
+const TITLE_WORD_CHARACTER = /[\p{L}\p{N}'’]/u;
+
+/**
+ * Title Case as Google writes it: the first letter of every word up, the rest down. `before` is
+ * the character that precedes `text` in its paragraph (the empty string at the paragraph start),
+ * so a run that starts inside a word (a mark boundary, a concurrent splice) does not capitalize
+ * mid word: the result depends on the characters alone, never on where the runs are cut, which
+ * is what the multiplayer transform relies on (gslides-parity SPEC-3 3.4).
+ */
+export function titleCase(text: string, before = ''): string {
+  const lower = text.toLowerCase();
+  const startsWord = !TITLE_WORD_CHARACTER.test(before);
+  return lower.replace(
+    /(^|[^\p{L}\p{N}'’])(\p{L})/gu,
+    (match, prefix: string, letter: string, offset: number) =>
+      offset === 0 && prefix === '' && !startsWord ? match : `${prefix}${letter.toUpperCase()}`,
+  );
 }
 
 /** The characters of the range rewritten in a case, marks and links kept (SPEC-2 0.19, 2.2.14). */
 export function caseRange(text: Text, range: readonly [number, number], mode: CaseMode): Text {
   const { paragraphs, inside } = splitAt(text, range);
+  const plain = plainOf(text);
   for (const placed of placeParagraphs(paragraphs)) {
     if (!inside(placed) || placed.run.gt) continue;
     const t = placed.run.t;
+    // the character before the run in its paragraph; a paragraph break counts as none
+    const before = placed.start > 0 ? plain.slice(placed.start - 1, placed.start) : '';
     placed.run.t =
-      mode === 'lower' ? t.toLowerCase() : mode === 'upper' ? t.toUpperCase() : titleCase(t);
+      mode === 'lower'
+        ? t.toLowerCase()
+        : mode === 'upper'
+          ? t.toUpperCase()
+          : titleCase(t, before === '\n' ? '' : before);
   }
   return paragraphs.map((runs) => serializeRuns(runs)).join('\n');
 }
@@ -683,6 +708,349 @@ export function insertAt(text: Text, at: number, insert: string): Text {
     paragraphs.splice(paragraph, 1, ...newParagraphs);
   }
   return paragraphs.map((runs) => serializeRuns(runs)).join('\n');
+}
+
+// ---------------------------------------------------------------------------------------------
+// Splices, flag edits and flag diffs in plain offsets (gslides-parity SPEC-3 3.1: the text.splice
+// and text.mark mutations). The offsets are the plain text offsets the range functions above use,
+// one character per paragraph break, so a comment anchor, a caret and a mutation count the same.
+
+/**
+ * Every flag a run carries but its characters: the marks, the display run and the link. What
+ * text.mark's `set` writes and its `clear` removes; `gt` is derived from the characters and is
+ * not a flag. The display run and the link are here so the inverse of a splice that removed a
+ * bold word or a link restores it exactly (SPEC-3 3.1 names RunMarks; b1.md records the widening).
+ */
+export type RunFlags = RunMarks & { b?: true; link?: string };
+
+/** The keys of RunFlags in canonical order; what text.mark's `clear` names. */
+export const RUN_FLAG_KEYS = [...MARK_FLAGS, 'color', 'hl', 'b', 'link'] as const;
+export type RunFlagKey = (typeof RUN_FLAG_KEYS)[number];
+
+export const runFlagsSchema = z.strictObject({
+  i: z.literal(true).optional(),
+  u: z.literal(true).optional(),
+  s: z.literal(true).optional(),
+  sup: z.literal(true).optional(),
+  sub: z.literal(true).optional(),
+  color: colorSchema.optional(),
+  hl: colorSchema.optional(),
+  b: z.literal(true).optional(),
+  link: z.string().min(1).optional(),
+}) satisfies z.ZodType<RunFlags>;
+
+/** What text.mark's `marks` kind carries: flags to set and flag keys to clear. */
+export type FlagEdit = { set?: RunFlags; clear?: ReadonlyArray<RunFlagKey> };
+
+/** A flag edit over a plain text range, what flagDiffs returns. */
+export type FlagEditRange = FlagEdit & { range: [number, number] };
+
+/** The flags of a run. */
+export function runFlags(run: Run): RunFlags {
+  const flags: RunFlags = runMarks(run);
+  if (run.b) flags.b = true;
+  if (run.link !== undefined) flags.link = run.link;
+  return flags;
+}
+
+/** An empty run carrying exactly these flags: the template a pinned insertion is placed with. */
+function runOfFlags(flags: RunFlags): Run {
+  const run: Run = { t: '' };
+  for (const flag of MARK_FLAGS) if (flags[flag]) run[flag] = true;
+  if (run.sup && run.sub) delete run.sub;
+  if (flags.color !== undefined) run.color = flags.color;
+  if (flags.hl !== undefined) run.hl = flags.hl;
+  if (flags.b) run.b = true;
+  if (flags.link !== undefined) run.link = flags.link;
+  return run;
+}
+
+export function sameRunFlags(a: RunFlags, b: RunFlags): boolean {
+  return RUN_FLAG_KEYS.every((key) => a[key] === b[key]);
+}
+
+/** The plain text of a Text with one `\n` per paragraph break: the string plain offsets index. */
+export function plainOf(text: Text): string {
+  return splitParagraphs(text).map(plainText).join('\n');
+}
+
+/**
+ * Every run of every paragraph split at the cuts. A gt run is split too when a cut lies inside
+ * it, and its pieces become plain runs: a splice that removes the T of GT leaves a G.
+ */
+function splitRunsAt(text: Text, cuts: ReadonlyArray<number>): Run[][] {
+  const sorted = [...new Set(cuts)].sort((a, b) => a - b);
+  const paragraphs: Run[][] = [];
+  let offset = 0;
+  parseParagraphs(text).forEach((runs, paragraph) => {
+    if (paragraph > 0) offset += 1;
+    const list: Run[] = [];
+    for (const run of runs) {
+      const from = offset;
+      const to = from + run.t.length;
+      offset = to;
+      const inner = sorted.filter((cut) => cut > from && cut < to);
+      if (inner.length === 0) {
+        list.push({ ...run });
+        continue;
+      }
+      let at = from;
+      for (const cut of [...inner, to]) {
+        if (cut === at) continue;
+        const piece: Run = { ...run, t: run.t.slice(at - from, cut - from) };
+        delete piece.gt;
+        list.push(piece);
+        at = cut;
+      }
+    }
+    paragraphs.push(list);
+  });
+  return paragraphs;
+}
+
+function joinParagraphs(paragraphs: ReadonlyArray<Run[]>): Text {
+  return paragraphs.map((runs) => serializeRuns(runs)).join('\n');
+}
+
+/** The runs with the plain range [at, end) removed; a break inside the range joins its paragraphs. */
+function deleteRange(text: Text, at: number, end: number): Run[][] {
+  const split = splitRunsAt(text, [at, end]);
+  const out: Run[][] = [];
+  let current: Run[] = [];
+  let offset = 0;
+  split.forEach((runs, paragraph) => {
+    if (paragraph > 0) {
+      const breakAt = offset;
+      offset += 1;
+      if (!(breakAt >= at && breakAt < end)) {
+        out.push(current);
+        current = [];
+      }
+    }
+    for (const run of runs) {
+      const from = offset;
+      const to = from + run.t.length;
+      offset = to;
+      if (!(from >= at && to <= end)) current.push(run);
+    }
+  });
+  out.push(current);
+  return out;
+}
+
+/**
+ * `insert` placed at a plain offset with the flags of `template` when given, else of the run it
+ * continues: the run that ends at the offset (typing continues it), else the run that starts
+ * there, the rule of insertAt. A `\n` in the string starts a paragraph.
+ */
+function insertPlain(paragraphs: Run[][], at: number, insert: string, template?: Run): Run[][] {
+  let offset = 0;
+  for (let p = 0; p < paragraphs.length; p += 1) {
+    if (p > 0) offset += 1;
+    const runs = paragraphs[p] ?? [];
+    const length = runs.reduce((sum, run) => sum + run.t.length, 0);
+    if (at > offset + length) {
+      offset += length;
+      continue;
+    }
+    const local = at - offset;
+    // the count of runs wholly before the offset, splitting the run that straddles it
+    let index = 0;
+    let cursor = 0;
+    for (let i = 0; i < runs.length; i += 1) {
+      const run = runs[i];
+      if (run === undefined) break;
+      const from = cursor;
+      const to = from + run.t.length;
+      cursor = to;
+      if (to <= local) {
+        index = i + 1;
+        continue;
+      }
+      if (from < local) {
+        const head: Run = { ...run, t: run.t.slice(0, local - from) };
+        const tail: Run = { ...run, t: run.t.slice(local - from) };
+        delete head.gt;
+        delete tail.gt;
+        runs.splice(i, 1, head, tail);
+        index = i + 1;
+      }
+      break;
+    }
+    const before = runs[index - 1];
+    const after = runs[index];
+    const host = template ?? (before !== undefined && !before.gt ? before : after);
+    const flags: Run = host === undefined ? { t: '' } : { ...host, t: '' };
+    delete flags.gt;
+    const pieces = insert.split('\n');
+    const head = runs.slice(0, index);
+    const tail = runs.slice(index);
+    const first = pieces[0] ?? '';
+    if (pieces.length === 1) {
+      paragraphs[p] = [...head, { ...flags, t: first }, ...tail];
+      return paragraphs;
+    }
+    const inserted: Run[][] = [[...head, { ...flags, t: first }]];
+    for (const middle of pieces.slice(1, -1)) inserted.push([{ ...flags, t: middle }]);
+    inserted.push([{ ...flags, t: pieces[pieces.length - 1] ?? '' }, ...tail]);
+    paragraphs.splice(p, 1, ...inserted);
+    return paragraphs;
+  }
+  return paragraphs;
+}
+
+/**
+ * What text.splice writes (SPEC-3 3.1): `remove` plain characters at `at` leave and `insert`
+ * lands in their place. A pure insertion takes the flags of the run it continues (the run that
+ * ends at the offset, else the one that starts there, the rule of insertAt); a replacement takes
+ * the flags of the first character it replaces, as typing over a selection does in an editor, so
+ * retyping a bold word keeps it bold. A break inside the removed range joins its two paragraphs
+ * and a `\n` in the insertion starts one. Throws RangeError outside the text. The result is
+ * canonical.
+ */
+export function spliceText(
+  text: Text,
+  at: number,
+  remove: number,
+  insert: string,
+  flags?: RunFlags,
+): Text {
+  const length = plainLength(text);
+  if (
+    !Number.isInteger(at) ||
+    !Number.isInteger(remove) ||
+    at < 0 ||
+    remove < 0 ||
+    at + remove > length
+  ) {
+    throw new RangeError(
+      `A splice at ${at} removing ${remove} characters is outside a text of ${length} characters`,
+    );
+  }
+  if (remove === 0 && insert === '') return text;
+  // pinned flags win (SPEC-3 3.1, the room client's caret run); else a replacement takes the
+  // flags of the first character it replaces and a pure insertion follows insertAt's rule
+  const replaced =
+    flags !== undefined
+      ? runOfFlags(flags)
+      : remove > 0
+        ? placeRuns(text).find((row) => row.start <= at && at < row.end)?.run
+        : undefined;
+  let paragraphs = remove === 0 ? splitRunsAt(text, []) : deleteRange(text, at, at + remove);
+  if (insert !== '') paragraphs = insertPlain(paragraphs, at, insert, replaced);
+  return joinParagraphs(paragraphs);
+}
+
+/**
+ * What text.mark's `marks` kind writes: the flags set and cleared on every run of a plain text
+ * range, the rest of the Text unchanged. sup and sub stay exclusive; a gt run is never split, so
+ * a range that cuts through one marks the whole run.
+ */
+export function markRange(text: Text, range: readonly [number, number], edit: FlagEdit): Text {
+  const { paragraphs, inside } = splitAt(text, range);
+  const [start, end] = range;
+  const set = edit.set ?? {};
+  const clear = edit.clear ?? [];
+  for (const placed of placeParagraphs(paragraphs)) {
+    const covered = placed.run.gt ? placed.start < end && placed.end > start : inside(placed);
+    if (!covered) continue;
+    const run = placed.run;
+    for (const flag of MARK_FLAGS) if (set[flag]) run[flag] = true;
+    if (set.sup) delete run.sub;
+    if (set.sub) delete run.sup;
+    if (set.color !== undefined) run.color = set.color;
+    if (set.hl !== undefined) run.hl = set.hl;
+    if (set.b) run.b = true;
+    if (set.link !== undefined) run.link = set.link;
+    for (const key of clear) delete run[key];
+  }
+  return joinParagraphs(paragraphs);
+}
+
+/**
+ * The flag edits that turn the runs of `from` into the runs of `to` over a plain range, for two
+ * Texts whose plain characters agree there: one edit per maximal segment whose flags differ,
+ * with `set` for every flag `to` carries and `from` does not (or carries with another value) and
+ * `clear` for every flag only `from` carries. Empty when the flags agree. The reducer builds the
+ * exact inverse of a splice and of a mark from it.
+ */
+export function flagDiffs(from: Text, to: Text, range: readonly [number, number]): FlagEditRange[] {
+  const [start, end] = range;
+  const a = placeRuns(from);
+  const b = placeRuns(to);
+  const cuts = new Set<number>([start, end]);
+  for (const placed of [...a, ...b]) {
+    for (const edge of [placed.start, placed.end]) if (edge > start && edge < end) cuts.add(edge);
+  }
+  const sorted = [...cuts].sort((x, y) => x - y);
+  const flagsAt = (placed: ReadonlyArray<PlacedRun>, offset: number): RunFlags | null => {
+    const row = placed.find((entry) => entry.start <= offset && offset < entry.end);
+    return row === undefined ? null : runFlags(row.run);
+  };
+  const out: FlagEditRange[] = [];
+  for (let i = 0; i + 1 < sorted.length; i += 1) {
+    const s = sorted[i];
+    const e = sorted[i + 1];
+    if (s === undefined || e === undefined) break;
+    const fa = flagsAt(a, s);
+    const fb = flagsAt(b, s);
+    if (fa === null || fb === null || sameRunFlags(fa, fb)) continue;
+    const set: RunFlags = {};
+    const clear: RunFlagKey[] = [];
+    for (const key of RUN_FLAG_KEYS) {
+      const want = fb[key];
+      const have = fa[key];
+      if (want !== undefined) {
+        if (have !== want) (set as Record<RunFlagKey, unknown>)[key] = want;
+      } else if (have !== undefined) {
+        clear.push(key);
+      }
+    }
+    const edit: FlagEditRange = {
+      range: [s, e],
+      ...(Object.keys(set).length > 0 ? { set } : {}),
+      ...(clear.length > 0 ? { clear } : {}),
+    };
+    const last = out[out.length - 1];
+    if (
+      last !== undefined &&
+      last.range[1] === s &&
+      JSON.stringify([last.set, last.clear]) === JSON.stringify([edit.set, edit.clear])
+    ) {
+      last.range[1] = e;
+    } else {
+      out.push(edit);
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------------------------
+// Link schemes (gslides-parity SPEC-3 8.4 layer 3, 0.27)
+
+/** The URL schemes a run link or a block link may carry, beside the slide link forms. */
+export const LINK_SCHEMES = ['https:', 'http:', 'mailto:', 'tel:'] as const;
+
+/**
+ * True for a link a Text or a block may carry: https, http, mailto, tel, or a slide link
+ * (`#s/<id>`, `#next`, `#previous`, `#first`, `#last`). Everything else (javascript:, data:, vbscript:,
+ * a relative path, an entity encoded scheme) is refused by the schema and the validator.
+ */
+export function isAllowedLink(url: string): boolean {
+  if (slideLinkTarget(url) !== null) return true;
+  const lower = url.toLowerCase();
+  return LINK_SCHEMES.some((scheme) => lower.startsWith(scheme) && url.length > scheme.length);
+}
+
+/** The refused run links of a Text, in order, for the validator's issue per link. */
+export function refusedLinksOf(text: Text): string[] {
+  const out: string[] = [];
+  for (const runs of parseParagraphs(text)) {
+    for (const run of runs) {
+      if (run.link !== undefined && !isAllowedLink(run.link)) out.push(run.link);
+    }
+  }
+  return out;
 }
 
 // ---------------------------------------------------------------------------------------------

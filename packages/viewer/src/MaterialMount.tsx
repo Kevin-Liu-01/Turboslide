@@ -1,9 +1,11 @@
-import { useLayoutEffect } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import type { RefObject } from 'react';
 
 import { mountMaterial } from '@turboslide/materials/mount';
 import type { MaterialHandle } from '@turboslide/materials/mount';
 import type { MaterialRecipe } from '@turboslide/schema/blocks/material';
+
+import { MATERIAL_PLAY_EVENT } from './dither';
 
 /**
  * The live material preview in the stage (SPEC 5.3: "materials mount on
@@ -17,6 +19,12 @@ import type { MaterialRecipe } from '@turboslide/schema/blocks/material';
  * mount is disposed before the next body or on unmount. A mount that fails
  * (no WebGL, an unknown material) is reported once and the frozen frame stays
  * visible, which is the frame contract: the picture is the frame.
+ *
+ * Round three (gslides-parity SPEC-3 0.38, 10.8): a material picture with a `dither` shows the
+ * dithered frozen frame and the shader does not play under it, because dithering a moving frame
+ * per animation frame through the integer pipeline is out of budget and would not match the
+ * export. The Material section's Play (`setMaterialPlay` in dither.ts) names one block whose
+ * shader plays undithered for a look; any new body (an edit) stops it.
  */
 export type MaterialMountProps = {
   /** the slide body the renderer's HTML was set on */
@@ -68,6 +76,16 @@ export function hostFor(root: Element): { host: HTMLElement; created: boolean } 
   return { host: box, created: false };
 }
 
+/**
+ * True when a recipe root sits under a dithered picture (SPEC-3 10.8): the shader stays frozen
+ * unless the block is the one Play named.
+ */
+export function ditheredRoot(root: Element, playing: string | null): boolean {
+  const dithered = root.closest('[data-dither][data-dither-key]');
+  if (dithered === null) return false;
+  return dithered.getAttribute('data-block') !== playing;
+}
+
 export function MaterialMount({
   body,
   html,
@@ -75,6 +93,20 @@ export function MaterialMount({
   speed = 1,
   onError,
 }: MaterialMountProps) {
+  /* the block whose shader plays undithered (Play in the Material section); every new body stops it */
+  const [playing, setPlaying] = useState<string | null>(null);
+  useEffect(() => {
+    const onPlay = (event: Event) => {
+      const detail = (event as CustomEvent<{ blockId: string | null }>).detail;
+      setPlaying(detail?.blockId ?? null);
+    };
+    window.addEventListener(MATERIAL_PLAY_EVENT, onPlay);
+    return () => window.removeEventListener(MATERIAL_PLAY_EVENT, onPlay);
+  }, []);
+  useEffect(() => {
+    setPlaying(null);
+  }, [html]);
+
   useLayoutEffect(() => {
     const root = body.current;
     if (!root || !enabled) return;
@@ -83,6 +115,7 @@ export function MaterialMount({
     const created: HTMLElement[] = [];
     const roots = [...root.querySelectorAll('[data-recipe]')];
     for (const element of roots) {
+      if (ditheredRoot(element, playing)) continue;
       const recipe = readRecipe(element);
       const target = hostFor(element);
       if (recipe === null || target === null) continue;
@@ -104,6 +137,6 @@ export function MaterialMount({
       for (const handle of handles) handle.dispose();
       for (const host of created) host.remove();
     };
-  }, [body, html, enabled, speed, onError]);
+  }, [body, html, enabled, speed, onError, playing]);
   return null;
 }

@@ -11,6 +11,7 @@
     "./inter": "./src/inter.ts",
     "./inter.css": "./src/inter.css",
     "./assets/InterVariable.woff2": "./assets/InterVariable.woff2",
+    "./assets/InterVariable-Italic.woff2": "./assets/InterVariable-Italic.woff2",
     "./export": "./src/export.ts",
     "./export/fonts.json": "./export/fonts.json",
     "./index": "./src/index.ts",

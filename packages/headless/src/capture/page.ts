@@ -7,7 +7,7 @@
 // SPEC 4.2 (url, viewport, scale, theme, region, recipe). The store write is the caller's.
 import { basename } from 'node:path';
 
-import type { Browser } from 'playwright-core';
+import type { Browser, BrowserContext } from 'playwright-core';
 import sharp from 'sharp';
 
 import type { Asset } from '@turboslide/schema/assets';
@@ -70,6 +70,24 @@ async function encode(png: Uint8Array, format: 'jpg' | 'png'): Promise<Uint8Arra
   return new Uint8Array(out.buffer, out.byteOffset, out.byteLength);
 }
 
+const PRIVATE_HOST =
+  /^(?:localhost|127(?:\.\d{1,3}){3}|0\.0\.0\.0|10(?:\.\d{1,3}){3}|192\.168(?:\.\d{1,3}){2}|172\.(?:1[6-9]|2\d|3[01])(?:\.\d{1,3}){2}|169\.254(?:\.\d{1,3}){2}|100\.(?:6[4-9]|[7-9]\d|1[01]\d|12[0-7])(?:\.\d{1,3}){2}|\[::1\]|\[fc[0-9a-f]{2}:.*\]|\[fd[0-9a-f]{2}:.*\]|\[fe80:.*\]|metadata\.google\.internal)$|\.localhost$|\.internal$/i;
+
+/** Aborts a captured page's requests to private and loopback hosts, other than the capture's own host. */
+export async function denyPrivateEgress(context: BrowserContext, ownHost: string): Promise<void> {
+  const own = ownHost.toLowerCase();
+  await context.route('**/*', (route) => {
+    let host = '';
+    try {
+      host = new URL(route.request().url()).hostname.toLowerCase();
+    } catch {
+      return route.continue();
+    }
+    if (host === own || !PRIVATE_HOST.test(host)) return route.continue();
+    return route.abort('blockedbyclient');
+  });
+}
+
 async function shootTheme(
   browser: Browser,
   recipe: CaptureRecipe,
@@ -86,6 +104,10 @@ async function shootTheme(
     reducedMotion: 'reduce',
   });
   try {
+    // the captured page's own subresources may come from anywhere public; a request to a private
+    // or loopback address from inside the page is aborted (gslides-parity SPEC-3 8.6), unless the
+    // capture itself targets a loopback name (the Prototemplate dev server on a checkout)
+    await denyPrivateEgress(context, new URL(request.url).hostname);
     if (recipe.init !== undefined) await context.addInitScript(recipe.init, { theme });
     const page = await context.newPage();
     page.setDefaultTimeout(timeoutMs);

@@ -46,6 +46,17 @@ export type StudioDescribe = {
 export type StudioAdapter = {
   owner: StudioOwnerId;
   actions?: readonly string[];
+  /**
+   * The page's nonce guard (gslides-parity SPEC-3 6.6; window/guard.ts): when set, the share,
+   * comment, invite, access, notification, account, publish and admin actions invoked through
+   * `window.turboslide.studio` are refused unless the input carries the nonce the owner holds in
+   * a closure; the owner's own dispatcher path stamps it with `withNonce`. Absent, every action
+   * passes (the viewer and the presenter offer none of the guarded ids).
+   */
+  guard?: (
+    action: string,
+    input: unknown,
+  ) => { ok: true; input: unknown } | { ok: false; error: Error };
   /** the exact current source document */
   getSource?: () => string;
   /** runs the owner's validator, then commits; the API waits two animation frames after it */
@@ -112,6 +123,10 @@ export function createLiveAdapter(initial: StudioAdapter): LiveAdapter {
     get state(): (() => Record<string, unknown>) | undefined {
       const read = current.state;
       return read === undefined ? undefined : () => read();
+    },
+    get guard(): StudioAdapter['guard'] {
+      const check = current.guard;
+      return check === undefined ? undefined : (action, input) => check(action, input);
     },
   };
   return {

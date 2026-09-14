@@ -63,6 +63,8 @@ export function touchedTargets(mutations: ReadonlyArray<Mutation>): Touched[] {
       case 'block.remove':
       case 'block.move':
       case 'text.replace':
+      case 'text.splice':
+      case 'text.mark':
         add(mutation.slideId, mutation.blockId);
         break;
       case 'block.insert':

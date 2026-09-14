@@ -15,6 +15,7 @@ import {
   runAttr,
 } from './context.ts';
 import type { BlockContext } from './context.ts';
+import { ditherRender } from './dither-attrs.ts';
 import { emptyPictureHtml, renderTextOrPrompt } from './prompt.ts';
 import {
   adjustDeclarations,
@@ -58,49 +59,54 @@ export function renderShot(block: BlockOf<'shot'>, ctx: BlockContext): string {
   // `.shot-crop` frame at the picture's aspect (the frame clips, the image is scaled inside it);
   // the frame border of 2.5.5 replaces the hairline, the adjustments are the image's opacity and
   // filter, the shadow the frame's. A shot without them renders byte for byte as before.
+  const image = isEmptyPicture(block.asset) ? undefined : imageFor(ctx, block.asset, block.id);
+  // the frame keeps the picture's aspect after the trim: the kept fractions of the asset's size,
+  // else the block's aspect, else 16:9; the box is the slot's width at that ratio
+  const size = image?.size;
+  const keptW = 1 - (block.trim?.left ?? 0) - (block.trim?.right ?? 0);
+  const keptH = 1 - (block.trim?.top ?? 0) - (block.trim?.bottom ?? 0);
+  const w = block.width ?? ctx.slotWidth ?? 1326;
+  const h = (w * (size?.[1] ?? 9) * keptH) / ((size?.[0] ?? 16) * keptW);
+  // the block level dither (gslides-parity SPEC-3 10.1, 10.3): a shot takes the field as a picture
+  // does; the figure root carries the attributes and the frame holds the overlay canvas
+  const dither =
+    image !== undefined ? ditherRender(block, block.asset, image, w, h, ctx) : undefined;
   const tooled =
     block.trim !== undefined ||
     block.mask !== undefined ||
     block.adjust !== undefined ||
     block.frame !== undefined ||
-    block.shadow !== undefined;
-  const image = isEmptyPicture(block.asset) ? undefined : imageFor(ctx, block.asset, block.id);
+    block.shadow !== undefined ||
+    dither !== undefined;
+  // a trimmed, masked or dithered picture sits in the `.shot-crop` frame
+  const framed = block.trim !== undefined || block.mask !== undefined || dither !== undefined;
   const imgStyle = style(
     block.aspect && `aspect-ratio:${block.aspect}`,
     block.aspect && 'object-fit:cover',
     block.aspect && `object-position:${block.crop ?? 'center'}`,
     block.border === false && 'border:0',
-    block.frame !== undefined && block.trim === undefined && block.mask === undefined
-      ? frameDeclarations(block.frame).join(';')
-      : false,
+    block.frame !== undefined && !framed ? frameDeclarations(block.frame).join(';') : false,
     ...adjustDeclarations(block.adjust),
-    (block.trim !== undefined || block.mask !== undefined) &&
-      `position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;border:0`,
+    framed && `position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;border:0`,
     ...(block.trim !== undefined ? trimDeclarations(block.trim) : []),
   );
   let img: string;
   if (image === undefined) img = emptyPictureHtml(ctx, 'shot');
   else {
+    const shown = dither?.image ?? image;
     img = voidEl('img', {
       class: classes('shot', block.fit === 'fit' && 'fit'),
-      ...imgAttrs(image),
+      ...imgAttrs(shown),
       style: imgStyle,
       ...raster(ctx, block.id, 'shot', false),
     });
-    if (tooled && (block.trim !== undefined || block.mask !== undefined)) {
-      // the frame keeps the picture's aspect after the trim: the kept fractions of the asset's
-      // size, else the block's aspect, else 16:9
-      const size = image.size;
-      const keptW = 1 - (block.trim?.left ?? 0) - (block.trim?.right ?? 0);
-      const keptH = 1 - (block.trim?.top ?? 0) - (block.trim?.bottom ?? 0);
+    if (framed) {
       const ratio =
         block.aspect !== undefined
           ? block.aspect
           : size !== undefined
             ? `${px(size[0] * keptW)} / ${px(size[1] * keptH)}`
             : `${px(16 * keptW)} / ${px(9 * keptH)}`;
-      const w = block.width ?? ctx.slotWidth ?? 1326;
-      const h = (w * (size?.[1] ?? 9) * keptH) / ((size?.[0] ?? 16) * keptW);
       img = el(
         'div',
         {
@@ -115,7 +121,7 @@ export function renderShot(block: BlockOf<'shot'>, ctx: BlockContext): string {
           'data-trim': trimAttr(block.trim),
           'data-mask': block.mask,
         },
-        img,
+        img + (dither?.canvas ?? ''),
       );
     }
   }
@@ -131,10 +137,9 @@ export function renderShot(block: BlockOf<'shot'>, ctx: BlockContext): string {
       ),
       style: style(
         block.width !== undefined && `width:${block.width}px;max-width:100%`,
-        block.shadow !== undefined && block.trim === undefined && block.mask === undefined
-          ? boxShadowDeclaration(block.shadow)
-          : false,
+        block.shadow !== undefined && !framed ? boxShadowDeclaration(block.shadow) : false,
       ),
+      ...dither?.attrs,
     }),
     img + caption,
   );

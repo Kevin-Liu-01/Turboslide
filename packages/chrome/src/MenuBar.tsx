@@ -6,7 +6,7 @@ import { cn } from './lib/cn';
 import { Menu } from './Menu';
 import type { MenuCloseReason } from './Menu';
 import { assignAccessKeys, tooltipKey } from './menus/keys';
-import { MENUS } from './menus/model';
+import { MENUS, visibleMenus } from './menus/model';
 import type { Menu as MenuData, MenuId, MenuItem } from './menus/model';
 import { tipProps } from './Tooltip';
 
@@ -35,7 +35,9 @@ export function menusWithAccessKeys(): ReadonlyArray<MenuData> {
 export function MenuBar({ className }: MenuBarProps) {
   const shell = useEditorShell();
   const { menuOpen, setMenuOpen, menuContext, platform, runItem } = shell;
-  const menus = useMemo(() => menusWithAccessKeys(), []);
+  /* the menus a role can use (SPEC-3 13.4, 09 2.3): Edit, Format, Slide, Arrange and Extensions
+     are absent below editor; Insert shows a commenter its Comment row */
+  const menus = useMemo(() => visibleMenus(menuContext, menusWithAccessKeys()), [menuContext]);
   const titles = useRef(new Map<MenuId, HTMLButtonElement>());
   const [focusId, setFocusId] = useState<MenuId>('file');
   /* the plate opened from the keyboard focuses its first row; from the pointer it does not */

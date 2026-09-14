@@ -1,0 +1,82 @@
+/* The You need access page (gslides-parity SPEC-3 6.5, 9.3): server rendered with the form
+   present, the email field decided on the server, the sign in form in a fixed height region. */
+.ts-access {
+  box-sizing: border-box;
+  max-width: 480px;
+  margin: 10vh auto 0;
+  padding: 24px;
+  color: var(--pt-ink);
+  font: 13px/1.45 var(--pt-text);
+}
+
+.ts-access-title {
+  margin: 0 0 8px;
+  font: 500 20px/1.2 var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+.ts-access-sentence {
+  margin: 0 0 16px;
+  color: var(--pt-ink-2);
+}
+
+.ts-access-cookies {
+  margin: 0 0 12px;
+  color: var(--pt-ink-2);
+}
+
+.ts-access-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ts-access-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--pt-ink-2);
+}
+
+.ts-access-field select,
+.ts-access-field input,
+.ts-access-field textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 32px;
+  padding: 6px 9px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1.3 var(--pt-text);
+}
+
+.ts-access-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 32px;
+}
+
+.ts-access-answer {
+  margin: 0;
+  min-height: 20px;
+  color: var(--pt-ink-2);
+}
+
+.ts-access-signin {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-access-invited {
+  margin: 0 0 8px;
+}
+
+/* the sign in form's fixed region, whatever the route renders */
+.ts-access-signin-form {
+  min-height: 120px;
+}

@@ -36,10 +36,22 @@ export type BundleManifest = {
   documents: Record<string, BundleDigest>;
   /** the twins and recipes under assets/, by the same relative path */
   assets: Record<string, BundleDigest>;
+  /**
+   * the comments sidecar (`comments/index.json`, `comments/<threadId>.json`, `comments/authors.json`;
+   * gslides-parity SPEC-3 2.2, 5.2), carried only when the packer asked for it; absent on a bundle
+   * written before the round or without `--comments`
+   */
+  comments?: Record<string, BundleDigest>;
 };
 
 /** The deck's files grouped as the manifest records them. */
-export type DeckFileList = { documents: string[]; assets: string[] };
+export type DeckFileList = { documents: string[]; assets: string[]; comments: string[] };
+
+/** The sidecar folder of the comments (SPEC-3 2.2); its files form the bundle's `comments` group. */
+export const COMMENTS_GROUP = 'comments';
+
+/** The files that never travel in a bundle (SPEC-3 2.2): the access record and the leases. */
+export const BUNDLE_DROPS: ReadonlySet<string> = new Set(['access.json', LEASES_FILE]);
 
 export function sha256Hex(bytes: Uint8Array): string {
   return createHash('sha256').update(bytes).digest('hex');
@@ -99,6 +111,13 @@ export function parseBundleManifest(raw: unknown, file = BUNDLE_MANIFEST): Bundl
   if (documents['deck.json'] === undefined) {
     throw new TypeError(`${file}: documents must include deck.json`);
   }
+  const comments =
+    raw.comments === undefined ? undefined : parseDigests(raw.comments, 'comments', file);
+  for (const path of Object.keys(comments ?? {})) {
+    if (!path.startsWith(`${COMMENTS_GROUP}/`) || !path.endsWith('.json')) {
+      throw new TypeError(`${file}: comments/${path} is not a comments sidecar file`);
+    }
+  }
   return {
     bundleVersion: BUNDLE_VERSION,
     deckId: raw.deckId,
@@ -107,12 +126,13 @@ export function parseBundleManifest(raw: unknown, file = BUNDLE_MANIFEST): Bundl
     packedAt: raw.packedAt,
     documents,
     assets: parseDigests(raw.assets, 'assets', file),
+    ...(comments === undefined ? {} : { comments }),
   };
 }
 
-/** True for the top-level JSON files a deck directory carries beside deck.json: the sidecars. */
+/** True for the top-level JSON files a deck directory carries beside deck.json: the sidecars, never the access record or the leases. */
 export function isSidecar(name: string): boolean {
-  return name.endsWith('.json') && name !== 'deck.json' && name !== LEASES_FILE;
+  return name.endsWith('.json') && name !== 'deck.json' && !BUNDLE_DROPS.has(name);
 }
 
 /**
@@ -120,10 +140,14 @@ export function isSidecar(name: string): boolean {
  * deck.json, the sidecars, slides/*.json, versions/*.json (when `versions` is on) and everything
  * under assets/. Dotfiles, the .turboslide state folder, leases.json and unknown folders stay out.
  */
-export function listDeckFiles(dir: string, options: { versions?: boolean } = {}): DeckFileList {
+export function listDeckFiles(
+  dir: string,
+  options: { versions?: boolean; comments?: boolean } = {},
+): DeckFileList {
   if (!existsSync(join(dir, 'deck.json'))) throw new RangeError(`No deck.json in ${dir}`);
   const documents: string[] = ['deck.json'];
   const assets: string[] = [];
+  const comments: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (entry.name.startsWith('.') || entry.name === STATE_DIR) continue;
     if (entry.isFile() && isSidecar(entry.name)) documents.push(entry.name);
@@ -138,6 +162,15 @@ export function listDeckFiles(dir: string, options: { versions?: boolean } = {})
   };
   jsonFolder('slides');
   if (options.versions !== false) jsonFolder('versions');
+  if (options.comments === true) {
+    const path = join(dir, COMMENTS_GROUP);
+    if (existsSync(path) && statSync(path).isDirectory()) {
+      for (const name of readdirSync(path)) {
+        if (name.startsWith('.') || !name.endsWith('.json')) continue;
+        if (statSync(join(path, name)).isFile()) comments.push(posix.join(COMMENTS_GROUP, name));
+      }
+    }
+  }
   const assetsDir = join(dir, 'assets');
   if (existsSync(assetsDir) && statSync(assetsDir).isDirectory()) {
     const walk = (folder: string, relative: string): void => {
@@ -150,7 +183,7 @@ export function listDeckFiles(dir: string, options: { versions?: boolean } = {})
     };
     walk(assetsDir, 'assets');
   }
-  return { documents: documents.sort(), assets: assets.sort() };
+  return { documents: documents.sort(), assets: assets.sort(), comments: comments.sort() };
 }
 
 // ---------------------------------------------------------------------------------------------

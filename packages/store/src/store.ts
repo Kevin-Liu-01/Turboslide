@@ -20,6 +20,12 @@ export type LeasePolicy = 'advisory' | 'enforce';
 export type WriteOptions = {
   /** Skip the lease check (SPEC 6.7 `force`). */
   force?: boolean;
+  /**
+   * The operation stream range this write commits (gslides-parity SPEC-3 2.1, 0.3): the
+   * checkpointer names the first and last `seq` of the entries it coalesced, and the record
+   * carries them as `ops`. Absent on every write made outside the room.
+   */
+  ops?: { fromSeq: number; toSeq: number };
 };
 
 /**
@@ -37,7 +43,63 @@ export type VersionRecord = Version & {
    * tmp stores and on records written before the round.
    */
   snapshot?: string;
+  /**
+   * The operation stream range this record coalesced (gslides-parity SPEC-3 2.1, 0.3): a
+   * checkpoint names the first and last `seq` of the entries it committed, so a client knows
+   * which retained operations the revision covers. Absent on a record written outside the room
+   * (a CLI write, an agent's strict write, a record from before the round).
+   */
+  ops?: { fromSeq: number; toSeq: number };
 };
+
+/** What `putAsset` answers: where the file is on this instance and where a browser can fetch it. */
+export type AssetPut = {
+  /** the relative path as stored, `assets/<file>` */
+  relative: string;
+  /** the absolute local path of the file on this instance */
+  path: string;
+  /** the URL a browser fetches the file from when the backend serves one; null on file and tmp */
+  url: string | null;
+  /** true when the file was already stored with the same bytes (a retry, a second instance) */
+  existed: boolean;
+};
+
+/**
+ * An asset name is in use with other bytes (gslides-parity SPEC-3 0.26, 8.5: nothing under
+ * `assets/` is ever overwritten; twins, sources and frames carry a content digest in their name,
+ * so a reuse of a name is a mistake and fails loudly).
+ */
+export class AssetExistsError extends Error {
+  readonly relative: string;
+  constructor(relative: string) {
+    super(
+      `${relative} exists with other bytes; asset files are digest named and never overwritten`,
+    );
+    this.name = 'AssetExistsError';
+    this.relative = relative;
+  }
+}
+
+const ASSET_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._@-]*$/;
+
+/**
+ * Checks and returns an asset's relative path: `assets/<file>` (one or more segments), every
+ * segment a plain file name, nothing that climbs out of the folder. A TypeError names the problem.
+ */
+export function assetRelative(relative: string): string {
+  const parts = relative.split('/');
+  if (parts[0] !== 'assets' || parts.length < 2) {
+    throw new TypeError(`An asset path starts with assets/, got ${JSON.stringify(relative)}`);
+  }
+  for (const segment of parts.slice(1)) {
+    if (!ASSET_SEGMENT.test(segment)) {
+      throw new TypeError(
+        `${JSON.stringify(relative)} is not an asset path: each segment is a plain file name`,
+      );
+    }
+  }
+  return relative;
+}
 
 export type ReadResult = {
   /** The normalized document; a deck with severity 3 issues is returned as parsed. */
@@ -120,6 +182,17 @@ export type DeckStore = {
   leases: () => Promise<Lease[]>;
   /** Subscribes to changes on disk; the return value unsubscribes. */
   watch: (listener: StoreListener) => () => void;
+  /**
+   * Stores one asset file under `assets/` on the backend the deck lives on (a local write on
+   * `file` and `tmp`; the same plus a `put` under the deck's prefix on `blob`), so a twin
+   * written by one hosted instance is served to the next and the record that names it can
+   * commit afterwards (gslides-parity SPEC-3 0.39, 8.5; report 10 F49). Names are digest names
+   * and never overwritten: an existing file with other bytes is an AssetExistsError, the same
+   * bytes are a no-op with `existed: true`. `contentType` defaults from the extension.
+   */
+  putAsset: (relative: string, bytes: Uint8Array, contentType?: string) => Promise<AssetPut>;
+  /** Removes an asset file everywhere the backend holds it; a missing file is not an error. */
+  removeAsset: (relative: string) => Promise<void>;
 };
 
 /** Two authors are the same when kind, name and runId agree. */
@@ -157,6 +230,12 @@ export function touchedSlides(mutations: ReadonlyArray<Mutation>): SlideId[] {
       case 'deck.set':
       case 'version.restore':
         break;
+      default: {
+        // an op this switch does not name yet (gslides-parity SPEC-3 3.1 adds text.splice and
+        // text.mark): every slide scoped op carries slideId, so the lease check still sees it
+        const other: { slideId?: unknown } = mutation;
+        if (typeof other.slideId === 'string') ids.add(other.slideId);
+      }
     }
   }
   return [...ids];

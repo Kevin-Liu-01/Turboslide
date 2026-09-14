@@ -8,13 +8,16 @@ import { authorLabel } from '@turboslide/store/store';
 import { flagBoolean, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
 import { UsageError } from '../exit.ts';
-import { versionList, versionRestore, versionSave } from '../store-actions.ts';
+import { versionDiff, versionList, versionRestore, versionSave } from '../store-actions.ts';
 import { baseRevision, openStore, runAction, storeDeps, writeContext } from '../write.ts';
 
 const USAGE = `usage: turboslide version <save|list|restore> ...
   version save -m <note>            a named version at the current revision (also --message, --note)
   version list [--named]            the log: every write and every save, oldest first
-  version restore <n>               restore version n as a write (--base-revision, --author, --json)`;
+  version restore <n>               restore version n as a write (--base-revision, --author, --json)
+  version diff [<from> [<to>]] [--staged]
+                                    the mutations between two revisions grouped by touched block and author, the data
+                                    behind Show changes (version.diff)`;
 
 export function formatVersion(version: Version): string {
   const what =
@@ -34,6 +37,8 @@ export async function version(ctx: CommandContext): Promise<number> {
       return list(inner);
     case 'restore':
       return restore(inner);
+    case 'diff':
+      return diff(inner);
     default:
       throw new UsageError(`unknown subcommand "version ${sub ?? ''}"\n${USAGE}`);
   }
@@ -79,5 +84,34 @@ async function restore(ctx: CommandContext): Promise<number> {
   );
   ctx.out.result(result);
   ctx.out.human(`restored version ${n}: revision ${result.revision}`);
+  return 0;
+}
+
+async function diff(ctx: CommandContext): Promise<number> {
+  const from = ctx.rest[0] === undefined ? undefined : Number(ctx.rest[0]);
+  const to = ctx.rest[1] === undefined ? undefined : Number(ctx.rest[1]);
+  if (
+    (from !== undefined && !Number.isInteger(from)) ||
+    (to !== undefined && !Number.isInteger(to))
+  ) {
+    throw new UsageError(`version diff wants revision numbers\n${USAGE}`);
+  }
+  const store = openStore(ctx);
+  const result = await runAction(ctx, () =>
+    versionDiff(storeDeps(ctx, store), {
+      ...(from !== undefined ? { from } : {}),
+      ...(to !== undefined ? { to } : {}),
+      ...(flagBoolean(ctx.args, 'staged') ? { staged: true } : {}),
+    }),
+  );
+  ctx.out.result(result);
+  ctx.out.human(
+    `${result.from} to ${result.to}: ${result.mutations.length} mutation(s) by ${result.byAuthor.length} author(s)`,
+  );
+  for (const group of result.byAuthor) {
+    ctx.out.human(
+      `  ${authorLabel(group.author)}: ${group.blocks.map((block) => `${block.slideId}${block.blockId !== undefined ? `#${block.blockId}` : ''} (${block.ops.join(', ')})`).join('; ')}`,
+    );
+  }
   return 0;
 }

@@ -1,0 +1,165 @@
+{
+  "recordedAt": "61b16e4 (the reducer case unchanged by round three; see reduce.test.ts)",
+  "records": [
+    {
+      "name": "typing at the end of a heading (a 400 ms burst)",
+      "slideId": "content-rule",
+      "blockId": "h",
+      "path": "/text",
+      "before": "The content rule",
+      "range": [16, 16],
+      "text": " now",
+      "next": "The content rule now",
+      "inverse": [
+        {
+          "op": "text.replace",
+          "slideId": "content-rule",
+          "blockId": "h",
+          "path": "/text",
+          "range": [0, 20],
+          "text": "The content rule"
+        }
+      ]
+    },
+    {
+      "name": "typing inside a word",
+      "slideId": "content-rule",
+      "blockId": "h",
+      "path": "/text",
+      "before": "The content rule",
+      "range": [4, 4],
+      "text": "copy ",
+      "next": "The copy content rule",
+      "inverse": [
+        {
+          "op": "text.replace",
+          "slideId": "content-rule",
+          "blockId": "h",
+          "path": "/text",
+          "range": [0, 21],
+          "text": "The content rule"
+        }
+      ]
+    },
+    {
+      "name": "deleting a word",
+      "slideId": "content-rule",
+      "blockId": "h",
+      "path": "/text",
+      "before": "The content rule",
+      "range": [4, 12],
+      "text": "",
+      "next": "The rule",
+      "inverse": [
+        {
+          "op": "text.replace",
+          "slideId": "content-rule",
+          "blockId": "h",
+          "path": "/text",
+          "range": [0, 8],
+          "text": "The content rule"
+        }
+      ]
+    },
+    {
+      "name": "a marks only change of the markup span",
+      "slideId": "content-rule",
+      "blockId": "h",
+      "path": "/text",
+      "before": "The content rule",
+      "range": [4, 11],
+      "text": "*content*",
+      "next": "The *content* rule",
+      "inverse": [
+        {
+          "op": "text.replace",
+          "slideId": "content-rule",
+          "blockId": "h",
+          "path": "/text",
+          "range": [0, 18],
+          "text": "The content rule"
+        }
+      ]
+    },
+    {
+      "name": "typing an asterisk, escaped by the canonical form",
+      "slideId": "content-rule",
+      "blockId": "h",
+      "path": "/text",
+      "before": "The content rule",
+      "range": [3, 3],
+      "text": " *",
+      "next": "The \\* content rule",
+      "inverse": [
+        {
+          "op": "text.replace",
+          "slideId": "content-rule",
+          "blockId": "h",
+          "path": "/text",
+          "range": [0, 19],
+          "text": "The content rule"
+        }
+      ]
+    },
+    {
+      "name": "typing inside a display run of the paragraph",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "before": "Every post states what was built, what it cost, and what changed. The list names what passes and what is excluded.",
+      "range": [7, 7],
+      "text": "blog ",
+      "next": "Every pblog ost states what was built, what it cost, and what changed. The list names what passes and what is excluded.",
+      "inverse": [
+        {
+          "op": "text.replace",
+          "slideId": "content-rule",
+          "blockId": "p1",
+          "path": "/text",
+          "range": [0, 119],
+          "text": "Every post states what was built, what it cost, and what changed. The list names what passes and what is excluded."
+        }
+      ]
+    },
+    {
+      "name": "replacing across the display run",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "before": "Every post states what was built, what it cost, and what changed. The list names what passes and what is excluded.",
+      "range": [0, 12],
+      "text": "Each note",
+      "next": "Each notetates what was built, what it cost, and what changed. The list names what passes and what is excluded.",
+      "inverse": [
+        {
+          "op": "text.replace",
+          "slideId": "content-rule",
+          "blockId": "p1",
+          "path": "/text",
+          "range": [0, 111],
+          "text": "Every post states what was built, what it cost, and what changed. The list names what passes and what is excluded."
+        }
+      ]
+    },
+    {
+      "name": "a paragraph break typed in a paragraph",
+      "slideId": "content-rule",
+      "blockId": "p1",
+      "path": "/text",
+      "before": "Every post states what was built, what it cost, and what changed. The list names what passes and what is excluded.",
+      "range": [114, 114],
+      "text": "\nSecond.",
+      "next": "Every post states what was built, what it cost, and what changed. The list names what passes and what is excluded.\nSecond.",
+      "inverse": [
+        {
+          "op": "text.replace",
+          "slideId": "content-rule",
+          "blockId": "p1",
+          "path": "/text",
+          "range": [0, 122],
+          "text": "Every post states what was built, what it cost, and what changed. The list names what passes and what is excluded."
+        }
+      ]
+    }
+  ]
+}

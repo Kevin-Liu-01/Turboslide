@@ -31,10 +31,14 @@ const bundleDownloadTicketFn = createServerFn({ method: 'POST' })
     return { deckId: raw.deckId };
   })
   .handler(async ({ data }): Promise<{ url: string }> => {
+    // a bundle carries the notes and every slide: the export right with the notes (SPEC-3 6.3);
+    // the security modules load inside the handler (the pages import this module for the stubs)
+    const { authorizeRequest, identityLabel } = await import('./authorize');
+    const { ctx } = await authorizeRequest(data.deckId, 'exportNotes', { action: 'deck.pack' });
     const decks = await ensureDecks();
     if (!(await decks.has(data.deckId)))
       throw new RangeError(`No deck ${data.deckId} under decks/`);
-    const ticket = signTicket(DOWNLOAD_PURPOSE, data.deckId);
+    const ticket = signTicket(DOWNLOAD_PURPOSE, data.deckId, identityLabel(ctx));
     return {
       url: `/api/decks/${encodeURIComponent(data.deckId)}/bundle?${TICKET_QUERY}=${ticket}`,
     };
@@ -46,10 +50,24 @@ export async function bundleDownloadTicket(input: { deckId: string }): Promise<{
 }
 
 const bundleUploadTicketFn = createServerFn({ method: 'POST' }).handler(
-  async (): Promise<{ url: string; maxBytes: number }> => ({
-    url: `/api/decks/bundle?${TICKET_QUERY}=${signTicket(UPLOAD_PURPOSE, ANY_SUBJECT)}`,
-    maxBytes: BUNDLE_MAX_BYTES,
-  }),
+  async (): Promise<{ url: string; maxBytes: number }> => {
+    // the ticket names the identity; the route checks `write` on the target when it replaces a
+    // deck and counts the bundles per day quota for that identity (SPEC-3 8.2, 8.3)
+    const { identityLabel, requestContext } = await import('./authorize');
+    const { assertQuota, tierOf } = await import('./ratelimit');
+    const ctx = await requestContext();
+    const identity = identityLabel(ctx) ?? 'anonymous';
+    await assertQuota('bundlesPerDay', {
+      identity,
+      tier: tierOf(ctx),
+      action: 'deck.unpack',
+      transport: 'window',
+    });
+    return {
+      url: `/api/decks/bundle?${TICKET_QUERY}=${signTicket(UPLOAD_PURPOSE, ANY_SUBJECT, identity)}`,
+      maxBytes: BUNDLE_MAX_BYTES,
+    };
+  },
 );
 
 /** Upload deck bundle (the /decks form): the route URL with a ticket; the page posts the zip to it. */

@@ -93,9 +93,14 @@ export function windowActions(): string[] {
 /** True when an http action's handler is expected on this instance by its milestone. */
 export function expectedByMilestone(
   id: ActionId,
-  current: 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1' | 'GS2',
+  current: 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1' | 'GS2' | 'GS3',
 ): boolean {
-  // GS1 and GS2 are the Google Slides parity rounds, landed after M6 (docs/gslides-parity/MILESTONES.md, MILESTONES-2.md)
-  const order = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'GS1', 'GS2'];
-  return order.indexOf(ACTIONS[id].milestone) <= order.indexOf(current);
+  // GS1, GS2 and GS3 are the Google Slides parity rounds, landed after M6 (docs/gslides-parity/
+  // MILESTONES.md, MILESTONES-2.md, MILESTONES-3.md); an id of a round after `current` is never
+  // expected, and an unknown milestone answers -1 on both sides, which reads as expected
+  const order = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'GS1', 'GS2', 'GS3'];
+  const landed = order.indexOf(ACTIONS[id].milestone);
+  const wanted = order.indexOf(current);
+  if (landed < 0) return false;
+  return landed <= wanted;
 }

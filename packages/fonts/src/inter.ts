@@ -48,6 +48,41 @@ export const INTER_CSS = new URL('./inter.css', import.meta.url);
 /** The deck's font family stack for display and text (head:21-22). */
 export const FONT_FAMILY = "'Inter', 'Helvetica Neue', Arial, sans-serif";
 
+/**
+ * The metric matched fallback face of gslides-parity SPEC-3 9.2 G1 (research-3 05 section 4 rule
+ * 3): Arial with size-adjust and the three overrides so the sheet's line boxes equal Inter's
+ * before the woff2 arrives. Computed by scripts/build-fonts.py from InterVariable's hhea and OS/2
+ * tables and Arial's (fonts.json `fallback`, pinned by inter.test.ts): size-adjust is Inter's
+ * frequency weighted average advance over Arial's, the overrides Inter's ascent, descent and
+ * line gap per em divided by size-adjust. inter.css carries the same four numbers.
+ */
+export const INTER_FALLBACK = {
+  family: 'Inter Fallback',
+  local: 'Arial',
+  sizeAdjust: '107.4724%',
+  ascentOverride: '90.1394%',
+  descentOverride: '22.444%',
+  lineGapOverride: '0%',
+} as const;
+
+/** The stack with the fallback face in place: what a chrome or sheet rule that must not shift on the first paint uses. */
+export const FONT_FAMILY_WITH_FALLBACK =
+  "'Inter', 'Inter Fallback', 'Helvetica Neue', Arial, sans-serif";
+
+/** The @font-face rule of the fallback, for a stylesheet that inlines its faces (the standalone build may add it beside the two woff2 faces). */
+export function fallbackFontFaceCss(): string {
+  return [
+    '@font-face {',
+    `  font-family: '${INTER_FALLBACK.family}';`,
+    `  src: local('${INTER_FALLBACK.local}');`,
+    `  size-adjust: ${INTER_FALLBACK.sizeAdjust};`,
+    `  ascent-override: ${INTER_FALLBACK.ascentOverride};`,
+    `  descent-override: ${INTER_FALLBACK.descentOverride};`,
+    `  line-gap-override: ${INTER_FALLBACK.lineGapOverride};`,
+    '}',
+  ].join('\n');
+}
+
 /** The font bytes. */
 export function interBytes(): Buffer {
   return readFileSync(INTER_VARIABLE_WOFF2);

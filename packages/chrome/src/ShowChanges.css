@@ -1,0 +1,65 @@
+/* Show changes (gslides-parity SPEC-3 0.44; research 11 6.9): hatched plates from measured
+   boxes, the author's 16 px chip outside the box, the run level underline and strike. No hue. */
+.ts-change-plate {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--pt-ink);
+  background-image: repeating-linear-gradient(
+    var(--ts-hatch, 45deg),
+    var(--pt-hair) 0,
+    var(--pt-hair) 1px,
+    transparent 1px,
+    transparent 6px
+  );
+  pointer-events: none;
+}
+
+.ts-change-plate.is-bayer {
+  background-image: radial-gradient(var(--pt-hair) 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+.ts-change-plate.is-inserted {
+  border-width: 2px;
+}
+
+.ts-change-plate.is-removed {
+  border-style: dashed;
+}
+
+.ts-change-plate.is-removed::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: 1px;
+  background: var(--pt-ink);
+  transform: rotate(-12deg);
+}
+
+.ts-change-chip {
+  position: absolute;
+  pointer-events: none;
+}
+
+.ts-change-run {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+
+.ts-change-run.is-insert,
+.ts-change-run.is-replace {
+  border-bottom: 2px solid var(--pt-ink);
+}
+
+.ts-change-run.is-delete::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: var(--pt-ink);
+}

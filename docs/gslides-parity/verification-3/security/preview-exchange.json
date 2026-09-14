@@ -1,0 +1,96 @@
+{
+  "base": "https://turboslide-dniaw7w8f-kl01s-projects.vercel.app",
+  "at": "2026-09-14T05:57:20.542Z",
+  "rows": [
+    {
+      "name": "deck.info gt-brand through the bearer",
+      "ok": true,
+      "evidence": "status 200 revision 31 in 265 ms"
+    },
+    {
+      "name": "deck.copy scratch (one slide)",
+      "ok": true,
+      "evidence": "status 200 in 2763 ms"
+    },
+    {
+      "name": "the copy starts restricted with an owner (6.1; the bearer caller is the owner)",
+      "ok": true,
+      "evidence": "generalAccess {\"mode\":\"restricted\",\"role\":\"viewer\"}; owner agent:bootstrap; record revision 0; caller role owner via admin"
+    },
+    {
+      "name": "share.createLink viewer through the bearer",
+      "ok": true,
+      "evidence": "status 200 in 229 ms; url path /s/<22 chars>; link id lnk_gyozvaBH7FdqM3Si; the address carries the token once, never the record"
+    },
+    {
+      "name": "A. a first navigation lands: 303 to /deck/<id>, the sealed cookie, no-referrer, noindex",
+      "ok": true,
+      "evidence": "first answer 303 (the request itself took 639 ms when it landed first); landed 303; location /deck/verifier-x-mu0tyquz; referrer-policy no-referrer; x-robots-tag noindex; set-cookie __vdpl,__Host-ts_id 639 ms after the mint; cookie attrs Max-Age=34560000 Path=/ HttpOnly Secure SameSite=Lax"
+    },
+    {
+      "name": "B. the same browser again with the cookie lands",
+      "ok": true,
+      "evidence": "303; location /deck/verifier-x-mu0tyquz; referrer-policy no-referrer; x-robots-tag noindex; set-cookie __vdpl"
+    },
+    {
+      "name": "C. no fetch metadata (curl) lands",
+      "ok": true,
+      "evidence": "303; location /deck/verifier-x-mu0tyquz; referrer-policy no-referrer; x-robots-tag noindex; set-cookie __Host-ts_id"
+    },
+    {
+      "name": "D. a cross site navigation lands",
+      "ok": true,
+      "evidence": "303; location /deck/verifier-x-mu0tyquz; referrer-policy no-referrer; x-robots-tag noindex; set-cookie __vdpl,__Host-ts_id"
+    },
+    {
+      "name": "E. a cors fetch is 403 with the sentence naming the fetch metadata (6.4)",
+      "ok": true,
+      "evidence": "403; location -; referrer-policy no-referrer; x-robots-tag noindex; set-cookie __Host-ts_id; body {\"error\":{\"name\":\"Error\",\"status\":403,\"code\":\"forbidden\",\"message\":\"Share links open by a top level navigation. This request carried Sec-Fetch-Mode cors with Se"
+    },
+    {
+      "name": "F. Node fetch() asking for navigate is 403 (undici sends cors: the pass 1 probe artifact)",
+      "ok": true,
+      "evidence": "403; location -; referrer-policy no-referrer; x-robots-tag noindex; set-cookie __Host-ts_id; body {\"error\":{\"name\":\"Error\",\"status\":403,\"code\":\"forbidden\",\"message\":\"Share links open by a top level navigation. This request carried Sec-Fetch-Mode cors with Se"
+    },
+    {
+      "name": "G. real curl with the navigation headers lands",
+      "ok": false,
+      "evidence": "HTTP/2 404"
+    },
+    {
+      "name": "the viewer page carries no notes key",
+      "ok": true,
+      "evidence": "status 200; 115238 bytes; \"notes\" absent"
+    },
+    {
+      "name": "H. a commenter link lands on /edit/<id> (6.4: a commenter link lands on /edit)",
+      "ok": true,
+      "evidence": "303; location /edit/verifier-x-mu0tyquz; referrer-policy no-referrer; x-robots-tag noindex; set-cookie __vdpl,__Host-ts_id at 14109 ms after the mint"
+    },
+    {
+      "name": "I. the revoked viewer link is the 404 page (6.4: a revocation kills the grant)",
+      "ok": true,
+      "evidence": "alive before the revoke 303; record revision 2 (the mint answered 1); share.revokeLink 200; then 404; location -; referrer-policy no-referrer; x-robots-tag noindex; set-cookie __vdpl,__Host-ts_id; body <!doctype html> 401 ms after the revoke"
+    },
+    {
+      "name": "J. an unknown token is the 404 page with the sentence",
+      "ok": true,
+      "evidence": "404; location -; referrer-policy no-referrer; x-robots-tag noindex; set-cookie __vdpl,__Host-ts_id; body <!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><meta name=\"robots\" content=\"noin"
+    },
+    {
+      "name": "comment.add through the bearer on the blob tier answers a thread (finding 6)",
+      "ok": true,
+      "evidence": "status 200 in 600 ms; {\"thread\":{\"id\":\"01m2f7vgs6m7nv2cdqx41pss71\",\"deckId\":\"verifier-x-mu0tyquz\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"opener-brand\"},\"comment\":{\"id\":\"01m2f7vgs6m7nv2c"
+    },
+    {
+      "name": "comment.list reads it back",
+      "ok": true,
+      "evidence": "status 200 in 481 ms; 1 threads; comments revision -"
+    },
+    {
+      "name": "scratch deck removed",
+      "ok": true,
+      "evidence": "deck.trash 200; deck.remove 200"
+    }
+  ]
+}

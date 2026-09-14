@@ -1,0 +1,33 @@
+{
+  "name": "@turboslide/identity",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Principals and their three id formats, the anonymous label, the six live hues, the display name rules, the capability matrix decide(), resolvePrincipal and the identity mark spec. Browser safe: no node: import (gslides-parity SPEC-3 4.1, 6.2, 7).",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "exports": {
+    "./ids": "./src/ids.ts",
+    "./labels": "./src/labels.ts",
+    "./hues": "./src/hues.ts",
+    "./names": "./src/names.ts",
+    "./access": "./src/access.ts",
+    "./resolve": "./src/resolve.ts",
+    "./marks": "./src/marks.ts",
+    "./marks-render": "./src/marks-render.ts",
+    "./marks-png": "./src/marks-png.ts",
+    "./principal": "./src/principal.ts",
+    "./sha256": "./src/sha256.ts",
+    "./index": "./src/index.ts",
+    "./package.json": "./package.json"
+  },
+  "dependencies": {
+    "@turboslide/effects": "workspace:*",
+    "@turboslide/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

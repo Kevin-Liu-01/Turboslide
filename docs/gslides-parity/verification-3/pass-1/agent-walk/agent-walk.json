@@ -1,0 +1,603 @@
+{
+  "at": "2026-09-14T02:54:47.286Z",
+  "scratch": "/Users/kevinliu/repos/Turboslide/.turboslide/v3-agent-walk/decks/gslides",
+  "summary": {
+    "ok": 64,
+    "fail": 0,
+    "notes": 21
+  },
+  "rows": [
+    {
+      "kind": "cli",
+      "name": "comment.add: turboslide comment add slide:table -m Verifier: check this --mention maya",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"thread\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"table\"},\"comment\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"author",
+      "ms": 35
+    },
+    {
+      "kind": "cli",
+      "name": "comment.reply: turboslide comment reply 01m2exd5mrqxskxsjnvhwrtxr9 -m Verifier reply --mention tester",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"thread\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"table\"},\"comment\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"author",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "comment.edit: turboslide comment edit 01m2exd5mrqxskxsjnvhwrtxr9 01m2exd5mrqxskxsjnvhwrtxr9 -m Verifier: check this number",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"thread\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"table\"},\"comment\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"author",
+      "ms": 13
+    },
+    {
+      "kind": "cli",
+      "name": "comment.assign: turboslide comment assign 01m2exd5mrqxskxsjnvhwrtxr9 maya",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"thread\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"table\"},\"comment\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"author",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "comment.done: turboslide comment done 01m2exd5mrqxskxsjnvhwrtxr9",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"thread\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"table\"},\"comment\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"author",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "comment.react: turboslide comment react 01m2exd5mrqxskxsjnvhwrtxr9 01m2exd5mrqxskxsjnvhwrtxr9 👍",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"thread\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"table\"},\"comment\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"author",
+      "ms": 3
+    },
+    {
+      "kind": "cli",
+      "name": "comment.link: turboslide comment link 01m2exd5mrqxskxsjnvhwrtxr9",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"url\":\"https://studio.test/edit/gslides?comment=01m2exd5mrqxskxsjnvhwrtxr9&slide=table\",\"viewUrl\":\"https://studio.test/deck/gslides?comment=01m2exd5mrqxskxsjnv",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "comment.get: turboslide comment get 01m2exd5mrqxskxsjnvhwrtxr9",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"thread\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"table\"},\"comment\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"author",
+      "ms": 6
+    },
+    {
+      "kind": "cli",
+      "name": "comment.list: turboslide comments --state all",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"threads\":[{\"id\":\"01m2em8s6p6mng6ehsnpf3r3xy\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"cell\",\"slideId\":\"table\",\"blockId\":\"table\",\"cell\":[1,2]},\"comment\":{\"id\":\"01m",
+      "ms": 13
+    },
+    {
+      "kind": "cli",
+      "name": "comment.list --for-me: turboslide comments --state all --for-me",
+      "ok": true,
+      "evidence": "exit 0, validates; 3 thread(s) for maya; {\"threads\":[{\"id\":\"01m2em8s6p6mng6ehsnpf3r3xy\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"cell\",\"slideId\":\"table\",\"blockId\":\"table\",\"cell\":[1,2]},\"comment\":{\"id\":\"01m",
+      "ms": 5
+    },
+    {
+      "kind": "cli",
+      "name": "comment.resolve: turboslide comment resolve 01m2exd5mrqxskxsjnvhwrtxr9",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"thread\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"table\"},\"comment\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"author",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "comment.reopen: turboslide comment reopen 01m2exd5mrqxskxsjnvhwrtxr9",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"thread\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"table\"},\"comment\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"author",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "comment.delete: turboslide comment delete 01m2exd5mrqxskxsjnvhwrtxr9 01m2exd5n23wjj8r6s7a8krdtk",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"thread\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"table\"},\"comment\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"author",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "comment.delete --restore: turboslide comment delete 01m2exd5mrqxskxsjnvhwrtxr9 01m2exd5n23wjj8r6s7a8krdtk --restore",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"thread\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"deckId\":\"gslides\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"table\"},\"comment\":{\"id\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"author",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "notification.list: turboslide notifications --unread",
+      "ok": true,
+      "evidence": "exit 0, validates; 4 unread for maya; {\"notifications\":[{\"id\":\"01m2exd5qy1w9s0z1ebwrxhttf\",\"principalId\":\"local:maya\",\"kind\":\"reopened\",\"deckId\":\"gslides\",\"threadId\":\"01m2exd5mrqxskxsjnvhwrtxr9\",\"sl",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "notification.markRead: turboslide notifications read 01m2exd5qy1w9s0z1ebwrxhttf",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"unread\":3}",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "notification.settings: turboslide notifications settings --level forYou",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"level\":\"forYou\",\"email\":true,\"activityForCommenters\":false}",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "activity.list: turboslide activity",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"events\":[{\"id\":\"reply:01m2exd5n23wjj8r6s7a8krdtk\",\"at\":\"2026-09-14T02:54:41.314Z\",\"kind\":\"comment\",\"actor\":\"local:maya\",\"deckId\":\"gslides\",\"slideId\":\"table\",\"",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "share.get: turboslide share get gslides",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":null,\"createdAt\":\"2026-09-14T02:54:41.447Z\",\"createdBy\":\"local:tester\",\"as",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "share.setGeneralAccess: turboslide share access gslides --mode link --role viewer",
+      "ok": true,
+      "evidence": "exit 0, validates; one /s/ link printed; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":null,\"createdAt\":\"2026-09-14T02:54:41.453Z\",\"createdBy\":\"local:tester\",\"as",
+      "ms": 3
+    },
+    {
+      "kind": "cli",
+      "name": "share.createLink: turboslide share link gslides --role commenter --label agency",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":null,\"createdAt\":\"2026-09-14T02:54:41.453Z\",\"createdBy\":\"local:tester\",\"as",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "share.rotateLink: turboslide share rotate-link gslides lnk_Qb8o4OE24Nug8F-R",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":null,\"createdAt\":\"2026-09-14T02:54:41.453Z\",\"createdBy\":\"local:tester\",\"as",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "share.revokeLink: turboslide share revoke-link gslides lnk_RsDv6RCC9-7dYonv",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":null,\"createdAt\":\"2026-09-14T02:54:41.453Z\",\"createdBy\":\"local:tester\",\"as",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "share.invite: turboslide share invite gslides --email maya@example.test --role commenter --no-notify",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":null,\"createdAt\":\"2026-09-14T02:54:41.453Z\",\"createdBy\":\"local:tester\",\"as",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "share.setRole: turboslide share role gslides --email maya@example.test --role editor",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":null,\"createdAt\":\"2026-09-14T02:54:41.453Z\",\"createdBy\":\"local:tester\",\"as",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "share.setExpiry: turboslide share expire gslides --email maya@example.test --at 2027-01-01T00:00:00.000Z",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":null,\"createdAt\":\"2026-09-14T02:54:41.453Z\",\"createdBy\":\"local:tester\",\"as",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "share.settings: turboslide share settings gslides --viewers-can-see-comments true",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":null,\"createdAt\":\"2026-09-14T02:54:41.453Z\",\"createdBy\":\"local:tester\",\"as",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "share.listRequests: turboslide share requests gslides",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"requests\":[]}",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "share.respond: turboslide share respond gslides req_none --grant commenter",
+      "ok": null,
+      "evidence": "exit 2: turboslide: no request req_none",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "share.transferOwnership: turboslide share transfer gslides --email maya@example.test",
+      "ok": null,
+      "evidence": "exit 0: ownership offered: Restricted, 1 grant, 1 live link; record revision 9",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "share.acceptOwnership: turboslide share accept-ownership gslides",
+      "ok": null,
+      "evidence": "exit 2: turboslide: This presentation is not available to you, or does not exist.",
+      "ms": 0
+    },
+    {
+      "kind": "cli",
+      "name": "share.declineOwnership: turboslide share decline-ownership gslides",
+      "ok": null,
+      "evidence": "exit 2: turboslide: This presentation is not available to you, or does not exist.",
+      "ms": 0
+    },
+    {
+      "kind": "cli",
+      "name": "share.claim: turboslide share claim gslides",
+      "ok": null,
+      "evidence": "exit 0: claimed: Restricted, 1 grant, 1 live link; record revision 10",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "share.emailCollaborators: turboslide share email gslides --message hello",
+      "ok": null,
+      "evidence": "exit 2: turboslide: share.emailCollaborators has no handler on a checkout; pass --to <url> to run it on a hosted studio",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "share.remove: turboslide share remove gslides --email maya@example.test",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":{\"principalId\":null,\"email\":\"maya@example.test\",\"askedAt\":\"2026-09-14T02:5",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "deck.publish: turboslide deck publish gslides",
+      "ok": true,
+      "evidence": "exit 0, validates; a published link printed; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":{\"principalId\":null,\"email\":\"maya@example.test\",\"askedAt\":\"2026-09-14T02:5",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "deck.unpublish: turboslide deck unpublish gslides",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":{\"principalId\":null,\"email\":\"maya@example.test\",\"askedAt\":\"2026-09-14T02:5",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "share.stop: turboslide share stop gslides",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"record\":{\"schemaVersion\":1,\"deckId\":\"gslides\",\"owner\":\"local:tester\",\"pendingOwner\":{\"principalId\":null,\"email\":\"maya@example.test\",\"askedAt\":\"2026-09-14T02:5",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "presence.list: turboslide presence list",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"deckId\":\"gslides\",\"cap\":20,\"pointersVisible\":true,\"self\":{\"clientId\":\"cli:15510\",\"principalId\":\"local:tester\",\"kind\":\"human\",\"label\":\"tester\",\"trust\":\"guest\",",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "presence.follow: turboslide presence follow c_none",
+      "ok": null,
+      "evidence": "exit 2: turboslide: presence.follow acts through an attached page: no studio page is attached to this deck; open it in the editor, or run the command with --to <studio> against a hosted deck",
+      "ms": 0
+    },
+    {
+      "kind": "cli",
+      "name": "presence.unfollow: turboslide presence unfollow",
+      "ok": null,
+      "evidence": "exit 2: turboslide: presence.unfollow acts through an attached page: no studio page is attached to this deck; open it in the editor, or run the command with --to <studio> against a hosted deck",
+      "ms": 0
+    },
+    {
+      "kind": "cli",
+      "name": "presence.pointer: turboslide presence pointer --on",
+      "ok": null,
+      "evidence": "exit 0: Showing my pointer",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "sync.status: turboslide sync status",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"seq\":0,\"revision\":2,\"pending\":0,\"retained\":0,\"tier\":\"memory\",\"transport\":\"file\",\"connected\":false}",
+      "ms": 3
+    },
+    {
+      "kind": "cli",
+      "name": "account.me: turboslide account me",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"principal\":{\"id\":\"local:tester\",\"kind\":\"local\",\"admin\":false},\"trust\":\"guest\",\"label\":\"tester\",\"mark\":{\"variant\":\"initials\",\"initials\":\"TE\",\"density\":1,\"glyph",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "account.setName: turboslide account name Verifier",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"principal\":{\"id\":\"local:tester\",\"kind\":\"local\",\"admin\":false},\"trust\":\"guest\",\"label\":\"tester\",\"name\":\"Verifier\",\"mark\":{\"variant\":\"initials\",\"initials\":\"VE\",",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "account.setAvatar: turboslide account avatar --variant initials",
+      "ok": null,
+      "evidence": "exit 0: Verifier (guest) local:tester; avatar initials",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "account.decks: turboslide account decks",
+      "ok": true,
+      "evidence": "exit 0, validates; [{\"id\":\"gslides\",\"title\":\"Export fixture\",\"slides\":29,\"sections\":2,\"revision\":2,\"updatedAt\":\"2026-09-14T01:42:50.600Z\",\"createdAt\":\"2026-09-12T00:00:00.000Z\",\"o",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "account.tokens.list: turboslide account tokens list --to https://studio.test",
+      "ok": null,
+      "evidence": "exit 2: turboslide: fetch failed",
+      "ms": 31
+    },
+    {
+      "kind": "cli",
+      "name": "account.tokens.create: turboslide account tokens create --to https://studio.test --name walk --scope read",
+      "ok": null,
+      "evidence": "exit 2: turboslide: fetch failed",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "account.tokens.revoke: turboslide account tokens revoke tok_none --to https://studio.test",
+      "ok": null,
+      "evidence": "exit 2: turboslide: fetch failed",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "account.sessions: turboslide account sessions --to https://studio.test",
+      "ok": null,
+      "evidence": "exit 2: turboslide: fetch failed",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "account.signOut: turboslide account sign-out --to https://studio.test",
+      "ok": null,
+      "evidence": "exit 2: turboslide: account sign-out wants --session <id> or --all",
+      "ms": 0
+    },
+    {
+      "kind": "cli",
+      "name": "admin.bootstrap: turboslide admin bootstrap --to https://studio.test --email kevin@example.test",
+      "ok": null,
+      "evidence": "exit 2: turboslide: fetch failed",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "admin.assignOwner: turboslide admin assign-owner gslides --email kevin@example.test",
+      "ok": null,
+      "evidence": "exit 0: owner of gslides: local:tester; record revision 15",
+      "ms": 1
+    },
+    {
+      "kind": "cli",
+      "name": "admin.flag: turboslide admin flag readOnly",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"name\":\"readOnly\",\"on\":true,\"default\":true,\"source\":\"default\"}",
+      "ms": 0
+    },
+    {
+      "kind": "cli",
+      "name": "admin.migrateStorage: turboslide admin migrate-storage plan --to https://studio.test",
+      "ok": null,
+      "evidence": "exit 2: turboslide: fetch failed",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "admin.mail.list: turboslide admin mail --to https://studio.test",
+      "ok": null,
+      "evidence": "exit 2: turboslide: fetch failed",
+      "ms": 2
+    },
+    {
+      "kind": "cli",
+      "name": "picture.dither: turboslide block dither rotated#photo --pattern bayer8 --black 120 --white 230 --gamma 0.9",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"slide\":{\"schemaVersion\":1,\"id\":\"rotated\",\"template\":\"blank\",\"kind\":\"content\",\"layout\":{\"type\":\"freeform\"},\"slots\":{\"main\":[{\"id\":\"h\",\"pos\":{\"x\":137,\"y\":129,\"w",
+      "ms": 22
+    },
+    {
+      "kind": "cli",
+      "name": "picture.materialize --dry-run: turboslide picture materialize --dry-run",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"revision\":3,\"written\":[],\"pruned\":[],\"missing\":[{\"slideId\":\"rotated\",\"blockId\":\"photo\",\"assetId\":\"fixture-photo\",\"key\":\"292ab99b16ee5f4f709f8259ee0f82dfe6126e",
+      "ms": 7
+    },
+    {
+      "kind": "cli",
+      "name": "picture.materialize: turboslide picture materialize",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"revision\":4,\"written\":[{\"assetId\":\"fixture-photo\",\"key\":\"292ab99b16ee5f4f709f8259ee0f82dfe6126e8bd41d5cef349b86ee57e70b92\",\"files\":[\"assets/fixture-photo.dith",
+      "ms": 65
+    },
+    {
+      "kind": "cli",
+      "name": "picture.dither --off: turboslide block dither rotated#photo --off",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"slide\":{\"schemaVersion\":1,\"id\":\"rotated\",\"template\":\"blank\",\"kind\":\"content\",\"layout\":{\"type\":\"freeform\"},\"slots\":{\"main\":[{\"id\":\"h\",\"pos\":{\"x\":137,\"y\":129,\"w",
+      "ms": 13
+    },
+    {
+      "kind": "cli",
+      "name": "slide.setBackgroundPicture: turboslide slide background-picture title --asset fixture-photo --dither",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"revision\":6,\"assetId\":\"fixture-photo\",\"slides\":[{\"slideId\":\"title\",\"blockId\":\"background\"}],\"findings\":[{\"id\":\"export/non-native|title|||\",\"rule\":\"export/non-",
+      "ms": 796
+    },
+    {
+      "kind": "cli",
+      "name": "slide.setBackgroundMaterial: turboslide slide background-material title paper:liquid-metal --dither",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"revision\":8,\"assetId\":\"liquid-metal\",\"slides\":[{\"slideId\":\"title\",\"blockId\":\"background\"}],\"findings\":[{\"id\":\"export/non-native|title|||\",\"rule\":\"export/non-n",
+      "ms": 1039
+    },
+    {
+      "kind": "cli",
+      "name": "version.diff: turboslide version diff 6 8",
+      "ok": true,
+      "evidence": "exit 0, validates; {\"from\":6,\"to\":8,\"mutations\":[{\"op\":\"asset.set\",\"asset\":{\"id\":\"liquid-metal\",\"role\":\"frame\",\"alt\":\"The liquid metal material, rendered at 3200 by 1800\",\"twins\":",
+      "ms": 11
+    },
+    {
+      "kind": "cli",
+      "name": "deck.watch: turboslide deck watch gslides --since 0",
+      "ok": null,
+      "evidence": "exit 0: revision 8: 6 records since 0; comments revision 16",
+      "ms": 9
+    },
+    {
+      "kind": "cli",
+      "name": "deck.follow: turboslide deck follow gslides --from https://studio.test",
+      "ok": null,
+      "evidence": "exit 2: turboslide: fetch failed",
+      "ms": 3
+    },
+    {
+      "kind": "mcp",
+      "name": "tools/list under the budgets",
+      "ok": true,
+      "evidence": "135 tools, 1786743 bytes (budget 4 MiB) in 292 ms; round three tools 58 of 58; absent on a checkout by design (hosted sessions): account.tokens.list, account.tokens.revoke, account.sessions, account.signOut",
+      "ms": 292
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_list_comments",
+      "ok": true,
+      "evidence": "{\n  \"threads\": [\n    {\n      \"id\": \"01m2exd5mrqxskxsjnvhwrtxr9\",\n      \"deckId\": \"gslides\",\n      \"anchor\": {\n        \"kind\": \"slide\",\n        \"slideId\": \"table; 4 thread(s)",
+      "ms": 41
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_add_comment",
+      "ok": true,
+      "evidence": "{\n  \"thread\": {\n    \"id\": \"01m2exd9dfkh3vqs4w7ce6pdyp\",\n    \"deckId\": \"gslides\",\n    \"anchor\": {\n      \"kind\": \"slide\",\n      \"slideId\": \"breaks\"\n    },\n    \"co",
+      "ms": 11
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_resolve_comment",
+      "ok": true,
+      "evidence": "{\n  \"thread\": {\n    \"id\": \"01m2exd9dfkh3vqs4w7ce6pdyp\",\n    \"deckId\": \"gslides\",\n    \"anchor\": {\n      \"kind\": \"slide\",\n      \"slideId\": \"breaks\"\n    },\n    \"co",
+      "ms": 4
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_get_share",
+      "ok": true,
+      "evidence": "{\n  \"record\": {\n    \"schemaVersion\": 1,\n    \"deckId\": \"gslides\",\n    \"owner\": \"local:tester\",\n    \"pendingOwner\": {\n      \"principalId\": null,\n      \"email\": \"k; general access restricted",
+      "ms": 3
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_list_presence",
+      "ok": true,
+      "evidence": "{\n  \"deckId\": \"gslides\",\n  \"cap\": 20,\n  \"pointersVisible\": true,\n  \"self\": {\n    \"clientId\": \"cli:15565\",\n    \"principalId\": \"local:tester\",\n    \"kind\": \"human\"",
+      "ms": 3
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_sync_status",
+      "ok": true,
+      "evidence": "{\n  \"seq\": 0,\n  \"revision\": 8,\n  \"pending\": 0,\n  \"retained\": 0,\n  \"tier\": \"memory\",\n  \"transport\": \"file\",\n  \"connected\": false\n}; tier memory, transport file",
+      "ms": 6
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_get_me",
+      "ok": true,
+      "evidence": "{\n  \"principal\": {\n    \"id\": \"local:tester\",\n    \"kind\": \"local\",\n    \"admin\": false\n  },\n  \"trust\": \"guest\",\n  \"label\": \"tester\",\n  \"name\": \"Verifier\",\n  \"mark; a principal",
+      "ms": 2
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_list_notifications",
+      "ok": true,
+      "evidence": "{\n  \"notifications\": [\n    {\n      \"id\": \"01m2exd5pbptjtgrnv3atz3syh\",\n      \"principalId\": \"local:tester\",\n      \"kind\": \"reaction\",\n      \"deckId\": \"gslides\",",
+      "ms": 1
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_list_activity",
+      "ok": true,
+      "evidence": "{\n  \"events\": [\n    {\n      \"id\": \"resolved:01m2exd9dfkh3vqs4w7ce6pdyp:2026-09-14T02:54:45.173Z\",\n      \"at\": \"2026-09-14T02:54:45.173Z\",\n      \"kind\": \"comment",
+      "ms": 6
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_version_diff",
+      "ok": true,
+      "evidence": "{\n  \"from\": 6,\n  \"to\": 8,\n  \"mutations\": [\n    {\n      \"op\": \"asset.set\",\n      \"asset\": {\n        \"id\": \"liquid-metal\",\n        \"role\": \"frame\",\n        \"alt\":",
+      "ms": 16
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_dither_picture",
+      "ok": true,
+      "evidence": "{\n  \"slide\": {\n    \"schemaVersion\": 1,\n    \"id\": \"rotated\",\n    \"template\": \"blank\",\n    \"kind\": \"content\",\n    \"layout\": {\n      \"type\": \"freeform\"\n    },\n    ",
+      "ms": 19
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_materialize_pictures",
+      "ok": true,
+      "evidence": "{\n  \"revision\": 9,\n  \"written\": [],\n  \"pruned\": [],\n  \"missing\": [\n    {\n      \"slideId\": \"title\",\n      \"blockId\": \"background\",\n      \"assetId\": \"liquid-metal",
+      "ms": 6
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_dither_picture",
+      "ok": true,
+      "evidence": "{\n  \"slide\": {\n    \"schemaVersion\": 1,\n    \"id\": \"rotated\",\n    \"template\": \"blank\",\n    \"kind\": \"content\",\n    \"layout\": {\n      \"type\": \"freeform\"\n    },\n    ",
+      "ms": 11
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_admin_flag",
+      "ok": true,
+      "evidence": "{\n  \"name\": \"readOnly\",\n  \"on\": true,\n  \"default\": true,\n  \"source\": \"default\"\n}",
+      "ms": 1
+    },
+    {
+      "kind": "mcp",
+      "name": "deck_list_my_decks",
+      "ok": true,
+      "evidence": "[\n  {\n    \"id\": \"gslides\",\n    \"title\": \"Export fixture\",\n    \"slides\": 29,\n    \"sections\": 2,\n    \"revision\": 10,\n    \"updatedAt\": \"2026-09-14T02:54:45.253Z\",\n",
+      "ms": 1
+    },
+    {
+      "kind": "mcp",
+      "name": "resources/list",
+      "ok": true,
+      "evidence": "41 resources; the comments, presence and inbox resources listed: deck://gslides/comments, deck://gslides/presence, deck://inbox"
+    },
+    {
+      "kind": "mcp",
+      "name": "resources/read deck://gslides/comments",
+      "ok": true,
+      "evidence": "7184 bytes; { \"threads\": [ { \"id\": \"01m2exd5mrqxskxsjnvhwrtxr9\", \"deckId\": \"gslides\", \"anchor\": { \"k"
+    },
+    {
+      "kind": "cli",
+      "name": "validate at the end",
+      "ok": true,
+      "evidence": "exit 0"
+    }
+  ]
+}

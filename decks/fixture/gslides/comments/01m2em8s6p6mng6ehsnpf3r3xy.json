@@ -1,0 +1,35 @@
+{
+  "id": "01m2em8s6p6mng6ehsnpf3r3xy",
+  "deckId": "gslides",
+  "anchor": {
+    "kind": "cell",
+    "slideId": "table",
+    "blockId": "table",
+    "cell": [
+      1,
+      2
+    ]
+  },
+  "comment": {
+    "id": "01m2em8s6p6mng6ehsnpf3r3xy",
+    "author": {
+      "principalId": "local:tester",
+      "label": "tester",
+      "kind": "human"
+    },
+    "createdAt": "2026-09-14T00:15:00.283Z",
+    "body": {
+      "text": "This number is from the March report; the deck says April. {@0}",
+      "mentions": [
+        {
+          "kind": "principal",
+          "principalId": "local:maya"
+        }
+      ]
+    }
+  },
+  "replies": [],
+  "createdAt": "2026-09-14T00:15:00.283Z",
+  "updatedAt": "2026-09-14T00:15:00.283Z",
+  "revision": 3
+}

@@ -9,7 +9,8 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ConflictError } from '@turboslide/schema/errors';
-import { WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
+import type { Asset } from '@turboslide/schema/assets';
+import { MOOD_EARTH, WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
 import { canonicalJson } from '@turboslide/schema/json';
 import type { Author, Mutation } from '@turboslide/schema/mutations';
 
@@ -17,7 +18,7 @@ import { memoryBlobClient } from './blob-fake.ts';
 import type { FakeBlobClient } from './blob-fake.ts';
 import { openBlobStore, pushDeckDir } from './blob-store.ts';
 import type { BlobStore } from './blob-store.ts';
-import { openFileStore } from './file-store.ts';
+import { digestAssetName, openFileStore } from './file-store.ts';
 import { openHostedDecks } from './hosted.ts';
 import type { HostedDecks } from './hosted.ts';
 import { directorySeed, materializeSeed } from './seed.ts';
@@ -30,6 +31,7 @@ import {
   snapshotPath,
 } from './snapshots.ts';
 import type { DeckStore, StoreEvent, VersionRecord } from './store.ts';
+import { AssetExistsError } from './store.ts';
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
 
@@ -230,6 +232,7 @@ describe('hosted stores', () => {
   /** Two BlobStores over one fake, each with its own mirror, the seed pushed once. */
   async function blobPair(hooks?: {
     beforeCommit?: () => Promise<void>;
+    afterHead?: () => Promise<void>;
   }): Promise<{ fake: FakeBlobClient; a: BlobStore; b: BlobStore }> {
     // the fake stamps uploads with the test clock; the pair prunes with no grace so a test sees
     // the retention rule act (the store's default leaves an unreferenced snapshot alone for 5 min)
@@ -375,6 +378,47 @@ describe('hosted stores', () => {
       expect(blobsOf(pair.fake, 'decks/gt-brand/versions/')).toEqual([
         'decks/gt-brand/versions/1.json',
       ]);
+    });
+
+    it('answers a commit that landed between the head read and the pull as a conflict, never an error', async () => {
+      // b opens a write against revision 412 and reads the store's head; a commits 413 before b
+      // pulls; b's pull proves a's document, so its mirror stands past the head it read. Before
+      // the fix this was a StaleMirrorError and a 500 on the route (VERIFICATION-3 finding 19).
+      let raced = false;
+      const hooks = {
+        afterHead: async () => {
+          // once: the retry below opens a write too, and must not meet a second commit
+          if (raced) return;
+          raced = true;
+          const won = await pair.a.write({
+            baseRevision: 412,
+            author: agentA,
+            mutations: [setSize(20)],
+          });
+          expect(won.ok).toBe(true);
+        },
+      };
+      const pair = await blobPair(hooks);
+      const lost = await pair.b.write({
+        baseRevision: 412,
+        author: agentB,
+        mutations: [setSize(22)],
+      });
+      expect(lost.ok).toBe(false);
+      if (lost.ok || lost.code !== 'conflict') return;
+      expect(lost.currentRevision).toBe(413);
+      const list = lost.current.slides['content-rule'];
+      expect(list?.kind === 'content' && list.slots.right?.[0]).toMatchObject({ size: 20 });
+      expect((await pair.b.records()).map((r) => r.mutations)).toEqual([[setSize(20)]]);
+      expect(await pair.b.revision()).toBe(413);
+      // the loser retries from the current document and lands
+      const retry = await pair.b.write({
+        baseRevision: 413,
+        author: agentB,
+        mutations: [setSize(22)],
+      });
+      expect(retry.ok).toBe(true);
+      if (retry.ok) expect(retry.revision).toBe(414);
     });
 
     it('drops a write the store did not take and re-reads the truth', async () => {
@@ -948,6 +992,82 @@ describe('hosted stores', () => {
       expect(() => collection('blob', join(root, 'overlay-3'), null)).toThrow(
         /needs a Blob client/,
       );
+    });
+
+    it('serves a picture added on one instance from the next (SPEC-3 0.39, report 10 F49)', async () => {
+      /* Before putAsset, a hosted asset.add wrote its twin into instance A's overlay only, so the
+         record reached the store inside the next deck.json while the bytes never did: instance B
+         rendered a broken image and an export on B found nothing under assets/ (report 10 F49,
+         the two instance case). The action now puts the bytes through the deck's store before
+         the record commits; this case stages the two calls the action makes and reads the twin
+         from a second instance that never saw A's disk. It fails at 61b16e4, where putAsset does
+         not exist. */
+      const fake = memoryBlobClient();
+      const first = collection('blob', join(root, 'overlay-1'), fake);
+      await first.ready();
+      clock = '2026-09-13T09:00:00.000Z';
+      await first.create({ name: 'Second deck', from: 'gt-brand' });
+      const a = await first.open('second-deck');
+
+      // 1. the bytes go to the store under a digest name, overwrite refused
+      const twin = digestAssetName('mood-sea', PNG, '-light.png');
+      const put = await a.putAsset(twin, PNG, 'image/png');
+      expect(put).toMatchObject({ relative: twin, existed: false });
+      expect(put.url).toBe(`${fake.base}/decks/second-deck/${twin}`);
+      expect(existsSync(put.path)).toBe(true);
+      expect(blobsOf(fake, 'decks/second-deck/assets/')).toContain(`decks/second-deck/${twin}`);
+      // the same bytes again are the same file; other bytes under the name are refused and the
+      // stored file is untouched (SPEC-3 0.26: nothing on the public store is overwritten)
+      expect((await a.putAsset(twin, PNG)).existed).toBe(true);
+      await expect(a.putAsset(twin, new Uint8Array([9, 9, 9]))).rejects.toBeInstanceOf(
+        AssetExistsError,
+      );
+      expect(fake.blobs.get(`decks/second-deck/${twin}`)?.bytes).toEqual(PNG);
+
+      // 2. the record commits through the same store, as commitAssets does
+      const asset: Asset = {
+        ...MOOD_EARTH,
+        id: 'mood-sea',
+        alt: 'the sea',
+        twins: { light: twin, dark: twin },
+        size: [4, 4],
+      };
+      const outcome = await a.write({
+        baseRevision: 0,
+        author: kevin,
+        mutations: [{ op: 'asset.set', asset }],
+      });
+      expect(outcome.ok).toBe(true);
+
+      // 3. instance B: a fresh overlay, no local knowledge of A's disk
+      const second = collection('blob', join(root, 'overlay-2'), fake);
+      await second.ready();
+      const b = await second.open('second-deck');
+      expect((await b.read()).document.deck.assets['mood-sea']?.twins).toEqual({
+        light: twin,
+        dark: twin,
+      });
+      expect(await second.assetFile('second-deck', twin.slice('assets/'.length))).toBeNull();
+      expect(await second.assetUrl('second-deck', twin.slice('assets/'.length))).toBe(put.url);
+      await second.ensureAssets('second-deck');
+      const file = await second.assetFile('second-deck', twin.slice('assets/'.length));
+      expect(file).not.toBeNull();
+      expect(new Uint8Array(readFileSync(file as string))).toEqual(PNG);
+
+      // 4. removal on B is removal everywhere; a miss is never cached, so a twin put after a
+      // miss is found on the next request (the editor asks for the image before the record lands)
+      const later = digestAssetName('mood-sea', new Uint8Array([7, 7]), '-dark.png');
+      expect(await second.assetUrl('second-deck', later.slice('assets/'.length))).toBeNull();
+      await a.putAsset(later, new Uint8Array([7, 7]));
+      expect(await second.assetUrl('second-deck', later.slice('assets/'.length))).toBe(
+        `${fake.base}/decks/second-deck/${later}`,
+      );
+      await b.removeAsset(twin);
+      expect(fake.blobs.has(`decks/second-deck/${twin}`)).toBe(false);
+      expect(await first.assetUrl('second-deck', twin.slice('assets/'.length))).toBeNull();
+      // the instance that asked before the removal keeps the old address in its URL cache; the
+      // store answers 404 there, as it does for any deleted file, and digest names never return
+      expect(await second.assetUrl('second-deck', twin.slice('assets/'.length))).toBe(put.url);
     });
   });
 });

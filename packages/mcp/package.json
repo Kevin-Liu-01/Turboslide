@@ -19,6 +19,7 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "catalog:",
     "@turboslide/agent": "workspace:*",
+    "@turboslide/identity": "workspace:*",
     "@turboslide/schema": "workspace:*",
     "zod": "catalog:"
   },

@@ -8,18 +8,31 @@ import { isAbsolute, join, resolve } from 'node:path';
 import { formatFinding } from '@turboslide/lint/run';
 import type { Slide } from '@turboslide/schema/deck';
 import { makeDiagram } from '@turboslide/schema/diagrams';
-import { ConflictError } from '@turboslide/schema/errors';
+import { ConflictError, ForbiddenError, GoneError } from '@turboslide/schema/errors';
 import { parseBlockAddress } from '@turboslide/schema/ids';
 import { parseJson } from '@turboslide/schema/json';
 import { openFileStore } from '@turboslide/store/file-store';
 import type { FileStore } from '@turboslide/store/file-store';
 
+import type { Asset } from '@turboslide/schema/assets';
+import { assetAdd, materialCapture } from '@turboslide/materials/actions';
+
 import { flagBoolean, flagString } from './args.ts';
 import type { CommandContext } from './context.ts';
-import { derivedDir, findDeckDir, loadDeck, readJson, readRenderRecords } from './deck-files.ts';
+import {
+  derivedDir,
+  findDeckDir,
+  loadDeck,
+  readJson,
+  readRenderRecords,
+  repoRootFor,
+} from './deck-files.ts';
 import { headlessCanvasMeasurer, headlessFitMeasurer } from './deps/canvas.ts';
 import { lintLists } from './deps/theme.ts';
 import { GateError, UsageError } from './exit.ts';
+import { localCaller, originOf } from './record-actions.ts';
+import type { RecordDeps } from './record-actions.ts';
+import { principalIdOf } from './records/principal.ts';
 import type { SlideResult, StoreActionDeps, WriteContext } from './store-actions.ts';
 
 /** The store over the deck the run resolves (--deck, TURBOSLIDE_DECK, the nearest deck.json). */
@@ -41,6 +54,52 @@ export function storeDeps(ctx: CommandContext, store: FileStore): StoreActionDep
     measureFit: headlessFitMeasurer(store.dir, slidesOf),
     // the diagram templates (SPEC-2 2.8.3): B5's @turboslide/schema/diagrams, bound at merge 2
     diagrams: makeDiagram,
+  };
+}
+
+/** The `decks/` folder a deck folder sits in. */
+export function decksDirOfStore(store: FileStore): string {
+  return join(store.dir, '..');
+}
+
+/**
+ * The record actions' deps over a deck (record-actions.ts): the caller is the CLI's author as the
+ * checkout principal (`local:<name>`, `agent:<runId>`), the inbox and the principal records live
+ * under the repository's `.turboslide/`, URLs print against TURBOSLIDE_ORIGIN or the dev server,
+ * and the file and url forms of the background picture and the material frame run the materials
+ * package's asset.add and material.capture over the same store.
+ */
+export function recordDeps(ctx: CommandContext, store: FileStore): RecordDeps {
+  const author = { ...ctx.author, principalId: principalIdOf(ctx.author) };
+  const deps = storeDeps(ctx, store);
+  const assetDeps = { store, cwd: ctx.cwd, log: (line: string) => ctx.out.human(line) };
+  return {
+    store,
+    deckId: store.id,
+    stateDir: join(
+      repoRootFor(store.dir) ?? derivedDir(store.dir, ctx.cwd).replace(/\/\.turboslide$/, ''),
+      '.turboslide',
+    ),
+    decksDir: decksDirOfStore(store),
+    origin: originOf(ctx.env),
+    caller: localCaller(author),
+    author,
+    storeDeps: deps,
+    addAsset: async (request, writeCtx, baseRevision) =>
+      assetAdd(assetDeps, writeCtx, { ...request, baseRevision }),
+    captureMaterial: async (request, writeCtx, baseRevision) => {
+      const captured = await materialCapture(assetDeps, writeCtx, {
+        materialId: request.materialId,
+        ...(request.preset !== undefined ? { preset: request.preset } : {}),
+        ...(request.uniforms !== undefined ? { uniforms: request.uniforms as never } : {}),
+        anchors: [request.anchor ?? 5500],
+        role: 'frame',
+        baseRevision,
+      });
+      const frame: Asset | undefined = Array.isArray(captured) ? captured[0] : captured;
+      if (frame === undefined) throw new Error('material.capture produced no frame');
+      return frame;
+    },
   };
 }
 
@@ -86,6 +145,17 @@ export async function runAction<T>(ctx: CommandContext, run: () => Promise<T>): 
     }
     if (error instanceof TypeError || error instanceof RangeError)
       throw new UsageError(error.message);
+    // a missing right and a revoked token (gslides-parity SPEC-3 6.2, 6.4) read as the fixed
+    // sentences with exit 2; the JSON result carries the status for a script
+    if (error instanceof ForbiddenError || error instanceof GoneError) {
+      ctx.out.result({
+        error: error.name,
+        status: error.status,
+        code: error.code,
+        message: error.message,
+      });
+      throw new UsageError(error.message);
+    }
     throw error;
   }
 }

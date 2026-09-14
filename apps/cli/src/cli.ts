@@ -32,6 +32,15 @@ import { table } from './commands/table.ts';
 import { text } from './commands/text.ts';
 import { validate } from './commands/validate.ts';
 import { version } from './commands/version.ts';
+import { account } from './commands/account.ts';
+import { activity } from './commands/activity.ts';
+import { admin } from './commands/admin.ts';
+import { comment, comments } from './commands/comment.ts';
+import { login, logout } from './commands/login.ts';
+import { notifications } from './commands/notifications.ts';
+import { picture } from './commands/picture.ts';
+import { presence, sync } from './commands/presence.ts';
+import { share } from './commands/share.ts';
 import { parseAuthor } from './context.ts';
 import type { CommandContext } from './context.ts';
 import { EXIT, GateError, UsageError } from './exit.ts';
@@ -49,7 +58,7 @@ Commands
   deck rename <name>                set the deck title (deck.rename)
   deck set <path> <value> [--unset] write /title, /theme or a /defaults field of the manifest (deck.set)
   deck list [--include-trashed]     every deck under decks/, newest first (deck.list)
-  deck copy <id> --name <name> [--id <newId>] [--slides <id,...>] [--remove-notes]
+  deck copy <id> --name <name> [--id <newId>] [--slides <id,...>] [--remove-notes] [--copy-comments]
                                     a copy under a new id at revision 0 (deck.copy)
   deck trash <id> | deck restore <id>
                                     move a deck to the trash and back (deck.trash, deck.restore)
@@ -164,15 +173,16 @@ Commands
                                     [--exclude-share-alike] [--baseline-target libreoffice|none] [--no-jpeg] [--verify] --out <dir>
                                     PPTX per theme (flatten is perfect, native is editable text), <deckId>-both.zip for both
                                     themes, export-report.json; exit 1 when the report fails
-  export pptx ... [--include-skipped] [--include-notes] [--tables auto|table|rows]
-                                    skipped slides stay out unless asked (slide.skip); the table block as a:tbl,
-                                    ruled rows when a cell misses the budget
+  export pptx ... [--include-skipped] [--include-notes] [--include-comments] [--tables auto|table|rows]
+                                    skipped slides stay out unless asked (slide.skip); comments as classic p:cm parts for
+                                    editors (parity SPEC-3 5.8); the table block as a:tbl, ruled rows when a cell
+                                    misses the budget
   export pdf [<deck>] [ids|all] [--appearance light|dark] [--include-skipped] [--verify] --out <dir>
                                     one page per slide at 13.333 by 7.5 in; --verify gates every page against the
                                     web render where poppler exists
   export jpeg [<deck>] [ids|all] [--theme light|dark] [--scale 1|2] --out <dir>
                                     JPEGs at quality 92
-  export txt [<deck>] [ids|all] [--include-notes] [--include-skipped]
+  export txt [<deck>] [ids|all] [--include-notes] [--include-skipped] [--include-comments]
                                     the deck as plain text: one block per slide, cells tab separated (export.text)
   export check <file.pptx | dir> [--python <bin>] [--no-quick-look] [--out <dir>] [--json]
                                     read an exported file back with python-pptx: pages, size, media formats, fonts,
@@ -181,6 +191,50 @@ Commands
                                     cut the export font set into packages/fonts/export (scripts/build-fonts.py)
   generate                          the contracts generator (pnpm generate:contracts)
   mcp [--derived <dir>]             the MCP server over stdio: deck_* tools, deck:// resources, the deck_review prompt
+
+Collaboration (every command takes --to <studio> to run on a hosted deck)
+  comment add <anchor> -m <text> [--mention <who>] [--assign <who>]
+                                    a thread at deck, slide:<id>, <slide>#<block>, <slide>#<block>/<path>:<a>-<b>,
+                                    <slide>#<block>/cell:<r>,<c> or notes:<slide> (comment.add)
+  comment reply|edit|delete|resolve|reopen|assign|done|react|get|link <threadId> ...
+                                    the thread commands (comment.reply, comment.edit, comment.delete, comment.resolve,
+                                    comment.reopen, comment.assign, comment.done, comment.react, comment.get, comment.link)
+  comments [<slideId>] [--block <id>] [--state open|resolved|all] [--for-me] [--search <text>] [--since <n>]
+                                    the threads with their anchors resolved (comment.list)
+  notifications [--unread] [--since <iso>] | notifications read <ids>|--all | notifications settings --level for-you
+                                    the inbox (notification.list, notification.markRead, notification.settings)
+  activity [--since <iso>] [--kind comment,share]
+                                    the activity feed (activity.list)
+  version diff [<from> [<to>]]      the changes between two revisions by author and block (version.diff)
+  share get|access|link|revoke-link|rotate-link|stop|invite|role|remove|expire|settings|requests|respond|transfer|
+        accept-ownership|decline-ownership|claim|email <id> ...
+                                    the access record (share.get, share.setGeneralAccess, share.createLink, share.revokeLink,
+                                    share.rotateLink, share.stop, share.invite, share.setRole, share.remove, share.setExpiry,
+                                    share.settings, share.listRequests, share.respond, share.transferOwnership,
+                                    share.acceptOwnership, share.declineOwnership, share.claim, share.emailCollaborators)
+  deck publish <id> | deck unpublish <id>
+                                    the published player (deck.publish, deck.unpublish)
+  deck watch <id> [--from <studio>] [--since <n>] | deck follow <id> --from <studio> [--push] [--comments]
+                                    the checkpoints as they land; a hosted deck mirrored into the checkout (deck.watch, deck.follow)
+  presence list | presence follow <clientId> | presence unfollow | presence pointer --on|--off
+                                    the roster and the follow controls (presence.list, presence.follow, presence.unfollow, presence.pointer)
+  sync status                       the client's position in the room (sync.status)
+  account me|name|avatar|decks|sessions|sign-out|tokens ...
+                                    the caller's account (account.me, account.setName, account.setAvatar, account.decks,
+                                    account.sessions, account.signOut, account.tokens.create, account.tokens.list, account.tokens.revoke)
+  admin flag <name> [on|off] | admin assign-owner <id> --email <a@x> | admin bootstrap --to <url> --email <a@x> |
+        admin migrate-storage <step> --to <url> | admin mail --to <url>
+                                    the deployment admin's actions (admin.flag, admin.assignOwner, admin.bootstrap,
+                                    admin.migrateStorage, admin.mail.list)
+  block dither <slide>#<block> [--pattern bayer8] [--black 120 --white 230 --gamma 0.9] [--photograph] [--off]
+                                    the deck's two tone screen over a picture (picture.dither)
+  picture materialize [<slideIds>] [--prune] [--scale 2] [--dry-run]
+                                    the dither variants every export reads (picture.materialize)
+  slide background-picture <ids> --asset <id>|--file <path>|--url <url> [--dither] | slide background-material <ids> <materialId> [--dither]
+                                    a covering picture, or a shader frame, at the back of each slide (slide.setBackgroundPicture,
+                                    slide.setBackgroundMaterial)
+  login --to <url> | logout --to <url>
+                                    an API key over the device flow, kept in ~/.config/turboslide/hosts.json
 
 Global flags
   --deck <dir>    the deck directory (default: TURBOSLIDE_DECK, the nearest deck.json, or decks/gt-brand)
@@ -226,6 +280,18 @@ const COMMANDS: Record<string, Command> = {
   fonts,
   generate,
   mcp,
+  comment,
+  comments,
+  notifications,
+  activity,
+  share,
+  presence,
+  sync,
+  account,
+  admin,
+  picture,
+  login,
+  logout,
 };
 
 export type RunOptions = {

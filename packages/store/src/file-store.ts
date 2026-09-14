@@ -5,12 +5,14 @@
 // never interleave. Leases live under <dir>/.turboslide/leases.json, which the repository's
 // .gitignore already excludes, because they expire; a lease another author holds refuses an
 // agent's write and warns on a human's (lease.ts, MILESTONES M4 item 2).
+import { createHash } from 'node:crypto';
 import {
   closeSync,
   existsSync,
   mkdirSync,
   openSync,
   readFileSync,
+  renameSync,
   rmSync,
   statSync,
   unlinkSync,
@@ -20,7 +22,7 @@ import { basename, dirname, join } from 'node:path';
 
 import type { Deck, DeckDocument } from '@turboslide/schema/deck';
 import { canonicalJson, parseJson } from '@turboslide/schema/json';
-import type { Author, Lease, Version, Write } from '@turboslide/schema/mutations';
+import type { Author, Lease, Mutation, Version, Write } from '@turboslide/schema/mutations';
 import { jsonEqual } from '@turboslide/schema/pointer';
 import { applyWrite } from '@turboslide/schema/reduce';
 import { validateDeck } from '@turboslide/schema/validate';
@@ -38,6 +40,7 @@ import {
   writeLeases,
 } from './lease.ts';
 import type {
+  AssetPut,
   DeckStore,
   LeaseOptions,
   LeasePolicy,
@@ -47,7 +50,7 @@ import type {
   WriteOptions,
   WriteOutcome,
 } from './store.ts';
-import { touchedSlides } from './store.ts';
+import { AssetExistsError, assetRelative, touchedSlides } from './store.ts';
 import {
   documentAtVersion,
   nextVersionNumber,
@@ -74,6 +77,12 @@ export type FileStoreOptions = {
   lockFile?: string;
   /** How long a write waits for another process's lock before failing. Default 5000 ms. */
   lockTimeoutMs?: number;
+  /**
+   * Runs inside the write lock after a committed write, with the documents before and after and
+   * the mutations that were applied (gslides-parity SPEC-3 0.52: the comments store shifts the
+   * text anchors the write moved and writes the sidecar under the same lock).
+   */
+  onWrite?: (before: DeckDocument, after: DeckDocument, mutations: ReadonlyArray<Mutation>) => void;
 };
 
 export type FileStore = DeckStore & { readonly dir: string; readonly leaseFile: string };
@@ -192,6 +201,68 @@ export function writeManifest(dir: string, deck: Deck): void {
   writeFileSync(join(dir, 'deck.json'), canonicalJson(deck));
 }
 
+/**
+ * The content digest an asset file name carries (gslides-parity SPEC-3 0.26, 8.5: twins
+ * `assets/<id>.<sha8>-light.png`, sources `assets/<id>.source.<sha8>.<ext>`, frames
+ * `assets/<id>.<sha8>@2x.png`): the first eight hex characters of the sha256 of the bytes.
+ */
+export function assetDigest(bytes: Uint8Array): string {
+  return createHash('sha256').update(bytes).digest('hex').slice(0, 8);
+}
+
+/** `assets/<id>.<sha8><suffix>` for a file's bytes; the suffix carries the twin side and the extension. */
+export function digestAssetName(id: string, bytes: Uint8Array, suffix: string): string {
+  return `assets/${id}.${assetDigest(bytes)}${suffix}`;
+}
+
+function sameBytes(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.byteLength !== b.byteLength) return false;
+  for (let i = 0; i < a.byteLength; i += 1) if (a[i] !== b[i]) return false;
+  return true;
+}
+
+/**
+ * The local half of `DeckStore.putAsset` (SPEC-3 8.5): writes the file under the deck directory
+ * through a sibling name and a rename, refuses other bytes under a taken name, and reports a
+ * file already there with the same bytes as `existed`. The Blob backend runs this before its put.
+ */
+export function putAssetFile(dir: string, relative: string, bytes: Uint8Array): AssetPut {
+  const rel = assetRelative(relative);
+  const path = join(dir, ...rel.split('/'));
+  if (existsSync(path)) {
+    if (!sameBytes(new Uint8Array(readFileSync(path)), bytes)) throw new AssetExistsError(rel);
+    return { relative: rel, path, url: null, existed: true };
+  }
+  mkdirSync(dirname(path), { recursive: true });
+  const partial = `${path}.${process.pid}.part`;
+  writeFileSync(partial, bytes);
+  renameSync(partial, path);
+  return { relative: rel, path, url: null, existed: false };
+}
+
+/** The local half of `DeckStore.removeAsset`: a missing file is not an error. */
+export function removeAssetFile(dir: string, relative: string): void {
+  const rel = assetRelative(relative);
+  rmSync(join(dir, ...rel.split('/')), { force: true });
+}
+
+/**
+ * Runs `run` under a deck's write lock (`<dir>/.turboslide/write.lock`, the one every FileStore
+ * write takes), so a sidecar write on a checkout (the comments store, SPEC-3 5.2) never interleaves
+ * with a document write of another process.
+ */
+export function withDeckLock<T>(
+  dir: string,
+  run: () => Promise<T>,
+  options: { lockFile?: string; timeoutMs?: number } = {},
+): Promise<T> {
+  return withLock(
+    options.lockFile ?? join(dir, STATE_DIR, 'write.lock'),
+    options.timeoutMs ?? 5000,
+    run,
+  );
+}
+
 export function openFileStore(options: FileStoreOptions): FileStore {
   const dir = options.dir;
   const clock = options.now ?? (() => new Date().toISOString());
@@ -256,9 +327,14 @@ export function openFileStore(options: FileStoreOptions): FileStore {
           createdAt: now,
           mutations: result.entry.mutations,
           inverse: result.inverse,
+          ...(writeOptions.ops !== undefined ? { ops: writeOptions.ops } : {}),
         };
         writeVersion(dir, entry);
         writeManifest(dir, result.document.deck);
+        // the comment anchors follow the text they name (gslides-parity SPEC-3 0.52): the shift
+        // entries a checkout's write produces are written to the sidecar under this same lock
+        if (options.onWrite !== undefined)
+          options.onWrite(current, result.document, write.mutations);
         return {
           ok: true,
           document: result.document,
@@ -351,6 +427,14 @@ export function openFileStore(options: FileStoreOptions): FileStore {
 
     watch(listener: StoreListener): () => void {
       return watchDeck(dir, listener);
+    },
+
+    async putAsset(relative: string, bytes: Uint8Array): Promise<AssetPut> {
+      return putAssetFile(dir, relative, bytes);
+    },
+
+    async removeAsset(relative: string): Promise<void> {
+      removeAssetFile(dir, relative);
     },
   };
   return store;

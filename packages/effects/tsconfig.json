@@ -6,7 +6,7 @@
       "sharp": ["./node_modules/sharp/lib/index.d.ts"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "vitest.config.ts"],
   "references": [
     {
       "path": "../schema"

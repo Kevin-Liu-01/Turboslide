@@ -1,0 +1,58 @@
+{
+  "id": "01m2em8sza0xrv8qsfe2pgbr1a",
+  "deckId": "gslides",
+  "anchor": {
+    "kind": "text",
+    "slideId": "breaks",
+    "blockId": "p1",
+    "path": "/text",
+    "range": [
+      0,
+      12
+    ],
+    "quoted": "The first pa"
+  },
+  "comment": {
+    "id": "01m2em8sza0xrv8qsfe2pgbr1a",
+    "author": {
+      "principalId": "local:tester",
+      "label": "tester",
+      "kind": "human"
+    },
+    "createdAt": "2026-09-14T00:15:01.068Z",
+    "body": {
+      "text": "Shorten this opening.",
+      "mentions": []
+    }
+  },
+  "replies": [
+    {
+      "id": "01m2em8tqb9crn08bve1ktmj1x",
+      "author": {
+        "principalId": "local:maya",
+        "label": "maya",
+        "kind": "human"
+      },
+      "createdAt": "2026-09-14T00:15:01.867Z",
+      "body": {
+        "text": "Done in the next revision.",
+        "mentions": []
+      }
+    }
+  ],
+  "assignee": {
+    "to": {
+      "kind": "principal",
+      "principalId": "local:maya"
+    },
+    "by": "local:tester",
+    "at": "2026-09-14T00:15:01.068Z"
+  },
+  "createdAt": "2026-09-14T00:15:01.068Z",
+  "updatedAt": "2026-09-14T00:15:02.835Z",
+  "revision": 6,
+  "resolved": {
+    "at": "2026-09-14T00:15:02.835Z",
+    "by": "local:maya"
+  }
+}

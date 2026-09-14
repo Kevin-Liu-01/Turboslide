@@ -1,0 +1,43 @@
+TURBOSLIDE_AUTHORIZE: Saving…
+TURBOSLIDE_AUTHORIZE: ✓ Overrode        TURBOSLIDE_AUTHORIZE
+TURBOSLIDE_AUTHORIZE:   Project         kl01s-projects/turboslide
+TURBOSLIDE_AUTHORIZE:   Environments    Production
+TURBOSLIDE_AUTHORIZE:   Type            Sensitive
+TURBOSLIDE_REALTIME: Saving…
+TURBOSLIDE_REALTIME: ✓ Overrode        TURBOSLIDE_REALTIME
+TURBOSLIDE_REALTIME:   Project         kl01s-projects/turboslide
+TURBOSLIDE_REALTIME:   Environments    Production
+TURBOSLIDE_REALTIME:   Type            Sensitive
+TURBOSLIDE_MAIL: Saving…
+TURBOSLIDE_MAIL: ✓ Overrode        TURBOSLIDE_MAIL
+TURBOSLIDE_MAIL:   Project         kl01s-projects/turboslide
+TURBOSLIDE_MAIL:   Environments    Production
+TURBOSLIDE_MAIL:   Type            Sensitive
+TURBOSLIDE_SESSION_SECRET (sensitive, 32 random bytes as hex): Saving…
+TURBOSLIDE_SESSION_SECRET (sensitive, 32 random bytes as hex): ✓ Overrode        TURBOSLIDE_SESSION_SECRET
+TURBOSLIDE_SESSION_SECRET (sensitive, 32 random bytes as hex):   Project         kl01s-projects/turboslide
+TURBOSLIDE_SESSION_SECRET (sensitive, 32 random bytes as hex):   Environments    Production
+TURBOSLIDE_SESSION_SECRET (sensitive, 32 random bytes as hex):   Type            Sensitive
+TURBOSLIDE_DOWNLOAD_SECRET (sensitive, 32 random bytes as hex): Saving…
+TURBOSLIDE_DOWNLOAD_SECRET (sensitive, 32 random bytes as hex): ✓ Overrode        TURBOSLIDE_DOWNLOAD_SECRET
+TURBOSLIDE_DOWNLOAD_SECRET (sensitive, 32 random bytes as hex):   Project         kl01s-projects/turboslide
+TURBOSLIDE_DOWNLOAD_SECRET (sensitive, 32 random bytes as hex):   Environments    Production
+TURBOSLIDE_DOWNLOAD_SECRET (sensitive, 32 random bytes as hex):   Type            Sensitive
+TURBOSLIDE_PUBLIC_STORE_HOST: Saving…
+TURBOSLIDE_PUBLIC_STORE_HOST: ✓ Overrode        TURBOSLIDE_PUBLIC_STORE_HOST
+TURBOSLIDE_PUBLIC_STORE_HOST:   Project         kl01s-projects/turboslide
+TURBOSLIDE_PUBLIC_STORE_HOST:   Environments    Production
+TURBOSLIDE_PUBLIC_STORE_HOST:   Type            Sensitive
+--- production environment names after the change ---
+> Environment Variables found for kl01s-projects/turboslide [91ms]
+
+ name                               value               environments                        created             
+ TURBOSLIDE_PUBLIC_STORE_HOST       Encrypted           Production                          739ms ago           
+ TURBOSLIDE_DOWNLOAD_SECRET         Encrypted           Production                          2s ago              
+ TURBOSLIDE_SESSION_SECRET          Encrypted           Production                          3s ago              
+ TURBOSLIDE_MAIL                    Encrypted           Production                          4s ago              
+ TURBOSLIDE_REALTIME                Encrypted           Production                          5s ago              
+ TURBOSLIDE_AUTHORIZE               Encrypted           Production                          6s ago              
+ TURBOSLIDE_TOKEN                   Encrypted           Production                          2d ago              
+ BLOB_READ_WRITE_TOKEN              Encrypted           Production, Preview, Development    3d ago              
+

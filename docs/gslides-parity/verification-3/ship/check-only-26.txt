@@ -1,0 +1,246 @@
+check: starting the studio dev server on 4321 (log capped in .turboslide/dev-server.log)
+check: warmed /deck/gt-brand and /edit/gt-brand and /new and /decks with 1296 client module(s) in 6.5 s
+check 26/28: pnpm exec playwright test apps/studio/e2e/realtime.spec.ts apps/studio/e2e/presence.spec.ts apps/studio/e2e/comments.spec.ts apps/studio/e2e/share.spec.ts apps/studio/e2e/versions-by-author.spec.ts apps/studio/e2e/accounts.spec.ts apps/studio/e2e/dither.spec.ts apps/studio/e2e/security.spec.ts
+
+Running 40 tests using 1 worker
+
+  ✓   1 apps/studio/e2e/accounts.spec.ts:174:1 › a share link from the address bar lands with no token in the address and a sealed identity cookie (889ms)
+  ✓   2 apps/studio/e2e/accounts.spec.ts:200:1 › a cors fetch of a share link is 403, a dead link is the You need access page, a foreign origin lands (553ms)
+  ✓   3 apps/studio/e2e/accounts.spec.ts:230:1 › sign in with the captured code links the anonymous id to the account; a stranger gets the same answer (1.5s)
+  ✓   4 apps/studio/e2e/accounts.spec.ts:270:1 › the device authorization flow: a code from the terminal, the /device page, the approval, the token (7.9s)
+  ✓   5 apps/studio/e2e/accounts.spec.ts:335:1 › a typed address opens /device (the CLI prints it): a top level navigation with Sec-Fetch-Site none is answered 200 (8ms)
+  ✓   6 apps/studio/e2e/accounts.spec.ts:350:1 › the avatar route serves a seeded picture with its headers and refuses a path outside the grammar (323ms)
+  ✓   7 apps/studio/e2e/accounts.spec.ts:370:3 › the chrome surfaces of section 7 (B6 days 3 to 6, B2 day 4) › the name prompt, the own chip menu, Forget this browser, the Picture tab sentence, the sessions list (1.8s)
+  ✘   8 apps/studio/e2e/comments.spec.ts:87:1 › a comment with a mention reaches the other browser within 2 s: the marker, the filmstrip chip, the inbox plate and For you; reply, resolve, delete with Undo, the orphan and its revival (10.4s)
+  -   9 apps/studio/e2e/comments.spec.ts:227:1 › a viewer link sees no marker until the owner turns on Viewers can see comments
+  ✓  10 apps/studio/e2e/dither.spec.ts:141:3 › the dither pipeline in the editor › Change background, Upload from computer with the Rosetta source lands the covering picture (9.5s)
+  ✓  11 apps/studio/e2e/dither.spec.ts:175:3 › the dither pipeline in the editor › Dither on writes the Photograph numbers and the live overlay draws; the Neutral chip switches them (7.7s)
+dither budget: {"date":"2026-09-14T08:57:27.035Z","path":"Format options slider","events":200,"framesDrawn":110,"p50Ms":30.1,"p95Ms":62.7,"maxMs":94,"hostP95Ms":14.9,"userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"}
+  ✓  12 apps/studio/e2e/dither.spec.ts:219:3 › the dither pipeline in the editor › Strength and Ink point over 200 slider events stay under 100 ms at the 95th percentile (8.2s)
+  ✓  13 apps/studio/e2e/dither.spec.ts:312:3 › the dither pipeline in the editor › the theme switch shows the inverse screen (1.9s)
+  ✓  14 apps/studio/e2e/dither.spec.ts:348:3 › the dither pipeline in the editor › Perfect and Editable text export with the variant materialized and the dither residual lines (9.8s)
+  ✓  15 apps/studio/e2e/presence.spec.ts:125:1 › the five fixed slots exist at first paint with nobody present and the page loads with zero layout shift entries (7.4s)
+  ✘  16 apps/studio/e2e/presence.spec.ts:158:1 › a second person appears as a chip without moving the row; the roster lists them with Go to slide; a selection draws the outline and the flag; the words typed arrive (4.10) (3.0m)
+  -  17 apps/studio/e2e/presence.spec.ts:273:1 › twenty simulated participants fill four chips and +16, the filmstrip chips and twenty flags at 120 by 18, with zero layout shift entries
+  ✓  18 apps/studio/e2e/realtime.spec.ts:181:1 › two contexts open one deck as two labels and see each other in the roster (4.5s)
+  ✘  19 apps/studio/e2e/realtime.spec.ts:206:1 › two contexts type in one paragraph and converge byte for byte within 2 s over 200 keystrokes (10.0s)
+  -  20 apps/studio/e2e/realtime.spec.ts:241:1 › a keystroke reaches the other tab: the op to screen latency on the dev server
+  -  21 apps/studio/e2e/realtime.spec.ts:266:1 › a block change and a keystroke on one slide both apply
+  -  22 apps/studio/e2e/realtime.spec.ts:310:1 › an agent write through /api/actions appears in both tabs within 1 s
+  -  23 apps/studio/e2e/realtime.spec.ts:328:1 › undo in A never reverts B’s later change
+  -  24 apps/studio/e2e/realtime.spec.ts:348:1 › a tab that lost its stream replays what landed and resends its pending queue
+  -  25 apps/studio/e2e/realtime.spec.ts:373:1 › a rejected op comes back to its author with its content
+  -  26 apps/studio/e2e/realtime.spec.ts:412:1 › a position more than 2,000 entries behind resyncs and rebases the pending ops
+  -  27 apps/studio/e2e/realtime.spec.ts:457:1 › a closed tab’s pending queue is offered on the next open and Apply lands it
+  -  28 apps/studio/e2e/realtime.spec.ts:485:1 › sync.status reads the same numbers through the window API and describe().state
+  ✓  29 apps/studio/e2e/security.spec.ts:177:1 › the eight html payloads are inert in the editor, the viewer and the print document (14.4s)
+  ✓  30 apps/studio/e2e/security.spec.ts:236:1 › the headers of 8.8 on four routes, the embed exception, and worker-src blob in the policy (326ms)
+  ✓  31 apps/studio/e2e/security.spec.ts:278:1 › a cross site text/plain POST, a foreign Origin and a form body are refused on the agent surface and the JSON routes (94ms)
+  ✓  32 apps/studio/e2e/security.spec.ts:311:1 › the export cancel needs its token, the thumbnail its grant in enforce mode, and the CSP report endpoint answers 204 (1.7s)
+  ✘  33 apps/studio/e2e/security.spec.ts:352:1 › the upload path refuses an svg, a type mismatch and a body over the declared size, and writes nothing (319ms)
+  -  34 apps/studio/e2e/security.spec.ts:399:1 › a restricted deck answers one 404 to a stranger on the routes and the pages, in enforce mode
+  -  35 apps/studio/e2e/security.spec.ts:423:1 › the stream, ops and presence rows wait on the realtime routes
+  ✓  36 apps/studio/e2e/share.spec.ts:103:1 › the Share dialog opens on Restricted with the people field first and the footer sentence; the toolbar Copy link holds no token (5.8s)
+  ✓  37 apps/studio/e2e/share.spec.ts:145:1 › a stranger receives the You need access page on four routes and 403 on the writes; a viewer link lands on /deck without notes and /edit opens Viewing with View only; a commenter link lands in Commenting (15.6s)
+  ✘  38 apps/studio/e2e/share.spec.ts:231:1 › rotate and Stop sharing kill the link; publish gives the player, the embed answers and 410 after unpublish (2.6s)
+  -  39 apps/studio/e2e/share.spec.ts:290:1 › request access shows the dot on Share, the banner and Approve as commenter; a legacy deck shows the claim
+  ✘  40 apps/studio/e2e/versions-by-author.spec.ts:96:1 › two labels editing two slides make one window with two marks; Show changes hatches with the author chip and underlines the run; Only named; Make a copy at a version; the delete rows are disabled with the clause (5.0m)
+
+
+  1) apps/studio/e2e/comments.spec.ts:87:1 › a comment with a mention reaches the other browser within 2 s: the marker, the filmstrip chip, the inbox plate and For you; reply, resolve, delete with Undo, the orphan and its revival 
+
+    Error: expect(locator).toHaveCount(expected) failed
+
+    Locator:  locator('[data-control="comment.marker"]')
+    Expected: 1
+    Received: 0
+    Timeout:  2000ms
+
+    Call log:
+      - Expect "toHaveCount" with timeout 2000ms
+      - waiting for locator('[data-control="comment.marker"]')
+        21 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+      125 |   /* B within 2 s: the marker, the chip, the plate, For you */
+      126 |   const markerB = pageB.locator('[data-control="comment.marker"]');
+    > 127 |   await expect(markerB).toHaveCount(1, { timeout: 2000 });
+          |                         ^
+      128 |   await expect(markerB).toHaveAttribute('data-count', '1');
+      129 |   await expect(pageB.locator(`[data-control="filmstrip.comments.${SLIDE}"]`)).toHaveText('1');
+      130 |   await expect(pageB.locator('[data-control="title.inbox"]')).toHaveAttribute('data-unread', '1');
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/comments.spec.ts:127:25
+
+    Error Context: .turboslide/playwright/comments-a-comment-with-a--ed5e3--the-orphan-and-its-revival/error-context.md
+
+    Error Context: .turboslide/playwright/comments-a-comment-with-a--ed5e3--the-orphan-and-its-revival/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/comments-a-comment-with-a--ed5e3--the-orphan-and-its-revival/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/comments-a-comment-with-a--ed5e3--the-orphan-and-its-revival/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) apps/studio/e2e/presence.spec.ts:158:1 › a second person appears as a chip without moving the row; the roster lists them with Go to slide; a selection draws the outline and the flag; the words typed arrive (4.10) 
+
+    Test timeout of 180000ms exceeded.
+
+    Error: locator.click: Test ended.
+    Call log:
+      - waiting for locator('.ts-stagewrap.ts-editor [data-block="h"] [data-run]').first()
+
+
+      256 |
+      257 |   /* 4.10: the words B types in the heading arrive in A as B types them */
+    > 258 |   await pageB.locator('.ts-stagewrap.ts-editor [data-block="h"] [data-run]').first().click();
+          |                                                                                      ^
+      259 |   await pageB.keyboard.press('End');
+      260 |   await pageB.keyboard.type(' live', { delay: 40 });
+      261 |   await expect(pageA.locator('.ts-stagewrap.ts-editor [data-block="h"]')).toContainText('live', {
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/presence.spec.ts:258:86
+
+    Error Context: .turboslide/playwright/presence-a-second-person-a-165c8-he-words-typed-arrive-4-10-/error-context.md
+
+    Error Context: .turboslide/playwright/presence-a-second-person-a-165c8-he-words-typed-arrive-4-10-/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/presence-a-second-person-a-165c8-he-words-typed-arrive-4-10-/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/presence-a-second-person-a-165c8-he-words-typed-arrive-4-10-/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) apps/studio/e2e/realtime.spec.ts:206:1 › two contexts type in one paragraph and converge byte for byte within 2 s over 200 keystrokes 
+
+    Error: expect(received).toBeLessThan(expected)
+
+    Expected: < 2000
+    Received:   5561
+
+      227 |   const converged = Date.now();
+      228 |   await expect.poll(() => runText(pageB, PARA), { timeout: 5000 }).toBe(`${left}${before}${right}`);
+    > 229 |   expect(converged - typed).toBeLessThan(2000);
+          |                             ^
+      230 |   console.info(
+      231 |     `realtime: 200 keystrokes typed in ${typed - started} ms, both tabs converged ${converged - typed} ms after the last one`,
+      232 |   );
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/realtime.spec.ts:229:29
+
+    Error Context: .turboslide/playwright/realtime-two-contexts-type-cb04f-hin-2-s-over-200-keystrokes/error-context.md
+
+    Error Context: .turboslide/playwright/realtime-two-contexts-type-cb04f-hin-2-s-over-200-keystrokes/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/realtime-two-contexts-type-cb04f-hin-2-s-over-200-keystrokes/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/realtime-two-contexts-type-cb04f-hin-2-s-over-200-keystrokes/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) apps/studio/e2e/security.spec.ts:352:1 › the upload path refuses an svg, a type mismatch and a body over the declared size, and writes nothing 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 403
+
+      377 |       data: '<svg xmlns="http://www.w3.org/2000/svg"></svg>',
+      378 |     });
+    > 379 |     expect(mismatch.status()).toBe(400);
+          |                               ^
+      380 |     const over = await request.post('/api/x/upload/picture', {
+      381 |       headers: JSON_FROM_PAGE,
+      382 |       data: JSON.stringify({ deckId: DECK, contentType: 'image/png', bytes: 8 }),
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/security.spec.ts:379:31
+
+    Error Context: .turboslide/playwright/security-the-upload-path-r-88f5a-red-size-and-writes-nothing/error-context.md
+
+    Error Context: .turboslide/playwright/security-the-upload-path-r-88f5a-red-size-and-writes-nothing/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/security-the-upload-path-r-88f5a-red-size-and-writes-nothing/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/security-the-upload-path-r-88f5a-red-size-and-writes-nothing/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) apps/studio/e2e/share.spec.ts:231:1 › rotate and Stop sharing kill the link; publish gives the player, the embed answers and 410 after unpublish 
+
+    Error: expect(received).toContain(expected) // indexOf
+
+    Matcher error: received value must not be null nor undefined
+
+    Received has value: undefined
+
+      266 |   const playerResponse = await pageP.goto(published.url);
+      267 |   expect(playerResponse?.status()).toBe(200);
+    > 268 |   expect(playerResponse?.headers()['x-robots-tag']).toContain('noindex');
+          |                                                     ^
+      269 |   await pageP.goto('about:blank');
+      270 |   await pageP.setContent(
+      271 |     `<iframe id="f" src="${new URL(published.embed, pageO.url()).href}" width="960" height="540"></iframe>`,
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/share.spec.ts:268:53
+
+    Error Context: .turboslide/playwright/share-rotate-and-Stop-shar-35939-ers-and-410-after-unpublish/error-context.md
+
+    Error Context: .turboslide/playwright/share-rotate-and-Stop-shar-35939-ers-and-410-after-unpublish/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/share-rotate-and-Stop-shar-35939-ers-and-410-after-unpublish/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/share-rotate-and-Stop-shar-35939-ers-and-410-after-unpublish/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) apps/studio/e2e/versions-by-author.spec.ts:96:1 › two labels editing two slides make one window with two marks; Show changes hatches with the author chip and underlines the run; Only named; Make a copy at a version; the delete rows are disabled with the clause 
+
+    Test timeout of 300000ms exceeded.
+
+    Error: locator.click: Test ended.
+    Call log:
+      - waiting for locator('.ts-stagewrap.ts-editor [data-block="big"] [data-run]').first()
+
+
+      80 | ): Promise<void> {
+      81 |   await goTo(page, slideId);
+    > 82 |   await page.locator(`.ts-stagewrap.ts-editor [data-block="${block}"] [data-run]`).first().click();
+         |                                                                                            ^
+      83 |   await page.keyboard.press('End');
+      84 |   await page.keyboard.type(word, { delay: 30 });
+      85 |   await page.keyboard.press('Escape');
+        at typeInHeading (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/versions-by-author.spec.ts:82:92)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/versions-by-author.spec.ts:108:3
+
+    Error Context: .turboslide/playwright/versions-by-author-two-lab-f435f-re-disabled-with-the-clause/error-context.md
+
+    Error Context: .turboslide/playwright/versions-by-author-two-lab-f435f-re-disabled-with-the-clause/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/versions-by-author-two-lab-f435f-re-disabled-with-the-clause/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/versions-by-author-two-lab-f435f-re-disabled-with-the-clause/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Slow test file: apps/studio/e2e/versions-by-author.spec.ts (5.0m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  6 failed
+    apps/studio/e2e/comments.spec.ts:87:1 › a comment with a mention reaches the other browser within 2 s: the marker, the filmstrip chip, the inbox plate and For you; reply, resolve, delete with Undo, the orphan and its revival 
+    apps/studio/e2e/presence.spec.ts:158:1 › a second person appears as a chip without moving the row; the roster lists them with Go to slide; a selection draws the outline and the flag; the words typed arrive (4.10) 
+    apps/studio/e2e/realtime.spec.ts:206:1 › two contexts type in one paragraph and converge byte for byte within 2 s over 200 keystrokes 
+    apps/studio/e2e/security.spec.ts:352:1 › the upload path refuses an svg, a type mismatch and a body over the declared size, and writes nothing 
+    apps/studio/e2e/share.spec.ts:231:1 › rotate and Stop sharing kill the link; publish gives the player, the embed answers and 410 after unpublish 
+    apps/studio/e2e/versions-by-author.spec.ts:96:1 › two labels editing two slides make one window with two marks; Show changes hatches with the author chip and underlines the run; Only named; Make a copy at a version; the delete rows are disabled with the clause 
+  14 did not run
+  20 passed (10.3m)
+check 26/28: FAIL exit 1 after 620.4 s
+check: dev server stopped
+check: stopped after a failure (641.7 s)

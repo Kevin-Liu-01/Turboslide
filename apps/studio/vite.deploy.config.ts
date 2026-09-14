@@ -126,9 +126,37 @@ export default defineConfig({
       plugins: [`${fileURLToPath(new URL('./src/server/hosting-plugin.ts', import.meta.url))}`],
       vercel: {
         functions: { maxDuration: 300 },
+        // the seed deck's twins are static files the CDN answers before the asset route runs,
+        // so the attachment rule of the route (server/headers.ts assetResponseHeaders; SPEC-3
+        // 0.28, report 04 F5) is repeated here for the two non raster types the CDN may serve:
+        // the headers apply and the filesystem handler still answers (`continue`). Measured on
+        // the merge 2 preview: the recipe json of gt-brand went out inline with no policy.
+        config: {
+          version: 3,
+          routes: [
+            {
+              src: '^/decks/[^/]+/assets/(.*)\\.(json|svg)$',
+              headers: {
+                'content-disposition': 'attachment',
+                'x-content-type-options': 'nosniff',
+                'content-security-policy': "sandbox; default-src 'none'",
+                'cross-origin-resource-policy': 'same-site',
+              },
+              continue: true,
+            },
+          ],
+        },
+        // gslides-parity SPEC-3 11.3, 8.5: the bundle routes stream a zip of up to 200 MB and the
+        // WAF visible export and render routes of /api/x/* run the same jobs the server functions
+        // do, so they join the heavy rule; the stream, ops and presence routes stay on the catch
+        // all (a stream holds a connection, not CPU, and the catch all's 300 s is its lifetime)
         functionRules: {
           '/api/export/**': HEAVY,
           '/api/render/**': HEAVY,
+          '/api/x/export/**': HEAVY,
+          '/api/x/render/**': HEAVY,
+          '/api/decks/bundle': HEAVY,
+          '/api/decks/**/bundle': HEAVY,
           '/_serverFn/**': HEAVY,
         },
       },

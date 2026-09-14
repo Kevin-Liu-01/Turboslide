@@ -1,0 +1,63 @@
+check  4/28: pnpm exec tsc -b
+check  4/28: ok in 0.4 s
+check  5/28: pnpm test
+$ vitest run
+
+ RUN  v4.1.11 /Users/kevinliu/repos/Turboslide
+
+ ❯ |identity| src/marks-render.test.ts (9 tests | 1 failed) 8014ms
+     × 1,000 marks over the chip and preview sizes carry the same raster in both 7970ms
+(node:57927) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:57936) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:57887) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:57885) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:57954) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+ ❯ |effects| src/parity.test.ts (26 tests | 3 failed) 45576ms
+     × mood-dictionary: every backend lights the cells pipeline.ts lights 8229ms
+     × mood-earth: every backend lights the cells pipeline.ts lights 12112ms
+     × mood-lighthouse: every backend lights the cells pipeline.ts lights 5638ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  |effects| src/parity.test.ts > cell identity on the deck two-tone assets > mood-dictionary: every backend lights the cells pipeline.ts lights
+ FAIL  |effects| src/parity.test.ts > cell identity on the deck two-tone assets > mood-earth: every backend lights the cells pipeline.ts lights
+ FAIL  |effects| src/parity.test.ts > cell identity on the deck two-tone assets > mood-lighthouse: every backend lights the cells pipeline.ts lights
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/parity.test.ts:153:5
+    151|
+    152|   for (const { id, asset, treatment } of twoToneAssets) {
+    153|     test(`${id}: every backend lights the cells pipeline.ts lights`, a…
+       |     ^
+    154|       const { image, from } = await inputFor(id, asset);
+    155|       const reference = ts.twoToneScreen(image, treatment);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  |identity| src/marks-render.test.ts > the SVG and the PNG agree > 1,000 marks over the chip and preview sizes carry the same raster in both
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/marks-render.test.ts:263:3
+    261|
+    262| describe('the SVG and the PNG agree', () => {
+    263|   test('1,000 marks over the chip and preview sizes carry the same ras…
+       |   ^
+    264|     const sizes = [...MARK_SIZES, ...MARK_PREVIEW_SIZES.filter((s) => …
+    265|     for (let i = 0; i < 1000; i += 1) {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+
+ Test Files  2 failed | 262 passed (264)
+      Tests  4 failed | 2826 passed | 3 skipped (2833)
+   Start at  00:50:06
+   Duration  152.28s (transform 345.99s, setup 0ms, import 628.06s, tests 601.43s, environment 129.45s)
+
+[ELIFECYCLE] Test failed. See above for more details.
+check  5/28: FAIL exit 1 after 153.4 s
+check: stopped after a failure (153.9 s)

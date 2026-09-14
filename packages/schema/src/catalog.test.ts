@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
-import { ACTION_IDS, ACTIONS, actionsInOrder, actionsOn } from './actions.ts';
+import { ACTION_IDS, ACTIONS, NO_REVISION_WRITES, actionsInOrder, actionsOn } from './actions.ts';
 import { readInspector } from './annotate.ts';
 import { BLOCK_SCHEMAS, BLOCK_TYPES, blockSchema, rowsBlockSchema } from './blocks.ts';
 import {
@@ -117,7 +117,10 @@ describe('the action table', () => {
         // (docs/deck-transfer.md), so there is no document revision to base on either
         spec.id !== 'deck.unpack' &&
         spec.id !== 'deck.push' &&
-        spec.id !== 'deck.pull'
+        spec.id !== 'deck.pull' &&
+        // round three's writes to page state, the principal record, the inbox, the identity store,
+        // a checkout mirror or the flags (gslides-parity SPEC-3 12): no revisioned record to base on
+        !NO_REVISION_WRITES.has(spec.id)
       ) {
         const json = z.toJSONSchema(spec.input, { target: 'draft-2020-12' }) as {
           properties?: Record<string, unknown>;
@@ -138,9 +141,10 @@ describe('the action table', () => {
 
   it('keeps the icon list in sprite order with the mark first', () => {
     expect(ICON_NAMES[0]).toBe('gt-mark');
-    // 67 Heroicons plus gt-mark: M5 added lock-closed (slide 83), the editor depth round the three
-    // bars glyphs of the arrange bar's align buttons
-    expect(ICON_NAMES).toHaveLength(68);
-    expect(new Set(ICON_NAMES).size).toBe(68);
+    // 69 Heroicons plus gt-mark: M5 added lock-closed (slide 83), the editor depth round the three
+    // bars glyphs of the arrange bar's align buttons, the Google Slides parity round three bell and
+    // inbox for the inbox plate and Notification settings (merge 1, build-3/b6.md request 2)
+    expect(ICON_NAMES).toHaveLength(70);
+    expect(new Set(ICON_NAMES).size).toBe(70);
   });
 });

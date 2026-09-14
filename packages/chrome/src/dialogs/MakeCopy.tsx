@@ -6,8 +6,9 @@ import { DIALOGS } from '../menus/strings';
 import { tipProps } from '../Tooltip';
 
 /**
- * File > Make a copy (gslides-parity SPEC 2.1, 6.5, 12 "Dialogs"): Name prefilled "Copy of
- * <title>" and selected, Remove speaker notes, Make a copy. `selected` copies the filmstrip's
+ * File > Make a copy (gslides-parity SPEC 2.1, 6.5, 12 "Dialogs"; SPEC-3 5.3): Name prefilled
+ * "Copy of <title>" and selected, Remove speaker notes, "Copy comments" under it (unticked,
+ * Google's default; `deck.copy { copyComments }`), Make a copy. `selected` copies the filmstrip's
  * selection only. One `deck.copy`; the copy opens in a new tab.
  */
 export function MakeCopyDialog({ selected = false }: { selected?: boolean }) {
@@ -16,6 +17,7 @@ export function MakeCopyDialog({ selected = false }: { selected?: boolean }) {
   const title = input.document.deck.title;
   const [name, setName] = useState(`Copy of ${title}`);
   const [removeNotes, setRemoveNotes] = useState(false);
+  const [copyComments, setCopyComments] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const slideIds = selected ? [...(input.selectedSlideIds ?? [input.slideId])] : undefined;
@@ -33,6 +35,7 @@ export function MakeCopyDialog({ selected = false }: { selected?: boolean }) {
         name: trimmed,
         ...(slideIds === undefined ? {} : { slideIds }),
         ...(removeNotes ? { removeNotes: true } : {}),
+        ...(copyComments ? { copyComments: true } : {}),
         baseRevision: input.revision,
       })
       .then((result) => {
@@ -106,6 +109,16 @@ export function MakeCopyDialog({ selected = false }: { selected?: boolean }) {
         control="dialog.makeCopy.removeNotes"
         doc="The copy carries no speaker notes"
       />
+      {input.comments !== undefined &&
+      (input.capabilities === undefined || input.capabilities.includes('readComments')) ? (
+        <DialogCheck
+          label={DIALOGS.makeCopy.copyComments}
+          checked={copyComments}
+          onChange={setCopyComments}
+          control="dialog.makeCopy.copyComments"
+          doc="The threads travel with the copy; off, the copy starts clean"
+        />
+      ) : null}
       {error !== null ? (
         <p className="ts-dialog-error" role="alert">
           {error}

@@ -31,6 +31,15 @@ export type ChromeScope = {
   /** Elements whose ink border is a state, not a seam. */
   active: string;
   /**
+   * The live collaboration surfaces of gslides-parity SPEC-3 4.9 and 16.5 (the flags, the
+   * remote outlines, carets and pointers, the Following plate, the chip stripes and the halo
+   * rings): they may carry the colours of `collabColors` and nothing else may (the integrator at
+   * merge 2 for b6.md request 5).
+   */
+  collab?: string;
+  /** The six hues and the two halo values, as `#rrggbb`. */
+  collabColors?: string[];
+  /**
    * The overlay's lint boxes (SPEC 2.2 junction table): 1px titanium for severity 1 and 2, ink
    * for 3, outside any active state; absent means no such element.
    */
@@ -96,6 +105,21 @@ export const CHROME_ALLOW: readonly string[] = [
   'ts-themes-frame',
 ];
 
+/**
+ * The six collaborator hues of gslides-parity SPEC-3 4.9 (`@turboslide/identity/hues`) and the
+ * two halo values; the only colours the live collaboration surfaces may draw beside the roles.
+ */
+export const COLLAB_COLORS: string[] = [
+  '#2f5ce0',
+  '#789000',
+  '#0f6a6a',
+  '#1d8fc8',
+  '#148d51',
+  '#5533ff',
+  '#070707',
+  '#ffffff',
+];
+
 /** The Prototemplate shell's scope (lint-lines.mjs SHELL_CHROME). */
 export const SHELL_CHROME: ChromeScope = {
   roots: '.pt-viewer, .pt-corner, .pt-corner-layer, .pt-help, .pt-toast, .pt-preview',
@@ -122,8 +146,11 @@ export const TURBOSLIDE_CHROME: ChromeScope = {
   roots:
     '.pt-viewer, .pt-corner, .pt-corner-layer, .pt-help, .pt-toast, .pt-preview, .ts-studio, .ts-chrome, .ts-home-page, .ts-trash-page, .ts-menu, .ts-dialog, .ts-layout-plate',
   content: '.ts-stage, .ts-sheet, .stage, .sheet-flow .sheet > *, .pt-page-body, .pt-root, iframe',
-  active: `${SHELL_CHROME.active}, .is-selected, [data-selected="true"]`,
+  active: `${SHELL_CHROME.active}, .is-selected, [data-selected="true"], .ts-chip.is-self`,
   lint: '.ts-lint-box',
+  collab:
+    '.ts-flag, .ts-remote-outline, .ts-remote-caret, .ts-remote-pointer, .ts-following-plate, .ts-chip-stripe, .is-following, .has-halo',
+  collabColors: COLLAB_COLORS,
 };
 
 /** The deck's own document inside the Prototemplate /deck iframe (lint-lines.mjs DECK_CHROME). */
@@ -340,6 +367,27 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
     }
     return false;
   };
+  /* a live collaboration surface drawing one of the six hues or a halo value (SPEC-3 4.9, 16.5) */
+  const channels = (color: string): number[] | null => {
+    const hex = /^#([0-9a-f]{6})$/i.exec(color.trim());
+    if (hex) {
+      const n = parseInt(hex[1] ?? '0', 16);
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+    const fn = /^rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/i.exec(color.trim());
+    return fn ? [Number(fn[1]), Number(fn[2]), Number(fn[3])] : null;
+  };
+  const collabColor = (el: Element, color: string): boolean => {
+    if (!chrome || !chrome.collab || !chrome.collabColors) return false;
+    if (!el.matches(chrome.collab) && !(el.parentElement?.matches(chrome.collab) ?? false))
+      return false;
+    const c = channels(color);
+    if (!c) return false;
+    return chrome.collabColors.some((hex) => {
+      const h = channels(hex);
+      return h !== null && h[0] === c[0] && h[1] === c[1] && h[2] === c[2];
+    });
+  };
   const SEAM_ROLES = ['hair', 'soft', 'edge'];
   const RING_ROLES = ['hair', 'soft', 'edge', 'ink', 'paper'];
   const SIDES = ['Top', 'Bottom', 'Left', 'Right'] as const;
@@ -359,6 +407,7 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
       const role = roleOf(color);
       if (role && SEAM_ROLES.includes(role)) continue;
       if (role === 'ink' && activeNear(el)) continue;
+      if (collabColor(el, color)) continue;
       /* a lint box is titanium (severity 1 and 2) or ink (3) by the junction table, not a seam */
       if ((role === 'titanium' || role === 'ink') && chrome.lint && el.matches(chrome.lint))
         continue;
@@ -382,7 +431,7 @@ export const auditDocument = (cfg: AuditConfig): AuditResult => {
     const ow = parseFloat(cs.outlineWidth);
     if (cs.outlineStyle !== 'none' && ow >= 1 && visible(cs.outlineColor)) {
       const role = roleOf(cs.outlineColor);
-      if (!role || !RING_ROLES.includes(role))
+      if ((!role || !RING_ROLES.includes(role)) && !collabColor(el, cs.outlineColor))
         colors.push({
           kind: 'outline',
           owner,

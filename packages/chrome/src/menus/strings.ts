@@ -24,16 +24,297 @@ export function stubTooltip(label: string, reason: string): string {
   return `${label} · ${stubClause(reason)}`;
 }
 
-/** The title row (SPEC 12 "Title row"). */
+/** The title row (SPEC 12 "Title row"; SPEC-3 4.2, 15 add the fifth save phrase and the slots). */
 export const TITLE_ROW = {
   untitled: 'Untitled presentation',
   notSaved: 'Not saved yet',
   saving: 'Saving…',
   saved: 'All changes saved',
   retrying: "Couldn't save, retrying",
+  /* SPEC-3 15: the fifth save phrase; the five stack in one fixed cell (9.2 E5) */
+  offline: 'Offline. Changes will save when you reconnect',
   lastEdit: (ago: string) => `Last edit ${ago}`,
+  /* SPEC-3 4.2: the newest record's author through resolvePrincipal, never the tab's own */
+  lastEditBy: (ago: string, name: string) => `Last edit ${ago} by ${name}`,
+  showAllComments: 'Show all comments',
+  notifications: 'Notifications',
+  /* the inbox plate's count: two tabular digits, "99+" beyond (SPEC-3 4.2) */
+  unread: (count: number) => (count > 99 ? '99+' : String(count)),
   slideshow: 'Slideshow',
   share: 'Share',
+  viewOnly: 'View only',
+} as const;
+
+/**
+ * The refusals of round three (SPEC-3 6.8, 0.47), verbatim, and the two words of the persisted
+ * queue notice. The e2e fixtures of share.spec.ts, comments.spec.ts and accounts.spec.ts read them
+ * from here. No sentence names a role the person lacks, an internal noun, or whether another deck
+ * or account exists.
+ */
+export const REFUSALS = {
+  nameTaken: 'That name is already in use in this presentation',
+  nameReserved: 'That name is reserved',
+  /* the shape rule of 0.19 (identity's NAME_REFUSALS.invalid; build-3/b3.md request 5) */
+  nameInvalid: 'Use 1 to 40 letters or digits in one script',
+  viewOnly: 'You can view this presentation',
+  requestEditAccess: 'Request edit access',
+  notAvailable: 'This presentation is not available to you, or does not exist.',
+  requested: 'If this presentation exists, its owner has been asked.',
+  tooManyChanges: 'Too many changes at once. Try again in a minute',
+  exportLimit: "You have reached today's export limit",
+  presenceNeedsRedis: 'Presence and live cursors need a Redis store on this deployment',
+  leaveAnyway: 'Changes are still saving. Leave anyway?',
+  unsavedChanges: (count: number) =>
+    `${count} unsaved change${count === 1 ? '' : 's'} from this browser`,
+  apply: 'Apply',
+  discard: 'Discard',
+  alreadyChanged: (name: string) => `That change was already changed by ${name}`,
+  inviteFromShare: 'Invite them from Share',
+  tooManyEditors: 'This presentation has too many editors right now',
+  noLongerPublished: 'This presentation is no longer published',
+  notSignedInOwner:
+    'Not signed in. Sign in, or copy an edit link, to get back to this presentation from another browser',
+  signInToUpload: 'Sign in to upload a picture',
+} as const;
+
+/**
+ * The presence surfaces (SPEC-3 4.2 to 4.9, 15): the roster, the chips, the flags, the Following
+ * plate and the announcements. Names are text everywhere (7.2); the trust word beside a typed
+ * name is "guest" (15, Kevin's list keeps "visitor" as the alternative).
+ */
+export const PRESENCE = {
+  collaborators: 'Collaborators',
+  follow: 'Follow',
+  following: (name: string) => `Following ${name}`,
+  /* the 240 by 24 plate at the stage's top centre (4.4) */
+  followingPlate: (name: string) => `Following ${name} · Stop`,
+  stop: 'Stop',
+  goToSlide: (n: number) => `Go to slide ${n}`,
+  slide: (n: number) => `slide ${n}`,
+  /* the chip's tooltip: "Maya · guest · slide 12"; a label carries no trust word */
+  chipTip: (name: string, trust: string | null, slide: number | null) =>
+    [name, trust, slide === null ? null : `slide ${slide}`]
+      .filter((part) => part !== null)
+      .join(' · '),
+  you: '(you)',
+  guest: 'guest',
+  byLink: 'by link',
+  /* the role word a link visitor sees instead of a name (0.12) */
+  anEditor: 'An editor',
+  aCommenter: 'A commenter',
+  aViewer: 'A viewer',
+  roleWord: { owner: 'owner', editor: 'editor', commenter: 'commenter', viewer: 'viewer' },
+  presenting: (n: number) => `Presenting slide ${n}`,
+  more: (n: number) => `+${n}`,
+  joinChat: 'Join chat',
+  /* the aria-live region of 4.9, one sentence per 5 s per person */
+  joined: (name: string) => `${name} joined`,
+  left: (name: string) => `${name} left`,
+  editing: (name: string, n: number) => `${name} is editing slide ${n}`,
+  showMyPointer: 'Show my pointer',
+  showingMyPointer: 'Showing my pointer',
+  showCollaboratorPointers: 'Show collaborator pointers',
+  announcements: 'Turn on collaborator announcements',
+} as const;
+
+/** The comment card, the markers and the Comments panel (SPEC-3 5.3, 15; Google's words). */
+export const COMMENTS = {
+  panel: 'Comments',
+  forYou: 'For you',
+  all: 'All',
+  open: 'Open',
+  resolved: 'Resolved',
+  search: 'Search all comments',
+  slideOrder: 'Slide order',
+  placeholder: 'Comment or add others with @',
+  replyPlaceholder: 'Reply or add others with @',
+  comment: 'Comment',
+  reply: 'Reply',
+  resolve: 'Resolve',
+  reopen: 'Re-open',
+  edit: 'Edit',
+  delete: 'Delete',
+  getLink: 'Get link to this comment',
+  addReaction: 'Add emoji reaction',
+  assignTo: (name: string) => `Assign to ${name}`,
+  reassign: 'Reassign',
+  done: 'Done',
+  more: 'More',
+  cancel: 'Cancel',
+  deleted: 'Comment deleted',
+  undo: 'Undo',
+  linkCopied: 'Link copied',
+  showAll: 'Show all comments',
+  expand: 'Expand comments',
+  minimize: 'Minimize comments',
+  hide: 'Hide comments',
+  /* an orphaned thread (5.1): listed under its slide with the quoted text */
+  removedObject: 'On an object that is no longer on the slide',
+  /* the count chip's accessible name (15): the number with its noun, never a bare digit */
+  count: (n: number) => (n === 1 ? '1 comment' : `${n} comments`),
+  empty: 'No comments yet',
+  emptyForYou: 'Nothing for you yet',
+  /* a viewer reading a thread under the owner's switch (0.11): every write control is absent */
+  readOnly: 'You can read this thread',
+} as const;
+
+/** The Notifications panel and the inbox plate (SPEC-3 5.5, 15; Turboslide's own, the levels Google's). */
+export const INBOX = {
+  panel: 'Notifications',
+  markAllRead: 'Mark all read',
+  settings: 'Notification settings',
+  levels: { all: 'All comments', forYou: 'Comments for you', none: 'None' },
+  emailToo: 'Email me too',
+  activityForCommenters: 'Commenters can see the activity',
+  replied: (name: string, n: number) => `${name} replied on slide ${n}`,
+  mentioned: (name: string, n: number) => `${name} mentioned you on slide ${n}`,
+  assigned: (name: string, n: number) => `${name} assigned you a comment on slide ${n}`,
+  resolved: (name: string, n: number) => `${name} resolved your comment on slide ${n}`,
+  reopened: (name: string, n: number) => `${name} re-opened your comment on slide ${n}`,
+  reacted: (name: string, n: number) => `${name} reacted to your comment on slide ${n}`,
+  commented: (name: string, n: number) => `${name} commented on slide ${n}`,
+  accessRequest: (who: string) => `${who} asked for access`,
+  granted: (name: string) => `${name} gave you access`,
+  versionNamed: (name: string, version: string) => `${name} named a version ${version}`,
+  empty: 'Nothing new',
+} as const;
+
+/** The Activity panel (SPEC-3 5.7, 15). */
+export const ACTIVITY = {
+  panel: 'Activity',
+  viewers: 'Viewers',
+  edits: 'Edits',
+  comments: 'Comments',
+  sharing: 'Sharing',
+  empty: 'No activity yet',
+} as const;
+
+/**
+ * The own chip's menu, the name prompt, the sign in dialog, the profile and the avatar builder
+ * (SPEC-3 7.2 to 7.6, 15). The avatar tab "Glyph" is the spec's word (0.22, 7.6) and the one
+ * place the round two engineering word is a label; the default view words test exempts that key
+ * and the build notes record it for Kevin.
+ */
+export const ACCOUNT = {
+  account: 'Account',
+  signedInAs: (email: string) => `Signed in as ${email}`,
+  notSignedIn: 'Not signed in',
+  changeName: 'Change name',
+  changeAvatar: 'Change avatar',
+  signIn: 'Sign in',
+  signOut: 'Sign out',
+  forget: 'Forget this browser',
+  forgetConfirm:
+    'Forget this browser? Your name, avatar and unsaved changes here are cleared; earlier edits keep the old name',
+  sessions: 'Sessions',
+  namePrompt: {
+    title: 'How should others see you?',
+    name: 'Name',
+    continue: 'Continue',
+    signIn: 'Sign in',
+  },
+  signInDialog: {
+    title: 'Sign in',
+    email: 'Email',
+    continue: 'Continue',
+    /* the same answer whether or not the address exists (7.3) */
+    sent: 'If that address can sign in, a message with a link and a six digit code is on its way',
+    code: 'Six digit code',
+    verify: 'Verify',
+    passkey: 'Use a passkey',
+    passkeysLater: 'Passkeys arrive once the address is final',
+    github: 'Continue with GitHub',
+    back: 'Back',
+    failed: 'That code did not match. Try again or request a new one',
+  },
+  profile: {
+    title: 'Profile',
+    name: 'Name',
+    email: 'Email',
+    trust: {
+      label: 'You are known by a label',
+      guest: 'You are known by the name you typed',
+      verified: (email: string) => `Signed in as ${email}, verified`,
+    },
+    sessions: 'Sessions',
+    thisBrowser: 'This browser',
+    signOut: 'Sign out',
+    signOutEverywhereElse: 'Sign out everywhere else',
+    keys: 'API keys',
+    keyShownOnce: 'A key is shown once; copy it now',
+    revoke: 'Revoke',
+    deleteAccount: 'Delete account',
+    deleteRefused: 'Other people hold access to presentations you own. Transfer them first',
+  },
+  avatar: {
+    title: 'Change avatar',
+    tabs: ['Initials', 'Glyph', 'Dither', 'Picture'],
+    another: 'Another',
+    initials: 'Initials',
+    upload: 'Upload a picture',
+    crop: 'Drag to crop',
+    apply: 'Apply',
+    tooLarge: 'Pictures up to 5 MB',
+  },
+} as const;
+
+/** The You need access page (SPEC-3 6.5, 6.8, 15). */
+export const ACCESS_PAGE = {
+  title: 'You need access',
+  sentence: REFUSALS.notAvailable,
+  role: 'Access',
+  message: 'Message',
+  email: 'Email',
+  requestAccess: 'Request access',
+  invited: 'Invited by email? Sign in with the address the invitation went to.',
+  asked: REFUSALS.requested,
+} as const;
+
+/**
+ * The dither surfaces (SPEC-3 10.6, 10.7, 15): B5 draws the Format options section and the
+ * Background dialog rows and reads the words here; the Turboslide additions carry
+ * `turboslide: true` where they are rows.
+ */
+export const DITHER = {
+  dither: 'Dither',
+  help: 'The deck’s two tone screen over the picture; change it under Format options',
+  preset: 'Preset',
+  neutral: 'Neutral',
+  photograph: 'Photograph',
+  pattern: 'Pattern',
+  tone: 'Tone',
+  cell: 'Cell',
+  strength: 'Strength',
+  inkPoint: 'Ink point',
+  paperPoint: 'Paper point',
+  midtones: 'Midtones',
+  lightTheme: 'Light theme',
+  thicken: 'Thicken',
+  advanced: 'Advanced',
+  reset: 'Reset',
+  material: 'Material',
+  choose: 'Choose',
+  place: 'Place',
+  play: 'Play',
+  formatOptions: 'Format options',
+  lit: (percent: string) => `Lit ${percent} percent`,
+  notMeasured: 'Not measured',
+  uploading: (mb: string) => `Uploading ${mb} MB`,
+} as const;
+
+/**
+ * Sentences that reach an agent, the CLI or the deployment admin and never the default view (the
+ * refusal of SPEC-3 10.1 on a picture without a continuous source, the standalone build's answer,
+ * the roster's word for an agent session of 15). They carry the engineering nouns the default
+ * view words list forbids, and the default view words test names this block as its one exemption
+ * beside the Agent access dialog.
+ */
+export const AGENT_SENTENCES = {
+  materializeFirst: 'materialize first',
+  noContinuousSource:
+    'the asset has no continuous source (sourceFile); the committed twins are already dithered',
+  /* the trust word of an agent chip in the roster and on its flag (SPEC-3 4.7, 15) */
+  agentTrust: (runId: string) => `Agent · ${runId}`,
 } as const;
 
 /** The canvas and notes prompts (SPEC 12 "Prompts", 5.4). */
@@ -77,6 +358,8 @@ export const DIALOGS = {
     title: 'Make a copy',
     name: 'Name',
     removeNotes: 'Remove speaker notes',
+    /* SPEC-3 5.3: under Remove speaker notes, unticked (Google's default) */
+    copyComments: 'Copy comments',
     ok: 'Make a copy',
     cancel: 'Cancel',
   },
@@ -101,6 +384,7 @@ export const DIALOGS = {
   },
   share: {
     title: (name: string) => `Share ${name}`,
+    /* the round one rows; the dialog rebuilt in round three (SPEC-3 6.5) retires them on day 4 */
     viewLink: 'View link',
     presentLink: 'Present link',
     editLink: 'Edit link',
@@ -109,6 +393,54 @@ export const DIALOGS = {
     noAccounts: 'Turboslide has no accounts yet. Anyone who has a link can open it',
     stripped: 'Skipped slides and speaker notes are not included in the view and present links',
     done: 'Done',
+    /* SPEC-3 6.5, 15: Google's two halves in Turboslide's words */
+    addPeople: 'Add people by email',
+    notifyPeople: 'Notify people',
+    message: 'Message',
+    send: 'Send',
+    roles: { viewer: 'Viewer', commenter: 'Commenter', editor: 'Editor', owner: 'Owner' },
+    transferOwnership: 'Transfer ownership',
+    addExpiration: 'Add expiration',
+    removeAccess: 'Remove access',
+    removeNote: 'Anyone who could open the presentation may already hold a copy',
+    pending: 'Pending',
+    expired: 'Expired',
+    pendingOwnership: 'Pending ownership',
+    generalAccess: 'General access',
+    restricted: 'Restricted',
+    restrictedDoc: 'Only people with access can open it',
+    anyoneWithLink: 'Anyone with the link',
+    legacy: 'Anyone with the address can view (legacy)',
+    switchToLink: 'Switch to a link',
+    links: { label: 'Label', role: 'Role', created: 'Created', expires: 'Expires' },
+    rotate: 'Rotate',
+    revoke: 'Revoke',
+    stopSharing: 'Stop sharing',
+    review: 'Review',
+    noPendingRequests: 'No pending requests',
+    approveAs: (role: string) => `Approve as ${role}`,
+    decline: 'Decline',
+    notify: 'Notify',
+    settings: {
+      editorsCanShare: 'Editors can change permissions and share',
+      viewersCanDownload: 'Viewers and commenters can download, print and copy',
+      viewersCanSeeComments: 'Viewers can see comments',
+      showNamesToLinkVisitors: 'Show names to people with the link',
+      allowHtmlBlocks: 'Allow embedded HTML blocks in this shared presentation',
+      downloadNote: 'A screenshot or the browser’s own print command cannot be stopped',
+    },
+    footer: 'Speaker notes and skipped slides never travel with a view or comment link',
+    publishToWeb: 'Publish to the web',
+    claim: 'This presentation has no owner yet. Claim it to decide who can open and edit it.',
+    claimButton: 'Claim',
+    expiry: {
+      none: 'No expiry',
+      days7: '7 days',
+      days30: '30 days',
+      days90: '90 days',
+      date: 'A date',
+    },
+    emailCollaborators: 'Email collaborators',
   },
   publish: {
     title: 'Publish to the web',
@@ -119,6 +451,12 @@ export const DIALOGS = {
     large: 'Large',
     custom: 'Custom',
     reachable: 'Every Turboslide presentation is reachable by anyone who has its link',
+    /* SPEC-3 6.4, 15 */
+    published:
+      'Anyone with the published link can view the current version; every edit is published',
+    publish: 'Publish',
+    stopPublishing: 'Stop publishing',
+    notPublished: 'This presentation is not published',
   },
   deleteForever: {
     title: (name: string) => `Delete ${name} forever? This cannot be undone`,
@@ -431,10 +769,28 @@ export const PANELS = {
     restore: 'Restore this version',
     name: 'Name this version',
     copy: 'Make a copy',
+    /* SPEC-3 5.7, 0.45: Show changes at the panel's bottom, the window rows and the two disabled delete rows */
+    showChanges: 'Show changes',
+    nameCurrent: 'Name current version',
+    deleteOlder: 'Delete this and older versions',
+    deleteHistory: 'Delete history',
+    earlierEdits: 'Earlier edits',
+    changes: (n: number) => (n === 1 ? '1 change' : `${n} changes`),
+    namedCap: (oldest: string) =>
+      `This presentation already has 40 named versions. Remove the name from ${oldest} to add one`,
   },
   suggestions: { title: 'Suggestions for this slide', fix: 'Fix' },
   changeHistory: { title: 'Change history' },
   picturesMaterials: { title: 'Pictures and materials' },
+  /* round three (SPEC-3 5.3, 5.5, 5.7, 0.27): the three collaboration panels and the Edit HTML panel */
+  comments: { title: 'Comments', empty: 'No comments yet' },
+  inbox: { title: 'Notifications', empty: 'Nothing new' },
+  activity: { title: 'Activity', empty: 'No activity yet' },
+  editHtml: {
+    title: 'Edit HTML',
+    apply: 'Apply',
+    note: 'The block shows inside a frame; its HTML is edited here',
+  },
   /* round two (SPEC-2 section 5, 10): the Diagram panel and the Chart data section */
   diagram: {
     title: 'Diagram',
@@ -510,7 +866,7 @@ export const PRESENT = {
   audienceTools: `Audience tools · ${STUB_PREFIX}`,
 } as const;
 
-/** Errors and interruptions (SPEC 11.3). */
+/** Errors and interruptions (SPEC 11.3; SPEC-3 6.8 holds the round three refusals in REFUSALS). */
 export const ERRORS = {
   keepOrTheirs: 'This slide changed while you were editing. Keep mine or Use theirs',
   pictureSize: 'Pictures up to 25 MB',

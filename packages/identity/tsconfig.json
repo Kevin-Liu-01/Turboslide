@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../tooling/tsconfig/node.json",
+  "include": ["src", "fixtures/*.json"],
+  "references": [
+    {
+      "path": "../schema"
+    },
+    {
+      "path": "../effects"
+    }
+  ]
+}

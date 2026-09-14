@@ -101,13 +101,20 @@ async function tableOf(page: Page, slideId: string): Promise<TableBlock> {
   return table as TableBlock;
 }
 
-/** The rendered cells of the table on the stage, by their run pointers. */
+/**
+ * The rendered cells of the table on the stage, by their run pointers. Scoped to the editor's
+ * own sheet: the filmstrip's live clone thumbnails carry the same `data-run` attributes (26
+ * `.ts-sheet` roots in the editor's document), so a `.pt-viewer` wide locator counted every cell
+ * twice and hit a strict mode violation (VERIFICATION-2 finding 28).
+ */
 function cells(page: Page, tableId: string) {
-  return page.locator(`.pt-viewer [data-run^="${tableId}/rows/"]`);
+  return page.locator(`.ts-stagewrap.ts-editor .pt-slide [data-run^="${tableId}/rows/"]`);
 }
 
 function cell(page: Page, tableId: string, row: number, column: number) {
-  return page.locator(`.pt-viewer [data-run="${tableId}/rows/${row}/cells/${column}"]`);
+  return page.locator(
+    `.ts-stagewrap.ts-editor .pt-slide [data-run="${tableId}/rows/${row}/cells/${column}"]`,
+  );
 }
 
 /** The Table section of Format options when B3's slot mounts it, else null. */

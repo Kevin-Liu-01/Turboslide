@@ -1,0 +1,1292 @@
+{
+  "$comment": "Vercel WAF custom rules of the third Google Slides parity round (docs/gslides-parity/SPEC-3.md 0.25, 8.3, 11.5 R0 and R8; research-3/04 7.4, research-3/10 3.3). One entry per rule R1 to R21 plus R16b and the CLI bypass. `value` is the rule as PATCH /v1/security/firewall/config `rules.insert` takes it (name, description, active, conditionGroup, action), in log mode: a rate limit rule counts and logs (`rateLimit.action: log`), a challenge or deny rule logs (`mitigate.action: log`). `enforce` is the `action` object the R8 flip writes after the log week. Counters are per IP and per region (about a third under the intended global number, counted again in the application, SPEC-3 8.3). The integrator applies this file to the project `turboslide` through the API in log mode; nothing here is applied by a builder. Field spelling follows the vercel CLI 58 `firewall rules add --json` form (build-3/b4.md records the check). On a deployment without REDIS_URL and without the Upstash pair the application quotas of apps/studio/src/server/ratelimit.ts count per function instance and never reach a limit (VERIFICATION-3 finding 17), so these rules are the only limits that hold across instances, and only after their flip from log mode to their action; a rule whose action is 429 (R1, R2, R5, R6, R10, R12 to R15, R16b, R17, R18, R20) may be flipped before the deny and challenge rules finish the log week.",
+  "version": 1,
+  "project": "turboslide",
+  "mode": "log",
+  "appliedAt": null,
+  "enforceAfter": "one week of log mode reviewed in the Firewall traffic page per rule id",
+  "rules": [
+    {
+      "key": "R1",
+      "value": {
+        "name": "R1 server functions per IP",
+        "description": "SPEC-3 8.3 R1: /_serverFn/* 600 per 60 s per IP; the editor stays well under it, scripts do not",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/_serverFn/"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 600,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 600,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R2",
+      "value": {
+        "name": "R2 renders per IP",
+        "description": "SPEC-3 8.3 R2: /api/x/render/* and /api/render/* 240 per 60 s per IP; a deck open at two widths is under 200",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/x/render/"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/render/"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 240,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 240,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R3",
+      "value": {
+        "name": "R3 exports per IP",
+        "description": "SPEC-3 8.3 R3: /api/x/export/* and /api/export/* 12 per 10 min per IP, then deny for 15 min; an export is minutes of CPU",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/x/export/"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/export/"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 600,
+              "limit": 12,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 600,
+            "limit": 12,
+            "keys": ["ip"],
+            "action": "deny"
+          },
+          "redirect": null,
+          "actionDuration": "15m"
+        }
+      }
+    },
+    {
+      "key": "R4",
+      "value": {
+        "name": "R4 bundles per IP",
+        "description": "SPEC-3 8.3 R4: /api/decks/bundle and /api/decks/*/bundle 6 per 10 min per IP, then deny for 15 min; 200 MB uploads",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "eq",
+                "value": "/api/decks/bundle"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "re",
+                "value": "^/api/decks/[^/]+/bundle$"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 600,
+              "limit": 6,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 600,
+            "limit": 6,
+            "keys": ["ip"],
+            "action": "deny"
+          },
+          "redirect": null,
+          "actionDuration": "15m"
+        }
+      }
+    },
+    {
+      "key": "R5",
+      "value": {
+        "name": "R5 agent actions per IP",
+        "description": "SPEC-3 8.3 R5: /api/actions/* 300 per 60 s per IP; an agent writes at human speed",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/actions/"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 300,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 300,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R6",
+      "value": {
+        "name": "R6 MCP per IP",
+        "description": "SPEC-3 8.3 R6: /mcp 300 per 60 s per IP, as R5",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "eq",
+                "value": "/mcp"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 300,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 300,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R7",
+      "value": {
+        "name": "R7 agent routes without Authorization",
+        "description": "SPEC-3 8.3 R7: /api/actions/*, /api/agent and /mcp without an Authorization header 30 per 60 s per IP, then deny for 1 h; token guessing and scanners",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/actions/"
+              },
+              {
+                "type": "header",
+                "key": "authorization",
+                "op": "nex"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "eq",
+                "value": "/api/agent"
+              },
+              {
+                "type": "header",
+                "key": "authorization",
+                "op": "nex"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "eq",
+                "value": "/mcp"
+              },
+              {
+                "type": "header",
+                "key": "authorization",
+                "op": "nex"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 30,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 30,
+            "keys": ["ip"],
+            "action": "deny"
+          },
+          "redirect": null,
+          "actionDuration": "1h"
+        }
+      }
+    },
+    {
+      "key": "R8",
+      "value": {
+        "name": "R8 sign in per IP",
+        "description": "SPEC-3 8.3 R8: /api/auth/* and /device 10 per 60 s per IP, then deny for 15 min; brute force",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/auth/"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "eq",
+                "value": "/device"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 10,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 10,
+            "keys": ["ip"],
+            "action": "deny"
+          },
+          "redirect": null,
+          "actionDuration": "15m"
+        }
+      }
+    },
+    {
+      "key": "R9",
+      "value": {
+        "name": "R9 sign in per client fingerprint",
+        "description": "SPEC-3 8.3 R9: /api/auth/* and /device 60 per 10 min per JA4, then challenge; distributed brute force with one client fingerprint",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/auth/"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "eq",
+                "value": "/device"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 600,
+              "limit": 60,
+              "keys": ["ja4"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 600,
+            "limit": 60,
+            "keys": ["ja4"],
+            "action": "challenge"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R10",
+      "value": {
+        "name": "R10 assets per IP",
+        "description": "SPEC-3 8.3 R10: /decks/*/assets/* 600 per 60 s per IP; hotlinking",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "re",
+                "value": "^/decks/[^/]+/assets/"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 600,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 600,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R11",
+      "value": {
+        "name": "R11 whole site per client fingerprint",
+        "description": "SPEC-3 8.3 R11: every path 200 per 10 s per JA4, then challenge; a flood from one client fingerprint",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 10,
+              "limit": 200,
+              "keys": ["ja4"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 10,
+            "limit": 200,
+            "keys": ["ja4"],
+            "action": "challenge"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R12",
+      "value": {
+        "name": "R12 stream opens per IP",
+        "description": "SPEC-3 8.3 R12: GET /api/decks/*/stream 30 per 60 s per IP; eight tabs reconnecting every 300 s is under 2 per minute",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "method",
+                "op": "eq",
+                "value": "GET"
+              },
+              {
+                "type": "path",
+                "op": "re",
+                "value": "^/api/decks/[^/]+/stream$"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 30,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 30,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R13",
+      "value": {
+        "name": "R13 operations per IP",
+        "description": "SPEC-3 8.3 R13: POST /api/decks/*/ops 3600 per 60 s per IP; 60 per second per client, one client per IP in the normal case",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "method",
+                "op": "eq",
+                "value": "POST"
+              },
+              {
+                "type": "path",
+                "op": "re",
+                "value": "^/api/decks/[^/]+/ops$"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 3600,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 3600,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R14",
+      "value": {
+        "name": "R14 presence per IP",
+        "description": "SPEC-3 8.3 R14: POST /api/decks/*/presence 900 per 60 s per IP; 15 batches per second",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "method",
+                "op": "eq",
+                "value": "POST"
+              },
+              {
+                "type": "path",
+                "op": "re",
+                "value": "^/api/decks/[^/]+/presence$"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 900,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 900,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R15",
+      "value": {
+        "name": "R15 comment writes per IP",
+        "description": "SPEC-3 8.3 R15: /api/comments/* writes (POST, PATCH, DELETE) 30 per 60 s per IP; a person writes a comment every few seconds at most",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/comments/"
+              },
+              {
+                "type": "method",
+                "op": "inc",
+                "value": ["POST", "PATCH", "DELETE"]
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 30,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 30,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R16",
+      "value": {
+        "name": "R16 share, access and link exchange per IP",
+        "description": "SPEC-3 8.3 R16: /api/share/*, /api/access/* and /s/* 20 per 10 min per IP, then deny for 15 min; share changes and requests are rare",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/share/"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/access/"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/s/"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 600,
+              "limit": 20,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 600,
+            "limit": 20,
+            "keys": ["ip"],
+            "action": "deny"
+          },
+          "redirect": null,
+          "actionDuration": "15m"
+        }
+      }
+    },
+    {
+      "key": "R16b",
+      "value": {
+        "name": "R16b deck pages per IP",
+        "description": "SPEC-3 8.3 R16b: the You need access page 120 per 60 s per IP. Pro rules cannot match a response status, so the rule counts the four page routes that render it (/deck/*, /edit/*, /present/*, /print/*); 120 page loads a minute is far above a person",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/deck/"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/edit/"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/present/"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/print/"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 120,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 120,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R17",
+      "value": {
+        "name": "R17 upload tokens per IP",
+        "description": "SPEC-3 8.3 R17: /api/x/upload/* 20 per 60 s per IP; one token per upload",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/x/upload/"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 20,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 20,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R18",
+      "value": {
+        "name": "R18 avatars per IP",
+        "description": "SPEC-3 8.3 R18: /api/avatar/* 10 per 10 min per IP; avatars change rarely",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/avatar/"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 600,
+              "limit": 10,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 600,
+            "limit": 10,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R19",
+      "value": {
+        "name": "R19 WebSocket upgrades per IP (round four)",
+        "description": "SPEC-3 8.3 R19: reserved for GET /api/decks/*/ws, 30 per 60 s per IP, as R12; the upgrade handler is round four (SPEC-3 17), so the rule is committed inactive",
+        "active": false,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "method",
+                "op": "eq",
+                "value": "GET"
+              },
+              {
+                "type": "path",
+                "op": "re",
+                "value": "^/api/decks/[^/]+/ws$"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 30,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 30,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R20",
+      "value": {
+        "name": "R20 notifications per IP",
+        "description": "SPEC-3 8.3 R20: /api/notify/* 120 per 60 s per IP; the inbox polls at most every few seconds",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/notify/"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 60,
+              "limit": 120,
+              "keys": ["ip"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 60,
+            "limit": 120,
+            "keys": ["ip"],
+            "action": "rate_limit"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "R21",
+      "value": {
+        "name": "R21 stream opens per client fingerprint",
+        "description": "SPEC-3 8.3 R21: /api/decks/*/stream 600 per 10 min per JA4, then challenge; a flood of opens from one client fingerprint across IPs",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "path",
+                "op": "re",
+                "value": "^/api/decks/[^/]+/stream$"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "rate_limit",
+            "rateLimit": {
+              "algo": "fixed_window",
+              "window": 600,
+              "limit": 600,
+              "keys": ["ja4"],
+              "action": "log"
+            },
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "rate_limit",
+          "rateLimit": {
+            "algo": "fixed_window",
+            "window": 600,
+            "limit": 600,
+            "keys": ["ja4"],
+            "action": "challenge"
+          },
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    },
+    {
+      "key": "bypass-cli",
+      "value": {
+        "name": "Bypass managed rules for the CLI and MCP clients on the agent routes",
+        "description": "SPEC-3 8.3 Managed: a bypass for the turboslide/ user agent and MCP clients on /api/actions/*, /api/agent and /mcp, which cannot solve a challenge and still need the bearer key; scoped to the agent paths so the bypass is narrow",
+        "active": true,
+        "conditionGroup": [
+          {
+            "conditions": [
+              {
+                "type": "user_agent",
+                "op": "pre",
+                "value": "turboslide/"
+              },
+              {
+                "type": "path",
+                "op": "pre",
+                "value": "/api/actions/"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "user_agent",
+                "op": "pre",
+                "value": "turboslide/"
+              },
+              {
+                "type": "path",
+                "op": "eq",
+                "value": "/api/agent"
+              }
+            ]
+          },
+          {
+            "conditions": [
+              {
+                "type": "header",
+                "key": "mcp-protocol-version",
+                "op": "ex"
+              },
+              {
+                "type": "path",
+                "op": "eq",
+                "value": "/mcp"
+              }
+            ]
+          }
+        ],
+        "action": {
+          "mitigate": {
+            "action": "log",
+            "rateLimit": null,
+            "redirect": null,
+            "actionDuration": null
+          }
+        }
+      },
+      "enforce": {
+        "mitigate": {
+          "action": "bypass",
+          "rateLimit": null,
+          "redirect": null,
+          "actionDuration": null
+        }
+      }
+    }
+  ],
+  "managed": {
+    "botProtection": {
+      "description": "SPEC-3 8.3 Managed: Bot Protection in log mode for the week, challenge mode after; the CLI and MCP clients pass through the bypass rule above and still need the key",
+      "mode": "log",
+      "enforce": "challenge"
+    }
+  },
+  "order": [
+    "bypass-cli",
+    "R7",
+    "R3",
+    "R4",
+    "R8",
+    "R9",
+    "R16",
+    "R17",
+    "R18",
+    "R2",
+    "R5",
+    "R6",
+    "R12",
+    "R13",
+    "R14",
+    "R15",
+    "R20",
+    "R21",
+    "R10",
+    "R1",
+    "R16b",
+    "R11",
+    "R19"
+  ]
+}

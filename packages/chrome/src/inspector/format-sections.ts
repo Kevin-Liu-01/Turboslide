@@ -1,4 +1,5 @@
 import type { Block, BlockType } from '@turboslide/schema/blocks';
+import { BLOCK_SCHEMAS } from '@turboslide/schema/blocks';
 import { isLineKind } from '@turboslide/schema/shapes';
 
 import type { IconName } from '../icons';
@@ -25,6 +26,8 @@ export type FormatSectionId =
   | 'colour'
   | 'picture'
   | 'adjustments'
+  /** round three (gslides-parity SPEC-3 10.7): the deck's two tone screen over a picture */
+  | 'dither'
   | 'shadow'
   | 'table'
   | 'chart'
@@ -81,6 +84,12 @@ export const FORMAT_SECTIONS: ReadonlyArray<FormatSectionMeta> = [
     title: 'Adjustments',
     icon: 'adjustments',
     doc: 'Transparency, brightness and contrast',
+  },
+  {
+    id: 'dither',
+    title: 'Dither',
+    icon: 'adjustments',
+    doc: 'The deck’s two tone screen over the picture, kept live',
   },
   {
     id: 'shadow',
@@ -156,6 +165,7 @@ const OWN_SECTION_PATHS: ReadonlySet<string> = new Set([
   '/trim',
   '/mask',
   '/adjust',
+  '/dither',
   '/frame',
   '/shadow',
   '/autofit',
@@ -209,6 +219,7 @@ export function formatSectionOfBlockControl(
   if (spec.kind === 'position') return 'size';
   if (spec.path === '/alt') return 'altText';
   if (spec.path === '/shadow') return 'shadow';
+  if (spec.path === '/dither') return 'dither';
   if (spec.path === '/autofit' || spec.path === '/valign' || spec.path === '/padding')
     return block.type === 'box' && spec.path === '/padding' && block.pos === undefined
       ? 'size'
@@ -290,18 +301,25 @@ export function hasTextFitting(block: Block): boolean {
   );
 }
 
-/** True for a block Drop shadow applies to (SPEC-2 2.3.4). */
+/**
+ * True for a block Drop shadow applies to (SPEC-2 2.3.4): the types whose schema carries the
+ * `shadow` field (box, shape, text, shot, picture, icon, table and chart), read from the schema so
+ * the section appears exactly where `block.shadow` is accepted and follows the schema when a type
+ * gains the field. A heading or a paragraph carries none, so the text context menu's Drop shadow
+ * row on one opens the panel without the section (VERIFICATION-2 finding 10, VERIFICATION-3
+ * finding 16); the schema request that closes it is in build-3/b5.md under Fix round.
+ */
 export function hasShadow(block: Block): boolean {
-  return (
-    block.type === 'box' ||
-    block.type === 'shape' ||
-    block.type === 'text' ||
-    block.type === 'shot' ||
-    block.type === 'picture' ||
-    block.type === 'icon' ||
-    block.type === 'table' ||
-    block.type === 'chart'
-  );
+  return 'shadow' in BLOCK_SCHEMAS[block.type].shape;
+}
+
+/**
+ * True for a block the Dither section serves (gslides-parity SPEC-3 10.7; research-3 06 4.7): a shot
+ * or a picture object, whose `dither` field is the deck's two tone screen over the picture; an icon
+ * has no continuous source to screen.
+ */
+export function hasDither(block: Block): boolean {
+  return block.type === 'shot' || block.type === 'picture';
 }
 
 /** True for a block Adjustments applies to (SPEC-2 2.5.3): shot, picture; icon takes transparency only. */

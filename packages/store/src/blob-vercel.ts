@@ -17,6 +17,7 @@ import {
 
 import type { BlobClient, BlobEntry } from './blob-store.ts';
 import { BlobExistsError, BlobPreconditionError } from './blob-store.ts';
+import { splitBlobClient } from './migrate.ts';
 import type { Env } from './select.ts';
 import { BLOB_TOKEN_VARIABLE } from './select.ts';
 
@@ -80,12 +81,45 @@ async function bytesOf(stream: ReadableStream<Uint8Array> | null): Promise<Uint8
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
-export function vercelBlobClient(env: Env = process.env): BlobClient {
-  const token = env[BLOB_TOKEN_VARIABLE];
+/**
+ * The private store of storage layout v2 (gslides-parity SPEC-3 2.2, 11.5): its read write token.
+ * Set, `vercelDocumentsClient` opens it and `splitBlobClient` (migrate.ts) puts every document
+ * there; unset, the deployment runs layout v1 on the public store alone.
+ */
+export const DOCUMENTS_TOKEN_VARIABLE = 'TURBOSLIDE_BLOB_PRIVATE_TOKEN';
+
+export function hasDocumentsToken(env: Env = process.env): boolean {
+  const token = env[DOCUMENTS_TOKEN_VARIABLE];
+  return token !== undefined && token !== '';
+}
+
+export type VercelClientOptions = {
+  /** the variable holding the token; `BLOB_READ_WRITE_TOKEN` by default */
+  tokenVariable?: string;
+  /** the access of every put; `TURBOSLIDE_BLOB_ACCESS` (public unless `private`) by default */
+  access?: Access;
+};
+
+/** The private documents store's client (layout v2); a TypeError names the variable when it is unset. */
+export function vercelDocumentsClient(env: Env = process.env): BlobClient {
+  return vercelBlobClient(env, { tokenVariable: DOCUMENTS_TOKEN_VARIABLE, access: 'private' });
+}
+
+export function vercelBlobClient(
+  env: Env = process.env,
+  options: VercelClientOptions = {},
+): BlobClient {
+  const variable = options.tokenVariable ?? BLOB_TOKEN_VARIABLE;
+  const token = env[variable];
   if (token === undefined || token === '') {
-    throw new TypeError(`${BLOB_TOKEN_VARIABLE} is not set; connect a Blob store to the project`);
+    throw new TypeError(
+      variable === BLOB_TOKEN_VARIABLE
+        ? `${BLOB_TOKEN_VARIABLE} is not set; connect a Blob store to the project`
+        : `${variable} is not set; create the private store and set its token (docs/hosting.md, the private store)`,
+    );
   }
-  const access: Access = env[BLOB_ACCESS_VARIABLE] === 'private' ? 'private' : 'public';
+  const access: Access =
+    options.access ?? (env[BLOB_ACCESS_VARIABLE] === 'private' ? 'private' : 'public');
   return {
     async head(pathname) {
       try {
@@ -164,4 +198,16 @@ export function vercelBlobClient(env: Env = process.env): BlobClient {
       await del([...pathnames], { token });
     },
   };
+}
+
+/**
+ * The client a deployment opens (gslides-parity SPEC-3 2.2, 11.5): with the private store's token
+ * set, one client over both stores that routes documents private and twins public and honours the
+ * migration's dual read window (`splitBlobClient`); without it, the public store alone (layout
+ * v1). The studio's hosting plugin registers the result as `HostingProviders.blob`.
+ */
+export function layoutBlobClient(env: Env = process.env): BlobClient {
+  const legacy = vercelBlobClient(env);
+  if (!hasDocumentsToken(env)) return legacy;
+  return splitBlobClient({ legacy, documents: vercelDocumentsClient(env) });
 }

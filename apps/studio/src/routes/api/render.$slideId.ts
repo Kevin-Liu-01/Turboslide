@@ -8,8 +8,12 @@ import { createWorkerClient } from '@turboslide/render-worker/client';
 import type { WorkerClient } from '@turboslide/render-worker/client';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
+import { authorize, authorizeMode, denialBody, requestContext } from '../../server/authorize';
+import { requireFlag } from '../../server/flags';
+import { logSecurityEvent } from '../../server/log';
 import { ensureDeckAssets, workerClientOptions } from '../../server/root';
 import { getThumbnail, isThumbWidth, thumbResponse } from '../../server/thumbs';
+import { THUMB_GRANT_QUERY, verifyThumbGrant } from '../../server/tokens';
 
 // GET /api/render/:slideId?deck=gt-brand&theme=light&scale=1[&format=json|jpg]: the facade over the
 // render worker (SPEC 3.4; MILESTONES M2 item 6). With ?w=160|320|640 the response is the
@@ -87,6 +91,37 @@ export const Route = createFileRoute('/api/render/$slideId')({
               { error: { message: 'w must be 160, 320 or 640', status: 400 } },
               { status: 400 },
             );
+          // the thumbnail grant (gslides-parity SPEC-3 8.13; report 04 F6): the page's `<img>`
+          // carries no header, so the loader's grant travels as `s`; without one the request
+          // is refused in enforce mode and logged in shadow mode, and the renderThumbs switch
+          // answers 503 with plates in the filmstrip
+          const flagged = await requireFlag('renderThumbs', { deckId, action: 'render.thumb' });
+          if (flagged !== null) return flagged;
+          const grant = verifyThumbGrant(deckId, url.searchParams.get(THUMB_GRANT_QUERY));
+          if (grant === null) {
+            const ctx = await requestContext(request);
+            const decision = await authorize(ctx, deckId, 'read', {
+              action: 'render.thumb',
+              transport: 'route',
+            });
+            if (!decision.ok)
+              return Response.json(denialBody(decision, 'read'), { status: decision.status });
+            if (
+              authorizeMode() === 'enforce' &&
+              ctx.principal === null &&
+              ctx.agent === undefined
+            ) {
+              logSecurityEvent({
+                event: 'http.403',
+                deckId,
+                action: 'render.thumb',
+                reason: 'unsigned thumbnail',
+                status: 403,
+                transport: 'route',
+              });
+              return Response.json({ error: 'forbidden', capability: 'read' }, { status: 403 });
+            }
+          }
           try {
             const request_ = { deckId, slideId, theme, width } as const;
             const thumb = await getThumbnail(request_);
@@ -101,6 +136,14 @@ export const Route = createFileRoute('/api/render/$slideId')({
         const wantsJson =
           url.searchParams.get('format') === 'json' ||
           (request.headers.get('accept') ?? '').includes('application/json');
+        // the full size render: authorize(read) for the bearer or the cookie (SPEC-3 6.2)
+        const ctx = await requestContext(request);
+        const decision = await authorize(ctx, deckId, 'read', {
+          action: 'render.slide',
+          transport: 'route',
+        });
+        if (!decision.ok)
+          return Response.json(denialBody(decision, 'read'), { status: decision.status });
         try {
           // the hosted seed and the deck's twins are on disk before the job runs (server/root.ts)
           await ensureDeckAssets(deckId);

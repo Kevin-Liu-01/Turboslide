@@ -18,6 +18,9 @@ import { spriteMarkup } from '@turboslide/theme/sprite';
 import type { ViewerDeck, ViewerSlide } from '@turboslide/viewer/model';
 import { isPictureKind } from '@turboslide/viewer/model';
 
+import { htmlFrameFor } from '@turboslide/render/blocks/html-escape';
+
+import type { AuthContext } from './authorize';
 import { renderSlide } from './render';
 import {
   createStoredDeck,
@@ -25,8 +28,8 @@ import {
   ensureDecks,
   hostingFacts,
   isHosted,
-  listStoredDecks,
   openDeckStore,
+  listStoredDecks,
 } from './root';
 
 /**
@@ -107,7 +110,30 @@ type ViewerBuildOptions = {
   notes: boolean;
   /** carry the skipped slides; off for the public payloads and present mode (SPEC 7.2.1) */
   includeSkipped: boolean;
+  /** how an `html` block renders (gslides-parity SPEC-3 8.4): inside the sandboxed frame, or as its note */
+  htmlPolicy: 'frame' | 'note';
+  /** the theme's sheet.css text for the frame's variables; empty when the bundle has none */
+  sheetCss: string;
 };
+
+let sheetCssCache: string | undefined;
+
+/**
+ * The theme's sheet.css text for the frame's variables, loaded once per process through
+ * packages/render's theme-node (a node module, so the import is dynamic: this file is imported by
+ * the pages for its client stubs and a module level node import would break the browser graph).
+ */
+async function sheetCss(): Promise<string> {
+  if (sheetCssCache === undefined) {
+    try {
+      const { loadThemeBundle } = await import('@turboslide/render/theme-node');
+      sheetCssCache = loadThemeBundle().sheetCss;
+    } catch {
+      sheetCssCache = '';
+    }
+  }
+  return sheetCssCache;
+}
 
 function buildViewerDeck(
   requestedId: string,
@@ -137,6 +163,14 @@ function buildViewerDeck(
         assetBase,
         blockAttrs: true,
         gtWord: true,
+        // every `html` block lands in the sandboxed frame (SPEC-3 8.4 item 2), or as its note
+        htmlFrame: htmlFrameFor({
+          theme: options.theme,
+          assetUrl: (path: string) => assetBase + path,
+          sheetCss: options.sheetCss,
+          policy: options.htmlPolicy,
+          publicStoreHost: process.env.TURBOSLIDE_PUBLIC_STORE_HOST ?? null,
+        }),
       });
       const asset = 'picture' in slide ? deck.assets[slide.picture.asset] : undefined;
       const picture =
@@ -268,7 +302,27 @@ const createDeckFn = createServerFn({ method: 'POST' })
       ...(input.id !== undefined ? { id: input.id } : {}),
     };
   })
-  .handler(async ({ data }): Promise<CreateDeckResult> => createStoredDeck(data));
+  .handler(async ({ data }): Promise<CreateDeckResult> => {
+    // no deck yet, so no authorize(): the read only switch and the deck creates per day quota
+    // (SPEC-3 8.3, 8.12); the owner of the new record is B2's `create(input, owner)` (day five)
+    const { identityLabel, requestContext } = await import('./authorize');
+    const { assertFlag } = await import('./flags');
+    const { assertQuota, tierOf } = await import('./ratelimit');
+    const ctx = await requestContext();
+    const identity = identityLabel(ctx) ?? 'anonymous';
+    await assertFlag('readOnly', { identity, action: 'deck.create' });
+    await assertQuota('deckCreatesPerDay', {
+      identity,
+      tier: tierOf(ctx),
+      action: 'deck.create',
+      transport: 'window',
+    });
+    const created = await createStoredDeck(data);
+    // the record of SPEC-3 6.1: restricted, the creator its owner (VERIFICATION-3 finding 4)
+    const { recordNewDeck } = await import('./access');
+    await recordNewDeck(created.deckId, ctx);
+    return created;
+  });
 
 export async function createNewDeck(input: CreateDeckInput): Promise<CreateDeckResult> {
   return createDeckFn({ data: input });
@@ -296,11 +350,19 @@ const renameDeckFn = createServerFn({ method: 'POST' })
     };
   })
   .handler(async ({ data }): Promise<RenameDeckResult> => {
+    // authorize(rename) first (SPEC-3 6.2); the author is the session's, never the page's
+    const { authorizeRequest } = await import('./authorize');
+    const { assertFlag } = await import('./flags');
+    const { author } = await authorizeRequest(data.deckId, 'rename', {
+      action: 'deck.rename',
+      fallbackAuthor: HOME_AUTHOR,
+    });
+    await assertFlag('readOnly', { deckId: data.deckId, action: 'deck.rename' });
     const store = await openDeckStore(data.deckId);
     const baseRevision = data.baseRevision ?? (await store.revision());
     const outcome = await store.write({
       baseRevision,
-      author: HOME_AUTHOR,
+      author,
       note: 'deck.rename',
       mutations: [{ op: 'deck.set', path: '/title', value: data.name }],
     });
@@ -347,13 +409,28 @@ const copyDeckFn = createServerFn({ method: 'POST' })
     };
   })
   .handler(async ({ data }): Promise<CopyDeckResult> => {
+    const { authorizeRequest, identityLabel } = await import('./authorize');
+    const { assertFlag } = await import('./flags');
+    const { assertQuota, tierOf } = await import('./ratelimit');
+    const { ctx } = await authorizeRequest(data.deckId, 'copy', { action: 'deck.copy' });
+    await assertFlag('readOnly', { deckId: data.deckId, action: 'deck.copy' });
+    await assertQuota('deckCreatesPerDay', {
+      identity: identityLabel(ctx) ?? 'anonymous',
+      tier: tierOf(ctx),
+      action: 'deck.copy',
+      transport: 'window',
+    });
     const input: CopyDeckInput = {
       id: data.deckId,
       name: data.name,
       ...(data.slideIds !== undefined ? { slideIds: data.slideIds } : {}),
       ...(data.removeNotes === true ? { removeNotes: true } : {}),
     };
-    return mapStale(async () => (await ensureDecks()).copy(input, data.baseRevision));
+    const copied = await mapStale(async () => (await ensureDecks()).copy(input, data.baseRevision));
+    // the copy is a new deck: restricted, the copier its owner (SPEC-3 6.1; VERIFICATION-3 finding 4)
+    const { recordNewDeck } = await import('./access');
+    await recordNewDeck(copied.deckId, ctx);
+    return copied;
   });
 
 export async function copyStoredDeck(input: CopyDeckRequest): Promise<CopyDeckResult> {
@@ -371,9 +448,13 @@ function validateDeckId(input: DeckIdRequest): DeckIdRequest {
 /** Move to trash (gslides-parity SPEC 6.4, `deck.trash`): the stamp on the manifest, the files stay. */
 const trashDeckFn = createServerFn({ method: 'POST' })
   .validator(validateDeckId)
-  .handler(async ({ data }): Promise<TrashState> =>
-    mapStale(async () => (await ensureDecks()).trash(data.deckId, data.baseRevision)),
-  );
+  .handler(async ({ data }): Promise<TrashState> => {
+    const { authorizeRequest } = await import('./authorize');
+    const { assertFlag } = await import('./flags');
+    await authorizeRequest(data.deckId, 'trash', { action: 'deck.trash' });
+    await assertFlag('readOnly', { deckId: data.deckId, action: 'deck.trash' });
+    return mapStale(async () => (await ensureDecks()).trash(data.deckId, data.baseRevision));
+  });
 
 export async function trashStoredDeck(input: DeckIdRequest): Promise<TrashState> {
   return trashDeckFn({ data: input });
@@ -382,9 +463,13 @@ export async function trashStoredDeck(input: DeckIdRequest): Promise<TrashState>
 /** Restore from the trash (`deck.restore`): the snackbar's Undo and the trash page's Restore. */
 const restoreDeckFn = createServerFn({ method: 'POST' })
   .validator(validateDeckId)
-  .handler(async ({ data }): Promise<TrashState> =>
-    mapStale(async () => (await ensureDecks()).restore(data.deckId, data.baseRevision)),
-  );
+  .handler(async ({ data }): Promise<TrashState> => {
+    const { authorizeRequest } = await import('./authorize');
+    const { assertFlag } = await import('./flags');
+    await authorizeRequest(data.deckId, 'restore', { action: 'deck.restore' });
+    await assertFlag('readOnly', { deckId: data.deckId, action: 'deck.restore' });
+    return mapStale(async () => (await ensureDecks()).restore(data.deckId, data.baseRevision));
+  });
 
 export async function restoreStoredDeck(input: DeckIdRequest): Promise<TrashState> {
   return restoreDeckFn({ data: input });
@@ -397,9 +482,14 @@ export async function restoreStoredDeck(input: DeckIdRequest): Promise<TrashStat
  */
 const removeDeckFn = createServerFn({ method: 'POST' })
   .validator(validateDeckId)
-  .handler(async ({ data }): Promise<{ id: string; removed: true }> =>
-    mapStale(async () => (await ensureDecks()).remove(data.deckId, data.baseRevision)),
-  );
+  .handler(async ({ data }): Promise<{ id: string; removed: true }> => {
+    // owner only (SPEC-3 8.2 "removeStoredDeck by anyone" closed): the `remove` cell is the owner's
+    const { authorizeRequest } = await import('./authorize');
+    const { assertFlag } = await import('./flags');
+    await authorizeRequest(data.deckId, 'remove', { action: 'deck.remove' });
+    await assertFlag('readOnly', { deckId: data.deckId, action: 'deck.remove' });
+    return mapStale(async () => (await ensureDecks()).remove(data.deckId, data.baseRevision));
+  });
 
 export async function removeStoredDeck(
   input: DeckIdRequest,
@@ -425,6 +515,14 @@ export type DeckDetails = {
 const deckDetailsFn = createServerFn({ method: 'GET' })
   .validator((input: { deckId: string }) => ({ deckId: requireSlug(input.deckId, 'deckId') }))
   .handler(async ({ data }): Promise<DeckDetails | null> => {
+    // a caller who may not read the deck learns nothing: one null for a missing and a restricted deck
+    const { authorize, requestContext } = await import('./authorize');
+    const ctx = await requestContext();
+    const read = await authorize(ctx, data.deckId, 'read', {
+      action: 'deck.details',
+      transport: 'window',
+    });
+    if (!read.ok) return null;
     const decks = await ensureDecks();
     const head = (await decks.list({ includeTrashed: true })).find((row) => row.id === data.deckId);
     if (head === undefined) return null;
@@ -459,6 +557,13 @@ export type SourceDeckSlides = {
 const sourceDeckSlidesFn = createServerFn({ method: 'GET' })
   .validator((input: { deckId: string }) => ({ deckId: requireSlug(input.deckId, 'deckId') }))
   .handler(async ({ data }): Promise<SourceDeckSlides | null> => {
+    const { authorize, requestContext } = await import('./authorize');
+    const ctx = await requestContext();
+    const read = await authorize(ctx, data.deckId, 'read', {
+      action: 'deck.slides',
+      transport: 'window',
+    });
+    if (!read.ok) return null;
     let document: DeckDocument;
     try {
       document = (await (await openDeckStore(data.deckId)).read()).document;
@@ -510,7 +615,45 @@ export type GetDeckInput = {
   includeSkipped?: boolean;
   /** serve a deck in the trash: /print and /present may; /deck and /embed answer 404 (SPEC 6.4) */
   includeTrashed?: boolean;
+  /** `?p=` of the published player (gslides-parity SPEC-3 6.4): read in present mode and the embed only */
+  publishToken?: string;
 };
+
+/** The payload shaped by role (SPEC-3 6.3): what the caller may read of notes and skipped slides. */
+async function shapeByRole(
+  ctx: AuthContext,
+  deckId: string,
+  input: GetDeckInput,
+): Promise<{
+  notes: boolean;
+  includeSkipped: boolean;
+  role: string;
+  htmlPolicy: 'frame' | 'note';
+}> {
+  const { DeniedError, authorize, denialBody } = await import('./authorize');
+  const { flagOn } = await import('./flags');
+  const options = { transport: 'window' as const };
+  const read = await authorize(ctx, deckId, 'read', { ...options, action: 'deck.view' });
+  if (!read.ok) {
+    // 410 travels to the page ("This presentation is no longer published"); 401 and 404 are one null
+    if (read.status === 410) throw new DeniedError(410, denialBody(read, 'read'));
+    return { notes: false, includeSkipped: false, role: 'none', htmlPolicy: 'note' };
+  }
+  const notes =
+    input.notes === true &&
+    (await authorize(ctx, deckId, 'readNotes', { ...options, action: 'deck.view' })).ok;
+  const includeSkipped =
+    input.includeSkipped === true &&
+    (await authorize(ctx, deckId, 'readSkipped', { ...options, action: 'deck.view' })).ok;
+  // the html block policy of SPEC-3 8.4: the owner and an unshared deck see the frame; a link or
+  // publish visitor sees the note unless the owner's switch is on (the record's settings, through
+  // B2's access store, are read by the shadow role's via until the store binds: `open`, `link`
+  // and `publish` count as shared beyond the owner)
+  const shared = read.via === 'link' || read.via === 'publish';
+  const htmlPolicy: 'frame' | 'note' =
+    (await flagOn('htmlBlocks')) === false ? 'note' : shared ? 'note' : 'frame';
+  return { notes, includeSkipped, role: read.role, htmlPolicy };
+}
 
 /**
  * The rendered deck for the viewer routes, or null when neither the deck nor the fixture exists,
@@ -521,17 +664,36 @@ export type GetDeckInput = {
 export const getDeck = createServerFn({ method: 'GET' })
   .validator((input: GetDeckInput) => {
     if (!/^[a-z0-9][a-z0-9-]*$/i.test(input.deckId)) throw new Error('deckId must be a slug');
+    if (input.publishToken !== undefined && !/^[A-Za-z0-9_-]{16,64}$/.test(input.publishToken))
+      throw new Error('publishToken must be a token');
     return input;
   })
   .handler(async ({ data }): Promise<DeckPayload | null> => {
+    // authorize(read) first, the payload shaped by role (SPEC-3 6.2, 6.3): a caller without a
+    // right gets null (the You need access page, one answer for a missing and a restricted deck)
+    const { requestContext } = await import('./authorize');
+    const ctx = await requestContext();
+    if (data.publishToken !== undefined) ctx.publishToken = data.publishToken;
+    const shape = await shapeByRole(ctx, data.deckId, data);
+    if (shape.role === 'none') return null;
     const loaded = await loadDeck(data.deckId);
     if (!loaded) return null;
     if (isTrashed(loaded.document.deck) && data.includeTrashed !== true) return null;
+    // the parser loads once per process, only when the deck holds an html block (SPEC-3 8.4)
+    const holdsHtml = Object.values(loaded.document.slides).some((slide) =>
+      JSON.stringify(slide).includes('"type":"html"'),
+    );
+    if (holdsHtml) {
+      const { loadPurifier } = await import('@turboslide/render/blocks/html-escape');
+      await loadPurifier().catch(() => undefined);
+    }
     const theme = data.theme ?? deckAppearance(loaded.document.deck);
     const built = buildViewerDeck(data.deckId, loaded.servedId, loaded, {
       theme,
-      notes: data.notes === true,
-      includeSkipped: data.includeSkipped === true,
+      notes: shape.notes,
+      includeSkipped: shape.includeSkipped,
+      htmlPolicy: shape.htmlPolicy,
+      sheetCss: holdsHtml ? await sheetCss() : '',
     });
     return {
       deck: built.deck,

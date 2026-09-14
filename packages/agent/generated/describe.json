@@ -96,7 +96,67 @@
         "export.run",
         "export.text",
         "build.run",
-        "validate.run"
+        "validate.run",
+        "presence.list",
+        "presence.follow",
+        "presence.unfollow",
+        "presence.pointer",
+        "sync.status",
+        "deck.watch",
+        "comment.add",
+        "comment.reply",
+        "comment.edit",
+        "comment.delete",
+        "comment.resolve",
+        "comment.reopen",
+        "comment.assign",
+        "comment.done",
+        "comment.react",
+        "comment.list",
+        "comment.get",
+        "comment.link",
+        "notification.list",
+        "notification.markRead",
+        "notification.settings",
+        "activity.list",
+        "version.diff",
+        "share.get",
+        "share.setGeneralAccess",
+        "share.createLink",
+        "share.revokeLink",
+        "share.rotateLink",
+        "share.stop",
+        "share.invite",
+        "share.setRole",
+        "share.remove",
+        "share.setExpiry",
+        "share.settings",
+        "share.requestAccess",
+        "share.listRequests",
+        "share.respond",
+        "share.transferOwnership",
+        "share.acceptOwnership",
+        "share.declineOwnership",
+        "share.claim",
+        "share.emailCollaborators",
+        "deck.publish",
+        "deck.unpublish",
+        "account.decks",
+        "account.tokens.create",
+        "account.tokens.list",
+        "account.tokens.revoke",
+        "account.me",
+        "account.setName",
+        "account.setAvatar",
+        "account.sessions",
+        "account.signOut",
+        "account.forget",
+        "admin.assignOwner",
+        "admin.flag",
+        "picture.dither",
+        "picture.materialize",
+        "slide.setBackgroundPicture",
+        "slide.setBackgroundMaterial"
       ]
     },
     {
@@ -233,7 +293,67 @@
     "controls.list",
     "control.activate",
     "control.set",
-    "artifact.download"
+    "artifact.download",
+    "presence.list",
+    "presence.follow",
+    "presence.unfollow",
+    "presence.pointer",
+    "sync.status",
+    "deck.watch",
+    "comment.add",
+    "comment.reply",
+    "comment.edit",
+    "comment.delete",
+    "comment.resolve",
+    "comment.reopen",
+    "comment.assign",
+    "comment.done",
+    "comment.react",
+    "comment.list",
+    "comment.get",
+    "comment.link",
+    "notification.list",
+    "notification.markRead",
+    "notification.settings",
+    "activity.list",
+    "version.diff",
+    "share.get",
+    "share.setGeneralAccess",
+    "share.createLink",
+    "share.revokeLink",
+    "share.rotateLink",
+    "share.stop",
+    "share.invite",
+    "share.setRole",
+    "share.remove",
+    "share.setExpiry",
+    "share.settings",
+    "share.requestAccess",
+    "share.listRequests",
+    "share.respond",
+    "share.transferOwnership",
+    "share.acceptOwnership",
+    "share.declineOwnership",
+    "share.claim",
+    "share.emailCollaborators",
+    "deck.publish",
+    "deck.unpublish",
+    "account.decks",
+    "account.tokens.create",
+    "account.tokens.list",
+    "account.tokens.revoke",
+    "account.me",
+    "account.setName",
+    "account.setAvatar",
+    "account.sessions",
+    "account.signOut",
+    "account.forget",
+    "admin.assignOwner",
+    "admin.flag",
+    "picture.dither",
+    "picture.materialize",
+    "slide.setBackgroundPicture",
+    "slide.setBackgroundMaterial"
   ],
   "details": {
     "deck.info": {
@@ -907,6 +1027,426 @@
       "mutates": false,
       "milestone": "M3",
       "group": "studio"
+    },
+    "presence.list": {
+      "label": "Collaborators",
+      "doc": "The roster of the deck’s room with the computed mark, slide, selection, pointer and follow target per participant; server side on the window transport.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "presence"
+    },
+    "presence.follow": {
+      "label": "Follow",
+      "doc": "The attached page follows a client’s slide and scroll; refused for viewers, commenters, anonymous people and agents with Go to slide offered instead.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "presence"
+    },
+    "presence.unfollow": {
+      "label": "Stop following",
+      "doc": "The attached page stops following.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "presence"
+    },
+    "presence.pointer": {
+      "label": "Live pointer",
+      "doc": "Turns the caller’s live pointer on or off, persisted on the principal record per deck.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "presence"
+    },
+    "sync.status": {
+      "label": "Sync status",
+      "doc": "The client’s position in the room: the last stream entry, the revision, the pending and retained counts, the tier, the transport and whether the stream is connected.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "sync"
+    },
+    "deck.watch": {
+      "label": "Watch",
+      "doc": "Long polls for the checkpoints and comment entries since a revision, the polling form for a transport without a stream; answers at once when something is newer, else at the timeout.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "sync"
+    },
+    "comment.add": {
+      "label": "Comment",
+      "doc": "Starts a thread at an anchor (the deck, a slide, a block, a text range, a table cell or the notes) with a plain text body whose {@n} tokens name its mentions, optionally assigned; server side.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "comment.reply": {
+      "label": "Reply",
+      "doc": "Appends a reply to a thread; server side.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "comment.edit": {
+      "label": "Edit comment",
+      "doc": "Rewrites a comment’s body, its author only; 409 with the current thread when the thread moved since expectedUpdatedAt.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "comment.delete": {
+      "label": "Delete comment",
+      "doc": "Tombstones a comment, keeping its replies; the first comment’s tombstone keeps the thread; restore brings it back within 30 days.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "comment.resolve": {
+      "label": "Resolve",
+      "doc": "Marks a thread resolved; last writer wins.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "comment.reopen": {
+      "label": "Re-open",
+      "doc": "Reopens a resolved thread; last writer wins.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "comment.assign": {
+      "label": "Assign",
+      "doc": "Assigns a thread to a principal or an invitation (an agent principal is assignable), or clears the assignment with null; last writer wins.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "comment.done": {
+      "label": "Mark as done",
+      "doc": "The assignee marks the thread done; last writer wins.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "comment.react": {
+      "label": "React",
+      "doc": "Toggles the caller’s reaction on a comment from the 24 emoji palette; reactions are a set per emoji keyed by principal.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "comment.list": {
+      "label": "Comments",
+      "doc": "The threads of the deck or a slide with their anchors resolved against the current document, filtered by block, state, assignment to the caller, author, search text or revision; 403 without readComments.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "comment.get": {
+      "label": "Comment thread",
+      "doc": "One thread with its anchor resolved against the current document.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "comment.link": {
+      "label": "Link to comment",
+      "doc": "The editor and the view URLs that open the deck on the thread’s slide with its card expanded; runs in the page on the window transport.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "notification.list": {
+      "label": "Notifications",
+      "doc": "The caller’s inbox, newest first: mentions, replies, assignments, resolutions, reactions, access requests and grants, coalesced per thread inside a 15 minute window.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "notification.markRead": {
+      "label": "Mark as read",
+      "doc": "Marks the named notifications read, or every one; answers the unread count.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "notification.settings": {
+      "label": "Notification settings",
+      "doc": "Reads or writes the caller’s per deck level (All comments, Comments for you, None), the email switch and, for the owner, whether commenters read the Activity panel; a read when every field is absent.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "activity.list": {
+      "label": "Activity",
+      "doc": "The merged activity feed of the deck: version windows, comment events, share events, requests, role changes, renames, restores, named versions, exports, imports and trash; editors and the owner, commenters when allowed.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "comment"
+    },
+    "version.diff": {
+      "label": "Show changes",
+      "doc": "The mutations between two revisions grouped by touched block and by author, the data behind Show changes; from omitted with staged is the last named version, to defaults to the current revision.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "version"
+    },
+    "share.get": {
+      "label": "Sharing",
+      "doc": "The access record with its tokens hashed and the dead links of the last thirty days, plus the caller’s role, how it was reached and the capabilities it gives; a viewer receives the owner, the general access mode, their own grant and their capabilities only.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.setGeneralAccess": {
+      "label": "General access",
+      "doc": "Sets Restricted or Anyone with the link with its role; the link mode mints a token and answers its /s/ URL once.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.createLink": {
+      "label": "Create link",
+      "doc": "Mints a share link with a role, a label and an optional expiry and answers its /s/ URL once; several links with several roles may live at once.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.revokeLink": {
+      "label": "Revoke link",
+      "doc": "Revokes one link; every session grant that names it dies on its next request.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.rotateLink": {
+      "label": "Rotate link",
+      "doc": "Mints a new token for a link and answers its URL once; the old token dies.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.stop": {
+      "label": "Stop sharing",
+      "doc": "Sets Restricted and revokes every link.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.invite": {
+      "label": "Share with people",
+      "doc": "Writes one grant per address with a role and an optional message and sends the invitations unless told not to; never says whether an account exists, and answers sent, queued or no-mail per address with the deck link for hand delivery.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.setRole": {
+      "label": "Change role",
+      "doc": "Changes a grant’s role; the owner’s row is refused.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.remove": {
+      "label": "Remove access",
+      "doc": "Removes a grant; the caller may remove their own at any role.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.setExpiry": {
+      "label": "Access expiry",
+      "doc": "Sets or clears a grant’s expiry, up to one year ahead.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.settings": {
+      "label": "Sharing settings",
+      "doc": "The gear’s five switches: editors can share, viewers can download, viewers can see comments, show names to people with the link, allow embedded HTML blocks; owner only, with a re-authentication within 10 minutes on the window transport.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.requestAccess": {
+      "label": "Request access",
+      "doc": "Asks the owner for a role with an optional message; always answers the same sentence, so a caller learns nothing about whether the deck exists; rate limited per IP, and an anonymous caller must give an email.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.listRequests": {
+      "label": "Access requests",
+      "doc": "The pending requests with the requester’s label, email, role, message and time.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.respond": {
+      "label": "Respond to request",
+      "doc": "Approves a request as a role or declines it with null; the requester is told when asked.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.transferOwnership": {
+      "label": "Transfer ownership",
+      "doc": "Offers the deck to a signed in principal or an email, who accepts or declines; owner only, anonymous targets refused.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.acceptOwnership": {
+      "label": "Accept ownership",
+      "doc": "The pending owner takes the deck; the previous owner becomes an editor.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.declineOwnership": {
+      "label": "Decline ownership",
+      "doc": "The pending owner declines the offer.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.claim": {
+      "label": "Claim",
+      "doc": "A signed in principal claims an unowned deck (an admin any unowned deck); the deck then reads Anyone with the address can view, so every view link and the embed keep working while editing by address stops.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "share.emailCollaborators": {
+      "label": "Email collaborators",
+      "doc": "Sends a message to every collaborator or the named ones; declared this round and answers not implemented until round four.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "deck.publish": {
+      "label": "Publish to the web",
+      "doc": "Mints the published player’s token and answers the player and embed URLs once; every edit is published, and the player never opens the editor.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "deck.unpublish": {
+      "label": "Stop publishing",
+      "doc": "Revokes the published token; the player and the embed answer 410.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "share"
+    },
+    "account.decks": {
+      "label": "My presentations",
+      "doc": "The caller’s deck index with the owner and the caller’s role per row: owned, shared with me, recent, trash, or all for an admin; on a checkout every deck as owned.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "account"
+    },
+    "account.tokens.create": {
+      "label": "Create API key",
+      "doc": "Mints an API key owned by the caller with a name, scopes and an optional expiry, shown once; never over MCP, and refused on a checkout, which has no accounts.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "account"
+    },
+    "account.tokens.list": {
+      "label": "API keys",
+      "doc": "The caller’s API keys without their secrets.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "account"
+    },
+    "account.tokens.revoke": {
+      "label": "Revoke API key",
+      "doc": "Revokes one of the caller’s keys; its MCP sessions close.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "account"
+    },
+    "account.me": {
+      "label": "Account",
+      "doc": "The caller’s principal, trust state, label, mark, avatar choice and sessions; the CLI can write the mark as a PNG.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "account"
+    },
+    "account.setName": {
+      "label": "Change name",
+      "doc": "Sets the display name under the rules of SPEC-3 0.19 (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "account"
+    },
+    "account.setAvatar": {
+      "label": "Change avatar",
+      "doc": "Chooses the mark: initials, a glyph field, a dither plate, or a picture for signed in principals only.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "account"
+    },
+    "account.sessions": {
+      "label": "Sessions",
+      "doc": "The caller’s sign in sessions, the current one marked.",
+      "mutates": false,
+      "milestone": "GS3",
+      "group": "account"
+    },
+    "account.signOut": {
+      "label": "Sign out",
+      "doc": "Ends one sign in session, or every other one with all.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "account"
+    },
+    "account.forget": {
+      "label": "Forget this browser",
+      "doc": "Replaces the anonymous cookie with a fresh id and clears the browser’s mirrors; window only.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "account"
+    },
+    "admin.assignOwner": {
+      "label": "Assign owner",
+      "doc": "An admin sets a deck’s owner.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "admin"
+    },
+    "admin.flag": {
+      "label": "Kill switch",
+      "doc": "Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly), read within 5 s by every instance.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "admin"
+    },
+    "picture.dither": {
+      "label": "Dither",
+      "doc": "Writes the deck’s two tone screen over a picture’s continuous source as a non destructive field, or removes it with null; a slide that is not a canvas converts first when the picture is positioned; answers the variant key, the metrics and any warnings.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "block"
+    },
+    "picture.materialize": {
+      "label": "Materialize dithers",
+      "doc": "Writes the variant files and records of every dithered picture on the named slides, prunes the variants no picture references when asked, or names the missing variants without writing under dryRun; server side.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "block"
+    },
+    "slide.setBackgroundPicture": {
+      "label": "Background picture",
+      "doc": "One write for a covering picture object at the back of each named slide with an optional dither, replacing the covering picture already there unless told not to; the file, url and upload forms run asset.add server side first.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "slide"
+    },
+    "slide.setBackgroundMaterial": {
+      "label": "Background material",
+      "doc": "Captures a shader material at an anchor and places the frozen frame as a covering picture object at the back of each named slide with an optional dither, in one call; server side.",
+      "mutates": true,
+      "milestone": "GS3",
+      "group": "slide"
     }
   },
   "methods": [

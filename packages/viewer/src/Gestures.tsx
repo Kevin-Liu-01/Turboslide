@@ -436,10 +436,17 @@ export function handlesFor(
   const blockId = selectedBlockId(selection);
   if (blockId === null) return handles;
   const ids = options.ids && options.ids.length > 0 ? options.ids : [blockId];
+  if (options.crop) {
+    /* crop mode's frame stands in for the measured box (SPEC-2 6.1 row 19): the eight crop
+       handles are drawn from it whether or not the anchor has a block box, so the provisional
+       crop of an unconverted photograph draws them too (VERIFICATION-3 finding 27) */
+    handles.push(...canvasHandles(slide, boxes, blockId, ids, options));
+    return handles;
+  }
   const box = boxes.blocks[blockId];
   if (!box) return handles;
   handles.push(...canvasHandles(slide, boxes, blockId, ids, options));
-  if (options.crop || ids.length > 1) return handles;
+  if (ids.length > 1) return handles;
   const block = blockById(slide, blockId);
   if (!block) return handles;
   const parts = boxes.parts[blockId] ?? [];
@@ -1342,6 +1349,10 @@ export function actionForMutation(mutation: Mutation, baseRevision: number): Act
     case 'slide.set':
     case 'slide.replace':
     case 'text.replace':
+    /* round three (gslides-parity SPEC-3 3.1; build-3/b1.md request 4): the two multiplayer text
+       ops the typing path emits travel as slide.update like text.replace does */
+    case 'text.splice':
+    case 'text.mark':
       return {
         id: 'slide.update',
         input: { slideId: mutation.slideId, baseRevision, mutations: [mutation] },

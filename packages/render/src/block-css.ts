@@ -66,6 +66,9 @@ export const BLOCK_CSS = `
 .ts-sheet .ladder.wide-value > div { grid-template-columns: 1fr 320px; } /* s21:6 */
 
 /* ---- figures ---- */
+/* every image the renderer writes carries width and height from the asset's size (gslides-parity
+   SPEC-3 9.2 E12), so a rule below that fixes one dimension leaves the other auto and the
+   attribute ratio reserves the box before the file decodes */
 .ts-sheet .shot-fig { margin: 0; width: 100%; display: grid; gap: 12px; } /* s33:3 */
 .ts-sheet .shot-fig figcaption { font-size: 16px; line-height: 1.45; color: var(--ink-2); } /* s33:4 */
 .ts-sheet .shot-fig.cap-15 figcaption { font-size: 15px; } /* s38:11 */
@@ -86,7 +89,7 @@ export const BLOCK_CSS = `
 .ts-sheet .tiles.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .ts-sheet .tiles.cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .ts-sheet .tiles.cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
-.ts-sheet .tiles img { display: block; width: 100%; object-fit: cover; object-position: center; border: 1px solid var(--hair); background: var(--plate); }
+.ts-sheet .tiles img { display: block; width: 100%; height: auto; object-fit: cover; object-position: center; border: 1px solid var(--hair); background: var(--plate); }
 .ts-sheet .tiles.aspect-16-9 img { aspect-ratio: 16 / 9; }
 .ts-sheet .tiles.aspect-16-10 img { aspect-ratio: 16 / 10; object-position: top; }
 .ts-sheet .tiles.aspect-1-1 img { aspect-ratio: 1 / 1; }
@@ -104,7 +107,7 @@ export const BLOCK_CSS = `
 .ts-sheet .details { display: grid; grid-template-columns: repeat(3, 425px); justify-content: space-between; row-gap: 24px; align-items: start; }
 .ts-sheet .details.one-row { row-gap: 0; }
 .ts-sheet .details figure { margin: 0; display: grid; gap: 10px; }
-.ts-sheet .details figure img { display: block; width: 425px; border: 1px solid var(--hair); background: var(--plate); object-fit: cover; object-position: center; }
+.ts-sheet .details figure img { display: block; width: 425px; height: auto; border: 1px solid var(--hair); background: var(--plate); object-fit: cover; object-position: center; }
 .ts-sheet .details figcaption { font-size: 15px; line-height: 1.45; color: var(--ink-2); }
 /* board: one ruled row per surface (s80:7-15) */
 .ts-sheet .board { display: flex; flex-direction: column; border-top: 1px solid var(--hair); }
@@ -181,6 +184,15 @@ export const BLOCK_CSS = `
 .ts-sheet .free > .picture, .ts-sheet .free > .link > .picture { width: 100%; height: 100%; }
 .ts-sheet .picture > img.picture-img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .ts-sheet .picture > .ts-material-live { position: absolute; inset: 0; }
+/* the dither overlay (gslides-parity SPEC-3 10.3): absolute inside the picture's box, drawn at the
+   screen size and scaled by CSS with pixelated cells so a 2x device shows exact cells; hidden until
+   the runtime draws it, so a toggle or a state change moves nothing (9.2) */
+.ts-sheet .picture > canvas.picture-dither, .ts-sheet .shot-crop > canvas.picture-dither { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; image-rendering: pixelated; pointer-events: none; }
+.ts-sheet canvas.picture-dither[hidden] { display: none; }
+/* the sandboxed frame of an html block (SPEC-3 8.4): the host is the block's box, the frame fills it */
+.ts-sheet .ts-x-host { position: relative; display: block; overflow: hidden; }
+.ts-sheet .free > .ts-x-host, .ts-sheet .free > .link > .ts-x-host { width: 100%; height: 100%; }
+.ts-sheet .ts-x-host > iframe.ts-x-frame { display: block; width: 100%; height: 100%; border: 0; background: transparent; }
 /* the two paper chips inside a covering picture object's wrapper paint over the photograph and
    nothing else (0.75, 0.98); the slot form's inset -57px is relative to .slide */
 .ts-sheet .free > .ts-chips { inset: 0; z-index: 1; }

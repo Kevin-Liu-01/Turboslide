@@ -42,6 +42,24 @@ describe('version records', () => {
     expect(toVersion(row)).not.toHaveProperty('baseRevision');
   });
 
+  it('carry the optional ops range of a checkpoint and refuse a malformed one (SPEC-3 2.1)', () => {
+    const row = { ...record(1, 412, 413), ops: { fromSeq: 4100, toSeq: 4140 } };
+    expect(versionRecordSchema.parse(row)).toEqual(row);
+    expect(versionRecordSchema.safeParse({ ...row, ops: { fromSeq: 5, toSeq: 4 } }).success).toBe(
+      false,
+    );
+    expect(versionRecordSchema.safeParse({ ...row, ops: { fromSeq: 1 } }).success).toBe(false);
+    expect(
+      versionRecordSchema.safeParse({ ...row, ops: { fromSeq: 1, toSeq: 2, extra: 3 } }).success,
+    ).toBe(false);
+    expect(versionRecordSchema.safeParse({ ...row, ops: [1, 2] }).success).toBe(false);
+    expect(versionRecordSchema.safeParse({ ...row, ops: { fromSeq: -1, toSeq: 2 } }).success).toBe(
+      false,
+    );
+    // a record without the field parses as before the round
+    expect(versionRecordSchema.parse(record(1, 412, 413))).not.toHaveProperty('ops');
+  });
+
   it('number from 1, find named versions and revisions', () => {
     const log = [record(1, 412, 413), record(2, 413, 413, 'saved'), record(3, 413, 414)];
     expect(nextVersionNumber([])).toBe(1);
@@ -79,5 +97,16 @@ describe('version records', () => {
         { op: 'section.set', sections: [] },
       ]),
     ).toEqual(['a', 'c']);
+    // an op the switch does not name yet (SPEC-3 3.1's text.splice) still counts by its slideId
+    const splice = {
+      op: 'text.splice',
+      slideId: 'd',
+      blockId: 'p1',
+      path: '/text',
+      at: 0,
+      remove: 0,
+      insert: 'x',
+    } as unknown as Parameters<typeof touchedSlides>[0][number];
+    expect(touchedSlides([splice])).toEqual(['d']);
   });
 });

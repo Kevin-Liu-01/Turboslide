@@ -25,6 +25,8 @@ import type { ZipEntry } from './zip.ts';
 export type PackOptions = {
   /** carry versions/<n>.json; default true */
   versions?: boolean;
+  /** carry the comments sidecar as the `comments` group (gslides-parity SPEC-3 2.2); default false, a bundle names people only when asked */
+  comments?: boolean;
   /** the clock for packedAt, for tests */
   now?: () => string;
 };
@@ -34,7 +36,7 @@ export type PackedBundle = {
   manifest: BundleManifest;
   /** `<deckId>-r<revision>.zip` */
   fileName: string;
-  counts: { documents: number; assets: number; versions: number };
+  counts: { documents: number; assets: number; versions: number; comments: number };
 };
 
 export type PackResult = {
@@ -45,7 +47,7 @@ export type PackResult = {
   out: string;
   bytes: number;
   sha256: string;
-  counts: { documents: number; assets: number; versions: number };
+  counts: { documents: number; assets: number; versions: number; comments: number };
 };
 
 function digestOf(bytes: Uint8Array): BundleDigest {
@@ -60,10 +62,14 @@ function digestOf(bytes: Uint8Array): BundleDigest {
 export function packDeckDir(dir: string, options: PackOptions = {}): PackedBundle {
   const { document } = loadDeckDir(dir);
   const { deck } = document;
-  const files = listDeckFiles(dir, { versions: options.versions !== false });
+  const files = listDeckFiles(dir, {
+    versions: options.versions !== false,
+    comments: options.comments === true,
+  });
   const prefix = bundleEntryPrefix(deck.id);
   const documents: Record<string, BundleDigest> = {};
   const assets: Record<string, BundleDigest> = {};
+  const comments: Record<string, BundleDigest> = {};
   const entries: ZipEntry[] = [];
   for (const relative of files.documents) {
     const bytes = new Uint8Array(readFileSync(join(dir, ...relative.split('/'))));
@@ -75,7 +81,14 @@ export function packDeckDir(dir: string, options: PackOptions = {}): PackedBundl
     assets[relative] = digestOf(bytes);
     entries.push({ name: `${prefix}${relative}`, data: bytes });
   }
+  for (const relative of files.comments) {
+    const bytes = new Uint8Array(readFileSync(join(dir, ...relative.split('/'))));
+    comments[relative] = digestOf(bytes);
+    entries.push({ name: `${prefix}${relative}`, data: bytes });
+  }
   const now = options.now ?? (() => new Date().toISOString());
+  // the comments group appears only when it carries a file, so a bundle without comments has the
+  // bytes it had before the group existed
   const manifest: BundleManifest = {
     bundleVersion: BUNDLE_VERSION,
     deckId: deck.id,
@@ -84,6 +97,7 @@ export function packDeckDir(dir: string, options: PackOptions = {}): PackedBundl
     packedAt: now(),
     documents,
     assets,
+    ...(files.comments.length === 0 ? {} : { comments }),
   };
   const stamp = new Date(deck.updatedAt);
   const zip = writeZip(
@@ -101,6 +115,7 @@ export function packDeckDir(dir: string, options: PackOptions = {}): PackedBundl
       documents: files.documents.length,
       assets: files.assets.length,
       versions: files.documents.filter((path) => path.startsWith('versions/')).length,
+      comments: files.comments.length,
     },
   };
 }

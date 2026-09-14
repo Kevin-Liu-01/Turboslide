@@ -1,10 +1,11 @@
 # Export fixture deck
 
 The deck the Google Slides parity rounds export in both PPTX modes and to PDF and text
-(gslides-parity SPEC 14.5, SPEC-2 11.2): one of every object the rounds added. Twenty seven
-slides in two sections, one asset. The first seven are round one's, committed at `a65b313` and
-copied under `packages/schema/src/__fixtures__/gslides-r1/` for the migration test; the twenty
-that follow are round two's, one per new object.
+(gslides-parity SPEC 14.5, SPEC-2 11.2, SPEC-3 16): one of every object the rounds added. Twenty
+nine slides in two sections, one asset, three comment threads. The first seven are round one's,
+committed at `a65b313` and copied under `packages/schema/src/__fixtures__/gslides-r1/` for the
+migration test; the twenty that follow are round two's, one per new object; the two dither slides
+are round three's.
 
 | Slide | What it carries |
 | --- | --- |
@@ -26,6 +27,8 @@ that follow are round two's, one per new object.
 | `shadow` | A box, a shape and a picture with drop shadows |
 | `background-color` | A content slide with `background.color: 'plate'` |
 | `background-picture` | A Title slide converted to the canvas with a `picture` object at the bottom of the stack (z 0) under its mark, heading and lead, the Background dialog's Choose image result written by `block insert --pos 0,0,1600,900` and `block order --move back` |
+| `background-dither` | A covering `picture` object at the bottom of the stack with `dither` set to the Photograph numbers (`bayer8`, black 120, white 230, gamma 0.9, written by `turboslide block dither background-dither#photo --photograph`), and a plate group (`box`, heading, paragraph) over it; the variant is materialized in the committed deck (`turboslide picture materialize` at merge 2 wrote `assets/fixture-photo.dither-<key12>-{light,dark}.png` and the `variants` record at scale 2), so `picture/plate-clear` measures it (SPEC-3 10.4, 16) |
+| `picture-dither-strength` | A `picture` object at a 560 by 315 box with `dither: { pattern: 'bayer8', strength: 0.6 }` (written by `turboslide block dither picture-dither-strength#photo --strength 0.6`): the two tone plane composited at 60 percent over the continuous picture (SPEC-3 10.1); its variant is materialized beside the other one |
 | `image-tools` | Three picture objects: one with `trim`, one with `mask: 'ellipse'`, one with `adjust` |
 | `table-merge` | A 4 by 4 table with a 2 by 2 span, a filled header cell, a transparent border on one cell, a dashed table border and equal row heights |
 | `chart-bar` | A bar chart with two series, the legend at the right, thousands format and 12 categories in a 720 px wide box, which plants `chart/size` at severity 2 |
@@ -44,6 +47,14 @@ deck carries no third party picture. `deck.json` sets `defaults.appearance` to `
 `turboslide validate decks/fixture/gslides` exits 0. The static lint reports two findings at
 severity 2 by design (`chart/size` on `chart-bar`, `freeform/off-sheet` on `canvas-opener`) and
 none at severity 3; `copy/empty-placeholder` fires on `prompt`, by design.
+
+`comments/` is the comment sidecar of SPEC-3 5.1 as fixture data, written through the CLI on a
+scratch copy (`docs/gslides-parity/build-3/b1.md` records the commands): three threads at
+`comments/<ulid>.json` with `index.json` and `authors.json`. One on `slide:background-dither` by
+`local:maya` with a reply, one on a table cell (`table#t/cell:1,2`) that mentions `local:maya`,
+and one on a text range of `breaks` (`text:0-12`) assigned to `local:maya`, replied to and
+resolved. `turboslide comments --state all --deck decks/fixture/gslides` lists them; the inbox
+records the writes left live under the scratch copy's `.turboslide/`, not here.
 
 The three canvas slides were written through the CLI on a scratch copy and copied back
 (`docs/gslides-parity/build-2/b1.md` records the commands); rebuilding them is

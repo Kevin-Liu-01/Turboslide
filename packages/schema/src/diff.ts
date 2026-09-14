@@ -262,6 +262,10 @@ export function diffDecks(a: DeckDocument, b: DeckDocument): Mutation[] {
   return out;
 }
 
+function characters(n: number): string {
+  return `${n} character${n === 1 ? '' : 's'}`;
+}
+
 /** One line of plain prose per mutation, for `turboslide diff` and the version list (SPEC 7.2). */
 export function describeMutation(mutation: Mutation): string {
   switch (mutation.op) {
@@ -285,6 +289,26 @@ export function describeMutation(mutation: Mutation): string {
       return `slide ${mutation.slideId}: block ${mutation.blockId} ${mutation.path} ${mutation.value === undefined ? 'removed' : 'changed'}`;
     case 'text.replace':
       return `slide ${mutation.slideId}: block ${mutation.blockId} ${mutation.path} text changed`;
+    case 'text.splice': {
+      const where = `slide ${mutation.slideId}: block ${mutation.blockId} ${mutation.path}`;
+      if (mutation.remove === 0)
+        return `${where} inserted ${characters(mutation.insert.length)} at ${mutation.at}`;
+      if (mutation.insert === '')
+        return `${where} deleted ${characters(mutation.remove)} at ${mutation.at}`;
+      return `${where} replaced ${characters(mutation.remove)} with ${characters(mutation.insert.length)} at ${mutation.at}`;
+    }
+    case 'text.mark': {
+      const where = `slide ${mutation.slideId}: block ${mutation.blockId} ${mutation.path}`;
+      const span = `${mutation.range[0]}:${mutation.range[1]}`;
+      if (mutation.edit.kind === 'case')
+        return `${where} case changed to ${mutation.edit.mode} over ${span}`;
+      const parts: string[] = [];
+      const set = Object.keys(mutation.edit.set ?? {});
+      if (set.length > 0) parts.push(`set ${set.join(', ')}`);
+      if (mutation.edit.clear !== undefined && mutation.edit.clear.length > 0)
+        parts.push(`cleared ${mutation.edit.clear.join(', ')}`);
+      return `${where} marks ${parts.length > 0 ? parts.join('; ') : 'unchanged'} over ${span}`;
+    }
     case 'section.set':
       return `sections: ${mutation.sections.map((section) => section.id).join(', ')}`;
     case 'asset.set':

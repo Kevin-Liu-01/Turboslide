@@ -37,6 +37,7 @@ import type { BlobClient } from '@turboslide/store/blob-store';
 import { contentTypeOf, jsonBody } from './export-sync';
 import type { SyncExportFile, SyncExportResult } from './export-sync';
 import { deckDir, ensureDeckAssets, exportBlobClient, openDeckStore, stateDir } from './root';
+import { cancelTokenFor } from './tokens';
 
 /**
  * The batched Perfect export's server side (gslides-parity SPEC-2 8.1, 0.31, 0.44, 0.45, 0.48):
@@ -61,6 +62,8 @@ import { deckDir, ensureDeckAssets, exportBlobClient, openDeckStore, stateDir } 
 
 export type StartBatchedExportResult = {
   jobId: string;
+  /** The cancel capability (gslides-parity SPEC-3 8.13): `?cancel=<jobId>&ct=<cancelToken>` on the route. */
+  cancelToken: string;
   revision: number;
   batches: string[][];
   /** the batch size in force (TURBOSLIDE_EXPORT_BATCH or 60) */
@@ -212,7 +215,14 @@ export async function startBatchedExport(
     overwrite: false,
     contentType: 'application/json',
   });
-  return { jobId, revision: plan.revision, batches, batchSize: size, total: ids.length };
+  return {
+    jobId,
+    cancelToken: cancelTokenFor(jobId),
+    revision: plan.revision,
+    batches,
+    batchSize: size,
+    total: ids.length,
+  };
 }
 
 /* one browser per process: batch calls on one instance run in turn (the render worker's rule) */

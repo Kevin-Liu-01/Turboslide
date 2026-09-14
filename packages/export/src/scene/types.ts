@@ -352,6 +352,21 @@ export type SceneBackground = {
   /** The raster id of the covering picture object. */
   pictureRasterId?: string;
   pictureBlockId?: string;
+  /**
+   * The materialized variant of a dithered covering picture (gslides-parity SPEC-3 10.4): the
+   * absolute path of the theme's variant file, which Editable text writes as the background's
+   * bytes instead of the raster shot, when the picture is a plain two tone plane (strength 1, no
+   * trim, mask, adjustments or frame).
+   */
+  pictureVariantFile?: string;
+};
+
+/** A dithered picture of the slide as the page read it (SPEC-3 10.4 residual `dither:`). */
+export type SceneDither = {
+  blockId: string;
+  assetId: string;
+  key12: string;
+  state: 'variant' | 'live';
 };
 
 export type Scene = {
@@ -371,6 +386,8 @@ export type Scene = {
   picture?: ScenePicture;
   /** True when the picture is excluded from the export (a share-alike source, SPEC 11). */
   pictureExcluded?: boolean;
+  /** The dithered pictures of the slide with the state each was shot in (SPEC-3 10.4). */
+  dithers?: SceneDither[];
   plates: SceneRect[];
   chips: Box[];
   wordmark?: Box;

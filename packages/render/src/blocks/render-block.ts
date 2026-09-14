@@ -13,6 +13,8 @@ import {
   renderTiles,
 } from './figures.ts';
 import { renderHtmlEscape } from './html-escape.ts';
+import { renderHtmlFrame } from './html-frame.ts';
+import { withImageSizes } from './img-size.ts';
 import { renderPlain, renderRefs, renderRows, renderSay } from './lists.ts';
 import { renderMaterial } from './material.ts';
 import { renderDither, renderMark, renderMarkSizes, renderMatrix } from './misc.ts';
@@ -96,8 +98,15 @@ function renderBlockBody(block: Block, ctx: BlockContext): string {
       return renderIcon(block, ctx);
     case 'table':
       return renderTable(block, ctx);
-    case 'html':
-      return renderHtmlEscape(block, ctx);
+    case 'html': {
+      // the block's images gain the deck's sizes first (img-size.ts); the sandboxed frame when the
+      // context supplies its document (gslides-parity SPEC-3 8.4), the scoped escape otherwise
+      const sized = { ...block, html: withImageSizes(block.html, ctx) };
+      const frame = ctx.htmlFrame?.(sized);
+      return frame !== undefined
+        ? renderHtmlFrame(sized, ctx, frame)
+        : renderHtmlEscape(sized, ctx);
+    }
     case 'chart':
       return renderChart(block, ctx);
     case 'picture':

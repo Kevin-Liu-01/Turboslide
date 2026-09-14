@@ -10,8 +10,8 @@ import type { Section, Slide, SlotName } from './deck.ts';
 import { SLOT_NAMES, sectionSchema, slideSchema } from './deck.ts';
 import type { AssetId, BlockId, SectionId, SlideId } from './ids.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
-import type { Text } from './text.ts';
-import { multilineTextSchema } from './text.ts';
+import type { CaseMode, RunFlagKey, RunFlags, Text } from './text.ts';
+import { CASE_MODES, RUN_FLAG_KEYS, multilineTextSchema, runFlagsSchema } from './text.ts';
 
 /** Where a block lives: a content slot, or the plate of a full-picture slide. */
 export type BlockSlot = SlotName | 'plate';
@@ -39,7 +39,11 @@ export type Mutation =
     }
   /** JSON pointer into the block; an absent value deletes the field. */
   | { op: 'block.set'; slideId: SlideId; blockId: BlockId; path: string; value?: unknown }
-  /** typing, coalesced; range is [start, end) in the markup string at `path` */
+  /**
+   * Typing, coalesced; range is [start, end) in the markup string at `path`. Kept for every stored
+   * record, the replay paths and the agents that still send it (gslides-parity SPEC-3 0.4); a whole
+   * value write at admission.
+   */
   | {
       op: 'text.replace';
       slideId: SlideId;
@@ -48,6 +52,41 @@ export type Mutation =
       range: [number, number];
       text: Text;
     }
+  /**
+   * Typing on the multiplayer path (gslides-parity SPEC-3 3.1): `remove` plain characters at `at`
+   * leave and `insert` lands in their place with the flags of the run it continues (the rule of
+   * insertAt). Offsets are plain text offsets with one character per paragraph break, the system
+   * plainLength, placeRuns, styleRange and the comment anchors use. A `\n` in `insert` is a
+   * paragraph break in the four multiline pointers and refused elsewhere by the validator after the
+   * write. `flags` pins the run flags of the inserted characters instead (the room client sends
+   * the caret's run, so two clients converge on the flags whatever order the server admits
+   * concurrent edits in; the transform splits a concurrent mark around a pinned insertion).
+   * Transformed at admission; the inverse is a splice.
+   */
+  | {
+      op: 'text.splice';
+      slideId: SlideId;
+      blockId: BlockId;
+      path: string;
+      at: number;
+      remove: number;
+      insert: string;
+      flags?: RunFlags;
+    }
+  /**
+   * Marks or a case change over a plain text range (gslides-parity SPEC-3 3.1): `marks` sets the
+   * run flags of `set` and removes the keys of `clear` on every run of the range; `case` rewrites
+   * the range's characters. Transformed as a range at admission; the inverse restores the previous
+   * flags, or the previous characters for a case change.
+   */
+  | {
+      op: 'text.mark';
+      slideId: SlideId;
+      blockId: BlockId;
+      path: string;
+      range: [number, number];
+      edit: TextMarkEdit;
+    }
   | { op: 'section.set'; sections: Section[] }
   | { op: 'asset.set'; asset: Asset }
   | { op: 'asset.remove'; assetId: AssetId }
@@ -55,6 +94,10 @@ export type Mutation =
   | { op: 'deck.set'; path: string; value?: unknown }
   /** restore is a mutation, so it is undoable and visible */
   | { op: 'version.restore'; n: number };
+
+/** What text.mark carries: flags to set and clear, or a case mode (gslides-parity SPEC-3 3.1). */
+export type TextMarkEdit =
+  { kind: 'marks'; set?: RunFlags; clear?: RunFlagKey[] } | { kind: 'case'; mode: CaseMode };
 
 export type MutationOp = Mutation['op'];
 
@@ -69,6 +112,8 @@ export const MUTATION_OPS = [
   'block.move',
   'block.set',
   'text.replace',
+  'text.splice',
+  'text.mark',
   'section.set',
   'asset.set',
   'asset.remove',
@@ -76,8 +121,24 @@ export const MUTATION_OPS = [
   'version.restore',
 ] as const satisfies ReadonlyArray<MutationOp>;
 
-/** CLI and MCP: --author agent:<runId> */
-export type Author = { kind: 'human' | 'agent'; name: string; runId?: string };
+/** The two ops of the multiplayer text path, the ones the admission transforms (SPEC-3 3.4). */
+export const TEXT_OPS = ['text.splice', 'text.mark'] as const satisfies ReadonlyArray<MutationOp>;
+export type TextOp = Extract<Mutation, { op: (typeof TEXT_OPS)[number] }>;
+export type SpliceMutation = Extract<Mutation, { op: 'text.splice' }>;
+export type MarkMutation = Extract<Mutation, { op: 'text.mark' }>;
+
+/**
+ * Who wrote something. CLI and MCP: --author agent:<runId>. `principalId` is the identity the
+ * server derived from the session or the token record (gslides-parity SPEC-3 0.17: `anon_<uuid>`,
+ * `usr_<id>` or `agent:<tokenId>`); absent on every record written before round three, which
+ * renders by its label.
+ */
+export type Author = {
+  kind: 'human' | 'agent';
+  name: string;
+  runId?: string;
+  principalId?: string;
+};
 export type Write = { baseRevision: number; author: Author; note?: string; mutations: Mutation[] };
 export type Version = {
   n: number;
@@ -149,6 +210,33 @@ export const mutationSchema = z.discriminatedUnion('op', [
     // multiline pointers after the write (gslides-parity SPEC 7.4)
     text: multilineTextSchema,
   }),
+  z.strictObject({
+    op: z.literal('text.splice'),
+    slideId: slugSchema,
+    blockId: blockIdSchema,
+    path: pointer,
+    at: z.number().int().nonnegative(),
+    remove: z.number().int().nonnegative(),
+    // plain text; a `\n` is a paragraph break, refused outside the four multiline pointers by the
+    // validator after the write (gslides-parity SPEC 7.4)
+    insert: z.string().refine((value) => !/\r/.test(value), 'a splice inserts no \\r'),
+    flags: runFlagsSchema.optional(),
+  }),
+  z.strictObject({
+    op: z.literal('text.mark'),
+    slideId: slugSchema,
+    blockId: blockIdSchema,
+    path: pointer,
+    range: z.tuple([z.number().int().nonnegative(), z.number().int().nonnegative()]),
+    edit: z.discriminatedUnion('kind', [
+      z.strictObject({
+        kind: z.literal('marks'),
+        set: runFlagsSchema.optional(),
+        clear: z.array(z.enum(RUN_FLAG_KEYS)).optional(),
+      }),
+      z.strictObject({ kind: z.literal('case'), mode: z.enum(CASE_MODES) }),
+    ]),
+  }),
   z.strictObject({ op: z.literal('section.set'), sections: z.array(sectionSchema) }),
   z.strictObject({ op: z.literal('asset.set'), asset: assetSchema }),
   z.strictObject({ op: z.literal('asset.remove'), assetId: slugSchema }),
@@ -160,6 +248,7 @@ export const authorSchema = z.strictObject({
   kind: z.enum(['human', 'agent']),
   name: z.string().min(1),
   runId: z.string().optional(),
+  principalId: z.string().min(1).optional(),
 }) satisfies z.ZodType<Author>;
 
 export const writeSchema = z.strictObject({

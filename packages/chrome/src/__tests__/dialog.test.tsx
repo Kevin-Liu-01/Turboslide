@@ -114,3 +114,42 @@ describe('Dialog', () => {
     expect(onClose).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('Dialog modal={false} (the floating form of SPEC-3 7.2)', () => {
+  it('draws the card with no scrim, no aria-modal and no focus trap, and leaves focus where it was', () => {
+    const opener = document.createElement('button');
+    document.body.appendChild(opener);
+    opener.focus();
+    const onClose = vi.fn();
+    const { container, unmount } = render(
+      <Dialog
+        title="How should others see you?"
+        onClose={onClose}
+        control="dialog.float"
+        modal={false}
+        actions={[{ label: 'Continue', primary: true, onClick: () => undefined }]}
+      >
+        <input type="text" aria-label="Name" data-control="dialog.float.name" />
+      </Dialog>,
+    );
+    const dialog = screen.getByRole('dialog', { name: 'How should others see you?' });
+    expect(dialog.hasAttribute('aria-modal')).toBe(false);
+    expect(container.querySelector('.ts-dialog-scrim')).toBeNull();
+    expect(container.querySelector('.ts-dialog-float')).not.toBeNull();
+    expect(dialog.classList.contains('is-float')).toBe(true);
+    /* the person typing keeps the caret: the card took no focus */
+    expect(document.activeElement).toBe(opener);
+    /* focus moving elsewhere on the page is not pulled back into the card */
+    const other = document.createElement('button');
+    document.body.appendChild(other);
+    other.focus();
+    fireEvent.focusIn(other);
+    expect(document.activeElement).toBe(other);
+    /* Esc from inside the card still closes it */
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    unmount();
+    opener.remove();
+    other.remove();
+  });
+});

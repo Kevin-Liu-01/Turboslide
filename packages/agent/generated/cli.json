@@ -308,7 +308,7 @@
     },
     {
       "action": "deck.copy",
-      "usage": "turboslide deck copy <id> --name <name> --id <newId> --slides <slideIds> --remove-notes",
+      "usage": "turboslide deck copy <id> --name <name> --id <newId> --slides <slideIds> --remove-notes --copy-comments",
       "command": [
         "deck",
         "copy"
@@ -346,6 +346,13 @@
           "description": "Leave the speaker notes out of the copy"
         },
         {
+          "key": "copyComments",
+          "flag": "--copy-comments",
+          "type": "boolean",
+          "required": false,
+          "description": "Carry the comment threads into the copy with their ids; off by default (gslides-parity SPEC-3 5.8)"
+        },
+        {
           "key": "baseRevision",
           "flag": "--base-revision",
           "type": "integer",
@@ -355,7 +362,7 @@
       ],
       "custom": [
         {
-          "flag": "--remove-notes"
+          "flag": "--copy-comments"
         }
       ],
       "mutates": true,
@@ -698,7 +705,7 @@
         {
           "key": "mutations",
           "flag": "--mutations",
-          "type": "object | object | object | object | object | object | object | object | object | object | object | object | object | object | object[]",
+          "type": "object | object | object | object | object | object | object | object | object | object | object | object | object | object | object | object | object[]",
           "required": true
         }
       ],
@@ -2907,7 +2914,7 @@
     },
     {
       "action": "asset.add",
-      "usage": "turboslide asset add <file> --role <role> --alt <alt> --two-tone --black <black> --plate <plate>",
+      "usage": "turboslide asset add <file> --role <role> --alt <alt> --two-tone --black <black> --plate <plate> --replace-source <replaceSource>",
       "command": [
         "asset",
         "add"
@@ -3028,6 +3035,20 @@
           ]
         },
         {
+          "key": "upload",
+          "flag": "--upload",
+          "type": "string",
+          "required": false,
+          "description": "Hosted: the key of a presigned client upload under uploads/<principalId>/ on the private store, for files over 3 MB (gslides-parity SPEC-3 0.29)"
+        },
+        {
+          "key": "replaceSource",
+          "flag": "--replace-source",
+          "type": "string",
+          "required": false,
+          "description": "Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins (SPEC-3 10.1)"
+        },
+        {
           "key": "baseRevision",
           "flag": "--base-revision",
           "type": "integer",
@@ -3046,7 +3067,7 @@
     },
     {
       "action": "asset.dither",
-      "usage": "turboslide asset dither <assetId> --gamma <gamma> --plate <plate> --all-two-tone --from-recorded --verify-cells",
+      "usage": "turboslide asset dither <assetId> --gamma <gamma> --plate <plate> --pattern <pattern> --cell <cell> --tone <tone> --all-two-tone --from-recorded --verify-cells",
       "command": [
         "asset",
         "dither"
@@ -3108,6 +3129,44 @@
           "type": "boolean",
           "required": false,
           "description": "Regenerate from the source where one exists and count the cells that differ"
+        },
+        {
+          "key": "pattern",
+          "flag": "--pattern",
+          "type": "\"bayer8\" | \"bayer4\" | \"blue64\" | \"random\"",
+          "required": false,
+          "description": "The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5)",
+          "enum": [
+            "bayer8",
+            "bayer4",
+            "blue64",
+            "random"
+          ]
+        },
+        {
+          "key": "cell",
+          "flag": "--cell",
+          "type": "1 | 2 | 3 | 4",
+          "required": false,
+          "description": "Sheet pixels per cell; 2 unless set",
+          "enum": [
+            1,
+            2,
+            3,
+            4
+          ]
+        },
+        {
+          "key": "tone",
+          "flag": "--tone",
+          "type": "\"two\" | \"three\" | \"original\"",
+          "required": false,
+          "description": "two, three or original; two unless set",
+          "enum": [
+            "two",
+            "three",
+            "original"
+          ]
         },
         {
           "key": "baseRevision",
@@ -3508,7 +3567,7 @@
         {
           "key": "rule",
           "flag": "--rule",
-          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"text/overflow\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"copy/empty-placeholder\" | \"table/size\" | \"chart/size\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
+          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"text/overflow\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"copy/empty-placeholder\" | \"table/size\" | \"chart/size\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"html/sanitize\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
           "required": false,
           "enum": [
             "sheet/overflow",
@@ -3563,6 +3622,7 @@
             "freeform/off-sheet",
             "scales/marker-equals-value",
             "escape/html-block",
+            "html/sanitize",
             "export/non-native",
             "numbers/contradiction",
             "count/hard-coded"
@@ -3590,7 +3650,7 @@
         {
           "key": "rule",
           "flag": "--rule",
-          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"text/overflow\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"copy/empty-placeholder\" | \"table/size\" | \"chart/size\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
+          "type": "\"sheet/overflow\" | \"sheet/rail-touch\" | \"sheet/thumb-legible\" | \"type/floor-15\" | \"type/svg-label-min\" | \"type/weight-cap\" | \"type/face\" | \"type/sizes-ladder\" | \"type/ladder\" | \"text/overflow\" | \"color/tokens-only\" | \"color/semantic-icons-only\" | \"color/off-palette\" | \"icon/placement\" | \"icon/known\" | \"rows/two-lines\" | \"rows/key-snap\" | \"dia/label-clearance\" | \"dia/stroke-grammar\" | \"dia/fit-slot\" | \"dia/half-pixel\" | \"asset/twin-or-border\" | \"asset/credit-on-plate\" | \"asset/license-missing\" | \"asset/stretched\" | \"picture/plate-clear\" | \"picture/blank-twin\" | \"picture/mood-placement\" | \"opener/sentence-lists-section\" | \"lines/law\" | \"copy/heading-period\" | \"copy/sentence-case\" | \"copy/token-first\" | \"copy/heading-is-name\" | \"copy/no-em-dash\" | \"copy/no-exclamation\" | \"copy/no-eyebrow\" | \"copy/full-sentence-caption\" | \"copy/contrast-pair\" | \"copy/metaphor-candidate\" | \"copy/empty-placeholder\" | \"table/size\" | \"chart/size\" | \"contrast/both-themes\" | \"layout/empty-half\" | \"layout/pair-gaps\" | \"layout/columns-aligned\" | \"layout/freeform\" | \"freeform/overlap\" | \"freeform/off-sheet\" | \"scales/marker-equals-value\" | \"escape/html-block\" | \"html/sanitize\" | \"export/non-native\" | \"numbers/contradiction\" | \"count/hard-coded\"",
           "required": false,
           "enum": [
             "sheet/overflow",
@@ -3645,6 +3705,7 @@
             "freeform/off-sheet",
             "scales/marker-equals-value",
             "escape/html-block",
+            "html/sanitize",
             "export/non-native",
             "numbers/contradiction",
             "count/hard-coded"
@@ -3801,7 +3862,7 @@
     },
     {
       "action": "export.run",
-      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --verify --out <out>",
+      "usage": "turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --include-comments --verify --out <out>",
       "command": [
         "export"
       ],
@@ -3917,6 +3978,13 @@
           "description": "Carry the speaker notes; left out by default (gslides-parity decision 15.2)"
         },
         {
+          "key": "includeComments",
+          "flag": "--include-comments",
+          "type": "boolean",
+          "required": false,
+          "description": "Write the comment threads as classic p:cm parts, editors and owners only; left out by default (gslides-parity SPEC-3 5.8)"
+        },
+        {
           "key": "out",
           "flag": "--out",
           "type": "string",
@@ -3967,7 +4035,7 @@
     },
     {
       "action": "export.text",
-      "usage": "turboslide export txt <slideIds> --include-notes --include-skipped",
+      "usage": "turboslide export txt <slideIds> --include-notes --include-skipped --include-comments",
       "command": [
         "export",
         "txt"
@@ -3989,11 +4057,18 @@
           "type": "boolean",
           "required": false,
           "description": "Include the skipped slides"
+        },
+        {
+          "key": "includeComments",
+          "flag": "--include-comments",
+          "type": "boolean",
+          "required": false,
+          "description": "Append each slide’s comment threads, for readers with readComments (SPEC-3 5.8)"
         }
       ],
       "custom": [
         {
-          "flag": "--include-skipped"
+          "flag": "--include-comments"
         }
       ],
       "mutates": false,
@@ -4111,6 +4186,2006 @@
       "custom": [],
       "mutates": false,
       "milestone": "M1"
+    },
+    {
+      "action": "presence.list",
+      "usage": "turboslide presence list",
+      "command": [
+        "presence",
+        "list"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "presence.follow",
+      "usage": "turboslide presence follow <clientId>",
+      "command": [
+        "presence",
+        "follow"
+      ],
+      "positionals": [
+        "clientId"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "presence.unfollow",
+      "usage": "turboslide presence unfollow",
+      "command": [
+        "presence",
+        "unfollow"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "presence.pointer",
+      "usage": "turboslide presence pointer --on",
+      "command": [
+        "presence",
+        "pointer"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "on",
+          "flag": "--on",
+          "type": "boolean",
+          "required": true
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--on"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "sync.status",
+      "usage": "turboslide sync status",
+      "command": [
+        "sync",
+        "status"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "deck.watch",
+      "usage": "turboslide deck watch <id> --from <from> --since <since>",
+      "command": [
+        "deck",
+        "watch"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "since",
+          "flag": "--since",
+          "type": "integer",
+          "required": false,
+          "description": "The revision the caller holds; the current one when absent"
+        },
+        {
+          "key": "timeoutMs",
+          "flag": "--timeout-ms",
+          "type": "integer",
+          "required": false,
+          "description": "How long to wait for a change; 25,000 unless set"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--from",
+          "template": "<from>"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "deck.follow",
+      "usage": "turboslide deck follow <id> --from <from> --push --comments --force --theirs",
+      "command": [
+        "deck",
+        "follow"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "from",
+          "flag": "--from",
+          "type": "string",
+          "required": true,
+          "description": "The studio to talk to; the hosts.json default otherwise"
+        },
+        {
+          "key": "push",
+          "flag": "--push",
+          "type": "boolean",
+          "required": false,
+          "description": "Push local writes to the studio as they land"
+        },
+        {
+          "key": "comments",
+          "flag": "--comments",
+          "type": "boolean",
+          "required": false,
+          "description": "Mirror the comments group too"
+        },
+        {
+          "key": "force",
+          "flag": "--force",
+          "type": "boolean",
+          "required": false,
+          "description": "Overwrite a checkout that diverged"
+        },
+        {
+          "key": "theirs",
+          "flag": "--theirs",
+          "type": "boolean",
+          "required": false,
+          "description": "On a divergence keep the studio’s records"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--theirs"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.add",
+      "usage": "turboslide comment add <anchor> -m <text> --mention <who> --assign <who>",
+      "command": [
+        "comment",
+        "add"
+      ],
+      "positionals": [
+        "anchor"
+      ],
+      "options": [
+        {
+          "key": "body",
+          "flag": "--body",
+          "type": "object",
+          "required": true
+        },
+        {
+          "key": "assignee",
+          "flag": "--assignee",
+          "type": "object | object",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": false,
+          "description": "The comments revision the caller read; a stale value never refuses (SPEC-3 5.2)"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "-m",
+          "template": "<text>"
+        },
+        {
+          "flag": "--mention",
+          "template": "<who>"
+        },
+        {
+          "flag": "--assign",
+          "template": "<who>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.reply",
+      "usage": "turboslide comment reply <threadId> -m <text> --mention <who>",
+      "command": [
+        "comment",
+        "reply"
+      ],
+      "positionals": [
+        "threadId"
+      ],
+      "options": [
+        {
+          "key": "body",
+          "flag": "--body",
+          "type": "object",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": false,
+          "description": "The comments revision after the write, the number comment.list { since } takes"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "-m",
+          "template": "<text>"
+        },
+        {
+          "flag": "--mention",
+          "template": "<who>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.edit",
+      "usage": "turboslide comment edit <threadId> <commentId> -m <text>",
+      "command": [
+        "comment",
+        "edit"
+      ],
+      "positionals": [
+        "threadId",
+        "commentId"
+      ],
+      "options": [
+        {
+          "key": "body",
+          "flag": "--body",
+          "type": "object",
+          "required": true
+        },
+        {
+          "key": "expectedUpdatedAt",
+          "flag": "--expected-updated-at",
+          "type": "string",
+          "required": true,
+          "description": "The thread’s updatedAt the caller read"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": false,
+          "description": "The comments revision after the write, the number comment.list { since } takes"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "-m",
+          "template": "<text>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.delete",
+      "usage": "turboslide comment delete <threadId> <commentId> --restore",
+      "command": [
+        "comment",
+        "delete"
+      ],
+      "positionals": [
+        "threadId",
+        "commentId"
+      ],
+      "options": [
+        {
+          "key": "restore",
+          "flag": "--restore",
+          "type": "boolean",
+          "required": false,
+          "description": "Undo a deletion within 30 days"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": false,
+          "description": "The comments revision after the write, the number comment.list { since } takes"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--restore"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.resolve",
+      "usage": "turboslide comment resolve <threadId>",
+      "command": [
+        "comment",
+        "resolve"
+      ],
+      "positionals": [
+        "threadId"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": false,
+          "description": "The comments revision after the write, the number comment.list { since } takes"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.reopen",
+      "usage": "turboslide comment reopen <threadId>",
+      "command": [
+        "comment",
+        "reopen"
+      ],
+      "positionals": [
+        "threadId"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": false,
+          "description": "The comments revision after the write, the number comment.list { since } takes"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.assign",
+      "usage": "turboslide comment assign <threadId> <who> --clear",
+      "command": [
+        "comment",
+        "assign"
+      ],
+      "positionals": [
+        "threadId"
+      ],
+      "options": [
+        {
+          "key": "assignee",
+          "flag": "--assignee",
+          "type": "object | object | null",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": false,
+          "description": "The comments revision after the write, the number comment.list { since } takes"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--clear"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.done",
+      "usage": "turboslide comment done <threadId>",
+      "command": [
+        "comment",
+        "done"
+      ],
+      "positionals": [
+        "threadId"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": false,
+          "description": "The comments revision after the write, the number comment.list { since } takes"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.react",
+      "usage": "turboslide comment react <threadId> <commentId> <emoji> --off",
+      "command": [
+        "comment",
+        "react"
+      ],
+      "positionals": [
+        "threadId",
+        "commentId",
+        "emoji"
+      ],
+      "options": [
+        {
+          "key": "on",
+          "flag": "--on",
+          "type": "boolean",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": false,
+          "description": "The comments revision after the write, the number comment.list { since } takes"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--off"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.list",
+      "usage": "turboslide comments <slideId> --block <blockId> --state <state> --for-me --author <author> --search <search> --since <since>",
+      "command": [
+        "comments"
+      ],
+      "positionals": [
+        "slideId"
+      ],
+      "options": [
+        {
+          "key": "blockId",
+          "flag": "--block",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "state",
+          "flag": "--state",
+          "type": "\"open\" | \"resolved\" | \"all\"",
+          "required": false,
+          "description": "open unless set",
+          "enum": [
+            "open",
+            "resolved",
+            "all"
+          ]
+        },
+        {
+          "key": "forMe",
+          "flag": "--for-me",
+          "type": "boolean",
+          "required": false,
+          "description": "Threads that mention or are assigned to the caller"
+        },
+        {
+          "key": "author",
+          "flag": "--author",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "search",
+          "flag": "--search",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "includeDeleted",
+          "flag": "--include-deleted",
+          "type": "boolean",
+          "required": false,
+          "description": "Keep the tombstones in the answer"
+        },
+        {
+          "key": "since",
+          "flag": "--since",
+          "type": "integer",
+          "required": false,
+          "description": "Threads touched after this comments revision"
+        },
+        {
+          "key": "limit",
+          "flag": "--limit",
+          "type": "integer",
+          "required": false
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.get",
+      "usage": "turboslide comment get <threadId>",
+      "command": [
+        "comment",
+        "get"
+      ],
+      "positionals": [
+        "threadId"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "comment.link",
+      "usage": "turboslide comment link <threadId>",
+      "command": [
+        "comment",
+        "link"
+      ],
+      "positionals": [
+        "threadId"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "notification.list",
+      "usage": "turboslide notifications --unread --since <since>",
+      "command": [
+        "notifications"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "unread",
+          "flag": "--unread",
+          "type": "boolean",
+          "required": false,
+          "description": "Unread records only"
+        },
+        {
+          "key": "since",
+          "flag": "--since",
+          "type": "string",
+          "required": false,
+          "description": "An ISO time; records updated after it"
+        },
+        {
+          "key": "limit",
+          "flag": "--limit",
+          "type": "integer",
+          "required": false
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "notification.markRead",
+      "usage": "turboslide notifications read <ids> --all",
+      "command": [
+        "notifications",
+        "read"
+      ],
+      "positionals": [
+        "ids"
+      ],
+      "options": [
+        {
+          "key": "all",
+          "flag": "--all",
+          "type": "true",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--all"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "notification.settings",
+      "usage": "turboslide notifications settings --level <level> --email --activity-for-commenters",
+      "command": [
+        "notifications",
+        "settings"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "level",
+          "flag": "--level",
+          "type": "\"all\" | \"forYou\" | \"none\"",
+          "required": false,
+          "enum": [
+            "all",
+            "forYou",
+            "none"
+          ]
+        },
+        {
+          "key": "email",
+          "flag": "--email",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "activityForCommenters",
+          "flag": "--activity-for-commenters",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--activity-for-commenters"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "activity.list",
+      "usage": "turboslide activity --since <since> --kind <kinds>",
+      "command": [
+        "activity"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "since",
+          "flag": "--since",
+          "type": "string",
+          "required": false,
+          "description": "An ISO time"
+        },
+        {
+          "key": "kinds",
+          "flag": "--kind",
+          "type": "\"version\" | \"comment\" | \"share\" | \"request\" | \"role\" | \"rename\" | \"restore\" | \"named\" | \"export\" | \"import\" | \"trash\"[]",
+          "required": false
+        },
+        {
+          "key": "limit",
+          "flag": "--limit",
+          "type": "integer",
+          "required": false
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "version.diff",
+      "usage": "turboslide version diff <from> <to> --staged",
+      "command": [
+        "version",
+        "diff"
+      ],
+      "positionals": [
+        "from",
+        "to"
+      ],
+      "options": [
+        {
+          "key": "staged",
+          "flag": "--staged",
+          "type": "boolean",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--staged"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.get",
+      "usage": "turboslide share get <id>",
+      "command": [
+        "share",
+        "get"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.setGeneralAccess",
+      "usage": "turboslide share access <id> --mode <mode> --role <role>",
+      "command": [
+        "share",
+        "access"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "mode",
+          "flag": "--mode",
+          "type": "\"restricted\" | \"link\"",
+          "required": true,
+          "enum": [
+            "restricted",
+            "link"
+          ]
+        },
+        {
+          "key": "role",
+          "flag": "--role",
+          "type": "\"viewer\" | \"commenter\" | \"editor\"",
+          "required": false,
+          "description": "viewer unless set",
+          "enum": [
+            "viewer",
+            "commenter",
+            "editor"
+          ]
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The access record’s revision the caller read"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.createLink",
+      "usage": "turboslide share link <id> --role <role> --label <label> --expires <expiresAt>",
+      "command": [
+        "share",
+        "link"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "role",
+          "flag": "--role",
+          "type": "\"viewer\" | \"commenter\" | \"editor\"",
+          "required": true,
+          "enum": [
+            "viewer",
+            "commenter",
+            "editor"
+          ]
+        },
+        {
+          "key": "label",
+          "flag": "--label",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "expiresAt",
+          "flag": "--expires",
+          "type": "string",
+          "required": false,
+          "description": "An ISO time, or 7d, 30d, 90d on the CLI; no expiry when absent"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.revokeLink",
+      "usage": "turboslide share revoke-link <id> <linkId>",
+      "command": [
+        "share",
+        "revoke-link"
+      ],
+      "positionals": [
+        "id",
+        "linkId"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.rotateLink",
+      "usage": "turboslide share rotate-link <id> <linkId>",
+      "command": [
+        "share",
+        "rotate-link"
+      ],
+      "positionals": [
+        "id",
+        "linkId"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.stop",
+      "usage": "turboslide share stop <id>",
+      "command": [
+        "share",
+        "stop"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.invite",
+      "usage": "turboslide share invite <id> --email <emails> --role <role> --message <message> --no-notify",
+      "command": [
+        "share",
+        "invite"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "emails",
+          "flag": "--email",
+          "type": "string[]",
+          "required": true
+        },
+        {
+          "key": "role",
+          "flag": "--role",
+          "type": "\"viewer\" | \"commenter\" | \"editor\"",
+          "required": true,
+          "enum": [
+            "viewer",
+            "commenter",
+            "editor"
+          ]
+        },
+        {
+          "key": "message",
+          "flag": "--message",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "notify",
+          "flag": "--notify",
+          "type": "boolean",
+          "required": false,
+          "description": "Send the invitation mail; on unless set"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--no-notify"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.setRole",
+      "usage": "turboslide share role <id> --email <email> --role <role>",
+      "command": [
+        "share",
+        "role"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "who",
+          "flag": "--who",
+          "type": "object | object",
+          "required": true
+        },
+        {
+          "key": "role",
+          "flag": "--role",
+          "type": "\"viewer\" | \"commenter\" | \"editor\"",
+          "required": true,
+          "enum": [
+            "viewer",
+            "commenter",
+            "editor"
+          ]
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--email",
+          "template": "<email>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.remove",
+      "usage": "turboslide share remove <id> --email <email>",
+      "command": [
+        "share",
+        "remove"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "who",
+          "flag": "--who",
+          "type": "object | object",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--email",
+          "template": "<email>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.setExpiry",
+      "usage": "turboslide share expire <id> --email <email> --at <expiresAt>",
+      "command": [
+        "share",
+        "expire"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "who",
+          "flag": "--who",
+          "type": "object | object",
+          "required": true
+        },
+        {
+          "key": "expiresAt",
+          "flag": "--at",
+          "type": "string | null",
+          "required": true,
+          "description": "An ISO time within a year, or null to clear"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--email",
+          "template": "<email>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.settings",
+      "usage": "turboslide share settings <id> --editors-can-share <editorsCanShare> --viewers-can-download <viewersCanDownload> --viewers-can-see-comments <viewersCanSeeComments> --show-names-to-link-visitors <showNamesToLinkVisitors> --allow-html-blocks <allowHtmlBlocks>",
+      "command": [
+        "share",
+        "settings"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "editorsCanShare",
+          "flag": "--editors-can-share",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "viewersCanDownload",
+          "flag": "--viewers-can-download",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "viewersCanSeeComments",
+          "flag": "--viewers-can-see-comments",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "showNamesToLinkVisitors",
+          "flag": "--show-names-to-link-visitors",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "allowHtmlBlocks",
+          "flag": "--allow-html-blocks",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.listRequests",
+      "usage": "turboslide share requests <id>",
+      "command": [
+        "share",
+        "requests"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.respond",
+      "usage": "turboslide share respond <id> <requestId> --grant <grant> --notify",
+      "command": [
+        "share",
+        "respond"
+      ],
+      "positionals": [
+        "id",
+        "requestId"
+      ],
+      "options": [
+        {
+          "key": "grant",
+          "flag": "--grant",
+          "type": "\"viewer\" | \"commenter\" | \"editor\" | null",
+          "required": true
+        },
+        {
+          "key": "notify",
+          "flag": "--notify",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--notify"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.transferOwnership",
+      "usage": "turboslide share transfer <id> --email <email>",
+      "command": [
+        "share",
+        "transfer"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "to",
+          "flag": "--to",
+          "type": "object | object",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--email",
+          "template": "<email>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.acceptOwnership",
+      "usage": "turboslide share accept-ownership <id>",
+      "command": [
+        "share",
+        "accept-ownership"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.declineOwnership",
+      "usage": "turboslide share decline-ownership <id>",
+      "command": [
+        "share",
+        "decline-ownership"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.claim",
+      "usage": "turboslide share claim <id>",
+      "command": [
+        "share",
+        "claim"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "share.emailCollaborators",
+      "usage": "turboslide share email <id> --message <message>",
+      "command": [
+        "share",
+        "email"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "to",
+          "flag": "--to",
+          "type": "\"all\" | object",
+          "required": true
+        },
+        {
+          "key": "message",
+          "flag": "--message",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "deck.publish",
+      "usage": "turboslide deck publish <id>",
+      "command": [
+        "deck",
+        "publish"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "deck.unpublish",
+      "usage": "turboslide deck unpublish <id>",
+      "command": [
+        "deck",
+        "unpublish"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "account.decks",
+      "usage": "turboslide account decks --view <view>",
+      "command": [
+        "account",
+        "decks"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "view",
+          "flag": "--view",
+          "type": "\"owned\" | \"shared\" | \"recent\" | \"trash\" | \"all\"",
+          "required": true,
+          "enum": [
+            "owned",
+            "shared",
+            "recent",
+            "trash",
+            "all"
+          ]
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "account.tokens.create",
+      "usage": "turboslide account tokens create --to <to> --name <name> --scope <scopes> --expires <expiresAt>",
+      "command": [
+        "account",
+        "tokens",
+        "create"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "name",
+          "flag": "--name",
+          "type": "string",
+          "required": true
+        },
+        {
+          "key": "scopes",
+          "flag": "--scope",
+          "type": "\"read\" | \"comment\" | \"write\" | \"export\" | \"share\" | \"admin\"[]",
+          "required": true
+        },
+        {
+          "key": "expiresAt",
+          "flag": "--expires",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--to",
+          "template": "<to>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "account.tokens.list",
+      "usage": "turboslide account tokens list --to <to>",
+      "command": [
+        "account",
+        "tokens",
+        "list"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [
+        {
+          "flag": "--to",
+          "template": "<to>"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "account.tokens.revoke",
+      "usage": "turboslide account tokens revoke <tokenId> --to <to>",
+      "command": [
+        "account",
+        "tokens",
+        "revoke"
+      ],
+      "positionals": [
+        "tokenId"
+      ],
+      "options": [],
+      "custom": [
+        {
+          "flag": "--to",
+          "template": "<to>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "account.me",
+      "usage": "turboslide account me --avatar-png <avatarPng>",
+      "command": [
+        "account",
+        "me"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "avatarPng",
+          "flag": "--avatar-png",
+          "type": "string",
+          "required": false,
+          "description": "CLI: write the mark as a PNG to this path"
+        }
+      ],
+      "custom": [],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "account.setName",
+      "usage": "turboslide account name <name>",
+      "command": [
+        "account",
+        "name"
+      ],
+      "positionals": [
+        "name"
+      ],
+      "options": [],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "account.setAvatar",
+      "usage": "turboslide account avatar --variant <variant> --another",
+      "command": [
+        "account",
+        "avatar"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "variant",
+          "flag": "--variant",
+          "type": "\"initials\" | \"glyph\" | \"dither\" | \"picture\"",
+          "required": true,
+          "enum": [
+            "initials",
+            "glyph",
+            "dither",
+            "picture"
+          ]
+        },
+        {
+          "key": "initials",
+          "flag": "--initials",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "salt",
+          "flag": "--salt",
+          "type": "integer",
+          "required": false,
+          "description": "Another glyph or plate"
+        },
+        {
+          "key": "picture",
+          "flag": "--picture",
+          "type": "string",
+          "required": false,
+          "description": "A file path or a data URL; sharp re-encodes it and keeps no original"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--another"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "account.sessions",
+      "usage": "turboslide account sessions --to <to>",
+      "command": [
+        "account",
+        "sessions"
+      ],
+      "positionals": [],
+      "options": [],
+      "custom": [
+        {
+          "flag": "--to",
+          "template": "<to>"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "account.signOut",
+      "usage": "turboslide account sign-out --all --to <to>",
+      "command": [
+        "account",
+        "sign-out"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "sessionId",
+          "flag": "--session-id",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "all",
+          "flag": "--all",
+          "type": "true",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--to",
+          "template": "<to>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "admin.bootstrap",
+      "usage": "turboslide admin bootstrap --to <to> --email <email>",
+      "command": [
+        "admin",
+        "bootstrap"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "email",
+          "flag": "--email",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--to",
+          "template": "<to>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "admin.assignOwner",
+      "usage": "turboslide admin assign-owner <id> --email <email>",
+      "command": [
+        "admin",
+        "assign-owner"
+      ],
+      "positionals": [
+        "id"
+      ],
+      "options": [
+        {
+          "key": "to",
+          "flag": "--to",
+          "type": "object | object",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--email",
+          "template": "<email>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "admin.flag",
+      "usage": "turboslide admin flag <name> --on <on>",
+      "command": [
+        "admin",
+        "flag"
+      ],
+      "positionals": [
+        "name"
+      ],
+      "options": [
+        {
+          "key": "on",
+          "flag": "--on",
+          "type": "boolean",
+          "required": false,
+          "description": "Absent reads the flag"
+        }
+      ],
+      "custom": [],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "admin.migrateStorage",
+      "usage": "turboslide admin migrate-storage <step> --to <to> --batch <batch>",
+      "command": [
+        "admin",
+        "migrate-storage"
+      ],
+      "positionals": [
+        "step"
+      ],
+      "options": [
+        {
+          "key": "batch",
+          "flag": "--batch",
+          "type": "integer",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--to",
+          "template": "<to>"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "admin.mail.list",
+      "usage": "turboslide admin mail --to <to> --since <since>",
+      "command": [
+        "admin",
+        "mail"
+      ],
+      "positionals": [],
+      "options": [
+        {
+          "key": "since",
+          "flag": "--since",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "limit",
+          "flag": "--limit",
+          "type": "integer",
+          "required": false
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--to",
+          "template": "<to>"
+        }
+      ],
+      "mutates": false,
+      "milestone": "GS3"
+    },
+    {
+      "action": "picture.dither",
+      "usage": "turboslide block dither <slideId>#<blockId> --pattern <pattern> --tone <tone> --cell <cell> --strength <strength> --black <black> --white <white> --gamma <gamma> --polarity <polarity> --off",
+      "command": [
+        "block",
+        "dither"
+      ],
+      "positionals": [
+        "slideId",
+        "blockId"
+      ],
+      "options": [
+        {
+          "key": "dither",
+          "flag": "--dither",
+          "type": "object | null",
+          "required": true
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--pattern",
+          "template": "<pattern>"
+        },
+        {
+          "flag": "--tone",
+          "template": "<tone>"
+        },
+        {
+          "flag": "--cell",
+          "template": "<cell>"
+        },
+        {
+          "flag": "--strength",
+          "template": "<strength>"
+        },
+        {
+          "flag": "--black",
+          "template": "<black>"
+        },
+        {
+          "flag": "--white",
+          "template": "<white>"
+        },
+        {
+          "flag": "--gamma",
+          "template": "<gamma>"
+        },
+        {
+          "flag": "--polarity",
+          "template": "<polarity>"
+        },
+        {
+          "flag": "--off"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "picture.materialize",
+      "usage": "turboslide picture materialize <slideIds> --prune --scale <scale> --dry-run",
+      "command": [
+        "picture",
+        "materialize"
+      ],
+      "positionals": [
+        "slideIds"
+      ],
+      "options": [
+        {
+          "key": "blockIds",
+          "flag": "--block-ids",
+          "type": "string[]",
+          "required": false
+        },
+        {
+          "key": "prune",
+          "flag": "--prune",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "scale",
+          "flag": "--scale",
+          "type": "1 | 2",
+          "required": false,
+          "description": "Device pixels per sheet pixel; 2 unless set",
+          "enum": [
+            1,
+            2
+          ]
+        },
+        {
+          "key": "dryRun",
+          "flag": "--dry-run",
+          "type": "boolean",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--dry-run"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "slide.setBackgroundPicture",
+      "usage": "turboslide slide background-picture <slideIds> --asset <assetId> --file <file> --url <url> --alt <alt> --dither --no-replace",
+      "command": [
+        "slide",
+        "background-picture"
+      ],
+      "positionals": [
+        "slideIds"
+      ],
+      "options": [
+        {
+          "key": "assetId",
+          "flag": "--asset",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "file",
+          "flag": "--file",
+          "type": "string",
+          "required": false,
+          "description": "A path on the machine, or a data: URL"
+        },
+        {
+          "key": "url",
+          "flag": "--url",
+          "type": "string",
+          "required": false,
+          "description": "An http(s) URL fetched through safeFetch"
+        },
+        {
+          "key": "upload",
+          "flag": "--upload",
+          "type": "string",
+          "required": false,
+          "description": "Hosted: the key of a presigned client upload"
+        },
+        {
+          "key": "alt",
+          "flag": "--alt",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "dither",
+          "flag": "--dither",
+          "type": "object",
+          "required": false
+        },
+        {
+          "key": "replace",
+          "flag": "--replace",
+          "type": "boolean",
+          "required": false,
+          "description": "Replace the covering picture at the bottom of the stack; on unless set"
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--no-replace"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
+    },
+    {
+      "action": "slide.setBackgroundMaterial",
+      "usage": "turboslide slide background-material <slideIds> <materialId> --preset <preset> --anchor <anchor> --dither",
+      "command": [
+        "slide",
+        "background-material"
+      ],
+      "positionals": [
+        "slideIds",
+        "materialId"
+      ],
+      "options": [
+        {
+          "key": "preset",
+          "flag": "--preset",
+          "type": "string",
+          "required": false
+        },
+        {
+          "key": "uniforms",
+          "flag": "--uniforms",
+          "type": "record",
+          "required": false
+        },
+        {
+          "key": "anchor",
+          "flag": "--anchor",
+          "type": "number",
+          "required": false,
+          "description": "The frame time in ms; the catalog default unless set"
+        },
+        {
+          "key": "dither",
+          "flag": "--dither",
+          "type": "object",
+          "required": false
+        },
+        {
+          "key": "baseRevision",
+          "flag": "--base-revision",
+          "type": "integer",
+          "required": true,
+          "description": "The revision the caller read; a stale value is rejected with 409"
+        }
+      ],
+      "custom": [
+        {
+          "flag": "--dither"
+        }
+      ],
+      "mutates": true,
+      "milestone": "GS3"
     }
   ]
 }

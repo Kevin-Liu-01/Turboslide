@@ -189,10 +189,13 @@ describe('the editor shell in its default state', () => {
     expect(controls).toEqual(
       [...TOOLBAR_HEAD, ...TOOLBAR_TAIL_DEFAULT].map((control) => control.control),
     );
-    /* the Later controls are in the tab order, aria-disabled, with the stub sentence */
+    /* SPEC-3 5.3: Insert comment is live for an editor in Editing mode; Transition stays the
+       Later control, in the tab order, aria-disabled, with the stub sentence */
     const comment = toolbar.querySelector('[data-control="toolbar.insertComment"]') as HTMLElement;
-    expect(comment.getAttribute('aria-disabled')).toBe('true');
-    expect(comment.hasAttribute('disabled')).toBe(false);
+    expect(comment.getAttribute('aria-disabled')).toBeNull();
+    const transition = toolbar.querySelector('[data-control="toolbar.transition"]') as HTMLElement;
+    expect(transition.getAttribute('aria-disabled')).toBe('true');
+    expect(transition.hasAttribute('disabled')).toBe(false);
     expect(container.querySelector('[data-control="bottombar"]')).not.toBeNull();
     expect(container.querySelector('[data-control="panel.toggle"]')).not.toBeNull();
     expect(container.querySelector('.ts-rpanel')?.childElementCount).toBe(0);
@@ -216,7 +219,11 @@ describe('the editor shell in its default state', () => {
     fireEvent.click(file);
     const menu = screen.getByRole('menu', { name: 'File menu' });
     expect(menu.querySelector('[data-menu-item="file.open"]')).not.toBeNull();
-    expect(menu.querySelector('[data-menu-item="file.email"]')).toBeNull();
+    /* SPEC-3 13.3: Email is present with Email collaborators as its Later row */
+    expect(menu.querySelector('[data-menu-item="file.email"]')?.getAttribute('aria-disabled')).toBe(
+      'true',
+    );
+    expect(menu.querySelector('[data-menu-item="file.move"]')).toBeNull();
     for (const text of defaultViewText(menu)) expect(forbiddenWordsIn(text), text).toEqual([]);
     for (const row of menu.querySelectorAll('[role^="menuitem"]')) {
       expect(row.getAttribute('data-tip')).toBeTruthy();
@@ -515,9 +522,12 @@ describe('the Insert menu, compact mode and the title row', () => {
     expect(lastEdit.getAttribute('data-control')).toBe('deck.lastEdit');
     fireEvent.click(lastEdit);
     expect(container.querySelector('[data-control="panel.versionHistory"]')).not.toBeNull();
+    /* SPEC-3 5.3, 13.1: Show all comments is live and opens the Comments panel */
     const comments = row.querySelector('[data-menu-item="title.comments"]') as HTMLElement;
     expect(comments).not.toBeNull();
-    expect(comments.getAttribute('aria-disabled')).toBe('true');
+    expect(comments.getAttribute('aria-disabled')).toBeNull();
     expect(comments.hasAttribute('disabled')).toBe(false);
+    fireEvent.click(comments);
+    expect(container.querySelector('[data-control="panel.comments"]')).not.toBeNull();
   });
 });

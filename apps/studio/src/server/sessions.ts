@@ -11,6 +11,7 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
 import { parseJsonInput } from './json';
 import type { Untrusted } from './json';
+import { identityOfRequest, sessionDirectory } from './sessions.server';
 
 /**
  * Attached studio pages (SPEC 7.3 "the view tools when a studio session is attached"; MILESTONES
@@ -30,6 +31,127 @@ export function studioSessions(): SessionRegistry {
   holder[REGISTRY] ??= createSessionRegistry();
   return holder[REGISTRY];
 }
+
+// ---------------------------------------------------------------------------------------------
+// The session directory (gslides-parity SPEC-3 11.3 "sessions.ts: the registry moves to Redis
+// and binds to identities"; MILESTONES-3 B2 day 5). The command bus above stays in process: a
+// long poll is answered by the instance holding it, so a command for a page reaches the instance
+// the page polls. What every instance must agree on is who is attached where: the directory
+// binds every session to the principal (or the agent) that attached it, lists a principal's
+// pages across instances ("Sessions" in the profile dialog, `account.sessions`), and caps the
+// pages one identity and one deck may attach, so a script cannot exhaust the poll pool. Redis
+// on the redis tier through the room's commands, memory elsewhere.
+
+export const SESSIONS_PER_IDENTITY_MAX = 20;
+export const SESSIONS_PER_DECK_MAX = 200;
+/** A binding not touched by a poll for this long is gone (the poll is 20 s, the sweep 45 s). */
+export const SESSION_BINDING_TTL_MS = 90_000;
+
+export type SessionBinding = {
+  id: string;
+  deckId: string;
+  owner: SessionOwner;
+  /** the principal id, or `agent:<tokenId>` */
+  identity: string;
+  kind: 'anonymous' | 'account' | 'agent' | 'unknown';
+  attachedAt: string;
+  lastSeenAt: string;
+  userAgent?: string;
+};
+
+export type BindRefusal = { ok: false; reason: 'identity' | 'deck'; cap: number };
+
+export type SessionDirectory = {
+  readonly kind: 'memory' | 'redis';
+  bind: (binding: SessionBinding) => Promise<{ ok: true } | BindRefusal>;
+  touch: (id: string, now: string) => Promise<void>;
+  unbind: (id: string) => Promise<void>;
+  forIdentity: (identity: string, now?: string) => Promise<SessionBinding[]>;
+  forDeck: (deckId: string, now?: string) => Promise<SessionBinding[]>;
+};
+
+type Kv = { call: (command: string, ...args: (string | number)[]) => Promise<unknown> };
+
+const fresh = (row: SessionBinding, now: string): boolean =>
+  Date.parse(now) - Date.parse(row.lastSeenAt) <= SESSION_BINDING_TTL_MS;
+
+/** One directory over a load and save of the whole table; the two backends differ only there. */
+function directoryOver(
+  kind: SessionDirectory['kind'],
+  load: () => Promise<SessionBinding[]>,
+  save: (rows: SessionBinding[]) => Promise<void>,
+): SessionDirectory {
+  return {
+    kind,
+    async bind(binding) {
+      const now = binding.lastSeenAt;
+      const rows = (await load()).filter((row) => fresh(row, now) && row.id !== binding.id);
+      const mine = rows.filter((row) => row.identity === binding.identity).length;
+      if (mine >= SESSIONS_PER_IDENTITY_MAX)
+        return { ok: false, reason: 'identity', cap: SESSIONS_PER_IDENTITY_MAX };
+      const onDeck = rows.filter((row) => row.deckId === binding.deckId).length;
+      if (onDeck >= SESSIONS_PER_DECK_MAX)
+        return { ok: false, reason: 'deck', cap: SESSIONS_PER_DECK_MAX };
+      await save([...rows, binding]);
+      return { ok: true };
+    },
+    async touch(id, now) {
+      const rows = await load();
+      const row = rows.find((entry) => entry.id === id);
+      if (row === undefined) return;
+      row.lastSeenAt = now;
+      await save(rows.filter((entry) => fresh(entry, now)));
+    },
+    async unbind(id) {
+      const rows = await load();
+      if (!rows.some((row) => row.id === id)) return;
+      await save(rows.filter((row) => row.id !== id));
+    },
+    async forIdentity(identity, now = new Date().toISOString()) {
+      return (await load()).filter((row) => row.identity === identity && fresh(row, now));
+    },
+    async forDeck(deckId, now = new Date().toISOString()) {
+      return (await load()).filter((row) => row.deckId === deckId && fresh(row, now));
+    },
+  };
+}
+
+export function memorySessionDirectory(): SessionDirectory {
+  let rows: SessionBinding[] = [];
+  return directoryOver(
+    'memory',
+    async () => rows.map((row) => ({ ...row })),
+    async (next) => {
+      rows = next;
+    },
+  );
+}
+
+/** `sessions:studio` as one JSON value with the binding TTL; every instance reads the same table. */
+export function redisSessionDirectory(kv: Kv, key = 'sessions:studio'): SessionDirectory {
+  return directoryOver(
+    'redis',
+    async () => {
+      const raw = await kv.call('GET', key);
+      if (typeof raw !== 'string') return [];
+      try {
+        const parsed = JSON.parse(raw) as unknown;
+        return Array.isArray(parsed) ? (parsed as SessionBinding[]) : [];
+      } catch {
+        return [];
+      }
+    },
+    async (rows) => {
+      await kv.call('SET', key, JSON.stringify(rows), 'PX', SESSION_BINDING_TTL_MS * 2);
+    },
+  );
+}
+
+// `sessionDirectory`, `identityOfRequest` and `attachedPagesOf` live in sessions.server.ts (the
+// integrator at merge 2): they reach the room and `getRequest()` of @tanstack/react-start/server,
+// and this module is in the client's graph through components/useStudioSession.ts, so the
+// production build's import protection refused the chain until the server half moved out. The
+// handlers below are the only callers and the client transform drops them.
 
 const POLL_DEFAULT_MS = 20_000;
 const POLL_MAX_MS = 25_000;
@@ -87,7 +209,28 @@ const attachFn = createServerFn({ method: 'POST' })
   })
   .handler(async ({ data }): Promise<string> => {
     const { id, ...rest } = data;
-    return JSON.stringify(studioSessions().attach(rest, id));
+    const who = await identityOfRequest();
+    const directory = await sessionDirectory();
+    const now = new Date().toISOString();
+    const session = studioSessions().attach(rest, id);
+    const bound = await directory.bind({
+      id: session.id,
+      deckId: session.deckId,
+      owner: session.owner,
+      identity: who.identity,
+      kind: who.kind,
+      attachedAt: session.attachedAt,
+      lastSeenAt: now,
+    });
+    if (!bound.ok) {
+      studioSessions().detach(session.id);
+      throw new TypeError(
+        bound.reason === 'identity'
+          ? `This browser has ${bound.cap} pages attached already; close one to attach another`
+          : `This presentation has ${bound.cap} pages attached already`,
+      );
+    }
+    return JSON.stringify(session);
   });
 
 /** Attaches (or re-attaches) a page; the session id comes back for the poll loop. */
@@ -106,6 +249,7 @@ const pollFn = createServerFn({ method: 'POST' })
     return { id: input.id, timeoutMs: Math.min(POLL_MAX_MS, Math.max(0, timeoutMs)) };
   })
   .handler(async ({ data }): Promise<string> => {
+    void (await sessionDirectory()).touch(data.id, new Date().toISOString()).catch(() => undefined);
     const commands = await studioSessions().poll(data.id, data.timeoutMs ?? POLL_DEFAULT_MS);
     return JSON.stringify(commands);
   });
@@ -167,7 +311,10 @@ const detachFn = createServerFn({ method: 'POST' })
       throw new TypeError('id must be a session id');
     return { id: input.id };
   })
-  .handler(async ({ data }): Promise<string> => JSON.stringify(studioSessions().detach(data.id)));
+  .handler(async ({ data }): Promise<string> => {
+    void (await sessionDirectory()).unbind(data.id).catch(() => undefined);
+    return JSON.stringify(studioSessions().detach(data.id));
+  });
 
 export async function detachStudioSession(input: { id: string }): Promise<boolean> {
   return JSON.parse(await detachFn({ data: JSON.stringify(input) })) as boolean;

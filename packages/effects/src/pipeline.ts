@@ -37,3 +37,9 @@ export function twoToneScreenTypeScript(rgba: RgbaImage, params: TwoToneParams):
   gray = tone(gray, params.black ?? 0, params.white ?? 255, params.gamma ?? 1);
   return { positive: ditherGray(gray), toneImage: gray };
 }
+
+// The block level dither of round three (dither.ts, blue64.ts) is reachable through this subpath
+// until the package's exports carry `./dither` and `./blue64` (a request of build-3/b5.md): the
+// stages are the same integer arithmetic as above, split at the cache line the live preview needs.
+export * from './dither.ts';
+export * from './blue64.ts';

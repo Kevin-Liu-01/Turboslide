@@ -190,3 +190,24 @@
     animation: none;
   }
 }
+
+/* Round three (gslides-parity SPEC-3 0.7, 9.3): the persisted queue notice, a fixed plate over
+   the stage at the top centre beside the Following plate's slot; never a row in the grid. */
+.pt-viewer.is-editor > .pt-main > .pt-stagewrap > .ts-queue-plate {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 4px 0 12px;
+  transform: translateX(-50%);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+  white-space: nowrap;
+}

@@ -110,7 +110,9 @@
       "slide.setBackground",
       "text.replaceAll",
       "diagram.insert",
-      "slide.lease"
+      "slide.lease",
+      "slide.setBackgroundPicture",
+      "slide.setBackgroundMaterial"
     ],
     "block": [
       "block.set",
@@ -151,7 +153,9 @@
       "table.distribute",
       "table.cellStyle",
       "shape.set",
-      "line.set"
+      "line.set",
+      "picture.dither",
+      "picture.materialize"
     ],
     "asset": [
       "asset.add",
@@ -173,7 +177,8 @@
       "diff.run",
       "version.save",
       "version.list",
-      "version.restore"
+      "version.restore",
+      "version.diff"
     ],
     "view": [
       "view.goto",
@@ -196,9 +201,80 @@
       "control.activate",
       "control.set",
       "artifact.download"
+    ],
+    "presence": [
+      "presence.list",
+      "presence.follow",
+      "presence.unfollow",
+      "presence.pointer"
+    ],
+    "sync": [
+      "sync.status",
+      "deck.watch",
+      "deck.follow"
+    ],
+    "comment": [
+      "comment.add",
+      "comment.reply",
+      "comment.edit",
+      "comment.delete",
+      "comment.resolve",
+      "comment.reopen",
+      "comment.assign",
+      "comment.done",
+      "comment.react",
+      "comment.list",
+      "comment.get",
+      "comment.link",
+      "notification.list",
+      "notification.markRead",
+      "notification.settings",
+      "activity.list"
+    ],
+    "share": [
+      "share.get",
+      "share.setGeneralAccess",
+      "share.createLink",
+      "share.revokeLink",
+      "share.rotateLink",
+      "share.stop",
+      "share.invite",
+      "share.setRole",
+      "share.remove",
+      "share.setExpiry",
+      "share.settings",
+      "share.requestAccess",
+      "share.listRequests",
+      "share.respond",
+      "share.transferOwnership",
+      "share.acceptOwnership",
+      "share.declineOwnership",
+      "share.claim",
+      "share.emailCollaborators",
+      "deck.publish",
+      "deck.unpublish"
+    ],
+    "account": [
+      "account.decks",
+      "account.tokens.create",
+      "account.tokens.list",
+      "account.tokens.revoke",
+      "account.me",
+      "account.setName",
+      "account.setAvatar",
+      "account.sessions",
+      "account.signOut",
+      "account.forget"
+    ],
+    "admin": [
+      "admin.bootstrap",
+      "admin.assignOwner",
+      "admin.flag",
+      "admin.migrateStorage",
+      "admin.mail.list"
     ]
   },
-  "actionCount": 105,
+  "actionCount": 169,
   "resources": [
     {
       "uri": "deck://manifest",
@@ -253,6 +329,24 @@
       "name": "Render",
       "description": "The latest render of a slide in a theme",
       "mimeType": "image/png"
+    },
+    {
+      "uri": "deck://{id}/comments",
+      "name": "Comments",
+      "description": "The comment threads with their anchors resolved; subscribe for updates",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "deck://{id}/presence",
+      "name": "Collaborators",
+      "description": "The roster of the room with the computed marks; subscribe for updates",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "deck://inbox",
+      "name": "Notifications",
+      "description": "The notifications of the caller; subscribe for updates",
+      "mimeType": "application/json"
     }
   ]
 }

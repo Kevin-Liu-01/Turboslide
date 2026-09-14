@@ -1,0 +1,128 @@
+{
+  "base": "https://turboslide-igavfcg2x-kl01s-projects.vercel.app",
+  "at": "2026-09-14T03:29:24.108Z",
+  "seconds": 246,
+  "summary": {
+    "ok": 8,
+    "fail": 14,
+    "notes": 0
+  },
+  "rows": [
+    {
+      "name": "scratch deck",
+      "ok": true,
+      "evidence": "verifier-walk-mu0ojw67 from gt-brand's first three slides (opener-brand, title, thesis)"
+    },
+    {
+      "name": "S4 named anonymous principal",
+      "ok": true,
+      "evidence": "account.setName Maya: {\"principal\":{\"id\":\"anon_f21b3ccf-9ec8-4abc-8a8b-ec238c8b5a1b\",\"kind\":\"anonymous\",\"admin\":false},\"trust\":\"guest\",\"label\"; state.account {\"principalId\":\"anon_f21b3ccf-9ec8-4abc-8a8b-ec238c8b5a1b\",\"trust\":\"label\",\"signedIn\":false}"
+    },
+    {
+      "name": "S4 the own chip names the principal",
+      "ok": true,
+      "evidence": "own chip tooltip \"Wax 924 (you)\""
+    },
+    {
+      "name": "S4 the own chip menu is the account surface",
+      "ok": true,
+      "evidence": "rows title.account.changeName, title.account.changeAvatar, title.account.forget, title.account.sessions; sentence \"WWax 924Not signed in\""
+    },
+    {
+      "name": "S4 nothing else in the chrome mentions accounts",
+      "ok": true,
+      "evidence": "0 account word(s) in the default view text"
+    },
+    {
+      "name": "presence chip within 10 s",
+      "ok": false,
+      "evidence": "B's chip on A after 10065 ms",
+      "ms": 10065
+    },
+    {
+      "name": "presence in the window state",
+      "ok": false,
+      "evidence": "A presence {\"clientId\":\"7896afb1efafbd9722b2f588ccfcfb36\",\"others\":0,\"following\":null}; B clientId 4485c2e5c48f9d4e39bcaa76e4dd8efe"
+    },
+    {
+      "name": "roster lists both",
+      "ok": false,
+      "evidence": "title.presence.joinChat:Join chat"
+    },
+    {
+      "name": "slide.new split",
+      "ok": false,
+      "evidence": "Error: slide.new did not answer within 30000 ms"
+    },
+    {
+      "name": "op to screen, A write to B document (3 writes)",
+      "ok": false,
+      "evidence": "landed 0 of 3; p50 null ms, p95 null ms, max undefined ms; samples , , ",
+      "p50": null,
+      "p95": null,
+      "samples": [null, null, null]
+    },
+    {
+      "name": "S2 typing rows",
+      "ok": false,
+      "evidence": "threw: page.evaluate: RangeError: No slide \"split-1\"\n    at q (https://turboslide-igavfcg2x-kl01s-projects.vercel.app/assets/edit._deckId-Cy_ENcEm.js:2:7845)\n    at https://turboslide-igavfcg2x-kl01s-projects.vercel.app/assets/edit._deckId-Cy_ENcEm.js:2:19062\n    at https://turboslide-igavfcg2x-kl01s-proje"
+    },
+    {
+      "name": "Follow moves the stage with B and shows the plate",
+      "ok": false,
+      "evidence": "presence.follow {\"error\":\"Error: page.evaluate: RangeError: No collaborator with client id 4485c; plate \"null\"; A followed to null then null"
+    },
+    {
+      "name": "Stop ends following",
+      "ok": true,
+      "evidence": "the plate is gone"
+    },
+    {
+      "name": "the chip offers Go to slide for an anonymous editor (4.4)",
+      "ok": false,
+      "evidence": "chip tooltip \"null\""
+    },
+    {
+      "name": "S1 comment.add with a mention",
+      "ok": false,
+      "evidence": "{\"error\":\"Error: page.evaluate: Error: The blob tier writes comments through the comments store; none is attached to this channel\\n    at Object.deserialize (ht; mention of anon_50675f57-244f-455f-af64-7f683d9e7ad8"
+    },
+    {
+      "name": "S1 the comment reaches B within 2 s: marker, filmstrip chip, inbox plate",
+      "ok": false,
+      "evidence": "0 marker(s) after 6314 ms; filmstrip chip \"null\"; inbox plate \"\"",
+      "ms": 6314
+    },
+    {
+      "name": "S1 B reads the thread",
+      "ok": false,
+      "evidence": "comment.list on B: {\"threads\":[],\"commentsRevision\":0,\"total\":0}"
+    },
+    {
+      "name": "S1 the Comments panel on B lists the thread with For you",
+      "ok": false,
+      "evidence": "panel open; For you tab \"null\"; thread card absent"
+    },
+    {
+      "name": "S1 B resolves; A sees the resolve within 2 s",
+      "ok": false,
+      "evidence": "comment.resolve {\"error\":\"Error: page.evaluate: TypeError: comment.resolve: invalid input at /th; A saw it after 6178 ms",
+      "ms": 6178
+    },
+    {
+      "name": "S1 A inbox after the resolve",
+      "ok": true,
+      "evidence": "{\"notifications\":[],\"unread\":0}"
+    },
+    {
+      "name": "walk",
+      "ok": false,
+      "evidence": "threw: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"share.open\"]')\n    - locator resolved to <button type=\"button\" data-tip=\"Share\" data-control=\"share.open\" class=\"pt-ib ts-title-share\" data-menu-item=\"title.share\">…</button>\n  - attempting click action\n    2 × waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div role=\"presentation\" class=\"ts-dialog-scrim ts-chrome\">…</div> intercepts pointer events\n    - retrying click action\n    - wait"
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "evidence": "verifier-walk-mu0ojw67 trashed and removed"
+    }
+  ]
+}

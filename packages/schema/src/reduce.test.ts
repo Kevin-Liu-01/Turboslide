@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import type { DeckDocument } from './deck.ts';
 import { workedDocument } from './fixtures.ts';
 import type { Mutation, Write } from './mutations.ts';
-import { applyMutations, applyWrite } from './reduce.ts';
+import { applyMutation, applyMutations, applyWrite } from './reduce.ts';
+import { canonicalText } from './text.ts';
 import { validateDocument } from './validate.ts';
 
 const author = { kind: 'agent', name: 'agent', runId: 'test' } as const;
@@ -559,6 +561,89 @@ describe('the gslides-parity fields (SPEC 7.2)', () => {
     expect(removeMissing.document.deck.defaults).toBeUndefined();
   });
 
+  it('keeps text.replace as it was: markup offsets and a whole string inverse (SPEC-3 0.4)', () => {
+    // the recorded form of round one and two: the inverse covers the whole new string in markup
+    // offsets, which the replay paths apply through this reducer
+    const document = base();
+    const result = applyWrite(
+      document,
+      write([
+        {
+          op: 'text.replace',
+          slideId: 'content-rule',
+          blockId: 'h',
+          path: '/text',
+          range: [4, 11],
+          text: '*copy*',
+        },
+      ]),
+      { now: NOW },
+    );
+    if (!result.ok) throw new Error(result.message);
+    const heading = result.document.slides['content-rule'];
+    expect(heading?.kind === 'content' && heading.slots.left?.[0]).toMatchObject({
+      text: 'The *copy* rule',
+    });
+    expect(result.inverse).toEqual([
+      {
+        op: 'text.replace',
+        slideId: 'content-rule',
+        blockId: 'h',
+        path: '/text',
+        range: [0, 'The *copy* rule'.length],
+        text: 'The content rule',
+      },
+    ]);
+  });
+
+  it('answers every recorded round one and two text.replace record as the reducer of 61b16e4 did (SPEC-3 0.4, 16.6)', () => {
+    // __fixtures__/text-replace-records.json: the editor's 400 ms bursts in markup offsets and
+    // their answers, recorded by the round two reducer's case (byte for byte this one, checked
+    // against `git show 61b16e4:packages/schema/src/reduce.ts`); the two new ops of round three
+    // leave every one of them, and every stored inverse, replayable
+    const fixture = JSON.parse(
+      readFileSync(new URL('./__fixtures__/text-replace-records.json', import.meta.url), 'utf8'),
+    ) as {
+      records: {
+        name: string;
+        slideId: string;
+        blockId: string;
+        path: string;
+        before: string;
+        range: [number, number];
+        text: string;
+        next: string;
+        inverse: Mutation[];
+      }[];
+    };
+    expect(fixture.records.length).toBeGreaterThanOrEqual(8);
+    for (const record of fixture.records) {
+      const document = base();
+      const textOf = (doc: DeckDocument): string => {
+        const slide = doc.slides[record.slideId];
+        if (slide?.kind !== 'content') throw new Error(record.name);
+        for (const list of Object.values(slide.slots)) {
+          const block = list.find((row) => row.id === record.blockId);
+          if (block !== undefined && 'text' in block) return block.text as string;
+        }
+        throw new Error(record.name);
+      };
+      expect(textOf(document), record.name).toBe(record.before);
+      const inverse = applyMutation(document, {
+        op: 'text.replace',
+        slideId: record.slideId,
+        blockId: record.blockId,
+        path: record.path,
+        range: record.range,
+        text: record.text,
+      });
+      expect(textOf(document), record.name).toBe(record.next);
+      expect(inverse, record.name).toEqual(record.inverse);
+      for (const back of inverse) applyMutation(document, back);
+      expect(textOf(document), record.name).toBe(record.before);
+    }
+  });
+
   it('accepts a paragraph break in text.replace on a paragraph and refuses it on a heading', () => {
     const document = base();
     const ok = applyWrite(
@@ -594,5 +679,286 @@ describe('the gslides-parity fields (SPEC 7.2)', () => {
       ]),
     );
     expect(refused.ok).toBe(false);
+  });
+});
+
+describe('the multiplayer text ops (gslides-parity SPEC-3 3.1)', () => {
+  const p1 = { slideId: 'content-rule', blockId: 'p1', path: '/text' } as const;
+  const MARKED = 'Every *post* states [what](https://x.y) was [built]{i c:red}.';
+
+  /** The normalized worked deck with p1 carrying marks, a display run and a link. */
+  function marked(): DeckDocument {
+    const document = base();
+    const result = applyWrite(document, write([{ op: 'block.set', ...p1, value: MARKED }]), {
+      now: NOW,
+    });
+    if (!result.ok) throw new Error(result.message);
+    return result.document;
+  }
+
+  function textOf(document: DeckDocument): string {
+    const slide = document.slides['content-rule'];
+    const block = slide?.kind === 'content' ? slide.slots.left?.[1] : undefined;
+    return block?.type === 'paragraph' ? block.text : '';
+  }
+
+  it('applies a splice in plain offsets and stores the canonical form', () => {
+    const result = applyWrite(
+      marked(),
+      write([{ op: 'text.splice', ...p1, at: 6, remove: 4, insert: 'note' }], 413),
+      { now: NOW },
+    );
+    if (!result.ok) throw new Error(result.message);
+    expect(textOf(result.document)).toBe(
+      'Every *note* states [what](https://x.y) was [built]{i c:red}.',
+    );
+    expect(result.inverse).toEqual([
+      { op: 'text.splice', ...p1, at: 6, remove: 4, insert: 'post' },
+    ]);
+  });
+
+  it('applies a mark and a case change in plain offsets', () => {
+    const marks = applyWrite(
+      marked(),
+      write(
+        [
+          {
+            op: 'text.mark',
+            ...p1,
+            range: [0, 5],
+            edit: { kind: 'marks', set: { u: true } },
+          },
+        ],
+        413,
+      ),
+      { now: NOW },
+    );
+    if (!marks.ok) throw new Error(marks.message);
+    expect(textOf(marks.document)).toBe(
+      '[Every]{u} *post* states [what](https://x.y) was [built]{i c:red}.',
+    );
+    expect(marks.inverse).toEqual([
+      { op: 'text.mark', ...p1, range: [0, 5], edit: { kind: 'marks', clear: ['u'] } },
+    ]);
+    const upper = applyWrite(
+      marked(),
+      write(
+        [{ op: 'text.mark', ...p1, range: [6, 10], edit: { kind: 'case', mode: 'upper' } }],
+        413,
+      ),
+      { now: NOW },
+    );
+    if (!upper.ok) throw new Error(upper.message);
+    expect(textOf(upper.document)).toBe(
+      'Every *POST* states [what](https://x.y) was [built]{i c:red}.',
+    );
+    expect(upper.inverse[0]).toEqual({
+      op: 'text.splice',
+      ...p1,
+      at: 6,
+      remove: 4,
+      insert: 'post',
+    });
+  });
+
+  const cases: { name: string; mutations: Mutation[] }[] = [
+    {
+      name: 'a typed character',
+      mutations: [{ op: 'text.splice', ...p1, at: 5, remove: 0, insert: ',' }],
+    },
+    {
+      name: 'typing at the end of a display run',
+      mutations: [{ op: 'text.splice', ...p1, at: 10, remove: 0, insert: 's' }],
+    },
+    {
+      name: 'a backspace inside a link',
+      mutations: [{ op: 'text.splice', ...p1, at: 21, remove: 1, insert: '' }],
+    },
+    {
+      name: 'a deletion of the display run',
+      mutations: [{ op: 'text.splice', ...p1, at: 6, remove: 4, insert: '' }],
+    },
+    {
+      name: 'a deletion across the display run and the link',
+      mutations: [{ op: 'text.splice', ...p1, at: 3, remove: 20, insert: '' }],
+    },
+    {
+      name: 'a deletion of the marked word with the period',
+      mutations: [{ op: 'text.splice', ...p1, at: 27, remove: 6, insert: '' }],
+    },
+    {
+      name: 'a replacement over mixed runs',
+      mutations: [{ op: 'text.splice', ...p1, at: 6, remove: 12, insert: 'x' }],
+    },
+    {
+      name: 'a paragraph break typed and the break removed',
+      mutations: [
+        { op: 'text.splice', ...p1, at: 12, remove: 0, insert: '\n' },
+        { op: 'text.splice', ...p1, at: 12, remove: 1, insert: '' },
+        { op: 'text.splice', ...p1, at: 19, remove: 0, insert: '\nNext.' },
+      ],
+    },
+    {
+      name: 'marks set over mixed runs',
+      mutations: [
+        {
+          op: 'text.mark',
+          ...p1,
+          range: [3, 24],
+          edit: { kind: 'marks', set: { s: true, hl: 'amber' } },
+        },
+      ],
+    },
+    {
+      name: 'marks cleared over mixed runs',
+      mutations: [
+        {
+          op: 'text.mark',
+          ...p1,
+          range: [0, 33],
+          edit: { kind: 'marks', clear: ['b', 'link', 'color'] },
+        },
+      ],
+    },
+    {
+      name: 'a link set and sub over sup',
+      mutations: [
+        {
+          op: 'text.mark',
+          ...p1,
+          range: [0, 5],
+          edit: { kind: 'marks', set: { link: 'https://gt.example', sup: true } },
+        },
+        { op: 'text.mark', ...p1, range: [2, 4], edit: { kind: 'marks', set: { sub: true } } },
+      ],
+    },
+    {
+      name: 'a title case over mixed runs',
+      mutations: [
+        { op: 'text.mark', ...p1, range: [0, 33], edit: { kind: 'case', mode: 'title' } },
+      ],
+    },
+    {
+      name: 'an upper case then a splice inside it',
+      mutations: [
+        { op: 'text.mark', ...p1, range: [6, 10], edit: { kind: 'case', mode: 'upper' } },
+        { op: 'text.splice', ...p1, at: 8, remove: 1, insert: 'ab' },
+      ],
+    },
+  ];
+
+  it.each(cases)(
+    '$name applies, stores a canonical Text and its inverse restores the document exactly',
+    ({ mutations }) => {
+      const before = marked();
+      const forward = applyWrite(before, write(mutations, 413), { now: NOW });
+      if (!forward.ok) throw new Error(forward.message);
+      expect(stable(forward.document)).not.toEqual(stable(before));
+      expect(canonicalText(textOf(forward.document))).toBe(textOf(forward.document));
+      const back = applyWrite(forward.document, write(forward.inverse, 414), { now: NOW });
+      if (!back.ok) throw new Error(back.message);
+      expect(textOf(back.document)).toBe(MARKED);
+      expect(stable(back.document)).toEqual(stable(before));
+      // the inverse is a splice or a mark, never a whole string, so undo transforms (SPEC-3 3.5)
+      for (const inverse of forward.inverse)
+        expect(['text.splice', 'text.mark']).toContain(inverse.op);
+    },
+  );
+
+  it('refuses a splice or a mark outside the text, on a non string pointer and a break on a heading', () => {
+    const document = marked();
+    const outside = applyWrite(
+      document,
+      write([{ op: 'text.splice', ...p1, at: 100, remove: 1, insert: '' }], 413),
+    );
+    expect(outside.ok).toBe(false);
+    if (outside.ok || outside.code !== 'invalid') throw new Error('expected invalid');
+    expect(outside.message).toMatch(/outside a text/);
+    const notText = applyWrite(
+      document,
+      write(
+        [
+          {
+            op: 'text.splice',
+            slideId: 'content-rule',
+            blockId: 'p1',
+            path: '/measure',
+            at: 0,
+            remove: 0,
+            insert: 'x',
+          },
+        ],
+        413,
+      ),
+    );
+    expect(notText.ok).toBe(false);
+    const badRange = applyWrite(
+      document,
+      write(
+        [{ op: 'text.mark', ...p1, range: [5, 3], edit: { kind: 'marks', set: { i: true } } }],
+        413,
+      ),
+    );
+    expect(badRange.ok).toBe(false);
+    const heading = applyWrite(
+      document,
+      write(
+        [
+          {
+            op: 'text.splice',
+            slideId: 'content-rule',
+            blockId: 'h',
+            path: '/text',
+            at: 3,
+            remove: 0,
+            insert: '\n',
+          },
+        ],
+        413,
+      ),
+    );
+    expect(heading.ok).toBe(false);
+    const paragraph = applyWrite(
+      document,
+      write([{ op: 'text.splice', ...p1, at: 5, remove: 0, insert: '\n' }], 413),
+      { now: NOW },
+    );
+    expect(paragraph.ok).toBe(true);
+  });
+
+  it('refuses a link outside the allowed schemes after the write (SPEC-3 8.4)', () => {
+    const refused = applyWrite(
+      marked(),
+      write(
+        [
+          {
+            op: 'text.mark',
+            ...p1,
+            range: [0, 5],
+            edit: { kind: 'marks', set: { link: 'javascript:alert(1)' } },
+          },
+        ],
+        413,
+      ),
+    );
+    expect(refused.ok).toBe(false);
+    if (refused.ok || refused.code !== 'invalid') throw new Error('expected invalid');
+    expect(refused.message).toMatch(/javascript/);
+    const blockLink = applyWrite(
+      marked(),
+      write(
+        [
+          {
+            op: 'block.set',
+            slideId: 'content-rule',
+            blockId: 'list',
+            path: '/link',
+            value: 'data:text/html,x',
+          },
+        ],
+        413,
+      ),
+    );
+    expect(blockLink.ok).toBe(false);
   });
 });

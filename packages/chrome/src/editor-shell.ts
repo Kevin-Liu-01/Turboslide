@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react';
 
+import type { MarkSpec } from '@turboslide/identity/marks';
 import type { Asset } from '@turboslide/schema/assets';
-import type { Block, BlockType, ShapeBlock } from '@turboslide/schema/blocks';
+import type { Block, BlockType, PictureDither, ShapeBlock } from '@turboslide/schema/blocks';
 import { emptyChart } from '@turboslide/schema/blocks/chart';
 import type { ChartKind } from '@turboslide/schema/blocks/chart';
 import { emptyTable } from '@turboslide/schema/blocks/table';
@@ -35,7 +36,17 @@ import type { DitherWorkerLike } from './inspector/dither';
 import type { ControlContext } from './inspector/props';
 import type { ArtifactRun, ExportDownload } from './ExportReportCard';
 import type { ExportCapabilities, ExportProgress } from './ExportMenu';
-import type { BlockFamily, MenuActionId, MenuContext, MenuItem, MenuSetting } from './menus/model';
+import type {
+  BlockFamily,
+  CommentsDisplay,
+  MenuActionId,
+  MenuCapability,
+  MenuContext,
+  MenuItem,
+  MenuMode,
+  MenuRole,
+  MenuSetting,
+} from './menus/model';
 import { DEFAULT_MENU_CONTEXT } from './menus/model';
 import type { TailKind } from './menus/toolbar-tails';
 import { freeBlockId } from './palette-data';
@@ -136,6 +147,399 @@ export type EditorHandle = {
   centerOnPage?: (axis: 'x' | 'y') => void;
   /** Change background > Choose: inserts the picture object at the bottom of the stack (2.6.4) */
   insertBackgroundPicture?: (asset: string) => void;
+  /* round three (SPEC-3 seams; B2 wires the room client, B6 draws the surfaces) */
+  /** follows a collaborator's client: the stage moves with them until a stop of 4.4 (`presence.follow`) */
+  followClient?: (clientId: string) => void;
+  /** a one time jump to the slide a collaborator has open (the roster's "Go to slide 12") */
+  goToClient?: (clientId: string) => void;
+  /** expands a thread's card on its slide (`comment.link`'s target); null closes the open card */
+  openComment?: (threadId: string | null) => void;
+  /** the live preview of a picture's dither under 100 ms while the section's sliders move (10.3); null restores */
+  ditherPreview?: (blockId: string, dither: PictureDitherLike | null) => void;
+  /** View > Mode: Editing, Commenting or Viewing (5.3, 6.3); the gates live in the editor */
+  setMode?: (mode: EditorMode) => void;
+};
+
+// ---------------------------------------------------------------------------------------------
+// Round three: presence, comments, inbox, access, account and sync (SPEC-3 sections 3 to 7)
+//
+// The shapes the collaboration surfaces read, as the route passes them. Every field is optional
+// on `EditorShellInput` and every callback is optional inside, so the route wires them in steps
+// (B2 lands the room client and the props on day 4, B3 the identity, B6 the surfaces). Where a
+// schema or identity type owns the canonical shape (`Thread`, `AccessRecord`, `MarkSpec`,
+// `Participant`), the field here is the view the chrome needs; the dither field and the mark are
+// the package types since merge 1 of round three (build-3/b6.md request 1), the names kept.
+
+/** The four roles of SPEC-3 6.1; `none` is a stranger on the You need access page. */
+export type EditorRole = MenuRole;
+/** The capabilities of SPEC-3 6.2, as `decide()` grants them. */
+export type EditorCapability = MenuCapability;
+/** View > Mode (SPEC-3 5.3). */
+export type EditorMode = MenuMode;
+/** The three trust states of 0.19 and the agent (4.1, 15): the word beside a name and the mark's family. */
+export type TrustState = 'label' | 'guest' | 'verified' | 'agent';
+
+/** A picture's dither field as the preview handle takes it (`PictureDither` of `@turboslide/schema/blocks`). */
+export type PictureDitherLike = PictureDither;
+
+/** The identity mark as `packages/identity` describes it (`MarkSpec` of `@turboslide/identity/marks`). */
+export type MarkSpecLike = MarkSpec;
+
+/** A principal as the surfaces show one: a label, a typed name with "guest", a verified account, an agent (7.8). */
+export type IdentityView = {
+  principalId: string;
+  /** the generated label (`Titanium 471`), always present as the fallback */
+  label: string;
+  /** the typed or account name; absent for a label */
+  name?: string;
+  trust: TrustState;
+  kind: 'anonymous' | 'account' | 'agent';
+  /** a verified account's address, for the tooltip; never for anyone the caller may not see it */
+  email?: string;
+  mark?: MarkSpecLike;
+  /** an agent's run id, shown as "Agent · <runId>" (4.7) */
+  runId?: string;
+};
+
+/** One participant of the room (SPEC-3 4.11 `Participant`), with the facts the chips and the roster draw. */
+export type PresenceParticipant = IdentityView & {
+  clientId: string;
+  /** the role word of the roster row; `link` for a person admitted by a link whose name is hidden (4.8) */
+  role: EditorRole | 'link';
+  /** the hue slot the room granted (`HueSlot`, 1 to 6, of `@turboslide/identity/hues`) for the live surfaces; absent for an agent */
+  hue?: number;
+  slideId?: string;
+  selection?: {
+    blockIds: readonly string[];
+    /** the caret in plain text offsets of the block's Text (3.1) */
+    caret?: { blockId: string; path: string; offset: number };
+  };
+  /** the pointer in sheet px, null while hidden */
+  pointer?: { x: number; y: number } | null;
+  /** the client this participant follows */
+  following?: string | null;
+  presenting?: boolean;
+  idle?: boolean;
+  lastSeenAt: string;
+};
+
+/** The room as the title row, the filmstrip and the overlay read it (SPEC-3 4.2 to 4.7). */
+export type EditorPresence = {
+  self?: PresenceParticipant;
+  others: readonly PresenceParticipant[];
+  /** the live pointer cap, 20 (0.6) */
+  cap?: number;
+  /** Show collaborator pointers (4.6) */
+  pointersVisible?: boolean;
+  /** Show my pointer (4.6), editors only */
+  pointerMine?: boolean;
+  /** the client this tab follows (4.4) */
+  following?: string | null;
+  /** the roster names grant holders to link visitors only under the owner's switch (0.12) */
+  showNames?: boolean;
+  /** the collaborator announcements of 4.9 */
+  announce?: boolean;
+  /** the room's tier, for the admin's sentence of 6.8 on the blob tier */
+  tier?: 'redis' | 'memory' | 'blob';
+  onFollow?: (clientId: string) => void;
+  onUnfollow?: () => void;
+  onGoTo?: (clientId: string) => void;
+  onPointer?: (on: boolean) => void;
+  onPointerOthers?: (on: boolean) => void;
+  onAnnounce?: (on: boolean) => void;
+};
+
+/** A thread's anchor resolved at read time (SPEC-3 5.1, six kinds); `orphaned` when the object left the slide. */
+export type CommentAnchorView = {
+  kind: 'deck' | 'slide' | 'block' | 'text' | 'cell' | 'notes';
+  slideId?: string;
+  blockId?: string;
+  /** the Text path of a `text` anchor */
+  path?: string;
+  /** plain text offsets of a `text` anchor */
+  range?: [number, number];
+  /** the quoted string of a `text` anchor, at most 200 code points */
+  quote?: string;
+  cell?: { row: number; column: number };
+  orphaned?: boolean;
+};
+
+/** One comment of a thread as the card shows it: the body as text with its mentions resolved (5.1, 5.4). */
+export type CommentView = {
+  id: string;
+  author: IdentityView;
+  createdAt: string;
+  editedAt?: string;
+  /** plain text with `{@n}` tokens indexing `mentions`; rendered through text nodes, never markup */
+  text: string;
+  mentions: readonly IdentityView[];
+  /** emoji to the principals who reacted */
+  reactions?: Readonly<Record<string, readonly string[]>>;
+  /** a tombstone keeping its replies (0.10) */
+  deleted?: boolean;
+};
+
+export type CommentThreadView = {
+  id: string;
+  anchor: CommentAnchorView;
+  comment: CommentView;
+  replies: readonly CommentView[];
+  resolved?: boolean;
+  assignee?: IdentityView | null;
+  createdAt: string;
+  updatedAt: string;
+  /** the thread mentions the reader, is theirs, or is assigned to them (For you, 5.3) */
+  forMe?: boolean;
+};
+
+/** A comment body as the card sends it (5.4): text with mention tokens and the stored mention ids. */
+export type CommentBodyInput = {
+  text: string;
+  /** principal ids or invitation ids, in token order */
+  mentions?: readonly string[];
+};
+
+/** The comments of a deck as the card, the markers and the panel read them (SPEC-3 5.3), with the writes of 5.9. */
+export type EditorComments = {
+  threads: readonly CommentThreadView[];
+  /** the sidecar's own counter (`index.revision`) */
+  revision: number;
+  display?: CommentsDisplay;
+  onDisplay?: (display: CommentsDisplay) => void;
+  /** the thread whose card is expanded */
+  openThreadId?: string | null;
+  onOpen?: (threadId: string | null) => void;
+  /** who the caller may mention: present people, past commenters, and grantees for editors (5.4) */
+  mentionables?: readonly IdentityView[];
+  add?: (input: {
+    anchor: CommentAnchorView;
+    body: CommentBodyInput;
+    assignee?: string | null;
+  }) => Promise<unknown>;
+  reply?: (threadId: string, body: CommentBodyInput) => Promise<unknown>;
+  edit?: (threadId: string, commentId: string, body: CommentBodyInput) => Promise<unknown>;
+  remove?: (threadId: string, commentId: string, restore?: boolean) => Promise<unknown>;
+  resolve?: (threadId: string) => Promise<unknown>;
+  reopen?: (threadId: string) => Promise<unknown>;
+  assign?: (threadId: string, assignee: string | null) => Promise<unknown>;
+  done?: (threadId: string) => Promise<unknown>;
+  react?: (threadId: string, commentId: string, emoji: string, on: boolean) => Promise<unknown>;
+  /** `comment.link`: the URL that opens the deck on the slide with the card expanded */
+  link?: (threadId: string) => Promise<{ url: string; viewUrl?: string }>;
+};
+
+/** One line of the inbox (SPEC-3 5.5): the actor's mark, one sentence, a tabular time. */
+export type InboxItemView = {
+  id: string;
+  kind:
+    | 'mention'
+    | 'reply'
+    | 'assigned'
+    | 'resolved'
+    | 'reopened'
+    | 'reaction'
+    | 'accessRequest'
+    | 'granted'
+    | 'versionNamed'
+    | 'comment';
+  deckId: string;
+  threadId?: string;
+  slideId?: string;
+  actors: readonly IdentityView[];
+  count: number;
+  createdAt: string;
+  updatedAt: string;
+  readAt?: string;
+};
+
+/** Google's three per file levels (5.5): All comments, Comments for you, None. */
+export type NotificationLevel = 'all' | 'forYou' | 'none';
+
+/** The Notifications panel and the inbox plate (SPEC-3 5.5). */
+export type EditorInbox = {
+  items: readonly InboxItemView[];
+  unread: number;
+  level?: NotificationLevel;
+  /** email digests, signed in grant holders only */
+  email?: boolean;
+  /** the owner's switch letting commenters read the Activity panel (5.7) */
+  activityForCommenters?: boolean;
+  onOpen?: (item: InboxItemView) => void;
+  onMarkRead?: (ids: readonly string[]) => void;
+  onMarkAllRead?: () => void;
+  onSettings?: (settings: {
+    level?: NotificationLevel;
+    email?: boolean;
+    activityForCommenters?: boolean;
+  }) => Promise<unknown>;
+};
+
+/** A grant row of the Share dialog (SPEC-3 6.1, 6.5). */
+export type AccessGrantView = {
+  principal?: IdentityView;
+  email?: string;
+  role: EditorRole;
+  invitedAt: string;
+  acceptedAt?: string;
+  expiresAt?: string | null;
+  /** the invitation has not been accepted, or has lapsed */
+  status?: 'pending' | 'expired' | 'active';
+};
+
+export type AccessLinkView = {
+  id: string;
+  role: EditorRole;
+  label?: string;
+  createdAt: string;
+  expiresAt?: string | null;
+  revokedAt?: string | null;
+  useCount?: number;
+};
+
+export type AccessRequestView = {
+  id: string;
+  principal?: IdentityView;
+  email?: string;
+  role: EditorRole;
+  message?: string;
+  askedAt: string;
+};
+
+/** The access record as the dialogs and the rows read it (SPEC-3 6.1, 6.5), with the writes of 6.9. */
+export type EditorAccess = {
+  /** the record's revision, sent as `baseRevision` on every write */
+  revision: number;
+  owner?: IdentityView | null;
+  pendingOwner?: IdentityView | null;
+  generalAccess: { mode: 'restricted' | 'link' | 'open'; role: EditorRole };
+  grants?: readonly AccessGrantView[];
+  links?: readonly AccessLinkView[];
+  requests?: readonly AccessRequestView[];
+  settings?: {
+    editorsCanShare?: boolean;
+    viewersCanDownload?: boolean;
+    viewersCanSeeComments?: boolean;
+    showNamesToLinkVisitors?: boolean;
+    allowHtmlBlocks?: boolean;
+  };
+  /** the published player, when `deck.publish` minted a token (6.4) */
+  published?: { playerUrl: string; embedUrl: string } | null;
+  /** a deck with no record that a signed in principal may claim (6.1) */
+  claimable?: boolean;
+  /** how the caller got in: the `via` of `decide()` */
+  via?: 'owner' | 'grant' | 'link' | 'open' | 'publish' | 'admin' | 'agent';
+  /** the `/s/` form of the general access link, for the dialog's Copy link (0.16); shown once by the action that minted it */
+  linkUrl?: string;
+};
+
+/** A sign in session row of the profile (SPEC-3 7.4). */
+export type SessionView = {
+  id: string;
+  browser: string;
+  platform: string;
+  location?: string;
+  createdAt: string;
+  lastActiveAt: string;
+  current: boolean;
+};
+
+/** An agent key row of the profile (7.7); the secret is shown once by the action that minted it. */
+export type TokenView = {
+  id: string;
+  name: string;
+  scopes: readonly string[];
+  createdAt: string;
+  lastUsedAt?: string;
+  expiresAt?: string | null;
+};
+
+/** The caller's identity and the account surfaces (SPEC-3 section 7). */
+export type EditorAccount = {
+  principal: IdentityView;
+  signedIn: boolean;
+  /** `DATABASE_URL` is set: the Sign in row exists (7.3) */
+  signInAvailable: boolean;
+  /** the passkey plugin is on: the production domain is fixed (7.3) */
+  passkeysAvailable?: boolean;
+  githubAvailable?: boolean;
+  sessions?: readonly SessionView[];
+  tokens?: readonly TokenView[];
+  /** the avatar choice on the principal record (7.6) */
+  avatar?: {
+    variant: 'initials' | 'glyph' | 'dither' | 'picture';
+    initials?: string;
+    salt?: string;
+  };
+  /** the name prompt fires on the first edit, comment or lease (0.18); the route says when */
+  namePrompt?: { open: boolean; prefilled: string };
+  onNamePrompt?: (open: boolean) => void;
+  setName?: (name: string) => Promise<unknown>;
+  setAvatar?: (choice: {
+    variant: 'initials' | 'glyph' | 'dither' | 'picture';
+    initials?: string;
+    salt?: string;
+    picture?: File;
+  }) => Promise<unknown>;
+  signIn?: () => void;
+  signOut?: (sessionId?: string | 'all') => Promise<unknown>;
+  forget?: () => Promise<unknown>;
+  /* the sign in dialog's exchanges (7.3), wired by the route over better-auth's own routes */
+  /** one mail with a magic link and a six digit code; the same answer whether or not the address exists */
+  requestCode?: (email: string) => Promise<unknown>;
+  verifyCode?: (email: string, code: string) => Promise<unknown>;
+  passkey?: () => Promise<unknown>;
+  github?: () => void;
+  /** the profile's agent key rows (7.7) */
+  revokeToken?: (tokenId: string) => Promise<unknown>;
+  /** Delete account (7.4); refused while other people hold grants on decks the caller owns */
+  deleteAccount?: () => Promise<unknown>;
+  /** the public URL of the picture avatar, when one is set */
+  pictureUrl?: string;
+};
+
+/** One line of the Activity panel (SPEC-3 5.7): one plain sentence, the actor's mark, a tabular time. */
+export type ActivityEventView = {
+  id: string;
+  at: string;
+  kind:
+    | 'version'
+    | 'comment'
+    | 'share'
+    | 'request'
+    | 'role'
+    | 'rename'
+    | 'restore'
+    | 'named'
+    | 'export'
+    | 'import'
+    | 'trash';
+  actor?: IdentityView;
+  slideId?: string;
+  threadId?: string;
+  revision?: number;
+  summary: string;
+};
+
+/** The Activity panel's feed (`activity.list`), merged by time; the route loads it when the panel opens. */
+export type EditorActivity = {
+  events: readonly ActivityEventView[];
+  /** loads or refreshes the feed */
+  load?: () => Promise<unknown>;
+  loading?: boolean;
+};
+
+/** `sync.status` (SPEC-3 3.10, section 12) plus the persisted queue offer of 0.7 and the offline word. */
+export type EditorSync = {
+  seq: number;
+  revision: number;
+  pending: number;
+  retained: number;
+  tier: 'redis' | 'memory' | 'blob';
+  transport: 'sse' | 'poll' | 'none';
+  connected: boolean;
+  offline?: boolean;
+  /** "3 unsaved changes from this browser" with Apply and Discard */
+  persisted?: { count: number; onApply: () => void; onDiscard: () => void };
 };
 
 export type EditorClipboardKind = MenuContext['clipboard'];
@@ -157,8 +561,13 @@ export type EditorSaveState = {
   draft?: boolean;
   /** ISO time of the last committed write, for the Last edit clock */
   lastEditAt?: string;
-  /** the author of the last write, shown only when it is not the default `studio` */
+  /** the author of the last write, shown only when it is not the default `studio` (the round one form) */
   lastEditBy?: string;
+  /* round three (SPEC-3 4.2): the newest record's author through resolvePrincipal, and the dot */
+  /** the identity of the newest record's author; wins over `lastEditBy` when present */
+  lastEditor?: IdentityView;
+  /** a record landed since this tab loaded the deck: the 6 px dot inside the clock button */
+  changedSinceOpen?: boolean;
 };
 
 export type EditorHistory = {
@@ -305,6 +714,46 @@ export type EditorShellInput = {
   navigate?: (path: string, newTab?: boolean) => void;
   /** the deck.trash snackbar's Undo restored the deck (the route re-enables the editor) */
   onTrashed?: () => void;
+  /* round three (SPEC-3 seams): every field optional until B2 wires the room client (day 4) */
+  /** the room: the presence slot, the roster, the filmstrip chips, the carets, outlines and pointers */
+  presence?: EditorPresence;
+  /** the comment threads, the markers, the card and the Comments panel */
+  comments?: EditorComments;
+  /** the inbox plate and the Notifications panel */
+  inbox?: EditorInbox;
+  /** the access record for the Share dialog, the Publish dialog and the dot on Share */
+  access?: EditorAccess;
+  /** the caller's identity for the own chip's menu and the account dialogs */
+  account?: EditorAccount;
+  /** the room client's status for the save words and the persisted queue offer */
+  sync?: EditorSync;
+  /** the caller's role (6.1); absent on a checkout and on a deck with no access record */
+  role?: EditorRole;
+  /** the caller's capabilities (6.2); absent reads as every capability (today's open deck) */
+  capabilities?: readonly EditorCapability[];
+  /** View > Mode (5.3, 6.3); `toggles.viewing` is the round one flag it supersedes */
+  mode?: EditorMode;
+  /** the Activity panel's feed (5.7) */
+  activity?: EditorActivity;
+  /**
+   * The identities of the principals the stored surfaces name (version authors, comment authors
+   * the route did not resolve inline), keyed by principal id, from `resolvePrincipal` (7.8)
+   */
+  identities?: Readonly<Record<string, IdentityView>>;
+  /** `version.diff` for Show changes (5.7): the route runs it; the shell dispatches the action when absent */
+  diffVersions?: (from: number, to: number) => Promise<VersionDiffView>;
+};
+
+/** `version.diff`'s answer as the Show changes overlay reads it (SPEC-3 0.44, 5.7). */
+export type VersionDiffView = {
+  from: number;
+  to: number;
+  byAuthor: ReadonlyArray<{
+    author: { kind: 'human' | 'agent'; name: string; runId?: string; principalId?: string };
+    blocks: ReadonlyArray<{ slideId: string; blockId?: string; ops: readonly string[] }>;
+  }>;
+  /** the mutations themselves, for the run level underline and strike */
+  mutations?: ReadonlyArray<Mutation>;
 };
 
 /** The line kinds a draw tool arms (SPEC-2 6.2): the legacy line, arrow and rule, the two connectors and the three path tools. */
@@ -346,6 +795,11 @@ export const PANEL_IDS = [
   'picturesMaterials',
   /* round two (SPEC-2 0.25): the Diagram picker in the right panel */
   'diagram',
+  /* round three (SPEC-3 5.3, 5.5, 5.7, 0.27): the Comments, Notifications and Activity panels and the Edit HTML source panel */
+  'comments',
+  'inbox',
+  'activity',
+  'editHtml',
 ] as const;
 export type PanelId = (typeof PANEL_IDS)[number];
 
@@ -366,6 +820,15 @@ export function panelIdOfTitle(title: string): PanelId | null {
       return 'picturesMaterials';
     case 'Diagram':
       return 'diagram';
+    /* round three (SPEC-3 section 13) */
+    case 'Comments':
+      return 'comments';
+    case 'Notifications':
+      return 'inbox';
+    case 'Activity':
+      return 'activity';
+    case 'Edit HTML':
+      return 'editHtml';
     default:
       return null;
   }
@@ -397,6 +860,17 @@ export const DIALOG_IDS = [
   'background',
   'customSpacing',
   'specialCharacters',
+  /* round three (SPEC-3 7.2 to 7.6, 5.5, 6.5): the name prompt, the sign in dialog, the profile,
+     the avatar builder, Notification settings and the request access form; `publish` above is
+     rebuilt with Stop publishing (6.4) */
+  'namePrompt',
+  'signIn',
+  'profile',
+  'avatarBuilder',
+  'notificationSettings',
+  'requestAccess',
+  /* Forget this browser asks first (7.4, ACCOUNT.forgetConfirm); the route's `account.forget` runs on Forget */
+  'forgetBrowser',
 ] as const;
 export type DialogId = (typeof DIALOG_IDS)[number];
 
@@ -440,6 +914,21 @@ export function dialogIdOf(title: string, itemId?: string): DialogId | null {
       return 'customSpacing';
     case 'Insert special characters':
       return 'specialCharacters';
+    /* round three (SPEC-3 section 13; the own chip's rows name their dialogs by their labels) */
+    case 'Change name':
+      return 'namePrompt';
+    case 'Sign in':
+      return 'signIn';
+    case 'Sessions':
+      return 'profile';
+    case 'Change avatar':
+      return 'avatarBuilder';
+    case 'Notification settings':
+      return 'notificationSettings';
+    case 'Forget this browser':
+      return 'forgetBrowser';
+    case 'Request access':
+      return 'requestAccess';
     default:
       return null;
   }
@@ -649,6 +1138,12 @@ export function buildMenuContext(
     | 'history'
     | 'clipboard'
     | 'guides'
+    /* round three (SPEC-3 13.4): the role, the capabilities, the identity and the access facts */
+    | 'role'
+    | 'capabilities'
+    | 'account'
+    | 'access'
+    | 'inbox'
   > & { regroup?: boolean },
   settings: ShellSettings,
   platform: MenuContext['platform'],
@@ -731,6 +1226,8 @@ export function buildMenuContext(
     ...(listLevel === undefined ? {} : { listLevel }),
     spaceBefore: typeof typography?.spaceBefore === 'number' && typography.spaceBefore > 0,
     spaceAfter: typeof typography?.spaceAfter === 'number' && typography.spaceAfter > 0,
+    /* round three (SPEC-3 0.27): an html block opens the Edit HTML source panel */
+    ...(block?.type === 'html' ? { html: true } : {}),
   };
   const focus: MenuContext['focus'] =
     input.focus ?? (input.selection?.text ? 'text' : blocks > 0 ? 'canvas' : 'none');
@@ -757,6 +1254,29 @@ export function buildMenuContext(
     sections: input.document.deck.sections.length,
     guides: (guides?.x.length ?? 0) + (guides?.y.length ?? 0),
     settings: { ...DEFAULT_MENU_CONTEXT.settings, ...settings },
+    /* round three (SPEC-3 13.4): absent fields read as today's open deck */
+    ...(input.role === undefined ? {} : { role: input.role }),
+    ...(input.capabilities === undefined ? {} : { capabilities: input.capabilities }),
+    ...(input.account === undefined
+      ? {}
+      : {
+          account: {
+            signedIn: input.account.signedIn,
+            signInAvailable: input.account.signInAvailable,
+          },
+        }),
+    ...(input.access === undefined && input.inbox === undefined
+      ? {}
+      : {
+          access: {
+            ...(input.inbox?.activityForCommenters === undefined
+              ? {}
+              : { activityForCommenters: input.inbox.activityForCommenters }),
+            ...(input.access?.requests === undefined
+              ? {}
+              : { pendingRequests: input.access.requests.length }),
+          },
+        }),
   };
 }
 
@@ -2182,7 +2702,11 @@ export const STORED_SETTINGS: ReadonlyArray<MenuSetting> = [
   'showGuides',
 ];
 
-/** The settings the shell starts from (SPEC 11.3 defaults; SPEC-2 6.1 rows 29 and 30: the rulers and guides start hidden). */
+/**
+ * The settings the shell starts from (SPEC 11.3 defaults; SPEC-2 6.1 rows 29 and 30: the rulers
+ * and guides start hidden; SPEC-3 4.6, 5.3: Editing mode, every comment shown, the collaborators'
+ * pointers on and the own pointer off, no announcements, Show changes off).
+ */
 export const DEFAULT_SETTINGS: ShellSettings = {
   snapGuides: true,
   snapGrid: false,
@@ -2203,7 +2727,19 @@ export const DEFAULT_SETTINGS: ShellSettings = {
   book: false,
   gridView: false,
   zoom: 'fit',
+  mode: 'editing',
+  comments: 'all',
+  pointerMine: false,
+  pointerOthers: true,
+  announce: false,
+  showChanges: false,
 };
+
+/** The mode the shell is in: the route's word, else the round one Viewing flag, else Editing (SPEC-3 5.3). */
+export function modeOf(input: Pick<EditorShellInput, 'mode' | 'toggles'>): EditorMode {
+  if (input.mode !== undefined) return input.mode;
+  return input.toggles?.viewing === true ? 'viewing' : 'editing';
+}
 
 /** The settings read back from storage, over the defaults; unknown keys ignored. */
 export function readStoredSettings(saved: string | null): ShellSettings {

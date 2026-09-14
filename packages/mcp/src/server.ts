@@ -16,15 +16,21 @@ import {
   ListToolsRequestSchema,
   McpError,
   ReadResourceRequestSchema,
+  SubscribeRequestSchema,
+  UnsubscribeRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
 import type { Author } from '@turboslide/schema/mutations';
 import { DECK_REVIEW_PROMPT, deckReviewPrompt } from './prompts.ts';
 import {
+  INBOX_URI,
   RESOURCE_TEMPLATES,
   ResourceNotFoundError,
+  commentsUri,
+  manifestUri,
   parseResourceUri,
+  presenceUri,
   readResource,
   staticResources,
 } from './resources.ts';
@@ -63,6 +69,8 @@ export type CreatedServer = {
   tools: ToolEntry[];
   /** The action context every dispatch receives. */
   context: ActionContext;
+  /** The URIs clients subscribed to (SPEC-3 3.7 g), for tests and the manifest. */
+  subscriptions: () => string[];
 };
 
 const INSTRUCTIONS = [
@@ -106,8 +114,67 @@ export function createMcpServer(options: McpServerOptions): CreatedServer {
 
   const server = new Server(
     { name: SERVER_NAME, title: 'Turboslide', version: options.version ?? '0.0.0' },
-    { capabilities: { tools: {}, resources: {}, prompts: {} }, instructions: INSTRUCTIONS },
+    {
+      // resources/subscribe and notifications/resources/updated (SPEC-3 3.7 g, 3.10)
+      capabilities: { tools: {}, resources: { subscribe: true, listChanged: true }, prompts: {} },
+      instructions: INSTRUCTIONS,
+    },
   );
+
+  // the subscriptions: a URI the client asked to follow; the source's change reports are matched
+  // against them and the bound deck's aliases (deck://comments for deck://<id>/comments)
+  const subscribed = new Set<string>();
+  const aliasesOf = (uri: string): string[] => {
+    const parsed = parseResourceUri(uri);
+    if (parsed === undefined) return [uri];
+    switch (parsed.kind) {
+      case 'comments':
+        return [commentsUri(source.deckId), 'deck://comments'];
+      case 'presence':
+        return [presenceUri(source.deckId), 'deck://presence'];
+      case 'manifest':
+        return [manifestUri(source.deckId), 'deck://manifest'];
+      case 'inbox':
+        return [INBOX_URI];
+      default:
+        return [uri];
+    }
+  };
+  server.setRequestHandler(SubscribeRequestSchema, (request) => {
+    const uri = request.params.uri;
+    if (parseResourceUri(uri) === undefined)
+      throw new McpError(RESOURCE_NOT_FOUND, `Resource not found: ${uri}`);
+    for (const alias of aliasesOf(uri)) subscribed.add(alias);
+    return {};
+  });
+  server.setRequestHandler(UnsubscribeRequestSchema, (request) => {
+    for (const alias of aliasesOf(request.params.uri)) subscribed.delete(alias);
+    return {};
+  });
+  let stopWatching: (() => void) | undefined;
+  if (source.subscribe !== undefined) {
+    stopWatching = source.subscribe((uris) => {
+      // one notification per changed resource, under its canonical URI, when any alias is subscribed
+      const hit = new Set<string>();
+      for (const changed of uris) {
+        const aliases = aliasesOf(changed);
+        if (aliases.some((alias) => subscribed.has(alias))) hit.add(aliases[0] ?? changed);
+      }
+      for (const uri of hit) {
+        void server.sendResourceUpdated({ uri }).catch((error: unknown) => {
+          log?.(
+            `mcp: resources/updated for ${uri} was not delivered: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        });
+      }
+    });
+    const previousClose = server.onclose;
+    server.onclose = () => {
+      stopWatching?.();
+      stopWatching = undefined;
+      previousClose?.();
+    };
+  }
 
   server.setRequestHandler(ListToolsRequestSchema, () => ({
     tools: tools.map((entry) => entry.tool),
@@ -151,7 +218,13 @@ export function createMcpServer(options: McpServerOptions): CreatedServer {
   });
 
   server.setRequestHandler(ListResourcesRequestSchema, async () => ({
-    resources: staticResources({ id: source.deckId, slides: await source.slides() }),
+    resources: staticResources({
+      id: source.deckId,
+      slides: await source.slides(),
+      comments: source.comments !== undefined,
+      presence: source.presence !== undefined,
+      inbox: source.inbox !== undefined,
+    }),
   }));
 
   server.setRequestHandler(ListResourceTemplatesRequestSchema, () => ({
@@ -195,5 +268,5 @@ export function createMcpServer(options: McpServerOptions): CreatedServer {
     }
   });
 
-  return { server, tools, context };
+  return { server, tools, context, subscriptions: () => [...subscribed] };
 }

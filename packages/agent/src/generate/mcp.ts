@@ -85,6 +85,26 @@ export const MCP_RESOURCES: McpResource[] = [
     description: 'The latest render of a slide in a theme',
     mimeType: 'image/png',
   },
+  // the round three resources (gslides-parity SPEC-3 3.7 g, 3.10); a server declares
+  // resources: { subscribe: true, listChanged: true } and sends notifications/resources/updated
+  {
+    uri: 'deck://{id}/comments',
+    name: 'Comments',
+    description: 'The comment threads with their anchors resolved; subscribe for updates',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'deck://{id}/presence',
+    name: 'Collaborators',
+    description: 'The roster of the room with the computed marks; subscribe for updates',
+    mimeType: 'application/json',
+  },
+  {
+    uri: 'deck://inbox',
+    name: 'Notifications',
+    description: 'The notifications of the caller; subscribe for updates',
+    mimeType: 'application/json',
+  },
 ];
 
 export const MCP_PROMPTS = [
@@ -114,6 +134,17 @@ const DESTRUCTIVE = new Set<ActionId>([
   'table.merge',
   'text.case',
   'chart.setKind',
+  // the parity round three (gslides-parity SPEC-3 12): a comment is tombstoned, links and grants
+  // die, the published URL answers 410, the anonymous identity is replaced, storage moves, an
+  // owner is set over a record
+  'comment.delete',
+  'share.stop',
+  'share.remove',
+  'share.revokeLink',
+  'deck.unpublish',
+  'account.forget',
+  'admin.migrateStorage',
+  'admin.assignOwner',
 ]);
 
 export type McpContract = {

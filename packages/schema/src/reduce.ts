@@ -9,7 +9,15 @@ import { diffDecks } from './diff.ts';
 import type { BlockId, SlideId } from './ids.ts';
 import type { Author, BlockSlot, Mutation, Write } from './mutations.ts';
 import { cloneJson, getAt, hasAt, setAt } from './pointer.ts';
-import { canonicalText } from './text.ts';
+import {
+  canonicalText,
+  caseRange,
+  flagDiffs,
+  markRange,
+  plainLength,
+  plainOf,
+  spliceText,
+} from './text.ts';
 import type { Issue } from './validate.ts';
 import { validateDocument } from './validate.ts';
 
@@ -113,6 +121,47 @@ function blockIds(slide: Slide): Set<string> {
         : [];
   for (const block of lists) ids.add(block.id);
   return ids;
+}
+
+/** The Text a text op names, read as a string; TypeError when the pointer holds anything else. */
+function requireText(
+  document: DeckDocument,
+  mutation: { op: string; slideId: SlideId; blockId: BlockId; path: string },
+): { block: Block; current: string } {
+  const slide = requireSlide(document, mutation.slideId);
+  const { block } = locateBlock(slide, mutation.blockId);
+  const current = getAt(block, mutation.path);
+  if (typeof current !== 'string') {
+    throw new TypeError(
+      `${mutation.op}: ${mutation.path} is not a string on block "${mutation.blockId}"`,
+    );
+  }
+  return { block, current };
+}
+
+/**
+ * The text.mark mutations that turn the flags of `from` into the flags of `to` over a plain range
+ * (the two Texts agree in plain characters there): what an inverse appends after its splice so a
+ * removed display run, link or mark comes back exactly (gslides-parity SPEC-3 3.1).
+ */
+function flagRestores(
+  mutation: { slideId: SlideId; blockId: BlockId; path: string },
+  from: string,
+  to: string,
+  range: readonly [number, number],
+): Mutation[] {
+  return flagDiffs(from, to, range).map((edit) => ({
+    op: 'text.mark',
+    slideId: mutation.slideId,
+    blockId: mutation.blockId,
+    path: mutation.path,
+    range: edit.range,
+    edit: {
+      kind: 'marks',
+      ...(edit.set !== undefined ? { set: edit.set } : {}),
+      ...(edit.clear !== undefined ? { clear: [...edit.clear] } : {}),
+    },
+  }));
 }
 
 const FORBIDDEN_SLIDE_PATHS = new Set(['', '/id', '/schemaVersion']);
@@ -333,6 +382,67 @@ export function applyMutation(
           text: current,
         },
       ];
+    }
+    case 'text.splice': {
+      const { block, current } = requireText(document, mutation);
+      const plain = plainOf(current);
+      const { at, remove, insert } = mutation;
+      if (at < 0 || remove < 0 || at + remove > plain.length) {
+        throw new RangeError(
+          `text.splice: ${at} plus ${remove} is outside a text of ${plain.length} characters`,
+        );
+      }
+      const removed = plain.slice(at, at + remove);
+      const next = canonicalText(spliceText(current, at, remove, insert, mutation.flags));
+      setAt(block, mutation.path, next);
+      // The inverse is a splice (SPEC-3 3.1), so undo transforms against later ops; the flags the
+      // removed span carried come back through the marks the re-inserted text lacks.
+      const back: Mutation = {
+        op: 'text.splice',
+        slideId: mutation.slideId,
+        blockId: mutation.blockId,
+        path: mutation.path,
+        at,
+        remove: insert.length,
+        insert: removed,
+      };
+      const restored = canonicalText(spliceText(next, at, insert.length, removed));
+      return [back, ...flagRestores(mutation, restored, current, [at, at + remove])];
+    }
+    case 'text.mark': {
+      const { block, current } = requireText(document, mutation);
+      const [start, end] = mutation.range;
+      const length = plainLength(current);
+      if (start > end || end > length) {
+        throw new RangeError(
+          `text.mark: range ${start}..${end} is outside a text of ${length} characters`,
+        );
+      }
+      const edit = mutation.edit;
+      const next = canonicalText(
+        edit.kind === 'marks'
+          ? markRange(current, mutation.range, edit)
+          : caseRange(current, mutation.range, edit.mode),
+      );
+      setAt(block, mutation.path, next);
+      // the mark that restores the previous flags of the range, per segment where they differed
+      if (edit.kind === 'marks') return flagRestores(mutation, next, current, mutation.range);
+      // a case change: the previous characters come back through a splice (a case change can move
+      // the length, so the range is re-read on the new text), then the flags the splice's host run
+      // did not carry
+      const before = plainOf(current).slice(start, end);
+      const nextEnd = end + (plainLength(next) - length);
+      const back: Mutation = {
+        op: 'text.splice',
+        slideId: mutation.slideId,
+        blockId: mutation.blockId,
+        path: mutation.path,
+        at: start,
+        remove: nextEnd - start,
+        insert: before,
+      };
+      const restored = canonicalText(spliceText(next, start, nextEnd - start, before));
+      return [back, ...flagRestores(mutation, restored, current, [start, end])];
     }
     case 'section.set': {
       const old = cloneJson(document.deck.sections);

@@ -255,6 +255,10 @@ function PrintPage() {
             skipped={skipped.has(slide.id)}
           />
         ))}
+        {/* the fit before first paint (gslides-parity SPEC-3 9.2 R1): every sheet's --k from its own
+            width as the parser reaches this script, so the server frame is already at scale and the
+            observer above only follows resizes; the sheets suppress the hydration warning for it */}
+        <script dangerouslySetInnerHTML={{ __html: PRINT_FIT_SCRIPT }} />
       </section>
       <Snackbar message={snackbar.message} onDismiss={snackbar.dismiss} />
     </main>
@@ -306,7 +310,7 @@ function PrintPage1({
       data-skipped={skipped ? '' : undefined}
       aria-label={`Slide ${index + 1}${skipped ? ', skipped' : ''}`}
     >
-      <div ref={sheet} className="ts-print-sheet">
+      <div ref={sheet} className="ts-print-sheet" suppressHydrationWarning>
         <div className="ts-sheet sheet" data-theme={theme}>
           <div className="ts-stage stage">
             <Frame index={index} total={total} />
@@ -338,6 +342,13 @@ function PrintMissing() {
     </main>
   );
 }
+
+/**
+ * The inline fit (SPEC-3 9.2 R1): runs as the parser reaches it, before first paint, and writes
+ * `--k` on every `.ts-print-sheet` from its width over the sheet's 1600 px, the same value the
+ * observer computes after hydration; a print layout ignores it (`@media print` fixes `--k`).
+ */
+export const PRINT_FIT_SCRIPT = `(function(){try{var s=document.querySelectorAll('.ts-print-sheet');for(var i=0;i<s.length;i+=1){var w=s[i].clientWidth;if(w)s[i].style.setProperty('--k',String(w/${SHEET_W}))}}catch(e){}})();`;
 
 /** The sheet's aspect, exported for the stylesheet's page geometry comment. */
 export const PRINT_SHEET = { width: SHEET_W, height: SHEET_H } as const;

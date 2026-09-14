@@ -2,6 +2,8 @@ import type { ChangeEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent, React
 import { useCallback, useId, useMemo, useRef, useState } from 'react';
 
 import { Link, createFileRoute, useNavigate, useRouter } from '@tanstack/react-router';
+import { createServerFn } from '@tanstack/react-start';
+import { getRequest } from '@tanstack/react-start/server';
 
 import { GtMark } from '@turboslide/chrome/GtMark';
 import { Icon } from '@turboslide/chrome/icons';
@@ -52,8 +54,12 @@ import './decks.css';
  */
 export const Route = createFileRoute('/decks/')({
   loader: async () => {
-    const [decks, health] = await Promise.all([listDecks(), getServerHealth()]);
-    return { decks, node: health.node };
+    const [decks, health, prefs] = await Promise.all([
+      listDecks(),
+      getServerHealth(),
+      readHomePrefs(),
+    ]);
+    return { decks, node: health.node, prefs };
   },
   head: () => ({ meta: [{ title: `${HOME.recent}, Turboslide` }] }),
   component: HomePage,
@@ -74,6 +80,48 @@ export type HomeView = 'grid' | 'list';
 type HomeSettings = { sort: HomeSort; view: HomeView };
 
 const DEFAULT_SETTINGS: HomeSettings = { sort: 'opened', view: 'grid' };
+
+/**
+ * The saved view and sort as a cookie the loader reads (gslides-parity SPEC-3 9.2 L1; research-3
+ * 05 3.4 L1): `ts-home=view:list;sort:title`, same origin, one year, so the server renders the
+ * rows or the cards and the order the rep chose and the first client render agrees with it (no
+ * reflow of the recent band after hydration). localStorage stays the mirror. The `opened` order
+ * is this browser's history and cannot reach the server, so with that sort the band is hidden
+ * until mounted (`data-pending`) and shows once, in its final order; a hidden band never counts.
+ */
+export const HOME_COOKIE = 'ts-home';
+const HOME_COOKIE_MAX_AGE_S = 365 * 24 * 60 * 60;
+
+export function parseHomeCookie(header: string | null | undefined): HomeSettings | null {
+  if (!header) return null;
+  for (const part of header.split(';')) {
+    const [name, ...rest] = part.trim().split('=');
+    if (name !== HOME_COOKIE) continue;
+    const value = decodeURIComponent(rest.join('='));
+    const out: HomeSettings = { ...DEFAULT_SETTINGS };
+    for (const field of value.split(';')) {
+      const [key, raw] = field.split(':');
+      if (key === 'view' && (raw === 'grid' || raw === 'list')) out.view = raw;
+      if (key === 'sort' && (raw === 'opened' || raw === 'modified' || raw === 'title'))
+        out.sort = raw;
+    }
+    return out;
+  }
+  return null;
+}
+
+export function homeCookieValue(settings: HomeSettings): string {
+  return `${HOME_COOKIE}=${encodeURIComponent(`view:${settings.view};sort:${settings.sort}`)}; Path=/; Max-Age=${HOME_COOKIE_MAX_AGE_S}; SameSite=Lax`;
+}
+
+/** The saved settings from the request's cookie, or null; the client keeps them beside localStorage. */
+const readHomePrefs = createServerFn({ method: 'GET' }).handler((): HomeSettings | null => {
+  try {
+    return parseHomeCookie(getRequest().headers.get('cookie'));
+  } catch {
+    return null;
+  }
+});
 
 export function readOpened(): Record<string, string> {
   try {
@@ -121,6 +169,11 @@ function writeSettings(settings: HomeSettings): void {
     window.localStorage.setItem(HOME_SETTINGS_KEY, JSON.stringify(settings));
   } catch {
     // private mode: the choice lasts the page
+  }
+  try {
+    document.cookie = homeCookieValue(settings);
+  } catch {
+    // a cookie the browser refuses: localStorage still carries the choice for this browser
   }
 }
 
@@ -351,7 +404,10 @@ function HomePage() {
   const page = useRef<HTMLElement>(null);
   const snackbar = useSnackbar();
   const [query, setQuery] = useState('');
-  const [settings, setSettings] = useState<HomeSettings>(DEFAULT_SETTINGS);
+  /* the cookie's settings on the server and on the first client render (SPEC-3 9.2 L1); the
+     localStorage mirror is read after hydration and wins when the cookie was refused */
+  const cookiePrefs = Route.useLoaderData().prefs;
+  const [settings, setSettings] = useState<HomeSettings>(cookiePrefs ?? DEFAULT_SETTINGS);
   const [opened, setOpened] = useState<Record<string, string>>({});
   const [mounted, setMounted] = useState(false);
   /* decks moved to the trash from this page and not yet reloaded: hidden at once, Undo shows them */
@@ -362,9 +418,10 @@ function HomePage() {
   const [creating, setCreating] = useState(false);
 
   useMountEffect(() => {
-    /* this browser's history and choices are read after hydration, so the server's HTML and the
-       first client render agree (React 418 otherwise) */
-    setSettings(readSettings());
+    /* this browser's history is read after hydration, so the server's HTML and the first client
+       render agree (React 418 otherwise); the settings come from the cookie already, and the
+       localStorage mirror stands in when no cookie reached the server */
+    if (cookiePrefs === null) setSettings(readSettings());
     setOpened(readOpened());
     setMounted(true);
     page.current?.setAttribute('data-hydrated', '');
@@ -601,7 +658,13 @@ function HomePage() {
         </ul>
       </section>
 
-      <section className="ts-recent" aria-labelledby="ts-recent-heading">
+      <section
+        className="ts-recent"
+        aria-labelledby="ts-recent-heading"
+        // the opened order is this browser's alone: hidden until mounted, then shown in its final
+        // order (L1); a sort the server knows paints once and stays
+        data-pending={!mounted && settings.sort === 'opened' ? '' : undefined}
+      >
         <div className="ts-recent-head">
           <div>
             <h2 id="ts-recent-heading">{HOME.recent}</h2>

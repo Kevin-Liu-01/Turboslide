@@ -1,0 +1,23 @@
+check  5/28: pnpm test
+$ vitest run
+
+ RUN  v4.1.11 /Users/kevinliu/repos/Turboslide
+
+(node:17139) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17142) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17131) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17130) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:17163) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+ Test Files  264 passed (264)
+      Tests  2830 passed | 3 skipped (2833)
+   Start at  02:07:01
+   Duration  82.69s (transform 159.42s, setup 0ms, import 300.88s, tests 328.14s, environment 70.94s)
+
+check  5/28: ok in 83.4 s
+check: all 1 selected step(s) passed in 83.4 s

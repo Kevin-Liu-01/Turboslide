@@ -19,12 +19,12 @@ const spriteIds = JSON.parse(
 ) as string[];
 
 describe('the sprite', () => {
-  it('has 67 Heroicons plus gt-mark, in the order of the schema’s icon list', () => {
+  it('has 69 Heroicons plus gt-mark, in the order of the schema’s icon list', () => {
     const symbols = parseSprite(spriteSvg);
-    expect(symbols).toHaveLength(68);
+    expect(symbols).toHaveLength(70);
     expect(symbols.map((symbol) => symbol.id)).toEqual(spriteIds);
     expect(symbols.map((symbol) => symbol.id)).toEqual(ICON_NAMES.map(iconSymbolId));
-    expect(symbols.filter((symbol) => symbol.viewBox === '0 0 20 20')).toHaveLength(67);
+    expect(symbols.filter((symbol) => symbol.viewBox === '0 0 20 20')).toHaveLength(69);
     expect(symbols.find((symbol) => symbol.id === 'gt-mark')?.viewBox).toBe('-8 214 1213 771');
   });
 
@@ -57,7 +57,7 @@ describe('the sprite', () => {
       true,
     );
     expect(markup.match(/<symbol /g)).toHaveLength(2);
-    expect(spriteMarkup().match(/<symbol /g)).toHaveLength(68);
+    expect(spriteMarkup().match(/<symbol /g)).toHaveLength(70);
   });
 
   it('turns a Heroicon file into a symbol and appends it before the closing tag', () => {

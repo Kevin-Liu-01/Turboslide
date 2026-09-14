@@ -17,6 +17,36 @@ import type { VersionRecord } from './store.ts';
 
 export const VERSIONS_DIR = 'versions';
 
+/** The operation stream range a checkpoint coalesced (gslides-parity SPEC-3 2.1, 0.3). */
+export type OpsRange = { fromSeq: number; toSeq: number };
+
+function isNonNegativeInt(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0;
+}
+
+/** `{ fromSeq, toSeq }` with two non negative integers in order and nothing else. */
+export function isOpsRange(value: unknown): value is OpsRange {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  const keys = Object.keys(value);
+  if (keys.length !== 2 || !('fromSeq' in value) || !('toSeq' in value)) return false;
+  const range = value as { fromSeq: unknown; toSeq: unknown };
+  return (
+    isNonNegativeInt(range.fromSeq) && isNonNegativeInt(range.toSeq) && range.toSeq >= range.fromSeq
+  );
+}
+
+// `slide.set`'s `value` is the one optional unknown the schema package exposes; the range check
+// above makes it the ops range without this package taking a zod dependency of its own.
+type SlideSetOption = (typeof mutationSchema.options)[3];
+const slideSet = mutationSchema.options.find(
+  (option): option is SlideSetOption => option.shape.op.value === 'slide.set',
+);
+if (slideSet === undefined) throw new Error('mutationSchema has no slide.set option');
+const opsRangeSchema = slideSet.shape.value.refine(
+  (value) => value === undefined || isOpsRange(value),
+  'ops names { fromSeq, toSeq }, two integers in order (gslides-parity SPEC-3 2.1)',
+);
+
 // Built from the schema package's own pieces so this package adds no schema dependency: the
 // revision schema doubles as baseRevision and the mutation list as the inverse list. `extend` on
 // a strict object stays strict (a test pins it).
@@ -26,7 +56,16 @@ export const versionRecordSchema = versionSchema.extend({
   // the Blob snapshot key of gslides-parity SPEC-2 8.2: optional, so every record written before
   // the round and every file or tmp store record still parses
   snapshot: versionSchema.shape.note.regex(/^[0-9a-f]{32}$/).optional(),
+  // the operation stream range a checkpoint coalesced (gslides-parity SPEC-3 2.1): optional, so
+  // every record written outside the room and before the round still parses
+  ops: opsRangeSchema,
 });
+
+/** A parsed record with `ops` narrowed to the range the schema's refinement proved. */
+function asRecord(parsed: ReturnType<typeof versionRecordSchema.parse>): VersionRecord {
+  const { ops, ...rest } = parsed;
+  return isOpsRange(ops) ? { ...rest, ops } : rest;
+}
 
 export function versionPath(dir: string, n: number): string {
   return join(dir, VERSIONS_DIR, `${n}.json`);
@@ -51,7 +90,7 @@ export function readVersions(dir: string): VersionRecord[] {
     if (parsed.data.n !== Number(match[1])) {
       throw new TypeError(`${file} carries n ${parsed.data.n}; the file name says ${match[1]}`);
     }
-    records.push(parsed.data);
+    records.push(asRecord(parsed.data));
   }
   return records.sort((a, b) => a.n - b.n);
 }

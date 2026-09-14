@@ -6,6 +6,7 @@ import type { KeyBinding } from '../keys.ts';
 import {
   GESTURES,
   OMITTED_SHORTCUTS,
+  OWN_MAP_SCOPES,
   SHARED_CHORDS,
   TURBOSLIDE_ONLY_KEYS,
   ariaKeyShortcuts,
@@ -26,10 +27,10 @@ import {
 import type { Platform } from '../model.ts';
 import { MENUS } from '../model.ts';
 
-// The keys (SPEC 10, 14.2): every row of Google's shortcut page (the R04 fixture) is bound, bound
-// as disabled, or listed as omitted with a reason; every bound chord equals Google's; no two
-// enabled chords collide in one scope unless they dispatch by focus; no bare letter is bound in
-// the editor map.
+// The keys (SPEC 10, 14.2; SPEC-3 section 14): every row of Google's shortcut page (the R04
+// fixture) is bound, bound as disabled, or listed as omitted with a reason; every bound chord
+// equals Google's; no two enabled chords collide in one scope unless they dispatch by focus; no
+// bare letter is bound in the editor map (the slideshow and the comment card own theirs).
 
 type FixtureRow = { id: string; action: string; mac: string[]; win: string[]; gesture?: boolean };
 type Fixture = { groups: Array<{ group: string; rows: FixtureRow[] }> };
@@ -254,7 +255,7 @@ describe('every row of Google’s shortcut page', () => {
     ).toEqual(['zoomWheel', 'pan']);
   });
 
-  it('greys exactly the rows SPEC-2 section 9 lists, and binds or omits every other row', () => {
+  it('greys exactly the rows SPEC-2 section 9 lists less the comment rows SPEC-3 section 14 binds, and binds or omits every other row', () => {
     const greyed = new Set<string>();
     for (const entry of OMITTED_SHORTCUTS) if (entry.status === 'later') greyed.add(entry.google);
     for (const binding of table)
@@ -266,21 +267,6 @@ describe('every row of Google’s shortcut page', () => {
         'move-paragraph-up',
         'move-paragraph-down',
         'animations-panel',
-        'insert-comment',
-        'enter-comment',
-        'next-comment',
-        'previous-comment',
-        'comment-focus-next',
-        'comment-focus-previous',
-        'comment-focus-reply',
-        'comment-focus-resolve',
-        'comment-thread',
-        'comment-reply-selected',
-        'comment-next-selected',
-        'comment-previous-selected',
-        'comment-resolve-selected',
-        'comment-exit-selected',
-        'hide-comment',
         'verbalize-selection',
         'screen-reader-support',
         'braille-support',
@@ -303,6 +289,77 @@ describe('every row of Google’s shortcut page', () => {
       expect(byGoogle.get(id)).toBeUndefined();
       expect(omitted.get(id)?.status).toBe('omit');
     }
+  });
+
+  it('binds the comment chords of SPEC-3 section 14 to Google’s rows: the modifier chords in the editor, the letters in the card', () => {
+    const mac = buildEditorKeymap('mac');
+    const ids = (chord: string) => mac.get(chord)?.bindings.map((binding) => binding.id) ?? [];
+    expect(ids('Cmd+Option+M')).toEqual(['insert.comment', 'toolbar.insertComment']);
+    expect(ids('Ctrl+Enter')).toEqual(['key.comment.enter']);
+    expect(ids('Cmd+Option+Shift+A')).toEqual(['key.comment.thread']);
+    expect(ids('Cmd+Option+Shift+J')).toEqual(['view.comments.hide']);
+    /* the two step chords of Google's page: the first step is the chord, the second the held key */
+    expect(ids('Cmd+Ctrl+N then C')).toEqual(['key.comment.next']);
+    expect(ids('Cmd+Ctrl+P then C')).toEqual(['key.comment.previous']);
+    expect(
+      buildEditorKeymap('win')
+        .get('Ctrl+Alt+N then C')
+        ?.bindings.map((b) => b.id),
+    ).toEqual(['key.comment.next']);
+    /* the letters belong to the card's own scope and never enter the editor map */
+    for (const id of [
+      'key.comment.focusNext',
+      'key.comment.focusPrevious',
+      'key.comment.reply',
+      'key.comment.resolve',
+      'key.comment.exit',
+      'key.comment.exitEsc',
+    ]) {
+      const binding = table.find((each) => each.id === id);
+      expect(binding?.scope, id).toBe('comment');
+      expect(binding?.status, id).toBe('now');
+      expect(binding?.group, id).toBe('Comments');
+    }
+    for (const letter of ['J', 'K', 'R', 'E', 'U']) expect(mac.has(letter), letter).toBe(false);
+    /* Esc leaves the card beside Google's u, as an alias folded into that row */
+    const esc = table.find((each) => each.id === 'key.comment.exitEsc');
+    expect(esc?.alias).toBe('key.comment.exit');
+    expect(esc?.google).toEqual([]);
+    expect(TURBOSLIDE_ONLY_KEYS).toContain('key.comment.exitEsc');
+    /* every comment row of Google's page is now answered by a bound row, none greyed */
+    for (const id of [
+      'insert-comment',
+      'enter-comment',
+      'next-comment',
+      'previous-comment',
+      'comment-focus-next',
+      'comment-focus-previous',
+      'comment-focus-reply',
+      'comment-focus-resolve',
+      'comment-thread',
+      'comment-reply-selected',
+      'comment-next-selected',
+      'comment-previous-selected',
+      'comment-resolve-selected',
+      'comment-exit-selected',
+      'hide-comment',
+    ]) {
+      const bound = byGoogle.get(id) ?? [];
+      expect(bound.length, id).toBeGreaterThan(0);
+      expect(
+        bound.every((binding) => binding.status === 'now'),
+        id,
+      ).toBe(true);
+      expect(omitted.get(id), id).toBeUndefined();
+    }
+    /* Shift+Tab from an open menu is the Collaborators list (01 G5), a Turboslide key with no Google row */
+    const roster = table.find((each) => each.id === 'key.roster');
+    expect(roster?.scope).toBe('menu');
+    expect(roster?.key).toEqual({ mac: 'Shift+Tab', win: 'Shift+Tab' });
+    expect(TURBOSLIDE_ONLY_KEYS).toContain('key.roster');
+    /* the held form of Google's spelling reads as a plain chord */
+    expect(normalizeGoogleChord('hold Ctrl + Enter')).toBe('Ctrl+Enter');
+    expect(normalizeGoogleChord('hold Ctrl + Cmd, press n then c')).toBe('Cmd+Ctrl+N then C');
   });
 
   it('binds the round two chords of SPEC-2 section 9 to Google’s rows', () => {
@@ -371,9 +428,10 @@ describe('the editor map', () => {
       for (const id of group.items) expect(ids.has(id), id).toBe(true);
   });
 
-  it('binds no bare letter outside present mode', () => {
+  it('binds no bare letter outside present mode and the comment card, and the editor map holds none at all', () => {
     for (const binding of table) {
-      if (binding.scope === 'present') continue;
+      /* the slideshow and the comment card own their letters (SPEC 9.2; SPEC-3 14) and dispatch them themselves */
+      if (OWN_MAP_SCOPES.has(binding.scope)) continue;
       for (const platform of PLATFORMS) {
         for (const chord of chordsOf(platform === 'mac' ? binding.key.mac : binding.key.win)) {
           expect(
@@ -383,6 +441,14 @@ describe('the editor map', () => {
         }
       }
     }
+    /* SPEC 0.28 on the map the handlers read: no chord of it is a bare key, on either platform */
+    for (const platform of PLATFORMS)
+      for (const entry of buildEditorKeymap(platform).values())
+        for (const chord of chordsOf(entry.chord))
+          expect(isBareKey(chord), `${entry.chord} on ${platform}`).toBe(false);
+    expect(OWN_MAP_SCOPES.has('present')).toBe(true);
+    expect(OWN_MAP_SCOPES.has('comment')).toBe(true);
+    expect(OWN_MAP_SCOPES.has('editor')).toBe(false);
     expect(isBareKey(parseChord('S'))).toBe(true);
     expect(isBareKey(parseChord('Shift+D'))).toBe(true);
     expect(isBareKey(parseChord('?'))).toBe(true);

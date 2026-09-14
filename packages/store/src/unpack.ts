@@ -10,6 +10,11 @@
 import { existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
+import {
+  commentAuthorsSchema,
+  commentsIndexSchema,
+  threadSchema,
+} from '@turboslide/schema/comments';
 import type { Deck } from '@turboslide/schema/deck';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { canonicalJson } from '@turboslide/schema/json';
@@ -18,8 +23,10 @@ import type { Issue } from '@turboslide/schema/validate';
 
 import type { BundleManifest } from './bundle.ts';
 import {
+  BUNDLE_DROPS,
   BUNDLE_MANIFEST,
   BUNDLE_MAX_BYTES,
+  COMMENTS_GROUP,
   assetProblem,
   bundleEntryPrefix,
   parseBundleManifest,
@@ -35,11 +42,15 @@ export type InspectedBundle = {
   documents: Map<string, Uint8Array>;
   /** the twins and recipes under assets/ */
   assets: Map<string, Uint8Array>;
+  /** the comments sidecar files, each validated against the schema (gslides-parity SPEC-3 2.2); empty without the group */
+  comments: Map<string, Uint8Array>;
   /** the validated manifest of the bundle */
   deck: Deck;
   /** the validator's issues below severity 3 */
   issues: Issue[];
-  counts: { slides: number; assets: number; versions: number; documents: number };
+  /** the entries the reader dropped: the access record, the leases, the state folder (SPEC-3 2.2) */
+  dropped: string[];
+  counts: { slides: number; assets: number; versions: number; documents: number; comments: number };
 };
 
 export type InspectOptions = {
@@ -82,6 +93,9 @@ export function inspectBundle(zip: Uint8Array, options: InspectOptions = {}): In
   const prefix = bundleEntryPrefix(manifest.deckId);
   const documents = new Map<string, Uint8Array>();
   const assets = new Map<string, Uint8Array>();
+  const comments = new Map<string, Uint8Array>();
+  const dropped: string[] = [];
+  const commentsGroup = manifest.comments ?? {};
   for (const entry of entries) {
     if (entry.name === BUNDLE_MANIFEST || isNoise(entry.name)) continue;
     if (!entry.name.startsWith(prefix)) {
@@ -90,7 +104,14 @@ export function inspectBundle(zip: Uint8Array, options: InspectOptions = {}): In
       );
     }
     const relative = entry.name.slice(prefix.length);
-    const group = relative.startsWith('assets/') ? manifest.assets : manifest.documents;
+    // the records that never travel (SPEC-3 2.2): dropped whether or not the manifest lists them
+    if (BUNDLE_DROPS.has(relative) || relative.startsWith(`${STATE_DIR}/`)) {
+      dropped.push(relative);
+      continue;
+    }
+    const isAsset = relative.startsWith('assets/');
+    const isComment = relative.startsWith(`${COMMENTS_GROUP}/`);
+    const group = isAsset ? manifest.assets : isComment ? commentsGroup : manifest.documents;
     const digest = group[relative];
     if (digest === undefined) {
       throw new TypeError(`"${entry.name}" is not listed in ${BUNDLE_MANIFEST}`);
@@ -98,10 +119,13 @@ export function inspectBundle(zip: Uint8Array, options: InspectOptions = {}): In
     if (digest.bytes !== entry.data.byteLength || digest.sha256 !== sha256Hex(entry.data)) {
       throw new TypeError(`"${entry.name}" does not match its digest in ${BUNDLE_MANIFEST}`);
     }
-    if (relative.startsWith('assets/')) {
+    if (isAsset) {
       const problem = assetProblem(relative, entry.data);
       if (problem !== null) throw new TypeError(problem);
       assets.set(relative, entry.data);
+    } else if (isComment) {
+      checkCommentsFile(relative, entry.data, manifest.deckId);
+      comments.set(relative, entry.data);
     } else {
       if (!relative.endsWith('.json')) {
         throw new TypeError(`"${entry.name}": a deck document is a .json file`);
@@ -110,12 +134,21 @@ export function inspectBundle(zip: Uint8Array, options: InspectOptions = {}): In
     }
   }
   for (const relative of Object.keys(manifest.documents)) {
-    if (!documents.has(relative)) {
+    if (
+      !documents.has(relative) &&
+      !BUNDLE_DROPS.has(relative) &&
+      !relative.startsWith(`${STATE_DIR}/`)
+    ) {
       throw new TypeError(`${BUNDLE_MANIFEST} lists ${relative}, which the archive does not hold`);
     }
   }
   for (const relative of Object.keys(manifest.assets)) {
     if (!assets.has(relative)) {
+      throw new TypeError(`${BUNDLE_MANIFEST} lists ${relative}, which the archive does not hold`);
+    }
+  }
+  for (const relative of Object.keys(commentsGroup)) {
+    if (!comments.has(relative)) {
       throw new TypeError(`${BUNDLE_MANIFEST} lists ${relative}, which the archive does not hold`);
     }
   }
@@ -143,10 +176,56 @@ export function inspectBundle(zip: Uint8Array, options: InspectOptions = {}): In
     manifest,
     documents,
     assets,
+    comments,
     deck: result.deck,
     issues: result.issues,
-    counts: { slides, assets: assets.size, versions, documents: documents.size },
+    dropped,
+    counts: {
+      slides,
+      assets: assets.size,
+      versions,
+      documents: documents.size,
+      comments: comments.size,
+    },
   };
+}
+
+/**
+ * A comments sidecar file must parse as what its name says (SPEC-3 2.2, 5.1): the index, the
+ * authors, or a thread whose id is its file name and whose deck is this deck. A bad thread refuses
+ * the whole bundle before anything is written, as a bad slide does.
+ */
+function checkCommentsFile(relative: string, bytes: Uint8Array, deckId: string): void {
+  const name = relative.slice(`${COMMENTS_GROUP}/`.length);
+  const raw = parseJsonBytes(bytes, relative);
+  if (name === 'index.json') {
+    const parsed = commentsIndexSchema.safeParse(raw);
+    if (!parsed.success)
+      throw new TypeError(
+        `${relative} is not a comments index: ${parsed.error.issues[0]?.message ?? 'invalid'}`,
+      );
+    if (parsed.data.deckId !== deckId)
+      throw new TypeError(`${relative} names deck "${parsed.data.deckId}", not "${deckId}"`);
+    return;
+  }
+  if (name === 'authors.json') {
+    const parsed = commentAuthorsSchema.safeParse(raw);
+    if (!parsed.success)
+      throw new TypeError(
+        `${relative} is not a comments author list: ${parsed.error.issues[0]?.message ?? 'invalid'}`,
+      );
+    return;
+  }
+  const parsed = threadSchema.safeParse(raw);
+  if (!parsed.success) {
+    throw new TypeError(
+      `${relative} is not a comment thread: ${parsed.error.issues[0]?.message ?? 'invalid'}`,
+    );
+  }
+  if (`${parsed.data.id}.json` !== name)
+    throw new TypeError(`${relative} holds thread "${parsed.data.id}", whose file name differs`);
+  if (parsed.data.deckId !== deckId)
+    throw new TypeError(`${relative} names deck "${parsed.data.deckId}", not "${deckId}"`);
 }
 
 export type UnpackOptions = {
@@ -176,7 +255,7 @@ export type UnpackResult = {
   replaced: boolean;
   /** the deck id differs from the bundle's */
   renamed: boolean;
-  counts: { slides: number; assets: number; versions: number; documents: number };
+  counts: { slides: number; assets: number; versions: number; documents: number; comments: number };
 };
 
 /** The first of `<base>`, `<base>-2`, `<base>-3` ... that is not taken. */
@@ -247,6 +326,19 @@ export async function unpackBundle(zip: Uint8Array, options: UnpackOptions): Pro
       writeUnder(staging, relative, bytes);
     }
     for (const [relative, bytes] of inspected.assets) writeUnder(staging, relative, bytes);
+    for (const [relative, bytes] of inspected.comments) {
+      if (deckId !== inspected.manifest.deckId) {
+        // the sidecar names its deck; the copy under a new id is rewritten in canonical form
+        const raw = JSON.parse(decoder.decode(bytes)) as Record<string, unknown>;
+        writeUnder(
+          staging,
+          relative,
+          new TextEncoder().encode(canonicalJson('deckId' in raw ? { ...raw, deckId } : raw)),
+        );
+        continue;
+      }
+      writeUnder(staging, relative, bytes);
+    }
     const target = join(decksDir, deckId);
     if (replaced) rmSync(target, { recursive: true, force: true });
     if (existsSync(target)) {

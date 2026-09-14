@@ -28,7 +28,17 @@ import { ConflictError } from '@turboslide/schema/errors';
 import type { Author, Lease, Version, Write } from '@turboslide/schema/mutations';
 import { applyWrite } from '@turboslide/schema/reduce';
 
-import { STATE_DIR, loadDeckDir, openFileStore, slidePath, writeManifest } from './file-store.ts';
+import { fileCommentsOnWrite, pushSidecar } from './comments-store.ts';
+import type { SidecarChange } from './comments-store.ts';
+import {
+  STATE_DIR,
+  loadDeckDir,
+  openFileStore,
+  putAssetFile,
+  removeAssetFile,
+  slidePath,
+  writeManifest,
+} from './file-store.ts';
 import {
   SNAPSHOTS_DIR,
   SNAPSHOT_GRACE_MS,
@@ -47,6 +57,7 @@ import type { HostedDecks, HostedOptions } from './hosted.ts';
 import { assetPathWithin, checkRevision, factsFor } from './hosted.ts';
 import { eachLimit, isAssetKey, isSafeKey } from './seed.ts';
 import type {
+  AssetPut,
   DeckStore,
   LeaseOptions,
   LeasePolicy,
@@ -56,6 +67,7 @@ import type {
   WriteOptions,
   WriteOutcome,
 } from './store.ts';
+import { AssetExistsError } from './store.ts';
 import {
   copyDeck,
   createDeck,
@@ -145,10 +157,23 @@ export function deckPrefix(deckId: string): string {
 
 export const LEASES_FILE = 'leases.json';
 
-/** The files the mirror manages: every document of the deck, not the twins, the leases or the snapshots. */
+/**
+ * The deck's access record (gslides-parity SPEC-3 2.2, 6.1): a deck level record beside the
+ * document with its own lifecycle, never a document of the mirror and never in a bundle.
+ */
+export const ACCESS_FILE = 'access.json';
+
+/** The comments sidecar folder (SPEC-3 2.2, 0.10): a deck folder like `slides/`, mirrored and bundled. */
+export const COMMENTS_DIR = 'comments';
+
+/**
+ * The files the mirror manages: every document of the deck, not the twins, the leases, the
+ * access record or the snapshots.
+ */
 export function isMirroredDocument(relative: string): boolean {
   return (
     relative !== LEASES_FILE &&
+    relative !== ACCESS_FILE &&
     !relative.startsWith('assets/') &&
     !relative.startsWith(`${SNAPSHOTS_DIR}/`) &&
     !relative.startsWith(`${STATE_DIR}/`) &&
@@ -200,9 +225,17 @@ function localDocuments(dir: string): string[] {
   if (!existsSync(dir)) return out;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (entry.name.startsWith('.')) continue;
-    if (entry.isFile() && entry.name.endsWith('.json') && entry.name !== LEASES_FILE) {
+    if (
+      entry.isFile() &&
+      entry.name.endsWith('.json') &&
+      entry.name !== LEASES_FILE &&
+      entry.name !== ACCESS_FILE
+    ) {
       out.push(entry.name);
-    } else if (entry.isDirectory() && (entry.name === 'slides' || entry.name === 'versions')) {
+    } else if (
+      entry.isDirectory() &&
+      (entry.name === 'slides' || entry.name === 'versions' || entry.name === COMMENTS_DIR)
+    ) {
       for (const file of readdirSync(join(dir, entry.name))) {
         if (file.endsWith('.json')) out.push(posix.join(entry.name, file));
       }
@@ -284,8 +317,11 @@ export type BlobStoreOptions = {
   pollMs?: number;
   /** how long a sync result is trusted before the next head call; default 750 ms */
   syncTtlMs?: number;
-  /** test hooks: runs between the local write and the push, to stage a race */
-  hooks?: { beforeCommit?: () => Promise<void> };
+  /**
+   * test hooks, to stage a race: `beforeCommit` runs between the local write and the push,
+   * `afterHead` between the head read that opens a write and the pull that follows it
+   */
+  hooks?: { beforeCommit?: () => Promise<void>; afterHead?: () => Promise<void> };
   /** how long an unreferenced snapshot is left alone before the prune removes it; default 5 minutes */
   snapshotGraceMs?: number;
 };
@@ -309,10 +345,19 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
   const syncTtlMs = options.syncTtlMs ?? 750;
   const snapshotGraceMs = options.snapshotGraceMs ?? SNAPSHOT_GRACE_MS;
   const serial = serialQueue();
+  // the text anchors of the comments follow the text a write moved, inside the lock (SPEC-3
+  // 0.52); the changed sidecar files are pushed after the commit below
+  const shifted: SidecarChange[] = [];
   const file: FileStore = openFileStore({
     dir,
     ...(options.now === undefined ? {} : { now: options.now }),
     ...(options.leases === undefined ? {} : { leases: options.leases }),
+    onWrite: fileCommentsOnWrite(
+      dir,
+      deckId,
+      options.now ?? (() => new Date().toISOString()),
+      (change) => shifted.push(change),
+    ),
   });
   let syncedAt = 0;
   let lastState: SyncState = { present: false, pulled: false, revision: null };
@@ -358,9 +403,22 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
       next.files[relative] = fetched.version;
       return true;
     };
-    // 1. the records: the listing's, then by number past what the listing shows
+    // 1. the records: the listing's, then by number past what the listing shows; the comments
+    // sidecar (SPEC-3 2.2) travels with the same rule as a record, by version, because it is
+    // neither a slide body the snapshot proves nor a record that never changes
     const slideEntries: { entry: BlobEntry; relative: string }[] = [];
     await eachLimit(entries, 8, async ({ entry, relative }) => {
+      if (relative.startsWith(`${COMMENTS_DIR}/`)) {
+        if (manifest.files[relative] === entry.version && existsSync(pathOf(relative))) {
+          next.files[relative] = entry.version;
+          return;
+        }
+        const fetched = await fetchBody(relative);
+        if (fetched === null) return;
+        writeAtomic(pathOf(relative), fetched.bytes);
+        next.files[relative] = fetched.version;
+        return;
+      }
       if (!relative.startsWith('versions/')) {
         slideEntries.push({ entry, relative });
         return;
@@ -649,6 +707,7 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         // inside the queue already: sync directly, not through serial()
         const head = await client.head(`${prefix}deck.json`);
         if (head === null) throw new RangeError(`No deck ${deckId} in the Blob store`);
+        if (options.hooks?.afterHead) await options.hooks.afterHead();
         const before = readManifest(dir);
         if (before.files['deck.json'] !== head.version || !existsSync(pathOf('deck.json'))) {
           await pull();
@@ -656,7 +715,17 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         await pullLeases();
         const manifest = readManifest(dir);
         const synced = manifest.files['deck.json'];
-        if (synced !== head.version) throw new StaleMirrorError(deckId);
+        if (synced !== head.version) {
+          // the store moved between the head read and the pull (another instance committed, the
+          // pull proved its document) or the pull could not prove the current document yet: a
+          // lost race either way, answered as the conflict outcome with the store's current
+          // document, never as an error (VERIFICATION-3 finding 19: five concurrent writers met
+          // six 500s beside their 409s). The mirror is discarded and re-read from the store.
+          const current = await client.head(`${prefix}deck.json`);
+          if (current === null) throw new RangeError(`No deck ${deckId} in the Blob store`);
+          if (current.version === head.version) throw new StaleMirrorError(deckId);
+          return conflictFromStore();
+        }
         const outcome = await file.write(write, writeOptions);
         if (!outcome.ok) return outcome;
         // the snapshot key (SPEC-2 8.2, 0.40): the md5 of the deck.json bytes about to be pushed,
@@ -687,6 +756,16 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
           const stored = await putDocument(record);
           manifest.files[record] = stored.version;
           writeManifestFile(dir, manifest);
+          for (const change of shifted.splice(0)) {
+            // the shifted threads and their index; a stale index (another instance's comment
+            // landed first) is left to that instance's next push, which pulls and re-shifts
+            const indexHead = await client
+              .head(`${prefix}${COMMENTS_DIR}/index.json`)
+              .catch(() => null);
+            await pushSidecar(client, deckId, dir, change, indexHead?.version ?? null).catch(
+              () => undefined,
+            );
+          }
           syncedAt = Date.now();
           lastState = { present: true, pulled: false, revision: outcome.revision };
           // retention runs after the commit and never blocks the answer (SPEC-2 8.2)
@@ -841,6 +920,35 @@ export function openBlobStore(options: BlobStoreOptions): BlobStore {
         const head = await client.head(`${prefix}deck.json`);
         return pruneSnapshots(head === null ? null : etagMd5(head.version));
       });
+    },
+
+    async putAsset(relative: string, bytes: Uint8Array, contentType?: string): Promise<AssetPut> {
+      await requirePresent();
+      // the local file first (this instance's renderer and exporter read the mirror), then the
+      // store with overwrite refused (SPEC-3 0.26): a name in use with the same bytes is the same
+      // file, a retry or another instance's identical write; other bytes are a mistake
+      const local = putAssetFile(dir, relative, bytes);
+      const pathname = `${prefix}${local.relative}`;
+      try {
+        const entry = await client.put(pathname, bytes, {
+          overwrite: false,
+          contentType: contentType ?? blobContentType(local.relative),
+        });
+        return { ...local, url: entry.url };
+      } catch (error) {
+        if (!(error instanceof BlobExistsError)) throw error;
+        const existing = await client.head(pathname);
+        if (existing !== null && existing.version === quotedMd5(bytes)) {
+          return { ...local, url: existing.url, existed: true };
+        }
+        if (!local.existed) rmSync(local.path, { force: true });
+        throw new AssetExistsError(local.relative);
+      }
+    },
+
+    async removeAsset(relative: string): Promise<void> {
+      removeAssetFile(dir, relative);
+      await client.del([`${prefix}${relative}`]);
     },
 
     async pullAssets(): Promise<number> {
@@ -1167,7 +1275,9 @@ export function blobDecks(options: HostedOptions): HostedDecks {
       if (cached !== undefined) return cached;
       const entry = await (await client()).head(pathname);
       const url = entry === null ? null : entry.url;
-      urls.set(pathname, url);
+      // a miss is not cached: a twin another instance puts after this instance asked for it
+      // (SPEC-3 0.39) must be found on the next request, and asset names never change bytes
+      if (url !== null) urls.set(pathname, url);
       return url;
     },
     facts() {

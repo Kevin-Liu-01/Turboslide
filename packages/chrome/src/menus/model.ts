@@ -1,3 +1,4 @@
+import type { Capability, Role } from '@turboslide/schema/access';
 import type { ActionId } from '@turboslide/schema/actions';
 
 import type { IconName } from '../icons';
@@ -30,6 +31,12 @@ import { STUB_PREFIX, stubClause } from './strings.ts';
  * ruler, Guides, Snap to and Zoom in (SPEC-2 0.77). What stays Later is section 12 of SPEC-2,
  * each row with its clause.
  *
+ * Round three (SPEC-3 section 13) flips the comment rows to Now with a live effect, brings in
+ * Live pointers, Commenting mode, the own chip's menu, Accessibility settings as a submenu,
+ * Activity dashboard, Notification settings, the inbox, the presence slot and its roster rows,
+ * Copy link, Dither, Show changes, and gives every row a role predicate: a row a role cannot use
+ * is absent, never disabled (13.4; `when`). What stays Later is 13.3, each row with its clause.
+ *
  * Nothing in a label, tooltip or stub clause names an internal thing (SPEC 12); the default view
  * words test greps this file. Relative imports carry the `.ts` extension so the parity audit
  * script can load the model under Node; the icon import is a type and is erased.
@@ -37,6 +44,21 @@ import { STUB_PREFIX, stubClause } from './strings.ts';
 
 export type MenuStatus = 'now' | 'later' | 'omit';
 export type Platform = 'mac' | 'win';
+
+/**
+ * The roles of SPEC-3 6.1 and the capabilities of 6.2, as the menus read them: the schema's
+ * `Role` and `Capability` of `@turboslide/schema/access` (B1's day one seam, aliased at merge 1 of
+ * round three per build-3/b6.md request 1) plus `none` for a stranger on the You need access
+ * page. Type only imports, so the model still loads under plain Node for the parity audit.
+ */
+export type MenuRole = Role | 'none';
+export type MenuCapability = Capability;
+
+/** View > Mode (SPEC-3 5.3, 6.3): an editor's three radios; Commenting and Viewing for a commenter. */
+export type MenuMode = 'editing' | 'commenting' | 'viewing';
+
+/** View > Comments (SPEC-3 5.3): the four radio rows over one setting. */
+export type CommentsDisplay = 'all' | 'expanded' | 'minimized' | 'hidden';
 
 /** Mac chord first; alternates joined by ' or '; an empty string is a platform with no chord. */
 export type Shortcut = { mac: string; win: string };
@@ -107,7 +129,87 @@ export const GS2_ACTION_IDS = [
   'deck.guides',
 ] as const satisfies readonly ActionId[];
 
-/** The action a menu row runs: an id of the actions table, since merge 1 of round two (SPEC-2 0.49). */
+/**
+ * The sixty four actions SPEC-3 section 12 adds, in its order (presence and sync 7, comments,
+ * notifications, activity and version diff 17, share and publish 21, account 10, admin 5, dither
+ * and backgrounds 4), kept as a list for the tests and the audit. B1 landed them in the actions
+ * table on day one and merge 1 of round three collapsed `MenuActionId` back into `ActionId` (the
+ * round two precedent, SPEC-2 0.49), so a row can only name an action that exists.
+ */
+export const GS3_ACTION_IDS = [
+  'presence.list',
+  'presence.follow',
+  'presence.unfollow',
+  'presence.pointer',
+  'sync.status',
+  'deck.watch',
+  'deck.follow',
+  'comment.add',
+  'comment.reply',
+  'comment.edit',
+  'comment.delete',
+  'comment.resolve',
+  'comment.reopen',
+  'comment.assign',
+  'comment.done',
+  'comment.react',
+  'comment.list',
+  'comment.get',
+  'comment.link',
+  'notification.list',
+  'notification.markRead',
+  'notification.settings',
+  'activity.list',
+  'version.diff',
+  'share.get',
+  'share.setGeneralAccess',
+  'share.createLink',
+  'share.revokeLink',
+  'share.rotateLink',
+  'share.stop',
+  'share.invite',
+  'share.setRole',
+  'share.remove',
+  'share.setExpiry',
+  'share.settings',
+  'share.requestAccess',
+  'share.listRequests',
+  'share.respond',
+  'share.transferOwnership',
+  'share.acceptOwnership',
+  'share.declineOwnership',
+  'share.claim',
+  'share.emailCollaborators',
+  'deck.publish',
+  'deck.unpublish',
+  'account.decks',
+  'account.tokens.create',
+  'account.tokens.list',
+  'account.tokens.revoke',
+  'account.me',
+  'account.setName',
+  'account.setAvatar',
+  'account.sessions',
+  'account.signOut',
+  'account.forget',
+  'admin.bootstrap',
+  'admin.assignOwner',
+  'admin.flag',
+  'admin.migrateStorage',
+  'admin.mail.list',
+  'picture.dither',
+  'picture.materialize',
+  'slide.setBackgroundPicture',
+  'slide.setBackgroundMaterial',
+] as const satisfies readonly ActionId[];
+
+export type Gs3ActionId = (typeof GS3_ACTION_IDS)[number];
+
+/**
+ * The action a menu row runs: an id of the actions table (since merge 1 of round two, SPEC-2
+ * 0.49; the round three ids joined `ACTION_IDS` on day one and the widening alias went at
+ * merge 1 of round three).
+ */
 export type MenuActionId = ActionId;
 
 /** The per browser and per document toggles the View, Tools and Snap to items flip. */
@@ -131,7 +233,16 @@ export type MenuSetting =
   | 'zoom'
   /* round two (SPEC-2 0.77): the rulers and the deck's guides, per browser like the snap settings */
   | 'showRuler'
-  | 'showGuides';
+  | 'showGuides'
+  /* round three (SPEC-3 13.1, 13.2): View > Mode's three radios (`viewing` stays as the round one
+     flag the route still reads), View > Comments' four radios, the two live pointer toggles, the
+     collaborator announcements, the Version history panel's Show changes checkbox */
+  | 'mode'
+  | 'comments'
+  | 'pointerMine'
+  | 'pointerOthers'
+  | 'announce'
+  | 'showChanges';
 
 /** Client side handlers with no action of their own (SPEC 2.13: undo, redo, the clipboard, zoom). */
 export type MenuClientHandler =
@@ -158,7 +269,13 @@ export type MenuClientHandler =
   | 'wordArt'
   | 'borderColorPicker'
   | 'borderWeightPicker'
-  | 'selectNone';
+  | 'selectNone'
+  /* round three (SPEC-3 13.1, 13.2): the comment card at the selection, Copy link without a
+     token, a one time jump to a collaborator's slide, the own chip's menu */
+  | 'comment'
+  | 'copyLink'
+  | 'goToClient'
+  | 'accountMenu';
 
 /**
  * The plates a dynamic submenu draws instead of a list of rows: the layout grid, a shape
@@ -241,7 +358,33 @@ export type MenuPredicate =
   | 'spaceAfterSet'
   | 'hasGuides'
   | 'rulerShown'
-  | 'coversSheet';
+  | 'coversSheet'
+  /** an html block is selected: the Edit HTML source panel (SPEC-3 0.27) */
+  | 'htmlBlockSelected'
+  /* round three (SPEC-3 13.4): the role predicates over the caller's capabilities (6.2); a
+     context without capabilities reads as the owner of a checkout, so every row is present */
+  | 'write'
+  | 'comment'
+  | 'readComments'
+  | 'readNotes'
+  | 'history'
+  | 'share'
+  | 'settings'
+  | 'publish'
+  | 'copy'
+  | 'export'
+  | 'rename'
+  | 'trash'
+  | 'follow'
+  /** the comment capability while the mode allows it (Viewing mode hides the comment controls, 5.3) */
+  | 'canComment'
+  /** `history`, or `comment` when the owner allows commenters into the Activity panel (5.7) */
+  | 'activity'
+  /** a viewer on the editor route: the View only button (6.3) */
+  | 'viewOnly'
+  /** the own chip's menu: Sign out and Sessions for a signed in principal, Sign in for the others (7.5) */
+  | 'signedIn'
+  | 'canSignIn';
 
 export type MenuCheck = { setting: MenuSetting; value?: string | boolean };
 
@@ -262,6 +405,11 @@ export type MenuItem = {
   effect?: MenuEffect;
   /** the predicate that enables the item; always when absent */
   enabled?: MenuPredicate;
+  /**
+   * The predicate that draws the item at all (SPEC-3 13.4): a row a role cannot use is absent,
+   * never disabled, so no tooltip has to name the person's role. Always when absent.
+   */
+  when?: MenuPredicate;
   /** the tooltip sentence while the predicate says no */
   disabledReason?: string;
   /** one sentence for the tooltip beyond the label and the key */
@@ -304,6 +452,8 @@ export type Menu = {
   accessKey: string;
   key: Shortcut;
   items: ReadonlyArray<MenuItem>;
+  /** the predicate that draws the whole menu (SPEC-3 13.4; 09 2.3: Edit, Format, Slide, Arrange and Extensions are absent below editor) */
+  when?: MenuPredicate;
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -379,9 +529,14 @@ const toggle = (setting: MenuSetting, value?: string | boolean): MenuEffect =>
 const client = (handler: MenuClientHandler): MenuEffect => ({ kind: 'client', handler });
 
 // ---------------------------------------------------------------------------------------------
-// Shared clauses (SPEC 12, SPEC-2 12: one clause, no internal noun, no process word)
+// Shared clauses (SPEC 12, SPEC-2 12, SPEC-3 13.3: one clause, no internal noun, no process word)
 
-const COMMENTS_LATER = 'Leave a note in the speaker notes instead';
+/* SPEC-3 13.3: the four rows that stay Later this round, each with its clause; the comment stub
+   clause of rounds one and two is gone with the comment rows now live (5.3) */
+const CHAT_LATER = 'Leave a comment on the slide instead';
+const EMAIL_COLLABORATORS_LATER = 'The invitation carries your message';
+const DELETE_VERSIONS_LATER = 'Named versions are kept; older records thin out after 30 days';
+const VIEWERS_TAB_LATER = 'Turboslide keeps no record of who viewed a presentation';
 const STILL_SLIDES = 'The GT theme presents still slides';
 const NUMBERING_STARTS = 'Numbering starts at 1';
 const NO_MEDIA = 'Link to a recording instead';
@@ -401,6 +556,27 @@ const SELECT_BORDERED = 'Select a box, shape, picture, line, table cell or word 
 /* the sheet is 1600 by 900: a new guide lands at its centre (SPEC-2 6.1 row 30) */
 const SHEET_CENTER_X = 800;
 const SHEET_CENTER_Y = 450;
+
+/* SPEC-3 5.3: Viewing mode hides the Add comment controls; the sentence names the way back, never a role */
+const COMMENT_IN_MODE = 'Switch to Commenting or Editing under View > Mode to comment';
+
+/**
+ * The role gate of a menu (SPEC-3 13.4, 09 2.3): every row of the menu that carries no `when` of
+ * its own takes the menu's predicate, recursively, so a commenter sees Insert > Comment alone and
+ * a viewer sees none of the write menus. Returns a copy; the rows keep their order.
+ */
+function gate(
+  items: ReadonlyArray<MenuItem>,
+  when: MenuPredicate,
+  except: Readonly<Record<string, MenuPredicate>> = {},
+): MenuItem[] {
+  return items.map((item) => {
+    const own = except[item.id] ?? item.when ?? when;
+    const copy: MenuItem = { ...item, when: own };
+    if (item.items !== undefined) copy.items = gate(item.items, own, except);
+    return copy;
+  });
+}
 
 /**
  * The Replace image sources (SPEC 2.4, 2.5): the Insert > Image sources as the Format > Image >
@@ -465,7 +641,7 @@ const shapeGrid = (category: ShapeCategory): MenuEffect => ({
 });
 
 // ---------------------------------------------------------------------------------------------
-// 2.0 The title row and 9.1 the Slideshow arrow
+// 2.0 The title row and 9.1 the Slideshow arrow; SPEC-3 4.2 the five fixed slots of the right group
 
 export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
   now('title.appIcon', 'Turboslide home', route('/decks'), {
@@ -474,19 +650,61 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
   }),
   now('title.name', 'Rename', action('deck.rename'), {
     google: 'Title field',
+    when: 'rename',
     doc: 'Click the title to rename the presentation; Enter keeps the name and Esc restores it',
   }),
-  omit('title.star', 'Star', 'Starring needs a person to star for; there are no accounts (R10 B1)'),
+  omit(
+    'title.star',
+    'Star',
+    'Starring is a per person list; the home page lists every presentation',
+  ),
   omit('title.move', 'Move', 'No folders'),
   now('title.saveState', 'Document status', client('showSaveState'), {
-    doc: 'All changes saved, Saving, Not saved yet or Couldn’t save, retrying',
+    when: 'write',
+    doc: 'All changes saved, Saving, Offline, Not saved yet or Couldn’t save, retrying',
   }),
   now('title.lastEdit', 'Last edit', panel('Version history'), {
     icon: 'clock',
     key: shortcut('Cmd+Option+Shift+H'),
-    doc: 'Opens Version history',
+    enabled: 'history',
+    doc: 'Who changed the presentation last and when; opens Version history',
   }),
-  later('title.comments', 'Show all comments', COMMENTS_LATER, { icon: 'chat' }),
+  /* SPEC-3 4.2, 13.2: the presence slot, drawn as four chips, the +N chip and the own chip; its
+     menu is the roster (the Collaborators list of 4.5) and these are its rows */
+  sub(
+    'title.presence',
+    'Collaborators',
+    [
+      now('title.presence.follow', 'Follow', action('presence.follow'), {
+        turboslide: true,
+        when: 'follow',
+        doc: 'Jumps to that person’s slide and moves with them; your own edit or click stops it',
+      }),
+      now('title.presence.goTo', 'Go to slide', client('goToClient'), {
+        turboslide: true,
+        doc: 'A one time jump to the slide that person has open',
+      }),
+      later('title.presence.joinChat', 'Join chat', CHAT_LATER, { dividerBefore: true }),
+      now('title.presence.me', 'You', client('accountMenu'), {
+        turboslide: true,
+        dividerBefore: true,
+        doc: 'Your name and avatar, and the ways to sign in and out',
+      }),
+    ],
+    {
+      google: 'Avatar row',
+      doc: 'Who has this presentation open; click a chip to follow that person',
+    },
+  ),
+  now('title.comments', 'Show all comments', panel('Comments'), {
+    icon: 'chat',
+    when: 'readComments',
+    doc: 'Every comment on this presentation, with the ones for you first',
+  }),
+  now('title.inbox', 'Notifications', panel('Notifications'), {
+    turboslide: true,
+    doc: 'Mentions, replies and requests on this presentation',
+  }),
   omit('title.meet', 'Meet', GOOGLE_SERVICE),
   omit('title.record', 'Record', GOOGLE_SERVICE),
   now('title.slideshow', 'Slideshow', action('view.present', { on: true }), {
@@ -518,10 +736,46 @@ export const TITLE_ROW_ITEMS: ReadonlyArray<MenuItem> = [
   }),
   now('title.share', 'Share', dialog('Share'), {
     icon: 'link',
-    doc: 'The view, present and edit links',
+    doc: 'Who can open this presentation, and the link to send',
   }),
-  omit('title.account', 'Account avatar', 'No accounts'),
-  omit('title.gemini', 'Ask Gemini', 'No accounts; agents reach the deck through Extensions'),
+  /* SPEC-3 0.21, 7.5, 13.1: the own chip's menu is the one place accounts appear */
+  sub(
+    'title.account',
+    'Account',
+    [
+      now('title.account.changeName', 'Change name', dialog('Change name'), {
+        turboslide: true,
+        doc: 'How others see you in this presentation',
+      }),
+      now('title.account.changeAvatar', 'Change avatar', dialog('Change avatar'), {
+        turboslide: true,
+        doc: 'Initials, a pattern from your name, or a picture',
+      }),
+      now('title.account.signIn', 'Sign in', dialog('Sign in'), {
+        turboslide: true,
+        when: 'canSignIn',
+        dividerBefore: true,
+        doc: 'Keep your name across browsers and receive invitations by email',
+      }),
+      now('title.account.signOut', 'Sign out', action('account.signOut'), {
+        turboslide: true,
+        when: 'signedIn',
+        dividerBefore: true,
+        doc: 'Ends the sign in on this browser; your edits keep your name',
+      }),
+      now('title.account.forget', 'Forget this browser', action('account.forget'), {
+        turboslide: true,
+        doc: 'Clears your name, avatar and unsaved changes from this browser; earlier edits keep the old name',
+      }),
+      now('title.account.sessions', 'Sessions', dialog('Sessions'), {
+        turboslide: true,
+        dividerBefore: true,
+        doc: 'The browsers signed in as you, with Sign out for each',
+      }),
+    ],
+    { google: 'Account avatar', doc: 'Your name and avatar; nothing else asks for an account' },
+  ),
+  omit('title.gemini', 'Ask Gemini', GOOGLE_SERVICE),
 ];
 
 // ---------------------------------------------------------------------------------------------
@@ -543,71 +797,87 @@ const FILE: Menu = {
       }),
     ]),
     now('file.open', 'Open…', dialog('Open'), { key: shortcut('Cmd+O'), icon: 'document' }),
-    now('file.importSlides', 'Import slides', dialog('Import slides')),
-    sub('file.makeCopy', 'Make a copy', [
-      now('file.makeCopy.entire', 'Entire presentation', dialog('Make a copy')),
-      now('file.makeCopy.selected', 'Selected slides', dialog('Make a copy'), {
-        enabled: 'slideSubsetSelected',
-        disabledReason: 'Select some of the slides in the filmstrip first',
-      }),
-    ]),
+    now('file.importSlides', 'Import slides', dialog('Import slides'), { when: 'write' }),
+    sub(
+      'file.makeCopy',
+      'Make a copy',
+      [
+        now('file.makeCopy.entire', 'Entire presentation', dialog('Make a copy')),
+        now('file.makeCopy.selected', 'Selected slides', dialog('Make a copy'), {
+          enabled: 'slideSubsetSelected',
+          disabledReason: 'Select some of the slides in the filmstrip first',
+        }),
+      ],
+      { when: 'copy' },
+    ),
     sub(
       'file.share',
       'Share',
       [
         now('file.share.withOthers', 'Share with others', dialog('Share')),
-        now('file.share.publish', 'Publish to web', dialog('Publish to the web')),
+        now('file.share.publish', 'Publish to web', dialog('Publish to the web'), {
+          when: 'publish',
+        }),
+        /* SPEC-3 0.16, 13.2: the address of the presentation with no token in it */
+        now('file.share.copyLink', 'Copy link', client('copyLink'), {
+          turboslide: true,
+          doc: 'Copies the address of this presentation; whoever opens it needs their own access',
+        }),
       ],
       { icon: 'link' },
     ),
     sub('file.email', 'Email', [
-      omit(
-        'file.email.thisFile',
-        'Email this file',
-        'No mail service; Share > Copy link is the path',
-      ),
-      omit('file.email.collaborators', 'Email collaborators', 'No mail service'),
+      omit('file.email.thisFile', 'Email this file', 'Share sends the link with your message'),
+      /* SPEC-3 13.3, 6.5: declared this round, live in round four (an open relay risk, 09 4.5) */
+      later('file.email.collaborators', 'Email collaborators', EMAIL_COLLABORATORS_LATER),
     ]),
-    sub('file.download', 'Download', [
-      now('file.download.pptx', 'Microsoft PowerPoint (.pptx)', dialog('Download'), {
-        doc: 'Perfect by default, or Editable text',
-      }),
-      later('file.download.odp', 'ODP Document (.odp)', DOWNLOAD_FORMATS),
-      now('file.download.pdf', 'PDF Document (.pdf)', dialog('Download'), {
-        doc: 'One slide per page',
-      }),
-      now('file.download.txt', 'Plain Text (.txt)', action('export.text'), {
-        doc: 'Every slide’s text in order',
-      }),
-      now(
-        'file.download.jpg',
-        'JPEG image (.jpg, current slide)',
-        action('render.slide', { format: 'jpg' }),
-      ),
-      now(
-        'file.download.png',
-        'PNG image (.png, current slide)',
-        action('render.slide', { format: 'png' }),
-      ),
-      later(
-        'file.download.svg',
-        'Scalable Vector Graphics (.svg, current slide)',
-        DOWNLOAD_FORMATS,
-      ),
-      now('file.download.html', 'Web page (.html)', action('build.run'), {
-        turboslide: true,
-        doc: 'One file that opens in any browser',
-      }),
-      now('file.download.zip', 'Turboslide bundle (.zip)', action('deck.pack'), {
-        turboslide: true,
-        doc: 'The file Open and Import slides read',
-      }),
-    ]),
-    now('file.rename', 'Rename', client('focusTitle'), { dividerBefore: true }),
+    sub(
+      'file.download',
+      'Download',
+      [
+        now('file.download.pptx', 'Microsoft PowerPoint (.pptx)', dialog('Download'), {
+          doc: 'Perfect by default, or Editable text',
+        }),
+        later('file.download.odp', 'ODP Document (.odp)', DOWNLOAD_FORMATS),
+        now('file.download.pdf', 'PDF Document (.pdf)', dialog('Download'), {
+          doc: 'One slide per page',
+        }),
+        now('file.download.txt', 'Plain Text (.txt)', action('export.text'), {
+          doc: 'Every slide’s text in order',
+        }),
+        now(
+          'file.download.jpg',
+          'JPEG image (.jpg, current slide)',
+          action('render.slide', { format: 'jpg' }),
+        ),
+        now(
+          'file.download.png',
+          'PNG image (.png, current slide)',
+          action('render.slide', { format: 'png' }),
+        ),
+        later(
+          'file.download.svg',
+          'Scalable Vector Graphics (.svg, current slide)',
+          DOWNLOAD_FORMATS,
+        ),
+        now('file.download.html', 'Web page (.html)', action('build.run'), {
+          turboslide: true,
+          doc: 'One file that opens in any browser',
+        }),
+        now('file.download.zip', 'Turboslide bundle (.zip)', action('deck.pack'), {
+          turboslide: true,
+          doc: 'The file Open and Import slides read',
+        }),
+      ],
+      /* SPEC-3 6.2: the Download rows follow the export capability (the owner's download switch) */
+      { when: 'export' },
+    ),
+    now('file.rename', 'Rename', client('focusTitle'), { dividerBefore: true, when: 'rename' }),
     omit('file.move', 'Move', 'No folders'),
     omit('file.addShortcut', 'Add shortcut to Drive', 'No Drive'),
     now('file.moveToTrash', 'Move to trash', action('deck.trash'), {
       icon: 'archive',
+      when: 'trash',
       doc: 'The presentation stays in the trash until someone deletes it forever',
     }),
     sub(
@@ -622,8 +892,25 @@ const FILE: Menu = {
         now('file.versionHistory.see', 'See version history', panel('Version history'), {
           key: shortcut('Cmd+Option+Shift+H'),
         }),
+        /* SPEC-3 5.7, 13.2: the panel's checkbox at its bottom, Google's position; 0.45, 13.3: the
+           two delete rows of a version's More menu, present and disabled with their clause */
+        now('file.versionHistory.showChanges', 'Show changes', toggle('showChanges'), {
+          contextOnly: true,
+          doc: 'Marks what each person changed on the slide, with their chip',
+        }),
+        later(
+          'file.versionHistory.deleteOlder',
+          'Delete this and older versions',
+          DELETE_VERSIONS_LATER,
+          {
+            contextOnly: true,
+          },
+        ),
+        later('file.versionHistory.deleteHistory', 'Delete history', DELETE_VERSIONS_LATER, {
+          contextOnly: true,
+        }),
       ],
-      { icon: 'clock', dividerBefore: true },
+      { icon: 'clock', dividerBefore: true, when: 'history' },
     ),
     omit('file.approvals', 'Approvals', 'Workspace only'),
     omit(
@@ -640,8 +927,9 @@ const FILE: Menu = {
     later('file.pageSetup', 'Page setup', 'The GT theme is 16:9 at 1600 by 900'),
     now('file.printPreview', 'Print settings and preview', route('/print/:deckId'), {
       dividerBefore: true,
+      when: 'export',
     }),
-    now('file.print', 'Print', route('/print/:deckId'), { key: shortcut('Cmd+P') }),
+    now('file.print', 'Print', route('/print/:deckId'), { key: shortcut('Cmd+P'), when: 'export' }),
   ],
 };
 
@@ -795,46 +1083,66 @@ const VIEW: Menu = {
       }),
       now('view.snapTo.grid', 'Grid', toggle('snapGrid'), { doc: 'The 8 px grid' }),
     ]),
+    /* SPEC-3 5.3, 13.1: the four display modes as radio rows over one setting, in Google's order
+       (01 3, the 2024 rollout); the chord hides */
     sub(
       'view.comments',
       'Comments',
       [
-        later('view.comments.hide', 'Hide comments', COMMENTS_LATER),
-        later('view.comments.minimize', 'Minimize comments', COMMENTS_LATER),
-        later('view.comments.expand', 'Expand comments', COMMENTS_LATER),
+        now('view.comments.showAll', 'Show all comments', toggle('comments', 'all'), {
+          doc: 'The Comments panel and every marker on the slides',
+        }),
+        now('view.comments.expand', 'Expand comments', toggle('comments', 'expanded'), {
+          doc: 'Every card open beside the slide',
+        }),
+        now('view.comments.minimize', 'Minimize comments', toggle('comments', 'minimized'), {
+          doc: 'Markers only; a click opens the card',
+        }),
+        now('view.comments.hide', 'Hide comments', toggle('comments', 'hidden'), {
+          key: shortcut('Cmd+Option+Shift+J'),
+          doc: 'No markers and no cards; the panel still lists them',
+        }),
       ],
-      { icon: 'chat', dividerBefore: true },
+      { icon: 'chat', dividerBefore: true, when: 'readComments' },
     ),
-    sub(
-      'view.livePointers',
-      'Live pointers',
-      [
-        omit('view.livePointers.mine', 'Show my pointer', 'Needs presence (R10 C1)'),
-        omit(
-          'view.livePointers.collaborators',
-          'Show collaborator pointers',
-          'Needs presence (R10 C1)',
-        ),
-      ],
-      { omitReason: 'Needs presence (R10 C1)' },
-    ),
+    /* SPEC-3 4.4, 4.6, 13.1: Google's two rows; the own pointer is off by default and needs the
+       editor role, the collaborators' pointers are on by default for everyone */
+    sub('view.livePointers', 'Live pointers', [
+      now('view.livePointers.mine', 'Show my pointer', toggle('pointerMine'), {
+        when: 'write',
+        doc: 'Others see where your pointer is on the slide, with your name',
+      }),
+      now(
+        'view.livePointers.collaborators',
+        'Show collaborator pointers',
+        toggle('pointerOthers'),
+        { doc: 'The pointers of the people in this presentation, up to twenty' },
+      ),
+    ]),
     now('view.showSpeakerNotes', 'Show speaker notes', toggle('speakerNotes'), {
       dividerBefore: true,
+      when: 'readNotes',
     }),
     now('view.showFilmstrip', 'Show filmstrip', toggle('filmstrip'), { icon: 'sidebar' }),
+    /* SPEC-3 5.3, 6.3, 13.1: three radios for an editor, Commenting and Viewing for a commenter,
+       no Mode menu for a viewer */
     sub(
       'view.mode',
       'Mode',
       [
-        now('view.mode.editing', 'Editing', toggle('viewing', false), {
+        now('view.mode.editing', 'Editing', toggle('mode', 'editing'), {
+          when: 'write',
           doc: 'Handles, the notes pane and Format options',
         }),
-        omit('view.mode.commenting', 'Commenting', 'Until comments exist'),
-        now('view.mode.viewing', 'Viewing', toggle('viewing', true), {
-          doc: 'Read only: no handles, no Format options',
+        now('view.mode.commenting', 'Commenting', toggle('mode', 'commenting'), {
+          when: 'comment',
+          doc: 'Comments without moving anything: no handles, no Format options',
+        }),
+        now('view.mode.viewing', 'Viewing', toggle('mode', 'viewing'), {
+          doc: 'Read only: no handles, no Format options, no comment controls',
         }),
       ],
-      { dividerBefore: true },
+      { dividerBefore: true, when: 'comment' },
     ),
     now('view.fullScreen', 'Full screen', toggle('compact'), {
       key: shortcut('Ctrl+Shift+F', 'Ctrl+Shift+F'),
@@ -1022,9 +1330,16 @@ const INSERT: Menu = {
       disabledReason: 'Select text or one block first',
       dividerBefore: true,
     }),
-    later('insert.comment', 'Comment', COMMENTS_LATER, {
+    /* SPEC-3 5.3, 13.1: the card at the selection (the block, the text range, the cell), on the
+       empty sheet at the slide, on a thumbnail at that slide; absent for a viewer, disabled in
+       Viewing mode */
+    now('insert.comment', 'Comment', client('comment'), {
       key: shortcut('Cmd+Option+M'),
       icon: 'chat',
+      when: 'comment',
+      enabled: 'canComment',
+      disabledReason: COMMENT_IN_MODE,
+      doc: 'A comment on the selected object, text or cell, or on the slide',
     }),
     now('insert.newSlide', 'New slide', action('slide.new'), {
       key: shortcut('Ctrl+M', 'Ctrl+M'),
@@ -1331,6 +1646,13 @@ const FORMAT: Menu = {
           disabledReason: 'The picture is not cropped, masked or adjusted',
           icon: 'arrow-uturn-left',
         }),
+        /* SPEC-3 10.5, 13.2: the deck's two tone screen over the picture, on and off; the Format
+           options Dither section carries the parameters */
+        now('format.image.dither', 'Dither', action('picture.dither'), {
+          enabled: 'imageSelected',
+          turboslide: true,
+          doc: 'The deck’s two tone screen over the picture; change it under Format options',
+        }),
         now('format.image.imageOptions', 'Image options', panel('Format options'), {
           enabled: 'imageSelected',
         }),
@@ -1405,6 +1727,13 @@ const FORMAT: Menu = {
       contextOnly: true,
       turboslide: true,
       doc: 'The categories and series of the chart',
+    }),
+    /* SPEC-3 0.27: the html block shows inside a frame, so its markup is edited in the Edit HTML panel */
+    now('format.editHtml', 'Edit HTML', panel('Edit HTML'), {
+      enabled: 'htmlBlockSelected',
+      contextOnly: true,
+      turboslide: true,
+      doc: 'The markup and styles of the embedded block',
     }),
     sub(
       'format.chartType',
@@ -1715,21 +2044,55 @@ const TOOLS: Menu = {
     omit('tools.dictionary', 'Dictionary', GOOGLE_SERVICE),
     omit('tools.qaHistory', 'Q&A history', GOOGLE_SERVICE),
     omit('tools.dictateNotes', 'Dictate speaker notes', GOOGLE_SERVICE),
+    /* SPEC-3 5.5, 13.2: Google's per file row; All comments, Comments for you or None */
+    now('tools.notificationSettings', 'Notification settings', dialog('Notification settings'), {
+      when: 'comment',
+      doc: 'Which comments reach your notifications: all of them, the ones for you, or none',
+    }),
     later(
       'tools.preferences',
       'Preferences',
       'Text fitting is set per text box in Format options; the ruler reads inches',
     ),
-    omit(
-      'tools.accessibilitySettings',
-      'Accessibility settings',
-      'The browser’s screen reader works on the DOM',
-    ),
-    omit('tools.activityDashboard', 'Activity dashboard', 'No identity'),
+    /* SPEC-3 0.42, 4.9, 13.1: a submenu with the one row Turboslide can honour; the screen reader
+       and braille rows stay out with their reason */
+    sub('tools.accessibilitySettings', 'Accessibility settings', [
+      now(
+        'tools.accessibilitySettings.collaboratorAnnouncements',
+        'Turn on collaborator announcements',
+        toggle('announce'),
+        { doc: 'Your screen reader says who joined, who left and who is on which slide' },
+      ),
+      omit(
+        'tools.accessibilitySettings.screenReader',
+        'Turn on screen reader support',
+        'The browser’s screen reader works on the DOM',
+      ),
+      omit(
+        'tools.accessibilitySettings.braille',
+        'Turn on braille support',
+        'The browser’s screen reader works on the DOM',
+      ),
+    ]),
+    /* SPEC-3 5.7, 13.1, 13.3: the Activity panel for editors, and for commenters when the owner
+       allows; the row opens the panel itself (a split, like the Slideshow button) and its one
+       child is the panel's Later tab, Viewers, with its clause */
+    {
+      ...now('tools.activityDashboard', 'Activity dashboard', panel('Activity'), {
+        when: 'activity',
+        doc: 'Edits, comments, sharing, names and restores, by time and by person',
+      }),
+      items: [
+        later('tools.activityDashboard.viewers', 'Viewers', VIEWERS_TAB_LATER, {
+          contextOnly: true,
+        }),
+      ],
+    },
     now('tools.checkSlides', 'Check slides', panel('Suggestions for this slide'), {
       turboslide: true,
       icon: 'check-badge',
       dividerBefore: true,
+      when: 'write',
       doc: 'One suggestion per row, with Fix where there is one',
     }),
     sub(
@@ -1857,17 +2220,33 @@ const HELP: Menu = {
   ],
 };
 
-/** The ten menus in Google's order (R01 row 2). */
+/**
+ * The ten menus in Google's order (R01 row 2), with the role gates of SPEC-3 13.4 and 09 2.3:
+ * Edit, Format, Slide, Arrange and Extensions are the editor's; Insert shows a commenter its
+ * Comment row alone; File, View, Tools and Help gate row by row; Help is everyone's.
+ */
 export const MENUS: ReadonlyArray<Menu> = [
   FILE,
-  EDIT,
+  { ...EDIT, when: 'write', items: gate(EDIT.items, 'write') },
   VIEW,
-  INSERT,
-  FORMAT,
-  SLIDE,
-  ARRANGE,
-  TOOLS,
-  EXTENSIONS,
+  {
+    ...INSERT,
+    when: 'comment',
+    items: gate(INSERT.items, 'write', { 'insert.comment': 'comment' }),
+  },
+  { ...FORMAT, when: 'write', items: gate(FORMAT.items, 'write') },
+  { ...SLIDE, when: 'write', items: gate(SLIDE.items, 'write') },
+  { ...ARRANGE, when: 'write', items: gate(ARRANGE.items, 'write') },
+  {
+    ...TOOLS,
+    items: gate(TOOLS.items, 'write', {
+      'tools.notificationSettings': 'comment',
+      'tools.preferences': 'always',
+      'tools.accessibilitySettings': 'always',
+      'tools.activityDashboard': 'activity',
+    }),
+  },
+  { ...EXTENSIONS, when: 'write', items: gate(EXTENSIONS.items, 'write') },
   HELP,
 ];
 
@@ -1903,6 +2282,10 @@ export type ToolbarControl = {
   doc?: string;
   /** a control Google's toolbar does not have (SPEC-2 section 10) */
   turboslide?: true;
+  /** the predicate that draws the control at all (SPEC-3 13.4): absent for a role that cannot use it */
+  when?: MenuPredicate;
+  /** an effect of the control's own, for a control that is no menu item (the View only button, SPEC-3 13.2) */
+  effect?: MenuEffect;
 };
 
 /** Positions 1 to 7 (SPEC 3.1); never collapse. */
@@ -2016,9 +2399,12 @@ export const TOOLBAR_TAIL_DEFAULT: ReadonlyArray<ToolbarControl> = [
     label: 'Insert comment',
     icon: 'chat',
     key: shortcut('Cmd+Option+M'),
-    status: 'later',
-    stubReason: COMMENTS_LATER,
+    status: 'now',
     item: 'insert.comment',
+    when: 'comment',
+    enabled: 'canComment',
+    disabledReason: COMMENT_IN_MODE,
+    doc: 'A comment on the selected object, text or cell, or on the slide',
   },
   {
     control: 'toolbar.background',
@@ -2164,6 +2550,8 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.textFitting',
     'format.dropShadow',
     'format.formatOptions',
+    /* SPEC-3 0.27: an embedded html block edits its markup in the Edit HTML panel */
+    { id: 'format.editHtml', when: 'htmlBlockSelected' },
     'format.altText',
     DIVIDER,
     'insert.comment',
@@ -2181,6 +2569,8 @@ export const CONTEXT_MENUS: Readonly<Record<ContextTarget, ReadonlyArray<Context
     'format.image.cropImage',
     'format.image.maskImage',
     'format.image.resetImage',
+    /* SPEC-3 13.2: the picture's Dither toggle sits with the image rows */
+    'format.image.dither',
     'format.image.imageOptions',
     'format.formatOptions',
     'format.altText',
@@ -2382,6 +2772,8 @@ export type MenuContext = {
     /** the selected block's paragraphs carry space before, or after */
     spaceBefore?: boolean;
     spaceAfter?: boolean;
+    /** the selected block is an embedded html block (SPEC-3 0.27) */
+    html?: boolean;
   };
   clipboard: 'empty' | 'slides' | 'blocks' | 'text' | 'image';
   history: { undo: boolean; redo: boolean };
@@ -2389,6 +2781,20 @@ export type MenuContext = {
   /** how many guides the presentation holds (Deck.guides, SPEC-2 2.10); none when absent */
   guides?: number;
   settings: Readonly<Partial<Record<MenuSetting, boolean | string>>>;
+  /* round three (SPEC-3 13.4), every field optional so a context built before merge 1 reads as today */
+  /** the caller's role on the deck (6.1); absent on a checkout and on a deck with no access record */
+  role?: MenuRole;
+  /** the caller's capabilities (6.2); absent reads as every capability, today's open deck */
+  capabilities?: ReadonlyArray<MenuCapability>;
+  /** the identity facts the own chip's menu reads (7.3, 7.5) */
+  account?: { signedIn: boolean; signInAvailable: boolean };
+  /** the access record facts the rows read (5.7, 6.5) */
+  access?: {
+    /** the owner lets commenters read the Activity panel (`notification.settings { activityForCommenters }`) */
+    activityForCommenters?: boolean;
+    /** pending access requests, for the dot on Share */
+    pendingRequests?: number;
+  };
 };
 
 /** A fresh presentation with nothing selected (SPEC 11.1): the default state of every menu. */
@@ -2409,7 +2815,9 @@ export const DEFAULT_MENU_CONTEXT: MenuContext = {
   history: { undo: false, redo: false },
   sections: 1,
   guides: 0,
-  /* the rulers and the guides start hidden, as Google's do (SPEC-2 6.1 rows 29 and 30) */
+  /* the rulers and the guides start hidden, as Google's do (SPEC-2 6.1 rows 29 and 30); the
+     editor opens in Editing mode with every comment shown and the collaborators' pointers on
+     (SPEC-3 4.6, 5.3) */
   settings: {
     snapGuides: true,
     speakerNotes: true,
@@ -2417,8 +2825,16 @@ export const DEFAULT_MENU_CONTEXT: MenuContext = {
     spellcheck: true,
     zoom: 'fit',
     appearance: 'match',
+    mode: 'editing',
+    comments: 'all',
+    pointerOthers: true,
   },
 };
+
+/** True when the caller holds a capability; a context without capabilities holds them all (a checkout, today's open deck). */
+export function hasCapability(ctx: MenuContext, capability: MenuCapability): boolean {
+  return ctx.capabilities === undefined || ctx.capabilities.includes(capability);
+}
 
 /** Runs a named predicate. */
 export function evaluate(predicate: MenuPredicate | undefined, ctx: MenuContext): boolean {
@@ -2531,7 +2947,42 @@ export function evaluate(predicate: MenuPredicate | undefined, ctx: MenuContext)
       return selection.spaceBefore === true;
     case 'spaceAfterSet':
       return selection.spaceAfter === true;
+    case 'htmlBlockSelected':
+      return selection.blocks === 1 && selection.html === true;
+    /* round three (SPEC-3 13.4): the role predicates over the capabilities of 6.2 */
+    case 'write':
+    case 'comment':
+    case 'readComments':
+    case 'readNotes':
+    case 'history':
+    case 'share':
+    case 'settings':
+    case 'publish':
+    case 'copy':
+    case 'export':
+    case 'rename':
+    case 'trash':
+    case 'follow':
+      return hasCapability(ctx, predicate);
+    case 'canComment':
+      return hasCapability(ctx, 'comment') && ctx.settings.mode !== 'viewing';
+    case 'activity':
+      return (
+        hasCapability(ctx, 'history') ||
+        (hasCapability(ctx, 'comment') && ctx.access?.activityForCommenters === true)
+      );
+    case 'viewOnly':
+      return ctx.role === 'viewer';
+    case 'signedIn':
+      return ctx.account?.signedIn === true;
+    case 'canSignIn':
+      return ctx.account !== undefined && !ctx.account.signedIn && ctx.account.signInAvailable;
   }
+}
+
+/** True when a row is drawn at all in a context (SPEC-3 13.4): its `when` holds, or it has none. */
+export function isPresent(item: Pick<MenuItem, 'when'>, ctx: MenuContext): boolean {
+  return item.when === undefined || evaluate(item.when, ctx);
 }
 
 /** True when the item takes input now: a `now` item whose predicate holds. */
@@ -2657,34 +3108,60 @@ export function itemPath(itemId: string): string[] {
   return [title, ...path];
 }
 
-/** The items a menu draws: omitted items dropped, context-only items dropped unless asked. */
+/**
+ * The items a menu draws: omitted items dropped, context-only items dropped unless asked, and
+ * with a context the rows whose `when` says no dropped too (SPEC-3 13.4: absent, never disabled).
+ */
 export function visibleItems(
   items: ReadonlyArray<MenuItem>,
-  options: { contextOnly?: boolean } = {},
+  options: { contextOnly?: boolean; context?: MenuContext } = {},
 ): MenuItem[] {
+  const ctx = options.context;
   return items.filter(
-    (item) => item.status !== 'omit' && (options.contextOnly === true || item.contextOnly !== true),
+    (item) =>
+      item.status !== 'omit' &&
+      (options.contextOnly === true || item.contextOnly !== true) &&
+      (ctx === undefined || isPresent(item, ctx)),
   );
 }
 
-/** The items of a right-click menu, resolved: dividers kept as `DIVIDER`, conditional entries filtered by the context. */
+/** The menus the bar draws in a context: a menu whose `when` says no is absent (SPEC-3 13.4). */
+export function visibleMenus(ctx: MenuContext, menus: ReadonlyArray<Menu> = MENUS): Menu[] {
+  return menus.filter((menu) => isPresent(menu, ctx));
+}
+
+/**
+ * The items of a right-click menu, resolved: dividers kept as `DIVIDER`, conditional entries
+ * filtered by the context, and a row a role cannot use dropped (SPEC-3 13.4); two dividers left
+ * adjacent by a dropped row collapse into one.
+ */
 export function contextMenuItems(
   target: ContextTarget,
   ctx: MenuContext,
 ): Array<MenuItem | typeof DIVIDER> {
   const out: Array<MenuItem | typeof DIVIDER> = [];
+  const push = (entry: MenuItem | typeof DIVIDER) => {
+    if (entry === DIVIDER) {
+      if (out.length === 0 || out[out.length - 1] === DIVIDER) return;
+      out.push(DIVIDER);
+      return;
+    }
+    if (!isPresent(entry, ctx)) return;
+    out.push(entry);
+  };
   for (const entry of CONTEXT_MENUS[target]) {
     if (entry === DIVIDER) {
-      out.push(DIVIDER);
+      push(DIVIDER);
       continue;
     }
     if (typeof entry === 'string') {
-      out.push(itemById(entry));
+      push(itemById(entry));
       continue;
     }
     if (!evaluate(entry.when, ctx)) continue;
-    out.push(entry.id === DIVIDER ? DIVIDER : itemById(entry.id));
+    push(entry.id === DIVIDER ? DIVIDER : itemById(entry.id));
   }
+  while (out.length > 0 && out[out.length - 1] === DIVIDER) out.pop();
   return out;
 }
 

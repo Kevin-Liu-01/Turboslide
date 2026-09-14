@@ -25,6 +25,22 @@
 // and its peak memory. The GT deck's 85 slides are two batches at the size of 60; pass
 // `--slides <n>` to export the first n slides of the play list instead. The export row can take
 // several minutes; the timeout of its requests is 15 minutes.
+//
+// Round three (gslides-parity SPEC-3 8.8, 16.4; report 10 P23): the security rows. Every page
+// route carries the headers of 8.8 (`x-content-type-options`, `x-frame-options` except /embed,
+// `referrer-policy`, `permissions-policy`, `x-request-id`, HSTS on https) and the nonce based
+// `content-security-policy-report-only` with `worker-src 'self' blob:`; `/embed/<deck>` names the
+// Prototemplate ancestors instead of `frame-ancestors 'none'`; a `.json` asset of the deck is an
+// attachment with `nosniff` and a sandboxing policy (the svg row is the same rule; the seed decks
+// carry no svg twin, pass `--asset <file>.svg` when one exists); a restricted deck id answers 404
+// on `/deck` and the JSON routes without saying whether it exists (`--restricted <id>` names one
+// the verifier prepared, else the row is skipped by name); a cross site `text/plain` POST to
+// `/api/actions/slide.remove` is refused; a thumbnail request without its grant is 403 in enforce
+// mode and 200 in shadow mode (the row records which); the CSP report endpoint answers 204 to a
+// report and 400 to garbage. The `/s/` exchange, the 410 after unpublish, the private document
+// 403 and the twin URL derivability rows need B2's and B3's routes and the private store; they run
+// when `--share-token <token>` and `--publish-token <token>` are given and are otherwise listed
+// as skipped, never as passed.
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -40,6 +56,9 @@ function parseArgs(argv) {
     tokenEnv: null,
     exportBatch: false,
     slides: null,
+    restricted: null,
+    shareToken: null,
+    publishToken: null,
   };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -50,6 +69,9 @@ function parseArgs(argv) {
     else if (arg === '--token-env') out.tokenEnv = argv[++i] ?? null;
     else if (arg === '--export-batch') out.exportBatch = true;
     else if (arg === '--slides') out.slides = Number(argv[++i] ?? 0) || null;
+    else if (arg === '--restricted') out.restricted = argv[++i] ?? null;
+    else if (arg === '--share-token') out.shareToken = argv[++i] ?? null;
+    else if (arg === '--publish-token') out.publishToken = argv[++i] ?? null;
     else if (arg === '--help' || arg === '-h') out.help = true;
     else if (out.url === null) out.url = arg;
   }
@@ -224,7 +246,7 @@ function protectionHeaders() {
   return token ? { 'x-vercel-trusted-oidc-idp-token': token } : {};
 }
 
-async function probe(base, path, timeoutMs) {
+async function probe(base, path, timeoutMs, init = {}) {
   const url = new URL(path, base).toString();
   const started = performance.now();
   const controller = new AbortController();
@@ -233,17 +255,21 @@ async function probe(base, path, timeoutMs) {
     const response = await fetch(url, {
       redirect: 'manual',
       signal: controller.signal,
-      headers: protectionHeaders(),
+      ...init,
+      headers: { ...protectionHeaders(), ...(init.headers ?? {}) },
     });
     const type = response.headers.get('content-type') ?? '';
     const text = type.startsWith('text/') || type.includes('json') ? await response.text() : '';
     const bytes = text === '' ? Number(response.headers.get('content-length') ?? 0) : text.length;
+    const headers = {};
+    for (const [name, value] of response.headers) headers[name] = value;
     return {
       url,
       status: response.status,
       type,
       location: response.headers.get('location') ?? '',
       robots: response.headers.get('x-robots-tag') ?? '',
+      headers,
       text,
       bytes,
       ms: Math.round(performance.now() - started),
@@ -255,6 +281,7 @@ async function probe(base, path, timeoutMs) {
       type: '',
       location: '',
       robots: '',
+      headers: {},
       text: '',
       bytes: 0,
       ms: Math.round(performance.now() - started),
@@ -266,7 +293,9 @@ async function probe(base, path, timeoutMs) {
 }
 
 const SHELL_MARKS = ['<!DOCTYPE html>', 'gt-theme', '<script'];
-const NOINDEX_META = /<meta\s+name="robots"\s+content="noindex"\s*\/?>/;
+// the router stamps its nonce on head tags as well once `ssr.nonce` is wired (round three), so the
+// meta may carry further attributes after `content`
+const NOINDEX_META = /<meta\s+name="robots"\s+content="noindex"[^>]*\/?>/;
 
 const isPage = (r) => r.status === 200 && r.type.includes('text/html');
 const isShell = (r) => isPage(r) && SHELL_MARKS.every((m) => r.text.includes(m));
@@ -361,6 +390,158 @@ function checks(deck, asset) {
   return rows;
 }
 
+/** The headers every page answer carries (SPEC-3 8.8); HSTS only over https. */
+const PAGE_HEADERS = [
+  'x-content-type-options',
+  'referrer-policy',
+  'permissions-policy',
+  'x-request-id',
+];
+
+function missingHeaders(r, names) {
+  return names.filter((name) => !(name in r.headers));
+}
+
+function cspOf(r) {
+  return (
+    r.headers['content-security-policy-report-only'] ?? r.headers['content-security-policy'] ?? ''
+  );
+}
+
+/** The round three security rows (SPEC-3 16.4; report 10 P23), after the page rows. */
+function securityChecks(base, deck, args) {
+  const https = base.startsWith('https:');
+  const rows = [];
+  for (const path of ['/', `/edit/${deck}`, `/deck/${deck}`]) {
+    rows.push({
+      name: `headers ${path}`,
+      path,
+      expect: `the headers of 8.8${https ? ' with HSTS' : ''}, X-Frame-Options DENY, a report only CSP with worker-src blob:`,
+      pass: (r) =>
+        missingHeaders(r, PAGE_HEADERS).length === 0 &&
+        (!https || 'strict-transport-security' in r.headers) &&
+        r.headers['x-frame-options'] === 'DENY' &&
+        (path === '/' || /worker-src 'self' blob:/.test(cspOf(r))) &&
+        (path === '/' || /frame-ancestors 'none'/.test(cspOf(r))),
+      detail: (r) => {
+        const missing = missingHeaders(r, PAGE_HEADERS);
+        return `${missing.length === 0 ? 'every header' : `missing ${missing.join(', ')}`}; csp ${cspOf(r) === '' ? 'none' : /worker-src 'self' blob:/.test(cspOf(r)) ? 'worker-src blob ok' : 'without worker-src blob'}; x-frame-options ${r.headers['x-frame-options'] ?? 'none'}`;
+      },
+    });
+  }
+  rows.push({
+    name: `headers /embed/${deck}`,
+    path: `/embed/${deck}`,
+    expect: 'no X-Frame-Options, frame-ancestors naming the Prototemplate hosts',
+    pass: (r) =>
+      !('x-frame-options' in r.headers) &&
+      /frame-ancestors https:\/\/prototemplate\.com/.test(cspOf(r)),
+    detail: (r) =>
+      `x-frame-options ${r.headers['x-frame-options'] ?? 'none'}; ${/frame-ancestors ([^;]+)/.exec(cspOf(r))?.[1] ?? 'no frame-ancestors'}`,
+  });
+  rows.push({
+    name: 'json asset attachment',
+    path: `/decks/${deck}/assets/${args.jsonAsset ?? 'liquid-metal-diamond.recipe.json'}`,
+    expect:
+      'a 200 attachment with nosniff and a sandboxing policy, or 404 when the deck has no such file',
+    pass: (r) =>
+      r.status === 404 ||
+      (r.status === 200 &&
+        /^attachment/.test(r.headers['content-disposition'] ?? '') &&
+        r.headers['x-content-type-options'] === 'nosniff' &&
+        /sandbox/.test(r.headers['content-security-policy'] ?? '')),
+    detail: (r) =>
+      r.status === 404
+        ? 'no such file (pass --asset)'
+        : `${r.headers['content-disposition'] ?? 'inline'}; ${r.headers['content-security-policy'] ?? 'no policy'}`,
+  });
+  rows.push({
+    name: 'cross site text/plain POST',
+    path: `/api/actions/slide.remove?deck=${encodeURIComponent(deck)}`,
+    init: {
+      method: 'POST',
+      headers: { 'content-type': 'text/plain', origin: 'https://evil.example' },
+      body: '{"id":"title"}',
+    },
+    expect: '401, 403 or 415, never a write',
+    pass: (r) => r.status === 401 || r.status === 403 || r.status === 415,
+    detail: (r) => `${r.status}`,
+  });
+  rows.push({
+    name: 'unsigned thumbnail',
+    path: `/api/render/title?deck=${encodeURIComponent(deck)}&theme=light&w=160`,
+    expect:
+      '403 in enforce mode (SPEC-3 8.13), 200 in shadow mode, or 404 for a deck without that slide',
+    pass: (r) => r.status === 403 || r.status === 200 || r.status === 404,
+    detail: (r) =>
+      r.status === 403
+        ? 'enforce: refused without the grant'
+        : r.status === 200
+          ? 'shadow: served and logged'
+          : 'no such slide',
+  });
+  rows.push({
+    name: 'csp report endpoint',
+    path: '/api/x/csp/report',
+    init: {
+      method: 'POST',
+      headers: { 'content-type': 'application/csp-report' },
+      body: JSON.stringify({
+        'csp-report': {
+          'document-uri': `${base}new`,
+          'violated-directive': 'script-src',
+          'blocked-uri': 'inline',
+        },
+      }),
+    },
+    expect: '204',
+    pass: (r) => r.status === 204,
+    detail: (r) => `${r.status}`,
+  });
+  if (args.restricted) {
+    for (const path of [
+      `/deck/${args.restricted}`,
+      `/api/actions/deck.info?deck=${encodeURIComponent(args.restricted)}`,
+    ]) {
+      rows.push({
+        name: `restricted ${path.split('?')[0]}`,
+        path,
+        expect: '404 or 401 without a right, no detail',
+        pass: (r) =>
+          (r.status === 404 || r.status === 401) && !/owner|grant|restricted/i.test(r.text),
+        detail: (r) => `${r.status}`,
+      });
+    }
+  }
+  return rows;
+}
+
+/** The rows that need B2's and B3's routes: listed as skipped with the flag that turns them on. */
+function skippedSecurityRows(args) {
+  const out = [];
+  if (!args.shareToken)
+    out.push({
+      name: '/s/<token> exchange',
+      why: 'pass --share-token <token> (SPEC-3 6.4; B3 route)',
+    });
+  if (!args.publishToken)
+    out.push({
+      name: '410 after unpublish',
+      why: 'pass --publish-token <token> (SPEC-3 6.4; B2 route)',
+    });
+  out.push({
+    name: 'private document 403',
+    why: 'the private store of SPEC-3 11.5 R2 is not connected this round',
+  });
+  out.push({
+    name: 'twin URL not derivable',
+    why: 'the storage layout v2 (d/<id>/<assetKey>/) lands with the migration',
+  });
+  if (!args.restricted)
+    out.push({ name: 'restricted 404', why: 'pass --restricted <deck id> with an access record' });
+  return out;
+}
+
 function pad(value, width) {
   const s = String(value);
   return s.length >= width ? s : s + ' '.repeat(width - s.length);
@@ -376,12 +557,15 @@ async function main() {
   }
   const base = args.url.endsWith('/') ? args.url : `${args.url}/`;
   const asset = args.asset ?? firstTwin(args.deck);
-  const rows = checks(args.deck, asset);
+  const rows = [...checks(args.deck, asset), ...securityChecks(base, args.deck, args)];
   const results = [];
   for (const row of rows) {
-    const r = await probe(base, row.path, args.timeoutMs);
+    const r = await probe(base, row.path, args.timeoutMs, row.init ?? {});
     const ok = r.error === undefined && row.pass(r);
     results.push({ row, r, ok });
+  }
+  for (const skipped of skippedSecurityRows(args)) {
+    console.log(`skip  ${skipped.name}: ${skipped.why}`);
   }
   // the round two rows, with the bearer (SPEC-2 8.1, 8.2)
   const headers = bearerHeaders(args.tokenEnv);

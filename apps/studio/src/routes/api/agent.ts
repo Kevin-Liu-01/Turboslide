@@ -1,10 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { createDispatcher } from '@turboslide/agent/dispatch';
+import { refuseSpoofedLocalhost } from '@turboslide/agent/http/dispatch';
 import { jsonResponse } from '@turboslide/agent/http/errors';
 import { runtimeManifest } from '@turboslide/agent/http/manifest';
 
 import { DEFAULT_DECK, deckDispatcher } from '../../server/actions';
-import { requireAgentAuth } from '../../server/auth';
+import { agentAuth, requireAgentAuth } from '../../server/auth';
+import { refuseForeignOrigin } from '../../server/headers';
 import { studioSessions } from '../../server/sessions';
 
 // GET /api/agent (SPEC 3.4, 7.4, 7.5; MILESTONES M4 item 1): the manifest an agent reads first.
@@ -14,6 +16,8 @@ import { studioSessions } from '../../server/sessions';
 // pages, and the window API's action list under `actions`, which the window-api spec compares
 // with describe().actions in the page. ?deck= names the deck whose dispatcher is described; an
 // unknown deck still answers, with the pending list saying every action waits for a deck.
+// The localhost rule holds only when every host the request names is local (gslides-parity
+// SPEC-3 8.8, TURBOSLIDE_TRUST_PROXY; server/headers.ts).
 
 export const Route = createFileRoute('/api/agent')({
   server: {
@@ -21,6 +25,13 @@ export const Route = createFileRoute('/api/agent')({
       GET: async ({ request }) => {
         const denied = requireAgentAuth(request);
         if (denied) return denied;
+        const auth = agentAuth(request);
+        if (auth.ok && auth.mode === 'localhost') {
+          const spoofed = refuseSpoofedLocalhost(request);
+          if (spoofed !== null) return spoofed;
+        }
+        const foreign = refuseForeignOrigin(request);
+        if (foreign !== null) return foreign;
         const url = new URL(request.url);
         const deckId = url.searchParams.get('deck') || DEFAULT_DECK;
         let dispatcher;

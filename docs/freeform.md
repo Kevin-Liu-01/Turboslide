@@ -97,6 +97,8 @@ A plain `slide.set /layout` from freeform to a grammar layout is refused by the 
 
 `packages/render/src/blocks/primitives.ts` renders the five primitives. A shape is inline SVG at the box's size on the half-pixel grid for a 1 px stroke, with `stroke-linecap="square"` and no joins (report 03 section 5.11, `DECK-GRAMMAR.md:44`); an arrow shortens its line by the head length at each headed end and fills the head in the stroke color. The svg carries `data-shape`, and for a line or arrow `data-from`, `data-to` and `data-heads` in the box's own pixels, which the exporter reads back. Typography is inline declarations after the block's own styles (`typographyDeclarations`); colors go through `colorCss`. The CSS is in `block-css.ts` under the freeform comment, on the tokens; every line is 1 px, drawn once.
 
+The block level dither of round three (gslides-parity SPEC-3 10.3): a `picture` or `shot` with a `dither` field renders with `data-dither`, `data-dither-key`, `data-dither-state` and `data-dither-source` on its root (`blocks/dither-attrs.ts`). In state `variant` the image is the materialized twin the asset record lists for the key; in state `live` the image stays the continuous twin and, in a live render only, a `<canvas class="picture-dither">` sits over it at the screen size (the box over the cell) for the runtime to draw (`dither-runtime.ts`, `image-rendering: pixelated`, absolute inside the box so a toggle moves nothing). The key is the sha256 of the source path, the resolved field and the screen in cells (`dither-key.ts`), the same derivation `picture.materialize` and the exporter use.
+
 ## 6. The linter
 
 `packages/lint/src/static/freeform.ts`, `color.ts`, `type.ts`:
@@ -117,6 +119,8 @@ The fixture deck (`packages/lint/src/fixtures/deck.ts`) plants every one on the 
 Flatten mode is unchanged: the whole sheet is one 2x raster over the invisible text layer, and the text of `text` and `box` blocks is in that layer through their `data-run` carriers.
 
 Native mode (`packages/export/src/scene/measure.ts`, `pptx/lines.ts`, `pptx/build.ts`): `text`, `box`, `shape` and `rule` join `NATIVE_BLOCK_TYPES`. A box is a `SceneRect` with role `box` from its computed background, border and corner radius; a closed shape is a `SceneRect` with role `shape` and `shape` `rect`, `roundRect` or `ellipse` from the inner element's computed fill and stroke (a shape with no fill measures `rgba(0, 0, 0, 0)` and travels as `fill: { type: 'none' }`); a line or arrow is a `SceneSegment` on `scene.lines`, from the svg's `data-from` and `data-to` scaled to its box, and travels as a native line with `beginArrowType` or `endArrowType` `triangle`, flipped when its end lies left of or above its start; a rule is a `SceneRule` with role `rule`. The icon block stays a raster. `TEXT_BLOCK_TYPES` and `LINE_BLOCK_TYPES` in `verify/budgets.ts` know the new types, so the verify loop measures them against the right budget. The importer is unchanged apart from its total id map over `BlockType`.
+
+Dithered pictures (gslides-parity SPEC-3 10.4): the export materializes the missing variants before the shoot and reads variant files on every page; a covering picture whose dither is a plain two tone plane travels as the slide background from the variant file's bytes; the residual carries one `dither:` line per dithered picture. docs/pptx.md "Dithered pictures" has the rules.
 
 ## 8. What the studio owns
 

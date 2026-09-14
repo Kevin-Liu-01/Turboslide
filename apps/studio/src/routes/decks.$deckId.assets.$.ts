@@ -4,6 +4,7 @@ import { Readable } from 'node:stream';
 
 import { createFileRoute } from '@tanstack/react-router';
 
+import { assetResponseHeaders } from '../server/headers';
 import { storedAssetFile, storedAssetUrl } from '../server/root';
 
 // GET /decks/:deckId/assets/*: the asset twins of a deck (SPEC 4.1), which the rendered slides
@@ -13,6 +14,11 @@ import { storedAssetFile, storedAssetUrl } from '../server/root';
 // another instance redirects to the twin's Blob URL. The path is confined to the deck's assets
 // folder by the store. On Vercel the seed deck's twins are also static files of the deployment
 // (vite.deploy.config.ts publicAssets), so the CDN answers those before this route runs.
+//
+// Every file goes out with `X-Content-Type-Options: nosniff`, and an `.svg`, a `.json` or any
+// file outside the four raster types goes out as an attachment under a sandboxing policy
+// (gslides-parity SPEC-3 0.28, 11.3, 11.5 R0; report 04 F5: an svg served inline here was stored
+// script in the app's origin). server/headers.ts assetResponseHeaders is the rule and its test.
 const TYPES: Record<string, string> = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
@@ -35,15 +41,17 @@ export const Route = createFileRoute('/decks/$deckId/assets/$')({
         if (file !== null && statSync(file).isFile()) {
           const type = TYPES[extname(file).toLowerCase()] ?? 'application/octet-stream';
           const body = Readable.toWeb(createReadStream(file)) as ReadableStream;
-          return new Response(body, {
-            headers: { 'content-type': type, 'cache-control': 'public, max-age=60' },
-          });
+          return new Response(body, { headers: assetResponseHeaders(relative, type) });
         }
         const url = await storedAssetUrl(params.deckId, relative);
         if (url !== null) {
           return new Response(null, {
             status: 302,
-            headers: { location: url, 'cache-control': 'public, max-age=60' },
+            headers: {
+              location: url,
+              'cache-control': 'public, max-age=60',
+              'x-content-type-options': 'nosniff',
+            },
           });
         }
         return new Response('Not found', { status: 404 });

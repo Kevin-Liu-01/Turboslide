@@ -3,7 +3,8 @@
 // block itself (report 05 section 6.1), numerals that contradict each other across slides, and a
 // numeral equal to the slide count in copy that should derive from the deck (report 06 section 4
 // item 2). The export/non-native listing moved to export-non-native.ts in M2.
-import type { Finding } from '../contracts.ts';
+import { sanitizeCss, sanitizeMarkup } from '@turboslide/render/blocks/html-escape';
+import type { Finding, Mutation } from '../contracts.ts';
 import { slideTitle } from '../contracts.ts';
 import type { LintContext } from '../context.ts';
 import { blockTexts, slideTexts } from '../context.ts';
@@ -60,6 +61,51 @@ export function checkStructure(ctx: LintContext): Finding[] {
             proposal: `Express the block in the grammar (${block.note}); until then it exports as a raster (report 05 section 6.1).`,
           }),
         );
+        // html/sanitize (gslides-parity SPEC-3 8.4): a block the sanitizer has not stamped. The
+        // fix is the cleaned markup and CSS with the stamp: the parser when it has loaded
+        // (`turboslide fix` loads it first), the pattern pass otherwise, and the write path
+        // repeats the parser pass on the block.set it commits.
+        if (block.htmlSanitized !== true) {
+          const markup = sanitizeMarkup(block.html);
+          const css = sanitizeCss(block.css);
+          const fix: Mutation[] = [];
+          if (markup.changed) {
+            fix.push({
+              op: 'block.set',
+              slideId: slide.id,
+              blockId: block.id,
+              path: '/html',
+              value: markup.html,
+            });
+          }
+          if (css.dropped.length > 0) {
+            fix.push({
+              op: 'block.set',
+              slideId: slide.id,
+              blockId: block.id,
+              path: '/css',
+              value: css.css,
+            });
+          }
+          fix.push({
+            op: 'block.set',
+            slideId: slide.id,
+            blockId: block.id,
+            path: '/htmlSanitized',
+            value: true,
+          });
+          out.push(
+            ctx.finding('html/sanitize', slide.id, {
+              blockId: block.id,
+              path: `${ref.path}/htmlSanitized`,
+              text: `${markup.changed ? 'markup changed' : 'markup unchanged'}; ${css.dropped.length} CSS declaration(s) dropped${markup.parsed ? '' : '; pattern pass only until the parser loads'}`,
+              measured: { droppedCss: css.dropped.length, markupChanged: markup.changed ? 1 : 0 },
+              proposal:
+                'This HTML block has not passed the sanitizer. `turboslide fix --rule html/sanitize` writes the cleaned HTML and CSS and records that they passed; the next edit of the block repeats the check with the parser.',
+              fix,
+            }),
+          );
+        }
         if (/class="scale"/.test(block.html) && /<i\s+style="[^"]*left\s*:/.test(block.html)) {
           out.push(
             ctx.finding('scales/marker-equals-value', slide.id, {

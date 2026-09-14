@@ -182,3 +182,42 @@ Since the Google Slides parity round (gslides-parity SPEC 6.2 to 6.5) the pages 
   `--no-versions` unpacks with an empty history.
 - The MCP and HTTP transports do not offer the four actions (they take paths on the caller's
   machine); the routes above are the hosted surface.
+
+## 8. The Google Slides parity round three: the comments group and deck follow
+
+The bundle gains a third group. `manifest.json` may carry `comments`, a map like `documents` and
+`assets` over `comments/index.json`, `comments/<threadId>.json` and `comments/authors.json`, the
+comments sidecar of `docs/gslides-parity/SPEC-3.md` section 2.2. The group is opt-in: `turboslide
+deck pack --comments` (`packDeckDir(dir, { comments: true })`) writes it, and without the flag a
+bundle has the bytes it had before the group existed, so `packages/store/src/bundle.test.ts`
+asserts a pack with and without comments byte for byte. The group is absent from the manifest when
+the deck has no sidecar, and a bundle from an older studio has no `comments` key; both read as
+before. On the way in (`inspectBundle`) every file of the group is checked before any write:
+`index.json` against `commentsIndexSchema` and naming this deck, `authors.json` against
+`commentAuthorsSchema`, every other file against `threadSchema` with its id equal to its file name
+and its deck equal to the bundle's; a thread that does not validate refuses the whole bundle, as a
+bad slide does. Unpacked under another id (`--as`), the sidecar's `deckId` is rewritten with the
+new id in canonical form.
+
+Two records never travel and are dropped on the way in whether or not a manifest lists them:
+`access.json` (the owner, the grants, the links) and `leases.json`; the `.turboslide/` state folder
+stays out as before. `listDeckFiles` never lists `access.json` as a sidecar, so a mirror folder
+of the Blob store, which holds the record beside `deck.json`, packs without it; and an archive
+that smuggles one in reads with the record dropped (`InspectedBundle.dropped` names it). A deck a
+person shares after unpacking gets a fresh record from `share.claim`.
+
+`turboslide deck follow <id> --from <studio> [--push] [--comments] [--once]` (SPEC-3 3.7 f; B1's
+`apps/cli/src/commands/follow.ts`) mirrors a hosted deck into the checkout as it changes: the
+command long polls `deck.watch { since }` through the agent route with the saved API key, applies
+every version record the host holds past the local revision forward through the `FileStore` with
+the record's author and note and the same reducer, checks the result's revision against the host's,
+and with `--comments` mirrors the sidecar from `comment.list` into `decks/<id>/comments/`. On the
+hosted side the records it reads are the ones the room's checkpointer writes
+(`apps/studio/src/server/checkpoint.ts`): a typing session lands as one record per author and
+contiguous run, so a follower sees the same history a person sees in Version history, and a
+comment added in a tab reaches the follower at the next checkpoint (2 s idle, 10 s at most).
+`--push` sends the records the host lacks as writes under the per slide conflict rule; a record
+that spans several slides or the deck level is listed as a conflict for `deck push`. The local
+editor on the dev server shows a followed record as it shows any CLI write: through the room's
+follower (`Room.follow`), which turns a record written outside the room into stream entries so
+every open tab applies it live.

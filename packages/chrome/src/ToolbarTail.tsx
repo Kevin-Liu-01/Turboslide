@@ -36,7 +36,13 @@ import { useMountEffect } from './lib/useMountEffect';
 import { Menu } from './Menu';
 import { evaluate, itemById, visibleItems } from './menus/model';
 import type { MenuItem } from './menus/model';
-import { HIDE_MENUS_CONTROL, MORE_BREAKPOINT_PX, tailFor } from './menus/toolbar-tails';
+import {
+  HIDE_MENUS_CONTROL,
+  MORE_BREAKPOINT_PX,
+  TOOLBAR_TAIL_END,
+  tailFor,
+} from './menus/toolbar-tails';
+import { PRESENCE } from './menus/strings';
 import type { TailControl, TailKind, TailOp } from './menus/toolbar-tails';
 import { ColorPlate, anchoredAt } from './pickers/ColorPlate';
 import { DashList } from './pickers/DashList';
@@ -785,6 +791,36 @@ export function ToolbarTail() {
         })
       )}
       <span className="ts-tb-spring" aria-hidden="true" />
+      {/* the tail's end (SPEC-3 4.4, 6.3, 13.2): the pointer toggle for editors, the View only
+          button for a viewer on the editor route; each present only when its predicate says so */}
+      {TOOLBAR_TAIL_END.filter((control) => evaluate(control.when, menuContext)).map((control) => {
+        if (control.control === 'toolbar.pointer') {
+          const on = input.presence?.pointerMine ?? shell.settings.pointerMine === true;
+          return (
+            <span key={control.control} className="ts-tb-slot ts-tb-end" data-control="toolbar.end">
+              <ToolbarButton
+                control={{
+                  ...control,
+                  label: on ? PRESENCE.showingMyPointer : PRESENCE.showMyPointer,
+                }}
+                pressed={on}
+                onClick={() => {
+                  if (input.presence?.onPointer) input.presence.onPointer(!on);
+                  else shell.setSetting('pointerMine', !on);
+                }}
+              />
+            </span>
+          );
+        }
+        return (
+          <span key={control.control} className="ts-tb-slot ts-tb-end" data-control="toolbar.end">
+            <ToolbarButton
+              control={control}
+              onClick={() => shell.openDialog({ id: 'requestAccess', role: 'editor' })}
+            />
+          </span>
+        );
+      })}
       <ToolbarButton control={hideControl} onClick={() => shell.setCompact(true)} />
       {plate !== null ? (
         plate.plate.kind === 'menu' ? (

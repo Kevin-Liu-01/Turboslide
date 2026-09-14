@@ -83,6 +83,25 @@ describe('every action', () => {
           'deck.push',
           'deck.pull',
           'source.apply',
+          // round three's writes to page state, the principal record, the inbox, the identity
+          // store, a checkout mirror, the request list and the flags (gslides-parity SPEC-3 12):
+          // no revisioned record to base on; the comment writes take the comments revision
+          'presence.follow',
+          'presence.unfollow',
+          'presence.pointer',
+          'deck.follow',
+          'notification.markRead',
+          'notification.settings',
+          'share.requestAccess',
+          'account.tokens.create',
+          'account.tokens.revoke',
+          'account.setName',
+          'account.setAvatar',
+          'account.signOut',
+          'account.forget',
+          'admin.bootstrap',
+          'admin.flag',
+          'admin.migrateStorage',
         ];
         if (!noBase.includes(spec.id))
           expect(JSON.stringify(spec.example), `${spec.id} baseRevision`).toContain('baseRevision');
@@ -97,7 +116,9 @@ describe('every action', () => {
 
   it('is named in at least one test or spec file once its milestone has landed', () => {
     const files = testFiles();
-    const landed: ReadonlySet<string> = new Set(['M1', 'M2', 'M3', 'M4', 'GS1', 'GS2']);
+    // GS3 is the round in progress (gslides-parity MILESTONES-3): its 64 ids are named by
+    // packages/schema/src/actions-gs3.test.ts from day one and by their own tests as they land
+    const landed: ReadonlySet<string> = new Set(['M1', 'M2', 'M3', 'M4', 'GS1', 'GS2', 'GS3']);
     const named = (spec: (typeof rows)[number][1]): string[] => [
       `'${spec.id}'`,
       `"${spec.id}"`,

@@ -22,6 +22,7 @@ import type { PresentIcons, PresentTip } from '@turboslide/viewer/present/ui';
 import { installThemeBridge, readTheme, useTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
+import { PresenterSkeleton } from '../components/PresenterSkeleton';
 import { useMountEffect } from '../components/useMountEffect';
 import { useStudioSession } from '../components/useStudioSession';
 import { readEditorDeck } from '../server/write';
@@ -49,6 +50,9 @@ export function validatePresentSearch(search: Record<string, unknown>): PresentS
 export const Route = createFileRoute('/present/$deckId')({
   ssr: false,
   validateSearch: validatePresentSearch,
+  // first paint carries the console's grid while the loader answers (SPEC-3 9.2 P1)
+  pendingComponent: PresenterSkeleton,
+  pendingMs: 0,
   beforeLoad: ({ params, search }) => {
     if (search.screen === 1) {
       throw redirect({

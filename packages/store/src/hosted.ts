@@ -35,6 +35,15 @@ import type {
 } from './templates.ts';
 import { tmpDecks } from './tmp-store.ts';
 
+// The deck's side records of round three (gslides-parity SPEC-3 2.2, 11.2: `HostedDecks.access`,
+// `writeAccess`, the per identity index) live in access-store.ts, comments-store.ts and inbox.ts
+// and are reachable through this entry as well as their own subpaths (build-3/b2.md R7 asks the
+// integrator for the entries; until they land the studio imports them from here).
+export * from './access-store.ts';
+export * from './comments-store.ts';
+export * from './inbox.ts';
+export * from './migrate.ts';
+
 /** What the deck list and the editor banner show about the store. */
 export type HostingFacts = {
   store: StoreKind;

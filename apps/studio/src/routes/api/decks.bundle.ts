@@ -5,12 +5,23 @@ import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { BUNDLE_MAX_BYTES } from '@turboslide/store/bundle';
 
 import {
+  authorize,
+  contextForIdentity,
+  denialBody,
+  identityLabel,
+  requestContext,
+} from '../../server/authorize';
+import type { AuthContext } from '../../server/authorize';
+import {
   ANY_SUBJECT,
   UPLOAD_PURPOSE,
-  bundleRouteAuth,
+  bundleRouteAdmission,
   fetchBundleFromUrl,
   importDeckBundle,
 } from '../../server/bundle-core';
+import { assertFlag } from '../../server/flags';
+import { RateLimitedError, checkQuota, rateLimitedResponse, tierOf } from '../../server/ratelimit';
+import { ensureDecks } from '../../server/root';
 
 // POST /api/decks/bundle (docs/deck-transfer.md): uploads a deck bundle and creates the deck it
 // holds on this studio, or replaces one. The body is the zip itself (`application/zip` or
@@ -122,16 +133,61 @@ export const Route = createFileRoute('/api/decks/bundle')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const denied = bundleRouteAuth(request, UPLOAD_PURPOSE, ANY_SUBJECT);
-        if (denied) return denied;
+        const admission = bundleRouteAdmission(request, UPLOAD_PURPOSE, ANY_SUBJECT);
+        if (admission instanceof Response) return admission;
+        // the identity behind the request (gslides-parity SPEC-3 8.2: a ticket carries the identity
+        // it was minted for and is checked against `write` on the target): the ticket's, the
+        // bearer's admin, or a checkout's open localhost holder
+        const ctx: AuthContext =
+          admission.kind === 'ticket'
+            ? contextForIdentity(admission.identity)
+            : await requestContext(request);
+        const identity = identityLabel(ctx) ?? 'anonymous';
+        try {
+          await assertFlag('readOnly', { identity, action: 'deck.unpack' });
+        } catch (error) {
+          return Response.json(
+            { error: 'unavailable', message: error instanceof Error ? error.message : 'read only' },
+            { status: 503, headers: { 'retry-after': '60' } },
+          );
+        }
         const length = Number(request.headers.get('content-length') ?? 0);
         if (length > BUNDLE_MAX_BYTES) return tooLarge(length);
+        if (admission.kind !== 'ticket') {
+          // the ticket paid the bundles per day quota when it was minted; the others pay here
+          const refused = await checkQuota('bundlesPerDay', {
+            identity,
+            tier: tierOf(ctx),
+            action: 'deck.unpack',
+            transport: 'route',
+          });
+          if (refused instanceof RateLimitedError) return rateLimitedResponse(refused);
+        }
         const read = await bundleBytes(request);
         if (read instanceof Response) return read;
         if (read.zip.byteLength === 0) return badRequest('the body is empty; post the bundle zip');
+        const bytesRefused = await checkQuota(
+          'bundleBytesPerDay',
+          { identity, tier: tierOf(ctx), action: 'deck.unpack', transport: 'route' },
+          read.zip.byteLength,
+        );
+        if (bytesRefused instanceof RateLimitedError) return rateLimitedResponse(bytesRefused);
         const url = new URL(request.url);
         const options = optionsOf(url, read.body);
         if (options instanceof Response) return options;
+        // replacing a deck that exists needs `write` on it for the identity behind the ticket
+        if (
+          options.as !== undefined &&
+          options.replace &&
+          (await (await ensureDecks()).has(options.as))
+        ) {
+          const decision = await authorize(ctx, options.as, 'write', {
+            action: 'deck.unpack',
+            transport: 'route',
+          });
+          if (!decision.ok)
+            return Response.json(denialBody(decision, 'write'), { status: decision.status });
+        }
         try {
           const result = await importDeckBundle(read.zip, options);
           return Response.json(result, {
@@ -146,8 +202,8 @@ export const Route = createFileRoute('/api/decks/bundle')({
         }
       },
       GET: async ({ request }) => {
-        const denied = bundleRouteAuth(request, UPLOAD_PURPOSE, ANY_SUBJECT);
-        if (denied) return denied;
+        const admission = bundleRouteAdmission(request, UPLOAD_PURPOSE, ANY_SUBJECT);
+        if (admission instanceof Response) return admission;
         return refuse(
           405,
           'method_not_allowed',

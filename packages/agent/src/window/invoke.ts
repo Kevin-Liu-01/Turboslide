@@ -96,10 +96,18 @@ export async function invokeAction(
       return null;
     }
     default: {
-      if (adapter.invoke) return adapter.invoke(action, input);
-      throw new RangeError(
-        `The active ${adapter.owner} owner does not expose the "${action}" action.`,
-      );
+      if (!adapter.invoke) {
+        throw new RangeError(
+          `The active ${adapter.owner} owner does not expose the "${action}" action.`,
+        );
+      }
+      // the nonce guard (SPEC-3 6.6): a guarded action needs the page's nonce in its input
+      if (adapter.guard !== undefined) {
+        const checked = adapter.guard(action, input);
+        if (!checked.ok) throw checked.error;
+        return adapter.invoke(action, checked.input);
+      }
+      return adapter.invoke(action, input);
     }
   }
 }

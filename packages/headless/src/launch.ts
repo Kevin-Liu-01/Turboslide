@@ -118,6 +118,23 @@ export const SPARTICUZ_DROPPED_PREFIXES: readonly string[] = [
 ];
 
 /**
+ * The two switches of the serverless package that relax the browser's own security (gslides-parity
+ * SPEC-3 8.10; report 04 F18): dropped under `TURBOSLIDE_WEB_SECURITY=strict`. The default keeps
+ * them until the verifier's preview run shows the `file://` subresource fixture rendering without
+ * them (docs/gslides-parity/build-3/b4.md records the measurement), then the default flips.
+ */
+export const WEB_SECURITY_PREFIXES: readonly string[] = [
+  '--disable-web-security',
+  '--allow-running-insecure-content',
+];
+
+export const WEB_SECURITY_ENV = 'TURBOSLIDE_WEB_SECURITY';
+
+export function strictWebSecurity(env: NodeJS.ProcessEnv = process.env): boolean {
+  return env[WEB_SECURITY_ENV]?.trim().toLowerCase() === 'strict';
+}
+
+/**
  * chromium.args with the conflicts above removed and the deck's SwiftShader flags deduplicated.
  * What stays and matters: `--single-process`, `--no-zygote` and `--in-process-gpu` (one process
  * in the function), `--disable-setuid-sandbox`, `--font-render-hinting=none` (the package's
@@ -125,11 +142,16 @@ export const SPARTICUZ_DROPPED_PREFIXES: readonly string[] = [
  * default hinting), `--disable-web-security` and `--allow-running-insecure-content` (harmless on
  * the file:// documents the renderer loads), the cache and nudge switches.
  */
-export function sparticuzExtraArgs(args: readonly string[]): string[] {
+export function sparticuzExtraArgs(
+  args: readonly string[],
+  options: { strictWebSecurity?: boolean } = {},
+): string[] {
   const base = new Set<string>(LAUNCH_ARGS.swiftshader);
+  const strict = options.strictWebSecurity ?? strictWebSecurity();
   const out: string[] = [];
   for (const arg of args) {
     if (SPARTICUZ_DROPPED_PREFIXES.some((prefix) => arg.startsWith(prefix))) continue;
+    if (strict && WEB_SECURITY_PREFIXES.some((prefix) => arg.startsWith(prefix))) continue;
     if (base.has(arg) || out.includes(arg)) continue;
     out.push(arg);
   }

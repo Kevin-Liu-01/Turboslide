@@ -70,6 +70,7 @@ export const RULE_IDS = [
   'freeform/off-sheet',
   'scales/marker-equals-value',
   'escape/html-block',
+  'html/sanitize',
   'export/non-native',
   'numbers/contradiction',
   'count/hard-coded',
@@ -557,6 +558,15 @@ export const RULES: Readonly<Record<RuleId, Rule>> = {
     'an html block exists; export is raster for it',
     false,
     'report 05 section 6.1',
+  ),
+  'html/sanitize': rule(
+    'html/sanitize',
+    'static',
+    2,
+    'defect',
+    'an html block without the htmlSanitized stamp: markup and CSS the parser and the tokenizer have not passed; the fix writes the cleaned strings and the stamp, by hand, never inside migrate',
+    true,
+    'gslides-parity SPEC-3 8.4',
   ),
   'export/non-native': rule(
     'export/non-native',

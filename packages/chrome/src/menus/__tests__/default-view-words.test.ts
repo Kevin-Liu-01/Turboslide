@@ -6,10 +6,16 @@ import { workedDocument } from '@turboslide/schema/fixtures';
 
 import { MENUS, TITLE_ROW_ITEMS, TOOLBAR_HEAD, TOOLBAR_TAIL_DEFAULT, allItems } from '../model.ts';
 import {
+  ACCESS_PAGE,
+  ACCOUNT,
+  ACTIVITY,
+  AGENT_SENTENCES,
   CANVAS,
   CANVAS_NOTICES,
   CHECKS,
+  COMMENTS,
   DIALOGS,
+  DITHER,
   DOWNLOAD_PROGRESS,
   ERRORS,
   FILMSTRIP,
@@ -18,10 +24,13 @@ import {
   GUIDES,
   HOME,
   IMPORT_PPTX,
+  INBOX,
   PANELS,
   PICKERS,
+  PRESENCE,
   PRESENT,
   PROMPTS,
+  REFUSALS,
   SNACKBARS,
   TITLE_ROW,
   WORD_ART,
@@ -29,12 +38,13 @@ import {
   stubClause,
   stubTooltip,
 } from '../strings.ts';
+import { TOOLBAR_TAIL_END } from '../toolbar-tails.ts';
 
-// The default view words (SPEC 12, R07 rule 22): none of the engineering words reaches a label,
-// a tooltip sentence or a stub clause of the menu model, the toolbar or the shared strings,
-// outside Tools > Advanced and Extensions > Agent access. The shell-level form of this test
-// (rendering /new and /edit) lands with the rest of B3; this one greps the data every surface is
-// generated from.
+// The default view words (SPEC 12, R07 rule 22; SPEC-3 15): none of the engineering words reaches
+// a label, a tooltip sentence or a stub clause of the menu model, the toolbar or the shared
+// strings, outside Tools > Advanced, Extensions > Agent access and the agent sentences of
+// SPEC-3 10.1 and 15. The shell-level form of this test (rendering /new and /edit) lands with the
+// rest of B3; this one greps the data every surface is generated from.
 
 const EXEMPT = (id: string): boolean =>
   id.startsWith('tools.advanced') || id === 'extensions.agentAccess';
@@ -87,7 +97,7 @@ describe('the menu model', () => {
   });
 
   it('keeps them out of the toolbar', () => {
-    for (const control of [...TOOLBAR_HEAD, ...TOOLBAR_TAIL_DEFAULT]) {
+    for (const control of [...TOOLBAR_HEAD, ...TOOLBAR_TAIL_DEFAULT, ...TOOLBAR_TAIL_END]) {
       clean(control.label, control.control);
       clean(control.doc, control.control);
       clean(control.disabledReason, control.control);
@@ -153,6 +163,27 @@ describe('the shared strings of SPEC 12', () => {
     /* the one dialog allowed the words, and the words it is allowed */
     expect(forbiddenWordsIn(agentAccess.title)).toEqual(['agent']);
     expect(forbiddenWordsIn(agentAccess.mcp)).toEqual(['MCP']);
+    /* round three (SPEC-3 6.8, 15): the refusals, the presence, comment, inbox, activity, account,
+       access page and dither words; the avatar tab "Glyph" is the spec's own label (0.22, 7.6) and
+       the one key exempted, recorded in build-3/b6.md for Kevin */
+    walk(REFUSALS, 'REFUSALS');
+    walk(PRESENCE, 'PRESENCE');
+    walk(COMMENTS, 'COMMENTS');
+    walk(INBOX, 'INBOX');
+    walk(ACTIVITY, 'ACTIVITY');
+    const { avatar, ...account } = ACCOUNT;
+    walk(account, 'ACCOUNT');
+    const { tabs, ...avatarWords } = avatar;
+    walk(avatarWords, 'ACCOUNT.avatar');
+    expect(tabs).toEqual(['Initials', 'Glyph', 'Dither', 'Picture']);
+    expect(forbiddenWordsIn(tabs.join(' '))).toEqual(['glyph']);
+    walk(ACCESS_PAGE, 'ACCESS_PAGE');
+    walk(DITHER, 'DITHER');
+    /* the agent sentences carry the nouns on purpose and never reach the default view (the
+       matcher reads whole words, so the plural "twins" passes it; "source" is caught) */
+    expect(forbiddenWordsIn(AGENT_SENTENCES.noContinuousSource)).toEqual(['source']);
+    expect(forbiddenWordsIn(AGENT_SENTENCES.agentTrust('a7f3'))).toEqual(['agent']);
+    expect(forbiddenWordsIn(AGENT_SENTENCES.materializeFirst)).toEqual([]);
   });
 
   it('spells the title row and the prompts as SPEC 12 does', () => {

@@ -25,6 +25,7 @@ import type { BlockSlot } from '@turboslide/schema/mutations';
 import { flagBoolean, flagList, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
 import { UsageError } from '../exit.ts';
+import { blockDitherCommand } from './dither.ts';
 import { AUTOFITS } from '@turboslide/schema/blocks';
 import { isClosedShapeKind } from '@turboslide/schema/shapes';
 
@@ -64,7 +65,9 @@ import {
   writeContext,
 } from '../write.ts';
 
-const USAGE = `usage: turboslide block <set|insert|remove|move|duplicate|align|distribute|order|group|ungroup|regroup|rotate|flip|crop|mask|reset-image|adjust|alt|shadow|autofit> ...
+const USAGE = `usage: turboslide block <set|insert|remove|move|duplicate|align|distribute|order|group|ungroup|regroup|rotate|flip|crop|mask|reset-image|adjust|alt|shadow|autofit|dither> ...
+  block dither <slideId>#<blockId> [--pattern bayer8] [--black 120 --white 230 --gamma 0.9] [--photograph] [--off]
+                                    the deck's two tone screen over a picture (picture.dither, gslides-parity SPEC-3 10.5)
   block set <slideId>#<blockId> <pointer> <value>     JSON when it parses (22, true, "x"), text otherwise (4/8)
   block set <slideId>#<blockId> <pointer> --delete    remove the property
   block insert <slideId> --slot <slot> [--after <blockId>] [--pos x,y,w,h] [--file block.json] < block.json
@@ -182,6 +185,8 @@ export async function block(ctx: CommandContext): Promise<number> {
       return blockShadowCommand(inner);
     case 'autofit':
       return blockAutofitCommand(inner);
+    case 'dither':
+      return blockDitherCommand(inner);
     default:
       throw new UsageError(`unknown subcommand "block ${sub ?? ''}"\n${USAGE}`);
   }

@@ -1,14 +1,28 @@
+import type { ReactNode } from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { PLATE_BOXES } from '@turboslide/effects/metrics';
 import type { TwoToneMetrics } from '@turboslide/effects/metrics';
 import type { Asset, TwoToneTreatment } from '@turboslide/schema/assets';
 import { twoToneTreatmentSchema } from '@turboslide/schema/assets';
+import type { Block, PictureDither } from '@turboslide/schema/blocks';
+import {
+  DITHER_DEFAULTS,
+  DITHER_PHOTOGRAPH_PRESET,
+  DITHER_TOGGLE_VALUE,
+  ditherPresetOf,
+  resolveDither,
+} from '@turboslide/schema/blocks/dither';
+import { DITHER_FRAME_EVENT, previewDither } from '@turboslide/viewer/dither';
 
 import type { EditorDispatch } from '../dispatch';
 import { InspectorControl } from '../InspectorControl';
 import { Seg } from '../Seg';
 import { ToolButton } from '../ToolButton';
+import { tipProps } from '../Tooltip';
+import { DITHER } from '../menus/strings';
+import { CheckField, NumberField, PanelButton, SelectField, ToggleRow } from './fields';
+import type { SectionWrite } from './fields';
 import { controlsFor } from './generate';
 
 import './dither.css';
@@ -213,7 +227,6 @@ export function DitherSection({
       source.current = null;
     };
     // the canvases draw the plate of the request's time; a plate change re-requests below
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createWorker, sourcePath, url]);
 
   /* every draft change asks the worker for both twins, 120 ms after the last one */
@@ -376,7 +389,7 @@ export function DitherSection({
               })),
             ]}
             value={plate ?? 'none'}
-            onChange={(next) => setPlate(next === 'none' ? undefined : (next as PlateSide))}
+            onChange={(next) => setPlate(next === 'none' ? undefined : next)}
             label={`${asset.id}: Plate options`}
             className="is-small"
             control={`asset.${asset.id}.plate.option`}
@@ -409,6 +422,505 @@ export function DitherSection({
           onClick={measure}
         />
       </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+// Round three: the Format options Dither section (gslides-parity SPEC-3 0.36, 0.37, 10.7; research-3
+// 06 4.7). The block level field on a shot or a picture object, in Google's position (after
+// Adjustments, before Drop shadow, where Recolor sits) with the tools' shared words (DITHER in
+// menus/strings.ts): Dither (the toggle, the field's presence), Preset (Neutral and Photograph,
+// highlighted by equality and never stored, 0.36), Pattern, Tone with a Steps stepper for the
+// original colours, Cell, Strength, Ink point, Paper point, Midtones, Invert, Light theme, the
+// Metrics line (reserved as "Not measured" until a frame speaks), Advanced (Blur, Thicken, Channel,
+// Seed) and Reset. Every row carries `data-control="formatOptions.dither.<row>"` and the Tooltip
+// primitive. A slider previews on every input event through the live overlay
+// (`EditorHandle.ditherPreview`, else the viewer's `previewDither`) and commits once on pointer up,
+// so the store sees one write per drag. The write is the field as `block.set /dither` in the page,
+// which is what `picture.dither` runs on the window transport (SPEC-3 10.5).
+
+export type DitherFormatSectionProps = {
+  block: Block;
+  write: SectionWrite;
+  /** The asset records, for the metrics a materialized variant recorded. */
+  assets?: Readonly<Record<string, Asset>>;
+};
+
+/** The field on a shot or a picture object, or undefined when the block has none. */
+export function ditherOf(block: Block): PictureDither | undefined {
+  if (block.type !== 'shot' && block.type !== 'picture') return undefined;
+  return block.dither;
+}
+
+/** The field with a patch applied; a value equal to its default is dropped so the stored field stays short. */
+export function patchDither(dither: PictureDither, patch: Partial<PictureDither>): PictureDither {
+  const next: Record<string, unknown> = { ...dither, ...patch };
+  for (const [key, value] of Object.entries(next)) {
+    if (value === undefined) delete next[key];
+    else if (key !== 'pattern' && (DITHER_DEFAULTS as Record<string, unknown>)[key] === value)
+      delete next[key];
+  }
+  if (next.pattern === undefined) next.pattern = DITHER_TOGGLE_VALUE.pattern;
+  return next as PictureDither;
+}
+
+/** The words of the metrics line (SPEC-3 10.7, 15): "Lit 8.9 percent", the plate clearance, the two warnings. */
+export function metricsWords(
+  metrics: {
+    litFraction?: number;
+    plateClear?: { litUnder: number; nearestLitPx: number };
+  } | null,
+): string {
+  if (metrics === null || metrics.litFraction === undefined) return DITHER.notMeasured;
+  const lit = metrics.litFraction;
+  const parts = [DITHER.lit((lit * 100).toFixed(1))];
+  if (metrics.plateClear !== undefined)
+    parts.push(
+      `${metrics.plateClear.litUnder} cells under the plate, ${metrics.plateClear.nearestLitPx} px to the nearest`,
+    );
+  if (lit < 0.02 || lit > 0.98) parts.push('one theme shows an empty sheet');
+  else if (lit < 0.08 || lit > 0.92) parts.push('a uniform screen; the picture needs an edge');
+  return parts.join('; ');
+}
+
+/** A range input that previews on every input and commits once on release, with a value field. */
+function PreviewSlider({
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  control,
+  disabled,
+  doc,
+  unit,
+  onPreview,
+  onCommit,
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  control: string;
+  disabled?: boolean;
+  doc?: string;
+  unit?: string;
+  onPreview: (value: number) => void;
+  onCommit: (value: number) => void;
+}) {
+  const [live, setLive] = useState<number | null>(null);
+  const shown = live ?? value;
+  const tip = tipProps({ name: label, ...(doc === undefined ? {} : { doc }) });
+  const commit = () => {
+    if (live !== null && live !== value) onCommit(live);
+    setLive(null);
+  };
+  return (
+    <div className={`ts-fo-slider ts-dither-row${disabled ? ' is-disabled' : ''}`}>
+      <span className="ts-fo-field-label">{label}</span>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={shown}
+        aria-label={label}
+        aria-valuetext={`${shown}${unit ?? ''}`}
+        data-control={`${control}.slider`}
+        disabled={disabled}
+        {...tip}
+        onChange={(event) => {
+          const next = Number(event.target.value);
+          setLive(next);
+          onPreview(next);
+        }}
+        onPointerUp={commit}
+        onKeyUp={commit}
+        onBlur={(event) => {
+          tip.onBlur(event);
+          commit();
+        }}
+      />
+      <NumberField
+        label={`${label} value`}
+        value={shown}
+        onCommit={onCommit}
+        control={control}
+        disabled={disabled}
+        step={step}
+        min={min}
+        max={max}
+        unit={unit}
+      />
+    </div>
+  );
+}
+
+/** An event whose target the handler compares with the element it sits on. */
+type TargetedEvent = { target: EventTarget; currentTarget: EventTarget };
+
+/** The handler only when the event started on the element itself, not on a control inside it. */
+function onSelf<TEvent extends TargetedEvent>(
+  handler: (event: TEvent) => void,
+): (event: TEvent) => void {
+  return (event) => {
+    if (event.target === event.currentTarget) handler(event);
+  };
+}
+
+/**
+ * A row of the section whose group carries the Tooltip primitive (SPEC-3 10.7: "every row carries
+ * `data-control` and the Tooltip primitive"; VERIFICATION-3 finding 14): the row's name and its
+ * sentence show after a rest over the label or the gaps between the options, and `data-tip` sits
+ * over the group's `data-control` for the audit's closest rule. The option buttons keep their own
+ * plates: a focus, a press or a key on one bubbles here and must neither replace the option's
+ * plate nor show one on a click, so those handlers act only on the row itself; the hover handlers
+ * stay as they are, because React sends the mouse enter to the row before the option and the
+ * option's schedule wins.
+ */
+function TipRow({ name, doc, children }: { name: string; doc: string; children: ReactNode }) {
+  const tip = tipProps({ name, doc });
+  return (
+    <div
+      className="ts-fo-row ts-dither-row"
+      {...tip}
+      onFocus={onSelf(tip.onFocus)}
+      onBlur={onSelf(tip.onBlur)}
+      onMouseDown={onSelf(tip.onMouseDown)}
+      onKeyDown={onSelf(tip.onKeyDown)}
+    >
+      <span className="ts-fo-field-label">{name}</span>
+      {children}
+    </div>
+  );
+}
+
+export function DitherFormatSection({ block, write, assets }: DitherFormatSectionProps) {
+  const words = DITHER;
+  const dither = ditherOf(block);
+  const on = dither !== undefined;
+  const current = dither ?? DITHER_TOGGLE_VALUE;
+  const resolved = resolveDither(current);
+  const preset = ditherPresetOf(current);
+  const [advanced, setAdvanced] = useState(false);
+  const [measured, setMeasured] = useState<{ litFraction: number } | null>(null);
+
+  /* the metrics line: the newest live frame of this block, else the variant a materialization recorded */
+  useEffect(() => {
+    setMeasured(null);
+    if (typeof document === 'undefined') return;
+    const onFrame = (event: Event) => {
+      const detail = (
+        event as CustomEvent<{ blockId?: string | null; litFraction?: number } | null>
+      ).detail;
+      if (detail?.blockId !== block.id || typeof detail.litFraction !== 'number') return;
+      setMeasured({ litFraction: detail.litFraction });
+    };
+    document.addEventListener(DITHER_FRAME_EVENT, onFrame);
+    return () => document.removeEventListener(DITHER_FRAME_EVENT, onFrame);
+  }, [block.id]);
+  const recorded = useMemo(() => {
+    if (!on || assets === undefined || (block.type !== 'shot' && block.type !== 'picture'))
+      return null;
+    const asset = assets[block.asset];
+    const variants = asset?.variants;
+    if (variants === undefined) return null;
+    const entries = Object.values(variants);
+    const latest = entries[entries.length - 1];
+    return latest?.metrics ?? null;
+  }, [assets, block, on]);
+
+  const commit = (next: PictureDither | null) => {
+    if (write.editor?.ditherPreview) write.editor.ditherPreview(block.id, null);
+    else previewDither(block.id, null);
+    write.report(
+      write.dispatch('block.set', {
+        slideId: write.slideId,
+        blockId: block.id,
+        path: '/dither',
+        ...(next === null ? {} : { value: next }),
+        baseRevision: write.revision,
+      }),
+    );
+  };
+  const patch = (fields: Partial<PictureDither>) => commit(patchDither(current, fields));
+  const preview = (fields: Partial<PictureDither>) => {
+    const draft = patchDither(current, fields);
+    if (write.editor?.ditherPreview) write.editor.ditherPreview(block.id, draft);
+    else previewDither(block.id, draft);
+  };
+  const disabled = write.busy || !on;
+
+  return (
+    <div className="ts-dither-section" data-dither-on={on ? '' : undefined}>
+      <CheckField
+        label={words.dither}
+        checked={on}
+        control="formatOptions.dither.on"
+        onChange={(checked) => commit(checked ? DITHER_TOGGLE_VALUE : null)}
+        disabled={write.busy}
+        doc={words.help}
+      />
+      <div className="ts-fo-row ts-dither-row">
+        <span className="ts-fo-field-label">{words.preset}</span>
+        <div className="ts-fo-buttons">
+          <PanelButton
+            label={words.neutral}
+            control="formatOptions.dither.preset.neutral"
+            pressed={preset === 'neutral'}
+            onClick={() =>
+              patch({
+                black: DITHER_DEFAULTS.black,
+                white: DITHER_DEFAULTS.white,
+                gamma: DITHER_DEFAULTS.gamma,
+              })
+            }
+            disabled={disabled}
+            doc="The screen's own tone: ink point 0, paper point 255, midtones 1"
+          />
+          <PanelButton
+            label={words.photograph}
+            control="formatOptions.dither.preset.photograph"
+            pressed={preset === 'photograph'}
+            onClick={() => patch({ ...DITHER_PHOTOGRAPH_PRESET })}
+            disabled={disabled}
+            doc="The deck's recorded look for a photograph: ink point 120, paper point 230, midtones 0.9"
+          />
+        </div>
+      </div>
+      <TipRow name={words.pattern} doc="How the screen arranges its cells">
+        <ToggleRow<PictureDither['pattern']>
+          label={words.pattern}
+          options={[
+            { value: 'bayer8', label: 'Bayer 8 by 8', doc: 'The deck’s screen' },
+            { value: 'bayer4', label: 'Bayer 4 by 4', doc: 'A coarser ordered screen' },
+            {
+              value: 'blue64',
+              label: 'Blue noise',
+              doc: 'A less ordered screen with no cross hatch',
+            },
+            {
+              value: 'random',
+              label: 'Random',
+              doc: 'A hashed screen; the seed is under Advanced',
+            },
+          ]}
+          pressed={resolved.pattern}
+          onToggle={(value) => patch({ pattern: value })}
+          control="formatOptions.dither.pattern"
+          disabled={disabled}
+        />
+      </TipRow>
+      <TipRow name={words.tone} doc="How many tones the picture keeps">
+        <ToggleRow<NonNullable<PictureDither['tone']>>
+          label={words.tone}
+          options={[
+            { value: 'two', label: 'Ink and paper', doc: 'The deck’s two tones' },
+            { value: 'three', label: 'Three tones', doc: 'Ink, titanium and paper' },
+            {
+              value: 'original',
+              label: 'Original colours',
+              doc: 'The picture’s own colours, posterised',
+            },
+          ]}
+          pressed={resolved.tone}
+          onToggle={(value) => patch({ tone: value })}
+          control="formatOptions.dither.tone"
+          disabled={disabled}
+        />
+      </TipRow>
+      {resolved.tone === 'original' ? (
+        <div className="ts-fo-row ts-dither-row">
+          <span className="ts-fo-field-label">Steps</span>
+          <NumberField
+            label="Steps"
+            value={resolved.steps}
+            min={2}
+            max={7}
+            step={1}
+            control="formatOptions.dither.steps"
+            onCommit={(value) => patch({ steps: Math.round(value) })}
+            disabled={disabled}
+          />
+        </div>
+      ) : null}
+      <TipRow name={words.cell} doc="The size of one cell of the screen, in sheet px">
+        <ToggleRow<'1' | '2' | '3' | '4'>
+          label={words.cell}
+          options={[
+            { value: '1', label: '1', doc: '1 sheet px per cell' },
+            { value: '2', label: '2', doc: '2 sheet px per cell, the deck’s cell' },
+            { value: '3', label: '3', doc: '3 sheet px per cell' },
+            { value: '4', label: '4', doc: '4 sheet px per cell' },
+          ]}
+          pressed={String(resolved.cell) as '1' | '2' | '3' | '4'}
+          onToggle={(value) => patch({ cell: Number(value) as 1 | 2 | 3 | 4 })}
+          control="formatOptions.dither.cell"
+          disabled={disabled}
+        />
+      </TipRow>
+      <PreviewSlider
+        label={words.strength}
+        value={Math.round(resolved.strength * 100)}
+        min={0}
+        max={100}
+        control="formatOptions.dither.strength"
+        unit="%"
+        doc="The screen's opacity over the picture; 100 is the pure two tone"
+        onPreview={(value) => preview({ strength: value / 100 })}
+        onCommit={(value) => patch({ strength: value / 100 })}
+        disabled={disabled}
+      />
+      <PreviewSlider
+        label={words.inkPoint}
+        value={resolved.black}
+        min={0}
+        max={255}
+        control="formatOptions.dither.black"
+        doc="Values at or below it become ink"
+        onPreview={(value) => preview({ black: value })}
+        onCommit={(value) => patch({ black: value })}
+        disabled={disabled}
+      />
+      <PreviewSlider
+        label={words.paperPoint}
+        value={resolved.white}
+        min={0}
+        max={255}
+        control="formatOptions.dither.white"
+        doc="Values at or above it become paper"
+        onPreview={(value) => preview({ white: value })}
+        onCommit={(value) => patch({ white: value })}
+        disabled={disabled}
+      />
+      <PreviewSlider
+        label={words.midtones}
+        value={resolved.gamma}
+        min={0.5}
+        max={2}
+        step={0.01}
+        control="formatOptions.dither.gamma"
+        doc="Below 1 lifts the midtones"
+        onPreview={(value) => preview({ gamma: value })}
+        onCommit={(value) => patch({ gamma: value })}
+        disabled={disabled}
+      />
+      <CheckField
+        label="Invert"
+        checked={resolved.invert}
+        control="formatOptions.dither.invert"
+        onChange={(checked) => patch({ invert: checked })}
+        disabled={disabled}
+        doc="Inverts the picture before the screen"
+      />
+      <TipRow
+        name={words.lightTheme}
+        doc="What the light theme shows: the inverse of the dark theme’s screen, or the same one"
+      >
+        <ToggleRow<'inverse' | 'same'>
+          label={words.lightTheme}
+          options={[
+            {
+              value: 'inverse',
+              label: 'Inverse',
+              doc: 'The light theme shows the inverse of the dark theme’s screen',
+            },
+            { value: 'same', label: 'Same', doc: 'Both themes show one screen' },
+          ]}
+          pressed={resolved.polarity === 'same' ? 'same' : 'inverse'}
+          onToggle={(value) => patch({ polarity: value === 'same' ? 'same' : 'auto' })}
+          control="formatOptions.dither.polarity"
+          disabled={disabled}
+        />
+      </TipRow>
+      <p
+        className="ts-dither-metrics"
+        data-control="formatOptions.dither.metrics"
+        aria-live="polite"
+        {...tipProps({ name: 'Metrics', doc: 'The share of lit cells and the plate clearance' })}
+      >
+        {on ? metricsWords(measured ?? recorded) : words.notMeasured}
+      </p>
+      <div className="ts-fo-row ts-dither-row">
+        <PanelButton
+          label={words.advanced}
+          control="formatOptions.dither.advanced"
+          pressed={advanced}
+          onClick={() => setAdvanced((open) => !open)}
+          disabled={write.busy}
+          doc="Blur, Thicken, Channel and Seed"
+          icon="chevron-down"
+        />
+        <PanelButton
+          label={words.reset}
+          control="formatOptions.dither.reset"
+          onClick={() => commit(DITHER_TOGGLE_VALUE)}
+          disabled={disabled}
+          doc="Back to the screen’s own tone; the dither stays on"
+          icon="arrow-uturn-left"
+        />
+      </div>
+      {advanced ? (
+        <div className="ts-dither-advanced">
+          <div className="ts-fo-row ts-dither-row">
+            <span className="ts-fo-field-label">Blur</span>
+            <NumberField
+              label="Blur"
+              value={resolved.blur}
+              min={0}
+              max={8}
+              step={0.1}
+              control="formatOptions.dither.advanced.blur"
+              onCommit={(value) => patch({ blur: value })}
+              disabled={disabled}
+              unit="px"
+            />
+          </div>
+          <div className="ts-fo-row ts-dither-row">
+            <span className="ts-fo-field-label">{words.thicken}</span>
+            <NumberField
+              label={words.thicken}
+              value={resolved.minFilter}
+              min={0}
+              max={9}
+              step={1}
+              control="formatOptions.dither.advanced.minFilter"
+              onCommit={(value) => patch({ minFilter: Math.round(value) })}
+              disabled={disabled}
+              unit="px"
+            />
+          </div>
+          <SelectField<NonNullable<PictureDither['channel']>>
+            label="Channel"
+            value={resolved.channel}
+            control="formatOptions.dither.advanced.channel"
+            options={[
+              { value: 'gray', label: 'Gray' },
+              { value: 'r', label: 'Red' },
+              { value: 'g', label: 'Green' },
+              { value: 'b', label: 'Blue' },
+            ]}
+            onChange={(value) => patch({ channel: value })}
+            disabled={disabled}
+            doc="The channel read as the tone"
+          />
+          <div className="ts-fo-row ts-dither-row">
+            <span className="ts-fo-field-label">Seed</span>
+            <NumberField
+              label="Seed"
+              value={resolved.seed}
+              min={-(2 ** 31)}
+              max={2 ** 31 - 1}
+              step={1}
+              control="formatOptions.dither.advanced.seed"
+              onCommit={(value) => patch({ seed: Math.round(value) })}
+              disabled={disabled}
+            />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -14,7 +14,7 @@
 // judge.bundle runs the judge command into the derived directory (MILESTONES M4 item 4). Not
 // registered here, so not offered as tools: asset.*, material.capture and view.goto, whose handlers
 // land with their packages.
-import { existsSync } from 'node:fs';
+import { existsSync, watch as fsWatch } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { delimiter, isAbsolute, join, resolve } from 'node:path';
 
@@ -37,6 +37,7 @@ import { validateDeck } from '@turboslide/schema/validate';
 import { makeDiagram } from '@turboslide/schema/diagrams';
 import { openFileStore } from '@turboslide/store/file-store';
 import type { FileStore } from '@turboslide/store/file-store';
+import { watchDeck } from '@turboslide/store/watch';
 import {
   COMPOSITE,
   CONTENT,
@@ -65,7 +66,10 @@ import type { LoadedDeck } from '../deck-files.ts';
 import { lintLists } from '../deps/theme.ts';
 import { EXIT } from '../exit.ts';
 import type { Output } from '../output.ts';
+import { registerRecordActions } from '../record-actions.ts';
+import { readIndex } from '../records/comments.ts';
 import { canvasCounts, registerStoreActions } from '../store-actions.ts';
+import { recordDeps } from '../write.ts';
 import { headlessCanvasMeasurer, headlessFitMeasurer } from '../deps/canvas.ts';
 import { build } from './build.ts';
 import { decksDirOfDeck, registerDeckActions } from './deck.ts';
@@ -524,12 +528,79 @@ function registerReadActions(dispatcher: Dispatcher, env: HandlerEnv): void {
   });
 }
 
+/** A command context over a handler env, for the record deps (the author, the cwd, the environment). */
+function commandContextOf(env: HandlerEnv): CommandContext {
+  const args = parseArgs([]);
+  return {
+    args,
+    out: { json: true, human: env.log, warn: env.log, result: () => undefined },
+    cwd: env.cwd,
+    env: env.processEnv,
+    author: env.author,
+    rest: [],
+    readStdin: async () => '',
+  };
+}
+
 // ---------------------------------------------------------------------------------------------
 // The deck:// resources over the deck directory and .turboslide/
 
-function fileDeckSource(env: HandlerEnv, deckId: string): DeckSource {
+/** The record deps of the resources: the same caller as the tools, so deck://inbox is the author's inbox. */
+function fileDeckSource(env: HandlerEnv, deckId: string, dispatcher: Dispatcher): DeckSource {
+  const context: ActionContext = { author: env.author, deckDir: env.dir };
+  const deps = recordDeps(commandContextOf(env), env.store);
   return {
     deckId,
+    comments: () => dispatcher.dispatch('comment.list', { state: 'all' }, context),
+    presence: () => dispatcher.dispatch('presence.list', {}, context),
+    inbox: () => dispatcher.dispatch('notification.list', {}, context),
+    // fs.watch over stdio (SPEC-3 3.7 g, 0.48): a document write moves the manifest and the
+    // slides, a comment write the comments resource, an inbox write the caller's notifications
+    subscribe: (onChange) => {
+      let commentsAt = -1;
+      try {
+        commentsAt = readIndex(env.dir, deckId).revision;
+      } catch {
+        // a torn index reads on the next change
+      }
+      const stopDeck = watchDeck(env.dir, (event) => {
+        const uris: string[] = [];
+        if (event.files.some((file) => file.startsWith('comments/'))) {
+          let revision = -1;
+          try {
+            revision = readIndex(env.dir, deckId).revision;
+          } catch {
+            revision = -1;
+          }
+          if (revision !== commentsAt) {
+            commentsAt = revision;
+            uris.push(`deck://${deckId}/comments`);
+          }
+        }
+        if (event.files.some((file) => !file.startsWith('comments/'))) {
+          uris.push(`deck://${deckId}/manifest`);
+          for (const file of event.files) {
+            const slide = /^slides\/([a-z0-9-]+)\.json$/.exec(file);
+            if (slide?.[1] !== undefined) uris.push(`deck://${deckId}/slides/${slide[1]}`);
+          }
+        }
+        if (uris.length > 0) onChange(uris);
+      });
+      const inboxDir = join(deps.stateDir, 'inbox');
+      let stopInbox: (() => void) | undefined;
+      try {
+        if (existsSync(inboxDir)) {
+          const watcher = fsWatch(inboxDir, () => onChange(['deck://inbox']));
+          stopInbox = () => watcher.close();
+        }
+      } catch {
+        stopInbox = undefined;
+      }
+      return () => {
+        stopDeck();
+        stopInbox?.();
+      };
+    },
     manifest: async () => readJson(join(env.dir, 'deck.json')),
     slides: async () =>
       slideRows(loadDeck(env.dir))
@@ -591,6 +662,10 @@ export function createDeckDispatcher(env: HandlerEnv): Dispatcher {
     diagrams: makeDiagram,
   };
   registerStoreActions(dispatcher, deps);
+  /* the record actions of round three (gslides-parity SPEC-3 12): comments, the inbox, activity,
+     sharing, the checkout's account facts, the flags, presence and sync reads, deck.watch and the
+     background picture and material (record-actions.ts) */
+  registerRecordActions(dispatcher, recordDeps(commandContextOf(env), env.store));
   /* deck.create and deck.copy make a sibling of this deck under the same decks/ folder; deck.rename
      and deck.set write this deck; deck.list, deck.trash and deck.restore read and stamp the folder */
   const decksDir = decksDirOfDeck(env.dir);
@@ -608,9 +683,10 @@ export function createDeckServer(
   version: string,
 ): ReturnType<typeof createMcpServer> {
   const context: ActionContext = { author: env.author, deckDir: env.dir };
+  const dispatcher = createDeckDispatcher(env);
   return createMcpServer({
-    dispatcher: createDeckDispatcher(env),
-    source: fileDeckSource(env, deckId),
+    dispatcher,
+    source: fileDeckSource(env, deckId, dispatcher),
     author: context.author,
     deckDir: context.deckDir,
     version,

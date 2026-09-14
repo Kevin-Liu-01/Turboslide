@@ -4,6 +4,14 @@
 import { describe, expect, test } from 'vitest';
 
 import type { Asset, Deck, DeckDocument, Slide } from '../contracts.ts';
+import {
+  FIXTURE_BACKGROUND_DITHER,
+  FIXTURE_BACKGROUND_KEY,
+  FIXTURE_DITHER_PLATE,
+  FIXTURE_STRENGTH_DITHER,
+  document as fixture,
+  fixtureDitherKey,
+} from '../fixtures/deck.ts';
 import { lintStatic } from '../lint-static.ts';
 import { creditCovers } from './asset.ts';
 import { slidePlateBox } from './picture.ts';
@@ -278,5 +286,174 @@ describe('asset rules', () => {
         'asset/license-missing',
       ),
     ).toEqual([]);
+  });
+
+  describe('the block level dither (gslides-parity SPEC-3 10.4)', () => {
+    const files = {
+      twins: { light: 'assets/h-light.png', dark: 'assets/h-dark.png' },
+      sourceFile: 'assets/h.jpg',
+    };
+    const key = fixtureDitherKey(files, FIXTURE_BACKGROUND_DITHER, [1600, 900]);
+    function continuous(metrics?: Asset['metrics']): Asset {
+      return {
+        id: 'h',
+        role: 'other',
+        alt: 'A harbour',
+        ...files,
+        size: [1600, 900],
+        scale: 1,
+        source: { kind: 'photo', origin: 'File:H.jpg', license: 'CC0 1.0', shareAlike: false },
+        inline: 'resample-1280',
+        ...(metrics !== undefined
+          ? {
+              variants: {
+                [key]: {
+                  key,
+                  twins: {
+                    light: 'assets/h.dither-x-light.png',
+                    dark: 'assets/h.dither-x-dark.png',
+                  },
+                  size: [1600, 900] as [number, number],
+                  scale: 2 as const,
+                  metrics,
+                  producedAt: '2026-09-13T00:00:00Z',
+                },
+              },
+            }
+          : {}),
+      };
+    }
+    function canvas(plate: boolean, stripDither = false): Slide {
+      return {
+        schemaVersion: 1,
+        id: 'c',
+        kind: 'content',
+        layout: { type: 'freeform' },
+        slots: {
+          main: [
+            {
+              id: 'bg',
+              type: 'picture',
+              asset: 'h',
+              dither: FIXTURE_BACKGROUND_DITHER,
+              pos: { x: 0, y: 0, w: 1600, h: 900, z: 0 },
+            },
+            ...(plate
+              ? [
+                  {
+                    id: 'plate',
+                    type: 'box' as const,
+                    fill: 'paper' as const,
+                    strokeWidth: 0 as const,
+                    pos: { x: 137, y: 506, w: 740, h: 265, z: 1, group: 'plate' },
+                  },
+                  {
+                    id: 'big',
+                    type: 'heading' as const,
+                    level: 'big' as const,
+                    text: 'Over the picture',
+                    pos: { x: 163, y: 528, w: 688, h: 77, z: 2, group: 'plate' },
+                  },
+                ]
+              : []),
+            ...(stripDither
+              ? [
+                  {
+                    id: 'strip',
+                    type: 'picture' as const,
+                    asset: 'h',
+                    dither: FIXTURE_STRENGTH_DITHER,
+                    pos: { x: 900, y: 129, w: 560, h: 315, z: 3 },
+                  },
+                ]
+              : []),
+          ],
+        },
+      };
+    }
+
+    test('the variant metrics drive blank-twin and plate-clear on the covering picture; a picture clear of the plate is not measured against it', () => {
+      const blankUnder = document(
+        [canvas(true, true)],
+        [
+          continuous({
+            litFraction: 0.99,
+            plateClear: { plate: FIXTURE_DITHER_PLATE, nearestLitPx: 0, litUnder: 5, litInBand: 2 },
+          }),
+        ],
+      );
+      const blank = rules(blankUnder, 'picture/blank-twin');
+      expect(blank).toHaveLength(1);
+      expect(blank[0]).toMatchObject({ blockId: 'bg', path: '/slots/main/0/dither', severity: 3 });
+      expect(blank[0]?.evidence.measured).toEqual({ litFraction: 0.99 });
+      const clear = rules(blankUnder, 'picture/plate-clear');
+      expect(clear).toHaveLength(1);
+      expect(clear[0]).toMatchObject({ blockId: 'bg', severity: 2 });
+      expect(clear[0]?.evidence.box).toEqual(FIXTURE_DITHER_PLATE);
+      expect(clear[0]?.evidence.measured).toMatchObject({ litUnder: 5 });
+      expect(clear[0]?.proposal).toContain('5 lit cell(s) sit under the plate');
+    });
+
+    test('without a variant the plate rule reports at severity 1 that nothing is measured, and only when a plate group sits over the picture', () => {
+      const unmeasured = rules(document([canvas(true)], [continuous()]), 'picture/plate-clear');
+      expect(unmeasured).toHaveLength(1);
+      expect(unmeasured[0]).toMatchObject({ blockId: 'bg', severity: 1 });
+      expect(unmeasured[0]?.proposal).toContain('turboslide picture materialize c');
+      expect(rules(document([canvas(true)], [continuous()]), 'picture/blank-twin')).toEqual([]);
+      expect(rules(document([canvas(false)], [continuous()]), 'picture/plate-clear')).toEqual([]);
+      const stale = rules(
+        document(
+          [canvas(true)],
+          [
+            continuous({
+              litFraction: 0.4,
+              plateClear: { plate: [0, 0, 10, 10], nearestLitPx: 3, litUnder: 0, litInBand: 0 },
+            }),
+          ],
+        ),
+        'picture/plate-clear',
+      );
+      expect(stale).toHaveLength(1);
+      expect(stale[0]?.severity).toBe(1);
+      expect(stale[0]?.proposal).toContain('measured against the plate at 0, 0, 10, 10');
+      const quiet = rules(
+        document(
+          [canvas(true)],
+          [
+            continuous({
+              litFraction: 0.4,
+              plateClear: {
+                plate: FIXTURE_DITHER_PLATE,
+                nearestLitPx: 40,
+                litUnder: 0,
+                litInBand: 0,
+              },
+            }),
+          ],
+        ),
+        'picture/plate-clear',
+      );
+      expect(quiet).toEqual([]);
+    });
+
+    test('an asset without a continuous source is skipped: the store refuses that dither before it is written', () => {
+      const twoTone = photo('h', { twins: files.twins });
+      const slide = canvas(true);
+      expect(() => rules(document([slide], [twoTone]), 'picture/plate-clear')).not.toThrow();
+      expect(rules(document([slide], [twoTone]), 'picture/plate-clear')).toEqual([]);
+    });
+
+    test('the fixture deck plants both rules on canvas-dither through its recorded variant', () => {
+      const onFixture = lintStatic(fixture, { slideIds: ['canvas-dither'] });
+      expect(
+        onFixture.filter((f) => f.rule === 'picture/blank-twin').map((f) => f.blockId),
+      ).toEqual(['bg']);
+      expect(
+        onFixture
+          .filter((f) => f.rule === 'picture/plate-clear')
+          .map((f) => [f.blockId, f.severity]),
+      ).toEqual([['bg', 2]]);
+      expect(fixture.deck.assets['dither-photo']?.variants?.[FIXTURE_BACKGROUND_KEY]).toBeDefined();
+    });
   });
 });

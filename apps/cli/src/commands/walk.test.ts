@@ -489,7 +489,8 @@ describe('the agent parity walk over the fixture deck', () => {
     const info = await run(['info', '--json']);
     expect(info.code).toBe(0);
     expect((info.json as { counts: Record<string, number> }).counts).toMatchObject({
-      slides: 27,
+      // twenty seven slides of rounds one and two plus the two dither slides of round three (SPEC-3 16)
+      slides: 29,
       charts: 3,
       guides: 2,
     });

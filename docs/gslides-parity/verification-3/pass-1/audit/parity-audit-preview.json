@@ -1,0 +1,6494 @@
+{
+  "base": "https://turboslide-igavfcg2x-kl01s-projects.vercel.app",
+  "at": "2026-09-14T03:41:25.893Z",
+  "commit": "a1dcc7e",
+  "seconds": 725,
+  "scratchDeck": "untitled-20260914-bxdz",
+  "namePromptAnswered": 9,
+  "summary": {
+    "pass": 443,
+    "fail": 37,
+    "skip": 180
+  },
+  "perSection": {
+    "firstOpen": {
+      "pass": 12,
+      "fail": 0,
+      "skip": 0
+    },
+    "defaultViewWords": {
+      "pass": 23,
+      "fail": 3,
+      "skip": 0
+    },
+    "toolbar:new": {
+      "pass": 1,
+      "fail": 0,
+      "skip": 0
+    },
+    "presence:scratch": {
+      "pass": 0,
+      "fail": 2,
+      "skip": 0
+    },
+    "rows:scratch": {
+      "pass": 302,
+      "fail": 0,
+      "skip": 60
+    },
+    "contextMenu:scratch": {
+      "pass": 2,
+      "fail": 0,
+      "skip": 0
+    },
+    "effects:scratch": {
+      "pass": 103,
+      "fail": 30,
+      "skip": 120
+    },
+    "infrastructure": {
+      "pass": 0,
+      "fail": 2,
+      "skip": 0
+    }
+  },
+  "totals": {
+    "scratch": {
+      "title": {
+        "now": {
+          "pass": 19,
+          "fail": 0,
+          "skip": 2
+        },
+        "later": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "file": {
+        "now": {
+          "pass": 29,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 1
+        },
+        "omit": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "edit": {
+        "now": {
+          "pass": 11,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "view": {
+        "now": {
+          "pass": 39,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "insert": {
+        "now": {
+          "pass": 34,
+          "fail": 0,
+          "skip": 4
+        },
+        "later": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 7,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "format": {
+        "now": {
+          "pass": 68,
+          "fail": 0,
+          "skip": 33
+        },
+        "later": {
+          "pass": 1,
+          "fail": 0,
+          "skip": 2
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "slide": {
+        "now": {
+          "pass": 12,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "arrange": {
+        "now": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 18
+        },
+        "later": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "tools": {
+        "now": {
+          "pass": 18,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 3,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 8,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "extensions": {
+        "now": {
+          "pass": 2,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 6,
+          "fail": 0,
+          "skip": 0
+        }
+      },
+      "help": {
+        "now": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        },
+        "later": {
+          "pass": 0,
+          "fail": 0,
+          "skip": 0
+        },
+        "omit": {
+          "pass": 4,
+          "fail": 0,
+          "skip": 0
+        }
+      }
+    }
+  },
+  "rows": [
+    {
+      "section": "firstOpen",
+      "id": "address /new",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "title \"Untitled presentation\"",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "save words \"Not saved yet\"",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the two prompts",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the notes prompt",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "one card in the filmstrip",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the right panel closed",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "no snackbar",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the ten menus in order",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the bottom bar: filmstrip, grid, the panel chevron",
+      "evidence": "{\"url\":\"/new\",\"title\":\"Untitled presentation\",\"saveState\":\"Not saved yet\",\"prompts\":[\"Click to add title\",\"Click to add subtitle\"],\"notes\":\"Click to add speaker notes\",\"cards\":1,\"panel\":null,\"snackbar\":\"\",\"bottom\":[\"view.filmstripView\",\"view.gridView\",\"panel.toggle\"],\"menus\":[\"File\",\"Edit\",\"View\",\"Insert\",\"Format\",\"Slide\",\"Arrange\",\"Tools\",\"Extensions\",\"Help\"]}",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "/new",
+      "evidence": "31 text nodes, 48 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "toolbar:new",
+      "id": "toolbar.default",
+      "kind": "default",
+      "wanted": [
+        "toolbar.search",
+        "toolbar.newSlide",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.transition",
+        "toolbar.hideMenus"
+      ],
+      "observed": [
+        "toolbar.search",
+        "toolbar.newSlide",
+        "toolbar.undo",
+        "toolbar.redo",
+        "toolbar.print",
+        "toolbar.paintFormat",
+        "toolbar.zoom",
+        "toolbar.select",
+        "toolbar.textBox",
+        "toolbar.insertImage",
+        "toolbar.insertShape",
+        "toolbar.insertLine",
+        "toolbar.insertComment",
+        "toolbar.background",
+        "toolbar.layout",
+        "toolbar.theme",
+        "toolbar.transition",
+        "toolbar.hideMenus"
+      ],
+      "evidence": "18 controls in the order of SPEC 3",
+      "check": "order",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "the first write creates the deck and moves the address",
+      "evidence": "https://turboslide-igavfcg2x-kl01s-projects.vercel.app/edit/untitled-20260914-bxdz; save words \"Offline. Changes will save when you reconnect\"; title \"Audit scratch\"",
+      "pass": true
+    },
+    {
+      "section": "firstOpen",
+      "id": "auto title from the first heading (SPEC 6.3)",
+      "evidence": "title \"Audit scratch\"",
+      "pass": true
+    },
+    {
+      "section": "presence:scratch",
+      "id": "collaborator.joins",
+      "menu": "title",
+      "evidence": "the second context never appeared in the room within 10 s",
+      "pass": false
+    },
+    {
+      "section": "presence:scratch",
+      "id": "presence.chip",
+      "menu": "title",
+      "evidence": "0 chip(s) in the presence slot",
+      "pass": false
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.appIcon",
+      "menu": "title",
+      "status": "now",
+      "label": "Turboslide home",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.name",
+      "menu": "title",
+      "status": "now",
+      "label": "Rename",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.star",
+      "menu": "title",
+      "status": "omit",
+      "label": "Star",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.move",
+      "menu": "title",
+      "status": "omit",
+      "label": "Move",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.saveState",
+      "menu": "title",
+      "status": "now",
+      "label": "Document status",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.lastEdit",
+      "menu": "title",
+      "status": "now",
+      "label": "Last edit",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.presence",
+      "menu": "title",
+      "status": "now",
+      "label": "Collaborators",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.presence.follow",
+      "menu": "title",
+      "status": "now",
+      "label": "Follow",
+      "check": "present",
+      "evidence": "no other participant in the room; the roster draws Follow and Go to slide per person",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.presence.goTo",
+      "menu": "title",
+      "status": "now",
+      "label": "Go to slide",
+      "check": "present",
+      "evidence": "no other participant in the room; the roster draws Follow and Go to slide per person",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.presence.joinChat",
+      "menu": "title",
+      "status": "later",
+      "label": "Join chat",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.presence.me",
+      "menu": "title",
+      "status": "now",
+      "label": "You",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.comments",
+      "menu": "title",
+      "status": "now",
+      "label": "Show all comments",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.inbox",
+      "menu": "title",
+      "status": "now",
+      "label": "Notifications",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.meet",
+      "menu": "title",
+      "status": "omit",
+      "label": "Meet",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.record",
+      "menu": "title",
+      "status": "omit",
+      "label": "Record",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.slideshow",
+      "menu": "title",
+      "status": "now",
+      "label": "Slideshow",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.slideshow.presenterView",
+      "menu": "title",
+      "status": "now",
+      "label": "Presenter view",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.slideshow.startFromBeginning",
+      "menu": "title",
+      "status": "now",
+      "label": "Start from beginning",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.slideshow.presentOnAnotherScreen",
+      "menu": "title",
+      "status": "later",
+      "label": "Present on another screen",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.slideshow.displayOptions",
+      "menu": "title",
+      "status": "omit",
+      "label": "Presentation display options",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.share",
+      "menu": "title",
+      "status": "now",
+      "label": "Share",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.account",
+      "menu": "title",
+      "status": "now",
+      "label": "Account",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.account.changeName",
+      "menu": "title",
+      "status": "now",
+      "label": "Change name",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.account.changeAvatar",
+      "menu": "title",
+      "status": "now",
+      "label": "Change avatar",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.account.signIn",
+      "menu": "title",
+      "status": "now",
+      "label": "Sign in",
+      "check": "absent by predicate",
+      "evidence": "when: canSignIn",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.account.signOut",
+      "menu": "title",
+      "status": "now",
+      "label": "Sign out",
+      "check": "absent by predicate",
+      "evidence": "when: signedIn",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.account.forget",
+      "menu": "title",
+      "status": "now",
+      "label": "Forget this browser",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.account.sessions",
+      "menu": "title",
+      "status": "now",
+      "label": "Sessions",
+      "check": "row",
+      "evidence": "level plate",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "title.gemini",
+      "menu": "title",
+      "status": "omit",
+      "label": "Ask Gemini",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.new",
+      "menu": "file",
+      "status": "now",
+      "label": "New",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.new.presentation",
+      "menu": "file",
+      "status": "now",
+      "label": "Presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.new.templateGallery",
+      "menu": "file",
+      "status": "now",
+      "label": "From template gallery",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.open",
+      "menu": "file",
+      "status": "now",
+      "label": "Open…",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.importSlides",
+      "menu": "file",
+      "status": "now",
+      "label": "Import slides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.makeCopy",
+      "menu": "file",
+      "status": "now",
+      "label": "Make a copy",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.makeCopy.entire",
+      "menu": "file",
+      "status": "now",
+      "label": "Entire presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.makeCopy.selected",
+      "menu": "file",
+      "status": "now",
+      "label": "Selected slides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.share",
+      "menu": "file",
+      "status": "now",
+      "label": "Share",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.share.withOthers",
+      "menu": "file",
+      "status": "now",
+      "label": "Share with others",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.share.publish",
+      "menu": "file",
+      "status": "now",
+      "label": "Publish to web",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.share.copyLink",
+      "menu": "file",
+      "status": "now",
+      "label": "Copy link",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.email",
+      "menu": "file",
+      "status": "later",
+      "label": "Email",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.email.thisFile",
+      "menu": "file",
+      "status": "omit",
+      "label": "Email this file",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.email.collaborators",
+      "menu": "file",
+      "status": "later",
+      "label": "Email collaborators",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download",
+      "menu": "file",
+      "status": "now",
+      "label": "Download",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.pptx",
+      "menu": "file",
+      "status": "now",
+      "label": "Microsoft PowerPoint (.pptx)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.odp",
+      "menu": "file",
+      "status": "later",
+      "label": "ODP Document (.odp)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.pdf",
+      "menu": "file",
+      "status": "now",
+      "label": "PDF Document (.pdf)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.txt",
+      "menu": "file",
+      "status": "now",
+      "label": "Plain Text (.txt)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.jpg",
+      "menu": "file",
+      "status": "now",
+      "label": "JPEG image (.jpg, current slide)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.png",
+      "menu": "file",
+      "status": "now",
+      "label": "PNG image (.png, current slide)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.svg",
+      "menu": "file",
+      "status": "later",
+      "label": "Scalable Vector Graphics (.svg, current slide)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.html",
+      "menu": "file",
+      "status": "now",
+      "label": "Web page (.html)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.download.zip",
+      "menu": "file",
+      "status": "now",
+      "label": "Turboslide bundle (.zip)",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.rename",
+      "menu": "file",
+      "status": "now",
+      "label": "Rename",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.move",
+      "menu": "file",
+      "status": "omit",
+      "label": "Move",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.addShortcut",
+      "menu": "file",
+      "status": "omit",
+      "label": "Add shortcut to Drive",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.moveToTrash",
+      "menu": "file",
+      "status": "now",
+      "label": "Move to trash",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.versionHistory",
+      "menu": "file",
+      "status": "now",
+      "label": "Version history",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.versionHistory.nameCurrent",
+      "menu": "file",
+      "status": "now",
+      "label": "Name current version",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.versionHistory.see",
+      "menu": "file",
+      "status": "now",
+      "label": "See version history",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.versionHistory.showChanges",
+      "menu": "file",
+      "status": "now",
+      "label": "Show changes",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.versionHistory.deleteOlder",
+      "menu": "file",
+      "status": "later",
+      "label": "Delete this and older versions",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.versionHistory.deleteHistory",
+      "menu": "file",
+      "status": "later",
+      "label": "Delete history",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.approvals",
+      "menu": "file",
+      "status": "omit",
+      "label": "Approvals",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.offline",
+      "menu": "file",
+      "status": "omit",
+      "label": "Make available offline",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.details",
+      "menu": "file",
+      "status": "now",
+      "label": "Details",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.language",
+      "menu": "file",
+      "status": "omit",
+      "label": "Language",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.pageSetup",
+      "menu": "file",
+      "status": "later",
+      "label": "Page setup",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.printPreview",
+      "menu": "file",
+      "status": "now",
+      "label": "Print settings and preview",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "file.print",
+      "menu": "file",
+      "status": "now",
+      "label": "Print",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.undo",
+      "menu": "edit",
+      "status": "now",
+      "label": "Undo",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.redo",
+      "menu": "edit",
+      "status": "now",
+      "label": "Redo",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.cut",
+      "menu": "edit",
+      "status": "now",
+      "label": "Cut",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.copy",
+      "menu": "edit",
+      "status": "now",
+      "label": "Copy",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.paste",
+      "menu": "edit",
+      "status": "now",
+      "label": "Paste",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.pasteWithoutFormatting",
+      "menu": "edit",
+      "status": "now",
+      "label": "Paste without formatting",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.delete",
+      "menu": "edit",
+      "status": "now",
+      "label": "Delete",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.duplicate",
+      "menu": "edit",
+      "status": "now",
+      "label": "Duplicate",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.selectAll",
+      "menu": "edit",
+      "status": "now",
+      "label": "Select all",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.selectNone",
+      "menu": "edit",
+      "status": "now",
+      "label": "Select none",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "edit.findReplace",
+      "menu": "edit",
+      "status": "now",
+      "label": "Find and replace",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.slideshow",
+      "menu": "view",
+      "status": "now",
+      "label": "Slideshow",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.motion",
+      "menu": "view",
+      "status": "omit",
+      "label": "Motion",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.themeBuilder",
+      "menu": "view",
+      "status": "omit",
+      "label": "Theme builder",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.gridView",
+      "menu": "view",
+      "status": "now",
+      "label": "Grid view",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.in",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom in",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.out",
+      "menu": "view",
+      "status": "now",
+      "label": "Zoom out",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.fit",
+      "menu": "view",
+      "status": "now",
+      "label": "Fit",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.50",
+      "menu": "view",
+      "status": "now",
+      "label": "50%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.100",
+      "menu": "view",
+      "status": "now",
+      "label": "100%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.zoom.200",
+      "menu": "view",
+      "status": "now",
+      "label": "200%",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.showRuler",
+      "menu": "view",
+      "status": "now",
+      "label": "Show ruler",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides",
+      "menu": "view",
+      "status": "now",
+      "label": "Guides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides.show",
+      "menu": "view",
+      "status": "now",
+      "label": "Show guides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides.addVertical",
+      "menu": "view",
+      "status": "now",
+      "label": "Add vertical guide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides.addHorizontal",
+      "menu": "view",
+      "status": "now",
+      "label": "Add horizontal guide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides.edit",
+      "menu": "view",
+      "status": "later",
+      "label": "Edit guides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides.clear",
+      "menu": "view",
+      "status": "now",
+      "label": "Clear guides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.guides.delete",
+      "menu": "view",
+      "status": "now",
+      "label": "Delete guide",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.snapTo",
+      "menu": "view",
+      "status": "now",
+      "label": "Snap to",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.snapTo.guides",
+      "menu": "view",
+      "status": "now",
+      "label": "Guides",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.snapTo.grid",
+      "menu": "view",
+      "status": "now",
+      "label": "Grid",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.comments",
+      "menu": "view",
+      "status": "now",
+      "label": "Comments",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.comments.showAll",
+      "menu": "view",
+      "status": "now",
+      "label": "Show all comments",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.comments.expand",
+      "menu": "view",
+      "status": "now",
+      "label": "Expand comments",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.comments.minimize",
+      "menu": "view",
+      "status": "now",
+      "label": "Minimize comments",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.comments.hide",
+      "menu": "view",
+      "status": "now",
+      "label": "Hide comments",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.livePointers",
+      "menu": "view",
+      "status": "now",
+      "label": "Live pointers",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.livePointers.mine",
+      "menu": "view",
+      "status": "now",
+      "label": "Show my pointer",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.livePointers.collaborators",
+      "menu": "view",
+      "status": "now",
+      "label": "Show collaborator pointers",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.showSpeakerNotes",
+      "menu": "view",
+      "status": "now",
+      "label": "Show speaker notes",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.showFilmstrip",
+      "menu": "view",
+      "status": "now",
+      "label": "Show filmstrip",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.mode",
+      "menu": "view",
+      "status": "now",
+      "label": "Mode",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.mode.editing",
+      "menu": "view",
+      "status": "now",
+      "label": "Editing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.mode.commenting",
+      "menu": "view",
+      "status": "now",
+      "label": "Commenting",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.mode.viewing",
+      "menu": "view",
+      "status": "now",
+      "label": "Viewing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.fullScreen",
+      "menu": "view",
+      "status": "now",
+      "label": "Full screen",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.showSections",
+      "menu": "view",
+      "status": "now",
+      "label": "Show sections",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.appearance",
+      "menu": "view",
+      "status": "now",
+      "label": "Appearance",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.appearance.light",
+      "menu": "view",
+      "status": "now",
+      "label": "Light",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.appearance.dark",
+      "menu": "view",
+      "status": "now",
+      "label": "Dark",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "view.appearance.match",
+      "menu": "view",
+      "status": "now",
+      "label": "Match the presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image",
+      "menu": "insert",
+      "status": "now",
+      "label": "Image",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.upload",
+      "menu": "insert",
+      "status": "now",
+      "label": "Upload from computer",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.stockWeb",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Stock & web",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.drivePhotos",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Drive & Photos",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.camera",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Camera",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.byUrl",
+      "menu": "insert",
+      "status": "now",
+      "label": "By URL",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.image.fromThisPresentation",
+      "menu": "insert",
+      "status": "now",
+      "label": "From this presentation",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.textBox",
+      "menu": "insert",
+      "status": "now",
+      "label": "Text box",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.audio",
+      "menu": "insert",
+      "status": "later",
+      "label": "Audio",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.video",
+      "menu": "insert",
+      "status": "later",
+      "label": "Video",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape",
+      "menu": "insert",
+      "status": "now",
+      "label": "Shape",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.shapes",
+      "menu": "insert",
+      "status": "now",
+      "label": "Shapes",
+      "check": "row",
+      "evidence": "level 1; shapes plate with 99 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.shapes.rectangle",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rectangle",
+      "check": "present",
+      "evidence": "drawn as a tile of the shapes plate of insert.shape.shapes (99 tiles)",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.shapes.rounded",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rounded rectangle",
+      "check": "present",
+      "evidence": "drawn as a tile of the shapes plate of insert.shape.shapes (99 tiles)",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.shapes.ellipse",
+      "menu": "insert",
+      "status": "now",
+      "label": "Ellipse",
+      "check": "present",
+      "evidence": "drawn as a tile of the shapes plate of insert.shape.shapes (99 tiles)",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.arrows",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrows",
+      "check": "row",
+      "evidence": "level 1; shapes plate with 26 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.arrows.arrow",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrow",
+      "check": "present",
+      "evidence": "drawn as a tile of the shapes plate of insert.shape.arrows (26 tiles)",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.callouts",
+      "menu": "insert",
+      "status": "now",
+      "label": "Callouts",
+      "check": "row",
+      "evidence": "level 1; shapes plate with 4 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.shape.equation",
+      "menu": "insert",
+      "status": "now",
+      "label": "Equation",
+      "check": "row",
+      "evidence": "level 1; shapes plate with 6 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.table",
+      "menu": "insert",
+      "status": "now",
+      "label": "Table",
+      "check": "row",
+      "evidence": "level 0; tableGrid plate with 400 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart",
+      "menu": "insert",
+      "status": "now",
+      "label": "Chart",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart.bar",
+      "menu": "insert",
+      "status": "now",
+      "label": "Bar",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart.column",
+      "menu": "insert",
+      "status": "now",
+      "label": "Column",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart.line",
+      "menu": "insert",
+      "status": "now",
+      "label": "Line",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart.pie",
+      "menu": "insert",
+      "status": "now",
+      "label": "Pie",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.chart.fromSheets",
+      "menu": "insert",
+      "status": "omit",
+      "label": "From Sheets",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.diagram",
+      "menu": "insert",
+      "status": "now",
+      "label": "Diagram",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.wordArt",
+      "menu": "insert",
+      "status": "now",
+      "label": "Word art",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line",
+      "menu": "insert",
+      "status": "now",
+      "label": "Line",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.line",
+      "menu": "insert",
+      "status": "now",
+      "label": "Line",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.arrow",
+      "menu": "insert",
+      "status": "now",
+      "label": "Arrow",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.rule",
+      "menu": "insert",
+      "status": "now",
+      "label": "Rule",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.elbowConnector",
+      "menu": "insert",
+      "status": "now",
+      "label": "Elbow connector",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.curvedConnector",
+      "menu": "insert",
+      "status": "now",
+      "label": "Curved connector",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.curve",
+      "menu": "insert",
+      "status": "now",
+      "label": "Curve",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.polyline",
+      "menu": "insert",
+      "status": "now",
+      "label": "Polyline",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.line.scribble",
+      "menu": "insert",
+      "status": "now",
+      "label": "Scribble",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.specialCharacters",
+      "menu": "insert",
+      "status": "now",
+      "label": "Special characters",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.animation",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Animation",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.link",
+      "menu": "insert",
+      "status": "now",
+      "label": "Link",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.comment",
+      "menu": "insert",
+      "status": "now",
+      "label": "Comment",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.newSlide",
+      "menu": "insert",
+      "status": "now",
+      "label": "New slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.slideNumbers",
+      "menu": "insert",
+      "status": "now",
+      "label": "Slide numbers",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.placeholder",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Placeholder",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.templates",
+      "menu": "insert",
+      "status": "later",
+      "label": "Templates",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.buildingBlocks",
+      "menu": "insert",
+      "status": "later",
+      "label": "Building blocks",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.speakerSpotlight",
+      "menu": "insert",
+      "status": "omit",
+      "label": "Speaker spotlight",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.icon",
+      "menu": "insert",
+      "status": "now",
+      "label": "Icon",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "insert.material",
+      "menu": "insert",
+      "status": "now",
+      "label": "Material",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text",
+      "menu": "format",
+      "status": "now",
+      "label": "Text",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.bold",
+      "menu": "format",
+      "status": "now",
+      "label": "Bold",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.italic",
+      "menu": "format",
+      "status": "now",
+      "label": "Italic",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.underline",
+      "menu": "format",
+      "status": "now",
+      "label": "Underline",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.strikethrough",
+      "menu": "format",
+      "status": "now",
+      "label": "Strikethrough",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.superscript",
+      "menu": "format",
+      "status": "now",
+      "label": "Superscript",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.subscript",
+      "menu": "format",
+      "status": "now",
+      "label": "Subscript",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.size",
+      "menu": "format",
+      "status": "now",
+      "label": "Size",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.size.increase",
+      "menu": "format",
+      "status": "now",
+      "label": "Increase font size",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.size.decrease",
+      "menu": "format",
+      "status": "now",
+      "label": "Decrease font size",
+      "check": "row",
+      "evidence": "level 2",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.capitalization",
+      "menu": "format",
+      "status": "now",
+      "label": "Capitalization",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.capitalization.lower",
+      "menu": "format",
+      "status": "now",
+      "label": "lowercase",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.capitalization.upper",
+      "menu": "format",
+      "status": "now",
+      "label": "UPPERCASE",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.text.capitalization.title",
+      "menu": "format",
+      "status": "now",
+      "label": "Title Case",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent",
+      "menu": "format",
+      "status": "now",
+      "label": "Align & indent",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.left",
+      "menu": "format",
+      "status": "now",
+      "label": "Left",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.center",
+      "menu": "format",
+      "status": "now",
+      "label": "Center",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.right",
+      "menu": "format",
+      "status": "now",
+      "label": "Right",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.justified",
+      "menu": "format",
+      "status": "now",
+      "label": "Justified",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.increaseIndent",
+      "menu": "format",
+      "status": "now",
+      "label": "Increase indent",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.decreaseIndent",
+      "menu": "format",
+      "status": "now",
+      "label": "Decrease indent",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.alignIndent.indentationOptions",
+      "menu": "format",
+      "status": "later",
+      "label": "Indentation options",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing",
+      "menu": "format",
+      "status": "now",
+      "label": "Line & paragraph spacing",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.single",
+      "menu": "format",
+      "status": "now",
+      "label": "Single",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.1_15",
+      "menu": "format",
+      "status": "now",
+      "label": "1.15",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.1_5",
+      "menu": "format",
+      "status": "now",
+      "label": "1.5",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.double",
+      "menu": "format",
+      "status": "now",
+      "label": "Double",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.addBefore",
+      "menu": "format",
+      "status": "now",
+      "label": "Add space before paragraph",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.addAfter",
+      "menu": "format",
+      "status": "now",
+      "label": "Add space after paragraph",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.spacing.custom",
+      "menu": "format",
+      "status": "now",
+      "label": "Custom spacing",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering",
+      "menu": "format",
+      "status": "now",
+      "label": "Bullets & numbering",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.numbered",
+      "menu": "format",
+      "status": "now",
+      "label": "Numbered list",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.bulleted",
+      "menu": "format",
+      "status": "now",
+      "label": "Bulleted list",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.listOptions",
+      "menu": "format",
+      "status": "now",
+      "label": "List options",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.listOptions.restart",
+      "menu": "format",
+      "status": "later",
+      "label": "Restart numbering",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.listOptions.prefixSuffix",
+      "menu": "format",
+      "status": "later",
+      "label": "Edit prefix and suffix",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bulletsNumbering.listOptions.moreBullets",
+      "menu": "format",
+      "status": "now",
+      "label": "More bullets",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table",
+      "menu": "format",
+      "status": "now",
+      "label": "Table",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.insertRowAbove",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert row above",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.insertRowBelow",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert row below",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.insertColumnLeft",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert column left",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.insertColumnRight",
+      "menu": "format",
+      "status": "now",
+      "label": "Insert column right",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.deleteRow",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete row",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.deleteColumn",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete column",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.deleteTable",
+      "menu": "format",
+      "status": "now",
+      "label": "Delete table",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.distributeRows",
+      "menu": "format",
+      "status": "now",
+      "label": "Distribute rows",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.distributeColumns",
+      "menu": "format",
+      "status": "now",
+      "label": "Distribute columns",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.mergeCells",
+      "menu": "format",
+      "status": "now",
+      "label": "Merge cells",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.table.unmergeCells",
+      "menu": "format",
+      "status": "now",
+      "label": "Unmerge cells",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image",
+      "menu": "format",
+      "status": "now",
+      "label": "Image",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.cropImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Crop image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.maskImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Mask image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.replaceImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Replace image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.replaceImage.upload",
+      "menu": "format",
+      "status": "now",
+      "label": "Upload from computer",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.replaceImage.byUrl",
+      "menu": "format",
+      "status": "now",
+      "label": "By URL",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.replaceImage.fromThisPresentation",
+      "menu": "format",
+      "status": "now",
+      "label": "From this presentation",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.resetImage",
+      "menu": "format",
+      "status": "now",
+      "label": "Reset image",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.dither",
+      "menu": "format",
+      "status": "now",
+      "label": "Dither",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.image.imageOptions",
+      "menu": "format",
+      "status": "now",
+      "label": "Image options",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines",
+      "menu": "format",
+      "status": "now",
+      "label": "Borders & lines",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderColor",
+      "menu": "format",
+      "status": "now",
+      "label": "Border color",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderWeight",
+      "menu": "format",
+      "status": "now",
+      "label": "Border weight",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderDash",
+      "menu": "format",
+      "status": "now",
+      "label": "Border dash",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderDash.solid",
+      "menu": "format",
+      "status": "now",
+      "label": "Solid",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderDash.dot",
+      "menu": "format",
+      "status": "now",
+      "label": "Dot",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderDash.dash",
+      "menu": "format",
+      "status": "now",
+      "label": "Dash",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderDash.dashDot",
+      "menu": "format",
+      "status": "now",
+      "label": "Dash dot",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderDash.longDash",
+      "menu": "format",
+      "status": "now",
+      "label": "Long dash",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.borderDash.longDashDot",
+      "menu": "format",
+      "status": "now",
+      "label": "Long dash dot",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart",
+      "menu": "format",
+      "status": "now",
+      "label": "Line start",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart.none",
+      "menu": "format",
+      "status": "now",
+      "label": "None",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart.fillArrow",
+      "menu": "format",
+      "status": "now",
+      "label": "Arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart.stealth",
+      "menu": "format",
+      "status": "now",
+      "label": "Stealth arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart.fillCircle",
+      "menu": "format",
+      "status": "now",
+      "label": "Circle",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart.fillSquare",
+      "menu": "format",
+      "status": "now",
+      "label": "Square",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart.fillDiamond",
+      "menu": "format",
+      "status": "now",
+      "label": "Diamond",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart.openArrow",
+      "menu": "format",
+      "status": "now",
+      "label": "Open arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart.openCircle",
+      "menu": "format",
+      "status": "now",
+      "label": "Open circle",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart.openSquare",
+      "menu": "format",
+      "status": "now",
+      "label": "Open square",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineStart.openDiamond",
+      "menu": "format",
+      "status": "now",
+      "label": "Open diamond",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd",
+      "menu": "format",
+      "status": "now",
+      "label": "Line end",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd.none",
+      "menu": "format",
+      "status": "now",
+      "label": "None",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd.fillArrow",
+      "menu": "format",
+      "status": "now",
+      "label": "Arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd.stealth",
+      "menu": "format",
+      "status": "now",
+      "label": "Stealth arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd.fillCircle",
+      "menu": "format",
+      "status": "now",
+      "label": "Circle",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd.fillSquare",
+      "menu": "format",
+      "status": "now",
+      "label": "Square",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd.fillDiamond",
+      "menu": "format",
+      "status": "now",
+      "label": "Diamond",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd.openArrow",
+      "menu": "format",
+      "status": "now",
+      "label": "Open arrow",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd.openCircle",
+      "menu": "format",
+      "status": "now",
+      "label": "Open circle",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd.openSquare",
+      "menu": "format",
+      "status": "now",
+      "label": "Open square",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.bordersLines.lineEnd.openDiamond",
+      "menu": "format",
+      "status": "now",
+      "label": "Open diamond",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.formatOptions",
+      "menu": "format",
+      "status": "now",
+      "label": "Format options",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.clearFormatting",
+      "menu": "format",
+      "status": "now",
+      "label": "Clear formatting",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.altText",
+      "menu": "format",
+      "status": "now",
+      "label": "Alt text",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.textFitting",
+      "menu": "format",
+      "status": "now",
+      "label": "Text fitting",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.dropShadow",
+      "menu": "format",
+      "status": "now",
+      "label": "Drop shadow",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.changeShape",
+      "menu": "format",
+      "status": "now",
+      "label": "Change shape",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.editData",
+      "menu": "format",
+      "status": "now",
+      "label": "Edit data",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.editHtml",
+      "menu": "format",
+      "status": "now",
+      "label": "Edit HTML",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.chartType",
+      "menu": "format",
+      "status": "now",
+      "label": "Chart type",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.chartType.bar",
+      "menu": "format",
+      "status": "now",
+      "label": "Bar",
+      "check": "not in the bar (under a context only row)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.chartType.column",
+      "menu": "format",
+      "status": "now",
+      "label": "Column",
+      "check": "not in the bar (under a context only row)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.chartType.line",
+      "menu": "format",
+      "status": "now",
+      "label": "Line",
+      "check": "not in the bar (under a context only row)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "format.chartType.pie",
+      "menu": "format",
+      "status": "now",
+      "label": "Pie",
+      "check": "not in the bar (under a context only row)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.newSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "New slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.duplicateSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Duplicate slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.deleteSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Delete slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.skipSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Skip slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.moveSlide",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.moveSlide.up",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide up",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.moveSlide.down",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide down",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.moveSlide.toBeginning",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide to beginning",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.moveSlide.toEnd",
+      "menu": "slide",
+      "status": "now",
+      "label": "Move slide to end",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.changeBackground",
+      "menu": "slide",
+      "status": "now",
+      "label": "Change background",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.applyLayout",
+      "menu": "slide",
+      "status": "now",
+      "label": "Apply layout",
+      "check": "row",
+      "evidence": "level 0; layouts plate with 21 tiles",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.transition",
+      "menu": "slide",
+      "status": "later",
+      "label": "Transition",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.editTheme",
+      "menu": "slide",
+      "status": "later",
+      "label": "Edit theme",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "slide.changeTheme",
+      "menu": "slide",
+      "status": "now",
+      "label": "Change theme",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.order",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Order",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.order.bringToFront",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bring to front",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.order.bringForward",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bring forward",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.order.sendBackward",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Send backward",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.order.sendToBack",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Send to back",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Align",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.left",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Left",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.center",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Center",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.right",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Right",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.top",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Top",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.middle",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Middle",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.align.bottom",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Bottom",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.distribute",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Distribute",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.distribute.horizontally",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Horizontally",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.distribute.vertically",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Vertically",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.centerOnPage",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Center on page",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.centerOnPage.horizontally",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Horizontally",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.centerOnPage.vertically",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Vertically",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.rotate",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Rotate",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.rotate.clockwise",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Rotate clockwise 90°",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.rotate.counterClockwise",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Rotate counter-clockwise 90°",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.rotate.flipHorizontally",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Flip horizontally",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.rotate.flipVertically",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Flip vertically",
+      "check": "present",
+      "evidence": "under a disabled or Later container; not reachable in this state",
+      "pass": null
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.group",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Group",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.ungroup",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Ungroup",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "arrange.regroup",
+      "menu": "arrange",
+      "status": "now",
+      "label": "Regroup",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.spelling",
+      "menu": "tools",
+      "status": "now",
+      "label": "Spelling",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.spelling.spellCheck",
+      "menu": "tools",
+      "status": "later",
+      "label": "Spell check",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.spelling.underlineErrors",
+      "menu": "tools",
+      "status": "now",
+      "label": "Underline errors",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.spelling.personalDictionary",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Personal dictionary",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.explore",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Explore",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.linkedObjects",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Linked objects",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.dictionary",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Dictionary",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.qaHistory",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Q&A history",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.dictateNotes",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Dictate speaker notes",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.notificationSettings",
+      "menu": "tools",
+      "status": "now",
+      "label": "Notification settings",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.preferences",
+      "menu": "tools",
+      "status": "later",
+      "label": "Preferences",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.accessibilitySettings",
+      "menu": "tools",
+      "status": "now",
+      "label": "Accessibility settings",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.accessibilitySettings.collaboratorAnnouncements",
+      "menu": "tools",
+      "status": "now",
+      "label": "Turn on collaborator announcements",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.accessibilitySettings.screenReader",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Turn on screen reader support",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.accessibilitySettings.braille",
+      "menu": "tools",
+      "status": "omit",
+      "label": "Turn on braille support",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.activityDashboard",
+      "menu": "tools",
+      "status": "now",
+      "label": "Activity dashboard",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.activityDashboard.viewers",
+      "menu": "tools",
+      "status": "later",
+      "label": "Viewers",
+      "check": "not in the bar (context only)",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.checkSlides",
+      "menu": "tools",
+      "status": "now",
+      "label": "Check slides",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced",
+      "menu": "tools",
+      "status": "now",
+      "label": "Advanced",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.showSource",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show source",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.sideBySide",
+      "menu": "tools",
+      "status": "now",
+      "label": "Light and dark side by side",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.suggestionMarks",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show suggestion marks on the slide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.showIds",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show slide and block ids",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.renderSlide",
+      "menu": "tools",
+      "status": "now",
+      "label": "Render this slide",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.changeHistory",
+      "menu": "tools",
+      "status": "now",
+      "label": "Change history",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.sectionsTree",
+      "menu": "tools",
+      "status": "now",
+      "label": "Show sections as a tree",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.readAsBook",
+      "menu": "tools",
+      "status": "now",
+      "label": "Read as a book",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.picturesMaterials",
+      "menu": "tools",
+      "status": "now",
+      "label": "Pictures and materials",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "tools.advanced.runAction",
+      "menu": "tools",
+      "status": "now",
+      "label": "Run an action…",
+      "check": "row",
+      "evidence": "level 1",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.addOns",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.addOns.get",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Get add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.addOns.manage",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Manage add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.installedAddOns",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Installed add-ons",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.appsScript",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "Apps Script",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.appSheet",
+      "menu": "extensions",
+      "status": "omit",
+      "label": "AppSheet",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.agentAccess",
+      "menu": "extensions",
+      "status": "now",
+      "label": "Agent access",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "extensions.embedInSite",
+      "menu": "extensions",
+      "status": "now",
+      "label": "Embed in a site",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.searchMenus",
+      "menu": "help",
+      "status": "now",
+      "label": "Search the menus",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.help",
+      "menu": "help",
+      "status": "now",
+      "label": "Help",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.training",
+      "menu": "help",
+      "status": "omit",
+      "label": "Training",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.updates",
+      "menu": "help",
+      "status": "omit",
+      "label": "Updates",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.improve",
+      "menu": "help",
+      "status": "now",
+      "label": "Help Turboslide improve",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.privacyPolicy",
+      "menu": "help",
+      "status": "omit",
+      "label": "Privacy Policy",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.termsOfService",
+      "menu": "help",
+      "status": "omit",
+      "label": "Terms of Service",
+      "check": "absent",
+      "pass": true
+    },
+    {
+      "section": "rows:scratch",
+      "id": "help.keyboardShortcuts",
+      "menu": "help",
+      "status": "now",
+      "label": "Keyboard shortcuts",
+      "check": "row",
+      "evidence": "level 0",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "/edit/untitled-20260914-bxdz",
+      "evidence": "33 text nodes, 48 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "contextMenu:scratch",
+      "id": "filmstripCard",
+      "wanted": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "-",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "edit.delete",
+        "slide.skipSlide",
+        "-",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.transition",
+        "-",
+        "slide.moveSlide",
+        "-",
+        "insert.comment"
+      ],
+      "observed": [
+        "edit.cut",
+        "edit.copy",
+        "edit.paste",
+        "-",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "edit.delete",
+        "slide.skipSlide",
+        "-",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.transition",
+        "-",
+        "slide.moveSlide",
+        "-",
+        "insert.comment"
+      ],
+      "check": "order",
+      "pass": true
+    },
+    {
+      "section": "contextMenu:scratch",
+      "id": "emptyCanvas",
+      "wanted": [
+        "edit.paste",
+        "-",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "slide.deleteSlide",
+        "slide.skipSlide",
+        "-",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.transition",
+        "-",
+        "insert.comment",
+        "-",
+        "view.guides"
+      ],
+      "observed": [
+        "edit.paste",
+        "-",
+        "slide.newSlide",
+        "slide.duplicateSlide",
+        "slide.deleteSlide",
+        "slide.skipSlide",
+        "-",
+        "slide.changeBackground",
+        "slide.applyLayout",
+        "slide.changeTheme",
+        "slide.transition",
+        "-",
+        "insert.comment",
+        "-",
+        "view.guides"
+      ],
+      "check": "order",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.appIcon",
+      "menu": "title",
+      "effect": "route",
+      "label": "Turboslide home",
+      "evidence": "threw: TimeoutError: page.click: Timeout 4000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"title.row\"] [data-menu-item=\"title.appIcon\"]')\n    - locator resolved to <a href=\"/decks\" class=\"ts-title-home\" data-control=\"title.home\" d",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.name",
+      "menu": "title",
+      "effect": "action",
+      "label": "Rename",
+      "evidence": "typed \"Audit renamed\" into the title field: \"Audit scratch\" -> \"Audit renamed\" (revision 1 -> 2); restored through deck.rename",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.saveState",
+      "menu": "title",
+      "effect": "client",
+      "label": "Document status",
+      "evidence": "snackbar \"All changes are saved automatically\"",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.lastEdit",
+      "menu": "title",
+      "effect": "panel",
+      "label": "Last edit",
+      "evidence": "panel \"Version history\" opened; closed",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.presence.follow",
+      "menu": "title",
+      "effect": "action",
+      "label": "Follow",
+      "evidence": "no other participant in the room",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.presence.goTo",
+      "menu": "title",
+      "effect": "client",
+      "label": "Go to slide",
+      "evidence": "no other participant in the room",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.presence.me",
+      "menu": "title",
+      "effect": "client",
+      "label": "You",
+      "evidence": "threw: TimeoutError: page.click: Timeout 4000ms exceeded.\nCall log:\n  - waiting for locator('#ts-menu-roster [data-menu-item=\"title.presence.me\"]')\n",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.comments",
+      "menu": "title",
+      "effect": "panel",
+      "label": "Show all comments",
+      "evidence": "panel \"Comments\" opened; closed",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.inbox",
+      "menu": "title",
+      "effect": "panel",
+      "label": "Notifications",
+      "evidence": "panel \"Notifications\" opened; closed",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.slideshow",
+      "menu": "title",
+      "effect": "action",
+      "label": "Slideshow",
+      "evidence": "is-present on; slideshow surface mounted; Esc left",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.slideshow.presenterView",
+      "menu": "title",
+      "effect": "client",
+      "label": "Presenter view",
+      "evidence": "second window https://turboslide-igavfcg2x-kl01s-projects.vercel.app/present/untitled-20260914-bxdz; this window presenting",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.slideshow.startFromBeginning",
+      "menu": "title",
+      "effect": "client",
+      "label": "Start from beginning",
+      "evidence": "is-present on; slideshow surface mounted; Esc left",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.share",
+      "evidence": "53 text nodes, 61 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.share",
+      "menu": "title",
+      "effect": "dialog",
+      "label": "Share",
+      "evidence": "dialog dialog.share \"Share Audit scratch\"; focus inside; Esc closed it; focus after: share.open",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.namePrompt",
+      "evidence": "41 text nodes, 53 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.account.changeName",
+      "menu": "title",
+      "effect": "dialog",
+      "label": "Change name",
+      "evidence": "dialog dialog.namePrompt \"How should others see you?\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.avatarBuilder",
+      "evidence": [
+        {
+          "text": "Glyph",
+          "words": ["glyph"]
+        },
+        {
+          "tip": "Glyph",
+          "words": ["glyph"]
+        }
+      ],
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.account.changeAvatar",
+      "menu": "title",
+      "effect": "dialog",
+      "label": "Change avatar",
+      "evidence": "dialog dialog.avatarBuilder \"Change avatar\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.account.signIn",
+      "menu": "title",
+      "effect": "dialog",
+      "label": "Sign in",
+      "evidence": "absent by its predicate canSignIn in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.account.signOut",
+      "menu": "title",
+      "effect": "action",
+      "label": "Sign out",
+      "evidence": "absent by its predicate signedIn in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.account.forget",
+      "menu": "title",
+      "effect": "action",
+      "label": "Forget this browser",
+      "evidence": "run on the collaborator context at the end of the round three phase",
+      "pass": null
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.profile",
+      "evidence": "47 text nodes, 54 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "title.account.sessions",
+      "menu": "title",
+      "effect": "dialog",
+      "label": "Sessions",
+      "evidence": "dialog dialog.profile \"Profile\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.new.presentation",
+      "menu": "file",
+      "effect": "route",
+      "label": "Presentation",
+      "evidence": "new tab https://turboslide-igavfcg2x-kl01s-projects.vercel.app/new",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.new.templateGallery",
+      "menu": "file",
+      "effect": "route",
+      "label": "From template gallery",
+      "evidence": "new tab https://turboslide-igavfcg2x-kl01s-projects.vercel.app/decks#templates",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.open",
+      "evidence": "43 text nodes, 56 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.open",
+      "menu": "file",
+      "effect": "dialog",
+      "label": "Open…",
+      "evidence": "dialog dialog.open \"Open\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.importSlides",
+      "evidence": "41 text nodes, 53 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.importSlides",
+      "menu": "file",
+      "effect": "dialog",
+      "label": "Import slides",
+      "evidence": "dialog dialog.importSlides \"Import slides\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.makeCopy",
+      "evidence": "42 text nodes, 56 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.makeCopy.entire",
+      "menu": "file",
+      "effect": "dialog",
+      "label": "Entire presentation",
+      "evidence": "dialog dialog.makeCopy \"Make a copy\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.makeCopy.selected",
+      "menu": "file",
+      "effect": "dialog",
+      "label": "Selected slides",
+      "evidence": "disabled by slideSubsetSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.share",
+      "evidence": "53 text nodes, 61 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.share.withOthers",
+      "menu": "file",
+      "effect": "dialog",
+      "label": "Share with others",
+      "evidence": "dialog dialog.share \"Share Audit scratch\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.publish",
+      "evidence": "48 text nodes, 58 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.share.publish",
+      "menu": "file",
+      "effect": "dialog",
+      "label": "Publish to web",
+      "evidence": "dialog dialog.publish \"Publish to the web\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.share.copyLink",
+      "menu": "file",
+      "effect": "client",
+      "label": "Copy link",
+      "evidence": "clipboard \"https://turboslide-igavfcg2x-kl01s-projects.vercel.app/deck/untitled-20260914-bxdz\" wanted \"https://turboslide-igavfcg2x-kl01s-projects.vercel.app/deck/untitled-20260914-bxdz\"; snackbar \"Link copied\"",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.download.pptx",
+      "evidence": "58 text nodes, 63 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.download.pptx",
+      "menu": "file",
+      "effect": "dialog",
+      "label": "Microsoft PowerPoint (.pptx)",
+      "evidence": "dialog dialog.download.pptx \"Download\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.download.pdf",
+      "evidence": "45 text nodes, 56 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.download.pdf",
+      "menu": "file",
+      "effect": "dialog",
+      "label": "PDF Document (.pdf)",
+      "evidence": "dialog dialog.download.pdf \"Download\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.download.txt",
+      "menu": "file",
+      "effect": "action",
+      "label": "Plain Text (.txt)",
+      "evidence": "download untitled-20260914-bxdz.txt",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.download.jpg",
+      "menu": "file",
+      "effect": "action",
+      "label": "JPEG image (.jpg, current slide)",
+      "evidence": "new tab https://turboslide-igavfcg2x-kl01s-projects.vercel.app/api/render/title?deck=untitled-20260914-bxdz&theme=light&scale=2&",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.download.png",
+      "menu": "file",
+      "effect": "action",
+      "label": "PNG image (.png, current slide)",
+      "evidence": "new tab https://turboslide-igavfcg2x-kl01s-projects.vercel.app/api/render/title?deck=untitled-20260914-bxdz&theme=light&scale=2&",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.download.html",
+      "menu": "file",
+      "effect": "action",
+      "label": "Web page (.html)",
+      "evidence": "threw: Error: page.evaluate: Execution context was destroyed, most likely because of a navigation",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.download.zip",
+      "menu": "file",
+      "effect": "action",
+      "label": "Turboslide bundle (.zip)",
+      "evidence": "no download within 30 s; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.rename",
+      "menu": "file",
+      "effect": "client",
+      "label": "Rename",
+      "evidence": "focus deck.name",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.moveToTrash",
+      "menu": "file",
+      "effect": "action",
+      "label": "Move to trash",
+      "evidence": "run last, as the cleanup",
+      "pass": null
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.nameVersion",
+      "evidence": "39 text nodes, 53 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.versionHistory.nameCurrent",
+      "menu": "file",
+      "effect": "dialog",
+      "label": "Name current version",
+      "evidence": "dialog dialog.nameVersion \"Name current version\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.versionHistory.see",
+      "menu": "file",
+      "effect": "panel",
+      "label": "See version history",
+      "evidence": "panel \"Version history\" opened; closed",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.details",
+      "evidence": "49 text nodes, 50 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.details",
+      "menu": "file",
+      "effect": "dialog",
+      "label": "Details",
+      "evidence": "dialog dialog.details \"Details\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.printPreview",
+      "menu": "file",
+      "effect": "route",
+      "label": "Print settings and preview",
+      "evidence": "https://turboslide-igavfcg2x-kl01s-projects.vercel.app/edit/untitled-20260914-bxdz#s/title -> https://turboslide-igavfcg2x-kl01s-projects.vercel.app/print/untitled-20260914-bxdz",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "file.print",
+      "menu": "file",
+      "effect": "route",
+      "label": "Print",
+      "evidence": "https://turboslide-igavfcg2x-kl01s-projects.vercel.app/edit/untitled-20260914-bxdz#s/title -> https://turboslide-igavfcg2x-kl01s-projects.vercel.app/print/untitled-20260914-bxdz",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.undo",
+      "menu": "edit",
+      "effect": "client",
+      "label": "Undo",
+      "evidence": "disabled by canUndo in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.redo",
+      "menu": "edit",
+      "effect": "client",
+      "label": "Redo",
+      "evidence": "disabled by canRedo in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.cut",
+      "menu": "edit",
+      "effect": "client",
+      "label": "Cut",
+      "evidence": "run in the clipboard sequence",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.copy",
+      "menu": "edit",
+      "effect": "client",
+      "label": "Copy",
+      "evidence": "run in the clipboard sequence",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.paste",
+      "menu": "edit",
+      "effect": "client",
+      "label": "Paste",
+      "evidence": "disabled by canPaste in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.pasteWithoutFormatting",
+      "menu": "edit",
+      "effect": "client",
+      "label": "Paste without formatting",
+      "evidence": "disabled by canPaste in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.delete",
+      "menu": "edit",
+      "effect": "client",
+      "label": "Delete",
+      "evidence": "run in the clipboard sequence",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.duplicate",
+      "menu": "edit",
+      "effect": "client",
+      "label": "Duplicate",
+      "evidence": "run in the clipboard sequence",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.selectAll",
+      "menu": "edit",
+      "effect": "client",
+      "label": "Select all",
+      "evidence": "selected {\"cards\":1,\"blocks\":0}",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.selectNone",
+      "menu": "edit",
+      "effect": "client",
+      "label": "Select none",
+      "evidence": "block null -> null; 0 selection chips",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.findReplace",
+      "evidence": "43 text nodes, 58 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.findReplace",
+      "menu": "edit",
+      "effect": "dialog",
+      "label": "Find and replace",
+      "evidence": "dialog dialog.findReplace \"Find and replace\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.slideshow",
+      "menu": "view",
+      "effect": "action",
+      "label": "Slideshow",
+      "evidence": "is-present on; slideshow surface mounted; Esc left",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.gridView",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Grid view",
+      "evidence": "aria-checked false -> true; gridView \"slide\" -> \"grid\" -> \"slide\"",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.zoom.in",
+      "menu": "view",
+      "effect": "client",
+      "label": "Zoom in",
+      "evidence": "zoom \"fit\" -> 0.75",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.zoom.out",
+      "menu": "view",
+      "effect": "client",
+      "label": "Zoom out",
+      "evidence": "zoom 0.75 -> 0.5",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.zoom.fit",
+      "menu": "view",
+      "effect": "action",
+      "label": "Fit",
+      "evidence": "zoom \"fit\"",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.zoom.50",
+      "menu": "view",
+      "effect": "action",
+      "label": "50%",
+      "evidence": "zoom 0.5",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.zoom.100",
+      "menu": "view",
+      "effect": "action",
+      "label": "100%",
+      "evidence": "zoom 1",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.zoom.200",
+      "menu": "view",
+      "effect": "action",
+      "label": "200%",
+      "evidence": "zoom 2",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.showRuler",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Show ruler",
+      "evidence": "aria-checked null -> null; showRuler false -> true -> false",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.guides.show",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Show guides",
+      "evidence": "aria-checked false -> true; showGuides null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.guides.addVertical",
+      "menu": "view",
+      "effect": "action",
+      "label": "Add vertical guide",
+      "evidence": "no write (revision 3); snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.guides.addHorizontal",
+      "menu": "view",
+      "effect": "action",
+      "label": "Add horizontal guide",
+      "evidence": "no write (revision 3); snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.guides.clear",
+      "menu": "view",
+      "effect": "action",
+      "label": "Clear guides",
+      "evidence": "disabled by hasGuides in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.snapTo.guides",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Guides",
+      "evidence": "aria-checked true -> false; snapGuides null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.snapTo.grid",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Grid",
+      "evidence": "aria-checked false -> true; snapGrid null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.comments.showAll",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Show all comments",
+      "evidence": "aria-checked true -> true; comments null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.comments.expand",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Expand comments",
+      "evidence": "aria-checked false -> true; comments null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.comments.minimize",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Minimize comments",
+      "evidence": "aria-checked false -> true; comments null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.comments.hide",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Hide comments",
+      "evidence": "aria-checked false -> true; comments null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.livePointers.mine",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Show my pointer",
+      "evidence": "aria-checked false -> true; pointerMine false -> true -> false",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.livePointers.collaborators",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Show collaborator pointers",
+      "evidence": "aria-checked true -> true; pointerOthers null -> null -> null",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.showSpeakerNotes",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Show speaker notes",
+      "evidence": "aria-checked true -> false; speakerNotes true -> false -> true",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.showFilmstrip",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Show filmstrip",
+      "evidence": "aria-checked true -> false; filmstrip true -> false -> true",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.mode.editing",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Editing",
+      "evidence": "aria-checked true -> true; mode \"editing\" -> \"editing\" -> \"editing\"",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.mode.commenting",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Commenting",
+      "evidence": "aria-checked false -> false; mode \"editing\" -> \"editing\" -> \"editing\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.mode.viewing",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Viewing",
+      "evidence": "aria-checked false -> true; mode \"editing\" -> \"viewing\" -> \"editing\"",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.fullScreen",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Full screen",
+      "evidence": "aria-checked false -> (menu bar hidden) -> false; bars hidden false -> true -> false; Show the menus chevron shown then gone after Esc",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.showSections",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Show sections",
+      "evidence": "aria-checked false -> true; sections null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.appearance.light",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Light",
+      "evidence": "aria-checked false -> true; appearance \"dark\" -> \"light\" -> \"dark\"",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.appearance.dark",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Dark",
+      "evidence": "aria-checked true -> true; appearance \"dark\" -> \"dark\" -> \"dark\"",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "view.appearance.match",
+      "menu": "view",
+      "effect": "toggle",
+      "label": "Match the presentation",
+      "evidence": "aria-checked false -> true; appearance \"dark\" -> \"dark\" -> \"dark\"",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.image.upload",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Upload from computer",
+      "evidence": "file chooser (one file)",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.imageByUrl",
+      "evidence": "41 text nodes, 53 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.image.byUrl",
+      "menu": "insert",
+      "effect": "dialog",
+      "label": "By URL",
+      "evidence": "dialog dialog.imageByUrl \"Image by URL\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.fromThisPresentation",
+      "evidence": "41 text nodes, 53 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.image.fromThisPresentation",
+      "menu": "insert",
+      "effect": "dialog",
+      "label": "From this presentation",
+      "evidence": "dialog dialog.fromThisPresentation \"Pictures in this presentation\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.shape.shapes",
+      "menu": "insert",
+      "effect": "submenu",
+      "label": "Shapes",
+      "evidence": "the shapes plate opened with 100 controls",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.shape.arrows",
+      "menu": "insert",
+      "effect": "submenu",
+      "label": "Arrows",
+      "evidence": "the shapes plate opened with 27 controls",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.shape.callouts",
+      "menu": "insert",
+      "effect": "submenu",
+      "label": "Callouts",
+      "evidence": "the shapes plate opened with 5 controls",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.shape.equation",
+      "menu": "insert",
+      "effect": "submenu",
+      "label": "Equation",
+      "evidence": "the shapes plate opened with 7 controls",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.table",
+      "menu": "insert",
+      "effect": "submenu",
+      "label": "Table",
+      "evidence": "the tableGrid plate opened with 403 controls",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.diagram",
+      "menu": "insert",
+      "effect": "panel",
+      "label": "Diagram",
+      "evidence": "panel \"Diagram\" opened; closed",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.wordArt",
+      "menu": "insert",
+      "effect": "client",
+      "label": "Word art",
+      "evidence": "bar \"Type your text and press Enter\"; revision 3 -> 4; blocks 0 -> 4; text block with outline {\"color\":\"ink\",\"width\":1.5} at {\"x\":400,\"y\":390,\"w\":800,\"h\":120,\"z\":3}",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.specialCharacters",
+      "evidence": [
+        {
+          "tip": "Heavy round tipped rightwards arrow",
+          "words": ["round"]
+        }
+      ],
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.specialCharacters",
+      "menu": "insert",
+      "effect": "dialog",
+      "label": "Special characters",
+      "evidence": "dialog dialog.specialCharacters \"Insert special characters\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.link",
+      "menu": "insert",
+      "effect": "client",
+      "label": "Link",
+      "evidence": "disabled by linkable in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.comment",
+      "menu": "insert",
+      "effect": "client",
+      "label": "Comment",
+      "evidence": "no comment card opened; snackbar \"Comments need the room; open the presentation from the studio\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.newSlide",
+      "menu": "insert",
+      "effect": "action",
+      "label": "New slide",
+      "evidence": "no write (revision 4); snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.slideNumbers",
+      "evidence": "42 text nodes, 54 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.slideNumbers",
+      "menu": "insert",
+      "effect": "dialog",
+      "label": "Slide numbers",
+      "evidence": "dialog dialog.slideNumbers \"Slide numbers\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.text.bold",
+      "menu": "format",
+      "effect": "action",
+      "label": "Bold",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.text.italic",
+      "menu": "format",
+      "effect": "action",
+      "label": "Italic",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.text.underline",
+      "menu": "format",
+      "effect": "action",
+      "label": "Underline",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.text.strikethrough",
+      "menu": "format",
+      "effect": "action",
+      "label": "Strikethrough",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.text.superscript",
+      "menu": "format",
+      "effect": "action",
+      "label": "Superscript",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.text.subscript",
+      "menu": "format",
+      "effect": "action",
+      "label": "Subscript",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.text.size.increase",
+      "menu": "format",
+      "effect": "action",
+      "label": "Increase font size",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.text.size.decrease",
+      "menu": "format",
+      "effect": "action",
+      "label": "Decrease font size",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.text.capitalization.lower",
+      "menu": "format",
+      "effect": "action",
+      "label": "lowercase",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.text.capitalization.upper",
+      "menu": "format",
+      "effect": "action",
+      "label": "UPPERCASE",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.text.capitalization.title",
+      "menu": "format",
+      "effect": "action",
+      "label": "Title Case",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.alignIndent.left",
+      "menu": "format",
+      "effect": "action",
+      "label": "Left",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.alignIndent.center",
+      "menu": "format",
+      "effect": "action",
+      "label": "Center",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.alignIndent.right",
+      "menu": "format",
+      "effect": "action",
+      "label": "Right",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.alignIndent.justified",
+      "menu": "format",
+      "effect": "action",
+      "label": "Justified",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.alignIndent.increaseIndent",
+      "menu": "format",
+      "effect": "action",
+      "label": "Increase indent",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.alignIndent.decreaseIndent",
+      "menu": "format",
+      "effect": "action",
+      "label": "Decrease indent",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.spacing.single",
+      "menu": "format",
+      "effect": "action",
+      "label": "Single",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.spacing.1_15",
+      "menu": "format",
+      "effect": "action",
+      "label": "1.15",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.spacing.1_5",
+      "menu": "format",
+      "effect": "action",
+      "label": "1.5",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.spacing.double",
+      "menu": "format",
+      "effect": "action",
+      "label": "Double",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.spacing.addBefore",
+      "menu": "format",
+      "effect": "action",
+      "label": "Add space before paragraph",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.spacing.addAfter",
+      "menu": "format",
+      "effect": "action",
+      "label": "Add space after paragraph",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.spacing.custom",
+      "menu": "format",
+      "effect": "dialog",
+      "label": "Custom spacing",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bulletsNumbering.numbered",
+      "menu": "format",
+      "effect": "submenu",
+      "label": "Numbered list",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bulletsNumbering.bulleted",
+      "menu": "format",
+      "effect": "submenu",
+      "label": "Bulleted list",
+      "evidence": "disabled by textBlockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bulletsNumbering.listOptions.moreBullets",
+      "menu": "format",
+      "effect": "dialog",
+      "label": "More bullets",
+      "evidence": "disabled by listItemSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.table.insertRowAbove",
+      "menu": "format",
+      "effect": "action",
+      "label": "Insert row above",
+      "evidence": "disabled by tableCellSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.table.insertRowBelow",
+      "menu": "format",
+      "effect": "action",
+      "label": "Insert row below",
+      "evidence": "disabled by tableCellSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.table.insertColumnLeft",
+      "menu": "format",
+      "effect": "action",
+      "label": "Insert column left",
+      "evidence": "disabled by tableCellSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.table.insertColumnRight",
+      "menu": "format",
+      "effect": "action",
+      "label": "Insert column right",
+      "evidence": "disabled by tableCellSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.table.deleteRow",
+      "menu": "format",
+      "effect": "action",
+      "label": "Delete row",
+      "evidence": "disabled by tableCellSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.table.deleteColumn",
+      "menu": "format",
+      "effect": "action",
+      "label": "Delete column",
+      "evidence": "disabled by tableCellSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.table.deleteTable",
+      "menu": "format",
+      "effect": "action",
+      "label": "Delete table",
+      "evidence": "disabled by tableCellSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.table.distributeRows",
+      "menu": "format",
+      "effect": "action",
+      "label": "Distribute rows",
+      "evidence": "disabled by tableCellSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.table.distributeColumns",
+      "menu": "format",
+      "effect": "action",
+      "label": "Distribute columns",
+      "evidence": "disabled by tableCellSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.table.mergeCells",
+      "menu": "format",
+      "effect": "action",
+      "label": "Merge cells",
+      "evidence": "disabled by cellRangeSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.table.unmergeCells",
+      "menu": "format",
+      "effect": "action",
+      "label": "Unmerge cells",
+      "evidence": "disabled by mergedCellSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.image.cropImage",
+      "menu": "format",
+      "effect": "client",
+      "label": "Crop image",
+      "evidence": "disabled by imageSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.image.maskImage",
+      "menu": "format",
+      "effect": "submenu",
+      "label": "Mask image",
+      "evidence": "disabled by imageSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.image.replaceImage.upload",
+      "menu": "format",
+      "effect": "action",
+      "label": "Upload from computer",
+      "evidence": "under format.image.replaceImage, disabled in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.image.replaceImage.byUrl",
+      "menu": "format",
+      "effect": "dialog",
+      "label": "By URL",
+      "evidence": "under format.image.replaceImage, disabled in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.image.replaceImage.fromThisPresentation",
+      "menu": "format",
+      "effect": "dialog",
+      "label": "From this presentation",
+      "evidence": "under format.image.replaceImage, disabled in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.image.resetImage",
+      "menu": "format",
+      "effect": "action",
+      "label": "Reset image",
+      "evidence": "disabled by imageEdited in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.image.dither",
+      "menu": "format",
+      "effect": "action",
+      "label": "Dither",
+      "evidence": "disabled by imageSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.image.imageOptions",
+      "menu": "format",
+      "effect": "panel",
+      "label": "Image options",
+      "evidence": "disabled by imageSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.borderColor",
+      "menu": "format",
+      "effect": "client",
+      "label": "Border color",
+      "evidence": "disabled by hasBorderField in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.borderWeight",
+      "menu": "format",
+      "effect": "client",
+      "label": "Border weight",
+      "evidence": "disabled by hasBorderField in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.borderDash.solid",
+      "menu": "format",
+      "effect": "action",
+      "label": "Solid",
+      "evidence": "disabled by blockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.borderDash.dot",
+      "menu": "format",
+      "effect": "action",
+      "label": "Dot",
+      "evidence": "disabled by blockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.borderDash.dash",
+      "menu": "format",
+      "effect": "action",
+      "label": "Dash",
+      "evidence": "disabled by blockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.borderDash.dashDot",
+      "menu": "format",
+      "effect": "action",
+      "label": "Dash dot",
+      "evidence": "disabled by blockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.borderDash.longDash",
+      "menu": "format",
+      "effect": "action",
+      "label": "Long dash",
+      "evidence": "disabled by blockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.borderDash.longDashDot",
+      "menu": "format",
+      "effect": "action",
+      "label": "Long dash dot",
+      "evidence": "disabled by blockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineStart.none",
+      "menu": "format",
+      "effect": "action",
+      "label": "None",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineStart.fillArrow",
+      "menu": "format",
+      "effect": "action",
+      "label": "Arrow",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineStart.stealth",
+      "menu": "format",
+      "effect": "action",
+      "label": "Stealth arrow",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineStart.fillCircle",
+      "menu": "format",
+      "effect": "action",
+      "label": "Circle",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineStart.fillSquare",
+      "menu": "format",
+      "effect": "action",
+      "label": "Square",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineStart.fillDiamond",
+      "menu": "format",
+      "effect": "action",
+      "label": "Diamond",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineStart.openArrow",
+      "menu": "format",
+      "effect": "action",
+      "label": "Open arrow",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineStart.openCircle",
+      "menu": "format",
+      "effect": "action",
+      "label": "Open circle",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineStart.openSquare",
+      "menu": "format",
+      "effect": "action",
+      "label": "Open square",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineStart.openDiamond",
+      "menu": "format",
+      "effect": "action",
+      "label": "Open diamond",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineEnd.none",
+      "menu": "format",
+      "effect": "action",
+      "label": "None",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineEnd.fillArrow",
+      "menu": "format",
+      "effect": "action",
+      "label": "Arrow",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineEnd.stealth",
+      "menu": "format",
+      "effect": "action",
+      "label": "Stealth arrow",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineEnd.fillCircle",
+      "menu": "format",
+      "effect": "action",
+      "label": "Circle",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineEnd.fillSquare",
+      "menu": "format",
+      "effect": "action",
+      "label": "Square",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineEnd.fillDiamond",
+      "menu": "format",
+      "effect": "action",
+      "label": "Diamond",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineEnd.openArrow",
+      "menu": "format",
+      "effect": "action",
+      "label": "Open arrow",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineEnd.openCircle",
+      "menu": "format",
+      "effect": "action",
+      "label": "Open circle",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineEnd.openSquare",
+      "menu": "format",
+      "effect": "action",
+      "label": "Open square",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.bordersLines.lineEnd.openDiamond",
+      "menu": "format",
+      "effect": "action",
+      "label": "Open diamond",
+      "evidence": "disabled by lineSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.formatOptions",
+      "menu": "format",
+      "effect": "panel",
+      "label": "Format options",
+      "evidence": "panel \"Format options\" opened; closed",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.clearFormatting",
+      "menu": "format",
+      "effect": "action",
+      "label": "Clear formatting",
+      "evidence": "disabled by blockSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.chartType.bar",
+      "menu": "format",
+      "effect": "action",
+      "label": "Bar",
+      "evidence": "disabled by chartSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.chartType.column",
+      "menu": "format",
+      "effect": "action",
+      "label": "Column",
+      "evidence": "disabled by chartSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.chartType.line",
+      "menu": "format",
+      "effect": "action",
+      "label": "Line",
+      "evidence": "disabled by chartSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "format.chartType.pie",
+      "menu": "format",
+      "effect": "action",
+      "label": "Pie",
+      "evidence": "disabled by chartSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.newSlide",
+      "menu": "slide",
+      "effect": "action",
+      "label": "New slide",
+      "evidence": "no write (revision 4); snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.duplicateSlide",
+      "menu": "slide",
+      "effect": "action",
+      "label": "Duplicate slide",
+      "evidence": "revision 4 -> 5; slides 1 -> 2",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.duplicateSlide.activeSlide",
+      "menu": "slide",
+      "evidence": "after Undo of Duplicate slide, the slide at index 0: expected title, current title; slide.get answers",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.deleteSlide",
+      "menu": "slide",
+      "effect": "action",
+      "label": "Delete slide",
+      "evidence": "the only slide; run after New slide",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.skipSlide",
+      "menu": "slide",
+      "effect": "action",
+      "label": "Skip slide",
+      "evidence": "threw: TimeoutError: page.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for locator('[data-control=\"menubar.slide\"]')\n    - locator resolved to <button tabindex=\"0\" type=\"button\" role=\"menuitem\" data-menu=\"slide\" aria-haspopup=\"menu\" aria",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.moveSlide.up",
+      "menu": "slide",
+      "effect": "action",
+      "label": "Move slide up",
+      "evidence": "disabled by canMoveUp in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.moveSlide.down",
+      "menu": "slide",
+      "effect": "action",
+      "label": "Move slide down",
+      "evidence": "no write (revision 6); snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.moveSlide.toBeginning",
+      "menu": "slide",
+      "effect": "action",
+      "label": "Move slide to beginning",
+      "evidence": "disabled by canMoveUp in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.moveSlide.toEnd",
+      "menu": "slide",
+      "effect": "action",
+      "label": "Move slide to end",
+      "evidence": "revision 6 -> 7; title at 1 -> 2",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.background",
+      "evidence": "58 text nodes, 83 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.changeBackground",
+      "menu": "slide",
+      "effect": "dialog",
+      "label": "Change background",
+      "evidence": "dialog dialog.background \"Background\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.applyLayout",
+      "menu": "slide",
+      "effect": "submenu",
+      "label": "Apply layout",
+      "evidence": "picked Title and body; no write; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "slide.changeTheme",
+      "menu": "slide",
+      "effect": "panel",
+      "label": "Change theme",
+      "evidence": "panel \"Themes\" opened; closed",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.order.bringToFront",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Bring to front",
+      "evidence": "disabled by canBringToFront in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.order.bringForward",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Bring forward",
+      "evidence": "disabled by canBringForward in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.order.sendBackward",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Send backward",
+      "evidence": "disabled by canSendBackward in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.order.sendToBack",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Send to back",
+      "evidence": "disabled by canSendToBack in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.align.left",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Left",
+      "evidence": "disabled by objectSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.align.center",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Center",
+      "evidence": "disabled by objectSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.align.right",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Right",
+      "evidence": "disabled by objectSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.align.top",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Top",
+      "evidence": "disabled by objectSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.align.middle",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Middle",
+      "evidence": "disabled by objectSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.align.bottom",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Bottom",
+      "evidence": "disabled by objectSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.distribute.horizontally",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Horizontally",
+      "evidence": "disabled by threeOrMore in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.distribute.vertically",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Vertically",
+      "evidence": "disabled by threeOrMore in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.centerOnPage.horizontally",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Horizontally",
+      "evidence": "disabled by objectSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.centerOnPage.vertically",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Vertically",
+      "evidence": "disabled by objectSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.rotate.clockwise",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Rotate clockwise 90°",
+      "evidence": "disabled by rotatable in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.rotate.counterClockwise",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Rotate counter-clockwise 90°",
+      "evidence": "disabled by rotatable in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.rotate.flipHorizontally",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Flip horizontally",
+      "evidence": "disabled by rotatable in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.rotate.flipVertically",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Flip vertically",
+      "evidence": "disabled by rotatable in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.group",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Group",
+      "evidence": "disabled by canGroup in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.ungroup",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Ungroup",
+      "evidence": "disabled by groupSelected in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "arrange.regroup",
+      "menu": "arrange",
+      "effect": "action",
+      "label": "Regroup",
+      "evidence": "disabled by canRegroup in this state",
+      "pass": null
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.spelling.underlineErrors",
+      "menu": "tools",
+      "effect": "toggle",
+      "label": "Underline errors",
+      "evidence": "aria-checked true -> false; spellcheck true -> false -> true",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.notificationSettings",
+      "evidence": "44 text nodes, 55 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.notificationSettings",
+      "menu": "tools",
+      "effect": "dialog",
+      "label": "Notification settings",
+      "evidence": "dialog dialog.notificationSettings \"Notification settings\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.accessibilitySettings.collaboratorAnnouncements",
+      "menu": "tools",
+      "effect": "toggle",
+      "label": "Turn on collaborator announcements",
+      "evidence": "aria-checked false -> true; announce false -> true -> false",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.activityDashboard",
+      "menu": "tools",
+      "effect": "panel",
+      "label": "Activity dashboard",
+      "evidence": "panel \"Activity\" opened; closed",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.checkSlides",
+      "menu": "tools",
+      "effect": "panel",
+      "label": "Check slides",
+      "evidence": "panel \"Suggestions for this slide\" opened; closed",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.advanced.showSource",
+      "menu": "tools",
+      "effect": "toggle",
+      "label": "Show source",
+      "evidence": "aria-checked false -> true; sourceDrawer false -> true -> false",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.advanced.sideBySide",
+      "menu": "tools",
+      "effect": "toggle",
+      "label": "Light and dark side by side",
+      "evidence": "aria-checked false -> true; sideBySide null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.advanced.suggestionMarks",
+      "menu": "tools",
+      "effect": "toggle",
+      "label": "Show suggestion marks on the slide",
+      "evidence": "aria-checked false -> true; suggestionMarks null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.advanced.showIds",
+      "menu": "tools",
+      "effect": "toggle",
+      "label": "Show slide and block ids",
+      "evidence": "aria-checked false -> true; showIds null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.advanced.renderSlide",
+      "menu": "tools",
+      "effect": "action",
+      "label": "Render this slide",
+      "evidence": "new tab https://turboslide-igavfcg2x-kl01s-projects.vercel.app/api/render/title-2?deck=untitled-20260914-bxdz&theme=light&scale=",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.advanced.changeHistory",
+      "menu": "tools",
+      "effect": "panel",
+      "label": "Change history",
+      "evidence": "panel \"Change history\" opened; closed",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.advanced.sectionsTree",
+      "menu": "tools",
+      "effect": "toggle",
+      "label": "Show sections as a tree",
+      "evidence": "aria-checked false -> true; sectionsTree null -> null -> null",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.advanced.readAsBook",
+      "menu": "tools",
+      "effect": "toggle",
+      "label": "Read as a book",
+      "evidence": "aria-checked false -> true; book \"slide\" -> \"book\" -> \"slide\"",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.advanced.picturesMaterials",
+      "menu": "tools",
+      "effect": "panel",
+      "label": "Pictures and materials",
+      "evidence": "panel \"Pictures and materials\" opened; closed",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "tools.advanced.runAction",
+      "menu": "tools",
+      "effect": "client",
+      "label": "Run an action…",
+      "evidence": "the action list opened",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.agentAccess",
+      "evidence": [
+        {
+          "text": "Copies the mcp address",
+          "words": ["MCP"]
+        }
+      ],
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "extensions.agentAccess",
+      "menu": "extensions",
+      "effect": "dialog",
+      "label": "Agent access",
+      "evidence": "dialog dialog.agentAccess \"Agent access\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.publish",
+      "evidence": "52 text nodes, 60 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "extensions.embedInSite",
+      "menu": "extensions",
+      "effect": "dialog",
+      "label": "Embed in a site",
+      "evidence": "dialog dialog.publish \"Publish to the web\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "help.searchMenus",
+      "menu": "help",
+      "effect": "client",
+      "label": "Search the menus",
+      "evidence": "the finder opened",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.help",
+      "evidence": "80 text nodes, 52 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "help.help",
+      "menu": "help",
+      "effect": "dialog",
+      "label": "Help",
+      "evidence": "dialog dialog.help \"Help\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "help.improve",
+      "menu": "help",
+      "effect": "route",
+      "label": "Help Turboslide improve",
+      "evidence": "new tab https://github.com/login?return_to=https%3A%2F%2Fgithub.com%2FKevin-Liu-01%2FTurboslide%2Fissues%2Fnew",
+      "pass": true
+    },
+    {
+      "section": "defaultViewWords",
+      "where": "dialog dialog.keyboardShortcuts",
+      "evidence": "322 text nodes, 51 tooltips, none of 36 words",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "help.keyboardShortcuts",
+      "menu": "help",
+      "effect": "dialog",
+      "label": "Keyboard shortcuts",
+      "evidence": "dialog dialog.keyboardShortcuts \"Keyboard shortcuts\"; focus inside; Esc closed it; focus after: BODY",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.textBox",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Text box",
+      "evidence": "no write (revision 7); the stage armed the text tool; clicked an empty spot on the sheet; dragged a box on the sheet; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.shape.shapes.rectangle",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Rectangle",
+      "evidence": "no write (revision 7); the stage armed the shape tool; clicked an empty spot on the sheet; dragged a box on the sheet; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.shape.shapes.rounded",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Rounded rectangle",
+      "evidence": "revision 7 -> 8; blocks 4 -> 5; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.shape.shapes.ellipse",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Ellipse",
+      "evidence": "no write (revision 8); the stage armed the shape tool; clicked an empty spot on the sheet; dragged a box on the sheet; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.shape.arrows.arrow",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Arrow",
+      "evidence": "revision 8 -> 9; blocks 5 -> 6; the stage armed the shape tool; clicked an empty spot on the sheet",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.chart.bar",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Bar",
+      "evidence": "no write (revision 9); clicked an empty spot on the sheet; dragged a box on the sheet; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.chart.column",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Column",
+      "evidence": "no write (revision 9); clicked an empty spot on the sheet; dragged a box on the sheet; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.chart.line",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Line",
+      "evidence": "no write (revision 9); clicked an empty spot on the sheet; dragged a box on the sheet; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.chart.pie",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Pie",
+      "evidence": "no write (revision 9); clicked an empty spot on the sheet; dragged a box on the sheet; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.line.line",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Line",
+      "evidence": "no write (revision 9); the stage armed the line tool; clicked an empty spot on the sheet; dragged a box on the sheet; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.line.arrow",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Arrow",
+      "evidence": "revision 9 -> 10; blocks 6 -> 7; the stage armed the line tool; clicked an empty spot on the sheet",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.line.rule",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Rule",
+      "evidence": "no write (revision 11); the stage armed the line tool; clicked an empty spot on the sheet; dragged a box on the sheet; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.line.elbowConnector",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Elbow connector",
+      "evidence": "no write (revision 11); the stage armed the line tool; clicked an empty spot on the sheet; dragged a box on the sheet; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.line.curvedConnector",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Curved connector",
+      "evidence": "revision 11 -> 12; blocks 6 -> 7; the stage armed the line tool; clicked an empty spot on the sheet",
+      "pass": true
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.line.curve",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Curve",
+      "evidence": "no write (revision 12); the stage armed the line tool; placed three points and pressed Enter; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.line.polyline",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Polyline",
+      "evidence": "no write (revision 12); the stage armed the line tool; placed three points and pressed Enter; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.line.scribble",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Scribble",
+      "evidence": "no write (revision 12); the stage armed the line tool; dragged a scribble of 20 steps on the sheet; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.icon",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Icon",
+      "evidence": "no write (revision 12); a plate opened (dialog.insertIcon); picked the first option; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "insert.material",
+      "menu": "insert",
+      "effect": "action",
+      "label": "Material",
+      "evidence": "no write (revision 12); a plate opened (dialog.insertMaterial); picked the first option; snackbar \"\"",
+      "pass": false
+    },
+    {
+      "section": "effects:scratch",
+      "id": "edit.duplicate",
+      "menu": "edit",
+      "effect": "client",
+      "label": "Duplicate",
+      "evidence": "threw: Error: page.evaluate: Target page, context or browser has been closed",
+      "pass": false
+    },
+    {
+      "section": "infrastructure",
+      "id": "run",
+      "evidence": "page.evaluate: Target page, context or browser has been closed\n    at state (/Users/kevinliu/repos/Turboslide/scripts/gslides-parity-audit.mjs:422:30)\n    at step (/Users/kevinliu/repos/Turboslide/scripts/gslides-parity-audit.mjs:2813:38)\n    at async clipboardSequence (/Users/kevinliu/repos/Turboslide/scripts/gslides-parity-audit.mjs:2817:3)\n    at async file:///Users/kevinliu/repos/Turboslide/scripts/gslides-parity-audit.mjs:5945:29",
+      "pass": false
+    },
+    {
+      "section": "infrastructure",
+      "id": "cleanup",
+      "evidence": "the scratch deck untitled-20260914-bxdz stayed in the store: Error: page.goto: Target page, context or browser has been closed",
+      "pass": false
+    }
+  ],
+  "pageErrors": []
+}

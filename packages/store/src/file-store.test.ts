@@ -27,8 +27,9 @@ import { jsonEqual } from '@turboslide/schema/pointer';
 import { validateDocument } from '@turboslide/schema/validate';
 
 import { leasePolicyFor, leaseRefusalMessage } from './lease.ts';
-import { openFileStore, slidePath } from './file-store.ts';
+import { assetDigest, digestAssetName, openFileStore, slidePath } from './file-store.ts';
 import type { FileStore } from './file-store.ts';
+import { AssetExistsError } from './store.ts';
 import { readVersions } from './versions.ts';
 
 const agent: Author = { kind: 'agent', name: 'agent', runId: 'm2-test' };
@@ -367,6 +368,41 @@ describe('FileStore', () => {
     const swept = await quick.write({ baseRevision: 412, author: agent, mutations: [setSize(22)] });
     expect(swept.ok).toBe(true);
     expect(existsSync(lock)).toBe(false);
+  });
+
+  it('stores digest named asset files once and never overwrites them (SPEC-3 0.39, 8.5)', async () => {
+    const png = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
+    const name = digestAssetName('mood-sea', png, '-light.png');
+    expect(name).toBe(`assets/mood-sea.${assetDigest(png)}-light.png`);
+    expect(assetDigest(png)).toMatch(/^[0-9a-f]{8}$/);
+    const first = await store.putAsset(name, png, 'image/png');
+    expect(first).toEqual({
+      relative: name,
+      path: join(dir, 'assets', name.slice('assets/'.length)),
+      url: null,
+      existed: false,
+    });
+    expect(new Uint8Array(readFileSync(first.path))).toEqual(png);
+    // the same bytes again: a retry, or the second instance of a hosted store
+    const again = await store.putAsset(name, png);
+    expect(again.existed).toBe(true);
+    // other bytes under a taken name fail loudly and leave the file alone
+    await expect(store.putAsset(name, new Uint8Array([1, 2, 3]))).rejects.toBeInstanceOf(
+      AssetExistsError,
+    );
+    expect(new Uint8Array(readFileSync(first.path))).toEqual(png);
+    // no path outside assets/, no climbing out of the folder
+    await expect(store.putAsset('slides/x.json', png)).rejects.toThrow(TypeError);
+    await expect(store.putAsset('assets/../deck.json', png)).rejects.toThrow(TypeError);
+    await expect(store.putAsset('assets/', png)).rejects.toThrow(TypeError);
+    await expect(store.putAsset('assets/.hidden', png)).rejects.toThrow(TypeError);
+    // removal is idempotent
+    await store.removeAsset(name);
+    expect(existsSync(first.path)).toBe(false);
+    await expect(store.removeAsset(name)).resolves.toBeUndefined();
+    // no version record and no revision change: the record commits separately through write()
+    expect(readVersions(dir)).toHaveLength(0);
+    expect(await store.revision()).toBe(412);
   });
 
   it('serializes concurrent writes so both land on the log', async () => {

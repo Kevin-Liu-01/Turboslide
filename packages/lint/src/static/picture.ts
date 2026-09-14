@@ -4,8 +4,17 @@
 // (OPENERS.md:137: a mood follows a dense content slide and at least one content slide separates
 // it from the next opener, so the two image kinds alternate). The plate rectangle is the slide's
 // own (side and max width), so metrics recorded against another plate are reported as stale.
+//
+// The block level dither of round three (gslides-parity SPEC-3 10.1, 10.4): a picture or shot
+// with a `dither` field is judged by the metrics of its materialized variant, found on the asset
+// under the key the renderer derives (`@turboslide/render/dither-key`), so both rules read one
+// record. Without a variant the plate rule reports at severity 1 that nothing is measured yet;
+// the blank rule stays quiet, because there is no file to judge.
 import { PLATE_BOXES } from '@turboslide/effects/metrics';
+import { ditheredPictures } from '@turboslide/render/dither-key';
+import type { DitheredPicture } from '@turboslide/render/dither-key';
 import type { Asset, Finding, Slide } from '../contracts.ts';
+import { SHEET_HEIGHT, SHEET_WIDTH } from '../contracts.ts';
 import type { LintContext } from '../context.ts';
 
 export type PlateSide = 'lower-left' | 'lower-right' | 'upper-left';
@@ -76,9 +85,102 @@ function twoToneRefs(
   return out;
 }
 
+/** True when two sheet boxes share any area. */
+function boxesTouch(a: readonly number[], b: readonly number[]): boolean {
+  const [ax, ay, aw, ah] = a as [number, number, number, number];
+  const [bx, by, bw, bh] = b as [number, number, number, number];
+  return ax < bx + bw && bx < ax + aw && ay < by + bh && by < ay + ah;
+}
+
+/** The dithered pictures of a slide; a slide whose asset has no continuous source yields none (the store refuses that write). */
+function ditheredOn(ctx: LintContext, slide: Slide): DitheredPicture[] {
+  try {
+    return ditheredPictures({ deck: ctx.deck, slides: ctx.slides }, [slide.id]);
+  } catch {
+    return [];
+  }
+}
+
+/** picture/blank-twin and picture/plate-clear on the block level dithers of one slide (SPEC-3 10.4). */
+function checkBlockDithers(ctx: LintContext, slide: Slide, out: Finding[]): void {
+  const paths = new Map(ctx.blocksOf(slide).map((ref) => [ref.block.id, ref.path]));
+  for (const row of ditheredOn(ctx, slide)) {
+    const path = `${paths.get(row.block.id) ?? ''}/dither`;
+    const variant = row.asset.variants?.[row.key];
+    const key12 = row.key.slice(0, 12);
+    const lit = variant?.metrics?.litFraction;
+    if (lit !== undefined && (lit < 0.02 || lit > 0.98)) {
+      out.push(
+        ctx.finding('picture/blank-twin', slide.id, {
+          blockId: row.block.id,
+          path,
+          text: `${row.asset.id} ${key12}`,
+          measured: { litFraction: lit },
+          proposal:
+            'One theme of the dithered picture is an empty sheet; move the ink point, the paper point or the midtones so both themes carry the picture, then write the files again with `turboslide picture materialize`.',
+        }),
+      );
+    }
+    if (row.plate === undefined) continue;
+    const box: [number, number, number, number] =
+      row.block.pos !== undefined
+        ? [row.block.pos.x, row.block.pos.y, row.block.pos.w, row.block.pos.h]
+        : [0, 0, SHEET_WIDTH, SHEET_HEIGHT];
+    if (!boxesTouch(box, row.plate)) continue;
+    const clear = variant?.metrics?.plateClear;
+    if (variant === undefined || clear === undefined) {
+      out.push(
+        ctx.finding('picture/plate-clear', slide.id, {
+          blockId: row.block.id,
+          path,
+          text: `${row.asset.id} ${key12}`,
+          box: row.plate,
+          proposal: `Nothing is measured under the plate for ${row.asset.id} at this dither yet; \`turboslide picture materialize ${slide.id}\` writes the files and the lit cells under the plate.`,
+          severity: 1,
+        }),
+      );
+    } else if (!sameBox(clear.plate, row.plate)) {
+      out.push(
+        ctx.finding('picture/plate-clear', slide.id, {
+          blockId: row.block.id,
+          path,
+          text: `${row.asset.id} ${key12}`,
+          box: row.plate,
+          measured: {
+            litUnder: clear.litUnder,
+            litInBand: clear.litInBand,
+            nearestLitPx: clear.nearestLitPx,
+          },
+          proposal: `The files of ${row.asset.id} were measured against the plate at ${clear.plate.join(', ')}, not this slide's ${row.plate.join(', ')}; \`turboslide picture materialize ${slide.id}\` measures them again.`,
+          severity: 1,
+        }),
+      );
+    } else if (clear.litUnder > 0 || clear.litInBand > 0) {
+      out.push(
+        ctx.finding('picture/plate-clear', slide.id, {
+          blockId: row.block.id,
+          path,
+          text: `${row.asset.id} ${key12}`,
+          box: row.plate,
+          measured: {
+            litUnder: clear.litUnder,
+            litInBand: clear.litInBand,
+            nearestLitPx: clear.nearestLitPx,
+          },
+          proposal:
+            clear.litUnder > 0
+              ? `${clear.litUnder} lit cell(s) sit under the plate; move the picture, change the ink and paper points, or move the plate to the other side.`
+              : `${clear.litInBand} lit cell(s) sit within 30 px of the plate; move the picture so the plate stands on solid ground.`,
+        }),
+      );
+    }
+  }
+}
+
 export function checkPictures(ctx: LintContext): Finding[] {
   const out: Finding[] = [];
   for (const slide of ctx.slideList()) {
+    checkBlockDithers(ctx, slide, out);
     // picture/blank-twin on every two-tone asset the slide shows
     const seen = new Set<string>();
     for (const { asset, path, blockId } of twoToneRefs(ctx, slide)) {

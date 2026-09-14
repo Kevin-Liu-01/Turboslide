@@ -133,7 +133,8 @@ export function thumbPath(
 /**
  * The URL the client asks: the facade route with `w`, plus the revision as `r` so the browser
  * cache turns over with the document and a thumbnail of the last revision is never shown for
- * the current one.
+ * the current one, and the page's thumbnail grant as `s` (gslides-parity SPEC-3 8.13; report 04
+ * F6: the route verifies it in enforce mode; server/render.ts `thumbGrant` hands the page one).
  */
 export function thumbUrl(
   deckId: string,
@@ -141,8 +142,10 @@ export function thumbUrl(
   theme: Theme,
   width: ThumbWidth,
   revision: number,
+  grant?: string,
 ): string {
-  return `/api/render/${encodeURIComponent(slideId)}?deck=${encodeURIComponent(deckId)}&theme=${theme}&w=${width}&r=${revision}`;
+  const signed = grant !== undefined && grant !== '' ? `&s=${encodeURIComponent(grant)}` : '';
+  return `/api/render/${encodeURIComponent(slideId)}?deck=${encodeURIComponent(deckId)}&theme=${theme}&w=${width}&r=${revision}${signed}`;
 }
 
 /** Both twins' URLs, the `shot` a ShellItem or a Thumb takes. */
@@ -151,10 +154,11 @@ export function thumbShot(
   slideId: string,
   revision: number,
   width: ThumbWidth = DEFAULT_THUMB_WIDTH,
+  grant?: string,
 ): { light: string; dark: string } {
   return {
-    light: thumbUrl(deckId, slideId, 'light', width, revision),
-    dark: thumbUrl(deckId, slideId, 'dark', width, revision),
+    light: thumbUrl(deckId, slideId, 'light', width, revision, grant),
+    dark: thumbUrl(deckId, slideId, 'dark', width, revision, grant),
   };
 }
 
@@ -285,6 +289,8 @@ export type WarmResult = {
   rendered: number;
   cached: number;
   ms: number;
+  /** the editor's warm call answered before the job ran; the captures land through /api/render (warm.ts) */
+  queued?: boolean;
 };
 
 /**

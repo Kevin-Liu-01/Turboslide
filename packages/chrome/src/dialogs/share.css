@@ -1,0 +1,286 @@
+/* The Share dialog (gslides-parity SPEC-3 6.5, 9.3; research 09 3.6, 8.5): a fixed width of 520,
+   rows of a fixed 40 px inside scroll regions of a fixed maximum height with the gutter reserved,
+   the Review banner slot present at every moment at its final height, Pending and Expired in a
+   fixed width chip, the footer sentence. Monochrome; every box square. */
+.ts-share .ts-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ts-share-review {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--pt-hair-soft);
+  font-size: 12.5px;
+}
+
+.ts-share-review.has-requests {
+  border-color: var(--pt-ink);
+}
+
+.ts-share-quiet {
+  color: var(--pt-titanium);
+}
+
+.ts-share-requests {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  border: 1px solid var(--pt-hair-soft);
+}
+
+.ts-share-request {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-share-request-who {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.ts-share-request-message {
+  display: block;
+  min-height: 18px;
+  color: var(--pt-ink-2);
+  font-size: 12px;
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  quotes: '“' '”';
+}
+
+.ts-share-request-acts {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.ts-share-request-notify {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: auto;
+  font-size: 12px;
+}
+
+.ts-share-claim {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid var(--pt-ink);
+  font-size: 12.5px;
+}
+
+.ts-share-people {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ts-share-invite {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.ts-share-emails,
+.ts-share-message {
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+}
+
+.ts-share-emails:focus-visible,
+.ts-share-message:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-share-notify {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  height: 32px;
+}
+
+.ts-share-message.is-empty {
+  display: block;
+  border-color: transparent;
+}
+
+.ts-share-role,
+.ts-share-mode,
+.ts-share-expiry {
+  height: 28px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+}
+
+.ts-share-list,
+.ts-share-links {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  border: 1px solid var(--pt-hair-soft);
+}
+
+.ts-share-list:empty {
+  display: none;
+}
+
+.ts-share-row {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 64px auto;
+  gap: 8px;
+  align-items: center;
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-share-row.is-link {
+  grid-template-columns: minmax(0, 1fr) 80px minmax(0, 1fr) auto;
+}
+
+.ts-share-row:last-child {
+  border-bottom: 0;
+}
+
+.ts-share-row-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Pending and Expired in a fixed 64 px chip, empty for an accepted grant */
+.ts-share-row-chip {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 64px;
+  height: 18px;
+  text-align: center;
+  color: var(--pt-ink-2);
+  font: 500 11px/18px var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01';
+}
+
+.ts-share-row.is-pending .ts-share-row-chip,
+.ts-share-row.is-expired .ts-share-row-chip,
+.ts-share-row.is-pending-owner .ts-share-row-chip {
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-share-row-role,
+.ts-share-row-meta {
+  color: var(--pt-ink-2);
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-share-row-acts {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.ts-share-general {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ts-share-general-row {
+  display: grid;
+  grid-template-columns: 16px auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  height: 32px;
+}
+
+.ts-share-general-row svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+
+.ts-share-general-words {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-share-stop {
+  align-self: flex-start;
+}
+
+.ts-share-gear {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.ts-share-switches {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: 6px 0;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-share-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.ts-share-footer-sentence {
+  margin: 0;
+  color: var(--pt-ink-2);
+  font-size: 12px;
+}
+
+/* ---- Publish to the web ---- */
+.ts-publish-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+  font-size: 12.5px;
+}

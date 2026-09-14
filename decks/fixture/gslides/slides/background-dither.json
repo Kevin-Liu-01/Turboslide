@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "background-dither",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "photo",
+        "pos": {
+          "x": 0,
+          "y": 0,
+          "w": 1600,
+          "h": 900,
+          "z": 0
+        },
+        "type": "picture",
+        "asset": "fixture-photo",
+        "dither": {
+          "pattern": "bayer8",
+          "black": 120,
+          "white": 230,
+          "gamma": 0.9
+        }
+      },
+      {
+        "id": "plate",
+        "pos": {
+          "x": 137,
+          "y": 506,
+          "w": 740,
+          "h": 265,
+          "z": 1,
+          "group": "plate"
+        },
+        "type": "box",
+        "fill": "paper",
+        "strokeWidth": 0,
+        "padding": {
+          "top": 22,
+          "right": 26,
+          "bottom": 20,
+          "left": 26
+        }
+      },
+      {
+        "id": "big",
+        "pos": {
+          "x": 163,
+          "y": 528,
+          "w": 688,
+          "h": 76,
+          "z": 2,
+          "group": "plate"
+        },
+        "type": "heading",
+        "level": "big",
+        "text": "Dithered background",
+        "autofit": "shrink"
+      },
+      {
+        "id": "p",
+        "pos": {
+          "x": 163,
+          "y": 618,
+          "w": 688,
+          "h": 99,
+          "z": 3,
+          "group": "plate"
+        },
+        "type": "paragraph",
+        "text": "A covering picture with the Photograph numbers of the Background dialog, and a plate group over it.",
+        "measure": 56,
+        "marginTop": 14,
+        "autofit": "shrink"
+      }
+    ]
+  }
+}

@@ -76,6 +76,9 @@ export const ICON_NAMES = [
   'bars-3-bottom-left',
   'bars-3-center-left',
   'bars-3-bottom-right',
+  // round three (gslides-parity SPEC-3 5.3, 5.5; build-3/b6.md request 2): the inbox plate and Notification settings
+  'bell',
+  'inbox',
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];

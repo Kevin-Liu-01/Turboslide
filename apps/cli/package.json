@@ -14,6 +14,8 @@
   "exports": {
     "./cli": "./src/cli.ts",
     "./store-actions": "./src/store-actions.ts",
+    "./record-actions": "./src/record-actions.ts",
+    "./records/*": "./src/records/*.ts",
     "./commands/deck": "./src/commands/deck.ts",
     "./package.json": "./package.json"
   },
@@ -23,6 +25,7 @@
     "@turboslide/export": "workspace:*",
     "@turboslide/fonts": "workspace:*",
     "@turboslide/headless": "workspace:*",
+    "@turboslide/identity": "workspace:*",
     "@turboslide/import": "workspace:*",
     "@turboslide/lint": "workspace:*",
     "@turboslide/materials": "workspace:*",

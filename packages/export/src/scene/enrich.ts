@@ -12,8 +12,15 @@ import type { Block, Shadow } from '@turboslide/schema/blocks';
 import { SHADOW_DEFAULTS } from '@turboslide/schema/blocks';
 import { SEMANTIC_PALETTE, isColorToken } from '@turboslide/schema/color';
 import type { Color } from '@turboslide/schema/color';
-import type { Slide } from '@turboslide/schema/deck';
+import type { Deck, Slide } from '@turboslide/schema/deck';
 import { canvasObjects } from '@turboslide/schema/deck';
+import {
+  ditherKey12,
+  ditheredPictures,
+  readDither,
+  resolveDither,
+  variantFor,
+} from '@turboslide/render/dither-key';
 import { boundingBox } from '@turboslide/schema/freeform';
 import type { NumberPreset } from '@turboslide/schema/text';
 import { NUMBER_PRESETS, NUMBER_PRESET_FORMS, presetSlot } from '@turboslide/schema/text';
@@ -22,7 +29,9 @@ import { SHEET_HEIGHT, SHEET_WIDTH } from '@turboslide/schema/render';
 import { TOKENS } from '@turboslide/theme/tokens';
 
 import { parseCssColor } from '../units.ts';
-import type { Scene, SceneBullet, SceneShadow, SceneText } from './types.ts';
+import { join } from 'node:path';
+
+import type { Scene, SceneBullet, SceneDither, SceneShadow, SceneText } from './types.ts';
 
 /** A Color as the theme's hex (no hash), for the shadow and outline the builder writes. */
 export function colorHexFor(color: Color, theme: Theme): string {
@@ -139,7 +148,14 @@ function coversSheet(pos: { x: number; y: number; w: number; h: number }): boole
 /**
  * The scene with the document's facts on its entries (SPEC-2 1.5). Mutates and returns `scene`.
  */
-export function enrichScene(scene: Scene, slide: Slide): Scene {
+export type EnrichContext = {
+  /** The deck, for the asset records the dither variants live on (SPEC-3 10.4). */
+  deck?: Deck;
+  /** The deck directory, so the variant file path on the scene is absolute for the builder. */
+  deckDir?: string;
+};
+
+export function enrichScene(scene: Scene, slide: Slide, context: EnrichContext = {}): Scene {
   const theme = scene.theme;
   const blocks = blocksOf(slide);
   const objectFacts = (blockId: string) => {
@@ -262,10 +278,81 @@ export function enrichScene(scene: Scene, slide: Slide): Scene {
           pictureRasterId: raster.id,
           pictureBlockId: lowest.id,
         };
+        // a dithered covering picture that is a plain two tone plane travels as the variant's own
+        // bytes in Editable text (SPEC-3 10.4), else the raster the page shot
+        const variantFile = variantFileOf(lowest, context, theme);
+        if (variantFile !== undefined) scene.background.pictureVariantFile = variantFile;
       }
     }
   }
+  // the dithered pictures of the slide with the state each was shot in (SPEC-3 10.4)
+  if (context.deck !== undefined) {
+    const dithers = ditherEntries(slide, context.deck);
+    if (dithers.length > 0) scene.dithers = dithers;
+  }
   return scene;
+}
+
+/** The dithered pictures of a slide as the scene records them; none for a slide without the field. */
+export function ditherEntries(slide: Slide, deck: Deck): SceneDither[] {
+  try {
+    return ditheredPictures({ deck, slides: { [slide.id]: slide } }, [slide.id]).map((target) => ({
+      blockId: target.block.id,
+      assetId: target.asset.id,
+      key12: ditherKey12(target.key),
+      state: target.asset.variants?.[target.key] !== undefined ? 'variant' : 'live',
+    }));
+  } catch {
+    // a dither over an asset without a source: the validator names it; the export shoots the twin
+    return [];
+  }
+}
+
+/**
+ * The theme's variant file of a covering picture whose dither is a plain two tone plane at full
+ * strength with no crop, mask, adjustments or frame, else undefined (the raster stands in).
+ */
+export function variantFileOf(
+  block: Block,
+  context: EnrichContext,
+  theme: Theme,
+): string | undefined {
+  if (context.deck === undefined || context.deckDir === undefined) return undefined;
+  if (block.type !== 'picture') return undefined;
+  const dither = readDither(block);
+  if (dither === undefined) return undefined;
+  const resolved = resolveDither(dither);
+  if (resolved.strength < 1 || resolved.tone !== 'two') return undefined;
+  if (
+    block.trim !== undefined ||
+    block.mask !== undefined ||
+    block.adjust !== undefined ||
+    block.frame !== undefined
+  )
+    return undefined;
+  const asset = context.deck.assets[block.asset];
+  if (asset === undefined) return undefined;
+  const entries = ditheredPictures(
+    {
+      deck: context.deck,
+      slides: {
+        s: {
+          schemaVersion: 1,
+          id: 's',
+          kind: 'content',
+          layout: { type: 'freeform' },
+          slots: { main: [block] },
+        },
+      },
+    },
+    ['s'],
+  );
+  const found = entries[0];
+  if (found === undefined) return undefined;
+  const variant = variantFor(asset, found.key);
+  if (variant === undefined) return undefined;
+  const twin = 'neutral' in variant.twins ? variant.twins.neutral : variant.twins[theme];
+  return join(context.deckDir, ...twin.split('/'));
 }
 
 /** The texts a builder writes as ordinary text boxes: not the counter, not a shape's text layer. */

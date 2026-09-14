@@ -29,7 +29,19 @@ import {
   mergeExport,
   startBatchedExport,
 } from '../../server/export-batch';
+import {
+  authorize,
+  carriesBootstrapToken,
+  denialBody,
+  identityLabel,
+  requestContext,
+} from '../../server/authorize';
+import type { AuthContext, Capability } from '../../server/authorize';
+import { requireFlag } from '../../server/flags';
+import { logSecurityEvent } from '../../server/log';
+import { RateLimitedError, checkQuota, rateLimitedResponse, tierOf } from '../../server/ratelimit';
 import { ensureDeckAssets, isHosted, workerClientOptions } from '../../server/root';
+import { CANCEL_TOKEN_QUERY, verifyCancelToken } from '../../server/tokens';
 
 // POST /api/export/:deckId enqueues an export job on the render worker and answers 202 with the job
 // and a poll location; GET /api/export/:deckId?job=<id> returns the job record, with the
@@ -163,6 +175,18 @@ function batchError(error: unknown): Response {
   const message = error instanceof Error ? error.message : String(error);
   const status = error instanceof RangeError ? 404 : error instanceof TypeError ? 400 : 502;
   return Response.json({ error: { message, status } }, { status });
+}
+
+/** authorize() for a route caller: the 6.2 body as the Response when refused, else null. */
+async function refusedBy(
+  ctx: AuthContext,
+  deckId: string,
+  capability: Capability,
+  action: string,
+): Promise<Response | null> {
+  const decision = await authorize(ctx, deckId, capability, { action, transport: 'route' });
+  if (decision.ok) return null;
+  return Response.json(denialBody(decision, capability), { status: decision.status });
 }
 
 type BatchField = { index: number; of: number; jobId: string } | undefined;
@@ -304,11 +328,48 @@ export const Route = createFileRoute('/api/export/$deckId')({
   server: {
     handlers: {
       POST: async ({ params, request }) => {
-        // the page's pagehide cancel carries no header (SPEC-2 0.45); the job id is the capability
-        const cancelling = new URL(request.url).searchParams.get('cancel') !== null;
+        // the page's pagehide cancel carries no header (SPEC-2 0.45); the cancel token minted
+        // with the plan is the capability (gslides-parity SPEC-3 8.13; report 04 F9), or the
+        // bearer for an agent
+        const cancelId = new URL(request.url).searchParams.get('cancel');
+        const cancelling = cancelId !== null;
+        if (cancelling) {
+          const token = new URL(request.url).searchParams.get(CANCEL_TOKEN_QUERY);
+          if (!verifyCancelToken(cancelId, token) && !carriesBootstrapToken(request)) {
+            logSecurityEvent({
+              event: 'http.403',
+              deckId: params.deckId,
+              action: 'export.cancel',
+              reason: 'cancel token',
+              status: 403,
+              transport: 'route',
+            });
+            return Response.json({ error: 'forbidden', capability: 'export' }, { status: 403 });
+          }
+        }
         const denied = cancelling ? null : unauthorized(request);
         if (denied) return denied;
         if (!SLUG_PATTERN.test(params.deckId)) return badRequest('deckId must be a slug');
+        if (!cancelling) {
+          const ctx = await requestContext(request);
+          const refused = await refusedBy(ctx, params.deckId, 'export', 'export.run');
+          if (refused !== null) return refused;
+          const identity = identityLabel(ctx) ?? 'anonymous';
+          const flagged = await requireFlag('exports', {
+            identity,
+            deckId: params.deckId,
+            action: 'export.run',
+          });
+          if (flagged !== null) return flagged;
+          const quota = await checkQuota('exportsPerDay', {
+            identity,
+            tier: tierOf(ctx),
+            deckId: params.deckId,
+            action: 'export.run',
+            transport: 'route',
+          });
+          if (quota instanceof RateLimitedError) return rateLimitedResponse(quota);
+        }
         const length = Number(request.headers.get('content-length') ?? 0);
         if (length > BODY_LIMIT)
           return Response.json(
@@ -348,6 +409,16 @@ export const Route = createFileRoute('/api/export/$deckId')({
           );
         }
         const input = parsed.data as ExportInput;
+        // the notes and the skipped slides need their own cells (SPEC-3 6.2, 8.2; report 04 F21)
+        const caller = await requestContext(request);
+        if (input.includeNotes === true) {
+          const refused = await refusedBy(caller, params.deckId, 'exportNotes', 'export.run');
+          if (refused !== null) return refused;
+        }
+        if (input.includeSkipped === true) {
+          const refused = await refusedBy(caller, params.deckId, 'readSkipped', 'export.run');
+          if (refused !== null) return refused;
+        }
         // the output directory is the worker's job directory, never a caller-chosen path
         const { out: _out, ...rest } = input;
         if (sync !== null) return syncExport(params.deckId, rest, request, url, sync);
@@ -368,6 +439,13 @@ export const Route = createFileRoute('/api/export/$deckId')({
         const denied = unauthorized(request);
         if (denied) return denied;
         if (!SLUG_PATTERN.test(params.deckId)) return badRequest('deckId must be a slug');
+        const refused = await refusedBy(
+          await requestContext(request),
+          params.deckId,
+          'export',
+          'export.list',
+        );
+        if (refused !== null) return refused;
         const url = new URL(request.url);
         const jobId = url.searchParams.get('job');
         const file = url.searchParams.get('file');

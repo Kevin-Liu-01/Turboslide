@@ -28,6 +28,7 @@ import {
   formatSectionOfSlideControl,
   hasAdjustments,
   hasAltText,
+  hasDither,
   hasPicture,
   hasShadow,
   hasTextFitting,
@@ -40,6 +41,7 @@ import { PositionSection, SizeRotationSection } from './inspector/geometry';
 import type { GeometryBox } from './inspector/geometry';
 import { LineSection } from './inspector/line';
 import { ListSection } from './inspector/list';
+import { DitherFormatSection } from './inspector/dither';
 import { AdjustmentsSection, PictureSection } from './inspector/picture';
 import type { ControlContext } from './inspector/props';
 import { ShadowSection } from './inspector/shadow';
@@ -482,6 +484,10 @@ export function FormatOptions({
         );
       case 'adjustments':
         return selected !== undefined && !many && hasAdjustments(selected);
+      case 'dither':
+        // the deck's two tone screen over a picture object or a shot (gslides-parity SPEC-3 10.3;
+        // the integrator at merge 2 for b5.md request 7)
+        return selected !== undefined && !many && hasDither(selected);
       case 'shadow':
         return selected !== undefined && (many ? blocks.some(hasShadow) : hasShadow(selected));
       case 'table':
@@ -651,6 +657,12 @@ export function FormatOptions({
                         slideFindings,
                       )
                     : null}
+                </Section>
+              );
+            case 'dither':
+              return selected === undefined ? null : (
+                <Section {...common}>
+                  <DitherFormatSection block={selected} write={write} assets={deck.assets} />
                 </Section>
               );
             case 'adjustments':

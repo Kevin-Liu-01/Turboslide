@@ -31,8 +31,15 @@ import { MENUS, TITLE_ROW_ITEMS, TOOLBAR_HEAD, TOOLBAR_TAIL_DEFAULT, walkItems }
  * browser keys of Subscript and Superscript, the Cmd+Option rotate alias of SPEC-2 0.78), an
  * `alias` binding is a Turboslide alternate chord for a Google row (listed in
  * `TURBOSLIDE_ONLY_KEYS`, folded into its row's note), and a `Gesture` without a Google row is a
- * Turboslide addition (`turboslide: true`). Relative imports here carry the `.ts` extension so the
- * parity audit script can load the module under Node.
+ * Turboslide addition (`turboslide: true`).
+ *
+ * Round three (SPEC-3 section 14) binds the comment chords: Insert comment, Enter current
+ * comment, the discussion thread, Hide comments, the two step Next and Previous comment, and the
+ * letters j, k, r, e and u inside a card or on a marker. The letters live in the `comment` scope,
+ * which the card owns the way present mode owns its letters: they are listed in the dialog under
+ * Comments and never enter the editor map, so SPEC 0.28 (no bare letter in the editor) still holds
+ * on the map the handlers read. Shift+Tab from an open menu focuses the roster (01 G5). Relative
+ * imports here carry the `.ts` extension so the parity audit script can load the module under Node.
  */
 
 export type Chord = {
@@ -389,6 +396,8 @@ export function normalizeGoogleChord(text: string): string {
       let chord = part.trim().replace(/\s*\([^)]*\)\s*$/, '');
       const held = /^hold\s+(.+?),\s*press\s+(\S+)\s+then\s+(\S+)$/i.exec(chord);
       if (held) chord = `${held[1]} + ${held[2]} then ${held[3]}`;
+      /* "hold Ctrl + Enter" (Enter current comment, SPEC-3 14): the held word alone is a plain chord */
+      chord = chord.replace(/^hold\s+/i, '');
       chord = chord
         .replace(/\bFn \+ Left arrow\b/i, 'Home')
         .replace(/\bFn \+ Right arrow\b/i, 'End')
@@ -409,8 +418,15 @@ export function normalizeGoogleChord(text: string): string {
 // ---------------------------------------------------------------------------------------------
 // The editor map
 
-/** Where a binding applies. The editor map is every scope but `present`; `present` is section 9.2. */
-export type KeyScope = 'editor' | 'filmstrip' | 'canvas' | 'text' | 'menu' | 'present';
+/**
+ * Where a binding applies. The editor map is every scope but `present` (section 9.2) and
+ * `comment` (SPEC-3 14: the letters inside a comment card or on a focused marker, which the card
+ * dispatches itself, as the slideshow dispatches its own).
+ */
+export type KeyScope = 'editor' | 'filmstrip' | 'canvas' | 'text' | 'menu' | 'present' | 'comment';
+
+/** The scopes the card and the slideshow own: their letters never enter the editor map. */
+export const OWN_MAP_SCOPES: ReadonlySet<KeyScope> = new Set<KeyScope>(['present', 'comment']);
 
 /** Google's group names on the shortcuts page (R04 Part B), the headings of the shortcuts dialog. */
 export type ShortcutGroup =
@@ -806,6 +822,107 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
     google: [],
     enabled: 'listLevelDown',
   }),
+  /* the comment chords (SPEC-3 section 14; 01 G5, G13): the modifier chords fire in the editor
+     scope over the comment under focus; the letters fire inside a card or on a focused marker
+     and belong to the `comment` scope, outside the editor map (SPEC 0.28) */
+  extra({
+    id: 'comment.enter',
+    label: 'Enter current comment',
+    key: K('Ctrl+Enter', 'Ctrl+Enter'),
+    scope: 'editor',
+    group: 'Comments',
+    google: ['enter-comment'],
+    enabled: 'readComments',
+  }),
+  extra({
+    id: 'comment.thread',
+    label: 'Open comment discussion thread',
+    key: K('Cmd+Option+Shift+A'),
+    scope: 'editor',
+    group: 'Comments',
+    google: ['comment-thread'],
+    enabled: 'readComments',
+  }),
+  extra({
+    id: 'comment.next',
+    label: 'Move to next comment in the presentation',
+    key: K('Cmd+Ctrl+N then C'),
+    scope: 'editor',
+    group: 'Comments',
+    google: ['next-comment'],
+    enabled: 'readComments',
+    note: 'Hold the modifiers, press N, then C',
+  }),
+  extra({
+    id: 'comment.previous',
+    label: 'Move to previous comment in the presentation',
+    key: K('Cmd+Ctrl+P then C'),
+    scope: 'editor',
+    group: 'Comments',
+    google: ['previous-comment'],
+    enabled: 'readComments',
+    note: 'Hold the modifiers, press P, then C',
+  }),
+  extra({
+    id: 'comment.focusNext',
+    label: 'When focus is on a comment, move to the next comment',
+    key: K('J', 'J'),
+    scope: 'comment',
+    group: 'Comments',
+    google: ['comment-focus-next', 'comment-next-selected'],
+  }),
+  extra({
+    id: 'comment.focusPrevious',
+    label: 'When focus is on a comment, move to the previous comment',
+    key: K('K', 'K'),
+    scope: 'comment',
+    group: 'Comments',
+    google: ['comment-focus-previous', 'comment-previous-selected'],
+  }),
+  extra({
+    id: 'comment.reply',
+    label: 'When focus is on a comment, reply to it',
+    key: K('R', 'R'),
+    scope: 'comment',
+    group: 'Comments',
+    google: ['comment-focus-reply', 'comment-reply-selected'],
+  }),
+  extra({
+    id: 'comment.resolve',
+    label: 'When focus is on a comment, resolve it',
+    key: K('E', 'E'),
+    scope: 'comment',
+    group: 'Comments',
+    google: ['comment-focus-resolve', 'comment-resolve-selected'],
+  }),
+  extra({
+    id: 'comment.exit',
+    label: 'When focus is on a comment, leave it',
+    key: K('U', 'U'),
+    scope: 'comment',
+    group: 'Comments',
+    google: ['comment-exit-selected'],
+    note: 'Esc leaves the comment too',
+  }),
+  extra({
+    id: 'comment.exitEsc',
+    label: 'When focus is on a comment, leave it',
+    key: K('Esc', 'Esc'),
+    scope: 'comment',
+    group: 'Comments',
+    google: [],
+    alias: 'key.comment.exit',
+  }),
+  /* the Collaborators list (SPEC-3 0.42, 4.5; 01 G5): Shift+Tab from any open menu focuses the
+     roster; Google's help page documents it and its shortcut page has no row for it */
+  extra({
+    id: 'roster',
+    label: 'Collaborators list, from an open menu',
+    key: K('Shift+Tab'),
+    scope: 'menu',
+    group: 'Menus',
+    google: [],
+  }),
   /* presenting (SPEC 9.2, R04 A10): B6 binds them; the dialog lists them from here */
   extra({
     id: 'present.stop',
@@ -909,12 +1026,12 @@ export const EXTRA_BINDINGS: ReadonlyArray<KeyBinding> = [
 
 /**
  * Google rows the round does not bind, each with the reason the shortcuts dialog prints in grey
- * (SPEC 10.1; SPEC-2 section 9 fixes the greyed list: Select none, Move paragraph, Open animations
- * panel, Insert comment, the comment chords, the screen reader chords, the input tools keys, Open
- * Explore, Turn on captions, the HTML view, the cell border chord, Select list item and Select
- * list items at current level, Move to next and previous text formatting change) or leaves out.
- * `status: 'later'` rows show in the dialog greyed with the stub formula, so their reasons are
- * default view sentences; `omit` rows are absent from it.
+ * (SPEC 10.1; SPEC-2 section 9 fixed the greyed list: Select none, Move paragraph, Open animations
+ * panel, the screen reader chords, the input tools keys, Open Explore, Turn on captions, the HTML
+ * view, the cell border chord, Select list item and Select list items at current level, Move to
+ * next and previous text formatting change; SPEC-3 section 14 takes Insert comment and the comment
+ * chords off it) or leaves out. `status: 'later'` rows show in the dialog greyed with the stub
+ * formula, so their reasons are default view sentences; `omit` rows are absent from it.
  */
 export type OmittedShortcut = {
   google: string;
@@ -922,7 +1039,6 @@ export type OmittedShortcut = {
   reason: string;
 };
 
-const COMMENTS_GREY = 'Leave a note in the speaker notes instead';
 const SCREEN_READER_GREY = 'Your screen reader reads the page as it is';
 const INPUT_TOOLS_GREY = 'The operating system input methods work in every field';
 const LIST_CHORD_GREY = 'A screen reader chord; lists are edited as text';
@@ -962,20 +1078,6 @@ export const OMITTED_SHORTCUTS: ReadonlyArray<OmittedShortcut> = [
   { google: 'accessibility-menu', status: 'omit', reason: SCREEN_READER_GREY },
   { google: 'input-tools-menu', status: 'later', reason: INPUT_TOOLS_GREY },
   { google: 'toggle-input-controls', status: 'later', reason: INPUT_TOOLS_GREY },
-  { google: 'enter-comment', status: 'later', reason: COMMENTS_GREY },
-  { google: 'next-comment', status: 'later', reason: COMMENTS_GREY },
-  { google: 'previous-comment', status: 'later', reason: COMMENTS_GREY },
-  { google: 'comment-focus-next', status: 'later', reason: COMMENTS_GREY },
-  { google: 'comment-focus-previous', status: 'later', reason: COMMENTS_GREY },
-  { google: 'comment-focus-reply', status: 'later', reason: COMMENTS_GREY },
-  { google: 'comment-focus-resolve', status: 'later', reason: COMMENTS_GREY },
-  { google: 'comment-thread', status: 'later', reason: COMMENTS_GREY },
-  { google: 'comment-reply-selected', status: 'later', reason: COMMENTS_GREY },
-  { google: 'comment-next-selected', status: 'later', reason: COMMENTS_GREY },
-  { google: 'comment-previous-selected', status: 'later', reason: COMMENTS_GREY },
-  { google: 'comment-resolve-selected', status: 'later', reason: COMMENTS_GREY },
-  { google: 'comment-exit-selected', status: 'later', reason: COMMENTS_GREY },
-  { google: 'hide-comment', status: 'later', reason: COMMENTS_GREY },
   {
     google: 'move-paragraph-down',
     status: 'later',
@@ -1186,8 +1288,16 @@ function bindingOfItem(
   if (item.enabled !== undefined) binding.enabled = item.enabled;
   const note = ITEM_NOTES[item.id];
   if (note !== undefined) binding.note = note;
+  const group = ITEM_GROUPS[item.id];
+  if (group !== undefined) binding.group = group;
   return binding;
 }
+
+/** The rows Google's shortcut page lists under a group other than their menu's (SPEC-3 14: the comment rows). */
+export const ITEM_GROUPS: Readonly<Record<string, ShortcutGroup>> = {
+  'insert.comment': 'Comments',
+  'view.comments.hide': 'Comments',
+};
 
 /**
  * The sentence the shortcuts dialog prints under a menu item's row (SPEC-2 section 9): Cmd+, opens
@@ -1225,6 +1335,7 @@ export const ITEM_GOOGLE_ROWS: Readonly<Record<string, ReadonlyArray<string>>> =
   'view.zoom.out': ['zoom-out'],
   'view.zoom.100': ['zoom-100'],
   'view.fullScreen': ['compact-mode'],
+  'view.comments.hide': ['hide-comment'],
   'insert.link': ['insert-link'],
   'insert.comment': ['insert-comment'],
   'insert.newSlide': ['new-slide'],
@@ -1274,8 +1385,10 @@ export const ITEM_GOOGLE_ROWS: Readonly<Record<string, ReadonlyArray<string>>> =
  * Keys with no row on Google's shortcut page: Paste without formatting is Google's item with a key
  * the Slides page does not print (R01 Edit), Extensions takes Ctrl+Option+X because Google
  * publishes no access key for it (SPEC 2.11), Tab and Shift+Tab move a list item between levels
- * as Google's editor does without a row for it (SPEC-2 section 9), and Cmd+Option+Left and Right
- * are the 15 degree rotate aliases of SPEC-2 0.78.
+ * as Google's editor does without a row for it (SPEC-2 section 9), Cmd+Option+Left and Right are
+ * the 15 degree rotate aliases of SPEC-2 0.78, Esc leaves a comment card beside Google's u
+ * (SPEC-3 14), and Shift+Tab from an open menu focuses the Collaborators list, which Google's help
+ * page documents (01 G5) and its shortcut page does not print.
  */
 export const TURBOSLIDE_ONLY_KEYS: ReadonlyArray<string> = [
   'edit.pasteWithoutFormatting',
@@ -1284,6 +1397,8 @@ export const TURBOSLIDE_ONLY_KEYS: ReadonlyArray<string> = [
   'key.listLevelDown',
   'key.rotateLeft15Alias',
   'key.rotateRight15Alias',
+  'key.comment.exitEsc',
+  'key.roster',
 ];
 
 /**
@@ -1338,9 +1453,9 @@ export function buildKeyTable(): KeyBinding[] {
 export type KeymapEntry = { chord: string; bindings: KeyBinding[] };
 
 /**
- * The editor map for a platform: every enabled chord outside present mode, keyed by its canonical
- * text, with the bindings that own it. A chord with two bindings is a collision unless the pair is
- * in `SHARED_CHORDS`; the handlers dispatch a shared chord by focus.
+ * The editor map for a platform: every enabled chord outside present mode and the comment card,
+ * keyed by its canonical text, with the bindings that own it. A chord with two bindings is a
+ * collision unless the pair is in `SHARED_CHORDS`; the handlers dispatch a shared chord by focus.
  */
 export function buildEditorKeymap(
   platform: Platform,
@@ -1348,7 +1463,7 @@ export function buildEditorKeymap(
 ): Map<string, KeymapEntry> {
   const map = new Map<string, KeymapEntry>();
   for (const binding of table) {
-    if (binding.scope === 'present' || binding.status !== 'now') continue;
+    if (OWN_MAP_SCOPES.has(binding.scope) || binding.status !== 'now') continue;
     for (const chord of chordsOf(platform === 'mac' ? binding.key.mac : binding.key.win)) {
       const text = chordText(chord, platform);
       const entry = map.get(text) ?? { chord: text, bindings: [] };

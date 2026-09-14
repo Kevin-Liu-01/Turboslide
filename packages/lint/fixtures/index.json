@@ -221,6 +221,7 @@
   "picture/plate-clear": {
     "layer": "static",
     "slides": [
+      "canvas-dither",
       "mood-rosetta"
     ],
     "tests": [
@@ -231,6 +232,7 @@
   "picture/blank-twin": {
     "layer": "static",
     "slides": [
+      "canvas-dither",
       "mood-rosetta"
     ],
     "tests": [
@@ -414,6 +416,7 @@
   "layout/freeform": {
     "layer": "static",
     "slides": [
+      "canvas-dither",
       "canvas-objects",
       "canvas-title",
       "fixed-points"
@@ -459,11 +462,22 @@
       "packages/lint/src/lint.test.ts"
     ]
   },
+  "html/sanitize": {
+    "layer": "static",
+    "slides": [
+      "bad-escape"
+    ],
+    "tests": [
+      "packages/lint/src/lint.test.ts",
+      "packages/lint/src/static/sanitize.test.ts"
+    ]
+  },
   "export/non-native": {
     "layer": "static",
     "slides": [
       "bad-copy",
       "bad-escape",
+      "canvas-dither",
       "canvas-objects",
       "canvas-title",
       "content-rule",

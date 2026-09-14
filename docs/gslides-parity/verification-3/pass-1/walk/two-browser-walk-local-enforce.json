@@ -1,0 +1,175 @@
+{
+  "base": "http://localhost:4321",
+  "at": "2026-09-14T04:00:01.566Z",
+  "seconds": 86,
+  "summary": {
+    "ok": 19,
+    "fail": 12,
+    "notes": 0
+  },
+  "rows": [
+    {
+      "name": "scratch deck",
+      "ok": true,
+      "evidence": "verifier-walk-mu0pqu98 from gt-brand's first three slides (opener-brand, title, thesis)"
+    },
+    {
+      "name": "S4 named anonymous principal",
+      "ok": true,
+      "evidence": "account.setName Maya: {\"principal\":{\"id\":\"anon_55953bf4-eef6-4607-b7bf-4a1fb48e4d29\",\"kind\":\"anonymous\",\"admin\":false},\"trust\":\"guest\",\"label\"; state.account {\"principalId\":\"anon_55953bf4-eef6-4607-b7bf-4a1fb48e4d29\",\"trust\":\"label\",\"signedIn\":false}"
+    },
+    {
+      "name": "S4 the own chip names the principal",
+      "ok": true,
+      "evidence": "own chip tooltip \"Neon 894 (you)\""
+    },
+    {
+      "name": "S4 the own chip menu is the account surface",
+      "ok": true,
+      "evidence": "rows title.account.changeName, title.account.changeAvatar, title.account.forget, title.account.sessions; sentence \"NNeon 894Not signed in\""
+    },
+    {
+      "name": "S4 nothing else in the chrome mentions accounts",
+      "ok": true,
+      "evidence": "0 account word(s) in the default view text"
+    },
+    {
+      "name": "presence chip within 10 s",
+      "ok": true,
+      "evidence": "B's chip on A after 10 ms",
+      "ms": 10
+    },
+    {
+      "name": "presence in the window state",
+      "ok": true,
+      "evidence": "A presence {\"clientId\":\"963eaef7e7662ad2b8139cf8847d67c7\",\"others\":1,\"following\":null}; B clientId 2d6fe884e7ff7eebad07da39861a22c6"
+    },
+    {
+      "name": "roster lists both",
+      "ok": true,
+      "evidence": "title.presence.me:EAn editor (you)slide 1 | title.presence.goTo:HHelium 649editor · slide 1Go to slide 1 | title.presence.joinChat:Join chat"
+    },
+    {
+      "name": "op to screen, A write to B document (10 writes)",
+      "ok": true,
+      "evidence": "landed 10 of 10; p50 63 ms, p95 107 ms, max 107 ms; samples 107, 90, 88, 65, 56, 63, 58, 54, 55, 59",
+      "p50": 63,
+      "p95": 107,
+      "samples": [107, 90, 88, 65, 56, 63, 58, 54, 55, 59]
+    },
+    {
+      "name": "S2 two edits on one slide within a second, both land, no keystroke lost",
+      "ok": false,
+      "evidence": "A typed \" alpha\" into h, B \" bravo\" into p1 in 558 ms (carets false/true); not converged within 15 s: A \"\" B \"\"; before \"\" / \"\"",
+      "ms": 15652
+    },
+    {
+      "name": "S2 the save words",
+      "ok": true,
+      "evidence": "\"All changes saved\""
+    },
+    {
+      "name": "remote caret and flag on A",
+      "ok": false,
+      "evidence": "0 remote element(s) after 52 ms; flag \"HHelium\"",
+      "ms": 52
+    },
+    {
+      "name": "Follow moves the stage with B and shows the plate",
+      "ok": true,
+      "evidence": "presence.follow {\"following\":\"2d6fe884e7ff7eebad07da39861a22c6\",\"slideId\":\"split-1\"}; plate \"HFollowing Helium 649·Stop\"; A followed to opener-brand then title"
+    },
+    {
+      "name": "Stop ends following",
+      "ok": true,
+      "evidence": "the plate is gone"
+    },
+    {
+      "name": "the chip offers Go to slide for an anonymous editor (4.4)",
+      "ok": true,
+      "evidence": "chip tooltip \"Helium 649 · slide 3\""
+    },
+    {
+      "name": "S1 comment.add with a mention",
+      "ok": true,
+      "evidence": "{\"thread\":{\"id\":\"01m2f13a21ebnjmw107n0yz8ab\",\"deckId\":\"verifier-walk-mu0pqu98\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"title\"},\"comment\":{\"id\":\"01m2f13a21ebnjmw107n; mention of anon_fc3072e6-84fe-46e1-97c8-8518774dcdd0"
+    },
+    {
+      "name": "S1 the comment reaches B within 2 s: marker, filmstrip chip, inbox plate",
+      "ok": false,
+      "evidence": "0 marker(s) after 6253 ms; filmstrip chip \"null\"; inbox plate \"\"",
+      "ms": 6253
+    },
+    {
+      "name": "S1 B reads the thread",
+      "ok": true,
+      "evidence": "comment.list on B: {\"threads\":[{\"id\":\"01m2f13a21ebnjmw107n0yz8ab\",\"deckId\":\"verifier-walk-mu0pqu98\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"title\"},\"comment\":{\"id\":\"01m2f13a21ebnjmw10"
+    },
+    {
+      "name": "S1 the Comments panel on B lists the thread with For you",
+      "ok": false,
+      "evidence": "panel open; For you tab \"null\"; thread card absent"
+    },
+    {
+      "name": "S1 B resolves; A sees the resolve within 2 s",
+      "ok": true,
+      "evidence": "comment.resolve {\"thread\":{\"id\":\"01m2f13a21ebnjmw107n0yz8ab\",\"deckId\":\"verifier-walk-mu0pqu98\",\"; A saw it after 75 ms",
+      "ms": 75
+    },
+    {
+      "name": "S1 A inbox after the resolve",
+      "ok": true,
+      "evidence": "{\"notifications\":[{\"id\":\"01m2f13h3pfvht7f596qcwgs5q\",\"principalId\":\"anon_55953bf4-eef6-4607-b7bf-4a1fb48e4d29\",\"kind\":\"resolved\",\"deckId\":\"verifier-walk-mu0pqu98\",\"threadId\":\"01m2f13a21ebnjmw107n0yz8a"
+    },
+    {
+      "name": "S3 the Share dialog opens on Restricted with the people field first and the footer sentence",
+      "ok": false,
+      "evidence": "width 520; mode \"null\"; people field above General access n/a; footer \"Speaker notes and skipped slides never travel with a view or comment link\"; legacy \"Anyone with the address can view (legacy)Switch to a link\"; claim \"null\"; review \"No pending requests\""
+    },
+    {
+      "name": "S3 Anyone with the link defaults to Viewer and Copy link copies an /s/ link",
+      "ok": false,
+      "evidence": "role \"null\"; clipboard http://localhost:4321/deck/verifier-walk-mu0pqu98; address bar holds no token"
+    },
+    {
+      "name": "S3 the prospect lands on the viewer form with no token in the address and no notes",
+      "ok": true,
+      "evidence": "landed /deck/verifier-walk-mu0pqu98 (status 404); notes in the payload: false; comment markers 0"
+    },
+    {
+      "name": "S3 /edit for the prospect is Viewing with View only",
+      "ok": false,
+      "evidence": "data-edit-mode editing; button \"null\""
+    },
+    {
+      "name": "S1 commenter link",
+      "ok": false,
+      "evidence": "{\"error\":\"Error: page.evaluate: Error: {\\\"error\\\":\\\"forbidden\\\",\\\"capability\\\":\\\"share\\\"}\\n    at Object.deserialize (http://localhost:4321/@fs/Users/kevinliu/r"
+    },
+    {
+      "name": "version history by author shows both authors",
+      "ok": false,
+      "evidence": "1 window(s), 0 version row(s), marks Helium 649, guest | Maya, guest; Show changes true; \"Version history Only show named versions Name current version Today H6 MA 08:58 PM to 08:58 PM Helium 649, Maya · 3 changes ▸ Show changes\""
+    },
+    {
+      "name": "Show changes hatches the changed blocks by author",
+      "ok": true,
+      "evidence": "1 diff element(s)"
+    },
+    {
+      "name": "a stranger after Stop sharing receives the You need access page",
+      "ok": false,
+      "evidence": "status 200; sentence \"null\"; the server's TURBOSLIDE_AUTHORIZE as the walk knows it: enforce"
+    },
+    {
+      "name": "the revoked viewer link is dead",
+      "ok": false,
+      "evidence": "status 200; path /deck/verifier-walk-mu0pqu98"
+    },
+    {
+      "name": "cleanup",
+      "ok": false,
+      "evidence": "verifier-walk-mu0pqu98 stays: Error: page.evaluate: Error: {\"error\":\"forbidden\",\"capability\":\"trash\"}\n    at Object.deserialize (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/@tanstack+router-core@1."
+    }
+  ]
+}

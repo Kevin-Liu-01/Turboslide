@@ -1,6 +1,6 @@
 // renderSlide: one string function that emits the deck's own markup for one slide (SPEC 5.2).
-import { markSvg, twinAttrs } from './blocks/context.ts';
-import type { BlockContext, RasterRef, ResolvedImage } from './blocks/context.ts';
+import { markSvg, sizeAttrs, twinAttrs } from './blocks/context.ts';
+import type { BlockContext, HtmlFrameSource, RasterRef, ResolvedImage } from './blocks/context.ts';
 import { isTextLike, renderBlock, renderBlocks, wantsShotWrap } from './blocks/render-block.ts';
 import { pictureRecipeAttr } from './blocks/material.ts';
 import { measureStyle } from './blocks/text-blocks.ts';
@@ -9,7 +9,8 @@ import { attrs, classes, el, escapeAttr, px, style } from './html.ts';
 import { colorCss } from '@turboslide/schema/color';
 import { renderTextOrPrompt } from './blocks/prompt.ts';
 import type { AssetId, SlideId } from '@turboslide/schema/ids';
-import type { Block } from '@turboslide/schema/blocks';
+import type { AssetTwins } from '@turboslide/schema/assets';
+import type { Block, BlockOf } from '@turboslide/schema/blocks';
 import type { ContentSlide, Deck, Layout, Plate, Slide, SlotName } from '@turboslide/schema/deck';
 import { insideContent, sortByZ } from '@turboslide/schema/freeform';
 import type { Position } from '@turboslide/schema/position';
@@ -43,6 +44,11 @@ export type RenderOptions = {
   prompts?: boolean;
   /** Write the `is-on` class so the slide is visible on its own (default true). */
   active?: boolean;
+  /**
+   * The sandboxed frame document of an `html` block (gslides-parity SPEC-3 8.4), built by the
+   * frame module from the sanitized markup; absent, the block renders as the scoped escape.
+   */
+  htmlFrame?: (block: BlockOf<'html'>) => HtmlFrameSource | undefined;
 };
 
 export type RenderedSlide = {
@@ -68,27 +74,69 @@ export function slideOrder(deck: Deck): SlideId[] {
  */
 export { slideTitle } from '@turboslide/schema/deck';
 
+/**
+ * A twin record as URLs for the rendered theme: `src` is the twin of the theme, the other twin
+ * travels as `data-light` or `data-dark` (twinAttrs), and the stored size gives the image its
+ * `width` and `height` (sizeAttrs). One resolver serves an asset's own twins and the materialized
+ * dither variants it lists (SPEC-3 10.3).
+ */
+function twinResolver(
+  options: RenderOptions,
+): (id: AssetId, twins: AssetTwins, alt: string, size: [number, number]) => ResolvedImage {
+  return (id, twins, alt, size) => {
+    const url = (path: string, theme: Theme): string =>
+      options.assetSrc ? options.assetSrc(id, theme, path) : `${options.assetBase}${path}`;
+    if ('neutral' in twins) return { src: url(twins.neutral, options.theme), alt, size };
+    const light = url(twins.light, 'light');
+    const dark = url(twins.dark, 'dark');
+    return { src: options.theme === 'dark' ? dark : light, light, dark, alt, size };
+  };
+}
+
 function imageResolver(
   deck: Deck,
   options: RenderOptions,
 ): (id: AssetId) => ResolvedImage | undefined {
+  const twins = twinResolver(options);
   return (id) => {
     const asset = deck.assets[id];
     if (!asset) return undefined;
-    const url = (path: string, theme: Theme): string =>
-      options.assetSrc ? options.assetSrc(id, theme, path) : `${options.assetBase}${path}`;
-    if ('neutral' in asset.twins) {
-      return { src: url(asset.twins.neutral, options.theme), alt: asset.alt, size: asset.size };
+    return twins(id, asset.twins, asset.alt, asset.size);
+  };
+}
+
+/**
+ * The stored size of the file at a twin path, over every asset's twins and the variants it lists
+ * (their own sizes), for the `<img>` rewrite of an escape block (blocks/img-size.ts).
+ */
+function assetSizeResolver(deck: Deck): (path: string) => [number, number] | undefined {
+  let sizes: Map<string, [number, number]> | undefined;
+  const put = (
+    into: Map<string, [number, number]>,
+    twins: AssetTwins,
+    size: [number, number],
+  ): void => {
+    if ('neutral' in twins) into.set(twins.neutral, size);
+    else {
+      into.set(twins.light, size);
+      into.set(twins.dark, size);
     }
-    const light = url(asset.twins.light, 'light');
-    const dark = url(asset.twins.dark, 'dark');
-    return {
-      src: options.theme === 'dark' ? dark : light,
-      light,
-      dark,
-      alt: asset.alt,
-      size: asset.size,
-    };
+  };
+  return (path) => {
+    if (sizes === undefined) {
+      sizes = new Map();
+      for (const asset of Object.values(deck.assets)) {
+        put(sizes, asset.twins, asset.size);
+        const variants = (asset as { variants?: unknown }).variants;
+        if (variants !== null && typeof variants === 'object')
+          for (const variant of Object.values(variants as Record<string, unknown>)) {
+            const record = variant as { twins?: AssetTwins; size?: [number, number] };
+            if (record.twins !== undefined && record.size !== undefined)
+              put(sizes, record.twins, record.size);
+          }
+      }
+    }
+    return sizes.get(path);
   };
 }
 
@@ -102,6 +150,9 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
     assetUrl: (path) =>
       options.assetSrc ? options.assetSrc('', options.theme, path) : `${options.assetBase}${path}`,
     asset: (id) => deck.assets[id],
+    assetSize: assetSizeResolver(deck),
+    twins: twinResolver(options),
+    ...(options.htmlFrame !== undefined ? { htmlFrame: options.htmlFrame } : {}),
     ...(options.chrome ? { chrome: true } : {}),
     ...(options.live === true ? { live: true } : {}),
     ...(options.prompts === true ? { prompts: true } : {}),
@@ -165,8 +216,10 @@ export function renderSlide(deck: Deck, slide: Slide, options: RenderOptions): R
               'data-live': options.live === true ? '1' : undefined,
             })
           : '';
+      // the stored size as width and height, so the box is reserved before the file decodes and the
+      // theme swap moves nothing (SPEC-3 9.2 E12)
       const img = image
-        ? `<img class="${imgClass}" src="${escapeAttr(image.src)}"${attrs(twinAttrs(image))}${recipe} alt="${escapeAttr(image.alt)}"${
+        ? `<img class="${imgClass}" src="${escapeAttr(image.src)}"${attrs(twinAttrs(image))}${attrs(sizeAttrs(image.size))}${recipe} alt="${escapeAttr(image.alt)}"${
             slide.picture.position && slide.picture.position !== 'center'
               ? ` style="object-position:${slide.picture.position}"`
               : ''

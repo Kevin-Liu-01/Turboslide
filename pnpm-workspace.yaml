@@ -21,6 +21,8 @@ catalog:
   '@modelcontextprotocol/sdk': 1.30.0
   '@paper-design/shaders': 0.0.78
   '@playwright/test': 1.62.1
+  '@simplewebauthn/browser': 14.0.0
+  '@simplewebauthn/server': 14.0.1
   # chrome-headless-shell 147 for Linux x64 functions (docs/hosting-chromium.md); optional in @turboslide/headless
   '@sparticuz/chromium': 147.0.2
   '@tanstack/devtools-vite': 0.8.5
@@ -32,17 +34,26 @@ catalog:
   '@tanstack/router-cli': 1.167.34
   '@testing-library/dom': 10.4.1
   '@testing-library/react': 16.3.3
+  '@types/jsdom': 30.0.0
   '@types/node': 24.13.4
+  '@types/pg': 8.23.1
   '@types/pngjs': 6.0.5
   '@types/react': 19.3.0
   '@types/react-dom': 19.3.0
+  '@upstash/ratelimit': 2.0.8
+  '@upstash/redis': 1.38.4
   '@vercel/blob': 2.8.0
   '@vitejs/plugin-react': 6.1.1
+  better-auth: 1.7.4
+  dompurify: 3.4.15
   eslint: 10.10.0
+  ioredis: 6.0.0
   jsdom: 30.0.1
   jszip: 3.10.2
+  kysely: 0.29.5
   nitro: 3.0.260903-beta
   parse5: 8.0.1
+  pg: 8.23.0
   pixelmatch: 7.2.0
   playwright-core: 1.62.1
   pngjs: 7.0.0
@@ -50,13 +61,23 @@ catalog:
   prettier: 3.9.6
   react: 19.3.0
   react-dom: 19.3.0
-  sharp: 0.35.0
+  resend: 6.28.0
+  sharp: 0.35.4
   tsdown: 0.23.0
   turbo: 2.10.12
   typescript: 6.0.3
+  ulid: 3.0.2
   vite: 8.2.2
   vitest: 4.1.11
   zod: 4.6.1
+
+# Round three (gslides-parity SPEC-3 8.10, 11.5 R0; build-3/b4.md request 1): pptxgenjs 4.0.1
+# declares image-size ^1.2.1 but its Node path requires the module name 'sizeof', which does not
+# exist, so image-size is never loaded; no published image-size release fixes GHSA-w3rx-r6r6-pgpr
+# and GHSA-5p2g-fcmc-qvqq (2.0.2 is the latest and still vulnerable). The inert dependency is
+# removed from the graph instead of an allowlist entry. Drop this when pptxgenjs stops declaring it.
+overrides:
+  'pptxgenjs>image-size': '-'
 
 # pnpm 11 refuses to run dependency build scripts it has not been told about
 # (strictDepBuilds; https://pnpm.io/settings/build). The old pnpm.onlyBuiltDependencies

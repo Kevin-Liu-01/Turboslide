@@ -166,6 +166,30 @@ a 10.7 GB log in eleven minutes) and from the parallel-builder setup.
 - The dev server is never a build step. Anything the product needs in production is a server
   route or a server function, not a Vite plugin hook.
 
+- The written exception for the Google Slides parity round three (`docs/gslides-parity/SPEC-3.md`,
+  `docs/gslides-parity/MILESTONES-3.md`): the round two form stands with two additions. The
+  channel is fixed to `memory` so no spec needs a service, and a tmp store refuses to mint an
+  export token without `TURBOSLIDE_DOWNLOAD_SECRET` (SPEC-3 8.10, `apps/studio/src/server/tokens.ts`),
+  so every builder's server that exports sets it to an obviously fake value of 16 bytes or more.
+  From `apps/studio`:
+
+  `TURBOSLIDE_STORE=tmp TURBOSLIDE_REALTIME=memory TURBOSLIDE_DOWNLOAD_SECRET=<16 or more fake bytes> node_modules/.bin/vite dev --port <port>`
+
+  | Port | Who                                               | Notes                                                                                                                        |
+  | ---- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+  | 4321 | the integrator, the verifier, `scripts/check.mjs` | the file store; started and stopped by them alone                                                                            |
+  | 4331 | B2 (realtime, store, the edit route)              | `realtime.spec.ts`                                                                                                           |
+  | 4332 | B3 (identity and accounts)                        | plus `TURBOSLIDE_AUTH_DB=.turboslide/auth-b3.sqlite` and `TURBOSLIDE_MAIL=capture`; `accounts.spec.ts`, `agent-http.spec.ts` |
+  | 4333 | B4 (security and the check chain)                 | `security.spec.ts`, `window-api.spec.ts`                                                                                     |
+  | 4334 | B5 (dithers, layout shift, route fixes)           | `dither.spec.ts`                                                                                                             |
+  | 4335 | B6 (the chrome)                                   | `presence`, `comments`, `share` and `versions-by-author` specs, `scripts/tooltip-audit.mjs`, `lint --chrome`                 |
+  | 4336 | the verifier                                      | the parity audit and the rows of VERIFICATION-3                                                                              |
+  | 4344 | B5's `vite preview` of a production build         | `scripts/layout-shift-audit.mjs` (SPEC-3 9.4)                                                                                |
+
+- The `vite build` exception (round three, row B5 only): the layout shift audit runs against
+  `vite preview` of a production build on 4344, so B5 may run `node_modules/.bin/vite build` inside
+  `apps/studio` for that row alone. Nobody else builds; the integrator builds everything else.
+
 ## Hosting
 
 The studio is deployed to Vercel from `apps/studio` (the project `turboslide` in Kevin's team,
@@ -188,6 +212,45 @@ there, and verify never runs there. `node scripts/hosted-smoke.mjs <url>` probes
 rows, exit 1 on a failure; a preview needs `VERCEL_OIDC_TOKEN` from `vercel env pull` in the
 environment); `docs/HOSTED-STATUS.md` records the round.
 
+Round three adds the tiers of SPEC-3 2.5 behind environment switches. The realtime channel
+(`@turboslide/realtime/select`, `selectRealtime(env)`) is `memory` on a checkout and in the tests,
+`redis` when `TURBOSLIDE_REALTIME=redis` or `REDIS_URL` is set, and `blob` hosted without Redis
+(`BlobStore.write` per batch, a one second head poll, presence per instance, and the title row says
+so). Identity is the sealed anonymous cookie `__Host-ts_id` (`apps/studio/src/server/auth/session.ts`)
+under `TURBOSLIDE_SESSION_SECRET`; a hosted deployment without it derives the secret from
+`TURBOSLIDE_TOKEN` and warns once. Accounts are better-auth over `node:sqlite` when
+`TURBOSLIDE_AUTH_DB` is set and Postgres when `DATABASE_URL` is set, else anonymous only; mail is
+captured with `TURBOSLIDE_MAIL=capture` on every preview. Documents move to a private Blob store
+(`turboslide-private`) while assets stay on the public one (`turboslide-decks`), through
+`turboslide admin migrate-storage` with a dual read window and a rollback flag (SPEC-3 8.9, 11.5).
+`authorize()` runs in shadow mode (`TURBOSLIDE_AUTHORIZE=shadow`, the default; `enforce` after the
+week SPEC-3 R3 and R5 name). `TURBOSLIDE_DOWNLOAD_SECRET` (16 bytes or more) is required on every
+hosted environment and on a tmp store. `docs/hosting.md` (B2's this round) carries the
+environment table and the runbook.
+
+The account boundary of round three (the orchestrator's rule, above SPEC-3 where they differ):
+no agent installs a Vercel Marketplace product, creates a paid resource, changes DNS, registers a
+sending domain or signs up for any service. The redis channel, the Upstash rate limiter, Neon
+Postgres and Resend are implemented and tested against fakes and local backends (the memory and
+blob channels, the file and blob stores, `node:sqlite`, `TURBOSLIDE_MAIL=capture`, the in memory
+and blob rate limit backends), and `docs/hosting.md` names the exact steps and variables Kevin
+sets to turn each one on. Previews and production run on the degraded tiers this round
+(multiplayer over the blob channel, anonymous identity with the name prompt, magic link disabled
+with the row saying why) and the verifier measures them as they are. A second Blob store
+(private) may be created through the vercel CLI if SPEC-3 11.4 needs it, because Blob is part of
+the project's storage and not a Marketplace install; the storage migration runs on the preview
+store first and on production only after the verifier has proved the dual read window and the
+rollback flag. The WAF rules ship as `firewall/rules.json` and are applied in log mode only,
+through the Vercel API from the ship step, if the plan accepts them; a refusal is recorded and
+never worked around. `TURBOSLIDE_AUTHORIZE` ships in shadow mode on production (SPEC-3 R8) so no
+existing deck link breaks. At merge 2 the preview and production environments of the Vercel
+project hold `TURBOSLIDE_TOKEN` and `BLOB_READ_WRITE_TOKEN` only; the merge 2 preview carried
+`TURBOSLIDE_MAIL=capture`, `TURBOSLIDE_AUTHORIZE=shadow`, `TURBOSLIDE_SESSION_SECRET` and
+`TURBOSLIDE_DOWNLOAD_SECRET` as per deployment variables (`vercel deploy -e`, values generated
+and never printed), and the ship step sets the two secrets on the project's production
+environment with Kevin before the deploy (a blob store refuses to mint an export token without
+`TURBOSLIDE_DOWNLOAD_SECRET`).
+
 ## Installs and dependencies
 
 - `pnpm install` runs once, by the scaffolder or the integrator. Never run `pnpm install` while
@@ -199,6 +262,21 @@ environment); `docs/HOSTED-STATUS.md` records the round.
 - `pnpm check` starts with `pnpm install --frozen-lockfile`, so the lockfile is always committed
   and current.
 
+- Round three catalog entries (SPEC-3 0.20, 0.23, 0.25, 0.27, 2.5, 8.10; merge 1): `better-auth`
+  1.7.4, `kysely` 0.29.5, `ioredis` 6.0.0, `dompurify` 3.4.15 (with the pinned `jsdom` and
+  `@types/jsdom` 30.0.0), `@upstash/ratelimit` 2.0.8 with its peer `@upstash/redis` 1.38.4,
+  `@simplewebauthn/server` 14.0.1 and `@simplewebauthn/browser` 14.0.0, `resend` 6.28.0, `pg`
+  8.23.0 with `@types/pg` 8.23.1, `ulid` 3.0.2; `sharp` bumped to 0.35.4 (GHSA-rgj7-g3m4-5g8c). A
+  builder names a package and its version in `docs/gslides-parity/build-3/<key>.md`; the
+  integrator adds it to the catalog and to the consuming package's `package.json` and installs
+  once. `ulid` is in the catalog and attached to no package yet.
+- `pnpm-workspace.yaml` carries an `overrides` block since round three: `pptxgenjs>image-size` is
+  removed (`-`) because pptxgenjs never loads it (its Node path requires the module name `sizeof`)
+  and no image-size release fixes its two advisories; `pnpm audit --prod --audit-level=high` is
+  clean with it (check step 28 of SPEC-3 16.1).
+- The per checkout agent token lives at `.turboslide/token` (SPEC-3 7.7), gitignored with the rest
+  of `.turboslide/`. Never print it, and never print `TURBOSLIDE_TOKEN`, a cookie value or a key.
+
 ## Ownership and git
 
 - Builders own disjoint packages and create or edit only the paths their task assigns. The
@@ -207,6 +285,12 @@ environment); `docs/HOSTED-STATUS.md` records the round.
   are authored as Kevin <kk23907751@gmail.com> (the repo-local identity).
 - Nothing is claimed done until the acceptance commands exit 0 and the report files named in the
   milestone plan exist. A claim about a deck names the revision.
+
+- Round three: ownership is the "Owns" lists of `docs/gslides-parity/MILESTONES-3.md`; a change
+  needed in another builder's file is a request in `docs/gslides-parity/build-3/<key>.md` and the
+  integrator makes it or reassigns it. `pnpm generate:contracts` is run by B1 and the integrator
+  only; `pnpm install`, `pnpm build` and `vite build` are the integrator's (the one exception is
+  the B5 row under the dev server rules). Nothing is committed until the ship step.
 
 ## Acceptance
 
@@ -276,6 +360,26 @@ run with its numbers and `docs/editor-depth-evidence/` holds the screenshots and
 tree steps 4 to 19 passed (step 3 fails as written on the uncommitted generated files and passes
 by regeneration and diff; step 5 timed out twice on the material capture test while other
 worktrees' servers loaded the machine and passed alone and on the rerun).
+
+Round three's lines (`docs/gslides-parity/SPEC-3.md` 16.1; `docs/gslides-parity/BUILD-STATUS-3.md`):
+`pnpm check` is 28 steps; step 26 runs the eight two browser specs of the round against the
+runner's server on the memory channel with `TURBOSLIDE_AUTH_DB=.turboslide/auth.sqlite`,
+`TURBOSLIDE_MAIL=capture`, `TURBOSLIDE_LOCAL_OPEN=1` and `TURBOSLIDE_AUTH_RATE_LIMIT=off`, step 27
+runs `scripts/layout-shift-audit.mjs` against `vite preview --port 4344` of the production build
+(started by the integrator or the verifier over `pnpm build`; the step skips with its reason when
+nothing answers on 4344), and step 28 is `pnpm audit --prod --audit-level=high` with
+`scripts/audit-allow.json`. Beyond `pnpm check`: `node apps/cli/e2e/share.mjs` (the CLI walk of the
+64 actions on a temp deck, 19 steps), the merge 2 action walk over `POST /api/actions` (every GS3
+id resolves; `.turboslide/int2-actions-walk.mjs`), `node scripts/hosted-smoke.mjs --base <preview>
+--token-env TURBOSLIDE_TOKEN` with `VERCEL_OIDC_TOKEN` from `vercel env pull` in the environment
+(19 rows; the development token expires within the hour, pull it again when every row answers
+403 `TRUSTED_SOURCES_ENVIRONMENT_MISMATCH`), and the verifier's VERIFICATION-3 rows. On the merge 2
+tree (2026-09-13, `BUILD-STATUS-3.md` "The tree at merge 2") steps 1, 2 and 4 to 18 passed in
+parts (step 5 once the machine was quiet, step 6 after the sessions split and the overwrite
+allowlist, step 18 after the chrome lint's hue exception), step 3 fails as written on the
+uncommitted generated files and passes by regeneration, step 19 fails on the other workflow's
+untracked documents alone, and the remaining steps are recorded step by step in
+`docs/gslides-parity/build-3/integrator.md` section 15.
 
 Type checking: `pnpm exec tsr generate` must run before `tsc -b` because `routeTree.gen.ts` is
 generated and git-ignored (measured: three type errors otherwise). `tsc -b` writes declaration
@@ -376,6 +480,73 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
   `scripts/check-client-bundle.mjs` (step 6) fails on `node:fs`, `node:path`, `node:zlib` and
   `node:child_process` in a client chunk, but only the dev server shows the module graph a build
   tree shakes, so a boot probe of `/new` on a dev server is part of every merge.
+
+- The round three seams (gslides-parity SPEC-3; MILESTONES-3 "The seams every builder types
+  against"), as merge 1 installed them:
+  - `@turboslide/schema/{comments,access,transform,blocks/dither}` are subpath exports.
+    `Author.principalId?`, `text.splice` and `text.mark` in `MUTATION_OPS` with exact inverses,
+    `PictureDither` on `picture` and `shot`, `Asset.variants`, `HtmlBlock.htmlSanitized?`, the 64
+    GS3 action ids in `ACTION_IDS` (169) with the milestone `GS3` and the six new action groups;
+    `transformSplice`, `transformMark`, `transformMutation` and `transformAgainst` throw
+    `NotImplementedError` until B1's day 3.
+  - `@turboslide/realtime/{channel,protocol,keys,memory,redis,redis-fake,blob,lua,coalesce,admission,select}`
+    (the `client/*` exports name B2's day 4 files). No `node:` import anywhere in the package; the
+    Redis client is injected (`ioredisCommands(client)`) and `ioredis` is a dependency of
+    `apps/studio` alone.
+  - `@turboslide/identity/{ids,labels,hues,names,access,resolve,marks,principal,sha256,index}`,
+    browser safe. `decide(record, ctx, capability, options?)` is the matrix of SPEC-3 6.2 with its
+    cell by cell test; `readPrincipal(request, secret)` lives in
+    `apps/studio/src/server/auth/session.ts`.
+  - `DeckStore.putAsset(relative, bytes, contentType?)` and `removeAsset(relative)` on
+    `@turboslide/store/store` for the file, tmp and blob backends: nothing under `assets/` is ever
+    overwritten (`AssetExistsError`; identical bytes are idempotent) and names carry the digest
+    (`digestAssetName`, `assetDigest` of `@turboslide/store/file-store`). `VersionRecord.ops?`;
+    `access.json` is not mirrored and `comments/` travels with the records.
+  - `authorize(ctx, deckId, capability)` in `apps/studio/src/server/authorize.ts`, shadow by
+    default; `SERVER_SIDE_WINDOW_ACTIONS` carries the ids of SPEC-3 11.3 and the dispatcher
+    answers `NotImplementedError` 501 for a landed id without a handler; `TURBOSLIDE_TRUST_PROXY`
+    decides whether a forwarded host is believed.
+  - The renderer's DOM: `.picture[data-dither][data-dither-key][data-dither-state]`,
+    `canvas.picture-dither` in live renders only, `img[width][height]` on every emitted image,
+    `iframe.ts-x-frame` behind `RenderOptions.htmlFrame`, and the collaborator classes and
+    geometry of `@turboslide/render/collab` (`COLLAB_CLASSES`, `COLLAB_GEOMETRY`).
+    `@turboslide/render/{collab,dither-key,blocks/dither-attrs,blocks/html-frame,blocks/img-size}`
+    are exports; `@turboslide/materials` and `@turboslide/chrome` depend on `@turboslide/render`
+    directly.
+  - The chrome contract: `EditorShellInput` gains `presence`, `comments`, `inbox`, `access`,
+    `account`, `sync`, `role`, `capabilities` and `mode`; `MenuRole` is the schema's `Role` plus
+    `none`, `MenuCapability` is the schema's `Capability`, `MenuActionId` is `ActionId` again,
+    `PictureDitherLike` is `PictureDither` and `MarkSpecLike` is `MarkSpec` (the names kept). The
+    model loads under plain Node for the parity audit. The theme sprite carries Heroicons `bell`
+    and `inbox` (70 symbols; `ICON_NAMES` agrees).
+  - `apps/studio`'s unit tests run under vitest (`apps/studio/vitest.config.ts`, `src/**/*.test.ts`)
+    and in the root `pnpm test`; `apps/studio/e2e/*.spec.ts` stay Playwright's. Every package has a
+    `vitest.config.ts`, so `cd <package> && ../../node_modules/.bin/vitest run` runs it alone.
+  - Merge 2 (`docs/gslides-parity/build-3/integrator.md` section 8): the studio's deck dispatcher
+    (`apps/studio/src/server/actions.ts` `deckDispatcher(deckId, { request? })`) composes the
+    round in a fixed order, the later registration of an id winning: the readers, the CLI's store
+    actions (`picture.dither`, `version.diff` included), the deck folder actions, the hosted
+    collection actions and `slide.import`, B1's record actions (`@turboslide/cli/record-actions`
+    over the studio's store with the access record read and written through
+    `hostedAccessHooks` of `server/access.ts`, `RecordDeps.access`), B2's stream path for the
+    twelve comment ids (`commentCallerFor` then `runCommentAction`) and the inbox for the three
+    notification ids, `admin.migrateStorage`, B3's account and admin ids with the request's
+    identity (`auth/actions.ts`), the materials package's `asset.*`, `material.*` and
+    `picture.materialize` (the dither pipeline), the worker actions and `admin.flag`. The two
+    background writes stay the record actions' (one write per call; the file, url and upload
+    forms through `asset.add`), on the CLI too (`apps/cli/src/dispatch.ts` forwards
+    `picture.materialize` alone to the materials package). The caller of the record, comment,
+    notification and account actions is the request's identity (B3's `requestIdentity`), never
+    the body; a cookieless request the localhost rule admits (curl, `--to` on a dev server, an MCP
+    client) is the checkout holder `agent:localhost` on both identity paths (`server/actions.ts`
+    `callerFactsFor`, `server/room.ts` `requestIdentity`), so a walk sees one caller. The access
+    record lives at `decks/<id>/.turboslide/access.json` on a checkout (the CLI, the access store
+    and `authorize()` agree) and in the access store hosted; `bindAuthorize({ loadRecord })`,
+    `bindIdentityHooks({ findShareLink, deckIndex })` and the Redis and Upstash binds run once per
+    server process from `apps/studio/src/start.ts` (`bindServerSeams`). `/api/share/<id>/<action>`
+    dispatches the same handlers. The CSRF filter passes a bearer on the three room routes and GET
+    on `/device` and `/api/auth/magic-link/verify`; `playwright.config.ts` and `scripts/check.mjs`
+    start their servers with `TURBOSLIDE_LOCAL_OPEN=1` and `TURBOSLIDE_AUTH_RATE_LIMIT=off`.
 
 ## Deviations from the spec, recorded
 
@@ -564,6 +735,43 @@ on the same build, so `@turboslide/headless` resolves the executable in this ord
     and Force, never as a revision conflict to rebase on: the server changed nothing, so a rebase
     re-sent the same write to the same refusal in a loop (measured at one write every 2 ms). A
     lease still outlives the tab that took it, ten minutes at most.
+
+- Round three, merge 1 (`docs/gslides-parity/build-3/integrator.md`): `image-size` is removed from
+  pptxgenjs's dependency graph through a pnpm override instead of bumped, because no fixed release
+  exists (SPEC-3 8.10 reads "overridden past 2.0.2"); `@simplewebauthn/server` is pinned at 14.0.1,
+  not 14.0.2, which was published on the day of the install; `@sparticuz/chromium` and
+  `playwright-core` are not bumped although 153.0.0 and 1.63.0 exist (SPEC-3 8.10 "bumped together
+  when a newer stable exists"): no advisory names them and a Chromium change moves the pixel
+  gates, so the bump is a fixer round decision taken with the verifier's compare-to-shoot run;
+  `apps/studio` joins the vitest project list with its own config although SPEC-3 16.1 named no
+  config change for step 5.
+
+- Round three, merge 2 (`docs/gslides-parity/build-3/integrator.md` section 8,
+  `BUILD-STATUS-3.md`): the account boundary held, so the preview runs on the blob channel,
+  anonymous identity and captured mail with the deployment's own environment passed per
+  deployment (`vercel deploy -e`), and no Marketplace product, private Blob store or WAF rule
+  was created or applied; the storage migration ran on the fake only (SPEC-3 11.4, 11.5 R7 wait
+  on Kevin). The fixture deck's two dither slides carry their materialized variants in the
+  committed deck (`turboslide picture materialize` at merge 2, revision 2) because the export
+  path writes them under the deck on the first export, which left untracked files in the fixture
+  after every run; B5's two dither tests strip the variants from their scratch copies. The
+  materials package's `picture.materialize` answers `missing` as what is still missing after the
+  write (the rows it rendered leave the list), and its `slide.toCanvas` call names `slideIds`
+  (the action's input), both found by the CLI's real dispatcher. SPEC-3 12 spells the comments
+  filter `--author <who>`; the CLI uses `--author-id <who>` because `--author` is the principal
+  flag since round one (B1). The localhost token (`TURBOSLIDE_LOCAL_TOKEN=require`) stays opt in
+  this round: flipping the default at merge 2 (b3.md R12) would have changed every builder's dev
+  server rule under the verifier's feet, so the flip is a fixer round decision. Cookieless
+  localhost agent calls are the checkout holder on both identity paths (a design decision above,
+  not in SPEC-3's text). `share.emailCollaborators` answers 501 by design (round four).
+  `presence.list` and `sync.status` over HTTP and MCP read the CLI's file records, not the room's
+  roster (the window transport reads the room); the digest queue and the one click unsubscribe
+  (`/api/notify/unsubscribe`, 501) are not wired (b2.md R14d, R17); `account me --avatar-png`
+  is not wired on the CLI (b3.md R15c); `closeAgentSessions` is not bound (b3.md R15b). A
+  fixed tamper in `tokens.test.ts` matched the original token one run in sixteen and now flips
+  the digit. The realtime spec's frozen `describe()` revision and the coalesced writes after a
+  resync (b2.md, two defects), the intermittent `no thread` 404 on a reopen right after a
+  resolve (one of six sequences on the merge 2 walk), and finding 28 stay for the fixer round.
 
 ## License
 

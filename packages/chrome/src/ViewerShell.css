@@ -69,6 +69,29 @@
   grid-template-columns: 0 minmax(0, 1fr);
 }
 
+/* the saved geometry before the shell's mount effect applies it (gslides-parity SPEC-3 9.2 D1,
+   D4; VERIFICATION-3 finding 26): the boot script of __root.tsx stamps the saved sidebar,
+   density, mode and present flags on <html> before first paint, and until the shell settles the
+   column takes that geometry, so the server's open list at 256 px never paints over a closed
+   list or an outline column and re-lays the main region a frame later (measured: 0.22 with the
+   list closed, 0.99 in outline density, 0.18 with the grid saved). The settle a frame after the
+   mount effect hands the same geometry to data-sb and data-density. */
+html[data-boot-density='outline'] .pt-viewer:not([data-settled]) {
+  --pt-sb-w: 208px;
+}
+
+html[data-boot-sb='0'] .pt-viewer:not([data-settled]),
+html[data-boot-mode='grid'] .pt-viewer:not([data-settled]),
+html[data-boot-present='1'] .pt-viewer:not([data-settled]) {
+  grid-template-columns: 0 minmax(0, 1fr);
+}
+
+html[data-boot-sb='0'] .pt-viewer:not([data-settled]) > .pt-sb,
+html[data-boot-mode='grid'] .pt-viewer:not([data-settled]) > .pt-sb,
+html[data-boot-present='1'] .pt-viewer:not([data-settled]) > .pt-sb {
+  visibility: hidden;
+}
+
 /* the list keeps the density's width whatever the track is doing, so its
    content holds still while the main region slides over it */
 .pt-viewer > .pt-sb {

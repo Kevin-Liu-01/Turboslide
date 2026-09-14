@@ -1,0 +1,1019 @@
+check: starting the studio dev server on 4321 (log capped in .turboslide/dev-server.log)
+check: warmed /deck/gt-brand and /edit/gt-brand and /new and /decks with 1296 client module(s) in 7.7 s
+check 21/28: pnpm exec playwright test apps/studio/e2e/ten-tasks.spec.ts apps/studio/e2e/text-editing.spec.ts apps/studio/e2e/filmstrip.spec.ts apps/studio/e2e/home.spec.ts apps/studio/e2e/present.spec.ts apps/studio/e2e/landing.spec.ts apps/studio/e2e/gslides-actions.spec.ts apps/studio/e2e/deck-transfer.spec.ts apps/studio/e2e/canvas.spec.ts apps/studio/e2e/objects.spec.ts apps/studio/e2e/text-styles.spec.ts apps/studio/e2e/tables.spec.ts apps/studio/e2e/charts.spec.ts apps/studio/e2e/hygiene.spec.ts apps/studio/e2e/export-batch.spec.ts
+
+Running 66 tests using 1 worker
+
+  ✘   1 apps/studio/e2e/canvas.spec.ts:265:1 › the canvas walk: one slide of every kind, one write per gesture, the conversion in the first write, one undo restores the kind (3.1m)
+  -   2 apps/studio/e2e/canvas.spec.ts:480:1 › step 5: the photograph is dragged, resized, cropped and sent to back, and the shader re-mounts at its box
+  -   3 apps/studio/e2e/canvas.spec.ts:582:1 › step 6: rulers, guides, zoom to 1600 and pan
+  -   4 apps/studio/e2e/canvas.spec.ts:710:1 › step 8: the fresh Title slide’s empty heading drags before anything is typed; the workspace marquee, deselect and menu; the covering photograph’s menu
+  ✘   5 apps/studio/e2e/charts.spec.ts:118:1 › Insert > Chart > Bar lands a chart with the placeholder data, centred at 960 by 540 (1.9s)
+  -   6 apps/studio/e2e/charts.spec.ts:175:1 › the data grid edits a value and adds a series, Chart type to Pie keeps the first series, the legend moves, the TXT export lists the data
+  ✓   7 apps/studio/e2e/deck-transfer.spec.ts:98:1 › Download on a home card downloads the deck as a zip (1.5s)
+  ✓   8 apps/studio/e2e/deck-transfer.spec.ts:113:1 › a bundle posted to the upload route creates the deck under a free id and the editor opens it (2.2s)
+  ✓   9 apps/studio/e2e/deck-transfer.spec.ts:143:1 › Make a copy with selected slides and removed notes, through deck.copy (1.8s)
+  ✘  10 apps/studio/e2e/deck-transfer.spec.ts:186:1 › Import slides copies the assets the slides need, through slide.import (92ms)
+  ✓  11 apps/studio/e2e/deck-transfer.spec.ts:232:1 › File > Download > Turboslide bundle (.zip) downloads the deck from the editor (1.9s)
+  ✓  12 apps/studio/e2e/deck-transfer.spec.ts:252:1 › /deck/<id>?present=1 opens the presentation in present mode (1.9s)
+  ✘  13 apps/studio/e2e/export-batch.spec.ts:85:3 › the batched Perfect export over the http route (SPEC-2 8.1) › 9 batches of 3 and one merge produce a perfect file that export check accepts (65ms)
+  ✘  14 apps/studio/e2e/export-batch.spec.ts:177:3 › the batched Perfect export over the http route (SPEC-2 8.1) › a replaced twin makes a batch answer stale, and a missing job is 404 (69ms)
+  ✘  15 apps/studio/e2e/filmstrip.spec.ts:135:3 › the filmstrip (SPEC 4.1, 4.2) › cards, the current ring, multi-select, the right-click order, skip and unskip (7.2s)
+  ✓  16 apps/studio/e2e/filmstrip.spec.ts:206:3 › the filmstrip (SPEC 4.1, 4.2) › drag reorders as one slide.move, Delete shows the snackbar and Undo brings the slide back (6.1s)
+  ✓  17 apps/studio/e2e/filmstrip.spec.ts:256:3 › the filmstrip (SPEC 4.1, 4.2) › Apply layout lists the 21 layouts with the current one checked, and a pick is one slide.applyLayout (2.1s)
+  ✘  18 apps/studio/e2e/gslides-actions.spec.ts:99:3 › the fourteen actions of the parity round through the window API › document actions run through the editor and reads carry the new facts (1.9s)
+  ✘  19 apps/studio/e2e/gslides-actions.spec.ts:205:3 › the fourteen actions of the parity round through the window API › collection actions and slide.import run on the server (1.8s)
+  ✘  20 apps/studio/e2e/gslides-actions.spec.ts:321:3 › the thirty six actions of round two through the window API › every canvas, text, table, chart, shape, line and diagram action resolves in the editor (1.8s)
+  ✘  21 apps/studio/e2e/gslides-actions.spec.ts:704:3 › the menus over the stage selection (VERIFICATION-2 findings 5 and 6) › Arrange reads two selected objects and Change shape draws its plate in the right-click menu (1.8s)
+  ✓  22 apps/studio/e2e/home.spec.ts:102:1 › the three bands: the strip, the recent cards with thumbnails, search, sort and the view toggle (1.8s)
+  ✓  23 apps/studio/e2e/home.spec.ts:169:1 › the card menu carries the items in order, follows the menu pattern and opens the deck (2.6s)
+  ✓  24 apps/studio/e2e/home.spec.ts:210:1 › Rename in place writes the title (1.5s)
+  ✓  25 apps/studio/e2e/home.spec.ts:225:1 › Make a copy opens the copy in a new tab without the speaker notes (1.8s)
+  ✓  26 apps/studio/e2e/home.spec.ts:256:1 › Move to trash hides the deck, Undo brings it back, the trash page restores and deletes forever (4.6s)
+  ✓  27 apps/studio/e2e/home.spec.ts:314:1 › the Blank card opens /new (1.3s)
+  ✓  28 apps/studio/e2e/hygiene.spec.ts:118:1 › Help > Help Turboslide improve opens the repository’s issue page in a new tab (SPEC-2 0.28) (1.9s)
+  ✓  29 apps/studio/e2e/hygiene.spec.ts:138:1 › the first write from /new can be undone and the address stays on the saved deck (SPEC-2 0.29) (6.5s)
+  ✓  30 apps/studio/e2e/hygiene.spec.ts:186:1 › Edit > Select all with the filmstrip focused selects every card, and Edit > Cut removes the selected slides with no snackbar (SPEC-2 0.30) (4.7s)
+  ✓  31 apps/studio/e2e/hygiene.spec.ts:230:1 › Edit > Select none clears a block selection (SPEC-2 0.61) (2.3s)
+  ✓  32 apps/studio/e2e/landing.spec.ts:80:1 › / answers a 307 to /new with X-Robots-Tag: noindex and the browser lands on /new (253ms)
+  ✘  33 apps/studio/e2e/landing.spec.ts:92:1 › /new is noindex and a visit that only looks writes nothing to the store (89ms)
+  -  34 apps/studio/e2e/landing.spec.ts:109:1 › the first write against a draft id creates the deck in the store (server functions, no editor)
+  -  35 apps/studio/e2e/landing.spec.ts:173:1 › the draft (editor attached) reads Untitled presentation, one Title slide, the two prompts and Not saved yet
+  -  36 apps/studio/e2e/landing.spec.ts:197:1 › the first edit (editor attached) creates the deck, moves the address to /edit/<id> and takes the heading as the title
+  -  37 apps/studio/e2e/landing.spec.ts:249:1 › two tabs on /new (editor attached) get two drafts
+  ✘  38 apps/studio/e2e/objects.spec.ts:153:1 › a text box drawn on the Title slide converts it; move, rotate, flip, group, ungroup, regroup, delete, each one write undone back to the Title slide (56.4s)
+  -  39 apps/studio/e2e/objects.spec.ts:332:1 › the export fixture’s canvas-title slide is unchanged by a reload
+  ✓  40 apps/studio/e2e/present.spec.ts:93:1 › the presenting keys, the blank slides, the laser and the toolbar on the audience surface (11.6s)
+  ✘  41 apps/studio/e2e/present.spec.ts:271:1 › Presenter view lists the unskipped slides with their notes and syncs with the slideshow window (2.9s)
+  ✓  42 apps/studio/e2e/present.spec.ts:397:1 › ?screen=1 on the presenter address opens the audience form (1.4s)
+  ✘  43 apps/studio/e2e/tables.spec.ts:128:1 › Insert > Table opens the hover grid, the caption follows the pointer and a click inserts 4 by 3 (2.5s)
+  -  44 apps/studio/e2e/tables.spec.ts:162:1 › a cell range, Merge cells and Unmerge cells
+  -  45 apps/studio/e2e/tables.spec.ts:251:1 › a cell fill, Distribute rows and two rows inserted below
+  ✓  46 apps/studio/e2e/ten-tasks.spec.ts:242:1 › task 1: open the right deck from the home page in one click (2.7s)
+  ✓  47 apps/studio/e2e/ten-tasks.spec.ts:252:1 › task 2: make a copy for a prospect and name it in three clicks and one key (20.0s)
+task 3: the rename's write settled in 1997 ms
+  ✓  48 apps/studio/e2e/ten-tasks.spec.ts:284:1 › task 3: retype the customer name on the cover and across the deck (5.5s)
+  ✓  49 apps/studio/e2e/ten-tasks.spec.ts:322:1 › task 4: swap a logo with one drop (23.6s)
+  ✓  50 apps/studio/e2e/ten-tasks.spec.ts:375:1 › task 5: add, duplicate, delete and reorder slides in one press each (23.4s)
+  ✓  51 apps/studio/e2e/ten-tasks.spec.ts:427:1 › task 6: hide the slides that do not apply (2.4s)
+  ✓  52 apps/studio/e2e/ten-tasks.spec.ts:451:1 › task 7: update the pricing table and the big number (17.2s)
+  ✓  53 apps/studio/e2e/ten-tasks.spec.ts:504:1 › task 8: write a talk track in one click (3.1s)
+  ✓  54 apps/studio/e2e/ten-tasks.spec.ts:518:1 › task 9: present over a call with Presenter view in two clicks (10.4s)
+  ✘  55 apps/studio/e2e/ten-tasks.spec.ts:534:1 › task 10: send a link or a PDF (1.0m)
+  ✘  56 apps/studio/e2e/ten-tasks.spec.ts:574:1 › the current slide follows a removal: Delete slide, and Undo after New slide and Duplicate slide (2.0m)
+  ✓  57 apps/studio/e2e/ten-tasks.spec.ts:643:1 › Edit > Copy, Paste and Cut from the menu bar act on the selected slide card (13.9s)
+  ✘  58 apps/studio/e2e/text-editing.spec.ts:144:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › a click places the caret, a pause writes one burst, Esc keeps the text and one Cmd Z removes the burst (6.5s)
+  ✘  59 apps/studio/e2e/text-editing.spec.ts:202:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Enter breaks a paragraph in a multiline pointer and commits in a heading; Shift Enter is the same break (36.8s)
+  ✓  60 apps/studio/e2e/text-editing.spec.ts:243:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Enter at the end of a list item appends an item and Backspace on the empty item removes it (2.4s)
+  ✓  61 apps/studio/e2e/text-editing.spec.ts:280:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Tab walks the table cells and adds a row past the last with the Row added snackbar (1.9s)
+  ✘  62 apps/studio/e2e/text-editing.spec.ts:326:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Cmd C and Cmd V paste a copy of the block through the envelope, Cmd D duplicates and Delete removes (18.6s)
+  ✘  63 apps/studio/e2e/text-editing.spec.ts:369:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › no bare letter changes the view with a block selected, and the arrows nudge the block by a pixel on a grammar slide (SPEC-2 0.87) (30.9s)
+  ✓  64 apps/studio/e2e/text-styles.spec.ts:117:1 › the marks on a range write one text.replace each and toggle off again; the caret word takes a mark with no range (29.9s)
+  ✓  65 apps/studio/e2e/text-styles.spec.ts:197:1 › Cmd ] and Cmd [ indent a text block by 64 px and step a list item’s level; Tab at the start of an item raises it to 9 at most (26.8s)
+  ✘  66 apps/studio/e2e/text-styles.spec.ts:273:1 › the special characters insert lands at the caret as one text.insert, and paint format carries italic (21.4s)
+
+
+  1) apps/studio/e2e/canvas.spec.ts:265:1 › the canvas walk: one slide of every kind, one write per gesture, the conversion in the first write, one undo restores the kind 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 4
+    Received: 0
+
+      431 |       const stackAfter = (await slideGet(page, step.id)).slots?.['main'] ?? [];
+      432 |       const top = Math.max(...stackAfter.map((b) => b.pos?.z ?? 0));
+    > 433 |       expect(stackAfter.find((b) => b.id === step.object)?.pos?.z).toBe(top);
+          |                                                                    ^
+      434 |     } else {
+      435 |       /* one object, or one already on top: Bring to front is the CLI's no write (reorderZ) */
+      436 |       await page.waitForTimeout(400);
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/canvas.spec.ts:433:68
+
+    Error Context: .turboslide/playwright/canvas-the-canvas-walk-one-907e4--one-undo-restores-the-kind/error-context.md
+
+    Error Context: .turboslide/playwright/canvas-the-canvas-walk-one-907e4--one-undo-restores-the-kind/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/canvas-the-canvas-walk-one-907e4--one-undo-restores-the-kind/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/canvas-the-canvas-walk-one-907e4--one-undo-restores-the-kind/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) apps/studio/e2e/charts.spec.ts:118:1 › Insert > Chart > Bar lands a chart with the placeholder data, centred at 960 by 540 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator: locator('.pt-viewer')
+    Expected: "blank-1"
+    Error: strict mode violation: locator('.pt-viewer') resolved to 2 elements:
+        1) <div data-index="1" data-total="2" data-dir="next" data-settled="" data-sb="thumbs" data-mode="slide" data-spellcheck="" data-active="blank-1" data-density="thumbs" data-edit-mode="editing" class="pt-viewer is-editor" data-shell="edit:untitled-20260914-x4la" data-tsd-source="/Users/kevinliu/repos/Turboslide/packages/chrome/src/ViewerShell.tsx:669:11">…</div> aka locator('div').nth(2)
+        2) <div data-sb="thumbs" aria-busy="true" data-density="thumbs" data-skeleton="editor" aria-label="Loading the editor" class="pt-viewer is-editor ts-skeleton" data-tsd-source="/src/components/EditorSkeleton.tsx:32:5">…</div> aka getByLabel('Loading the editor')
+
+    Call log:
+      - Expect "toHaveAttribute" with timeout 30000ms
+      - waiting for locator('.pt-viewer')
+
+
+      86 |     baseRevision: await revision(page),
+      87 |   });
+    > 88 |   await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', created.slide.id, {
+         |                                            ^
+      89 |     timeout: 30_000,
+      90 |   });
+      91 |   return created.slide.id;
+        at blankSlide (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/charts.spec.ts:88:44)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/charts.spec.ts:122:19
+
+    Error Context: .turboslide/playwright/charts-Insert-Chart-Bar-la-9738a--data-centred-at-960-by-540/error-context.md
+
+    Error Context: .turboslide/playwright/charts-Insert-Chart-Bar-la-9738a--data-centred-at-960-by-540/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/charts-Insert-Chart-Bar-la-9738a--data-centred-at-960-by-540/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/charts-Insert-Chart-Bar-la-9738a--data-centred-at-960-by-540/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) apps/studio/e2e/deck-transfer.spec.ts:186:1 › Import slides copies the assets the slides need, through slide.import 
+
+    Error: expect(received).toBeDefined()
+
+    Received: undefined
+
+      204 |   ) as { sections: { slideIds: string[] }[] };
+      205 |   const opener = sourceManifest.sections.flatMap((s) => s.slideIds).find((id) => id !== 'title');
+    > 206 |   expect(opener).toBeDefined();
+          |                  ^
+      207 |   await page.goto(`/edit/${target}?author=agent:e2e-transfer`);
+      208 |   await editorReady(page);
+      209 |   const info = await invoke<{ revision: number }>(page, 'deck.info');
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/deck-transfer.spec.ts:206:18
+
+    Error Context: .turboslide/playwright/deck-transfer-Import-slide-53917-s-need-through-slide-import/error-context.md
+
+    Error Context: .turboslide/playwright/deck-transfer-Import-slide-53917-s-need-through-slide-import/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/deck-transfer-Import-slide-53917-s-need-through-slide-import/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/deck-transfer-Import-slide-53917-s-need-through-slide-import/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) apps/studio/e2e/export-batch.spec.ts:85:3 › the batched Perfect export over the http route (SPEC-2 8.1) › 9 batches of 3 and one merge produce a perfect file that export check accepts 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 26
+    Received: 28
+
+      89 |     const started = await post<Start>(request, 'start=1', { mode: 'flatten', theme: ['light'] });
+      90 |     expect(started.jobId).toMatch(/^b[0-9a-z]+-[0-9a-f]{8}$/);
+    > 91 |     expect(started.total).toBe(PLAY);
+         |                           ^
+      92 |     expect(started.batchSize).toBe(BATCH);
+      93 |     expect(started.batches).toHaveLength(Math.ceil(PLAY / BATCH));
+      94 |     expect(started.batches.flat()).toHaveLength(PLAY);
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/export-batch.spec.ts:91:27
+
+    Error Context: .turboslide/playwright/export-batch-the-batched-P-f88e7-e-that-export-check-accepts/error-context.md
+
+    Error Context: .turboslide/playwright/export-batch-the-batched-P-f88e7-e-that-export-check-accepts/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/export-batch-the-batched-P-f88e7-e-that-export-check-accepts/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/export-batch-the-batched-P-f88e7-e-that-export-check-accepts/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) apps/studio/e2e/export-batch.spec.ts:177:3 › the batched Perfect export over the http route (SPEC-2 8.1) › a replaced twin makes a batch answer stale, and a missing job is 404 
+
+    Error: POST ?cancel=bmu0z3uh4-2c0cccd3: 403 {"error":"forbidden","capability":"export"}
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: true
+    Received: false
+
+      71 |   });
+      72 |   const text = await response.text();
+    > 73 |   expect(response.ok(), `POST ?${query}: ${response.status()} ${text.slice(0, 300)}`).toBe(true);
+         |                                                                                       ^
+      74 |   return JSON.parse(text) as T;
+      75 | }
+      76 |
+        at post (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/export-batch.spec.ts:73:87)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/export-batch.spec.ts:202:5
+
+    Error Context: .turboslide/playwright/export-batch-the-batched-P-e5b4d-le-and-a-missing-job-is-404/error-context.md
+
+    Error Context: .turboslide/playwright/export-batch-the-batched-P-e5b4d-le-and-a-missing-job-is-404/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/export-batch-the-batched-P-e5b4d-le-and-a-missing-job-is-404/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/export-batch-the-batched-P-e5b4d-le-and-a-missing-job-is-404/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) apps/studio/e2e/filmstrip.spec.ts:135:3 › the filmstrip (SPEC 4.1, 4.2) › cards, the current ring, multi-select, the right-click order, skip and unskip 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator:  locator('[role="menu"][aria-label="Slide menu"]').locator('[data-menu-item="insert.comment"]')
+    Expected: "true"
+    Received: ""
+    Timeout:  5000ms
+
+    Call log:
+      - Expect "toHaveAttribute" with timeout 5000ms
+      - waiting for locator('[role="menu"][aria-label="Slide menu"]').locator('[data-menu-item="insert.comment"]')
+        14 × locator resolved to <div tabindex="-1" role="menuitem" data-status="now" data-tip="Comment" class="ts-menu-item" aria-keyshortcuts="Alt+Meta+M" data-menu-item="insert.comment" data-control="menu.insert.comment" data-tsd-source="/Users/kevinliu/repos/Turboslide/packages/chrome/src/Menu.tsx:519:13">…</div>
+           - unexpected value "null"
+
+
+      163 |       'true',
+      164 |     );
+    > 165 |     await expect(menu(page).locator('[data-menu-item="insert.comment"]')).toHaveAttribute(
+          |                                                                           ^
+      166 |       'aria-disabled',
+      167 |       'true',
+      168 |     );
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/filmstrip.spec.ts:165:75
+
+    Error Context: .turboslide/playwright/filmstrip-the-filmstrip-SP-47d7d-click-order-skip-and-unskip/error-context.md
+
+    Error Context: .turboslide/playwright/filmstrip-the-filmstrip-SP-47d7d-click-order-skip-and-unskip/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/filmstrip-the-filmstrip-SP-47d7d-click-order-skip-and-unskip/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/filmstrip-the-filmstrip-SP-47d7d-click-order-skip-and-unskip/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  7) apps/studio/e2e/gslides-actions.spec.ts:99:3 › the fourteen actions of the parity round through the window API › document actions run through the editor and reads carry the new facts 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: 2
+    Received: 1
+
+      117 |     );
+      118 |     expect(created.slide.template).toBe('big-number');
+    > 119 |     expect(created.revision).toBe(start.revision + 1);
+          |                              ^
+      120 |     await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', created.slide.id);
+      121 |     let list = await rows(page);
+      122 |     expect(list.map((row) => row.id)).toEqual(['title', 'content-rule', created.slide.id]);
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:119:30
+
+    Error Context: .turboslide/playwright/gslides-actions-the-fourte-da9e1-d-reads-carry-the-new-facts/error-context.md
+
+    Error Context: .turboslide/playwright/gslides-actions-the-fourte-da9e1-d-reads-carry-the-new-facts/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/gslides-actions-the-fourte-da9e1-d-reads-carry-the-new-facts/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/gslides-actions-the-fourte-da9e1-d-reads-carry-the-new-facts/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) apps/studio/e2e/gslides-actions.spec.ts:205:3 › the fourteen actions of the parity round through the window API › collection actions and slide.import run on the server 
+
+    Error: page.evaluate: Error: baseRevision 1 is stale; e2e-gslides is at revision 2
+
+      63 |
+      64 | async function invoke<T>(page: Page, action: string, input?: unknown): Promise<T> {
+    > 65 |   return page.evaluate(([id, value]) => window.turboslide!.studio.invoke(id, value), [
+         |               ^
+      66 |     action,
+      67 |     input,
+      68 |   ] as const) as Promise<T>;
+        at Object.deserialize (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/@tanstack+router-core@1.171.28/node_modules/@tanstack/router-core/dist/esm/ssr/serializer/ShallowErrorPlugin.js?v=728ea863:27:10)
+        at deserializePlugin (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1485:76)
+        at deserialize$1 (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1596:19)
+        at assignProperty (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1339:84)
+        at deserializeProperties (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1361:87)
+        at deserializeObject (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1366:2)
+        at deserialize$1 (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1582:19)
+        at deserializeTop (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1615:10)
+        at fromCrossJSON (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:2844:9)
+        at getResponse (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/@tanstack+start-client-core@1.170.28/node_modules/@tanstack/start-client-core/dist/esm/client-rpc/serverFnFetcher.js?v=728ea863:164:14)
+        at Object.deserialize (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/@tanstack+router-core@1.171.28/node_modules/@tanstack/router-core/dist/esm/ssr/serializer/ShallowErrorPlugin.js?v=728ea863:27:10)
+        at deserializePlugin (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1485:76)
+        at deserialize$1 (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1596:19)
+        at assignProperty (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1339:84)
+        at deserializeProperties (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1361:87)
+        at deserializeObject (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1366:2)
+        at deserialize$1 (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1582:19)
+        at deserializeTop (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:1615:10)
+        at fromCrossJSON (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/seroval@1.6.7/node_modules/seroval/dist/dev/index.js?v=728ea863:2844:9)
+        at getResponse (http://localhost:4321/@fs/Users/kevinliu/repos/Turboslide/node_modules/.pnpm/@tanstack+start-client-core@1.170.28/node_modules/@tanstack/start-client-core/dist/esm/client-rpc/serverFnFetcher.js?v=728ea863:164:14)
+        at invoke (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:65:15)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:214:26
+
+    Error Context: .turboslide/playwright/gslides-actions-the-fourte-f651b-de-import-run-on-the-server/error-context.md
+
+    Error Context: .turboslide/playwright/gslides-actions-the-fourte-f651b-de-import-run-on-the-server/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/gslides-actions-the-fourte-f651b-de-import-run-on-the-server/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/gslides-actions-the-fourte-f651b-de-import-run-on-the-server/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) apps/studio/e2e/gslides-actions.spec.ts:321:3 › the thirty six actions of round two through the window API › every canvas, text, table, chart, shape, line and diagram action resolves in the editor 
+
+    Error: deck.guides
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 3
+    Received: 2
+
+      331 |     ): Promise<T> => {
+      332 |       const out = await invoke<T>(page, action, { ...input, baseRevision: revision });
+    > 333 |       expect(out.revision, action).toBe(revision + 1);
+          |                                    ^
+      334 |       revision = out.revision;
+      335 |       return out;
+      336 |     };
+        at write (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:333:36)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:343:5
+
+    Error Context: .turboslide/playwright/gslides-actions-the-thirty-daa83-tion-resolves-in-the-editor/error-context.md
+
+    Error Context: .turboslide/playwright/gslides-actions-the-thirty-daa83-tion-resolves-in-the-editor/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/gslides-actions-the-thirty-daa83-tion-resolves-in-the-editor/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/gslides-actions-the-thirty-daa83-tion-resolves-in-the-editor/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) apps/studio/e2e/gslides-actions.spec.ts:704:3 › the menus over the stage selection (VERIFICATION-2 findings 5 and 6) › Arrange reads two selected objects and Change shape draws its plate in the right-click menu 
+
+    Error: block.insert
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 3
+    Received: 2
+
+      713 |     ): Promise<T> => {
+      714 |       const out = await invoke<T>(page, action, { ...input, baseRevision: revision });
+    > 715 |       expect(out.revision, action).toBe(revision + 1);
+          |                                    ^
+      716 |       revision = out.revision;
+      717 |       return out;
+      718 |     };
+        at write (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:715:36)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/gslides-actions.spec.ts:739:7
+
+    Error Context: .turboslide/playwright/gslides-actions-the-menus--e1503-ate-in-the-right-click-menu/error-context.md
+
+    Error Context: .turboslide/playwright/gslides-actions-the-menus--e1503-ate-in-the-right-click-menu/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/gslides-actions-the-menus--e1503-ate-in-the-right-click-menu/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/gslides-actions-the-menus--e1503-ate-in-the-right-click-menu/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) apps/studio/e2e/landing.spec.ts:92:1 › /new is noindex and a visit that only looks writes nothing to the store 
+
+    Error: expect(received).toMatch(expected)
+
+    Expected pattern: /<meta name="robots" content="noindex"\s*\/?>/
+    Received string:  "<!DOCTYPE html><html lang=\"en\" data-tsd-source=\"/src/routes/__root.tsx:132:5\"><head data-tsd-source=\"/src/routes/__root.tsx:133:7\"><meta charSet=\"utf-8\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\"/><link rel=\"stylesheet\" href=\"/@fs/Users/kevinliu/repos/Turboslide/packages/fonts/src/inter.css\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\" data-precedence=\"default\"/><link rel=\"stylesheet\" href=\"/@fs/Users/kevinliu/repos/Turboslide/packages/chrome/src/tokens.css\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\" data-precedence=\"default\"/><link rel=\"stylesheet\" href=\"/@fs/Users/kevinliu/repos/Turboslide/packages/theme/src/gt-ink-paper/sheet.css\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\" data-precedence=\"default\"/><link rel=\"stylesheet\" href=\"/@fs/Users/kevinliu/repos/Turboslide/packages/theme/src/gt-ink-paper/stage.css\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\" data-precedence=\"default\"/><link rel=\"stylesheet\" href=\"/src/styles.css\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\" data-precedence=\"default\"/><link rel=\"stylesheet\" href=\"/@tanstack-start/styles.css?routes=__root__%2C%2Fnew\" data-tanstack-router-dev-styles=\"true\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\" data-precedence=\"default\"/><meta property=\"csp-nonce\" content=\"aW61Q+PRT9tNi7wTU8YzMw==\"/><title>Untitled presentation, Turboslide</title><meta name=\"robots\" content=\"noindex\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\"/><link rel=\"modulepreload\" href=\"/@id/virtual:tanstack-start-dev-client-entry\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\"/><link rel=\"icon\" href=\"data:,\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\"/><link rel=\"preload\" href=\"/@fs/Users/kevinliu/repos/Turboslide/packages/fonts/assets/InterVariable.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\"/><link rel=\"preload\" href=\"/@fs/Users/kevinliu/repos/Turboslide/packages/fonts/assets/InterVariable-Italic.woff2\" as=\"font\" type=\"font/woff2\" crossorigin=\"anonymous\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\"/><script nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\" data-tsd-source=\"/src/routes/__root.tsx:134:9\">try{var t=localStorage.getItem('gt-theme');if(t!=='light'&&t!=='dark')t=localStorage.getItem('gt-deck-theme');document.documentElement.setAttribute('data-theme',t==='light'||t==='dark'?t:'dark')}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script><script nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\" data-tsd-source=\"/src/routes/__root.tsx:140:9\">(function(){try{var d=document.documentElement,l=localStorage;var sb=l.getItem('gt-shell-sb');if(sb==='0'||sb==='1')d.setAttribute('data-boot-sb',sb);var de=l.getItem('gt-shell-density');if(de==='outline'||de==='thumbs')d.setAttribute('data-boot-density',de);var m=/^\\/(?:deck|embed|edit)\\/([^/?#]+)/.exec(location.pathname);if(m){var id=decodeURIComponent(m[1]);var mode=l.getItem('gt-shell-mode:deck:'+id);if(mode==='slide'||mode==='grid'||mode==='book')d.setAttribute('data-boot-mode',mode)}if(/[?&]present=1(?:&|$)/.test(location.search))d.setAttribute('data-boot-present','1')}catch(e){}})();</script><style nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\" data-tsd-source=\"/src/routes/__root.tsx:147:9\">
+    /* ---- the sheet's inherited text rules. head.html sets these on body (head:183) and on .slide a
+       (head:196-199), outside the 11-176 range the theme ports, so the renderer carries them until
+       the theme does; the values are identical, so a duplicate is harmless ---- */
+    .ts-sheet { color: var(--ink); background: var(--paper); font-family: var(--text); font-optical-sizing: auto; -webkit-font-smoothing: antialiased; }
+    .ts-sheet .slide a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: var(--hair); text-underline-offset: 5px; }
+    .ts-sheet .slide a:hover { text-decoration-color: var(--ink); }
+    .ts-sheet .rows.links span { color: var(--ink-2); }·
+    /* ---- full-picture kinds: opener, mood, closing (s01:3-11, s06:3-12, s85:3-13) ---- */
+    .ts-sheet .slide.opener .opener-img, .ts-sheet .slide.mood .mood-img { position: absolute; inset: -57px; z-index: -1; width: 1600px; height: 900px; object-fit: cover; display: block; }
+    /* the two paper chips under the wordmark and the counter, emitted only with chrome (OPENERS.md:47) */
+    .ts-sheet .ts-chips { position: absolute; inset: -57px; z-index: -1; pointer-events: none; background: linear-gradient(var(--paper), var(--paper)) 66px 858px / 40px 30px no-repeat, linear-gradient(var(--paper), var(--paper)) 1474px 856px / 60px 28px no-repeat; }
+    .ts-sheet .opener-plate { position: absolute; left: 0; bottom: 0; width: fit-content; max-width: 740px; padding: 22px 26px 20px; background: var(--paper); color: var(--ink); }
+    .ts-sheet .opener-plate .big { color: var(--ink); }
+    .ts-sheet .opener-plate p { margin-top: 14px; max-width: 56ch; color: var(--ink); }
+    .ts-sheet .opener-plate .credit, .ts-sheet .mood-plate .credit { margin-top: 12px; font-size: 15px; line-height: 1.45; letter-spacing: 0.01em; color: var(--titanium); }
+    .ts-sheet .mood-plate { position: absolute; right: 0; bottom: 0; width: fit-content; max-width: 560px; padding: 22px 26px 20px; background: var(--paper); color: var(--ink); }
+    .ts-sheet .mood-plate .title { font-size: 44px; line-height: 1.08; color: var(--ink); }
+    .ts-sheet .mood-plate p { margin-top: 12px; color: var(--ink); }
+    .ts-sheet .s-closing .opener-plate { top: 0; bottom: auto; max-width: 720px; }
+    .ts-sheet .s-closing .opener-plate .mark { display: block; width: 138px; height: 88px; fill: currentColor; margin-bottom: 24px; }·
+    /* ---- layouts ---- */
+    /* the head of a split as two columns (s21:4, s34:3-5, s38:3-5, s61:4-5, s80:4-6) */
+    .ts-sheet .split > .head.head-cols { display: grid; gap: 72px; align-items: start; }
+    .ts-sheet .split > .head.head-5-7 { grid-template-columns: 5fr 7fr; }
+    .ts-sheet .split > .head.head-4-8 { grid-template-columns: 4fr 8fr; }
+    .ts-sheet .split > .head.head-baseline { align-items: first baseline; }
+    .ts-sheet .split > .head.head-cols h2 { margin-bottom: 0; }
+    .ts-sheet .split > .head.head-cols p { margin-top: 0; }
+    .ts-sheet .split > .body.start { align-content: start; }
+    /* a stack that holds a preformatted panel must not widen its column (s78:3-4) */
+    .ts-sheet .cols > .stack.has-pre { min-width: 0; }
+    .ts-sheet .composite { display: grid; }·
+    /* ---- rows and lists ---- */
+    /* a key without an icon in a table where other keys carry one takes the icon's indent (s14:8) */
+    .ts-sheet .rows > div > b.no-ic { padding-left: 30px; }
+    .ts-sheet .rows.links .lk { white-space: nowrap; }
+    .ts-sheet .plain.plain-22 { font-size: 22px; line-height: 1.4; }
+    .ts-sheet .plain.plain-20 { font-size: 20px; line-height: 1.45; }
+    .ts-sheet .plain.plain-20 > span { padding: 8px 0; }
+    .ts-sheet .plain.plain-20 > span > .ic { width: 20px; height: 20px; vertical-align: -4px; margin-right: 10px; }
+    .ts-sheet .plain.plain-20 > span:has(> .ic) { padding-left: 30px; text-indent: -30px; }
+    /* say: two registers as ruled rows, the form of s12:3-8 */
+    .ts-sheet .rows.ex { --key: 190px; }
+    .ts-sheet .rows.ex > div { padding: 20px 0; gap: 28px; align-items: baseline; }
+    .ts-sheet .rows.ex > div > b { font-size: 18px; color: var(--titanium); font-weight: 500; padding-top: 4px; }
+    .ts-sheet .rows.ex .q { font-family: var(--display); font-weight: 500; font-size: 27px; line-height: 1.25; letter-spacing: -0.015em; color: var(--ink); }
+    .ts-sheet .rows.ex .q.no { color: var(--ink-2); text-decoration: line-through; text-decoration-thickness: 1.5px; text-decoration-color: var(--titanium); }·
+    /* ---- scales: the center tick (s11:3) ---- */
+    .ts-sheet .scales.center-tick .scale .bar::after { content: ''; position: absolute; left: 50%; top: -4px; width: 1px; height: 9px; background: var(--ink-2); transform: translateX(-50%); }·
+    /* ---- specimen blocks ---- */
+    .ts-sheet .spec .w small { font-weight: 400; } /* s19:2 */
+    .ts-sheet .lang div small { font-size: 15px; } /* s20:4 */
+    .ts-sheet .lang .ja, .ts-sheet .lang .zh, .ts-sheet .lang .ko { font-weight: 400; } /* s20:5 */
+    .ts-sheet .ladder > div { padding: 7px 0; } /* s21:6 */
+    .ts-sheet .ladder > div > small { font-size: 15px; } /* s21:7 */
+    .ts-sheet .ladder.wide-value > div { grid-template-columns: 1fr 320px; } /* s21:6 */·
+    /* ---- figures ---- */
+    /* every image the renderer writes carries width and height from the asset's size (gslides-parity
+       SPEC-3 9.2 E12), so a rule below that fixes one dimension leaves the other auto and the
+       attribute ratio reserves the box before the file decodes */
+    .ts-sheet .shot-fig { margin: 0; width: 100%; display: grid; gap: 12px; } /* s33:3 */
+    .ts-sheet .shot-fig figcaption { font-size: 16px; line-height: 1.45; color: var(--ink-2); } /* s33:4 */
+    .ts-sheet .shot-fig.cap-15 figcaption { font-size: 15px; } /* s38:11 */
+    /* material (M5): a shader frame as a figure in the shot figure's form; the box keeps 16:9 at the
+       slot's width unless the block sets a height; the editor's live mount prepends a canvas that covers
+       the frozen frame; before a capture the plate ground carries a 15 px titanium label */
+    .ts-sheet .material-fig { margin: 0; width: 100%; display: grid; gap: 12px; }
+    .ts-sheet .material-fig figcaption { font-size: 16px; line-height: 1.45; color: var(--ink-2); }
+    .ts-sheet .material-fig.cap-15 figcaption { font-size: 15px; }
+    .ts-sheet .material { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: var(--plate); }
+    .ts-sheet .material > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .ts-sheet .material > canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .ts-sheet .material-label { position: absolute; left: 14px; bottom: 12px; font-size: 15px; line-height: 1.45; letter-spacing: 0.01em; color: var(--titanium); }
+    .ts-sheet .pair.gap-40 { gap: 40px; } /* s76:5 */
+    .ts-sheet .pair.cap-15 figcaption { font-size: 15px; } /* s63:5 */
+    /* tiles: the reference and direction grids (s13:3-7, s69:3-7) and the engine grid (s72:6-10) */
+    .ts-sheet .tiles { display: grid; gap: 18px 16px; }
+    .ts-sheet .tiles.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .ts-sheet .tiles.cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+    .ts-sheet .tiles.cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .ts-sheet .tiles img { display: block; width: 100%; height: auto; object-fit: cover; object-position: center; border: 1px solid var(--hair); background: var(--plate); }
+    .ts-sheet .tiles.aspect-16-9 img { aspect-ratio: 16 / 9; }
+    .ts-sheet .tiles.aspect-16-10 img { aspect-ratio: 16 / 10; object-position: top; }
+    .ts-sheet .tiles.aspect-1-1 img { aspect-ratio: 1 / 1; }
+    .ts-sheet .tiles.tiles-thumb .tile span { display: block; margin-top: 8px; font-size: 15px; line-height: 1.4; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ts-sheet .tiles .tile.more { border-top: 1px solid var(--hair); padding-top: 10px; font-size: 15px; line-height: 1.45; color: var(--ink-2); }
+    .ts-sheet .tiles.tiles-marked .tile span { display: flex; align-items: baseline; gap: 8px; margin-top: 7px; font-family: var(--display); font-weight: 500; font-size: 15px; line-height: 1.3; color: var(--ink); white-space: normal; overflow: visible; }
+    .ts-sheet .tiles.tiles-marked .tile.site img { border-color: var(--ink); }
+    .ts-sheet .tiles.tiles-marked .tile.site span::before { content: ''; width: 9px; height: 9px; background: var(--ink); flex: 0 0 auto; transform: translateY(-1px); }
+    .ts-sheet .tiles.tiles-eng { gap: 8px 20px; }
+    .ts-sheet .tiles.tiles-eng figure { margin: 0; display: grid; gap: 4px; }
+    .ts-sheet .tiles.tiles-eng img { aspect-ratio: auto; height: auto; object-position: center; }
+    .ts-sheet .tiles.tiles-eng b { display: block; font-family: var(--display); font-weight: 500; font-size: 20px; line-height: 1.2; letter-spacing: -0.01em; color: var(--ink); }
+    .ts-sheet .tiles.tiles-eng span { display: block; font-size: 15px; line-height: 1.35; color: var(--ink-2); white-space: nowrap; }
+    /* details: three 425 px columns of 2x crops (s38:6-11, s65:5-8) */
+    .ts-sheet .details { display: grid; grid-template-columns: repeat(3, 425px); justify-content: space-between; row-gap: 24px; align-items: start; }
+    .ts-sheet .details.one-row { row-gap: 0; }
+    .ts-sheet .details figure { margin: 0; display: grid; gap: 10px; }
+    .ts-sheet .details figure img { display: block; width: 425px; height: auto; border: 1px solid var(--hair); background: var(--plate); object-fit: cover; object-position: center; }
+    .ts-sheet .details figcaption { font-size: 15px; line-height: 1.45; color: var(--ink-2); }
+    /* board: one ruled row per surface (s80:7-15) */
+    .ts-sheet .board { display: flex; flex-direction: column; border-top: 1px solid var(--hair); }
+    .ts-sheet .board > div { display: grid; grid-template-columns: 128px 250px 200px 1fr; gap: 22px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--hair); font-size: 20px; line-height: 1.45; }
+    .ts-sheet .board img { display: block; width: 128px; height: 72px; object-fit: cover; object-position: top; border: 1px solid var(--hair); background: var(--plate); }
+    .ts-sheet .board b { font-family: var(--display); font-weight: 500; letter-spacing: -0.01em; }
+    .ts-sheet .board .who b { display: block; }
+    .ts-sheet .board .who small { display: block; font-size: 16px; line-height: 1.3; color: var(--ink-2); margin-top: 2px; }
+    .ts-sheet .board .state { white-space: nowrap; }
+    .ts-sheet .board .state .ic { margin-right: 10px; }
+    /* logoPlates: external logos on fixed-white plates (s14:3-7; the one sanctioned fixed color) */
+    .ts-sheet .lineage { display: grid; grid-template-columns: repeat(3, 150px); gap: 20px; margin-top: 6px; }
+    .ts-sheet .lineage figure { margin: 0; }
+    .ts-sheet .lineage .plate { display: grid; place-items: center; height: 90px; background: #ffffff; border: 1px solid var(--hair); }
+    .ts-sheet .lineage img { display: block; height: 56px; width: auto; }
+    .ts-sheet .lineage svg { display: block; height: 40px; width: 63px; color: #070707; }
+    .ts-sheet .lineage figcaption { margin-top: 8px; font-size: 15px; line-height: 1.4; color: var(--ink-2); }·
+    /* ---- panel variants ---- */
+    .ts-sheet .panel.panel-15 { font-size: 15px; }
+    .ts-sheet .panel.pre { white-space: pre; overflow: hidden; padding: 20px 18px; } /* s78:5 */
+    .ts-sheet .panel.term { display: flex; align-items: center; gap: 28px; padding: 14px 26px; } /* s84:24 */
+    .ts-sheet .panel.term svg { display: block; fill: currentColor; flex: 0 0 auto; }
+    .ts-sheet .panel.term span { font-size: 20px; line-height: 1; }·
+    /* ---- markSizes and matrix ---- */
+    .ts-sheet .sizes { display: grid; grid-template-columns: repeat(5, 1fr); } /* s17:3-6 */
+    .ts-sheet .sizes > div { display: grid; grid-template-rows: 1fr auto; }
+    .ts-sheet .sizes svg { display: block; align-self: end; justify-self: start; }
+    .ts-sheet .sizes .step { display: block; border-top: 1px solid var(--hair); padding-top: 14px; font-size: 16px; }
+    .ts-sheet .matrix { display: grid; border: 1px solid var(--hair); font-family: var(--display); font-size: 22px; font-variant-numeric: tabular-nums; text-align: center; } /* s26:10 */
+    .ts-sheet .matrix > span { padding: 14px 0; }
+    .ts-sheet .matrix > span.r { border-right: 1px solid var(--hair-soft); }
+    .ts-sheet .matrix > span.b { border-bottom: 1px solid var(--hair-soft); }·
+    /* ---- the freeform layout and the primitives (docs/freeform.md) ---- */
+    /* the layer over the content box and the layer at the sheet origin; a .free wrapper is one block's box */
+    .ts-sheet .freeform { position: absolute; inset: 0; }
+    .ts-sheet .freeform-sheet { position: absolute; width: 1600px; height: 900px; pointer-events: none; }
+    .ts-sheet .freeform-sheet > .free { pointer-events: auto; }
+    .ts-sheet .free { position: absolute; }
+    .ts-sheet .free > .box, .ts-sheet .free > svg.shape { width: 100%; height: 100%; }
+    .ts-sheet .free > .rule-h { width: 100%; }
+    .ts-sheet .free > .rule-v { height: 100%; }
+    .ts-sheet .free > h1, .ts-sheet .free > h2, .ts-sheet .free > .big, .ts-sheet .free > p { margin: 0; }
+    /* a linked block (gslides-parity SPEC 7.2.7) sits in its .link wrapper, which takes the box the block would have */
+    .ts-sheet .free > .link { display: block; width: 100%; height: 100%; }
+    .ts-sheet .free > .link > .box, .ts-sheet .free > .link > svg.shape { width: 100%; height: 100%; }
+    .ts-sheet .free > .link > .rule-h { width: 100%; }
+    .ts-sheet .free > .link > .rule-v { height: 100%; }
+    .ts-sheet .free > .link > h1, .ts-sheet .free > .link > h2, .ts-sheet .free > .link > .big, .ts-sheet .free > .link > p { margin: 0; }
+    /* box: a hairline rectangle with its text at the body size (head:62); the border color and width are inline */
+    .ts-sheet .box { display: block; box-sizing: border-box; font-size: 22px; line-height: 1.5; color: var(--ink); }
+    .ts-sheet .box .box-text { margin: 0; }
+    /* shape: inline SVG on the tokens; a flow-layout shape is as wide as its slot */
+    .ts-sheet svg.shape { display: block; overflow: visible; max-width: 100%; }
+    /* rule: the sheet hairline as a block (DECK-GRAMMAR.md:15) */
+    .ts-sheet .rule { display: block; flex: 0 0 auto; }
+    /* text: the body step unless typography says otherwise */
+    .ts-sheet p.text { font-size: 22px; line-height: 1.5; color: var(--ink); }
+    /* icon: one glyph at its stated size; .ic keeps the sprite fill */
+    .ts-sheet svg.icon-block { display: block; vertical-align: baseline; }·
+    /* ---- the canvas (gslides-parity SPEC-2 section 1, 1.4): every object in its .free wrapper ---- */
+    /* an object's box is its wrapper: the block's own flow margins (a paragraph's margin-top, an
+       imported residual margin) do not move it inside the box, whatever the inline style says */
+    .ts-sheet .free > *, .ts-sheet .free > .link > * { margin: 0 !important; }
+    /* a rotated or flipped object turns about its centre; .ts-measure on the sheet root drops the
+       transform for the exporter's measurement pass (1.5) */
+    .ts-sheet .free[data-rotate], .ts-sheet .free[data-flip] { transform-origin: center; }
+    .ts-sheet.ts-measure .free[data-rotate], .ts-sheet.ts-measure .free[data-flip], .ts-measure .free[data-rotate], .ts-measure .free[data-flip] { transform: none !important; }
+    /* the picture object (2.6.4): a frame at the object's box, the image covering it with the twins */
+    .ts-sheet .picture { position: relative; display: block; box-sizing: border-box; overflow: hidden; }
+    .ts-sheet .free > .picture, .ts-sheet .free > .link > .picture { width: 100%; height: 100%; }
+    .ts-sheet .picture > img.picture-img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+    .ts-sheet .picture > .ts-material-live { position: absolute; inset: 0; }
+    /* the dither overlay (gslides-parity SPEC-3 10.3): absolute inside the picture's box, drawn at the
+       screen size and scaled by CSS with pixelated cells so a 2x device shows exact cells; hidden until
+       the runtime draws it, so a toggle or a state change moves nothing (9.2) */
+    .ts-sheet .picture > canvas.picture-dither, .ts-sheet .shot-crop > canvas.picture-dither { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; image-rendering: pixelated; pointer-events: none; }
+    .ts-sheet canvas.picture-dither[hidden] { display: none; }
+    /* the sandboxed frame of an html block (SPEC-3 8.4): the host is the block's box, the frame fills it */
+    .ts-sheet .ts-x-host { position: relative; display: block; overflow: hidden; }
+    .ts-sheet .free > .ts-x-host, .ts-sheet .free > .link > .ts-x-host { width: 100%; height: 100%; }
+    .ts-sheet .ts-x-host > iframe.ts-x-frame { display: block; width: 100%; height: 100%; border: 0; background: transparent; }
+    /* the two paper chips inside a covering picture object's wrapper paint over the photograph and
+       nothing else (0.75, 0.98); the slot form's inset -57px is relative to .slide */
+    .ts-sheet .free > .ts-chips { inset: 0; z-index: 1; }
+    /* a material object and a picture object over a material take the object's box, not 16:9 (0.105) */
+    .ts-sheet .free > .material-fig, .ts-sheet .free > .material { width: 100%; height: 100%; aspect-ratio: auto; }
+    .ts-sheet .free > .material-fig { grid-template-rows: 1fr auto; }
+    .ts-sheet .free > .material-fig > .material { aspect-ratio: auto; height: 100%; min-height: 0; }
+    /* the plate scoped declarations of the picture kinds repeated on a converted plate's children
+       (block-css.ts .opener-plate and .mood-plate above), so a plate child renders the same as an
+       object: the members keep the plate group tag the conversion wrote (schema/canvas.ts CANVAS_GROUP);
+       the credit's 15 px titanium and the mood title's 44 px are the block's own look on any canvas */
+    .ts-sheet .free[data-group=\"plate\"] > .big { color: var(--ink); }
+    .ts-sheet .free[data-group=\"plate\"] > p { max-width: 56ch; color: var(--ink); }
+    .ts-sheet .free > .credit { font-size: 15px; line-height: 1.45; letter-spacing: 0.01em; color: var(--titanium); }
+    .ts-sheet .free > .big.title { font-size: 44px; line-height: 1.08; }
+    .ts-sheet .free > svg[data-type=\"mark\"] { display: block; fill: currentColor; }
+    /* the slide background colour layer (2.6.1): under .in at the sheet box */
+    .ts-sheet .slide-bg { position: absolute; inset: -57px; pointer-events: none; }
+    /* a positioned text box with an alignment or a padding fills its box (2.2.18, 2.2.19) */
+    .ts-sheet .free > p.text, .ts-sheet .free > .link > p.text { box-sizing: border-box; }
+    /* a shape with text: the svg and the .shape-text layer at the preset's text rectangle (2.2.17) */
+    .ts-sheet .shape-block { position: relative; display: block; }
+    .ts-sheet .free > .shape-block, .ts-sheet .free > .link > .shape-block { width: 100%; height: 100%; }
+    .ts-sheet .shape-block > svg.shape { display: block; width: 100%; height: 100%; }
+    .ts-sheet .shape-text { position: absolute; box-sizing: border-box; font-size: 22px; line-height: 1.5; color: var(--ink); overflow-wrap: anywhere; }
+    .ts-sheet .shape-text .para { margin: 0; }
+    /* word art (2.2.16): the outline behind the fill */
+    .ts-sheet p.text.word-art { paint-order: stroke fill; }
+    /* the picture tools on a shot (2.5): the clipping frame at the picture's aspect */
+    .ts-sheet .shot-crop { position: relative; display: block; width: 100%; overflow: hidden; box-sizing: border-box; background: var(--plate); }
+    .ts-sheet .shot-crop > img.shot { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: cover; border: 0; }
+    /* the chart block (2.8.1): the diagram grammar's sizes */
+    .ts-sheet svg.chart { display: block; overflow: visible; }
+    .ts-sheet .free > svg.chart, .ts-sheet .free > .link > svg.chart { width: 100%; height: 100%; }
+    .ts-sheet svg.chart text { font-family: var(--text); font-size: 18px; fill: var(--ink-2); }
+    .ts-sheet svg.chart .title { font-family: var(--display); font-size: 20px; font-weight: 500; letter-spacing: -0.01em; fill: var(--ink); }
+    .ts-sheet svg.chart .legend text { font-size: 15px; }
+    .ts-sheet svg.chart .value { font-size: 15px; fill: var(--ink); }
+    .ts-sheet svg.chart .ink { stroke: var(--ink); }
+    .ts-sheet svg.chart .hair { stroke: var(--hair-soft); }
+    /* Google's bulleted and numbered list (2.2.12): the glyph or numeral in the 36 px key position,
+       the item indented 36 px per level below the first */
+    .ts-sheet .plain.marked > .item { display: grid; grid-template-columns: 36px minmax(0, 1fr); padding: 12px 0; border-bottom: 1px solid var(--hair-soft); }
+    .ts-sheet .plain.marked > .item:last-child { border-bottom-color: var(--hair); }
+    .ts-sheet .plain.marked > .item > span { display: block; padding: 0; border-bottom: 0; }
+    .ts-sheet .plain.marked > .item > .num { font-variant-numeric: tabular-nums; }
+    .ts-sheet .plain.marked > .item > .glyph { font-size: 0.8em; line-height: 1.75; }
+    /* the table's grid form (2.7.1, 2.7.2): merged cells and per cell rules */
+    .ts-sheet .table.grid { display: grid; grid-template-columns: var(--table-cols); }
+    .ts-sheet .table.grid > .tr { display: contents; }
+    /* a cell fills its track so its rule sits on the row's bottom edge and its fill covers the row, as
+       in Google's table and the a:tbl the export writes; the vertical alignment moves to the content */
+    .ts-sheet .table.grid .td { align-self: stretch; align-content: var(--table-valign, start); }
+    .ts-sheet .table.grid > .tr.header .td { font-family: var(--display); font-weight: 500; letter-spacing: -0.01em; }·
+    /* ---- the render surface: one visible slide, the sheet filling the viewport in present mode ---- */
+    .ts-render-surface { margin: 0; background: var(--paper); overflow: hidden; }
+    .ts-render-surface .ts-sheet.ts-present { position: absolute; left: -1px; top: -1px; border-color: transparent; box-shadow: none; }
+    </style></head><body data-tsd-source=\"/src/routes/__root.tsx:153:7\"><!--$--><!--$--><div class=\"pt-viewer is-editor ts-skeleton\" data-sb=\"thumbs\" data-density=\"thumbs\" data-skeleton=\"editor\" aria-busy=\"true\" aria-label=\"Loading the editor\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:32:5\"><header class=\"ts-title-row ts-skeleton-row\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:40:7\"><span class=\"ts-skeleton-mark\" aria-hidden=\"true\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:41:9\"></span><span class=\"ts-skeleton-title\" aria-hidden=\"true\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:42:9\"></span></header><nav class=\"ts-menubar ts-skeleton-row\" aria-hidden=\"true\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:44:7\"><div class=\"ts-menubar-titles\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:45:9\"><span class=\"ts-skeleton-menu\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:47:13\">File</span><span class=\"ts-skeleton-menu\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:47:13\">Edit</span><span class=\"ts-skeleton-menu\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:47:13\">View</span><span class=\"ts-skeleton-menu\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:47:13\">Insert</span><span class=\"ts-skeleton-menu\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:47:13\">Format</span><span class=\"ts-skeleton-menu\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:47:13\">Slide</span><span class=\"ts-skeleton-menu\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:47:13\">Arrange</span><span class=\"ts-skeleton-menu\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:47:13\">Tools</span><span class=\"ts-skeleton-menu\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:47:13\">Extensions</span><span class=\"ts-skeleton-menu\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:47:13\">Help</span></div></nav><div class=\"ts-toolbar ts-skeleton-row\" aria-hidden=\"true\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:53:7\"></div><aside class=\"pt-sb ts-skeleton-sb\" aria-hidden=\"true\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:54:7\"><div class=\"ts-skeleton-film\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:55:9\"><div class=\"ts-skeleton-card\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:57:13\"><span class=\"ts-skeleton-n\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:58:15\">1</span><span class=\"ts-skeleton-frame\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:59:15\"></span></div><div class=\"ts-skeleton-card\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:57:13\"><span class=\"ts-skeleton-n\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:58:15\">2</span><span class=\"ts-skeleton-frame\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:59:15\"></span></div><div class=\"ts-skeleton-card\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:57:13\"><span class=\"ts-skeleton-n\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:58:15\">3</span><span class=\"ts-skeleton-frame\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:59:15\"></span></div></div></aside><section class=\"pt-main ts-skeleton-main\" aria-hidden=\"true\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:64:7\"><div class=\"pt-stagewrap ts-skeleton-stagewrap\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:65:9\"></div><div class=\"ts-notes-slot\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:66:9\"></div></section><footer class=\"ts-bottombar ts-skeleton-row\" aria-hidden=\"true\" data-tsd-source=\"/src/components/EditorSkeleton.tsx:68:7\"></footer></div><!--/$--><script nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\">(function(a,f){let l;try{l=JSON.parse(sessionStorage.getItem(a)||\"{}\")}catch{return}const n=l?.[f||history.state?.__TSR_key];let c=!1;for(const t in n){const e=n[t],o=e?.scrollX,s=e?.scrollY;if(Number.isFinite(o)&&Number.isFinite(s)){if(t===\"window\")scrollTo(o,s),c=!0;else if(t)try{const r=document.querySelector(t);r&&(r.scrollLeft=o,r.scrollTop=s)}catch{}}}if(c)return;const i=location.hash.slice(1);if(i){const t=history.state?.__hashScrollIntoViewOptions??!0;if(t){const e=document.getElementById(i);e&&e.scrollIntoView(t)}return}scrollTo(0,0)})(\"tsr-scroll-restoration-v1_3\");document.currentScript.remove()</script><!--/$--><script nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\" class=\"$tsr\" id=\"$tsr-stream-barrier\">(self.$R=self.$R||{})[\"tsr\"]=[];self.$_TSR={h(){this.hydrated=!0,this.c()},e(){this.streamEnded=!0,this.c()},c(){this.hydrated&&this.streamEnded&&(delete self.$_TSR,delete self.$R.tsr)},p(e){this.initialized?e():this.buffer.push(e)},buffer:[]};$_TSR.router=($R=>$R[0]={manifest:$R[1]={routes:$R[2]={__root__:$R[3]={preloads:$R[4]=[\"/@id/virtual:tanstack-start-dev-client-entry\"],scripts:$R[5]=[$R[6]={attrs:$R[7]={type:\"module\",async:!0,src:\"/@id/virtual:tanstack-start-dev-client-entry\"}}],css:$R[8]=[$R[9]={href:\"/@tanstack-start/styles.css?routes=__root__%2C%2Fnew\",\"data-tanstack-router-dev-styles\":!0}]}}},matches:$R[10]=[$R[11]={i:\"__root__ \",u:1789374101289,s:\"success\",ssr:!0},$R[12]={i:\" new new\",u:1789374101289,s:\"pending\",ssr:!1}]})($R[\"tsr\"]);$_TSR.e();document.currentScript.remove()</script><script type=\"module\" async=\"\" src=\"/@id/virtual:tanstack-start-dev-client-entry\" nonce=\"aW61Q+PRT9tNi7wTU8YzMw==\"></script></body></html>"
+
+      94 | }) => {
+      95 |   const html = await (await page.request.get('/new')).text();
+    > 96 |   expect(html).toMatch(/<meta name="robots" content="noindex"\s*\/?>/);
+         |                ^
+      97 |   const seen = draftDecks();
+      98 |   await page.goto('/new');
+      99 |   await expect(page).toHaveTitle('Untitled presentation, Turboslide');
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/landing.spec.ts:96:16
+
+    Error Context: .turboslide/playwright/landing--new-is-noindex-an-c5c80-writes-nothing-to-the-store/error-context.md
+
+    Error Context: .turboslide/playwright/landing--new-is-noindex-an-c5c80-writes-nothing-to-the-store/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/landing--new-is-noindex-an-c5c80-writes-nothing-to-the-store/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/landing--new-is-noindex-an-c5c80-writes-nothing-to-the-store/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) apps/studio/e2e/objects.spec.ts:153:1 › a text box drawn on the Title slide converts it; move, rotate, flip, group, ungroup, regroup, delete, each one write undone back to the Title slide 
+
+    Error: expect(locator).toHaveText(expected) failed
+
+    Locator: locator('.ts-overlay .ts-readout')
+    Expected: "44°"
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+      - Expect "toHaveText" with timeout 5000ms
+      - waiting for locator('.ts-overlay .ts-readout')
+
+
+      251 |   await expectOneWrite(page, log);
+      252 |   expect(objects(await slideGet(page, SLIDE)).find((b) => b.id === textId)!.pos!.rotate).toBe(44);
+    > 253 |   await expect(page.locator('.ts-overlay .ts-readout')).toHaveText('44°');
+          |                                                         ^
+      254 |
+      255 |   /* the flip through Arrange > Rotate > Flip horizontally */
+      256 |   await select(textId);
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/objects.spec.ts:253:57
+
+    Error Context: .turboslide/playwright/objects-a-text-box-drawn-o-49e0d-one-back-to-the-Title-slide/error-context.md
+
+    Error Context: .turboslide/playwright/objects-a-text-box-drawn-o-49e0d-one-back-to-the-Title-slide/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/objects-a-text-box-drawn-o-49e0d-one-back-to-the-Title-slide/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/objects-a-text-box-drawn-o-49e0d-one-back-to-the-Title-slide/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  13) apps/studio/e2e/present.spec.ts:271:1 › Presenter view lists the unskipped slides with their notes and syncs with the slideshow window 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator: locator('.ts-presenter')
+    Expected: "28"
+    Error: strict mode violation: locator('.ts-presenter') resolved to 2 elements:
+        1) <div aria-busy="true" data-skeleton="presenter" class="ts-presenter ts-skeleton" aria-label="Loading the presenter view" data-tsd-source="/src/components/PresenterSkeleton.tsx:11:5">…</div> aka getByLabel('Loading the presenter view').first()
+        2) <div aria-busy="true" data-skeleton="presenter" class="ts-presenter ts-skeleton" aria-label="Loading the presenter view" data-tsd-source="/src/components/PresenterSkeleton.tsx:11:5">…</div> aka getByLabel('Loading the presenter view').nth(1)
+
+    Call log:
+      - Expect "toHaveAttribute" with timeout 5000ms
+      - waiting for locator('.ts-presenter')
+        5 × locator resolved to <div aria-busy="true" data-skeleton="presenter" class="ts-presenter ts-skeleton" aria-label="Loading the presenter view" data-tsd-source="/src/components/PresenterSkeleton.tsx:11:5">…</div>
+          - unexpected value "null"
+
+
+      281 |   const root = console.locator('.ts-presenter');
+      282 |   await expect(root).toBeVisible();
+    > 283 |   await expect(root).toHaveAttribute('data-total', String(PLAY.length));
+          |                      ^
+      284 |   const counter = console.locator('[data-control="presenter.counter"]');
+      285 |   await expect(counter.locator('b')).toHaveText(`1 of ${PLAY.length}`);
+      286 |   await expect(console.locator('[data-control="presenter.connection"]')).toHaveAttribute(
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/present.spec.ts:283:22
+
+    Error Context: .turboslide/playwright/present-Presenter-view-lis-451a1-s-with-the-slideshow-window/error-context.md
+
+    Error Context: .turboslide/playwright/present-Presenter-view-lis-451a1-s-with-the-slideshow-window/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/present-Presenter-view-lis-451a1-s-with-the-slideshow-window/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/present-Presenter-view-lis-451a1-s-with-the-slideshow-window/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  14) apps/studio/e2e/tables.spec.ts:128:1 › Insert > Table opens the hover grid, the caption follows the pointer and a click inserts 4 by 3 
+
+    Error: expect(locator).toHaveAttribute(expected) failed
+
+    Locator: locator('.pt-viewer')
+    Expected: "blank-1"
+    Error: strict mode violation: locator('.pt-viewer') resolved to 2 elements:
+        1) <div data-index="1" data-total="2" data-dir="next" data-settled="" data-sb="thumbs" data-mode="slide" data-spellcheck="" data-active="blank-1" data-density="thumbs" data-edit-mode="editing" class="pt-viewer is-editor" data-shell="edit:untitled-20260914-puz5" data-tsd-source="/Users/kevinliu/repos/Turboslide/packages/chrome/src/ViewerShell.tsx:669:11">…</div> aka locator('div').nth(2)
+        2) <div data-sb="thumbs" aria-busy="true" data-density="thumbs" data-skeleton="editor" aria-label="Loading the editor" class="pt-viewer is-editor ts-skeleton" data-tsd-source="/src/components/EditorSkeleton.tsx:32:5">…</div> aka getByLabel('Loading the editor')
+
+    Call log:
+      - Expect "toHaveAttribute" with timeout 30000ms
+      - waiting for locator('.pt-viewer')
+
+
+      88 |     baseRevision: await revision(page),
+      89 |   });
+    > 90 |   await expect(page.locator('.pt-viewer')).toHaveAttribute('data-active', created.slide.id, {
+         |                                            ^
+      91 |     timeout: 30_000,
+      92 |   });
+      93 |   return created.slide.id;
+        at blankSlide (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/tables.spec.ts:90:44)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/tables.spec.ts:132:19
+
+    Error Context: .turboslide/playwright/tables-Insert-Table-opens--b45d7--and-a-click-inserts-4-by-3/error-context.md
+
+    Error Context: .turboslide/playwright/tables-Insert-Table-opens--b45d7--and-a-click-inserts-4-by-3/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/tables-Insert-Table-opens--b45d7--and-a-click-inserts-4-by-3/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/tables-Insert-Table-opens--b45d7--and-a-click-inserts-4-by-3/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  15) apps/studio/e2e/ten-tasks.spec.ts:534:1 › task 10: send a link or a PDF ──────────────────────
+
+    Test timeout of 60000ms exceeded.
+
+    Error: locator.click: Test timeout of 60000ms exceeded.
+    Call log:
+      - waiting for locator('[data-control="dialog.share.view.copy"]')
+
+
+      52 |     click: async (target: Locator, options?: Parameters<Locator['click']>[0]) => {
+      53 |       c.clicks += 1;
+    > 54 |       await target.click(options);
+         |                    ^
+      55 |     },
+      56 |     clickAt: async (x: number, y: number, options?: { clickCount?: number }) => {
+      57 |       c.clicks += options?.clickCount ?? 1;
+        at Object.click (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/ten-tasks.spec.ts:54:20)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/ten-tasks.spec.ts:541:11
+
+    Error Context: .turboslide/playwright/ten-tasks-task-10-send-a-link-or-a-PDF/error-context.md
+
+    Error Context: .turboslide/playwright/ten-tasks-task-10-send-a-link-or-a-PDF/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/ten-tasks-task-10-send-a-link-or-a-PDF/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/ten-tasks-task-10-send-a-link-or-a-PDF/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  16) apps/studio/e2e/ten-tasks.spec.ts:574:1 › the current slide follows a removal: Delete slide, and Undo after New slide and Duplicate slide 
+
+    Test timeout of 120000ms exceeded.
+
+    Error: page.waitForFunction: Test timeout of 120000ms exceeded.
+
+      180 | /** The editor's pending writes have all reached the server. */
+      181 | async function settled(page: Page): Promise<void> {
+    > 182 |   await page.waitForFunction(() => {
+          |              ^
+      183 |     const state = window.turboslide!.studio.describe().state as {
+      184 |       revision?: number;
+      185 |       serverRevision?: number;
+        at settled (/Users/kevinliu/repos/Turboslide/apps/studio/e2e/ten-tasks.spec.ts:182:14)
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/ten-tasks.spec.ts:600:9
+
+    Error Context: .turboslide/playwright/ten-tasks-the-current-slid-73779-w-slide-and-Duplicate-slide/error-context.md
+
+    Error Context: .turboslide/playwright/ten-tasks-the-current-slid-73779-w-slide-and-Duplicate-slide/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/ten-tasks-the-current-slid-73779-w-slide-and-Duplicate-slide/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/ten-tasks-the-current-slid-73779-w-slide-and-Duplicate-slide/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  17) apps/studio/e2e/text-editing.spec.ts:144:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › a click places the caret, a pause writes one burst, Esc keeps the text and one Cmd Z removes the burst 
+
+    Error: expect(received).toBe(expected) // Object.is equality
+
+    Expected: "text.replace"
+    Received: "text.splice"
+
+      175 |     const afterFirst = await versions(page);
+      176 |     const burst = afterFirst[afterFirst.length - 1]?.mutations[0];
+    > 177 |     expect(burst?.op).toBe('text.replace');
+          |                       ^
+      178 |     expect(burst?.text).toBe(' now');
+      179 |     /* the session survives the write: still editable, still focused */
+      180 |     await expect(heading).toHaveAttribute('contenteditable', 'true');
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/text-editing.spec.ts:177:23
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--02b72-one-Cmd-Z-removes-the-burst/error-context.md
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--02b72-one-Cmd-Z-removes-the-burst/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/text-editing-text-editing--02b72-one-Cmd-Z-removes-the-burst/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/text-editing-text-editing--02b72-one-Cmd-Z-removes-the-burst/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  18) apps/studio/e2e/text-editing.spec.ts:202:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Enter breaks a paragraph in a multiline pointer and commits in a heading; Shift Enter is the same break 
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 2
+    Received:   2
+
+    Call Log:
+    - Timeout 30000ms exceeded while waiting on the predicate
+
+      234 |     await page.keyboard.press('Enter');
+      235 |     await expect(heading).not.toHaveAttribute('contenteditable', 'true', { timeout: 30_000 });
+    > 236 |     await expect.poll(() => revision(page), { timeout: 30_000 }).toBeGreaterThan(beforeHeading);
+          |                                                                  ^
+      237 |     await settled(page);
+      238 |     await expect
+      239 |       .poll(() => runText(page, 'content-rule', 'h', 'text'), { timeout: 30_000 })
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/text-editing.spec.ts:236:66
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--8eb29-ift-Enter-is-the-same-break/error-context.md
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--8eb29-ift-Enter-is-the-same-break/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/text-editing-text-editing--8eb29-ift-Enter-is-the-same-break/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/text-editing-text-editing--8eb29-ift-Enter-is-the-same-break/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  19) apps/studio/e2e/text-editing.spec.ts:326:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Cmd C and Cmd V paste a copy of the block through the envelope, Cmd D duplicates and Delete removes 
+
+    Error: expect(received).toEqual(expected) // deep equality
+
+    - Expected  - 1
+    + Received  + 1
+
+      Array [
+    +   "h-2-2",
+        "h",
+        "h-2",
+    -   "h-2-2",
+        "p",
+        "list",
+      ]
+
+    Call Log:
+    - Timeout 15000ms exceeded while waiting on the predicate
+
+      357 |     await settled(page);
+      358 |     await page.keyboard.press('ControlOrMeta+d');
+    > 359 |     await expect.poll(() => ids(), { timeout: 15_000 }).toEqual(['h', 'h-2', 'h-2-2', 'p', 'list']);
+          |                                                         ^
+      360 |     await expect
+      361 |       .poll(() => page.evaluate(() => window.turboslide!.studio.describe().state.blockId))
+      362 |       .toBe('h-2-2');
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/text-editing.spec.ts:359:57
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--7c1b0-plicates-and-Delete-removes/error-context.md
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--7c1b0-plicates-and-Delete-removes/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/text-editing-text-editing--7c1b0-plicates-and-Delete-removes/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/text-editing-text-editing--7c1b0-plicates-and-Delete-removes/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  20) apps/studio/e2e/text-editing.spec.ts:369:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › no bare letter changes the view with a block selected, and the arrows nudge the block by a pixel on a grammar slide (SPEC-2 0.87) 
+
+    Error: expect(received).toBeGreaterThan(expected)
+
+    Expected: > 4
+    Received:   4
+
+    Call Log:
+    - Timeout 30000ms exceeded while waiting on the predicate
+
+      411 |        down and 1 px right, the first press converting the slide to the canvas in the same write;
+      412 |        round one held the arrows inert on a grammar slide */
+    > 413 |     await expect.poll(() => revision(page), { timeout: 30_000 }).toBeGreaterThan(startRevision);
+          |                                                                  ^
+      414 |     await settled(page);
+      415 |     const slide = (await page.evaluate(() =>
+      416 |       window.turboslide!.studio.invoke('slide.get', { slideId: 'content-rule' }),
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/text-editing.spec.ts:413:66
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--9c362--grammar-slide-SPEC-2-0-87-/error-context.md
+
+    Error Context: .turboslide/playwright/text-editing-text-editing--9c362--grammar-slide-SPEC-2-0-87-/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/text-editing-text-editing--9c362--grammar-slide-SPEC-2-0-87-/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/text-editing-text-editing--9c362--grammar-slide-SPEC-2-0-87-/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  21) apps/studio/e2e/text-styles.spec.ts:273:1 › the special characters insert lands at the caret as one text.insert, and paint format carries italic 
+
+    Error: expect(received).toMatch(expected)
+
+    Expected pattern: /^\[.*\]\{i\}$/
+    Received string:  "[The→]{i u}[ copy ]{i}[test]{i s sup}"
+
+      313 |   await expect.poll(() => logLength(page), { timeout: 10_000 }).toBe(log + 1);
+      314 |   await settled(page);
+    > 315 |   expect(await text(page, 'h')).toMatch(/^\[.*\]\{i\}$/);
+          |                                 ^
+      316 |   await page.keyboard.press('Escape');
+      317 |   await settled(page);
+      318 |   /* the heading as an object with italic text; Cmd Option C then Cmd Option V on the paragraph */
+        at /Users/kevinliu/repos/Turboslide/apps/studio/e2e/text-styles.spec.ts:315:33
+
+    Error Context: .turboslide/playwright/text-styles-the-special-ch-0f92c-paint-format-carries-italic/error-context.md
+
+    Error Context: .turboslide/playwright/text-styles-the-special-ch-0f92c-paint-format-carries-italic/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    .turboslide/playwright/text-styles-the-special-ch-0f92c-paint-format-carries-italic/trace.zip
+    Usage:
+
+        pnpm exec playwright show-trace .turboslide/playwright/text-styles-the-special-ch-0f92c-paint-format-carries-italic/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  21 failed
+    apps/studio/e2e/canvas.spec.ts:265:1 › the canvas walk: one slide of every kind, one write per gesture, the conversion in the first write, one undo restores the kind 
+    apps/studio/e2e/charts.spec.ts:118:1 › Insert > Chart > Bar lands a chart with the placeholder data, centred at 960 by 540 
+    apps/studio/e2e/deck-transfer.spec.ts:186:1 › Import slides copies the assets the slides need, through slide.import 
+    apps/studio/e2e/export-batch.spec.ts:85:3 › the batched Perfect export over the http route (SPEC-2 8.1) › 9 batches of 3 and one merge produce a perfect file that export check accepts 
+    apps/studio/e2e/export-batch.spec.ts:177:3 › the batched Perfect export over the http route (SPEC-2 8.1) › a replaced twin makes a batch answer stale, and a missing job is 404 
+    apps/studio/e2e/filmstrip.spec.ts:135:3 › the filmstrip (SPEC 4.1, 4.2) › cards, the current ring, multi-select, the right-click order, skip and unskip 
+    apps/studio/e2e/gslides-actions.spec.ts:99:3 › the fourteen actions of the parity round through the window API › document actions run through the editor and reads carry the new facts 
+    apps/studio/e2e/gslides-actions.spec.ts:205:3 › the fourteen actions of the parity round through the window API › collection actions and slide.import run on the server 
+    apps/studio/e2e/gslides-actions.spec.ts:321:3 › the thirty six actions of round two through the window API › every canvas, text, table, chart, shape, line and diagram action resolves in the editor 
+    apps/studio/e2e/gslides-actions.spec.ts:704:3 › the menus over the stage selection (VERIFICATION-2 findings 5 and 6) › Arrange reads two selected objects and Change shape draws its plate in the right-click menu 
+    apps/studio/e2e/landing.spec.ts:92:1 › /new is noindex and a visit that only looks writes nothing to the store 
+    apps/studio/e2e/objects.spec.ts:153:1 › a text box drawn on the Title slide converts it; move, rotate, flip, group, ungroup, regroup, delete, each one write undone back to the Title slide 
+    apps/studio/e2e/present.spec.ts:271:1 › Presenter view lists the unskipped slides with their notes and syncs with the slideshow window 
+    apps/studio/e2e/tables.spec.ts:128:1 › Insert > Table opens the hover grid, the caption follows the pointer and a click inserts 4 by 3 
+    apps/studio/e2e/ten-tasks.spec.ts:534:1 › task 10: send a link or a PDF ────────────────────────
+    apps/studio/e2e/ten-tasks.spec.ts:574:1 › the current slide follows a removal: Delete slide, and Undo after New slide and Duplicate slide 
+    apps/studio/e2e/text-editing.spec.ts:144:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › a click places the caret, a pause writes one burst, Esc keeps the text and one Cmd Z removes the burst 
+    apps/studio/e2e/text-editing.spec.ts:202:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Enter breaks a paragraph in a multiline pointer and commits in a heading; Shift Enter is the same break 
+    apps/studio/e2e/text-editing.spec.ts:326:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › Cmd C and Cmd V paste a copy of the block through the envelope, Cmd D duplicates and Delete removes 
+    apps/studio/e2e/text-editing.spec.ts:369:3 › text editing on the canvas (SPEC 10.2, 7.2.15, 7.4) › no bare letter changes the view with a block selected, and the arrows nudge the block by a pixel on a grammar slide (SPEC-2 0.87) 
+    apps/studio/e2e/text-styles.spec.ts:273:1 › the special characters insert lands at the caret as one text.insert, and paint format carries italic 
+  11 did not run
+  34 passed (13.7m)
+check 21/28: FAIL exit 1 after 820.4 s
+check: dev server stopped
+check: stopped after a failure (849.7 s)

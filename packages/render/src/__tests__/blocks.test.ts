@@ -17,12 +17,16 @@ function context(theme: Theme, blockAttrs = true): BlockContext {
     image: (id) => {
       const asset = deck.assets[id];
       if (!asset) return undefined;
-      if ('neutral' in asset.twins) return { src: asset.twins.neutral, alt: asset.alt };
+      // the stored size travels with the twins so every emitted image carries width and height
+      // (gslides-parity SPEC-3 9.2 E12), as the deck resolver of slide.ts passes it
+      if ('neutral' in asset.twins)
+        return { src: asset.twins.neutral, alt: asset.alt, size: asset.size };
       return {
         src: theme === 'dark' ? asset.twins.dark : asset.twins.light,
         light: asset.twins.light,
         dark: asset.twins.dark,
         alt: asset.alt,
+        size: asset.size,
       };
     },
     assetUrl: (path) => path,

@@ -7,6 +7,13 @@
 // attached) at initialize, so the tool list a client reads is the one it can call. This module is
 // framework free: it takes a web-standard Request and returns a Response, so the studio route is
 // an adapter and the tests drive it through the SDK client with a fetch that calls handle().
+//
+// Round three binds a session to the API key record the request carries (gslides-parity SPEC-3
+// 3.10, 7.7, 0.23): the host's `resolveKey` answers the key's record (B3's resolver over the
+// better-auth API key plugin) and the session remembers its `tokenId`, so `account.tokens.revoke`
+// closes the key's sessions (`closeByKey`) and a key opens at most 16 sessions at once (a 429 with
+// `Retry-After` beyond); the deployment's static bearer resolves to no record and keeps the round
+// one behaviour.
 import { randomUUID } from 'node:crypto';
 import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
@@ -22,7 +29,20 @@ export type McpHttpSession = {
   lastSeenAt: string;
   /** What the factory reported about the session: the deck, the author, the tool count. */
   facts: Record<string, unknown>;
+  /** The API key record the session is bound to (SPEC-3 3.10), when the request carried one. */
+  key?: KeyBinding;
 };
+
+/** The API key record a request resolved to: the key, its owner, its scopes and its name. */
+export type KeyBinding = {
+  tokenId: string;
+  ownerId: string;
+  scopes: readonly string[];
+  name: string;
+};
+
+/** How many sessions one key may hold open at once (SPEC-3 3.10, 8.3 R5 and R6). */
+export const SESSIONS_PER_KEY = 16;
 
 export type CreatedSession = {
   server: Server;
@@ -33,9 +53,22 @@ export type CreatedSession = {
 export type McpHttpOptions = {
   /**
    * Builds the server for a new session from the initialize request (its query names the deck and
-   * the author). A RangeError (an unknown deck) becomes a 404 JSON-RPC error; anything else a 500.
+   * the author; `key` is the record `resolveKey` answered). A RangeError (an unknown deck) becomes
+   * a 404 JSON-RPC error; anything else a 500.
    */
-  createServer: (request: Request, sessionId: string) => Promise<CreatedSession> | CreatedSession;
+  createServer: (
+    request: Request,
+    sessionId: string,
+    key: KeyBinding | null,
+  ) => Promise<CreatedSession> | CreatedSession;
+  /**
+   * Resolves the request's bearer to an API key record, or null for the static bearer and the
+   * localhost rule (SPEC-3 7.7). Runs after `authorize` admitted the request. A later request of a
+   * bound session whose key resolves to nothing (a revoked key) is refused with 401 and the
+   * session closed.
+   */
+  resolveKey?: (request: Request) => Promise<KeyBinding | null> | KeyBinding | null;
+  sessionsPerKey?: number;
   /** Refuses a request before it reaches the transport (the bearer token check); undefined lets it through. */
   authorize?: (request: Request) => Response | undefined | Promise<Response | undefined>;
   idleMs?: number;
@@ -50,6 +83,8 @@ export type McpHttpHandler = {
   sessions: () => McpHttpSession[];
   /** Closes one session, or every session when no id is given. */
   close: (sessionId?: string) => Promise<void>;
+  /** Closes every session bound to a key (account.tokens.revoke, SPEC-3 12); answers how many. */
+  closeByKey: (tokenId: string) => Promise<number>;
 };
 
 type Entry = {
@@ -104,11 +139,29 @@ export function createMcpHttpHandler(options: McpHttpOptions): McpHttpHandler {
     }
   };
 
-  const start = async (request: Request, body: unknown): Promise<Response> => {
+  const start = async (
+    request: Request,
+    body: unknown,
+    key: KeyBinding | null,
+  ): Promise<Response> => {
     const id = randomUUID();
+    if (key !== null) {
+      const open = [...entries.values()].filter(
+        (entry) => entry.session.key?.tokenId === key.tokenId,
+      ).length;
+      if (open >= (options.sessionsPerKey ?? SESSIONS_PER_KEY)) {
+        const response = rpcError(
+          429,
+          -32000,
+          `this key holds ${open} open MCP sessions; close one or wait for the idle timeout`,
+        );
+        response.headers.set('retry-after', '60');
+        return response;
+      }
+    }
     let created: CreatedSession;
     try {
-      created = await options.createServer(request, id);
+      created = await options.createServer(request, id, key);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       if (error instanceof RangeError) return rpcError(404, -32004, message);
@@ -126,7 +179,13 @@ export function createMcpHttpHandler(options: McpHttpOptions): McpHttpHandler {
       },
     });
     const entry: Entry = {
-      session: { id, createdAt: stamp(), lastSeenAt: stamp(), facts: created.facts ?? {} },
+      session: {
+        id,
+        createdAt: stamp(),
+        lastSeenAt: stamp(),
+        facts: created.facts ?? {},
+        ...(key !== null ? { key } : {}),
+      },
       transport,
       server: created.server,
     };
@@ -144,11 +203,24 @@ export function createMcpHttpHandler(options: McpHttpOptions): McpHttpHandler {
       const denied = await options.authorize?.(request);
       if (denied) return denied;
       await sweep();
+      const key = (await options.resolveKey?.(request)) ?? null;
       const sessionId = request.headers.get(SESSION_HEADER);
       if (sessionId) {
         const entry = entries.get(sessionId);
         if (!entry)
           return rpcError(404, -32001, `Unknown MCP session ${sessionId}; initialize again`);
+        if (
+          entry.session.key !== undefined &&
+          (key === null || key.tokenId !== entry.session.key.tokenId)
+        ) {
+          // the key was revoked or the request carries another one: the binding is the session's
+          await closeEntry(entry);
+          return rpcError(
+            401,
+            -32001,
+            'this MCP session was bound to a key that no longer resolves; initialize again',
+          );
+        }
         entry.session.lastSeenAt = stamp();
         return entry.transport.handleRequest(request);
       }
@@ -172,12 +244,13 @@ export function createMcpHttpHandler(options: McpHttpOptions): McpHttpHandler {
           `a request without an ${SESSION_HEADER} header must be initialize`,
         );
       }
-      return start(request, body);
+      return start(request, body, key);
     },
     sessions() {
       return [...entries.values()].map((entry) => ({
         ...entry.session,
         facts: { ...entry.session.facts },
+        ...(entry.session.key !== undefined ? { key: { ...entry.session.key } } : {}),
       }));
     },
     async close(sessionId) {
@@ -187,6 +260,15 @@ export function createMcpHttpHandler(options: McpHttpOptions): McpHttpHandler {
         return;
       }
       for (const entry of [...entries.values()]) await closeEntry(entry);
+    },
+    async closeByKey(tokenId) {
+      let closed = 0;
+      for (const entry of [...entries.values()]) {
+        if (entry.session.key?.tokenId !== tokenId) continue;
+        await closeEntry(entry);
+        closed += 1;
+      }
+      return closed;
     },
   };
   return handler;

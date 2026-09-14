@@ -6,6 +6,7 @@
 // dark one, and, where the continuous source is on disk (Asset.sourceFile or --source), re-runs
 // the recorded treatment and counts the cells that differ. A re-run with new parameters needs the
 // source and writes fresh 1-bit twins. The store write is the caller's.
+import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { rm } from 'node:fs/promises';
 import { isAbsolute, join, resolve } from 'node:path';
@@ -108,10 +109,24 @@ function stripWarnings(metrics: TwoToneMetrics): NonNullable<Asset['metrics']> {
   };
 }
 
+export type DitherOptions = {
+  deckDir: string;
+  /** The store's asset write (SPEC-3 8.5); the deck directory when absent. */
+  putAsset?: (relative: string, bytes: Uint8Array) => Promise<{ relative: string }>;
+  /** Removes a superseded twin everywhere the store holds it; the deck directory when absent. */
+  removeAsset?: (relative: string) => Promise<void>;
+  /** Digest named twins (`assets/<id>.<sha8>-light.png`), never overwritten. */
+  digestNames?: boolean;
+};
+
+function digestOf(bytes: Uint8Array): string {
+  return createHash('sha256').update(bytes).digest('hex').slice(0, 8);
+}
+
 /** Re-reads or re-runs one asset's twins. */
 export async function ditherAsset(
   request: DitherRequest,
-  options: { deckDir: string },
+  options: DitherOptions,
 ): Promise<DitherOutcome> {
   const { asset } = request;
   const recorded = asset.treatment?.kind === 'two-tone' ? asset.treatment : undefined;
@@ -137,14 +152,27 @@ export async function ditherAsset(
     const result = twoTone(rgba, treatmentParams(treatment), {
       ...(plate !== undefined ? { plate } : {}),
     });
-    const paths = twinPaths(asset.id);
+    const paths =
+      options.digestNames === true
+        ? {
+            light: `assets/${asset.id}.${digestOf(result.light.png)}-light.png`,
+            dark: `assets/${asset.id}.${digestOf(result.dark.png)}-dark.png`,
+          }
+        : twinPaths(asset.id);
+    const put = async (relative: string, bytes: Uint8Array): Promise<string> =>
+      options.putAsset !== undefined
+        ? (await options.putAsset(relative, bytes)).relative
+        : writeUnder(options.deckDir, relative, bytes);
     const written = [
-      await writeUnder(options.deckDir, paths.light, result.light.png),
-      await writeUnder(options.deckDir, paths.dark, result.dark.png),
+      await put(paths.light, result.light.png),
+      await put(paths.dark, result.dark.png),
     ];
     if (!('neutral' in asset.twins)) {
+      // the superseded twins go after the new ones are in place (the record commit is the caller's)
       for (const old of [asset.twins.light, asset.twins.dark]) {
-        if (old !== paths.light && old !== paths.dark && existsSync(join(options.deckDir, old)))
+        if (old === paths.light || old === paths.dark) continue;
+        if (options.removeAsset !== undefined) await options.removeAsset(old);
+        else if (existsSync(join(options.deckDir, old)))
           await rm(join(options.deckDir, old), { force: true });
       }
     }

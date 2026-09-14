@@ -15,8 +15,9 @@ import type { BlockOf, ShotAdjust, ShotFrame, ShotTrim } from '@turboslide/schem
 import { colorCss } from '@turboslide/schema/color';
 import { shapePath } from '@turboslide/schema/shapes';
 import { classes, el, px, style, voidEl } from '../html.ts';
-import { imageFor, raster, rootAttrs, twinAttrs } from './context.ts';
+import { imageFor, raster, rootAttrs, sizeAttrs, twinAttrs } from './context.ts';
 import type { BlockContext } from './context.ts';
+import { ditherRender } from './dither-attrs.ts';
 import { pictureRecipeAttr } from './material.ts';
 import { borderStyleDeclaration, boxShadowDeclaration } from './primitives.ts';
 
@@ -77,6 +78,11 @@ export function renderPicture(block: BlockOf<'picture'>, ctx: BlockContext): str
   const asset = ctx.asset?.(block.asset);
   const material =
     asset !== undefined && asset.source.kind === 'material' ? asset.source : undefined;
+  // the block level dither (gslides-parity SPEC-3 10.3): the root carries the field, its key and
+  // the state; in state variant the image is the materialized twin, in state live the continuous
+  // twin under the overlay canvas the runtime draws (a live render only, dither-attrs.ts)
+  const dither = ditherRender(block, block.asset, image, w, h, ctx);
+  const shown = dither?.image ?? image;
   const imgStyle = style(
     block.position !== undefined &&
       block.position !== 'center' &&
@@ -86,9 +92,10 @@ export function renderPicture(block: BlockOf<'picture'>, ctx: BlockContext): str
   );
   const img = voidEl('img', {
     class: 'picture-img',
-    src: image.src,
-    ...twinAttrs(image),
-    alt: image.alt,
+    src: shown.src,
+    ...twinAttrs(shown),
+    ...sizeAttrs(shown.size),
+    alt: shown.alt,
     style: imgStyle,
     ...(material !== undefined
       ? {
@@ -115,7 +122,8 @@ export function renderPicture(block: BlockOf<'picture'>, ctx: BlockContext): str
       style: frameStyle,
       'data-trim': trimAttr(block.trim),
       'data-mask': block.mask,
+      ...dither?.attrs,
     }),
-    img,
+    img + (dither?.canvas ?? ''),
   );
 }

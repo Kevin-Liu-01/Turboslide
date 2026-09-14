@@ -2,6 +2,7 @@
 // mutations of the findings that carry one as a single write and reports what remains. A fix the
 // reducer rejects on top of the earlier ones is skipped with its reason, not a failed write.
 import { formatFinding } from '@turboslide/lint/run';
+import { loadPurifier } from '@turboslide/render/blocks/html-escape';
 import { isRuleId } from '@turboslide/schema/rules';
 import type { RuleId } from '@turboslide/schema/rules';
 
@@ -22,6 +23,17 @@ export async function fix(ctx: CommandContext): Promise<number> {
     throw new UsageError(`unknown rule ${ruleFlag}`);
   const rule = ruleFlag as RuleId | undefined;
   const dryRun = flagBoolean(ctx.args, 'dry-run');
+  // html/sanitize (gslides-parity SPEC-3 8.4) cleans with the parser when it has loaded; a tree
+  // without DOMPurify and jsdom falls back to the pattern pass and the write repeats the check
+  if (rule === undefined || rule === 'html/sanitize') {
+    try {
+      await loadPurifier();
+    } catch (error) {
+      ctx.out.warn(
+        `fix: the HTML parser did not load (${error instanceof Error ? error.message : String(error)}); html/sanitize uses the pattern pass`,
+      );
+    }
+  }
   const result = await runAction(ctx, async () =>
     fixRun(storeDeps(ctx, store), writeContext(ctx), {
       slideIds: all ? 'all' : ids,

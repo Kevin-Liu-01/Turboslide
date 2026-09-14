@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "deckId": "gslides",
+  "revision": 6,
+  "updatedAt": "2026-09-14T00:15:02.835Z",
+  "threads": [
+    {
+      "id": "01m2em8qmhj2zety9spb2sd9ck",
+      "slideId": "background-dither",
+      "kind": "slide",
+      "open": true,
+      "updatedAt": "2026-09-14T00:14:59.397Z",
+      "count": 2
+    },
+    {
+      "id": "01m2em8s6p6mng6ehsnpf3r3xy",
+      "slideId": "table",
+      "kind": "cell",
+      "open": true,
+      "updatedAt": "2026-09-14T00:15:00.283Z",
+      "count": 1
+    },
+    {
+      "id": "01m2em8sza0xrv8qsfe2pgbr1a",
+      "slideId": "breaks",
+      "kind": "text",
+      "open": false,
+      "updatedAt": "2026-09-14T00:15:02.835Z",
+      "count": 2,
+      "assignee": {
+        "kind": "principal",
+        "principalId": "local:maya"
+      }
+    }
+  ]
+}

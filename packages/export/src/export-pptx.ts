@@ -23,6 +23,8 @@ import type { DeckDocument } from '@turboslide/schema/deck';
 import { slideOrder, unskippedSlideOrder } from '@turboslide/schema/deck';
 import type { ExportMode, ExportReport } from '@turboslide/schema/export';
 import { exportReportSchema, NATIVE_BLOCK_TYPES } from '@turboslide/schema/export';
+
+import { materializeForExport } from './dither-variants.ts';
 import type { Theme } from '@turboslide/schema/render';
 
 import { ENTRY_DATE } from './ooxml/zip.ts';
@@ -94,6 +96,12 @@ export type ExportPptxOptions = {
   verify?: ExportVerifyOptions;
   /** Write `scene-<theme>.json` beside the files for inspection. */
   writeScenes?: boolean;
+  /**
+   * Materialize the missing dither variants before the shoot (gslides-parity SPEC-3 10.4), on by
+   * default so every dithered picture is shot in state `variant`; false leaves the deck's files
+   * and records as they are and the residual names the pictures shot live.
+   */
+  materialize?: boolean;
   fontsCatalog?: FontsCatalog;
   onSlide?: (scene: Scene, ms: number) => void;
   onPage?: (scene: Scene, raster: PageRaster) => void;
@@ -114,6 +122,8 @@ export type ExportPptxResult = {
   omitted: string[];
   /** Tables rebuilt as ruled rows after the verify pass, as `<slideId>#<blockId>` per theme. */
   tableFallbacks: Record<string, string[]>;
+  /** The dither variant files this export wrote before the shoot (SPEC-3 10.4), relative to the deck. */
+  materialized: string[];
 };
 
 export const DEFAULT_MODE: ExportMode = 'flatten';
@@ -151,18 +161,29 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
   const themes = options.themes ?? ['light', 'dark'];
   const fontSet = options.fonts ?? DEFAULT_FONT_SET;
   const catalog = options.fontsCatalog ?? loadFontsCatalog();
-  const { deck } = options.document;
   await mkdir(options.outDir, { recursive: true });
+  // every dithered picture reads a variant file, never a live canvas (SPEC-3 10.4): the missing
+  // variants are written under the deck's assets/ and recorded on the document the shoot renders
+  const materialized =
+    options.materialize === false
+      ? { document: options.document, written: [] as string[] }
+      : await materializeForExport(options.document, options.deckDir, {
+          scale: 2,
+          ...(options.slideIds !== undefined ? { slideIds: options.slideIds } : {}),
+          ...(options.verify?.log !== undefined ? { log: options.verify.log } : {}),
+        });
+  const document = materialized.document;
+  const { deck } = document;
   const workDir = join(options.outDir, 'work');
   const nativeTypes =
     options.headings === 'raster'
       ? NATIVE_BLOCK_TYPES.filter((type) => type !== 'heading')
       : [...NATIVE_BLOCK_TYPES];
-  const { play, ids, omitted } = playList(options.document, options);
+  const { play, ids, omitted } = playList(document, options);
   if (ids.length === 0) throw new RangeError('exportPptx: every selected slide is skipped');
   const extracted = await extractScenes({
     deckDir: options.deckDir,
-    document: options.document,
+    document,
     themes,
     mode,
     slideIds: ids,
@@ -268,6 +289,11 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
     residual: [
       ...mergedBase.residual,
       ...(zipPath ? [`both: ${basename(zipPath)} holds the light and dark files`] : []),
+      ...(materialized.written.length > 0
+        ? [
+            `dither: ${materialized.written.length} variant file(s) written before the shoot; turboslide picture materialize records them on the deck (gslides-parity SPEC-3 10.4)`,
+          ]
+        : []),
     ],
   });
   const reportPath = join(options.outDir, 'export-report.json');
@@ -283,6 +309,7 @@ export async function exportPptx(options: ExportPptxOptions): Promise<ExportPptx
     scenes: extracted.scenes,
     omitted,
     tableFallbacks,
+    materialized: materialized.written,
   };
 }
 

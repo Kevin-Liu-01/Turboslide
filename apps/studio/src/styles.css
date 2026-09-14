@@ -142,3 +142,213 @@ body {
   color: var(--pt-titanium);
   font-variant-numeric: tabular-nums;
 }
+
+/* ---- the collaborator layer (gslides-parity SPEC-3 4.4, 9.3; research-3 11 sections 6 and 8).
+   The geometry hooks of the classes the chrome draws remote carets, flags, outlines, pointers, the
+   Following plate, the comment markers and the presence slot with: absolute layers and fixed boxes
+   so a person joining, a name of any length or a thread growing moves nothing, and motion by
+   transform and opacity only. The hues, the identity marks and the type are the chrome's
+   (packages/chrome, packages/identity). The two halo values are the one exception to the token
+   rule above: they never swap with the theme (11 6.10), so they are absolute. The numbers are
+   mirrored by @turboslide/render/collab and pinned by its test. ---- */
+:root {
+  --ts-halo-in: #070707;
+  --ts-halo-out: #ffffff;
+  --ts-flag-w: 120px;
+  --ts-flag-h: 18px;
+  --ts-following-w: 240px;
+  --ts-following-h: 24px;
+  --ts-marker: 20px;
+  --ts-count-min-w: 20px;
+  --ts-presence-tracks: 24px 4px 24px 4px 24px 4px 24px 4px 32px 8px 1px 7px 24px;
+  --ts-pointer-ms: 80ms;
+}
+/* the name flag of a caret or a pointer (11 6.5): a fixed 120 by 18 box, the name ellipsized */
+.ts-flag {
+  position: absolute;
+  box-sizing: border-box;
+  width: var(--ts-flag-w);
+  height: var(--ts-flag-h);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+/* the "being edited by" outline (11 6.7): a box at the block's edge, no layout of its own */
+.ts-remote-outline {
+  position: absolute;
+  box-sizing: border-box;
+  pointer-events: none;
+}
+/* a remote pointer (11 6.6): a 12 by 16 box moved by transform over 80 ms, linear */
+.ts-remote-pointer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 12px;
+  height: 16px;
+  pointer-events: none;
+  will-change: transform;
+  transition: transform var(--ts-pointer-ms) linear;
+}
+/* the Following plate (11 6.3, 05 rule 4): absolute over the stage at the top centre, 240 by 24 */
+.ts-following {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  width: var(--ts-following-w);
+  height: var(--ts-following-h);
+  margin-left: calc(var(--ts-following-w) / -2);
+  box-sizing: border-box;
+}
+/* a comment marker and its count chip (11 6.8): a 20 px plate outside the anchored box; the chip
+   at least 20 px wide in tabular figures, drawn from count 1 */
+.ts-comment-marker {
+  position: absolute;
+  box-sizing: border-box;
+  width: var(--ts-marker);
+  height: var(--ts-marker);
+}
+.ts-comment-count {
+  display: inline-block;
+  box-sizing: border-box;
+  min-width: var(--ts-count-min-w);
+  height: 16px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+/* the presence slot of the title row (11 6.2, 05 rule 4): 184 px reserved from first paint whether
+   nobody or twenty people are present; the tracks are the four other chips, the +N chip, the hair
+   rule and the own chip */
+.ts-presence {
+  position: relative;
+  box-sizing: border-box;
+  flex: 0 0 var(--pt-presence-w, 184px);
+  width: var(--pt-presence-w, 184px);
+  height: 32px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ts-remote-pointer {
+    transition: none;
+  }
+}
+
+/* The pending skeletons of the ssr: false routes (gslides-parity SPEC-3 9.2 E1, P1): the same
+   grid as the shell they stand in for (EditorShell.css, PresenterConsole.css lay out the rows and
+   columns by class), the interior as plates of the final heights so first paint has the geometry
+   and the real chrome replaces it in place. Plates only, no motion, no measurement. */
+/* the grid in literal pixels, so a token stylesheet arriving late cannot move the rows */
+.pt-viewer.is-editor.ts-skeleton {
+  --pt-sb-w: 256px;
+  grid-template-columns: 256px minmax(0, 1fr) 0;
+  grid-template-rows: 44px 28px 40px minmax(0, 1fr) 32px;
+}
+
+.ts-presenter.ts-skeleton {
+  grid-template-rows: 52px minmax(0, 1fr);
+}
+
+.ts-skeleton .ts-presenter-head {
+  height: 52px;
+  box-sizing: border-box;
+}
+
+.ts-skeleton .ts-presenter-tabs {
+  height: 44px;
+  box-sizing: border-box;
+}
+
+.ts-skeleton .ts-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.ts-skeleton .ts-title-row {
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-skeleton .ts-toolbar {
+  border-bottom: 1px solid var(--pt-hair);
+}
+
+.ts-skeleton-mark {
+  display: block;
+  width: 25px;
+  height: 16px;
+  background: var(--pt-plate);
+}
+
+.ts-skeleton-title {
+  display: block;
+  width: 180px;
+  height: 16px;
+  background: var(--pt-plate);
+}
+
+.ts-skeleton .ts-menubar-titles {
+  display: flex;
+  gap: 2px;
+  padding: 0 4px;
+}
+
+.ts-skeleton-menu {
+  display: inline-block;
+  padding: 0 8px;
+  font-size: 13px;
+  line-height: 24px;
+  color: var(--pt-ink-2);
+  white-space: nowrap;
+}
+
+.ts-skeleton .pt-sb {
+  grid-column: 1;
+  grid-row: 4;
+  border-right: 1px solid var(--pt-hair);
+  overflow: hidden;
+}
+
+.ts-skeleton-film {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.ts-skeleton-card {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.ts-skeleton-n {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-skeleton .ts-skeleton-frame {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--pt-plate);
+  border: 1px solid var(--pt-hair);
+  box-sizing: border-box;
+}
+
+.ts-skeleton .pt-main {
+  grid-column: 2;
+  grid-row: 4;
+}
+
+.ts-skeleton-stagewrap {
+  background: var(--pt-paper);
+}
+
+.ts-skeleton .ts-presenter-frame.ts-skeleton-frame {
+  border: 1px solid var(--pt-hair);
+}

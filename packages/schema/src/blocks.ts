@@ -48,6 +48,8 @@ import type { TableFields } from './blocks/table.ts';
 import { tableFieldsShape } from './blocks/table.ts';
 import type { ChartFields } from './blocks/chart.ts';
 import { chartFieldsShape } from './blocks/chart.ts';
+import type { PictureDither } from './blocks/dither.ts';
+import { pictureDitherField } from './blocks/dither.ts';
 
 /** The table block's parts live in blocks/table.ts (gslides-parity SPEC 7.3). */
 export type {
@@ -179,6 +181,31 @@ export type Diagram = {
 /** The whole-object link of gslides-parity SPEC 7.2.7 lives in text.ts beside the slide link forms. */
 export type { BlockLink } from './text.ts';
 export { blockLinkSchema, blockLinkField, blockLinkSlide } from './text.ts';
+export type {
+  DitherCell,
+  DitherChannel,
+  DitherPattern,
+  DitherPolarity,
+  DitherTone,
+  PictureDither,
+  ResolvedDither,
+} from './blocks/dither.ts';
+export {
+  DITHER_CELLS,
+  DITHER_CHANNELS,
+  DITHER_DEFAULT_PATTERN,
+  DITHER_DEFAULTS,
+  DITHER_NO_SOURCE_MESSAGE,
+  DITHER_PATTERNS,
+  DITHER_PHOTOGRAPH_PRESET,
+  DITHER_PHOTOGRAPH_VALUE,
+  DITHER_POLARITIES,
+  DITHER_TOGGLE_VALUE,
+  DITHER_TONES,
+  ditherPresetOf,
+  pictureDitherSchema,
+  resolveDither,
+} from './blocks/dither.ts';
 
 /**
  * `pos` is the block's box on a canvas slide, a content slide on the freeform layout
@@ -489,6 +516,8 @@ export type ShotBlock = BlockBase & {
   adjust?: ShotAdjust;
   frame?: ShotFrame;
   shadow?: Shadow;
+  /** The deck's two tone screen over the continuous source, non destructive (gslides-parity SPEC-3 10.1). */
+  dither?: PictureDither;
 };
 /**
  * The picture object (gslides-parity SPEC-2 2.6.4, 0.71): a photograph as an object on a canvas
@@ -507,6 +536,8 @@ export type PictureBlock = BlockBase & {
   adjust?: ShotAdjust;
   frame?: ShotFrame;
   shadow?: Shadow;
+  /** The deck's two tone screen over the continuous source, non destructive (gslides-parity SPEC-3 10.1). */
+  dither?: PictureDither;
   side?: 'lower-left' | 'lower-right' | 'upper-left';
 };
 export type PairBlock = BlockBase & {
@@ -589,8 +620,19 @@ export type LogoPlatesBlock = BlockBase & {
   type: 'logoPlates';
   items: { asset?: AssetId; mark?: true; name: Text }[];
 };
-/** The escape hatch: flagged by lint, raster on export. */
-export type HtmlBlock = BlockBase & { type: 'html'; css: string; html: string; note: string };
+/**
+ * The escape hatch: flagged by lint, raster on export. `htmlSanitized` is set by the sanitizer
+ * (gslides-parity SPEC-3 8.4: DOMPurify at write time through `applyWrite`, the bundle importer
+ * and the `html/sanitize` fix rule); a legacy block without it is flagged by the linter until the
+ * rule runs.
+ */
+export type HtmlBlock = BlockBase & {
+  type: 'html';
+  css: string;
+  html: string;
+  note: string;
+  htmlSanitized?: true;
+};
 /** Google's table as a grid of Text cells in the .rows idiom (gslides-parity SPEC 7.3; blocks/table.ts). */
 export type TableBlock = BlockBase & TableFields & { shadow?: Shadow };
 /** Google's chart as data drawn in the diagram grammar (gslides-parity SPEC-2 2.8; blocks/chart.ts). */
@@ -1244,6 +1286,7 @@ const pictureToolFields = {
     },
   ),
   shadow: shadowField,
+  dither: pictureDitherField,
 };
 
 export const shotBlockSchema = z.strictObject({
@@ -1599,6 +1642,12 @@ export const htmlBlockSchema = z.strictObject({
     control: 'textarea',
     group: 'Advanced',
     help: 'What the grammar cannot express here; the count of these blocks is the grammar’s honest scope (SPEC 1).',
+  }),
+  htmlSanitized: annotate(z.literal(true).optional(), {
+    label: 'Sanitized',
+    control: 'readonly',
+    group: 'Advanced',
+    help: 'Set by the sanitizer once the markup passed DOMPurify and the CSS tokenizer (gslides-parity SPEC-3 8.4); the linter flags a block without it.',
   }),
 }) satisfies z.ZodType<HtmlBlock>;
 

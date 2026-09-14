@@ -21,6 +21,7 @@ import type { MenuContext, MenuItem, MenuSetting } from './menus/model.ts';
 import { DEFAULT_MENU_CONTEXT } from './menus/model.ts';
 import { FILMSTRIP, SNACKBARS } from './menus/strings.ts';
 import { blankSlide, freeSlideId } from './palette-data';
+import { CommentCountChip, FilmstripMarks, OutlineMarks } from './presence/FilmstripMarks';
 import { Seg } from './Seg';
 import type { SegOption } from './Seg';
 import { usePtShell } from './shell-context';
@@ -309,7 +310,7 @@ function TreeRow({ section, item, active, shots, theme, href, onPick, follow, ed
         <use href={`#${glyphOf(item)}`} />
       </svg>
       <span className="pt-orow-name">{item.title}</span>
-      {lint || item.leased || edit ? (
+      {lint || edit || true ? (
         <span className="pt-orow-marks">
           {lint ? (
             <span
@@ -320,7 +321,7 @@ function TreeRow({ section, item, active, shots, theme, href, onPick, follow, ed
               {lint.s3 > 0 ? lint.s3 : lint.s2}
             </span>
           ) : null}
-          {item.leased ? <i className="pt-orow-lease" title="Held by another author" /> : null}
+          <OutlineMarks slideId={item.id} />
           {edit ? (
             <button
               type="button"
@@ -1278,9 +1279,16 @@ function FilmCard({
       ref={follow}
       {...tip}
     >
-      <span className="ts-card-n">{n}</span>
+      <span className="ts-card-n">
+        {n}
+        <CommentCountChip slideId={item.id} />
+      </span>
       <span className="ts-card-frame">
         <Thumb shot={item.shot} html={item.html} theme={theme} frame={false} fallbackText={n} />
+        <FilmstripMarks
+          slideId={item.id}
+          picture={facts.kind === 'opener' || facts.kind === 'mood' || facts.kind === 'closing'}
+        />
         {facts.skip ? (
           <span className="ts-card-skip" aria-hidden="true">
             <svg viewBox="0 0 20 20" fill="currentColor">

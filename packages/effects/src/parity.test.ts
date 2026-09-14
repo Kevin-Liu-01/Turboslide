@@ -150,65 +150,72 @@ describe.skipIf(!hasNative)('cell identity on the deck two-tone assets', () => {
   });
 
   for (const { id, asset, treatment } of twoToneAssets) {
-    test(`${id}: every backend lights the cells pipeline.ts lights`, async () => {
-      const { image, from } = await inputFor(id, asset);
-      const reference = ts.twoToneScreen(image, treatment);
-      const polarity = treatment.polarity ?? 'dark-ground';
-      const darkBits =
-        polarity === 'dark-ground' ? reference.positive : invertBits(reference.positive);
-      const tsMetrics = twoToneMetrics(darkBits, plateFor(id), treatment.cell ?? 2);
-      for (const backend of nativeBackends) {
-        const got = backend.twoToneScreen(image, treatment);
-        const cells = cellAgreement(got.positive, reference.positive);
-        const toneMismatch = countDiff(got.toneImage.data, reference.toneImage.data);
-        report.rows.push({
-          check: 'screen',
-          asset: id,
-          input: from,
-          size: [image.width, image.height],
-          backend: backend.kind,
-          cells: cells.cells,
-          mismatchedCells: cells.mismatched,
-          mismatchedTone: toneMismatch,
-          treatment,
-        });
-        expect(cells, `${backend.kind} ${id}`).toEqual({
-          cells: 360000,
-          mismatched: 0,
-          agreement: 1,
-        });
-        expect(toneMismatch, `${backend.kind} ${id} tone image`).toBe(0);
-      }
-      // The whole-picture entry point of the crate: twins, polarity, cell scale and the metrics
-      // (lit fraction to four decimals, plate clearance through V8's Math.hypot, the warnings).
-      for (const native of [addon, wasm]) {
-        if (!native) continue;
-        const full = native.twoTone(
-          image.data,
-          image.width,
-          image.height,
-          JSON.stringify(treatment),
-          JSON.stringify(plateFor(id)),
-          false,
-        );
-        const metrics = JSON.parse(full.metricsJson) as TwoToneMetrics;
-        report.rows.push({
-          check: 'metrics',
-          asset: id,
-          backend: native.kind,
-          typescript: tsMetrics,
-          native: metrics,
-          equal: stableJson(metrics) === stableJson(tsMetrics),
-        });
-        expect(metrics, `${native.kind} ${id} metrics`).toEqual(tsMetrics);
-        expect([full.width, full.height]).toEqual([1600, 900]);
-        const darkSheet = bitsFromGray(
-          { width: 1600, height: 900, data: full.darkBits.map((b) => (b ? 255 : 0)) },
-          2,
-        );
-        expect(cellAgreement(darkSheet, darkBits).mismatched).toBe(0);
-      }
-    });
+    // the sixteen assets decode and dither on every backend in one test each; alone a row takes a
+    // second and under a load average above twenty it passed vitest's 5 s default only sometimes
+    // (VERIFICATION-3 finding 45, the ship step's step 5 run), so each row carries its own budget
+    test(
+      `${id}: every backend lights the cells pipeline.ts lights`,
+      { timeout: 30_000 },
+      async () => {
+        const { image, from } = await inputFor(id, asset);
+        const reference = ts.twoToneScreen(image, treatment);
+        const polarity = treatment.polarity ?? 'dark-ground';
+        const darkBits =
+          polarity === 'dark-ground' ? reference.positive : invertBits(reference.positive);
+        const tsMetrics = twoToneMetrics(darkBits, plateFor(id), treatment.cell ?? 2);
+        for (const backend of nativeBackends) {
+          const got = backend.twoToneScreen(image, treatment);
+          const cells = cellAgreement(got.positive, reference.positive);
+          const toneMismatch = countDiff(got.toneImage.data, reference.toneImage.data);
+          report.rows.push({
+            check: 'screen',
+            asset: id,
+            input: from,
+            size: [image.width, image.height],
+            backend: backend.kind,
+            cells: cells.cells,
+            mismatchedCells: cells.mismatched,
+            mismatchedTone: toneMismatch,
+            treatment,
+          });
+          expect(cells, `${backend.kind} ${id}`).toEqual({
+            cells: 360000,
+            mismatched: 0,
+            agreement: 1,
+          });
+          expect(toneMismatch, `${backend.kind} ${id} tone image`).toBe(0);
+        }
+        // The whole-picture entry point of the crate: twins, polarity, cell scale and the metrics
+        // (lit fraction to four decimals, plate clearance through V8's Math.hypot, the warnings).
+        for (const native of [addon, wasm]) {
+          if (!native) continue;
+          const full = native.twoTone(
+            image.data,
+            image.width,
+            image.height,
+            JSON.stringify(treatment),
+            JSON.stringify(plateFor(id)),
+            false,
+          );
+          const metrics = JSON.parse(full.metricsJson) as TwoToneMetrics;
+          report.rows.push({
+            check: 'metrics',
+            asset: id,
+            backend: native.kind,
+            typescript: tsMetrics,
+            native: metrics,
+            equal: stableJson(metrics) === stableJson(tsMetrics),
+          });
+          expect(metrics, `${native.kind} ${id} metrics`).toEqual(tsMetrics);
+          expect([full.width, full.height]).toEqual([1600, 900]);
+          const darkSheet = bitsFromGray(
+            { width: 1600, height: 900, data: full.darkBits.map((b) => (b ? 255 : 0)) },
+            2,
+          );
+          expect(cellAgreement(darkSheet, darkBits).mismatched).toBe(0);
+        }
+      },
+    );
   }
 });
 

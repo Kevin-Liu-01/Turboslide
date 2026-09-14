@@ -2,7 +2,7 @@
 
 exports[`block catalog > renders board (board) in dark 1`] = `
 {
-  "html": "<div class="board" data-block="board" data-type="board"><div><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="board:1"><span class="who"><b data-run="board/rows/0/name">Site</b><small>generaltranslation.com</small></span><b class="state"><svg class="ic warn" aria-hidden="true" data-raster="icon" data-rid="board:2"><use href="#i-clock"/></svg>Fixes open</b><span data-run="board/rows/0/note">Home, pricing, enterprise, careers and contact run the redesign.</span></div><div><span></span><span class="who"><b data-run="board/rows/1/name">Blog</b></span><b class="state"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="board:3"><use href="#i-check-circle"/></svg>Live</b><span data-run="board/rows/1/note">Live.</span></div></div>",
+  "html": "<div class="board" data-block="board" data-type="board"><div><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" width="1440" height="900" alt="The home page at 1440 by 900" data-raster="shot" data-rid="board:1"><span class="who"><b data-run="board/rows/0/name">Site</b><small>generaltranslation.com</small></span><b class="state"><svg class="ic warn" aria-hidden="true" data-raster="icon" data-rid="board:2"><use href="#i-clock"/></svg>Fixes open</b><span data-run="board/rows/0/note">Home, pricing, enterprise, careers and contact run the redesign.</span></div><div><span></span><span class="who"><b data-run="board/rows/1/name">Blog</b></span><b class="state"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="board:3"><use href="#i-check-circle"/></svg>Live</b><span data-run="board/rows/1/note">Live.</span></div></div>",
   "rasters": [
     {
       "alpha": false,
@@ -28,7 +28,7 @@ exports[`block catalog > renders board (board) in dark 1`] = `
 
 exports[`block catalog > renders board (board) in light 1`] = `
 {
-  "html": "<div class="board" data-block="board" data-type="board"><div><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="board:1"><span class="who"><b data-run="board/rows/0/name">Site</b><small>generaltranslation.com</small></span><b class="state"><svg class="ic warn" aria-hidden="true" data-raster="icon" data-rid="board:2"><use href="#i-clock"/></svg>Fixes open</b><span data-run="board/rows/0/note">Home, pricing, enterprise, careers and contact run the redesign.</span></div><div><span></span><span class="who"><b data-run="board/rows/1/name">Blog</b></span><b class="state"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="board:3"><use href="#i-check-circle"/></svg>Live</b><span data-run="board/rows/1/note">Live.</span></div></div>",
+  "html": "<div class="board" data-block="board" data-type="board"><div><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" width="1440" height="900" alt="The home page at 1440 by 900" data-raster="shot" data-rid="board:1"><span class="who"><b data-run="board/rows/0/name">Site</b><small>generaltranslation.com</small></span><b class="state"><svg class="ic warn" aria-hidden="true" data-raster="icon" data-rid="board:2"><use href="#i-clock"/></svg>Fixes open</b><span data-run="board/rows/0/note">Home, pricing, enterprise, careers and contact run the redesign.</span></div><div><span></span><span class="who"><b data-run="board/rows/1/name">Blog</b></span><b class="state"><svg class="ic ok" aria-hidden="true" data-raster="icon" data-rid="board:3"><use href="#i-check-circle"/></svg>Live</b><span data-run="board/rows/1/note">Live.</span></div></div>",
   "rasters": [
     {
       "alpha": false,
@@ -138,7 +138,7 @@ exports[`block catalog > renders credit (credit) in light 1`] = `
 
 exports[`block catalog > renders details (grid) in dark 1`] = `
 {
-  "html": "<div class="details" data-block="grid" data-type="details"><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:1"><figcaption data-run="grid/items/0/caption">The header.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:2"><figcaption data-run="grid/items/1/caption">The seam.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:3"><figcaption data-run="grid/items/2/caption">The logo row.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" style="height:236px" data-raster="shot" data-rid="grid:4"><figcaption data-run="grid/items/3/caption">The table of contents.</figcaption></figure></div>",
+  "html": "<div class="details" data-block="grid" data-type="details"><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" width="1440" height="900" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:1"><figcaption data-run="grid/items/0/caption">The header.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" width="1440" height="900" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:2"><figcaption data-run="grid/items/1/caption">The seam.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" width="1440" height="900" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:3"><figcaption data-run="grid/items/2/caption">The logo row.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" width="1440" height="900" alt="The home page at 1440 by 900" style="height:236px" data-raster="shot" data-rid="grid:4"><figcaption data-run="grid/items/3/caption">The table of contents.</figcaption></figure></div>",
   "rasters": [
     {
       "alpha": false,
@@ -170,7 +170,7 @@ exports[`block catalog > renders details (grid) in dark 1`] = `
 
 exports[`block catalog > renders details (grid) in light 1`] = `
 {
-  "html": "<div class="details" data-block="grid" data-type="details"><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:1"><figcaption data-run="grid/items/0/caption">The header.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:2"><figcaption data-run="grid/items/1/caption">The seam.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:3"><figcaption data-run="grid/items/2/caption">The logo row.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" style="height:236px" data-raster="shot" data-rid="grid:4"><figcaption data-run="grid/items/3/caption">The table of contents.</figcaption></figure></div>",
+  "html": "<div class="details" data-block="grid" data-type="details"><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" width="1440" height="900" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:1"><figcaption data-run="grid/items/0/caption">The header.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" width="1440" height="900" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:2"><figcaption data-run="grid/items/1/caption">The seam.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" width="1440" height="900" alt="The home page at 1440 by 900" style="height:140px" data-raster="shot" data-rid="grid:3"><figcaption data-run="grid/items/2/caption">The logo row.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" width="1440" height="900" alt="The home page at 1440 by 900" style="height:236px" data-raster="shot" data-rid="grid:4"><figcaption data-run="grid/items/3/caption">The table of contents.</figcaption></figure></div>",
   "rasters": [
     {
       "alpha": false,
@@ -456,7 +456,7 @@ exports[`block catalog > renders lang (lang) in light 1`] = `
 
 exports[`block catalog > renders logoPlates (logos) in dark 1`] = `
 {
-  "html": "<div class="lineage" data-block="logos" data-type="logoPlates"><figure><div class="plate"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="logos:1"></div><figcaption data-run="logos/items/0/name">General Motors</figcaption></figure><figure><div class="plate"><svg fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="logos:2"><use href="#gt-mark"/></svg></div><figcaption data-run="logos/items/1/name">General Translation</figcaption></figure></div>",
+  "html": "<div class="lineage" data-block="logos" data-type="logoPlates"><figure><div class="plate"><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="logos:1"></div><figcaption data-run="logos/items/0/name">General Motors</figcaption></figure><figure><div class="plate"><svg fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="logos:2"><use href="#gt-mark"/></svg></div><figcaption data-run="logos/items/1/name">General Translation</figcaption></figure></div>",
   "rasters": [
     {
       "alpha": false,
@@ -476,7 +476,7 @@ exports[`block catalog > renders logoPlates (logos) in dark 1`] = `
 
 exports[`block catalog > renders logoPlates (logos) in light 1`] = `
 {
-  "html": "<div class="lineage" data-block="logos" data-type="logoPlates"><figure><div class="plate"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="logos:1"></div><figcaption data-run="logos/items/0/name">General Motors</figcaption></figure><figure><div class="plate"><svg fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="logos:2"><use href="#gt-mark"/></svg></div><figcaption data-run="logos/items/1/name">General Translation</figcaption></figure></div>",
+  "html": "<div class="lineage" data-block="logos" data-type="logoPlates"><figure><div class="plate"><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="logos:1"></div><figcaption data-run="logos/items/0/name">General Motors</figcaption></figure><figure><div class="plate"><svg fill="currentColor" aria-hidden="true" data-raster="mark" data-rid="logos:2"><use href="#gt-mark"/></svg></div><figcaption data-run="logos/items/1/name">General Translation</figcaption></figure></div>",
   "rasters": [
     {
       "alpha": false,
@@ -600,7 +600,7 @@ exports[`block catalog > renders markSizes (sizes) in light 1`] = `
 
 exports[`block catalog > renders material (mat) in dark 1`] = `
 {
-  "html": "<figure class="material-fig" data-block="mat" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;uniforms&quot;:{&quot;u_scale&quot;:0.5},&quot;anchor&quot;:5500,&quot;twoTone&quot;:true,&quot;plate&quot;:&quot;lower-left&quot;}"><div class="material" role="img" aria-label="A liquid metal diamond, dithered" data-raster="material" data-rid="mat:1"><img class="material-frame" src="assets/opener-brand-dark.jpg" data-light="assets/opener-brand-light.jpg" alt="The top arc of the event horizon ring, dithered"></div><figcaption data-run="mat/caption">The liquid metal diamond, frozen at 5.5 s.</figcaption></figure>",
+  "html": "<figure class="material-fig" data-block="mat" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;uniforms&quot;:{&quot;u_scale&quot;:0.5},&quot;anchor&quot;:5500,&quot;twoTone&quot;:true,&quot;plate&quot;:&quot;lower-left&quot;}"><div class="material" role="img" aria-label="A liquid metal diamond, dithered" data-raster="material" data-rid="mat:1"><img class="material-frame" src="assets/opener-brand-dark.jpg" data-light="assets/opener-brand-light.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"></div><figcaption data-run="mat/caption">The liquid metal diamond, frozen at 5.5 s.</figcaption></figure>",
   "rasters": [
     {
       "alpha": false,
@@ -614,7 +614,7 @@ exports[`block catalog > renders material (mat) in dark 1`] = `
 
 exports[`block catalog > renders material (mat) in light 1`] = `
 {
-  "html": "<figure class="material-fig" data-block="mat" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;uniforms&quot;:{&quot;u_scale&quot;:0.5},&quot;anchor&quot;:5500,&quot;twoTone&quot;:true,&quot;plate&quot;:&quot;lower-left&quot;}"><div class="material" role="img" aria-label="A liquid metal diamond, dithered" data-raster="material" data-rid="mat:1"><img class="material-frame" src="assets/opener-brand-light.jpg" data-dark="assets/opener-brand-dark.jpg" alt="The top arc of the event horizon ring, dithered"></div><figcaption data-run="mat/caption">The liquid metal diamond, frozen at 5.5 s.</figcaption></figure>",
+  "html": "<figure class="material-fig" data-block="mat" data-type="material" data-recipe="{&quot;materialId&quot;:&quot;paper:liquid-metal&quot;,&quot;preset&quot;:&quot;diamond&quot;,&quot;uniforms&quot;:{&quot;u_scale&quot;:0.5},&quot;anchor&quot;:5500,&quot;twoTone&quot;:true,&quot;plate&quot;:&quot;lower-left&quot;}"><div class="material" role="img" aria-label="A liquid metal diamond, dithered" data-raster="material" data-rid="mat:1"><img class="material-frame" src="assets/opener-brand-light.jpg" data-dark="assets/opener-brand-dark.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"></div><figcaption data-run="mat/caption">The liquid metal diamond, frozen at 5.5 s.</figcaption></figure>",
   "rasters": [
     {
       "alpha": false,
@@ -670,7 +670,7 @@ exports[`block catalog > renders matrix (matrix) in light 1`] = `
 
 exports[`block catalog > renders pair (pair) in dark 1`] = `
 {
-  "html": "<div class="pair gap-40 cap-15" style="grid-template-columns:27fr 16fr" data-block="pair" data-type="pair"><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:1"><figcaption data-run="pair/figures/0/caption">The X banner is 1500 by 500 pixels.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:2"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="pair:3"><figcaption data-run="pair/figures/1/caption">Two images in one figure.</figcaption></figure></div>",
+  "html": "<div class="pair gap-40 cap-15" style="grid-template-columns:27fr 16fr" data-block="pair" data-type="pair"><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" width="1440" height="900" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:1"><figcaption data-run="pair/figures/0/caption">The X banner is 1500 by 500 pixels.</figcaption></figure><figure><img src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" width="1440" height="900" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:2"><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="pair:3"><figcaption data-run="pair/figures/1/caption">Two images in one figure.</figcaption></figure></div>",
   "rasters": [
     {
       "alpha": false,
@@ -696,7 +696,7 @@ exports[`block catalog > renders pair (pair) in dark 1`] = `
 
 exports[`block catalog > renders pair (pair) in light 1`] = `
 {
-  "html": "<div class="pair gap-40 cap-15" style="grid-template-columns:27fr 16fr" data-block="pair" data-type="pair"><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:1"><figcaption data-run="pair/figures/0/caption">The X banner is 1500 by 500 pixels.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:2"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="pair:3"><figcaption data-run="pair/figures/1/caption">Two images in one figure.</figcaption></figure></div>",
+  "html": "<div class="pair gap-40 cap-15" style="grid-template-columns:27fr 16fr" data-block="pair" data-type="pair"><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" width="1440" height="900" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:1"><figcaption data-run="pair/figures/0/caption">The X banner is 1500 by 500 pixels.</figcaption></figure><figure><img src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" width="1440" height="900" alt="The home page at 1440 by 900" data-raster="shot" data-rid="pair:2"><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="pair:3"><figcaption data-run="pair/figures/1/caption">Two images in one figure.</figcaption></figure></div>",
   "rasters": [
     {
       "alpha": false,
@@ -834,7 +834,7 @@ exports[`block catalog > renders paragraph (p3) in light 1`] = `
 
 exports[`block catalog > renders picture (photo) in dark 1`] = `
 {
-  "html": "<div class="picture trimmed" style="width:731.5px;height:411px;border:1px solid var(--hair)" data-block="photo" data-type="picture" data-trim="0.1,0.1,0,0"><img class="picture-img" src="assets/opener-brand-dark.jpg" data-light="assets/opener-brand-light.jpg" alt="The top arc of the event horizon ring, dithered" style="width:125%;height:100%;left:-12.5%;top:0%" data-raster="shot" data-rid="photo:1"></div>",
+  "html": "<div class="picture trimmed" style="width:731.5px;height:411px;border:1px solid var(--hair)" data-block="photo" data-type="picture" data-trim="0.1,0.1,0,0"><img class="picture-img" src="assets/opener-brand-dark.jpg" data-light="assets/opener-brand-light.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered" style="width:125%;height:100%;left:-12.5%;top:0%" data-raster="shot" data-rid="photo:1"></div>",
   "rasters": [
     {
       "alpha": false,
@@ -848,7 +848,7 @@ exports[`block catalog > renders picture (photo) in dark 1`] = `
 
 exports[`block catalog > renders picture (photo) in light 1`] = `
 {
-  "html": "<div class="picture trimmed" style="width:731.5px;height:411px;border:1px solid var(--hair)" data-block="photo" data-type="picture" data-trim="0.1,0.1,0,0"><img class="picture-img" src="assets/opener-brand-light.jpg" data-dark="assets/opener-brand-dark.jpg" alt="The top arc of the event horizon ring, dithered" style="width:125%;height:100%;left:-12.5%;top:0%" data-raster="shot" data-rid="photo:1"></div>",
+  "html": "<div class="picture trimmed" style="width:731.5px;height:411px;border:1px solid var(--hair)" data-block="photo" data-type="picture" data-trim="0.1,0.1,0,0"><img class="picture-img" src="assets/opener-brand-light.jpg" data-dark="assets/opener-brand-dark.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered" style="width:125%;height:100%;left:-12.5%;top:0%" data-raster="shot" data-rid="photo:1"></div>",
   "rasters": [
     {
       "alpha": false,
@@ -1222,7 +1222,7 @@ exports[`block catalog > renders shape (round) in light 1`] = `
 
 exports[`block catalog > renders shot (fig) in dark 1`] = `
 {
-  "html": "<figure class="shot-fig" data-block="fig" data-type="shot"><img class="shot" src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="fig:1"><figcaption data-run="fig/caption">The home page at 1440 by 900 shows the navigation bar closed by one hairline.</figcaption></figure>",
+  "html": "<figure class="shot-fig" data-block="fig" data-type="shot"><img class="shot" src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" width="1440" height="900" alt="The home page at 1440 by 900" data-raster="shot" data-rid="fig:1"><figcaption data-run="fig/caption">The home page at 1440 by 900 shows the navigation bar closed by one hairline.</figcaption></figure>",
   "rasters": [
     {
       "alpha": false,
@@ -1236,7 +1236,7 @@ exports[`block catalog > renders shot (fig) in dark 1`] = `
 
 exports[`block catalog > renders shot (fig) in light 1`] = `
 {
-  "html": "<figure class="shot-fig" data-block="fig" data-type="shot"><img class="shot" src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="fig:1"><figcaption data-run="fig/caption">The home page at 1440 by 900 shows the navigation bar closed by one hairline.</figcaption></figure>",
+  "html": "<figure class="shot-fig" data-block="fig" data-type="shot"><img class="shot" src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" width="1440" height="900" alt="The home page at 1440 by 900" data-raster="shot" data-rid="fig:1"><figcaption data-run="fig/caption">The home page at 1440 by 900 shows the navigation bar closed by one hairline.</figcaption></figure>",
   "rasters": [
     {
       "alpha": false,
@@ -1250,7 +1250,7 @@ exports[`block catalog > renders shot (fig) in light 1`] = `
 
 exports[`block catalog > renders shot (fig2) in dark 1`] = `
 {
-  "html": "<figure class="shot-fig" style="width:768px;max-width:100%" data-block="fig2" data-type="shot"><img class="shot" src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" alt="The home page at 1440 by 900" style="aspect-ratio:1440/780;object-fit:cover;object-position:top" data-raster="shot" data-rid="fig2:1"></figure>",
+  "html": "<figure class="shot-fig" style="width:768px;max-width:100%" data-block="fig2" data-type="shot"><img class="shot" src="assets/site-home-dark.jpg" data-light="assets/site-home-light.jpg" width="1440" height="900" alt="The home page at 1440 by 900" style="aspect-ratio:1440/780;object-fit:cover;object-position:top" data-raster="shot" data-rid="fig2:1"></figure>",
   "rasters": [
     {
       "alpha": false,
@@ -1264,7 +1264,7 @@ exports[`block catalog > renders shot (fig2) in dark 1`] = `
 
 exports[`block catalog > renders shot (fig2) in light 1`] = `
 {
-  "html": "<figure class="shot-fig" style="width:768px;max-width:100%" data-block="fig2" data-type="shot"><img class="shot" src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" alt="The home page at 1440 by 900" style="aspect-ratio:1440/780;object-fit:cover;object-position:top" data-raster="shot" data-rid="fig2:1"></figure>",
+  "html": "<figure class="shot-fig" style="width:768px;max-width:100%" data-block="fig2" data-type="shot"><img class="shot" src="assets/site-home-light.jpg" data-dark="assets/site-home-dark.jpg" width="1440" height="900" alt="The home page at 1440 by 900" style="aspect-ratio:1440/780;object-fit:cover;object-position:top" data-raster="shot" data-rid="fig2:1"></figure>",
   "rasters": [
     {
       "alpha": false,
@@ -1320,7 +1320,7 @@ exports[`block catalog > renders text (tx) in light 1`] = `
 
 exports[`block catalog > renders tiles (dirs) in dark 1`] = `
 {
-  "html": "<div class="tiles cols-4 aspect-16-10 tiles-thumb tiles-marked" data-block="dirs" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="dirs:1"><span data-run="dirs/items/0/label">Toolchain</span></div><div class="tile site"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="dirs:2"><span data-run="dirs/items/1/label">Dossier</span></div></div>",
+  "html": "<div class="tiles cols-4 aspect-16-10 tiles-thumb tiles-marked" data-block="dirs" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="dirs:1"><span data-run="dirs/items/0/label">Toolchain</span></div><div class="tile site"><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="dirs:2"><span data-run="dirs/items/1/label">Dossier</span></div></div>",
   "rasters": [
     {
       "alpha": false,
@@ -1340,7 +1340,7 @@ exports[`block catalog > renders tiles (dirs) in dark 1`] = `
 
 exports[`block catalog > renders tiles (dirs) in light 1`] = `
 {
-  "html": "<div class="tiles cols-4 aspect-16-10 tiles-thumb tiles-marked" data-block="dirs" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="dirs:1"><span data-run="dirs/items/0/label">Toolchain</span></div><div class="tile site"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="dirs:2"><span data-run="dirs/items/1/label">Dossier</span></div></div>",
+  "html": "<div class="tiles cols-4 aspect-16-10 tiles-thumb tiles-marked" data-block="dirs" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="dirs:1"><span data-run="dirs/items/0/label">Toolchain</span></div><div class="tile site"><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="dirs:2"><span data-run="dirs/items/1/label">Dossier</span></div></div>",
   "rasters": [
     {
       "alpha": false,
@@ -1360,7 +1360,7 @@ exports[`block catalog > renders tiles (dirs) in light 1`] = `
 
 exports[`block catalog > renders tiles (eng) in dark 1`] = `
 {
-  "html": "<div class="tiles cols-4 aspect-16-9 tiles-eng label-20" data-block="eng" data-type="tiles"><figure><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="eng:1"><b data-run="eng/items/0/label">Horizon field</b><span data-run="eng/items/0/sub">A WebGL lens shader takes 21 parameters.</span></figure></div>",
+  "html": "<div class="tiles cols-4 aspect-16-9 tiles-eng label-20" data-block="eng" data-type="tiles"><figure><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="eng:1"><b data-run="eng/items/0/label">Horizon field</b><span data-run="eng/items/0/sub">A WebGL lens shader takes 21 parameters.</span></figure></div>",
   "rasters": [
     {
       "alpha": false,
@@ -1374,7 +1374,7 @@ exports[`block catalog > renders tiles (eng) in dark 1`] = `
 
 exports[`block catalog > renders tiles (eng) in light 1`] = `
 {
-  "html": "<div class="tiles cols-4 aspect-16-9 tiles-eng label-20" data-block="eng" data-type="tiles"><figure><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="eng:1"><b data-run="eng/items/0/label">Horizon field</b><span data-run="eng/items/0/sub">A WebGL lens shader takes 21 parameters.</span></figure></div>",
+  "html": "<div class="tiles cols-4 aspect-16-9 tiles-eng label-20" data-block="eng" data-type="tiles"><figure><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="eng:1"><b data-run="eng/items/0/label">Horizon field</b><span data-run="eng/items/0/sub">A WebGL lens shader takes 21 parameters.</span></figure></div>",
   "rasters": [
     {
       "alpha": false,
@@ -1388,7 +1388,7 @@ exports[`block catalog > renders tiles (eng) in light 1`] = `
 
 exports[`block catalog > renders tiles (tiles) in dark 1`] = `
 {
-  "html": "<div class="tiles cols-6 aspect-16-9 tiles-thumb" data-block="tiles" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="tiles:1"><span data-run="tiles/items/0/label">Müller-Brockmann, 1955</span></div><div class="tile more" data-run="tiles/more">The list continues with Powers of Ten.</div></div>",
+  "html": "<div class="tiles cols-6 aspect-16-9 tiles-thumb" data-block="tiles" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="tiles:1"><span data-run="tiles/items/0/label">Müller-Brockmann, 1955</span></div><div class="tile more" data-run="tiles/more">The list continues with Powers of Ten.</div></div>",
   "rasters": [
     {
       "alpha": false,
@@ -1402,7 +1402,7 @@ exports[`block catalog > renders tiles (tiles) in dark 1`] = `
 
 exports[`block catalog > renders tiles (tiles) in light 1`] = `
 {
-  "html": "<div class="tiles cols-6 aspect-16-9 tiles-thumb" data-block="tiles" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" alt="The General Motors logo" data-raster="shot" data-rid="tiles:1"><span data-run="tiles/items/0/label">Müller-Brockmann, 1955</span></div><div class="tile more" data-run="tiles/more">The list continues with Powers of Ten.</div></div>",
+  "html": "<div class="tiles cols-6 aspect-16-9 tiles-thumb" data-block="tiles" data-type="tiles"><div class="tile"><img src="assets/logo-gm.jpg" width="640" height="640" alt="The General Motors logo" data-raster="shot" data-rid="tiles:1"><span data-run="tiles/items/0/label">Müller-Brockmann, 1955</span></div><div class="tile more" data-run="tiles/more">The list continues with Powers of Ten.</div></div>",
   "rasters": [
     {
       "alpha": false,

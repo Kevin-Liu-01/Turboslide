@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
+import { isUnsavedDraft } from './root';
 import { THUMB_WIDTHS, isThumbWidth, warmThumbs } from './thumbs';
 import type { WarmInput, WarmResult } from './thumbs';
 
@@ -26,4 +27,20 @@ export const warmThumbnails = createServerFn({ method: 'POST' })
       throw new Error('slideIds must be slugs');
     return input;
   })
-  .handler(async ({ data }): Promise<WarmResult> => warmThumbs(data));
+  .handler(async ({ data }): Promise<WarmResult> => {
+    // the job runs detached and the call answers at once (VERIFICATION-3 finding 32): a full
+    // deck's first warm renders every capture of a theme in one worker job, which took tens of
+    // seconds on a fresh 85 slide copy, and the browser held one of its six connections to the
+    // dev server open for the whole answer; with the HMR socket, the three on demand captures and
+    // a session call beside it the pool was full and the room's presence and ops posts of the
+    // same page waited behind it (measured in the presence spec's trace: a POST issued 100 ms
+    // after the stream connected had not left the browser 10 s later). The filmstrip reads the
+    // captures through /api/render as they land, so nothing waits on this answer.
+    if (await isUnsavedDraft(data.deckId)) return warmThumbs(data);
+    void warmThumbs(data).catch((error: unknown) => {
+      console.error(
+        `turboslide warm: ${data.deckId} ${data.theme}: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    });
+    return { revision: -1, ready: [], failed: [], rendered: 0, cached: 0, ms: 0, queued: true };
+  });

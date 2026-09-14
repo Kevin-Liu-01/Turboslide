@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "picture-dither-strength",
+  "kind": "content",
+  "layout": {
+    "type": "freeform"
+  },
+  "slots": {
+    "main": [
+      {
+        "id": "h",
+        "pos": {
+          "x": 137,
+          "y": 129,
+          "w": 700,
+          "h": 56,
+          "z": 0
+        },
+        "type": "heading",
+        "level": "h2",
+        "text": "A dithered picture at a box"
+      },
+      {
+        "id": "p",
+        "pos": {
+          "x": 137,
+          "y": 210,
+          "w": 700,
+          "h": 120,
+          "z": 1
+        },
+        "type": "paragraph",
+        "text": "The two tone plane is composited at 60 percent over the continuous picture, so the tones show through the screen.",
+        "measure": 56
+      },
+      {
+        "id": "photo",
+        "pos": {
+          "x": 900,
+          "y": 300,
+          "w": 560,
+          "h": 315,
+          "z": 2
+        },
+        "type": "picture",
+        "asset": "fixture-photo",
+        "dither": {
+          "pattern": "bayer8",
+          "strength": 0.6
+        }
+      }
+    ]
+  }
+}

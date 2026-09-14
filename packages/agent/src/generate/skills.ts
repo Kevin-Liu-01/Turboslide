@@ -91,6 +91,16 @@ export function generateActionsReference(): string {
           '`slideId`, `blockId`, `path`, `range`, `text`',
           'Typing, coalesced; range in the markup string',
         ],
+        [
+          '`text.splice`',
+          '`slideId`, `blockId`, `path`, `at`, `remove`, `insert`, `flags?`, `side?`',
+          'One edit in plain offsets, transformed against concurrent edits; `flags` pins the inserted run',
+        ],
+        [
+          '`text.mark`',
+          '`slideId`, `blockId`, `path`, `range`, `set?`, `clear?`, `case?`',
+          'Formatting or a case change over a plain range',
+        ],
         ['`section.set`', '`sections`', 'The only place order lives'],
         ['`asset.set`', '`asset`', ''],
         ['`asset.remove`', '`assetId`', ''],
@@ -109,6 +119,36 @@ export function generateActionsReference(): string {
         error.when,
       ]),
     ),
+    '',
+    '## Comment anchors',
+    '',
+    'A comment thread names a place in the deck with an anchor (`comment.add`, `comment.list`, `comment.get`; gslides-parity SPEC-3 5.9). The CLI spells an anchor as one argument; the actions take the object form.',
+    '',
+    markdownTable(
+      ['CLI form', 'Object', 'Names'],
+      [
+        ['`deck`', '`{ kind: "deck" }`', 'the presentation'],
+        ['`slide:<slideId>`', '`{ kind: "slide", slideId }`', 'one slide'],
+        ['`notes:<slideId>`', '`{ kind: "notes", slideId }`', 'the speaker notes of a slide'],
+        ['`<slideId>#<blockId>`', '`{ kind: "block", slideId, blockId }`', 'one block'],
+        [
+          '`<slideId>#<blockId>/cell:<row>,<col>`',
+          '`{ kind: "cell", slideId, blockId, cell: [row, col] }`',
+          'one table cell, zero based',
+        ],
+        [
+          '`<slideId>#<blockId>/<pointer>:<start>-<end>`',
+          '`{ kind: "text", slideId, blockId, path, range: [start, end], quoted }`',
+          'a range of the plain text at a Text pointer of the block (`/text`, `/items/3/text`); the server fills `quoted` from the document',
+        ],
+      ],
+    ),
+    '',
+    'Every write on the document moves text anchors with the text (`shiftAnchors`); an anchor whose target is gone is answered with `placement.orphaned: true` and the reason, never dropped. `<who>` in `--mention` and `--assign` is a principal id (`usr_…`, `anon_…`, `agent:<runId>`), a bare name for the checkout principal `local:<name>`, or an email address for an invitation; the stored form is the id, never a display string.',
+    '',
+    '## Record revisions',
+    '',
+    'The comment sidecar and the access record keep their own revisions beside the document\'s. `comment.*` answer `commentsRevision`; `comments --since <n>` and `deck.watch` read entries after it. Every `share.*` write, `deck.publish`, `deck.unpublish` and `admin.assignOwner` take `baseRevision` against the access record\'s `revision` and answer 409 with the current record when it is stale; the CLI reads the current one when `--base-revision` is absent. A missing right is 403 `{ error: "forbidden", capability }`; a revoked publish token is 410; a deck the caller may not see reads as 404, the same as one that does not exist.',
     '',
   ].join('\n');
 }

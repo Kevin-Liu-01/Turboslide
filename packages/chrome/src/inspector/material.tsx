@@ -4,6 +4,8 @@ import { requireMaterial, materialEntry, MATERIAL_IDS } from '@turboslide/materi
 import type { MaterialEntry } from '@turboslide/materials/catalog';
 import { resolveRecipe } from '@turboslide/materials/recipe';
 import type { Asset } from '@turboslide/schema/assets';
+import type { PictureBlock } from '@turboslide/schema/blocks';
+import { DITHER_TOGGLE_VALUE } from '@turboslide/schema/blocks/dither';
 import type {
   MaterialBlock,
   MaterialRecipe,
@@ -13,7 +15,10 @@ import type {
 } from '@turboslide/schema/blocks/material';
 import { MATERIAL_ANCHORS } from '@turboslide/schema/blocks/material';
 
+import { setMaterialPlay } from '@turboslide/viewer/dither';
+
 import type { EditorDispatch } from '../dispatch';
+import { DITHER } from '../menus/strings';
 import { Seg } from '../Seg';
 import { ToolButton } from '../ToolButton';
 import { tipProps } from '../Tooltip';
@@ -36,7 +41,13 @@ export type PlateSide = 'lower-left' | 'lower-right' | 'upper-left';
 
 export type MaterialTarget =
   | { kind: 'block'; slideId: string; block: MaterialBlock }
-  | { kind: 'picture'; slideId: string; asset: Asset; plateSide: PlateSide };
+  | { kind: 'picture'; slideId: string; asset: Asset; plateSide: PlateSide }
+  /**
+   * A picture object whose asset is a material frame (gslides-parity SPEC-3 0.38, 10.8: the
+   * Background dialog's Material row places one): the recipe is the asset's, edited as a draft,
+   * and the Two-tone row is the Dither toggle on the object's `dither` field with Play beside it.
+   */
+  | { kind: 'object'; slideId: string; block: PictureBlock; asset: Asset };
 
 export type MaterialSectionProps = {
   target: MaterialTarget;
@@ -71,7 +82,7 @@ export function recipeOfTarget(target: MaterialTarget): MaterialRecipe {
       source.kind === 'material' ? source.materialId : (MATERIAL_IDS[0] ?? 'paper:gem-smoke'),
     ...(source.kind === 'material' ? { uniforms: source.uniforms, anchor: source.timeMs } : {}),
     twoTone: target.asset.treatment?.kind === 'two-tone',
-    plate: target.plateSide,
+    ...(target.kind === 'picture' ? { plate: target.plateSide } : {}),
   };
 }
 
@@ -112,9 +123,16 @@ export function MaterialSection({
   busy = false,
   onNotice,
 }: MaterialSectionProps) {
-  const noun = target.kind === 'block' ? target.block.id : 'slide';
+  const noun = target.kind === 'picture' ? 'slide' : target.block.id;
   const controlBase =
-    target.kind === 'block' ? `block.${target.block.id}` : 'slide.picture.material';
+    target.kind === 'block'
+      ? `block.${target.block.id}`
+      : target.kind === 'object'
+        ? `block.${target.block.id}.material`
+        : 'slide.picture.material';
+  /* the object's Play: the shader plays undithered for a look until stopped or edited (10.8) */
+  const [playing, setPlaying] = useState(false);
+  useEffect(() => () => setMaterialPlay(null), []);
   const [draft, setDraft] = useState<MaterialRecipe>(() => recipeOfTarget(target));
   const [pending, setPending] = useState<{ assetId: string; since: number } | null>(null);
   const [captureError, setCaptureError] = useState<string | null>(null);
@@ -165,7 +183,7 @@ export function MaterialSection({
     const { assetId } = pending;
     setPending(null);
     const promise =
-      target.kind === 'block'
+      target.kind === 'block' || target.kind === 'object'
         ? dispatch('block.set', {
             slideId: target.slideId,
             blockId: target.block.id,
@@ -193,9 +211,9 @@ export function MaterialSection({
     setCaptureError(null);
     const anchor = draft.anchor ?? MATERIAL_ANCHORS[1];
     const id =
-      target.kind === 'block'
-        ? `${target.slideId}-${target.block.id}-${anchor}`
-        : `${target.asset.id}-${anchor}`;
+      target.kind === 'picture'
+        ? `${target.asset.id}-${anchor}`
+        : `${target.slideId}-${target.block.id}-${anchor}`;
     const since = revisionRef.current;
     dispatch('material.capture', {
       materialId: draft.materialId,
@@ -405,7 +423,56 @@ export function MaterialSection({
               </datalist>
             </div>
           </div>
-          <div className="ts-insp-row">
+          {target.kind === 'object' ? (
+            <div className="ts-insp-row" data-control={`${controlBase}.ditherRow`}>
+              <span className="ts-insp-label">{DITHER.dither}</span>
+              <div className="ts-insp-field ts-material-dither">
+                <label
+                  className="ts-ctl-check"
+                  {...tipProps({ name: DITHER.dither, doc: DITHER.help })}
+                >
+                  <input
+                    type="checkbox"
+                    aria-label={`${noun}: ${DITHER.dither}`}
+                    data-control={`${controlBase}.dither`}
+                    checked={target.block.dither !== undefined}
+                    disabled={busy}
+                    onChange={(event) => {
+                      setMaterialPlay(null);
+                      setPlaying(false);
+                      dispatch('block.set', {
+                        slideId: target.slideId,
+                        blockId: target.block.id,
+                        path: '/dither',
+                        ...(event.target.checked ? { value: DITHER_TOGGLE_VALUE } : {}),
+                        baseRevision: revision,
+                      }).catch((cause: unknown) =>
+                        onNotice?.(cause instanceof Error ? cause.message : String(cause)),
+                      );
+                    }}
+                  />
+                  <span className="ts-ctl-check-box" aria-hidden="true" />
+                  <span className="ts-ctl-check-word" aria-hidden="true">
+                    {target.block.dither !== undefined ? 'on' : 'off'}
+                  </span>
+                </label>
+                <ToolButton
+                  title={playing ? 'Stop' : DITHER.play}
+                  doc="Plays the shader without its screen for a look; any edit stops it and the frozen frame is what exports."
+                  label={playing ? 'Stop' : DITHER.play}
+                  icon="play"
+                  control={`${controlBase}.play`}
+                  pressed={playing}
+                  onClick={() => {
+                    const next = !playing;
+                    setPlaying(next);
+                    setMaterialPlay(next ? target.block.id : null);
+                  }}
+                />
+              </div>
+            </div>
+          ) : null}
+          <div className="ts-insp-row" hidden={target.kind === 'object'}>
             <span className="ts-insp-label">Two-tone</span>
             <div className="ts-insp-field">
               <label

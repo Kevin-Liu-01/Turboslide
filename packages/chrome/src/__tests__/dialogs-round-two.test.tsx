@@ -75,6 +75,11 @@ function Host({ input: value, children }: { input: EditorShellInput; children: R
     lastLayout: null,
     focusTitle: vi.fn(),
     registerTitleField: vi.fn(),
+    commentCard: null,
+    openCommentCard: vi.fn(),
+    closeCommentCard: vi.fn(),
+    stepComment: vi.fn(),
+    diff: null,
   } satisfies EditorShellState;
   return <EditorShellContext value={state}>{children}</EditorShellContext>;
 }

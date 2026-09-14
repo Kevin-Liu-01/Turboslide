@@ -105,6 +105,7 @@ describe('turboslide export pptx arguments', () => {
         scenes: [],
         omitted: [],
         tableFallbacks: {},
+        materialized: [],
       };
       return result;
     });

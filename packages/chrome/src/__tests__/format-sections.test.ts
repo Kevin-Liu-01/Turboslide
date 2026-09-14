@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import type { Block } from '@turboslide/schema/blocks';
+import type { Block, BlockType } from '@turboslide/schema/blocks';
+import { BLOCK_SCHEMAS } from '@turboslide/schema/blocks';
 import { workedDocument } from '@turboslide/schema/fixtures';
 import type { Slide } from '@turboslide/schema/deck';
 
@@ -9,6 +10,7 @@ import {
   formatSectionOfBlockControl,
   formatSectionOfSlideControl,
   hasAltText,
+  hasShadow,
   hasTextFitting,
 } from '../inspector/format-sections';
 import { blockControls, slideControls } from '../inspector/generate';
@@ -23,7 +25,7 @@ const rule = document.slides['content-rule'] as Slide;
 function block(type: Block['type']): Block {
   if (rule.kind !== 'content') throw new Error('content slide');
   for (const blocks of Object.values(rule.slots)) {
-    const found = blocks?.find((each) => each.type === type);
+    const found = blocks.find((each) => each.type === type);
     if (found) return found;
   }
   throw new Error(`no ${type} on the worked slide`);
@@ -71,7 +73,7 @@ describe('a block control routes to', () => {
       if (spec.path.startsWith('/items'))
         expect(formatSectionOfBlockControl(spec, plain), spec.path).toBe('list');
     }
-    const box: Block = { id: 'b', type: 'box', fill: 'plate', text: 'x' } as Block;
+    const box: Block = { id: 'b', type: 'box', fill: 'plate', text: 'x' };
     const boxControls = blockControls(box);
     const fill = boxControls.controls.find((spec) => spec.path === '/fill');
     expect(fill).toBeDefined();
@@ -81,7 +83,7 @@ describe('a block control routes to', () => {
   });
 
   it('Picture for a shot’s asset and caption; Table for a table’s cells', () => {
-    const shot: Block = { id: 's', type: 'shot', asset: 'a', caption: 'c' } as Block;
+    const shot: Block = { id: 's', type: 'shot', asset: 'a', caption: 'c' };
     for (const spec of blockControls(shot).controls) {
       if (spec.path === '/asset' || spec.path === '/caption' || spec.path === '/crop')
         expect(formatSectionOfBlockControl(spec, shot), spec.path).toBe('picture');
@@ -91,7 +93,7 @@ describe('a block control routes to', () => {
       type: 'table',
       columns: [{}],
       rows: [{ cells: ['x'] }],
-    } as Block;
+    };
     for (const spec of blockControls(table).controls) {
       if (spec.path === '/alt') expect(formatSectionOfBlockControl(spec, table)).toBe('altText');
       else if (spec.path === '/valign')
@@ -101,10 +103,10 @@ describe('a block control routes to', () => {
     }
     expect(hasAltText(shot)).toBe(true);
     expect(hasAltText(table)).toBe(false);
-    expect(hasTextFitting({ id: 'x', type: 'text', text: '' } as Block)).toBe(true);
-    expect(hasTextFitting({ id: 'h', type: 'heading', level: 'h2', text: '' } as Block)).toBe(true);
-    expect(hasTextFitting({ id: 's', type: 'shape', shape: 'rect' } as Block)).toBe(true);
-    expect(hasTextFitting({ id: 'l', type: 'shape', shape: 'line' } as Block)).toBe(false);
+    expect(hasTextFitting({ id: 'x', type: 'text', text: '' })).toBe(true);
+    expect(hasTextFitting({ id: 'h', type: 'heading', level: 'h2', text: '' })).toBe(true);
+    expect(hasTextFitting({ id: 's', type: 'shape', shape: 'rect' })).toBe(true);
+    expect(hasTextFitting({ id: 'l', type: 'shape', shape: 'line' })).toBe(false);
     expect(hasTextFitting(shot)).toBe(false);
   });
 });
@@ -120,5 +122,60 @@ describe('a slide control routes to', () => {
       if (path === '/notes' || path === '/title' || path === '/tags' || path === '/id')
         expect(section, path).toBeNull();
     }
+  });
+});
+
+describe('the Dither section (gslides-parity SPEC-3 10.7)', () => {
+  it('sits after Adjustments and before Drop shadow, routes /dither and serves shots and pictures', async () => {
+    const { FORMAT_SECTION_BY_ID, hasDither, isOwnSectionPath } =
+      await import('../inspector/format-sections');
+    const names = FORMAT_SECTIONS.map((section) => section.id);
+    expect(names.indexOf('adjustments')).toBeLessThan(names.indexOf('dither'));
+    expect(names.indexOf('dither')).toBeLessThan(names.indexOf('shadow'));
+    expect(FORMAT_SECTION_BY_ID.dither.title).toBe('Dither');
+    expect(FORMAT_SECTION_BY_ID.dither.icon).toBe('adjustments');
+    expect(forbiddenWordsIn(FORMAT_SECTION_BY_ID.dither.doc)).toEqual([]);
+    const picture: Block = {
+      id: 'p',
+      type: 'picture',
+      asset: 'site-home',
+      pos: { x: 0, y: 0, w: 1600, h: 900, z: 0 },
+      dither: { pattern: 'bayer8' },
+    };
+    const generated = blockControls(picture, { freeform: true });
+    const dither = generated.controls.find((spec) => spec.path === '/dither');
+    expect(dither).toBeDefined();
+    if (dither) expect(formatSectionOfBlockControl(dither, picture)).toBe('dither');
+    expect(isOwnSectionPath('/dither')).toBe(true);
+    expect(hasDither(picture)).toBe(true);
+    expect(hasDither({ id: 's', type: 'shot', asset: 'site-home' })).toBe(true);
+    expect(hasDither({ id: 'i', type: 'icon', name: 'bell' })).toBe(false);
+    expect(hasDither(block('heading'))).toBe(false);
+  });
+});
+
+describe('Drop shadow (gslides-parity SPEC-2 2.3.4)', () => {
+  it('serves exactly the blocks whose schema carries the shadow field', () => {
+    for (const type of Object.keys(BLOCK_SCHEMAS) as BlockType[]) {
+      /* one source of truth: the section appears where block.shadow is accepted (VERIFICATION-3
+         finding 16: a heading or a paragraph carries no field today, so the section stays absent
+         until the schema gains it; build-3/b5.md, Fix round, names the request) */
+      expect(hasShadow({ id: 'x', type } as Block), type).toBe(
+        'shadow' in BLOCK_SCHEMAS[type].shape,
+      );
+    }
+    for (const type of [
+      'box',
+      'shape',
+      'text',
+      'shot',
+      'picture',
+      'icon',
+      'table',
+      'chart',
+    ] as const)
+      expect(hasShadow({ id: 'x', type } as Block), type).toBe(true);
+    expect(hasShadow(block('heading'))).toBe('shadow' in BLOCK_SCHEMAS.heading.shape);
+    expect(hasShadow(block('paragraph'))).toBe('shadow' in BLOCK_SCHEMAS.paragraph.shape);
   });
 });

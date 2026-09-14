@@ -10,14 +10,23 @@ import type { ExportReport } from '@turboslide/schema/export';
 import { exportReportSchema } from '@turboslide/schema/export';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 
+import type { Authorized } from './authorize';
 import type {
   ExportBatchResult,
   MergeExportResult,
   StartBatchedExportResult,
 } from './export-batch';
 import type { jsonBody } from './export-sync';
+import type { QuotaContext } from './ratelimit';
 import { deckDir, ensureDeckAssets, isHosted, workerClientOptions } from './root';
 import { buildsDir, downloadUrl, signDownloadToken } from './tokens';
+
+/**
+ * The query parameter of the export cancel token (server/tokens.ts CANCEL_TOKEN_QUERY, pinned
+ * equal by tokens.test.ts): spelled here as well because `cancelOnPagehide` runs in the browser and
+ * tokens.ts is a node module this file must not import at module level.
+ */
+const CANCEL_TOKEN_QUERY = 'ct';
 
 /**
  * The export surface of the editor (SPEC 8; Kevin's directive: PPTX from the editor's toolbar,
@@ -58,6 +67,40 @@ async function worker(): Promise<WorkerClient> {
     client = createWorkerClient(workerClientOptions());
   }
   return client;
+}
+
+/**
+ * The export rule of every export server function (gslides-parity SPEC-3 6.2, 8.2, 8.3, 8.12):
+ * `authorize(export)` first, `exportNotes` when the input carries the notes and `readSkipped` when
+ * it carries the skipped slides (a viewer's `includeNotes: true` is 403; report 04 F21), the
+ * `exports` switch, then the exports per day quota. Returns the authorized context for the quota
+ * that follows the run.
+ */
+async function authorizeExport(
+  deckId: string,
+  input: { includeNotes?: boolean; includeSkipped?: boolean },
+  action: string,
+  quota: 'exportsPerDay' | 'standaloneBuildsPerDay' | null = 'exportsPerDay',
+): Promise<Authorized & { quota: QuotaContext }> {
+  // loaded here, not at the top: the edit route imports this module for its client stubs and the
+  // client transform keeps every module level import a plain function references
+  const { authorizeRequest, identityLabel } = await import('./authorize');
+  const { assertFlag } = await import('./flags');
+  const { assertQuota, tierOf } = await import('./ratelimit');
+  const authorized = await authorizeRequest(deckId, 'export', { action });
+  if (input.includeNotes === true) await authorizeRequest(deckId, 'exportNotes', { action });
+  if (input.includeSkipped === true) await authorizeRequest(deckId, 'readSkipped', { action });
+  const identity = identityLabel(authorized.ctx) ?? 'anonymous';
+  await assertFlag('exports', { identity, deckId, action });
+  const context: QuotaContext = {
+    identity,
+    tier: tierOf(authorized.ctx),
+    deckId,
+    action,
+    transport: 'window',
+  };
+  if (quota !== null) await assertQuota(quota, context);
+  return { ...authorized, quota: context };
 }
 
 /** The deck's folder once the hosted seed is materialized; a RangeError when the deck is missing. */
@@ -135,6 +178,7 @@ export function validateExportRun(raw: StartExportInput): StartExportInput {
 const startExportFn = createServerFn({ method: 'POST' })
   .validator(validateExportRun)
   .handler(async ({ data }): Promise<StartExportResult> => {
+    await authorizeExport(data.deckId, data.input, 'export.run');
     await requireDeck(data.deckId);
     const job = await (await worker()).submit('export', { deckId: data.deckId, ...data.input });
     return { jobId: job.id, status: job.status };
@@ -151,10 +195,18 @@ export type SyncExportAnswer = ReturnType<typeof jsonBody>;
 const syncExportFn = createServerFn({ method: 'POST' })
   .validator(validateExportRun)
   .handler(async ({ data }): Promise<SyncExportAnswer> => {
+    const { quota } = await authorizeExport(data.deckId, data.input, 'export.run');
     await requireDeck(data.deckId);
-    // loaded here for the same reason worker() is: export-sync imports the worker client statically
-    const { jsonBody: body, runSyncExport } = await import('./export-sync');
-    return body(await runSyncExport(data.deckId, data.input));
+    // one export at a time per identity (SPEC-3 8.3 concurrency 1 / 1 / 2)
+    const { assertQuota, releaseQuota } = await import('./ratelimit');
+    await assertQuota('exportConcurrency', quota);
+    try {
+      // loaded here for the same reason worker() is: export-sync imports the worker client statically
+      const { jsonBody: body, runSyncExport } = await import('./export-sync');
+      return body(await runSyncExport(data.deckId, data.input));
+    } finally {
+      await releaseQuota('exportConcurrency', quota);
+    }
   });
 
 /**
@@ -176,6 +228,7 @@ export async function syncExport(input: StartExportInput): Promise<SyncExportAns
 const startBatchedExportFn = createServerFn({ method: 'POST' })
   .validator(validateExportRun)
   .handler(async ({ data }): Promise<StartBatchedExportResult> => {
+    await authorizeExport(data.deckId, data.input, 'export.run');
     await requireDeck(data.deckId);
     const { startBatchedExport: start } = await import('./export-batch');
     return start(data.deckId, data.input);
@@ -206,6 +259,8 @@ const exportBatchFn = createServerFn({ method: 'POST' })
     return raw;
   })
   .handler(async ({ data }): Promise<ExportBatchResult> => {
+    // the plan already paid the day's quota; a batch needs the right, not another count
+    await authorizeExport(data.deckId, {}, 'export.run', null);
     await requireDeck(data.deckId);
     const { exportBatch: run } = await import('./export-batch');
     return run(data.deckId, data.jobId, data.index);
@@ -221,6 +276,7 @@ export type ExportJobInput = { deckId: string; jobId: string };
 const mergeExportFn = createServerFn({ method: 'POST' })
   .validator(validateJobInput<ExportJobInput>)
   .handler(async ({ data }): Promise<MergeExportResult> => {
+    await authorizeExport(data.deckId, {}, 'export.run', null);
     await requireDeck(data.deckId);
     const { mergeExport: run } = await import('./export-batch');
     return run(data.deckId, data.jobId);
@@ -234,6 +290,8 @@ export async function mergeExport(input: ExportJobInput): Promise<MergeExportRes
 const cancelBatchedExportFn = createServerFn({ method: 'POST' })
   .validator(validateJobInput<ExportJobInput>)
   .handler(async ({ data }): Promise<{ jobId: string; removed: number }> => {
+    const { authorizeRequest } = await import('./authorize');
+    await authorizeRequest(data.deckId, 'export', { action: 'export.cancel' });
     const { cancelBatchedExport: run } = await import('./export-batch');
     return run(data.deckId, data.jobId);
   });
@@ -283,14 +341,21 @@ export class BatchedExportCancelled extends Error {
   }
 }
 
-/** The best effort cancel a closing page can still send (SPEC-2 0.45): the http route with keepalive. */
-function cancelOnPagehide(deckId: string, jobId: string): () => void {
+/**
+ * The best effort cancel a closing page can still send (SPEC-2 0.45): the http route with
+ * keepalive, carrying the cancel token minted with the plan (gslides-parity SPEC-3 8.13; report
+ * 04 F9: the job id alone is no longer the capability).
+ */
+function cancelOnPagehide(deckId: string, jobId: string, cancelToken: string): () => void {
   if (typeof window === 'undefined') return () => {};
   const onHide = () => {
-    void fetch(`/api/export/${encodeURIComponent(deckId)}?cancel=${encodeURIComponent(jobId)}`, {
-      method: 'POST',
-      keepalive: true,
-    }).catch(() => undefined);
+    void fetch(
+      `/api/export/${encodeURIComponent(deckId)}?cancel=${encodeURIComponent(jobId)}&${CANCEL_TOKEN_QUERY}=${encodeURIComponent(cancelToken)}`,
+      {
+        method: 'POST',
+        keepalive: true,
+      },
+    ).catch(() => undefined);
   };
   window.addEventListener('pagehide', onHide);
   return () => window.removeEventListener('pagehide', onHide);
@@ -319,7 +384,7 @@ export async function runBatchedExport(
   for (let restart = 0; ; restart += 1) {
     throwIfCancelled();
     const started = await startBatchedExport({ deckId, input });
-    const stopPagehide = cancelOnPagehide(deckId, started.jobId);
+    const stopPagehide = cancelOnPagehide(deckId, started.jobId, started.cancelToken);
     let stale: 'revision' | 'asset' | null = null;
     try {
       const timings: { slides: number; ms: number }[] = [];
@@ -420,6 +485,12 @@ const pollExportFn = createServerFn({ method: 'POST' })
   })
   .handler(async ({ data }): Promise<ExportPoll> => {
     const job = await (await worker()).job(data.jobId);
+    // the job names its deck; the poll needs the export right on it
+    const deckOfJob = (job?.input as { deckId?: string } | undefined)?.deckId;
+    if (typeof deckOfJob === 'string' && SLUG_PATTERN.test(deckOfJob)) {
+      const { authorizeRequest } = await import('./authorize');
+      await authorizeRequest(deckOfJob, 'export', { action: 'export.poll' });
+    }
     if (!job) throw new RangeError(`No export job ${data.jobId}`);
     const status = jobStatus(job.status);
     const line = job.log[job.log.length - 1];
@@ -480,6 +551,15 @@ const signDownloadFn = createServerFn({ method: 'POST' })
     return { kind: 'build', deckId: raw.deckId, name: raw.name };
   })
   .handler(async ({ data }): Promise<{ url: string }> => {
+    const { authorizeRequest } = await import('./authorize');
+    if (data.kind === 'build')
+      await authorizeRequest(data.deckId, 'export', { action: 'export.sign' });
+    else {
+      const job = await (await worker()).job(data.jobId);
+      const deckOfJob = (job?.input as { deckId?: string } | undefined)?.deckId;
+      if (typeof deckOfJob === 'string' && SLUG_PATTERN.test(deckOfJob))
+        await authorizeRequest(deckOfJob, 'export', { action: 'export.sign' });
+    }
     if ((await worker()).mode !== 'local')
       throw new RangeError('The render worker runs elsewhere; its files are not served from here');
     const token =
@@ -531,6 +611,8 @@ const runBuildFn = createServerFn({ method: 'POST' })
     return raw;
   })
   .handler(async ({ data }): Promise<RunBuildResult> => {
+    // a standalone file carries no notes and no skipped slides; the export right and its own quota
+    await authorizeExport(data.deckId, {}, 'build.run', 'standaloneBuildsPerDay');
     const dir = await requireDeck(data.deckId);
     const outDir = buildsDir(data.deckId);
     mkdirSync(outDir, { recursive: true });

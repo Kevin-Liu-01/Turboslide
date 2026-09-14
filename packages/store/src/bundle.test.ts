@@ -19,6 +19,7 @@ import { join, posix } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import type { Thread } from '@turboslide/schema/comments';
 import { WORKED_DECK, WORKED_SLIDES } from '@turboslide/schema/fixtures';
 import { canonicalJson } from '@turboslide/schema/json';
 
@@ -31,6 +32,7 @@ import {
   sha256Hex,
   sniffImage,
 } from './bundle.ts';
+import { applyCommentOps } from './comments-store.ts';
 import { openFileStore } from './file-store.ts';
 import { packDeckDir, writeDeckBundle } from './pack.ts';
 import { freeDeckId, inspectBundle, unpackBundle } from './unpack.ts';
@@ -232,6 +234,7 @@ describe('pack and unpack', () => {
       documents: files.documents.length,
       assets: files.assets.length,
       versions: 1,
+      comments: 0,
     });
     const names = readZip(packed.zip).map((entry) => entry.name);
     expect(names[0]).toBe(BUNDLE_MANIFEST);
@@ -277,6 +280,108 @@ describe('pack and unpack', () => {
     expect(result.sha256).toBe(sha256Hex(new Uint8Array(readFileSync(out))));
     expect(result.counts.versions).toBe(0);
     expect(inspectBundle(new Uint8Array(readFileSync(out))).counts.versions).toBe(0);
+  });
+
+  it('packs with and without the comments group byte for byte, drops access.json and leases, refuses a bad thread', async () => {
+    const dir = await writeDeck(join(root, 'decks'));
+    const plain = packDeckDir(dir, { now: () => '2026-09-11T00:00:00.000Z' });
+    // the sidecar and the two records that never travel
+    const thread: Thread = {
+      id: '01j8z2kmayaq4e0s7r9x2v8b3c',
+      deckId: 'gt-brand',
+      anchor: { kind: 'block', slideId: 'content-rule', blockId: 'list' },
+      comment: {
+        id: '01j8z2kmayaq4e0s7r9x2v8b3c',
+        author: {
+          principalId: 'anon_0f1e2d3c-4b5a-4978-8a9b-0c1d2e3f4a5b',
+          label: 'Maya',
+          kind: 'human',
+        },
+        createdAt: '2026-09-11T00:00:00.000Z',
+        body: { text: 'Check this', mentions: [] },
+      },
+      replies: [],
+      createdAt: '2026-09-11T00:00:00.000Z',
+      updatedAt: '2026-09-11T00:00:00.000Z',
+      revision: 0,
+    };
+    applyCommentOps(dir, 'gt-brand', [{ op: 'add', thread }], '2026-09-11T00:00:00.000Z');
+    writeFileSync(
+      join(dir, 'access.json'),
+      '{ "schemaVersion": 1, "deckId": "gt-brand", "owner": null }\n',
+    );
+    writeFileSync(join(dir, 'leases.json'), '{ "leases": [] }\n');
+    // without the group the bytes are the round two bytes; the records never enter
+    const still = packDeckDir(dir, { now: () => '2026-09-11T00:00:00.000Z' });
+    expect(sha256Hex(still.zip)).toBe(sha256Hex(plain.zip));
+    expect(still.manifest.comments).toBeUndefined();
+    expect(listDeckFiles(dir).documents).not.toContain('access.json');
+    // with the group: three files, listed under `comments`, verified on the way in
+    const withComments = packDeckDir(dir, {
+      comments: true,
+      now: () => '2026-09-11T00:00:00.000Z',
+    });
+    expect(withComments.counts.comments).toBe(3);
+    expect(Object.keys(withComments.manifest.comments ?? {}).sort()).toEqual([
+      'comments/01j8z2kmayaq4e0s7r9x2v8b3c.json',
+      'comments/authors.json',
+      'comments/index.json',
+    ]);
+    const names = readZip(withComments.zip).map((entry) => entry.name);
+    expect(names).not.toContain('decks/gt-brand/access.json');
+    expect(names).not.toContain('decks/gt-brand/leases.json');
+    const again = packDeckDir(dir, { comments: true, now: () => '2026-09-11T00:00:00.000Z' });
+    expect(sha256Hex(again.zip)).toBe(sha256Hex(withComments.zip));
+
+    const other = join(root, 'other');
+    mkdirSync(other, { recursive: true });
+    const result = await unpackBundle(withComments.zip, { decksDir: other });
+    expect(result.counts.comments).toBe(3);
+    expect(
+      Buffer.compare(
+        readFileSync(join(result.dir, 'comments', 'index.json')),
+        readFileSync(join(dir, 'comments', 'index.json')),
+      ),
+    ).toBe(0);
+    expect(existsSync(join(result.dir, 'access.json'))).toBe(false);
+    // an archive carrying access.json is read with the record dropped
+    const entries = readZip(withComments.zip);
+    const smuggled = writeZip(
+      [
+        ...entries,
+        { name: 'decks/gt-brand/access.json', data: new TextEncoder().encode('{"owner":"usr_x"}') },
+      ],
+      { date: new Date(Date.UTC(2026, 8, 11)) },
+    );
+    const inspected = inspectBundle(smuggled);
+    expect(inspected.dropped).toEqual(['access.json']);
+    // a thread that does not validate refuses the bundle before any write
+    const bad = entries.map((entry) =>
+      entry.name === 'decks/gt-brand/comments/01j8z2kmayaq4e0s7r9x2v8b3c.json'
+        ? {
+            ...entry,
+            data: new TextEncoder().encode(
+              '{"id":"01j8z2kmayaq4e0s7r9x2v8b3c","deckId":"gt-brand"}',
+            ),
+          }
+        : entry,
+    );
+    const manifestEntry = bad.find((entry) => entry.name === BUNDLE_MANIFEST)!;
+    const manifest = JSON.parse(new TextDecoder().decode(manifestEntry.data)) as {
+      comments: Record<string, { bytes: number; sha256: string }>;
+    };
+    const badThread = bad.find((entry) => entry.name.endsWith('b3c.json'))!;
+    manifest.comments['comments/01j8z2kmayaq4e0s7r9x2v8b3c.json'] = {
+      bytes: badThread.data.byteLength,
+      sha256: sha256Hex(badThread.data),
+    };
+    manifestEntry.data = new TextEncoder().encode(canonicalJson(manifest));
+    const third = join(root, 'third');
+    mkdirSync(third, { recursive: true });
+    await expect(
+      unpackBundle(writeZip(bad, { date: new Date(Date.UTC(2026, 8, 11)) }), { decksDir: third }),
+    ).rejects.toThrow(/not a comment thread/);
+    expect(existsSync(join(third, 'gt-brand'))).toBe(false);
   });
 
   it('refuses a bundle with a bad slide before writing anything', async () => {

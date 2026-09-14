@@ -82,3 +82,36 @@ describe('the session registry', () => {
     expect(registry.heartbeat('nope')).toBeUndefined();
   });
 });
+
+describe('sessions bound to a principal (gslides-parity SPEC-3 8.2)', () => {
+  it('lists, finds and counts pages by the principal that attached them, never by the body', () => {
+    const registry = createSessionRegistry();
+    const maya = registry.attach({
+      deckId: 'fixture',
+      owner: 'editor',
+      actions: ['view.goto'],
+      principalId: 'usr_maya',
+    });
+    const kai = registry.attach({
+      deckId: 'fixture',
+      owner: 'viewer',
+      actions: ['view.goto'],
+      principalId: 'anon_9f1c2a3e-4b5d-4e6f-8a9b-0c1d2e3f4a5b',
+    });
+    const bare = registry.attach({ deckId: 'fixture', owner: 'viewer', actions: ['view.goto'] });
+    expect(registry.list('fixture')).toHaveLength(3);
+    expect(registry.list('fixture', 'usr_maya').map((s) => s.id)).toEqual([maya.id]);
+    expect(registry.attached('fixture', 'view.goto', 'usr_maya')?.id).toBe(maya.id);
+    expect(registry.attached('fixture', 'view.goto', 'usr_nobody')).toBeUndefined();
+    expect(registry.countFor('usr_maya')).toBe(1);
+    expect(registry.countFor(kai.principalId ?? '')).toBe(1);
+    expect(bare.principalId).toBeUndefined();
+    // a re-attach under the same id keeps the identity the server wrote
+    const again = registry.attach(
+      { deckId: 'fixture', owner: 'editor', actions: ['view.goto'], principalId: 'usr_maya' },
+      maya.id,
+    );
+    expect(again.principalId).toBe('usr_maya');
+    expect(registry.countFor('usr_maya')).toBe(1);
+  });
+});

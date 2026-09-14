@@ -63,8 +63,8 @@ import type { RunMarks } from '@turboslide/schema/text';
 import { TYPE_LADDER } from '@turboslide/schema/typography';
 import { CONTENT_ORIGIN } from '@turboslide/theme/tokens';
 
-import { measureForCanvas, measureForFit } from './canvas-measure';
-import type { FitMeasure } from './canvas-measure';
+import { measureForCanvas, measureForFit, virtualObjectIds } from './canvas-measure';
+import type { FitMeasure, VirtualObjectId } from './canvas-measure';
 import {
   altFor,
   assetIdFor,
@@ -260,6 +260,8 @@ export type EditorOverlayView = {
   /** the stage scale: sheet pixels times k are CSS pixels inside the overlay */
   k: number;
   boxes: MeasuredBoxes;
+  /** the sheet body (`.pt-slide`) the remote carets are measured in (SPEC-3 4.4); null before the mount */
+  body: HTMLElement | null;
   /** the block under the pointer, when it is not the selected one */
   hover: Box | null;
   selection: Selection;
@@ -567,6 +569,14 @@ export type EditorProps = {
   onCanvasConvert?: (slideId: string) => void;
   /** the caret's marks and range changed inside a run (the toolbar's pressed state) */
   onCaret?: (info: CaretInfo | null) => void;
+  /* round three (gslides-parity SPEC-3 5.3, 6.3) */
+  /**
+   * View > Mode: Editing, Commenting or Viewing. Commenting and Viewing refuse every edit gesture
+   * (no handles, no caret, no drag, no write) and keep the selection so a comment can anchor to
+   * an object; the root's `data-edit-mode` attribute the editor shell sets is the fallback when
+   * the route passes nothing.
+   */
+  mode?: 'editing' | 'commenting' | 'viewing';
 };
 
 type Editing = {
@@ -773,6 +783,7 @@ export function Editor({
   snapGrid = false,
   onCanvasConvert,
   onCaret,
+  mode: modeProp,
 }: EditorProps) {
   const slide = doc.slides[slideId];
   const [draft, setDraft] = useState<DeckDocument | null>(null);
@@ -803,6 +814,17 @@ export function Editor({
   const [extra, setExtra] = useState<string[]>([]);
   const [boxes, setBoxes] = useState<MeasuredBoxes>(EMPTY_BOXES);
   const [hover, setHover] = useState<string | null>(null);
+  /* View > Mode from the root attribute the editor shell sets, when the route passes no prop (SPEC-3 5.3) */
+  const [rootMode, setRootMode] = useState<string | null>(null);
+  const effectiveMode: 'editing' | 'commenting' | 'viewing' =
+    modeProp ?? (rootMode === 'commenting' || rootMode === 'viewing' ? rootMode : 'editing');
+  const editable = effectiveMode === 'editing';
+  const editableRef = useRef(editable);
+  editableRef.current = editable;
+  /* the anchor the stage itself set with a multi-selection (Select all, a group click), so the
+     effect that ends a multi-selection on an external anchor change leaves it alone
+     (VERIFICATION-2 findings 17 and 18) */
+  const internalAnchor = useRef<string | null>(null);
   const [activeHandle, setActiveHandle] = useState<string | null>(null);
   const [drop, setDrop] = useState<Box | null>(null);
   const [dropSlot, setDropSlot] = useState<Box | null>(null);
@@ -826,6 +848,17 @@ export function Editor({
   const [scroll, setScroll] = useState({ left: 0, top: 0 });
 
   const root = useRef<HTMLDivElement>(null);
+  /* the editor shell stamps View > Mode on the viewer root; the stage follows it when the route
+     passes no `mode` prop (SPEC-3 5.3) */
+  useEffect(() => {
+    const viewer = root.current?.closest<HTMLElement>('.pt-viewer');
+    if (!viewer) return;
+    const read = () => setRootMode(viewer.getAttribute('data-edit-mode'));
+    read();
+    const observer = new MutationObserver(read);
+    observer.observe(viewer, { attributes: true, attributeFilter: ['data-edit-mode'] });
+    return () => observer.disconnect();
+  }, []);
   const body = useRef<HTMLDivElement>(null);
   const scroller = useRef<HTMLDivElement>(null);
   const gesture = useRef<ActiveGesture | null>(null);
@@ -924,6 +957,7 @@ export function Editor({
   const select = (next: Selection, nextExtra: string[] = []) => {
     const anchor = selectedBlockId(next);
     const pruned = anchor === null ? [] : nextExtra.filter((id) => id !== anchor);
+    if (pruned.length > 0) internalAnchor.current = anchor;
     if (!jsonEqual(pruned, extraRef.current)) {
       extraRef.current = pruned;
       setExtra(pruned);
@@ -959,6 +993,12 @@ export function Editor({
     lastAnchor.current = anchorId;
     if (anchorId === previous) return;
     const current = extraRef.current;
+    /* the stage set this anchor together with the rest of the selection (Cmd+A, a click on a
+       group member): the anchor is not in `extra` by construction and the selection stands */
+    if (anchorId !== null && internalAnchor.current === anchorId) {
+      internalAnchor.current = null;
+      return;
+    }
     if (anchorId === null || (previous !== null && !current.includes(anchorId))) {
       if (current.length > 0) {
         extraRef.current = [];
@@ -998,7 +1038,7 @@ export function Editor({
 
   /** One action call per gesture (SPEC 7.1); several mutations travel as one slide.update. */
   const commit = (mutations: ReadonlyArray<Mutation>): void => {
-    if (mutations.length === 0) {
+    if (mutations.length === 0 || !editableRef.current) {
       setDraft(null);
       return;
     }
@@ -1563,9 +1603,17 @@ export function Editor({
     if (!isObjectId(slideNow, boxes, current.blockId)) select(null);
   }, [html, boxes]);
 
-  /* crop mode ends when the slide or the picture changes under it */
+  /* crop mode ends when the slide or the picture changes under it; the photograph of an
+     unconverted picture kind is a virtual object with no block until the crop's own commit
+     converts the slide (enterCropProvisional), so it counts as present (VERIFICATION-3 finding 27:
+     the block test alone ended the provisional crop on its first render, chip and handles gone) */
   useEffect(() => {
-    if (crop && (!slide || !blockById(slide, crop.blockId))) setCrop(null);
+    if (!crop) return;
+    const present =
+      slide !== undefined &&
+      (blockById(slide, crop.blockId) !== undefined ||
+        virtualObjectIds(slide).has(crop.blockId as VirtualObjectId));
+    if (!present) setCrop(null);
   }, [slide, crop]);
 
   /* the zoom centre: the stage scrolls the named sheet point under its centre (SPEC-2 0.81) */
@@ -1883,6 +1931,12 @@ export function Editor({
   // -------------------------------------------------------------------------------------------
   // Crop mode (SPEC-2 6.1 row 19, 6.2)
 
+  const enterCropAt = (blockId: string, frame: Box, trim: ShotTrim) => {
+    if (editingRef.current) editingRef.current.element.blur();
+    select({ kind: 'block', blockId });
+    setCrop({ blockId, frame, trim, original: { frame, trim } });
+  };
+
   const enterCrop = (blockId: string) => {
     const slideNow = slideRef.current;
     if (!slideNow) return;
@@ -1893,10 +1947,28 @@ export function Editor({
     const frame: Box = block.pos
       ? [block.pos.x, block.pos.y, block.pos.w, block.pos.h]
       : [Math.round(box[0]), Math.round(box[1]), Math.round(box[2]), Math.round(box[3])];
-    const trim = block.trim ?? NO_TRIM;
-    if (editingRef.current) editingRef.current.element.blur();
-    select({ kind: 'block', blockId });
-    setCrop({ blockId, frame, trim, original: { frame, trim } });
+    enterCropAt(blockId, frame, block.trim ?? NO_TRIM);
+  };
+
+  /**
+   * Crop mode on the photograph of an unconverted picture kind (VERIFICATION-2 finding 19; SPEC-2
+   * 1.1, 7.1): the entry writes nothing. The slide is converted in memory to find the picture
+   * object's box, the crop runs on that frame, and the Enter that commits it writes the
+   * conversion and the crop as one slide.update through commitCanvas; Esc leaves the slide as it
+   * was, unconverted.
+   */
+  const enterCropProvisional = async (blockId: string): Promise<void> => {
+    const slideNow = slideRef.current;
+    if (!slideNow) return;
+    const converted = await measuredCanvas(slideNow);
+    if (!converted || slideRef.current !== slideNow) return;
+    const block = blockById(converted.slide, blockId);
+    if (!isCroppable(block) || !block.pos) return;
+    enterCropAt(
+      blockId,
+      [block.pos.x, block.pos.y, block.pos.w, block.pos.h],
+      block.trim ?? NO_TRIM,
+    );
   };
 
   /** Enter, Esc or a click outside: one write of the trim and the frame, converting the slide first (SPEC-2 1.6 "Crop image"). */
@@ -2962,6 +3034,15 @@ export function Editor({
         return;
       }
       if (fromControl) return;
+      /* Commenting and Viewing mode (SPEC-3 5.3): Tab walks the objects above; Esc clears the
+         selection; every writing key is inert */
+      if (!editableRef.current) {
+        if (e.key === 'Escape' && current !== null) {
+          select(null);
+          stop();
+        }
+        return;
+      }
       /* Shift F10 and Cmd Shift \ open the right-click menu on the selection (SPEC 13.2) */
       if (
         (e.key === 'F10' && e.shiftKey) ||
@@ -3618,7 +3699,7 @@ export function Editor({
       return;
     }
     const drawTool = toolRef.current;
-    if (drawTool !== 'select') {
+    if (drawTool !== 'select' && editableRef.current) {
       e.preventDefault();
       armDraw(e.clientX, e.clientY, drawTool, { shift: e.shiftKey, alt: e.altKey });
       return;
@@ -3685,17 +3766,27 @@ export function Editor({
       select(next.selection, next.extra);
       return;
     }
+    /* a click on a member of a group selects the group, caret or not, until a double click enters
+       the member (SPEC-2 6.1 row 14; VERIFICATION-2 finding 17): the run's caret waits */
+    const grouped =
+      blockById(slideNow, id)?.pos?.group !== undefined && groupEnteredRef.current !== id;
+    /* Commenting and Viewing mode: the click selects the object for a comment's anchor and
+       nothing else, no caret, no drag (SPEC-3 5.3, 6.3) */
+    if (!editableRef.current) {
+      if (!selected.includes(id)) selectObjects([id]);
+      return;
+    }
     /* a single click inside text places the caret there (gslides-parity SPEC 10.2, R09 A1);
        the block's frame and the overlay's handles are the drag surface */
     const run = resolveRun(e.target, el);
-    if (run && run.blockId === id) {
+    if (run && run.blockId === id && !grouped) {
       const text = readRunText(slideNow, run.blockId, run.pointer);
       if (text !== undefined) {
         startEdit(run, { x: e.clientX, y: e.clientY });
         return;
       }
     }
-    if (!selected.includes(id)) {
+    if (!selected.includes(id) || (grouped && selected.length === 1)) {
       /* a click on a member of a group selects the group, so the drag that follows moves it whole */
       if (groupEnteredRef.current !== id) setGroupEntered(null);
       selectObjects([id]);
@@ -3712,6 +3803,8 @@ export function Editor({
     const el = body.current;
     const slideNow = slideRef.current;
     if (!el || !slideNow || editingRef.current) return;
+    /* Commenting and Viewing mode: no crop, no member entry, no caret (SPEC-3 5.3) */
+    if (!editableRef.current) return;
     const id = resolveObject(e.target, el, slideNow);
     if (id === null) return;
     const block = blockById(slideNow, id);
@@ -3721,10 +3814,10 @@ export function Editor({
       return;
     }
     if (id === 'picture' && !isFreeformSlide(slideNow)) {
-      /* the photograph of a picture kind: convert, then crop mode on the picture object */
+      /* the photograph of a picture kind: crop mode on the picture object's box without a write;
+         the conversion travels with the crop's own commit (finding 19) */
       e.preventDefault();
-      pendingCrop.current = 'picture';
-      void toCanvas();
+      void enterCropProvisional('picture');
       return;
     }
     const tag = block?.pos?.group;
@@ -3834,7 +3927,7 @@ export function Editor({
   const hoverBox =
     hover !== null && !ids.includes(hover) && !activeHandle ? (boxes.blocks[hover] ?? null) : null;
   const handles =
-    shownSlide && !editing
+    shownSlide && !editing && editable
       ? handlesFor(shownSlide, boxes, selection, {
           ids,
           ...(crop ? { crop: { frame: crop.frame } } : {}),
@@ -3892,6 +3985,7 @@ export function Editor({
     slideId,
     k,
     boxes,
+    body: body.current,
     hover: hoverBox,
     selection,
     selectionBox,
@@ -3960,6 +4054,7 @@ export function Editor({
     freeform && 'is-freeform',
     space && 'is-pan',
     crop && 'is-crop',
+    !editable && 'is-readonly',
   ]
     .filter(Boolean)
     .join(' ');
@@ -3978,6 +4073,7 @@ export function Editor({
         data-paint={paint ? '' : undefined}
         data-pan={space ? '' : undefined}
         data-crop={crop ? '' : undefined}
+        data-mode={effectiveMode}
         tabIndex={-1}
         onDragOver={onDragOver}
         onDrop={onDrop}

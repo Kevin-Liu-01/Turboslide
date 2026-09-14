@@ -60,6 +60,7 @@ function viewOf(over: Partial<EditorOverlayView> = {}): EditorOverlayView {
     slideId: 'free',
     k: 0.5,
     boxes,
+    body: null,
     hover: null,
     selection: { kind: 'block', blockId: 'a' },
     selectionBox: boxes.blocks['a'] ?? null,

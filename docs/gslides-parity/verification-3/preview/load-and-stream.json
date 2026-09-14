@@ -1,0 +1,35 @@
+{
+  "base": "https://turboslide-dniaw7w8f-kl01s-projects.vercel.app",
+  "at": "2026-09-14T05:58:41.423Z",
+  "deck.copy (one slide) ms": "5864 status 200",
+  "one write: slide.update ms / revision visible after ms": "200 in 593 ms; visible in deck.info after 446 ms",
+  "one full commit (version.save) ms": "400 in 127 ms",
+  "load test": {
+    "writers": 5,
+    "writesEach": 10,
+    "seconds": 9.8,
+    "statuses": {
+      "200": 13,
+      "409": 34,
+      "500": 3
+    },
+    "p50": 542,
+    "p95": 1021,
+    "max": 2364,
+    "writesPerSecond": 5.1
+  },
+  "another deck's read after the burst": "200 in 282 ms",
+  "scratch revision after the burst": 14,
+  "stream": {
+    "status": 200,
+    "firstByteMs": 544,
+    "events": 30,
+    "comments": 17,
+    "hello": "{\"type\":\"hello\",\"seq\":0,\"revision\":0,\"clientId\":\"01e12cc2919cc73ac5690bef34483f63\",\"role\":\"owner\",\"clients\":[],\"editing\":0,\"tier\":\"blob\"}",
+    "retry": 2692,
+    "lastEventId": "14",
+    "lifetimeS": 261,
+    "closedBy": "server"
+  },
+  "cleanup": "trash 200 remove 200"
+}

@@ -1,4 +1,5 @@
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
+import { useContext } from 'react';
 
 import type { EditorOverlayView, LintBox } from '@turboslide/viewer/Editor';
 import type { Box, Handle } from '@turboslide/viewer/Gestures';
@@ -6,7 +7,9 @@ import { GuideLines } from '@turboslide/viewer/Guides';
 import { MarqueeRect } from '@turboslide/viewer/Marquee';
 import { objectTransform, ROTATE_HANDLE_GAP_PX, ROTATE_HANDLE_PX } from '@turboslide/viewer/rotate';
 
+import { CollabLayer } from './CollabLayer';
 import { DeckGuides } from './DeckGuides';
+import { EditorShellContext } from './editor-shell-context';
 import { cn } from './lib/cn';
 import { CANVAS } from './menus/strings';
 import { Rulers } from './Rulers';
@@ -335,6 +338,10 @@ function HandleButton({
 
 export function Overlay({ view }: OverlayProps) {
   const { k } = view;
+  /* the collaboration layer of round three (SPEC-3 4.4, 5.3, 5.7) draws from the editor shell
+     when the overlay is mounted under it; the viewer's own overlay (a test, the twin stage) has
+     no shell and draws none */
+  const shell = useContext(EditorShellContext);
   const chipHandle = view.handles.find((handle) => handle.shape === 'chip');
   const drawn = view.handles.filter((handle) => handle.shape !== 'chip');
   const onHandleKey = (e: ReactKeyboardEvent<HTMLButtonElement>, handle: Handle) => {
@@ -618,6 +625,7 @@ export function Overlay({ view }: OverlayProps) {
       ) : null}
       {flat.map((handle) => handleButton(handle, false))}
       {!rotated || view.count !== 1 ? turning.map((handle) => handleButton(handle, false)) : null}
+      {shell !== null ? <CollabLayer view={view} shell={shell} /> : null}
     </>
   );
 }

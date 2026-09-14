@@ -211,3 +211,121 @@
   font-size: 12px;
   color: var(--pt-titanium);
 }
+
+/* Round three (gslides-parity SPEC-3 0.45, 5.7; research 11 6.9, 8 P14): the author's 16 px chip
+   in a fixed box on the meta line, the window rows with up to four marks and the count, the tools
+   row with Only show named versions and Name current version, Show changes at the foot. */
+.ts-versions-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+}
+
+.ts-versions.is-history .ts-version {
+  grid-template-columns: 16px minmax(0, 1fr) auto auto;
+}
+
+.ts-version-mark {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+}
+
+.ts-chip-16 {
+  width: 16px;
+  height: 16px;
+}
+
+.ts-version-pick {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.ts-version-pick:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+.ts-version.is-picked {
+  background: var(--pt-plate);
+}
+
+.ts-version-author {
+  display: inline-block;
+  max-width: 140px;
+  vertical-align: bottom;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-version-window {
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-version-window-row {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr) 16px;
+  gap: 8px;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  margin: 0;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--pt-ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-version-window-row:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+/* the marks strip: a fixed 70 px for four 16 px marks at 2 px gaps and the +N */
+.ts-version-marks {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  width: 70px;
+}
+
+.ts-version-marks-more {
+  font: 500 9px/1 var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  color: var(--pt-ink-2);
+}
+
+.ts-version-window-chevron {
+  color: var(--pt-ink-2);
+  font-size: 11px;
+}
+
+.ts-versions-list.is-window {
+  padding-left: 12px;
+  border-left: 1px solid var(--pt-hair-soft);
+  margin-bottom: 4px;
+}
+
+.ts-versions-foot {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--pt-hair-soft);
+}

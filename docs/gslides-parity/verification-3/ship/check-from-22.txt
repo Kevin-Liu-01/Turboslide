@@ -1,0 +1,659 @@
+check 22/28: pnpm exec turboslide export decks/fixture/gslides --mode native --out .turboslide/gs-native && pnpm exec turboslide export check .turboslide/gs-native && pnpm exec turboslide export decks/fixture/gslides --mode flatten --out .turboslide/gs-flatten && pnpm exec turboslide export check .turboslide/gs-flatten && node -e "const fs=require('fs'); const dir='.turboslide/gs-flatten'; const reports=fs.readdirSync(dir).filter(f=>f.endsWith('.json')&&!f.endsWith('.check.json')); if(reports.length===0) process.exit(1); for (const f of reports) { const r=JSON.parse(fs.readFileSync(dir+'/'+f)); const perfect = r.perfect ?? (r.themes ?? r.reports ?? []).every(t=>t.perfect); if(perfect!==true){ console.error(f+': flatten report is not perfect'); process.exit(1) } }"
+export: pptx native (editable text), 28 slide(s) x light,dark, fonts exact -> /Users/kevinliu/repos/Turboslide/.turboslide/gs-native
+   1 title light 631 ms, 2 text(s), 2 raster(s)
+   2 breaks light 241 ms, 3 text(s), 1 raster(s)
+   3 table light 235 ms, 17 text(s), 1 raster(s)
+   4 numbered light 323 ms, 8 text(s), 1 raster(s)
+   5 links light 292 ms, 3 text(s), 1 raster(s)
+   6 prompt light 266 ms, 0 text(s), 1 raster(s)
+   7 styles light 282 ms, 3 text(s), 1 raster(s)
+   8 canvas-title light 278 ms, 5 text(s), 3 raster(s)
+   9 canvas-opener light 524 ms, 3 text(s), 2 raster(s)
+  10 rotated light 325 ms, 2 text(s), 2 raster(s)
+  11 grouped light 233 ms, 2 text(s), 1 raster(s)
+  12 shapes light 209 ms, 5 text(s), 1 raster(s)
+  13 lines light 257 ms, 3 text(s), 1 raster(s)
+  14 word-art light 267 ms, 2 text(s), 1 raster(s)
+  15 shadow light 350 ms, 2 text(s), 2 raster(s)
+  16 background-color light 433 ms, 2 text(s), 1 raster(s)
+  17 background-picture light 491 ms, 2 text(s), 3 raster(s)
+  18 background-dither light 551 ms, 2 text(s), 2 raster(s)
+  19 picture-dither-strength light 432 ms, 2 text(s), 2 raster(s)
+  20 image-tools light 433 ms, 1 text(s), 4 raster(s)
+  21 table-merge light 283 ms, 14 text(s), 1 raster(s)
+  22 chart-bar light 308 ms, 2 text(s), 1 raster(s)
+  23 chart-line light 307 ms, 1 text(s), 1 raster(s)
+  24 chart-pie light 217 ms, 1 text(s), 1 raster(s)
+  25 diagram light 191 ms, 5 text(s), 1 raster(s)
+  26 bullets light 183 ms, 13 text(s), 1 raster(s)
+  27 spacing light 192 ms, 3 text(s), 1 raster(s)
+  28 autofit light 192 ms, 2 text(s), 1 raster(s)
+   1 title dark 427 ms, 2 text(s), 2 raster(s)
+   2 breaks dark 191 ms, 3 text(s), 1 raster(s)
+   3 table dark 192 ms, 17 text(s), 1 raster(s)
+   4 numbered dark 200 ms, 8 text(s), 1 raster(s)
+   5 links dark 191 ms, 3 text(s), 1 raster(s)
+   6 prompt dark 200 ms, 0 text(s), 1 raster(s)
+   7 styles dark 217 ms, 3 text(s), 1 raster(s)
+   8 canvas-title dark 234 ms, 5 text(s), 3 raster(s)
+   9 canvas-opener dark 324 ms, 3 text(s), 2 raster(s)
+  10 rotated dark 234 ms, 2 text(s), 2 raster(s)
+  11 grouped dark 183 ms, 2 text(s), 1 raster(s)
+  12 shapes dark 192 ms, 5 text(s), 1 raster(s)
+  13 lines dark 192 ms, 3 text(s), 1 raster(s)
+  14 word-art dark 184 ms, 2 text(s), 1 raster(s)
+  15 shadow dark 232 ms, 2 text(s), 2 raster(s)
+  16 background-color dark 192 ms, 2 text(s), 1 raster(s)
+  17 background-picture dark 317 ms, 2 text(s), 3 raster(s)
+  18 background-dither dark 325 ms, 2 text(s), 2 raster(s)
+  19 picture-dither-strength dark 225 ms, 2 text(s), 2 raster(s)
+  20 image-tools dark 283 ms, 1 text(s), 4 raster(s)
+  21 table-merge dark 201 ms, 14 text(s), 1 raster(s)
+  22 chart-bar dark 182 ms, 2 text(s), 1 raster(s)
+  23 chart-line dark 201 ms, 1 text(s), 1 raster(s)
+  24 chart-pie dark 183 ms, 1 text(s), 1 raster(s)
+  25 diagram dark 217 ms, 5 text(s), 1 raster(s)
+  26 bullets dark 191 ms, 13 text(s), 1 raster(s)
+  27 spacing dark 193 ms, 3 text(s), 1 raster(s)
+  28 autofit dark 191 ms, 2 text(s), 1 raster(s)
+export: wrote /Users/kevinliu/repos/Turboslide/.turboslide/gs-native/gslides-light.pptx (1.32 MiB)
+export: wrote /Users/kevinliu/repos/Turboslide/.turboslide/gs-native/gslides-dark.pptx (1.34 MiB)
+export: wrote /Users/kevinliu/repos/Turboslide/.turboslide/gs-native/gslides-both.zip (2.66 MiB)
+export: 2 file(s) plus the zip of both, revision 2, geometry in bounds, perfect false, fonts embedded 0, required on viewer 10, passed true, 1 skipped slide(s) left out, 17.8 s
+  residual: merged report over light and dark; theme names the first, per-theme reports are beside this file
+  residual: renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max
+  residual: native (editable text): text boxes at the browser boxes, layout within 3 px; the glyph antialiasing is the viewer's
+  residual: rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x
+  residual: package: 157 parts, 186 relationships, valid against the content types and relationships
+  residual: skipped: 1 slide(s) left out (skipped); pass includeSkipped to carry them
+  residual: table: table#table written as a:tbl (4 by 4); the per cell 3 px budget is measured by the verify loop, which falls back to ruled rows when a cell misses it
+  residual: paths: ts:lines#closed is a curve through its points; the file holds the sheet's Catmull-Rom cubics as a:cubicBezTo segments (gslides-parity SPEC-2 2.4.3)
+  residual: background-picture: the picture object photo covers the sheet at the bottom of the stack and travels as the slide background, the form a picture kind exports (gslides-parity SPEC-2 2.6.4)
+  residual: dither: background-dither#photo cab7a9fe5523 variant
+  residual: background-dither: the picture object photo covers the sheet at the bottom of the stack and travels as the slide background from its dither variant file (gslides-parity SPEC-3 10.4)
+  residual: dither: picture-dither-strength#photo e908a7883d7b variant
+  residual: table: table-merge#table written as a:tbl (4 by 4, 1 merged cell(s)); the per cell 3 px budget is measured by the verify loop, which falls back to ruled rows when a cell misses it
+  residual: chart: chart-bar#chart written as a bar chart part (addChart); its box is a picture region in the verify loop, reported and never gated (gslides-parity SPEC-2 2.8.1)
+  residual: chart: chart-line#chart written as a line chart part (addChart); its box is a picture region in the verify loop, reported and never gated (gslides-parity SPEC-2 2.8.1)
+  residual: chart: chart-pie#chart written as a pie chart part (addChart); its box is a picture region in the verify loop, reported and never gated (gslides-parity SPEC-2 2.8.1)
+  residual: connectors: 4 connector(s) written as p:cxnSp with stCxn and endCxn on their targets, so PowerPoint moves them with the shapes (gslides-parity SPEC-2 2.4.7)
+  residual: rotation: 6 object(s) carry a rotation or a flip on their own xfrm; a rotated group is written per member (gslides-parity SPEC-2 2.1)
+  residual: package: 27 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)
+  residual: package: 85 kern="0" attribute(s) and 0 empty ext list(s) removed; 3 custGeom
+  residual: links: 9 hyperlink(s) written (a URL as is, a slide link as a jump to its number in this file; SPEC 7.2.7, 7.2.8)
+  residual: notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)
+  residual: fonts not embedded: GT Inter Display, GT Inter Text 26, GT Inter Text 14, GT Inter Text 22, GT Inter Text 20 Medium, GT Inter Text 20, GT Inter Text 24 Medium, GT Inter Text 15, GT Inter Text 18, GT Inter Text 22 Medium; a viewer without them installed substitutes (SPEC 8.4); --embed-fonts embeds them
+  residual: both: gslides-both.zip holds the light and dark files
+  quicklook: /usr/bin/qlmanage -t -s 3200 -o /Users/kevinliu/repos/Turboslide/.turboslide/gs-native/check /Users/kevinliu/repos/Turboslide/.turboslide/gs-native/gslides-dark.pptx
+check: gslides-dark.pptx: 1.34 MiB, 157 parts, 28 slide(s), 28 notes part(s)
+check: page: 12192000 by 6858000 EMU (13.333 by 7.5 in); 225 shapes, 0 out of bounds
+check: media: 1 png-1bit, 15 png-rgba; 1.23 MiB
+check: fonts embedded: none
+check: titles: 28 of 28 slide(s) carry a title placeholder; slide names 28 set
+check: checklist: 3 custGeom, 0 normAutofit, 0 kern="0"
+check: round two: 1 italic run(s), 6 rotated, 17 group(s), 3 chart part(s), 4 attached connector(s), 1 numCol, 1 avLst, 2 table(s) with 3 merged cell(s)
+check: relationships: 186 checked, 0 invalid; content types: 0 undeclared part(s), 0 override(s) for missing parts
+check: python-pptx: reopened, 28 slide(s), 189 shape(s) (/Users/kevinliu/repos/Turboslide/.turboslide/venv/bin/python)
+check: quicklook: first page rendered at 3200 by 1805 in 250 ms (/Users/kevinliu/repos/Turboslide/.turboslide/gs-native/check/gslides-dark.pptx.quicklook.png)
+check: valid
+  quicklook: /usr/bin/qlmanage -t -s 3200 -o /Users/kevinliu/repos/Turboslide/.turboslide/gs-native/check /Users/kevinliu/repos/Turboslide/.turboslide/gs-native/gslides-light.pptx
+check: gslides-light.pptx: 1.32 MiB, 157 parts, 28 slide(s), 28 notes part(s)
+check: page: 12192000 by 6858000 EMU (13.333 by 7.5 in); 225 shapes, 0 out of bounds
+check: media: 1 png-1bit, 15 png-rgba; 1.20 MiB
+check: fonts embedded: none
+check: titles: 28 of 28 slide(s) carry a title placeholder; slide names 28 set
+check: checklist: 3 custGeom, 0 normAutofit, 0 kern="0"
+check: round two: 1 italic run(s), 6 rotated, 17 group(s), 3 chart part(s), 4 attached connector(s), 1 numCol, 1 avLst, 2 table(s) with 3 merged cell(s)
+check: relationships: 186 checked, 0 invalid; content types: 0 undeclared part(s), 0 override(s) for missing parts
+check: python-pptx: reopened, 28 slide(s), 189 shape(s) (/Users/kevinliu/repos/Turboslide/.turboslide/venv/bin/python)
+check: quicklook: first page rendered at 3200 by 1805 in 226 ms (/Users/kevinliu/repos/Turboslide/.turboslide/gs-native/check/gslides-light.pptx.quicklook.png)
+check: valid
+export: pptx flatten (perfect), 28 slide(s) x light,dark, fonts exact -> /Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten
+   1 title light 368 ms, 2 text(s), 2 raster(s)
+   2 breaks light 213 ms, 3 text(s), 1 raster(s)
+   3 table light 235 ms, 17 text(s), 1 raster(s)
+   4 numbered light 241 ms, 8 text(s), 1 raster(s)
+   5 links light 338 ms, 3 text(s), 1 raster(s)
+   6 prompt light 198 ms, 0 text(s), 1 raster(s)
+   7 styles light 316 ms, 3 text(s), 1 raster(s)
+   8 canvas-title light 619 ms, 5 text(s), 3 raster(s)
+   9 canvas-opener light 511 ms, 3 text(s), 2 raster(s)
+  10 rotated light 326 ms, 2 text(s), 2 raster(s)
+  11 grouped light 201 ms, 2 text(s), 1 raster(s)
+  12 shapes light 204 ms, 5 text(s), 1 raster(s)
+  13 lines light 190 ms, 3 text(s), 1 raster(s)
+  14 word-art light 255 ms, 2 text(s), 1 raster(s)
+  15 shadow light 294 ms, 2 text(s), 2 raster(s)
+  16 background-color light 230 ms, 2 text(s), 1 raster(s)
+  17 background-picture light 240 ms, 2 text(s), 3 raster(s)
+  18 background-dither light 219 ms, 2 text(s), 2 raster(s)
+  19 picture-dither-strength light 215 ms, 2 text(s), 2 raster(s)
+  20 image-tools light 291 ms, 1 text(s), 4 raster(s)
+  21 table-merge light 261 ms, 14 text(s), 1 raster(s)
+  22 chart-bar light 215 ms, 2 text(s), 1 raster(s)
+  23 chart-line light 200 ms, 1 text(s), 1 raster(s)
+  24 chart-pie light 193 ms, 1 text(s), 1 raster(s)
+  25 diagram light 212 ms, 5 text(s), 1 raster(s)
+  26 bullets light 326 ms, 13 text(s), 1 raster(s)
+  27 spacing light 288 ms, 3 text(s), 1 raster(s)
+  28 autofit light 249 ms, 2 text(s), 1 raster(s)
+   1 title dark 534 ms, 2 text(s), 2 raster(s)
+   2 breaks dark 325 ms, 3 text(s), 1 raster(s)
+   3 table dark 305 ms, 17 text(s), 1 raster(s)
+   4 numbered dark 295 ms, 8 text(s), 1 raster(s)
+   5 links dark 258 ms, 3 text(s), 1 raster(s)
+   6 prompt dark 222 ms, 0 text(s), 1 raster(s)
+   7 styles dark 311 ms, 3 text(s), 1 raster(s)
+   8 canvas-title dark 343 ms, 5 text(s), 3 raster(s)
+   9 canvas-opener dark 439 ms, 3 text(s), 2 raster(s)
+  10 rotated dark 318 ms, 2 text(s), 2 raster(s)
+  11 grouped dark 299 ms, 2 text(s), 1 raster(s)
+  12 shapes dark 327 ms, 5 text(s), 1 raster(s)
+  13 lines dark 405 ms, 3 text(s), 1 raster(s)
+  14 word-art dark 345 ms, 2 text(s), 1 raster(s)
+  15 shadow dark 306 ms, 2 text(s), 2 raster(s)
+  16 background-color dark 307 ms, 2 text(s), 1 raster(s)
+  17 background-picture dark 379 ms, 2 text(s), 3 raster(s)
+  18 background-dither dark 428 ms, 2 text(s), 2 raster(s)
+  19 picture-dither-strength dark 388 ms, 2 text(s), 2 raster(s)
+  20 image-tools dark 376 ms, 1 text(s), 4 raster(s)
+  21 table-merge dark 228 ms, 14 text(s), 1 raster(s)
+  22 chart-bar dark 192 ms, 2 text(s), 1 raster(s)
+  23 chart-line dark 195 ms, 1 text(s), 1 raster(s)
+  24 chart-pie dark 185 ms, 1 text(s), 1 raster(s)
+  25 diagram dark 187 ms, 5 text(s), 1 raster(s)
+  26 bullets dark 195 ms, 13 text(s), 1 raster(s)
+  27 spacing dark 186 ms, 3 text(s), 1 raster(s)
+  28 autofit dark 193 ms, 2 text(s), 1 raster(s)
+   1 title light page png-palette 36.4 KiB, 640 colors, 0.000 percent mismatch
+   2 breaks light page png-palette 45.5 KiB, 412 colors, 0.000 percent mismatch
+   3 table light page png-palette 31.0 KiB, 417 colors, 0.000 percent mismatch
+   4 numbered light page png-palette 34.4 KiB, 412 colors, 0.000 percent mismatch
+   5 links light page png-palette 30.6 KiB, 411 colors, 0.000 percent mismatch
+   6 prompt light page png-palette 11.9 KiB, 182 colors, 0.000 percent mismatch
+   7 styles light page png-palette 52.2 KiB, 869 colors, 0.000 percent mismatch
+   8 canvas-title light page png-palette 88.8 KiB, 652 colors, 0.000 percent mismatch
+   9 canvas-opener light page png-palette 349.7 KiB, 567 colors, 0.000 percent mismatch
+  10 rotated light page png-palette 99.0 KiB, 415 colors, 0.000 percent mismatch
+  11 grouped light page png-palette 30.0 KiB, 390 colors, 0.000 percent mismatch
+  12 shapes light page png-palette 35.6 KiB, 400 colors, 0.000 percent mismatch
+  13 lines light page png-palette 29.4 KiB, 407 colors, 0.000 percent mismatch
+  14 word-art light page png-palette 34.2 KiB, 397 colors, 0.000 percent mismatch
+  15 shadow light page png-palette 79.1 KiB, 406 colors, 0.000 percent mismatch
+  16 background-color light page png-palette 32.9 KiB, 402 colors, 0.000 percent mismatch
+  17 background-picture light page png-palette 142.1 KiB, 940 colors, 0.000 percent mismatch
+  18 background-dither light page png-palette 47.3 KiB, 404 colors, 0.000 percent mismatch
+  19 picture-dither-strength light page png-palette 114.1 KiB, 413 colors, 0.000 percent mismatch
+  20 image-tools light page png-palette 85.4 KiB, 419 colors, 0.000 percent mismatch
+  21 table-merge light page png-palette 30.5 KiB, 402 colors, 0.000 percent mismatch
+  22 chart-bar light page png-palette 39.5 KiB, 657 colors, 0.000 percent mismatch
+  23 chart-line light page png-palette 39.7 KiB, 671 colors, 0.000 percent mismatch
+  24 chart-pie light page png-palette 33.3 KiB, 646 colors, 0.000 percent mismatch
+  25 diagram light page png-palette 25.2 KiB, 406 colors, 0.000 percent mismatch
+  26 bullets light page png-palette 57.9 KiB, 415 colors, 0.000 percent mismatch
+  27 spacing light page png-palette 52.5 KiB, 407 colors, 0.000 percent mismatch
+  28 autofit light page png-palette 51.6 KiB, 412 colors, 0.000 percent mismatch
+export: wrote /Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/gslides-light.pptx (1.80 MiB)
+   1 title dark page png-palette 36.3 KiB, 805 colors, 0.000 percent mismatch
+   2 breaks dark page png-palette 45.4 KiB, 431 colors, 0.000 percent mismatch
+   3 table dark page png-palette 31.1 KiB, 437 colors, 0.000 percent mismatch
+   4 numbered dark page png-palette 34.5 KiB, 431 colors, 0.000 percent mismatch
+   5 links dark page png-palette 30.6 KiB, 441 colors, 0.000 percent mismatch
+   6 prompt dark page png-palette 12.0 KiB, 197 colors, 0.000 percent mismatch
+   7 styles dark page png-palette 52.1 KiB, 835 colors, 0.000 percent mismatch
+   8 canvas-title dark page png-palette 88.8 KiB, 823 colors, 0.000 percent mismatch
+   9 canvas-opener dark page png-palette 351.9 KiB, 881 colors, 0.000 percent mismatch
+  10 rotated dark page png-palette 99.9 KiB, 651 colors, 0.000 percent mismatch
+  11 grouped dark page png-palette 29.9 KiB, 409 colors, 0.000 percent mismatch
+  12 shapes dark page png-palette 35.6 KiB, 494 colors, 0.000 percent mismatch
+  13 lines dark page png-palette 29.4 KiB, 430 colors, 0.000 percent mismatch
+  14 word-art dark page png-palette 34.2 KiB, 584 colors, 0.000 percent mismatch
+  15 shadow dark page png-palette 81.3 KiB, 664 colors, 0.000 percent mismatch
+  16 background-color dark page png-palette 32.9 KiB, 424 colors, 0.000 percent mismatch
+  17 background-picture dark page png-palette 143.4 KiB, 1217 colors, 0.000 percent mismatch
+  18 background-dither dark page png-palette 47.4 KiB, 428 colors, 0.000 percent mismatch
+  19 picture-dither-strength dark page png-palette 116.5 KiB, 551 colors, 0.000 percent mismatch
+  20 image-tools dark page png-palette 84.4 KiB, 619 colors, 0.000 percent mismatch
+  21 table-merge dark page png-palette 30.8 KiB, 490 colors, 0.000 percent mismatch
+  22 chart-bar dark page png-palette 39.2 KiB, 668 colors, 0.000 percent mismatch
+  23 chart-line dark page png-palette 39.5 KiB, 696 colors, 0.000 percent mismatch
+  24 chart-pie dark page png-palette 33.2 KiB, 655 colors, 0.000 percent mismatch
+  25 diagram dark page png-palette 25.2 KiB, 501 colors, 0.000 percent mismatch
+  26 bullets dark page png-palette 57.9 KiB, 435 colors, 0.000 percent mismatch
+  27 spacing dark page png-palette 52.5 KiB, 425 colors, 0.000 percent mismatch
+  28 autofit dark page png-palette 51.6 KiB, 430 colors, 0.000 percent mismatch
+export: wrote /Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/gslides-dark.pptx (1.80 MiB)
+export: wrote /Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/gslides-both.zip (3.60 MiB)
+export: 2 file(s) plus the zip of both, revision 2, geometry in bounds, perfect true, fonts embedded 0, required on viewer 9, passed true, 1 skipped slide(s) left out, 29.7 s
+  residual: merged report over light and dark; theme names the first, per-theme reports are beside this file
+  residual: renderer: Chrome for Testing 147.0.7727.15, ANGLE Metal, Apple M5 Max
+  residual: flatten (perfect): the slide is a 2x raster of the sheet under the page raster policy; text is an invisible native layer; the slide title is the slide name and a hidden title placeholder
+  residual: rasters: auto scale policy (auto is 3x for icons and marks, 1x for diagrams and the language specimen, 2x otherwise); two-tone pictures regenerated at 2x
+  residual: package: 161 parts, 194 relationships, valid against the content types and relationships
+  residual: skipped: 1 slide(s) left out (skipped); pass includeSkipped to carry them
+  residual: links: a slide link on an invisible run of the flatten layer is written as a slide jump; whether PowerPoint honours it under the cover picture is unverified (gslides-parity SPEC 7.2.8)
+  residual: dither: background-dither#photo cab7a9fe5523 variant
+  residual: dither: picture-dither-strength#photo e908a7883d7b variant
+  residual: rotation: 4 object(s) carry a rotation or a flip on their own xfrm; a rotated group is written per member (gslides-parity SPEC-2 2.1)
+  residual: package: 27 content type override(s) for parts the package does not hold removed (pptxgenjs writes one slideMaster override per slide)
+  residual: package: 85 kern="0" attribute(s) and 0 empty ext list(s) removed; 0 custGeom
+  residual: pages: 28 png-palette; 1.70 MiB of page rasters; worst decoded mismatch 0.000 percent at threshold 0.1 (perfect budget 0.1)
+  residual: links: 8 hyperlink(s) written (a URL as is, a slide link as a jump to its number in this file; SPEC 7.2.7, 7.2.8)
+  residual: notes: left out; pass includeNotes to carry the speaker notes (gslides-parity decision 15.2)
+  residual: fonts not embedded: GT Inter Display, GT Inter Text 26, GT Inter Text 14, GT Inter Text 22, GT Inter Text 20 Medium, GT Inter Text 20, GT Inter Text 24 Medium, GT Inter Text 15, GT Inter Text 22 Medium; the text layer is invisible, so no viewer draws them (docs/pptx.md)
+  residual: pages: 28 png-palette; 1.71 MiB of page rasters; worst decoded mismatch 0.000 percent at threshold 0.1 (perfect budget 0.1)
+  residual: both: gslides-both.zip holds the light and dark files
+  quicklook: /usr/bin/qlmanage -t -s 3200 -o /Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/check /Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/gslides-dark.pptx
+check: gslides-dark.pptx: 1.80 MiB, 161 parts, 28 slide(s), 28 notes part(s)
+check: page: 12192000 by 6858000 EMU (13.333 by 7.5 in); 197 shapes, 0 out of bounds
+check: media: 28 png-palette, 1 png-rgba; 1.71 MiB
+check: fonts embedded: none
+check: titles: 28 of 28 slide(s) carry a title placeholder; slide names 28 set
+check: checklist: 0 custGeom, 0 normAutofit, 0 kern="0"
+check: round two: 1 italic run(s), 4 rotated, 16 group(s), 0 chart part(s), 0 attached connector(s), 0 numCol, 0 avLst, 0 table(s) with 0 merged cell(s)
+check: relationships: 194 checked, 0 invalid; content types: 0 undeclared part(s), 0 override(s) for missing parts
+check: python-pptx: reopened, 28 slide(s), 165 shape(s) (/Users/kevinliu/repos/Turboslide/.turboslide/venv/bin/python)
+check: quicklook: first page rendered at 3200 by 1805 in 265 ms (/Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/check/gslides-dark.pptx.quicklook.png)
+check: valid
+  quicklook: /usr/bin/qlmanage -t -s 3200 -o /Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/check /Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/gslides-light.pptx
+check: gslides-light.pptx: 1.80 MiB, 161 parts, 28 slide(s), 28 notes part(s)
+check: page: 12192000 by 6858000 EMU (13.333 by 7.5 in); 197 shapes, 0 out of bounds
+check: media: 28 png-palette, 1 png-rgba; 1.70 MiB
+check: fonts embedded: none
+check: titles: 28 of 28 slide(s) carry a title placeholder; slide names 28 set
+check: checklist: 0 custGeom, 0 normAutofit, 0 kern="0"
+check: round two: 1 italic run(s), 4 rotated, 16 group(s), 0 chart part(s), 0 attached connector(s), 0 numCol, 0 avLst, 0 table(s) with 0 merged cell(s)
+check: relationships: 194 checked, 0 invalid; content types: 0 undeclared part(s), 0 override(s) for missing parts
+check: python-pptx: reopened, 28 slide(s), 165 shape(s) (/Users/kevinliu/repos/Turboslide/.turboslide/venv/bin/python)
+check: quicklook: first page rendered at 3200 by 1805 in 262 ms (/Users/kevinliu/repos/Turboslide/.turboslide/gs-flatten/check/gslides-light.pptx.quicklook.png)
+check: valid
+check 22/28: ok in 53.6 s
+check 23/28: pnpm exec turboslide fonts build --check
+fonts: /Users/kevinliu/repos/Turboslide/.turboslide/venv/bin/python /Users/kevinliu/repos/Turboslide/scripts/build-fonts.py --json --check
+fonts build --check: 0 stale file(s), version 4.001+gt.2
+check 23/28: ok in 47.8 s
+check 24/28: node scripts/canvas-fidelity.mjs --deck decks/gt-brand --deck decks/templates/gt-brand --deck decks/templates/blank --max-mismatch 0.005
+deck          slide                        kind       theme  mismatch  status
+gt-brand      opener-brand                 opener     light   0.000%  ok
+gt-brand      title                        title      light   0.094%  ok
+gt-brand      thesis                       statement  light   0.000%  ok
+gt-brand      reputation                   content    light   0.000%  ok
+gt-brand      why                          content    light   0.000%  ok
+gt-brand      mood-earth                   mood       light   0.000%  ok
+gt-brand      positioning                  content    light   0.000%  ok
+gt-brand      audience                     content    light   0.000%  ok
+gt-brand      values                       content    light   0.000%  ok
+gt-brand      mood-rosetta                 mood       light   0.000%  ok
+gt-brand      character                    content    light   0.000%  ok
+gt-brand      voice                        content    light   0.000%  ok
+gt-brand      inspirations                 content    light   0.000%  ok
+gt-brand      naming                       content    light   0.000%  ok
+gt-brand      mark                         content    light   0.000%  ok
+gt-brand      opener-design-system         opener     light   0.000%  ok
+gt-brand      compression                  content    light   0.000%  ok
+gt-brand      color                        content    light   0.000%  ok
+gt-brand      type                         content    light   0.000%  ok
+gt-brand      multilingual                 content    light   0.000%  ok
+gt-brand      ladder                       content    light   0.000%  ok
+gt-brand      lines                        content    light   0.000%  ok
+gt-brand      doubled-line                 content    light   0.000%  ok
+gt-brand      mood-calligraphy             mood       light   0.000%  ok
+gt-brand      diagrams                     content    light   0.000%  ok
+gt-brand      dither                       content    light   0.000%  ok
+gt-brand      iso                          content    light   0.000%  ok
+gt-brand      language-as-material         content    light   0.000%  ok
+gt-brand      motion                       content    light   0.000%  ok
+gt-brand      avoid                        content    light   0.000%  ok
+gt-brand      opener-website               opener     light   0.000%  ok
+gt-brand      surfaces                     content    light   0.000%  ok
+gt-brand      site                         content    light   0.000%  ok
+gt-brand      dark-mode                    content    light   0.000%  ok
+gt-brand      pages-a                      content    light   0.000%  ok
+gt-brand      pages-b                      content    light   0.000%  ok
+gt-brand      mood-lighthouse              mood       light   0.000%  ok
+gt-brand      details                      content    light   0.000%  ok
+gt-brand      details-two                  content    light   0.000%  ok
+gt-brand      shell-numbers                content    light   0.000%  ok
+gt-brand      horizon                      content    light   0.000%  ok
+gt-brand      opener-documentation         opener     light   0.000%  ok
+gt-brand      docs                         content    light   0.000%  ok
+gt-brand      nearest-page-routing         content    light   0.000%  ok
+gt-brand      mood-dictionary              mood       light   0.000%  ok
+gt-brand      docs-for-agents              content    light   0.000%  ok
+gt-brand      opener-blog                  opener     light   0.000%  ok
+gt-brand      blog-index                   content    light   0.000%  ok
+gt-brand      blog-covers                  content    light   0.000%  ok
+gt-brand      mood-devanagari              mood       light   0.000%  ok
+gt-brand      gem-smoke                    content    light   0.000%  ok
+gt-brand      blog-vision                  content    light   0.000%  ok
+gt-brand      content-rule                 content    light   0.000%  ok
+gt-brand      two-registers                content    light   0.000%  ok
+gt-brand      off-the-site                 content    light   0.000%  ok
+gt-brand      opener-developer-experience  opener     light   0.000%  ok
+gt-brand      dx                           content    light   0.000%  ok
+gt-brand      mood-cable                   mood       light   0.000%  ok
+gt-brand      cli                          content    light   0.000%  ok
+gt-brand      opener-prototemplate         opener     light   0.000%  ok
+gt-brand      lab                          content    light   0.000%  ok
+gt-brand      knowledge-base               content    light   0.000%  ok
+gt-brand      skills-marks                 content    light   0.000%  ok
+gt-brand      viewer-shell                 content    light   0.000%  ok
+gt-brand      shell-views                  content    light   0.000%  ok
+gt-brand      line-law                     content    light   0.000%  ok
+gt-brand      presenter-compare            content    light   0.000%  ok
+gt-brand      dossier                      content    light   0.000%  ok
+gt-brand      directions                   content    light   0.237%  ok
+gt-brand      mood-wave                    mood       light   0.000%  ok
+gt-brand      archive                      content    light   0.000%  ok
+gt-brand      engines                      content    light   0.000%  ok
+gt-brand      build-log                    content    light   0.000%  ok
+gt-brand      glyphfield                   content    light   0.000%  ok
+gt-brand      glyphfield-tools             content    light   0.000%  ok
+gt-brand      books-and-templates          content    light   0.000%  ok
+gt-brand      glyphfield-materials         content    light   0.000%  ok
+gt-brand      agent-api                    content    light   0.000%  ok
+gt-brand      opener-status                opener     light   0.000%  ok
+gt-brand      state                        content    light   0.000%  ok
+gt-brand      mood-compass                 mood       light   0.000%  ok
+gt-brand      identity-project             content    light   0.000%  ok
+gt-brand      fixed-points                 content    light   0.000%  ok
+gt-brand      goals                        content    light   0.000%  ok
+gt-brand      closing                      closing    light   0.000%  ok
+gt-brand      opener-brand                 opener     dark    0.000%  ok
+gt-brand      title                        title      dark    0.092%  ok
+gt-brand      thesis                       statement  dark    0.000%  ok
+gt-brand      reputation                   content    dark    0.000%  ok
+gt-brand      why                          content    dark    0.000%  ok
+gt-brand      mood-earth                   mood       dark    0.000%  ok
+gt-brand      positioning                  content    dark    0.000%  ok
+gt-brand      audience                     content    dark    0.000%  ok
+gt-brand      values                       content    dark    0.000%  ok
+gt-brand      mood-rosetta                 mood       dark    0.000%  ok
+gt-brand      character                    content    dark    0.000%  ok
+gt-brand      voice                        content    dark    0.000%  ok
+gt-brand      inspirations                 content    dark    0.000%  ok
+gt-brand      naming                       content    dark    0.000%  ok
+gt-brand      mark                         content    dark    0.000%  ok
+gt-brand      opener-design-system         opener     dark    0.000%  ok
+gt-brand      compression                  content    dark    0.000%  ok
+gt-brand      color                        content    dark    0.000%  ok
+gt-brand      type                         content    dark    0.000%  ok
+gt-brand      multilingual                 content    dark    0.000%  ok
+gt-brand      ladder                       content    dark    0.000%  ok
+gt-brand      lines                        content    dark    0.000%  ok
+gt-brand      doubled-line                 content    dark    0.000%  ok
+gt-brand      mood-calligraphy             mood       dark    0.000%  ok
+gt-brand      diagrams                     content    dark    0.000%  ok
+gt-brand      dither                       content    dark    0.000%  ok
+gt-brand      iso                          content    dark    0.000%  ok
+gt-brand      language-as-material         content    dark    0.000%  ok
+gt-brand      motion                       content    dark    0.000%  ok
+gt-brand      avoid                        content    dark    0.000%  ok
+gt-brand      opener-website               opener     dark    0.000%  ok
+gt-brand      surfaces                     content    dark    0.000%  ok
+gt-brand      site                         content    dark    0.000%  ok
+gt-brand      dark-mode                    content    dark    0.000%  ok
+gt-brand      pages-a                      content    dark    0.000%  ok
+gt-brand      pages-b                      content    dark    0.000%  ok
+gt-brand      mood-lighthouse              mood       dark    0.000%  ok
+gt-brand      details                      content    dark    0.000%  ok
+gt-brand      details-two                  content    dark    0.000%  ok
+gt-brand      shell-numbers                content    dark    0.000%  ok
+gt-brand      horizon                      content    dark    0.000%  ok
+gt-brand      opener-documentation         opener     dark    0.000%  ok
+gt-brand      docs                         content    dark    0.000%  ok
+gt-brand      nearest-page-routing         content    dark    0.000%  ok
+gt-brand      mood-dictionary              mood       dark    0.000%  ok
+gt-brand      docs-for-agents              content    dark    0.000%  ok
+gt-brand      opener-blog                  opener     dark    0.000%  ok
+gt-brand      blog-index                   content    dark    0.000%  ok
+gt-brand      blog-covers                  content    dark    0.000%  ok
+gt-brand      mood-devanagari              mood       dark    0.000%  ok
+gt-brand      gem-smoke                    content    dark    0.000%  ok
+gt-brand      blog-vision                  content    dark    0.000%  ok
+gt-brand      content-rule                 content    dark    0.000%  ok
+gt-brand      two-registers                content    dark    0.000%  ok
+gt-brand      off-the-site                 content    dark    0.000%  ok
+gt-brand      opener-developer-experience  opener     dark    0.000%  ok
+gt-brand      dx                           content    dark    0.000%  ok
+gt-brand      mood-cable                   mood       dark    0.000%  ok
+gt-brand      cli                          content    dark    0.000%  ok
+gt-brand      opener-prototemplate         opener     dark    0.000%  ok
+gt-brand      lab                          content    dark    0.000%  ok
+gt-brand      knowledge-base               content    dark    0.000%  ok
+gt-brand      skills-marks                 content    dark    0.000%  ok
+gt-brand      viewer-shell                 content    dark    0.000%  ok
+gt-brand      shell-views                  content    dark    0.000%  ok
+gt-brand      line-law                     content    dark    0.000%  ok
+gt-brand      presenter-compare            content    dark    0.000%  ok
+gt-brand      dossier                      content    dark    0.000%  ok
+gt-brand      directions                   content    dark    0.262%  ok
+gt-brand      mood-wave                    mood       dark    0.000%  ok
+gt-brand      archive                      content    dark    0.000%  ok
+gt-brand      engines                      content    dark    0.000%  ok
+gt-brand      build-log                    content    dark    0.000%  ok
+gt-brand      glyphfield                   content    dark    0.000%  ok
+gt-brand      glyphfield-tools             content    dark    0.000%  ok
+gt-brand      books-and-templates          content    dark    0.000%  ok
+gt-brand      glyphfield-materials         content    dark    0.000%  ok
+gt-brand      agent-api                    content    dark    0.000%  ok
+gt-brand      opener-status                opener     dark    0.000%  ok
+gt-brand      state                        content    dark    0.000%  ok
+gt-brand      mood-compass                 mood       dark    0.000%  ok
+gt-brand      identity-project             content    dark    0.000%  ok
+gt-brand      fixed-points                 content    dark    0.000%  ok
+gt-brand      goals                        content    dark    0.000%  ok
+gt-brand      closing                      closing    dark    0.000%  ok
+gt-brand      opener-brand                 opener     light   0.000%  ok
+gt-brand      title                        title      light   0.094%  ok
+gt-brand      thesis                       statement  light   0.000%  ok
+gt-brand      reputation                   content    light   0.000%  ok
+gt-brand      why                          content    light   0.000%  ok
+gt-brand      mood-earth                   mood       light   0.000%  ok
+gt-brand      positioning                  content    light   0.000%  ok
+gt-brand      audience                     content    light   0.000%  ok
+gt-brand      values                       content    light   0.000%  ok
+gt-brand      mood-rosetta                 mood       light   0.000%  ok
+gt-brand      character                    content    light   0.000%  ok
+gt-brand      voice                        content    light   0.000%  ok
+gt-brand      inspirations                 content    light   0.000%  ok
+gt-brand      naming                       content    light   0.000%  ok
+gt-brand      mark                         content    light   0.000%  ok
+gt-brand      opener-design-system         opener     light   0.000%  ok
+gt-brand      compression                  content    light   0.000%  ok
+gt-brand      color                        content    light   0.000%  ok
+gt-brand      type                         content    light   0.000%  ok
+gt-brand      multilingual                 content    light   0.000%  ok
+gt-brand      ladder                       content    light   0.000%  ok
+gt-brand      lines                        content    light   0.000%  ok
+gt-brand      doubled-line                 content    light   0.000%  ok
+gt-brand      mood-calligraphy             mood       light   0.000%  ok
+gt-brand      diagrams                     content    light   0.000%  ok
+gt-brand      dither                       content    light   0.000%  ok
+gt-brand      iso                          content    light   0.000%  ok
+gt-brand      language-as-material         content    light   0.000%  ok
+gt-brand      motion                       content    light   0.000%  ok
+gt-brand      avoid                        content    light   0.000%  ok
+gt-brand      opener-website               opener     light   0.000%  ok
+gt-brand      surfaces                     content    light   0.000%  ok
+gt-brand      site                         content    light   0.000%  ok
+gt-brand      dark-mode                    content    light   0.000%  ok
+gt-brand      pages-a                      content    light   0.000%  ok
+gt-brand      pages-b                      content    light   0.000%  ok
+gt-brand      mood-lighthouse              mood       light   0.000%  ok
+gt-brand      details                      content    light   0.000%  ok
+gt-brand      details-two                  content    light   0.000%  ok
+gt-brand      shell-numbers                content    light   0.000%  ok
+gt-brand      horizon                      content    light   0.000%  ok
+gt-brand      opener-documentation         opener     light   0.000%  ok
+gt-brand      docs                         content    light   0.000%  ok
+gt-brand      nearest-page-routing         content    light   0.000%  ok
+gt-brand      mood-dictionary              mood       light   0.000%  ok
+gt-brand      docs-for-agents              content    light   0.000%  ok
+gt-brand      opener-blog                  opener     light   0.000%  ok
+gt-brand      blog-index                   content    light   0.000%  ok
+gt-brand      blog-covers                  content    light   0.000%  ok
+gt-brand      mood-devanagari              mood       light   0.000%  ok
+gt-brand      gem-smoke                    content    light   0.000%  ok
+gt-brand      blog-vision                  content    light   0.000%  ok
+gt-brand      content-rule                 content    light   0.000%  ok
+gt-brand      two-registers                content    light   0.000%  ok
+gt-brand      off-the-site                 content    light   0.000%  ok
+gt-brand      opener-developer-experience  opener     light   0.000%  ok
+gt-brand      dx                           content    light   0.000%  ok
+gt-brand      mood-cable                   mood       light   0.000%  ok
+gt-brand      cli                          content    light   0.000%  ok
+gt-brand      opener-prototemplate         opener     light   0.000%  ok
+gt-brand      lab                          content    light   0.000%  ok
+gt-brand      knowledge-base               content    light   0.000%  ok
+gt-brand      skills-marks                 content    light   0.000%  ok
+gt-brand      viewer-shell                 content    light   0.000%  ok
+gt-brand      shell-views                  content    light   0.000%  ok
+gt-brand      line-law                     content    light   0.000%  ok
+gt-brand      presenter-compare            content    light   0.000%  ok
+gt-brand      dossier                      content    light   0.000%  ok
+gt-brand      directions                   content    light   0.143%  ok
+gt-brand      mood-wave                    mood       light   0.000%  ok
+gt-brand      archive                      content    light   0.000%  ok
+gt-brand      engines                      content    light   0.000%  ok
+gt-brand      build-log                    content    light   0.000%  ok
+gt-brand      glyphfield                   content    light   0.000%  ok
+gt-brand      glyphfield-tools             content    light   0.000%  ok
+gt-brand      books-and-templates          content    light   0.000%  ok
+gt-brand      glyphfield-materials         content    light   0.000%  ok
+gt-brand      agent-api                    content    light   0.000%  ok
+gt-brand      opener-status                opener     light   0.000%  ok
+gt-brand      state                        content    light   0.000%  ok
+gt-brand      mood-compass                 mood       light   0.000%  ok
+gt-brand      identity-project             content    light   0.000%  ok
+gt-brand      fixed-points                 content    light   0.000%  ok
+gt-brand      goals                        content    light   0.000%  ok
+gt-brand      closing                      closing    light   0.000%  ok
+gt-brand      opener-brand                 opener     dark    0.000%  ok
+gt-brand      title                        title      dark    0.092%  ok
+gt-brand      thesis                       statement  dark    0.000%  ok
+gt-brand      reputation                   content    dark    0.000%  ok
+gt-brand      why                          content    dark    0.000%  ok
+gt-brand      mood-earth                   mood       dark    0.000%  ok
+gt-brand      positioning                  content    dark    0.000%  ok
+gt-brand      audience                     content    dark    0.000%  ok
+gt-brand      values                       content    dark    0.000%  ok
+gt-brand      mood-rosetta                 mood       dark    0.000%  ok
+gt-brand      character                    content    dark    0.000%  ok
+gt-brand      voice                        content    dark    0.000%  ok
+gt-brand      inspirations                 content    dark    0.000%  ok
+gt-brand      naming                       content    dark    0.000%  ok
+gt-brand      mark                         content    dark    0.000%  ok
+gt-brand      opener-design-system         opener     dark    0.000%  ok
+gt-brand      compression                  content    dark    0.000%  ok
+gt-brand      color                        content    dark    0.000%  ok
+gt-brand      type                         content    dark    0.000%  ok
+gt-brand      multilingual                 content    dark    0.000%  ok
+gt-brand      ladder                       content    dark    0.000%  ok
+gt-brand      lines                        content    dark    0.000%  ok
+gt-brand      doubled-line                 content    dark    0.000%  ok
+gt-brand      mood-calligraphy             mood       dark    0.000%  ok
+gt-brand      diagrams                     content    dark    0.000%  ok
+gt-brand      dither                       content    dark    0.000%  ok
+gt-brand      iso                          content    dark    0.000%  ok
+gt-brand      language-as-material         content    dark    0.000%  ok
+gt-brand      motion                       content    dark    0.000%  ok
+gt-brand      avoid                        content    dark    0.000%  ok
+gt-brand      opener-website               opener     dark    0.000%  ok
+gt-brand      surfaces                     content    dark    0.000%  ok
+gt-brand      site                         content    dark    0.000%  ok
+gt-brand      dark-mode                    content    dark    0.000%  ok
+gt-brand      pages-a                      content    dark    0.000%  ok
+gt-brand      pages-b                      content    dark    0.000%  ok
+gt-brand      mood-lighthouse              mood       dark    0.000%  ok
+gt-brand      details                      content    dark    0.000%  ok
+gt-brand      details-two                  content    dark    0.000%  ok
+gt-brand      shell-numbers                content    dark    0.000%  ok
+gt-brand      horizon                      content    dark    0.000%  ok
+gt-brand      opener-documentation         opener     dark    0.000%  ok
+gt-brand      docs                         content    dark    0.000%  ok
+gt-brand      nearest-page-routing         content    dark    0.000%  ok
+gt-brand      mood-dictionary              mood       dark    0.000%  ok
+gt-brand      docs-for-agents              content    dark    0.000%  ok
+gt-brand      opener-blog                  opener     dark    0.000%  ok
+gt-brand      blog-index                   content    dark    0.000%  ok
+gt-brand      blog-covers                  content    dark    0.000%  ok
+gt-brand      mood-devanagari              mood       dark    0.000%  ok
+gt-brand      gem-smoke                    content    dark    0.000%  ok
+gt-brand      blog-vision                  content    dark    0.000%  ok
+gt-brand      content-rule                 content    dark    0.000%  ok
+gt-brand      two-registers                content    dark    0.000%  ok
+gt-brand      off-the-site                 content    dark    0.000%  ok
+gt-brand      opener-developer-experience  opener     dark    0.000%  ok
+gt-brand      dx                           content    dark    0.000%  ok
+gt-brand      mood-cable                   mood       dark    0.000%  ok
+gt-brand      cli                          content    dark    0.000%  ok
+gt-brand      opener-prototemplate         opener     dark    0.000%  ok
+gt-brand      lab                          content    dark    0.000%  ok
+gt-brand      knowledge-base               content    dark    0.000%  ok
+gt-brand      skills-marks                 content    dark    0.000%  ok
+gt-brand      viewer-shell                 content    dark    0.000%  ok
+gt-brand      shell-views                  content    dark    0.000%  ok
+gt-brand      line-law                     content    dark    0.000%  ok
+gt-brand      presenter-compare            content    dark    0.000%  ok
+gt-brand      dossier                      content    dark    0.000%  ok
+gt-brand      directions                   content    dark    0.142%  ok
+gt-brand      mood-wave                    mood       dark    0.000%  ok
+gt-brand      archive                      content    dark    0.000%  ok
+gt-brand      engines                      content    dark    0.000%  ok
+gt-brand      build-log                    content    dark    0.000%  ok
+gt-brand      glyphfield                   content    dark    0.000%  ok
+gt-brand      glyphfield-tools             content    dark    0.000%  ok
+gt-brand      books-and-templates          content    dark    0.000%  ok
+gt-brand      glyphfield-materials         content    dark    0.000%  ok
+gt-brand      agent-api                    content    dark    0.000%  ok
+gt-brand      opener-status                opener     dark    0.000%  ok
+gt-brand      state                        content    dark    0.000%  ok
+gt-brand      mood-compass                 mood       dark    0.000%  ok
+gt-brand      identity-project             content    dark    0.000%  ok
+gt-brand      fixed-points                 content    dark    0.000%  ok
+gt-brand      goals                        content    dark    0.000%  ok
+gt-brand      closing                      closing    dark    0.000%  ok
+blank         title                        title      light   0.021%  ok
+blank         title                        title      dark    0.021%  ok
+canvas-fidelity: 171 slide(s) converted, 342 pairs compared, 0 over budget; worst 0.262 percent (gt-brand/directions dark), mean 0.004 percent, threshold 0.1, budget 0.50 percent, 83.2 s
+check 24/28: ok in 83.6 s
+check 25/28: docker build -f docker/render-worker.Dockerfile -t turboslide-render-worker . && docker run --rm -v "$PWD/.turboslide/container:/work" turboslide-render-worker turboslide export decks/fixture/gslides --mode native --verify --out /work/gs-native
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            Install the buildx component to build images with BuildKit:
+            https://docs.docker.com/go/buildx/
+
+Sending build context to Docker daemon  839.9MB
+Step 1/18 : FROM node:24-trixie AS runtime
+ ---> 9516e2220ff6
+Step 2/18 : ARG CHROMIUM_REVISION=1217
+ ---> Using cache
+ ---> b4d77c4bbd61
+Step 3/18 : ARG PNPM_VERSION=11.15.1
+ ---> Using cache
+ ---> a55724a4d386
+Step 4/18 : ARG PNPM_INSTALL_FLAGS=--frozen-lockfile
+ ---> Using cache
+ ---> 4069c3ce4a09
+Step 5/18 : ENV DEBIAN_FRONTEND=noninteractive     PNPM_HOME=/pnpm     PATH=/pnpm:$PATH     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright     PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ ---> Using cache
+ ---> b054586d8052
+Step 6/18 : RUN apt-get update     && apt-get install -y --no-install-recommends         libreoffice-impress         libreoffice-draw         poppler-utils         fontconfig         fonts-liberation         fonts-dejavu-core         fonts-noto-core         ca-certificates         curl         unzip         libasound2t64         libatk-bridge2.0-0t64         libatk1.0-0t64         libatspi2.0-0t64         libcups2t64         libdbus-1-3         libdrm2         libgbm1         libnspr4         libnss3         libpango-1.0-0         libx11-6         libx11-xcb1         libxcb1         libxcomposite1         libxdamage1         libxext6         libxfixes3         libxi6         libxkbcommon0         libxrandr2         libxshmfence1     && rm -rf /var/lib/apt/lists/*     && soffice --version     && pdftoppm -v 2>&1 | head -1
+ ---> Using cache
+ ---> 7979f980ceb0
+Step 7/18 : RUN set -eux;     arch="$(dpkg --print-architecture)";     case "${arch}" in       arm64) zip="chromium-linux-arm64.zip" ;;       amd64) zip="chromium-linux.zip" ;;       *) echo "unsupported architecture ${arch}" >&2; exit 1 ;;     esac;     curl -fsSL "https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/${CHROMIUM_REVISION}/${zip}" -o /tmp/chromium.zip;     mkdir -p "/ms-playwright/chromium-${CHROMIUM_REVISION}";     unzip -q /tmp/chromium.zip -d "/ms-playwright/chromium-${CHROMIUM_REVISION}";     rm /tmp/chromium.zip;     "/ms-playwright/chromium-${CHROMIUM_REVISION}/chrome-linux/chrome" --version
+ ---> Using cache
+ ---> 33124aa499e6
+Step 8/18 : ENV TURBOSLIDE_CHROME=/ms-playwright/chromium-1217/chrome-linux/chrome     TURBOSLIDE_GPU=swiftshader
+ ---> Using cache
+ ---> 1a26706f2f2b
+Step 9/18 : RUN corepack enable && corepack prepare "pnpm@${PNPM_VERSION}" --activate
+ ---> Using cache
+ ---> 6727cf666d98
+Step 10/18 : WORKDIR /app
+ ---> Using cache
+ ---> 83c9f0a0d9b5
+Step 11/18 : COPY . .
+failed to copy files: failed to copy directory: write /docs/gslides-parity/design-4/type/previews/home-light.png: no space left on device
+check 25/28: FAIL exit 1 after 7.4 s
+check: stopped after a failure (192.4 s)

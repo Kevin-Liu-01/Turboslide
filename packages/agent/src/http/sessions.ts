@@ -17,6 +17,12 @@ export type StudioSession = {
   /** The action ids the page answers, from describe().actions of its active owner. */
   actions: string[];
   author?: string;
+  /**
+   * The principal the page attached as (gslides-parity SPEC-3 8.2): commands from an agent go to
+   * pages of the agent owner's identity only, and `list` and `attached` filter by it when asked.
+   * Written by the studio's server function from the request's identity, never from the body.
+   */
+  principalId?: string;
   url?: string;
   attachedAt: string;
   lastSeenAt: string;
@@ -35,6 +41,7 @@ export type AttachInput = {
   owner: SessionOwner;
   actions: readonly string[];
   author?: string;
+  principalId?: string;
   url?: string;
   state?: Record<string, unknown>;
 };
@@ -48,9 +55,16 @@ export type SessionRegistry = {
     patch?: Partial<Pick<AttachInput, 'actions' | 'state' | 'owner'>>,
   ) => StudioSession | undefined;
   detach: (id: string) => boolean;
-  list: (deckId?: string) => StudioSession[];
-  /** The most recently seen session on a deck that offers the action (or any, when action is absent). */
-  attached: (deckId: string, action?: string) => StudioSession | undefined;
+  /** Every session, or those on a deck, or those of one principal on a deck. */
+  list: (deckId?: string, principalId?: string) => StudioSession[];
+  /**
+   * The most recently seen session on a deck that offers the action (or any, when action is
+   * absent), of one principal when `principalId` is given (SPEC-3 8.2: an agent's commands go to
+   * its owner's pages and never to another identity's).
+   */
+  attached: (deckId: string, action?: string, principalId?: string) => StudioSession | undefined;
+  /** How many pages one principal holds on this instance, for the caps of SPEC-3 8.2. */
+  countFor: (principalId: string) => number;
   /** Pending commands for a session; resolves at the timeout with an empty list. */
   poll: (id: string, timeoutMs: number) => Promise<SessionCommand[]>;
   answer: (id: string, answer: SessionAnswer) => boolean;
@@ -155,6 +169,7 @@ export function createSessionRegistry(options: SessionRegistryOptions = {}): Ses
         owner: input.owner,
         actions: [...input.actions],
         ...(input.author !== undefined ? { author: input.author } : {}),
+        ...(input.principalId !== undefined ? { principalId: input.principalId } : {}),
         ...(input.url !== undefined ? { url: input.url } : {}),
         attachedAt: existing?.session.attachedAt ?? at,
         lastSeenAt: at,
@@ -182,17 +197,21 @@ export function createSessionRegistry(options: SessionRegistryOptions = {}): Ses
       drop(entry);
       return true;
     },
-    list(deckId) {
+    list(deckId, principalId) {
       registry.sweep();
       return [...entries.values()]
         .map((entry) => entry.session)
         .filter((session) => deckId === undefined || session.deckId === deckId)
+        .filter((session) => principalId === undefined || session.principalId === principalId)
         .sort((a, b) => b.lastSeenAt.localeCompare(a.lastSeenAt));
     },
-    attached(deckId, action) {
+    attached(deckId, action, principalId) {
       return registry
-        .list(deckId)
+        .list(deckId, principalId)
         .find((session) => action === undefined || session.actions.includes(action));
+    },
+    countFor(principalId) {
+      return registry.list(undefined, principalId).length;
     },
     poll(id, timeoutMs) {
       const entry = entries.get(id);

@@ -49,7 +49,10 @@ import { flagBoolean, flagList, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
 import { repoRootFor } from '../deck-files.ts';
 import { UsageError } from '../exit.ts';
-import { hostsPath, normalizeHost, resolveToken, saveHostToken } from '../hosts.ts';
+import { normalizeHost } from '../hosts.ts';
+import { authHeaders, readError, refused, tokenFor } from '../remote.ts';
+import { deckFollowCommand, deckWatchCommand } from './follow.ts';
+import { publish } from './share.ts';
 import { formatBytes } from '../output.ts';
 import { commit, deckGuides, deckSetBackground } from '../store-actions.ts';
 import type { StoreActionDeps, WriteContext } from '../store-actions.ts';
@@ -62,7 +65,13 @@ import {
   writeContext,
 } from '../write.ts';
 
-const USAGE = `usage: turboslide deck <create|rename|set|list|copy|trash|restore|remove|pack|unpack|push|pull|guides|background> ...
+const USAGE = `usage: turboslide deck <create|rename|set|list|copy|trash|restore|remove|pack|unpack|push|pull|guides|background|publish|unpublish|watch|follow> ...
+  deck publish <id> | deck unpublish <id>
+                                    the published player's token, printed once, and its revocation (deck.publish, deck.unpublish)
+  deck watch <id> [--from <studio>] [--since <n>]
+                                    the checkpoints and comment entries since a revision (deck.watch)
+  deck follow <id> --from <studio> [--push] [--comments] [--once]
+                                    mirror a hosted deck's records into decks/<id> (deck.follow)
   deck create <name> --from gt-brand|blank [--id <id>] [--decks <dir>]
                                     decks/<id> from decks/templates/<from> (gt-brand: the GT brand deck, 85 slides; blank: one title slide with the starter pictures)
   deck rename <name>                set the deck title (--deck, --base-revision, --author, --note, --json)
@@ -271,6 +280,14 @@ export async function deck(ctx: CommandContext): Promise<number> {
       return guides(inner);
     case 'background':
       return background(inner);
+    case 'publish':
+      return publish(inner, false);
+    case 'unpublish':
+      return publish(inner, true);
+    case 'watch':
+      return deckWatchCommand(inner);
+    case 'follow':
+      return deckFollowCommand(inner);
     default:
       throw new UsageError(`unknown subcommand "deck ${sub ?? ''}"\n${USAGE}`);
   }
@@ -617,59 +634,7 @@ async function unpack(ctx: CommandContext): Promise<number> {
 // ---------------------------------------------------------------------------------------------
 // The hosted routes
 
-type ErrorBody = { error?: { message?: string; status?: number; code?: string } };
-
 export type PushResult = UnpackResult & { url: string };
-
-/** The bearer token for a studio, from --token (saved for next time), the environment or the hosts file. */
-function tokenFor(ctx: CommandContext, url: string): string | undefined {
-  const flag = flagString(ctx.args, 'token');
-  const { token, source } = resolveToken(url, flag, ctx.env);
-  if (source === 'flag' && token !== undefined) {
-    const path = saveHostToken(url, token, ctx.env);
-    ctx.out.human(`token for ${normalizeHost(url)} saved to ${path}`);
-  }
-  return token;
-}
-
-/**
- * The bearer, plus the Trusted Sources header when VERCEL_OIDC_TOKEN is in the environment, so
- * push and pull reach a preview deployment behind Vercel Authentication the way
- * scripts/hosted-smoke.mjs does (docs/hosting.md section 7); neither value is printed.
- */
-function authHeaders(token: string | undefined): Record<string, string> {
-  const oidc = process.env.VERCEL_OIDC_TOKEN;
-  return {
-    ...(token === undefined ? {} : { authorization: `Bearer ${token}` }),
-    ...(oidc ? { 'x-vercel-trusted-oidc-idp-token': oidc } : {}),
-  };
-}
-
-async function readError(response: Response): Promise<string> {
-  let message = `${response.status} ${response.statusText}`.trim();
-  try {
-    const body = (await response.json()) as ErrorBody;
-    if (body.error?.message) message = body.error.message;
-  } catch {
-    // not JSON: the status line is the message
-  }
-  return message;
-}
-
-function refused(url: string, response: Response, message: string): UsageError {
-  const origin = normalizeHost(url);
-  if (response.status === 401) {
-    return new UsageError(
-      `${origin} refused the request: ${message}. Pass --token <TURBOSLIDE_TOKEN of the deployment> once; the CLI keeps it in ${hostsPath()}`,
-    );
-  }
-  if (response.status === 413) {
-    return new UsageError(
-      `${origin} refused the request: ${message}. A Vercel function accepts a 4.5 MB body; store the zip where the studio can read it (the deck store's Blob host) and pass --from-url <url>`,
-    );
-  }
-  return new UsageError(`${origin} answered ${response.status}: ${message}`);
-}
 
 /**
  * Uploads a bundle to a studio: the zip as the body, or `{ url }` when the bundle sits at a URL
@@ -700,7 +665,7 @@ export async function pushBundle(
     },
     body: body.body,
   });
-  if (!response.ok) throw refused(options.to, response, await readError(response));
+  if (!response.ok) throw refused(options.to, response, (await readError(response)).message);
   const result = (await response.json()) as UnpackResult & { editUrl?: string };
   return { ...result, url: new URL(result.editUrl ?? `/edit/${result.deckId}`, origin).toString() };
 }
@@ -716,11 +681,11 @@ export async function pullBundle(
     headers: { ...authHeaders(options.token), accept: `${BUNDLE_MEDIA_TYPE}, application/json` },
     redirect: 'follow',
   });
-  if (!response.ok) throw refused(options.from, response, await readError(response));
+  if (!response.ok) throw refused(options.from, response, (await readError(response)).message);
   const type = response.headers.get('content-type') ?? '';
   if (type.includes('application/json')) {
     throw new UsageError(
-      `${origin} answered JSON where a zip was expected: ${await readError(response)}`,
+      `${origin} answered JSON where a zip was expected: ${(await readError(response)).message}`,
     );
   }
   const bytes = new Uint8Array(await response.arrayBuffer());

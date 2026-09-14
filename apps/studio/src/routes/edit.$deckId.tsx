@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 
 import { createFileRoute, notFound, useNavigate } from '@tanstack/react-router';
 import type { ActionContext, Dispatcher } from '@turboslide/agent/dispatch';
@@ -11,7 +11,6 @@ import {
   SCOPE_ATTRIBUTE,
   registerStudioAutomation,
   studioAutomationForOwner,
-  viewerActionIds,
   windowActionIds,
 } from '@turboslide/agent/window/registry';
 import {
@@ -43,6 +42,7 @@ import {
   deckText,
   diagramInsert,
   lineSet,
+  pictureDither,
   shapeSet,
   slideApplyLayout,
   slideDuplicate,
@@ -97,6 +97,7 @@ import type {
   DiagramInsertInput,
   ExportTextInput,
   LineSetInput,
+  PictureDitherInput,
   ShapeSetInput,
   SlideApplyLayoutInput,
   SlideDuplicateInput,
@@ -131,17 +132,32 @@ import type {
 import { ContextMenu, contextMenuLabel } from '@turboslide/chrome/ContextMenu';
 import type { EditorDispatch } from '@turboslide/chrome/dispatch';
 import type {
+  CommentAnchorView,
+  CommentBodyInput,
+  CommentThreadView,
+  CommentView,
   DrawTool,
+  EditorAccess,
+  EditorAccount,
   EditorClipboard,
+  EditorComments,
+  EditorInbox,
+  EditorMode,
+  EditorPresence,
   EditorSelection,
   EditorShellInput,
+  EditorSync,
+  IdentityView,
+  InboxItemView,
+  NotificationLevel,
   PictureTarget,
+  PresenceParticipant,
 } from '@turboslide/chrome/editor-shell';
 import { useEditorShell } from '@turboslide/chrome/editor-shell-context';
 import type { EditorShellState } from '@turboslide/chrome/editor-shell-context';
 import { LayoutGrid } from '@turboslide/chrome/LayoutGrid';
-import type { MenuContext } from '@turboslide/chrome/menus/model';
-import { HOME, SNACKBARS } from '@turboslide/chrome/menus/strings';
+import type { CommentsDisplay, MenuContext } from '@turboslide/chrome/menus/model';
+import { HOME, REFUSALS, SNACKBARS } from '@turboslide/chrome/menus/strings';
 import { NOTES_DEFAULT_HEIGHT, NotesPane } from '@turboslide/chrome/NotesPane';
 import type { SidebarEdit } from '@turboslide/chrome/Sidebar';
 import type { SnackbarAction } from '@turboslide/chrome/Snackbar';
@@ -163,9 +179,43 @@ import type { SaveState } from '@turboslide/chrome/StatusChip';
 import { TwinStage } from '@turboslide/chrome/TwinStage';
 import { ViewerShell } from '@turboslide/chrome/ViewerShell';
 import { planPlayList } from '@turboslide/export/batch/plan';
+import { labelFor } from '@turboslide/identity/labels';
+import type { Entry, RoomEvent, RosterEntry } from '@turboslide/realtime/channel';
+import {
+  clearPendingMirror,
+  indexedDbPendingStore,
+  memoryPendingStore,
+} from '@turboslide/realtime/client/pending-store';
+import type { PendingStore } from '@turboslide/realtime/client/pending-store';
+import { createRoomClient } from '@turboslide/realtime/client/room-client';
+import type {
+  OpsResponse,
+  PersistedOffer,
+  Rejected,
+  RoomClient,
+  RoomTransport,
+  SyncStatus,
+} from '@turboslide/realtime/client/room-client';
+import { roomEventOf } from '@turboslide/realtime/protocol';
+import type { OpsPost, PresencePost } from '@turboslide/realtime/protocol';
 import { lintStatic } from '@turboslide/lint/lint-static';
 import { renderSlide } from '@turboslide/render/slide';
+import type { AccessRecord, Capability, Role, Via } from '@turboslide/schema/access';
+import { ACTIONS, isActionId } from '@turboslide/schema/actions';
 import type { ActionId, DeckTemplateId } from '@turboslide/schema/actions';
+import {
+  PRINCIPAL_ID_PATTERN,
+  anchorSlideId,
+  resolveAnchor,
+  threadIsFor,
+} from '@turboslide/schema/comments';
+import type {
+  Comment as ThreadComment,
+  CommentAnchor,
+  CommentBody,
+  Thread,
+} from '@turboslide/schema/comments';
+import type { Notification } from '@turboslide/store/inbox';
 import { SHAPE_KINDS } from '@turboslide/schema/blocks';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
 import { makeDiagram } from '@turboslide/schema/diagrams';
@@ -207,6 +257,11 @@ import type {
   EditorNotice,
 } from '@turboslide/viewer/Editor';
 import type { EditorTool } from '@turboslide/viewer/Gestures';
+import {
+  TEXT_UNDO_GROUP_MS,
+  announceTextChanged,
+  readRunText,
+} from '@turboslide/viewer/InlineText';
 import type { CaretInfo } from '@turboslide/viewer/InlineText';
 import { GRID_DEFAULT_TILE, GridView } from '@turboslide/viewer/GridView';
 import type { GridTileSize } from '@turboslide/viewer/GridView';
@@ -226,10 +281,11 @@ import {
   startSlideshow,
 } from '../components/presentActions';
 import type { PresentHost } from '../components/presentActions';
+import { EditorSkeleton } from '../components/EditorSkeleton';
 import { Slideshow } from '../components/Slideshow';
 import { useMountEffect } from '../components/useMountEffect';
 import { useStudioSession } from '../components/useStudioSession';
-import { runDeckAction } from '../server/agent-actions';
+import { SERVER_SIDE_WINDOW_ACTIONS_GS3, runDeckAction } from '../server/agent-actions';
 import type { ServerSideWindowAction } from '../server/agent-actions';
 import { bundleDownloadTicket, bundleUploadTicket, connectFacts } from '../server/bundle';
 import { createNewDeck, listDecks, readSourceDeckSlides, restoreStoredDeck } from '../server/decks';
@@ -251,19 +307,14 @@ import { warmThumbnails } from '../server/warm';
 import {
   DECK_CREATED_EVENT,
   autoTitleMutations,
+  holdDraft,
   leaseSlide,
   listVersions,
   readEditorDeck,
   saveVersion,
-  watchDeck,
   writeDeck,
 } from '../server/write';
-import type {
-  DeckCreatedDetail,
-  EditorDeck,
-  WatchDeckResult,
-  WriteDeckResult,
-} from '../server/write';
+import type { DeckCreatedDetail, EditorDeck, EditorIdentity } from '../server/write';
 
 import { recordDeckOpened } from './decks.index';
 
@@ -288,11 +339,150 @@ import './edit.$deckId.css';
 
 const MODES: readonly ShellMode[] = ['slide', 'grid', 'book'];
 
-/** The author of a browser session when ?author= is absent (SPEC 7.2 names $USER for the CLI). */
+/**
+ * The author of a browser session before the server has named one (a draft with no identity in
+ * its payload): the round one word. Since round three the author is derived from the session on
+ * the server (gslides-parity SPEC-3 0.17) and the page shows the identity the payload carries;
+ * `?author=` in the address is accepted and ignored.
+ */
 const DEFAULT_AUTHOR = 'studio';
 
-/** Lease length the editor takes on the slide it edits (SPEC 6.7); enforced against agent writes from M4. */
-const LEASE_MINUTES = 10;
+/** The author a page writes as, from the identity the server derived (SPEC-3 0.17, 7.8). */
+function authorOfIdentity(identity: EditorIdentity | undefined): Author {
+  if (identity === undefined) return parseAuthor(DEFAULT_AUTHOR);
+  return {
+    kind: identity.kind === 'agent' ? 'agent' : 'human',
+    name: identity.name ?? identity.label,
+    principalId: identity.principalId,
+  };
+}
+
+/** The identity as the chrome draws it (SPEC-3 7.8). */
+function identityView(identity: EditorIdentity | undefined, author: Author): IdentityView {
+  if (identity === undefined) {
+    return { principalId: author.name, label: author.name, trust: 'guest', kind: 'anonymous' };
+  }
+  return {
+    principalId: identity.principalId,
+    label: identity.label,
+    ...(identity.name !== undefined ? { name: identity.name } : {}),
+    trust: identity.trust,
+    kind: identity.kind,
+    ...(identity.email !== undefined ? { email: identity.email } : {}),
+  };
+}
+
+/** A roster entry as the presence surfaces read it (SPEC-3 4.11 Participant; the chrome's PresenceParticipant). */
+function participantOf(entry: RosterEntry, now: string): PresenceParticipant {
+  const named = entry.trust === 'guest' || entry.trust === 'verified';
+  return {
+    principalId: entry.principalId,
+    label: entry.label,
+    ...(named ? { name: entry.label } : {}),
+    trust: entry.trust,
+    kind:
+      entry.kind === 'agent'
+        ? 'agent'
+        : entry.principalId.startsWith('usr_')
+          ? 'account'
+          : 'anonymous',
+    mark: entry.mark as PresenceParticipant['mark'],
+    clientId: entry.clientId,
+    role: entry.role,
+    ...(entry.kind === 'agent' ? {} : { hue: entry.hueSlot }),
+    ...(entry.slideId !== undefined ? { slideId: entry.slideId } : {}),
+    ...(entry.selection !== undefined
+      ? {
+          selection: {
+            blockIds: entry.selection.blockIds,
+            ...(entry.selection.caret !== undefined
+              ? {
+                  caret: {
+                    blockId: entry.selection.caret.blockId,
+                    path: entry.selection.caret.path,
+                    offset: entry.selection.caret.offset ?? entry.selection.caret.range?.[0] ?? 0,
+                  },
+                }
+              : {}),
+          },
+        }
+      : {}),
+    pointer: entry.pointer ?? null,
+    following: entry.follow ?? null,
+    presenting: entry.presenting,
+    idle: false,
+    lastSeenAt: now,
+  };
+}
+
+/** The browser's transport of the room (SPEC-3 3.3): EventSource down, fetch up, same origin. */
+function sseTransport(deckId: string): RoomTransport {
+  const base = `/api/decks/${encodeURIComponent(deckId)}`;
+  const EVENTS = [
+    'hello',
+    'ops',
+    'op',
+    'checkpoint',
+    'presence',
+    'leave',
+    'reject',
+    'inbox',
+    'access',
+    'resync',
+  ];
+  return {
+    open({ since, onEvent, onError }) {
+      const source = new EventSource(`${base}/stream?since=${since}`);
+      for (const type of EVENTS) {
+        source.addEventListener(type, (raw) => {
+          const event = roomEventOf({ data: (raw as MessageEvent<string>).data });
+          if (event !== null) onEvent(event);
+        });
+      }
+      source.onerror = () => onError(new Error('the stream closed'));
+      return { close: () => source.close() };
+    },
+    async postOps(body: OpsPost): Promise<OpsResponse> {
+      const response = await fetch(`${base}/ops`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const json = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+      if (response.ok && json.ok === true) return json as unknown as OpsResponse;
+      const retry = response.headers.get('retry-after');
+      return {
+        ok: false,
+        status: response.status,
+        code: typeof json.error === 'string' ? json.error : 'error',
+        message:
+          typeof json.message === 'string' ? json.message : `The room answered ${response.status}`,
+        ...(typeof json.head === 'number' ? { head: json.head } : {}),
+        ...(retry !== null ? { retryAfterMs: Number(retry) * 1000 } : {}),
+      };
+    },
+    async postPresence(body: PresencePost, options = {}) {
+      await fetch(`${base}/presence${options.leave === true ? '?leave=1' : ''}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+        keepalive: options.leave === true,
+      });
+    },
+  };
+}
+
+/** The pending queue mirror: IndexedDB in a browser, memory where it is missing (SPEC-3 0.7). */
+function pendingStoreFor(): PendingStore {
+  return typeof indexedDB === 'undefined' ? memoryPendingStore() : indexedDbPendingStore();
+}
+
+/** The Text a typing burst names, for the 400 ms undo grouping (SPEC 7.2.15). */
+function typingKeyOf(mutations: ReadonlyArray<Mutation>): string | null {
+  const first = mutations[0];
+  if (mutations.length !== 1 || first === undefined || first.op !== 'text.splice') return null;
+  return `${first.slideId}/${first.blockId}${first.path}`;
+}
 
 /** How long the external revision banner stays once the revision has been brought in (M4 item 2). */
 const EXTERNAL_BANNER_MS = 8000;
@@ -319,6 +509,8 @@ export type EditSearch = {
   /** opens the Export menu on load (the deck list's Export link) */
   export?: 1;
   author?: string;
+  /** the thread whose card opens on load (`comment.link`'s target, SPEC-3 5.9) */
+  comment?: string;
 };
 
 function isMode(value: unknown): value is ShellMode {
@@ -348,6 +540,8 @@ export function validateEditSearch(search: Record<string, unknown>): EditSearch 
   if (flag(search.src)) out.src = 1;
   if (flag(search.export)) out.export = 1;
   if (typeof search.author === 'string' && search.author.trim()) out.author = search.author;
+  if (typeof search.comment === 'string' && /^[0-9a-hjkmnp-tv-z]{26}$/.test(search.comment))
+    out.comment = search.comment;
   return out;
 }
 
@@ -367,6 +561,10 @@ export const Route = createFileRoute('/edit/$deckId')({
     ],
   }),
   component: EditPage,
+  // the editor skeleton at 0 ms while the loader runs (gslides-parity SPEC-3 9.2 E1; the
+  // integrator at merge 2 for b5.md request 6): the shell's fixed boxes paint before the document
+  pendingComponent: EditorSkeleton,
+  pendingMs: 0,
   notFoundComponent: EditMissing,
 });
 
@@ -384,7 +582,7 @@ function EditPage() {
   const payload = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
-  const author = useMemo(() => parseAuthor(search.author ?? DEFAULT_AUTHOR), [search.author]);
+  const author = useMemo(() => authorOfIdentity(payload.identity), [payload.identity]);
   const onSearch = (patch: Partial<EditSearch>) => {
     void navigate({
       search: (prev) => {
@@ -412,40 +610,252 @@ function EditPage() {
 }
 
 // ---------------------------------------------------------------------------------------------
-// The controller: the document, the write queue, undo, versions, leases, the watch loop, the
-// dispatcher. Framework free inside; React reads it through useSyncExternalStore.
+// Comments, the inbox and the sign in exchanges as the chrome reads them (SPEC-3 5.3, 5.5, 7.3)
 
-type Committed = { revision: number; entry: VersionRecord };
-
-type PendingWrite = {
-  write: Write;
-  label: string;
-  resolve: (value: Committed) => void;
-  reject: (error: unknown) => void;
-  /** retries after the hosted store refused to commit on a copy it could not prove yet */
-  attempts?: number;
-};
-
-/** The hosted store's refusal while another instance's write has not reached its mirror (StaleMirrorError, packages/store/src/blob-store.ts). */
-function isRetryableWriteError(error: unknown): boolean {
-  return error instanceof Error && /retry the write/.test(error.message);
+/** An identity the chrome can draw for a principal the roster does not hold (a past commenter, a mention). */
+function identityOfPrincipal(
+  principalId: string,
+  label?: string,
+  kind?: 'human' | 'agent',
+): IdentityView {
+  const agent = kind === 'agent' || principalId.startsWith('agent:');
+  const account = principalId.startsWith('usr_');
+  return {
+    principalId,
+    label: label ?? labelFor(principalId),
+    trust: agent ? 'agent' : account ? 'verified' : 'label',
+    kind: agent ? 'agent' : account ? 'account' : 'anonymous',
+  };
 }
-const WRITE_RETRIES = 6;
-const WRITE_RETRY_MS = 1500;
 
-export type Conflict = {
-  message: string;
-  currentRevision: number;
-  current: DeckDocument;
-  holder?: Author;
-  /** the version records written since the pending base */
-  since: VersionRecord[];
-  /** the local writes that were waiting, in order */
-  pending: Write[];
-  /** slides both sides touched; empty when the card is only about a deck-level write */
-  overlap: string[];
-  /** a rebase attempt that failed, with the reducer's reason */
-  error?: string;
+/**
+ * Who is who on this deck: the roster's rows (with their marks and trust), the caller, and the
+ * authors the threads name, so a comment by someone who left still shows the label they wrote as.
+ */
+function identityIndex(
+  roster: readonly RosterEntry[],
+  identity: EditorIdentity | undefined,
+  author: Author,
+  threads: readonly Thread[],
+): ReadonlyMap<string, IdentityView> {
+  const out = new Map<string, IdentityView>();
+  for (const thread of threads) {
+    for (const comment of [thread.comment, ...thread.replies]) {
+      const { principalId, label, kind } = comment.author;
+      if (!out.has(principalId))
+        out.set(principalId, identityOfPrincipal(principalId, label, kind));
+    }
+  }
+  const now = new Date().toISOString();
+  for (const entry of roster) out.set(entry.principalId, participantOf(entry, now));
+  const me = identityView(identity, author);
+  out.set(me.principalId, me);
+  return out;
+}
+
+function resolveIdentity(
+  names: ReadonlyMap<string, IdentityView>,
+  principalId: string,
+): IdentityView {
+  return names.get(principalId) ?? identityOfPrincipal(principalId);
+}
+
+function commentViewOf(
+  comment: ThreadComment,
+  names: ReadonlyMap<string, IdentityView>,
+): CommentView {
+  return {
+    id: comment.id,
+    author: resolveIdentity(names, comment.author.principalId),
+    createdAt: comment.createdAt,
+    ...(comment.editedAt !== undefined ? { editedAt: comment.editedAt } : {}),
+    text: comment.body.text,
+    mentions: comment.body.mentions.map((mention) =>
+      mention.kind === 'principal'
+        ? resolveIdentity(names, mention.principalId)
+        : {
+            principalId: mention.inviteId,
+            label: mention.inviteId,
+            trust: 'label' as const,
+            kind: 'anonymous' as const,
+          },
+    ),
+    ...(comment.reactions !== undefined && comment.reactions.length > 0
+      ? {
+          reactions: Object.fromEntries(
+            comment.reactions.map((reaction) => [reaction.emoji, reaction.principalIds]),
+          ),
+        }
+      : {}),
+    ...(comment.deleted !== undefined ? { deleted: true } : {}),
+  };
+}
+
+/** A stored thread as the card, the markers and the panel read it, its anchor resolved now (SPEC-3 5.1). */
+function threadViewOf(
+  thread: Thread,
+  document: DeckDocument,
+  me: string,
+  names: ReadonlyMap<string, IdentityView>,
+): CommentThreadView {
+  const placement = resolveAnchor(document, thread.anchor);
+  const slideId = placement.slideId ?? anchorSlideId(thread.anchor);
+  const stored = thread.anchor;
+  const anchor: CommentAnchorView = {
+    kind: stored.kind,
+    ...(slideId !== undefined ? { slideId } : {}),
+    ...('blockId' in stored ? { blockId: stored.blockId } : {}),
+    ...(stored.kind === 'text'
+      ? { path: stored.path, range: stored.range, quote: stored.quoted }
+      : {}),
+    ...(stored.kind === 'cell' ? { cell: { row: stored.cell[0], column: stored.cell[1] } } : {}),
+    ...(placement.orphaned ? { orphaned: true } : {}),
+  };
+  const assignee =
+    thread.assignee === undefined
+      ? null
+      : thread.assignee.to.kind === 'principal'
+        ? resolveIdentity(names, thread.assignee.to.principalId)
+        : {
+            principalId: thread.assignee.to.inviteId,
+            label: thread.assignee.to.inviteId,
+            trust: 'label' as const,
+            kind: 'anonymous' as const,
+          };
+  return {
+    id: thread.id,
+    anchor,
+    comment: commentViewOf(thread.comment, names),
+    replies: thread.replies.map((reply) => commentViewOf(reply, names)),
+    ...(thread.resolved !== undefined ? { resolved: true } : {}),
+    assignee,
+    createdAt: thread.createdAt,
+    updatedAt: thread.updatedAt,
+    forMe: threadIsFor(thread, me) || thread.comment.author.principalId === me,
+  };
+}
+
+/** The card's anchor as the server stores it (SPEC-3 5.1): the quote of a text anchor is filled by the server when empty. */
+function anchorOfView(view: CommentAnchorView): CommentAnchor {
+  const slideId = view.slideId ?? '';
+  const blockId = view.blockId ?? '';
+  switch (view.kind) {
+    case 'deck':
+      return { kind: 'deck' };
+    case 'slide':
+      return { kind: 'slide', slideId };
+    case 'notes':
+      return { kind: 'notes', slideId };
+    case 'block':
+      return { kind: 'block', slideId, blockId };
+    case 'cell':
+      return {
+        kind: 'cell',
+        slideId,
+        blockId,
+        cell: [view.cell?.row ?? 0, view.cell?.column ?? 0],
+      };
+    case 'text':
+      return {
+        kind: 'text',
+        slideId,
+        blockId,
+        path: view.path ?? '/text',
+        range: view.range ?? [0, 0],
+        quoted: view.quote ?? '',
+      };
+  }
+}
+
+/** The card's body as the server stores it (SPEC-3 5.4): mention ids become principal or invitation mentions in token order. */
+function bodyOfInput(body: CommentBodyInput): CommentBody {
+  return {
+    text: body.text,
+    mentions: (body.mentions ?? []).map((id) =>
+      PRINCIPAL_ID_PATTERN.test(id)
+        ? { kind: 'principal' as const, principalId: id }
+        : { kind: 'invite' as const, inviteId: id },
+    ),
+  };
+}
+
+/** One inbox row as the Notifications panel reads it (SPEC-3 5.5). */
+function inboxItemViewOf(
+  item: Notification,
+  names: ReadonlyMap<string, IdentityView>,
+): InboxItemView {
+  return {
+    id: item.id,
+    kind: item.kind,
+    deckId: item.deckId,
+    ...(item.threadId !== undefined ? { threadId: item.threadId } : {}),
+    ...(item.slideId !== undefined ? { slideId: item.slideId } : {}),
+    actors: item.actors.map((principalId) => resolveIdentity(names, principalId)),
+    count: item.count,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+    ...(item.readAt !== undefined ? { readAt: item.readAt } : {}),
+  };
+}
+
+/**
+ * One call of better-auth's routes (SPEC-3 7.3; B3's `/api/auth/$`): the magic link mail with
+ * its six digit code, the code exchange, sign out and the GitHub redirect. Same origin, JSON, the
+ * library's own cookies; a refusal's sentence is the dialog's error row.
+ */
+async function authPost(path: string, body: unknown): Promise<unknown> {
+  const response = await fetch(`/api/auth/${path}`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+    credentials: 'same-origin',
+  });
+  if (!response.ok) {
+    let message = `Sign in did not complete (${response.status})`;
+    try {
+      const data = (await response.json()) as {
+        message?: string;
+        error?: { message?: string } | string;
+      };
+      message =
+        data.message ??
+        (typeof data.error === 'string' ? data.error : data.error?.message) ??
+        message;
+    } catch {
+      // no body
+    }
+    throw new Error(message);
+  }
+  return response.json().catch(() => null);
+}
+
+/** The address the sign in mail's link and the GitHub callback return to: this deck, no token. */
+function signInReturnAddress(): string {
+  return `${window.location.origin}${window.location.pathname}${window.location.search}`;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The controller: the document, the room client (gslides-parity SPEC-3 3.6), undo per author,
+// versions, the dispatcher. Framework free inside; React reads it through useSyncExternalStore.
+
+/**
+ * What a commit resolves with once the room admitted the op: the revision the tab knows (the last
+ * checkpoint), the stream seq, and a record shaped answer for the callers that print one.
+ */
+type Committed = { revision: number; entry: VersionRecord; seq?: number };
+
+/**
+ * An operation the room returned to its author with its content (SPEC-3 3.5, 3.6): the reject
+ * card lists it with Copy text; the conflict card of round one stays for this and for a
+ * `version.restore` admitted while pending ops sat on the restored slides.
+ */
+export type RejectNotice = {
+  opId: string;
+  reason: string;
+  message?: string;
+  mutations: Mutation[];
+  /** the plain text the mutations carried, for Copy text */
+  text: string;
 };
 
 export type External = { revision: number; author?: Author; note?: string };
@@ -456,6 +866,39 @@ export type Selection = { slideId: string; blockId: string; pointer?: string };
 /** What the shell shows, mirrored into the snapshot by ShellBridge for the palette and the keys. */
 export type EditorView = { mode: ShellMode; present: boolean };
 
+/**
+ * The comments sidecar as this tab holds it (SPEC-3 5.3, 3.10): the threads as the server
+ * stores them (anchors resolved against the live document at render time, so an orphan and its
+ * revival show at once), the sidecar's counter, the View > Comments display and the open card.
+ */
+export type CommentsState = {
+  threads: readonly Thread[];
+  revision: number;
+  display: CommentsDisplay;
+  openThreadId: string | null;
+  /** `comment.list` answered once since the room opened */
+  loaded: boolean;
+};
+
+/** The caller's inbox (SPEC-3 5.5): the rows, the unread count the stream keeps current, the per deck level. */
+export type InboxState = {
+  items: readonly Notification[];
+  unread: number;
+  level?: NotificationLevel;
+  email?: boolean;
+  activityForCommenters?: boolean;
+  loaded: boolean;
+};
+
+/** The caller's standing on the deck (SPEC-3 6.1, 6.3), from the loader and again on every `access` event. */
+export type AccessFacts = {
+  role: Role | null;
+  via: Via | null;
+  capabilities: readonly Capability[];
+  /** the effective record, tokens hashed; null on a draft */
+  record: AccessRecord | null;
+};
+
 /** The export surface's state: a run in flight (export.run or build.run) and the last finished one. */
 export type ArtifactState = { progress: ExportProgress | null; run: ArtifactRun | null };
 
@@ -465,11 +908,29 @@ export type EditorSnapshot = {
   document: DeckDocument;
   /** rendered HTML per slide id, from renderSlide over the current document */
   html: ReadonlyMap<string, string>;
-  /** the last revision the server confirmed */
+  /** the last revision the server confirmed (the last checkpoint, SPEC-3 3.6) */
   serverRevision: number;
-  /** writes queued or in flight */
+  /** operations pending or retained (SPEC-3 3.6: "Saving…" while pending + retained > 0) */
   pending: number;
-  conflict: Conflict | null;
+  /** the room client's status, null before the stream opened */
+  sync: SyncStatus | null;
+  /** the room's roster as the stream told it */
+  roster: readonly RosterEntry[];
+  /** the collaborator this tab follows (SPEC-3 4.4) */
+  following: string | null;
+  /** the operations the room returned with their content */
+  rejects: readonly RejectNotice[];
+  /** a closed tab's queue offered on this open (SPEC-3 0.7) */
+  persisted: PersistedOffer | null;
+  /** the name prompt of 0.18 is open */
+  namePrompt: boolean;
+  /** View > Live pointers > Show collaborator pointers (SPEC-3 4.6), on by default */
+  pointersVisible: boolean;
+  /** Show my pointer (SPEC-3 4.6): the toolbar toggle's pressed state, mirrored from the room's presence */
+  pointerOn: boolean;
+  comments: CommentsState;
+  inbox: InboxState;
+  access: AccessFacts;
   external: External | null;
   versions: readonly Version[];
   leases: readonly Lease[];
@@ -504,19 +965,43 @@ export type EditorController = {
   attachShell: (shell: ShellState) => void;
   setActiveSlide: (slideId: string) => void;
   select: (selection: Selection | null) => void;
-  /** one Write: applied locally now, sent to the server in order; resolves when the server confirmed */
+  /** one Write: applied locally now, sent through the room; resolves when the room admitted it */
   commit: (mutations: Mutation[], label: string) => Promise<Committed>;
   undo: () => Promise<void>;
   redo: () => Promise<void>;
   undoTo: (id: number) => Promise<void>;
-  rebase: () => Promise<void>;
-  discard: () => void;
+  /** dismisses a reject notice */
+  dismissReject: (opId: string) => void;
   reload: () => Promise<void>;
+  /* round three (SPEC-3 3.6, 4.4, 4.11) */
+  followClient: (clientId: string) => void;
+  unfollow: () => void;
+  goToClient: (clientId: string) => void;
+  setPointerOn: (on: boolean) => void;
+  /** View > Live pointers > Show collaborator pointers (SPEC-3 4.6) */
+  setPointersVisible: (on: boolean) => void;
+  /** the tab's own presence state, from the shell and the stage */
+  reportPresence: (state: Partial<Omit<PresencePost, 'clientId' | 'clock'>>) => void;
+  /* round three comments and the inbox (SPEC-3 5.3, 5.5) */
+  /** the threads as the chrome reads them, anchors resolved against the current document */
+  threadViews: () => readonly CommentThreadView[];
+  inboxViews: () => readonly InboxItemView[];
+  /** `comment.list` again; the stream's comment entries schedule it too */
+  refreshComments: () => Promise<void>;
+  refreshInbox: () => Promise<void>;
+  /** a comment or notification action through the dispatcher, then the sidecar and the inbox re-read */
+  roomAction: (action: ActionId, input: unknown) => Promise<unknown>;
+  setCommentsDisplay: (display: CommentsDisplay) => void;
+  openComment: (threadId: string | null) => void;
+  /** an inbox row's click: the slide, the card, the row read */
+  openInboxItem: (item: InboxItemView) => void;
+  promptName: (open: boolean) => void;
+  /** the stage reports an inline text session opening or closing; a due name prompt opens at the close */
+  noteInlineSession: (active: boolean) => void;
   saveVersion: (note: string) => Promise<Version>;
   restoreVersion: (n: number) => Promise<{ revision: number }>;
   refreshVersions: () => Promise<Version[]>;
   promptVersion: (open: boolean) => void;
-  leaseActive: () => void;
   readSource: () => string;
   /** the validator behind the source drawer's Apply and the window API's applySource */
   validateSource: (source: string) => { slide: Slide | null; issues: Issue[]; error?: string };
@@ -676,19 +1161,27 @@ function createEditorController(init: {
   payload: EditorDeck;
   /** deck.create from this editor: open the new deck */
   onDeckCreated?: (deckId: string) => void;
+  /** the thread whose card opens on load (`?comment=`) */
+  initialThread?: string;
 }): EditorController {
   const { deckId, author } = init;
   const history = createEditHistory();
   /* the local revision each history entry produced, for the History rows */
   const revisionOf = new Map<number, number>();
+  /* the room client's clock at each history entry, so an undo transforms past what landed since */
+  const clockOf = new Map<number, number>();
   const warmed = new Set<Theme>();
   const listeners = new Set<() => void>();
-  let queue: PendingWrite[] = [];
-  let pumping = false;
   let alive = false;
   let shell: ShellState | null = null;
-  let leased: string | null = null;
   let findingsCache: { document: DeckDocument; findings: Finding[] } | null = null;
+  let room: RoomClient | null = null;
+  let draftChain: Promise<unknown> = Promise.resolve();
+  /* the typing group (SPEC 7.2.15): consecutive bursts on one Text inside 400 ms are one Cmd Z */
+  let lastTyping: { entryId: number; key: string; at: number } | null = null;
+  let versionsTimer: ReturnType<typeof setTimeout> | undefined;
+  const identity = init.payload.identity;
+  const pendingStore = pendingStoreFor();
 
   const initialOrder = slideOrder(init.payload.document);
   let snapshot: EditorSnapshot = {
@@ -698,7 +1191,28 @@ function createEditorController(init: {
     html: new Map(),
     serverRevision: init.payload.document.deck.revision,
     pending: 0,
-    conflict: null,
+    sync: null,
+    roster: [],
+    following: null,
+    rejects: [],
+    persisted: null,
+    namePrompt: false,
+    pointersVisible: true,
+    pointerOn: false,
+    comments: {
+      threads: [],
+      revision: 0,
+      display: 'all',
+      openThreadId: init.initialThread ?? null,
+      loaded: false,
+    },
+    inbox: { items: [], unread: 0, loaded: false },
+    access: {
+      role: init.payload.role ?? null,
+      via: init.payload.via ?? null,
+      capabilities: init.payload.capabilities ?? [],
+      record: init.payload.access ?? null,
+    },
     external: null,
     versions: init.payload.versions,
     leases: init.payload.leases,
@@ -809,6 +1323,13 @@ function createEditorController(init: {
       document,
       html: renderMissing(document, html),
       ...(moved ? { activeSlide: replacement, selection: null } : {}),
+      // the document's revision is the room's confirmed one (pending ops never move it), so the
+      // revision describe().state and sync.status report follows it on every path: a remote op
+      // folded after a checkpoint, this tab's own apply, a resync (measured before this: 0
+      // reported against a document at 3, and a chrome write based on it met a stale base)
+      ...(document.deck.revision > snapshot.serverRevision
+        ? { serverRevision: document.deck.revision }
+        : {}),
     });
     if (moved && replacement !== '') selectSoon(replacement);
   };
@@ -831,166 +1352,419 @@ function createEditorController(init: {
     shell?.say(message);
   };
 
+  /** Waits until nothing is pending in the room (a named version, a restore). */
   const idle = async (): Promise<void> => {
-    while (queue.length > 0 || pumping) await sleep(40);
-  };
-
-  const rejectAll = (jobs: PendingWrite[], error: unknown): void => {
-    for (const job of jobs) job.reject(error);
-  };
-
-  /** Replays writes on a newer document; null when a mutation no longer applies. */
-  const replay = (
-    base: DeckDocument,
-    writes: PendingWrite[],
-  ): { document: DeckDocument; jobs: PendingWrite[] } | { error: string } => {
-    let document = base;
-    const jobs: PendingWrite[] = [];
-    for (const job of writes) {
-      const result = applyWrite(document, {
-        ...job.write,
-        baseRevision: document.deck.revision,
-      });
-      if (!result.ok) return { error: result.message };
-      jobs.push({ ...job, write: { ...job.write, baseRevision: document.deck.revision } });
-      document = result.document;
+    await draftChain.catch(() => undefined);
+    if (room !== null) {
+      await room.flush();
+      const until = Date.now() + 10_000;
+      while (room.status().pending > 0 && Date.now() < until) await sleep(40);
     }
-    return { document, jobs };
   };
 
-  const onConflict = (result: Extract<WriteDeckResult, { code: 'conflict' }>): void => {
-    const waiting = queue;
-    queue = [];
-    const outside = touchedSlides(result.since.flatMap((record) => record.mutations));
-    const deckLevelOutside = result.since.some((record) => record.mutations.some(isDeckLevel));
-    const mine = touchedSlides(waiting.flatMap((row) => row.write.mutations));
-    const overlap = mine.filter((id) => outside.includes(id));
-    const deckLevelMine = waiting.some((row) => row.write.mutations.some(isDeckLevel));
-    // Pending mutations that touch other slides rebase on their own (SPEC 6.7); the card appears
-    // when both sides touched one slide, or when either side changed the deck itself. A lease
-    // refusal (the result names the holder) is not a revision conflict: the server changed
-    // nothing, so `since` is empty and a rebase would re-send the same write to the same refusal
-    // (measured on the dev server: the pump re-sent it every 2 ms for two minutes against the
-    // ten minute lease a closed tab had left on the slide); the card names the holder instead.
-    const leaseRefused = result.holder !== undefined;
-    if (!leaseRefused && overlap.length === 0 && !deckLevelOutside && !deckLevelMine) {
-      const replayed = replay(result.current, waiting);
-      if (!('error' in replayed)) {
-        queue = replayed.jobs;
-        publish({ serverRevision: result.currentRevision, pending: queue.length, external: null });
-        setDocument(replayed.document, 'all');
-        say(
-          `Rebased ${waiting.length} pending change${waiting.length === 1 ? '' : 's'} onto r${result.currentRevision}`,
-        );
-        return;
-      }
-    }
-    const conflict: Conflict = {
-      message: result.message,
-      currentRevision: result.currentRevision,
-      current: result.current,
-      ...(result.holder !== undefined ? { holder: result.holder } : {}),
-      since: result.since,
-      pending: waiting.map((row) => row.write),
-      overlap,
+  // The external revision banner (SPEC 6.7; SPEC-3 R4: it retires for edits that arrive live and
+  // stays for a resync, a restore or a CLI write the stream could not replay).
+  let externalTimer: ReturnType<typeof setTimeout> | undefined;
+  const showExternal = (external: External): void => {
+    if (externalTimer !== undefined) clearTimeout(externalTimer);
+    publish({ external });
+    externalTimer = setTimeout(() => {
+      if (latest().external?.revision === external.revision) publish({ external: null });
+    }, EXTERNAL_BANNER_MS);
+  };
+
+  /** The History panel's version rows follow the checkpoints, read once per burst of them. */
+  const refreshVersionsSoon = (): void => {
+    if (versionsTimer !== undefined) clearTimeout(versionsTimer);
+    versionsTimer = setTimeout(() => {
+      versionsTimer = undefined;
+      listVersions({ deckId })
+        .then((versions) => publish({ versions }))
+        .catch(() => undefined);
+    }, 500);
+  };
+
+  const rejectNoticeOf = (rejected: Rejected & { mutations?: Mutation[] }): RejectNotice => {
+    const mutations = rejected.mutations ?? [];
+    const text = mutations
+      .map((mutation) => {
+        if (mutation.op === 'text.splice') return mutation.insert;
+        if (mutation.op === 'text.replace') return mutation.text;
+        if (mutation.op === 'block.set' && typeof mutation.value === 'string')
+          return mutation.value;
+        return '';
+      })
+      .filter((row) => row !== '')
+      .join('\n');
+    return {
+      opId: rejected.opId,
+      reason: rejected.reason,
+      ...(rejected.message === undefined ? {} : { message: rejected.message }),
+      mutations,
+      text,
     };
-    publish({ conflict, pending: 0, error: result.message });
-    rejectAll(
-      waiting,
-      new ConflictError(result.message, {
-        currentRevision: result.currentRevision,
-        current: result.current,
-        ...(result.holder !== undefined ? { holder: result.holder } : {}),
-      }),
-    );
   };
 
-  const pump = async (): Promise<void> => {
-    if (pumping) return;
-    pumping = true;
-    try {
-      while (queue.length > 0 && latest().conflict === null) {
-        const job = queue[0];
-        if (!job) break;
-        let result: WriteDeckResult;
-        try {
-          result = await writeDeck({ deckId, write: job.write });
-        } catch (error) {
-          const attempts = (job.attempts ?? 0) + 1;
-          if (isRetryableWriteError(error) && attempts <= WRITE_RETRIES) {
-            job.attempts = attempts;
-            await new Promise((resolve) => setTimeout(resolve, WRITE_RETRY_MS * attempts));
-            continue;
-          }
-          const waiting = queue;
-          queue = [];
-          publish({ pending: 0, error: errorMessage(error) });
-          rejectAll(waiting, error);
-          break;
-        }
-        if (result.ok) {
-          queue.shift();
-          const versions = [...snapshot.versions];
-          const { baseRevision: _base, inverse: _inverse, ...version } = result.entry;
-          versions.push(version);
-          const document =
-            snapshot.document.deck.revision === result.revision
-              ? {
-                  deck: { ...snapshot.document.deck, updatedAt: result.entry.createdAt },
-                  slides: snapshot.document.slides,
-                }
-              : snapshot.document;
-          publish({
-            serverRevision: result.revision,
-            pending: queue.length,
-            versions,
-            document,
-            error: null,
-          });
-          for (const line of result.warnings) say(line);
-          job.resolve({ revision: result.revision, entry: result.entry });
-          continue;
-        }
-        if (result.code === 'conflict') {
-          onConflict(result);
-          if (latest().conflict) break;
-          continue;
-        }
-        // The server refused what the local reducer accepted: the two documents differ, so the
-        // server's wins. Pending writes after this one were computed on the local one.
-        const waiting = queue;
-        queue = [];
-        publish({ pending: 0, error: result.message });
-        rejectAll(waiting, new TypeError(result.message));
-        await reload();
-        break;
+  const stopFollowing = (): void => {
+    if (latest().following !== null) publish({ following: null });
+  };
+
+  /**
+   * A collaborator's entry changed a Text (SPEC-3 3.5): every open inline session on that run
+   * absorbs the document's new markup (InlineText's TEXT_CHANGED_EVENT), so two people typing in
+   * one paragraph converge without a lost keystroke. Own entries are skipped: the editable already
+   * holds them.
+   */
+  const announceRemoteText = (entry: Entry): void => {
+    if (room === null || entry.clientId === room.clientId() || entry.mutations === undefined)
+      return;
+    const document = room.document();
+    const seen = new Set<string>();
+    for (const mutation of entry.mutations) {
+      if (
+        mutation.op !== 'text.splice' &&
+        mutation.op !== 'text.mark' &&
+        mutation.op !== 'text.replace' &&
+        !(mutation.op === 'block.set' && typeof mutation.value === 'string')
+      ) {
+        continue;
       }
-    } finally {
-      pumping = false;
+      const pointer = mutation.path.replace(/^\//, '');
+      const key = `${mutation.slideId}:${mutation.blockId}/${pointer}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const slide = document.slides[mutation.slideId];
+      if (slide === undefined) continue;
+      const text = readRunText(slide, mutation.blockId, pointer);
+      if (text === undefined) continue;
+      announceTextChanged({ slideId: mutation.slideId, blockId: mutation.blockId, pointer, text });
     }
   };
 
-  const enqueue = (write: Write, label: string): Promise<Committed> =>
-    new Promise<Committed>((resolve, reject) => {
-      queue.push({ write, label, resolve, reject });
-      publish({ pending: queue.length });
-      void pump();
-    });
+  // -------------------------------------------------------------------------------------------
+  // Comments and the inbox (SPEC-3 5.3, 5.5, 3.10; VERIFICATION-3 finding 1): the sidecar is
+  // read through `comment.list` when the room opens and again after every comment entry on the
+  // stream, every checkpoint that wrote comments, every access change and every comment write of
+  // this tab; anchors are resolved against the live document at render time (threadViews), so a
+  // block's removal orphans its thread and an undo revives it without a round trip. The reads
+  // are refused on a draft before its first write and for a role without `readComments`, and
+  // both are silent: there is nothing to show.
 
-  /** The local half of a write: the reducer now, the history entry, the queued server write. */
-  const commitAs = (
+  /** A draft's creator holds every capability until the loader names a role (SPEC-3 6.1). */
+  const hasCapability = (capability: Capability): boolean =>
+    init.payload.draft === true || latest().access.capabilities.includes(capability);
+  let commentsTimer: ReturnType<typeof setTimeout> | undefined;
+  let inboxTimer: ReturnType<typeof setTimeout> | undefined;
+  const refreshComments = async (): Promise<void> => {
+    if (!hasCapability('readComments')) {
+      if (latest().comments.threads.length > 0 || latest().comments.loaded) {
+        publish({ comments: { ...latest().comments, threads: [], loaded: false } });
+      }
+      return;
+    }
+    try {
+      const answer = (await invoke('comment.list', {
+        state: 'all',
+        includeDeleted: true,
+        limit: 200,
+      })) as { threads: Thread[]; commentsRevision: number };
+      publish({
+        comments: {
+          ...latest().comments,
+          threads: answer.threads,
+          revision: answer.commentsRevision,
+          loaded: true,
+        },
+      });
+    } catch {
+      // a draft before its first write, or a role the record does not let read comments
+    }
+  };
+  const scheduleCommentsRefresh = (): void => {
+    if (commentsTimer !== undefined) return;
+    commentsTimer = setTimeout(() => {
+      commentsTimer = undefined;
+      void refreshComments();
+    }, 60);
+  };
+  const refreshInbox = async (): Promise<void> => {
+    if (init.payload.draft === true && room === null) return;
+    try {
+      const [list, settings] = await Promise.all([
+        invoke('notification.list', { limit: 100 }) as Promise<{
+          notifications: Notification[];
+          unread: number;
+        }>,
+        invoke('notification.settings', {}) as Promise<{
+          level: NotificationLevel;
+          email: boolean;
+          activityForCommenters: boolean;
+        }>,
+      ]);
+      publish({
+        inbox: {
+          items: list.notifications,
+          unread: list.unread,
+          level: settings.level,
+          email: settings.email,
+          activityForCommenters: settings.activityForCommenters,
+          loaded: true,
+        },
+      });
+    } catch {
+      // the inbox needs the deck in the store and the server's notification handlers
+    }
+  };
+  const scheduleInboxRefresh = (): void => {
+    if (inboxTimer !== undefined) return;
+    inboxTimer = setTimeout(() => {
+      inboxTimer = undefined;
+      void refreshInbox();
+    }, 60);
+  };
+  /** A comment or notification action of this tab, then the sidecar and the inbox re-read. */
+  const roomAction = async (action: ActionId, input: unknown): Promise<unknown> => {
+    const out = await invoke(action, input);
+    scheduleCommentsRefresh();
+    scheduleInboxRefresh();
+    return out;
+  };
+  /* the thread views, computed once per (threads, document, roster) for the shell and describe() */
+  let viewsCache: {
+    threads: readonly Thread[];
+    document: DeckDocument;
+    roster: readonly RosterEntry[];
+    views: CommentThreadView[];
+  } | null = null;
+  const threadViews = (): readonly CommentThreadView[] => {
+    const current = snapshot;
+    if (
+      viewsCache !== null &&
+      viewsCache.threads === current.comments.threads &&
+      viewsCache.document === current.document &&
+      viewsCache.roster === current.roster
+    ) {
+      return viewsCache.views;
+    }
+    const names = identityIndex(current.roster, identity, author, current.comments.threads);
+    const me = identity?.principalId ?? author.name;
+    const views = current.comments.threads.map((thread) =>
+      threadViewOf(thread, current.document, me, names),
+    );
+    viewsCache = {
+      threads: current.comments.threads,
+      document: current.document,
+      roster: current.roster,
+      views,
+    };
+    return views;
+  };
+  let inboxCache: { items: readonly Notification[]; views: InboxItemView[] } | null = null;
+  const inboxViews = (): readonly InboxItemView[] => {
+    const current = snapshot;
+    if (inboxCache !== null && inboxCache.items === current.inbox.items) return inboxCache.views;
+    const names = identityIndex(current.roster, identity, author, current.comments.threads);
+    const views = current.inbox.items.map((item) => inboxItemViewOf(item, names));
+    inboxCache = { items: current.inbox.items, views };
+    return views;
+  };
+  /** The caller's standing again after an `access` event (SPEC-3 6.3): the role may have moved. */
+  const refreshAccess = async (): Promise<void> => {
+    const payload = await readEditorDeck({ deckId });
+    if (payload === null) {
+      window.location.reload();
+      return;
+    }
+    publish({
+      access: {
+        role: payload.role ?? null,
+        via: payload.via ?? null,
+        capabilities: payload.capabilities ?? [],
+        record: payload.access ?? null,
+      },
+    });
+    scheduleCommentsRefresh();
+  };
+
+  /** The room client over the stream (SPEC-3 3.6); started once the deck exists in the store. */
+  const attachRoom = (document: DeckDocument, seq: number, tier: SyncStatus['tier']): void => {
+    if (room !== null) return;
+    const now = (): string => new Date().toISOString();
+    const client = createRoomClient({
+      deckId,
+      transport: sseTransport(deckId),
+      document,
+      seq,
+      tier,
+      pendingStore,
+      onChange: ({ document: next, changed, reason }) => {
+        if (reason === 'local') return;
+        if (reason === 'checkpoint') {
+          // the revision moved and nothing else: the manifest fields on the snapshot follow
+          publish({
+            document: {
+              deck: {
+                ...latest().document.deck,
+                revision: next.deck.revision,
+                updatedAt: next.deck.updatedAt,
+              },
+              slides: latest().document.slides,
+            },
+            serverRevision: next.deck.revision,
+          });
+          return;
+        }
+        setDocument(next, changed);
+        // the document's revision moves with a checkpoint the fold already carries (a remote op
+        // after it): describe().state.revision and sync.status follow it, so a chrome or agent
+        // write that bases on them never meets a stale base (measured: 0 against a document at 2)
+        if (next.deck.revision !== latest().serverRevision) {
+          publish({ serverRevision: next.deck.revision });
+        }
+      },
+      onStatus: (status) => {
+        publish({
+          sync: status,
+          pending: status.pending + status.retained,
+          serverRevision: Math.max(status.revision, latest().serverRevision),
+        });
+      },
+      onEvent: (event: RoomEvent) => {
+        switch (event.type) {
+          case 'op':
+            announceRemoteText(event.entry);
+            if (event.entry.kind === 'comment') scheduleCommentsRefresh();
+            return;
+          case 'ops':
+            for (const entry of event.entries) announceRemoteText(entry);
+            if (event.entries.some((entry) => entry.kind === 'comment')) scheduleCommentsRefresh();
+            return;
+          case 'hello':
+            publish({ roster: event.clients, error: null });
+            if (event.role === 'viewer' && event.editing >= 100) say(REFUSALS.tooManyEditors);
+            return;
+          case 'presence': {
+            const rest = latest().roster.filter((row) => row.clientId !== event.clientId);
+            publish({ roster: [...rest, event.state] });
+            // Follow (SPEC-3 4.4): the stage moves with the followed client's slide
+            const following = latest().following;
+            if (
+              following === event.clientId &&
+              event.state.slideId !== undefined &&
+              shell?.active !== event.state.slideId
+            ) {
+              shell?.select(event.state.slideId);
+            }
+            return;
+          }
+          case 'leave':
+            publish({ roster: latest().roster.filter((row) => row.clientId !== event.clientId) });
+            if (latest().following === event.clientId) publish({ following: null });
+            return;
+          case 'checkpoint':
+            refreshVersionsSoon();
+            if (event.comments !== undefined) scheduleCommentsRefresh();
+            if (event.external === true) {
+              showExternal({
+                revision: event.revision,
+                author: event.author,
+                ...(event.note !== '' ? { note: event.note } : {}),
+              });
+            }
+            return;
+          case 'inbox':
+            // the unread count travels on the stream (SPEC-3 5.5); the rows are re-read behind it
+            publish({ inbox: { ...latest().inbox, unread: event.unread } });
+            scheduleInboxRefresh();
+            return;
+          case 'access':
+            // the deck's record changed: the role may have moved; the loader answers the new one
+            void refreshAccess().catch(() => undefined);
+            return;
+          default:
+            return;
+        }
+      },
+      onReject: (rejected) => {
+        const notice = rejectNoticeOf(rejected);
+        publish({ rejects: [...latest().rejects, notice], error: notice.message ?? null });
+      },
+      onUnplaceable: (op) => {
+        publish({
+          rejects: [
+            ...latest().rejects,
+            rejectNoticeOf({
+              opId: op.opId,
+              reason: 'stale',
+              ...(op.mutations === undefined ? {} : { mutations: op.mutations }),
+            }),
+          ],
+        });
+      },
+      onResync: async (revision) => {
+        const payload = await readEditorDeck({ deckId });
+        if (payload === null) return null;
+        history.clear();
+        clockOf.clear();
+        publish({
+          versions: payload.versions,
+          leases: payload.leases,
+          serverRevision: payload.document.deck.revision,
+        });
+        showExternal({ revision: payload.document.deck.revision });
+        void revision;
+        return payload.document;
+      },
+      onPersisted: (offer) => {
+        publish({
+          persisted: {
+            count: offer.count,
+            apply: async () => {
+              publish({ persisted: null });
+              await offer.apply();
+            },
+            discard: async () => {
+              publish({ persisted: null });
+              await offer.discard();
+            },
+          },
+        });
+      },
+    });
+    room = client;
+    client.start();
+    void now;
+    // the sidecar and the inbox once the deck is in the store (a draft reaches here on its first write)
+    scheduleCommentsRefresh();
+    scheduleInboxRefresh();
+  };
+
+  /** A record shaped answer for the callers of commit that print one (the window API's outputs). */
+  const recordOf = (
+    mutations: Mutation[],
+    inverse: Mutation[],
+    seq: number | undefined,
+  ): VersionRecord => ({
+    n: seq ?? 0,
+    revision: latest().serverRevision,
+    baseRevision: latest().serverRevision,
+    author,
+    note: '',
+    createdAt: new Date().toISOString(),
+    mutations,
+    inverse,
+  });
+
+  /**
+   * The draft's first write (SPEC 6.1): the deck does not exist until it lands, so the write goes
+   * through the strict server function, which creates the deck and admits the write through the
+   * room; the room client starts on the answer.
+   */
+  const draftCommit = (
     mutations: Mutation[],
     label: string,
     kind: 'edit' | 'undo' | 'redo',
   ): Promise<Committed> => {
-    if (snapshot.conflict) {
-      return Promise.reject(
-        new ConflictError('Resolve the conflict card before writing again', {
-          currentRevision: snapshot.conflict.currentRevision,
-          current: snapshot.conflict.current,
-        }),
-      );
-    }
     const base = snapshot.document.deck.revision;
     const write: Write = { baseRevision: base, author, mutations };
     const result = applyWrite(snapshot.document, write);
@@ -1010,7 +1784,122 @@ function createEditorController(init: {
       revisionOf.set(entry.id, result.document.deck.revision);
     }
     setDocument(result.document, changedBy(mutations));
-    return enqueue(write, label);
+    publish({ pending: snapshot.pending + 1 });
+    const run = draftChain.then(async () => {
+      const answer = await writeDeck({ deckId, write, returnDocument: true });
+      if (!answer.ok) {
+        publish({ pending: Math.max(0, latest().pending - 1), error: answer.message });
+        if (answer.code === 'conflict')
+          throw new ConflictError(answer.message, {
+            currentRevision: answer.currentRevision,
+            current: answer.current,
+          });
+        throw new TypeError(answer.message);
+      }
+      publish({
+        pending: Math.max(0, latest().pending - 1),
+        serverRevision: answer.revision,
+        error: null,
+      });
+      if (room === null && answer.document !== undefined) {
+        setDocument(answer.document, 'all');
+        attachRoom(
+          answer.document,
+          answer.seq ?? answer.revision,
+          init.payload.room?.tier ?? 'memory',
+        );
+      }
+      refreshVersionsSoon();
+      return {
+        revision: answer.revision,
+        entry: answer.entry,
+        ...(answer.seq === undefined ? {} : { seq: answer.seq }),
+      };
+    });
+    draftChain = run.catch(() => undefined);
+    return run;
+  };
+
+  /**
+   * The local half of a write (SPEC-3 3.6): the room client applies the mutations through the
+   * reducer now and flushes them at their cadence; the history takes the entry (typing bursts on
+   * one Text inside 400 ms fold into one, SPEC 7.2.15); the promise resolves when the room
+   * admitted the op, or rejects with the room's reason and the op's content returned.
+   */
+  const commitAs = (
+    mutations: Mutation[],
+    label: string,
+    kind: 'edit' | 'undo' | 'redo',
+  ): Promise<Committed> => {
+    if (room === null) return draftCommit(mutations, label, kind);
+    let applied;
+    try {
+      applied = room.apply(mutations, label);
+    } catch (error) {
+      publish({ error: errorMessage(error) });
+      return Promise.reject(error instanceof Error ? error : new TypeError(String(error)));
+    }
+    if (kind === 'edit') {
+      const key = typingKeyOf(mutations);
+      const nowMs = Date.now();
+      const group =
+        key !== null &&
+        lastTyping !== null &&
+        lastTyping.key === key &&
+        nowMs - lastTyping.at < TEXT_UNDO_GROUP_MS
+          ? history.entries().find((entry) => entry.id === lastTyping?.entryId)
+          : undefined;
+      if (group !== undefined && history.entries()[history.entries().length - 1] === group) {
+        group.mutations.push(...mutations);
+        group.inverse.unshift(...applied.inverse);
+        if (lastTyping !== null) lastTyping.at = nowMs;
+      } else {
+        const entry = history.push({ mutations, inverse: applied.inverse, label });
+        revisionOf.set(entry.id, latest().serverRevision);
+        clockOf.set(entry.id, applied.at);
+        lastTyping = key === null ? null : { entryId: entry.id, key, at: nowMs };
+      }
+      if (
+        identity !== undefined &&
+        identity.trust === 'label' &&
+        !latest().namePrompt &&
+        !promptedName
+      ) {
+        // the name prompt fires on the first edit, never on open (SPEC-3 0.18); a burst of typing
+        // is an edit, so the dialog waits for the inline session to end rather than taking the
+        // caret mid word (measured: the first 100 keystroke run lost every character after the
+        // first burst to the prompt's field)
+        if (inlineActive) namePromptDue = true;
+        else openNamePrompt();
+      }
+    }
+    setDocument(applied.document, changedBy(mutations));
+    stopFollowing();
+    return applied.settled.then((outcome) => {
+      if ('rejected' in outcome) {
+        throw new ConflictError(
+          outcome.rejected.message ?? `The change was not accepted (${outcome.rejected.reason})`,
+          {
+            currentRevision: latest().serverRevision,
+            current: latest().document,
+          },
+        );
+      }
+      return {
+        revision: latest().serverRevision,
+        entry: recordOf(mutations, applied.inverse, outcome.seq),
+        seq: outcome.seq,
+      };
+    });
+  };
+  let promptedName = false;
+  /* an inline text session is open (the Editor reports the caret); the name prompt waits for its end */
+  let inlineActive = false;
+  let namePromptDue = false;
+  const openNamePrompt = (): void => {
+    promptedName = true;
+    namePromptDue = false;
+    publish({ namePrompt: true });
   };
 
   /* the auto-title (gslides-parity SPEC 6.3): the first committed heading of an Untitled
@@ -1018,11 +1907,28 @@ function createEditorController(init: {
   const commit = (mutations: Mutation[], label: string): Promise<Committed> =>
     commitAs([...mutations, ...autoTitleMutations(snapshot.document, mutations)], label, 'edit');
 
+  /** An undo or redo step moved past what landed since it was recorded (SPEC-3 3.5, 3.6). */
+  const stepMutations = (entry: HistoryEntry, mutations: Mutation[]): Mutation[] => {
+    const at = clockOf.get(entry.id);
+    if (room === null || at === undefined) return mutations;
+    return room.transformSince(mutations, at);
+  };
+
   const undo = async (): Promise<void> => {
     const entry = history.undo();
     if (!entry) return;
+    lastTyping = null;
+    const inverse = stepMutations(entry, entry.inverse);
+    if (inverse.length === 0) {
+      say(
+        REFUSALS.alreadyChanged(
+          latest().roster.find((row) => row.clientId !== room?.clientId())?.label ?? 'someone',
+        ),
+      );
+      return;
+    }
     try {
-      await commitAs(entry.inverse, `undo ${entry.label}`, 'undo');
+      await commitAs(inverse, `undo ${entry.label}`, 'undo');
     } catch (error) {
       say(`Undo failed: ${errorMessage(error)}`);
     }
@@ -1031,8 +1937,10 @@ function createEditorController(init: {
   const redo = async (): Promise<void> => {
     const entry = history.redo();
     if (!entry) return;
+    const forward = stepMutations(entry, entry.mutations);
+    if (forward.length === 0) return;
     try {
-      await commitAs(entry.mutations, `redo ${entry.label}`, 'redo');
+      await commitAs(forward, `redo ${entry.label}`, 'redo');
     } catch (error) {
       say(`Redo failed: ${errorMessage(error)}`);
     }
@@ -1042,7 +1950,7 @@ function createEditorController(init: {
     const entries = history.undoTo(id);
     for (const entry of entries) {
       try {
-        await commitAs(entry.inverse, `undo ${entry.label}`, 'undo');
+        await commitAs(stepMutations(entry, entry.inverse), `undo ${entry.label}`, 'undo');
       } catch (error) {
         say(`Undo failed: ${errorMessage(error)}`);
         return;
@@ -1051,6 +1959,11 @@ function createEditorController(init: {
   };
 
   const reload = async (): Promise<void> => {
+    if (room !== null) {
+      await room.resync();
+      publish({ external: null, error: null });
+      return;
+    }
     const payload = await readEditorDeck({ deckId });
     if (!payload) return;
     history.clear();
@@ -1058,57 +1971,21 @@ function createEditorController(init: {
       serverRevision: payload.document.deck.revision,
       versions: payload.versions,
       leases: payload.leases,
-      conflict: null,
       external: null,
       error: null,
     });
     setDocument(payload.document, 'all');
   };
 
-  const rebase = async (): Promise<void> => {
-    const conflict = snapshot.conflict;
-    if (!conflict) return;
-    let document = conflict.current;
-    const writes: Write[] = [];
-    for (const write of conflict.pending) {
-      const result = applyWrite(document, { ...write, baseRevision: document.deck.revision });
-      if (!result.ok) {
-        publish({ conflict: { ...conflict, error: result.message } });
-        return;
-      }
-      writes.push({ ...write, baseRevision: document.deck.revision });
-      document = result.document;
-    }
-    publish({ conflict: null, serverRevision: conflict.currentRevision, error: null });
-    setDocument(document, 'all');
-    for (const write of writes) {
-      void enqueue(write, 'rebase').catch(() => undefined);
-    }
+  const dismissReject = (opId: string): void => {
+    room?.dismissReject(opId);
+    publish({ rejects: latest().rejects.filter((row) => row.opId !== opId), error: null });
   };
 
-  const discard = (): void => {
-    const conflict = snapshot.conflict;
-    if (!conflict) return;
-    history.clear();
-    publish({
-      conflict: null,
-      serverRevision: conflict.currentRevision,
-      error: null,
-      external: null,
-    });
-    setDocument(conflict.current, 'all');
-  };
-
-  /** A write the server applies first (version.restore needs the version log); the document comes back. */
+  /** A write the server applies first (version.restore needs the version log); the room announces it. */
   const commitServerFirst = async (mutations: Mutation[], label: string): Promise<Committed> => {
     await idle();
-    const conflict = latest().conflict;
-    if (conflict) {
-      throw new ConflictError('Resolve the conflict card first', {
-        currentRevision: conflict.currentRevision,
-      });
-    }
-    const write: Write = { baseRevision: latest().document.deck.revision, author, mutations };
+    const write: Write = { baseRevision: latest().serverRevision, author, mutations };
     const result = await writeDeck({ deckId, write, returnDocument: true });
     if (!result.ok) {
       if (result.code === 'conflict') {
@@ -1125,7 +2002,10 @@ function createEditorController(init: {
     revisionOf.set(entry.id, result.revision);
     const { baseRevision: _base, inverse: _inverse, ...version } = result.entry;
     publish({ serverRevision: result.revision, versions: [...snapshot.versions, version] });
-    if (result.document) setDocument(result.document, 'all');
+    if (result.document) {
+      if (room !== null) await room.resync();
+      else setDocument(result.document, 'all');
+    }
     return { revision: result.revision, entry: result.entry };
   };
 
@@ -1146,117 +2026,6 @@ function createEditorController(init: {
   const restoreVersion = async (n: number): Promise<{ revision: number }> => {
     const committed = await commitServerFirst([{ op: 'version.restore', n }], `restore ${n}`);
     return { revision: committed.revision };
-  };
-
-  const leaseActive = (): void => {
-    const slideId = snapshot.activeSlide;
-    if (!slideId || slideId === leased || snapshot.document.slides[slideId] === undefined) return;
-    const previous = leased;
-    leased = slideId;
-    void (async () => {
-      try {
-        if (previous && snapshot.document.slides[previous] !== undefined) {
-          await leaseSlide({ deckId, slideId: previous, author, release: true }).catch(
-            () => undefined,
-          );
-        }
-        await leaseSlide({ deckId, slideId, author, minutes: LEASE_MINUTES });
-      } catch (error) {
-        /* a slide removed while its lease was in flight (Cut, Delete) is no one's error to read */
-        if (latest().document.slides[slideId] === undefined) return;
-        say(`Lease: ${errorMessage(error)}`);
-      }
-    })();
-  };
-
-  // The watch channel (SPEC 6.7; MILESTONES M4 item 2): the store's fs.watch reaches the browser
-  // as a long poll; a revision this session did not write is brought into the document once the
-  // queue is idle, and the banner names it and its author.
-  const running = (): boolean => alive;
-  let externalTimer: ReturnType<typeof setTimeout> | undefined;
-  const showExternal = (external: External): void => {
-    if (externalTimer !== undefined) clearTimeout(externalTimer);
-    publish({ external });
-    externalTimer = setTimeout(() => {
-      if (latest().external?.revision === external.revision) publish({ external: null });
-    }, EXTERNAL_BANNER_MS);
-  };
-  /**
-   * Applies the records written since the local revision forward through the reducer with the
-   * server's timestamps, so the document equals the server's without a reload and the undo stack
-   * survives; a record that does not apply (a version.restore, a gap in the log) reloads instead.
-   */
-  const adoptExternal = async (result: WatchDeckResult): Promise<void> => {
-    const local = latest();
-    const records = result.since
-      .filter((record) => record.revision > local.serverRevision && record.mutations.length > 0)
-      .sort((a, b) => a.revision - b.revision);
-    const last = records[records.length - 1];
-    const recordAuthor = last?.author ?? result.head?.author;
-    const external: External = {
-      revision: result.revision,
-      ...(recordAuthor !== undefined ? { author: recordAuthor } : {}),
-      ...(last?.note ? { note: last.note } : {}),
-    };
-    let document = local.document;
-    const changed = new Set<string>();
-    let deckLevel = false;
-    let applied = 0;
-    for (const record of records) {
-      if (
-        record.baseRevision !== document.deck.revision ||
-        record.mutations.some((mutation) => mutation.op === 'version.restore')
-      )
-        break;
-      const step = applyWrite(
-        document,
-        {
-          baseRevision: record.baseRevision,
-          author: record.author,
-          mutations: record.mutations,
-          ...(record.note ? { note: record.note } : {}),
-        },
-        { now: record.createdAt },
-      );
-      if (!step.ok) break;
-      document = step.document;
-      if (record.mutations.some(isDeckLevel)) deckLevel = true;
-      for (const id of touchedSlides(record.mutations)) changed.add(id);
-      applied += 1;
-    }
-    if (applied !== records.length || document.deck.revision !== result.revision) {
-      await reload();
-      showExternal(external);
-      return;
-    }
-    const versions = [
-      ...latest().versions,
-      ...records.map(({ baseRevision: _base, inverse: _inverse, ...version }) => version),
-    ];
-    publish({ serverRevision: result.revision, versions, error: null });
-    setDocument(document, deckLevel ? 'all' : [...changed]);
-    showExternal(external);
-  };
-  const watchLoop = async (): Promise<void> => {
-    let since = snapshot.serverRevision;
-    while (running()) {
-      try {
-        const result = await watchDeck({ deckId, since });
-        if (!running()) break;
-        publish({ leases: result.leases });
-        if (!result.changed) continue;
-        since = Math.max(since, result.revision);
-        if (result.revision <= latest().serverRevision) continue;
-        if (queue.length > 0 || pumping) {
-          await idle();
-          if (!running() || result.revision <= latest().serverRevision) continue;
-        }
-        if (latest().conflict) continue;
-        await adoptExternal(result);
-      } catch {
-        await sleep(2000);
-      }
-    }
   };
 
   const validateSource = (source: string) => {
@@ -1317,8 +2086,21 @@ function createEditorController(init: {
   const on = <T,>(id: ActionId, run: (input: T) => Promise<unknown> | unknown): void => {
     dispatcher.register(id, (input) => run(input as T));
   };
+  /**
+   * The revision every surface reports and every base check uses (SPEC-3 3.10): the largest of
+   * the room client's confirmed revision, the snapshot's and the document's, so a write based on
+   * what describe().state or sync.status answered never meets a stale base (measured before:
+   * describe answered 0 while the document stood at 3 and the chrome's block.set met a 409).
+   */
+  const reportedRevision = (): number =>
+    Math.max(
+      room?.status().revision ?? 0,
+      snapshot.serverRevision,
+      snapshot.document.deck.revision,
+    );
+
   const checkBase = (baseRevision: number): void => {
-    const current = snapshot.document.deck.revision;
+    const current = reportedRevision();
     if (baseRevision !== current) {
       throw new ConflictError(
         `baseRevision ${baseRevision} is stale; the document is at revision ${current}`,
@@ -1397,6 +2179,9 @@ function createEditorController(init: {
       release: unavailable('release'),
       leases: unavailable('leases'),
       watch: unavailable('watch'),
+      // asset bytes go through the server side window actions (SPEC-3 0.39), never this shim
+      putAsset: unavailable('putAsset'),
+      removeAsset: unavailable('removeAsset'),
     };
   };
   /*
@@ -1845,6 +2630,169 @@ function createEditorController(init: {
       return lease;
     },
   );
+  /*
+   * Round three (gslides-parity SPEC-3 3.10, 4.11, 12): the presence and sync reads answer from
+   * the room client in the page; follow, unfollow and the pointer act on this tab; `comment.link`
+   * builds its URLs here; every other new action needs the store or the identity records and runs
+   * on the server through runDeckAction (SERVER_SIDE_WINDOW_ACTIONS_GS3).
+   */
+  const participants = (): { self: PresenceParticipant | null; others: PresenceParticipant[] } => {
+    const now = new Date().toISOString();
+    const own = room?.clientId() ?? null;
+    const rows = latest().roster.map((entry) => participantOf(entry, now));
+    return {
+      self: rows.find((row) => row.clientId === own) ?? null,
+      others: rows.filter((row) => row.clientId !== own),
+    };
+  };
+  const participantOut = (row: PresenceParticipant) => ({
+    clientId: row.clientId,
+    principalId: row.principalId,
+    kind: row.kind === 'agent' ? 'agent' : 'human',
+    label: row.label,
+    trust: row.trust,
+    mark: row.mark ?? {},
+    ...(row.role !== undefined && row.role !== 'link' ? { role: row.role } : {}),
+    ...(row.slideId !== undefined ? { slideId: row.slideId } : {}),
+    ...(row.selection !== undefined
+      ? {
+          selection: {
+            blockIds: [...row.selection.blockIds],
+            ...(row.selection.caret !== undefined
+              ? {
+                  caret: {
+                    blockId: row.selection.caret.blockId,
+                    path: row.selection.caret.path,
+                    range: [row.selection.caret.offset, row.selection.caret.offset] as [
+                      number,
+                      number,
+                    ],
+                  },
+                }
+              : {}),
+          },
+        }
+      : {}),
+    ...(row.pointer !== undefined && row.pointer !== null ? { pointer: row.pointer } : {}),
+    ...(row.following !== undefined && row.following !== null ? { following: row.following } : {}),
+    presenting: row.presenting ?? false,
+    idle: row.idle ?? false,
+    lastSeenAt: row.lastSeenAt,
+  });
+  on<Record<string, never>>('presence.list', () => {
+    const { self, others } = participants();
+    const own = self ?? {
+      // the tab's client id once the stream's hello bound it; `unbound` before (the room client's own word)
+      clientId: room?.clientId() ?? 'unbound',
+      principalId: identity?.principalId ?? author.name,
+      label: identity?.label ?? author.name,
+      trust: identity?.trust ?? 'guest',
+      kind: identity?.kind ?? 'anonymous',
+      presenting: false,
+      idle: false,
+      lastSeenAt: new Date().toISOString(),
+      role: latest().access.role ?? 'editor',
+    };
+    return {
+      deckId,
+      cap: 20,
+      pointersVisible: latest().pointersVisible,
+      self: participantOut(own),
+      others: others.map(participantOut),
+    };
+  });
+  const canFollow = (): boolean => latest().access.capabilities.includes('follow');
+  on<{ clientId: string }>('presence.follow', (input) => {
+    if (!canFollow()) {
+      throw new TypeError(
+        'Follow is for signed in editors and owners; use Go to slide to jump to where they are',
+      );
+    }
+    const target = latest().roster.find((row) => row.clientId === input.clientId);
+    if (target === undefined)
+      throw new RangeError(`No collaborator with client id ${input.clientId}`);
+    controller.followClient(input.clientId);
+    return {
+      following: input.clientId,
+      ...(target.slideId !== undefined ? { slideId: target.slideId } : {}),
+    };
+  });
+  on<Record<string, never>>('presence.unfollow', () => {
+    controller.unfollow();
+    return { following: null };
+  });
+  on<{ on: boolean }>('presence.pointer', (input) => {
+    controller.setPointerOn(input.on);
+    return { on: input.on };
+  });
+  on<Record<string, never>>('sync.status', () => {
+    const status = room?.status();
+    return {
+      seq: status?.seq ?? init.payload.room?.seq ?? 0,
+      revision: reportedRevision(),
+      pending: status?.pending ?? latest().pending,
+      retained: status?.retained ?? 0,
+      tier: status?.tier ?? init.payload.room?.tier ?? 'memory',
+      transport: status === undefined ? 'poll' : 'sse',
+      connected: status?.connected ?? false,
+    };
+  });
+  on<{ threadId: string }>('comment.link', (input) => {
+    const origin = typeof window === 'undefined' ? '' : window.location.origin;
+    return {
+      url: `${origin}/edit/${encodeURIComponent(deckId)}?comment=${encodeURIComponent(input.threadId)}`,
+      viewUrl: `${origin}/deck/${encodeURIComponent(deckId)}?comment=${encodeURIComponent(input.threadId)}`,
+    };
+  });
+  for (const id of SERVER_SIDE_WINDOW_ACTIONS_GS3) {
+    if (id === 'presence.list' || id === 'sync.status' || !isActionId(id)) continue;
+    if (id.startsWith('comment.') || id.startsWith('notification.')) {
+      // a comment or inbox write of this tab re-reads the sidecar and the inbox once the server
+      // answered, so the window transport shows its own comment without waiting for the stream
+      // (the blob tier has no stream event for it on another instance). The reads never do:
+      // refreshComments and refreshInbox run through these same handlers (comment.list,
+      // notification.list, notification.settings with an empty input), and a refresh that
+      // scheduled the next refresh ran the pair thirty times a second on every open editor and
+      // spent the deck's writes per minute quota on the settings read, so every write of the tab
+      // then answered "Too many changes at once" (the fix round, measured on the two browser walk
+      // and the round two suites)
+      const readsOnly = (input: unknown): boolean =>
+        !ACTIONS[id].mutates ||
+        (id === 'notification.settings' &&
+          (input === undefined ||
+            input === null ||
+            (typeof input === 'object' && Object.keys(input as object).length === 0)));
+      on<unknown>(id, async (input) => {
+        const output = await runDeckAction({ deckId, action: id, input, author });
+        if (!readsOnly(input)) {
+          scheduleCommentsRefresh();
+          scheduleInboxRefresh();
+        }
+        return output;
+      });
+      continue;
+    }
+    serverSide(id as ServerSideWindowAction);
+  }
+  /* Forget this browser (SPEC-3 7.4; VERIFICATION-3 finding 12): the server mints the new
+     anonymous principal and its cookie (the response's Set-Cookie replaces the old one), then
+     this page clears the localStorage and IndexedDB mirrors together and reloads as the new
+     visitor, so the own chip, the page's principal and the cookie mirror change as one; the old
+     edits keep the old label and nothing links the two. The menu row asks first (the
+     forgetBrowser dialog); the window API acts at once, the agent having asked. */
+  on<Record<string, never>>('account.forget', async () => {
+    const output = (await runDeckAction({
+      deckId,
+      action: 'account.forget',
+      input: {},
+      author,
+    })) as {
+      principalId: string;
+    };
+    await clearPendingMirror().catch(() => undefined);
+    setTimeout(() => window.location.reload(), 50);
+    return output;
+  });
   on<{ note: string }>('version.save', (input) => saveVersionNamed(input.note));
   on<Record<string, never>>('version.list', () => refreshVersions());
   on<{ n: number; baseRevision: number }>('version.restore', async (input) => {
@@ -1998,6 +2946,12 @@ function createEditorController(init: {
   );
   on<BlockFlipInput>('block.flip', (input) => blockFlip(storeDeps('block.flip'), context, input));
   on<BlockCropInput>('block.crop', (input) => blockCrop(storeDeps('block.crop'), context, input));
+  /* picture.dither writes the picture's `dither` field in the page as block.set does, converting
+     the slide to a canvas by block.crop's rule (gslides-parity SPEC-3 10.5; the integrator at
+     merge 2 for b5.md request 6); the menu row format.image.dither toggles through it */
+  on<PictureDitherInput>('picture.dither', (input) =>
+    pictureDither(storeDeps('picture.dither'), context, input),
+  );
   on<BlockMaskInput>('block.mask', (input) => blockMask(storeDeps('block.mask'), context, input));
   on<BlockResetImageInput>('block.resetImage', (input) =>
     blockResetImage(storeDeps('block.resetImage'), context, input),
@@ -2090,13 +3044,15 @@ function createEditorController(init: {
   const invoke = (action: string, input?: unknown): Promise<unknown> =>
     dispatcher.dispatch(action, input ?? {}, context);
 
-  const editorAdapter = (): StudioAdapter => ({
-    owner: 'editor',
-    actions: windowActionIds(),
-    getSource: readSource,
-    applySource,
-    invoke,
-    state: () => ({
+  /**
+   * describe().state for both owners (SPEC-3 3.10): the document's facts and the room's. The
+   * access record and the caller's standing come from the snapshot, which every `access` event
+   * of the stream refreshes, so a share write based on `state.access.revision` never meets a
+   * stale record (comments.spec.ts, share.spec.ts).
+   */
+  const stateOf = (): Record<string, unknown> => {
+    const record = snapshot.access.record;
+    return {
       deckId,
       revision: snapshot.document.deck.revision,
       serverRevision: snapshot.serverRevision,
@@ -2107,27 +3063,125 @@ function createEditorController(init: {
       theme: readTheme(),
       zoom: snapshot.zoom,
       author: authorLabel(author),
-    }),
+      // round three (SPEC-3 3.10): the room's facts beside the document's
+      sync: {
+        seq: snapshot.sync?.seq ?? init.payload.room?.seq ?? 0,
+        revision: reportedRevision(),
+        pending: snapshot.sync?.pending ?? snapshot.pending,
+        retained: snapshot.sync?.retained ?? 0,
+        tier: snapshot.sync?.tier ?? init.payload.room?.tier ?? 'memory',
+        transport: snapshot.sync === null ? 'poll' : 'sse',
+        connected: snapshot.sync?.connected ?? false,
+      },
+      // the room as presence.list answers it (SPEC-3 3.10; presence.spec.ts reads self.clientId
+      // and others[]) beside the count the round two readers had
+      presence: (() => {
+        const { self, others } = participants();
+        return {
+          clientId: room?.clientId() ?? null,
+          ...(self === null ? {} : { self: participantOut(self) }),
+          others: others.map(participantOut),
+          count: others.length,
+          following: snapshot.following,
+          pointersVisible: snapshot.pointersVisible,
+        };
+      })(),
+      // the record as the Share dialog reads it (SPEC-3 3.10; share.spec.ts reads generalAccess,
+      // revision, requests and claimable) with the caller's standing on it; the link and publish
+      // hashes stay out
+      access: {
+        ...(record === null
+          ? {}
+          : {
+              deckId: record.deckId,
+              revision: record.revision,
+              owner: record.owner,
+              pendingOwner: record.pendingOwner,
+              generalAccess: record.generalAccess,
+              links: record.links.map(({ hash: _hash, ...link }) => link),
+              publish:
+                record.publish === null
+                  ? null
+                  : (({ hash: _hash, ...rest }) => rest)(record.publish),
+              grants: record.grants,
+              requests: record.requests,
+              settings: record.settings,
+              claimable: record.owner === null && init.payload.identity?.kind === 'account',
+            }),
+        role: snapshot.access.role,
+        via: snapshot.access.via,
+        capabilities: [...snapshot.access.capabilities],
+        mode: record?.generalAccess.mode ?? 'open',
+      },
+      account: {
+        principalId: identity?.principalId ?? null,
+        label: identity?.label ?? author.name,
+        ...(identity?.name !== undefined ? { name: identity.name } : {}),
+        trust: identity?.trust ?? 'guest',
+        signedIn: identity?.kind === 'account',
+        signInAvailable: init.payload.auth?.signIn ?? false,
+      },
+      // the sidecar as the chrome reads it (SPEC-3 3.10; comments.spec.ts reads threads[], revision)
+      comments: {
+        threads: threadViews(),
+        revision: snapshot.comments.revision,
+        display: snapshot.comments.display,
+        openThreadId: snapshot.comments.openThreadId,
+      },
+      inbox: {
+        unread: snapshot.inbox.unread,
+        items: inboxViews(),
+      },
+    };
+  };
+
+  const editorAdapter = (): StudioAdapter => ({
+    owner: 'editor',
+    actions: windowActionIds(),
+    getSource: readSource,
+    applySource,
+    invoke,
+    state: stateOf,
   });
 
+  /**
+   * The actions the viewer owner answers (SPEC-3 3.10, 6.6; VERIFICATION-3 finding 3): every read
+   * of the window transport for every role, the comment writes for a role with `comment`, the
+   * inbox, account and presence writes for everyone, and Request access. A document write stays
+   * the editor owner's: an editor in Viewing or Commenting mode is told to switch to Editing, a
+   * visitor's write is refused by the server anyway. The round one list (view.*, render.*) is a
+   * subset of this one.
+   */
+  const visitorActionIds = (): string[] => {
+    const draft = init.payload.draft === true;
+    return windowActionIds().filter((id) => {
+      if (!isActionId(id)) return false;
+      const spec = ACTIONS[id];
+      if (!spec.mutates) return true;
+      if (id === 'share.requestAccess') return true;
+      if (id.startsWith('comment.')) return draft || hasCapability('comment');
+      return (
+        id.startsWith('notification.') || id.startsWith('account.') || id.startsWith('presence.')
+      );
+    });
+  };
   const viewerAdapter = (): StudioAdapter => ({
     owner: 'viewer',
-    actions: viewerActionIds(),
+    actions: visitorActionIds(),
     invoke: (action, input) => {
-      if (!viewerActionIds().includes(action)) {
+      if (!visitorActionIds().includes(action)) {
+        // in words (SPEC-3 6.8; VERIFICATION-3 finding 44): a person without the write capability
+        // is told what they can do and what to ask for, never a role they lack or an internal
+        // noun; an editor in Viewing or Commenting mode is told where the mode switch is
         throw new RangeError(
-          `The viewer owner does not expose "${action}"; switch to Edit for it.`,
+          hasCapability('write')
+            ? `"${action}" needs Editing mode; switch View > Mode to Editing for it.`
+            : `${REFUSALS.viewOnly}. ${REFUSALS.requestEditAccess} to change it.`,
         );
       }
       return invoke(action, input);
     },
-    state: () => ({
-      deckId,
-      revision: snapshot.document.deck.revision,
-      slideId: snapshot.activeSlide,
-      mode: shell?.mode ?? 'slide',
-      theme: readTheme(),
-    }),
+    state: stateOf,
   });
 
   const controller: EditorController = {
@@ -2142,10 +3196,20 @@ function createEditorController(init: {
       if (alive) return;
       alive = true;
       setDocument(snapshot.document, 'all');
-      void watchLoop();
+      // the room (SPEC-3 3.6): a stored deck opens its stream now; a draft opens it on its first write
+      if (init.payload.draft !== true) {
+        attachRoom(
+          snapshot.document,
+          init.payload.room?.seq ?? 0,
+          init.payload.room?.tier ?? 'memory',
+        );
+      }
     },
     stop() {
       alive = false;
+      const client = room;
+      room = null;
+      if (client !== null) void client.stop();
     },
     attachShell(next) {
       shell = next;
@@ -2163,16 +3227,72 @@ function createEditorController(init: {
     undo,
     redo,
     undoTo,
-    rebase,
-    discard,
+    dismissReject,
     reload,
+    followClient(clientId) {
+      const target = latest().roster.find((row) => row.clientId === clientId);
+      publish({ following: clientId });
+      room?.setPresence({ follow: clientId });
+      if (target?.slideId !== undefined && shell?.active !== target.slideId)
+        shell?.select(target.slideId);
+    },
+    unfollow() {
+      publish({ following: null });
+      room?.setPresence({ follow: undefined });
+    },
+    goToClient(clientId) {
+      const target = latest().roster.find((row) => row.clientId === clientId);
+      if (target?.slideId !== undefined) shell?.select(target.slideId);
+    },
+    setPointerOn(on) {
+      room?.setPresence({ pointerOn: on });
+      // the toolbar's Show my pointer reads `presence.pointerMine`; without the mirror the toggle
+      // never pressed (presence.spec.ts row 2, the fix round)
+      publish({ pointerOn: on });
+    },
+    setPointersVisible(on) {
+      if (on === snapshot.pointersVisible) return;
+      publish({ pointersVisible: on });
+    },
+    reportPresence(state) {
+      room?.setPresence(state);
+    },
+    threadViews,
+    inboxViews,
+    refreshComments,
+    refreshInbox,
+    roomAction,
+    setCommentsDisplay(display) {
+      if (display === snapshot.comments.display) return;
+      publish({ comments: { ...snapshot.comments, display } });
+    },
+    openComment(threadId) {
+      if (threadId === snapshot.comments.openThreadId) return;
+      publish({ comments: { ...snapshot.comments, openThreadId: threadId } });
+    },
+    openInboxItem(item) {
+      if (item.slideId !== undefined && snapshot.document.slides[item.slideId] !== undefined) {
+        if (shell?.mode === 'grid') shell.setMode('slide');
+        shell?.select(item.slideId);
+      }
+      if (item.threadId !== undefined) {
+        publish({ comments: { ...snapshot.comments, openThreadId: item.threadId } });
+      }
+      if (item.readAt === undefined) void roomAction('notification.markRead', { ids: [item.id] });
+    },
+    promptName(open) {
+      publish({ namePrompt: open });
+    },
+    noteInlineSession(active) {
+      inlineActive = active;
+      if (!active && namePromptDue && !promptedName) openNamePrompt();
+    },
     saveVersion: saveVersionNamed,
     restoreVersion,
     refreshVersions,
     promptVersion(open) {
       publish({ versionPrompt: open });
     },
-    leaseActive,
     readSource,
     validateSource,
     applySource,
@@ -2527,9 +3647,17 @@ type EditorRootProps = {
  */
 export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }: EditorRootProps) {
   const [controller] = useState(() =>
-    createEditorController({ deckId: payload.deckId, author, payload, onDeckCreated }),
+    createEditorController({
+      deckId: payload.deckId,
+      author,
+      payload,
+      onDeckCreated,
+      ...(search.comment !== undefined ? { initialThread: search.comment } : {}),
+    }),
   );
   const [capabilities, setCapabilities] = useState<ExportCapabilities | null>(null);
+  /* View > Mode for an editor (SPEC-3 5.3): Editing or Commenting; Viewing is the `?edit=0` flag */
+  const [chosenMode, setChosenMode] = useState<'editing' | 'commenting'>('editing');
   /* Extensions > Agent access: whether the deployment asks for TURBOSLIDE_TOKEN */
   const [tokenRequired, setTokenRequired] = useState(true);
   /* the report card, from the Download dialog's Details link and nowhere else (SPEC 6.7) */
@@ -2540,9 +3668,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     controller.getSnapshot,
   );
   const theme = useTheme();
-  /* a trashed presentation is read only under its banner (SPEC 6.4) */
+  /* a trashed presentation is read only under its banner (SPEC 6.4); a viewer role too (SPEC-3 6.3) */
   const trashed = isTrashed(snap.document.deck);
-  const editing = search.edit !== 0 && !trashed;
+  const editing = search.edit !== 0 && !trashed && snap.access.role !== 'viewer';
   const twin = search.twin === 1;
   const lintLayer = search.lint === 1;
   const src = search.src === 1;
@@ -2557,6 +3685,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   /* the caret's marks and range inside a run (the toolbar's pressed state and Format options' Text
      colour), reported by the stage; a state so the shell re-reads the selection facts on change */
   const [caret, setCaret] = useState<CaretInfo | null>(null);
+  useEffect(() => {
+    controller.noteInlineSession(caret !== null);
+  }, [controller, caret]);
   /* the stage's selection beyond the anchor (B4's onMultiSelectionChange): a Shift click, a
      marquee or Select all changes it while the route's selection keeps the anchor, so it is a
      change signal of its own for the facts the menus read */
@@ -2583,6 +3714,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   useMountEffect(() => {
     if (search.theme) applyTheme(search.theme);
     const stopBridge = installThemeBridge();
+    // a draft stays the same draft while this editor holds it (server/write.ts holdDraft): the
+    // loader of /new reruns on every search change and would otherwise mint another
+    const releaseDraft = payload.draft === true ? holdDraft(payload.deckId) : () => undefined;
     controller.start();
     if (payload.draft !== true) recordDeckOpened(payload.deckId);
     exportCapabilities()
@@ -2613,6 +3747,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       document.removeEventListener('focusin', onFocus);
       stopBridge();
       controller.stop();
+      releaseDraft();
     };
   });
 
@@ -2634,7 +3769,274 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const selection =
     snap.selection && snap.selection.slideId === snap.activeSlide ? snap.selection : null;
 
-  const status: SaveState = snap.conflict ? 'conflict' : snap.pending > 0 ? 'unsaved' : 'saved';
+  /* the save words (SPEC-3 3.6): Saving… while anything is pending or retained, the retry word
+     while the wire is down; a reject notice is the one conflict state left */
+  const status: SaveState =
+    snap.rejects.length > 0
+      ? 'conflict'
+      : snap.sync?.offline === true
+        ? 'unsaved'
+        : snap.pending > 0
+          ? 'unsaved'
+          : 'saved';
+  /* the caller's standing, from the loader and again on every access event of the stream */
+  const roleOf = snap.access.role ?? undefined;
+  const roleCapabilities = snap.access.capabilities;
+  const overCeiling = snap.sync?.overCeiling === true;
+  /* the role shaped editor (SPEC-3 6.3, 0.9): a viewer and a tab over the editing ceiling open in
+     Viewing mode, a commenter in Commenting mode; an editor's mode is the chrome's own setting */
+  const forcedMode: EditorMode | undefined =
+    roleOf === 'viewer' || overCeiling
+      ? 'viewing'
+      : roleOf === 'commenter'
+        ? 'commenting'
+        : undefined;
+  /* View > Mode as the shell shows it (SPEC-3 5.3): the role's mode, else Viewing under the
+     round one flag, else the editor's own choice; the root's data-edit-mode gates the stage */
+  const effectiveMode: EditorMode = forcedMode ?? (editing ? chosenMode : 'viewing');
+  const canWrite = effectiveMode === 'editing';
+  /* View > Mode's rows (EditorHandle.setMode): Viewing is the address's flag, so a reload keeps
+     it; Commenting is this page's state; a change never remounts the editor (VERIFICATION-3
+     finding 2) */
+  const setChromeMode = (mode: EditorMode): void => {
+    if (mode === 'viewing') {
+      setChosenMode('editing');
+      if (search.edit !== 0) onSearch({ edit: 0 });
+      return;
+    }
+    setChosenMode(mode);
+    if (search.edit === 0) onSearch({ edit: undefined });
+  };
+  /* the leave warning while operations are pending (SPEC-3 0.7, 3.6) */
+  useEffect(() => {
+    const onBeforeUnload = (event: BeforeUnloadEvent) => {
+      const current = controller.getSnapshot();
+      if ((current.sync?.pending ?? current.pending) > 0) {
+        event.preventDefault();
+        event.returnValue = REFUSALS.leaveAnyway;
+      }
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [controller]);
+  /* the tab's presence (SPEC-3 3.8): the slide, the selection and the caret, coalesced by the room client */
+  useEffect(() => {
+    const blockIds =
+      selection === null
+        ? []
+        : [selection.blockId, ...multiSelection.filter((id) => id !== selection.blockId)];
+    controller.reportPresence({
+      slideId: snap.activeSlide,
+      selection: {
+        blockIds: blockIds.slice(0, 64),
+        ...(selection !== null && selection.pointer !== undefined && caret !== null
+          ? {
+              caret: {
+                blockId: selection.blockId,
+                path: `/${selection.pointer}`,
+                range: caret.range,
+              },
+            }
+          : {}),
+      },
+      presenting: snap.view.present,
+    });
+  }, [controller, snap.activeSlide, selection, multiSelection, caret, snap.view.present]);
+  const now = new Date().toISOString();
+  const ownClientId = snap.sync?.clientId ?? null;
+  const rosterRows = useMemo(
+    () => snap.roster.map((entry) => participantOf(entry, now)),
+    [snap.roster],
+  );
+  const presence: EditorPresence = {
+    ...(rosterRows.find((row) => row.clientId === ownClientId) !== undefined
+      ? { self: rosterRows.find((row) => row.clientId === ownClientId) }
+      : {}),
+    others: rosterRows.filter((row) => row.clientId !== ownClientId),
+    cap: 20,
+    /* View > Live pointers > Show collaborator pointers (SPEC-3 4.6): the controller's setting */
+    pointersVisible: snap.pointersVisible,
+    pointerMine: snap.pointerOn,
+    following: snap.following,
+    showNames: snap.access.record?.settings.showNamesToLinkVisitors ?? false,
+    ...(payload.room !== undefined ? { tier: payload.room.tier } : {}),
+    onFollow: (clientId) => controller.followClient(clientId),
+    onUnfollow: () => controller.unfollow(),
+    onGoTo: (clientId) => controller.goToClient(clientId),
+    onPointer: (on) => controller.setPointerOn(on),
+    onPointerOthers: (on) => controller.setPointersVisible(on),
+  };
+  const sync: EditorSync = {
+    seq: snap.sync?.seq ?? payload.room?.seq ?? 0,
+    revision: snap.serverRevision,
+    pending: snap.sync?.pending ?? snap.pending,
+    retained: snap.sync?.retained ?? 0,
+    tier: snap.sync?.tier ?? payload.room?.tier ?? 'memory',
+    transport: snap.sync === null ? 'none' : 'sse',
+    connected: snap.sync?.connected ?? false,
+    offline: snap.sync?.offline ?? false,
+    ...(snap.persisted !== null
+      ? {
+          persisted: {
+            count: snap.persisted.count,
+            onApply: () => void snap.persisted?.apply(),
+            onDiscard: () => void snap.persisted?.discard(),
+          },
+        }
+      : {}),
+  };
+  const selfIdentity = identityView(payload.identity, author);
+  /* the deployment's sign in facts (SPEC-3 7.3): the row exists when a database is configured;
+     the dialog's exchanges run over better-auth's own routes and the page reloads with the
+     account's identity once one lands (B2 R19; VERIFICATION-3 finding 9) */
+  const auth = payload.auth;
+  const account: EditorAccount = {
+    principal: selfIdentity,
+    signedIn: payload.identity?.kind === 'account',
+    signInAvailable: auth?.signIn ?? false,
+    passkeysAvailable: auth?.passkeys ?? false,
+    githubAvailable: auth?.github ?? false,
+    namePrompt: {
+      open: snap.namePrompt,
+      prefilled: payload.identity?.name ?? payload.identity?.label ?? author.name,
+    },
+    onNamePrompt: (open) => controller.promptName(open),
+    setName: (name) => controller.invoke('account.setName', { name }),
+    setAvatar: (choice) =>
+      controller.invoke('account.setAvatar', {
+        variant: choice.variant,
+        ...(choice.initials !== undefined ? { initials: choice.initials } : {}),
+        ...(choice.salt !== undefined ? { salt: Number(choice.salt) } : {}),
+      }),
+    forget: () => controller.invoke('account.forget', {}),
+    ...(auth?.email === true
+      ? {
+          requestCode: (email) =>
+            authPost('sign-in/magic-link', { email, callbackURL: signInReturnAddress() }),
+          verifyCode: async (email, code) => {
+            await authPost('sign-in/email-otp', { email, otp: code });
+            window.location.reload();
+          },
+        }
+      : {}),
+    ...(auth?.github === true
+      ? {
+          github: () => {
+            void authPost('sign-in/social', {
+              provider: 'github',
+              callbackURL: signInReturnAddress(),
+            })
+              .then((answer) => {
+                const url = (answer as { url?: string } | null)?.url;
+                if (typeof url === 'string') window.location.assign(url);
+              })
+              .catch((error: unknown) => controller.say(errorMessage(error)));
+          },
+        }
+      : {}),
+    ...(payload.identity?.kind === 'account'
+      ? {
+          signOut: async (sessionId) => {
+            if (sessionId === undefined) {
+              await authPost('sign-out', {});
+              window.location.reload();
+              return null;
+            }
+            return controller.invoke(
+              'account.signOut',
+              sessionId === 'all' ? { all: true } : { sessionId },
+            );
+          },
+        }
+      : {}),
+  };
+  const record = snap.access.record ?? undefined;
+  const access: EditorAccess | undefined =
+    record === undefined
+      ? undefined
+      : {
+          revision: record.revision,
+          owner:
+            record.owner === null
+              ? null
+              : {
+                  principalId: record.owner,
+                  label: labelFor(record.owner),
+                  trust: record.owner.startsWith('usr_') ? 'verified' : 'label',
+                  kind: record.owner.startsWith('usr_') ? 'account' : 'anonymous',
+                },
+          pendingOwner:
+            record.pendingOwner === null || record.pendingOwner.principalId === null
+              ? null
+              : {
+                  principalId: record.pendingOwner.principalId,
+                  label: labelFor(record.pendingOwner.principalId),
+                  trust: 'verified',
+                  kind: 'account',
+                },
+          generalAccess: record.generalAccess,
+          grants: record.grants.map((grant) => ({
+            ...(grant.principalId !== null
+              ? {
+                  principal: {
+                    principalId: grant.principalId,
+                    label: labelFor(grant.principalId),
+                    trust: grant.principalId.startsWith('usr_')
+                      ? ('verified' as const)
+                      : ('label' as const),
+                    kind: grant.principalId.startsWith('usr_')
+                      ? ('account' as const)
+                      : ('anonymous' as const),
+                  },
+                }
+              : {}),
+            ...(grant.email !== null ? { email: grant.email } : {}),
+            role: grant.role,
+            invitedAt: grant.invitedAt,
+            ...(grant.acceptedAt !== null ? { acceptedAt: grant.acceptedAt } : {}),
+            expiresAt: grant.expiresAt,
+            status:
+              grant.acceptedAt === null
+                ? ('pending' as const)
+                : grant.expiresAt !== null && Date.parse(grant.expiresAt) < Date.now()
+                  ? ('expired' as const)
+                  : ('active' as const),
+          })),
+          links: record.links
+            .filter((link) => link.revokedAt === null)
+            .map((link) => ({
+              id: link.id,
+              role: link.role,
+              ...(link.label !== undefined ? { label: link.label } : {}),
+              createdAt: link.createdAt,
+              expiresAt: link.expiresAt,
+              revokedAt: link.revokedAt,
+              ...(link.useCount !== undefined ? { useCount: link.useCount } : {}),
+            })),
+          requests: record.requests
+            .filter((request) => request.respondedAt === null)
+            .map((request) => ({
+              id: request.id,
+              ...(request.principalId !== null
+                ? {
+                    principal: {
+                      principalId: request.principalId,
+                      label: labelFor(request.principalId),
+                      trust: 'label' as const,
+                      kind: 'anonymous' as const,
+                    },
+                  }
+                : {}),
+              ...(request.email !== null ? { email: request.email } : {}),
+              role: request.role,
+              ...(request.message !== undefined ? { message: request.message } : {}),
+              askedAt: request.askedAt,
+            })),
+          settings: record.settings,
+          published: null,
+          claimable: record.owner === null && payload.identity?.kind === 'account',
+          ...(payload.via !== undefined ? { via: payload.via } : {}),
+        };
 
   /* the source drawer as a delegating owner (SPEC 6.6, 7.4): Apply from the drawer and
      applySource from an agent run one validator; an action the drawer does not know reaches
@@ -2773,6 +4175,12 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
   const shellDispatch: EditorDispatch = (action, input) => {
     if (action === 'view.present' && (input as { on?: boolean }).on === true) {
       requestPresentFullscreen();
+    }
+    if (action === 'account.forget' && shellApi.current) {
+      // the own chip's row asks first with ACCOUNT.forgetConfirm (SPEC-3 7.4); Forget in the
+      // dialog runs the action through EditorAccount.forget
+      shellApi.current.openDialog('forgetBrowser');
+      return Promise.resolve({ asked: true });
     }
     if (action === 'deck.pack') {
       return bundleDownloadTicket({ deckId }).then(({ url }) => {
@@ -2944,14 +4352,104 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       : undefined;
   /* the stage's handle in the shell's words (SPEC-2 seams): the same object, plus the Background
      dialog's Choose landing the picture object at the bottom of the stack */
-  const shellEditor: EditorShellInput['editor'] =
-    editorHandle === null
-      ? undefined
+  const shellEditor: EditorShellInput['editor'] = {
+    ...(editorHandle === null
+      ? {}
       : {
           ...editorHandle,
           insertBackgroundPicture: (asset) =>
             editorHandle.insertObject({ id: 'picture', type: 'picture', asset }, { bottom: true }),
-        };
+        }),
+    /* View > Mode and comment.link's target are the route's, whatever the stage shows (SPEC-3 5.3, 5.9) */
+    setMode: setChromeMode,
+    openComment: (threadId) => controller.openComment(threadId),
+  };
+  /* the comments and the inbox as the chrome reads them (SPEC-3 5.3, 5.5; VERIFICATION-3
+     finding 1): the sidecar for a role with readComments, the writes for one with comment; a
+     draft's creator holds both until the loader names a role */
+  const canReadComments = payload.draft === true || roleCapabilities.includes('readComments');
+  const canComment = payload.draft === true || roleCapabilities.includes('comment');
+  const threadViews = snap.comments.loaded ? controller.threadViews() : [];
+  const mentionables = useMemo<IdentityView[]>(() => {
+    const seen = new Map<string, IdentityView>();
+    for (const row of rosterRows) seen.set(row.principalId, row);
+    seen.set(selfIdentity.principalId, selfIdentity);
+    for (const thread of threadViews) {
+      for (const comment of [thread.comment, ...thread.replies]) {
+        if (!seen.has(comment.author.principalId))
+          seen.set(comment.author.principalId, comment.author);
+      }
+    }
+    return [...seen.values()];
+  }, [rosterRows, selfIdentity.principalId, threadViews]);
+  const comments: EditorComments | undefined = canReadComments
+    ? {
+        threads: threadViews,
+        revision: snap.comments.revision,
+        display: snap.comments.display,
+        onDisplay: (display) => controller.setCommentsDisplay(display),
+        openThreadId: snap.comments.openThreadId,
+        onOpen: (threadId) => controller.openComment(threadId),
+        mentionables,
+        link: (threadId) =>
+          controller.invoke('comment.link', { threadId }) as Promise<{
+            url: string;
+            viewUrl?: string;
+          }>,
+        ...(canComment
+          ? {
+              add: (input) =>
+                controller.roomAction('comment.add', {
+                  anchor: anchorOfView(input.anchor),
+                  body: bodyOfInput(input.body),
+                  ...(input.assignee !== undefined && input.assignee !== null
+                    ? { assignee: { kind: 'principal', principalId: input.assignee } }
+                    : {}),
+                }),
+              reply: (threadId, body) =>
+                controller.roomAction('comment.reply', { threadId, body: bodyOfInput(body) }),
+              edit: (threadId, commentId, body) =>
+                controller.roomAction('comment.edit', {
+                  threadId,
+                  commentId,
+                  body: bodyOfInput(body),
+                  expectedUpdatedAt:
+                    snap.comments.threads.find((thread) => thread.id === threadId)?.updatedAt ??
+                    new Date(0).toISOString(),
+                }),
+              remove: (threadId, commentId, restore) =>
+                controller.roomAction('comment.delete', {
+                  threadId,
+                  commentId,
+                  ...(restore === true ? { restore: true } : {}),
+                }),
+              resolve: (threadId) => controller.roomAction('comment.resolve', { threadId }),
+              reopen: (threadId) => controller.roomAction('comment.reopen', { threadId }),
+              assign: (threadId, assignee) =>
+                controller.roomAction('comment.assign', {
+                  threadId,
+                  assignee: assignee === null ? null : { kind: 'principal', principalId: assignee },
+                }),
+              done: (threadId) => controller.roomAction('comment.done', { threadId }),
+              react: (threadId, commentId, emoji, on) =>
+                controller.roomAction('comment.react', { threadId, commentId, emoji, on }),
+            }
+          : {}),
+      }
+    : undefined;
+  const inbox: EditorInbox = {
+    items: controller.inboxViews(),
+    unread: snap.inbox.unread,
+    ...(snap.inbox.level !== undefined ? { level: snap.inbox.level } : {}),
+    ...(snap.inbox.email !== undefined ? { email: snap.inbox.email } : {}),
+    ...(snap.inbox.activityForCommenters !== undefined
+      ? { activityForCommenters: snap.inbox.activityForCommenters }
+      : {}),
+    onOpen: (item) => controller.openInboxItem(item),
+    onMarkRead: (ids) => void controller.roomAction('notification.markRead', { ids: [...ids] }),
+    onMarkAllRead: () => void controller.roomAction('notification.markRead', { all: true }),
+    onSettings: (settings) => controller.roomAction('notification.settings', settings),
+  };
   /* B5's Chart data and Table sections inside Format options (SPEC-2 section 5) */
   const formatSlots: NonNullable<EditorShellInput['formatSlots']> = {
     chart: (props) =>
@@ -2995,7 +4493,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
       state: status,
       draft,
       lastEditAt: deck.updatedAt,
-      ...(authorLabel(author) !== DEFAULT_AUTHOR ? { lastEditBy: authorLabel(author) } : {}),
+      ...(snap.versions.length > 0
+        ? { lastEditBy: authorLabel(snap.versions[snap.versions.length - 1]?.author ?? author) }
+        : {}),
     },
     clipboard,
     toggles: {
@@ -3012,6 +4512,17 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     versions: snap.versions,
     historyEntries: snap.history.versions,
     leases: snap.leases.filter((lease) => !sameAuthor(lease.holder, author)),
+    /* round three (SPEC-3 sections 3 to 7; B6's surfaces read these) */
+    presence,
+    sync,
+    account,
+    ...(comments !== undefined ? { comments } : {}),
+    inbox,
+    ...(access !== undefined ? { access } : {}),
+    ...(roleOf !== undefined ? { role: roleOf } : {}),
+    ...(payload.draft === true ? {} : { capabilities: roleCapabilities }),
+    /* View > Mode's radio and the root's data-edit-mode follow this (SPEC-3 5.3) */
+    mode: effectiveMode,
     onUndoTo: (entry) => {
       void controller.undoAfter(entry.n);
     },
@@ -3022,7 +4533,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
     lintText,
     assetUrl: (path) => assetBase + path,
     createDitherWorker,
-    busy: snap.conflict !== null,
+    busy: false,
     renderSlide: (record, renderTheme) =>
       renderSlide(deck, record, {
         theme: renderTheme,
@@ -3188,7 +4699,7 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
         sidebarEdit={sidebarEdit}
         editor={editorInput}
       >
-        <ShellBridge controller={controller} editing={editing} api={shellApi} />
+        <ShellBridge controller={controller} editing={canWrite} api={shellApi} />
         <SessionBridge deckId={deckId} author={author} />
         <EditorStage
           controller={controller}
@@ -3217,7 +4728,9 @@ export function EditorRoot({ payload, search, author, onSearch, onDeckCreated }:
           onClose={() => setReportOpen(false)}
         />
       ) : null}
-      {snap.conflict ? <ConflictCard controller={controller} conflict={snap.conflict} /> : null}
+      {snap.rejects.length > 0 ? (
+        <RejectCard controller={controller} notices={snap.rejects} />
+      ) : null}
       {trashed ? (
         <TrashedBanner deckId={deckId} controller={controller} />
       ) : snap.external ? (
@@ -3268,7 +4781,8 @@ function ShellBridge({
   useLayoutEffect(() => {
     controller.setActiveSlide(shell.active);
     controller.setView({ mode: shell.mode, present: shell.present });
-    if (editing) controller.leaseActive();
+    /* Follow stops when the tab presents (SPEC-3 4.4); the editor takes no lease since round three (0.5) */
+    if (shell.present && controller.getSnapshot().following !== null) controller.unfollow();
   }, [controller, shell.active, shell.mode, shell.present, editing]);
   useLayoutEffect(() => {
     if (shell.density === 'thumbs' || shell.mode === 'grid') controller.warmThumbs(theme);
@@ -3699,80 +5213,70 @@ function TwinOverlay({
 // ---------------------------------------------------------------------------------------------
 // The conflict card and the external revision banner (SPEC 6.6, 6.7)
 
-function slideJson(document: DeckDocument, slideId: string): string {
-  const slide = document.slides[slideId];
-  return slide ? canonicalJson(slide) : `slide ${slideId} is absent`;
-}
-
-function ConflictCard({
+/**
+ * The reject card (gslides-parity SPEC-3 3.5, 3.6): an operation the room could not place comes
+ * back to its author with its content and a fixed reason; the card lists it with Copy text so no
+ * typed word is lost, and Dismiss. The rebase and discard of round one's conflict card retired
+ * with the queue they resolved.
+ */
+function RejectCard({
   controller,
-  conflict,
+  notices,
 }: {
   controller: EditorController;
-  conflict: Conflict;
+  notices: readonly RejectNotice[];
 }) {
-  const snap = controller.getSnapshot();
-  const last = conflict.since[conflict.since.length - 1];
-  const author = last
-    ? authorLabel(last.author)
-    : conflict.holder
-      ? authorLabel(conflict.holder)
-      : 'another writer';
-  const slideId =
-    conflict.overlap[0] ?? touchedSlides(conflict.pending.flatMap((write) => write.mutations))[0];
-  const pendingCount = conflict.pending.reduce((sum, write) => sum + write.mutations.length, 0);
   return (
     <div
       className="ts-conflict ts-chrome"
       role="dialog"
-      aria-label="Conflict"
+      aria-label="Changes not applied"
       data-state="conflict"
     >
       <div className="ts-conflict-head">
-        <b>Conflict at r{conflict.currentRevision}</b>
-        <span>{conflict.message}</span>
+        <b>
+          {notices.length === 1
+            ? 'A change was not applied'
+            : `${notices.length} changes were not applied`}
+        </b>
+        <span>{notices[0]?.message ?? 'Another change landed first; the text is kept here'}</span>
       </div>
-      <p>
-        {`${author} wrote ${conflict.since.length} revision${conflict.since.length === 1 ? '' : 's'} while ${pendingCount} local mutation${pendingCount === 1 ? '' : 's'} waited`}
-        {conflict.overlap.length > 0 ? `; both touched ${conflict.overlap.join(', ')}.` : '.'}
-      </p>
-      {slideId ? (
-        <div className="ts-conflict-both">
+      {notices.map((notice) => (
+        <div key={notice.opId} className="ts-conflict-both" data-reason={notice.reason}>
           <div>
-            <h4>Current document (server)</h4>
-            <pre>{slideJson(conflict.current, slideId)}</pre>
+            <h4>
+              {notice.text === '' ? notice.mutations.map((m) => m.op).join(', ') : 'Your text'}
+            </h4>
+            <pre>
+              {notice.text === '' ? JSON.stringify(notice.mutations, null, 2) : notice.text}
+            </pre>
           </div>
-          <div>
-            <h4>This editor</h4>
-            <pre>{slideJson(snap.document, slideId)}</pre>
+          <div className="ts-conflict-actions">
+            {notice.text !== '' ? (
+              <button
+                type="button"
+                className="pt-ib is-text is-solid"
+                title="Copy the text of this change"
+                data-control="conflict.copy"
+                onClick={() => {
+                  void navigator.clipboard?.writeText(notice.text).catch(() => undefined);
+                }}
+              >
+                <span className="pt-lb">Copy text</span>
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className="pt-ib is-text"
+              title="Dismiss this notice"
+              data-control="conflict.discard"
+              onClick={() => controller.dismissReject(notice.opId)}
+            >
+              <span className="pt-lb">Dismiss</span>
+            </button>
           </div>
         </div>
-      ) : null}
-      {conflict.error ? (
-        <p className="ts-conflict-error">{`Rebase failed: ${conflict.error}`}</p>
-      ) : null}
-      <div className="ts-conflict-actions">
-        <button
-          type="button"
-          className="pt-ib is-text is-solid"
-          title="Replay the waiting mutations on the current document and write them again"
-          data-control="conflict.rebase"
-          onClick={() => {
-            void controller.rebase();
-          }}
-        >
-          <span className="pt-lb">Rebase</span>
-        </button>
-        <button
-          type="button"
-          className="pt-ib is-text"
-          title="Drop the waiting mutations and show the current document"
-          data-control="conflict.discard"
-          onClick={() => controller.discard()}
-        >
-          <span className="pt-lb">Discard</span>
-        </button>
-      </div>
+      ))}
     </div>
   );
 }

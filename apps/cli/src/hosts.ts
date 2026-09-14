@@ -8,7 +8,18 @@ import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from '
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-export type HostRecord = { token: string; savedAt: string };
+/**
+ * A saved credential for a studio: the deployment's static bearer (round one), or an API key
+ * minted by `turboslide login` over the device flow (gslides-parity SPEC-3 7.7, `kind: 'api-key'`)
+ * with the key's record id, so `turboslide logout` revokes the right key.
+ */
+export type HostRecord = {
+  token: string;
+  savedAt: string;
+  kind?: 'bearer' | 'api-key';
+  tokenId?: string;
+  principalId?: string;
+};
 export type HostsFile = { version: 1; hosts: Record<string, HostRecord> };
 
 export const HOSTS_FILE = 'hosts.json';
@@ -64,6 +75,9 @@ export function readHosts(env: NodeJS.ProcessEnv = process.env): HostsFile {
       hosts[origin] = {
         token: record.token,
         savedAt: typeof record.savedAt === 'string' ? record.savedAt : '',
+        ...(record.kind === 'api-key' || record.kind === 'bearer' ? { kind: record.kind } : {}),
+        ...(typeof record.tokenId === 'string' ? { tokenId: record.tokenId } : {}),
+        ...(typeof record.principalId === 'string' ? { principalId: record.principalId } : {}),
       };
     }
   }
@@ -76,11 +90,12 @@ export function saveHostToken(
   token: string,
   env: NodeJS.ProcessEnv = process.env,
   now: () => string = () => new Date().toISOString(),
+  extra: Pick<HostRecord, 'kind' | 'tokenId' | 'principalId'> = {},
 ): string {
   if (token.trim() === '') throw new TypeError('the token must not be empty');
   const origin = normalizeHost(url);
   const file = readHosts(env);
-  file.hosts[origin] = { token: token.trim(), savedAt: now() };
+  file.hosts[origin] = { token: token.trim(), savedAt: now(), ...extra };
   const path = hostsPath(env);
   mkdirSync(configDir(env), { recursive: true, mode: 0o700 });
   const partial = `${path}.${process.pid}.part`;
@@ -92,6 +107,28 @@ export function saveHostToken(
 /** The saved token for an origin, or undefined. */
 export function savedToken(url: string, env: NodeJS.ProcessEnv = process.env): string | undefined {
   return readHosts(env).hosts[normalizeHost(url)]?.token;
+}
+
+/** The saved record for an origin, or undefined. */
+export function savedHost(
+  url: string,
+  env: NodeJS.ProcessEnv = process.env,
+): HostRecord | undefined {
+  return readHosts(env).hosts[normalizeHost(url)];
+}
+
+/** Forgets the credential of an origin; true when one was stored. */
+export function forgetHost(url: string, env: NodeJS.ProcessEnv = process.env): boolean {
+  const origin = normalizeHost(url);
+  const file = readHosts(env);
+  if (file.hosts[origin] === undefined) return false;
+  delete file.hosts[origin];
+  const path = hostsPath(env);
+  mkdirSync(configDir(env), { recursive: true, mode: 0o700 });
+  const partial = `${path}.${process.pid}.part`;
+  writeFileSync(partial, `${JSON.stringify(file, null, 2)}\n`, { mode: 0o600 });
+  renameSync(partial, path);
+  return true;
 }
 
 /** --token, then TURBOSLIDE_TOKEN, then the hosts file. */

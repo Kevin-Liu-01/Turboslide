@@ -51,6 +51,7 @@
   "freeform/off-sheet",
   "scales/marker-equals-value",
   "escape/html-block",
+  "html/sanitize",
   "export/non-native",
   "numbers/contradiction",
   "count/hard-coded"

@@ -17,6 +17,7 @@ import { loadDeckDir } from '@turboslide/store/file-store';
 import { flagAll, flagBoolean, flagString } from '../args.ts';
 import type { CommandContext } from '../context.ts';
 import { UsageError } from '../exit.ts';
+import { slideBackgroundMaterialCommand, slideBackgroundPictureCommand } from './dither.ts';
 import {
   slideApplyLayout,
   slideDuplicate,
@@ -48,7 +49,11 @@ import { measureSlidesHeadless } from '../deps/canvas.ts';
 import { decksDirFor } from './deck.ts';
 import { slideGet } from './slides.ts';
 
-const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-layout|new|duplicate|skip|apply-layout|import|to-canvas|measure|background> ...
+const USAGE = `usage: turboslide slide <get|put|patch|insert|remove|move|set-layout|new|duplicate|skip|apply-layout|import|to-canvas|measure|background|background-picture|background-material> ...
+  slide background-picture <ids> --asset <assetId>|--file <path>|--url <url> [--alt <text>] [--dither] [--no-replace]
+                                    a covering picture at the back of each slide, dithered when asked (slide.setBackgroundPicture)
+  slide background-material <ids> <materialId> [--preset <name>] [--anchor <ms>] [--dither]
+                                    a shader frame as the covering picture (slide.setBackgroundMaterial)
   slide get <id>
   slide put <id> [--file slide.json] < slide.json
   slide patch <id> --set <pointer>=<value> [--unset <pointer>] | --mutations [--file mutations.json]
@@ -108,6 +113,10 @@ export async function slide(ctx: CommandContext): Promise<number> {
       return slideMeasureCommand(inner);
     case 'background':
       return slideBackgroundCommand(inner);
+    case 'background-picture':
+      return slideBackgroundPictureCommand(inner);
+    case 'background-material':
+      return slideBackgroundMaterialCommand(inner);
     default:
       throw new UsageError(`unknown subcommand "slide ${sub ?? ''}"\n${USAGE}`);
   }

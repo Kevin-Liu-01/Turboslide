@@ -1,0 +1,44 @@
+/* The Edit HTML panel (gslides-parity SPEC-3 0.27): two monospaced fields and Apply. */
+.ts-edit-html-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.ts-edit-html-note {
+  margin: 0;
+  color: var(--pt-ink-2);
+  font-size: 12px;
+}
+
+.ts-edit-html-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--pt-ink-2);
+}
+
+.ts-edit-html-field textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 160px;
+  padding: 6px 8px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px/1.45 var(--pt-mono);
+  resize: vertical;
+}
+
+.ts-edit-html-field textarea:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-edit-html-actions {
+  display: flex;
+  justify-content: flex-end;
+}

@@ -5,6 +5,7 @@ import { createDispatcher } from '@turboslide/agent/dispatch';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { createMcpHttpHandler, isInitializeBody } from './http.ts';
+import type { KeyBinding } from './http.ts';
 import type { DeckSource } from './resources.ts';
 import { createMcpServer } from './server.ts';
 
@@ -28,9 +29,19 @@ afterEach(async () => {
   while (closers.length > 0) await closers.pop()?.();
 });
 
-function handlerWith(options: { denyToken?: boolean; withView?: boolean } = {}) {
+function handlerWith(
+  options: {
+    denyToken?: boolean;
+    withView?: boolean;
+    /** The API key record a bearer resolves to (SPEC-3 3.10); `null` for the static bearer. */
+    resolveKey?: (request: Request) => KeyBinding | null;
+    sessionsPerKey?: number;
+  } = {},
+) {
   const created: string[] = [];
   const handler = createMcpHttpHandler({
+    ...(options.resolveKey !== undefined ? { resolveKey: options.resolveKey } : {}),
+    ...(options.sessionsPerKey !== undefined ? { sessionsPerKey: options.sessionsPerKey } : {}),
     authorize: options.denyToken
       ? (request) =>
           request.headers.get('authorization') === 'Bearer secret'
@@ -161,5 +172,79 @@ describe('createMcpHttpHandler', () => {
     await expect(connect(handler)).rejects.toThrow(/401/);
     const { client } = await connect(handler, '/mcp', { authorization: 'Bearer secret' });
     expect((await client.listTools()).tools).toHaveLength(1);
+  });
+
+  describe('the key binding of round three (SPEC-3 3.10, 7.7)', () => {
+    const keys: Record<string, KeyBinding> = {
+      'Bearer ts_one': {
+        tokenId: 'tok_one',
+        ownerId: 'usr_kevin',
+        scopes: ['read', 'write'],
+        name: 'ci',
+      },
+      'Bearer ts_two': {
+        tokenId: 'tok_two',
+        ownerId: 'usr_maya',
+        scopes: ['read'],
+        name: 'reader',
+      },
+    };
+    const resolveKey = (request: Request): KeyBinding | null =>
+      keys[request.headers.get('authorization') ?? ''] ?? null;
+
+    it('binds a session to the key record the request resolved and reports it', async () => {
+      const { handler } = handlerWith({ resolveKey });
+      await connect(handler, '/mcp', { authorization: 'Bearer ts_one' });
+      expect(handler.sessions()[0]?.key).toEqual(keys['Bearer ts_one']);
+      // the static bearer resolves to no record and binds nothing (the round one rule)
+      await connect(handler, '/mcp', { authorization: 'Bearer static' });
+      expect(handler.sessions().filter((session) => session.key === undefined)).toHaveLength(1);
+    });
+
+    it('caps the sessions one key holds open and answers 429 with Retry-After beyond the cap', async () => {
+      const { handler } = handlerWith({ resolveKey, sessionsPerKey: 2 });
+      await connect(handler, '/mcp', { authorization: 'Bearer ts_one' });
+      await connect(handler, '/mcp', { authorization: 'Bearer ts_one' });
+      const third = await handler.handle(
+        new Request('http://localhost:4321/mcp', {
+          method: 'POST',
+          headers: {
+            authorization: 'Bearer ts_one',
+            'content-type': 'application/json',
+            accept: 'application/json, text/event-stream',
+          },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            id: 1,
+            method: 'initialize',
+            params: {
+              protocolVersion: '2025-06-18',
+              capabilities: {},
+              clientInfo: { name: 'x', version: '0' },
+            },
+          }),
+        }),
+      );
+      expect(third.status).toBe(429);
+      expect(third.headers.get('retry-after')).toBe('60');
+      // another key is not held back
+      await connect(handler, '/mcp', { authorization: 'Bearer ts_two' });
+      expect(handler.sessions()).toHaveLength(3);
+    });
+
+    it("closes a key's sessions on revoke and refuses a bound session whose key stopped resolving", async () => {
+      const live: Record<string, KeyBinding | null> = { ...keys };
+      const { handler } = handlerWith({
+        resolveKey: (request) => live[request.headers.get('authorization') ?? ''] ?? null,
+      });
+      const { client } = await connect(handler, '/mcp', { authorization: 'Bearer ts_one' });
+      await connect(handler, '/mcp', { authorization: 'Bearer ts_two' });
+      expect(await handler.closeByKey('tok_two')).toBe(1);
+      expect(handler.sessions().map((session) => session.key?.tokenId)).toEqual(['tok_one']);
+      // the key is revoked: the next request of the bound session is 401 and the session closes
+      live['Bearer ts_one'] = null;
+      await expect(client.listTools()).rejects.toThrow();
+      expect(handler.sessions()).toHaveLength(0);
+    });
   });
 });

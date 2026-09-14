@@ -27,6 +27,7 @@
     "./blocks/material": "./src/blocks/material.ts",
     "./blocks/table": "./src/blocks/table.ts",
     "./blocks/chart": "./src/blocks/chart.ts",
+    "./blocks/dither": "./src/blocks/dither.ts",
     "./deck": "./src/deck.ts",
     "./layouts": "./src/layouts.ts",
     "./apply-layout": "./src/apply-layout.ts",
@@ -45,6 +46,9 @@
     "./validate": "./src/validate.ts",
     "./reduce": "./src/reduce.ts",
     "./diff": "./src/diff.ts",
+    "./comments": "./src/comments.ts",
+    "./access": "./src/access.ts",
+    "./transform": "./src/transform.ts",
     "./fixtures": "./src/fixtures.ts",
     "./index": "./src/index.ts",
     "./package.json": "./package.json"

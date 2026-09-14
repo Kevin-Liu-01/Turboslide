@@ -322,6 +322,9 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
         });
     };
     let page: PageRasterEntry | undefined;
+    // the dithered pictures of the slide and the state each was shot in (SPEC-3 10.4)
+    for (const entry of scene.dithers ?? [])
+      residual.add(`dither: ${scene.slideId}#${entry.blockId} ${entry.key12} ${entry.state}`);
 
     if (options.mode === 'flatten') {
       // The text layer first, then the 2x sheet raster as a full-page picture over it. The runs
@@ -392,10 +395,20 @@ export async function buildPptx(scenes: Scene[], options: BuildOptions): Promise
       // The picture, then the chrome over it.
       if (hasPicture || backgroundRaster !== undefined) {
         if (backgroundRaster !== undefined) {
-          addPictureBackground(slide, backgroundRaster);
-          residual.add(
-            `${scene.slideId}: the picture object ${backgroundRaster.blockId} covers the sheet at the bottom of the stack and travels as the slide background, the form a picture kind exports (gslides-parity SPEC-2 2.6.4)`,
-          );
+          const variantFile = scene.background?.pictureVariantFile;
+          if (variantFile !== undefined && existsSync(variantFile)) {
+            // the dithered covering picture travels as its variant's own bytes (SPEC-3 10.4): the
+            // 1-bit file the store holds, not the raster the page shot
+            slide.background = { data: dataUri(readFileSync(variantFile), 'image/png') };
+            residual.add(
+              `${scene.slideId}: the picture object ${backgroundRaster.blockId} covers the sheet at the bottom of the stack and travels as the slide background from its dither variant file (gslides-parity SPEC-3 10.4)`,
+            );
+          } else {
+            addPictureBackground(slide, backgroundRaster);
+            residual.add(
+              `${scene.slideId}: the picture object ${backgroundRaster.blockId} covers the sheet at the bottom of the stack and travels as the slide background, the form a picture kind exports (gslides-parity SPEC-2 2.6.4)`,
+            );
+          }
         } else {
           const source = readPictureSource(scene);
           if (source) {

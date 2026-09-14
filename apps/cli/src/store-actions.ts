@@ -24,7 +24,16 @@ import type { ChartKind, ChartSeries } from '@turboslide/schema/blocks/chart';
 import type { CellBorder, TableCommand } from '@turboslide/schema/blocks/table';
 import { applyTableCommand } from '@turboslide/schema/blocks/table';
 import { applyLayout } from '@turboslide/schema/apply-layout';
-import type { Asset } from '@turboslide/schema/assets';
+import type { Asset, AssetVariant } from '@turboslide/schema/assets';
+import { hasContinuousSource } from '@turboslide/schema/assets';
+import type { PictureDither } from '@turboslide/schema/blocks/dither';
+import { DITHER_NO_SOURCE_MESSAGE } from '@turboslide/schema/blocks/dither';
+import {
+  ditherKey,
+  ditherScreen,
+  ditherSourceOf,
+  resolveDither,
+} from '@turboslide/render/dither-key';
 import type { Autofit, Block, Shadow, ShapeBlock } from '@turboslide/schema/blocks';
 import type { CanvasBoxes } from '@turboslide/schema/canvas';
 import { applyGuides, toCanvas } from '@turboslide/schema/canvas';
@@ -103,7 +112,7 @@ import {
   rotatePositions,
   snapToGrid,
 } from '@turboslide/schema/freeform';
-import type { BlockSlot, Lease, Mutation, Version } from '@turboslide/schema/mutations';
+import type { Author, BlockSlot, Lease, Mutation, Version } from '@turboslide/schema/mutations';
 import { getAt, jsonEqual } from '@turboslide/schema/pointer';
 import type { Position } from '@turboslide/schema/position';
 import { applyMutations } from '@turboslide/schema/reduce';
@@ -157,7 +166,24 @@ export type StoreActionDeps = {
   measureFit?: MeasureFit;
   /** The diagram templates diagram.insert instantiates (SPEC-2 2.8.3). */
   diagrams?: DiagramMaker;
+  /**
+   * The dither pipeline picture.materialize writes variants with (gslides-parity SPEC-3 10.2,
+   * 10.4; B5's @turboslide/effects/dither over the store's putAsset): given a picture's asset,
+   * its resolved dither and the screen size, writes the variant twins under assets/ and answers
+   * the record. Without it the action answers its dry run (the missing variants) and refuses a
+   * write with the sentence naming the pipeline.
+   */
+  materialize?: Materializer;
 };
+
+/** The write half of picture.materialize (SPEC-3 10.4): one variant per key, the files under assets/. */
+export type Materializer = (request: {
+  asset: Asset;
+  dither: PictureDither;
+  key: string;
+  screen: [number, number];
+  scale: 1 | 2;
+}) => Promise<{ variant: AssetVariant; files: string[] }>;
 
 /** The per-call context: the author from the transport, plus the CLI's --force and --note. */
 export type WriteContext = ActionContext & {
@@ -3029,6 +3055,436 @@ export function canvasCounts(document: DeckDocument): {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Round three (gslides-parity SPEC-3 5.7, 10.5, 12): version.diff, picture.dither,
+// picture.materialize and slide.setBackgroundPicture. The record actions (comments, share, the
+// inbox, accounts, admin, presence) need the file system and live in record-actions.ts.
+
+export type VersionDiffInput = { from?: number; to?: number; staged?: boolean };
+export type VersionDiffResult = {
+  from: number;
+  to: number;
+  mutations: Mutation[];
+  byAuthor: {
+    author: Author;
+    blocks: { slideId: string; blockId?: string; ops: Mutation['op'][] }[];
+  }[];
+};
+
+/** The slide and block a mutation touches, for the Show changes grouping; deck level ops touch none. */
+function touchedBy(mutation: Mutation): { slideId: string; blockId?: string } | undefined {
+  switch (mutation.op) {
+    case 'block.set':
+    case 'block.remove':
+    case 'block.move':
+    case 'text.replace':
+    case 'text.splice':
+    case 'text.mark':
+      return { slideId: mutation.slideId, blockId: mutation.blockId };
+    case 'block.insert':
+      return { slideId: mutation.slideId, blockId: mutation.block.id };
+    case 'slide.set':
+    case 'slide.replace':
+    case 'slide.remove':
+    case 'slide.move':
+      return { slideId: mutation.slideId };
+    case 'slide.insert':
+      return { slideId: mutation.slide.id };
+    default:
+      return undefined;
+  }
+}
+
+function authorKey(author: Author): string {
+  return (
+    author.principalId ??
+    (author.kind === 'agent' ? `agent:${author.runId ?? author.name}` : `local:${author.name}`)
+  );
+}
+
+/**
+ * The mutations between two revisions grouped by touched block and by author (SPEC-3 5.7, 0.44):
+ * the data behind Show changes. The range follows diff.run (from omitted with staged is the last
+ * named version; to defaults to the current revision); the records inside the range attribute
+ * every mutation to its author, so a version's authors group the touched blocks.
+ */
+export async function versionDiff(
+  deps: StoreActionDeps,
+  input: VersionDiffInput,
+): Promise<VersionDiffResult> {
+  const current = (await deps.store.read()).document;
+  const records = await deps.store.records();
+  const range = resolveDiffRange(input, current.deck.revision, records);
+  if (range.from > range.to)
+    throw new TypeError(`version.diff reads forward: from ${range.from} is after to ${range.to}`);
+  if (range.to > current.deck.revision)
+    throw new RangeError(
+      `revision ${range.to} does not exist yet; the deck is at ${current.deck.revision}`,
+    );
+  const inside = records.filter(
+    (record) => record.baseRevision >= range.from && record.revision <= range.to,
+  );
+  const before =
+    range.from === current.deck.revision
+      ? current
+      : await deps.store.documentAtRevision(range.from);
+  const after =
+    range.to === current.deck.revision ? current : await deps.store.documentAtRevision(range.to);
+  const mutations = diffDecks(before, after);
+  const groups = new Map<
+    string,
+    {
+      author: Author;
+      blocks: Map<string, { slideId: string; blockId?: string; ops: Mutation['op'][] }>;
+    }
+  >();
+  for (const record of inside) {
+    const key = authorKey(record.author);
+    const group = groups.get(key) ?? { author: record.author, blocks: new Map() };
+    groups.set(key, group);
+    for (const mutation of record.mutations) {
+      const touched = touchedBy(mutation);
+      if (touched === undefined) continue;
+      const id = `${touched.slideId}#${touched.blockId ?? ''}`;
+      const row = group.blocks.get(id) ?? {
+        slideId: touched.slideId,
+        ...(touched.blockId !== undefined ? { blockId: touched.blockId } : {}),
+        ops: [],
+      };
+      if (!row.ops.includes(mutation.op)) row.ops.push(mutation.op);
+      group.blocks.set(id, row);
+    }
+  }
+  return {
+    from: range.from,
+    to: range.to,
+    mutations,
+    byAuthor: [...groups.values()].map((group) => ({
+      author: group.author,
+      blocks: [...group.blocks.values()],
+    })),
+  };
+}
+
+export type PictureDitherInput = Rev & {
+  slideId: string;
+  blockId: string;
+  dither: PictureDither | null;
+};
+export type PictureDitherResult = SlideResult & {
+  key?: string;
+  metrics?: Asset['metrics'];
+  warnings: string[];
+};
+
+/** The screen size a dithered picture is keyed at: its box, or the sheet for a covering picture without one (the renderer's rule). */
+function screenOf(block: Block, dither: PictureDither): [number, number] {
+  const w = block.pos?.w ?? SHEET_WIDTH;
+  const h = block.pos?.h ?? SHEET_HEIGHT;
+  return ditherScreen(w, h, resolveDither(dither).cell);
+}
+
+/**
+ * The dither field on a picture or a shot (SPEC-3 10.5): writes `block.set /dither`, or removes
+ * the field with null; a slide that is not a canvas converts first when the picture is
+ * positioned, the rule of block.crop; a dither over an asset with a two tone treatment and no
+ * continuous source is refused with the sentence of 10.1. The answer carries the variant key, the
+ * variant's metrics when one is materialized and a warning when none is.
+ */
+export async function pictureDither(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: PictureDitherInput,
+): Promise<PictureDitherResult> {
+  const current = (await deps.store.read()).document;
+  const slide = requireSlide(current, input.slideId);
+  const picture = requirePicture(slide, input.blockId);
+  const asset = current.deck.assets[picture.asset];
+  if (asset === undefined)
+    throw new RangeError(`No asset "${picture.asset}" for block "${input.blockId}"`);
+  if (input.dither !== null && !hasContinuousSource(asset)) {
+    throw new TypeError(
+      `Block "${input.blockId}" dithers asset "${asset.id}": ${DITHER_NO_SOURCE_MESSAGE}`,
+    );
+  }
+  const canvas =
+    isCanvasSlide(slide) || picture.pos === undefined
+      ? { prefix: [] as Mutation[], document: current, slide }
+      : await withCanvas(deps, current, slide);
+  const mutations = [
+    ...canvas.prefix,
+    ...fieldMutations(canvas.slide, input.blockId, { dither: input.dither }),
+  ];
+  const warnings: string[] = [];
+  if (mutations.length === 0)
+    warnings.push('the field already held this value; nothing was written');
+  const result =
+    mutations.length === 0
+      ? {
+          slide: canvas.slide,
+          revision: current.deck.revision,
+          findings: findingsFor(deps, current, input.slideId),
+        }
+      : await commitOrCurrent(deps, ctx, input, current, mutations);
+  if (input.dither === null) return { ...result, warnings };
+  const key = ditherKey({
+    source: ditherSourceOf(asset),
+    dither: input.dither,
+    screen: screenOf(picture, input.dither),
+  });
+  const variant = asset.variants?.[key];
+  if (variant === undefined)
+    warnings.push(
+      `no variant is materialized for key ${key.slice(0, 12)} yet; the editor draws the live overlay and \`turboslide picture materialize\` writes the files every export reads`,
+    );
+  return {
+    ...result,
+    key,
+    ...(variant?.metrics !== undefined ? { metrics: variant.metrics } : {}),
+    warnings,
+  };
+}
+
+export type PictureMaterializeInput = Rev & {
+  slideIds?: 'all' | string[];
+  blockIds?: string[];
+  prune?: boolean;
+  scale?: 1 | 2;
+  dryRun?: boolean;
+};
+export type PictureMaterializeResult = {
+  revision: number;
+  written: { assetId: string; key: string; files: string[]; metrics?: Asset['metrics'] }[];
+  pruned: { assetId: string; key: string }[];
+  missing: { slideId: string; blockId: string; assetId: string; key: string }[];
+};
+
+type DitheredPicture = {
+  slideId: string;
+  block: Block & { type: 'picture' | 'shot' };
+  dither: PictureDither;
+  asset: Asset;
+  key: string;
+  screen: [number, number];
+};
+
+/** Every dithered picture or shot on the named slides with its variant key. */
+function ditheredPictures(
+  document: DeckDocument,
+  slideIds: 'all' | string[] | undefined,
+  blockIds?: string[],
+): DitheredPicture[] {
+  const ids = slideIds === undefined || slideIds === 'all' ? slideOrder(document.deck) : slideIds;
+  const out: DitheredPicture[] = [];
+  for (const slideId of ids) {
+    const slide = requireSlide(document, slideId);
+    for (const { block } of slideBlocks(slide)) {
+      if (!isPictureLike(block)) continue;
+      if (blockIds !== undefined && !blockIds.includes(block.id)) continue;
+      const dither = (block as { dither?: PictureDither }).dither;
+      if (dither === undefined) continue;
+      const asset = document.deck.assets[block.asset];
+      if (asset === undefined) continue;
+      const screen = screenOf(block, dither);
+      out.push({
+        slideId,
+        block,
+        dither,
+        asset,
+        key: ditherKey({ source: ditherSourceOf(asset), dither, screen }),
+        screen,
+      });
+    }
+  }
+  return out;
+}
+
+/**
+ * The variant files and records of every dithered picture on the named slides (SPEC-3 10.4,
+ * 10.5): `dryRun` names the missing variants without writing; `prune` drops the variants no
+ * picture references (one asset.set per asset, the files removed after the record commits); the
+ * write path runs the bound Materializer and records every variant in one write.
+ */
+export async function pictureMaterialize(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: PictureMaterializeInput,
+): Promise<PictureMaterializeResult> {
+  const current = (await deps.store.read()).document;
+  const pictures = ditheredPictures(current, input.slideIds, input.blockIds);
+  const missing = pictures.filter((row) => row.asset.variants?.[row.key] === undefined);
+  const referenced = new Set(
+    ditheredPictures(current, 'all').map((row) => `${row.asset.id}:${row.key}`),
+  );
+  const pruned: PictureMaterializeResult['pruned'] = [];
+  if (input.prune === true) {
+    for (const asset of Object.values(current.deck.assets)) {
+      for (const key of Object.keys(asset.variants ?? {})) {
+        if (!referenced.has(`${asset.id}:${key}`)) pruned.push({ assetId: asset.id, key });
+      }
+    }
+  }
+  const missingRows = missing.map((row) => ({
+    slideId: row.slideId,
+    blockId: row.block.id,
+    assetId: row.asset.id,
+    key: row.key,
+  }));
+  if (input.dryRun === true)
+    return { revision: current.deck.revision, written: [], pruned, missing: missingRows };
+  const written: PictureMaterializeResult['written'] = [];
+  const nextAssets = new Map<string, Asset>();
+  const assetOf = (id: string): Asset =>
+    nextAssets.get(id) ?? cloneJsonAsset(current.deck.assets[id]);
+  const seen = new Set<string>();
+  for (const row of missing) {
+    if (seen.has(`${row.asset.id}:${row.key}`)) continue;
+    seen.add(`${row.asset.id}:${row.key}`);
+    if (deps.materialize === undefined) {
+      throw new TypeError(
+        'picture.materialize needs the dither pipeline (@turboslide/effects/dither, gslides-parity SPEC-3 10.2) bound on this transport; run it through the turboslide CLI once the pipeline lands, or pass dryRun to list the missing variants',
+      );
+    }
+    const asset = assetOf(row.asset.id);
+    const { variant, files } = await deps.materialize({
+      asset,
+      dither: row.dither,
+      key: row.key,
+      screen: row.screen,
+      scale: input.scale ?? 2,
+    });
+    asset.variants = { ...(asset.variants ?? {}), [row.key]: variant };
+    nextAssets.set(asset.id, asset);
+    written.push({
+      assetId: asset.id,
+      key: row.key,
+      files,
+      ...(variant.metrics !== undefined ? { metrics: variant.metrics } : {}),
+    });
+  }
+  const removed: string[] = [];
+  for (const { assetId, key } of pruned) {
+    const asset = assetOf(assetId);
+    const variant = asset.variants?.[key];
+    if (variant === undefined) continue;
+    const rest = { ...asset.variants };
+    delete rest[key];
+    if (Object.keys(rest).length > 0) asset.variants = rest;
+    else delete asset.variants;
+    nextAssets.set(assetId, asset);
+    removed.push(
+      ...('neutral' in variant.twins
+        ? [variant.twins.neutral]
+        : [variant.twins.light, variant.twins.dark]),
+    );
+  }
+  if (nextAssets.size === 0)
+    return { revision: current.deck.revision, written, pruned, missing: [] };
+  const committed = await commit(
+    deps,
+    ctx,
+    input.baseRevision,
+    [...nextAssets.values()].map((asset) => ({ op: 'asset.set', asset })),
+  );
+  for (const relative of removed) await deps.store.removeAsset(relative);
+  return { revision: committed.revision, written, pruned, missing: [] };
+}
+
+function cloneJsonAsset(asset: Asset | undefined): Asset {
+  if (asset === undefined) throw new RangeError('no such asset');
+  return JSON.parse(JSON.stringify(asset)) as Asset;
+}
+
+export type SlideSetBackgroundPictureInput = Rev & {
+  slideIds: string[];
+  assetId: string;
+  alt?: string;
+  dither?: PictureDither;
+  replace?: boolean;
+};
+export type SlideSetBackgroundPictureResult = {
+  revision: number;
+  assetId: string;
+  slides: { slideId: string; blockId: string }[];
+  findings: Finding[];
+};
+
+/** The covering picture at the bottom of a canvas slide's stack, when one exists (SPEC-3 10.6). */
+export function coveringPicture(slide: Slide): (Block & { type: 'picture' }) | undefined {
+  const objects = canvasObjects(slide).filter(
+    (block): block is Block & { type: 'picture' } =>
+      block.type === 'picture' &&
+      block.pos !== undefined &&
+      block.pos.x === 0 &&
+      block.pos.y === 0 &&
+      block.pos.w === SHEET_WIDTH &&
+      block.pos.h === SHEET_HEIGHT,
+  );
+  if (objects.length === 0) return undefined;
+  return objects.sort((a, b) => (a.pos?.z ?? 0) - (b.pos?.z ?? 0))[0];
+}
+
+/**
+ * One write for a covering picture object at the back of each named slide with an optional
+ * dither (SPEC-3 10.5, 10.6): the slide converts to the canvas first, the covering picture already
+ * there is replaced unless told not to, else a new picture lands at (0, 0, 1600, 900) under every
+ * other object. The file, url and upload forms run asset.add first (the Node side of this action,
+ * record-actions.ts) and call this with the asset id.
+ */
+export async function slideSetBackgroundPicture(
+  deps: StoreActionDeps,
+  ctx: WriteContext,
+  input: SlideSetBackgroundPictureInput,
+): Promise<SlideSetBackgroundPictureResult> {
+  const current = (await deps.store.read()).document;
+  const asset = current.deck.assets[input.assetId];
+  if (asset === undefined) throw new RangeError(`No asset "${input.assetId}"`);
+  if (input.dither !== undefined && !hasContinuousSource(asset)) {
+    throw new TypeError(`asset "${asset.id}": ${DITHER_NO_SOURCE_MESSAGE}`);
+  }
+  const slides = slidesInOrder(current, input.slideIds);
+  const mutations: Mutation[] = [];
+  const placed: SlideSetBackgroundPictureResult['slides'] = [];
+  let working = current;
+  for (const slide of slides) {
+    const canvas = await withCanvas(deps, working, slide);
+    mutations.push(...canvas.prefix);
+    working = canvas.document;
+    const existing = input.replace === false ? undefined : coveringPicture(canvas.slide);
+    if (existing !== undefined) {
+      mutations.push(
+        ...fieldMutations(canvas.slide, existing.id, {
+          asset: input.assetId,
+          ...(input.alt !== undefined ? { alt: input.alt } : {}),
+          dither: input.dither ?? null,
+        }),
+      );
+      placed.push({ slideId: slide.id, blockId: existing.id });
+      continue;
+    }
+    const taken = new Set(slideBlocks(canvas.slide).map(({ block }) => block.id));
+    const id = freeId('background', taken);
+    const minZ = Math.min(0, ...canvasObjects(canvas.slide).map((block) => block.pos?.z ?? 0));
+    const block = {
+      id,
+      type: 'picture',
+      asset: input.assetId,
+      ...(input.alt !== undefined ? { alt: input.alt } : {}),
+      ...(input.dither !== undefined ? { dither: input.dither } : {}),
+      pos: { x: 0, y: 0, w: SHEET_WIDTH, h: SHEET_HEIGHT, z: minZ - 1 },
+    } as unknown as Block;
+    mutations.push({ op: 'block.insert', slideId: slide.id, slot: 'main', block });
+    placed.push({ slideId: slide.id, blockId: id });
+  }
+  const committed = await commit(deps, ctx, input.baseRevision, mutations);
+  return {
+    revision: committed.revision,
+    assetId: input.assetId,
+    slides: placed,
+    findings: placed.flatMap((row) => findingsFor(deps, committed.document, row.slideId)),
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
 // Registration
 
 /** Registers every store-backed action on a dispatcher; inputs arrive validated by the action's schema. */
@@ -3291,5 +3747,18 @@ export function registerStoreActions(dispatcher: Dispatcher, deps: StoreActionDe
   dispatcher.register(
     'diagram.insert',
     on<DiagramInsertInput>((i, c) => diagramInsert(deps, c, i)),
+  );
+  // the Google Slides parity round three (SPEC-3 5.7, 10.5)
+  dispatcher.register(
+    'version.diff',
+    on<VersionDiffInput>((i) => versionDiff(deps, i)),
+  );
+  dispatcher.register(
+    'picture.dither',
+    on<PictureDitherInput>((i, c) => pictureDither(deps, c, i)),
+  );
+  dispatcher.register(
+    'picture.materialize',
+    on<PictureMaterializeInput>((i, c) => pictureMaterialize(deps, c, i)),
   );
 }

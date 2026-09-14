@@ -44,6 +44,13 @@
   --pt-sb-w: 208px;
   /* the right panel: Format options, Themes, Version history, Check slides (gslides-parity SPEC 1.2) */
   --pt-panel-w: 320px;
+  /* the title row's fixed slots of round three (gslides-parity SPEC-3 4.2, 9.3; report 11 6.2):
+     the presence slot (four 24 px chips with 4 px gaps, the 32 px +N chip, an 8 px gap, a hair
+     rule, a 7 px gap, the own 24 px chip) and the inbox plate (a 32 px glyph, a 4 px gap and a
+     24 px count chip with two tabular digits, "99+" beyond), both present from the first paint
+     whether empty or full so a join or a notification moves nothing */
+  --pt-presence-w: 184px;
+  --pt-inbox-w: 60px;
   --pt-rail: 1170px;
   /* The one corner in chrome (Kevin's directive): the Search pill's 6px,
      shared by the segmented control at both sizes (the toolbar's format seg,

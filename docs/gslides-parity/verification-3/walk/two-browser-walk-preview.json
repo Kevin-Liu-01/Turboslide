@@ -1,0 +1,175 @@
+{
+  "base": "https://turboslide-dniaw7w8f-kl01s-projects.vercel.app",
+  "at": "2026-09-14T05:58:32.285Z",
+  "seconds": 210,
+  "summary": {
+    "ok": 17,
+    "fail": 14,
+    "notes": 0
+  },
+  "rows": [
+    {
+      "name": "scratch deck",
+      "ok": true,
+      "evidence": "verifier-walk-mu0twg3a from gt-brand's first three slides (opener-brand, title, thesis)"
+    },
+    {
+      "name": "S4 named anonymous principal",
+      "ok": true,
+      "evidence": "account.setName Maya: {\"principal\":{\"id\":\"anon_3ab349d1-d044-4509-89da-b027e0940126\",\"kind\":\"anonymous\",\"admin\":false},\"trust\":\"guest\",\"label\"; state.account {\"principalId\":\"anon_3ab349d1-d044-4509-89da-b027e0940126\",\"label\":\"Helium 559\",\"trust\":\"label\",\"signedIn\":false,\"signInAvailable\":false}"
+    },
+    {
+      "name": "S4 the own chip names the principal",
+      "ok": true,
+      "evidence": "own chip tooltip \"Helium 559 (you)\""
+    },
+    {
+      "name": "S4 the own chip menu is the account surface",
+      "ok": true,
+      "evidence": "rows title.account.changeName, title.account.changeAvatar, title.account.forget, title.account.sessions; sentence \"HHelium 559Not signed in\""
+    },
+    {
+      "name": "S4 nothing else in the chrome mentions accounts",
+      "ok": true,
+      "evidence": "0 account word(s) in the default view text"
+    },
+    {
+      "name": "presence chip within 10 s",
+      "ok": false,
+      "evidence": "B's chip on A after 10045 ms",
+      "ms": 10045
+    },
+    {
+      "name": "presence in the window state",
+      "ok": false,
+      "evidence": "A presence {\"clientId\":\"72d6ced5da52fda1ede7d007f7bc3056\",\"self\":{\"clientId\":\"72d6ced5da52fda1ede7d007f7bc3056\",\"principalId\":\"anon_3ab349d1-d044-4509-89da-b027e0940126\",\"kind\":\"human\",\"label\":\"Helium 559\",\"trust\":\"label\",\"mark\":{\"density\":2,\"glyphSeed\":4029489800,\"presenter\":false,\"self\":false,\"trust\":\"label\",\"label\":\"Helium 559\",\"variant\":\"initials\",\"initials\":\"H\",\"hue\":{\"slot\":5,\"hex\":\"#148d51\"}},\"role\":\"owner\",\"slideId\":\"opener-brand\",\"selection\":{\"blockIds\":[]},\"presenting\":false,\"idle\":false,\"lastSeenAt\":\"2026-09-14T05:55:19.769Z\"},\"others\":[],\"count\":0,\"following\":null,\"pointersVisible\":true}; B clientId c98e65b279c81636d08f2dec8404a02c"
+    },
+    {
+      "name": "roster lists both",
+      "ok": false,
+      "evidence": "title.presence.me:HHelium 559 (you)slide 1 | title.presence.joinChat:Join chat"
+    },
+    {
+      "name": "op to screen, A write to B document (10 writes)",
+      "ok": false,
+      "evidence": "landed 0 of 10; p50 null ms, p95 null ms, max undefined ms; samples , , , , , , , , , ",
+      "p50": null,
+      "p95": null,
+      "samples": [null, null, null, null, null, null, null, null, null, null]
+    },
+    {
+      "name": "S2 two edits on one slide within a second, both land, no keystroke lost",
+      "ok": false,
+      "evidence": "A typed \" alpha\" into h, B \" bravo\" into p1 in 320 ms (carets true/true); not converged within 15 s: A \"\" B \"\"; before \"\" / \"\"",
+      "ms": 15358
+    },
+    {
+      "name": "S2 the save words",
+      "ok": true,
+      "evidence": "\"All changes saved\""
+    },
+    {
+      "name": "remote caret and flag on A",
+      "ok": true,
+      "evidence": "2 remote element(s) after 5 ms; flag \"IIridium\"",
+      "ms": 5
+    },
+    {
+      "name": "Follow moves the stage with B and shows the plate",
+      "ok": false,
+      "evidence": "presence.follow {\"following\":\"c98e65b279c81636d08f2dec8404a02c\",\"slideId\":\"split-1\"}; plate \"IFollowing Iridium 190·Stop\"; A followed to opener-brand then null"
+    },
+    {
+      "name": "Stop ends following",
+      "ok": true,
+      "evidence": "the plate is gone"
+    },
+    {
+      "name": "the chip offers Go to slide for an anonymous editor (4.4)",
+      "ok": true,
+      "evidence": "chip tooltip \"Iridium 190 · slide 1\""
+    },
+    {
+      "name": "S1 comment.add with a mention",
+      "ok": true,
+      "evidence": "{\"thread\":{\"id\":\"01m2f7x9k4cvzz5b67x01dgynq\",\"deckId\":\"verifier-walk-mu0twg3a\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"title\"},\"comment\":{\"id\":\"01m2f7x9k4cvzz5b67x0; mention of anon_48726a46-9833-4727-b397-b86c450a0e6c"
+    },
+    {
+      "name": "S1 the comment reaches B within 2 s: marker, filmstrip chip, inbox plate",
+      "ok": false,
+      "evidence": "0 marker(s) after 6486 ms; filmstrip chip \"\"; inbox plate \"\"",
+      "ms": 6486
+    },
+    {
+      "name": "S1 B reads the thread",
+      "ok": true,
+      "evidence": "comment.list on B: {\"threads\":[{\"id\":\"01m2f7x9k4cvzz5b67x01dgynq\",\"deckId\":\"verifier-walk-mu0twg3a\",\"anchor\":{\"kind\":\"slide\",\"slideId\":\"title\"},\"comment\":{\"id\":\"01m2f7x9k4cvzz5b67"
+    },
+    {
+      "name": "S1 the Comments panel on B lists the thread with For you",
+      "ok": false,
+      "evidence": "panel open; For you tab \"For you\"; thread card absent"
+    },
+    {
+      "name": "S1 B resolves; A sees the resolve within 2 s",
+      "ok": true,
+      "evidence": "comment.resolve {\"thread\":{\"id\":\"01m2f7x9k4cvzz5b67x01dgynq\",\"deckId\":\"verifier-walk-mu0twg3a\",\"; A saw it after 160 ms",
+      "ms": 160
+    },
+    {
+      "name": "S1 A inbox after the resolve",
+      "ok": true,
+      "evidence": "{\"notifications\":[],\"unread\":0}"
+    },
+    {
+      "name": "S3 the Share dialog opens on Restricted with the people field first and the footer sentence",
+      "ok": true,
+      "evidence": "width 520; mode \"restricted\"; people field above General access true; footer \"Speaker notes and skipped slides never travel with a view or comment link\"; legacy \"null\"; claim \"null\"; review \"No pending requests\""
+    },
+    {
+      "name": "S3 Anyone with the link defaults to Viewer and Copy link copies an /s/ link",
+      "ok": false,
+      "evidence": "role \"null\"; clipboard https://turboslide-dniaw7w8f-kl01s-projects.vercel.app/deck/verifier-walk-mu0twg3a; address bar holds no token"
+    },
+    {
+      "name": "S3 the prospect lands on the viewer form with no token in the address and no notes",
+      "ok": true,
+      "evidence": "landed /deck/verifier-walk-mu0twg3a (status 200); notes in the payload: false; comment markers 0"
+    },
+    {
+      "name": "S3 /edit for the prospect is Viewing with View only",
+      "ok": false,
+      "evidence": "data-edit-mode editing; button \"null\""
+    },
+    {
+      "name": "S1 commenter link",
+      "ok": false,
+      "evidence": "{\"error\":\"Error: page.evaluate: Error: decks/verifier-walk-mu0twg3a/access.json changed in the Blob store since it was read\\n    at Object.deserialize (https://"
+    },
+    {
+      "name": "version history by author shows both authors",
+      "ok": false,
+      "evidence": "1 window(s), 0 version row(s), marks Iridium 190, guest | Helium 559, guest; Show changes true; \"Version history Only show named versions Name current version Today I1 H5 10:55 PM to 10:57 PM Iridium 190, Helium 559 · 3 changes ▸ Show changes\""
+    },
+    {
+      "name": "Show changes hatches the changed blocks by author",
+      "ok": true,
+      "evidence": "1 diff element(s)"
+    },
+    {
+      "name": "a stranger after Stop sharing receives the You need access page",
+      "ok": false,
+      "evidence": "status 200; sentence \"null\"; the server's TURBOSLIDE_AUTHORIZE as the walk knows it: shadow (the default)"
+    },
+    {
+      "name": "the revoked viewer link is dead",
+      "ok": false,
+      "evidence": "status 200; path /deck/verifier-walk-mu0twg3a"
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "evidence": "verifier-walk-mu0twg3a trashed and removed"
+    }
+  ]
+}

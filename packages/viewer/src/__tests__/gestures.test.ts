@@ -239,6 +239,38 @@ describe('plate, shot, scales and pair gestures', () => {
     parts: {},
   };
 
+  it('draws the eight crop handles over the frame of an unconverted photograph with no block box (VERIFICATION-3 finding 27)', () => {
+    /* the provisional crop of SPEC-2 1.1 arms on a picture kind before the slide converts: the
+       photograph is measured under `picture`, never `blocks.picture`, so the frame is the box */
+    const frame: [number, number, number, number] = [420, 0, 1180, 900];
+    const handles = handlesFor(
+      opener,
+      plateBoxes,
+      { kind: 'block', blockId: 'picture' },
+      { ids: ['picture'], crop: { frame } },
+    );
+    const crop = handles.filter((h) => h.kind === 'crop-edge');
+    expect(crop).toHaveLength(8);
+    expect(crop.map((h) => h.control).sort()).toEqual(
+      ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
+        .map((dir) => `handle.picture.crop.${dir}`)
+        .sort(),
+    );
+    expect(handles.some((h) => h.kind === 'free-move' || h.kind === 'free-resize')).toBe(false);
+    const west = crop.find((h) => h.dir === 'w')!;
+    expect(west.box[0] + west.box[2] / 2).toBe(frame[0]);
+    expect(west.box[1] + west.box[3] / 2).toBe(frame[1] + frame[3] / 2);
+    /* without crop mode the same selection still draws nothing: no measured box, no handles */
+    expect(
+      handlesFor(
+        opener,
+        plateBoxes,
+        { kind: 'block', blockId: 'picture' },
+        { ids: ['picture'] },
+      ).filter((h) => h.blockId === 'picture'),
+    ).toEqual([]);
+  });
+
   it('snaps the plate edge to the plate widths and flips the side by the pointer half', () => {
     const handles = handlesFor(opener, plateBoxes, null);
     expect(handles.map((h) => h.kind)).toEqual(['plate-width', 'plate-side']);
@@ -411,6 +443,50 @@ describe('actionForMutation', () => {
         baseRevision: 13,
       },
     });
+  });
+
+  it('sends the two multiplayer text ops through slide.update like text.replace (SPEC-3 3.1)', () => {
+    const splice = actionForMutation(
+      {
+        op: 'text.splice',
+        slideId: 'p',
+        blockId: 'h',
+        path: '/text',
+        at: 3,
+        remove: 0,
+        insert: 'ab',
+      },
+      7,
+    );
+    expect(splice.id).toBe('slide.update');
+    expect(splice.input).toEqual({
+      slideId: 'p',
+      baseRevision: 7,
+      mutations: [
+        {
+          op: 'text.splice',
+          slideId: 'p',
+          blockId: 'h',
+          path: '/text',
+          at: 3,
+          remove: 0,
+          insert: 'ab',
+        },
+      ],
+    });
+    const mark = actionForMutation(
+      {
+        op: 'text.mark',
+        slideId: 'p',
+        blockId: 'h',
+        path: '/text',
+        range: [0, 2],
+        edit: { kind: 'marks', set: { i: true } },
+      },
+      7,
+    );
+    expect(mark.id).toBe('slide.update');
+    expect((mark.input as { mutations: unknown[] }).mutations).toHaveLength(1);
   });
 
   it('omits an absent value so the action deletes the property', () => {

@@ -15,6 +15,8 @@
     "preview": "vite preview --port 4321 --strictPort"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "catalog:",
+    "@simplewebauthn/server": "catalog:",
     "@tanstack/react-devtools": "catalog:",
     "@tanstack/react-router": "catalog:",
     "@tanstack/react-router-devtools": "catalog:",
@@ -25,17 +27,27 @@
     "@turboslide/effects": "workspace:*",
     "@turboslide/export": "workspace:*",
     "@turboslide/fonts": "workspace:*",
+    "@turboslide/headless": "workspace:*",
+    "@turboslide/identity": "workspace:*",
     "@turboslide/lint": "workspace:*",
     "@turboslide/materials": "workspace:*",
     "@turboslide/mcp": "workspace:*",
+    "@turboslide/realtime": "workspace:*",
     "@turboslide/render": "workspace:*",
     "@turboslide/render-worker": "workspace:*",
     "@turboslide/schema": "workspace:*",
     "@turboslide/store": "workspace:*",
     "@turboslide/theme": "workspace:*",
     "@turboslide/viewer": "workspace:*",
+    "@upstash/ratelimit": "catalog:",
+    "@upstash/redis": "catalog:",
+    "better-auth": "catalog:",
+    "ioredis": "catalog:",
+    "kysely": "catalog:",
+    "pg": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "resend": "catalog:"
   },
   "optionalDependencies": {
     "@sparticuz/chromium": "catalog:"
@@ -44,6 +56,7 @@
     "@tanstack/devtools-vite": "catalog:",
     "@tanstack/router-cli": "catalog:",
     "@types/node": "catalog:",
+    "@types/pg": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",

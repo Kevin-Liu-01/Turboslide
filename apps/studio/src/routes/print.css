@@ -156,6 +156,11 @@
   padding: 16px;
 }
 
+/* the document scrolls: the gutter stays when the page count changes (SPEC-3 9.2 G2, L5, R4) */
+html:has(.ts-print) {
+  scrollbar-gutter: stable;
+}
+
 .ts-print-page[data-skipped] {
   opacity: 0.72;
 }

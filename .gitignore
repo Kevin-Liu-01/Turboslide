@@ -1,5 +1,8 @@
 node_modules
 dist
+# .turboslide at any depth: the repo's render and e2e scratch, .turboslide/token (the per checkout
+# agent token), .turboslide/session-secret, .turboslide/principals and decks/<id>/.turboslide/access.json
+# (gslides-parity SPEC-3 2.2, 7.1, 7.7)
 .turboslide
 .output
 coverage
@@ -23,3 +26,8 @@ crates/*/target
 *.node
 packages/native/wasm/*
 !packages/native/wasm/README.md
+
+# A deck's comment threads name people (gslides-parity SPEC-3 2.2): gitignored in this public
+# repository; a private deck repository removes the one line. The pattern is one level deep, so
+# the fixture threads under decks/fixture/gslides/comments/ stay tracked (MILESTONES-3 B1).
+decks/*/comments/

@@ -17,6 +17,12 @@
     },
     {
       "path": "../effects"
+    },
+    {
+      "path": "../render"
+    },
+    {
+      "path": "../identity"
     }
   ]
 }

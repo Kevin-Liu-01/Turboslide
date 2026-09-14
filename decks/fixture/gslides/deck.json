@@ -32,6 +32,8 @@
         "shadow",
         "background-color",
         "background-picture",
+        "background-dither",
+        "picture-dither-strength",
         "image-tools",
         "table-merge",
         "chart-bar",
@@ -61,7 +63,52 @@
       "source": {
         "kind": "file"
       },
-      "inline": "two-color"
+      "inline": "two-color",
+      "variants": {
+        "cab7a9fe5523cbd641fce71e2ed2e49bacd3148d958857d39071069668fcb0cd": {
+          "key": "cab7a9fe5523cbd641fce71e2ed2e49bacd3148d958857d39071069668fcb0cd",
+          "twins": {
+            "light": "assets/fixture-photo.dither-cab7a9fe5523-light.png",
+            "dark": "assets/fixture-photo.dither-cab7a9fe5523-dark.png"
+          },
+          "size": [
+            1600,
+            900
+          ],
+          "scale": 2,
+          "metrics": {
+            "litFraction": 0.1941,
+            "plateClear": {
+              "plate": [
+                137,
+                506,
+                740,
+                265
+              ],
+              "nearestLitPx": 0,
+              "litUnder": 12717,
+              "litInBand": 3633
+            }
+          },
+          "producedAt": "2026-09-14T01:42:50.431Z"
+        },
+        "e908a7883d7b960bc3b9b7e3daa2e9dba41acf66df91f37149b1247c6a4e23f4": {
+          "key": "e908a7883d7b960bc3b9b7e3daa2e9dba41acf66df91f37149b1247c6a4e23f4",
+          "twins": {
+            "light": "assets/fixture-photo.dither-e908a7883d7b-light.png",
+            "dark": "assets/fixture-photo.dither-e908a7883d7b-dark.png"
+          },
+          "size": [
+            560,
+            316
+          ],
+          "scale": 2,
+          "metrics": {
+            "litFraction": 0.1875
+          },
+          "producedAt": "2026-09-14T01:42:50.595Z"
+        }
+      }
     }
   },
   "defaults": {
@@ -76,7 +123,7 @@
       450
     ]
   },
-  "revision": 1,
+  "revision": 2,
   "createdAt": "2026-09-12T00:00:00.000Z",
-  "updatedAt": "2026-09-12T00:00:00.000Z"
+  "updatedAt": "2026-09-14T01:42:50.600Z"
 }

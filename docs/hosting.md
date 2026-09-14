@@ -276,7 +276,7 @@ Environment variables the hosted studio reads:
 | `TURBOSLIDE_OVERLAY_DIR`                        | you            | moves the overlay (default `<tmpdir>/turboslide`)                                                                                                                                                                                                         |
 | `TURBOSLIDE_BLOB_ACCESS`                        | you            | `public` (default) or `private`                                                                                                                                                                                                                           |
 | `TURBOSLIDE_TOKEN`                              | you            | the bearer token of `/api/actions`, `/api/agent`, `/mcp` off localhost (SPEC 11), and of `/api/export`, `/api/render` (the thumbnail variant `?w=` stays open) and the bundle routes once set; set on production and preview since 2026-09-11 (section 6) |
-| `TURBOSLIDE_DOWNLOAD_SECRET`                    | you            | the signing secret of the export download URLs; random per instance when unset                                                                                                                                                                            |
+| `TURBOSLIDE_DOWNLOAD_SECRET`                    | you            | the signing secret of the export download URLs; required on every hosted environment, 16 bytes or more (a `tmp` or `blob` store refuses to mint an export token without it since the Google Slides parity round three); random per instance on a checkout |
 | `TURBOSLIDE_DECKS_DIR`, `TURBOSLIDE_WORKER_DIR` | root.ts        | pointed at the overlay for the render worker's local mode when hosted                                                                                                                                                                                     |
 | `TURBOSLIDE_PACKAGES_DIR`                       | root.ts        | the materialized `packages` group the renderer and exporter read from (section 2); unset in a checkout                                                                                                                                                    |
 | `TURBOSLIDE_LAUNCH_LOG`                         | you            | prints the browser launch steps on stderr (always on inside a function; docs/hosting-chromium.md)                                                                                                                                                         |
@@ -582,3 +582,183 @@ Every route below runs on the file, tmp and Blob backends through the same serve
   `documentAt` reports as a break. It is a rare network failure, not a conflict, and the document
   itself stays consistent on the next sync.
 - The per-route function copies triple the upload; Nitro offers no shared directory for rules.
+
+## 9. Redis, the realtime tier (Google Slides parity round three)
+
+The multiplayer room of `docs/gslides-parity/SPEC-3.md` section 2.3 needs a store that every
+function instance shares and that can fan out: Vercel Blob allows about 15 one slide commits per
+second across a deployment and cannot push a change to another instance, so the room runs on Redis
+over the Redis protocol (`ioredis`; the REST API cannot block on `XREAD`). `@turboslide/realtime/select`
+`selectRealtime(env)` picks the tier once per process, like `selectStore`:
+
+| Environment                               | Tier     | Change feed                                                       | Presence                                 |
+| ----------------------------------------- | -------- | ----------------------------------------------------------------- | ---------------------------------------- |
+| a checkout, the tests                     | `memory` | in process; CLI writes beside the dev server arrive by `fs.watch` | in process                               |
+| `REDIS_URL` set                           | `redis`  | a Redis stream per deck, pub/sub, one Lua compare and append      | a Redis hash and sorted set              |
+| hosted without `REDIS_URL`                | `blob`   | every batch is a `BlobStore.write`; `head('deck.json')` polled    | per instance only; the title row says so |
+| `TURBOSLIDE_REALTIME=memory\|redis\|blob` | forced   | as above                                                          | as above                                 |
+
+What Redis holds, all of it derived or short lived (a flush loses nothing a store does not have;
+the room reloads the document from the store and the tabs resync): the operation stream of each
+deck (`deck:<id>:ops`, trimmed to 10,000 entries after a checkpoint), its head, the checkpointer
+lock (`deck:<id>:ckpt`, `SET NX PX 5000`, a 1 s heartbeat, broken after 3 s of silence), the
+follow lock, the presence hash and roster (120 s expiry), the client bindings (report 10 F26), the
+per client and per identity budgets (fixed windows), the access record cache (60 s, dropped by a
+`PUBLISH` on every write), the deck head cache (`head:<deckId>`, a day, refreshed by the commit
+path), the anonymous principal records, the anonymous inboxes (`inbox:<principalId>`, 30 days),
+the studio session directory (`sessions:studio`), the kill switch flags and the spent download
+tokens. The key builder is `packages/realtime/src/keys.ts`; every key starts with the slug
+validated deck id or one of the fixed prefixes, so a key never carries user text.
+
+The stream protocol (SPEC-3 3.3): `GET /api/decks/:id/stream` is Server-Sent Events with `hello`,
+`ops`, `op`, `checkpoint`, `presence`, `leave`, `reject`, `inbox`, `access` and `resync`, a comment
+line every 15 s, `Last-Event-ID` (or `?since=`) to resume, a server close at a random point between
+240 and 290 s with `retry` between 1,000 and 4,000 ms so tabs never reconnect together; `POST
+/api/decks/:id/ops` admits a batch of operations against `base.seq` (64 entries and 256 kB at
+most, a 500 entry window behind the head, transform against what landed, the reducer and the
+validator, one Lua compare and append); `POST /api/decks/:id/presence` posts one presence state
+(15 a second per client, coalesced). Both POST routes and the stream sit behind the CSRF filter of
+`apps/studio/src/start.ts`: a browser passes with `Sec-Fetch-Site: same-origin`; `curl` needs the
+header set by hand.
+
+The checkpointer (`apps/studio/src/server/checkpoint.ts`) turns the stream into version records:
+one record per author and contiguous run (SPEC-3 0.51), after 2 s idle, 10 s at most, 2,000
+entries or 1 MB, at once for an agent's write and a named version, under the lock above; the
+record carries `ops: { fromSeq, toSeq }` so a cold instance loads the document at the last
+checkpoint and applies the entries after it (0.53). Comment entries ride the same run into the
+sidecar (section 10) on the memory and redis tiers; on the blob tier the version log carries no
+comment entries for the checkpointer to fold, so the channel writes them to the sidecar itself in
+the same append (`room.ts` attaches the comments store as the channel's `applyComments`; without
+it every comment write answered 400 on the previews, VERIFICATION-3 finding 6). Measured on the
+dev server with the memory tier: the numbers of `docs/gslides-parity/build-3/b2.md`.
+
+When Redis is unreachable the channel logs `redis.unavailable`, the kill switch `realtime` reads
+as off and the tabs fall to the `blob` tier's behaviour until the connection returns; nothing is
+lost, because every admitted entry reaches the store within the checkpoint interval. Redis must
+never hold the only copy of anything: that is the test of whether a value belongs there.
+
+## 10. The private store and storage layout v2
+
+Layout v1 (sections 4 and 5) is one public store: every document has a predictable public URL, and
+once roles exist (SPEC-3 6) a viewer link must not be a way to read `deck.json` or `access.json`
+by address (research 04 F8). Layout v2 keeps the twins on the public store, because a browser
+`<img>` needs a URL, and moves every document to a second, private store:
+
+| Store                        | Access  | Holds                                                                                                                                             |
+| ---------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `turboslide-decks` (today's) | public  | `decks/<id>/assets/*` (the twins, the recipes, the dither variants), `exports/`, `bundles/`; later `d/<id>/<assetKey>/*` and `u/<avatarKey>/*`    |
+| `turboslide-private` (new)   | private | `decks/<id>/{deck.json,slides/,versions/,snapshots/,leases.json,access.json,comments/,<sidecars>}`, `users/<principalId>/decks.json`, `meta.json` |
+
+The code (`packages/store/src/migrate.ts`, `blob-vercel.ts`): `vercelDocumentsClient(env)` opens
+the private store from `TURBOSLIDE_BLOB_PRIVATE_TOKEN` with `access: private`; `splitBlobClient({
+legacy, documents })` is one `BlobClient` that routes by pathname (`isPublicPath`: twins, keyed
+twins, exports and bundles are public, everything else a document), reads a document from the
+private store first and, during the dual read window, from the public one when it is absent there,
+and writes every document private from the first request after the plan; `layoutBlobClient(env)`
+returns that client when the private token is set and the plain public client otherwise, so a
+deployment without the second store runs layout v1 unchanged. `openBlobStore` and `openHostedDecks`
+take the split client as their client with no change of their own. The layout is read from
+`meta.json` in the private store and cached for 5 s per process.
+
+The migration is `turboslide admin migrate-storage <step> [--batch <n>]` (`admin.migrateStorage`,
+the admin's bearer, then an API key), one step per call and resumable from the cursor `meta.json`
+keeps, so a function timeout never loses work:
+
+1. `plan`: lists `decks/` on the public store (the templates are not stored), writes `meta.json`
+   with `layout: 'v1'`, the deck list, `dualRead: true`. From here every document write goes
+   private and every read checks the private store first.
+2. `copy`: per deck (5 per call by default), every document of the public store that the private
+   one lacks is read and put with `overwrite: false`; the etag of the copy must equal the source's
+   (Vercel Blob's etag is the md5 of the body; the fake's too), else the deck is listed under
+   `failed`. A document already private is left alone: it is the copy of an earlier call, or a
+   write of the window, which is newer than the public copy.
+3. `verify`: per deck, a `head` per document compares the etags; a snapshot is compared byte for
+   byte; a private copy newer than the public one (a write of the window) passes. Verified decks
+   accumulate in `meta.verified`.
+4. `cutover`: refused with the list of unverified decks while any deck failed or is unverified;
+   otherwise flips `layout: 'v2'` and ends the dual read window. From here a document that exists
+   on the public store only is invisible.
+5. `delete`: per deck, the public documents leave in `del` batches of at most 50 paths, off the
+   request path (the CLI runs it after the cutover verified).
+6. `rollback`: before the cutover, sets the rollback flag: reads and writes go to the public store
+   again, as if no plan had run; `plan` restarts the migration. After the cutover there is no
+   rollback flag; `deck pull` and `deck push` still move any deck.
+
+Tested on the fake in `packages/store/src/migrate.test.ts`: two decks with 68 documents each move
+byte for byte with equal etags, the twins stay, the templates are not touched, a copy re-run is
+idempotent, the cutover before verify refuses, the public documents leave in batches, a tampered
+private copy fails verification and a rollback before the cutover flips the reads. The rehearsal
+on a checkout: `TURBOSLIDE_BLOB_PRIVATE_DIR=<folder>` opens a folder as the private store
+(`diskBlobClient`).
+
+Deviation from SPEC-3 11.5, recorded for the verifier: the migration does not generate an
+`assetKey` per deck or copy the twins to `d/<id>/<assetKey>/<digest name>` with an `asset.set`
+rewrite of `twins` and `sourceFile`. The twins keep their `decks/<id>/assets/` paths on the public
+store, which the assets route serves today; the keyed layout of the twins is the assets route's
+change (B4) and can run as a later step of the same command once that route reads `assetKey`.
+
+Turning the private store on (Kevin or the integrator; no agent creates a paid resource):
+`vercel blob create-store turboslide-private --access private --region iad1 --yes` from the linked
+project, then `vercel env add TURBOSLIDE_BLOB_PRIVATE_TOKEN preview` with the store's read write
+token (the Marketplace names it with the prefix Kevin picks; the variable the studio reads is this
+one), redeploy the preview, run the migration to its dual read window on the preview store
+(`plan`, `copy` until `done`, `verify` until `done`), watch the editor and `/decks` for a day, then
+`cutover` and `delete`. Production repeats the same steps with its own token after the preview
+verified.
+
+## 11. The runbook of the round three services
+
+The account boundary of MILESTONES-3: no agent installs a Vercel Marketplace product, creates a paid
+resource, changes DNS, registers a sending domain or signs up for a service. Every tier below is
+built behind an environment switch with a fake in the tests and turns on when the variable is set.
+
+- Redis (Upstash, Marketplace, the fixed 250 MB plan): install from the project's Storage tab,
+  which sets `REDIS_URL` (the Redis protocol URL, `rediss://`); redeploy; `turboslide sync status
+--from <studio>` answers `tier: redis`. To turn it off, unset the variable: the deployment falls
+  to the `blob` tier with the title row's notice.
+- Postgres (Neon, Marketplace, free tier): sets `DATABASE_URL`; better-auth's Kysely adapter runs
+  the migrations at the first request (B3's `apps/studio/src/server/auth/better-auth.ts`); without
+  it the deployment has anonymous principals only.
+- Resend: `RESEND_API_KEY` and `TURBOSLIDE_MAIL_FROM` after Kevin registers the sending domain;
+  `TURBOSLIDE_MAIL=capture` on every preview writes outgoing mail to a Redis list that
+  `admin.mail.list` reads instead of sending.
+- The private store: section 10.
+- The WAF rules file (`firewall/rules.json`, B4): log mode from the ship step; enforce is Kevin's
+  date (SPEC-3 11.5 R8).
+- `TURBOSLIDE_AUTHORIZE=shadow` on production for a week (R3), `enforce` after the denial counts
+  per route were reviewed.
+- Retention (SPEC-3 8.10): presence 120 s, the ops stream 24 hours and 10,000 entries, counters an
+  hour at most, inboxes 500 unread and 5,000 in all, comments the deck's life with tombstones
+  restorable for 30 days.
+
+A dev server needs `TURBOSLIDE_SESSION_SECRET` (32 characters or more; every `/api/actions/*`
+request derives its author from the sealed cookie, and the tmp store's export tokens need
+`TURBOSLIDE_DOWNLOAD_SECRET` beside it); an obviously fake value is fine on a checkout.
+
+Environment variables the round adds (every secret differs between preview and production):
+
+| Variable                                             | Set by                | Effect                                                                                         |
+| ---------------------------------------------------- | --------------------- | ---------------------------------------------------------------------------------------------- |
+| `REDIS_URL`                                          | the Upstash install   | the `redis` realtime tier, the caches and the inboxes of section 9                             |
+| `TURBOSLIDE_REALTIME`                                | you                   | forces `memory`, `redis` or `blob`                                                             |
+| `TURBOSLIDE_BLOB_PRIVATE_TOKEN`                      | the private store     | layout v2: documents in the private store through `layoutBlobClient` (section 10)              |
+| `TURBOSLIDE_BLOB_PRIVATE_DIR`                        | you, a checkout       | a folder as the private store for a migration rehearsal                                        |
+| `DATABASE_URL`, `BETTER_AUTH_SECRET`                 | the Neon install, you | accounts (B3)                                                                                  |
+| `TURBOSLIDE_SESSION_SECRET`                          | you                   | seals the anonymous principal cookie; 32 characters or more, `openssl rand -hex 32`            |
+| `RESEND_API_KEY`, `TURBOSLIDE_MAIL_FROM`             | you, after the domain | the mail sender (B3)                                                                           |
+| `TURBOSLIDE_MAIL`                                    | you                   | `capture` on previews                                                                          |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`           | you                   | the GitHub sign in (B3)                                                                        |
+| `TURBOSLIDE_ADMIN_EMAILS`                            | you                   | the deployment admins                                                                          |
+| `TURBOSLIDE_DOWNLOAD_SECRET`                         | you                   | required on every hosted environment, 16 bytes or more (section 5's table)                     |
+| `TURBOSLIDE_AUTH_DB`                                 | you, a checkout       | `node:sqlite` accounts on a checkout                                                           |
+| `TURBOSLIDE_AUTHORIZE`                               | you                   | `shadow` (default) logs denials and allows; `enforce` refuses                                  |
+| `TURBOSLIDE_MISSING_RECORD`                          | you                   | what a deck without `access.json` synthesizes as (B4's `authorize.ts`)                         |
+| `TURBOSLIDE_TRUST_PROXY`                             | you                   | trusts the platform's client address header (B4)                                               |
+| `TURBOSLIDE_LOCAL_OPEN`                              | a checkout's tests    | the localhost open rule for the test runs only                                                 |
+| `TURBOSLIDE_LOCAL_TOKEN`                             | you, a checkout       | `require` makes the localhost agent surface take the token of `.turboslide/token` (B3)         |
+| `TURBOSLIDE_AUTH_RATE_LIMIT`                         | a checkout's tests    | `off` turns the library's sign in limiter off for a spec run; ignored hosted                   |
+| `TURBOSLIDE_PASSKEY_RPID`                            | reserved              | the production host once final; the passkey plugin reads it when installed                     |
+| `TURBOSLIDE_CSP`                                     | you                   | `report` (default) sends the nonce CSP as report only; `enforce` after the report weeks; `off` |
+| `TURBOSLIDE_EGRESS`, `TURBOSLIDE_WEB_SECURITY`       | you                   | the capture browser's egress denial and `strict` web security (B4, docs/security.md)           |
+| `TURBOSLIDE_PUBLIC_STORE_HOST`                       | you, hosted           | the public store's host for the CSP's `img-src` (B4)                                           |
+| `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | the Upstash install   | the Upstash rate limiter replaces the memory one when both are set (B4)                        |

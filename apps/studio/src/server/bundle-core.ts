@@ -50,7 +50,8 @@ export const UPLOAD_PURPOSE = 'bundle-upload';
 /** The subject an upload ticket names: any deck. */
 export const ANY_SUBJECT = '*';
 
-type Ticket = { p: string; s: string; exp: number; nonce: string };
+/** `i` is the minting identity (gslides-parity SPEC-3 8.2: "bundle tickets carry the identity"). */
+type Ticket = { p: string; s: string; i: string; exp: number; nonce: string };
 
 type Shared = { secret?: Buffer };
 
@@ -77,16 +78,65 @@ function sign(body: string): string {
   return createHmac('sha256', secret()).update(body).digest('hex');
 }
 
-/** A ticket for one purpose and subject, valid for TICKET_TTL_MS. */
-export function signTicket(purpose: string, subject: string, now: number = Date.now()): string {
+/** The identity a ticket names when the minting request had none (a checkout's tests). */
+export const ANONYMOUS_TICKET_IDENTITY = 'anonymous';
+
+/**
+ * A ticket for one purpose and subject, valid for TICKET_TTL_MS, naming the identity that asked
+ * for it (SPEC-3 8.2; report 04 F1: a ticket minted for one person can no longer replace any
+ * deck as anyone). The route reads the identity back through `verifyTicket` and runs
+ * `authorize()` for it against the target deck.
+ */
+export function signTicket(
+  purpose: string,
+  subject: string,
+  identity: string = ANONYMOUS_TICKET_IDENTITY,
+  now: number = Date.now(),
+): string {
   const ticket: Ticket = {
     p: purpose,
     s: subject,
+    i: identity,
     exp: now + TICKET_TTL_MS,
     nonce: randomBytes(8).toString('hex'),
   };
   const body = Buffer.from(JSON.stringify(ticket), 'utf8').toString('base64url');
   return `${body}.${sign(body)}`;
+}
+
+/**
+ * The identity of a ticket that is well formed, signed here, unexpired and names the purpose and
+ * subject; null otherwise. A round two ticket without an identity reads as anonymous.
+ */
+export function ticketIdentity(
+  token: string,
+  purpose: string,
+  subject: string,
+  now: number = Date.now(),
+): string | null {
+  const dot = token.indexOf('.');
+  if (dot <= 0) return null;
+  const body = token.slice(0, dot);
+  const given = token.slice(dot + 1);
+  const expected = sign(body);
+  if (given.length !== expected.length) return null;
+  if (!timingSafeEqual(Buffer.from(given, 'utf8'), Buffer.from(expected, 'utf8'))) return null;
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as unknown;
+  } catch {
+    return null;
+  }
+  if (typeof parsed !== 'object' || parsed === null) return null;
+  const ticket = parsed as Partial<Ticket>;
+  if (
+    ticket.p !== purpose ||
+    ticket.s !== subject ||
+    typeof ticket.exp !== 'number' ||
+    ticket.exp < now
+  )
+    return null;
+  return typeof ticket.i === 'string' && ticket.i !== '' ? ticket.i : ANONYMOUS_TICKET_IDENTITY;
 }
 
 /** True when the ticket is well formed, signed here, unexpired and names the purpose and subject. */
@@ -96,27 +146,7 @@ export function verifyTicket(
   subject: string,
   now: number = Date.now(),
 ): boolean {
-  const dot = token.indexOf('.');
-  if (dot <= 0) return false;
-  const body = token.slice(0, dot);
-  const given = token.slice(dot + 1);
-  const expected = sign(body);
-  if (given.length !== expected.length) return false;
-  if (!timingSafeEqual(Buffer.from(given, 'utf8'), Buffer.from(expected, 'utf8'))) return false;
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(Buffer.from(body, 'base64url').toString('utf8')) as unknown;
-  } catch {
-    return false;
-  }
-  if (typeof parsed !== 'object' || parsed === null) return false;
-  const ticket = parsed as Partial<Ticket>;
-  return (
-    ticket.p === purpose &&
-    ticket.s === subject &&
-    typeof ticket.exp === 'number' &&
-    ticket.exp >= now
-  );
+  return ticketIdentity(token, purpose, subject, now) !== null;
 }
 
 function sameToken(given: string, expected: string): boolean {
@@ -125,28 +155,50 @@ function sameToken(given: string, expected: string): boolean {
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
+export type BundleRouteAdmission =
+  /** the studio page's ticket: the identity it was minted for */
+  | { kind: 'ticket'; identity: string }
+  /** the deployment's bearer: the bootstrap admin */
+  | { kind: 'bearer' }
+  /** a checkout without a token: the localhost holder */
+  | { kind: 'open' };
+
 /**
  * The bundle routes' rule: a valid ticket for the purpose and subject (the studio's own page),
  * else the bearer token when TURBOSLIDE_TOKEN is set, else open (a checkout, the rule of the
- * export and render routes). Returns the 401 Response to send, or null when the request may proceed.
+ * export and render routes). Returns the 401 Response to send, or how the request was admitted,
+ * so the route can run `authorize()` for the ticket's identity (SPEC-3 6.3, 8.2).
  */
-export function bundleRouteAuth(
+export function bundleRouteAdmission(
   request: Request,
   purpose: string,
   subject: string,
-): Response | null {
+): Response | BundleRouteAdmission {
   const url = new URL(request.url);
   const ticket = url.searchParams.get(TICKET_QUERY);
-  if (ticket !== null && verifyTicket(ticket, purpose, subject)) return null;
+  if (ticket !== null) {
+    const identity = ticketIdentity(ticket, purpose, subject);
+    if (identity !== null) return { kind: 'ticket', identity };
+  }
   const token = process.env.TURBOSLIDE_TOKEN;
-  if (token === undefined || token === '') return null;
+  if (token === undefined || token === '') return { kind: 'open' };
   const given = bearerToken(request);
-  if (given !== undefined && sameToken(given, token)) return null;
+  if (given !== undefined && sameToken(given, token)) return { kind: 'bearer' };
   return refuse(
     401,
     'unauthorized',
     'bearer token required: send Authorization: Bearer <TURBOSLIDE_TOKEN>, or ask the studio page for a ticket',
   );
+}
+
+/** The round two shape of the rule: the 401 Response, or null when the request may proceed. */
+export function bundleRouteAuth(
+  request: Request,
+  purpose: string,
+  subject: string,
+): Response | null {
+  const admission = bundleRouteAdmission(request, purpose, subject);
+  return admission instanceof Response ? admission : null;
 }
 
 function requireSlug(deckId: string): void {

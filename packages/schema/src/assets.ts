@@ -89,6 +89,25 @@ export type AssetMetrics = {
   };
 };
 
+/**
+ * A materialized dither variant (gslides-parity SPEC-3 10.1, 10.4; research-3 06 4.5): the files
+ * `picture.materialize` wrote for one resolved dither over one source, recorded on the asset
+ * because two pictures with the same source and effect share one file; what every export reads.
+ */
+export type AssetVariant = {
+  /** sha256, hex, of the source digest, the resolved PictureDither, the cell and the screen size. */
+  key: string;
+  /** `assets/<id>.dither-<key12>-light.png` and `-dark.png`, or one neutral file for polarity 'same'. */
+  twins: AssetTwins;
+  /** The sheet pixels the file covers. */
+  size: [number, number];
+  /** Cells are cell times scale file pixels. */
+  scale: 1 | 2;
+  /** The lit fraction; the plate clearance when a plate group sits over it. */
+  metrics?: AssetMetrics;
+  producedAt: string;
+};
+
 export type Asset = {
   id: AssetId;
   role: AssetRole;
@@ -112,8 +131,13 @@ export type Asset = {
   credit?: string;
   inline: InlineRule;
   metrics?: AssetMetrics;
+  /** The materialized dither variants by key (SPEC-3 10.1); pruned by `picture.materialize --prune`. */
+  variants?: Record<string, AssetVariant>;
   ext?: Record<string, unknown>;
 };
+
+/** A variant key: the sha256 hex digest of 06 4.5. */
+export const ASSET_VARIANT_KEY = /^[0-9a-f]{64}$/;
 
 const relativePath = z
   .string()
@@ -239,6 +263,15 @@ export const assetMetricsSchema = z.strictObject({
     .optional(),
 }) satisfies z.ZodType<AssetMetrics>;
 
+export const assetVariantSchema = z.strictObject({
+  key: z.string().regex(ASSET_VARIANT_KEY, 'a sha256 hex digest'),
+  twins: assetTwinsSchema,
+  size: z.tuple([z.number().int().positive(), z.number().int().positive()]),
+  scale: z.literal([1, 2]),
+  metrics: assetMetricsSchema.optional(),
+  producedAt: z.string(),
+}) satisfies z.ZodType<AssetVariant>;
+
 export const assetSchema = z.strictObject({
   id: slugSchema,
   role: annotate(z.enum(ASSET_ROLES), {
@@ -273,8 +306,30 @@ export const assetSchema = z.strictObject({
     help: 'How the standalone build embeds the file (build-deck.mjs:72-76).',
   }),
   metrics: assetMetricsSchema.optional(),
+  variants: z
+    .record(z.string().regex(ASSET_VARIANT_KEY, 'a sha256 hex digest'), assetVariantSchema)
+    .optional(),
   ext: extSchema,
 }) satisfies z.ZodType<Asset>;
+
+/** The variant twins for a theme, or undefined when no variant carries the key. */
+export function assetVariantTwin(
+  asset: Asset,
+  key: string,
+  theme: 'light' | 'dark',
+): string | undefined {
+  const variant = asset.variants?.[key];
+  if (variant === undefined) return undefined;
+  return 'neutral' in variant.twins ? variant.twins.neutral : variant.twins[theme];
+}
+
+/**
+ * True when a block level dither may run on the asset (SPEC-3 10.1): the asset has a continuous
+ * source, or carries no two tone treatment (its twins are the continuous picture).
+ */
+export function hasContinuousSource(asset: Asset): boolean {
+  return asset.sourceFile !== undefined || asset.treatment?.kind !== 'two-tone';
+}
 
 /** The twin for a theme; a neutral asset serves both. */
 export function assetTwin(asset: Asset, theme: 'light' | 'dark'): string {

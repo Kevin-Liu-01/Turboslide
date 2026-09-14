@@ -1,5 +1,5 @@
 {
-  "$comment": "Google Slides' menu items as R01 transcribed them on 2026-09-11 (docs/gslides-parity/research/01-menu-bar.md), one entry per Google item with its label as the report prints it and its path of parent labels. The title row and the Slideshow arrow come from R01 'Menu bar placement and behaviour' plus SPEC 2.0, which names the controls R01 describes without a label (Document status, Record, Ask Gemini); each such entry says so in `source`. Round two (SPEC-2 section 4) adds the submenu rows R05 attests and R01 only names as a submenu: the Capitalization options (R05 B1), the paragraph spacing toggles (R05 B3, S52), the six dashes and the ten line decorations (R05 A10; the labels are the enum values in sentence case, Google prints no tooltip names); each such entry names its report in `source`. Items R01 marks unverified carry `unverified: true`. menu-model.test.ts asserts every entry is in the model with a status.",
+  "$comment": "Google Slides' menu items as R01 transcribed them on 2026-09-11 (docs/gslides-parity/research/01-menu-bar.md), one entry per Google item with its label as the report prints it and its path of parent labels. The title row and the Slideshow arrow come from R01 'Menu bar placement and behaviour' plus SPEC 2.0, which names the controls R01 describes without a label (Document status, Record, Ask Gemini); each such entry says so in `source`. Round two (SPEC-2 section 4) adds the submenu rows R05 attests and R01 only names as a submenu: the Capitalization options (R05 B1), the paragraph spacing toggles (R05 B3, S52), the six dashes and the ten line decorations (R05 A10; the labels are the enum values in sentence case, Google prints no tooltip names); each such entry names its report in `source`. Items R01 marks unverified carry `unverified: true`. Round three (SPEC-3 section 13) adds the collaboration rows research-3 report 01 attests (docs/gslides-parity/research-3/01-google-collaboration.md, read 2026-09-13): the avatar row and its Join chat (section 2, G1, G10), View > Comments > Show all comments (section 3, W3, G7), Tools > Notification settings (section 3, G14), and the three rows of Google's Accessibility settings dialog that SPEC-3 0.42 and 13.1 name; each such entry names its source. menu-model.test.ts asserts every entry is in the model with a status.",
   "menus": [
     {
       "menu": "Title row",
@@ -10,6 +10,12 @@
         { "label": "Move", "path": [] },
         { "label": "Document status", "path": [], "source": "SPEC 2.0 (the cloud glyph)" },
         { "label": "Last edit", "path": [] },
+        { "label": "Avatar row", "path": [], "source": "R3-01 section 2 (G1, T1), SPEC-3 4.2" },
+        {
+          "label": "Join chat",
+          "path": ["Avatar row"],
+          "source": "R3-01 section 2 (G10), SPEC-3 0.41"
+        },
         { "label": "Show all comments", "path": [] },
         { "label": "Meet", "path": [] },
         { "label": "Record", "path": [], "source": "SPEC 2.0" },
@@ -104,6 +110,11 @@
         { "label": "Guides", "path": ["Snap to"] },
         { "label": "Grid", "path": ["Snap to"] },
         { "label": "Comments", "path": [] },
+        {
+          "label": "Show all comments",
+          "path": ["Comments"],
+          "source": "R3-01 section 3 (W3, G7), SPEC-3 13.1"
+        },
         { "label": "Hide comments", "path": ["Comments"] },
         { "label": "Minimize comments", "path": ["Comments"] },
         { "label": "Expand comments", "path": ["Comments"] },
@@ -397,8 +408,28 @@
         { "label": "Dictionary", "path": [] },
         { "label": "Q&A history", "path": [] },
         { "label": "Dictate speaker notes", "path": [] },
+        {
+          "label": "Notification settings",
+          "path": [],
+          "source": "R3-01 section 3 (G14), SPEC-3 5.5"
+        },
         { "label": "Preferences", "path": [] },
         { "label": "Accessibility settings", "path": [] },
+        {
+          "label": "Turn on screen reader support",
+          "path": ["Accessibility settings"],
+          "source": "SPEC-3 0.42, 13.1 (Google's Accessibility settings dialog)"
+        },
+        {
+          "label": "Turn on braille support",
+          "path": ["Accessibility settings"],
+          "source": "SPEC-3 0.42, 13.1 (Google's Accessibility settings dialog)"
+        },
+        {
+          "label": "Turn on collaborator announcements",
+          "path": ["Accessibility settings"],
+          "source": "SPEC-3 0.42, 13.1 (Google's Accessibility settings dialog)"
+        },
         { "label": "Activity dashboard", "path": [] }
       ]
     },

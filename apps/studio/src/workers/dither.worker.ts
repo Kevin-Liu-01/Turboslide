@@ -4,25 +4,38 @@ import type { BitImage, Box, GrayImage, RgbaImage } from '@turboslide/effects/im
 import { invertBits } from '@turboslide/effects/image';
 import { twoToneMetrics } from '@turboslide/effects/metrics';
 import type { TwoToneMetrics } from '@turboslide/effects/metrics';
+import { ditherFrame, prepareToneBase } from '@turboslide/effects/pipeline';
+import type { ToneBase, ToneBaseSpec } from '@turboslide/effects/pipeline';
 import { cropPadded, fitCover, scaleNearest } from '@turboslide/effects/resample';
 import { autocontrast, invertGray, toGray, tone } from '@turboslide/effects/tone';
 import type { TwoToneTreatment } from '@turboslide/schema/assets';
+import type {
+  DitherWorkerFrame,
+  DitherWorkerPrepare,
+  DitherWorkerReply,
+  DitherWorkerRequest,
+} from '@turboslide/viewer/dither';
 
 /**
- * The dither preview worker (SPEC 5.4, 6.5; MILESTONES M3 item 5): the two-tone treatment of a
- * picture asset run off the main thread, so the inspector's Asset section shows the twins and
- * their plate metrics live while a designer moves the black point, the gamma or the crop. The
- * source arrives as an ImageBitmap (the main thread's createImageBitmap of the asset file or of
- * an img), is read to RGBA on an OffscreenCanvas, goes through the pipeline of
- * @turboslide/effects, and each twin comes back as an ImageBitmap of the 1600 by 900 sheet,
- * transferred, ready for drawImage on the inspector's canvas.
+ * The dither preview worker (SPEC 5.4, 6.5; MILESTONES M3 item 5; gslides-parity SPEC-3 10.2 for
+ * the block level dither): the pipelines of @turboslide/effects run off the main thread, so the
+ * editor shows a dither live while a designer moves a slider.
  *
- * The stages and their order are twoToneScreen in packages/effects/src/two-tone.ts (gray or one
- * channel, crop, invert, minimum filter, blur, cover fit to 800 by 450 with the pinned Lanczos3,
- * unsharp band, autocontrast, the tone LUT, the 8 by 8 Bayer screen), repeated here stage by
- * stage because that module also imports the 1-bit PNG encoder, which needs node:zlib and cannot
- * load in a browser worker. `previewTwoTone` is exported so a Node test can hold it against
- * twoToneScreen; a change to the pipeline is made in both places.
+ * Two request shapes share the worker:
+ *
+ * 1. The asset level treatment of round one (`treatment` present, the inspector's Pictures and
+ *    materials panel): the source arrives as an ImageBitmap, goes through the two-tone stages
+ *    stage by stage (repeated here because two-tone.ts imports the 1-bit PNG encoder, which needs
+ *    node:zlib), and each twin comes back as a 1600 by 900 ImageBitmap. `previewTwoTone` is
+ *    exported so a Node test can hold it against twoToneScreen.
+ * 2. The block level dither of round three (`kind` present, packages/viewer/src/dither.ts
+ *    `workerDitherHost`): `prepare` reads the source once and keeps the tone base (the cover fit,
+ *    the slow step) under the caller's key; `frame` re-runs the LUT, the threshold and the paint
+ *    over the cached base for one field and one theme and answers a transferred ImageBitmap of
+ *    the plane, one pixel per cell; `release` forgets a base. Requests carry an id increasing per
+ *    key; a frame request older than the newest one served for its key is dropped with a `stale`
+ *    reply, so a drag never queues frames. The same effects stages run in Node
+ *    (`@turboslide/effects/pipeline` ditherFrame) and the test asserts equal bits.
  *
  * Usage from the main thread:
  *   const worker = new Worker(new URL('../workers/dither.worker.ts', import.meta.url), { type: 'module' });
@@ -202,6 +215,113 @@ export function answer(request: DitherRequest): {
   }
 }
 
+// ---------------------------------------------------------------------------------------------
+// The block level dither (round three)
+
+/** The cached bases and the newest frame id served per key; the pure state a Node test can drive. */
+export type BlockDitherState = {
+  bases: Map<string, ToneBase>;
+  served: Map<string, number>;
+};
+
+export function newBlockDitherState(): BlockDitherState {
+  return { bases: new Map(), served: new Map() };
+}
+
+/** `prepare` over decoded pixels: the base under the key (the fit runs here, once per source and region). */
+export function prepareBlockBase(
+  state: BlockDitherState,
+  key: string,
+  rgba: RgbaImage,
+  spec: ToneBaseSpec,
+): ToneBase {
+  const base = prepareToneBase(rgba, spec);
+  state.bases.set(key, base);
+  return base;
+}
+
+export type BlockFrame = {
+  plane: RgbaImage;
+  litFraction: number;
+};
+
+/**
+ * `frame` over a cached base: null when the key has no base or the request is older than the newest
+ * one served for the key (the stale drop of SPEC-3 10.2); else the plane and the lit fraction.
+ */
+export function blockFrame(state: BlockDitherState, request: DitherWorkerFrame): BlockFrame | null {
+  const base = state.bases.get(request.key);
+  if (base === undefined) return null;
+  if ((state.served.get(request.key) ?? -1) > request.id) return null;
+  state.served.set(request.key, request.id);
+  const frame = ditherFrame(base, request.dither, request.theme, {
+    ...(request.adjust !== undefined ? { adjust: request.adjust } : {}),
+  });
+  return { plane: frame.plane, litFraction: frame.metrics.litFraction };
+}
+
+/** One block level request to its reply and the bitmaps to transfer. */
+export function answerBlock(
+  state: BlockDitherState,
+  request: DitherWorkerRequest,
+): { reply: DitherWorkerReply | null; transfer: Transferable[] } {
+  const t = performance.now();
+  if (request.kind === 'release') {
+    state.bases.delete(request.key);
+    state.served.delete(request.key);
+    return { reply: null, transfer: [] };
+  }
+  try {
+    if (request.kind === 'prepare') {
+      const rgba = readSource(request.source);
+      request.source.close();
+      prepareBlockBase(state, request.key, rgba, request.spec);
+      return {
+        reply: {
+          kind: 'prepared',
+          id: request.id,
+          key: request.key,
+          ok: true,
+          ms: Math.round(performance.now() - t),
+        },
+        transfer: [],
+      };
+    }
+    const frame = blockFrame(state, request);
+    if (frame === null)
+      return {
+        reply: { kind: 'stale', id: request.id, key: request.key, ok: false },
+        transfer: [],
+      };
+    const image = toBitmap(frame.plane);
+    return {
+      reply: {
+        kind: 'frame',
+        id: request.id,
+        key: request.key,
+        ok: true,
+        image,
+        width: frame.plane.width,
+        height: frame.plane.height,
+        litFraction: frame.litFraction,
+        ms: performance.now() - t,
+      },
+      transfer: [image],
+    };
+  } catch (error) {
+    return {
+      reply: {
+        kind: 'error',
+        id: request.id,
+        key: request.key,
+        ok: false,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      transfer: [],
+    };
+  }
+}
+
 type WorkerScope = {
   postMessage: (message: unknown, transfer?: Transferable[]) => void;
   addEventListener: (type: 'message', listener: (event: MessageEvent<unknown>) => void) => void;
@@ -218,12 +338,31 @@ function isRequest(data: unknown): data is DitherRequest {
   );
 }
 
-/* the listener registers only inside a worker; a Node test imports the pure functions above */
+function isBlockRequest(data: unknown): data is DitherWorkerRequest {
+  if (typeof data !== 'object' || data === null || !('kind' in data)) return false;
+  const kind = (data as { kind: unknown }).kind;
+  if (kind === 'release') return typeof (data as { key?: unknown }).key === 'string';
+  if (kind !== 'prepare' && kind !== 'frame') return false;
+  return (
+    typeof (data as { id?: unknown }).id === 'number' &&
+    typeof (data as { key?: unknown }).key === 'string'
+  );
+}
+
+/* the listeners register only inside a worker; a Node test imports the pure functions above */
 if (typeof self !== 'undefined' && typeof OffscreenCanvas !== 'undefined') {
   const scope = self as unknown as WorkerScope;
+  const state = newBlockDitherState();
   scope.addEventListener('message', (event) => {
+    if (isBlockRequest(event.data)) {
+      const { reply, transfer } = answerBlock(state, event.data);
+      if (reply !== null) scope.postMessage(reply, transfer);
+      return;
+    }
     if (!isRequest(event.data)) return;
     const { response, transfer } = answer(event.data);
     scope.postMessage(response, transfer);
   });
 }
+
+export type { DitherWorkerPrepare };

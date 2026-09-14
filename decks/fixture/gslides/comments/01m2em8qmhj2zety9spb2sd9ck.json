@@ -1,0 +1,39 @@
+{
+  "id": "01m2em8qmhj2zety9spb2sd9ck",
+  "deckId": "gslides",
+  "anchor": {
+    "kind": "slide",
+    "slideId": "background-dither"
+  },
+  "comment": {
+    "id": "01m2em8qmhj2zety9spb2sd9ck",
+    "author": {
+      "principalId": "local:maya",
+      "label": "maya",
+      "kind": "human"
+    },
+    "createdAt": "2026-09-14T00:14:58.677Z",
+    "body": {
+      "text": "Does the plate clear the horizon rule in both themes?",
+      "mentions": []
+    }
+  },
+  "replies": [
+    {
+      "id": "01m2em8ra56s6qq1wtzv6ze54y",
+      "author": {
+        "principalId": "local:tester",
+        "label": "tester",
+        "kind": "human"
+      },
+      "createdAt": "2026-09-14T00:14:59.397Z",
+      "body": {
+        "text": "Materialize the variant and read the lit cells under the plate.",
+        "mentions": []
+      }
+    }
+  ],
+  "createdAt": "2026-09-14T00:14:58.677Z",
+  "updatedAt": "2026-09-14T00:14:59.397Z",
+  "revision": 2
+}

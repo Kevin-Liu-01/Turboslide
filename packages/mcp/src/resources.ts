@@ -9,11 +9,19 @@
 //   deck://sheet/<theme>                 the latest contact sheet PNG plus its cell map
 //   deck://sheet/<theme>/map             the cell map alone
 //   deck://lint/<deckId>                 Finding[] from a fresh lint through lint.run
-//   deck://manifest, deck://slides/<slideId>, deck://lint     the same for the bound deck
+//   deck://<deckId>/comments             the comment threads with their anchors resolved (comment.list)
+//   deck://<deckId>/presence             the roster of the deck's room (presence.list)
+//   deck://inbox                         the caller's notifications (notification.list)
+//   deck://manifest, deck://slides/<slideId>, deck://lint, deck://comments, deck://presence
+//                                        the same for the bound deck
 //   deck://grammar, deck://grammar/prose, deck://catalog/blocks, deck://catalog/icons, deck://theme
 //
-// The words manifest, slides, render, sheet, lint, grammar, catalog and theme are reserved in the
-// first segment, so a deck id equal to one of them is addressed through the bound-deck forms.
+// The words manifest, slides, render, sheet, lint, grammar, catalog, theme, comments, presence and
+// inbox are reserved in the first segment, so a deck id equal to one of them is addressed through
+// the bound-deck forms. The comments, presence and inbox resources are round three's (gslides-parity
+// SPEC-3 3.7 g, 3.10); a server declares `resources: { subscribe: true, listChanged: true }` and
+// sends `notifications/resources/updated` for a subscribed URI when the source reports a change
+// (fs.watch over stdio, the room's stream hosted).
 import type {
   ReadResourceResult,
   Resource,
@@ -38,6 +46,9 @@ export const RESERVED_HOSTS = [
   'grammar',
   'catalog',
   'theme',
+  'comments',
+  'presence',
+  'inbox',
 ] as const;
 
 export type ParsedResource =
@@ -48,7 +59,10 @@ export type ParsedResource =
   | { kind: 'lint'; deckId?: string }
   | { kind: 'grammar'; part: 'rules' | 'prose' }
   | { kind: 'catalog'; which: 'blocks' | 'icons' }
-  | { kind: 'theme' };
+  | { kind: 'theme' }
+  | { kind: 'comments'; deckId?: string }
+  | { kind: 'presence'; deckId?: string }
+  | { kind: 'inbox' };
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -99,10 +113,20 @@ export function parseResourceUri(uri: string): ParsedResource | undefined {
       return undefined;
     case 'theme':
       return segments.length === 0 ? { kind: 'theme' } : undefined;
+    case 'comments':
+      return segments.length === 0 ? { kind: 'comments' } : undefined;
+    case 'presence':
+      return segments.length === 0 ? { kind: 'presence' } : undefined;
+    case 'inbox':
+      return segments.length === 0 ? { kind: 'inbox' } : undefined;
     default: {
       if (!SLUG.test(host)) return undefined;
       if (segments.length === 1 && segments[0] === 'manifest')
         return { kind: 'manifest', deckId: host };
+      if (segments.length === 1 && segments[0] === 'comments')
+        return { kind: 'comments', deckId: host };
+      if (segments.length === 1 && segments[0] === 'presence')
+        return { kind: 'presence', deckId: host };
       if (segments.length === 2 && segments[0] === 'slides' && SLUG.test(segments[1] ?? ''))
         return { kind: 'slide', deckId: host, slideId: segments[1] ?? '' };
       return undefined;
@@ -133,6 +157,16 @@ export function sheetMapUri(theme: Theme): string {
 export function lintUri(deckId: string): string {
   return `deck://lint/${deckId}`;
 }
+
+export function commentsUri(deckId: string): string {
+  return `deck://${deckId}/comments`;
+}
+
+export function presenceUri(deckId: string): string {
+  return `deck://${deckId}/presence`;
+}
+
+export const INBOX_URI = 'deck://inbox';
 
 export const GRAMMAR_URI = 'deck://grammar';
 export const GRAMMAR_PROSE_URI = 'deck://grammar/prose';
@@ -178,12 +212,33 @@ export const RESOURCE_TEMPLATES: ResourceTemplate[] = [
     description: 'The current findings from a fresh lint of every slide in both layers',
     mimeType: 'application/json',
   },
+  {
+    uriTemplate: 'deck://{deckId}/comments',
+    name: 'Comments',
+    description:
+      'The comment threads with their anchors resolved against the current document; subscribe for updates',
+    mimeType: 'application/json',
+  },
+  {
+    uriTemplate: 'deck://{deckId}/presence',
+    name: 'Collaborators',
+    description:
+      'The roster of the room with the computed mark per participant; subscribe for updates',
+    mimeType: 'application/json',
+  },
 ];
 
 export type SlideRow = { id: string; n: number; title: string };
 
 /** The fixed resources of a bound deck, for resources/list: the references, the manifest, the lint report and every slide. */
-export function staticResources(deck: { id: string; slides: ReadonlyArray<SlideRow> }): Resource[] {
+export function staticResources(deck: {
+  id: string;
+  slides: ReadonlyArray<SlideRow>;
+  /** True when the source answers the round three resources (SPEC-3 3.10). */
+  comments?: boolean;
+  presence?: boolean;
+  inbox?: boolean;
+}): Resource[] {
   const out: Resource[] = [
     {
       uri: manifestUri(deck.id),
@@ -237,6 +292,30 @@ export function staticResources(deck: { id: string; slides: ReadonlyArray<SlideR
       mimeType: 'image/png',
     });
   }
+  if (deck.comments === true) {
+    out.push({
+      uri: commentsUri(deck.id),
+      name: 'Comments',
+      description: `The comment threads of ${deck.id} with their anchors resolved`,
+      mimeType: 'application/json',
+    });
+  }
+  if (deck.presence === true) {
+    out.push({
+      uri: presenceUri(deck.id),
+      name: 'Collaborators',
+      description: `The roster of ${deck.id}`,
+      mimeType: 'application/json',
+    });
+  }
+  if (deck.inbox === true) {
+    out.push({
+      uri: INBOX_URI,
+      name: 'Notifications',
+      description: 'The notifications of the caller',
+      mimeType: 'application/json',
+    });
+  }
   for (const slide of deck.slides) {
     out.push({
       uri: slideUri(deck.id, slide.id),
@@ -263,6 +342,18 @@ export type DeckSource = {
   latestSheet: (theme: Theme) => Promise<{ image: string; map: string } | undefined>;
   /** The theme tokens for deck://theme; the tokens live in @turboslide/theme, so the caller supplies them. */
   theme?: () => unknown;
+  /** The comment threads with their anchors resolved (comment.list), for deck://<id>/comments. */
+  comments?: () => Promise<unknown>;
+  /** The roster of the room (presence.list), for deck://<id>/presence. */
+  presence?: () => Promise<unknown>;
+  /** The caller's notifications (notification.list), for deck://inbox. */
+  inbox?: () => Promise<unknown>;
+  /**
+   * Reports the resource URIs whose contents changed (a checkpoint, a comment write, an inbox
+   * record): `fs.watch` on a checkout, the room's stream hosted. The return value stops watching.
+   * The server sends `notifications/resources/updated` for the subscribed ones (SPEC-3 3.7 g).
+   */
+  subscribe?: (onChange: (uris: string[]) => void) => () => void;
 };
 
 export class ResourceNotFoundError extends Error {
@@ -393,6 +484,23 @@ export async function readResource(
       if (source.theme === undefined)
         throw new ResourceNotFoundError(uri, 'this server has no theme source');
       return { contents: jsonContents(uri, source.theme()) };
+    }
+    case 'comments': {
+      requireBound(parsed.deckId);
+      if (source.comments === undefined)
+        throw new ResourceNotFoundError(uri, 'comment.list has no handler on this server');
+      return { contents: jsonContents(uri, await source.comments()) };
+    }
+    case 'presence': {
+      requireBound(parsed.deckId);
+      if (source.presence === undefined)
+        throw new ResourceNotFoundError(uri, 'presence.list has no handler on this server');
+      return { contents: jsonContents(uri, await source.presence()) };
+    }
+    case 'inbox': {
+      if (source.inbox === undefined)
+        throw new ResourceNotFoundError(uri, 'notification.list has no handler on this server');
+      return { contents: jsonContents(uri, await source.inbox()) };
     }
   }
 }

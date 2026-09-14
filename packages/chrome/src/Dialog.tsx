@@ -48,6 +48,13 @@ export type DialogProps = {
   /** the data-control id of the card */
   control?: string;
   className?: string;
+  /**
+   * false draws the card as a floating box with no scrim and no focus trap, at the place the
+   * caller's class names, and leaves focus where it is: the one prompt of SPEC-3 7.2 (the name
+   * prompt) uses it so the person typing keeps the caret and the menu bar (VERIFICATION-3
+   * finding 8). Esc still closes it and Enter still runs the primary button from inside it.
+   */
+  modal?: boolean;
   children?: ReactNode;
 };
 
@@ -71,6 +78,7 @@ export function Dialog({
   width = 480,
   control,
   className,
+  modal = true,
   children,
 }: DialogProps) {
   const card = useRef<HTMLDivElement>(null);
@@ -85,8 +93,15 @@ export function Dialog({
       ]
     : [...actions];
 
-  /* focus the first field or button on open; on close, back to the opener */
+  /* focus the first field or button on open; on close, back to the opener (a floating card
+     leaves focus where it is, and returns it only if it took it) */
   useMountEffect(() => {
+    if (!modal) {
+      return () => {
+        const back = opener.current;
+        if (back && back.isConnected) back.focus();
+      };
+    }
     opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const el = card.current;
     if (el) {
@@ -101,6 +116,7 @@ export function Dialog({
 
   /* the trap: Tab and Shift+Tab cycle inside the card; nothing under the scrim takes focus */
   useEffect(() => {
+    if (!modal) return undefined;
     const onFocusIn = (event: FocusEvent) => {
       const el = card.current;
       if (!el || !(event.target instanceof Node) || el.contains(event.target)) return;
@@ -109,7 +125,7 @@ export function Dialog({
     };
     document.addEventListener('focusin', onFocusIn);
     return () => document.removeEventListener('focusin', onFocusIn);
-  }, []);
+  }, [modal]);
 
   const onKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Escape') {
@@ -119,6 +135,7 @@ export function Dialog({
       return;
     }
     if (event.key === 'Tab') {
+      if (!modal) return;
       const el = card.current;
       if (!el) return;
       const list = focusableIn(el);
@@ -149,12 +166,16 @@ export function Dialog({
   };
 
   return (
-    <div className="ts-dialog-scrim ts-chrome" role="presentation" onMouseDown={onScrim}>
+    <div
+      className={cn(modal ? 'ts-dialog-scrim' : 'ts-dialog-float', 'ts-chrome')}
+      role="presentation"
+      onMouseDown={modal ? onScrim : undefined}
+    >
       <div
         ref={card}
-        className={cn('ts-dialog', className)}
+        className={cn('ts-dialog', !modal && 'is-float', className)}
         role="dialog"
-        aria-modal="true"
+        aria-modal={modal ? 'true' : undefined}
         aria-labelledby={titleId}
         aria-describedby={lead === undefined ? undefined : leadId}
         tabIndex={-1}

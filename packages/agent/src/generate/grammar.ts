@@ -81,6 +81,12 @@ export function generateGrammar(): string {
     '',
   );
 
+  parts.push('### Comment anchors', '');
+  parts.push(
+    'A comment names a place with an anchor (gslides-parity SPEC-3 5.9): the deck (`deck`), a slide (`slide:<slideId>`), its speaker notes (`notes:<slideId>`), a block (`<slideId>#<blockId>`), a table cell (`<slideId>#<blockId>/cell:<row>,<col>`, zero based) or a range of the plain text at a Text pointer of a block (`<slideId>#<blockId>/text:<start>-<end>`, one character per paragraph break). Text anchors move with the text on every write; an anchor whose target is gone is reported as orphaned with its reason and kept.',
+    '',
+  );
+
   parts.push('## Slide kinds', '');
   parts.push(
     markdownTable(

@@ -1,0 +1,17 @@
+driver: start 2026-09-14T07:50:05Z load 5.26 8.05 11.09
+driver: segment 1 from 4 exit 1 2026-09-14T07:52:39Z load 26.20 21.38 16.45
+driver: segment 2 from 6 exit 1 2026-09-14T07:57:54Z load 7.73 12.78 13.95
+driver: vite preview started on 4344 (pid )
+driver: segment 3 from 20 exit 1 2026-09-14T08:16:57Z load 15.21 18.27 17.22
+driver: vite preview started on 4344 (pid )
+driver: segment 4 from 21 exit 1 2026-09-14T08:31:07Z load 5.92 9.48 13.88
+driver: vite preview started on 4344 (pid )
+driver: segment 5 from 22 exit 1 2026-09-14T08:34:19Z load 5.49 7.78 12.27
+driver: vite preview started on 4344 (pid )
+driver: segment 6 from 26 exit 1 2026-09-14T08:44:47Z load 9.82 9.42 10.67
+driver: vite preview started on 4344 (pid )
+driver: segment 7 from 27 exit 1 2026-09-14T08:55:51Z load 17.19 16.34 14.34
+driver: vite preview started on 4344 (pid )
+driver: segment 8 from 28 exit 0 2026-09-14T08:55:53Z load 17.19 16.34 14.34
+driver: vite preview started on 4344 (pid )
+driver: done 2026-09-14T08:55:53Z

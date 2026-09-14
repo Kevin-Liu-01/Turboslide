@@ -89,6 +89,17 @@
   border-color: var(--pt-hair);
 }
 
+/* the name as text for a role without rename (SPEC-3 13.4): the button's box, no affordance */
+.ts-title-name.is-readonly {
+  display: inline-flex;
+  align-items: center;
+  cursor: default;
+}
+
+.ts-title-name.is-readonly:hover {
+  border-color: transparent;
+}
+
 .ts-title-name:focus-visible,
 .ts-title-field:focus-visible {
   outline: 1px solid var(--pt-ink);
@@ -191,5 +202,152 @@
   .ts-title-name,
   .ts-title-field {
     max-width: 160px;
+  }
+}
+
+/* Round three (gslides-parity SPEC-3 4.2, 0.43, 9.3): the five fixed slots of the right group.
+   The presence slot is its own grid (presence/presence.css); the comments and inbox slots are
+   32 px boxes that stay whether their control is present or not; the Last edit clock and the
+   Share button carry a 6 px dot as an absolute badge inside their box, so a request or a change
+   moves nothing. The save words live in one cell wide enough for the five phrases. */
+.ts-title-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.ts-title-inbox-slot {
+  flex-basis: var(--pt-inbox-w, 60px);
+  width: var(--pt-inbox-w, 60px);
+}
+
+/* the inbox plate: the glyph, a 4 px gap, a 24 px count cell for two tabular digits */
+.ts-title-inbox {
+  appearance: none;
+  display: inline-grid;
+  grid-template-columns: 32px 24px;
+  column-gap: 4px;
+  align-items: center;
+  box-sizing: border-box;
+  width: var(--pt-inbox-w, 60px);
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-titanium);
+  cursor: pointer;
+}
+
+.ts-title-inbox:hover {
+  border-color: var(--pt-hair);
+  color: var(--pt-ink);
+}
+
+.ts-title-inbox.is-on {
+  color: var(--pt-ink);
+}
+
+.ts-title-inbox:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-title-inbox svg {
+  width: 16px;
+  height: 16px;
+  margin: 0 auto;
+  fill: currentColor;
+}
+
+.ts-title-inbox-count {
+  display: inline-block;
+  box-sizing: border-box;
+  min-width: 24px;
+  height: 16px;
+  padding: 0 3px;
+  font: 500 11px/16px var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--pt-ink);
+}
+
+.ts-title-inbox.has-unread .ts-title-inbox-count {
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+/* the dot slots: the clock and Share carry an absolute 6 px ink dot, drawn only in the has-dot state */
+.ts-title-clock-slot,
+.ts-title-share-slot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.ts-title-dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  background: var(--pt-ink);
+  outline: 1px solid var(--pt-paper);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.has-dot > .ts-title-dot {
+  opacity: 1;
+}
+
+/* the save words: one cell for the five phrases; the longest sets the width */
+.ts-title-save-words {
+  display: inline-grid;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* the live phrase and the hidden longest phrase (a pseudo element, so the words stay the only
+   text) share one cell, so the cell is as wide as the longest and nothing to its right moves
+   when the phrase changes (05 rule 4; VERIFICATION-3 finding 26: the Last edit clock moved with
+   the words) */
+.ts-title-save-live,
+.ts-title-save-words::after {
+  grid-area: 1 / 1;
+}
+
+.ts-title-save-words::after {
+  content: attr(data-longest);
+  visibility: hidden;
+}
+
+.ts-title-save.is-offline {
+  color: var(--pt-ink-2);
+}
+
+.ts-title-name.is-readonly {
+  cursor: default;
+}
+
+.ts-title-name.is-readonly:hover {
+  border-color: transparent;
+}
+
+@media (max-width: 900px) {
+  .ts-title-save-words {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-title-dot {
+    transition: none;
   }
 }

@@ -6,6 +6,11 @@ import { readFile, writeFile } from 'node:fs/promises';
 import sharp from 'sharp';
 
 import type { BitImage, RgbaImage } from './image.ts';
+
+// The untrusted loaders are blocked at module load (gslides-parity SPEC-3 0.29, 8.5; report 04
+// F17): HEIF and JXL never decode here, so `decodeImage` on a kept source file is covered as the
+// intake path is (packages/headless blockUntrustedLoaders runs the same call on its side).
+sharp.block({ operation: ['VipsForeignLoadHeif', 'VipsForeignLoadJxl'] });
 import { encodePng1 } from './png1.ts';
 import type { Png1Options } from './png1.ts';
 
@@ -46,3 +51,7 @@ export async function writePng1(
   await writeFile(path, bytes);
   return bytes.length;
 }
+
+// The dither's variant files (dither-io.ts) are reachable through this subpath until the package's
+// exports carry `./dither-io` (a request of build-3/b5.md); the module imports sharp as this one does.
+export * from './dither-io.ts';

@@ -1,0 +1,517 @@
+/* The presence surfaces (gslides-parity SPEC-3 4.2 to 4.5, 9.3; research 11 section 6): the
+   identity chip, the presence slot of the title row, the roster and account plates, the Following
+   plate, the flags, outlines, carets and pointers of the overlay, the announcements region. The
+   geometry hooks (.ts-flag, .ts-remote-outline, .ts-remote-pointer, .ts-following, .ts-presence)
+   are declared once in apps/studio/src/styles.css by B5 (position, fixed sizes, transform only
+   motion); this file adds the marks, the type and the one colour exception of the round: the six
+   hues on live surfaces through --ts-hue, and the two halo values over pictures. Every stored
+   surface stays monochrome. Motion is opacity and transform only; the reduced motion block at
+   the end goes still. */
+
+/* ---- the identity chip (11 6.1) ---- */
+.ts-chip {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  vertical-align: middle;
+  overflow: visible;
+}
+
+.ts-chip.is-self {
+  border-color: var(--pt-ink);
+}
+
+.ts-chip.is-agent {
+  border-style: dashed;
+}
+
+.ts-chip.is-blank {
+  width: 24px;
+  height: 24px;
+}
+
+.ts-chip-plate {
+  display: block;
+  fill: var(--pt-ink);
+}
+
+.ts-chip-picture {
+  display: block;
+  object-fit: cover;
+}
+
+.ts-chip-initials {
+  fill: var(--pt-ink);
+  font-family: var(--pt-display);
+  font-weight: 500;
+  font-feature-settings: 'cv11', 'ss01';
+  paint-order: stroke fill;
+  stroke: var(--pt-paper);
+  stroke-width: 2px;
+}
+
+/* the 2 px live stripe at the plate's bottom, in the person's hue, live surfaces only */
+.ts-chip-stripe {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--ts-hue, var(--pt-ink));
+  pointer-events: none;
+}
+
+/* the presenter's 6 px right pointing triangle at the plate's bottom right, over a 1 px paper gap */
+.ts-chip-presenter {
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  width: 0;
+  height: 0;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  border-left: 6px solid var(--pt-ink);
+  outline: 1px solid var(--pt-paper);
+  pointer-events: none;
+}
+
+/* over a dithered picture: 1 px ink inside 1 px paper, never themed (11 2.1) */
+.ts-chip.has-halo,
+.ts-flag.has-halo,
+.ts-remote-outline.has-halo,
+.ts-remote-caret.has-halo {
+  box-shadow:
+    0 0 0 1px var(--ts-halo-in, #070707),
+    0 0 0 2px var(--ts-halo-out, #ffffff);
+}
+
+/* ---- the presence slot (11 6.2, 8 P1): 184 px of fixed tracks ---- */
+.ts-presence {
+  display: grid;
+  grid-template-columns: var(
+    --ts-presence-tracks,
+    24px 4px 24px 4px 24px 4px 24px 4px 32px 8px 1px 7px 24px
+  );
+  align-items: center;
+  box-sizing: border-box;
+  width: var(--pt-presence-w, 184px);
+  height: 32px;
+  flex: 0 0 var(--pt-presence-w, 184px);
+}
+
+.ts-presence-slot:nth-child(1) {
+  grid-column: 1;
+}
+.ts-presence-slot:nth-child(2) {
+  grid-column: 3;
+}
+.ts-presence-slot:nth-child(3) {
+  grid-column: 5;
+}
+.ts-presence-slot:nth-child(4) {
+  grid-column: 7;
+}
+.ts-presence-more {
+  grid-column: 9;
+}
+.ts-presence-rule {
+  grid-column: 11;
+}
+.ts-presence-me {
+  grid-column: 13;
+}
+
+.ts-presence-slot,
+.ts-presence-more,
+.ts-presence-me {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink);
+  height: 24px;
+  cursor: pointer;
+  transition: opacity var(--pt-dur-fast) var(--pt-ease-out);
+}
+
+.ts-presence-slot {
+  width: 24px;
+}
+
+.ts-presence-slot.is-empty {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* the followed chip gains a 2 px ring in the hue: an outline outside the edge border, no layout */
+.ts-presence-chip.is-following .ts-chip {
+  outline: 1px solid var(--ts-hue, var(--pt-ink));
+  outline-offset: 1px;
+}
+
+.ts-presence-chip:focus-visible,
+.ts-presence-more:focus-visible,
+.ts-presence-me:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: 1px;
+}
+
+/* the +N chip: 32 by 24, an edge border, twelve pixel tabular figures; empty until a fifth joins */
+.ts-presence-more {
+  width: 32px;
+  border: 1px solid var(--pt-edge);
+  font: 500 12px/1 var(--pt-display);
+  font-feature-settings: 'cv11', 'ss01', 'tnum';
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-presence-more:hover {
+  border-color: var(--pt-ink);
+}
+
+.ts-presence-count {
+  min-width: 20px;
+  text-align: center;
+}
+
+.ts-presence-rule {
+  width: 1px;
+  height: 24px;
+  background: var(--pt-hair);
+}
+
+.ts-presence-me {
+  width: 24px;
+}
+
+/* ---- the roster and the account plates (11 6.2, 8 P12) ---- */
+.ts-plate-menu {
+  position: fixed;
+  z-index: 30;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  font: 13px/1.3 var(--pt-text);
+  outline: none;
+  animation: pt-fade-in var(--pt-dur-fast) var(--pt-ease-out) both;
+}
+
+/* ten 32 px rows, then the region scrolls with its gutter reserved */
+.ts-plate-menu-rows {
+  max-height: 320px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+
+.ts-roster-row {
+  appearance: none;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 32px;
+  margin: 0;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-roster-row.is-plain {
+  grid-template-columns: minmax(0, 1fr);
+  height: 28px;
+}
+
+.ts-roster-row:hover,
+.ts-roster-row:focus-visible {
+  background: var(--pt-plate, var(--pt-paper-2, rgba(7, 7, 7, 0.06)));
+  outline: none;
+}
+
+.ts-roster-row.is-stub {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+.ts-roster-row.is-stub:hover {
+  background: none;
+}
+
+.ts-roster-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ts-roster-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-roster-trust,
+.ts-roster-meta {
+  color: var(--pt-ink-2);
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-roster-act {
+  color: var(--pt-ink-2);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.ts-roster-row.is-following .ts-roster-act {
+  color: var(--pt-ink);
+}
+
+.ts-roster-foot .ts-menu-divider,
+.ts-account-row-wrap .ts-menu-divider {
+  display: block;
+  height: 1px;
+  margin: 4px 0;
+  background: var(--pt-hair-soft);
+}
+
+.ts-account-head {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding: 6px 10px 8px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  margin-bottom: 4px;
+}
+
+.ts-account-words {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ts-account-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-account-sentence {
+  color: var(--pt-ink-2);
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---- the Following plate (11 6.3, 8 P4): 240 by 24, ink, over the stage ---- */
+.ts-following-plate {
+  position: absolute;
+  top: var(--ts-following-top, 8px);
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  width: var(--ts-following-w, 240px);
+  height: var(--ts-following-h, 24px);
+  margin-left: calc(var(--ts-following-w, 240px) / -2);
+  padding: 0 8px;
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  border: 1px solid var(--pt-paper);
+  font: 500 13px/1 var(--pt-text);
+  animation: pt-fade-in var(--pt-dur-toast) var(--pt-ease-out) both;
+  pointer-events: auto;
+}
+
+.ts-following-plate .ts-chip {
+  border-color: var(--pt-paper);
+  background: var(--pt-ink);
+}
+
+.ts-following-plate .ts-chip-plate,
+.ts-following-plate .ts-chip-initials {
+  fill: var(--pt-paper);
+}
+
+.ts-following-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-following-stop {
+  appearance: none;
+  margin: 0;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  color: var(--pt-paper);
+  font: 500 13px/1 var(--pt-text);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ts-following-stop:focus-visible {
+  outline: 1px solid var(--pt-paper);
+  outline-offset: 1px;
+}
+
+/* ---- the flags, outlines, carets and pointers of the overlay (11 6.5 to 6.7) ---- */
+.ts-flag {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  width: var(--ts-flag-w, 120px);
+  height: var(--ts-flag-h, 18px);
+  padding: 0 6px;
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+  border: 1px solid var(--pt-paper);
+  font: 500 13px/1 var(--pt-text);
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+  transition: opacity var(--pt-dur-toast) var(--pt-ease-out);
+}
+
+.ts-flag .ts-chip {
+  border-color: var(--pt-paper);
+  background: var(--pt-ink);
+}
+
+.ts-flag .ts-chip-plate,
+.ts-flag .ts-chip-initials {
+  fill: var(--pt-paper);
+}
+
+.ts-flag-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-flag.is-faded {
+  opacity: 0;
+}
+
+.ts-remote-outline {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid var(--ts-hue, var(--pt-ink));
+  pointer-events: none;
+}
+
+.ts-remote-outline.is-agent {
+  border-style: dashed;
+  border-color: var(--pt-ink);
+}
+
+.ts-remote-caret {
+  position: absolute;
+  width: 2px;
+  background: var(--ts-hue, var(--pt-ink));
+  pointer-events: none;
+  transition: opacity var(--pt-dur-toast) var(--pt-ease-out);
+}
+
+.ts-remote-caret.is-dim {
+  opacity: 0.5;
+}
+
+.ts-remote-pointer-group {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  transition: transform var(--ts-pointer-ms, 80ms) linear;
+  will-change: transform;
+}
+
+.ts-remote-pointer {
+  display: block;
+  overflow: visible;
+}
+
+.ts-remote-pointer-outer {
+  fill: none;
+  stroke: var(--ts-halo-out, #ffffff);
+  stroke-width: 3;
+  stroke-linejoin: round;
+}
+
+.ts-remote-pointer-inner {
+  fill: none;
+  stroke: var(--ts-halo-in, #070707);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+.ts-remote-pointer-fill {
+  fill: var(--ts-hue, var(--pt-ink));
+}
+
+/* ---- the announcements region: present at zero size, spoken only while on ---- */
+.ts-announce {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-plate-menu,
+  .ts-following-plate {
+    animation: none;
+  }
+
+  .ts-flag,
+  .ts-remote-caret,
+  .ts-remote-pointer-group,
+  .ts-presence-slot {
+    transition: none;
+  }
+}

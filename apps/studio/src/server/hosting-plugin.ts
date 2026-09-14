@@ -1,7 +1,7 @@
 import { definePlugin } from 'nitro';
 import { useStorage } from 'nitro/storage';
 
-import { vercelBlobClient } from '@turboslide/store/blob-vercel';
+import { layoutBlobClient } from '@turboslide/store/blob-vercel';
 import { registerHostingProviders } from '@turboslide/store/hosted';
 import { keyValueSeed } from '@turboslide/store/seed';
 import { hasBlobToken } from '@turboslide/store/select';
@@ -35,6 +35,8 @@ export default definePlugin(() => {
       getKeys: (base) => packages.getKeys(base),
       getItemRaw: (key) => packages.getItemRaw(key),
     }),
-    blob: hasBlobToken(process.env) ? () => Promise.resolve(vercelBlobClient(process.env)) : null,
+    // layout v2 through the split client when TURBOSLIDE_BLOB_PRIVATE_TOKEN is set, the public
+    // client alone otherwise (gslides-parity SPEC-3 11.4; docs/hosting.md section 10; b2.md R9)
+    blob: hasBlobToken(process.env) ? () => Promise.resolve(layoutBlobClient(process.env)) : null,
   });
 });

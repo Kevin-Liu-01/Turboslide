@@ -18,3 +18,16 @@
   font-display: swap;
   src: url('../assets/InterVariable-Italic.woff2') format('woff2');
 }
+/* The metric matched fallback (gslides-parity SPEC-3 9.2 G1; research-3 05 section 4 rule 3):
+   Arial adjusted to Inter's average advance and line box, so a first visit paints the sheet at
+   Inter's metrics before InterVariable.woff2 arrives and nothing moves when it does. The four
+   descriptors are computed by scripts/build-fonts.py (fonts.json `fallback`) and pinned by
+   inter.test.ts; a font stack places 'Inter Fallback' right after 'Inter'. */
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Arial');
+  size-adjust: 107.4724%;
+  ascent-override: 90.1394%;
+  descent-override: 22.444%;
+  line-gap-override: 0%;
+}

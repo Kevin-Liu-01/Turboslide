@@ -40,6 +40,17 @@ export const DESTRUCTIVE_ACTIONS: ReadonlySet<ActionId> = new Set<ActionId>([
   'table.merge',
   'text.case',
   'chart.setKind',
+  // the parity round three (gslides-parity SPEC-3 12): a comment is tombstoned, links and grants
+  // die, the published URL answers 410, the anonymous identity is replaced, storage moves, an
+  // owner is set over a record
+  'comment.delete',
+  'share.stop',
+  'share.remove',
+  'share.revokeLink',
+  'deck.unpublish',
+  'account.forget',
+  'admin.migrateStorage',
+  'admin.assignOwner',
 ]);
 
 export type ToolEntry = {

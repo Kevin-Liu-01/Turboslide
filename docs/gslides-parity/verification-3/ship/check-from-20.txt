@@ -1,0 +1,128 @@
+check: starting the studio dev server on 4321 (log capped in .turboslide/dev-server.log)
+check: warmed /deck/gt-brand and /edit/gt-brand and /new and /decks with 1296 client module(s) in 7.1 s
+check 20/28: node scripts/gslides-parity-audit.mjs --base http://localhost:4321 --out docs/gslides-parity/verification-3/parity-audit.json
+audit: http://localhost:4321 (local), commit a1dcc7e
+audit: scratch deck untitled-20260914-s1bk
+audit: role viewer: 78 rows rendered, 232 absent by role
+audit: role commenter: 89 rows rendered, 221 absent by role
+audit: tooltip audit
+audit: read-only walk of /edit/gt-brand
+firstOpen                    pass   12  fail   0  skip   0
+defaultViewWords             pass   43  fail   0  skip   0
+toolbar:new                  pass    1  fail   0  skip   0
+presence:scratch             pass    2  fail   0  skip   0
+rows:scratch                 pass  302  fail   1  skip  59
+contextMenu:scratch          pass    2  fail   0  skip   0
+effects:scratch              pass  142  fail   1  skip 121
+effects:twoSlides            pass    5  fail   0  skip   1
+shortcuts:scratch            pass   28  fail   0  skip   0
+retiredKeys:scratch          pass   14  fail   0  skip   0
+toolbar:scratch              pass    5  fail   0  skip   0
+rows:textBlock               pass  329  fail   0  skip  34
+contextMenu:textBlock        pass    1  fail   0  skip   0
+effects:textBlock            pass   15  fail   0  skip   3
+effects:textBlock2           pass   18  fail   1  skip   0
+pickers:objects              pass   10  fail   0  skip   0
+shortcuts:text               pass    7  fail   0  skip   0
+formatOptions:objects        pass    6  fail   0  skip   0
+rows:shape                   pass  328  fail   0  skip  34
+contextMenu:objects          pass    6  fail   0  skip   1
+effects:shape                pass   23  fail   0  skip   0
+shortcuts:objects            pass    0  fail   4  skip   0
+effects:line                 pass    4  fail   1  skip   0
+rows:image                   pass  328  fail   0  skip  34
+effects:image                pass    3  fail   0  skip   0
+toolbar:objects              pass    1  fail   0  skip   0
+effects:chart                pass    2  fail   0  skip   0
+rows:objects                 pass    4  fail   0  skip   0
+effects:objects              pass    3  fail   0  skip   0
+contextMenu:coversSheet      pass    1  fail   0  skip   0
+versions:scratch             pass    1  fail   0  skip   1
+dither:scratch               pass    6  fail   0  skip   0
+roles:scratch                pass   19  fail   0  skip   0
+rows:scratch:viewer          pass  320  fail   0  skip   1
+rows:scratch:commenter       pass  320  fail   0  skip   1
+tooltipAudit                 pass    1  fail   0  skip   0
+titleRow:gt-brand            pass    2  fail   0  skip   0
+rows:gt-brand                pass  302  fail   0  skip  60
+toolbar:gt-brand             pass    1  fail   0  skip   0
+contextMenu:gt-brand         pass    1  fail   0  skip   0
+retiredKeys:gt-brand         pass   14  fail   0  skip   0
+rows:decks                   pass    1  fail   0  skip   0
+rows on scratch:
+  title        now 61/62 (1 unreachable)  later 6/6  omit 6/6
+  file         now 87/87 (0 unreachable)  later 14/14  omit 6/6
+  edit         now 35/35 (0 unreachable)  later 0/0  omit 0/0
+  view         now 117/117 (0 unreachable)  later 3/3  omit 2/2
+  insert       now 112/112 (4 unreachable)  later 12/12  omit 7/7
+  format       now 258/258 (33 unreachable)  later 7/7  omit 0/0
+  slide        now 38/38 (0 unreachable)  later 6/6  omit 0/0
+  arrange      now 62/62 (18 unreachable)  later 0/0  omit 0/0
+  tools        now 56/56 (0 unreachable)  later 7/7  omit 8/8
+  extensions   now 8/8 (0 unreachable)  later 0/0  omit 6/6
+  help         now 14/14 (0 unreachable)  later 0/0  omit 4/4
+rows on textBlock:
+  arrange      now 25/25 (2 unreachable)  later 0/0  omit 0/0
+  title        now 20/20 (1 unreachable)  later 2/2  omit 6/6
+  file         now 29/29 (0 unreachable)  later 6/6  omit 6/6
+  edit         now 11/11 (0 unreachable)  later 0/0  omit 0/0
+  view         now 39/39 (0 unreachable)  later 1/1  omit 2/2
+  insert       now 34/34 (4 unreachable)  later 4/4  omit 7/7
+  format       now 77/77 (24 unreachable)  later 1/1  omit 0/0
+  slide        now 12/12 (0 unreachable)  later 2/2  omit 0/0
+  tools        now 18/18 (0 unreachable)  later 3/3  omit 8/8
+  extensions   now 2/2 (0 unreachable)  later 0/0  omit 6/6
+  help         now 4/4 (0 unreachable)  later 0/0  omit 4/4
+rows on shape:
+  title        now 20/20 (1 unreachable)  later 2/2  omit 6/6
+  file         now 29/29 (0 unreachable)  later 6/6  omit 6/6
+  edit         now 11/11 (0 unreachable)  later 0/0  omit 0/0
+  view         now 39/39 (0 unreachable)  later 1/1  omit 2/2
+  insert       now 34/34 (4 unreachable)  later 4/4  omit 7/7
+  format       now 77/77 (24 unreachable)  later 1/1  omit 0/0
+  slide        now 12/12 (0 unreachable)  later 2/2  omit 0/0
+  arrange      now 24/24 (2 unreachable)  later 0/0  omit 0/0
+  tools        now 18/18 (0 unreachable)  later 3/3  omit 8/8
+  extensions   now 2/2 (0 unreachable)  later 0/0  omit 6/6
+  help         now 4/4 (0 unreachable)  later 0/0  omit 4/4
+rows on image:
+  title        now 20/20 (1 unreachable)  later 2/2  omit 6/6
+  file         now 29/29 (0 unreachable)  later 6/6  omit 6/6
+  edit         now 11/11 (0 unreachable)  later 0/0  omit 0/0
+  view         now 39/39 (0 unreachable)  later 1/1  omit 2/2
+  insert       now 34/34 (4 unreachable)  later 4/4  omit 7/7
+  format       now 77/77 (24 unreachable)  later 1/1  omit 0/0
+  slide        now 12/12 (0 unreachable)  later 2/2  omit 0/0
+  arrange      now 24/24 (2 unreachable)  later 0/0  omit 0/0
+  tools        now 18/18 (0 unreachable)  later 3/3  omit 8/8
+  extensions   now 2/2 (0 unreachable)  later 0/0  omit 6/6
+  help         now 4/4 (0 unreachable)  later 0/0  omit 4/4
+rows on objects:
+  view         now 3/3 (0 unreachable)  later 0/0  omit 0/0
+  context      now 1/1 (0 unreachable)  later 0/0  omit 0/0
+rows on gt-brand:
+  title        now 19/19 (2 unreachable)  later 2/2  omit 6/6
+  file         now 29/29 (0 unreachable)  later 6/6  omit 6/6
+  edit         now 11/11 (0 unreachable)  later 0/0  omit 0/0
+  view         now 39/39 (0 unreachable)  later 1/1  omit 2/2
+  insert       now 34/34 (4 unreachable)  later 4/4  omit 7/7
+  format       now 68/68 (33 unreachable)  later 1/1  omit 0/0
+  slide        now 12/12 (0 unreachable)  later 2/2  omit 0/0
+  arrange      now 8/8 (18 unreachable)  later 0/0  omit 0/0
+  tools        now 18/18 (0 unreachable)  later 3/3  omit 8/8
+  extensions   now 2/2 (0 unreachable)  later 0/0  omit 6/6
+  help         now 4/4 (0 unreachable)  later 0/0  omit 4/4
+rows on decks:
+  title        now 1/1 (0 unreachable)  later 0/0  omit 0/0
+audit: 2633 pass, 8 fail, 350 skipped in 1120 s; report docs/gslides-parity/verification-3/parity-audit.json
+  FAIL rows:scratch title.account.signIn: no [data-menu-item] rendered on its path
+  FAIL effects:scratch insert.comment: no comment card opened; snackbar ""
+  FAIL effects:textBlock2 format.dropShadow: Format options opened; section shadow absent
+  FAIL shortcuts:objects key.rotate.right15: revision 193 -> null; rotate 0 -> 15; the slide converted in the same write
+  FAIL shortcuts:objects key.rotate.left1: could not select audit-shape
+  FAIL shortcuts:objects key.nudge.right1: could not select audit-shape
+  FAIL shortcuts:objects key.nudge.down10: could not select audit-shape
+  FAIL effects:line format.bordersLines.lineStart.fillCircle: no write (revision 193); snackbar "baseRevision 193 is stale; the document is at revision 194"
+check 20/28: FAIL exit 1 after 1121.0 s
+check: dev server stopped
+check: stopped after a failure (1143.1 s)

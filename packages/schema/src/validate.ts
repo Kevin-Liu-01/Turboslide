@@ -17,7 +17,9 @@ import type { Severity } from './findings.ts';
 import type { SlideId } from './ids.ts';
 import { isRecord, migrate } from './migrations.ts';
 import { getAt, joinPointer, setAt } from './pointer.ts';
-import { SLIDE_LINK_KEYWORDS, canonicalText, slideLinksOf } from './text.ts';
+import { DITHER_NO_SOURCE_MESSAGE } from './blocks/dither.ts';
+import { hasContinuousSource } from './assets.ts';
+import { SLIDE_LINK_KEYWORDS, canonicalText, refusedLinksOf, slideLinksOf } from './text.ts';
 
 export type IssueCode =
   | 'not_object'
@@ -36,8 +38,10 @@ export type IssueCode =
   | 'position'
   /** a table over 20 by 20, or a row without one cell per column (gslides-parity SPEC 7.3) */
   | 'table_size'
-  /** a block link on a grammar text block, or a slide link whose slide is not in the deck (SPEC 7.2.7, 7.2.8) */
+  /** a block link on a grammar text block, a slide link whose slide is not in the deck (SPEC 7.2.7, 7.2.8), or a run link outside https, http, mailto, tel and the slide link forms (SPEC-3 8.4) */
   | 'link'
+  /** a block dither over an asset that carries a two tone treatment and no continuous source (gslides-parity SPEC-3 10.1) */
+  | 'dither'
   /** a chart over 12 categories or 6 series, a ragged series, or a pie with several (gslides-parity SPEC-2 2.8.1) */
   | 'chart_size'
   /** a connector attached to a block that is missing, unpositioned or a line, a site out of range, or an end off its site (SPEC-2 2.4.7) */
@@ -342,7 +346,40 @@ function normalizeSlide(slide: Slide, file: string, issues: Issue[]): void {
     });
   }
   checkConnectors(slide, file, issues);
+  checkRunLinks(slide, file, issues);
   canonicalizeSlideText(slide);
+}
+
+/**
+ * Every run link of the slide's Texts carries an allowed scheme (gslides-parity SPEC-3 8.4 layer
+ * 3, 0.27): https, http, mailto, tel or a slide link form. Severity 3, so a `javascript:` or
+ * `data:` link never reaches a stored file; the block level `link` is refused by its schema.
+ */
+function checkRunLinks(slide: Slide, file: string, issues: Issue[]): void {
+  const refuse = (pointer: string, url: string): void => {
+    issues.push(
+      issue(
+        'link',
+        3,
+        file,
+        pointer,
+        `The link ${JSON.stringify(url)} is refused: a link is https:, http:, mailto:, tel: or a slide link (#s/<id>, #next, #previous, #first, #last) (gslides-parity SPEC-3 8.4)`,
+      ),
+    );
+  };
+  for (const path of SLIDE_KIND_CATALOG[slide.kind].textPaths) {
+    const value = getAt(slide, path);
+    if (typeof value === 'string') for (const url of refusedLinksOf(value)) refuse(path, url);
+  }
+  for (const list of blockLists(slide)) {
+    walkBlocks(list.blocks, list.pointer, (block, pointer) => {
+      for (const path of blockTextPaths(block)) {
+        const value = getAt(block, path);
+        if (typeof value === 'string')
+          for (const url of refusedLinksOf(value)) refuse(`${pointer}${path}`, url);
+      }
+    });
+  }
 }
 
 /**
@@ -792,6 +829,22 @@ export function validateDeck(input: unknown): ValidationResult {
                   file,
                   `${pointer}${ref.path}`,
                   `Asset "${ref.assetId}" is not in deck.json`,
+                ),
+              );
+            }
+          }
+          // a block dither needs a continuous source: the committed two tone twins cannot be
+          // re-toned (gslides-parity SPEC-3 10.1); asset.add --replace-source attaches one
+          if ((block.type === 'picture' || block.type === 'shot') && block.dither !== undefined) {
+            const asset = deck.assets[block.asset];
+            if (asset !== undefined && !hasContinuousSource(asset)) {
+              issues.push(
+                issue(
+                  'dither',
+                  3,
+                  file,
+                  `${pointer}/dither`,
+                  `Block "${block.id}" dithers asset "${asset.id}": ${DITHER_NO_SOURCE_MESSAGE}`,
                 ),
               );
             }

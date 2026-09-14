@@ -1,0 +1,29 @@
+{
+  "deck": "gt-brand",
+  "slideId": "books-and-templates",
+  "template": "split",
+  "source": "docs/gslides-parity/verification-2/canvas-walk.mjs (Chromium, the editor, hidden 1x sheet)",
+  "objects": {
+    "h": {
+      "x": 137,
+      "y": 129,
+      "w": 1326,
+      "h": 48.390625,
+      "z": 0
+    },
+    "p1": {
+      "x": 137,
+      "y": 195.390625,
+      "w": 1326,
+      "h": 66,
+      "z": 1
+    },
+    "pair": {
+      "x": 137,
+      "y": 297.640625,
+      "w": 1326,
+      "h": 469.09375,
+      "z": 2
+    }
+  }
+}

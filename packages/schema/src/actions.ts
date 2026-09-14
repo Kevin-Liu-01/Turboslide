@@ -6,6 +6,18 @@
 // baseRevision and rejects a stale one with 409 and the current document.
 import { z } from 'zod';
 import {
+  FLAG_NAMES,
+  REQUEST_ACCESS_ANSWER,
+  SCOPES,
+  accessRecordSchema,
+  accessRequestSchema,
+  capabilitySchema,
+  grantRoleSchema,
+  grantWhoSchema,
+  roleSchema,
+  viaSchema,
+} from './access.ts';
+import {
   assetMetricsSchema,
   assetSchema,
   assetSourceSchema,
@@ -14,6 +26,23 @@ import {
   ASSET_ROLES,
 } from './assets.ts';
 import { AUTOFITS, SHAPE_KINDS, blockSchema, shadowSchema } from './blocks.ts';
+import {
+  DITHER_CELLS,
+  DITHER_PATTERNS,
+  DITHER_TONES,
+  pictureDitherSchema,
+} from './blocks/dither.ts';
+import {
+  anchorResolutionSchema,
+  commentAnchorSchema,
+  commentBodySchema,
+  commentOpSchema,
+  emojiSchema,
+  mentionSchema,
+  principalIdSchema,
+  threadIdSchema,
+  threadSchema,
+} from './comments.ts';
 import { CHART_KINDS, chartSeriesSchema } from './blocks/chart.ts';
 import { materialCatalogEntrySchema, materialUniformsSchema } from './blocks/material.ts';
 import { cellBorderSchema } from './blocks/table.ts';
@@ -35,7 +64,13 @@ import { exportCheckSchema, exportReportSchema } from './export.ts';
 import { findingSchema } from './findings.ts';
 import { ALIGN_EDGES, ALIGN_TARGETS, DISTRIBUTE_AXES, ORDER_MOVES } from './freeform.ts';
 import { blockIdSchema, slugSchema } from './ids.ts';
-import { leaseSchema, mutationSchema, versionSchema } from './mutations.ts';
+import {
+  MUTATION_OPS,
+  authorSchema,
+  leaseSchema,
+  mutationSchema,
+  versionSchema,
+} from './mutations.ts';
 import { positionObjectSchema } from './position.ts';
 import { renderRecordSchema } from './render.ts';
 import { RULE_IDS } from './rules.ts';
@@ -53,10 +88,16 @@ export type Transport = 'cli' | 'mcp' | 'http' | 'window';
 export const TRANSPORTS = ['cli', 'mcp', 'http', 'window'] as const;
 export const ALL_TRANSPORTS: ReadonlyArray<Transport> = TRANSPORTS;
 
-/** M1 to M6 are the first six milestones; GS1 and GS2 are the Google Slides parity rounds (docs/gslides-parity). */
-export type Milestone = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1' | 'GS2';
+/** M1 to M6 are the first six milestones; GS1, GS2 and GS3 are the Google Slides parity rounds (docs/gslides-parity). */
+export type Milestone = 'M1' | 'M2' | 'M3' | 'M4' | 'M5' | 'M6' | 'GS1' | 'GS2' | 'GS3';
 
-/** The palette groups (SPEC 6.1) and the docs sections. */
+/** The milestones in landing order, for the manifest's "expected here" answer. */
+export const MILESTONES = ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'GS1', 'GS2', 'GS3'] as const;
+
+/**
+ * The palette groups (SPEC 6.1) and the docs sections; presence, sync, comment, share, account and
+ * admin are round three's (gslides-parity SPEC-3 12).
+ */
 export type ActionGroup =
   | 'deck'
   | 'slide'
@@ -67,7 +108,32 @@ export type ActionGroup =
   | 'version'
   | 'export'
   | 'view'
-  | 'studio';
+  | 'studio'
+  | 'presence'
+  | 'sync'
+  | 'comment'
+  | 'share'
+  | 'account'
+  | 'admin';
+
+export const ACTION_GROUPS = [
+  'deck',
+  'slide',
+  'block',
+  'asset',
+  'render',
+  'lint',
+  'version',
+  'export',
+  'view',
+  'studio',
+  'presence',
+  'sync',
+  'comment',
+  'share',
+  'account',
+  'admin',
+] as const satisfies ReadonlyArray<ActionGroup>;
 
 export type ActionCli = {
   /** The documented command; `<name>` tokens are positionals named after input keys. */
@@ -202,9 +268,103 @@ export const ACTION_IDS = [
   'control.activate',
   'control.set',
   'artifact.download',
+  // the Google Slides parity round three (gslides-parity SPEC-3 12): 64 actions, counted once here
+  'presence.list',
+  'presence.follow',
+  'presence.unfollow',
+  'presence.pointer',
+  'sync.status',
+  'deck.watch',
+  'deck.follow',
+  'comment.add',
+  'comment.reply',
+  'comment.edit',
+  'comment.delete',
+  'comment.resolve',
+  'comment.reopen',
+  'comment.assign',
+  'comment.done',
+  'comment.react',
+  'comment.list',
+  'comment.get',
+  'comment.link',
+  'notification.list',
+  'notification.markRead',
+  'notification.settings',
+  'activity.list',
+  'version.diff',
+  'share.get',
+  'share.setGeneralAccess',
+  'share.createLink',
+  'share.revokeLink',
+  'share.rotateLink',
+  'share.stop',
+  'share.invite',
+  'share.setRole',
+  'share.remove',
+  'share.setExpiry',
+  'share.settings',
+  'share.requestAccess',
+  'share.listRequests',
+  'share.respond',
+  'share.transferOwnership',
+  'share.acceptOwnership',
+  'share.declineOwnership',
+  'share.claim',
+  'share.emailCollaborators',
+  'deck.publish',
+  'deck.unpublish',
+  'account.decks',
+  'account.tokens.create',
+  'account.tokens.list',
+  'account.tokens.revoke',
+  'account.me',
+  'account.setName',
+  'account.setAvatar',
+  'account.sessions',
+  'account.signOut',
+  'account.forget',
+  'admin.bootstrap',
+  'admin.assignOwner',
+  'admin.flag',
+  'admin.migrateStorage',
+  'admin.mail.list',
+  'picture.dither',
+  'picture.materialize',
+  'slide.setBackgroundPicture',
+  'slide.setBackgroundMaterial',
 ] as const;
 
 export type ActionId = (typeof ACTION_IDS)[number];
+
+/** The 64 ids round three added (gslides-parity SPEC-3 12, 0.40), in table order. */
+export const GS3_ACTION_IDS = ACTION_IDS.slice(ACTION_IDS.indexOf('presence.list'));
+
+/**
+ * The round three writes with no revisioned record to base on (gslides-parity SPEC-3 12): page
+ * state (follow, pointer), the principal record (name, avatar, pointer, notification settings),
+ * the inbox (mark read), the identity store (tokens, sessions, bootstrap), a checkout mirror
+ * (deck.follow), the request list (request access) and the flags. Every other GS3 write names
+ * the document's, the comments' or the access record's revision.
+ */
+export const NO_REVISION_WRITES: ReadonlySet<ActionId> = new Set<ActionId>([
+  'presence.follow',
+  'presence.unfollow',
+  'presence.pointer',
+  'deck.follow',
+  'notification.markRead',
+  'notification.settings',
+  'share.requestAccess',
+  'account.tokens.create',
+  'account.tokens.revoke',
+  'account.setName',
+  'account.setAvatar',
+  'account.signOut',
+  'account.forget',
+  'admin.bootstrap',
+  'admin.flag',
+  'admin.migrateStorage',
+]);
 
 // ---------------------------------------------------------------------------------------------
 // Shared pieces
@@ -342,6 +502,10 @@ export const deckHeadSchema = z.strictObject({
   createdAt: z.string(),
   /** set when the deck is in the trash; such rows appear only with includeTrashed */
   trashedAt: z.string().optional(),
+  /** the owner's principal id, null for an unowned deck (gslides-parity SPEC-3 6.7); absent on a checkout */
+  owner: z.string().nullable().optional(),
+  /** the caller's role on the deck (SPEC-3 6.7); absent on a checkout, where every deck is owned */
+  role: roleSchema.optional(),
 });
 
 const deckTrashState = z.strictObject({
@@ -447,6 +611,266 @@ export const bundleUnpackResultSchema = z.strictObject({
   renamed: z.boolean(),
   counts: bundleCounts,
 });
+
+// ---------------------------------------------------------------------------------------------
+// The shared pieces of round three (gslides-parity SPEC-3 12): presence, sync, comments,
+// notifications, activity, the access record's answers, accounts, admin and the dither
+
+/** The comments revision, the sidecar's own counter (SPEC-3 5.2). */
+const commentsRevision = z
+  .number()
+  .int()
+  .nonnegative()
+  .describe('The comments revision after the write, the number comment.list { since } takes');
+
+/** A thread and the revision it landed at: what every comment write answers. */
+export const threadResultSchema = z.strictObject({
+  thread: threadSchema,
+  commentsRevision,
+});
+
+/** A thread with its anchor resolved against the current document (SPEC-3 5.1). */
+export const placedThreadSchema = threadSchema.extend({
+  placement: anchorResolutionSchema.describe('Where the anchor lands on the document now'),
+});
+
+export const commentListResultSchema = z.strictObject({
+  threads: z.array(placedThreadSchema),
+  commentsRevision,
+  total: z.number().int().nonnegative().describe('Threads matching before the limit'),
+});
+
+/** The comment anchor grammar of SPEC-3 5.9, parsed by the CLI into a CommentAnchor. */
+const anchorInput = commentAnchorSchema.describe(
+  'deck, slide:<id>, <slide>#<block>, <slide>#<block>/<path>:<start>-<end>, <slide>#<block>/cell:<r>,<c> or notes:<slide> on the CLI; the anchor object elsewhere',
+);
+
+/** The inbox record kinds (SPEC-3 5.5). */
+export const NOTIFICATION_KINDS = [
+  'mention',
+  'reply',
+  'assigned',
+  'resolved',
+  'reopened',
+  'reaction',
+  'accessRequest',
+  'granted',
+  'versionNamed',
+  'comment',
+] as const;
+export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
+
+export const notificationSchema = z.strictObject({
+  id: z.string().min(1),
+  principalId: principalIdSchema,
+  kind: z.enum(NOTIFICATION_KINDS),
+  deckId: slugSchema,
+  threadId: threadIdSchema.optional(),
+  slideId: slugSchema.optional(),
+  /** The principals that caused the record, newest first, coalesced inside the 15 minute window. */
+  actors: z.array(principalIdSchema),
+  count: z.number().int().positive(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  readAt: z.string().optional(),
+});
+
+/** Google's three per file levels (SPEC-3 5.5): All comments, Comments for you, None. */
+export const NOTIFICATION_LEVELS = ['all', 'forYou', 'none'] as const;
+export type NotificationLevel = (typeof NOTIFICATION_LEVELS)[number];
+
+export const notificationSettingsSchema = z.strictObject({
+  level: z.enum(NOTIFICATION_LEVELS),
+  email: z.boolean().describe('Email digests for a signed in grant holder'),
+  activityForCommenters: z
+    .boolean()
+    .describe('The owner lets commenters read the Activity panel (SPEC-3 5.7)'),
+});
+
+/** The activity feed's event kinds (SPEC-3 5.7). */
+export const ACTIVITY_KINDS = [
+  'version',
+  'comment',
+  'share',
+  'request',
+  'role',
+  'rename',
+  'restore',
+  'named',
+  'export',
+  'import',
+  'trash',
+] as const;
+export type ActivityKind = (typeof ACTIVITY_KINDS)[number];
+
+export const activityEventSchema = z.strictObject({
+  id: z.string().min(1),
+  at: z.string(),
+  kind: z.enum(ACTIVITY_KINDS),
+  actor: principalIdSchema.optional(),
+  deckId: slugSchema,
+  slideId: slugSchema.optional(),
+  threadId: threadIdSchema.optional(),
+  revision: revision.optional(),
+  /** One plain sentence, "Maya named version 12". */
+  summary: z.string(),
+  data: z.record(z.string(), z.unknown()).optional(),
+});
+
+/** The identity's trust state and mark (SPEC-3 0.19, 4.1; the identity package draws the mark). */
+export const TRUSTS = ['label', 'guest', 'verified', 'agent'] as const;
+export type Trust = (typeof TRUSTS)[number];
+const trust = z.enum(TRUSTS);
+const markSpec = z
+  .record(z.string(), z.unknown())
+  .describe('The computed MarkSpec of @turboslide/identity, the same mark a person sees');
+
+/** One roster entry (SPEC-3 4.11; 11 7.3). */
+export const participantSchema = z.strictObject({
+  clientId: z.string().min(1),
+  principalId: principalIdSchema,
+  kind: z.enum(['human', 'agent']),
+  label: z.string(),
+  trust,
+  mark: markSpec,
+  role: roleSchema.optional(),
+  slideId: slugSchema.optional(),
+  selection: z
+    .strictObject({
+      blockIds: z.array(blockIdSchema).max(64),
+      caret: z
+        .strictObject({
+          blockId: blockIdSchema,
+          path: z.string(),
+          range: z.tuple([z.number().int().nonnegative(), z.number().int().nonnegative()]),
+        })
+        .optional(),
+    })
+    .optional(),
+  pointer: z.strictObject({ x: z.number(), y: z.number() }).optional(),
+  following: z.string().optional().describe('The clientId this participant follows'),
+  presenting: z.boolean(),
+  idle: z.boolean(),
+  lastSeenAt: z.string(),
+});
+
+export const presenceListResultSchema = z.strictObject({
+  deckId: slugSchema,
+  cap: z.literal(20).describe('Live pointers publish for the first 20 clients by join order'),
+  pointersVisible: z.boolean(),
+  self: participantSchema,
+  others: z.array(participantSchema),
+});
+
+/** The realtime tiers and transports (SPEC-3 2.5, 3.10). */
+export const SYNC_TIERS = ['memory', 'redis', 'blob'] as const;
+export const SYNC_TRANSPORTS = ['sse', 'poll', 'file'] as const;
+
+export const syncStatusSchema = z.strictObject({
+  seq: z.number().int().nonnegative().describe('The last stream entry this client saw'),
+  revision,
+  pending: z.number().int().nonnegative().describe('Sent or about to be sent, not in the stream'),
+  retained: z.number().int().nonnegative().describe('In the stream, not yet in a checkpoint'),
+  tier: z.enum(SYNC_TIERS),
+  transport: z.enum(SYNC_TRANSPORTS),
+  connected: z.boolean(),
+});
+
+const shareLinkView = z.strictObject({
+  id: z.string(),
+  role: grantRoleSchema,
+  label: z.string().optional(),
+  createdAt: z.string(),
+  expiresAt: z.string().nullable(),
+});
+
+/** A record as `share.get` answers it: tokens hashed; a viewer receives the partial view (SPEC-3 12). */
+export const shareGetResultSchema = z.strictObject({
+  record: accessRecordSchema
+    .partial()
+    .required({ deckId: true, owner: true, generalAccess: true })
+    .describe(
+      'The whole record for share holders; owner, generalAccess and the own grant for a viewer',
+    ),
+  role: roleSchema.nullable().describe("The caller's role, null without access"),
+  via: viaSchema.nullable(),
+  capabilities: z.array(capabilitySchema),
+});
+
+const recordResult = z.strictObject({ record: accessRecordSchema });
+
+export const shareLinkResultSchema = z.strictObject({
+  record: accessRecordSchema,
+  link: shareLinkView,
+  url: z.string().describe('The /s/<token> URL, shown once'),
+});
+
+export const INVITE_STATUSES = ['sent', 'queued', 'no-mail'] as const;
+
+/** The player and embed URLs of a published deck (SPEC-3 6.4). */
+export const publishResultSchema = z.strictObject({
+  record: accessRecordSchema,
+  url: z.string().describe('/deck/<id>?p=<token>&present=1, shown once'),
+  embed: z.string().describe('/embed/<id>?p=<token>, shown once'),
+});
+
+/**
+ * The principal as `account.me` reports it (SPEC-3 7.9; 11 7.3); `local` is the checkout's
+ * `local:<name>` principal the CLI derives from --author, never a hosted session.
+ */
+export const principalSchema = z.strictObject({
+  id: principalIdSchema,
+  kind: z.enum(['anonymous', 'account', 'agent', 'local']),
+  email: z.email().optional(),
+  admin: z.boolean(),
+});
+
+export const AVATAR_VARIANTS = ['initials', 'glyph', 'dither', 'picture'] as const;
+
+export const avatarChoiceSchema = z.strictObject({
+  variant: z.enum(AVATAR_VARIANTS),
+  initials: z.string().max(3).optional(),
+  salt: z.number().int().nonnegative().optional(),
+  /** The public store URL of the picture avatar, `u/<avatarKey>/...`. */
+  url: z.string().optional(),
+});
+
+export const sessionRecordSchema = z.strictObject({
+  id: z.string().min(1),
+  createdAt: z.string(),
+  lastSeenAt: z.string(),
+  current: z.boolean(),
+  userAgent: z.string().optional(),
+});
+
+export const meSchema = z.strictObject({
+  principal: principalSchema,
+  trust,
+  label: z.string().describe('The generated label or the typed name'),
+  name: z.string().optional().describe('The typed display name, when chosen'),
+  mark: markSpec,
+  avatar: avatarChoiceSchema.nullable(),
+  sessions: z.array(sessionRecordSchema).optional(),
+  /** The path of the PNG the CLI wrote for --avatar-png. */
+  avatarPng: z.string().optional(),
+});
+
+export const tokenRecordSchema = z.strictObject({
+  tokenId: z.string().min(1),
+  name: z.string(),
+  scopes: z.array(z.enum(SCOPES)),
+  createdAt: z.string(),
+  expiresAt: z.string().nullable(),
+  lastUsedAt: z.string().nullable(),
+});
+
+/** The storage migration steps (SPEC-3 11.5). */
+export const MIGRATION_STEPS = ['plan', 'copy', 'verify', 'cutover', 'delete', 'rollback'] as const;
+
+const studioUrl = z
+  .string()
+  .url()
+  .describe('The studio to talk to; the hosts.json default otherwise');
 
 const A = ALL_TRANSPORTS;
 const noWindow: ReadonlyArray<Transport> = ['cli', 'mcp', 'http'];
@@ -720,6 +1144,12 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .optional()
         .describe('Copy these slides only, in deck order; every slide when absent'),
       removeNotes: z.boolean().optional().describe('Leave the speaker notes out of the copy'),
+      copyComments: z
+        .boolean()
+        .optional()
+        .describe(
+          'Carry the comment threads into the copy with their ids; off by default (gslides-parity SPEC-3 5.8)',
+        ),
       baseRevision: baseRevision.describe(
         'The revision of the source deck the caller read; a stale value is rejected with 409',
       ),
@@ -738,7 +1168,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     }),
     cli: {
       usage:
-        'turboslide deck copy <id> --name <name> --id <newId> --slides <slideIds> --remove-notes',
+        'turboslide deck copy <id> --name <name> --id <newId> --slides <slideIds> --remove-notes --copy-comments',
     },
     mcp: 'deck_copy',
     example: { id: 'gt-brand', name: 'Copy of GT brand deck', baseRevision: 412 },
@@ -1389,12 +1819,23 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .describe('Run the two-tone pipeline; the source is kept as assets/<id>.source.<ext>'),
       treatment: twoToneParamsSchema.optional(),
       plate: plateSide.optional(),
+      upload: z
+        .string()
+        .optional()
+        .describe(
+          'Hosted: the key of a presigned client upload under uploads/<principalId>/ on the private store, for files over 3 MB (gslides-parity SPEC-3 0.29)',
+        ),
+      replaceSource: slugSchema
+        .optional()
+        .describe(
+          'Attach the file as the continuous source of this existing asset instead of adding one, so a block dither can re-tone its committed twins (SPEC-3 10.1)',
+        ),
       baseRevision,
     }),
     output: assetSchema,
     cli: {
       usage:
-        'turboslide asset add <file> --role <role> --alt <alt> --two-tone --black <black> --plate <plate>',
+        'turboslide asset add <file> --role <role> --alt <alt> --two-tone --black <black> --plate <plate> --replace-source <replaceSource>',
     },
     mcp: 'deck_asset_add',
     example: {
@@ -1440,12 +1881,20 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .boolean()
         .optional()
         .describe('Regenerate from the source where one exists and count the cells that differ'),
+      pattern: z
+        .enum(DITHER_PATTERNS)
+        .optional()
+        .describe(
+          'The threshold texture to regenerate the twins with; bayer8 unless set (SPEC-3 10.5)',
+        ),
+      cell: z.literal(DITHER_CELLS).optional().describe('Sheet pixels per cell; 2 unless set'),
+      tone: z.enum(DITHER_TONES).optional().describe('two, three or original; two unless set'),
       baseRevision,
     }),
     output: z.union([ditherResultSchema, z.array(ditherResultSchema)]),
     cli: {
       usage:
-        'turboslide asset dither <assetId> --gamma <gamma> --plate <plate> --all-two-tone --from-recorded --verify-cells',
+        'turboslide asset dither <assetId> --gamma <gamma> --plate <plate> --pattern <pattern> --cell <cell> --tone <tone> --all-two-tone --from-recorded --verify-cells',
     },
     mcp: 'deck_asset_dither',
     example: {
@@ -1913,6 +2362,12 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
         .boolean()
         .optional()
         .describe('Carry the speaker notes; left out by default (gslides-parity decision 15.2)'),
+      includeComments: z
+        .boolean()
+        .optional()
+        .describe(
+          'Write the comment threads as classic p:cm parts, editors and owners only; left out by default (gslides-parity SPEC-3 5.8)',
+        ),
       out: z.string().optional().describe('Output directory; defaults to .turboslide/export'),
       batch: z
         .strictObject({
@@ -1934,7 +2389,7 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       omit: ['batch', 'merge'],
 
       usage:
-        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --verify --out <out>',
+        'turboslide export <format> --mode <mode> --theme <theme> --fonts <fonts> --embed-fonts --exclude-share-alike --baseline-target <baseline> --include-skipped --include-notes --include-comments --verify --out <out>',
     },
     mcp: 'deck_export',
     example: { format: 'pptx', mode: 'flatten', theme: ['light'], fonts: 'exact', verify: true },
@@ -1982,13 +2437,22 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
       slideIds: slideIdsOrAll.optional().describe("A subset; defaults to 'all'"),
       includeNotes: z.boolean().optional().describe('Append each slide’s speaker notes'),
       includeSkipped: z.boolean().optional().describe('Include the skipped slides'),
+      includeComments: z
+        .boolean()
+        .optional()
+        .describe(
+          'Append each slide’s comment threads, for readers with readComments (SPEC-3 5.8)',
+        ),
     }),
     output: z.strictObject({
       text: z.string(),
       slides: z.number().int().nonnegative().describe('How many slides the text covers'),
       bytes: z.number().int().nonnegative(),
     }),
-    cli: { usage: 'turboslide export txt <slideIds> --include-notes --include-skipped' },
+    cli: {
+      usage:
+        'turboslide export txt <slideIds> --include-notes --include-skipped --include-comments',
+    },
     mcp: 'deck_export_text',
     example: { slideIds: 'all', includeNotes: true },
   }),
@@ -3108,6 +3572,1312 @@ export const ACTIONS: Readonly<Record<ActionId, ActionSpec>> = {
     input: z.strictObject({ fileName: z.string().min(1) }),
     output: z.null(),
     example: { fileName: 'gt-brand-light.pptx' },
+  }),
+
+  // -------------------------------------------------------------------------------------------
+  // Round three (gslides-parity SPEC-3 12). Every mutating row takes baseRevision (the
+  // document's, the comments revision or the access record's revision, as the doc says); every
+  // row runs on the file store, the tmp store and the Blob store through
+  // apps/cli/src/store-actions.ts; the author comes from the session or the token on the server.
+  // "Server side" means the window handler joins SERVER_SIDE_WINDOW_ACTIONS.
+
+  'presence.list': action({
+    id: 'presence.list',
+    label: 'Collaborators',
+    doc: 'The roster of the deck’s room with the computed mark, slide, selection, pointer and follow target per participant; server side on the window transport.',
+    group: 'presence',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: empty,
+    output: presenceListResultSchema,
+    cli: { usage: 'turboslide presence list' },
+    mcp: 'deck_list_presence',
+    example: {},
+  }),
+  'presence.follow': action({
+    id: 'presence.follow',
+    label: 'Follow',
+    doc: 'The attached page follows a client’s slide and scroll; refused for viewers, commenters, anonymous people and agents with Go to slide offered instead.',
+    group: 'presence',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ clientId: z.string().min(1) }),
+    output: z.strictObject({ following: z.string().nullable(), slideId: slugSchema.optional() }),
+    cli: { usage: 'turboslide presence follow <clientId>' },
+    mcp: 'deck_follow_client',
+    example: { clientId: 'c_01J8Z2K' },
+  }),
+  'presence.unfollow': action({
+    id: 'presence.unfollow',
+    label: 'Stop following',
+    doc: 'The attached page stops following.',
+    group: 'presence',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: empty,
+    output: z.strictObject({ following: z.null() }),
+    cli: { usage: 'turboslide presence unfollow' },
+    mcp: 'deck_unfollow',
+    example: {},
+  }),
+  'presence.pointer': action({
+    id: 'presence.pointer',
+    label: 'Live pointer',
+    doc: 'Turns the caller’s live pointer on or off, persisted on the principal record per deck.',
+    group: 'presence',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ on: z.boolean() }),
+    output: z.strictObject({ on: z.boolean() }),
+    cli: { usage: 'turboslide presence pointer --on' },
+    mcp: 'deck_set_pointer',
+    example: { on: true },
+  }),
+  'sync.status': action({
+    id: 'sync.status',
+    label: 'Sync status',
+    doc: 'The client’s position in the room: the last stream entry, the revision, the pending and retained counts, the tier, the transport and whether the stream is connected.',
+    group: 'sync',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: empty,
+    output: syncStatusSchema,
+    cli: { usage: 'turboslide sync status' },
+    mcp: 'deck_sync_status',
+    example: {},
+  }),
+  'deck.watch': action({
+    id: 'deck.watch',
+    label: 'Watch',
+    doc: 'Long polls for the checkpoints and comment entries since a revision, the polling form for a transport without a stream; answers at once when something is newer, else at the timeout.',
+    group: 'sync',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      since: revision
+        .optional()
+        .describe('The revision the caller holds; the current one when absent'),
+      timeoutMs: z
+        .number()
+        .int()
+        .min(0)
+        .max(30_000)
+        .optional()
+        .describe('How long to wait for a change; 25,000 unless set'),
+    }),
+    output: z.strictObject({
+      since: revision,
+      revision,
+      versions: z.array(versionSchema).describe('The checkpoints written since'),
+      comments: z.array(commentOpSchema).describe('The comment entries since'),
+      commentsRevision,
+      timedOut: z.boolean(),
+    }),
+    cli: { usage: 'turboslide deck watch <id> --from <from> --since <since>' },
+    mcp: 'deck_watch',
+    example: { since: 412, timeoutMs: 1000 },
+  }),
+  'deck.follow': action({
+    id: 'deck.follow',
+    label: 'Follow a hosted deck',
+    doc: 'Mirrors a hosted deck’s records into the checkout byte for byte as they land, with the comments when asked, and pushes local writes back when asked; CLI only.',
+    group: 'sync',
+    mutates: true,
+    transports: ['cli'],
+    milestone: 'GS3',
+    input: z.strictObject({
+      from: studioUrl,
+      push: z.boolean().optional().describe('Push local writes to the studio as they land'),
+      comments: z.boolean().optional().describe('Mirror the comments group too'),
+      force: z.boolean().optional().describe('Overwrite a checkout that diverged'),
+      theirs: z.boolean().optional().describe('On a divergence keep the studio’s records'),
+    }),
+    output: z.strictObject({
+      deckId: slugSchema,
+      from: z.string(),
+      revision,
+      documents: z.number().int().nonnegative(),
+      assets: z.number().int().nonnegative(),
+      versions: z.number().int().nonnegative(),
+      comments: z.number().int().nonnegative(),
+      pushed: z.number().int().nonnegative(),
+      conflicts: z.array(z.string()),
+    }),
+    cli: { usage: 'turboslide deck follow <id> --from <from> --push --comments --force --theirs' },
+    example: { from: 'https://turboslide.vercel.app', comments: true },
+  }),
+  'comment.add': action({
+    id: 'comment.add',
+    label: 'Comment',
+    doc: 'Starts a thread at an anchor (the deck, a slide, a block, a text range, a table cell or the notes) with a plain text body whose {@n} tokens name its mentions, optionally assigned; server side.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      anchor: anchorInput,
+      body: commentBodySchema,
+      assignee: mentionSchema.optional(),
+      baseRevision: commentsRevision
+        .optional()
+        .describe(
+          'The comments revision the caller read; a stale value never refuses (SPEC-3 5.2)',
+        ),
+    }),
+    output: threadResultSchema,
+    cli: { usage: 'turboslide comment add <anchor> -m <text> --mention <who> --assign <who>' },
+    mcp: 'deck_add_comment',
+    example: {
+      anchor: { kind: 'block', slideId: 'content-rule', blockId: 'p1' },
+      body: {
+        text: 'Check this number with {@0}',
+        mentions: [{ kind: 'principal', principalId: 'usr_01J8Z2KMAYA' }],
+      },
+      baseRevision: 3,
+    },
+  }),
+  'comment.reply': action({
+    id: 'comment.reply',
+    label: 'Reply',
+    doc: 'Appends a reply to a thread; server side.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      threadId: threadIdSchema,
+      body: commentBodySchema,
+      baseRevision: commentsRevision.optional(),
+    }),
+    output: threadResultSchema,
+    cli: { usage: 'turboslide comment reply <threadId> -m <text> --mention <who>' },
+    mcp: 'deck_reply_comment',
+    example: {
+      threadId: '01j8z2kmayaq4e0s7r9x2v8b3c',
+      body: { text: 'Done, see the new figure.', mentions: [] },
+      baseRevision: 4,
+    },
+  }),
+  'comment.edit': action({
+    id: 'comment.edit',
+    label: 'Edit comment',
+    doc: 'Rewrites a comment’s body, its author only; 409 with the current thread when the thread moved since expectedUpdatedAt.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      threadId: threadIdSchema,
+      commentId: threadIdSchema,
+      body: commentBodySchema,
+      expectedUpdatedAt: z.string().describe('The thread’s updatedAt the caller read'),
+      baseRevision: commentsRevision.optional(),
+    }),
+    output: threadResultSchema,
+    cli: { usage: 'turboslide comment edit <threadId> <commentId> -m <text>' },
+    mcp: 'deck_edit_comment',
+    example: {
+      threadId: '01j8z2kmayaq4e0s7r9x2v8b3c',
+      commentId: '01j8z2kmayaq4e0s7r9x2v8b3c',
+      body: { text: 'Check this number against the Q3 sheet.', mentions: [] },
+      expectedUpdatedAt: '2026-09-13T10:00:00.000Z',
+      baseRevision: 4,
+    },
+  }),
+  'comment.delete': action({
+    id: 'comment.delete',
+    label: 'Delete comment',
+    doc: 'Tombstones a comment, keeping its replies; the first comment’s tombstone keeps the thread; restore brings it back within 30 days.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      threadId: threadIdSchema,
+      commentId: threadIdSchema,
+      restore: z.boolean().optional().describe('Undo a deletion within 30 days'),
+      baseRevision: commentsRevision.optional(),
+    }),
+    output: threadResultSchema,
+    cli: { usage: 'turboslide comment delete <threadId> <commentId> --restore' },
+    mcp: 'deck_delete_comment',
+    example: {
+      threadId: '01j8z2kmayaq4e0s7r9x2v8b3c',
+      commentId: '01j8z2kmayaq4e0s7r9x2v8b3d',
+      baseRevision: 5,
+    },
+  }),
+  'comment.resolve': action({
+    id: 'comment.resolve',
+    label: 'Resolve',
+    doc: 'Marks a thread resolved; last writer wins.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ threadId: threadIdSchema, baseRevision: commentsRevision.optional() }),
+    output: threadResultSchema,
+    cli: { usage: 'turboslide comment resolve <threadId>' },
+    mcp: 'deck_resolve_comment',
+    example: { threadId: '01j8z2kmayaq4e0s7r9x2v8b3c', baseRevision: 5 },
+  }),
+  'comment.reopen': action({
+    id: 'comment.reopen',
+    label: 'Re-open',
+    doc: 'Reopens a resolved thread; last writer wins.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ threadId: threadIdSchema, baseRevision: commentsRevision.optional() }),
+    output: threadResultSchema,
+    cli: { usage: 'turboslide comment reopen <threadId>' },
+    mcp: 'deck_reopen_comment',
+    example: { threadId: '01j8z2kmayaq4e0s7r9x2v8b3c', baseRevision: 6 },
+  }),
+  'comment.assign': action({
+    id: 'comment.assign',
+    label: 'Assign',
+    doc: 'Assigns a thread to a principal or an invitation (an agent principal is assignable), or clears the assignment with null; last writer wins.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      threadId: threadIdSchema,
+      assignee: mentionSchema.nullable(),
+      baseRevision: commentsRevision.optional(),
+    }),
+    output: threadResultSchema,
+    cli: { usage: 'turboslide comment assign <threadId> <who> --clear' },
+    mcp: 'deck_assign_comment',
+    example: {
+      threadId: '01j8z2kmayaq4e0s7r9x2v8b3c',
+      assignee: { kind: 'principal', principalId: 'agent:tok_01J8Z2K' },
+      baseRevision: 6,
+    },
+  }),
+  'comment.done': action({
+    id: 'comment.done',
+    label: 'Mark as done',
+    doc: 'The assignee marks the thread done; last writer wins.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ threadId: threadIdSchema, baseRevision: commentsRevision.optional() }),
+    output: threadResultSchema,
+    cli: { usage: 'turboslide comment done <threadId>' },
+    mcp: 'deck_done_comment',
+    example: { threadId: '01j8z2kmayaq4e0s7r9x2v8b3c', baseRevision: 7 },
+  }),
+  'comment.react': action({
+    id: 'comment.react',
+    label: 'React',
+    doc: 'Toggles the caller’s reaction on a comment from the 24 emoji palette; reactions are a set per emoji keyed by principal.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      threadId: threadIdSchema,
+      commentId: threadIdSchema,
+      emoji: emojiSchema,
+      on: z.boolean(),
+      baseRevision: commentsRevision.optional(),
+    }),
+    output: threadResultSchema,
+    cli: { usage: 'turboslide comment react <threadId> <commentId> <emoji> --off' },
+    mcp: 'deck_react_comment',
+    example: {
+      threadId: '01j8z2kmayaq4e0s7r9x2v8b3c',
+      commentId: '01j8z2kmayaq4e0s7r9x2v8b3c',
+      emoji: '👍',
+      on: true,
+      baseRevision: 7,
+    },
+  }),
+  'comment.list': action({
+    id: 'comment.list',
+    label: 'Comments',
+    doc: 'The threads of the deck or a slide with their anchors resolved against the current document, filtered by block, state, assignment to the caller, author, search text or revision; 403 without readComments.',
+    group: 'comment',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      slideId: slugSchema.optional(),
+      blockId: blockIdSchema.optional(),
+      state: z.enum(['open', 'resolved', 'all']).optional().describe('open unless set'),
+      forMe: z.boolean().optional().describe('Threads that mention or are assigned to the caller'),
+      author: principalIdSchema.optional(),
+      search: z.string().max(200).optional(),
+      includeDeleted: z.boolean().optional().describe('Keep the tombstones in the answer'),
+      since: commentsRevision.optional().describe('Threads touched after this comments revision'),
+      limit: z.number().int().positive().max(500).optional(),
+    }),
+    output: commentListResultSchema,
+    cli: {
+      usage:
+        'turboslide comments <slideId> --block <blockId> --state <state> --for-me --author <author> --search <search> --since <since>',
+    },
+    mcp: 'deck_list_comments',
+    example: { slideId: 'content-rule', state: 'open' },
+  }),
+  'comment.get': action({
+    id: 'comment.get',
+    label: 'Comment thread',
+    doc: 'One thread with its anchor resolved against the current document.',
+    group: 'comment',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ threadId: threadIdSchema }),
+    output: z.strictObject({ thread: placedThreadSchema, commentsRevision }),
+    cli: { usage: 'turboslide comment get <threadId>' },
+    mcp: 'deck_get_comment',
+    example: { threadId: '01j8z2kmayaq4e0s7r9x2v8b3c' },
+  }),
+  'comment.link': action({
+    id: 'comment.link',
+    label: 'Link to comment',
+    doc: 'The editor and the view URLs that open the deck on the thread’s slide with its card expanded; runs in the page on the window transport.',
+    group: 'comment',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ threadId: threadIdSchema }),
+    output: z.strictObject({ url: z.string(), viewUrl: z.string() }),
+    cli: { usage: 'turboslide comment link <threadId>' },
+    mcp: 'deck_comment_link',
+    example: { threadId: '01j8z2kmayaq4e0s7r9x2v8b3c' },
+  }),
+  'notification.list': action({
+    id: 'notification.list',
+    label: 'Notifications',
+    doc: 'The caller’s inbox, newest first: mentions, replies, assignments, resolutions, reactions, access requests and grants, coalesced per thread inside a 15 minute window.',
+    group: 'comment',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      unread: z.boolean().optional().describe('Unread records only'),
+      since: z.string().optional().describe('An ISO time; records updated after it'),
+      limit: z.number().int().positive().max(500).optional(),
+    }),
+    output: z.strictObject({
+      notifications: z.array(notificationSchema),
+      unread: z.number().int().nonnegative(),
+    }),
+    cli: { usage: 'turboslide notifications --unread --since <since>' },
+    mcp: 'deck_list_notifications',
+    example: { unread: true },
+  }),
+  'notification.markRead': action({
+    id: 'notification.markRead',
+    label: 'Mark as read',
+    doc: 'Marks the named notifications read, or every one; answers the unread count.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z
+      .strictObject({
+        ids: z.array(z.string().min(1)).min(1).optional(),
+        all: z.literal(true).optional(),
+      })
+      .refine((input) => input.ids !== undefined || input.all === true, 'ids or all'),
+    output: z.strictObject({ unread: z.number().int().nonnegative() }),
+    cli: { usage: 'turboslide notifications read <ids> --all' },
+    mcp: 'deck_mark_notifications_read',
+    example: { all: true },
+  }),
+  'notification.settings': action({
+    id: 'notification.settings',
+    label: 'Notification settings',
+    doc: 'Reads or writes the caller’s per deck level (All comments, Comments for you, None), the email switch and, for the owner, whether commenters read the Activity panel; a read when every field is absent.',
+    group: 'comment',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      level: z.enum(NOTIFICATION_LEVELS).optional(),
+      email: z.boolean().optional(),
+      activityForCommenters: z.boolean().optional(),
+    }),
+    output: notificationSettingsSchema,
+    cli: {
+      usage: 'turboslide notifications settings --level <level> --email --activity-for-commenters',
+    },
+    mcp: 'deck_notification_settings',
+    example: { level: 'forYou', email: true },
+  }),
+  'activity.list': action({
+    id: 'activity.list',
+    label: 'Activity',
+    doc: 'The merged activity feed of the deck: version windows, comment events, share events, requests, role changes, renames, restores, named versions, exports, imports and trash; editors and the owner, commenters when allowed.',
+    group: 'comment',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      since: z.string().optional().describe('An ISO time'),
+      kinds: z.array(z.enum(ACTIVITY_KINDS)).min(1).optional(),
+      limit: z.number().int().positive().max(1000).optional(),
+    }),
+    output: z.strictObject({ events: z.array(activityEventSchema) }),
+    cli: { usage: 'turboslide activity --since <since> --kind <kinds>' },
+    mcp: 'deck_list_activity',
+    example: { kinds: ['comment', 'share'] },
+  }),
+  'version.diff': action({
+    id: 'version.diff',
+    label: 'Show changes',
+    doc: 'The mutations between two revisions grouped by touched block and by author, the data behind Show changes; from omitted with staged is the last named version, to defaults to the current revision.',
+    group: 'version',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      from: revision.optional(),
+      to: revision.optional(),
+      staged: z.boolean().optional(),
+    }),
+    output: z.strictObject({
+      from: revision,
+      to: revision,
+      mutations: z.array(mutationSchema),
+      byAuthor: z.array(
+        z.strictObject({
+          author: authorSchema,
+          blocks: z.array(
+            z.strictObject({
+              slideId: slugSchema,
+              blockId: blockIdSchema.optional(),
+              ops: z.array(z.enum(MUTATION_OPS)),
+            }),
+          ),
+        }),
+      ),
+    }),
+    cli: { usage: 'turboslide version diff <from> <to> --staged' },
+    mcp: 'deck_version_diff',
+    example: { from: 400, to: 412 },
+  }),
+  'share.get': action({
+    id: 'share.get',
+    label: 'Sharing',
+    doc: 'The access record with its tokens hashed and the dead links of the last thirty days, plus the caller’s role, how it was reached and the capabilities it gives; a viewer receives the owner, the general access mode, their own grant and their capabilities only.',
+    group: 'share',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema }),
+    output: shareGetResultSchema,
+    cli: { usage: 'turboslide share get <id>' },
+    mcp: 'deck_get_share',
+    example: { id: 'q4-review' },
+  }),
+  'share.setGeneralAccess': action({
+    id: 'share.setGeneralAccess',
+    label: 'General access',
+    doc: 'Sets Restricted or Anyone with the link with its role; the link mode mints a token and answers its /s/ URL once.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      id: slugSchema,
+      mode: z.enum(['restricted', 'link']),
+      role: grantRoleSchema.optional().describe('viewer unless set'),
+      baseRevision: baseRevision.describe('The access record’s revision the caller read'),
+    }),
+    output: z.strictObject({
+      record: accessRecordSchema,
+      url: z.string().optional().describe('The /s/<token> URL of the new link, shown once'),
+    }),
+    cli: { usage: 'turboslide share access <id> --mode <mode> --role <role>' },
+    mcp: 'deck_set_general_access',
+    example: { id: 'q4-review', mode: 'link', role: 'viewer', baseRevision: 7 },
+  }),
+  'share.createLink': action({
+    id: 'share.createLink',
+    label: 'Create link',
+    doc: 'Mints a share link with a role, a label and an optional expiry and answers its /s/ URL once; several links with several roles may live at once.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      id: slugSchema,
+      role: grantRoleSchema,
+      label: z.string().max(120).optional(),
+      expiresAt: z
+        .string()
+        .optional()
+        .describe('An ISO time, or 7d, 30d, 90d on the CLI; no expiry when absent'),
+      baseRevision,
+    }),
+    output: shareLinkResultSchema,
+    cli: {
+      usage: 'turboslide share link <id> --role <role> --label <label> --expires <expiresAt>',
+    },
+    mcp: 'deck_create_share_link',
+    example: { id: 'q4-review', role: 'commenter', label: 'agency', baseRevision: 7 },
+  }),
+  'share.revokeLink': action({
+    id: 'share.revokeLink',
+    label: 'Revoke link',
+    doc: 'Revokes one link; every session grant that names it dies on its next request.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema, linkId: z.string().min(1), baseRevision }),
+    output: recordResult,
+    cli: { usage: 'turboslide share revoke-link <id> <linkId>' },
+    mcp: 'deck_revoke_share_link',
+    example: { id: 'q4-review', linkId: 'lnk_01J8Z2K', baseRevision: 8 },
+  }),
+  'share.rotateLink': action({
+    id: 'share.rotateLink',
+    label: 'Rotate link',
+    doc: 'Mints a new token for a link and answers its URL once; the old token dies.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema, linkId: z.string().min(1), baseRevision }),
+    output: shareLinkResultSchema,
+    cli: { usage: 'turboslide share rotate-link <id> <linkId>' },
+    mcp: 'deck_rotate_share_link',
+    example: { id: 'q4-review', linkId: 'lnk_01J8Z2K', baseRevision: 8 },
+  }),
+  'share.stop': action({
+    id: 'share.stop',
+    label: 'Stop sharing',
+    doc: 'Sets Restricted and revokes every link.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema, baseRevision }),
+    output: recordResult,
+    cli: { usage: 'turboslide share stop <id>' },
+    mcp: 'deck_stop_sharing',
+    example: { id: 'q4-review', baseRevision: 9 },
+  }),
+  'share.invite': action({
+    id: 'share.invite',
+    label: 'Share with people',
+    doc: 'Writes one grant per address with a role and an optional message and sends the invitations unless told not to; never says whether an account exists, and answers sent, queued or no-mail per address with the deck link for hand delivery.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      id: slugSchema,
+      emails: z.array(z.email()).min(1).max(50),
+      role: grantRoleSchema,
+      message: z.string().max(600).optional(),
+      notify: z.boolean().optional().describe('Send the invitation mail; on unless set'),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      record: accessRecordSchema,
+      invited: z.array(z.strictObject({ email: z.email(), status: z.enum(INVITE_STATUSES) })),
+      url: z.string().describe('The deck link for hand delivery, without a token'),
+    }),
+    cli: {
+      usage:
+        'turboslide share invite <id> --email <emails> --role <role> --message <message> --no-notify',
+    },
+    mcp: 'deck_invite',
+    example: { id: 'q4-review', emails: ['lee@example.com'], role: 'editor', baseRevision: 9 },
+  }),
+  'share.setRole': action({
+    id: 'share.setRole',
+    label: 'Change role',
+    doc: 'Changes a grant’s role; the owner’s row is refused.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      id: slugSchema,
+      who: grantWhoSchema,
+      role: grantRoleSchema,
+      baseRevision,
+    }),
+    output: recordResult,
+    cli: { usage: 'turboslide share role <id> --email <email> --role <role>' },
+    mcp: 'deck_set_role',
+    example: {
+      id: 'q4-review',
+      who: { email: 'lee@example.com' },
+      role: 'viewer',
+      baseRevision: 10,
+    },
+  }),
+  'share.remove': action({
+    id: 'share.remove',
+    label: 'Remove access',
+    doc: 'Removes a grant; the caller may remove their own at any role.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema, who: grantWhoSchema, baseRevision }),
+    output: recordResult,
+    cli: { usage: 'turboslide share remove <id> --email <email>' },
+    mcp: 'deck_remove_access',
+    example: { id: 'q4-review', who: { email: 'lee@example.com' }, baseRevision: 11 },
+  }),
+  'share.setExpiry': action({
+    id: 'share.setExpiry',
+    label: 'Access expiry',
+    doc: 'Sets or clears a grant’s expiry, up to one year ahead.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      id: slugSchema,
+      who: grantWhoSchema,
+      expiresAt: z.string().nullable().describe('An ISO time within a year, or null to clear'),
+      baseRevision,
+    }),
+    output: recordResult,
+    cli: { usage: 'turboslide share expire <id> --email <email> --at <expiresAt>' },
+    mcp: 'deck_set_access_expiry',
+    example: {
+      id: 'q4-review',
+      who: { email: 'lee@example.com' },
+      expiresAt: '2027-01-01T00:00:00.000Z',
+      baseRevision: 11,
+    },
+  }),
+  'share.settings': action({
+    id: 'share.settings',
+    label: 'Sharing settings',
+    doc: 'The gear’s five switches: editors can share, viewers can download, viewers can see comments, show names to people with the link, allow embedded HTML blocks; owner only, with a re-authentication within 10 minutes on the window transport.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      id: slugSchema,
+      editorsCanShare: z.boolean().optional(),
+      viewersCanDownload: z.boolean().optional(),
+      viewersCanSeeComments: z.boolean().optional(),
+      showNamesToLinkVisitors: z.boolean().optional(),
+      allowHtmlBlocks: z.boolean().optional(),
+      baseRevision,
+    }),
+    output: recordResult,
+    cli: {
+      usage:
+        'turboslide share settings <id> --editors-can-share <editorsCanShare> --viewers-can-download <viewersCanDownload> --viewers-can-see-comments <viewersCanSeeComments> --show-names-to-link-visitors <showNamesToLinkVisitors> --allow-html-blocks <allowHtmlBlocks>',
+    },
+    mcp: 'deck_share_settings',
+    example: { id: 'q4-review', viewersCanSeeComments: true, baseRevision: 12 },
+  }),
+  'share.requestAccess': action({
+    id: 'share.requestAccess',
+    label: 'Request access',
+    doc: 'Asks the owner for a role with an optional message; always answers the same sentence, so a caller learns nothing about whether the deck exists; rate limited per IP, and an anonymous caller must give an email.',
+    group: 'share',
+    mutates: true,
+    // no CLI: a CLI user holds a key and a role (SPEC-3 12); an agent without access asks over MCP
+    transports: ['mcp', 'http', 'window'],
+    milestone: 'GS3',
+    input: z.strictObject({
+      id: slugSchema,
+      role: grantRoleSchema,
+      message: z.string().max(600).optional(),
+      email: z.email().optional().describe('Required for anonymous callers'),
+    }),
+    output: z.strictObject({ ok: z.literal(true), message: z.literal(REQUEST_ACCESS_ANSWER) }),
+    mcp: 'deck_request_access',
+    example: { id: 'q4-review', role: 'editor', email: 'sam@example.com' },
+  }),
+  'share.listRequests': action({
+    id: 'share.listRequests',
+    label: 'Access requests',
+    doc: 'The pending requests with the requester’s label, email, role, message and time.',
+    group: 'share',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema }),
+    output: z.strictObject({
+      requests: z.array(accessRequestSchema.extend({ label: z.string().optional() })),
+    }),
+    cli: { usage: 'turboslide share requests <id>' },
+    mcp: 'deck_list_access_requests',
+    example: { id: 'q4-review' },
+  }),
+  'share.respond': action({
+    id: 'share.respond',
+    label: 'Respond to request',
+    doc: 'Approves a request as a role or declines it with null; the requester is told when asked.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      id: slugSchema,
+      requestId: z.string().min(1),
+      grant: grantRoleSchema.nullable(),
+      notify: z.boolean().optional(),
+      baseRevision,
+    }),
+    output: recordResult,
+    cli: { usage: 'turboslide share respond <id> <requestId> --grant <grant> --notify' },
+    mcp: 'deck_respond_access_request',
+    example: { id: 'q4-review', requestId: 'req_01J8Z2K', grant: 'commenter', baseRevision: 12 },
+  }),
+  'share.transferOwnership': action({
+    id: 'share.transferOwnership',
+    label: 'Transfer ownership',
+    doc: 'Offers the deck to a signed in principal or an email, who accepts or declines; owner only, anonymous targets refused.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema, to: grantWhoSchema, baseRevision }),
+    output: recordResult,
+    cli: { usage: 'turboslide share transfer <id> --email <email>' },
+    mcp: 'deck_transfer_ownership',
+    example: { id: 'q4-review', to: { email: 'ana@example.com' }, baseRevision: 13 },
+  }),
+  'share.acceptOwnership': action({
+    id: 'share.acceptOwnership',
+    label: 'Accept ownership',
+    doc: 'The pending owner takes the deck; the previous owner becomes an editor.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema, baseRevision }),
+    output: recordResult,
+    cli: { usage: 'turboslide share accept-ownership <id>' },
+    mcp: 'deck_accept_ownership',
+    example: { id: 'q4-review', baseRevision: 14 },
+  }),
+  'share.declineOwnership': action({
+    id: 'share.declineOwnership',
+    label: 'Decline ownership',
+    doc: 'The pending owner declines the offer.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema, baseRevision }),
+    output: recordResult,
+    cli: { usage: 'turboslide share decline-ownership <id>' },
+    mcp: 'deck_decline_ownership',
+    example: { id: 'q4-review', baseRevision: 14 },
+  }),
+  'share.claim': action({
+    id: 'share.claim',
+    label: 'Claim',
+    doc: 'A signed in principal claims an unowned deck (an admin any unowned deck); the deck then reads Anyone with the address can view, so every view link and the embed keep working while editing by address stops.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema, baseRevision }),
+    output: recordResult,
+    cli: { usage: 'turboslide share claim <id>' },
+    mcp: 'deck_claim',
+    example: { id: 'gt-brand', baseRevision: 0 },
+  }),
+  'share.emailCollaborators': action({
+    id: 'share.emailCollaborators',
+    label: 'Email collaborators',
+    doc: 'Sends a message to every collaborator or the named ones; declared this round and answers not implemented until round four.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      id: slugSchema,
+      to: z.union([
+        z.literal('all'),
+        z.strictObject({ principalIds: z.array(principalIdSchema).min(1) }),
+      ]),
+      message: z.string().min(1).max(2000),
+      baseRevision,
+    }),
+    output: z.strictObject({ sent: z.number().int().nonnegative() }),
+    cli: { usage: 'turboslide share email <id> --message <message>' },
+    mcp: 'deck_email_collaborators',
+    example: {
+      id: 'q4-review',
+      to: 'all',
+      message: 'The pricing slide is final.',
+      baseRevision: 14,
+    },
+  }),
+  'deck.publish': action({
+    id: 'deck.publish',
+    label: 'Publish to the web',
+    doc: 'Mints the published player’s token and answers the player and embed URLs once; every edit is published, and the player never opens the editor.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema, baseRevision }),
+    output: publishResultSchema,
+    cli: { usage: 'turboslide deck publish <id>' },
+    mcp: 'deck_publish',
+    example: { id: 'q4-review', baseRevision: 15 },
+  }),
+  'deck.unpublish': action({
+    id: 'deck.unpublish',
+    label: 'Stop publishing',
+    doc: 'Revokes the published token; the player and the embed answer 410.',
+    group: 'share',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema, baseRevision }),
+    output: recordResult,
+    cli: { usage: 'turboslide deck unpublish <id>' },
+    mcp: 'deck_unpublish',
+    example: { id: 'q4-review', baseRevision: 16 },
+  }),
+  'account.decks': action({
+    id: 'account.decks',
+    label: 'My presentations',
+    doc: 'The caller’s deck index with the owner and the caller’s role per row: owned, shared with me, recent, trash, or all for an admin; on a checkout every deck as owned.',
+    group: 'account',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ view: z.enum(['owned', 'shared', 'recent', 'trash', 'all']) }),
+    output: z.array(deckHeadSchema),
+    cli: { usage: 'turboslide account decks --view <view>' },
+    mcp: 'deck_list_my_decks',
+    example: { view: 'shared' },
+  }),
+  'account.tokens.create': action({
+    id: 'account.tokens.create',
+    label: 'Create API key',
+    doc: 'Mints an API key owned by the caller with a name, scopes and an optional expiry, shown once; never over MCP, and refused on a checkout, which has no accounts.',
+    group: 'account',
+    mutates: true,
+    transports: ['window', 'cli', 'http'],
+    milestone: 'GS3',
+    input: z.strictObject({
+      name: z.string().min(1).max(80),
+      scopes: z.array(z.enum(SCOPES)).min(1),
+      expiresAt: z.string().optional(),
+    }),
+    output: z.strictObject({
+      token: tokenRecordSchema,
+      secret: z.string().describe('The ts_ key, shown once'),
+    }),
+    cli: {
+      usage:
+        'turboslide account tokens create --to <to> --name <name> --scope <scopes> --expires <expiresAt>',
+    },
+    example: { name: 'ci', scopes: ['read', 'export'] },
+  }),
+  'account.tokens.list': action({
+    id: 'account.tokens.list',
+    label: 'API keys',
+    doc: 'The caller’s API keys without their secrets.',
+    group: 'account',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: empty,
+    output: z.strictObject({ tokens: z.array(tokenRecordSchema) }),
+    cli: { usage: 'turboslide account tokens list --to <to>' },
+    mcp: 'deck_list_tokens',
+    example: {},
+  }),
+  'account.tokens.revoke': action({
+    id: 'account.tokens.revoke',
+    label: 'Revoke API key',
+    doc: 'Revokes one of the caller’s keys; its MCP sessions close.',
+    group: 'account',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ tokenId: z.string().min(1) }),
+    output: z.strictObject({
+      tokenId: z.string(),
+      revoked: z.literal(true),
+      sessionsClosed: z.number().int().nonnegative(),
+    }),
+    cli: { usage: 'turboslide account tokens revoke <tokenId> --to <to>' },
+    mcp: 'deck_revoke_token',
+    example: { tokenId: 'tok_01J8Z2K' },
+  }),
+  'account.me': action({
+    id: 'account.me',
+    label: 'Account',
+    doc: 'The caller’s principal, trust state, label, mark, avatar choice and sessions; the CLI can write the mark as a PNG.',
+    group: 'account',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      avatarPng: z.string().optional().describe('CLI: write the mark as a PNG to this path'),
+    }),
+    output: meSchema,
+    cli: { usage: 'turboslide account me --avatar-png <avatarPng>' },
+    mcp: 'deck_get_me',
+    example: {},
+  }),
+  'account.setName': action({
+    id: 'account.setName',
+    label: 'Change name',
+    doc: 'Sets the display name under the rules of SPEC-3 0.19 (NFC, 1 to 40 code points with a letter or digit, no bidi controls, the reserved and confusable lists, unique per deck by skeleton); the refusal sentences are fixed.',
+    group: 'account',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ name: z.string().min(1).max(200) }),
+    output: meSchema,
+    cli: { usage: 'turboslide account name <name>' },
+    mcp: 'deck_set_my_name',
+    example: { name: 'Maya' },
+  }),
+  'account.setAvatar': action({
+    id: 'account.setAvatar',
+    label: 'Change avatar',
+    doc: 'Chooses the mark: initials, a glyph field, a dither plate, or a picture for signed in principals only.',
+    group: 'account',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      variant: z.enum(AVATAR_VARIANTS),
+      initials: z.string().max(3).optional(),
+      salt: z.number().int().nonnegative().optional().describe('Another glyph or plate'),
+      picture: z
+        .string()
+        .optional()
+        .describe('A file path or a data URL; sharp re-encodes it and keeps no original'),
+    }),
+    output: meSchema,
+    cli: { usage: 'turboslide account avatar --variant <variant> --another' },
+    mcp: 'deck_set_my_avatar',
+    example: { variant: 'glyph' },
+  }),
+  'account.sessions': action({
+    id: 'account.sessions',
+    label: 'Sessions',
+    doc: 'The caller’s sign in sessions, the current one marked.',
+    group: 'account',
+    mutates: false,
+    transports: A,
+    milestone: 'GS3',
+    input: empty,
+    output: z.strictObject({ sessions: z.array(sessionRecordSchema) }),
+    cli: { usage: 'turboslide account sessions --to <to>' },
+    mcp: 'deck_list_sessions',
+    example: {},
+  }),
+  'account.signOut': action({
+    id: 'account.signOut',
+    label: 'Sign out',
+    doc: 'Ends one sign in session, or every other one with all.',
+    group: 'account',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z
+      .strictObject({ sessionId: z.string().min(1).optional(), all: z.literal(true).optional() })
+      .refine((input) => input.sessionId !== undefined || input.all === true, 'sessionId or all'),
+    output: z.strictObject({ signedOut: z.number().int().nonnegative() }),
+    cli: { usage: 'turboslide account sign-out --all --to <to>' },
+    mcp: 'deck_sign_out',
+    example: { all: true },
+  }),
+  'account.forget': action({
+    id: 'account.forget',
+    label: 'Forget this browser',
+    doc: 'Replaces the anonymous cookie with a fresh id and clears the browser’s mirrors; window only.',
+    group: 'account',
+    mutates: true,
+    transports: ['window'],
+    milestone: 'GS3',
+    input: empty,
+    output: z.strictObject({ principalId: principalIdSchema }),
+    example: {},
+  }),
+  'admin.bootstrap': action({
+    id: 'admin.bootstrap',
+    label: 'Bootstrap admin',
+    doc: 'With the static bearer, gives an email the admin role and mints the first API key, shown once.',
+    group: 'admin',
+    mutates: true,
+    transports: ['cli', 'http'],
+    milestone: 'GS3',
+    input: z.strictObject({ email: z.email() }),
+    output: z.strictObject({ principalId: principalIdSchema, tokenOnce: z.string() }),
+    cli: { usage: 'turboslide admin bootstrap --to <to> --email <email>' },
+    example: { email: 'kevin@example.com' },
+  }),
+  'admin.assignOwner': action({
+    id: 'admin.assignOwner',
+    label: 'Assign owner',
+    doc: 'An admin sets a deck’s owner.',
+    group: 'admin',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({ id: slugSchema, to: grantWhoSchema, baseRevision }),
+    output: recordResult,
+    cli: { usage: 'turboslide admin assign-owner <id> --email <email>' },
+    mcp: 'deck_assign_owner',
+    example: { id: 'q4-review', to: { email: 'ana@example.com' }, baseRevision: 16 },
+  }),
+  'admin.flag': action({
+    id: 'admin.flag',
+    label: 'Kill switch',
+    doc: 'Reads or flips one of the kill switches (realtime, presence, comments, invites, email, exports, uploads, renderThumbs, materialize, htmlBlocks, signup, readOnly), read within 5 s by every instance.',
+    group: 'admin',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      name: z.enum(FLAG_NAMES),
+      on: z.boolean().optional().describe('Absent reads the flag'),
+    }),
+    output: z.strictObject({
+      name: z.enum(FLAG_NAMES),
+      on: z.boolean(),
+      default: z.boolean().describe('What the flag reads when the store is unreachable'),
+      source: z.enum(['redis', 'file', 'default']),
+    }),
+    cli: { usage: 'turboslide admin flag <name> --on <on>' },
+    mcp: 'deck_admin_flag',
+    example: { name: 'comments' },
+  }),
+  'admin.migrateStorage': action({
+    id: 'admin.migrateStorage',
+    label: 'Migrate storage',
+    doc: 'Runs one step of the storage layout v2 migration (plan, copy, verify, cutover, delete or rollback) from its cursor, in batches.',
+    group: 'admin',
+    mutates: true,
+    transports: ['cli', 'http'],
+    milestone: 'GS3',
+    input: z.strictObject({
+      step: z.enum(MIGRATION_STEPS),
+      batch: z.number().int().positive().max(1000).optional(),
+    }),
+    output: z.strictObject({
+      step: z.enum(MIGRATION_STEPS),
+      cursor: z.string().nullable(),
+      processed: z.number().int().nonnegative(),
+      verified: z.number().int().nonnegative(),
+      failed: z.array(z.string()),
+      done: z.boolean(),
+      dualRead: z.boolean().describe('True while both stores are read'),
+    }),
+    cli: { usage: 'turboslide admin migrate-storage <step> --to <to> --batch <batch>' },
+    example: { step: 'plan' },
+  }),
+  'admin.mail.list': action({
+    id: 'admin.mail.list',
+    label: 'Captured mail',
+    doc: 'The mail captured under TURBOSLIDE_MAIL=capture, newest first; absent otherwise.',
+    group: 'admin',
+    mutates: false,
+    transports: ['cli', 'http'],
+    milestone: 'GS3',
+    input: z.strictObject({
+      since: z.string().optional(),
+      limit: z.number().int().positive().max(500).optional(),
+    }),
+    output: z.strictObject({
+      mail: z.array(
+        z.strictObject({
+          id: z.string(),
+          to: z.email(),
+          subject: z.string(),
+          text: z.string(),
+          html: z.string().optional(),
+          kind: z.string(),
+          sentAt: z.string(),
+        }),
+      ),
+    }),
+    cli: { usage: 'turboslide admin mail --to <to> --since <since>' },
+    example: {},
+  }),
+  'picture.dither': action({
+    id: 'picture.dither',
+    label: 'Dither',
+    doc: 'Writes the deck’s two tone screen over a picture’s continuous source as a non destructive field, or removes it with null; a slide that is not a canvas converts first when the picture is positioned; answers the variant key, the metrics and any warnings.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      slideId: slugSchema,
+      blockId: blockIdSchema,
+      dither: pictureDitherSchema.nullable(),
+      baseRevision,
+    }),
+    output: slideResultSchema.extend({
+      key: z.string().optional().describe('The variant digest of the resolved dither'),
+      metrics: assetMetricsSchema.optional(),
+      warnings: z.array(z.string()),
+    }),
+    cli: {
+      usage:
+        'turboslide block dither <slideId>#<blockId> --pattern <pattern> --tone <tone> --cell <cell> --strength <strength> --black <black> --white <white> --gamma <gamma> --polarity <polarity> --off',
+    },
+    mcp: 'deck_dither_picture',
+    example: {
+      slideId: 'background-picture',
+      blockId: 'picture',
+      dither: { pattern: 'bayer8', black: 120, white: 230, gamma: 0.9 },
+      baseRevision: 412,
+    },
+  }),
+  'picture.materialize': action({
+    id: 'picture.materialize',
+    label: 'Materialize dithers',
+    doc: 'Writes the variant files and records of every dithered picture on the named slides, prunes the variants no picture references when asked, or names the missing variants without writing under dryRun; server side.',
+    group: 'block',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      slideIds: slideIdsOrAll.optional().describe("A subset; 'all' when absent"),
+      blockIds: z.array(blockIdSchema).min(1).optional(),
+      prune: z.boolean().optional(),
+      scale: z.literal([1, 2]).optional().describe('Device pixels per sheet pixel; 2 unless set'),
+      dryRun: z.boolean().optional(),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      revision,
+      written: z.array(
+        z.strictObject({
+          assetId: slugSchema,
+          key: z.string(),
+          files: z.array(z.string()),
+          metrics: assetMetricsSchema.optional(),
+        }),
+      ),
+      pruned: z.array(z.strictObject({ assetId: slugSchema, key: z.string() })),
+      missing: z.array(
+        z.strictObject({
+          slideId: slugSchema,
+          blockId: blockIdSchema,
+          assetId: slugSchema,
+          key: z.string(),
+        }),
+      ),
+    }),
+    cli: {
+      usage: 'turboslide picture materialize <slideIds> --prune --scale <scale> --dry-run',
+    },
+    mcp: 'deck_materialize_pictures',
+    example: { slideIds: 'all', baseRevision: 412 },
+  }),
+  'slide.setBackgroundPicture': action({
+    id: 'slide.setBackgroundPicture',
+    label: 'Background picture',
+    doc: 'One write for a covering picture object at the back of each named slide with an optional dither, replacing the covering picture already there unless told not to; the file, url and upload forms run asset.add server side first.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z
+      .strictObject({
+        slideIds: slideIdList,
+        assetId: slugSchema.optional(),
+        file: z.string().optional().describe('A path on the machine, or a data: URL'),
+        url: z.string().url().optional().describe('An http(s) URL fetched through safeFetch'),
+        upload: z.string().optional().describe('Hosted: the key of a presigned client upload'),
+        alt: z.string().optional(),
+        dither: pictureDitherSchema.optional(),
+        replace: z
+          .boolean()
+          .optional()
+          .describe('Replace the covering picture at the bottom of the stack; on unless set'),
+        baseRevision,
+      })
+      .refine(
+        (input) =>
+          [input.assetId, input.file, input.url, input.upload].filter((v) => v !== undefined)
+            .length === 1,
+        'exactly one of assetId, file, url or upload',
+      ),
+    output: z.strictObject({
+      revision,
+      assetId: slugSchema,
+      slides: z.array(z.strictObject({ slideId: slugSchema, blockId: blockIdSchema })),
+      findings: z.array(findingSchema),
+    }),
+    cli: {
+      usage:
+        'turboslide slide background-picture <slideIds> --asset <assetId> --file <file> --url <url> --alt <alt> --dither --no-replace',
+    },
+    mcp: 'deck_set_slide_background_picture',
+    example: {
+      slideIds: ['content-rule'],
+      assetId: 'mood-rosetta',
+      dither: { pattern: 'bayer8', black: 120, white: 230, gamma: 0.9 },
+      baseRevision: 412,
+    },
+  }),
+  'slide.setBackgroundMaterial': action({
+    id: 'slide.setBackgroundMaterial',
+    label: 'Background material',
+    doc: 'Captures a shader material at an anchor and places the frozen frame as a covering picture object at the back of each named slide with an optional dither, in one call; server side.',
+    group: 'slide',
+    mutates: true,
+    transports: A,
+    milestone: 'GS3',
+    input: z.strictObject({
+      slideIds: slideIdList,
+      materialId: z.string().min(1),
+      preset: z.string().optional(),
+      uniforms: materialUniformsSchema.optional(),
+      anchor: z
+        .number()
+        .nonnegative()
+        .optional()
+        .describe('The frame time in ms; the catalog default unless set'),
+      dither: pictureDitherSchema.optional(),
+      baseRevision,
+    }),
+    output: z.strictObject({
+      revision,
+      assetId: slugSchema,
+      slides: z.array(z.strictObject({ slideId: slugSchema, blockId: blockIdSchema })),
+      findings: z.array(findingSchema),
+    }),
+    cli: {
+      usage:
+        'turboslide slide background-material <slideIds> <materialId> --preset <preset> --anchor <anchor> --dither',
+    },
+    mcp: 'deck_set_slide_background_material',
+    example: {
+      slideIds: ['content-rule'],
+      materialId: 'paper:liquid-metal',
+      preset: 'diamond',
+      anchor: 5500,
+      dither: { pattern: 'bayer8' },
+      baseRevision: 412,
+    },
   }),
 };
 

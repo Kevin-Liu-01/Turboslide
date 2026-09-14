@@ -1,0 +1,35 @@
+{
+  "base": "https://turboslide-igavfcg2x-kl01s-projects.vercel.app",
+  "at": "2026-09-14T03:20:13.573Z",
+  "deck.copy (one slide) ms": "4435 status 200",
+  "one write: slide.update ms / revision visible after ms": "200 in 893 ms; visible in deck.info after 382 ms",
+  "one full commit (version.save) ms": "400 in 164 ms",
+  "load test": {
+    "writers": 5,
+    "writesEach": 10,
+    "seconds": 8,
+    "statuses": {
+      "200": 10,
+      "409": 34,
+      "500": 6
+    },
+    "p50": 639,
+    "p95": 1013,
+    "max": 1031,
+    "writesPerSecond": 6.2
+  },
+  "another deck's read after the burst": "200 in 202 ms",
+  "scratch revision after the burst": 11,
+  "stream": {
+    "status": 200,
+    "firstByteMs": 226,
+    "events": 24,
+    "comments": 17,
+    "hello": "{\"type\":\"hello\",\"seq\":0,\"revision\":0,\"clientId\":\"9c1d278b09522099f6f7df09be42d1d0\",\"role\":\"owner\",\"clients\":[],\"editing\":0,\"tier\":\"blob\"}",
+    "retry": 2700,
+    "lastEventId": "11",
+    "lifetimeS": 256,
+    "closedBy": "server"
+  },
+  "cleanup": "trash 200 remove 200"
+}

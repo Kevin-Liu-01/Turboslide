@@ -1,0 +1,15 @@
+{
+  "deck": "gt-brand",
+  "slideId": "thesis",
+  "template": "statement",
+  "source": "docs/gslides-parity/verification-2/canvas-walk.mjs (Chromium, the editor, hidden 1x sheet)",
+  "objects": {
+    "big": {
+      "x": 311.15625,
+      "y": 411.84375,
+      "w": 977.6875,
+      "h": 76.3125,
+      "z": 0
+    }
+  }
+}

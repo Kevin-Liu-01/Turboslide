@@ -1,4 +1,5 @@
-import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { expect, test } from '@playwright/test';
@@ -12,6 +13,15 @@ import type { APIRequestContext, Page } from '@playwright/test';
 // contract, and asserts the open editor shows the agent's write with the agent as author within
 // one second (the store's watch channel, SPEC 6.7). The spec works on a scratch copy of
 // decks/fixture under decks/e2e-agent so the committed decks keep their revision.
+//
+// Round three (gslides-parity SPEC-3 0.23, 7.7, 8.2; MILESTONES-3 B3 day 6): the identity rows
+// at the end run against the builder's server on 4332 with `TURBOSLIDE_AUTH_DB` set: an API key
+// minted through the identity database (e2e/identity-seed.mts) is accepted as the bearer, its
+// writes are attributed to the key's registered name under `agent:<tokenId>` with the header's
+// run id and `?author=` ignored, an unknown key and a revoked key answer 401 with no detail.
+// The rows that need B4's day three wiring (the author derived from the session on the window
+// transport, a key's scopes refusing `deck.remove` in enforce mode) are the round's `share.spec.ts`
+// and `security.spec.ts`; `authorize()` runs in shadow mode on every server this round.
 
 const ROOT = join(import.meta.dirname, '..', '..', '..');
 const DECK = 'e2e-agent';
@@ -255,10 +265,10 @@ test('the open editor shows the agent write with the agent as author within one 
     mutations: [setHeading('Written by the agent')],
   });
   expect(written.status()).toBe(200);
-  const banner = page.locator('.ts-banner[data-state="external"]');
-  await expect(banner).toBeVisible({ timeout: 1000 });
-  await expect(banner).toContainText(`r${before + 1}`);
-  await expect(banner).toContainText('agent:e2e-agent');
+  // Round three (gslides-parity SPEC-3 11.5 R4; MILESTONES-3 B2 day 4): the agent's write reaches
+  // the open editor through the room, so the external revision banner of round one retires for an
+  // edit that arrives live and stays for a resync; the budget of one second holds on the document
+  // itself (the revision below) and the author is read from the version log
   await expect
     .poll(
       () => page.evaluate(() => window.turboslide!.studio.describe().state.revision as number),
@@ -292,4 +302,102 @@ test('the open editor shows the agent write with the agent as author within one 
     return { themed: themed.theme, presenting: presenting.present, back: back.theme };
   });
   expect(view).toEqual({ themed: 'light', presenting: false, back: 'dark' });
+});
+
+test.describe('API keys as the bearer (gslides-parity SPEC-3 0.23, 7.7, 8.2)', () => {
+  // the database the server under test opened (TURBOSLIDE_AUTH_DB in the spec's environment; B3's
+  // server on 4332 names `.turboslide/auth-b3.sqlite`, the check runner and playwright.config.ts
+  // `.turboslide/auth.sqlite`), so the seed writes the key where the server reads it
+  const AUTH_DB_RELATIVE = process.env.TURBOSLIDE_AUTH_DB ?? '.turboslide/auth.sqlite';
+  const AUTH_DB = AUTH_DB_RELATIVE.startsWith('/')
+    ? AUTH_DB_RELATIVE
+    : join(ROOT, AUTH_DB_RELATIVE);
+  const SEED = join(import.meta.dirname, 'identity-seed.mts');
+  let key: { userId: string; tokenId: string; secret: string } | null = null;
+
+  function seed(mode: string, ...args: string[]): Record<string, unknown> {
+    const out = execFileSync('node', [SEED, mode, ...args], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    return JSON.parse(out.trim().split('\n').pop() ?? '{}') as Record<string, unknown>;
+  }
+
+  test.beforeAll(async ({ request }) => {
+    // the first request builds the identity runtime and migrates the database the seed writes
+    const probe = await request.get('/api/auth/get-session', {
+      headers: { 'sec-fetch-site': 'same-origin' },
+    });
+    test.skip(
+      probe.status() !== 200 || !existsSync(AUTH_DB),
+      `the identity rows run against a server started with TURBOSLIDE_AUTH_DB=${AUTH_DB_RELATIVE} (MILESTONES-3 B3, port 4332; the check runner's server names .turboslide/auth.sqlite)`,
+    );
+    key = seed(
+      'key',
+      AUTH_DB,
+      `e2e-agent-${Date.now()}@example.test`,
+      'e2e-key',
+      'read,write,export',
+    ) as {
+      userId: string;
+      tokenId: string;
+      secret: string;
+    };
+  });
+
+  test('a key is accepted, its writes carry the registered name and the run id, and ?author= is ignored', async ({
+    request,
+  }) => {
+    if (key === null) throw new Error('no key');
+    const current = revisionOnDisk();
+    const written = await request.post(`/api/actions/slide.update?deck=${DECK}&author=kevin`, {
+      data: { slideId: SLIDE, baseRevision: current, mutations: [setHeading('Written by a key')] },
+      headers: { authorization: `Bearer ${key.secret}`, 'x-turboslide-author': 'agent:run-9' },
+    });
+    expect(written.status()).toBe(200);
+    expect(revisionOnDisk()).toBe(current + 1);
+    const versions = (await (
+      await request.post(`/api/actions/version.list?deck=${DECK}`, {
+        data: {},
+        headers: { authorization: `Bearer ${key.secret}` },
+      })
+    ).json()) as { author: { kind: string; name: string; runId?: string; principalId?: string } }[];
+    const last = versions[versions.length - 1];
+    expect(last?.author).toEqual({
+      kind: 'agent',
+      name: 'e2e-key',
+      runId: 'run-9',
+      principalId: `agent:${key.tokenId}`,
+    });
+    expect(JSON.stringify(versions)).not.toContain('"kevin"');
+    // the manifest answers the key holder too
+    const manifest = await request.get(`/api/agent?deck=${DECK}`, {
+      headers: { authorization: `Bearer ${key.secret}` },
+    });
+    expect(manifest.status()).toBe(200);
+  });
+
+  test('an unknown key and a revoked key answer 401 with no detail; the header alone still names a run id on localhost', async ({
+    request,
+  }) => {
+    if (key === null) throw new Error('no key');
+    const unknown = await request.post(`/api/actions/deck.info?deck=${DECK}`, {
+      data: {},
+      headers: { authorization: 'Bearer ts_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' },
+    });
+    expect(unknown.status()).toBe(401);
+    const body = (await unknown.json()) as Conflict;
+    expect(body.error.code).toBe('unauthorized');
+    expect(body.error.message).not.toContain('ts_AAAA');
+    expect((seed('revoke', AUTH_DB, key.tokenId) as { revoked: boolean }).revoked).toBe(true);
+    const revoked = await request.post(`/api/actions/deck.info?deck=${DECK}`, {
+      data: {},
+      headers: { authorization: `Bearer ${key.secret}` },
+    });
+    expect(revoked.status()).toBe(401);
+    expect(((await revoked.json()) as Conflict).error.message).toMatch(/unknown or revoked/);
+    // the round one form on a checkout: no bearer, the header names the run id
+    const open = await post(request, 'deck.info', {}, { author: 'agent:e2e-agent' });
+    expect(open.status()).toBe(200);
+  });
 });

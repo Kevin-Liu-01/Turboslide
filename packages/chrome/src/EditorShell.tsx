@@ -8,9 +8,13 @@ import type { ShapeCategory } from '@turboslide/schema/shapes';
 import { applyTheme, readTheme } from '@turboslide/viewer/theme';
 import type { Theme } from '@turboslide/viewer/theme';
 
+import { ActivityPanel } from './activity/ActivityPanel';
 import { BottomBar } from './BottomBar';
+import { anchorAtSelection, canvasOrder, stepThread } from './comments/comments-model';
+import { CommentsPanel } from './comments/CommentsPanel';
 import { DiagramPanel } from './DiagramPanel';
 import { AgentAccessDialog } from './dialogs/AgentAccess';
+import { AvatarBuilderDialog } from './dialogs/AvatarBuilder';
 import { BackgroundDialog } from './dialogs/Background';
 import { CustomSpacingDialog } from './dialogs/CustomSpacing';
 import { DetailsDialog } from './dialogs/Details';
@@ -24,10 +28,17 @@ import { InsertIconDialog } from './dialogs/InsertIcon';
 import { InsertMaterialDialog } from './dialogs/InsertMaterial';
 import { LinkDialog } from './dialogs/Link';
 import { MakeCopyDialog } from './dialogs/MakeCopy';
+import { ForgetBrowserDialog } from './dialogs/ForgetBrowser';
+import { NamePromptDialog } from './dialogs/NamePrompt';
 import { NameVersionDialog } from './dialogs/NameVersion';
+import { NotificationSettingsDialog } from './dialogs/NotificationSettings';
 import { OpenDialog } from './dialogs/Open';
+import { ProfileDialog } from './dialogs/Profile';
 import { PublishDialog } from './dialogs/Publish';
+import { RequestAccessDialog } from './dialogs/RequestAccess';
 import { ShareDialog } from './dialogs/Share';
+import { SignInDialog } from './dialogs/SignIn';
+import { EditHtmlPanel } from './EditHtmlPanel';
 import { SlideNumbersDialog } from './dialogs/SlideNumbers';
 import { SpecialCharactersDialog } from './dialogs/SpecialCharacters';
 import { WordArtBar } from './dialogs/WordArtBar';
@@ -57,6 +68,7 @@ import {
   selectedBlock,
   selectedBlocks,
   shapeDrawTool,
+  modeOf,
   shapePickPlan,
   wordArtBlock,
   writeStoredSettings,
@@ -65,14 +77,22 @@ import {
 import type {
   ActionPlan,
   ActionRefusal,
+  CommentThreadView,
   DialogId,
   EditorShellInput,
   InsertPicker,
   PanelId,
   ShellSettings,
+  VersionDiffView,
 } from './editor-shell';
 import { EditorShellContext } from './editor-shell-context';
-import type { DialogRequest, EditorShellState, LayoutGridRequest } from './editor-shell-context';
+import type {
+  CommentCardRequest,
+  DialogRequest,
+  EditorShellState,
+  LayoutGridRequest,
+} from './editor-shell-context';
+import { InboxPanel } from './inbox/InboxPanel';
 import { FormatOptions } from './FormatOptions';
 import { HistoryPanel } from './HistoryPanel';
 import type { FormatSectionId } from './inspector/format-sections';
@@ -83,7 +103,7 @@ import { detectPlatform } from './menus/keys';
 import type { KeyBinding } from './menus/keys';
 import { evaluate, findItem, isEnabled, itemById, resolveEffect } from './menus/model';
 import type { MenuId, MenuItem, MenuSetting, Platform } from './menus/model';
-import { CANVAS_NOTICES, PANELS, SNACKBARS } from './menus/strings';
+import { CANVAS_NOTICES, PANELS, REFUSALS, SNACKBARS } from './menus/strings';
 import type { TailControl } from './menus/toolbar-tails';
 import { Palette } from './Palette';
 import { Panel } from './Panel';
@@ -95,6 +115,10 @@ import { ShapePicker } from './pickers/ShapePicker';
 import { TableGrid } from './pickers/TableGrid';
 import { WeightList } from './pickers/WeightList';
 import { PicturesPanel } from './PicturesPanel';
+import { AnnouncerRegion } from './presence/Announcer';
+import { FollowingPlate } from './presence/FollowingPlate';
+import { openRoster } from './presence/roster-hook';
+import { displayNameFor, viewerFactsOf } from './presence/presence-model';
 import { usePtShell } from './shell-context';
 import type { ShellState } from './shell-context';
 import { ShortcutsDialog } from './ShortcutsDialog';
@@ -108,7 +132,9 @@ import { ToolbarTail } from './ToolbarTail';
 import { ToolFinder } from './ToolFinder';
 import { useEditorKeys } from './useEditorKeys';
 import { VersionsPanel } from './VersionsPanel';
+import { previousOf } from './versions-model';
 import { useMountEffect } from './lib/useMountEffect';
+import type { Version } from '@turboslide/schema/mutations';
 
 import './EditorShell.css';
 
@@ -221,6 +247,12 @@ export function EditorShell({
   );
   const [makeCopySelected, setMakeCopySelected] = useState(false);
   const [publishTab, setPublishTab] = useState<'link' | 'embed'>('link');
+  /* round three (SPEC-3 5.3, 5.7): the comment card the overlay draws, the Show changes diff */
+  const [commentCard, setCommentCard] = useState<CommentCardRequest | null>(null);
+  const [diff, setDiff] = useState<VersionDiffView | null>(null);
+  const [selectedVersion, setSelectedVersion] = useState<Version | null>(null);
+  /* the first chord of a two step comment chord (Cmd+Ctrl+N then C), until the C or 2 s */
+  const pendingChord = useRef<{ direction: 1 | -1; at: number } | null>(null);
 
   /* the platform, the stored settings, the last layout and the chrome appearance, read after mount */
   useMountEffect(() => {
@@ -261,6 +293,26 @@ export function EditorShell({
     else root.setAttribute('data-rpanel', panel);
   }, [panel, stageRef]);
 
+  /* View > Mode on the root, so the stage and the stylesheet read it (SPEC-3 5.3, 6.3) */
+  const mode = modeOf(input);
+  useEffect(() => {
+    const root = stageRef.current?.closest<HTMLElement>('.pt-viewer');
+    if (!root) return;
+    root.setAttribute('data-edit-mode', mode);
+  }, [mode, stageRef]);
+
+  /* the name prompt fires when the route says so (SPEC-3 0.18): never on open, on the first write.
+     It is a floating card beside the dialog slot, not the shell's dialog, so the keys, the menu bar
+     and the caret of the person typing stay live while it waits (VERIFICATION-3 finding 8); a real
+     dialog covers it while open */
+  const namePromptOpen = input.account?.namePrompt?.open === true;
+
+  /* `comment.link`'s target and the route's open thread: the card follows it */
+  const routeThread = input.comments?.openThreadId ?? null;
+  useEffect(() => {
+    if (routeThread !== null) setCommentCard({ threadId: routeThread });
+  }, [routeThread]);
+
   /* the deck's appearance changed while the chrome matches it */
   const deckAppearance = appearanceOf(input.document.deck);
   useEffect(() => {
@@ -282,6 +334,16 @@ export function EditorShell({
       compact,
       appearance,
       viewing: input.toggles?.viewing ?? false,
+      /* SPEC-3 5.3: the route's mode, else the round one Viewing flag */
+      mode: modeOf(input),
+      /* SPEC-3 4.6: the room's pointer facts win over the stored settings */
+      ...(input.presence?.pointerMine === undefined
+        ? {}
+        : { pointerMine: input.presence.pointerMine }),
+      ...(input.presence?.pointersVisible === undefined
+        ? {}
+        : { pointerOthers: input.presence.pointersVisible }),
+      ...(input.comments?.display === undefined ? {} : { comments: input.comments.display }),
       sideBySide: input.toggles?.sideBySide ?? false,
       sourceDrawer: input.toggles?.source ?? false,
       suggestionMarks: input.toggles?.suggestionMarks ?? false,
@@ -294,6 +356,10 @@ export function EditorShell({
       compact,
       appearance,
       input.toggles,
+      input.mode,
+      input.presence?.pointerMine,
+      input.presence?.pointersVisible,
+      input.comments?.display,
       input.document.deck.sections.length,
     ],
   );
@@ -632,6 +698,40 @@ export function EditorShell({
           current.onSelectBlock?.(undefined);
           filmstripRef.current?.selectNone();
           return;
+        /* round three (SPEC-3 5.3, 13.1, 13.2) */
+        case 'comment': {
+          if (current.comments?.add === undefined) {
+            say('Comments need the room; open the presentation from the studio');
+            return;
+          }
+          const anchor = anchorAtSelection(current.slideId, current.selection);
+          setCommentCard({ anchor });
+          return;
+        }
+        case 'copyLink': {
+          /* the address without a token (0.16) */
+          const origin =
+            current.origin ?? (typeof window === 'undefined' ? '' : window.location.origin);
+          const url = `${origin}/deck/${encodeURIComponent(current.deckId)}`;
+          navigator.clipboard
+            .writeText(url)
+            .then(() => say(SNACKBARS.linkCopied))
+            .catch(() => say(url));
+          return;
+        }
+        case 'goToClient': {
+          const target = current.presence?.others.find((each) => each.slideId !== undefined);
+          if (target === undefined) {
+            say('Nobody else has this presentation open');
+            return;
+          }
+          if (current.presence?.onGoTo) current.presence.onGoTo(target.clientId);
+          else if (target.slideId !== undefined) s.select(target.slideId);
+          return;
+        }
+        case 'accountMenu':
+          document.querySelector<HTMLButtonElement>('[data-control="title.account"]')?.click();
+          return;
         default:
           say(`${item.label} is not available for the current selection`);
       }
@@ -659,6 +759,50 @@ export function EditorShell({
         case 'viewing':
           current.toggles?.onViewing?.(value === true);
           return;
+        /* SPEC-3 5.3: the editor's setMode gates the gestures; a route with the round one flag alone reads Viewing */
+        case 'mode': {
+          const mode =
+            value === 'commenting' || value === 'viewing' || value === 'editing'
+              ? value
+              : 'editing';
+          if (current.editor?.setMode) current.editor.setMode(mode);
+          else current.toggles?.onViewing?.(mode === 'viewing');
+          return;
+        }
+        /* round three (SPEC-3 4.6, 5.3, 5.7, 0.42) */
+        case 'comments': {
+          const display =
+            value === 'all' || value === 'expanded' || value === 'minimized' || value === 'hidden'
+              ? value
+              : 'all';
+          setSetting('comments', display);
+          current.comments?.onDisplay?.(display);
+          return;
+        }
+        case 'pointerMine': {
+          const on = !(current.presence?.pointerMine ?? effectiveSettings.pointerMine === true);
+          setSetting('pointerMine', on);
+          current.presence?.onPointer?.(on);
+          return;
+        }
+        case 'pointerOthers': {
+          const on = !(
+            current.presence?.pointersVisible ?? effectiveSettings.pointerOthers !== false
+          );
+          setSetting('pointerOthers', on);
+          current.presence?.onPointerOthers?.(on);
+          return;
+        }
+        case 'announce': {
+          const on = !(effectiveSettings.announce === true);
+          setSetting('announce', on);
+          current.presence?.onAnnounce?.(on);
+          return;
+        }
+        case 'showChanges':
+          setSetting('showChanges', !(effectiveSettings.showChanges === true));
+          if (effectiveSettings.showChanges === true) setDiff(null);
+          return;
         case 'sideBySide':
           current.toggles?.onSideBySide?.(!(current.toggles.sideBySide ?? false));
           return;
@@ -679,6 +823,79 @@ export function EditorShell({
     },
     [compact, effectiveSettings, setAppearance, setCompact, setSetting],
   );
+
+  /* the comment card (SPEC-3 5.3): the overlay draws it; the route learns the open thread */
+  const openCommentCard = useCallback((request: CommentCardRequest) => {
+    setCommentCard(request);
+    if (request.threadId !== undefined) inputRef.current.comments?.onOpen?.(request.threadId);
+  }, []);
+  const closeCommentCard = useCallback(() => {
+    setCommentCard(null);
+    inputRef.current.comments?.onOpen?.(null);
+    const marker = document.querySelector<HTMLElement>('[data-control="comment.marker"]');
+    marker?.focus();
+  }, []);
+  const stepComment = useCallback(
+    (direction: 1 | -1) => {
+      const current = inputRef.current;
+      const threads = current.comments?.threads ?? [];
+      const order = canvasOrder(threads, current.document);
+      const currentId = commentCard?.threadId ?? null;
+      const next: CommentThreadView | null = stepThread(order, currentId, direction);
+      if (next === null) return;
+      if (next.anchor.slideId !== undefined && next.anchor.slideId !== current.slideId)
+        shellRef.current.select(next.anchor.slideId);
+      openCommentCard({ threadId: next.id });
+    },
+    [commentCard?.threadId, openCommentCard],
+  );
+
+  /* Show changes (SPEC-3 5.7): the selected version against its predecessor */
+  const selectVersion = useCallback(
+    (version: Version | null) => {
+      setSelectedVersion(version);
+      const current = inputRef.current;
+      if (version === null || effectiveSettings.showChanges !== true) {
+        setDiff(null);
+        return;
+      }
+      const previous = previousOf(current.versions ?? [], version);
+      const from = previous?.revision ?? Math.max(0, version.revision - 1);
+      const run =
+        current.diffVersions?.(from, version.revision) ??
+        (current.dispatch('version.diff', {
+          from,
+          to: version.revision,
+        }) as Promise<VersionDiffView>);
+      run.then((result) => setDiff(result)).catch((error: unknown) => say(errorText(error)));
+    },
+    [effectiveSettings.showChanges, say],
+  );
+  useEffect(() => {
+    if (effectiveSettings.showChanges === true && selectedVersion !== null && diff === null)
+      selectVersion(selectedVersion);
+  }, [effectiveSettings.showChanges, selectedVersion, diff, selectVersion]);
+
+  /* the second step of Cmd+Ctrl+N then C and P then C (section 14) */
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const pending = pendingChord.current;
+      if (pending === null) return;
+      if (Date.now() - pending.at > 2000) {
+        pendingChord.current = null;
+        return;
+      }
+      if (event.key.toLowerCase() === 'c') {
+        event.preventDefault();
+        pendingChord.current = null;
+        stepComment(pending.direction);
+      } else if (!event.metaKey && !event.ctrlKey && !event.altKey && event.key !== 'Shift') {
+        pendingChord.current = null;
+      }
+    };
+    document.addEventListener('keydown', onKey, true);
+    return () => document.removeEventListener('keydown', onKey, true);
+  }, [stepComment]);
 
   const runItem = useCallback(
     (item: MenuItem, anchor?: HTMLElement | null) => {
@@ -1128,12 +1345,51 @@ export function EditorShell({
             return true;
           }
           return false;
+        /* round three (SPEC-3 0.42, section 14): Shift+Tab reaches the key owner when the open
+           menu's list does not hold focus (the title button does); the menu closes and the
+           roster takes focus once it is placed, as it would from inside the list */
+        case 'key.roster': {
+          const opened = openRoster();
+          if (opened) setMenuOpen(null);
+          return opened;
+        }
+        case 'key.comment.enter': {
+          const card = document.querySelector<HTMLElement>('[data-control="comment.card"]');
+          if (card) {
+            card.focus();
+            return true;
+          }
+          const marker = document.querySelector<HTMLElement>('[data-control="comment.marker"]');
+          if (marker) {
+            marker.click();
+            return true;
+          }
+          return false;
+        }
+        case 'key.comment.thread': {
+          const threadId =
+            commentCard?.threadId ??
+            document.querySelector<HTMLElement>('[data-control="comment.marker"]')?.dataset.thread;
+          if (threadId === undefined) {
+            openPanel('comments');
+            return true;
+          }
+          openCommentCard({ threadId });
+          openPanel('comments');
+          return true;
+        }
+        case 'key.comment.next':
+          pendingChord.current = { direction: 1, at: Date.now() };
+          return true;
+        case 'key.comment.previous':
+          pendingChord.current = { direction: -1, at: Date.now() };
+          return true;
         default:
           break;
       }
       return false;
     },
-    [openDialog, rotateBy, say],
+    [commentCard?.threadId, openCommentCard, openDialog, openPanel, rotateBy, say],
   );
 
   useEditorKeys(
@@ -1196,6 +1452,11 @@ export function EditorShell({
       lastLayout,
       focusTitle,
       registerTitleField,
+      commentCard,
+      openCommentCard,
+      closeCommentCard,
+      stepComment,
+      diff,
     }),
     [
       input,
@@ -1230,11 +1491,20 @@ export function EditorShell({
       lastLayout,
       focusTitle,
       registerTitleField,
+      commentCard,
+      openCommentCard,
+      closeCommentCard,
+      stepComment,
+      diff,
     ],
   );
 
   const slide = input.document.slides[input.slideId];
   const speakerNotes = effectiveSettings.speakerNotes !== false;
+  const followed =
+    input.presence?.following === undefined || input.presence.following === null
+      ? undefined
+      : input.presence.others.find((each) => each.clientId === input.presence?.following);
 
   const panelNode = (() => {
     switch (panel) {
@@ -1294,6 +1564,14 @@ export function EditorShell({
               revision={input.revision}
               dispatch={input.dispatch}
               history
+              identities={input.identities}
+              showChanges={effectiveSettings.showChanges === true}
+              selected={selectedVersion}
+              onShowChanges={(on) => {
+                setSetting('showChanges', on);
+                if (!on) setDiff(null);
+              }}
+              onSelect={selectVersion}
               onMakeCopy={() => {
                 setMakeCopySelected(false);
                 openDialog('makeCopy');
@@ -1360,6 +1638,79 @@ export function EditorShell({
             busy={input.busy}
           />
         );
+      /* round three (SPEC-3 5.3, 5.5, 5.7, 0.27): the collaboration panels and Edit HTML */
+      case 'comments':
+        return input.comments === undefined ? (
+          <Panel title={PANELS.comments.title} onClose={closePanel} control="panel.comments">
+            <p className="ts-panel-empty">{PANELS.comments.empty}</p>
+          </Panel>
+        ) : (
+          <CommentsPanel
+            comments={input.comments}
+            document={input.document}
+            me={input.account?.principal}
+            canComment={
+              (input.capabilities === undefined || input.capabilities.includes('comment')) &&
+              effectiveSettings.mode !== 'viewing'
+            }
+            onOpen={(thread) => {
+              if (thread.anchor.slideId !== undefined && thread.anchor.slideId !== input.slideId)
+                shell.select(thread.anchor.slideId);
+              openCommentCard({ threadId: thread.id });
+            }}
+            onNotificationSettings={
+              input.capabilities === undefined || input.capabilities.includes('comment')
+                ? () => openDialog('notificationSettings')
+                : undefined
+            }
+            onClose={closePanel}
+            say={say}
+          />
+        );
+      case 'inbox':
+        return input.inbox === undefined ? (
+          <Panel title={PANELS.inbox.title} onClose={closePanel} control="panel.inbox">
+            <p className="ts-panel-empty">{PANELS.inbox.empty}</p>
+          </Panel>
+        ) : (
+          <InboxPanel
+            inbox={input.inbox}
+            document={input.document}
+            onOpen={(item) => {
+              if (input.inbox?.onOpen) input.inbox.onOpen(item);
+              if (item.slideId !== undefined && item.slideId !== input.slideId)
+                shell.select(item.slideId);
+              if (item.threadId !== undefined) openCommentCard({ threadId: item.threadId });
+              else if (item.kind === 'accessRequest') openDialog('share');
+            }}
+            onSettings={() => openDialog('notificationSettings')}
+            onClose={closePanel}
+          />
+        );
+      case 'activity':
+        return (
+          <ActivityPanel
+            activity={input.activity}
+            onOpen={(event) => {
+              if (event.slideId !== undefined && event.slideId !== input.slideId)
+                shell.select(event.slideId);
+              if (event.threadId !== undefined) openCommentCard({ threadId: event.threadId });
+            }}
+            onClose={closePanel}
+          />
+        );
+      case 'editHtml':
+        return (
+          <EditHtmlPanel
+            slideId={input.slideId}
+            block={selectedBlock(slide, input.selection)}
+            revision={input.revision}
+            dispatch={input.dispatch}
+            busy={input.busy}
+            onNotice={say}
+            onClose={closePanel}
+          />
+        );
       default:
         return null;
     }
@@ -1413,6 +1764,22 @@ export function EditorShell({
         return <CustomSpacingDialog />;
       case 'specialCharacters':
         return <SpecialCharactersDialog />;
+      /* round three (SPEC-3 7.2 to 7.6, 5.5, 6.5) */
+      case 'namePrompt':
+        /* opened on purpose (Change name): a dialog with the scrim and the trap (finding 36) */
+        return <NamePromptDialog modal />;
+      case 'signIn':
+        return <SignInDialog />;
+      case 'profile':
+        return <ProfileDialog />;
+      case 'avatarBuilder':
+        return <AvatarBuilderDialog />;
+      case 'notificationSettings':
+        return <NotificationSettingsDialog />;
+      case 'requestAccess':
+        return <RequestAccessDialog role={dialog.role ?? 'editor'} />;
+      case 'forgetBrowser':
+        return <ForgetBrowserDialog />;
     }
   })();
 
@@ -1546,6 +1913,37 @@ export function EditorShell({
             <WordArtBar onInsert={insertWordArt} onCancel={() => setWordArtOpen(false)} />
           ) : null}
           {children}
+          {followed !== undefined ? (
+            <FollowingPlate
+              followed={followed}
+              name={displayNameFor(followed, viewerFactsOf(input.access, input.presence))}
+              onStop={() => {
+                if (input.presence?.onUnfollow) input.presence.onUnfollow();
+                else input.editor?.followClient?.('');
+              }}
+            />
+          ) : null}
+          {input.sync?.persisted !== undefined && input.sync.persisted.count > 0 ? (
+            <div className="ts-queue-plate ts-chrome" role="status" data-control="sync.persisted">
+              <span>{REFUSALS.unsavedChanges(input.sync.persisted.count)}</span>
+              <button
+                type="button"
+                className="pt-ib is-text"
+                data-control="sync.persisted.discard"
+                onClick={input.sync.persisted.onDiscard}
+              >
+                <span className="pt-lb">{REFUSALS.discard}</span>
+              </button>
+              <button
+                type="button"
+                className="pt-ib is-solid"
+                data-control="sync.persisted.apply"
+                onClick={input.sync.persisted.onApply}
+              >
+                <span className="pt-lb">{REFUSALS.apply}</span>
+              </button>
+            </div>
+          ) : null}
         </div>
         {speakerNotes && input.notes !== undefined ? (
           <div className="ts-notes-slot">{input.notes}</div>
@@ -1557,6 +1955,7 @@ export function EditorShell({
       {layoutPlate}
       {anchoredNode}
       {dialogNode}
+      {namePromptOpen && dialog === null ? <NamePromptDialog /> : null}
       <ToolFinder
         open={toolFinderOpen}
         document={input.document}
@@ -1582,6 +1981,12 @@ export function EditorShell({
         onNotice={say}
       />
       <Snackbar message={snackbar.message} onDismiss={snackbar.dismiss} />
+      <AnnouncerRegion
+        on={effectiveSettings.announce === true}
+        presence={input.presence}
+        document={input.document}
+        viewer={viewerFactsOf(input.access, input.presence)}
+      />
     </EditorShellContext>
   );
 }

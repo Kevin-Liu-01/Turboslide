@@ -351,6 +351,7 @@ export async function extractScenes(options: ExtractOptions): Promise<ExtractRes
                 tags,
               }),
               slide,
+              { deck, deckDir: options.deckDir },
             );
             scene.title = slideTitle(slide, scene.n);
             if (pictureFile) scene.pictureFile = pictureFile;

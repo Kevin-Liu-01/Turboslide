@@ -104,9 +104,10 @@ describe('turboslide cli', () => {
       sections: { id: string; slides: { n: number; title: string }[] }[];
     };
     // the lint fixture deck: eight slides of round one plus canvas-title and canvas-objects
-    expect(info.counts).toMatchObject({ slides: 10, sections: 2, canvas: 3 });
+    // the lint fixture deck: ten slides of rounds one and two plus canvas-dither (gslides-parity SPEC-3 10.4)
+    expect(info.counts).toMatchObject({ slides: 11, sections: 2, canvas: 4 });
     expect(info.sections[0]?.slides[1]).toMatchObject({ n: 2, title: 'The content rule' });
-    expect(r.stderr).toContain('10 slides in 2 sections');
+    expect(r.stderr).toContain('11 slides in 2 sections');
   });
 
   test('validate reports the planted schema violations and passes a clean deck', async () => {

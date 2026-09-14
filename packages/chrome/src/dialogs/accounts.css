@@ -1,0 +1,279 @@
+/* The account dialogs (gslides-parity SPEC-3 7.2 to 7.6, 9.3; research 11 8 P6 to P9): fixed
+   boxes for every state (the name prompt 360 by 168, the sign in dialog 400 by 320, the profile
+   and the avatar builder 560 by 640), a reserved 20 px error row, the preview strip's eight fixed
+   boxes from first paint, the session list at 40 px rows with a three row minimum. Monochrome. */
+
+/* the reserved error row: one line that speaks without moving anything */
+.ts-dialog-error-row {
+  box-sizing: border-box;
+  min-height: 20px;
+  margin: 4px 0 0;
+  color: var(--pt-ink-2);
+  font-size: 12px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-dialog-error-row:empty::before {
+  content: '\00a0';
+}
+
+/* ---- the name prompt: 360 by 168 ---- */
+.ts-name-prompt {
+  height: 168px;
+}
+
+.ts-name-prompt .ts-dialog-body {
+  padding-top: 4px;
+}
+
+.ts-name-prompt-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.ts-name-prompt-field {
+  box-sizing: border-box;
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--pt-hair);
+  border-radius: 0;
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+}
+
+.ts-name-prompt-field:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-name-prompt-signin {
+  appearance: none;
+  margin: 0;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--pt-ink);
+  font: 13px/1 var(--pt-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* ---- the sign in dialog: 400 by 320 ---- */
+.ts-sign-in {
+  height: 320px;
+}
+
+.ts-sign-in-body {
+  min-height: 180px;
+}
+
+.ts-sign-in-methods {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-sign-in-method {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--pt-hair);
+  background: none;
+  color: var(--pt-ink);
+  font: 13px/1.2 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-sign-in-method.is-later {
+  color: var(--pt-titanium);
+  cursor: default;
+}
+
+.ts-sign-in-note {
+  font-size: 11px;
+  color: var(--pt-titanium);
+}
+
+.ts-sign-in-sent {
+  margin: 0 0 8px;
+  color: var(--pt-ink-2);
+}
+
+/* ---- the profile and the avatar builder: 560 by 640 ---- */
+.ts-profile,
+.ts-avatar-builder {
+  height: 640px;
+}
+
+.ts-profile .ts-dialog-body,
+.ts-avatar-builder .ts-dialog-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.ts-profile-head {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-profile-sentence {
+  color: var(--pt-ink-2);
+  font-size: 12px;
+}
+
+.ts-profile-section {
+  margin-top: 12px;
+}
+
+.ts-profile-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  font-weight: 500;
+}
+
+.ts-profile-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-height: 120px;
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  border: 1px solid var(--pt-hair-soft);
+}
+
+.ts-profile-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  height: 40px;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+  contain-intrinsic-size: auto 40px;
+}
+
+.ts-profile-row:last-child {
+  border-bottom: 0;
+}
+
+.ts-profile-row-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ts-profile-row-main {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-profile-row-meta {
+  color: var(--pt-ink-2);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-profile-empty {
+  margin: 0;
+  padding: 12px 10px;
+  color: var(--pt-titanium);
+  height: 40px;
+  box-sizing: border-box;
+}
+
+.ts-profile-danger {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+/* the avatar builder's preview strip: eight fixed boxes, 24, 32, 64 and 256 in light and dark */
+.ts-avatar-strip {
+  display: grid;
+  grid-template-columns: 24px 32px 64px 256px;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px 12px;
+  align-items: center;
+  justify-items: center;
+  padding: 8px;
+  border: 1px solid var(--pt-hair-soft);
+}
+
+.ts-avatar-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background: var(--pt-paper);
+}
+
+.ts-avatar-cell.is-dark {
+  --pt-paper: #070707;
+  --pt-ink: #f2f2f0;
+  --pt-edge: rgba(242, 242, 240, 0.55);
+  --pt-plate: rgba(242, 242, 240, 0.05);
+  background: #070707;
+}
+
+.ts-avatar-scaled {
+  transform-origin: top left;
+  image-rendering: pixelated;
+}
+
+.ts-avatar-panel {
+  box-sizing: border-box;
+  height: 320px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.ts-avatar-crop {
+  position: relative;
+  width: 256px;
+  height: 256px;
+  margin: 8px auto 0;
+  border: 1px solid var(--pt-edge);
+  background: var(--pt-plate);
+  overflow: hidden;
+}
+
+.ts-avatar-crop img {
+  position: absolute;
+  max-width: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.ts-avatar-sentence {
+  margin: 12px 0 0;
+  color: var(--pt-ink-2);
+}

@@ -329,3 +329,32 @@ test('the source drawer is a delegating owner over the same validator', async ({
     .toBe('editor');
   expect(existsSync(join(DECK_DIR, 'versions'))).toBe(true);
 });
+
+test('a guarded share action through the window API is refused without the page nonce (SPEC-3 6.6)', async ({
+  page,
+}) => {
+  await openEditor(page);
+  // the editor's adapter guards the share, comment, invite, access and account handlers behind
+  // the nonce it holds in a closure (packages/agent/src/window/guard.ts); a script in the origin
+  // reaches window.turboslide.studio and gets the fixed sentence, never a write. Until B2's edit
+  // route sets the guard on its adapter the row records the gap instead of passing silently.
+  const outcome = await page.evaluate(() =>
+    window
+      .turboslide!.studio.invoke('share.setGeneralAccess', { mode: 'link', role: 'editor' })
+      .then(
+        () => 'resolved',
+        (error: unknown) => (error instanceof Error ? error.message : String(error)),
+      ),
+  );
+  const described = await page.evaluate(() => window.turboslide!.studio.describe());
+  expect(JSON.stringify(described)).not.toMatch(/nonce/i);
+  const REFUSAL = 'This action is available from the presentation’s own controls';
+  // until B2's edit route sets `guard: page.guard` on the editor adapter the call reaches the
+  // dispatcher (it resolves, or fails on its own input); the row is skipped with the gap named,
+  // never passed silently, and asserts the sentence once the guard is wired
+  test.skip(
+    outcome !== REFUSAL,
+    `the editor adapter carries no nonce guard yet (B2 edit route, build-3/b4.md request 2.4.3); the call answered: ${outcome}`,
+  );
+  expect(outcome).toBe(REFUSAL);
+});

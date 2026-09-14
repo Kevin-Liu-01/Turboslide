@@ -1,0 +1,46 @@
+{
+  "base": "http://localhost:4336",
+  "at": "2026-09-14T07:15:29.972Z",
+  "rows": [
+    {
+      "name": "scratch deck",
+      "ok": true,
+      "evidence": "verifier-ic-mu0wr64y from gt-brand's title"
+    },
+    {
+      "name": "Insert > Comment with nothing selected opens the card anchored to the slide",
+      "ok": true,
+      "evidence": "{\"disabled\":null,\"card\":true,\"panel\":null,\"dialog\":null,\"markers\":0,\"menuOpen\":false,\"snackbar\":\"\"}; selection null"
+    },
+    {
+      "name": "the card submits and leaves a marker",
+      "ok": true,
+      "evidence": "{\"card\":false,\"panel\":null,\"dialog\":null,\"markers\":1,\"menuOpen\":false}"
+    },
+    {
+      "name": "Insert > Comment with a slide card selected",
+      "ok": true,
+      "evidence": "{\"disabled\":null,\"card\":true,\"panel\":null,\"dialog\":null,\"markers\":1,\"menuOpen\":false,\"snackbar\":\"\"}"
+    },
+    {
+      "name": "a block to select",
+      "ok": null,
+      "evidence": "title has no slot block (a kind slide)"
+    },
+    {
+      "name": "the toolbar Add comment control",
+      "ok": null,
+      "evidence": "no toolbar comment control found by the probe selectors"
+    },
+    {
+      "name": "Cmd+Option+M opens the card (section 14)",
+      "ok": true,
+      "evidence": "{\"card\":true,\"panel\":null,\"dialog\":null,\"markers\":1,\"menuOpen\":false}"
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "evidence": "verifier-ic-mu0wr64y trashed and removed"
+    }
+  ]
+}

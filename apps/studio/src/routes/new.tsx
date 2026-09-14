@@ -7,6 +7,7 @@ import { parseAuthor } from '@turboslide/schema/mutations';
 import type { Author } from '@turboslide/schema/mutations';
 import { TITLE_ROW } from '@turboslide/chrome/menus/strings';
 
+import { EditorSkeleton } from '../components/EditorSkeleton';
 import { useMountEffect } from '../components/useMountEffect';
 import { DECK_CREATED_EVENT, readDraftDeck } from '../server/write';
 import type { DeckCreatedDetail, EditorDeck } from '../server/write';
@@ -64,6 +65,9 @@ const EditorRoot: ComponentType<DraftEditorProps> | undefined = (
 export const Route = createFileRoute('/new')({
   ssr: false,
   validateSearch: validateEditSearch,
+  // first paint carries the editor's rows and columns while the loader answers (SPEC-3 9.2 E1)
+  pendingComponent: EditorSkeleton,
+  pendingMs: 0,
   loader: () => readDraftDeck(),
   head: () => ({ meta: [{ title: `${TITLE_ROW.untitled}, Turboslide` }] }),
   component: NewPage,

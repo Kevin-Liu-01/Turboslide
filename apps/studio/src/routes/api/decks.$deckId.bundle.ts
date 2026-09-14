@@ -4,9 +4,11 @@ import { refuse } from '@turboslide/agent/http/errors';
 import { SLUG_PATTERN } from '@turboslide/schema/ids';
 import { BUNDLE_MEDIA_TYPE } from '@turboslide/store/bundle';
 
+import { authorize, contextForIdentity, denialBody, requestContext } from '../../server/authorize';
+import type { AuthContext } from '../../server/authorize';
 import {
   DOWNLOAD_PURPOSE,
-  bundleRouteAuth,
+  bundleRouteAdmission,
   exportDeckBundle,
   storeBundleCopy,
 } from '../../server/bundle-core';
@@ -34,8 +36,20 @@ export const Route = createFileRoute('/api/decks/$deckId/bundle')({
       GET: async ({ params, request }) => {
         if (!SLUG_PATTERN.test(params.deckId))
           return refuse(400, 'invalid_input', 'deckId must be a slug');
-        const denied = bundleRouteAuth(request, DOWNLOAD_PURPOSE, params.deckId);
-        if (denied) return denied;
+        const admission = bundleRouteAdmission(request, DOWNLOAD_PURPOSE, params.deckId);
+        if (admission instanceof Response) return admission;
+        // a bundle carries the notes and every slide: `exportNotes` for the identity behind the
+        // ticket or the request (gslides-parity SPEC-3 6.3, 8.2)
+        const ctx: AuthContext =
+          admission.kind === 'ticket'
+            ? contextForIdentity(admission.identity)
+            : await requestContext(request);
+        const decision = await authorize(ctx, params.deckId, 'exportNotes', {
+          action: 'deck.pack',
+          transport: 'route',
+        });
+        if (!decision.ok)
+          return Response.json(denialBody(decision, 'exportNotes'), { status: decision.status });
         let packed;
         try {
           packed = await exportDeckBundle(params.deckId);

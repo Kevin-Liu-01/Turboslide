@@ -78,3 +78,115 @@
   gap: 8px;
   padding-top: 4px;
 }
+
+/* The Format options Dither section (gslides-parity SPEC-3 10.7, 9.3): every row a fixed 32 px
+   line so a toggle, a preset or a slider moves nothing under it; the metrics line reserves one
+   line ("Not measured") before a frame speaks; the advanced rows open under the buttons. */
+.ts-dither-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ts-dither-section .ts-dither-row,
+.ts-dither-section .ts-fo-slider.ts-dither-row {
+  min-height: 32px;
+}
+
+.ts-dither-metrics {
+  margin: 0;
+  min-height: 20px;
+  line-height: 20px;
+  font-size: 12px;
+  color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ts-dither-advanced {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+/* The Background dialog's dither rows (gslides-parity SPEC-3 10.6, 9.3): the covering picture's
+   fixed 96 by 54 thumbnail (a plate until the file decodes), the Dither toggle with its two chips
+   on one 32 px line, the reserved upload line, the Material row's three controls on one line. */
+.ts-dialog-bg-picture {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-dialog-bg-thumb {
+  display: block;
+  width: 96px;
+  height: 54px;
+  flex: none;
+  overflow: hidden;
+  background: var(--pt-plate);
+  border: 1px solid var(--pt-hair);
+}
+
+.ts-dialog-bg-thumb img {
+  display: block;
+  width: 96px;
+  height: 54px;
+  object-fit: cover;
+}
+
+.ts-dialog-dither {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 32px;
+}
+
+.ts-dialog-chips {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.ts-dialog-chip {
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--pt-hair);
+  border-radius: var(--pt-radius);
+  background: var(--pt-paper);
+  color: var(--pt-ink);
+  font: 12px var(--pt-text);
+  cursor: pointer;
+}
+
+.ts-dialog-chip.is-on {
+  border-color: var(--pt-ink);
+  background: var(--pt-ink);
+  color: var(--pt-paper);
+}
+
+.ts-dialog-chip:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ts-dialog-upload {
+  margin: 0;
+  min-height: 18px;
+  line-height: 18px;
+  font-size: 12px;
+  color: var(--pt-ink-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-dialog-material-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}

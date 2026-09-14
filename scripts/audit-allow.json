@@ -1,0 +1,4 @@
+{
+  "$comment": "Accepted advisories for scripts/check.mjs --audit (gslides-parity SPEC-3 8.10, 16.1 step 28): pnpm audit --prod --audit-level=high fails the step on any high or critical advisory whose GitHub id is not listed here, and on a listed one whose expiry has passed. Each entry names the advisory, the package, why it is accepted (the reachable code path, or the absence of one) and the date the acceptance ends; the integrator's merge notes record the day it was added. Empty on 2026-09-13: the merge 1 catalog (sharp 0.35.4, the pptxgenjs image-size override) left the audit clean (docs/gslides-parity/build-3/integrator.md section 3).",
+  "accepted": []
+}

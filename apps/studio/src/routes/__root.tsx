@@ -1,11 +1,13 @@
 import { TanStackDevtools } from '@tanstack/react-devtools';
-import { HeadContent, Link, Scripts, createRootRoute } from '@tanstack/react-router';
+import { HeadContent, Link, Scripts, createRootRoute, useRouter } from '@tanstack/react-router';
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
 import tokensCss from '@turboslide/chrome/tokens.css?url';
+import interWoff2 from '@turboslide/fonts/assets/InterVariable.woff2?url';
 import interCss from '@turboslide/fonts/inter.css?url';
+import interItalicWoff2 from '../../../../packages/fonts/assets/InterVariable-Italic.woff2?url';
 import { BLOCK_CSS } from '@turboslide/render/block-css';
 import sheetCss from '@turboslide/theme/gt-ink-paper/sheet.css?url';
 import stageCss from '@turboslide/theme/gt-ink-paper/stage.css?url';
@@ -28,6 +30,20 @@ import appCss from '../styles.css?url';
  */
 const NOINDEX_ROUTES: ReadonlySet<string> = new Set(['/new', '/decks/trash', '/print/$deckId']);
 
+/**
+ * The shell geometry boot script (gslides-parity SPEC-3 9.2 D1, D4, D6; research-3 05 3.3): runs
+ * in the head before first paint beside the theme boot script and stamps the saved geometry the
+ * viewer shell would otherwise apply in a mount effect (`gt-shell-sb`, `gt-shell-density`,
+ * `gt-shell-mode:deck:<id>` in localStorage; `?present=1` in the address) on `<html>` as
+ * `data-boot-sb`, `data-boot-density`, `data-boot-mode` and `data-boot-present`, so the chrome's
+ * CSS carries the unsettled frame (`.pt-viewer:not([data-settled])`, ViewerShell.css) and a saved
+ * closed list or outline density moves nothing at hydration. Attributes only; the React state
+ * still boots in its effect and stamps `data-settled` after it, so the server markup is unchanged.
+ * A storage that refuses to answer (a private window) stamps nothing and the default frame stands.
+ */
+export const SHELL_BOOT_SCRIPT =
+  "(function(){try{var d=document.documentElement,l=localStorage;var sb=l.getItem('gt-shell-sb');if(sb==='0'||sb==='1')d.setAttribute('data-boot-sb',sb);var de=l.getItem('gt-shell-density');if(de==='outline'||de==='thumbs')d.setAttribute('data-boot-density',de);var m=/^\\/(?:deck|embed|edit)\\/([^/?#]+)/.exec(location.pathname);if(m){var id=decodeURIComponent(m[1]);var mode=l.getItem('gt-shell-mode:deck:'+id);if(mode==='slide'||mode==='grid'||mode==='book')d.setAttribute('data-boot-mode',mode)}if(/[?&]present=1(?:&|$)/.test(location.search))d.setAttribute('data-boot-present','1')}catch(e){}})();";
+
 export const Route = createRootRoute({
   head: ({ matches }) => {
     const leaf = matches[matches.length - 1];
@@ -42,6 +58,22 @@ export const Route = createRootRoute({
       links: [
         /* no favicon file yet: an empty data URL keeps the browser from asking for /favicon.ico */
         { rel: 'icon', href: 'data:,' },
+        /* both Inter faces start with the HTML (SPEC-3 9.2 G1): the request no longer waits for
+           the stylesheet, and the metric matched fallback face of inter.css covers the swap */
+        {
+          rel: 'preload',
+          href: interWoff2,
+          as: 'font',
+          type: 'font/woff2',
+          crossOrigin: 'anonymous',
+        },
+        {
+          rel: 'preload',
+          href: interItalicWoff2,
+          as: 'font',
+          type: 'font/woff2',
+          crossOrigin: 'anonymous',
+        },
         { rel: 'stylesheet', href: interCss },
         { rel: 'stylesheet', href: tokensCss },
         { rel: 'stylesheet', href: sheetCss },
@@ -91,14 +123,32 @@ function DevtoolsMount() {
 }
 
 function RootDocument({ children }: { children: ReactNode }) {
+  /* the request's CSP nonce (SPEC-3 8.8): the router carries it from the security headers middleware
+     (router.tsx requestNonce); the browser hides the attribute once the script ran, so the hydration
+     compare is suppressed on these three elements */
+  const nonce = useRouter().options.ssr?.nonce;
   return (
     // the boot script stamps data-theme before hydration, so the attribute is expected to differ from the server's markup
     <html lang="en" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }}
+        />
+        {/* the saved shell geometry stamped before first paint (SPEC-3 9.2 D1, D4), beside the theme */}
+        <script
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: SHELL_BOOT_SCRIPT }}
+        />
         <HeadContent />
         {/* the CSS the renderer owns (SPEC 5.2), after the theme's sheet.css and under the same .ts-sheet root */}
-        <style dangerouslySetInnerHTML={{ __html: BLOCK_CSS }} />
+        <style
+          nonce={nonce}
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: BLOCK_CSS }}
+        />
       </head>
       <body>
         {children}

@@ -12,6 +12,7 @@ export type Parsed = {
 export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'deck',
   'author',
+  'author-id',
   'theme',
   'themes',
   'scale',
@@ -137,6 +138,20 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'count',
   'total',
   'adjust',
+  // the parity round three (docs/gslides-parity/SPEC-3.md section 12): the comment, share,
+  // notification, account, presence, dither and background commands
+  'principal',
+  'editors-can-share',
+  'viewers-can-download',
+  'viewers-can-see-comments',
+  'show-names-to-link-visitors',
+  'allow-html-blocks',
+  'activity-for-commenters',
+  'avatar-png',
+  'initials',
+  'picture',
+  'session',
+  'expires-at',
   'fill',
   'stroke',
   'width',
@@ -163,6 +178,38 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
   'right',
   'top',
   'bottom',
+  // the parity round three (docs/gslides-parity/SPEC-3.md section 12): comments, sharing, the
+  // inbox, accounts, admin, presence, the dither and the background commands
+  'mention',
+  'assign',
+  'block',
+  'state',
+  'search',
+  'since',
+  'limit',
+  'email',
+  'message',
+  'expires',
+  'label',
+  'grant',
+  'level',
+  'variant',
+  'view',
+  'scope',
+  'step',
+  'batch',
+  'pattern',
+  'tone',
+  'cell',
+  'strength',
+  'steps',
+  'seed',
+  'asset',
+  'client',
+  'kind',
+  'password',
+  'on',
+  'dither',
 ]);
 
 /**
@@ -173,6 +220,10 @@ export const VALUED_FLAGS: ReadonlySet<string> = new Set([
  */
 const OPTIONAL_VALUE_FLAGS: ReadonlySet<string> = new Set([
   'render',
+  // `presence pointer --on` is a switch; `admin flag <name> --on false` names a value
+  'on',
+  // `share access <id> --mode link` names a mode; `--dither` alone is the toggle, with a value the preset
+  'dither',
   'unset',
   // `text indent --out` is a switch (the step out); `export --out <dir>` names a directory
   'out',

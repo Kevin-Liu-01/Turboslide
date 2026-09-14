@@ -1,0 +1,76 @@
+{
+  "base": "http://localhost:4336",
+  "at": "2026-09-14T07:14:53.545Z",
+  "rows": [
+    {
+      "name": "scratch deck",
+      "ok": true,
+      "evidence": "verifier-name-mu0wqu6n from gt-brand's title"
+    },
+    {
+      "name": "finding 24: the own chip shows the typed name after account.setName (7.8: a typed name with guest)",
+      "ok": false,
+      "evidence": "chip before \"Plaster 865 (you)\", after \"Plaster 865 (you)\"; setName answered {\"principal\":{\"id\":\"anon_936aceff-4297-4720-9db2-3ef5e5108e58\",\"kind\":\"anonymous\",\"admin\":false},\"trust\":\"guest\",\"label\":\"Maya\",\"name\":\"Maya\",\"mark\":{\"density\":; state.account {\"label\":\"Plaster 865\",\"trust\":\"label\"}; the own menu reads \"PPlaster 865Not signed inChange nameChange avatarSign inForget this browserSessions\""
+    },
+    {
+      "name": "finding 24: the own presence chip after setName",
+      "ok": false,
+      "evidence": "own presence chip \"null\""
+    },
+    {
+      "name": "finding 24: the typed name survives a reload",
+      "ok": true,
+      "evidence": "chip after reload \"Maya (you)\""
+    },
+    {
+      "name": "7.2: no prompt on open",
+      "ok": true,
+      "evidence": "absent"
+    },
+    {
+      "name": "7.2: the prompt opens after the first inline session ends",
+      "ok": true,
+      "evidence": "{\"wrapClass\":\"ts-dialog-float ts-chrome\",\"ariaModal\":null,\"focusInside\":false,\"activeTag\":\"BODY\",\"box\":{\"x\":1064,\"y\":684,\"w\":360,\"h\":168,\"vw\":1440,\"vh\":900},\"title\":\"How should others see you?\"}"
+    },
+    {
+      "name": "the prompt is a floating card with no scrim and takes no focus (fix round deviation 1)",
+      "ok": true,
+      "evidence": "wrapper ts-dialog-float ts-chrome; aria-modal null; focus inside false; active BODY; box {\"x\":1064,\"y\":684,\"w\":360,\"h\":168,\"vw\":1440,\"vh\":900}"
+    },
+    {
+      "name": "the menu bar answers a click while the prompt is open (finding 8)",
+      "ok": true,
+      "evidence": "File menu open after 31 ms"
+    },
+    {
+      "name": "Esc on the menu leaves the prompt as it was, or closes it",
+      "ok": true,
+      "evidence": "prompt still open"
+    },
+    {
+      "name": "Continue records the name and closes the card",
+      "ok": false,
+      "evidence": "closed true; chip \"Graphite 276 (you)\"; state.account {\"label\":\"Graphite 276\",\"trust\":\"label\"}"
+    },
+    {
+      "name": "7.2: the prompt is one prompt (no second time)",
+      "ok": true,
+      "evidence": "absent after a second session"
+    },
+    {
+      "name": "7.4: Forget this browser asks first with ACCOUNT.forgetConfirm (fix round deviation 2)",
+      "ok": true,
+      "evidence": "\"Forget this browserForget this browser? Your name, avatar and unsaved changes here are cleared; earlier edits keep the old nameCancelForget this browser\""
+    },
+    {
+      "name": "Forget mints a new principal and label, and the page reloads as the new visitor",
+      "ok": true,
+      "evidence": "principal anon_8e504e78… -> anon_e8e3145d…; chip \"Gravel 787 (you)\""
+    },
+    {
+      "name": "cleanup",
+      "ok": true,
+      "evidence": "verifier-name-mu0wqu6n trashed and removed"
+    }
+  ]
+}

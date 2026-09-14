@@ -81,6 +81,39 @@ BUILD_VERSION = 2
 WINDOWS = (3, 1, 0x409)
 MAC = (1, 0, 0)
 
+# The metric matched fallback face (gslides-parity SPEC-3 9.2 G1; research-3 05 section 4 rule 3):
+# `Inter Fallback` is Arial with size-adjust, ascent-override, descent-override and
+# line-gap-override so a first visit paints the sheet's lines at Inter's metrics before the woff2
+# arrives and nothing moves when it does. The overrides are computed from the upright source's
+# hhea and OS/2 tables and from Arial's, both at 2048 units per em. Arial's numbers are pinned here
+# so the build is the same on a machine without the font (CI); when the system Arial exists it is
+# read and must agree, so a different Arial fails loudly rather than drifting. The average width
+# is the advance of the letters weighted by their English frequency (the letter table of the
+# Wikipedia article on letter frequency, rounded to three decimals) plus the space at 18 percent,
+# the way capsize and fontaine measure a face, so size-adjust matches running text rather than
+# the OS/2 xAvgCharWidth (which averages every glyph of the font once).
+LETTER_FREQUENCY = {
+    "a": 8.167, "b": 1.492, "c": 2.782, "d": 4.253, "e": 12.702, "f": 2.228, "g": 2.015,
+    "h": 6.094, "i": 6.966, "j": 0.153, "k": 0.772, "l": 4.025, "m": 2.406, "n": 6.749,
+    "o": 7.507, "p": 1.929, "q": 0.095, "r": 5.987, "s": 6.327, "t": 9.056, "u": 2.758,
+    "v": 0.978, "w": 2.360, "x": 0.150, "y": 1.974, "z": 0.074, " ": 18.0,
+}
+ARIAL_METRICS = {
+    "family": "Arial",
+    "unitsPerEm": 2048,
+    "ascent": 1854,
+    "descent": -434,
+    "lineGap": 67,
+    # the weighted average advance of LETTER_FREQUENCY over Arial Regular (macOS 15, Arial.ttf)
+    "avgWidth": 915.39312197561,
+}
+ARIAL_PATHS = [
+    Path("/System/Library/Fonts/Supplemental/Arial.ttf"),
+    Path("/Library/Fonts/Arial.ttf"),
+    Path("/usr/share/fonts/truetype/msttcorefonts/Arial.ttf"),
+]
+FALLBACK_FAMILY = "Inter Fallback"
+
 
 def sha256_of(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -308,6 +341,75 @@ def source_record(source_path: Path, source: TTFont, source_bytes: bytes) -> dic
     }
 
 
+def vertical_metrics(font: TTFont) -> dict:
+    head = font["head"]
+    hhea = font["hhea"]
+    return {
+        "unitsPerEm": head.unitsPerEm,
+        "ascent": hhea.ascent,
+        "descent": hhea.descent,
+        "lineGap": hhea.lineGap,
+    }
+
+
+def weighted_average_width(font: TTFont) -> float:
+    cmap = font.getBestCmap()
+    hmtx = font["hmtx"]
+    total = 0.0
+    weight = 0.0
+    for char, share in LETTER_FREQUENCY.items():
+        glyph = cmap.get(ord(char))
+        if glyph is None:
+            raise SystemExit(f"build-fonts: the source has no glyph for {char!r}")
+        total += hmtx[glyph][0] * share
+        weight += share
+    return total / weight
+
+
+def arial_metrics() -> dict:
+    """The pinned Arial numbers, checked against the system font when one is installed."""
+    for path in ARIAL_PATHS:
+        if not path.exists():
+            continue
+        arial = TTFont(path, recalcTimestamp=False)
+        measured = {**vertical_metrics(arial), "avgWidth": weighted_average_width(arial)}
+        for key in ("unitsPerEm", "ascent", "descent", "lineGap"):
+            if measured[key] != ARIAL_METRICS[key]:
+                raise SystemExit(f"build-fonts: {path} {key} is {measured[key]}, the pinned Arial has {ARIAL_METRICS[key]}")
+        if abs(measured["avgWidth"] - ARIAL_METRICS["avgWidth"]) > 1e-6:
+            raise SystemExit(f"build-fonts: {path} average width is {measured['avgWidth']}, the pinned Arial has {ARIAL_METRICS['avgWidth']}")
+        return {**ARIAL_METRICS, "checkedAgainst": str(path)}
+    return {**ARIAL_METRICS, "checkedAgainst": None}
+
+
+def percent(value: float) -> str:
+    """A CSS percentage at four decimals with the trailing zeros dropped (22.444%, 0%): the form
+    prettier keeps in inter.css, which inter.test.ts pins against fonts.json."""
+    text = f"{value * 100:.4f}".rstrip("0").rstrip(".")
+    return f"{text or '0'}%"
+
+
+def fallback_face(source: TTFont) -> dict:
+    """The `Inter Fallback` descriptors (SPEC-3 9.2 G1): size-adjust = Inter's average advance over
+    Arial's (both per em); the three overrides are Inter's ascent, descent and line gap per em
+    divided by size-adjust, so the fallback's line boxes equal Inter's at every size."""
+    inter = {**vertical_metrics(source), "avgWidth": weighted_average_width(source)}
+    arial = arial_metrics()
+    size_adjust = (inter["avgWidth"] / inter["unitsPerEm"]) / (arial["avgWidth"] / arial["unitsPerEm"])
+    ascent = (inter["ascent"] / inter["unitsPerEm"]) / size_adjust
+    descent = (abs(inter["descent"]) / inter["unitsPerEm"]) / size_adjust
+    line_gap = (inter["lineGap"] / inter["unitsPerEm"]) / size_adjust
+    return {
+        "family": FALLBACK_FAMILY,
+        "local": arial["family"],
+        "sizeAdjust": percent(size_adjust),
+        "ascentOverride": percent(ascent),
+        "descentOverride": percent(descent),
+        "lineGapOverride": percent(line_gap),
+        "metrics": {"inter": inter, "arial": arial, "letterWeights": LETTER_FREQUENCY},
+    }
+
+
 def build(source_path: Path, italic_path: Path, out: Path, prefix: str) -> tuple[dict, dict[str, bytes]]:
     source, source_bytes, version = open_source(source_path, "upright")
     italic, italic_bytes, italic_version = open_source(italic_path, "italic")
@@ -377,6 +479,8 @@ def build(source_path: Path, italic_path: Path, out: Path, prefix: str) -> tuple
         "displaySizes": DISPLAY_SIZES,
         "displayOpsz": DISPLAY_OPSZ,
         "standard": {"400": "Inter", "500": "Inter Medium"},
+        # the metric matched fallback face of gslides-parity SPEC-3 9.2 G1 (packages/fonts/src/inter.css)
+        "fallback": fallback_face(source),
         "faces": faces,
         # The same rows under the key the PPTX builder's fonts-map.ts reads (packages/export).
         "families": faces,

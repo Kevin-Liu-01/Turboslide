@@ -214,14 +214,18 @@ function textControls(options: { table?: boolean } = {}): TailControl[] {
       item: 'insert.link',
       dividerBefore: true,
     },
+    /* SPEC-3 5.3, 13.1: live, absent for a role that cannot comment, disabled in Viewing mode */
     {
       control: 'toolbar.insertComment',
       label: 'Insert comment',
       icon: 'chat',
       key: shortcut('Cmd+Option+M'),
-      status: 'later',
-      stubReason: 'Leave a note in the speaker notes instead',
+      status: 'now',
       item: 'insert.comment',
+      when: 'comment',
+      enabled: 'canComment',
+      disabledReason: 'Switch to Commenting or Editing under View > Mode to comment',
+      doc: 'A comment on the selected object, text or cell, or on the slide',
     },
     {
       control: 'toolbar.align',
@@ -395,6 +399,17 @@ const IMAGE_TAIL: TailControl[] = [
     enabled: 'imageEdited',
     disabledReason: 'The picture is not cropped, masked or adjusted',
   },
+  /* SPEC-3 10.5, 13.2: the deck's two tone screen over the picture, on and off, `aria-pressed`
+     from the block's field; the Format options Dither section carries the parameters */
+  {
+    control: 'toolbar.dither',
+    label: 'Dither',
+    icon: 'squares-2x2',
+    status: 'now',
+    item: 'format.image.dither',
+    turboslide: true,
+    doc: 'The deck’s two tone screen over the picture; change it under Format options',
+  },
   FORMAT_OPTIONS,
 ];
 
@@ -538,7 +553,36 @@ export const TOOLBAR_TAILS: Readonly<Record<TailKind, ReadonlyArray<TailControl>
 /** The Hide the menus chevron: the last control of every tail (SPEC 3.1 row 18). */
 export const HIDE_MENUS_CONTROL = 'toolbar.hideMenus';
 
-/** The tail for a selection family; the Hide the menus chevron is drawn apart at the far right. */
+/**
+ * The right end of every tail (SPEC-3 4.4, 6.3, 13.2), drawn apart beside the Hide the menus
+ * chevron whatever the selection: the own pointer toggle for editors (`aria-pressed`, the tooltips
+ * "Show my pointer" and "Showing my pointer"), and the View only button a viewer sees on the
+ * editor route, whose click asks for edit access. Both are present from first paint for their
+ * role and absent for the others (`when`), so nothing moves when a role is known.
+ */
+export const TOOLBAR_TAIL_END: ReadonlyArray<TailControl> = [
+  {
+    control: 'toolbar.pointer',
+    label: 'Show my pointer',
+    icon: 'cursor-arrow-rays',
+    status: 'now',
+    item: 'view.livePointers.mine',
+    when: 'write',
+    turboslide: true,
+    doc: 'Others see where your pointer is on the slide, with your name',
+  },
+  {
+    control: 'toolbar.viewOnly',
+    label: 'View only',
+    text: true,
+    status: 'now',
+    effect: { kind: 'action', id: 'share.requestAccess', input: { role: 'editor' } },
+    when: 'viewOnly',
+    doc: 'You can view this presentation. Click to request edit access',
+  },
+];
+
+/** The tail for a selection family; the Hide the menus chevron and the tail's end are drawn apart at the far right. */
 export function tailFor(kind: TailKind): TailControl[] {
   return TOOLBAR_TAILS[kind].filter((control) => control.control !== HIDE_MENUS_CONTROL);
 }

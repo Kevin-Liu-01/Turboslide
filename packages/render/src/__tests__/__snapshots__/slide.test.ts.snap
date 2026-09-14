@@ -2,7 +2,7 @@
 
 exports[`renderSlide > renders closing slide closing in dark 1`] = `
 {
-  "html": "<section class="slide opener s-opener s-closing is-on" data-slide="closing" data-kind="closing"><img class="opener-img" src="decks/test/assets/opener-brand-dark.jpg" data-light="decks/test/assets/opener-brand-light.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><svg class="mark" aria-hidden="true"><use href="#gt-mark"/></svg><div class="big" data-block="big" data-type="heading" data-run="big/text">Every product in every language</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">generaltranslation.com</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Singularity, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "html": "<section class="slide opener s-opener s-closing is-on" data-slide="closing" data-kind="closing"><img class="opener-img" src="decks/test/assets/opener-brand-dark.jpg" data-light="decks/test/assets/opener-brand-light.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><svg class="mark" aria-hidden="true"><use href="#gt-mark"/></svg><div class="big" data-block="big" data-type="heading" data-run="big/text">Every product in every language</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">generaltranslation.com</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Singularity, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
   "rasters": [],
   "slots": {
     "plate": [
@@ -18,7 +18,7 @@ exports[`renderSlide > renders closing slide closing in dark 1`] = `
 
 exports[`renderSlide > renders closing slide closing in light 1`] = `
 {
-  "html": "<section class="slide opener s-opener s-closing is-on" data-slide="closing" data-kind="closing"><img class="opener-img" src="decks/test/assets/opener-brand-light.jpg" data-dark="decks/test/assets/opener-brand-dark.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><svg class="mark" aria-hidden="true"><use href="#gt-mark"/></svg><div class="big" data-block="big" data-type="heading" data-run="big/text">Every product in every language</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">generaltranslation.com</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Singularity, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "html": "<section class="slide opener s-opener s-closing is-on" data-slide="closing" data-kind="closing"><img class="opener-img" src="decks/test/assets/opener-brand-light.jpg" data-dark="decks/test/assets/opener-brand-dark.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><svg class="mark" aria-hidden="true"><use href="#gt-mark"/></svg><div class="big" data-block="big" data-type="heading" data-run="big/text">Every product in every language</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">generaltranslation.com</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Singularity, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
   "rasters": [],
   "slots": {
     "plate": [
@@ -220,7 +220,7 @@ exports[`renderSlide > renders content slide free in light 1`] = `
 
 exports[`renderSlide > renders content slide site in dark 1`] = `
 {
-  "html": "<section class="slide is-on" data-slide="site" data-kind="content"><div class="in"><div class="cols wide-right"><div class="stack" data-slot="left"><h2 data-block="h" data-type="heading" data-run="h/text">The production site</h2></div><div class="shot-wrap" data-slot="right"><figure class="shot-fig" data-block="shot" data-type="shot"><img class="shot" src="decks/test/assets/site-home-dark.jpg" data-light="decks/test/assets/site-home-light.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="shot:1"><figcaption data-run="shot/caption">The home page.</figcaption></figure></div></div></div></section>",
+  "html": "<section class="slide is-on" data-slide="site" data-kind="content"><div class="in"><div class="cols wide-right"><div class="stack" data-slot="left"><h2 data-block="h" data-type="heading" data-run="h/text">The production site</h2></div><div class="shot-wrap" data-slot="right"><figure class="shot-fig" data-block="shot" data-type="shot"><img class="shot" src="decks/test/assets/site-home-dark.jpg" data-light="decks/test/assets/site-home-light.jpg" width="1440" height="900" alt="The home page at 1440 by 900" data-raster="shot" data-rid="shot:1"><figcaption data-run="shot/caption">The home page.</figcaption></figure></div></div></div></section>",
   "rasters": [
     {
       "alpha": false,
@@ -249,7 +249,7 @@ exports[`renderSlide > renders content slide site in dark 1`] = `
 
 exports[`renderSlide > renders content slide site in light 1`] = `
 {
-  "html": "<section class="slide is-on" data-slide="site" data-kind="content"><div class="in"><div class="cols wide-right"><div class="stack" data-slot="left"><h2 data-block="h" data-type="heading" data-run="h/text">The production site</h2></div><div class="shot-wrap" data-slot="right"><figure class="shot-fig" data-block="shot" data-type="shot"><img class="shot" src="decks/test/assets/site-home-light.jpg" data-dark="decks/test/assets/site-home-dark.jpg" alt="The home page at 1440 by 900" data-raster="shot" data-rid="shot:1"><figcaption data-run="shot/caption">The home page.</figcaption></figure></div></div></div></section>",
+  "html": "<section class="slide is-on" data-slide="site" data-kind="content"><div class="in"><div class="cols wide-right"><div class="stack" data-slot="left"><h2 data-block="h" data-type="heading" data-run="h/text">The production site</h2></div><div class="shot-wrap" data-slot="right"><figure class="shot-fig" data-block="shot" data-type="shot"><img class="shot" src="decks/test/assets/site-home-light.jpg" data-dark="decks/test/assets/site-home-dark.jpg" width="1440" height="900" alt="The home page at 1440 by 900" data-raster="shot" data-rid="shot:1"><figcaption data-run="shot/caption">The home page.</figcaption></figure></div></div></div></section>",
   "rasters": [
     {
       "alpha": false,
@@ -322,7 +322,7 @@ exports[`renderSlide > renders content slide voice in light 1`] = `
 
 exports[`renderSlide > renders mood slide mood-earth in dark 1`] = `
 {
-  "html": "<section class="slide mood s-mood is-on" data-slide="mood-earth" data-kind="mood"><img class="mood-img" src="decks/test/assets/opener-brand-dark.jpg" data-light="decks/test/assets/opener-brand-light.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="mood-plate" data-slot="plate"><div class="big title" data-block="title" data-type="heading" data-run="title/text">The Blue Marble</div><p style="margin-top:12px" data-block="p" data-type="paragraph" data-run="p/text">NASA's composite of the whole planet.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Image: NASA, Reto Stöckli, 2007, public domain</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "html": "<section class="slide mood s-mood is-on" data-slide="mood-earth" data-kind="mood"><img class="mood-img" src="decks/test/assets/opener-brand-dark.jpg" data-light="decks/test/assets/opener-brand-light.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="mood-plate" data-slot="plate"><div class="big title" data-block="title" data-type="heading" data-run="title/text">The Blue Marble</div><p style="margin-top:12px" data-block="p" data-type="paragraph" data-run="p/text">NASA's composite of the whole planet.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Image: NASA, Reto Stöckli, 2007, public domain</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
   "rasters": [],
   "slots": {
     "plate": [
@@ -338,7 +338,7 @@ exports[`renderSlide > renders mood slide mood-earth in dark 1`] = `
 
 exports[`renderSlide > renders mood slide mood-earth in light 1`] = `
 {
-  "html": "<section class="slide mood s-mood is-on" data-slide="mood-earth" data-kind="mood"><img class="mood-img" src="decks/test/assets/opener-brand-light.jpg" data-dark="decks/test/assets/opener-brand-dark.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="mood-plate" data-slot="plate"><div class="big title" data-block="title" data-type="heading" data-run="title/text">The Blue Marble</div><p style="margin-top:12px" data-block="p" data-type="paragraph" data-run="p/text">NASA's composite of the whole planet.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Image: NASA, Reto Stöckli, 2007, public domain</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "html": "<section class="slide mood s-mood is-on" data-slide="mood-earth" data-kind="mood"><img class="mood-img" src="decks/test/assets/opener-brand-light.jpg" data-dark="decks/test/assets/opener-brand-dark.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="mood-plate" data-slot="plate"><div class="big title" data-block="title" data-type="heading" data-run="title/text">The Blue Marble</div><p style="margin-top:12px" data-block="p" data-type="paragraph" data-run="p/text">NASA's composite of the whole planet.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Image: NASA, Reto Stöckli, 2007, public domain</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
   "rasters": [],
   "slots": {
     "plate": [
@@ -354,7 +354,7 @@ exports[`renderSlide > renders mood slide mood-earth in light 1`] = `
 
 exports[`renderSlide > renders opener slide opener-brand in dark 1`] = `
 {
-  "html": "<section class="slide opener s-opener is-on" data-slide="opener-brand" data-kind="opener"><img class="opener-img" src="decks/test/assets/opener-brand-dark.jpg" data-light="decks/test/assets/opener-brand-light.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><div class="big" data-block="big" data-type="heading" data-run="big/text">Brand</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">This section covers the company.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Event Horizon, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "html": "<section class="slide opener s-opener is-on" data-slide="opener-brand" data-kind="opener"><img class="opener-img" src="decks/test/assets/opener-brand-dark.jpg" data-light="decks/test/assets/opener-brand-light.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><div class="big" data-block="big" data-type="heading" data-run="big/text">Brand</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">This section covers the company.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Event Horizon, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
   "rasters": [],
   "slots": {
     "plate": [
@@ -370,7 +370,7 @@ exports[`renderSlide > renders opener slide opener-brand in dark 1`] = `
 
 exports[`renderSlide > renders opener slide opener-brand in light 1`] = `
 {
-  "html": "<section class="slide opener s-opener is-on" data-slide="opener-brand" data-kind="opener"><img class="opener-img" src="decks/test/assets/opener-brand-light.jpg" data-dark="decks/test/assets/opener-brand-dark.jpg" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><div class="big" data-block="big" data-type="heading" data-run="big/text">Brand</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">This section covers the company.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Event Horizon, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
+  "html": "<section class="slide opener s-opener is-on" data-slide="opener-brand" data-kind="opener"><img class="opener-img" src="decks/test/assets/opener-brand-light.jpg" data-dark="decks/test/assets/opener-brand-dark.jpg" width="1600" height="900" alt="The top arc of the event horizon ring, dithered"><div class="in"><div class="opener-plate" data-slot="plate"><div class="big" data-block="big" data-type="heading" data-run="big/text">Brand</div><p class="max-p" style="margin-top:14px" data-block="p" data-type="paragraph" data-run="p/text">This section covers the company.</p><div class="credit" data-block="credit" data-type="credit" data-run="credit/text">Material: Event Horizon, a Prototemplate direction</div></div></div><div class="ts-chips" aria-hidden="true"></div></section>",
   "rasters": [],
   "slots": {
     "plate": [

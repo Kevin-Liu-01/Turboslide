@@ -4,11 +4,13 @@ import { createContext, useContext } from 'react';
 import type { LayoutId } from '@turboslide/schema/layouts';
 
 import type {
+  CommentAnchorView,
   DialogId,
   EditorShellInput,
   PanelId,
   PictureTarget,
   ShellSettings,
+  VersionDiffView,
 } from './editor-shell';
 import type { FormatSectionId } from './inspector/format-sections';
 import type { MenuContext, MenuId, MenuItem, MenuSetting, Platform } from './menus/model';
@@ -34,7 +36,12 @@ export type DialogRequest = {
   id: DialogId;
   /** the picture target of Image by URL and Pictures in this presentation */
   target?: PictureTarget;
+  /** the role the Request access dialog asks for (the View only button asks for editor) */
+  role?: 'viewer' | 'commenter' | 'editor';
 };
+
+/** The comment card the overlay draws (SPEC-3 5.3): an existing thread, or a new comment at an anchor. */
+export type CommentCardRequest = { threadId?: string; anchor?: CommentAnchorView };
 
 export type EditorShellState = {
   input: EditorShellInput;
@@ -100,6 +107,15 @@ export type EditorShellState = {
   /** the id the title field carries, for File > Rename to focus */
   focusTitle: () => void;
   registerTitleField: (el: HTMLElement | null) => void;
+  /* round three (SPEC-3 5.3, 5.7): the comment card and Show changes the overlay draws */
+  /** the open comment card: a thread's, or a new comment's anchor; null when none */
+  commentCard: CommentCardRequest | null;
+  openCommentCard: (request: CommentCardRequest) => void;
+  closeCommentCard: () => void;
+  /** `j` and `k`: the next or previous open thread in the canvas order */
+  stepComment: (direction: 1 | -1) => void;
+  /** the `version.diff` Show changes draws, null while off */
+  diff: VersionDiffView | null;
 };
 
 export const EditorShellContext = createContext<EditorShellState | null>(null);

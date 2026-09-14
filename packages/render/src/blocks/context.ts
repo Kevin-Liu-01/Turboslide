@@ -2,8 +2,8 @@
 // roots addressable (SPEC 5.2: data-block, data-type, data-run, data-raster).
 import { classes, escapeAttr, style } from '../html.ts';
 import type { AssetId, BlockId, SlideId } from '@turboslide/schema/ids';
-import type { Asset } from '@turboslide/schema/assets';
-import type { Block, Icon } from '@turboslide/schema/blocks';
+import type { Asset, AssetTwins } from '@turboslide/schema/assets';
+import type { Block, BlockOf, Icon } from '@turboslide/schema/blocks';
 import { EMPTY_ASSET_REF } from '@turboslide/schema/blocks';
 import type { LayoutId, SlideKind } from '@turboslide/schema/deck';
 import type { RasterKind, Theme } from '@turboslide/schema/render';
@@ -19,6 +19,17 @@ export type ResolvedImage = {
   dark?: string;
   alt: string;
   size?: [number, number];
+};
+
+/**
+ * What the frame module hands the renderer for an `html` block (SPEC-3 8.4): the frame document
+ * (the sanitized markup, the theme CSS the block needs and the frame's CSP as `srcdoc`), the
+ * accessible title, and the height in sheet pixels when the block sits in a flow layout.
+ */
+export type HtmlFrameSource = {
+  srcdoc: string;
+  title?: string;
+  height?: number;
 };
 
 export type BlockContext = {
@@ -52,6 +63,27 @@ export type BlockContext = {
   prompts?: boolean;
   /** The slide the block sits on, for the prompt wording (promptFor) and the slide link forms. */
   slide?: { kind: SlideKind; template?: LayoutId | undefined };
+  /**
+   * The stored size of the asset file at a twin path (`assets/x-light.jpg`), for the `width` and
+   * `height` an escape block's `<img>` gains (gslides-parity SPEC-3 9.2 E12); undefined when the
+   * context has no deck.
+   */
+  assetSize?: (path: string) => [number, number] | undefined;
+  /**
+   * A twin record as URLs, the way `image` resolves an asset's own twins, for the materialized
+   * dither variants an asset lists (SPEC-3 10.3, 10.4); undefined when the context has no deck.
+   */
+  twins?: (
+    assetId: AssetId,
+    twins: AssetTwins,
+    alt: string,
+    size: [number, number],
+  ) => ResolvedImage;
+  /**
+   * The sandboxed frame document of an `html` block (SPEC-3 8.4), from the frame module; absent,
+   * the block renders as the scoped escape markup (html-escape.ts).
+   */
+  htmlFrame?: (block: BlockOf<'html'>) => HtmlFrameSource | undefined;
   rasters: RasterRef[];
   warnings: string[];
   /** Counter for unique raster ids within the slide. */
@@ -166,8 +198,20 @@ export function imgAttrs(image: ResolvedImage): Record<string, string | undefine
   return {
     src: image.src,
     ...twinAttrs(image),
+    ...sizeAttrs(image.size),
     alt: image.alt,
   };
+}
+
+/**
+ * `width` and `height` from the asset's stored size, so the box is reserved before the file
+ * decodes and a theme swap of the twins moves nothing (gslides-parity SPEC-3 9.2 E12, G3, P5, R2;
+ * research-3 05 rule 2). Nothing when the size is unknown; the sheet rules that fix one dimension
+ * leave the other `auto` so the attribute ratio holds.
+ */
+export function sizeAttrs(size: [number, number] | undefined): { width?: string; height?: string } {
+  if (size === undefined) return {};
+  return { width: String(size[0]), height: String(size[1]) };
 }
 
 /** The twin attributes alone: each twin only when it differs from `src`. */

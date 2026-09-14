@@ -1,0 +1,114 @@
+check 27/28: node scripts/layout-shift-audit.mjs --base http://localhost:4344 --out docs/gslides-parity/verification-3/layout-shift.json
+layout shift audit: 109 cells against http://localhost:4344
+  ok   new 1440 light
+  ok   new 1440 dark
+  ok   new 1280 light
+  ok   new 1280 dark
+  ok   new 390 light
+  ok   new 390 dark
+  FAIL edit 1440 light
+  FAIL edit 1440 light notesHidden (1 load entries)
+  ok   edit 1440 light listClosed
+  ok   edit 1440 dark
+  FAIL edit 1440 dark notesHidden (1 load entries)
+  ok   edit 1440 dark listClosed
+  ok   edit 1280 light
+  FAIL edit 1280 light notesHidden (1 load entries)
+  ok   edit 1280 light listClosed
+  ok   edit 1280 dark
+  FAIL edit 1280 dark notesHidden (1 load entries)
+  ok   edit 1280 dark listClosed
+  ok   edit 390 light
+  ok   edit 390 dark
+  FAIL deck 1440 light (1 load entries)
+  FAIL deck 1440 light listClosed (1 load entries)
+  FAIL deck 1440 light outline (1 load entries)
+  FAIL deck 1440 light listClosedOutline (1 load entries)
+  FAIL deck 1440 light gridSaved (1 load entries)
+  FAIL deck 1440 light hash (2 load entries)
+  FAIL deck 1440 dark (1 load entries)
+  FAIL deck 1440 dark listClosed (1 load entries)
+  FAIL deck 1440 dark outline (1 load entries)
+  FAIL deck 1440 dark listClosedOutline (1 load entries)
+  FAIL deck 1440 dark gridSaved (1 load entries)
+  FAIL deck 1440 dark hash (2 load entries)
+  FAIL deck 1280 light (1 load entries)
+  FAIL deck 1280 light listClosed (1 load entries)
+  FAIL deck 1280 light outline (2 load entries)
+  FAIL deck 1280 light listClosedOutline (1 load entries)
+  FAIL deck 1280 light gridSaved (1 load entries)
+  FAIL deck 1280 light hash (2 load entries)
+  FAIL deck 1280 dark (1 load entries)
+  FAIL deck 1280 dark listClosed (1 load entries)
+  FAIL deck 1280 dark outline (2 load entries)
+  FAIL deck 1280 dark listClosedOutline (1 load entries)
+  FAIL deck 1280 dark gridSaved (1 load entries)
+  FAIL deck 1280 dark hash (2 load entries)
+  FAIL deck 390 light (1 load entries)
+  FAIL deck 390 dark (1 load entries)
+  FAIL embed 1440 light (1 load entries)
+  FAIL embed 1440 dark (1 load entries)
+  FAIL embed 1280 light (1 load entries)
+  FAIL embed 1280 dark (1 load entries)
+  FAIL embed 390 light (1 load entries)
+  FAIL embed 390 dark (1 load entries)
+  FAIL decks 1440 light
+  FAIL decks 1440 light listView (1 load entries)
+  ok   decks 1440 light sortTitle
+  ok   decks 1440 light openedHistory
+  ok   decks 1440 dark
+  FAIL decks 1440 dark listView (1 load entries)
+  ok   decks 1440 dark sortTitle
+  ok   decks 1440 dark openedHistory
+  ok   decks 1280 light
+  ok   decks 1280 light listView
+  ok   decks 1280 light sortTitle
+  ok   decks 1280 light openedHistory
+  ok   decks 1280 dark
+  ok   decks 1280 dark listView
+  ok   decks 1280 dark sortTitle
+  ok   decks 1280 dark openedHistory
+  ok   decks 390 light
+  ok   decks 390 dark
+  ok   trash 1440 light
+  ok   trash 1440 dark
+  ok   trash 1280 light
+  ok   trash 1280 dark
+  ok   trash 390 light
+  ok   trash 390 dark
+  FAIL present 1440 light
+  ok   present 1440 dark
+  ok   present 1280 light
+  ok   present 1280 dark
+  ok   present 390 light
+  ok   present 390 dark
+  ok   print 1440 light
+  ok   print 1440 dark
+  ok   print 1280 light
+  ok   print 1280 dark
+  ok   print 390 light
+  ok   print 390 dark
+  FAIL deckPresent 1440 light (2 load entries)
+  FAIL deckPresent 1440 dark (2 load entries)
+  FAIL deckPresent 1280 light (2 load entries)
+  FAIL deckPresent 1280 dark (2 load entries)
+  FAIL deckPresent 390 light (1 load entries)
+  FAIL deckPresent 390 dark (1 load entries)
+  FAIL deck 1440 light F (2 load entries)
+  FAIL deck 1440 light I (1 load entries)
+  ok   deck 1440 light B
+  FAIL edit 1440 light F (1 load entries)
+  ok   edit 1440 light I
+  FAIL decks 1440 light F (1 load entries)
+  ok   decks 1440 light I
+  ok   decks 1440 light B
+  FAIL print 1440 light F (1 load entries)
+  ok   print 1440 light I
+  ok   print 1440 light B
+  FAIL present 1440 light F (1 load entries)
+  ok   present 1440 light I
+  FAIL deck 1440 light reduced (1 load entries)
+  ok   embed 1440 light framed
+69 failure(s), 8 skipped state(s); /Users/kevinliu/repos/Turboslide/docs/gslides-parity/verification-3/layout-shift.json
+check 27/28: FAIL exit 1 after 663.4 s
+check: stopped after a failure (664.3 s)

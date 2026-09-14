@@ -1,6 +1,7 @@
 // Inline text editing on the stage (SPEC 6.4; gslides-parity SPEC 7.2.15, 7.4, 10.2): the run
 // element itself is `contenteditable` for the session, the caret lands where the reader clicked,
-// typing becomes one `text.replace` per 400 ms pause (a burst), so one Cmd Z removes one burst,
+// typing becomes one `text.splice` per 100 ms pause (a burst, gslides-parity SPEC-3 3.1, 3.6; the
+// undo grouping of 400 ms is the route's), so a collaborator sees the words as they are typed,
 // Enter breaks a paragraph in the four multiline pointers and commits elsewhere, Esc commits and
 // hands the block back to the Editor, Tab and Shift Tab hand the next cell of a table to the
 // Editor, `BR` and the renderer's `.para` spans read back as `\n`, and `spellcheck` stays on so
@@ -30,6 +31,7 @@ import {
   parseText,
   plainLength,
   serializeRuns,
+  spliceText,
 } from '@turboslide/schema/text';
 import type { Run, RunMarks, Text as Markup } from '@turboslide/schema/text';
 
@@ -58,8 +60,14 @@ export const GT_WORD_CLASS = 'gt-word';
 /** The class the renderer gives one paragraph of a multiline Text (gslides-parity SPEC 7.2.9). */
 export const PARA_CLASS = 'para';
 
-/** The pause after the last keystroke before the typing is one write (gslides-parity SPEC 7.2.15). */
-export const TEXT_BURST_MS = 400;
+/**
+ * The pause after the last keystroke before the typing is one write: 100 ms on the multiplayer
+ * path (gslides-parity SPEC-3 3.6, 3.9: "typing 100 ms"); the undo grouping keeps its own 400 ms
+ * rule in the editor's controller (SPEC 7.2.15).
+ */
+export const TEXT_BURST_MS = 100;
+/** The undo grouping window: consecutive bursts inside it are one Cmd Z (gslides-parity SPEC 7.2.15, SPEC-3 3.6). */
+export const TEXT_UNDO_GROUP_MS = 400;
 
 /** The elements the browser or the renderer use as paragraph boxes inside an editable run. */
 const PARAGRAPH_ELEMENTS = new Set(['DIV', 'P', 'LI']);
@@ -311,9 +319,12 @@ export function textDiff(from: string, to: string): { start: number; end: number
 }
 
 /**
- * One burst of typing as a write (gslides-parity SPEC 7.2.15): `text.replace` of the changed span
- * at the run's pointer, so one Cmd Z removes one burst; the text of a title or statement slide is
- * a field and travels as `slide.set`. Null when nothing changed.
+ * One burst of typing as a write (gslides-parity SPEC 7.2.15; SPEC-3 3.1): `text.splice` of the
+ * changed plain span at the run's pointer, in plain text offsets with one character per paragraph
+ * break, so the admission transforms it against a collaborator's concurrent typing and no
+ * character is lost (SPEC-3 3.5). A change of marks alone (the plain text equal, the markup not)
+ * is `text.replace` of the markup span, the whole value write of 0.4; the text of a title or
+ * statement slide is a field and travels as `slide.set`. Null when nothing changed.
  */
 export function textBurstMutation(
   slide: Slide,
@@ -326,7 +337,28 @@ export function textBurstMutation(
   if (isSlideField(slide, blockId) || blockById(slide, blockId) === undefined) {
     return textCommitMutation(slide, blockId, pointer, to);
   }
-  const diff = textDiff(from, to);
+  // the base is the markup the session last absorbed from a collaborator when one landed since
+  // the last burst (SPEC-3 3.5; `absorbedText` put it into the editable together with the
+  // unflushed keystrokes), else the Editor's remembered markup; never the slide prop, which lags
+  // a render behind the last burst under load and made a burst resend its own characters
+  const absorbed = takeAbsorbed(runKey(slide.id, blockId, pointer));
+  const base = absorbed ?? from;
+  if (base === to) return null;
+  const plainFrom = plainOf(base);
+  const plainTo = plainOf(to);
+  if (plainFrom !== plainTo) {
+    const diff = textDiff(plainFrom, plainTo);
+    return {
+      op: 'text.splice',
+      slideId: slide.id,
+      blockId,
+      path: `/${pointer}`,
+      at: diff.start,
+      remove: diff.end - diff.start,
+      insert: diff.text,
+    };
+  }
+  const diff = textDiff(base, to);
   return {
     op: 'text.replace',
     slideId: slide.id,
@@ -334,6 +366,82 @@ export function textBurstMutation(
     path: `/${pointer}`,
     range: [diff.start, diff.end],
     text: diff.text,
+  };
+}
+
+// ---------------------------------------------------------------------------------------------
+// A collaborator's change to the run being edited (gslides-parity SPEC-3 3.5, 3.6, 16.3)
+
+/** The window event the edit route fires when a collaborator's op changed a Text (the detail is `TextChangedDetail`). */
+export const TEXT_CHANGED_EVENT = 'turboslide:text-changed';
+
+export type TextChangedDetail = {
+  slideId: string;
+  blockId: string;
+  /** the run pointer without its leading slash (`text`, `items/2/text`) */
+  pointer: string;
+  /** the markup the document holds now */
+  text: Markup;
+};
+
+/** The key of one run across the session and the burst: slide, block and pointer. */
+export function runKey(slideId: string, blockId: string, pointer: string): string {
+  return `${slideId}:${blockId}/${pointer}`;
+}
+
+/* the markup a session absorbed from a collaborator since its last burst, per run; the next burst
+   diffs against it (textBurstMutation) and clears it */
+const absorbedBases = new Map<string, Markup>();
+
+export function noteAbsorbed(key: string, text: Markup): void {
+  absorbedBases.set(key, text);
+}
+
+export function takeAbsorbed(key: string): Markup | undefined {
+  const text = absorbedBases.get(key);
+  if (text !== undefined) absorbedBases.delete(key);
+  return text;
+}
+
+/** Tells every open inline session that a Text changed under it. */
+export function announceTextChanged(detail: TextChangedDetail): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent<TextChangedDetail>(TEXT_CHANGED_EVENT, { detail }));
+}
+
+/**
+ * The editable after a collaborator's change (SPEC-3 3.5): the document's new markup with this
+ * person's unflushed keystrokes re-applied at their shifted offset, and the caret moved by the
+ * remote splice when it landed before the caret. Pure: `base` is the markup the session last
+ * handed out, `dom` what the editable holds now, `remote` the document's markup now.
+ */
+export function absorbedText(
+  base: Markup,
+  dom: Markup,
+  remote: Markup,
+  selection: [number, number] | null,
+): { text: Markup; selection: [number, number] | null } {
+  const local = textDiff(plainOf(base), plainOf(dom));
+  const change = textDiff(plainOf(base), plainOf(remote));
+  const delta = change.text.length - (change.end - change.start);
+  const shift = (offset: number): number =>
+    change.start <= offset ? Math.max(change.start, offset + delta) : offset;
+  const untouched = local.text === '' && local.end === local.start;
+  let text = remote;
+  if (!untouched) {
+    const at = shift(local.start);
+    const end = Math.max(at, shift(local.end));
+    try {
+      text = spliceText(remote, at, Math.min(end - at, plainLength(remote) - at), local.text);
+    } catch {
+      text = remote;
+    }
+  }
+  const length = plainLength(text);
+  const clamp = (offset: number): number => Math.min(length, Math.max(0, shift(offset)));
+  return {
+    text,
+    selection: selection === null ? null : [clamp(selection[0]), clamp(selection[1])],
   };
 }
 
@@ -679,6 +787,41 @@ function positionOf(
   };
 }
 
+/**
+ * The remote caret hooks (gslides-parity SPEC-3 4.4; the chrome's RemotePresence draws against
+ * them): the DOM position of a collaborator's plain offset inside a run, and the client rectangles
+ * of a plain range, so a remote caret and selection land on the characters they name in a run
+ * that is being edited or merely rendered. Null when the run holds no such character.
+ */
+export function positionForPlainOffset(
+  root: HTMLElement,
+  multiline: boolean,
+  at: number,
+): { node: Node; offset: number } | null {
+  return positionOf(root, multiline, at);
+}
+
+export function rectsForPlainRange(
+  root: HTMLElement,
+  multiline: boolean,
+  range: readonly [number, number],
+): DOMRect[] {
+  const start = positionOf(root, multiline, Math.min(range[0], range[1]));
+  const end = positionOf(root, multiline, Math.max(range[0], range[1]));
+  if (!start || !end || typeof document === 'undefined') return [];
+  const dom = document.createRange();
+  try {
+    dom.setStart(start.node, start.offset);
+    dom.setEnd(end.node, end.offset);
+  } catch {
+    return [];
+  }
+  const rects = Array.from(dom.getClientRects());
+  if (rects.length > 0) return rects;
+  const one = dom.getBoundingClientRect();
+  return one.width === 0 && one.height === 0 ? [] : [one];
+}
+
 /** Restores the window selection to plain offsets inside the editable. */
 export function restoreSelection(
   root: HTMLElement,
@@ -1013,6 +1156,42 @@ export function InlineText({
     burstTimer.current = window.setTimeout(flushBurst, TEXT_BURST_MS);
   };
 
+  /**
+   * A collaborator's op changed this run (SPEC-3 3.5): the editable takes the document's markup
+   * with the unflushed keystrokes re-applied and the caret shifted (`absorbedText`); the next
+   * burst then diffs against the document's text (textBurstMutation), so nothing lands twice and
+   * nothing is lost. The route announces every remote Text change through TEXT_CHANGED_EVENT.
+   */
+  const absorbRemote = (remote: Markup) => {
+    if (done.current) return;
+    if (remote === lastBurst.current) return;
+    const dom = readText();
+    const selection = selectionOffsets(element, options.current.multiline);
+    const next = absorbedText(lastBurst.current, dom, remote, selection);
+    element.innerHTML = editableHtml(next.text, options.current.multiline);
+    element.querySelectorAll<HTMLElement>(`.${GT_WORD_CLASS}`).forEach((mark) => {
+      mark.contentEditable = 'false';
+    });
+    if (next.selection !== null && document.activeElement === element) {
+      restoreSelection(element, options.current.multiline, next.selection);
+    }
+    lastBurst.current = remote;
+    callbacks.current.onInput?.();
+    if (next.text !== remote) scheduleBurst();
+  };
+
+  const onTextChanged = (e: Event) => {
+    const detail = (e as CustomEvent<TextChangedDetail>).detail;
+    if (detail === undefined) return;
+    const run = element.getAttribute('data-run');
+    if (run !== `${detail.blockId}/${detail.pointer}`) return;
+    const slide = element.closest('[data-slide]')?.getAttribute('data-slide');
+    if (slide !== null && slide !== undefined && slide !== detail.slideId) return;
+    if (detail.text === lastBurst.current) return;
+    noteAbsorbed(runKey(detail.slideId, detail.blockId, detail.pointer), detail.text);
+    absorbRemote(detail.text);
+  };
+
   const finish = (reason: InlineTextEndReason) => {
     if (done.current) return;
     done.current = true;
@@ -1218,11 +1397,13 @@ export function InlineText({
     element.addEventListener('input', onInputEvent);
     element.addEventListener('blur', onBlur);
     element.addEventListener('paste', onPaste);
+    window.addEventListener(TEXT_CHANGED_EVENT, onTextChanged);
     listeners.current = () => {
       element.removeEventListener('keydown', onKey);
       element.removeEventListener('input', onInputEvent);
       element.removeEventListener('blur', onBlur);
       element.removeEventListener('paste', onPaste);
+      window.removeEventListener(TEXT_CHANGED_EVENT, onTextChanged);
       document.removeEventListener('selectionchange', onSelectionChange);
       callbacks.current.onHandle?.(null);
     };

@@ -10,6 +10,17 @@
   padding-top: 24px;
 }
 
+/* the document scrolls: the gutter stays whether or not the list fills the viewport (SPEC-3 9.2 G2, L5) */
+html:has(.ts-home-page) {
+  scrollbar-gutter: stable;
+}
+
+/* the opened order is this browser's alone: the band paints once, in its final order (SPEC-3 9.2 L1) */
+.ts-recent[data-pending] > .ts-cards,
+.ts-recent[data-pending] > .ts-rows {
+  visibility: hidden;
+}
+
 .ts-visually-hidden {
   position: absolute;
   width: 1px;
@@ -336,6 +347,9 @@
   align-items: center;
   gap: 8px;
   min-width: 0;
+  /* the rename field's 26 px, so the swap is in place (SPEC-3 9.2 L6) */
+  min-height: 26px;
+  box-sizing: border-box;
   color: var(--pt-ink);
   text-decoration: none;
   font-family: var(--pt-display);

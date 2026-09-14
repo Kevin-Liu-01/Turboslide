@@ -1,7 +1,49 @@
 // A small deck for the linter's tests: the three worked slides of SPEC 4.3 as they should be,
 // plus one slide and one asset per family of planted defects. Each planted defect names the rule
 // it should trip in a comment, so the test reads as the rule table.
+import {
+  ditherKey,
+  ditherScreen,
+  ditherSourceOf,
+  resolveDither,
+} from '@turboslide/render/dither-key';
 import type { Asset, Deck, DeckDocument, RenderRecord, Slide } from '../contracts.ts';
+
+/** The Background dialog's Photograph numbers (gslides-parity SPEC-3 10.5), on the covering picture of canvas-dither. */
+export const FIXTURE_BACKGROUND_DITHER = {
+  pattern: 'bayer8',
+  black: 120,
+  white: 230,
+  gamma: 0.9,
+} as const;
+/** A picture at a box with the plane composited at 0.6 over the continuous picture (SPEC-3 10.1). */
+export const FIXTURE_STRENGTH_DITHER = { pattern: 'bayer8', strength: 0.6 } as const;
+/** The plate group's union box on canvas-dither, the rectangle the variant's plate clearance is measured against. */
+export const FIXTURE_DITHER_PLATE: [number, number, number, number] = [137, 506, 740, 265];
+
+/** The variant key the renderer derives for a dithered picture (dither-key.ts): the source path, the resolved dither and the screen in cells. */
+export function fixtureDitherKey(
+  asset: Pick<Asset, 'twins' | 'sourceFile'>,
+  dither: typeof FIXTURE_BACKGROUND_DITHER | typeof FIXTURE_STRENGTH_DITHER,
+  box: [number, number],
+): string {
+  return ditherKey({
+    source: ditherSourceOf(asset),
+    dither,
+    screen: ditherScreen(box[0], box[1], resolveDither(dither).cell),
+  });
+}
+
+const ditherPhotoFiles = {
+  twins: { light: 'assets/dither-photo-light.png', dark: 'assets/dither-photo-dark.png' },
+  sourceFile: 'assets/dither-photo.jpg',
+};
+/** The covering picture's key on canvas-dither: the whole sheet at cell 2. */
+export const FIXTURE_BACKGROUND_KEY = fixtureDitherKey(
+  ditherPhotoFiles,
+  FIXTURE_BACKGROUND_DITHER,
+  [1600, 900],
+);
 
 const assets: Record<string, Asset> = {
   'liquid-metal-diamond': {
@@ -92,6 +134,41 @@ const assets: Record<string, Asset> = {
     metrics: {
       litFraction: 0.01,
       plateClear: { plate: [851, 539, 612, 232], nearestLitPx: 0, litUnder: 12, litInBand: 4 },
+    },
+  },
+  // picture/blank-twin and picture/plate-clear from the metrics of the one materialized variant
+  // (gslides-parity SPEC-3 10.4): the covering picture of canvas-dither reads lit fraction 0.99
+  // and five lit cells under the plate; the strength picture of the same slide has no variant yet
+  'dither-photo': {
+    id: 'dither-photo',
+    role: 'other',
+    alt: 'A harbour at dusk, continuous tone',
+    ...ditherPhotoFiles,
+    size: [1600, 900],
+    scale: 1,
+    source: {
+      kind: 'photo',
+      origin: 'File:Harbour at dusk.jpg',
+      artist: 'A. Photographer',
+      license: 'CC0 1.0',
+      shareAlike: false,
+    },
+    inline: 'resample-1280',
+    variants: {
+      [FIXTURE_BACKGROUND_KEY]: {
+        key: FIXTURE_BACKGROUND_KEY,
+        twins: {
+          light: `assets/dither-photo.dither-${FIXTURE_BACKGROUND_KEY.slice(0, 12)}-light.png`,
+          dark: `assets/dither-photo.dither-${FIXTURE_BACKGROUND_KEY.slice(0, 12)}-dark.png`,
+        },
+        size: [1600, 900],
+        scale: 2,
+        metrics: {
+          litFraction: 0.99,
+          plateClear: { plate: FIXTURE_DITHER_PLATE, nearestLitPx: 0, litUnder: 5, litInBand: 2 },
+        },
+        producedAt: '2026-09-13T00:00:00Z',
+      },
     },
   },
   // asset/twin-or-border: a neutral twin
@@ -493,6 +570,49 @@ const badRaw: unknown[] = [
       ],
     },
   },
+  // The block level dither (gslides-parity SPEC-3 10.4): the covering picture `bg` carries the
+  // Photograph numbers and its materialized variant reads lit fraction 0.99 with five lit cells
+  // under the plate group, so picture/blank-twin (severity 3) and picture/plate-clear (severity 2)
+  // fire on `bg`; the picture `strip` at a box carries strength 0.6 with no variant and stands
+  // clear of the plate, so neither rule names it. layout/freeform fires as on every canvas slide.
+  {
+    schemaVersion: 1,
+    id: 'canvas-dither',
+    kind: 'content',
+    layout: { type: 'freeform' },
+    slots: {
+      main: [
+        {
+          id: 'bg',
+          type: 'picture',
+          asset: 'dither-photo',
+          dither: FIXTURE_BACKGROUND_DITHER,
+          pos: { x: 0, y: 0, w: 1600, h: 900, z: 0 },
+        },
+        {
+          id: 'plate',
+          type: 'box',
+          fill: 'paper',
+          strokeWidth: 0,
+          pos: { x: 137, y: 506, w: 740, h: 265, z: 1, group: 'plate' },
+        },
+        {
+          id: 'big',
+          type: 'heading',
+          level: 'big',
+          text: 'Over the dithered picture',
+          pos: { x: 163, y: 528, w: 688, h: 77, z: 2, group: 'plate' },
+        },
+        {
+          id: 'strip',
+          type: 'picture',
+          asset: 'dither-photo',
+          dither: FIXTURE_STRENGTH_DITHER,
+          pos: { x: 900, y: 129, w: 560, h: 315, z: 3 },
+        },
+      ],
+    },
+  },
 ];
 
 const bad = badRaw as Slide[];
@@ -518,7 +638,13 @@ export const deck: Deck = {
     {
       id: 'status',
       name: 'Status and plan',
-      slideIds: ['opener-status', 'fixed-points', 'canvas-title', 'canvas-objects'],
+      slideIds: [
+        'opener-status',
+        'fixed-points',
+        'canvas-title',
+        'canvas-objects',
+        'canvas-dither',
+      ],
     },
   ],
   assets,

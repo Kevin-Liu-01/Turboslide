@@ -1,0 +1,108 @@
+/* The Notifications and Activity panels (gslides-parity SPEC-3 5.5, 5.7, 9.3): fixed 40 px rows
+   with tabular times, the unread dot as an absolute badge inside the row's box. Monochrome. */
+.ts-inbox-list,
+.ts-activity-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ts-inbox-row,
+.ts-activity-row {
+  height: 40px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-inbox-row-btn,
+.ts-activity-row-in {
+  position: relative;
+  appearance: none;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 4ch;
+  gap: 8px;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px;
+  margin: 0;
+  padding: 0 14px 0 12px;
+  border: 0;
+  background: none;
+  color: var(--pt-ink);
+  font: 13px/1.3 var(--pt-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.ts-activity-row-in {
+  cursor: default;
+}
+
+.ts-inbox-row-btn:hover {
+  background: var(--pt-plate);
+}
+
+.ts-inbox-row-btn:focus-visible {
+  outline: 1px solid var(--pt-ink);
+  outline-offset: -1px;
+}
+
+.ts-inbox-sentence,
+.ts-activity-sentence {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ts-inbox-row.is-unread .ts-inbox-sentence {
+  font-weight: 500;
+}
+
+.ts-inbox-time,
+.ts-activity-time {
+  color: var(--pt-ink-2);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.ts-inbox-dot {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  background: var(--pt-ink);
+  opacity: 0;
+}
+
+.ts-inbox-row.is-unread .ts-inbox-dot {
+  opacity: 1;
+}
+
+.ts-inbox-foot,
+.ts-activity-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px;
+  border-top: 1px solid var(--pt-hair-soft);
+}
+
+.ts-inbox-markall {
+  height: 28px;
+}
+
+/* the Activity panel's tabs: the one built tab and the Viewers stub with its clause */
+.ts-activity-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--pt-hair-soft);
+}
+
+.ts-activity-kind {
+  color: var(--pt-ink-2);
+  font-size: 11px;
+  text-transform: capitalize;
+}

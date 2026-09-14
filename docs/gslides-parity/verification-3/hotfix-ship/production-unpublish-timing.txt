@@ -1,0 +1,27 @@
+token for https://turboslide.vercel.app: 64 characters, saved 2026-09-11T23:13:03.969Z
+copy 200 ship-unpub-mu1bkbpi
+publish 200 player https://turboslide.vercel.app/deck/ship-unpub-mu1bkbpi?p=<t>&present=1
+player before unpublish 200
+  unpublish try 0: 409 the access record is at revision 1, not 0; re-read
+  unpublish try 1: 409 the access record is at revision 1, not 0; re-read
+  unpublish try 2: 409 the access record is at revision 1, not 0; re-read
+  unpublish try 3: 409 the access record is at revision 1, not 0; re-read
+  unpublish try 4: 409 the access record is at revision 1, not 0; re-read
+  unpublish try 5: 409 the access record is at revision 1, not 0; re-read
+unpublish 409
+  +0.3s player 200
+  +2.5s player 200
+  +4.6s player 200
+  +6.8s player 200
+  +9.0s player 200
+  +11.3s player 200
+  +13.4s player 200
+  +15.6s player 200
+  +17.7s player 200
+  +19.9s player 200
+  +22.2s player 200
+  +24.4s player 200
+  +26.7s player 200
+  +28.9s player 200
+  +31.1s player 200
+cleanup removed

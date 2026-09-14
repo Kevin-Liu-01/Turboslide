@@ -1,0 +1,21 @@
+ok   the draft has an untitled id: untitled-20260914-jk6c
+ok   a draft is not connected before its first write
+ok   the double click opened and kept the inline session: contenteditable=true
+ok   edit 1 saved: revision 1
+ok   the first write moved the address to /edit/<id>: /edit/untitled-20260914-jk6c
+ok   the room attached after the first write: {"seq":0,"revision":1,"pending":0,"retained":0,"tier":"memory","transport":"poll","connected":false}
+ok   edit 2 saved: revision 2
+FAIL edit 3 saved: revision 2
+FAIL edit 4 saved: revision 3
+FAIL edit 5 saved: revision 4
+FAIL edit 6 saved: revision 5
+FAIL six edits landed: revision 5
+ok   no 404 on the draft thumbnail route: 0 seen
+ok   the first write after opening the deck saved and was not lost (finding 33): opened at 5, now 6, rejects 0
+ok   the immediate keystroke reached the document: Q4 review b c d e f Z
+FAIL the probe ran to completion: page.waitForURL: Timeout 20000ms exceeded.
+=========================== logs ===========================
+waiting for navigation until "load"
+============================================================
+
+new-write-probe: 6 step(s) failed against https://turboslide.vercel.app

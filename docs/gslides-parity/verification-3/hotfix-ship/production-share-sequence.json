@@ -1,0 +1,183 @@
+{
+  "base": "https://turboslide.vercel.app",
+  "at": "2026-09-14T14:03:32.931Z",
+  "rows": [
+    {
+      "name": "deck.info gt-brand through the bearer",
+      "ok": true,
+      "evidence": "status 200 revision 31 in 384 ms"
+    },
+    {
+      "name": "deck.copy scratch (one slide)",
+      "ok": true,
+      "evidence": "status 200 in 6780 ms"
+    },
+    {
+      "name": "1. share.createLink viewer",
+      "ok": true,
+      "evidence": "status 200 in 444 ms; /s/<22 chars>; link id lnk_M8DSlY41o2ulFmjK; record revision 1"
+    },
+    {
+      "name": "2. the viewer link exchanged from a fresh context: 303 to /deck/<id> with the sealed cookie",
+      "ok": true,
+      "evidence": "303; location /deck/verifier-share-mu1bbz0b; x-robots-tag noindex; instance 7-c781142c2512; landed on try 1, 193 ms after the mint"
+    },
+    {
+      "name": "3. share.createLink commenter after the exchange: 200, no raw Blob sentence",
+      "ok": true,
+      "evidence": "status 200 in 917 ms; based on record revision 1 (the mint answered 1, the exchange moved it to 1); body the record"
+    },
+    {
+      "name": "3c. the commenter link lands on /edit/<id>",
+      "ok": true,
+      "evidence": "303; location /edit/verifier-share-mu1bbz0b; x-robots-tag noindex; instance 7-ba809d5b9ef7 256 ms after the mint"
+    },
+    {
+      "name": "4. share.revokeLink viewer: 200, no raw Blob sentence",
+      "ok": true,
+      "evidence": "alive before 303; revoke 200 in 256 ms"
+    },
+    {
+      "name": "5. the revoked link answers 404 on every request after the 5 s TTL",
+      "ok": false,
+      "evidence": "first 404 at 5901 ms; 24 navigations over 20 s on 24 instance id(s); after 6 s: 404 404 404 404 404 404 404 404 404 404 404 404 500 404 500 500"
+    },
+    {
+      "name": "5b. the revoke was seen at once on the instance that served it",
+      "ok": false,
+      "evidence": "first 404 at 5901 ms"
+    },
+    {
+      "name": "6. an unknown token is the 404 page with the sentence",
+      "ok": false,
+      "evidence": "500; location -; x-robots-tag -; instance 3-1984bfa79692; body {\"status\":500,\"unhandled\":true,\"message\":\"HTTPError\"}"
+    },
+    {
+      "name": "scratch deck removed",
+      "ok": false,
+      "evidence": "deck.trash 200; deck.remove 500"
+    }
+  ],
+  "samples": [
+    {
+      "at": 124,
+      "status": 303,
+      "instance": "3d887d82b145"
+    },
+    {
+      "at": 940,
+      "status": 303,
+      "instance": "f582bf2e8310"
+    },
+    {
+      "at": 1773,
+      "status": 303,
+      "instance": "fab827f57255"
+    },
+    {
+      "at": 2613,
+      "status": 303,
+      "instance": "1ab7652d1223"
+    },
+    {
+      "at": 3441,
+      "status": 303,
+      "instance": "c57acf7876e8"
+    },
+    {
+      "at": 4254,
+      "status": 303,
+      "instance": "2e4a3f268852"
+    },
+    {
+      "at": 5058,
+      "status": 303,
+      "instance": "a112c6e8ca23"
+    },
+    {
+      "at": 5901,
+      "status": 404,
+      "instance": "c72c5d9a1de6"
+    },
+    {
+      "at": 6716,
+      "status": 404,
+      "instance": "91852e26162b"
+    },
+    {
+      "at": 7536,
+      "status": 404,
+      "instance": "de2c501a8a97"
+    },
+    {
+      "at": 8350,
+      "status": 404,
+      "instance": "01f7488d6e45"
+    },
+    {
+      "at": 9153,
+      "status": 404,
+      "instance": "8a766c9ca4c4"
+    },
+    {
+      "at": 10024,
+      "status": 404,
+      "instance": "4d24b0e3f1f1"
+    },
+    {
+      "at": 10847,
+      "status": 404,
+      "instance": "bd715c96467c"
+    },
+    {
+      "at": 11767,
+      "status": 404,
+      "instance": "3f3c9bcaaf3c"
+    },
+    {
+      "at": 12578,
+      "status": 404,
+      "instance": "a5ca3a7b5a4e"
+    },
+    {
+      "at": 13387,
+      "status": 404,
+      "instance": "2d7a44f072d8"
+    },
+    {
+      "at": 14185,
+      "status": 404,
+      "instance": "bc348a530073"
+    },
+    {
+      "at": 14991,
+      "status": 404,
+      "instance": "e4b6018781ba"
+    },
+    {
+      "at": 15804,
+      "status": 404,
+      "instance": "67633ee48529"
+    },
+    {
+      "at": 16811,
+      "status": 500,
+      "instance": "a38d31092bdb"
+    },
+    {
+      "at": 17673,
+      "status": 404,
+      "instance": "5c6fcb8cf11a"
+    },
+    {
+      "at": 18788,
+      "status": 500,
+      "instance": "612341dbe62c"
+    },
+    {
+      "at": 19870,
+      "status": 500,
+      "instance": "3fd4a5308c29"
+    }
+  ]
+}

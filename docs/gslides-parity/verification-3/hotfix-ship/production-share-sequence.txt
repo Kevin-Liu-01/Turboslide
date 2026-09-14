@@ -1,0 +1,13 @@
+token for https://turboslide.vercel.app: 64 characters, saved 2026-09-11T23:13:03.969Z
+ok   deck.info gt-brand through the bearer: status 200 revision 31 in 384 ms
+ok   deck.copy scratch (one slide): status 200 in 6780 ms
+ok   1. share.createLink viewer: status 200 in 444 ms; /s/<22 chars>; link id lnk_M8DSlY41o2ulFmjK; record revision 1
+ok   2. the viewer link exchanged from a fresh context: 303 to /deck/<id> with the sealed cookie: 303; location /deck/verifier-share-mu1bbz0b; x-robots-tag noindex; instance 7-c781142c2512; landed on try 1, 193 ms after the mint
+ok   3. share.createLink commenter after the exchange: 200, no raw Blob sentence: status 200 in 917 ms; based on record revision 1 (the mint answered 1, the exchange moved it to 1); body the record
+ok   3c. the commenter link lands on /edit/<id>: 303; location /edit/verifier-share-mu1bbz0b; x-robots-tag noindex; instance 7-ba809d5b9ef7 256 ms after the mint
+ok   4. share.revokeLink viewer: 200, no raw Blob sentence: alive before 303; revoke 200 in 256 ms
+FAIL 5. the revoked link answers 404 on every request after the 5 s TTL: first 404 at 5901 ms; 24 navigations over 20 s on 24 instance id(s); after 6 s: 404 404 404 404 404 404 404 404 404 404 404 404 500 404 500 500
+FAIL 5b. the revoke was seen at once on the instance that served it: first 404 at 5901 ms
+FAIL 6. an unknown token is the 404 page with the sentence: 500; location -; x-robots-tag -; instance 3-1984bfa79692; body {"status":500,"unhandled":true,"message":"HTTPError"}
+FAIL scratch deck removed: deck.trash 200; deck.remove 500
+7 ok, 4 fail

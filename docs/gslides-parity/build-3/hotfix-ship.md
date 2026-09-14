@@ -146,4 +146,16 @@ Section 17.4 of VERIFICATION-3 names the commit, the path count and the push.
 
 ## 5. Production
 
-The production table is VERIFICATION-3 section 17.5.
+The production table is VERIFICATION-3 section 17.5. In short: the commit pushed to `main`, the
+Vercel Git integration built and aliased the deployment about 5.5 minutes after the push, and the
+two severity 3 findings that motivated this round are fixed and live. Finding 45 (the fresh
+presentation could not be edited) is closed on production, the first thing a sales user meets at
+the root address: the double click opens the editor, every character lands, the address moves and
+the first write after open is not lost (finding 33). `hosted-smoke.mjs` passes 18 of 18 and, with
+the bearer and a batched export, 20 of 20; the share sequence closes finding 34's raw Blob sentence
+(the second mint after another instance's exchange answers the record). The remaining production
+gaps are the blob tier's access record eventual consistency without Redis (findings 59 and 60: the
+intermittent `Vercel Blob: 403` on a heavily rewritten record and the 410 after unpublish deferred
+by the record read lag), which the round specified Redis to fix and which production does not run
+this round; both are recorded with their evidence, not worked around. Every scratch deck this run
+created was trashed and deleted forever.
